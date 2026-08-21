@@ -1598,10 +1598,76 @@ html.lightbox-open {
 
 /* ── The free layer: briefings ── */
 
-.market-articles {
+.market-articles-shell {
+  min-width: 0;
+}
+
+.market-articles__header {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.market-articles__label,
+.market-articles__count {
+  display: block;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.market-articles__label {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  margin-bottom: 5px;
+}
+
+.market-articles__count {
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.market-articles__controls {
+  display: flex;
+  gap: 8px;
+}
+
+.market-articles__controls button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.market-articles__controls button:hover,
+.market-articles__controls button:focus-visible {
+  color: var(--accent-bright);
+  border-color: var(--accent-muted);
+  background: var(--surface2);
+}
+
+.market-articles {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(min(82vw, 290px), 360px);
+  gap: 12px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline proximity;
+  scroll-padding-inline: 1px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-muted) transparent;
+  padding: 1px 1px 10px;
 }
 
 .market-article {
@@ -1612,6 +1678,8 @@ html.lightbox-open {
   background: var(--surface);
   border: 0.5px solid var(--border);
   border-radius: 4px;
+  min-height: 190px;
+  scroll-snap-align: start;
   /* Named properties only — never `all`. */
   transition: border-color 180ms ease, background-color 180ms ease;
 }
@@ -1646,11 +1714,19 @@ html.lightbox-open {
   white-space: nowrap;
 }
 
-.market-article__date {
+.market-article__date,
+.market-article__place {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   color: var(--text-muted);
+}
+
+.market-article__place {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
 }
 
 .market-article__title {
@@ -1675,6 +1751,8 @@ html.lightbox-open {
 
 /* The empty state is the COMMON case here, not an edge case. */
 .market-articles--empty {
+  display: block;
+  overflow: visible;
   background: var(--surface);
   border: 0.5px solid var(--border);
   border-radius: 4px;
@@ -1791,6 +1869,8 @@ html.lightbox-open {
   .market-numbers__row { gap: 12px; }
   .market-numbers__label { font-size: 13px; }
   .market-article { padding: 14px 15px; }
+  .market-articles { grid-auto-columns: minmax(82vw, 82vw); }
+  .market-articles--empty { display: block; }
   .market-chapter__lede { font-size: 15px; }
   /* The lock title's 0.25em tracking is what overflows first at 320px. */
   .market-numbers__lock-title { letter-spacing: 0.14em; font-size: 10px; }

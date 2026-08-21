@@ -52,11 +52,16 @@ describe("Turnstile production boundaries", () => {
     expect(context).not.toContain("supabase.auth.signInWithPassword(");
   });
 
-  it("keeps the configured Google OAuth path visible and handles provider errors", () => {
+  it("keeps Google sign-in on the ScoutIt origin and exchanges a nonce-bound ID token", () => {
     const onboarding = read("src/app/onboarding/page.js");
 
     expect(onboarding).toContain("Continue with Google");
-    expect(onboarding).toContain('signInWithOAuth("google"');
+    expect(onboarding).toContain("https://accounts.google.com/gsi/client");
+    expect(onboarding).toContain("supabase.auth.signInWithIdToken");
+    expect(onboarding).toContain("nonce: hashedNonce");
+    expect(onboarding).toContain("use_fedcm_for_button: true");
+    expect(onboarding).toContain("nonce,");
+    expect(onboarding).not.toContain('signInWithOAuth("google"');
     expect(onboarding).toContain("Google sign-in is temporarily unavailable.");
     expect(onboarding).not.toContain("Google Auth Disabled for MVP");
   });

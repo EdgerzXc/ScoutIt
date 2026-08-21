@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
 import { BadgeCheck, Building2, Search } from "lucide-react";
 import {
   getSession,
   getUser,
-  signInWithOAuth,
   signInWithOtp,
   signInWithPassword,
   resendSignupConfirmation,
@@ -25,6 +25,29 @@ import {
   onboardingActiveModes,
   onboardingPrimaryMode,
 } from "@/lib/onboardingProfile";
+
+// Google OAuth client IDs are public identifiers by design. Keeping a fallback
+// prevents a missing Vercel env value from silently removing social login; the
+// value is already exposed by every Google sign-in request.
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "626088890600-iavfh4001lirqsrn2kjdl4i5049s7i0p.apps.googleusercontent.com";
+
+function createGoogleNonce() {
+  const bytes = new Uint8Array(32);
+  window.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function sha256Hex(value) {
+  const digest = await window.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
 
 const PRIMARY_ROLES = [
   {
@@ -64,6 +87,7 @@ function localSessionFromProfile(userId, profile) {
 export default function OnboardingPage() {
   const router = useRouter();
   const turnstileRef = useRef(null);
+  const googleButtonRef = useRef(null);
   const [step, setStep] = useState(1);
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -227,12 +251,50 @@ export default function OnboardingPage() {
     resetCaptcha();
   };
 
-  const handleGoogleAuth = async () => {
+  const initializeGoogleAuth = async () => {
+    const googleIdentity = window.google?.accounts?.id;
+    const button = googleButtonRef.current;
+    if (!googleIdentity || !button) return;
+
     try {
-      const { error } = await signInWithOAuth("google", {
-        redirectTo: window.location.origin + "/onboarding",
+      const nonce = createGoogleNonce();
+      const hashedNonce = await sha256Hex(nonce);
+
+      googleIdentity.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        nonce: hashedNonce,
+        use_fedcm_for_button: true,
+        callback: async (response) => {
+          try {
+            if (!response?.credential) {
+              throw new Error("Google did not return a sign-in credential.");
+            }
+
+            const { data, error } = await supabase.auth.signInWithIdToken({
+              provider: "google",
+              token: response.credential,
+              nonce,
+            });
+            if (error) throw error;
+            if (!data?.user) throw new Error("Google sign-in did not create a session.");
+
+            await continueAuthenticatedUser(data.user);
+          } catch (error) {
+            showToast(sanitizeError(error, "Google sign-in is temporarily unavailable."));
+          }
+        },
       });
-      if (error) throw error;
+
+      button.replaceChildren();
+      googleIdentity.renderButton(button, {
+        type: "standard",
+        theme: "filled_black",
+        size: "large",
+        shape: "rectangular",
+        text: "continue_with",
+        logo_alignment: "left",
+        width: Math.min(400, Math.max(240, button.clientWidth || 400)),
+      });
     } catch (error) {
       showToast(sanitizeError(error, "Google sign-in is temporarily unavailable."));
     }
@@ -345,10 +407,21 @@ export default function OnboardingPage() {
         </button>
       )}
       <div className="flex items-center text-text-secondary text-sm my-5 gap-4"><div className="flex-1 h-px bg-surface-variant" /><span className="uppercase tracking-widest text-[10px]">Or</span><div className="flex-1 h-px bg-surface-variant" /></div>
-      <button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title font-bold py-4 px-6 rounded hover:bg-surface-container flex items-center justify-center gap-3" onClick={handleGoogleAuth}>
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.6 6.6 0 0 1 5.49 12c0-.73.13-1.43.35-2.09V7.07H2.18A10.9 10.9 0 0 0 1 12c0 1.78.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A10.97 10.97 0 0 0 2.18 7.07l3.66 2.84A6.5 6.5 0 0 1 12 5.38z" fill="#EA4335"/></svg>
-        Continue with Google
-      </button>
+      <Script
+        id="google-identity-services"
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+        onReady={initializeGoogleAuth}
+        onError={() => showToast("Google sign-in is temporarily unavailable.")}
+      />
+      <div
+        ref={googleButtonRef}
+        className="flex min-h-11 w-full items-center justify-center"
+        role="group"
+        aria-label="Continue with Google"
+      >
+        <span className="text-xs text-text-muted">Loading secure Google sign-in…</span>
+      </div>
     </div>
   );
 

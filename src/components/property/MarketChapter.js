@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, MapPin } from "lucide-react";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
 import { articlesForProperty, areaIntelHref } from "@/lib/propertyArticles";
 
@@ -79,6 +79,12 @@ function ArticleRow({ article }) {
         {article.date && (
           <span className="market-article__date">{article.date}</span>
         )}
+        {(article.location || article.district || article.city) && (
+          <span className="market-article__place">
+            <MapPin size={11} aria-hidden="true" />
+            {article.location || article.district || article.city}
+          </span>
+        )}
       </div>
       <span className="market-article__title">{article.title}</span>
       {article.excerpt && (
@@ -90,6 +96,16 @@ function ArticleRow({ article }) {
 
 function ArticlesBlock({ property, articles }) {
   const matched = articlesForProperty(articles, property);
+  const railRef = useRef(null);
+
+  function moveRail(direction) {
+    const rail = railRef.current;
+    if (!rail) return;
+    rail.scrollBy({
+      left: direction * rail.clientWidth * 0.82,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }
 
   // The empty state is the COMMON case, not the edge case: there are currently
   // four published briefings against eight properties, and the property link
@@ -110,11 +126,31 @@ function ArticlesBlock({ property, articles }) {
   }
 
   return (
-    <div className="market-articles">
-      {matched.map((article) => (
-        <ArticleRow key={article.slug} article={article} />
-      ))}
-    </div>
+    <section className="market-articles-shell" aria-label="Local market briefings">
+      <div className="market-articles__header">
+        <div>
+          <span className="market-articles__label">Spatial intelligence</span>
+          <span className="market-articles__count">
+            {matched.length} location-matched {matched.length === 1 ? "briefing" : "briefings"}
+          </span>
+        </div>
+        {matched.length > 1 && (
+          <div className="market-articles__controls" aria-label="Briefing navigation">
+            <button type="button" onClick={() => moveRail(-1)} aria-label="Previous briefings">
+              <ChevronLeft size={17} aria-hidden="true" />
+            </button>
+            <button type="button" onClick={() => moveRail(1)} aria-label="Next briefings">
+              <ChevronRight size={17} aria-hidden="true" />
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="market-articles" ref={railRef}>
+        {matched.map((article) => (
+          <ArticleRow key={article.slug} article={article} />
+        ))}
+      </div>
+    </section>
   );
 }
 

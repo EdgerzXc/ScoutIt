@@ -187,6 +187,8 @@ async function buildBundle() {
           : "Just Now",
         city: b.city || "BGC, Taguig",
         region: b.region || "Metro Manila",
+        location: b.location || b.district || b.city || "",
+        district: b.district || "",
         lat: Number(b.lat) || 14.5547,
         lng: Number(b.lng) || 121.0244,
         image: b.cover_image_url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",

@@ -57,6 +57,30 @@ describe("articlesForProperty — what gets in", () => {
     const out = articlesForProperty([article({ city: "  taguig " })], property());
     expect(out).toHaveLength(1);
   });
+
+  it("bridges article location to property location when city is blank", () => {
+    const out = articlesForProperty(
+      [article({ city: "", region: "", location: "Capitol Commons" })],
+      property({ city: "", region: "", location: "Capitol Commons, Pasig City" }),
+    );
+    expect(out).toHaveLength(1);
+  });
+
+  it("bridges article city to a more specific property location", () => {
+    const out = articlesForProperty(
+      [article({ city: "Pasig", region: "" })],
+      property({ city: "", region: "", location: "Capitol Commons, Pasig City" }),
+    );
+    expect(out).toHaveLength(1);
+  });
+
+  it("accepts a district field as a local market signal", () => {
+    const out = articlesForProperty(
+      [article({ city: "", region: "", district: "Ortigas Center" })],
+      property({ city: "Pasig", region: "", location: "Ortigas Center, Pasig" }),
+    );
+    expect(out).toHaveLength(1);
+  });
 });
 
 describe("articlesForProperty — real place-name shapes", () => {
@@ -213,7 +237,7 @@ describe("articlesForProperty — defensive", () => {
     const many = Array.from({ length: 12 }, (_, i) =>
       article({ slug: `a${i}`, title: `A${i}` }),
     );
-    expect(articlesForProperty(many, property())).toHaveLength(4);
+    expect(articlesForProperty(many, property())).toHaveLength(8);
     expect(articlesForProperty(many, property(), { limit: 2 })).toHaveLength(2);
   });
 

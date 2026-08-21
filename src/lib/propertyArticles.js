@@ -69,6 +69,10 @@ function placesOverlap(a, b) {
   return false;
 }
 
+function anyPlaceOverlap(left, right) {
+  return left.some((a) => right.some((b) => placesOverlap(a, b)));
+}
+
 /**
  * Does this article name this property explicitly?
  *
@@ -103,12 +107,18 @@ function isAboutProperty(article, property) {
  * sort below city matches.
  */
 function areaRank(article, property) {
-  if (placesOverlap(article?.city, property?.city)) return 1;
+  const articleLocal = [article?.location, article?.district, article?.city];
+  const propertyLocal = [property?.location, property?.district, property?.city];
 
-  // An article's district may name the property's city and vice versa, so the
-  // city fields are also checked against the region fields before giving up.
-  if (placesOverlap(article?.region, property?.city)) return 2;
-  if (placesOverlap(article?.city, property?.region)) return 2;
+  // Most-specific bridge: a district/address on either record may contain the
+  // other's city ("Capitol Commons, Pasig City" ↔ "Pasig") or the same
+  // neighbourhood even when both City fields are blank.
+  if (anyPlaceOverlap(articleLocal, propertyLocal)) return 1;
+
+  // Region is deliberately a broader fallback. It remains useful when an
+  // article is regional, but always sorts below a building/district/city match.
+  if (articleLocal.some((place) => placesOverlap(place, property?.region))) return 2;
+  if (propertyLocal.some((place) => placesOverlap(place, article?.region))) return 2;
   if (placesOverlap(article?.region, property?.region)) return 2;
 
   return 0; // no match
@@ -132,7 +142,7 @@ function byDateDesc(a, b) {
  * @returns {Array<object & { isAboutThisProperty: boolean }>}
  */
 export function articlesForProperty(articles, property, options = {}) {
-  const { limit = 4 } = options;
+  const { limit = 8 } = options;
   if (!Array.isArray(articles) || !property) return [];
 
   const scored = [];

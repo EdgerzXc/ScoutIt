@@ -434,6 +434,10 @@ export async function fetchIntel(apiKey, baseId) {
         date:         f.Date             || "",
         city:         f.City             || "",
         region:       f.Region           || cityToRegion(f.City || ""),
+        // Preserve neighbourhood/district detail for the property ↔ market
+        // bridge. City remains the canonical fallback for older records.
+        location:     f.Location         || f.District || f.City || "",
+        district:     f.District         || "",
         // Airtable link field → array of PROPERTIES_CMS record ids. Powers the
         // "About this property" tier in lib/propertyArticles.js.
         //

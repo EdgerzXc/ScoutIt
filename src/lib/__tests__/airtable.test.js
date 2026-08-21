@@ -60,4 +60,9 @@ describe('fetchIntel field wiring', () => {
     // has no related property — which is currently all of them.
     expect(source).toContain('Array.isArray(f.Related_Property) ? f.Related_Property : []');
   });
+
+  it('preserves article location and district for property-market matching', () => {
+    expect(source).toContain('location:     f.Location');
+    expect(source).toContain('district:     f.District');
+  });
 });
