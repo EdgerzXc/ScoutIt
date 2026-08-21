@@ -72,8 +72,12 @@
 
 .contact-label {
   font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  /* A form field label. Someone reads this to know what to type, so it is
+     reading content, not chrome — 10px at 0.18em was neither big enough nor
+     tight enough to scan. Tracking does most of the work here: wide tracking
+     is what dissolves a word at small sizes. */
+  font-size: 12px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary, #c8c8c8);
 }
@@ -124,8 +128,10 @@
 
 .contact-hint {
   font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  /* A full sentence of instruction ("This is the only way we can reply"), not
+     a label. Sentences want near-zero tracking. */
+  font-size: 12px;
+  letter-spacing: 0.03em;
   /* No tertiary text token exists in DESIGN.md. Dim the documented secondary
      rather than inventing a new grey — one fewer colour nobody approved. */
   color: var(--text-secondary, #c8c8c8);

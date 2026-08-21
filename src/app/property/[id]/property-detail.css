@@ -1634,8 +1634,11 @@ html.lightbox-open {
 
 .market-article__tag {
   font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
+  /* Mine, and wrong when I wrote it: 9.5px is under this project's own stated
+     10px floor. Weight carries the emphasis the extra size was doing. */
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 3px 8px;
   border: 1px solid var(--border);
