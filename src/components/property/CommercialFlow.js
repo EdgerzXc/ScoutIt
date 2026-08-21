@@ -99,6 +99,7 @@ function isNearManilaRail(lat, lng) {
   return lat != null && lng != null && lat >= 14.2 && lat <= 14.9 && lng >= 120.7 && lng <= 121.3;
 }
 import "@/app/property/[id]/property-detail.css";
+import MarketChapter from "@/components/property/MarketChapter";
 import { getChapterConfig } from "./chapterConfig";
 import { PROPERTY_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
@@ -332,7 +333,7 @@ function BackOfHousePanel({ property: d }) {
 // share a link to a specific chapter, and refresh always reset to "The Space").
 // Uses history.replaceState rather than Next.js router push so a chapter click
 // never triggers a navigation/refetch — this is a URL bookmark, not a route change.
-const VALID_CHAPTERS = new Set(["space","location","vault","life","whereto","buildplans","units","universe","services","yourmove"]);
+const VALID_CHAPTERS = new Set(["space","location","vault","life","whereto","buildplans","hiddenintel","units","universe","services","yourmove"]);
 
 function initialChapterFromUrl(fallback) {
   if (typeof window === "undefined") return fallback;
@@ -340,7 +341,7 @@ function initialChapterFromUrl(fallback) {
   return urlChapter && VALID_CHAPTERS.has(urlChapter) ? urlChapter : fallback;
 }
 
-export default function CommercialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null }) {
+export default function CommercialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null, articles = [] }) {
   const router = useRouter();
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -364,9 +365,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // Enhanced photos unlock at Solar+. SSR-safe — locked until the client reads the viewer's tier.
   const [canEnhance,        setCanEnhance]        = useState(false);
   useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
-  // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
-  const [canMarketIntel,    setCanMarketIntel]    = useState(false);
-  useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
+  // Market intelligence moved into <MarketChapter/>, which resolves the tier
+  // itself. The state that used to live here was declared, computed on mount,
+  // and never read — commercial listings rendered no market panel at all, not
+  // even the locked teaser residential got. Removed rather than left dangling.
   const [activeTab,         setActiveTab]         = useState(externalActiveTab || "space");
 
   // ── Chapters mount their maps only once the reader has opened them ────────
@@ -1359,6 +1361,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.3"/><path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg> },
               { id: "buildplans", label: "Build Plans",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="1" stroke="currentColor" strokeWidth="1.3"/><path d="M6 6h8M6 9h8M6 12h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><path d="M13 14l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><rect x="12" y="12" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.1"/></svg> },
+              { id: "hiddenintel", label: "The Market",
+                icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M3 15l4-4 3 3 6-7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 7h4v4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
 
             ].map((tab, idx, arr) => (
               <span key={tab.id} style={{display:"contents"}}>
@@ -2234,6 +2238,32 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
           </div>
 
+
+          {/* ── THE MARKET (Ch. 6) ──────────────────────────────────────
+              New on this flow. Commercial, STR, hospitality, restaurants and
+              venues all render through CommercialFlow and previously had NO
+              market intelligence — the entitlement was computed here and never
+              read. Cap rate and transaction history are commercial metrics
+              first, so the flow that lacked them was the one that needed them
+              most. Same component as ResidentialFlow: one definition, so a new
+              space category cannot quietly miss it. */}
+          <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
+            <div className="panel-content">
+              <MarketChapter
+                property={d}
+                articles={articles}
+                deepIntel={d.deepIntel}
+                chapterNumber="06"
+                chapterLabel="The Market"
+              />
+            </div>
+
+            <div className="panel-sidebar">
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
+            </div>
+          </div>
 
           {/* ── UNITS (Ch. 7) ── */}
           <div className={`chapter-panel ${activeTab === "units" ? "active" : ""}`} id="panel-units">

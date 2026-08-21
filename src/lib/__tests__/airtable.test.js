@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { expandDeepIntel } from '../airtable.js';
 
 describe('expandDeepIntel', () => {
@@ -31,5 +32,32 @@ describe('expandDeepIntel', () => {
     const result = expandDeepIntel(jsonStr);
     expect(result.DI_Ceiling).toBe("3m");
     expect(result["Clear Ceiling Height"]).toBe("4m");
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────
+// A field that exists in Airtable and has no consumer in code is invisible:
+// nothing errors, nothing logs, the feature just quietly does nothing. That is
+// how SEO_Title, Floor_Plans and Verification_Status each hid for months
+// (AIRTABLE_COMPRESSION_PLAN F1/F2/F3), and how Related_Property hid until
+// 2026-08-20 despite being the strongest article↔property signal in the base.
+//
+// This asserts the wiring, not the data. The Airtable records are empty today;
+// the mapping still has to survive.
+// ─────────────────────────────────────────────────────────────────────────
+describe('fetchIntel field wiring', () => {
+  const source = readFileSync('src/lib/airtable.js', 'utf8');
+
+  it('maps Related_Property, the link field that drives "About this property"', () => {
+    expect(source).toContain('relatedPropertyIds');
+    expect(source).toContain('f.Related_Property');
+  });
+
+  it('defends against Airtable returning a non-array for the link field', () => {
+    // An empty link field is omitted from the payload entirely rather than
+    // returned as [], so the guard is doing real work on every article that
+    // has no related property — which is currently all of them.
+    expect(source).toContain('Array.isArray(f.Related_Property) ? f.Related_Property : []');
   });
 });

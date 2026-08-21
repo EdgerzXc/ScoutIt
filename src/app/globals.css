@@ -383,8 +383,20 @@ body.light-mode .scoutit-wordmark .word-it {
    `Company` headings were 1.03:1 — white on near-white.
    Losing a selector from a comma list is invisible in review; if this list is
    edited again, check `body.light-mode .global-footer` still matches. */
+/* ➕ `.contact-page` added 2026-08-20. It sets `background: var(--bg-root,
+   #0d0d0d)` in contact.css — a dark ground — but was never registered here, so
+   in light mode it kept that dark ground while the ink tokens flipped to the
+   light theme's near-black. Measured on /contact at 390px: the `Talk to a
+   person.` h1 was 1.03:1, and 11 elements failed in total. The page a stranger
+   uses to reach a human was unreadable for anyone with light mode on.
+
+   This is the same failure as the 2026-08-07 regression above, arriving from
+   the other direction: that one was an island with dark ink and no dark ground,
+   this one is an island with dark ground and no dark ink. Either half alone is
+   broken. A surface that hardcodes a dark background MUST be in this list. */
 body.light-mode .cinematic-container,
 body.light-mode .descent-root,
+body.light-mode .contact-page,
 body.light-mode .global-footer,
 /* Layer 02 surfaces are dark islands too: the Stratosphere layer sits over a
    WebGL night sky, and the Discover / radar / nearby-signals instruments are
@@ -393,7 +405,6 @@ body.light-mode .global-footer,
    footer had. */
 body.light-mode .stratosphere-layer,
 body.light-mode .dsc,
-body.light-mode .nbs,
 body.light-mode .spatial-intel-map-card {
   --text-primary:       #ffffff;
   --text-primary-ch:    255 255 255;

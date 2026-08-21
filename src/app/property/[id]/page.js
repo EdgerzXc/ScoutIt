@@ -8,7 +8,6 @@ import { buildPropertyJsonLd, mergeFaqIntoOverride } from "@/lib/propertySchema"
 import { getAnsweredFaqs } from "@/lib/faqServer";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
-import NearbySignals from "@/components/property/NearbySignals";
 import ClaimPropertyPanel from "@/components/property/ClaimPropertyPanel";
 import PropertyViewTracker from "@/components/analytics/PropertyViewTracker";
 
@@ -127,10 +126,15 @@ const CATEGORY_TO_LAYOUT_MAP = {
 export default async function PropertyRoute({ params }) {
   const resolvedParams = await params;
   let match = null;
+  // The Intel feed rides along with the properties in the same cached bundle,
+  // so surfacing briefings on a property page costs no extra fetch. Matching
+  // happens in lib/propertyArticles.js, not here.
+  let articles = [];
 
   try {
     const bundle = await getCmsBundle();
     const properties = bundle.properties || [];
+    articles = bundle.intel || [];
     match = properties.find(
       (p) =>
         (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
@@ -210,6 +214,7 @@ export default async function PropertyRoute({ params }) {
         <InjectedLayout
           slug={resolvedParams.id}
           initialData={match ? stripPremiumFields(match, "starry") : null}
+          articles={articles}
         />
 
         {/* â”€â”€ CLAIM THIS PROPERTY (Â§37 Â· W8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -227,24 +232,6 @@ export default async function PropertyRoute({ params }) {
                here would be identical for the owner, a broker and a stranger.
 
             It renders nothing at all when the listing isn't claimable. */}
-        {/* ── NEARBY SIGNALS ──────────────────────────────────────────
-            The reverse link: intel that may affect THIS space. Until now the
-            connection only ran the other way — an article could name the
-            spaces it affects, but a property page listed no articles at all.
-
-            Mounted at the page shell for the same reason as the claim panel:
-            there are two flow components and four category aliases mapping
-            into them, so putting it in one flow would make it exist on
-            residential listings and silently not on commercial ones.
-
-            Renders nothing when the listing has no coordinates — we would
-            rather say nothing than imply "nothing nearby". */}
-        <NearbySignals
-          lat={typeof match?.lat === "number" ? match.lat : null}
-          lng={typeof match?.lng === "number" ? match.lng : null}
-          spaceName={match?.title || "this space"}
-        />
-
         <div className="claim-panel-slot">
           <ClaimPropertyPanel propertyId={resolvedParams.id} />
         </div>

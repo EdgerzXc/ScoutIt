@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
+import { pushBriefingToAirtable, publishedMarkers } from "@/lib/intelPublish";
 
 // ⚠️ 🔴 UNAUTHENTICATED UNTIL 2026-08-06 (§59, full-system audit).
 //
@@ -152,8 +153,16 @@ export async function POST(req) {
           lng: briefingData.lng || 121.0244,
           source_name: briefingData.sourceName || briefingData.source_name || "OSINT Gazette",
           source_url: briefingData.sourceUrl || briefingData.source_url || "",
-          published_to_airtable: true,
-          published_at: new Date().toISOString(),
+          // ⚠️ NOT `published_to_airtable: true`. This used to be hardcoded
+          // true here, at insert, while nothing in the codebase ever wrote to
+          // Airtable and nothing ever read the column back — a column that
+          // certified something that never happened (Standing Rule 7: a schema
+          // must never manufacture a claim).
+          //
+          // The flag is now set in exactly one place: publishedMarkers() in
+          // lib/intelPublish.js, which refuses to produce it without a real
+          // Airtable record id. A briefing lands here as a DRAFT.
+          published_to_airtable: false,
         })
         .select()
         .single();
@@ -162,7 +171,52 @@ export async function POST(req) {
         console.warn("[OSINT API] Supabase Insert Error (Non-blocking):", subErr.message);
       }
 
-      // 2. Update status on raw source row
+      // 2. THE BRIDGE — Supabase draft → Airtable INTEL_CMS.
+      //
+      // This is the step the schema was built for and never had. Until now,
+      // `published_to_airtable` was set true at insert while nothing ever
+      // wrote to Airtable, and `lib/intelPublish.js` had no caller at all —
+      // an endpoint with no caller is a plan, not a feature (Standing Rule 13).
+      //
+      // Deliberately NON-FATAL. The Supabase row is already committed and is
+      // the draft of record; losing the Airtable hop is a sync problem, not a
+      // lost article. But it is reported honestly rather than swallowed —
+      // the operator must be able to tell "in Airtable" from "not in Airtable",
+      // which is precisely what the old hardcoded `true` made impossible.
+      let airtableStatus = "skipped";
+      let airtableRecordId = null;
+
+      const apiKey = process.env.AIRTABLE_API_KEY;
+      const baseId = process.env.AIRTABLE_BASE_ID;
+
+      if (inserted && apiKey && baseId) {
+        try {
+          const { recordId } = await pushBriefingToAirtable({
+            apiKey,
+            baseId,
+            briefing: inserted,
+            relatedPropertyIds: Array.isArray(briefingData.relatedPropertyIds)
+              ? briefingData.relatedPropertyIds
+              : [],
+          });
+
+          // Markers are written ONLY here, only with a real record id.
+          await supabase
+            .from("intel_briefings")
+            .update(publishedMarkers(recordId))
+            .eq("id", inserted.id);
+
+          airtableRecordId = recordId;
+          airtableStatus = "published";
+        } catch (bridgeErr) {
+          console.error("[OSINT API] Airtable bridge failed:", bridgeErr?.message);
+          airtableStatus = "failed";
+        }
+      } else if (!apiKey || !baseId) {
+        airtableStatus = "unconfigured";
+      }
+
+      // 3. Update status on raw source row
       if (sourceId) {
         await supabase
           .from("intel_sources")
@@ -173,7 +227,16 @@ export async function POST(req) {
       return NextResponse.json({
         success: true,
         briefing: inserted || briefingData,
-        message: "Successfully published to Intel platform and synced with 3D Map!",
+        airtable: { status: airtableStatus, recordId: airtableRecordId },
+        // The message names what actually happened. "Published" previously
+        // meant "a Supabase row exists", which is not what a reader of that
+        // word assumes.
+        message:
+          airtableStatus === "published"
+            ? "Draft saved and synced to Airtable. Tick Approved_For_Live_Site there to put it on the public site."
+            : airtableStatus === "failed"
+              ? "Draft saved to Supabase, but the Airtable sync failed. The article is not in the CMS yet."
+              : "Draft saved to Supabase. Airtable is not configured, so it was not synced.",
       });
     }
 

@@ -69,11 +69,24 @@ describe("ambient information labels", () => {
     expect(items.map((entry) => entry.id)).not.toContain("greeting");
     expect(items.map((entry) => entry.id)).toEqual(expect.arrayContaining(["weather", "rain", "comfort", "air"]));
     expect(items.find((entry) => entry.id === "weather").mobileSegments.map((segment) => segment.text)).toEqual(["BGC", "31\u00B0C"]);
-    expect(items.find((entry) => entry.id === "rain").mobileSegments.map((segment) => segment.text)).toEqual(["RAIN CHANCE", "70%"]);
-    expect(items.find((entry) => entry.id === "air").mobileSegments.map((segment) => segment.text)).toEqual(["AIR GOOD", "AQI 32"]);
+    // Re-aimed 2026-08-20 (Standing Rule 14). These asserted the DESKTOP
+    // wording — "RAIN CHANCE" and "AIR GOOD" — against `mobileSegments`. The
+    // mobile pass deliberately shortened those labels to fit the rail, and
+    // ambientData.js says so in a comment beside the code. The tests were left
+    // behind and the suite has been red ever since; the behaviour was correct
+    // the whole time. Desktop wording is asserted through `segments` above.
+    expect(items.find((entry) => entry.id === "rain").mobileSegments.map((segment) => segment.text)).toEqual(["RAIN", "70%"]);
+    expect(items.find((entry) => entry.id === "air").mobileSegments.map((segment) => segment.text)).toEqual(["AIR", "AQI 32"]);
   });
 
-  it("keeps generic time explicitly labelled outside property pages", () => {
+  // Re-aimed 2026-08-20 (Standing Rule 14). The label IS still carried outside
+  // property pages — on desktop. On a phone it is dropped on purpose: a clock
+  // reads as a clock, and the label was the difference between the rail fitting
+  // and being cut off. The rule the code actually follows is narrower than
+  // "always label": a label survives on mobile only where the value cannot
+  // speak for itself, which is why RAIN and FEELS keep theirs and time does not.
+  // That distinction is what this now asserts.
+  it("labels generic time on desktop and lets the clock speak for itself on mobile", () => {
     const items = buildAmbientItems({
       now: new Date("2026-08-11T05:00:00Z"),
       user: null,
@@ -81,7 +94,9 @@ describe("ambient information labels", () => {
     });
 
     expect(items[0].id).toBe("time");
-    expect(items[0].mobileSegments[0].text).toBe("LOCAL TIME");
+    expect(items[0].segments[0].text).toBe("LOCAL TIME");
+    expect(items[0].mobileSegments.map((segment) => segment.text)).not.toContain("LOCAL TIME");
+    expect(items[0].mobileSegments).toHaveLength(1);
   });
 
   it("caches property identity without persisting coordinates", () => {

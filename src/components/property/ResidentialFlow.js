@@ -46,6 +46,7 @@ const OperatorRequestModal = dynamic(() => import("@/components/property/Operato
 const AffordabilityCalculator = dynamic(() => import("@/components/property/AffordabilityCalculator"), { ssr: false });
 import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
+import MarketChapter from "@/components/property/MarketChapter";
 import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
 import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
@@ -209,7 +210,7 @@ function initialChapterFromUrl(fallback) {
   return urlChapter && VALID_CHAPTERS.has(urlChapter) ? urlChapter : fallback;
 }
 
-export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null }) {
+export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null, articles = [] }) {
   const router = useRouter();
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -232,8 +233,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   const [canEnhance,        setCanEnhance]        = useState(false);
   useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
   // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
-  const [canMarketIntel,    setCanMarketIntel]    = useState(false);
-  useEffect(() => { setCanMarketIntel(canSee("marketIntel", getCurrentTier())); }, []);
   // Operator role check (SSR-safe).
   const [isOperator,        setIsOperator]        = useState(false);
   useEffect(() => { setIsOperator(hasActiveRole("operator")); }, []);
@@ -1220,7 +1219,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.3"/><path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg> },
               { id: "buildplans", label: ch['buildplans']?.navLabel || "Build Plans",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="1" stroke="currentColor" strokeWidth="1.3"/><path d="M6 6h8M6 9h8M6 12h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><path d="M13 14l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><rect x="12" y="12" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.1"/></svg> },
-              { id: "hiddenintel", label: ch['hiddenintel']?.navLabel || "The Fine Print",
+              { id: "hiddenintel", label: ch['hiddenintel']?.navLabel || "The Market",
                 icon: <svg className="chapter-icon" viewBox="0 0 20 20" fill="none"><path d="M10 4C5.5 4 2 10 2 10s3.5 6 8 6 8-6 8-6-3.5-6-8-6z" stroke="currentColor" strokeWidth="1.3"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M3 3l14 14" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" opacity="0.4"/></svg> },
             ].map((tab, idx, arr) => (
               <span key={tab.id} style={{display:"contents"}}>
@@ -1986,62 +1985,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           {/* ── HIDDEN INTEL (Ch. 6) ── */}
           <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
             <div className="panel-content">
-
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
-                {ch['hiddenintel']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['hiddenintel'].subtitle}</div>
-                )}
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
-
-              <FloodRiskBadge floodRiskScore={d.flood_risk_score} floodZoneStatus={d.flood_zone_status} />
-
-              <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
-                Market and investment intelligence for this asset — transaction history, capitalization rates, and appreciation modelling — is reserved for Verified Scouts.
-              </p>
-
-              {/* Market panel — unlocks at Cluster+ (canMarketIntel). Reveals real
-                  values from d.deepIntel (keyed by label) when unlocked. */}
-              {canMarketIntel ? (
-                <div style={{background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden", padding:"20px"}}>
-                  {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => {
-                    const raw = d.deepIntel ? d.deepIntel[label] : undefined;
-                    const value = raw != null && String(raw).trim() !== "" ? raw : null;
-                    return (
-                      <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none", gap:"20px"}}>
-                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-muted)"}}>{label}</span>
-                        {value !== null ? (
-                          <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"#E8AE3C", letterSpacing:"0.04em", textAlign:"right"}}>{value}</span>
-                        ) : (
-                          <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.08em", textAlign:"right"}}>Not recorded</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{position:"relative", background:"var(--surface)", border:"0.5px solid #262626", borderRadius:"4px", overflow:"hidden"}}>
-                  <div style={{filter:"blur(5px)", pointerEvents:"none", userSelect:"none", padding:"20px"}}>
-                    {["Cap Rate (Area Benchmark)","Transaction History","Appreciation Projection","Price History","Competitive Density","Market Position Index"].map((label, i, arr) => (
-                      <div key={label} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", borderBottom: i < arr.length - 1 ? "1px solid #262626" : "none"}}>
-                        <span style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-muted)"}}>{label}</span>
-                        <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"#3a3a3a", letterSpacing:"0.1em"}}>████████</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"16px", background:"rgba(22,22,22,0.9)"}}>
-                    <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-                      <Lock size={15} strokeWidth={1.5} style={{color:"#E8AE3C", flexShrink:0}} />
-                      <span style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"#E8AE3C", letterSpacing:"0.25em", textTransform:"uppercase"}}>Market Intelligence · Cluster Tier</span>
-                    </div>
-                    <a href="/pricing/seeker" style={{textDecoration:"none", fontFamily:"var(--font-body)", fontSize:"14px", color:"#0e0e0e", background:"#E8AE3C", border:"none", padding:"11px 28px", borderRadius:"4px", cursor:"pointer", letterSpacing:"0.03em"}}>
-                      Unlock with Cluster →
-                    </a>
-                  </div>
-                </div>
-              )}
-
+              {/* Was ~55 lines of inline market panel that existed ONLY here.
+                  Now the shared chapter, so commercial/STR/hospitality/
+                  restaurants/venues get it too — see MarketChapter.js. */}
+              <MarketChapter
+                property={d}
+                articles={articles}
+                deepIntel={d.deepIntel}
+                chapterNumber={ch['hiddenintel']?.chapterNumber || '06'}
+                chapterLabel={ch['hiddenintel']?.chapterLabel || 'The Market'}
+                subtitle={ch['hiddenintel']?.subtitle || ''}
+              />
             </div>
 
             <div className="panel-sidebar">

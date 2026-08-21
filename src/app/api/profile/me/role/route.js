@@ -26,6 +26,17 @@ import { resolveUserId } from "@/lib/serverAuth";
 // Do not extend this into a general profile endpoint. Each field added here is
 // a field exposed to any script running on the page.
 
+// Every exit from this route carries the same headers. The signed-in branch
+// used to be the only one that set them, so the three `{ role: null }` returns
+// fell through to Next's default `public, max-age=0, must-revalidate` —
+// verified live on 2026-08-20, which is how this was found.
+//
+// `public` is wrong on a per-caller endpoint even when the body is harmless:
+// it tells shared caches that one visitor's answer may be served to another.
+// The body is `null` today, and "today" is exactly the qualifier that rots.
+// Setting it once, at the top, means a future early return cannot forget it.
+const NO_STORE = { "Cache-Control": "private, no-store" };
+
 export async function GET(request) {
   try {
     const userId = await resolveUserId(request);
@@ -34,13 +45,13 @@ export async function GET(request) {
     // are. Null role means the guide shows its role-neutral copy, which is
     // written to stand on its own.
     if (!userId) {
-      return NextResponse.json({ role: null }, { status: 200 });
+      return NextResponse.json({ role: null }, { status: 200, headers: NO_STORE });
     }
 
     if (!supabaseAdmin) {
       // Fail to the neutral copy rather than 500: a missing service-role config
       // must not take a property page's guide down with it.
-      return NextResponse.json({ role: null }, { status: 200 });
+      return NextResponse.json({ role: null }, { status: 200, headers: NO_STORE });
     }
 
     const { data, error } = await supabaseAdmin
@@ -51,15 +62,15 @@ export async function GET(request) {
 
     if (error) {
       console.error("[Profile Role] Lookup failed", error.message);
-      return NextResponse.json({ role: null }, { status: 200 });
+      return NextResponse.json({ role: null }, { status: 200, headers: NO_STORE });
     }
 
     return NextResponse.json(
       { role: data?.role || null },
-      { status: 200, headers: { "Cache-Control": "private, no-store" } },
+      { status: 200, headers: NO_STORE },
     );
   } catch (err) {
     console.error("[Profile Role] Unexpected failure", err?.message);
-    return NextResponse.json({ role: null }, { status: 200 });
+    return NextResponse.json({ role: null }, { status: 200, headers: NO_STORE });
   }
 }
