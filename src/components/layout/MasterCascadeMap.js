@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Compass,
   Layers,
@@ -307,15 +306,6 @@ export default function MasterCascadeMap() {
               </div>
 
               <div className="header-actions">
-                <Link
-                  href="/flow"
-                  onClick={() => setIsOpen(false)}
-                  className="header-action-btn flow-fullscreen-btn"
-                  title="Open Fullscreen Flow Map Canvas"
-                >
-                  <ExternalLink size={14} />
-                  <span>Fullscreen Canvas</span>
-                </Link>
                 <button
                   onClick={() => setSupportOpen(true)}
                   className="header-action-btn support-btn"
