@@ -365,7 +365,7 @@ export default function BoardPodium() {
 
         .orbit-telemetry-text {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 600;
           letter-spacing: 0.16em;
           color: var(--accent);
@@ -476,7 +476,7 @@ export default function BoardPodium() {
           background: transparent;
           color: var(--text-secondary);
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 600;
           letter-spacing: 0.11em;
           text-transform: uppercase;
@@ -591,7 +591,7 @@ export default function BoardPodium() {
 
         .orbit-badge-label {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -610,7 +610,7 @@ export default function BoardPodium() {
           background: rgba(232, 174, 60, 0.18);
           border: 1px solid rgba(232, 174, 60, 0.45);
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -633,7 +633,7 @@ export default function BoardPodium() {
 
         .orbit-prop-category {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 700;
           letter-spacing: 0.18em;
           text-transform: uppercase;
@@ -642,7 +642,7 @@ export default function BoardPodium() {
 
         .orbit-prop-location {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 500;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -677,7 +677,7 @@ export default function BoardPodium() {
 
         .orbit-velocity-title {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10px;
           font-weight: 600;
           letter-spacing: 0.13em;
           text-transform: uppercase;
@@ -686,7 +686,7 @@ export default function BoardPodium() {
 
         .orbit-velocity-score {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           font-weight: 700;
           letter-spacing: 0.05em;
           color: var(--accent-bright);
@@ -756,7 +756,7 @@ export default function BoardPodium() {
           color: #0d0d0d;
           border-radius: 9px;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -779,7 +779,7 @@ export default function BoardPodium() {
           color: #f5f3ee;
           border-radius: 9px;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -855,7 +855,7 @@ export default function BoardPodium() {
           background: rgba(0, 0, 0, 0.7);
           border: 1px solid;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 700;
           font-variant-numeric: tabular-nums;
         }
@@ -877,7 +877,7 @@ export default function BoardPodium() {
           align-items: center;
           gap: 6px;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -1000,7 +1000,7 @@ export default function BoardPodium() {
           align-items: center;
           gap: 7px;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.18em;
           color: var(--accent-bright);
@@ -1043,7 +1043,7 @@ export default function BoardPodium() {
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.1);
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10.5px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -1070,7 +1070,7 @@ export default function BoardPodium() {
           background: linear-gradient(135deg, #f7c64e, #e8ae3c);
           color: #0d0d0d;
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;

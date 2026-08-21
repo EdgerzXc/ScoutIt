@@ -1809,7 +1809,7 @@ body.high-contrast :focus-visible {
 
   .bottom-nav-label {
     font-family: var(--font-mono);
-    font-size: var(--type-micro);
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -1867,7 +1867,7 @@ body.high-contrast :focus-visible {
     color: var(--accent);
     border: 1px solid rgba(232, 174, 60, 0.32);
     font-family: var(--font-mono);
-    font-size: var(--type-micro);
+    font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     padding: 9px 18px;
@@ -1907,7 +1907,7 @@ body.high-contrast :focus-visible {
 
   .theme-sheet-title {
     font-family: var(--font-mono);
-    font-size: var(--type-micro);
+    font-size: 11px;
     color: var(--accent);
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -2388,7 +2388,7 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
 
 .scoutit-img-ph-text {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2412,112 +2412,4 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
 @keyframes compareBarIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   TYPOGRAPHY LEGIBILITY FLOOR
-   Added 2026-08-20 after an owner report that type had become hard
-   to read, and a measurement pass that confirmed it site-wide.
-
-   WHAT WAS MEASURED (production, 390px and 1280px, 10 routes):
-     · 50 distinct text styles rendering BELOW 10px — down to 8px
-     · 255 distinct styles below 12px
-     · ~900 sub-12px declarations in source
-
-   Every loaded design reference says the same thing, and the codebase
-   was on the wrong side of all of them:
-     · ui-ux-pro-max — "Text < 12px body" is a named anti-pattern;
-       minimum 16px body on mobile
-     · Apple (WWDC, The Details of UI Typography) — tracking is
-       SIZE-SPECIFIC. Small text wants SLIGHTLY POSITIVE tracking.
-       This codebase applies 0.25em to 9px mono labels, which is
-       hostile at that size: the eye loses the word shape entirely.
-     · Both — build hierarchy from WEIGHT + SIZE + LEADING as a set.
-       Weight adds presence without taking more space, which is the
-       right lever for a dense instrument UI like this one.
-
-   WHY THIS IS A FLOOR AND NOT A REWRITE.
-   Hand-editing ~900 declarations across the app in one pass would be
-   a huge blast radius for a legibility fix. Tailwind's arbitrary-size
-   utilities account for 487 of them and are all (0,1,0) specificity,
-   so overriding them HERE — after `@tailwind utilities` on line 3 —
-   corrects the majority in four rules, with a one-line revert if any
-   surface needs its old density back.
-
-   ⚠️ Raising type can cause overflow. This was re-measured at
-   320/390/768/1280 after the change, not assumed.
-   ═══════════════════════════════════════════════════════════════ */
-
-:root {
-  /* The floor. Nothing user-facing renders below --type-floor. */
-  --type-floor:   11.5px;  /* micro labels: eyebrows, kickers, badges */
-  --type-micro:   12px;    /* the smallest size a sentence may use    */
-  --type-small:   13px;
-  --type-body:    16px;    /* iOS zooms inputs below this             */
-
-  /* Tracking, per Apple's size-specific rule. Small text gets a LITTLE
-     air, not a lot. 0.25em belongs on a 20px display word, never on a
-     11px label. */
-  --track-micro:  0.08em;
-  --track-label:  0.06em;
-}
-
-/* ── The floor, applied to Tailwind's arbitrary sizes ──────────────
-   487 usages in src/. Ordered smallest-first so intent stays readable. */
-.text-\[8px\],
-.text-\[8\.5px\],
-.text-\[9px\],
-.text-\[9\.5px\] {
-  font-size: var(--type-floor);
-  letter-spacing: var(--track-micro);
-}
-
-.text-\[10px\],
-.text-\[10\.5px\] {
-  font-size: var(--type-micro);
-  letter-spacing: var(--track-label);
-}
-
-.text-\[11px\],
-.text-\[11\.5px\] {
-  font-size: var(--type-small);
-}
-
-/* ── Weight, not size, carries the extra presence ──────────────────
-   A 12px uppercase mono label at weight 500 reads considerably better
-   than the same label at 400, and costs no layout space at all. This
-   is the lever Apple names explicitly and the one this UI had not used. */
-.text-\[8px\],
-.text-\[9px\],
-.text-\[10px\],
-.text-\[11px\] {
-  font-weight: 500;
-}
-
-/* ── Runaway tracking on small type ────────────────────────────────
-   `tracking-[0.25em]` and friends are correct on a large word and
-   actively harmful under ~13px. Clamped rather than removed: the
-   spaced-mono look is part of the brand, it just cannot be this wide
-   when the glyphs are this small. */
-.text-\[8px\].tracking-\[0\.25em\],
-.text-\[9px\].tracking-\[0\.25em\],
-.text-\[10px\].tracking-\[0\.25em\],
-.text-\[11px\].tracking-\[0\.25em\],
-.text-\[8px\].tracking-widest,
-.text-\[9px\].tracking-widest,
-.text-\[10px\].tracking-widest,
-.text-\[11px\].tracking-widest {
-  letter-spacing: var(--track-micro);
-}
-
-/* ── Mobile is where this hurt most ────────────────────────────────
-   Phone type must never be SMALLER than desktop for the same element;
-   viewing distance does not shrink with the screen. Half a pixel reads
-   as a real difference at these sizes. */
-@media (max-width: 768px) {
-  :root {
-    --type-floor: 12px;
-    --type-micro: 12.5px;
-    --type-small: 13.5px;
-  }
 }

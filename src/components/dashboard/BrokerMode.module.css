@@ -115,7 +115,7 @@
   justify-content: space-between;
   align-items: center;
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 11px;
   text-transform: uppercase;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-solid);
@@ -144,7 +144,7 @@
 
 .cardType {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -189,7 +189,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--type-micro);
+  font-size: 10px;
 }
 
 /* Feed List */
@@ -263,7 +263,7 @@
 }
 
 .sigLabel {
-  font-size: var(--type-micro);
+  font-size: 10px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -301,7 +301,7 @@
 
 .cost {
   font-family: var(--font-mono);
-  font-size: var(--type-micro);
+  font-size: 10px;
   color: var(--text-muted);
 }
 

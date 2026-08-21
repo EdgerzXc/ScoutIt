@@ -66,7 +66,7 @@
 }
 
 .gold-section-label {
-  font-size: var(--type-micro);
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 3px;
   color: var(--accent);
@@ -130,7 +130,7 @@
   background: rgba(232, 174, 60, 0.15);
   color: var(--accent);
   border: 0.5px solid rgba(232, 174, 60, 0.3);
-  font-size: var(--type-micro);
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.5px;
   padding: 4px 10px;
@@ -176,7 +176,7 @@
 .leris-badge {
   background: rgba(76, 175, 125, 0.12);
   color: var(--green);
-  font-size: var(--type-micro);
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
   padding: 2px 8px;
@@ -206,7 +206,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-solid);
   color: var(--text-secondary);
-  font-size: var(--type-micro);
+  font-size: 11px;
   padding: 4px 10px;
   border-radius: 4px;
 }
@@ -236,7 +236,7 @@
 }
 
 .rating-lbl {
-  font-size: var(--type-micro);
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-secondary);
   letter-spacing: 1px;
@@ -380,7 +380,7 @@
 }
 
 .brokers-compliance-footer p {
-  font-size: var(--type-micro);
+  font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
@@ -413,7 +413,7 @@
   position: absolute;
   top: 12px;
   right: 24px;
-  font-size: var(--type-micro);
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
   padding: 4px 10px;

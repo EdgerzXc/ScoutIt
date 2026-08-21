@@ -235,7 +235,7 @@ export default function Footer() {
         }
 
         .nav-col h2 {
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -296,7 +296,7 @@ export default function Footer() {
 
         .meta-separator {
           color: var(--text-muted);
-          font-size: var(--type-micro);
+          font-size: 10px;
         }
 
         @media (max-width: 768px) {

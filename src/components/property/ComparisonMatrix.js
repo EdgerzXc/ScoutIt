@@ -229,7 +229,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
 
         .no-image {
           font-family: var(--font-mono);
-          font-size: var(--type-micro);
+          font-size: 10px;
           text-transform: uppercase;
           color: #555;
         }

@@ -140,7 +140,7 @@ export default function PropertyVerifyPanel() {
         }
         .pv-notice {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           letter-spacing: 0.06em;
           line-height: 1.7;
           padding: 10px 12px;

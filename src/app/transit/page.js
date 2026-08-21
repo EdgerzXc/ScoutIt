@@ -41,7 +41,7 @@ export default function TransitPage() {
         }
         .vector-label {
           font-family: var(--font-mono), monospace;
-          font-size: var(--type-micro);
+          font-size: 11px;
           letter-spacing: 0.25em;
           color: var(--accent);
           text-transform: uppercase;

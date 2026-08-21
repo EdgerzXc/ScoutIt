@@ -82,7 +82,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         }
         .wt-title {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           color: var(--accent, #E8AE3C);
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -218,7 +218,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         }
         .wt-card__name {
           font-family: var(--font-body, sans-serif);
-          font-size: var(--type-micro);
+          font-size: 11.5px;
           color: var(--text-primary);
           font-weight: 500;
         }
@@ -253,7 +253,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           border-radius: 2px;
           text-align: center;
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           color: var(--text-secondary);
           letter-spacing: 0.12em;
           line-height: 1.8;

@@ -107,7 +107,7 @@ export function renderEmail({ heading, body, ctaLabel, ctaPath, footnote }) {
     ${cta}
     ${footnote ? `<p style="margin:26px 0 0;font-size:12px;line-height:1.5;color:#777">${escapeHtml(footnote)}</p>` : ""}
     <hr style="border:none;border-top:1px solid #eee;margin:26px 0 14px">
-    <p style="margin:0;font-size: var(--type-micro);line-height:1.5;color:#999">
+    <p style="margin:0;font-size:11px;line-height:1.5;color:#999">
       You're receiving this because you have a ScoutIt account.
       <a href="${SITE_URL}/settings" style="color:#8a7433">Manage notifications</a>.
     </p>

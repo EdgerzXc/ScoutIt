@@ -73,7 +73,7 @@ export default function GlobalError({ error, reset }) {
         }
         .err-eyebrow {
           font-family: var(--font-mono, 'Courier New', monospace);
-          font-size: var(--type-micro);
+          font-size: 10px;
           letter-spacing: 0.25em;
           text-transform: uppercase;
           color: var(--accent, #E8AE3C);
@@ -108,7 +108,7 @@ export default function GlobalError({ error, reset }) {
           box-sizing: border-box;
           border-radius: 3px;
           font-family: var(--font-mono, 'Courier New', monospace);
-          font-size: var(--type-micro);
+          font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;

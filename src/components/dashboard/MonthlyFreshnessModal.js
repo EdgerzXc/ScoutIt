@@ -242,7 +242,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           width: 100%;
           border-radius: 3px;
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           letter-spacing: 0.15em;
           text-transform: uppercase;
           cursor: pointer;
@@ -252,7 +252,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         .mf-btn--ghost { background: transparent; border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
         .mf-error {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           color: var(--red);
           letter-spacing: 0.05em;
           line-height: 1.6;

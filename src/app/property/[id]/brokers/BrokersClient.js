@@ -177,7 +177,7 @@ export default function BrokersClient({ slug }) {
                 {brokers.length > 0 && (
                   <section className="broker-layer scoutit-match-layer">
                     <header className="layer-header" style={{ marginBottom: "20px" }}>
-                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase" }}>RECOMMENDED REPRESENTATION</span>
+                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase" }}>RECOMMENDED REPRESENTATION</span>
                       <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>ScoutIt Match ✦</h2>
                       <p className="layer-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "8px", maxWidth: "700px" }}>
                         Our recommendation algorithm weights verified ratings, detail completeness, and subscription tier. 
@@ -194,7 +194,7 @@ export default function BrokersClient({ slug }) {
                 {brokers.length > 0 && (
                   <section className="broker-layer top-rated-layer" style={{ marginTop: "48px" }}>
                     <header className="layer-header" style={{ marginBottom: "20px" }}>
-                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--type-micro)", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase" }}>INDEPENDENT RATING</span>
+                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--accent)", letterSpacing: "0.15em", textTransform: "uppercase" }}>INDEPENDENT RATING</span>
                       <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>Top Rated</h2>
                       <p className="layer-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "8px", maxWidth: "700px" }}>
                         The complete authorized roster for this property, ranked strictly by verified independent ratings. 

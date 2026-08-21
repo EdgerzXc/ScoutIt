@@ -84,7 +84,7 @@ export default function SeoReadinessPanel({ propertyId }) {
         }
         .sr-h {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 11px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
           color: var(--text-secondary);
@@ -186,7 +186,7 @@ export default function SeoReadinessPanel({ propertyId }) {
         }
         .sr-err {
           font-family: ${MONO};
-          font-size: var(--type-micro);
+          font-size: 10px;
           color: var(--red);
           line-height: 1.7;
           letter-spacing: 0.04em;

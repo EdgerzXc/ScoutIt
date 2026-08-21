@@ -69,7 +69,7 @@ export default function FoundingProgramPanel({
         .founding-badge {
           display: inline-block;
           font-family: var(--font-mono), monospace;
-          font-size: var(--type-micro); font-weight: 700; letter-spacing: 0.18em;
+          font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
           color: var(--accent);
           border: 1px solid var(--accent-muted);
           border-radius: 3px; padding: 5px 12px; margin-bottom: 18px;

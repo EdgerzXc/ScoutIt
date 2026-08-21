@@ -626,7 +626,7 @@ export default function SpatialCanvas({
               strong.style.color = tokens.GOLD;
               const label = document.createElement("span");
               label.textContent = "Target Space";
-              label.style.cssText = "color:var(--text-secondary,#c8c8c8);font-size: var(--type-micro);";
+              label.style.cssText = "color:var(--text-secondary,#c8c8c8);font-size:11px;";
               wrap.append(strong, document.createElement("br"), label);
               return wrap;
             })()
@@ -884,7 +884,7 @@ export default function SpatialCanvas({
 
           {/* Telemetry Metrics */}
           {hudExpanded && spatialIntel && (
-            <div style={{ borderTop: "1px dashed rgba(255,255,255,0.12)", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "5px", fontSize: "var(--type-micro)" }}>
+            <div style={{ borderTop: "1px dashed rgba(255,255,255,0.12)", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "5px", fontSize: "10.5px" }}>
               {continuity && (
                 <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(232, 174, 60, 0.08)", padding: "3px 6px", borderRadius: "3px", border: `1px solid ${continuity.badge_color}` }}>
                   <span style={{ color: "var(--accent, #E8AE3C)", fontWeight: "bold" }}>🛡️ Continuity Index:</span>
