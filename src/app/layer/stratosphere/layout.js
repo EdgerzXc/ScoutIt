@@ -1,7 +1,7 @@
 export const metadata = {
-  title: { absolute: "Stratosphere — Stories & Market Intel · ScoutIt" },
+  title: { absolute: "Stratosphere — Spatial Discovery & Intelligence · ScoutIt" },
   description:
-    "Stratosphere · Intel on ScoutIt — neighborhood stories, market signals, and editorial briefings that decode Philippine space.",
+    "Layer 02: Stratosphere on ScoutIt — real-time spatial signals, corridor radar, and affected spaces across Philippine commercial corridors.",
   alternates: { canonical: "/layer/stratosphere" },
 };
 

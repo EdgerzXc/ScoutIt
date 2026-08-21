@@ -1,0 +1,234 @@
+{
+  "deal_room_lifecycle": {
+    "id": "deal_room_lifecycle",
+    "name": "Deal Room Lifecycle (Viewing → Offer → Handshake)",
+    "description": "End-to-end seeker transaction journey from property detail through two-sided handshake closure.",
+    "goal": "complete_deal",
+    "role": "seeker",
+    "startNodes": [
+      "deal_room"
+    ],
+    "terminalNodes": [
+      "terminal_handshake_success"
+    ],
+    "requiredCapabilities": [
+      "deal.participate"
+    ],
+    "requiredOrderedMilestones": [
+      "inquiry_modal",
+      "booking_modal",
+      "offer_modal",
+      "deal_room",
+      "sys_transaction_handshake"
+    ],
+    "completionPredicate": {
+      "field": "deal.status",
+      "operator": "==",
+      "value": "closed"
+    },
+    "allowedEdgeTypes": [
+      "NAVIGATE",
+      "ACTION",
+      "SUBMIT",
+      "SUCCESS",
+      "FAILURE",
+      "RECOVERY",
+      "AUTH_GATE",
+      "CONDITION_TRUE",
+      "SYSTEM"
+    ],
+    "nodeIds": [
+      "inquiry_modal",
+      "booking_modal",
+      "offer_modal",
+      "deal_room",
+      "gate_viewing",
+      "exc_viewing_noshow",
+      "reschedule_modal",
+      "gate_offer",
+      "sys_double_optin_handshake",
+      "sys_transaction_handshake",
+      "terminal_handshake_success"
+    ]
+  },
+  "broker_representation": {
+    "id": "broker_representation",
+    "name": "Broker Verified Representation & Lead Assignment",
+    "description": "Professional PRC-licensed broker workflow for claiming listing representation and client advisory.",
+    "goal": "manage_representation",
+    "role": "broker",
+    "startNodes": [
+      "dashboard_broker"
+    ],
+    "terminalNodes": [
+      "terminal_handshake_success"
+    ],
+    "requiredCapabilities": [
+      "deal.represent_client"
+    ],
+    "requiredOrderedMilestones": [
+      "dashboard_broker",
+      "brokers_roster",
+      "broker_field_briefing",
+      "deal_room",
+      "sys_transaction_handshake"
+    ],
+    "completionPredicate": {
+      "field": "representation.status",
+      "operator": "==",
+      "value": "active"
+    },
+    "allowedEdgeTypes": [
+      "NAVIGATE",
+      "ACTION",
+      "SUBMIT",
+      "SUCCESS",
+      "SYSTEM"
+    ],
+    "nodeIds": [
+      "dashboard_broker",
+      "comp_return_brief_broker",
+      "brokers_roster",
+      "broker_field_briefing",
+      "deal_room",
+      "sys_transaction_handshake",
+      "terminal_handshake_success"
+    ]
+  },
+  "owner_listing_pipeline": {
+    "id": "owner_listing_pipeline",
+    "name": "Property Owner Listing & Verification Pipeline",
+    "description": "Direct owner publishing pipeline with Title Deed KYC and automated verification.",
+    "goal": "publish_verified_listing",
+    "role": "owner",
+    "startNodes": [
+      "dashboard_owner"
+    ],
+    "terminalNodes": [
+      "api_publish_listing",
+      "terminal_handshake_success"
+    ],
+    "requiredCapabilities": [
+      "property.manage_owned"
+    ],
+    "requiredOrderedMilestones": [
+      "dashboard_owner",
+      "owner_creation_pipeline",
+      "ai_listing_engine",
+      "api_publish_listing"
+    ],
+    "completionPredicate": {
+      "field": "listing.status",
+      "operator": "==",
+      "value": "verified"
+    },
+    "allowedEdgeTypes": [
+      "NAVIGATE",
+      "ACTION",
+      "SUBMIT",
+      "SUCCESS",
+      "SYSTEM"
+    ],
+    "nodeIds": [
+      "dashboard_owner",
+      "comp_return_brief_owner",
+      "owner_creation_pipeline",
+      "method_scratch",
+      "method_advanced",
+      "method_csv",
+      "method_pdf",
+      "ai_listing_engine",
+      "sys_ai_council",
+      "sys_ai_arbiter",
+      "api_publish_listing"
+    ]
+  },
+  "sentinel_edge_defense": {
+    "id": "sentinel_edge_defense",
+    "name": "Sentinel Edge Security & Anonymity Pipeline",
+    "description": "Zero-Knowledge edge masking, rate-limiting, and Cloudflare Turnstile anti-scraping mesh.",
+    "goal": "enforce_edge_security",
+    "role": "visitor",
+    "startNodes": [
+      "sys_edge_ip_masking"
+    ],
+    "terminalNodes": [
+      "terminal_edge_blacklist"
+    ],
+    "requiredCapabilities": [],
+    "requiredOrderedMilestones": [
+      "sys_edge_ip_masking",
+      "sys_velocity_radar",
+      "exc_bot_quarantine",
+      "terminal_edge_blacklist"
+    ],
+    "completionPredicate": {
+      "field": "sentinel.status",
+      "operator": "==",
+      "value": "enforced"
+    },
+    "allowedEdgeTypes": [
+      "SYSTEM",
+      "SUCCESS",
+      "FAILURE",
+      "RECOVERY",
+      "TERMINATE"
+    ],
+    "nodeIds": [
+      "sys_edge_ip_masking",
+      "sys_velocity_radar",
+      "exc_bot_quarantine",
+      "rec_turnstile_challenge",
+      "terminal_edge_blacklist"
+    ]
+  },
+  "buyer_journey": {
+    "id": "buyer_journey",
+    "name": "Buyer Discovery to Offer Journey",
+    "description": "Complete buyer discovery path from hero search down to formal offer submission.",
+    "goal": "submit_property_offer",
+    "role": "seeker",
+    "startNodes": [
+      "hero"
+    ],
+    "terminalNodes": [
+      "terminal_handshake_success"
+    ],
+    "requiredCapabilities": [],
+    "requiredOrderedMilestones": [
+      "hero",
+      "discover_directory",
+      "pep",
+      "inquiry_modal",
+      "deal_room",
+      "offer_modal",
+      "sys_transaction_handshake"
+    ],
+    "completionPredicate": {
+      "field": "transaction.status",
+      "operator": "==",
+      "value": "completed"
+    },
+    "allowedEdgeTypes": [
+      "NAVIGATE",
+      "ACTION",
+      "SUBMIT",
+      "SUCCESS",
+      "AUTH_GATE",
+      "SYSTEM"
+    ],
+    "nodeIds": [
+      "hero",
+      "discover_directory",
+      "search_results",
+      "pep",
+      "pep_ch10_your_move",
+      "inquiry_modal",
+      "booking_modal",
+      "offer_modal",
+      "deal_room",
+      "sys_transaction_handshake",
+      "terminal_handshake_success"
+    ]
+  }
+}

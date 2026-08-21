@@ -1,0 +1,474 @@
+{
+  "version": "2.2.0",
+  "generatedAt": "2026-08-19T12:39:54.029Z",
+  "positions": {
+    "hero": {
+      "x": 80,
+      "y": 300
+    },
+    "sys_edge_ip_masking": {
+      "x": 80,
+      "y": 550
+    },
+    "direct_slug": {
+      "x": 80,
+      "y": 850
+    },
+    "login": {
+      "x": 80,
+      "y": 1200
+    },
+    "gate_adult_age": {
+      "x": 80,
+      "y": 1450
+    },
+    "auth_onboarding_flow": {
+      "x": 80,
+      "y": 1700
+    },
+    "privacy_page": {
+      "x": 80,
+      "y": 2000
+    },
+    "terms_page": {
+      "x": 80,
+      "y": 2250
+    },
+    "orbit": {
+      "x": 750,
+      "y": 100
+    },
+    "showcase": {
+      "x": 750,
+      "y": 350
+    },
+    "stratosphere": {
+      "x": 750,
+      "y": 600
+    },
+    "metropolis": {
+      "x": 750,
+      "y": 850
+    },
+    "crust": {
+      "x": 750,
+      "y": 1100
+    },
+    "mantle": {
+      "x": 750,
+      "y": 1350
+    },
+    "core": {
+      "x": 750,
+      "y": 1600
+    },
+    "discover_directory": {
+      "x": 750,
+      "y": 1850
+    },
+    "search_results": {
+      "x": 750,
+      "y": 2050
+    },
+    "spatial_canvas": {
+      "x": 750,
+      "y": 2250
+    },
+    "wishlist": {
+      "x": 750,
+      "y": 2450
+    },
+    "intel_articles": {
+      "x": 750,
+      "y": 2650
+    },
+    "hubs": {
+      "x": 750,
+      "y": 2850
+    },
+    "transit": {
+      "x": 750,
+      "y": 3050
+    },
+    "brokers_roster": {
+      "x": 750,
+      "y": 3250
+    },
+    "photographers_roster": {
+      "x": 750,
+      "y": 3450
+    },
+    "researchers_roster": {
+      "x": 750,
+      "y": 3650
+    },
+    "planners_roster": {
+      "x": 750,
+      "y": 3850
+    },
+    "badges": {
+      "x": 750,
+      "y": 4050
+    },
+    "sys_velocity_radar": {
+      "x": 750,
+      "y": 4250
+    },
+    "pep": {
+      "x": 1500,
+      "y": 1100
+    },
+    "pep_ch1_space": {
+      "x": 1500,
+      "y": 150
+    },
+    "pep_ch2_location": {
+      "x": 1500,
+      "y": 350
+    },
+    "pep_ch3_life": {
+      "x": 1500,
+      "y": 550
+    },
+    "pep_ch4_where_to": {
+      "x": 1500,
+      "y": 750
+    },
+    "pep_ch5_build_plans": {
+      "x": 1500,
+      "y": 950
+    },
+    "pep_ch6_fine_print": {
+      "x": 1500,
+      "y": 1150
+    },
+    "gate_deep_intel_tier": {
+      "x": 1500,
+      "y": 1250
+    },
+    "gate_hidden_intel_tier": {
+      "x": 1500,
+      "y": 1300
+    },
+    "pep_ch7_units": {
+      "x": 1500,
+      "y": 1450
+    },
+    "pep_ch8_universe": {
+      "x": 1500,
+      "y": 1650
+    },
+    "pep_ch9_services": {
+      "x": 1500,
+      "y": 1850
+    },
+    "pep_ch10_your_move": {
+      "x": 1500,
+      "y": 2050
+    },
+    "act_save_reaction": {
+      "x": 2250,
+      "y": 150
+    },
+    "action_ask_faq": {
+      "x": 2250,
+      "y": 400
+    },
+    "inquiry_modal": {
+      "x": 2250,
+      "y": 700
+    },
+    "booking_modal": {
+      "x": 2250,
+      "y": 1000
+    },
+    "offer_modal": {
+      "x": 2250,
+      "y": 1300
+    },
+    "claim_listing_modal": {
+      "x": 2250,
+      "y": 1600
+    },
+    "owner_creation_pipeline": {
+      "x": 2250,
+      "y": 1950
+    },
+    "method_scratch": {
+      "x": 2250,
+      "y": 2200
+    },
+    "method_advanced": {
+      "x": 2250,
+      "y": 2450
+    },
+    "method_csv": {
+      "x": 2250,
+      "y": 2700
+    },
+    "method_pdf": {
+      "x": 2250,
+      "y": 2950
+    },
+    "sys_gemini_ocr_extractor": {
+      "x": 2250,
+      "y": 3200
+    },
+    "sys_web_researcher": {
+      "x": 2250,
+      "y": 3450
+    },
+    "gate_auth": {
+      "x": 3050,
+      "y": 150
+    },
+    "dec_tier_gate": {
+      "x": 3050,
+      "y": 400
+    },
+    "sys_connect_wallet": {
+      "x": 3050,
+      "y": 650
+    },
+    "sys_connect_hemorrhage_guard": {
+      "x": 3050,
+      "y": 800
+    },
+    "gate_viewing": {
+      "x": 3050,
+      "y": 950
+    },
+    "gate_offer": {
+      "x": 3050,
+      "y": 1200
+    },
+    "sys_contact_leak_filter": {
+      "x": 3050,
+      "y": 1450
+    },
+    "sys_double_optin_handshake": {
+      "x": 3050,
+      "y": 1700
+    },
+    "sys_transaction_handshake": {
+      "x": 3050,
+      "y": 1950
+    },
+    "ai_listing_engine": {
+      "x": 3050,
+      "y": 2150
+    },
+    "sys_ai_council": {
+      "x": 3050,
+      "y": 2350
+    },
+    "sys_ai_arbiter": {
+      "x": 3050,
+      "y": 2550
+    },
+    "api_publish_listing": {
+      "x": 3050,
+      "y": 2750
+    },
+    "scenario_pii_erasure": {
+      "x": 3050,
+      "y": 2950
+    },
+    "scenario_non_refundable_connect": {
+      "x": 3050,
+      "y": 3200
+    },
+    "exc_bot_quarantine": {
+      "x": 3050,
+      "y": 3450
+    },
+    "dashboard_buyer": {
+      "x": 3850,
+      "y": 250
+    },
+    "comp_return_brief_buyer": {
+      "x": 3850,
+      "y": 450
+    },
+    "dashboard_owner": {
+      "x": 3850,
+      "y": 700
+    },
+    "comp_return_brief_owner": {
+      "x": 3850,
+      "y": 900
+    },
+    "dashboard_broker": {
+      "x": 3850,
+      "y": 1150
+    },
+    "comp_return_brief_broker": {
+      "x": 3850,
+      "y": 1350
+    },
+    "dashboard_provider": {
+      "x": 3850,
+      "y": 1600
+    },
+    "deal_room": {
+      "x": 3850,
+      "y": 1900
+    },
+    "mission_control": {
+      "x": 3850,
+      "y": 2300
+    },
+    "exc_insufficient_connects": {
+      "x": 4650,
+      "y": 100
+    },
+    "rec_topup_connects": {
+      "x": 4650,
+      "y": 300
+    },
+    "exc_slot_conflict": {
+      "x": 4650,
+      "y": 500
+    },
+    "rec_propose_alt_slot": {
+      "x": 4650,
+      "y": 700
+    },
+    "exc_contact_leak_blocked": {
+      "x": 4650,
+      "y": 900
+    },
+    "rec_redact_contact_faq": {
+      "x": 4650,
+      "y": 1100
+    },
+    "exc_viewing_noshow": {
+      "x": 4650,
+      "y": 1300
+    },
+    "reschedule_modal": {
+      "x": 4650,
+      "y": 1500
+    },
+    "exc_missing_pdf_metric": {
+      "x": 4650,
+      "y": 1750
+    },
+    "rec_owner_manual_override": {
+      "x": 4650,
+      "y": 1950
+    },
+    "exc_ai_deadlock": {
+      "x": 4650,
+      "y": 2150
+    },
+    "rec_manual_approval_queue": {
+      "x": 4650,
+      "y": 2350
+    },
+    "scenario_churned_owner_escrow": {
+      "x": 4650,
+      "y": 2600
+    },
+    "scenario_listing_cap_limit": {
+      "x": 4650,
+      "y": 2850
+    },
+    "scenario_prc_expired_notice": {
+      "x": 4650,
+      "y": 3100
+    },
+    "scenario_broker_lead_collision": {
+      "x": 4650,
+      "y": 3350
+    },
+    "scenario_offmarket_pitch": {
+      "x": 4650,
+      "y": 3600
+    },
+    "scenario_chat_purge": {
+      "x": 4650,
+      "y": 3850
+    },
+    "rec_turnstile_challenge": {
+      "x": 4650,
+      "y": 4050
+    },
+    "terminal_edge_blacklist": {
+      "x": 4650,
+      "y": 4250
+    },
+    "terminal_handshake_success": {
+      "x": 4650,
+      "y": 4450
+    },
+    "terminal_deal_closed": {
+      "x": 4650,
+      "y": 4650
+    },
+    "compare_specs_matrix": {
+      "x": 880,
+      "y": 1950
+    },
+    "broker_field_briefing": {
+      "x": 1680,
+      "y": 1350
+    },
+    "sys_zero_log_ai_crm": {
+      "x": 2480,
+      "y": 1350
+    },
+    "sys_monthly_scout_wrap": {
+      "x": 2880,
+      "y": 750
+    },
+    "sys_freshness_staleness_engine": {
+      "x": 2880,
+      "y": 1050
+    },
+    "exc_stale_listing_quarantine": {
+      "x": 3280,
+      "y": 1050
+    },
+    "rec_confirm_freshness_click": {
+      "x": 3680,
+      "y": 1050
+    },
+    "sys_noah_hazard_radar": {
+      "x": 1280,
+      "y": 1950
+    },
+    "provider_bounty_handshake": {
+      "x": 3280,
+      "y": 2250
+    },
+    "sys_faq_appeal_engine": {
+      "x": 1680,
+      "y": 1950
+    },
+    "auth_enterprise_sso": {
+      "x": 80,
+      "y": 1500
+    },
+    "exc_sso_domain_mismatch": {
+      "x": 480,
+      "y": 1500
+    },
+    "rec_sso_idp_reauth": {
+      "x": 880,
+      "y": 1500
+    },
+    "sys_ephemeral_secret_engine": {
+      "x": 480,
+      "y": 650
+    },
+    "exc_ephemeral_token_expired": {
+      "x": 880,
+      "y": 650
+    },
+    "rec_silent_token_refresh": {
+      "x": 1280,
+      "y": 650
+    }
+  }
+}

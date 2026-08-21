@@ -1,0 +1,353 @@
+{
+  "AUTH_ACCOUNT": {
+    "totalNodes": 8,
+    "happyPathCoverage": {
+      "numerator": 3,
+      "denominator": 4,
+      "percentage": "75%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 1,
+      "denominator": 4,
+      "percentage": "25%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 1,
+      "denominator": 1,
+      "percentage": "100%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 0,
+      "denominator": 2,
+      "percentage": "0%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "PROPERTY_LISTING": {
+    "totalNodes": 16,
+    "happyPathCoverage": {
+      "numerator": 4,
+      "denominator": 4,
+      "percentage": "100%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 1,
+      "denominator": 3,
+      "percentage": "33%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 0,
+      "denominator": 1,
+      "percentage": "0%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 3,
+      "denominator": 4,
+      "percentage": "75%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "CONNECTS_WALLET": {
+    "totalNodes": 5,
+    "happyPathCoverage": {
+      "numerator": 4,
+      "denominator": 4,
+      "percentage": "100%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 0,
+      "denominator": 3,
+      "percentage": "0%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 1,
+      "denominator": 1,
+      "percentage": "100%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 0,
+      "denominator": 2,
+      "percentage": "0%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "VIEWING_TRANSACTION": {
+    "totalNodes": 13,
+    "happyPathCoverage": {
+      "numerator": 3,
+      "denominator": 4,
+      "percentage": "75%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 2,
+      "denominator": 3,
+      "percentage": "67%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "OFFER_NEGOTIATION": {
+    "totalNodes": 13,
+    "happyPathCoverage": {
+      "numerator": 3,
+      "denominator": 4,
+      "percentage": "75%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 2,
+      "denominator": 3,
+      "percentage": "67%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "HANDSHAKE_CLOSURE": {
+    "totalNodes": 13,
+    "happyPathCoverage": {
+      "numerator": 3,
+      "denominator": 4,
+      "percentage": "75%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 2,
+      "denominator": 3,
+      "percentage": "67%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 2,
+      "denominator": 2,
+      "percentage": "100%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "OWNERSHIP_CLAIM": {
+    "totalNodes": 19,
+    "happyPathCoverage": {
+      "numerator": 2,
+      "denominator": 4,
+      "percentage": "50%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 4,
+      "denominator": 4,
+      "percentage": "100%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 2,
+      "denominator": 3,
+      "percentage": "67%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "BROKER_REPRESENTATION": {
+    "totalNodes": 9,
+    "happyPathCoverage": {
+      "numerator": 2,
+      "denominator": 4,
+      "percentage": "50%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 0,
+      "denominator": 3,
+      "percentage": "0%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 0,
+      "denominator": 1,
+      "percentage": "100%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 2,
+      "denominator": 3,
+      "percentage": "67%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  },
+  "SECURITY_SENTINEL": {
+    "totalNodes": 11,
+    "happyPathCoverage": {
+      "numerator": 1,
+      "denominator": 4,
+      "percentage": "25%",
+      "formula": "implemented expected happy paths / total expected happy paths"
+    },
+    "failureCoverage": {
+      "numerator": 2,
+      "denominator": 3,
+      "percentage": "67%",
+      "formula": "mapped expected failures / total expected failures"
+    },
+    "recoveryCoverage": {
+      "numerator": 2,
+      "denominator": 2,
+      "percentage": "100%",
+      "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
+    },
+    "guideCoverage": {
+      "numerator": 0,
+      "denominator": 0,
+      "percentage": "100%",
+      "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
+    },
+    "telemetryCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "runtime transitions requiring telemetry with verified instrumentation / runtime transitions requiring telemetry"
+    },
+    "evidenceCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "percentage": "100%",
+      "formula": "VERIFIED atomic claims with valid evidence / total required atomic claims"
+    }
+  }
+}

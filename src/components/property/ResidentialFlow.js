@@ -44,9 +44,12 @@ const PropertyFAQSection = dynamic(() => import("@/components/property/PropertyF
 const WhereToSection = dynamic(() => import("@/components/property/WhereToSection"), { ssr: false });
 const OperatorRequestModal = dynamic(() => import("@/components/property/OperatorRequestModal"), { ssr: false });
 const AffordabilityCalculator = dynamic(() => import("@/components/property/AffordabilityCalculator"), { ssr: false });
+const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
 import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
-import SpatialVaultWidget from "@/components/property/SpatialVaultWidget";
+import IntelDoorCard from "@/components/intel/IntelDoorCard";
+import AttachedFindingCard from "@/components/property/AttachedFindingCard";
+import { getSignalsForProperty, getSignalBySlug, getSignalResolution } from "@/lib/signalsData";
 import { hasInteractiveUnitPage, hasSpatial3D, unitMasterPageOverview, formatUnitPrice } from "@/lib/unitMasterPage";
 import { canSee, getCurrentTier, hasActiveRole } from "@/lib/entitlements";
 import useCuratedShare from "@/lib/useCuratedShare";
@@ -275,6 +278,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
       if (scrollEl) scrollEl.scrollTop = 0;
     }
   }, [externalActiveTab]);
+
+  // ── Attached Finding from Stratosphere Detour ──
+  const [attachedSignalSlug, setAttachedSignalSlug] = useState(null);
+  const [attachedFindingKey, setAttachedFindingKey] = useState("resolved");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const sig = params.get("signal");
+    const fnd = params.get("finding");
+    if (sig) {
+      setAttachedSignalSlug(sig);
+      if (fnd) setAttachedFindingKey(fnd);
+    }
+  }, []);
+
   const [menuOpen,   setMenuOpen]   = useState(false);
   // Seed from the server-resolved record so the first paint is real content,
   // not the loading gate.
@@ -510,6 +528,20 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   // ── Chapter config (drives nav labels & chapter headings) ──
   const chapterConfig = useMemo(() => getChapterConfig(d), [d]);
   const ch = useMemo(() => Object.fromEntries(chapterConfig.map(c => [c.id, c])), [chapterConfig]);
+
+  // ── Spatial Signals & Curiosity Doors (Stratosphere Detour) ──
+  const propertySignals = useMemo(() => getSignalsForProperty(slug || d?.slug), [slug, d?.slug]);
+  const finePrintSignal = useMemo(() => propertySignals.find(s => s.door === "hiddenintel") || propertySignals[0], [propertySignals]);
+  const whereToSignal = useMemo(() => propertySignals.find(s => s.door === "whereto") || (propertySignals.length > 1 ? propertySignals[1] : null), [propertySignals]);
+  const universeSignal = useMemo(() => propertySignals.find(s => s.door === "universe") || (propertySignals.length > 2 ? propertySignals[2] : null), [propertySignals]);
+
+  const prefilledInquiryMsg = useMemo(() => {
+    if (!attachedSignalSlug) return "";
+    const res = getSignalResolution(attachedSignalSlug, attachedFindingKey);
+    const sig = getSignalBySlug(attachedSignalSlug);
+    if (!res || !sig) return "";
+    return `Hi, I've reviewed the "${sig.title}" spatial dossier on ScoutIt (${res.name}: ${res.headline}). I'd like to discuss the ${res.inquiryTopic} for ${d?.title || "this property"}.`;
+  }, [attachedSignalSlug, attachedFindingKey, d?.title]);
 
   // Determine brief label
   const briefLabel = useMemo(() => {
@@ -1818,6 +1850,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 />
               </div>
 
+              {/* Stratosphere Curiosity Door (Ch 04 -> Area Guide) */}
+              {whereToSignal && (
+                <IntelDoorCard
+                  signal={whereToSignal}
+                  propertySlug={slug || d?.slug}
+                  doorChapterId="whereto"
+                  doorChapterNumber={ch['whereto']?.chapterNumber || '04'}
+                  overrideQuestion="What is the true walkability and district corridor rhythm around this building?"
+                />
+              )}
+
               <DeepIntelWidget
                 open={widgets.whereto}
                 onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
@@ -1996,6 +2039,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               </div>
 
               <FloodRiskBadge floodRiskScore={d.flood_risk_score} floodZoneStatus={d.flood_zone_status} />
+
+              {/* Stratosphere Curiosity Door (Ch 06 -> Commercial Signal / Decarbonization Ordinance) */}
+              {finePrintSignal && (
+                <IntelDoorCard
+                  signal={finePrintSignal}
+                  propertySlug={slug || d?.slug}
+                  doorChapterId="hiddenintel"
+                  doorChapterNumber={ch['hiddenintel']?.chapterNumber || '06'}
+                />
+              )}
 
               <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
                 Market and investment intelligence for this asset — transaction history, capitalization rates, and appreciation modelling — is reserved for Verified Scouts.
@@ -2217,6 +2270,17 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 </>
               )}
 
+              {/* Stratosphere Curiosity Door (Ch 08 -> Developing Story / Transit Corridor) */}
+              {universeSignal && (
+                <IntelDoorCard
+                  signal={universeSignal}
+                  propertySlug={slug || d?.slug}
+                  doorChapterId="universe"
+                  doorChapterNumber={ch['universe']?.chapterNumber || '08'}
+                  overrideQuestion="Is the wider masterplan & infrastructure actually active or a rendering?"
+                />
+              )}
+
               <DeepIntelWidget
                 open={widgets.universe}
                 onToggle={() => setWidgets(w => ({...w, universe: !w.universe}))}
@@ -2301,6 +2365,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
+
+              {/* Attached Spatial Finding from Stratosphere Detour */}
+              {attachedSignalSlug && (
+                <AttachedFindingCard
+                  signalSlug={attachedSignalSlug}
+                  findingKey={attachedFindingKey}
+                  propertySlug={slug || d?.slug}
+                  onClear={() => setAttachedSignalSlug(null)}
+                />
+              )}
 
               <h2 style={{fontFamily:"var(--font-body)", fontWeight:400, fontSize:"clamp(26px,3.6vw,40px)", color:"var(--text-primary)", lineHeight:1.25, margin:"4px 0 28px", maxWidth:"600px"}}>
                 When you&apos;re ready, we&apos;ll make the introduction.
@@ -2550,7 +2624,8 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         propertyTitle={d.title}
-        propertySlug={d.slug}
+        propertySlug={slug || d.slug}
+        defaultMessage={prefilledInquiryMsg}
       />
 
       <OperatorRequestModal

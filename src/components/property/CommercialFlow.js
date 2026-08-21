@@ -103,6 +103,10 @@ import { getChapterConfig } from "./chapterConfig";
 import { PROPERTY_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 import { Bed, Bath, Ruler, Car, Lock, Search, Camera, Building2 } from "lucide-react";
 import useCuratedShare from "@/lib/useCuratedShare";
+import IntelDoorCard from "@/components/intel/IntelDoorCard";
+import AttachedFindingCard from "@/components/property/AttachedFindingCard";
+import { getSignalsForProperty, getSignalBySlug, getSignalResolution } from "@/lib/signalsData";
+import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 // Modals are closed on load but were pulling framer-motion (~60kb gzip) into the
 // initial property-page bundle, inflating TBT/TTI on mobile. They render null when
 // closed, so deferring them is visually identical.
@@ -332,7 +336,7 @@ function BackOfHousePanel({ property: d }) {
 // share a link to a specific chapter, and refresh always reset to "The Space").
 // Uses history.replaceState rather than Next.js router push so a chapter click
 // never triggers a navigation/refetch — this is a URL bookmark, not a route change.
-const VALID_CHAPTERS = new Set(["space","location","vault","life","whereto","buildplans","units","universe","services","yourmove"]);
+const VALID_CHAPTERS = new Set(["space","location","vault","life","whereto","buildplans","hiddenintel","units","universe","services","yourmove"]);
 
 function initialChapterFromUrl(fallback) {
   if (typeof window === "undefined") return fallback;
@@ -405,6 +409,21 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       if (scrollEl) scrollEl.scrollTop = 0;
     }
   }, [externalActiveTab]);
+
+  // ── Attached Finding from Stratosphere Detour ──
+  const [attachedSignalSlug, setAttachedSignalSlug] = useState(null);
+  const [attachedFindingKey, setAttachedFindingKey] = useState("resolved");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const sig = params.get("signal");
+    const fnd = params.get("finding");
+    if (sig) {
+      setAttachedSignalSlug(sig);
+      if (fnd) setAttachedFindingKey(fnd);
+    }
+  }, []);
+
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
@@ -641,6 +660,20 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   // ── Chapter config (drives nav labels & chapter headings) ──
   const chapterConfig = useMemo(() => getChapterConfig(d), [d]);
   const ch = useMemo(() => Object.fromEntries(chapterConfig.map(c => [c.id, c])), [chapterConfig]);
+
+  // ── Spatial Signals & Curiosity Doors (Stratosphere Detour) ──
+  const propertySignals = useMemo(() => getSignalsForProperty(slug || d?.slug), [slug, d?.slug]);
+  const finePrintSignal = useMemo(() => propertySignals.find(s => s.door === "hiddenintel") || propertySignals[0], [propertySignals]);
+  const whereToSignal = useMemo(() => propertySignals.find(s => s.door === "whereto") || (propertySignals.length > 1 ? propertySignals[1] : null), [propertySignals]);
+  const universeSignal = useMemo(() => propertySignals.find(s => s.door === "universe") || (propertySignals.length > 2 ? propertySignals[2] : null), [propertySignals]);
+
+  const prefilledInquiryMsg = useMemo(() => {
+    if (!attachedSignalSlug) return "";
+    const res = getSignalResolution(attachedSignalSlug, attachedFindingKey);
+    const sig = getSignalBySlug(attachedSignalSlug);
+    if (!res || !sig) return "";
+    return `Hi, I've reviewed the "${sig.title}" spatial dossier on ScoutIt (${res.name}: ${res.headline}). I'd like to discuss the ${res.inquiryTopic} for ${d?.title || "this property"}.`;
+  }, [attachedSignalSlug, attachedFindingKey, d?.title]);
 
   // Determine brief label
   const briefLabel = useMemo(() => {
@@ -2120,6 +2153,17 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 />
               </div>
 
+              {/* Stratosphere Curiosity Door (Ch 04 -> Area Guide) */}
+              {whereToSignal && (
+                <IntelDoorCard
+                  signal={whereToSignal}
+                  propertySlug={slug || d?.slug}
+                  doorChapterId="whereto"
+                  doorChapterNumber={ch['whereto']?.chapterNumber || '04'}
+                  overrideQuestion="What is the true walkability and district corridor rhythm around this building?"
+                />
+              )}
+
               <DeepIntelWidget
                 open={widgets.whereto}
                 onToggle={() => setWidgets(w => ({...w, whereto: !w.whereto}))}
@@ -2234,6 +2278,39 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
           </div>
 
+          {/* ── HIDDEN INTEL (Ch. 6) ── */}
+          <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
+            <div className="panel-content">
+              <div style={{marginBottom:"32px"}}>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
+                {ch['hiddenintel']?.subtitle && (
+                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['hiddenintel'].subtitle}</div>
+                )}
+                <div style={{height:"1px", background:"var(--border)"}}/>
+              </div>
+
+              <FloodRiskBadge floodRiskScore={d.flood_risk_score} floodZoneStatus={d.flood_zone_status} />
+
+              {/* Stratosphere Curiosity Door (Ch 06 -> Commercial Signal / Decarbonization Ordinance) */}
+              {finePrintSignal && (
+                <IntelDoorCard
+                  signal={finePrintSignal}
+                  propertySlug={slug || d?.slug}
+                  doorChapterId="hiddenintel"
+                  doorChapterNumber={ch['hiddenintel']?.chapterNumber || '06'}
+                />
+              )}
+
+              <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
+                Regulatory and municipal zoning intelligence for this asset — LEED mandates, building code compliance, and environmental covenants.
+              </p>
+            </div>
+
+            <div className="panel-sidebar">
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"#E8AE3C"}}/><div className="sidebar-label">Zoning Status</div><div className="sidebar-value">{d.zoning_type || "Verified Commercial"}</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
+            </div>
+          </div>
 
           {/* ── UNITS (Ch. 7) ── */}
           <div className={`chapter-panel ${activeTab === "units" ? "active" : ""}`} id="panel-units">
@@ -2406,6 +2483,17 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 </>
               )}
 
+              {/* Stratosphere Curiosity Door (Ch 08 -> Developing Story / Transit Corridor) */}
+              {universeSignal && (
+                <IntelDoorCard
+                  signal={universeSignal}
+                  propertySlug={slug || d?.slug}
+                  doorChapterId="universe"
+                  doorChapterNumber={ch['universe']?.chapterNumber || '08'}
+                  overrideQuestion="Is the wider masterplan & infrastructure actually active or a rendering?"
+                />
+              )}
+
               <DeepIntelWidget
                 open={widgets.universe}
                 onToggle={() => setWidgets(w => ({...w, universe: !w.universe}))}
@@ -2480,7 +2568,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           </div>
 
           {/* ── YOUR MOVE ── */}
-          <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
+          <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove" data-scoutit-guide="property-your-move-actions">
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
@@ -2490,6 +2578,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 )}
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
+
+              {/* Attached Spatial Finding from Stratosphere Detour */}
+              {attachedSignalSlug && (
+                <AttachedFindingCard
+                  signalSlug={attachedSignalSlug}
+                  findingKey={attachedFindingKey}
+                  propertySlug={slug || d?.slug}
+                  onClear={() => setAttachedSignalSlug(null)}
+                />
+              )}
 
               <h2 style={{fontFamily:"var(--font-body)", fontWeight:400, fontSize:"clamp(26px,3.6vw,40px)", color:"var(--text-primary)", lineHeight:1.25, margin:"4px 0 28px", maxWidth:"600px"}}>
                 When you&apos;re ready, we&apos;ll make the introduction.
@@ -2760,7 +2858,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         propertyTitle={d.title}
-        propertySlug={d.slug}
+        propertySlug={slug || d.slug}
+        defaultMessage={prefilledInquiryMsg}
       />
 
       <OperatorRequestModal
