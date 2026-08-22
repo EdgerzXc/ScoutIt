@@ -1,0 +1,21 @@
+-- Remove the chat purge function that could never have run.
+--
+-- WHY
+-- ---
+-- public.purge_expired_chat_messages() was created by
+-- 20260802000004_handshakes_and_chat_lifecycle.sql and updates
+-- `deal_messages.content`. The live column is `body`; `content` has never
+-- existed on that table, so the function raises 42703 on its first statement.
+--
+-- Nothing ever invoked it — no route, no job, no scheduler, and pg_cron is not
+-- installed on this project — so the error was never observed. Meanwhile the
+-- Privacy notice and the deal-close response both promise the purge to users.
+--
+-- The rule now has exactly one implementation with a named consumer:
+-- /api/cron/purge-chat-messages, written against the live column names and
+-- scheduled in vercel.json. Two definitions of one retention rule is how they
+-- drift, so the dead one goes.
+--
+-- Safe to apply: dropping it cannot remove behaviour that was never reachable.
+
+DROP FUNCTION IF EXISTS public.purge_expired_chat_messages();

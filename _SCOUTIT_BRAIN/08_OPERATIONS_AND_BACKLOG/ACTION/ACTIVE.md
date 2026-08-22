@@ -11,13 +11,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]"]
 > Maximum 25 open items. An agent may work here only after Urgent is stable and
 > after re-checking the named behavior against current code.
 
-## A-002 — Contact-message retention and support boundary
-
-The public contact form, database intake, staff queue, reply-by-email path, and
-delivery chain are built. Decide and implement only the remaining retention
-contract for visitor support messages. Keep visitor support separate from the
-post-Connect deal chat lifecycle.
-
 ## A-003 — Preview-deployment verification contract
 
 Choose and implement a dependable method for measuring protected Vercel previews:

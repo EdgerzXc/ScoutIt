@@ -63,3 +63,20 @@ only the sitemap processing status; do not repeat verification/setup work.
 
 See [[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]] for deliberately deferred
 work and [[WAITING]] for the exact conditions that reopen engineering.
+
+### A-002 — Visitor contact-message retention period
+
+`contact_messages` holds a stranger's name, email and free text with no
+retention rule: rows currently live forever. The table is RLS deny-all and
+service-role only, so this is a retention question, not an exposure one. Live
+count at handoff: 0 rows.
+
+**The one decision needed:** how long a resolved visitor support message is
+kept before its personal fields are cleared. Everything else is built and
+waiting on that number. Retention wording also sits inside the counsel review
+already tracked as O-003, so the two should be answered together rather than
+guessing a period and publishing it.
+
+Deliberately not implemented: a placeholder period would become a published
+privacy claim nobody actually decided.
+
