@@ -523,8 +523,8 @@ export default function Header({ ambientContext = null }) {
           }
 
           .header-menu-btn {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
           }
           .header-menu-btn svg { width: 13px; height: 13px; }
 
@@ -574,7 +574,7 @@ export default function Header({ ambientContext = null }) {
           .header-left { gap: 4px; }
           .header-back-btn { font-size: 12px; padding: 0 6px; min-height: 44px; letter-spacing: 0.06em; border-radius: 14px; }
           .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
-          .header-menu-btn { width: 36px; height: 36px; }
+          .header-menu-btn { width: 44px; height: 44px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
         }
 
@@ -589,7 +589,7 @@ export default function Header({ ambientContext = null }) {
         @media (max-width: 340px) {
           .global-header { padding: 4px 4px; gap: 2px; }
           .header-back-btn { padding: 0 4px; }
-          .header-eye-btn, .header-menu-btn { width: 34px; height: 34px; }
+          .header-eye-btn, .header-menu-btn { width: 44px; height: 44px; }
         }
 
         /* ── The ambient rail stops competing for the same row ──────────────
