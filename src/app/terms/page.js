@@ -1,4 +1,5 @@
 import LegalDoc from "@/components/legal/LegalDoc";
+import { CURRENT_TERMS_EFFECTIVE_DATE, CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 export const metadata = {
   title: "Terms of Service",
@@ -10,7 +11,7 @@ const SECTIONS = [
   {
     num: "01",
     title: "What ScoutIt is — and what it isn't",
-    body: `ScoutIt is operated by ScoutIt Intelligence Technologies Inc., a technology company registered in the Republic of the Philippines ("ScoutIt," "we," "us," or "our"). ScoutIt is the Philippines' first spatial commerce and intelligence platform — a B2B2C technology layer for physical space: homes, commercial offices, short-term rentals, hospitality, restaurants, and event venues. We turn space into clear, verified briefings, and we connect space owners and professionals to seekers.
+    body: `ScoutIt is an independently operated spatial commerce and intelligence platform ("ScoutIt," "we," "us," or "our") for physical space: homes, commercial offices, short-term rentals, hospitality, restaurants, and event venues. We turn space into clear briefings and connect space owners and professionals to seekers.
 
 INTELLIGENCE FIRST. TRANSACTIONS NEVER. ScoutIt is deliberately and strictly NOT a real estate broker, real estate salesperson, real estate appraiser, real estate consultant, or real estate dealer under Republic Act No. 9646 (the Real Estate Service Act of the Philippines, or RESA). ScoutIt does not sell, purchase, lease, negotiate, represent any party in, manage escrow for, or receive commissions or transaction fees on any property transaction. All discussions, viewings, negotiations, lease agreements, purchase contracts, and financial settlements occur entirely off-platform between the respective parties and their independently retained, licensed professionals.`,
   },
@@ -37,7 +38,7 @@ If you choose to log in and sync your Ledger across devices, you explicitly inst
 
 Each Connect wallet holds three structural allocations:
 — Monthly Allowance: Granted based on subscription tier. Resets on the 1st of each calendar month, non-cumulative, with zero rollover. Consumed first.
-— Purchased Allocation: Acquired à la carte via authorized payment processors (PayMongo). Permanent, non-expiring, and account-wide. Consumed second.
+— Purchased Allocation: Reserved for future activation through an owner-selected payment provider. Purchases are disabled during the invited pilot.
 — Reward Balance: Earned by completing platform data verification bounties. Permanent, non-expiring, and account-wide. Consumed third.
 
 A Connect is consumed immediately upon the successful dispatch and delivery of an interaction (sending an inquiry, submitting a pitch, or requesting contact). In compliance with Republic Act No. 7394 (Consumer Act of the Philippines), the platform service is fully rendered upon transmission; consequently, spent Connects are non-refundable even if the recipient declines, fails to respond, or allows the interaction to time out. Discretionary token corrections may be issued by administration only for verified technical system errors.`,
@@ -115,7 +116,7 @@ Breach of these prohibitions results in immediate account revocation, asset forf
   {
     num: "13",
     title: "Platform identity and proprietary rights",
-    body: `The ScoutIt brand, trademark, software code, dynamic interfaces, scrollytelling visual tracks, Connects economic architecture, spatial display systems, and editorial intelligence publications are the exclusive property of ScoutIt Intelligence Technologies Inc. Unauthorized reproduction, modification, or distribution is prohibited under RA 8293.`,
+    body: `The ScoutIt brand, software code, dynamic interfaces, scrollytelling visual tracks, Connects architecture, spatial display systems, and original editorial publications are proprietary ScoutIt materials. Unauthorized reproduction, modification, or distribution is prohibited.`,
   },
   {
     num: "14",
@@ -134,9 +135,9 @@ ScoutIt WILL NOT mediate, arbitrate, or involve itself in transaction disputes r
   {
     num: "16",
     title: "Electronic acceptance and terms modifications",
-    body: `Pursuant to Republic Act No. 8792 (Electronic Commerce Act of 2000), registering an account, clicking any confirmation button, or utilizing the Platform constitutes valid, binding electronic contract acceptance equivalent to a physical signature.
+    body: `ScoutIt records acceptance only when an authenticated user checks the Terms and Privacy box and submits onboarding for the exact version displayed. The server stores the user, version, time, acceptance method, and a snapshot hash as evidence of that electronic action. Republic Act No. 8792 recognizes electronic data messages and documents, but ScoutIt does not claim that merely browsing the Platform creates acceptance.
 
-ScoutIt reserves the right to amend these Terms at any time. Material changes will be communicated via in-app notifications or registered email. Continued use of the Platform following published amendments constitutes binding acceptance of the revised Terms.`,
+ScoutIt may amend these Terms to reflect product, operational, or legal changes. Material revisions receive a new version and effective date; account flows must request acceptance of that current version instead of silently treating continued browsing as assent. Philippine counsel should review this pilot text before public commercial launch.`,
   },
   {
     num: "17",
@@ -146,12 +147,7 @@ ScoutIt reserves the right to amend these Terms at any time. Material changes wi
   {
     num: "18",
     title: "Official legal contact details",
-    body: `For legal inquiries, operational notices, or formal statutory communications, contact ScoutIt at:
-ScoutIt Intelligence Technologies Inc.
-Attn: Legal Department / Regulatory Compliance
-Address: Tower 1, High Street South Corporate Plaza, 9th Ave cor 26th St, Bonifacio Global City, Taguig City 1634, Metro Manila, Philippines
-Dedicated Legal Email: legal@scoutit.ph
-Data Protection Officer Email: dpo@scoutit.ph`,
+    body: `ScoutIt has not yet published a dedicated legal mailbox or office address. During the invited pilot, use the official Contact surface for legal, privacy, or operational notices. This section will be replaced only after the owner verifies the receiving channel and counsel approves the wording.`,
   },
 ];
 
@@ -160,8 +156,8 @@ export default function TermsPage() {
     <LegalDoc
       eyebrow="LAYER 09 // PLATFORM GOVERNANCE"
       title="Terms of Service"
-      meta="Version 1.0  ·  Effective October 24, 2026  ·  Philippine operations governed by RA 9646, RA 10173, RA 8792"
-      intro="These Terms of Service govern your access to and use of ScoutIt. By registering an account, accessing the platform, or executing an electronic acceptance, you agree to be bound by these terms. ScoutIt is engineered around procedural verification and statutory compliance under Philippine jurisprudence. Intelligence first. Transactions never."
+      meta={`Version ${CURRENT_TERMS_VERSION}  ·  Effective ${CURRENT_TERMS_EFFECTIVE_DATE}  ·  Invited pilot`}
+      intro="These pilot Terms describe the current rules for using ScoutIt. Account onboarding requires explicit acceptance of the version shown above. The text is designed with reference to Philippine law but still requires Philippine counsel review before public commercial launch. Intelligence first. Transactions never."
       sections={SECTIONS}
       related={{ href: "/privacy", label: "Privacy Policy" }}
     />

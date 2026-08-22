@@ -1,4 +1,5 @@
 import { profileIsEligible } from "@/lib/adultEligibility";
+import { hasCurrentTermsAcceptance } from "@/lib/legalAcceptance";
 import { normalizeDashboardMode, normalizeDashboardModes } from "@/lib/dashboardModes";
 
 export const SIGNUP_PRIMARY_MODES = Object.freeze(["buyer", "owner", "broker"]);
@@ -21,6 +22,9 @@ export function onboardingActiveModes(profile) {
 export function isOnboardingComplete(profile) {
   if (!profile?.onboarding_completed_at) return false;
   if (!normalizeSignupPrimaryMode(profile.primary_mode)) return false;
+  // A published version change re-opens onboarding rather than letting the
+  // account keep browsing under terms it never saw.
+  if (!hasCurrentTermsAcceptance(profile)) return false;
   return profileIsEligible(profile);
 }
 

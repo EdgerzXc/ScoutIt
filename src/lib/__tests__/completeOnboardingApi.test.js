@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   legacyWalletUpsert: vi.fn(),
   canonicalRoleWalletUpsert: vi.fn(),
   canonicalAccountUpsert: vi.fn(),
+  termsInsert: vi.fn(),
+  termsSelectSingle: vi.fn(),
 }));
 
 vi.mock("@supabase/supabase-js", () => ({
@@ -19,6 +21,13 @@ vi.mock("@/lib/supabaseAdmin", () => ({
   supabaseAdmin: {
     from: (table) => {
       if (table === "user_connect_wallets") return { upsert: mocks.canonicalRoleWalletUpsert };
+      if (table === "terms_acceptances") {
+        return {
+          insert: mocks.termsInsert,
+          select: () => ({ eq: () => ({ eq: () => ({ single: mocks.termsSelectSingle }) }) }),
+        };
+      }
+
       if (table === "user_connect_accounts") return { upsert: mocks.canonicalAccountUpsert };
       if (table === "connect_balances") return { upsert: mocks.legacyWalletUpsert };
       if (table === "user_profiles") {
@@ -32,13 +41,14 @@ vi.mock("@/lib/supabaseAdmin", () => ({
     },
   },
 }));
+import { CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 import { POST } from "@/app/api/auth/complete-onboarding/route";
 
 function request(body) {
   return {
-    headers: { get: () => "Bearer valid-token" },
-    json: async () => body,
+    headers: { get: (name) => name.toLowerCase() === "authorization" ? "Bearer valid-token" : "vitest" },
+    json: async () => ({ termsVersion: CURRENT_TERMS_VERSION, ...body }),
   };
 }
 
@@ -54,6 +64,8 @@ describe("complete onboarding API", () => {
     mocks.canonicalAccountUpsert.mockResolvedValue({ error: null });
     mocks.legacyWalletUpsert.mockResolvedValue({ error: null });
     mocks.profileEq.mockResolvedValue({ error: null });
+    mocks.termsInsert.mockResolvedValue({ error: null });
+    mocks.termsSelectSingle.mockResolvedValue({ data: { accepted_at: "2026-08-21T00:00:00.000Z" }, error: null });
     mocks.profileUpdate.mockReturnValue({ eq: mocks.profileEq });
   });
 
@@ -86,6 +98,8 @@ describe("complete onboarding API", () => {
         }),
         expect.anything(),
       );
+      expect(mocks.termsInsert).toHaveBeenCalledOnce();
+      expect(mocks.profileUpsert).toHaveBeenCalledWith(expect.objectContaining({ terms_version: CURRENT_TERMS_VERSION }), expect.anything());
       expect(mocks.canonicalRoleWalletUpsert).not.toHaveBeenCalled();
       expect(mocks.canonicalAccountUpsert).not.toHaveBeenCalled();
       expect(mocks.profileUpdate).toHaveBeenCalledWith({
@@ -105,6 +119,69 @@ describe("complete onboarding API", () => {
 
       expect(response.status).toBe(500);
       expect(mocks.profileUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Versioned legal acceptance", () => {
+    it("rejects a missing or stale version before writing account state", async () => {
+      const response = await POST(request({
+        name: "Jane Scout",
+        role: "buyer",
+        dateOfBirth: "1990-01-02",
+        termsVersion: "stale-version",
+      }));
+
+      expect(response.status).toBe(409);
+      expect(mocks.termsInsert).not.toHaveBeenCalled();
+      expect(mocks.profileUpsert).not.toHaveBeenCalled();
+    });
+
+    it("does not complete onboarding when acceptance evidence cannot be persisted", async () => {
+      mocks.termsInsert.mockResolvedValue({ error: { code: "42501", message: "write denied" } });
+      const response = await POST(request({
+        name: "Jane Scout",
+        role: "buyer",
+        dateOfBirth: "1990-01-02",
+      }));
+
+      expect(response.status).toBe(500);
+      expect(mocks.profileUpsert).not.toHaveBeenCalled();
+      expect(mocks.profileUpdate).not.toHaveBeenCalled();
+    });
+
+    it("does not duplicate evidence when the same version was already accepted", async () => {
+      mocks.termsInsert.mockResolvedValue({ error: { code: "23505", message: "duplicate key" } });
+      mocks.termsSelectSingle.mockResolvedValue({
+        data: { accepted_at: "2026-08-21T09:30:00.000Z" },
+        error: null,
+      });
+
+      const response = await POST(request({
+        name: "Jane Scout",
+        role: "buyer",
+        dateOfBirth: "1990-01-02",
+      }));
+
+      expect(response.status).toBe(200);
+      // The original acceptance time is preserved, not restamped to "now".
+      expect(mocks.profileUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          terms_version: CURRENT_TERMS_VERSION,
+          terms_accepted_at: "2026-08-21T09:30:00.000Z",
+        }),
+        expect.anything(),
+      );
+    });
+
+    it("records nothing for an unauthenticated caller", async () => {
+      const response = await POST({
+        headers: { get: () => null },
+        json: async () => ({ termsVersion: CURRENT_TERMS_VERSION }),
+      });
+
+      expect(response.status).toBe(401);
+      expect(mocks.termsInsert).not.toHaveBeenCalled();
+      expect(mocks.profileUpsert).not.toHaveBeenCalled();
     });
   });
 

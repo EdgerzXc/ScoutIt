@@ -1,16 +1,17 @@
 import LegalDoc from "@/components/legal/LegalDoc";
+import { CURRENT_TERMS_EFFECTIVE_DATE, CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 export const metadata = {
   title: "Privacy Policy",
   description:
-    "How ScoutIt collects, uses, and protects your data — built privacy-first and compliant with the Philippine Data Privacy Act (RA 10173) and NPC Circulars.",
+    "How ScoutIt currently collects, uses, retains, and protects data during the invited pilot.",
 };
 
 const SECTIONS = [
   {
     num: "01",
     title: "Our privacy-first architecture",
-    body: `ScoutIt Intelligence Technologies Inc. ("ScoutIt," "we," "us," or "our") is committed to protecting your fundamental right to privacy. This Privacy Policy governs the collection, processing, storage, disclosure, and protection of personal data collected through the ScoutIt platform, website, applications, and digital services (collectively, the "Platform"), in compliance with Republic Act No. 10173 (Data Privacy Act of 2012 - DPA), its Implementing Rules and Regulations (IRR), and applicable circulars of the National Privacy Commission (NPC).
+    body: `ScoutIt ("ScoutIt," "we," "us," or "our") is an independently operated platform committed to protecting personal data. This Privacy Policy describes the collection, processing, storage, disclosure, and protection of personal data during the invited pilot, with reference to Republic Act No. 10173 and applicable National Privacy Commission guidance. It is not a claim of completed registration or legal certification.
 
 ScoutIt is engineered around principles of data minimization and privacy-by-default. We collect personal data only to the extent strictly necessary to deliver spatial intelligence, secure platform interactions, and maintain account integrity. Public discovery, spatial browsing, and personal wishlist curation stay locally on your device by default.`,
   },
@@ -23,7 +24,7 @@ ScoutIt is engineered around principles of data minimization and privacy-by-defa
 — Service Providers (Photographers, Researchers, Event Planners): Portfolio media, verification credentials, professional bio, and service specialties.
 — Submission and Telemetry Data: Property submission details, photos, spatial descriptions, geotagged bounty proofs, search filters, and interaction logs.
 
-ScoutIt does not collect, process, or store credit card, debit card, or bank account credentials. All subscription billing and Connect purchases are processed directly by PCI-DSS-compliant payment processors (PayMongo).`,
+ScoutIt does not currently collect, process, or store payment-card or bank-account credentials. Subscription billing and Connect purchases are disabled during the invited pilot; no payment provider has been selected.`,
   },
   {
     num: "03",
@@ -94,18 +95,12 @@ To exercise any right, contact our Data Protection Officer as provided in Sectio
   {
     num: "11",
     title: "Data Protection Officer (DPO) contact details",
-    body: `Pursuant to NPC Circulars 2022-04 and 2023-06, ScoutIt has designated a Data Protection Officer to oversee statutory privacy compliance:
-
-Attn: Data Protection Officer (DPO)
-ScoutIt Intelligence Technologies Inc.
-Address: Tower 1, High Street South Corporate Plaza, 9th Ave cor 26th St, Bonifacio Global City, Taguig City 1634, Metro Manila, Philippines
-Direct DPO Email: dpo@scoutit.ph
-Platform Privacy Web Interface: https://scoutit.ph/privacy`,
+    body: `ScoutIt has not yet published a verified Data Protection Officer mailbox or office address. During the invited pilot, use the official Contact surface for privacy requests. The owner must designate the responsible person and verify the receiving channel before this section names one.`,
   },
   {
     num: "12",
     title: "NPC registration & compliance status",
-    body: `Pursuant to Section 5 of NPC Circular 2022-04, ScoutIt maintains compliance through registered Data Processing Systems or notarized Sworn Declaration and Undertaking (SDAU, Annex 1) submitted to the National Privacy Commission.`,
+    body: `ScoutIt does not represent that an NPC registration, Data Processing System registration, or Sworn Declaration and Undertaking has been completed. The owner and Philippine counsel must close the applicable filing and documentation gates before any such statement is published.`,
   },
   {
     num: "13",
@@ -119,8 +114,8 @@ export default function PrivacyPage() {
     <LegalDoc
       eyebrow="LAYER 09 // PLATFORM GOVERNANCE"
       title="Privacy Policy"
-      meta="Version 1.0  ·  Effective October 24, 2026  ·  Compliant with the Data Privacy Act (RA 10173) & NPC Circulars"
-      intro="ScoutIt is built privacy-first. Your browsing and your saved spaces stay on your device by default. This policy explains the personal data we collect, why, who we share it with under offshore transfer rules, and the rights you hold under Philippine law."
+      meta={`Version ${CURRENT_TERMS_VERSION}  ·  Effective ${CURRENT_TERMS_EFFECTIVE_DATE}  ·  Invited pilot`}
+      intro="This invited-pilot notice describes the data ScoutIt currently handles, the providers involved, and the controls available to users. Browsing and saved spaces stay on the device by default. Philippine counsel and the designated privacy lead must review the notice before public commercial launch."
       sections={SECTIONS}
       related={{ href: "/terms", label: "Terms of Service" }}
     />

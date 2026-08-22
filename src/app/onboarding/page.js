@@ -19,6 +19,7 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
+import { CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 import {
   isOnboardingComplete,
   isPrcLicenseFormatValid,
@@ -106,6 +107,7 @@ export default function OnboardingPage() {
     primaryMode: "",
     locationFocus: "",
     prcLicense: "",
+    acceptedTerms: false,
   });
 
   const showToast = (message, type = "error") => {
@@ -311,6 +313,7 @@ export default function OnboardingPage() {
           dateOfBirth: formData.dateOfBirth,
           locationFocus: formData.locationFocus,
           prcLicense: formData.prcLicense,
+          termsVersion: formData.acceptedTerms ? CURRENT_TERMS_VERSION : null,
         }),
       });
       const body = await response.json().catch(() => ({}));
@@ -475,10 +478,23 @@ export default function OnboardingPage() {
           {mode === "owner" && <><h3 className="font-working-title text-xl text-on-surface mb-2">Ready to list a property?</h3><p className="text-text-secondary text-sm">You can open the listing builder immediately after your account setup succeeds, or explore the dashboard first.</p></>}
           {mode === "broker" && <><h3 className="font-working-title text-xl text-on-surface mb-2">Broker license</h3><p className="text-text-secondary text-sm mb-6">Enter your PRC Real Estate Broker license number. This records your claim; public verification remains a separate review.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full uppercase" maxLength={80} placeholder="PRC-REB-XXXXXXX" value={formData.prcLicense} onChange={(event) => setFormData({ ...formData, prcLicense: event.target.value })} />{formData.prcLicense && !isPrcLicenseFormatValid(formData.prcLicense) && <p className="text-error text-sm mt-3">Enter a license number containing at least five digits.</p>}</>}
         </div>
+        <label className="mb-6 flex min-h-11 cursor-pointer items-start gap-3 rounded border border-surface-variant bg-surface p-4 text-sm text-text-secondary">
+          <input
+            type="checkbox"
+            className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent-bright)]"
+            checked={formData.acceptedTerms}
+            onChange={(event) => setFormData({ ...formData, acceptedTerms: event.target.checked })}
+          />
+          <span>
+            I accept the current <Link className="text-gold-accent underline" href="/terms" target="_blank">Terms of Service</Link>
+            {" "}and acknowledge the <Link className="text-gold-accent underline" href="/privacy" target="_blank">Privacy Policy</Link>.
+            My acceptance will be recorded with version {CURRENT_TERMS_VERSION}.
+          </span>
+        </label>
         {mode === "owner" ? (
-          <div className="flex flex-col gap-3"><button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving} onClick={() => completeOnboarding({ openOwnerWizard: true })}>Create my first listing →</button><button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving} onClick={() => completeOnboarding()}>Explore dashboard first</button></div>
+          <div className="flex flex-col gap-3"><button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms} onClick={() => completeOnboarding({ openOwnerWizard: true })}>Create my first listing →</button><button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms} onClick={() => completeOnboarding()}>Explore dashboard first</button></div>
         ) : (
-          <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || (mode === "broker" && !isPrcLicenseFormatValid(formData.prcLicense))} onClick={() => completeOnboarding()}>{saving ? "Securing profile…" : "Enter my dashboard →"}</button>
+          <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms || (mode === "broker" && !isPrcLicenseFormatValid(formData.prcLicense))} onClick={() => completeOnboarding()}>{saving ? "Securing profile…" : "Enter my dashboard →"}</button>
         )}
       </div>
     );

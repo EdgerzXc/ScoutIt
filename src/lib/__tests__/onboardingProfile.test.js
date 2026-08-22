@@ -7,6 +7,7 @@ import {
   onboardingPrimaryMode,
   sanitizeLocationFocus,
 } from "@/lib/onboardingProfile";
+import { CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 const completeProfile = {
   primary_mode: "buyer",
@@ -14,6 +15,8 @@ const completeProfile = {
   onboarding_completed_at: "2026-08-09T00:00:00.000Z",
   adult_eligibility_status: "declared_adult",
   created_at: "2026-08-09T00:00:00.000Z",
+  terms_accepted_at: "2026-08-21T00:00:00.000Z",
+  terms_version: CURRENT_TERMS_VERSION,
 };
 
 describe("onboarding profile contract", () => {
@@ -35,6 +38,15 @@ describe("onboarding profile contract", () => {
     expect(isOnboardingComplete({ ...completeProfile, onboarding_completed_at: null })).toBe(false);
     expect(isOnboardingComplete({ ...completeProfile, primary_mode: "provider" })).toBe(false);
     expect(isOnboardingComplete({ ...completeProfile, adult_eligibility_status: "underage" })).toBe(false);
+  });
+
+  it("re-opens onboarding when the published terms version has moved on", () => {
+    expect(isOnboardingComplete({ ...completeProfile, terms_version: "pilot-2026-01-01" })).toBe(false);
+  });
+
+  it("does not read a missing acceptance as consent", () => {
+    expect(isOnboardingComplete({ ...completeProfile, terms_version: null, terms_accepted_at: null })).toBe(false);
+    expect(isOnboardingComplete({ ...completeProfile, terms_accepted_at: null })).toBe(false);
   });
 
   it("keeps the fixed-cutoff grandfathering behavior for migrated accounts", () => {

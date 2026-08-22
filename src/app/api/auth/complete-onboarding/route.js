@@ -3,6 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { monthlyAllowance } from "@/lib/entitlements";
 import { isCanonicalConnectWalletActive } from "@/lib/connectsSchemaGate";
+import {
+  CURRENT_TERMS_VERSION,
+  isCurrentTermsAcceptance,
+  legalAcceptanceEvidence,
+} from "@/lib/legalAcceptance";
+
+const NO_STORE = { "Cache-Control": "private, no-store" };
 
 function parseDateOfBirth(value) {
   if (!value || typeof value !== "string") return null;
@@ -74,7 +81,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { name, role, dateOfBirth, prcLicense, locationFocus } = body;
+    const { name, role, dateOfBirth, prcLicense, locationFocus, termsVersion } = body;
 
     const allowedRoles = ["buyer", "seeker", "owner", "broker"];
     if (!role || !allowedRoles.includes(role)) {
@@ -84,6 +91,13 @@ export async function POST(request) {
     const trimmedName = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
     if (!trimmedName || trimmedName.length < 2) {
       return NextResponse.json({ error: "Full name is required." }, { status: 400 });
+    }
+
+    if (!isCurrentTermsAcceptance(termsVersion)) {
+      return NextResponse.json(
+        { error: "Accept the current Terms and Privacy notice to continue.", currentTermsVersion: CURRENT_TERMS_VERSION },
+        { status: 409, headers: NO_STORE },
+      );
     }
 
     const { data: existingProfile } = await supabaseAdmin
@@ -124,6 +138,36 @@ export async function POST(request) {
     const dbRole = role === "buyer" ? "seeker" : role;
     const tier = "starry";
     const startingAllowance = monthlyAllowance(dbRole, tier);
+    const acceptedAt = new Date().toISOString();
+    const evidence = legalAcceptanceEvidence(request);
+
+    const { error: acceptanceError } = await supabaseAdmin
+      .from("terms_acceptances")
+      .insert({
+        user_id: user.id,
+        terms_version: CURRENT_TERMS_VERSION,
+        accepted_at: acceptedAt,
+        ...evidence,
+      });
+
+    if (acceptanceError && acceptanceError.code !== "23505") {
+      console.error("[ONBOARDING API] Terms acceptance persistence failed:", acceptanceError);
+      return NextResponse.json(
+        { error: "Your acceptance could not be recorded. No account setup was completed." },
+        { status: 500, headers: NO_STORE },
+      );
+    }
+
+    let recordedAcceptedAt = acceptedAt;
+    if (acceptanceError?.code === "23505") {
+      const { data: existingAcceptance } = await supabaseAdmin
+        .from("terms_acceptances")
+        .select("accepted_at")
+        .eq("user_id", user.id)
+        .eq("terms_version", CURRENT_TERMS_VERSION)
+        .single();
+      recordedAcceptedAt = existingAcceptance?.accepted_at || acceptedAt;
+    }
 
     const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert(
       {
@@ -137,6 +181,8 @@ export async function POST(request) {
         prc_license: normalizedPrc,
         location_focus: normalizedLocation,
         subscription_tier: tier,
+        terms_accepted_at: recordedAcceptedAt,
+        terms_version: CURRENT_TERMS_VERSION,
         onboarding_completed_at: null,
       },
       { onConflict: "id" },
@@ -236,6 +282,7 @@ export async function POST(request) {
       activeRoles: [primaryMode],
       primaryMode,
       onboardingCompletedAt: completedAt,
+      termsVersion: CURRENT_TERMS_VERSION,
     });
   } catch (error) {
     console.error("[ONBOARDING API] Server error:", error);
