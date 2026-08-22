@@ -26,3 +26,10 @@ on property briefings; paid rank manipulation and invented metrics are forbidden
 
 **Boundary:** this is content/operations work. It does not authorize visual
 changes to the owner-locked Showcase stage.
+
+**Blocked on [[MASTER_OWNER_ACTIONS|O-007]] (2026-08-22):** curation cannot
+proceed honestly while the stage renders rank-derived percentages and multiplied
+counts under a "Verified" badge, with every entry coming from
+`src/data/mock/mockShowcase.js` and no sample disclosure. Curating merits onto
+that surface would dress invented telemetry as reviewed judgement. The surface
+is checksum-locked, so the fix needs explicit owner authorization first.

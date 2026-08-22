@@ -89,3 +89,36 @@ guessing a period and publishing it.
 Deliberately not implemented: a placeholder period would become a published
 privacy claim nobody actually decided.
 
+### O-007 — The Showcase presents invented metrics as verified, on a locked surface
+
+Found 2026-08-22 while reviewing A-007. Stated here rather than fixed, because
+`src/components/board/ShowcaseStage.js` is checksum-locked and a failed lock is
+a stop signal.
+
+What the page renders today:
+
+- **"Inquiry Velocity 98.4% / 94.1% / 89.6% / 82.0%"** — not a measurement. The
+  number is chosen from the card's rank position, so rank 1 always reads 98.4%.
+- **"Private saves"** and **"View signals"** fall back to `inquiry_count × 1.8`
+  and `inquiry_count × 8` when absent — arithmetic dressed as telemetry.
+- A **"Verified"** shield sits above all of it.
+- Every entry comes from `src/data/mock/mockShowcase.js`. There is no live
+  showcase data source; `SHOWCASE_CMS` is still a planned Airtable table.
+- Unlike sample Intel and sample properties, the Showcase carries **no sample
+  disclosure of any kind** (U-003 covered the others).
+
+This is Standing Rule 3 and the A-007 prohibition on invented metrics, on the
+one public surface that claims to rank real spaces by real demand.
+
+**The decisions needed, in order:**
+
+1. Does the Showcase carry a sample disclosure until real data exists? That is
+   the smallest honest fix and it changes a locked surface.
+2. Do the rank-derived percentage and the multiplied counts come out, or does
+   the Showcase wait for the real `SHOWCASE_CMS` feed before it ships?
+3. Explicit authorization is required before either edit, and the checksum is
+   refreshed only after you have reviewed the exact new appearance.
+
+Not done here: nothing on the locked surface was edited, and no checksum was
+touched.
+
