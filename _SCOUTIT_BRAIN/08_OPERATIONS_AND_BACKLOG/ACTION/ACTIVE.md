@@ -18,12 +18,6 @@ an automation bypass token or an explicit production-after-merge verification
 rule. Every browser audit must assert a known render anchor before trusting a
 zero-defect result.
 
-## A-004 — CI failure visibility
-
-Finish the current CI work so a cancelled or failed verification job cannot
-look green, typography regression checks run, and the browser suite is at least
-discovered in CI without mutating production data.
-
 ## A-005 — Universal menu and authenticated-surface verification
 
 After A-001, run production-mode coverage for representative public, property,

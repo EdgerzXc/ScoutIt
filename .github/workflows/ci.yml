@@ -47,6 +47,13 @@ jobs:
 
       - name: Unit tests (Vitest)
         run: npm run test:unit
+
+      # Mission Control ships from this repository and has its own suite. Tests
+      # nobody runs are a plan, not a safety net.
+      - name: Install Mission Control dependencies
+        run: npm ci --prefix mission-control
+      - name: Mission Control tests
+        run: npm --prefix mission-control run test:security
       - name: Browser suite discovery
         run: npm run test:e2e:list
 
