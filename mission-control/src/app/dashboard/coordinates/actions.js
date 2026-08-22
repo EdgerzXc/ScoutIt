@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, TIERS } from "@/lib/rbac";
+import { assertTier, getCurrentStaff, TIERS } from "@/lib/rbac";
 
 // Staff correction of a listing's position.
 //
@@ -21,7 +21,12 @@ function parsePoint(value) {
 
 export async function setVerifiedCoordinates(formData) {
   const staff = await getCurrentStaff();
-  if (!staff || staff.tier < TIERS.AGENT) {
+  if (!staff) {
+    return { ok: false, message: "Not authorised" };
+  }
+  try {
+    assertTier(staff, TIERS.AGENT);
+  } catch {
     return { ok: false, message: "Not authorised" };
   }
 
@@ -83,10 +88,21 @@ export async function setVerifiedCoordinates(formData) {
  * Sorted worst first: no coordinates at all, then coarse matches.
  */
 export async function loadFlaggedCoordinates() {
+  const staff = await getCurrentStaff();
+  if (!staff) {
+    return { rows: [], error: "Not authorised" };
+  }
+  try {
+    assertTier(staff, TIERS.AGENT);
+  } catch {
+    return { rows: [], error: "Not authorised" };
+  }
+
   const supabase = createAdminClient();
+
   const { data, error } = await supabase
     .from("properties")
-    .select("id, slug, title, location, coordinates, details, status, created_at")
+    .select("id, slug, title, location, coordinates, details, pipeline_status, created_at")
     .order("created_at", { ascending: false })
     .limit(300);
 
