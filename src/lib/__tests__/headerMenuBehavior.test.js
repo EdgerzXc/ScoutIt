@@ -24,10 +24,14 @@ describe("universal header menu operating layer", () => {
     expect(header).toMatch(/setMenuOpen\(false\);\s*\}, \[pathname\]\)/);
   });
 
-  it("announces the panel it controls", () => {
+  it("announces the panel it controls as a disclosure, not an ARIA menu", () => {
     expect(header).toContain('aria-controls="header-menu-panel"');
-    expect(header).toContain('aria-haspopup="menu"');
-    expect(header).toContain('role="menu"');
+    expect(header).toContain("aria-expanded={menuOpen}");
+    // Site navigation is a disclosure of links, not an application menu.
+    // role="menu"/"menuitem" would promise arrow-key navigation that does not
+    // exist, and it strips the native link and button roles that assistive
+    // technology and test locators rely on.
+    expect(header).not.toMatch(/role="menu(item)?"/);
   });
 
   it("uses dvh for the mobile sheet, because vh lies under the iOS toolbar", () => {

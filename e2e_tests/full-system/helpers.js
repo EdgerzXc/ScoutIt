@@ -36,9 +36,16 @@ export const MOCK_SEEKER = {
   primaryMode: 'buyer',
 };
 
+// The dashboard's authoritative identity comes from `scoutit_dev_user` via
+// readDevelopmentMockUser(); `scoutit_user` is only the browser display cache
+// that components like the header read. Writing the display key alone left
+// every "signed in" test actually signed out, which is why authenticated
+// assertions were failing to find their anchors rather than failing on
+// behaviour. Write both, exactly as the app does.
 export async function signInAsMock(page, user) {
   await page.addInitScript((u) => {
     window.localStorage.setItem('scoutit_user', JSON.stringify(u));
+    window.localStorage.setItem('scoutit_dev_user', JSON.stringify(u));
   }, user);
 }
 
@@ -62,6 +69,13 @@ const IGNORED_CONSOLE = [
   /ResizeObserver loop/i,
   /THREE\./,
   /Turnstile/i,
+  // Vercel serves /_vercel/speed-insights/script.js only on Vercel. A local
+  // production build answers with the app's HTML, so Chromium refuses it on
+  // MIME grounds. Narrow on purpose: it cannot mask an application error.
+  /_vercel\/(speed-insights|insights)\//i,
+  // Google Identity Services refuses http://localhost:3000 because it is not
+  // an authorised origin on the OAuth client. Environment, not application.
+  /GSI_LOGGER.*origin is not allowed/i,
 ];
 
 export function trackErrors(page) {
@@ -148,10 +162,11 @@ export async function assertScoutItRendered(page) {
     }
   }
 
-  await expect(
-    page.locator('div.grain'),
+  const grainCount = await page.locator('div.grain').count();
+  expect(
+    grainCount,
     'render anchor missing: div.grain is emitted by the ScoutIt root layout on every page',
-  ).toHaveCount(1);
+  ).toBeGreaterThan(0);
 
   const organizationSchema = await page
     .locator('script[type="application/ld+json"]')

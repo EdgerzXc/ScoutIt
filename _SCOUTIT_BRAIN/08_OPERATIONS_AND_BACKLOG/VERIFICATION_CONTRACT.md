@@ -55,6 +55,20 @@ issue one, it is sent as the documented bypass header and the render anchor
 still applies — the token changes what can be reached, never what counts as
 proof.
 
+## 3b. Never read a result off a piped summary
+
+A run reported "392 passed, exit 0" while the JSON reporter showed **82
+failures** on the same run. The exit code belonged to the `tail` in the pipe,
+and the reporter's own failure list had scrolled past the captured window.
+
+- Take the verdict from `--reporter=json` (or an equivalent machine-readable
+  report), never from the tail of a progress reporter.
+- If you must pipe, capture the runner's exit status explicitly; a pipeline's
+  status is the last command's.
+- A discovery count that exceeds the executed count is unexplained until it is
+  explained. `--list` said 466; the run accounted for 394. The missing 72 were
+  failures.
+
 ## 4. What a verification claim must state
 
 - the exact target measured (localhost build, or the deployed host);

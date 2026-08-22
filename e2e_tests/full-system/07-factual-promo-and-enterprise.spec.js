@@ -180,7 +180,12 @@ test.describe('Enterprise Mission Control (honest data)', () => {
 
     // Team tab used to throw (undefined permissionOverrides) — regression probe.
     await page.getByRole('button', { name: /^Team$/i }).click();
-    await expect(page.getByRole('button', { name: 'Invite Member' })).toBeVisible({ timeout: 10000 });
+    // Exact match: a permission toggle labelled "Invite Members / Allow member
+    // to invite new users" also matches the loose name, and the ambiguity was
+    // invisible while this test was running signed-out and never got here.
+    await expect(
+      page.getByRole('button', { name: 'Invite Member', exact: true }),
+    ).toBeVisible({ timeout: 10000 });
     // No seeded fake teammates.
     await expect(page.getByText('Sarah Chen')).toHaveCount(0);
     await expect(page.getByText('David Park')).toHaveCount(0);

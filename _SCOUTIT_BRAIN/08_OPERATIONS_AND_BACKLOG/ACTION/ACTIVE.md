@@ -11,12 +11,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]"]
 > Maximum 25 open items. An agent may work here only after Urgent is stable and
 > after re-checking the named behavior against current code.
 
-## A-005 — Universal menu and authenticated-surface verification
-
-After A-001, run production-mode coverage for representative public, property,
-profile, onboarding, and authenticated dashboard states. Include mobile touch,
-desktop keyboard, session transitions, and zero unexpected console/page errors.
-
 ## A-007 — Monthly Showcase merit curation
 
 On the first operating cycle of each month, review featured spaces and record

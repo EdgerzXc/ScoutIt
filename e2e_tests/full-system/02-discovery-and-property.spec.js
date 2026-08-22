@@ -71,17 +71,37 @@ test.describe('Property directory + briefing page', () => {
     const bodyText = await page.locator('body').innerText();
     expect(bodyText).not.toMatch(/NaN|undefined₱|₱undefined/);
 
-    // Opening the contact surface covers the last safe step of the buyer
-    // journey. Stop before spending a Connect or submitting an inquiry.
-    const connectButton = page.viewportSize().width < 900
-      ? page.getByRole('button', { name: /inquire about this space/i }).first()
-      : yourMovePanel.getByRole('button', { name: /connect with an authorized broker/i }).first();
-    await expect(connectButton).toBeVisible({ timeout: 15000 });
-    await connectButton.click();
-    const inquiryDialog = page.getByRole('dialog', { name: /contact the property recipient/i });
-    await expect(inquiryDialog).toBeVisible();
-    await inquiryDialog.getByRole('button', { name: 'Close' }).click();
-    await expect(inquiryDialog).toBeHidden();
+    // The buyer must always have a way to reach a person. Which affordance
+    // that is depends on the listing and the viewport, and asserting one
+    // hard-coded button made this test depend on whichever property happened
+    // to sort first in the live directory:
+    //
+    //  - phone: the bottom bar's "Inquire" opens the inquiry dialog
+    //  - desktop, no confirmed price: "Inquire with an authorized broker →"
+    //  - desktop, confirmed price: the representation roster route
+    //
+    // Stop before spending a Connect or submitting anything.
+    const inquireButton = page.getByRole('button', { name: /^inquire/i }).first();
+    // Scoped to the property's own roster route: a bare /brokers match also
+    // catches the universal header menu's directory link, which is present in
+    // the DOM but hidden while the menu is closed.
+    const brokerRoute = page.locator('a[href^="/property/"][href$="/brokers"]').first();
+
+    if (await inquireButton.isVisible().catch(() => false)) {
+      await inquireButton.click();
+      const inquiryDialog = page.getByRole('dialog', { name: /contact the property recipient/i });
+      await expect(inquiryDialog).toBeVisible();
+      await inquiryDialog.getByRole('button', { name: 'Close' }).click();
+      await expect(inquiryDialog).toBeHidden();
+    } else {
+      // No dialog trigger at this width: the roster route is the contact path,
+      // and it must exist rather than leaving the buyer with nothing.
+      await expect(brokerRoute).toBeVisible({ timeout: 15000 });
+      await expect(brokerRoute).toHaveAttribute('href', /\/brokers/);
+    }
+
+    // Either way the panel is still the live one, not a crashed remnant.
+    await expect(yourMovePanel).toBeVisible();
 
     expect(errors, errors.join('\n')).toEqual([]);
   });

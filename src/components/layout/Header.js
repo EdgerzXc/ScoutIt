@@ -16,6 +16,7 @@ export default function Header({ ambientContext = null }) {
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
   const menuPanelRef = useRef(null);
+  const lastPathRef = useRef(pathname);
 
   // pointerdown rather than mousedown: a touch tap outside the sheet should
   // dismiss it on the same gesture, not on the synthesised mouse event after it.
@@ -31,7 +32,14 @@ export default function Header({ ambientContext = null }) {
 
   // Navigating is a dismissal. Without this the sheet stays open over the page
   // the user just asked for.
+  //
+  // Guarded on an actual change: this effect also runs on mount and on every
+  // re-render that follows hydration, and an unguarded close there cancels a
+  // menu the user has just opened — a race that only shows up on a slower
+  // device, as an open that silently does not take.
   useEffect(() => {
+    if (lastPathRef.current === pathname) return;
+    lastPathRef.current = pathname;
     setMenuOpen(false);
   }, [pathname]);
 
@@ -44,7 +52,14 @@ export default function Header({ ambientContext = null }) {
     const focusables = () =>
       Array.from(panel?.querySelectorAll("a[href], button:not([disabled])") || []);
 
-    focusables()[0]?.focus();
+    // The panel transitions from visibility:hidden, and focus() on a still
+    // hidden element is a silent no-op. Wait for the browser to apply the open
+    // state before moving focus, or the menu opens with focus left behind on
+    // the page underneath.
+    const focusFrame = requestAnimationFrame(() => {
+      const first = focusables()[0];
+      if (first && document.activeElement !== first) first.focus();
+    });
 
     function onKeyDown(event) {
       if (event.key === "Escape") {
@@ -71,7 +86,10 @@ export default function Header({ ambientContext = null }) {
     }
 
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [menuOpen]);
 
   useEffect(() => {
@@ -158,7 +176,6 @@ export default function Header({ ambientContext = null }) {
           ref={menuButtonRef}
           aria-expanded={menuOpen}
           aria-controls="header-menu-panel"
-          aria-haspopup="menu"
           onClick={() => setMenuOpen(v => !v)}
           aria-label="Menu"
         >
@@ -170,7 +187,6 @@ export default function Header({ ambientContext = null }) {
           className={`header-dropdown ${menuOpen ? "open" : ""}`}
           id="header-menu-panel"
           ref={menuPanelRef}
-          role="menu"
           aria-label="ScoutIt navigation"
         >
           <div className="dropdown-brand">
@@ -182,7 +198,6 @@ export default function Header({ ambientContext = null }) {
             <Link
               key={entry.id}
               href={entry.href}
-              role="menuitem"
               aria-current={pathname === entry.href ? "page" : undefined}
               onClick={() => setMenuOpen(false)}
             >
@@ -191,7 +206,6 @@ export default function Header({ ambientContext = null }) {
           ))}
           <button
             type="button"
-            role="menuitem"
             className="dropdown-display-btn"
             onClick={() => {
               setMenuOpen(false);
@@ -457,7 +471,12 @@ export default function Header({ ambientContext = null }) {
           visibility: hidden;
           transform: scale(0.96) translateY(-4px);
           transform-origin: top right;
-          transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1), visibility 180ms cubic-bezier(0.23, 1, 0.32, 1);
+          /* visibility is switched discretely, not eased: an eased visibility
+             leaves the panel hidden for the first frame of the open, and
+             focus() on a hidden element is a silent no-op — the menu would
+             open with focus still on the page underneath. Delay it on close
+             instead, so the fade-out stays visible for its full duration. */
+          transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1), visibility 0s linear 180ms;
           z-index: 1001;
         }
 
@@ -465,6 +484,7 @@ export default function Header({ ambientContext = null }) {
           opacity: 1;
           visibility: visible;
           transform: scale(1) translateY(0);
+          transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1), visibility 0s linear;
         }
 
         .header-dropdown :global(a) {

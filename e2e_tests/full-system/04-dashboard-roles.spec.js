@@ -68,19 +68,23 @@ test.describe('Owner with zero listings (safe mock)', () => {
     await gotoAndSettle(page, '/dashboard');
     await expectRealContent(page);
 
-    // Zero-listings owner state → the first-listing CTA.
-    const startBtn = page.getByRole('button', { name: /Get Started/i }).first();
+    // Zero-listings owner state → the first-listing CTA. The label is
+    // "Add Property →" under the "Add your first property" panel; the old
+    // "Get Started" wording no longer exists anywhere in the app.
+    await expect(page.getByRole('heading', { name: /Add your first property/i })).toBeVisible({ timeout: 25000 });
+    const startBtn = page.getByRole('button', { name: /Add Property/i }).first();
     await expect(startBtn).toBeVisible({ timeout: 25000 });
     await startBtn.click();
 
-    // The creation-mode chooser must appear.
+    // The creation-mode chooser must appear. Current copy is "How would you
+    // like to add this property?"; the manual route is "I'll build it myself".
     await expect(
-      page.getByText(/How do you want to create your listing\?/i)
+      page.getByRole('heading', { name: /How would you like to add this property/i })
     ).toBeVisible({ timeout: 15000 });
 
     // Preserve the old Live Canvas regression coverage inside the safe suite:
     // open the editor and prove the preview reacts, then STOP before saving.
-    await page.getByRole('heading', { name: /Build from Scratch/i }).click();
+    await page.getByRole('heading', { name: /build it myself/i }).click();
     await expect(page.getByRole('heading', { name: /Basic Property Information/i })).toBeVisible();
     await expect(page.getByText('LIVE PREVIEW / DRAFT MODE').first()).toBeVisible();
 

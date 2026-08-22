@@ -56,10 +56,10 @@ test.describe('universal header responsive contract', () => {
       expect(result.overlapsRight).toBe(false);
       expect(result.back.fontSize).toBeGreaterThanOrEqual(10);
 
-      const minimumTarget = width <= 640 ? 36 : 44;
-      expect(result.back.height).toBeGreaterThanOrEqual(minimumTarget);
-      expect(result.menu.width).toBeGreaterThanOrEqual(minimumTarget);
-      expect(result.menu.height).toBeGreaterThanOrEqual(minimumTarget);
+      expect(result.back.height).toBeGreaterThanOrEqual(width <= 640 ? 36 : 44);
+      // U-004: the menu control is 44px at every width, including 320.
+      expect(result.menu.width).toBeGreaterThanOrEqual(44);
+      expect(result.menu.height).toBeGreaterThanOrEqual(44);
     });
   }
 
@@ -103,5 +103,88 @@ test.describe('universal header responsive contract', () => {
     expect(result.headerRight).toBeLessThanOrEqual(result.viewportWidth);
     expect(result.threadDisplay).toBe('none');
     expect(result.ambientAnimation).toBe('none');
+  });
+});
+
+// ── MENU OPERATING LAYER (A-001) ─────────────────────────────────────────
+// The unit tests assert the source wires these behaviours. These assert a real
+// browser actually performs them, on a real page, in a production build.
+test.describe('universal menu behaviour', () => {
+  // The header streams in before React has attached its handlers, so under a
+  // loaded machine the first click can land on markup that is not listening
+  // yet. Retry actionability-checked clicks until the control confirms the
+  // state change — the same pattern openYourMove() uses in helpers.js. Never
+  // force:true, and never invoke the handler directly.
+  const openMenu = async (page) => {
+    const trigger = page.locator('.header-menu-btn');
+    await expect(trigger).toBeVisible();
+    await expect.poll(async () => {
+      if ((await trigger.getAttribute('aria-expanded')) !== 'true') {
+        await trigger.click();
+      }
+      return trigger.getAttribute('aria-expanded');
+    }, { timeout: 15000 }).toBe('true');
+    return trigger;
+  };
+
+  test('opens to the first item and returns focus to the trigger on Escape', async ({ page }) => {
+    await gotoAndSettle(page, PROPERTY_ROUTE);
+    const trigger = await openMenu(page);
+
+    const firstItem = page.locator('#header-menu-panel a[href], #header-menu-panel button').first();
+    await expect(firstItem).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).toBeFocused();
+  });
+
+  test('keeps Tab inside the panel while it is open', async ({ page }) => {
+    await gotoAndSettle(page, PROPERTY_ROUTE);
+    await openMenu(page);
+
+    const items = page.locator('#header-menu-panel a[href], #header-menu-panel button');
+    const count = await items.count();
+    expect(count).toBeGreaterThan(1);
+
+    await items.nth(count - 1).focus();
+    await page.keyboard.press('Tab');
+    await expect(items.first()).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(items.nth(count - 1)).toBeFocused();
+  });
+
+  test('closes on a route change the menu did not initiate', async ({ page }) => {
+    await gotoAndSettle(page, '/discover');
+    const trigger = await openMenu(page);
+
+    await page.locator('#header-menu-panel a[href="/brokers"]').click();
+    await expect(page).toHaveURL(/\/brokers$/);
+    await expect(page.locator('.header-menu-btn')).toHaveAttribute('aria-expanded', 'false');
+
+    await openMenu(page);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/discover$/);
+    await expect(page.locator('.header-menu-btn')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('every destination resolves and the current page is marked', async ({ page }) => {
+    await gotoAndSettle(page, '/discover');
+    await openMenu(page);
+
+    const hrefs = await page.locator('#header-menu-panel a[href]').evaluateAll((links) =>
+      links.map((link) => link.getAttribute('href')),
+    );
+    expect(hrefs.length).toBeGreaterThan(5);
+    for (const href of hrefs) {
+      expect(href.startsWith('/')).toBe(true);
+    }
+
+    await expect(page.locator('#header-menu-panel [aria-current="page"]')).toHaveAttribute(
+      'href',
+      '/discover',
+    );
+    await expect(page.locator('.header-menu-btn')).toHaveAttribute('aria-controls', 'header-menu-panel');
   });
 });
