@@ -1,5 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Point the suite at a deployment instead of a local build:
+//   SCOUTIT_E2E_BASE_URL=https://... npx playwright test
+//
+// When a target is supplied no local server is started, because building and
+// serving a second copy of the app while measuring a remote one is how a run
+// ends up reporting on the wrong thing. A protected Vercel preview will fail
+// at the render anchor rather than passing vacuously against its login wall
+// (see assertScoutItRendered in helpers.js).
+const externalTarget = process.env.SCOUTIT_E2E_BASE_URL || '';
+const baseURL = externalTarget || 'http://localhost:3000';
+
 export default defineConfig({
   // The canonical launch suite is deliberately read-only against live data.
   // Keep experimental or destructive journeys out of the default test run.
@@ -15,10 +26,10 @@ export default defineConfig({
   // report can still be requested with `--reporter=html` when debugging.
   reporter: 'line',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     trace: 'on-first-retry',
   },
-  webServer: {
+  webServer: externalTarget ? undefined : {
     // Next.js recommends production code for E2E parity. It also prevents the
     // dev overlay and hot-compiled chunk churn from corrupting launch results.
     command: 'npm run build && npm run start',

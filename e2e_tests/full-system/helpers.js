@@ -107,10 +107,59 @@ export async function expectRealContent(page, minChars = 40) {
     .toBeGreaterThan(minChars);
 
   const bodyText = await page.locator('body').innerText();
+  // A wall of text is not proof the app rendered — anchor it first.
+  await assertScoutItRendered(page);
   // Next.js error overlays / boundaries render these strings.
   expect(bodyText).not.toContain('Application error');
   expect(bodyText).not.toContain('Unhandled Runtime Error');
   expect(bodyText).not.toContain('This page could not be found');
+}
+
+// ── RENDER ANCHOR ────────────────────────────────────────────────────────
+//
+// A browser audit that finds zero defects has proved nothing unless it first
+// proves it was looking at ScoutIt. A protected Vercel preview answers every
+// request with an authentication wall; a parked domain, a cold 502, or a
+// Cloudflare challenge all render plenty of text and no ScoutIt. Every
+// assertion downstream then passes vacuously and the run reports green.
+//
+// `div.grain` and the Organization JSON-LD come from the root layout, so they
+// exist on every ScoutIt page and on nothing else.
+
+const INTERSTITIAL_MARKERS = [
+  /authentication required/i,
+  /vercel authentication/i,
+  /deployment protection/i,
+  /log in to vercel/i,
+  /just a moment/i,
+  /checking your browser/i,
+  /attention required/i,
+];
+
+export async function assertScoutItRendered(page) {
+  const bodyText = (await page.locator('body').innerText()).trim();
+
+  for (const marker of INTERSTITIAL_MARKERS) {
+    if (marker.test(bodyText)) {
+      throw new Error(
+        `Render anchor failed: the response is an interstitial, not ScoutIt (matched ${marker}). ` +
+          'A protected preview cannot be audited without a bypass; measure production after merge instead.',
+      );
+    }
+  }
+
+  await expect(
+    page.locator('div.grain'),
+    'render anchor missing: div.grain is emitted by the ScoutIt root layout on every page',
+  ).toHaveCount(1);
+
+  const organizationSchema = await page
+    .locator('script[type="application/ld+json"]')
+    .allTextContents();
+  expect(
+    organizationSchema.some((entry) => entry.includes('#organization')),
+    'render anchor missing: the ScoutIt Organization JSON-LD was not emitted',
+  ).toBe(true);
 }
 
 export async function gotoAndSettle(page, path) {

@@ -11,13 +11,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]"]
 > Maximum 25 open items. An agent may work here only after Urgent is stable and
 > after re-checking the named behavior against current code.
 
-## A-003 — Preview-deployment verification contract
-
-Choose and implement a dependable method for measuring protected Vercel previews:
-an automation bypass token or an explicit production-after-merge verification
-rule. Every browser audit must assert a known render anchor before trusting a
-zero-defect result.
-
 ## A-005 — Universal menu and authenticated-surface verification
 
 After A-001, run production-mode coverage for representative public, property,
