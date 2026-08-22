@@ -11,15 +11,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]"]
 > Maximum 25 open items. An agent may work here only after Urgent is stable and
 > after re-checking the named behavior against current code.
 
-## A-001 — Universal navigation: functional completion only
-
-Keep the accepted visual header. Complete the navigation operating layer:
-canonical manifest, valid routes, signed-in/out and server-approved role states,
-Escape/outside dismissal, focus containment/restoration, mobile bottom sheet,
-desktop popover, route-change closure, and focused tests.
-
-**Boundary:** no broad Showcase or header visual redesign.
-
 ## A-002 — Contact-message retention and support boundary
 
 The public contact form, database intake, staff queue, reply-by-email path, and
