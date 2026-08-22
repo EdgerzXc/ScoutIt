@@ -1,27 +1,78 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import AmbientRail from "@/components/layout/ambient/AmbientRail";
+import { menuEntries } from "@/lib/navigationManifest";
 
 export default function Header({ ambientContext = null }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
 
   const menuRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const menuPanelRef = useRef(null);
 
+  // pointerdown rather than mousedown: a touch tap outside the sheet should
+  // dismiss it on the same gesture, not on the synthesised mouse event after it.
   useEffect(() => {
-    function onClickOutside(e) {
+    function onPointerOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("pointerdown", onPointerOutside);
+    return () => document.removeEventListener("pointerdown", onPointerOutside);
   }, []);
+
+  // Navigating is a dismissal. Without this the sheet stays open over the page
+  // the user just asked for.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Escape closes and hands focus back to the control that opened the menu,
+  // and Tab stays inside the panel while it is open.
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const panel = menuPanelRef.current;
+    const focusables = () =>
+      Array.from(panel?.querySelectorAll("a[href], button:not([disabled])") || []);
+
+    focusables()[0]?.focus();
+
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || active === menuButtonRef.current)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   useEffect(() => {
     function readUser() {
@@ -56,8 +107,6 @@ export default function Header({ ambientContext = null }) {
     window.__scoutitDisplaySettingsRequested = true;
     window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
   }
-
-  const profileHref = user ? "/profile" : "/onboarding";
 
 
   return (
@@ -106,7 +155,10 @@ export default function Header({ ambientContext = null }) {
         <button
           className="header-menu-btn"
           type="button"
+          ref={menuButtonRef}
           aria-expanded={menuOpen}
+          aria-controls="header-menu-panel"
+          aria-haspopup="menu"
           onClick={() => setMenuOpen(v => !v)}
           aria-label="Menu"
         >
@@ -114,27 +166,36 @@ export default function Header({ ambientContext = null }) {
             <path d="M2 4h12M2 8h12M2 12h12"/>
           </svg>
         </button>
-        <div className={`header-dropdown ${menuOpen ? "open" : ""}`}>
+        <div
+          className={`header-dropdown ${menuOpen ? "open" : ""}`}
+          id="header-menu-panel"
+          ref={menuPanelRef}
+          role="menu"
+          aria-label="ScoutIt navigation"
+        >
           <div className="dropdown-brand">
             <span className="brand-s" style={{ color: "var(--accent)" }}>S</span>
             <span className="brand-scout">cout</span>
             <span className="brand-it">IT</span>
           </div>
-          <Link href={profileHref}>{user ? "My Profile" : "Create Account"}</Link>
-          <Link href="/">Home</Link>
-          <Link href="/discover">Discover</Link>
-          <Link href="/brokers">Brokers</Link>
-          <Link href="/photographers">Photographers</Link>
-          <Link href="/researchers">Researchers</Link>
-          <Link href="/event-planners">Event Planners</Link>
-          <Link href="/wishlist">Your Board</Link>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/about">About</Link>
+          {menuEntries(Boolean(user)).map((entry) => (
+            <Link
+              key={entry.id}
+              href={entry.href}
+              role="menuitem"
+              aria-current={pathname === entry.href ? "page" : undefined}
+              onClick={() => setMenuOpen(false)}
+            >
+              {entry.label}
+            </Link>
+          ))}
           <button
             type="button"
+            role="menuitem"
             className="dropdown-display-btn"
             onClick={() => {
               setMenuOpen(false);
+              menuButtonRef.current?.focus();
               openDisplaySettings();
             }}
 
@@ -406,7 +467,7 @@ export default function Header({ ambientContext = null }) {
           transform: scale(1) translateY(0);
         }
 
-        .header-dropdown a {
+        .header-dropdown :global(a) {
           display: block;
           padding: 10px 14px;
           font-size: 13px;
@@ -417,7 +478,7 @@ export default function Header({ ambientContext = null }) {
           transition: background 150ms ease, color 150ms ease, padding-left 150ms ease;
         }
 
-        .header-dropdown a:hover {
+        .header-dropdown :global(a):hover {
           background: var(--surface2);
           color: var(--text-primary);
           padding-left: 18px;
@@ -469,7 +530,7 @@ export default function Header({ ambientContext = null }) {
             padding: 6px;
           }
 
-          .header-dropdown a {
+          .header-dropdown :global(a) {
             padding: 10px 12px;
             font-size: 12px;
           }
@@ -539,7 +600,7 @@ export default function Header({ ambientContext = null }) {
             border-left: none;
             border-right: none;
             border-bottom: none;
-            max-height: 60vh;
+            max-height: 60dvh;
             overflow-y: auto;
             padding: 12px;
             box-shadow: 0 -6px 24px rgba(0,0,0,0.65);
@@ -549,7 +610,7 @@ export default function Header({ ambientContext = null }) {
             animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
 
-          .header-dropdown a {
+          .header-dropdown :global(a) {
             padding: 14px 12px;
             font-size: 13px;
             min-height: 44px;
@@ -558,7 +619,7 @@ export default function Header({ ambientContext = null }) {
             border-radius: 6px;
           }
 
-          .header-dropdown a:active {
+          .header-dropdown :global(a):active {
             background: rgba(232, 174, 60, 0.15);
           }
 
@@ -657,7 +718,7 @@ export default function Header({ ambientContext = null }) {
 
         /* Touch-friendly active state */
         @media (hover: none) and (pointer: coarse) {
-          .header-dropdown a {
+          .header-dropdown :global(a) {
             min-height: 48px;
           }
 
