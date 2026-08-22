@@ -353,18 +353,20 @@ export function filterByInvestigation(articles, { event, place, space } = {}) {
 
 export function getArticles(category = "All") {
   if (category === "All") {
-    return ARTICLES;
+    return ARTICLES.map(article => ({ ...article, isSample: true }));
   }
-  return ARTICLES.filter(art =>
-    art.category.toLowerCase() === category.toLowerCase() ||
-    art.category === category ||
-    art.intelType === category
-  );
+  return ARTICLES
+    .filter(art =>
+      art.category.toLowerCase() === category.toLowerCase() ||
+      art.category === category ||
+      art.intelType === category
+    )
+    .map(article => ({ ...article, isSample: true }));
 }
 
 export function getArticleBySlug(slug) {
   const details = ARTICLE_DB[slug];
-  if (details) return details;
+  if (details) return { ...details, isSample: true };
   
   const meta = ARTICLES.find(a => a.slug === slug);
   if (meta) {
@@ -381,6 +383,7 @@ export function getArticleBySlug(slug) {
       image: meta.image,
       sourceName: meta.sourceName,
       sourceUrl: meta.sourceUrl,
+      isSample: true,
       lead: meta.excerpt,
       body: [meta.excerpt],
       recommendation: "Request full catalog briefing via advisory network."

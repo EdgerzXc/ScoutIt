@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, X, MapPin, ArrowRight, SlidersHorizontal } from "lucide-react";
 
 import SpatialIntelMap from "@/components/intel/SpatialIntelMap";
+import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import {
   ARTICLES,
@@ -48,6 +49,7 @@ function normalizeArticle(raw) {
     region: raw.region || null,
     lat: typeof raw.lat === "number" ? raw.lat : null,
     lng: typeof raw.lng === "number" ? raw.lng : null,
+    isSample: false,
     date: raw.date || "",
     status: raw.status || null,
   };
@@ -85,7 +87,7 @@ export default function DiscoverSearch() {
 
   const articles = useMemo(() => {
     const bySlug = new Map();
-    for (const a of ARTICLES) bySlug.set(a.slug, a);
+    for (const a of ARTICLES) bySlug.set(a.slug, { ...a, isSample: true });
     for (const a of liveArticles) if (!bySlug.has(a.slug)) bySlug.set(a.slug, a);
     return [...bySlug.values()];
   }, [liveArticles]);
@@ -345,6 +347,7 @@ export default function DiscoverSearch() {
                     </span>
 
                     <span className="dsc-row-body">
+                      {art.isSample ? <SampleIntelDisclosure compact /> : null}
                       {art.status ? (
                         <span className="dsc-status">{art.status}</span>
                       ) : null}

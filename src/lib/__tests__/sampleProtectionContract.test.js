@@ -27,6 +27,20 @@ describe("human-testing sample inventory contract", () => {
     expect(residential).toContain('mobile-hero-title">{d.title}<ProvenanceBadge record={d} />');
     expect(cmsCache).toContain("normalizeSampleBundle(cachedBundle)");
   });
+
+  it("discloses mock Intel in feeds, search results, and article details", () => {
+    const mockArticles = read("src/data/mock/mockArticles.js");
+    const intel = read("src/app/intel/page.js");
+    const detail = read("src/app/intel/[article-slug]/page.js");
+    const discover = read("src/components/discover/DiscoverSearch.js");
+    const disclosure = read("src/components/intel/SampleIntelDisclosure.js");
+    expect(mockArticles).toContain("isSample: true");
+    expect(intel).toContain("<SampleIntelDisclosure");
+    expect(detail).toContain("<SampleIntelDisclosure");
+    expect(discover).toContain("<SampleIntelDisclosure compact");
+    expect(disclosure).toContain("Sample data &mdash; for human testing");
+  });
+
   it("keeps sample property and child-space routes out of indexing", () => {
     const propertyPage = read("src/app/property/[id]/page.js");
     const unitPage = read("src/app/property/[id]/unit/[unitId]/page.js");

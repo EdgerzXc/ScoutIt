@@ -13,6 +13,7 @@ import FulfilmentTerminal from "@/components/intel/FulfilmentTerminal";
 import { getInvestigation } from "@/data/mock/investigations";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
+import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 import "./article-detail.css";
 
 async function getLiveArticle(slug) {
@@ -29,7 +30,8 @@ async function getLiveArticle(slug) {
         if (category.toLowerCase() === "culinary") category = "Culinary";
         return {
           ...matched,
-          category
+          category,
+          isSample: false
         };
       }
     } catch (e) {
@@ -135,6 +137,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
         <section className="article-hero" style={{ backgroundImage: `url(${article.image})` }}>
           <div className="hero-overlay"></div>
           <div className="hero-content">
+            {article.isSample ? <SampleIntelDisclosure /> : null}
             <div className="flex items-center gap-3 mb-3">
               <span className="article-category-tag" style={{ margin: 0 }}>{article.category}</span>
               {article.city ? (
@@ -151,6 +154,14 @@ export default async function IntelArticlePage({ params, searchParams }) {
         {/* Article Body */}
         <section className="article-body-container">
           <div className="article-content-wrapper">
+            {article.isSample ? (
+              <GlassPanel className="p-4 mb-8 border-l-2 border-l-gold-accent bg-gold-accent/5">
+                <SampleIntelDisclosure />
+                <p className="font-serif text-sm text-text-secondary m-0">
+                  This illustrative briefing is retained so invited testers can evaluate the full Intel experience. It is not a live market report.
+                </p>
+              </GlassPanel>
+            ) : null}
             {/* Insight disclaimer banner */}
             {["INSIGHT", "Insight"].includes(article.category) || ["INSIGHT", "Insight"].includes(article.intelType) || ["INSIGHT", "Insight"].includes(article.type) ? (
               <GlassPanel className="p-4 mb-8 border-l-2 border-l-gold-accent bg-gold-accent/5">

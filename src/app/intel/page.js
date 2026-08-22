@@ -10,6 +10,7 @@ import SpatialIntelMap from "@/components/intel/SpatialIntelMap";
 import { distanceKm } from "@/lib/geo";
 import OSINTFlashTicker from "@/components/intel/OSINTFlashTicker";
 import InViewport from "@/components/ui/InViewport";
+import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 
 function getArticleType(art) {
   if (!art) return "Analysis";
@@ -98,7 +99,8 @@ export default function IntelPage() {
               date: item.date || "Just Now",
               excerpt: item.excerpt || "",
               image: item.image || "",
-              sourceName: item.sourceName || item.source || ""
+              sourceName: item.sourceName || item.source || "",
+              isSample: false
             });
           }
         });
@@ -287,6 +289,7 @@ export default function IntelPage() {
                 </div>
                 <div className="featured-content-new">
                   <div className="featured-badge-row flex flex-wrap items-center gap-2 mb-3">
+                    {featuredArticle.isSample ? <SampleIntelDisclosure compact /> : null}
                     <span className="featured-tag-new" style={{ margin: 0 }}>{featuredArticle.category}</span>
                     <span className={`article-type-badge ${getArticleType(featuredArticle).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(featuredArticle)}</span>
                     <span className="featured-read-time" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{Math.max(1, Math.round((featuredArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
@@ -320,6 +323,7 @@ export default function IntelPage() {
               {trendingArticles.length > 0 ? (
                 trendingArticles.map((art, idx) => (
                   <Link href={`/intel/${art.slug}`} key={art.slug} className="trending-dispatch-card group">
+                    {art.isSample ? <SampleIntelDisclosure compact /> : null}
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="trending-meta">0{idx + 1} &middot; {art.category} &middot; {art.date}</span>
                       {art.city ? (
@@ -429,6 +433,7 @@ export default function IntelPage() {
                     <div className="image-overlay"></div>
                   </div>
                   <div className="article-content">
+                    {art.isSample ? <SampleIntelDisclosure /> : null}
                     <div className="article-header" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
                       <span className="article-category" style={{ marginRight: 'auto' }}>{art.category}</span>
                       <span className={`article-type-badge ${getArticleType(art).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(art)}</span>
@@ -484,6 +489,7 @@ export default function IntelPage() {
               <div className="side-panel-image" style={{ backgroundImage: `url(${sidePanelArticle.image})` }}></div>
             )}
             <div className="side-panel-body">
+              {sidePanelArticle.isSample ? <SampleIntelDisclosure /> : null}
               <div className="side-panel-badge-row" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                 <span className="side-panel-cat">{sidePanelArticle.category}</span>
                 <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
