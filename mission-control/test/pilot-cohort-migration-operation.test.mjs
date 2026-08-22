@@ -20,7 +20,7 @@ test("pilot cohort migration is byte-identical and checksum locked", async () =>
   assert.ok(embedded);
   assert.deepEqual(Buffer.from(embedded[1], "utf8"), canonicalBytes);
   assert.equal(createHash("sha256").update(bundledBytes).digest("hex").toUpperCase(),
-    "C3910F49F333B023FF2B99F558F0057E954314E8302AA12C5DB018C03ED36140");
+    "A6B33FFE65B919B8AE1FBA7C1F05CF8120764072F30BFB595FECFB0BB82FB674");
 });
 
 test("pilot identity stays private, relational, and independent of product tables", async () => {

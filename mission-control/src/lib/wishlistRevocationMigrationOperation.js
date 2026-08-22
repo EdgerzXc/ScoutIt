@@ -20,7 +20,6 @@ revoke all on table public.wishlist_share_revocations from anon, authenticated;
 
 comment on table public.wishlist_share_revocations is
   'Service-role-only high-watermark used to revoke public wishlist share tokens without storing bearer credentials.';
-
 `;
 
 export const WISHLIST_REVOCATION_MIGRATION = Object.freeze({

@@ -71,7 +71,6 @@ comment on table public.pilot_participants is
   'Service-role-only cohort membership. Rows survive account deletion as cleanup evidence; never store raw temporary email addresses.';
 comment on column public.pilot_participants.user_id is
   'Existing authenticated tester ID used to trace related private writes without adding pilot flags to product tables.';
-
 `;
 
 export const PILOT_COHORT_MIGRATION = Object.freeze({

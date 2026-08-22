@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, TIERS, logActionStrict } from "@/lib/rbac";
+import { assertTier, getCurrentStaff, TIERS, logActionStrict } from "@/lib/rbac";
 
 const ALLOWED_STATUSES = new Set(["new", "in_progress", "resolved", "spam"]);
 
@@ -15,7 +15,12 @@ const ALLOWED_STATUSES = new Set(["new", "in_progress", "resolved", "spam"]);
  */
 export async function setContactStatus(formData) {
   const staff = await getCurrentStaff();
-  if (!staff || staff.tier < TIERS.OPS_MANAGER) {
+  if (!staff) {
+    return { ok: false, error: "Insufficient tier" };
+  }
+  try {
+    assertTier(staff, TIERS.OPS_MANAGER);
+  } catch {
     return { ok: false, error: "Insufficient tier" };
   }
 

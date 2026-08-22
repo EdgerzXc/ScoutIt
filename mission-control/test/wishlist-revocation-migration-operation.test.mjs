@@ -17,7 +17,7 @@ test("bundled wishlist revocation migration is byte-identical and checksum locke
   const embedded = source.match(/const MIGRATION_SQL = String\.raw`([\s\S]*?)`;/);
   assert.ok(embedded);
   assert.deepEqual(Buffer.from(embedded[1], "utf8"), canonicalBytes);
-  assert.equal(createHash("sha256").update(bundledBytes).digest("hex").toUpperCase(), "A38EA1213432886619147933E0D103341D94E5A83DA1AE94FDEEFB69CD731E69");
+  assert.equal(createHash("sha256").update(bundledBytes).digest("hex").toUpperCase(), "3EADAA2D4CA84CAAEE940D24CC5EAFDFDE9CC4C426D7EF59969998124207E10B");
 });
 
 test("wishlist migration is fixed, guarded, backup checked, and not a SQL console", async () => {
