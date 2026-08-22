@@ -6,6 +6,14 @@ updated: 2026-08-18
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
 
+> **EXECUTION AUTHORITY CHANGED 2026-08-22.** This file remains historical
+> status context, not a build queue. Start at
+> [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|Master Action Router]]
+> and use its bounded Urgent, Active, Owner, Waiting, Future, Done, and Inbox
+> lanes. Older sections below that call the former master ledger “live,” cite
+> its retired section numbers, or mirror completed package tables are preserved
+> chronology and cannot assign work.
+
 > **2026-08-21 Owner-approved surface lock checkpoint:** the accepted Showcase stage,
 > Metropolis foreground, and Metropolis WebGL background are protected by normalized
 > source checksums in `scripts/approved-surfaces.json`. `npm run verify:surfaces` and CI

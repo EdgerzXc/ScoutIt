@@ -46,3 +46,13 @@ Before writing complex code or modifying data structures, you must immediately r
 - Never update a surface checksum during cleanup, formatting, conflict resolution, dependency work, or an unrelated fix.
 - For an intentional visual change: edit locally, verify desktop/mobile behavior, let the owner review it, and update the checksum only after explicit owner acceptance.
 - Mock/demo property scaffolding stays until the owner separately approves its retirement; it is not cleanup debris.
+
+## 6. ACTION CONTROL & DOCUMENTATION LIFECYCLE
+- Before implementation, open `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN.md` and verify the task against current code or live state.
+- Every executable task must have one stable task ID and exactly one home: `URGENT.md`, `ACTIVE.md`, `WAITING.md`, `MASTER_OWNER_ACTIONS.md`, or `FUTURE.md`. Raw or uncertain findings belong in `INBOX/` and are not authorized work.
+- Never execute work directly from a specification, handoff, implementation record, comment, archived ledger, or historical unchecked checkbox. Promote a verified item into one live queue first.
+- Keep the same task ID for its whole life. Moving a task means removing it from its former queue in the same change; never duplicate it across queues.
+- Treat implementation and documentation as one transaction. Before ending the turn, update the task's disposition: keep it current in its live queue, move it to the exact blocked/owner/deferred queue, or remove it from all live queues and add an evidence row to the current monthly `DONE/` file.
+- A completion record must state the behavior delivered, verification performed, and any remaining boundary. Creating a file or writing a plan is not evidence that the product work is done.
+- If behavior, architecture, schema, operations, or user flow changed, update the matching canonical `_SCOUTIT_BRAIN/` document in the same turn.
+- Respect the queue limits in the Master Action Plan. Split an overloaded queue by product domain before adding more work.

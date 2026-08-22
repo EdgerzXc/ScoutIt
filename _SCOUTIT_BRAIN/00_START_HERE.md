@@ -68,12 +68,12 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 |---|---|---|
 | 0 | **`00_START_HERE.md`** (this file) | The map + the cheat sheet |
 | ★★ | [[00_MASTER_SYNC]] | 🆕 **Read this first** — the always-current one-pager (North Star, active build queue, decision log, open owner decisions). Updated in place every session. |
-| MASTER | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] | **The only live execution list** — unfinished engineering, owner actions, unresolved decisions, and milestone-triggered obligations. Completed work is intentionally excluded. |
+| MASTER | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION ROUTER]] | **The only execution router** — opens bounded Urgent, Active, Owner, Waiting, Future, Done, and Inbox lanes. |
 | ★ | [[00_SOP]] | **Read every turn** — operating rules + invariants that keep work aligned & non-breaking |
 | ★ | [[00_COUNCIL]] | The 5-seat decision panel for product/UX calls |
 | 📄 | `00_CONTEXT/` | Small standing-context notes (brand voice draft, SEO brainstorm) |
 | 📅 | [[00_DAILY_LOG/README|Daily Log README]] | Quick dated scratch notes (Obsidian Daily Notes plugin writes here) |
-| HISTORY | [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] | Historical launch program evidence; current open work is in the Master Action Plan. |
+| HISTORY | [[15_IMPLEMENTATION_RECORDS/README|Implementation Records]] | Historical execution evidence; legacy task ledgers are non-executable Inbox records. |
 | 1 | **`01_IDENTITY_AND_VISION/`** | What ScoutIT *is*, why it exists, the wordplay, the manifesto, future ideas |
 | 2 | **`02_ARCHITECTURE_AND_STRUCTURE/`** | The tech stack, folder map, dual-CMS data flow, AI working rules |
 | 3 | **`03_DESIGN/`** | The visual DNA: 95% black / 5% gold, tokens, typography, motion |
@@ -136,7 +136,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
   desktop HUD (Left = Inquiry Velocity, Center = 16:9 verified media, Right = Showcase
   Distinction & Merits). Per-rank cosmic periphery backgrounds (Universe = deep-space nebula,
   Cluster = galactic gas clouds, Solar = planetary orbits, Starry = Van Gogh beach horizon).
-  Monthly operator curation per Master Action Plan §16. Raw data tables are banned from the
+  Monthly operator curation per [[08_OPERATIONS_AND_BACKLOG/ACTION/ACTIVE#A-007 — Monthly Showcase merit curation|Active A-007]]. Raw data tables are banned from the
   Showcase — they belong on the Property Page. See [[WEBSITE_ARCHITECTURE]] §8.
 - **The Ledger** = private, device-only wishlist (4 tags: Potential Fit / Interested /
   Inspired Me / Save). No account required.
@@ -297,20 +297,20 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - [[ZERO_LOG_AI_CRM_SPEC]] — CRM milestone intelligence without retaining raw chat/audio
 
 **08 · Operations & Backlog**
-- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] — ⭐ canonical step-by-step launch execution plan
-- [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] — pre-launch property/owner/broker Spotify-Wrapped-style metrics build
-- [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]] — dated required/optional provider budget and founder activation order
-- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] - retired historical LR-01 execution prompt; do not run as the current queue
-- [[SESSION_HANDOFF_2026-07-30]] - latest dated handoff in the archived handoff chain; use [[00_MASTER_SYNC]] and the canonical action files for current state, because handoffs are chronological evidence rather than live queues
-- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] — every bug/unverified flow flagged during codebase work, batched for one E2E pass
-- [[HEATMAP_NOAH_INTEGRATION_PLAN]] — NOAH/HazardHunterPH research + the ready-to-execute plan for the flood-risk map layer
-- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] — the single prioritized build/fix list + launch build order
-- [[FUTURE_SCALING_ROADMAP]] — longer-horizon scaling plan
-- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] — website audit
-- [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]] — pre-launch cleanup playbook
-- [[MISSION_CONTROL_SOP]] — how Mission Control operates
-- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]] — stale historical pre-launch checklist; superseded by [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]
-- [[PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS]] — staff/enterprise analytics + notifications plan
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION ROUTER]] — ⭐ start every execution decision here
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/URGENT|URGENT]] — broken current work and pre-pilot blockers
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/ACTIVE|ACTIVE]] — approved engineering that can proceed
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/WAITING|WAITING]] — blocked work with named unblock conditions
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS|OWNER ACTIONS]] — decisions, counsel, dashboards, approvals, physical devices
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]] — deferred and trigger-gated work
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/README|DONE]] — concise monthly closure evidence
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/README|INBOX]] — preserved, non-executable findings awaiting reconciliation
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/RULES|RULES]] — binding implementation and frontend standards
+- [[15_IMPLEMENTATION_RECORDS/README|Implementation Records]] — detailed historical evidence, not task authority
+- [[SESSION_HANDOFF_2026-07-30]] — archived chronology, not a live queue
+- [[MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN]] — implementation reference
+- [[FOUNDER_LAUNCH_BUDGET_CHECKLIST]] — trigger-gated budget reference
+- [[HEATMAP_NOAH_INTEGRATION_PLAN]] — NOAH/HazardHunterPH reference and implementation plan
 - [[09_SECURITY/README|Security]] — vulnerability audit
 - [[00_START_HERE]] — the standing prompt used to launch a fresh AI session
 - [[2026-08-13_BRAIN_PRUNING_RECORD|Brain Pruning Record]] — deploy prompt record

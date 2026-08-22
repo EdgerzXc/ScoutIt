@@ -2,7 +2,7 @@
 section: "00_META"
 status: locked
 tags: [sop, operating-rules, invariants, workflow]
-updated: 2026-08-18
+updated: 2026-08-22
 related: ["[[00_COUNCIL]]", "[[00_START_HERE]]", "[[00_LOGIC_HIERARCHY]]", "[[USER_EXPERIENCES]]"]
 ---
 
@@ -11,7 +11,7 @@ related: ["[[00_COUNCIL]]", "[[00_START_HERE]]", "[[00_LOGIC_HIERARCHY]]", "[[US
 > The contract for how we work each turn so everything aligns to one goal and no change
 > compromises another part. If a turn would violate anything here, stop and flag it first.
 > Pairs with [[00_START_HERE]] (the map) and [[00_COUNCIL]] (the decision panel).
-> Last updated: June 2026.
+> Last updated: August 22, 2026.
 
 ---
 
@@ -30,6 +30,20 @@ the **user side** (the app people use) and the **founder side** (our Mission Con
 2. **The running code + live data win over any document.** Verify current state before acting
    (read the file / query the table) — never assume a doc is still true.
 3. State the goal of the turn in one line and which surface it touches.
+
+### Mandatory action-control transaction
+
+Before implementation, open
+[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|the Master Action Plan]],
+name the stable task ID, and confirm it has exactly one authorized queue home.
+Unverified findings go to the Inbox and cannot be executed until promoted.
+
+Before ending, close the documentation transaction in the same change: keep an
+unfinished item current in its one queue; move an item with an exact unblock
+condition to Waiting; move an owner decision to Owner Actions; move deliberately
+deferred work to Future; or remove completed work from every live queue and add
+an evidence row to the current monthly Done file. A code, data, UI, operations,
+or documentation change is not complete until this disposition is recorded.
 
 **While working:**
 4. Use the **Council** ([[00_COUNCIL]]) for product/UX decisions; 2-round cap, Founder breaks ties.
@@ -80,7 +94,7 @@ These protect other parts of the platform. Breaking one to fix something else is
   is ScoutIt's premier editorial and spatial showcase. It cannot be automated with generic
   placeholders. Every month, operators calibrate property merits (fast connect reply speed,
   heatmap location proximity, architectural accolades, earned demand standing) per
-  [[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN#§16. Monthly Showcase Curation & Merit Calibration SOP (P0 Operating Rhythm)|Master Action Plan §16]].
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/ACTIVE#A-007 — Monthly Showcase merit curation|Active A-007]].
 - **Security hardening is DONE (2026-07-09)** — RLS permissive-policy reset executed and
   verified, `mockOwnerId` gated in 17 routes. RLS is no longer dev-open: **never** add an
   always-true policy or a direct client write to a service-role-only table (`deals` inserts,
