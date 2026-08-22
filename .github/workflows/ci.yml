@@ -41,9 +41,15 @@ jobs:
 
       - name: Lint
         run: npm run lint
+      - name: Typography regression audit
+        run: npm run audit:typography
+
 
       - name: Unit tests (Vitest)
         run: npm run test:unit
+      - name: Browser suite discovery
+        run: npm run test:e2e:list
+
 
       - name: Build check
         # Placeholder env so `next build` doesn't fail on missing vars.
@@ -57,3 +63,18 @@ jobs:
           AIRTABLE_API_KEY: "placeholder"
           AIRTABLE_BASE_ID: "appPlaceholder"
         run: npm run build
+
+  required-ci-result:
+    name: Required CI result
+    if: ${{ always() }}
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Surface failed or cancelled verification
+        env:
+          VERIFY_RESULT: ${{ needs.verify.result }}
+        run: |
+          if [ "$VERIFY_RESULT" != "success" ]; then
+            echo "::error::ScoutIt verification ended with: $VERIFY_RESULT"
+            exit 1
+          fi
