@@ -17,12 +17,6 @@ After A-001, run production-mode coverage for representative public, property,
 profile, onboarding, and authenticated dashboard states. Include mobile touch,
 desktop keyboard, session transitions, and zero unexpected console/page errors.
 
-## A-006 — Security and migration reconciliation
-
-Continue the prepared read-only/grant/RLS analysis and migration-wrapper tests.
-No migration application, retention scheduling, DNS mutation, or provider change
-is authorized by this queue; those move through [[MASTER_OWNER_ACTIONS]].
-
 ## A-007 — Monthly Showcase merit curation
 
 On the first operating cycle of each month, review featured spaces and record
