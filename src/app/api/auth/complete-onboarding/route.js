@@ -102,7 +102,7 @@ export async function POST(request) {
 
     const { data: existingProfile } = await supabaseAdmin
       .from("user_profiles")
-      .select("adult_eligibility_status")
+      .select("adult_eligibility_status, onboarding_completed_at, active_roles, primary_mode, role, subscription_tier")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -167,6 +167,39 @@ export async function POST(request) {
         .eq("terms_version", CURRENT_TERMS_VERSION)
         .single();
       recordedAcceptedAt = existingAcceptance?.accepted_at || acceptedAt;
+    }
+
+    // ── RE-CONSENT ────────────────────────────────────────────────────────
+    // An account that already finished onboarding is here because a new Terms
+    // version was published, not because it is being set up again. The form
+    // cannot express what such an account already is: it offers three signup
+    // roles, one active role, and the starter tier. Running first-time
+    // provisioning over it would collapse a multi-role account to a single
+    // role and reset a paid tier to the starter one — silently, on the way
+    // through a consent checkbox. Record the acceptance and change nothing
+    // else.
+    if (existingProfile?.onboarding_completed_at) {
+      const { error: reconsentError } = await supabaseAdmin
+        .from("user_profiles")
+        .update({ terms_accepted_at: recordedAcceptedAt, terms_version: CURRENT_TERMS_VERSION })
+        .eq("id", user.id);
+
+      if (reconsentError) {
+        console.error("[ONBOARDING API] Re-consent persistence failed:", reconsentError);
+        return NextResponse.json(
+          { error: "Your acceptance could not be recorded. Please try again." },
+          { status: 500, headers: NO_STORE },
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        reconsent: true,
+        activeRoles: existingProfile.active_roles || [],
+        primaryMode: existingProfile.primary_mode || null,
+        onboardingCompletedAt: existingProfile.onboarding_completed_at,
+        termsVersion: CURRENT_TERMS_VERSION,
+      });
     }
 
     const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert(

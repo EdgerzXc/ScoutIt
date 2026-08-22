@@ -37,11 +37,20 @@ Approve only individually reconciled migrations with live-schema read-back,
 backup, rollback, and immediate verification. spatial_ref_sys remains held
 unless its dedicated risk plan is accepted.
 
-Named dependency: `supabase/migrations/20260821000001_versioned_terms_acceptance.sql`
-must be applied **before** the versioned-acceptance code is deployed. The code
-reads and writes `user_profiles.terms_version`, `user_profiles.terms_accepted_at`,
-and `terms_acceptances`; deploying first would send every signed-in account back
-to an onboarding form that cannot save.
+~~Named dependency: the versioned-acceptance migration must be applied before
+that code deploys.~~ **Withdrawn 2026-08-22 — it was already applied.** The live
+database carries `20260821122706 versioned_terms_acceptance`; `terms_acceptances`
+and both `user_profiles` columns exist with RLS on and no policies. There is no
+deploy-ordering hazard for U-002.
+
+Still open under this lane: `supabase/migrations/20260822000001_drop_broken_chat_purge_function.sql`
+(drops a function that can never have run — safe, but unapplied) and the
+`spatial_ref_sys` decision.
+
+What the owner should expect on the next deploy: all five onboarded accounts,
+including the founder's, will be asked to accept the current Terms once before
+reaching the dashboard. That re-consent is now additive only — it records the
+acceptance and changes no roles, tier, or profile data (U-007).
 
 ### O-005 — Stable-release real-device pass
 

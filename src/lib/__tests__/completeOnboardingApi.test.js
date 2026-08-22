@@ -173,6 +173,63 @@ describe("complete onboarding API", () => {
       );
     });
 
+    it("re-consent preserves a multi-role, paid account instead of re-provisioning it", async () => {
+      // The shape of the live founder account: several server-approved roles,
+      // an admin role the signup form cannot express, and a paid tier.
+      mocks.profileMaybeSingle.mockResolvedValue({
+        data: {
+          adult_eligibility_status: "confirmed",
+          onboarding_completed_at: "2026-07-01T00:00:00.000Z",
+          active_roles: ["broker", "owner", "buyer", "provider"],
+          primary_mode: "buyer",
+          role: "admin",
+          subscription_tier: "universe",
+        },
+        error: null,
+      });
+
+      const response = await POST(request({
+        name: "Jane Scout",
+        role: "buyer",
+        dateOfBirth: "1990-01-02",
+      }));
+      const payload = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(payload.reconsent).toBe(true);
+      expect(payload.activeRoles).toEqual(["broker", "owner", "buyer", "provider"]);
+
+      // The acceptance is still recorded.
+      expect(mocks.termsInsert).toHaveBeenCalledOnce();
+      // Nothing else is. A full upsert here would write active_roles:["buyer"],
+      // role:"seeker" and subscription_tier:"starry" over the real account.
+      expect(mocks.profileUpsert).not.toHaveBeenCalled();
+      expect(mocks.legacyWalletUpsert).not.toHaveBeenCalled();
+      expect(mocks.canonicalRoleWalletUpsert).not.toHaveBeenCalled();
+      expect(mocks.profileUpdate).toHaveBeenCalledTimes(1);
+      expect(mocks.profileUpdate).toHaveBeenCalledWith({
+        terms_accepted_at: expect.any(String),
+        terms_version: CURRENT_TERMS_VERSION,
+      });
+    });
+
+    it("reports a failed re-consent write instead of claiming acceptance", async () => {
+      mocks.profileMaybeSingle.mockResolvedValue({
+        data: { adult_eligibility_status: "confirmed", onboarding_completed_at: "2026-07-01T00:00:00.000Z" },
+        error: null,
+      });
+      mocks.profileEq.mockResolvedValue({ error: { message: "write denied" } });
+
+      const response = await POST(request({
+        name: "Jane Scout",
+        role: "buyer",
+        dateOfBirth: "1990-01-02",
+      }));
+
+      expect(response.status).toBe(500);
+      expect(mocks.profileUpsert).not.toHaveBeenCalled();
+    });
+
     it("records nothing for an unauthenticated caller", async () => {
       const response = await POST({
         headers: { get: () => null },
