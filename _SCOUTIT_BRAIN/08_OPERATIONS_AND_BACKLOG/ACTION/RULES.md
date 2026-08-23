@@ -10,12 +10,14 @@ related:
 
 # 4 · RULES — binding, not advisory
 
-Two standards in one file, because they are always consulted together:
+Standards consulted together for architecture, frontend, and action control:
 
 - **Part A — the 25 standing rules.** Each one cost a real bug.
 - **Part B — the frontend standard.** A gate any screen must clear before it ships.
+- **Part C — the action documentation lifecycle.** Mandatory transaction rules for tasks.
+- **Part D — direct Codex execution.** The active single-agent execution rule.
 
-> Merged 2026-08-13 from `05_STANDING_RULES.md` and `02_FRONTEND_STANDARD.md`.
+> Merged 2026-08-13 from `05_STANDING_RULES.md` and `02_FRONTEND_STANDARD.md`; Part D revised 2026-08-23 after the owner retired the Antigravity workflow.
 > Rule numbers are **never reused** — a reference to "Rule 6" is unambiguous
 > forever. There is no Rule 2ʹ, and two rules share 14 (a historical slip kept
 > deliberately; renumbering would silently invalidate every existing reference).
@@ -275,3 +277,21 @@ a pointer to its canonical replacement.
 - Respect every queue limit shown in the Master Action Plan.
 - If a queue reaches its limit, consolidate duplicates and split it by product
   domain before accepting more items.
+
+---
+
+# PART D — DIRECT CODEX EXECUTION
+
+The Action queues in `08_OPERATIONS_AND_BACKLOG/ACTION/` are the **sole backlog**
+and execution authority. Codex works directly from one authorized item at a time;
+the retired agent workspace and its reports are historical evidence only.
+
+1. Re-check the queue item's claimed need against current code or connected live state.
+2. Preserve unrelated working-tree changes and implement only the bounded item.
+3. Run verification proportional to risk, including a failure-path proof when a guard is material.
+4. Update the same task's queue disposition and canonical documentation in the same turn.
+5. Never claim independent review when Codex authored the change; report the actual self-verification performed.
+
+No queue item by itself authorizes commits, pushes, deployments, live database
+migrations, data mutations, DNS/credential changes, or approved-surface checksum
+updates. Those actions still require their exact owner gate.

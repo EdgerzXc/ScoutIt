@@ -62,7 +62,11 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
         )}
       </div>
 
-      {isEmpty ? (
+      {isPublic ? (
+        <div style={emptyState}>
+          <p style={emptyText}>No public performance evidence is attached to this profile. Property-specific representation appears only on an accepted property roster.</p>
+        </div>
+      ) : isEmpty ? (
         <div style={emptyState}>
           <p style={emptyText}>
             Your Scout Rating starts the moment you log your first verified closure.

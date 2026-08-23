@@ -46,6 +46,8 @@ test.describe('Auth walls on mutation routes', () => {
     { method: 'POST', path: '/api/admin/approve', body: { recordId: 'e2e-void' } },
     { method: 'POST', path: '/api/badges/claim', body: { badgeId: 'e2e-void' } },
     { method: 'POST', path: '/api/storage/upload', body: {} },
+    { method: 'POST', path: '/api/professionals/saved', body: { professionalKey: 'airtable:broker:e2e-void', category: 'broker', source: 'airtable' } },
+    { method: 'DELETE', path: '/api/professionals/saved', body: { professionalKey: 'airtable:broker:e2e-void', category: 'broker', source: 'airtable' } },
     {
       method: 'POST',
       path: '/api/viewing-appointments',
@@ -73,6 +75,11 @@ test.describe('Auth walls on mutation routes', () => {
     const res = await request.get('/api/notifications');
     expect(res.status()).toBeGreaterThanOrEqual(400);
     expect(res.status()).toBeLessThan(500);
+  });
+
+  test('GET /api/professionals/saved rejects anonymous requests', async ({ request }) => {
+    const res = await request.get('/api/professionals/saved');
+    expect(res.status()).toBe(401);
   });
 
   const ADMIN_ENDPOINTS = [

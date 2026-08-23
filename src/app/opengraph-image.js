@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import ScoutItImageWordmark from '@/components/brand/ScoutItImageWordmark';
 
 export const runtime = 'edge';
 export const alt = 'ScoutIt — Space Intelligence';
@@ -16,7 +17,10 @@ export default async function Image() {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#0d0d0d',
+          '--bg': '#0d0d0d',
+          '--accent': '#E8AE3C',
+          '--text-primary': '#ffffff',
+          backgroundColor: 'var(--bg)',
         }}
       >
         <div
@@ -40,18 +44,8 @@ export default async function Image() {
             🛸
           </div>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 72,
-            fontFamily: 'sans-serif',
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
-            color: '#ffffff',
-            marginBottom: '20px',
-          }}
-        >
-          Scout<span style={{ color: '#E8AE3C' }}>It</span>
+        <div style={{ display: 'flex', marginBottom: '20px' }}>
+          <ScoutItImageWordmark />
         </div>
         <div
           style={{

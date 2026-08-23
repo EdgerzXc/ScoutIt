@@ -3,12 +3,21 @@ import { siteUrl } from "@/lib/siteUrl";
 
 async function publicProfileMetadata(username) {
   if (!supabaseAdmin || !username) return null;
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(username);
 
-  const { data: profile, error } = await supabaseAdmin
+  let { data: profile, error } = await supabaseAdmin
     .from("public_profiles")
     .select("id, display_name, headline, is_example_account")
-    .eq("display_name", username)
+    .eq(isUuid ? "id" : "display_name", username)
     .maybeSingle();
+
+  if (isUuid && !error && !profile) {
+    ({ data: profile, error } = await supabaseAdmin
+      .from("public_profiles")
+      .select("id, display_name, headline, is_example_account")
+      .eq("display_name", username)
+      .maybeSingle());
+  }
 
   if (error || !profile) return null;
 
@@ -35,7 +44,7 @@ export async function generateMetadata({ params }) {
   }
 
   const resolved = await publicProfileMetadata(username);
-  const canonical = siteUrl(`/profile/${encodeURIComponent(username || "")}`);
+  const canonical = siteUrl(`/profile/${encodeURIComponent(resolved?.profile?.id || username || "")}`);
 
   // ── Indexability is an ALLOWLIST, and the default is no ─────────────────
   // Owner ruling 2026-08-16: index only profiles that are real AND explicitly

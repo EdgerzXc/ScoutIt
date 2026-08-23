@@ -1,0 +1,53 @@
+.wrapper {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+.main {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  padding-top: 52px;
+}
+
+.earthBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.earthBackdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(var(--accent-rgb), 0.06), transparent 34%),
+    linear-gradient(90deg, rgba(var(--bg-rgb), 0.68), rgba(var(--bg-rgb), 0.08) 58%, rgba(var(--bg-rgb), 0.3));
+}
+
+.earthBackdrop :global(.scout-earth) {
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  .earthBackdrop::after {
+    background:
+      radial-gradient(circle at 50% 24%, rgba(var(--accent-rgb), 0.08), transparent 34%),
+      linear-gradient(180deg, rgba(var(--bg-rgb), 0.5), rgba(var(--bg-rgb), 0.08) 48%, rgba(var(--bg-rgb), 0.44));
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .earthBackdrop::after {
+    background: rgba(var(--bg-rgb), 0.58);
+  }
+}

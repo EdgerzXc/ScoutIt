@@ -81,12 +81,14 @@ async function getLiveRelated(slug) {
 export async function generateMetadata({ params }) {
   const { "article-slug": slug } = await params;
   const article = await getLiveArticle(slug);
+  const isSample = article ? Boolean(article.isSample) : false;
   return {
     title: article ? `${article.title} &middot; Intel Briefing` : "Intel Briefing",
     description: article ? article.lead : "Real estate news and intelligence.",
     // Without this the article inherits `canonical: "/intel"` from
     // src/app/intel/layout.js, which tells Google to index the hub instead.
     alternates: { canonical: siteUrl(`/intel/${slug}`) },
+    ...(isSample ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

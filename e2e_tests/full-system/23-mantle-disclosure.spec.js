@@ -24,6 +24,7 @@ for (const viewport of VIEWPORTS) {
     await expect(page.getByRole("button", { name: /platform architecture/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /data philosophy/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /trust & verification/i })).toBeVisible();
+    await expect(page.locator(".mantle-archive")).toHaveAttribute("data-flow-source", "fact_layer.mantle");
 
     const geometry = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,

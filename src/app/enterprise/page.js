@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 
 const CAPABILITIES = [
   {
@@ -23,7 +24,7 @@ export default function EnterprisePage() {
     <div className="directory-layout">
       <Header />
       <main className="enterprise-main">
-        <span className="vector-label">SCOUTIT FOR BUSINESS</span>
+        <span className="vector-label"><ScoutItWordmark /> FOR BUSINESS</span>
         <h1 className="enterprise-title">Enterprise Accounts</h1>
         <p className="enterprise-subtitle">
           For developers, brokerages, and property groups managing multi-asset portfolios.

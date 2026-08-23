@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "approvedAt": "2026-08-21",
+  "approvedAt": "2026-08-23",
   "policy": "Checksums may change only after the owner explicitly approves the new local appearance. Never refresh them as part of an unrelated fix, cleanup, merge, or formatting pass.",
   "surfaces": [
     {
       "name": "Showcase stage and parent navigation",
       "path": "src/components/board/ShowcaseStage.js",
-      "sha256": "dca3e17774fd8b7b66a98f3e1570e5c174e16dadcbc14d02cd8cfae8e99f7d62"
+      "sha256": "8633959bc8d9b29fa185313c9ff8deb17e6ddde7356e8d26b3f9abfe0cd979db"
     },
     {
       "name": "Metropolis foreground surface",

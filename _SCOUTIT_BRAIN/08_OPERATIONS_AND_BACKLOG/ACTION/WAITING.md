@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [waiting, blocked, decisions, dependencies]
-updated: 2026-08-22
+updated: 2026-08-23
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[MASTER_OWNER_ACTIONS]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]]"]
 ---
 
@@ -37,9 +37,10 @@ verification, rollback, and one-at-a-time order.
 ## W-004 — Real-device acceptance
 
 Automated responsive/accessibility checks do not replace physical-device review.
+The already-built broker briefing print layout is included in this acceptance pass.
 
 **Unblocks when:** a stable intended release is deployed and the owner completes
-the iPhone/Android, zoom, screen-reader, auth, navigation, and pilot journeys.
+the iPhone/Android, zoom, screen-reader, auth, navigation, print, and pilot journeys.
 
 ## W-005 — Payment-provider completion
 

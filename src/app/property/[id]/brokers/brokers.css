@@ -29,10 +29,11 @@
 }
 
 .nav-brand-logo {
-  size: 14px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--text-primary);
+  text-decoration: none;
 }
 
 .nav-prop-info {

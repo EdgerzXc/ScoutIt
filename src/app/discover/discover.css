@@ -10,7 +10,7 @@
 /* 1. Left Sidebar Navigation Strip */
 .catSidebar {
   position: fixed;
-  top: 0;
+  top: 56px;
   left: 0;
   bottom: 0;
   width: 160px;
@@ -20,17 +20,6 @@
   flex-direction: column;
   padding: 40px 16px;
   z-index: 100;
-}
-
-.brandLogo {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  color: var(--accent); /* --accent */
-  text-transform: uppercase;
-  margin-bottom: 48px;
-  padding-left: 8px;
 }
 
 .navLinks {
@@ -54,7 +43,7 @@
 
 .navLink:hover {
   color: var(--accent);
-  background: rgba(232, 174, 60, 0.05);
+  background: rgba(var(--accent-rgb), 0.05);
 }
 
 .navLink.active {
@@ -121,7 +110,7 @@
 }
 
 .spotlightMatrix::-webkit-scrollbar-thumb {
-  background: rgba(232, 174, 60, 0.2);
+  background: rgba(var(--accent-rgb), 0.2);
 }
 
 .spotlightCard {
@@ -266,7 +255,7 @@ body.light-mode .visualContent {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 6px 12px;
-  border: 1px solid rgba(232, 174, 60, 0.4);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
   border-radius: 2px;
 }
 
@@ -360,9 +349,9 @@ body.light-mode .visualContent {
 }
 
 .spotlightIntentBtn.active {
-  background: rgba(232, 174, 60, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
   color: var(--accent);
-  border-color: rgba(232, 174, 60, 0.28);
+  border-color: rgba(var(--accent-rgb), 0.28);
 }
 
 .chronologicalNewsRow {
@@ -452,13 +441,18 @@ body.light-mode .visualContent {
   scrollbar-width: thin;
 }
 
+button.contextCell,
 .contextCell {
-  flex: 0 0 300px;
-  width: 300px;
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -466,6 +460,7 @@ body.light-mode .visualContent {
   transition: all var(--transition);
 }
 
+button.contextCell:hover,
 .contextCell:hover {
   border-color: rgba(var(--accent-rgb), 0.3);
   transform: translateY(-4px);
@@ -490,10 +485,37 @@ body.light-mode .visualContent {
   margin-top: 4px;
 }
 
+.contextMeta {
+  margin-top: 7px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .contextArrow {
   color: var(--accent);
   font-size: 14px;
   font-weight: bold;
+  transition: transform var(--transition-fast);
+}
+
+.contextCell.regionActive .contextArrow {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.contextCell,
+  .contextCell,
+  .contextArrow {
+    transition: none;
+  }
+
+  button.contextCell:hover,
+  .contextCell:hover {
+    transform: none;
+  }
 }
 
 /* 6. The Popup Drawer Panel Engine */
@@ -630,15 +652,12 @@ body.light-mode .visualContent {
 @media (max-width: 900px) {
   .catSidebar {
     position: relative;
+    top: auto;
     width: 100%;
     height: auto;
     border-right: none;
     border-bottom: 1px solid var(--border-solid);
     padding: 20px;
-  }
-
-  .brandLogo {
-    margin-bottom: 16px;
   }
 
   .navLinks {
@@ -731,7 +750,7 @@ body.light-mode .visualContent {
 }
 
 .discover-briefing-btn:hover {
-  background: rgba(232, 174, 60, 0.08) !important;
+  background: rgba(var(--accent-rgb), 0.08) !important;
   border-color: var(--accent) !important;
 }
 
@@ -778,8 +797,8 @@ body.light-mode .visualContent {
   transition: all var(--transition);
 }
 .modeJumpBox:hover {
-  border-color: rgba(232, 174, 60, 0.5);
-  background: rgba(232, 174, 60, 0.06);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  background: rgba(var(--accent-rgb), 0.06);
 }
 .modeJumpBox .jumpHere {
   font-family: var(--font-mono);
@@ -831,7 +850,7 @@ body.light-mode .visualContent {
   transition: border-color var(--transition);
 }
 .regionSearch::placeholder { color: var(--text-muted); }
-.regionSearch:focus { outline: none; border-color: rgba(232, 174, 60, 0.5); }
+.regionSearch:focus { outline: none; border-color: rgba(var(--accent-rgb), 0.5); }
 
 
 /* ══════════════════════════════════════

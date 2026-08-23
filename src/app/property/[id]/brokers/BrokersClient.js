@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import TrustBadge from "@/components/ui/TrustBadge";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
@@ -154,7 +155,7 @@ export default function BrokersClient({ slug }) {
     <div className="brokers-wrapper">
       <nav className="brokers-sticky-nav" aria-label="Property broker roster navigation">
         <Link href={`/property/${slug || "batasan-hills"}`} className="nav-back-link">← Back to Property</Link>
-        <span className="nav-brand-logo">SCOUTIT</span>
+        <ScoutItWordmark href="/" className="nav-brand-logo" />
         <span className="nav-prop-info">{property?.title || "Property Profile"}</span>
       </nav>
 

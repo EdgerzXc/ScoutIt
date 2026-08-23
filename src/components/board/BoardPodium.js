@@ -3,40 +3,28 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { rankBoard, BOARD_CATEGORIES } from "@/data/mock/mockShowcase";
-import { Flame, ArrowRight, Bookmark, ShieldCheck, Sparkles, Building2, Trophy } from "lucide-react";
+import { ArrowRight, Bookmark, ShieldCheck, Sparkles, Building2, Trophy } from "lucide-react";
 
 const TIER_THEME = {
   universe: {
     label: "Champion",
-    name: "Gold Apex",
-    color: "#E8AE3C",
-    rgb: "232, 174, 60",
-    border: "rgba(232, 174, 60, 0.45)",
-    glow: "rgba(232, 174, 60, 0.25)",
+    color: "var(--accent)",
+    border: "rgba(var(--accent-rgb), 0.4)",
   },
   cluster: {
     label: "Runner-Up",
-    name: "Silver",
-    color: "#E0E0E0",
-    rgb: "224, 224, 224",
-    border: "rgba(224, 224, 224, 0.35)",
-    glow: "rgba(224, 224, 224, 0.12)",
+    color: "var(--text-primary)",
+    border: "var(--border-mid)",
   },
   solar: {
     label: "Contender",
-    name: "Bronze",
-    color: "#CD7F32",
-    rgb: "205, 127, 50",
-    border: "rgba(205, 127, 50, 0.35)",
-    glow: "rgba(205, 127, 50, 0.12)",
+    color: "var(--accent)",
+    border: "rgba(var(--accent-rgb), 0.28)",
   },
   starry: {
     label: "Ranked",
-    name: "Standard",
-    color: "#9E9E9E",
-    rgb: "158, 158, 158",
-    border: "rgba(255, 255, 255, 0.08)",
-    glow: "transparent",
+    color: "var(--text-secondary)",
+    border: "var(--border)",
   },
 };
 
@@ -44,6 +32,7 @@ export default function BoardPodium() {
   const [entries, setEntries] = useState([]);
   const [category, setCategory] = useState("All");
   const [savedSlugs, setSavedSlugs] = useState(new Set());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -52,7 +41,10 @@ export default function BoardPodium() {
       .then((d) => {
         if (alive && d.entries) setEntries(d.entries);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
     return () => {
       alive = false;
     };
@@ -88,42 +80,42 @@ export default function BoardPodium() {
   };
 
   return (
-    <section className="orbit-showcase-container">
-      {/* ── 1. SPLIT-COMMAND HERO (TITLE + MISSION PRE-INTRODUCTION) ── */}
+    <section className="orbit-showcase-container" aria-label="Orbit Demand Rankings" aria-busy={loading}>
+      {/* ── 1. SPLIT-COMMAND HERO (TITLE + MISSION PROVENANCE) ── */}
       <header className="orbit-hero-split">
         <div className="orbit-hero-left">
           <div className="orbit-telemetry-badge">
-            <span className="orbit-signal-pulse" />
+            <span className="orbit-signal-dot" aria-hidden="true" />
             <span className="orbit-telemetry-text">
-              LAYER 01 // ORBIT DEMAND INDEX · LIVE TELEMETRY
+              LAYER 01 // ORBIT · SAMPLE DEMAND INDEX
             </span>
           </div>
           <h1 className="orbit-hero-title">
-            Top Inquired <span className="text-gold-gradient">Spaces</span>
+            Top-Ranked <span className="orbit-gold-accent">Spaces</span>
           </h1>
           <p className="orbit-hero-subtitle">
-            The most demanded properties in the Philippines, calculated from real verified inquiry volume and seeker saves over the last 30 days.
+            Illustrative rankings across residential, commercial, and hospitality spaces, demonstrating ScoutIt&apos;s spatial demand and inquiry framework in preview.
           </p>
         </div>
 
         <aside className="orbit-mission-card">
           <div className="orbit-mission-header">
-            <Sparkles size={13} className="text-gold-accent" />
+            <Sparkles size={13} className="orbit-icon-gold" aria-hidden="true" />
             <span className="orbit-mission-kicker">LAYER PURPOSE &amp; PROVENANCE</span>
           </div>
           <p className="orbit-mission-body">
-            Orbit is ScoutIt&apos;s demand index. It tracks the most-saved and inquired spaces across the Philippines, so you can see where market attention is moving before transactions close.
+            Orbit is ScoutIt&apos;s demand index preview. It models how space engagement, seeker interest, and curated inquiry momentum are ranked across Philippine properties.
           </p>
           <div className="orbit-mission-footer">
-            <ShieldCheck size={13} className="text-gold-accent" />
-            <span>100% Earned demand · Unpaid &amp; unbiased</span>
+            <ShieldCheck size={13} className="orbit-icon-gold" aria-hidden="true" />
+            <span>Sample demand framework · Independent &amp; unpaid</span>
           </div>
         </aside>
       </header>
 
       {/* ── 2. HORIZONTAL CATEGORY SCANNER PILLS ── */}
       <div className="orbit-filter-rail-wrapper">
-        <nav className="orbit-filter-rail" aria-label="Orbit Property Categories">
+        <nav className="orbit-filter-rail" aria-label="Orbit Space Categories">
           {BOARD_CATEGORIES.map((c) => {
             const count = categoryCounts[c] || 0;
             const isActive = category === c;
@@ -133,6 +125,7 @@ export default function BoardPodium() {
                 type="button"
                 className={`orbit-filter-pill ${isActive ? "is-active" : ""}`}
                 onClick={() => setCategory(c)}
+                aria-pressed={isActive}
               >
                 <span>{c === "All" ? "All Spaces" : c}</span>
                 <span className="orbit-filter-count">{count}</span>
@@ -143,17 +136,22 @@ export default function BoardPodium() {
       </div>
 
       {/* ── 3. PODIUM STAGE (APEX HERO + RUNNER-UPS) ── */}
-      {allRanked.length === 0 ? (
+      {loading ? (
+        <div className="orbit-loading-state" role="status" aria-live="polite">
+          <span>Reading the current sample index…</span>
+          <div className="orbit-loading-lines" aria-hidden="true"><i /><i /><i /></div>
+        </div>
+      ) : allRanked.length === 0 ? (
         <div className="orbit-empty-state">
-          <Building2 size={36} className="text-gold-accent/40 mb-3" />
-          <p className="orbit-empty-text">No verified demand telemetry recorded in this category yet.</p>
+          <Building2 size={32} className="orbit-empty-icon" aria-hidden="true" />
+          <p className="orbit-empty-text">No spaces recorded in this category yet.</p>
         </div>
       ) : (
         <div className="orbit-podium-grid">
           {/* #01 CHAMPION APEX CARD */}
           {hero && (
             <article className="orbit-apex-card">
-              <Link href="/showcase" className="orbit-apex-link">
+              <div className="orbit-apex-link">
                 <div
                   className="orbit-apex-media"
                   style={hero.photo ? { backgroundImage: `url(${hero.photo})` } : undefined}
@@ -161,11 +159,10 @@ export default function BoardPodium() {
                   <div className="orbit-media-gradient" />
                   <div className="orbit-apex-badge">
                     <span className="orbit-badge-ring">#01</span>
-                    <span className="orbit-badge-label">Champion</span>
+                    <span className="orbit-badge-label">Champion Apex</span>
                   </div>
                   <div className="orbit-apex-chip">
-                    <Flame size={12} className="text-gold-accent" />
-                    <span>Top Demand Apex</span>
+                    <span>Sample Model Data</span>
                   </div>
                 </div>
 
@@ -177,47 +174,48 @@ export default function BoardPodium() {
 
                   <h2 className="orbit-apex-name">{hero.name}</h2>
 
-                  {/* Demand telemetry meter */}
+                  {/* Demand metrics panel */}
                   <div className="orbit-velocity-box">
                     <div className="orbit-velocity-header">
-                      <span className="orbit-velocity-title">Market Inquiry Velocity</span>
-                      <strong className="orbit-velocity-score">98.4% Score</strong>
-                    </div>
-                    <div className="orbit-meter-bar">
-                      <div className="orbit-meter-fill" style={{ width: "98.4%" }} />
+                      <span className="orbit-velocity-title">Demand Momentum Signals</span>
+                      <span className="orbit-velocity-provenance">Curated Demand Model</span>
                     </div>
                     <div className="orbit-stat-row">
                       <div className="orbit-stat-item">
                         <span className="orbit-stat-num">{hero.inquiry_count}</span>
                         <span className="orbit-stat-lbl">Inquiries / Mo</span>
+                        <span className="orbit-stat-sub">(sample model)</span>
                       </div>
                       <div className="orbit-stat-item">
                         <span className="orbit-stat-num">{hero.saves || Math.round(hero.inquiry_count * 1.8)}</span>
                         <span className="orbit-stat-lbl">Private Saves</span>
+                        <span className="orbit-stat-sub">(sample model)</span>
                       </div>
                       <div className="orbit-stat-item">
                         <span className="orbit-stat-num">{hero.views || hero.inquiry_count * 8}</span>
-                        <span className="orbit-stat-lbl">View Signals</span>
+                        <span className="orbit-stat-lbl">Spatial Views</span>
+                        <span className="orbit-stat-sub">(sample model)</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="orbit-apex-actions">
-                    <span className="orbit-primary-btn">
-                      Explore The Showcase <ArrowRight size={14} />
-                    </span>
+                    <Link href="/showcase" className="orbit-primary-btn" aria-label={`View Champion space: ${hero.name}`}>
+                      Explore The Showcase <ArrowRight size={14} aria-hidden="true" />
+                    </Link>
                     <button
                       type="button"
                       onClick={(e) => toggleSave(hero.property_slug, e)}
                       className={`orbit-save-btn ${savedSlugs.has(hero.property_slug) ? "is-saved" : ""}`}
-                      aria-label="Save to Board"
+                      aria-label={savedSlugs.has(hero.property_slug) ? `Remove ${hero.name} from saved` : `Save ${hero.name} to Board`}
+                      aria-pressed={savedSlugs.has(hero.property_slug)}
                     >
-                      <Bookmark size={14} />
+                      <Bookmark size={14} aria-hidden="true" />
                       <span>{savedSlugs.has(hero.property_slug) ? "Saved" : "Save"}</span>
                     </button>
                   </div>
                 </div>
-              </Link>
+              </div>
             </article>
           )}
 
@@ -232,9 +230,9 @@ export default function BoardPodium() {
                   className="orbit-runner-card"
                   style={{ "--tier-color": theme.color, "--tier-border": theme.border }}
                 >
-                  <Link href="/showcase" className="orbit-runner-link">
+                  <div className="orbit-runner-link">
                     <div className="orbit-runner-body">
-                      {/* TOP BAR: BADGES (LEFT) + CATEGORY/LOCATION (RIGHT) */}
+                      {/* TOP BAR: BADGES + CATEGORY/LOCATION */}
                       <div className="orbit-runner-topbar">
                         <div className="orbit-runner-badges-group">
                           <span className="orbit-runner-rank" style={{ borderColor: theme.border, color: theme.color }}>
@@ -252,29 +250,30 @@ export default function BoardPodium() {
                       </div>
 
                       {/* MAIN PROPERTY NAME */}
-                      <h3 className="orbit-runner-name">{item.name}</h3>
+                      <h3 className="orbit-runner-name"><Link href="/showcase" aria-label={`View runner-up space: ${item.name}`}>{item.name}</Link></h3>
 
                       {/* BOTTOM STATS + SAVE */}
                       <div className="orbit-runner-stats">
                         <div className="orbit-runner-stat-item">
                           <strong style={{ color: theme.color }}>{item.inquiry_count}</strong>
-                          <small>Inquiries</small>
+                          <small>Inquiries (sample)</small>
                         </div>
                         <div className="orbit-runner-stat-item">
                           <strong>{item.saves || Math.round(item.inquiry_count * 1.7)}</strong>
-                          <small>Saves</small>
+                          <small>Saves (sample)</small>
                         </div>
                         <button
                           type="button"
                           onClick={(e) => toggleSave(item.property_slug, e)}
                           className={`orbit-runner-save ${isSaved ? "is-saved" : ""}`}
-                          aria-label="Save space"
+                          aria-label={isSaved ? `Remove ${item.name} from saved` : `Save ${item.name} to Board`}
+                          aria-pressed={isSaved}
                         >
-                          <Bookmark size={13} />
+                          <Bookmark size={13} aria-hidden="true" />
                         </button>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </article>
               );
             })}
@@ -283,27 +282,26 @@ export default function BoardPodium() {
       )}
 
       {/* ── 4. COMPLETE SHOWCASE PORTAL CALLOUT BANNER ── */}
-      <section className="orbit-showcase-portal-card">
-        <div className="orbit-portal-glow" />
+      <section className="orbit-showcase-portal-card" aria-label="Explore The Showcase">
         <div className="orbit-portal-content">
           <div className="orbit-portal-badge">
-            <Trophy size={13} className="text-gold-accent" />
-            <span>COMPLETE PHILIPPINE LEADERBOARD</span>
+            <Trophy size={13} className="orbit-icon-gold" aria-hidden="true" />
+            <span>PHILIPPINE SPACE LEADERBOARD</span>
           </div>
           <h2 className="orbit-portal-title">
-            See the Full Demand Rankings in The Showcase
+            Explore Full Space Rankings in The Showcase
           </h2>
           <p className="orbit-portal-desc">
-            Explore all 100+ ranked properties across Metro Manila, Cebu, and prime regional districts. Filter by live inquiry velocity, private saves, and monthly demand movements.
+            Review category rankings across Metro Manila, Cebu, and prime regional districts, with demand tiers and architectural merits.
           </p>
           <div className="orbit-portal-meta">
             <div className="orbit-portal-pill">
-              <ShieldCheck size={13} className="text-gold-accent" />
-              <span>100% Verified Buyer Demand · Never Paid</span>
+              <ShieldCheck size={13} className="orbit-icon-gold" aria-hidden="true" />
+              <span>Independent Spatial Curation · Unpaid</span>
             </div>
             <div className="orbit-portal-pill">
-              <Sparkles size={13} className="text-gold-accent" />
-              <span>Updated Monthly with Real Platform Signals</span>
+              <Sparkles size={13} className="orbit-icon-gold" aria-hidden="true" />
+              <span>Sample Demand Framework · Demonstration</span>
             </div>
           </div>
         </div>
@@ -311,9 +309,9 @@ export default function BoardPodium() {
         <div className="orbit-portal-action">
           <Link href="/showcase" className="orbit-portal-cta-btn">
             <span>Explore The Showcase</span>
-            <ArrowRight size={16} />
+            <ArrowRight size={15} aria-hidden="true" />
           </Link>
-          <span className="orbit-portal-cta-sub">Free public intelligence · Instant access</span>
+          <span className="orbit-portal-cta-sub">Curated public intelligence preview · Instant access</span>
         </div>
       </section>
 
@@ -344,23 +342,17 @@ export default function BoardPodium() {
           gap: 8px;
           padding: 5px 12px;
           border-radius: 9999px;
-          background: rgba(232, 174, 60, 0.08);
-          border: 1px solid rgba(232, 174, 60, 0.25);
+          background: rgba(var(--accent-rgb), 0.08);
+          border: 1px solid rgba(var(--accent-rgb), 0.22);
           margin-bottom: 14px;
         }
 
-        .orbit-signal-pulse {
+        .orbit-signal-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: var(--accent-bright);
-          box-shadow: 0 0 8px var(--accent-bright);
-          animation: pulseGlow 2s infinite ease-in-out;
-        }
-
-        @keyframes pulseGlow {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.35); opacity: 0.6; }
+          background: var(--accent);
+          box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4);
         }
 
         .orbit-telemetry-text {
@@ -375,26 +367,24 @@ export default function BoardPodium() {
 
         .orbit-hero-title {
           font-family: var(--font-display);
-          font-size: clamp(32px, 4.5vw, 52px);
-          font-weight: 500;
-          line-height: 1.06;
-          letter-spacing: -0.028em;
-          color: #f7f5f0;
+          font-size: clamp(32px, 4.5vw, 50px);
+          font-weight: 400;
+          line-height: 1.08;
+          letter-spacing: -0.025em;
+          color: var(--text-primary);
           margin: 0 0 14px;
         }
 
-        .text-gold-gradient {
-          background: linear-gradient(135deg, #f7c64e 20%, #e8ae3c 80%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+        .orbit-gold-accent {
+          color: var(--accent);
         }
 
         .orbit-hero-subtitle {
           font-family: var(--font-body);
-          font-size: clamp(14px, 1.25vw, 15.5px);
+          font-size: clamp(14px, 1.2vw, 15px);
           font-weight: 400;
-          line-height: 1.62;
-          letter-spacing: -0.012em;
+          line-height: 1.65;
+          letter-spacing: -0.01em;
           color: var(--text-secondary);
           max-width: 560px;
           margin: 0;
@@ -402,12 +392,12 @@ export default function BoardPodium() {
 
         /* ── MISSION CARD ── */
         .orbit-mission-card {
-          background: rgba(13, 13, 16, 0.78);
+          background: rgba(var(--surface-rgb), 0.82);
           border: 1px solid var(--accent-muted);
-          border-radius: 16px;
-          padding: 22px 26px;
+          border-radius: 14px;
+          padding: 22px 24px;
           backdrop-filter: blur(20px);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+          box-shadow: 0 12px 32px rgba(var(--bg-rgb), 0.4);
           position: relative;
         }
 
@@ -416,6 +406,10 @@ export default function BoardPodium() {
           align-items: center;
           gap: 8px;
           margin-bottom: 10px;
+        }
+
+        .orbit-icon-gold {
+          color: var(--accent);
         }
 
         .orbit-mission-kicker {
@@ -433,7 +427,7 @@ export default function BoardPodium() {
           font-weight: 400;
           line-height: 1.62;
           letter-spacing: -0.008em;
-          color: #d6d4cd;
+          color: var(--text-secondary);
           margin: 0 0 14px;
         }
 
@@ -442,13 +436,13 @@ export default function BoardPodium() {
           align-items: center;
           gap: 8px;
           padding-top: 12px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-top: 1px solid rgba(var(--text-primary-rgb), 0.08);
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 500;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--text-secondary);
+          color: var(--text-muted);
         }
 
         /* ── FILTER RAIL ── */
@@ -463,8 +457,8 @@ export default function BoardPodium() {
         .orbit-filter-rail {
           display: inline-flex;
           gap: 6px;
-          background: rgba(18, 18, 22, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(var(--surface-rgb), 0.75);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.08);
           padding: 5px;
           border-radius: 9999px;
           backdrop-filter: blur(16px);
@@ -472,13 +466,14 @@ export default function BoardPodium() {
 
         .orbit-filter-pill {
           appearance: none;
+          min-height: 44px;
           border: 0;
           background: transparent;
           color: var(--text-secondary);
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 600;
-          letter-spacing: 0.11em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           font-variant-numeric: tabular-nums;
           padding: 8px 16px;
@@ -488,7 +483,7 @@ export default function BoardPodium() {
           align-items: center;
           gap: 7px;
           white-space: nowrap;
-          transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow);
         }
 
         .orbit-filter-count {
@@ -498,25 +493,25 @@ export default function BoardPodium() {
           font-variant-numeric: tabular-nums;
           padding: 1px 6px;
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.06);
+          background: rgba(var(--text-primary-rgb), 0.06);
           color: var(--text-muted);
         }
 
         .orbit-filter-pill:hover {
-          color: #fff;
-          background: rgba(255, 255, 255, 0.06);
+          color: var(--text-primary);
+          background: rgba(var(--text-primary-rgb), 0.06);
         }
 
         .orbit-filter-pill.is-active {
-          background: var(--accent-bright);
-          color: #0d0d0d;
+          background: var(--accent);
+          color: var(--on-accent);
           font-weight: 700;
-          box-shadow: 0 2px 14px rgba(232, 174, 60, 0.35);
+          box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.25);
         }
 
         .orbit-filter-pill.is-active .orbit-filter-count {
-          background: rgba(0, 0, 0, 0.2);
-          color: #0d0d0d;
+          background: rgba(var(--bg-rgb), 0.2);
+          color: var(--on-accent);
           font-weight: 700;
         }
 
@@ -530,18 +525,18 @@ export default function BoardPodium() {
 
         /* ── APEX CARD ── */
         .orbit-apex-card {
-          background: rgba(13, 13, 16, 0.76);
-          border: 1px solid rgba(232, 174, 60, 0.42);
-          border-radius: 18px;
+          background: rgba(var(--surface-rgb), 0.8);
+          border: 1px solid rgba(var(--accent-rgb), 0.35);
+          border-radius: 16px;
           overflow: hidden;
           backdrop-filter: blur(24px);
-          box-shadow: 0 16px 44px rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-          transition: transform 0.22s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.22s ease;
+          box-shadow: 0 16px 40px rgba(var(--bg-rgb), 0.45);
+          transition: transform var(--transition-slow), border-color var(--transition-slow);
         }
 
         .orbit-apex-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 22px 56px rgba(0, 0, 0, 0.62), 0 0 28px rgba(232, 174, 60, 0.18);
+          transform: translateY(-2px);
+          border-color: rgba(var(--accent-rgb), 0.55);
         }
 
         .orbit-apex-link {
@@ -554,8 +549,8 @@ export default function BoardPodium() {
 
         .orbit-apex-media {
           position: relative;
-          height: 250px;
-          background: #141416;
+          height: 240px;
+          background: var(--surface);
           background-size: cover;
           background-position: center;
           overflow: hidden;
@@ -564,7 +559,7 @@ export default function BoardPodium() {
         .orbit-media-gradient {
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(13,13,16,0.96) 100%);
+          background: linear-gradient(180deg, rgba(var(--bg-rgb),0.1) 0%, rgba(var(--bg-rgb),0.95) 100%);
         }
 
         .orbit-apex-badge {
@@ -574,9 +569,9 @@ export default function BoardPodium() {
           display: inline-flex;
           align-items: center;
           gap: 7px;
-          padding: 5px 12px;
-          border-radius: 7px;
-          background: rgba(0, 0, 0, 0.8);
+          padding: 4px 10px;
+          border-radius: 6px;
+          background: rgba(var(--bg-rgb), 0.85);
           border: 1px solid var(--accent);
           backdrop-filter: blur(10px);
         }
@@ -593,9 +588,9 @@ export default function BoardPodium() {
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #fff;
+          color: var(--text-primary);
         }
 
         .orbit-apex-chip {
@@ -604,21 +599,21 @@ export default function BoardPodium() {
           right: 14px;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 5px 10px;
-          border-radius: 6px;
-          background: rgba(232, 174, 60, 0.18);
-          border: 1px solid rgba(232, 174, 60, 0.45);
+          gap: 5px;
+          padding: 4px 8px;
+          border-radius: 5px;
+          background: rgba(var(--bg-rgb), 0.75);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
           font-family: var(--font-mono);
           font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
+          font-weight: 600;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--accent-bright);
+          color: var(--accent);
         }
 
         .orbit-apex-content {
-          padding: 22px 26px;
+          padding: 22px 24px;
           display: flex;
           flex-direction: column;
           flex-grow: 1;
@@ -646,24 +641,24 @@ export default function BoardPodium() {
           font-weight: 500;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #a8a69f;
+          color: var(--text-muted);
         }
 
         .orbit-apex-name {
           font-family: var(--font-display);
-          font-size: clamp(22px, 2.3vw, 28px);
-          font-weight: 500;
-          letter-spacing: -0.022em;
-          color: #f7f5f0;
-          margin: 0 0 18px;
-          line-height: 1.18;
+          font-size: clamp(22px, 2.2vw, 26px);
+          font-weight: 400;
+          letter-spacing: -0.02em;
+          color: var(--text-primary);
+          margin: 0 0 16px;
+          line-height: 1.2;
         }
 
         /* Velocity Box */
         .orbit-velocity-box {
-          background: rgba(20, 20, 24, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 12px;
+          background: rgba(var(--surface-rgb), 0.7);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.06);
+          border-radius: 10px;
           padding: 14px 16px;
           margin-bottom: 20px;
         }
@@ -672,47 +667,31 @@ export default function BoardPodium() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 7px;
+          margin-bottom: 12px;
         }
 
         .orbit-velocity-title {
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 600;
-          letter-spacing: 0.13em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #a8a69f;
+          color: var(--text-secondary);
         }
 
-        .orbit-velocity-score {
+        .orbit-velocity-provenance {
           font-family: var(--font-mono);
           font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.05em;
-          color: var(--accent-bright);
-          font-variant-numeric: tabular-nums;
-        }
-
-        .orbit-meter-bar {
-          height: 4px;
-          background: rgba(255, 255, 255, 0.08);
-          border-radius: 2px;
-          overflow: hidden;
-          margin-bottom: 14px;
-        }
-
-        .orbit-meter-fill {
-          height: 100%;
-          background: linear-gradient(90deg, var(--accent), var(--accent-bright));
-          border-radius: 2px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          color: var(--accent);
+          text-transform: uppercase;
         }
 
         .orbit-stat-row {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-          padding-top: 10px;
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          gap: 10px;
         }
 
         .orbit-stat-item {
@@ -725,18 +704,26 @@ export default function BoardPodium() {
           font-size: 18px;
           font-weight: 700;
           letter-spacing: -0.02em;
-          color: #f7f5f0;
+          color: var(--text-primary);
           font-variant-numeric: tabular-nums;
         }
 
         .orbit-stat-lbl {
           font-family: var(--font-mono);
           font-size: 12px;
-          font-weight: 500;
-          letter-spacing: 0.12em;
+          font-weight: 600;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #a8a69f;
+          color: var(--text-secondary);
           margin-top: 2px;
+        }
+
+        .orbit-stat-sub {
+          font-family: var(--font-mono);
+          font-size: 12px;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          margin-top: 1px;
         }
 
         .orbit-apex-actions {
@@ -752,20 +739,21 @@ export default function BoardPodium() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: var(--accent-bright);
-          color: #0d0d0d;
-          border-radius: 9px;
+          background: var(--accent);
+          color: var(--on-accent);
+          border-radius: 8px;
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          transition: background 0.18s, transform 0.18s;
+          text-decoration: none;
+          white-space: nowrap;
+          transition: background var(--transition-slow);
         }
 
         .orbit-apex-card:hover .orbit-primary-btn {
-          background: #ffe082;
-          transform: translateY(-1px);
+          background: var(--accent-bright);
         }
 
         .orbit-save-btn {
@@ -774,28 +762,28 @@ export default function BoardPodium() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          background: rgba(255, 255, 255, 0.05);
-          color: #f5f3ee;
-          border-radius: 9px;
+          border: 1px solid rgba(var(--text-primary-rgb), 0.12);
+          background: rgba(var(--text-primary-rgb), 0.04);
+          color: var(--text-primary);
+          border-radius: 8px;
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 600;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
-          transition: all 0.18s ease;
+          transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow);
         }
 
         .orbit-save-btn:hover {
           border-color: var(--accent);
           color: var(--accent);
-          background: rgba(232, 174, 60, 0.08);
+          background: rgba(var(--accent-rgb), 0.06);
         }
 
         .orbit-save-btn.is-saved {
           background: var(--accent);
-          color: #0d0d0d;
+          color: var(--on-accent);
           border-color: var(--accent);
           font-weight: 700;
         }
@@ -804,16 +792,16 @@ export default function BoardPodium() {
         .orbit-runners-stack {
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 16px;
         }
 
         .orbit-runner-card {
-          background: rgba(13, 13, 16, 0.76);
-          border: 1px solid var(--tier-border, rgba(255, 255, 255, 0.1));
-          border-radius: 15px;
+          background: rgba(var(--surface-rgb), 0.8);
+          border: 1px solid var(--tier-border, rgba(var(--text-primary-rgb), 0.1));
+          border-radius: 14px;
           overflow: hidden;
           backdrop-filter: blur(20px);
-          transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s ease;
+          transition: transform var(--transition-slow), border-color var(--transition-slow);
         }
 
         .orbit-runner-card:hover {
@@ -829,7 +817,7 @@ export default function BoardPodium() {
         }
 
         .orbit-runner-body {
-          padding: 18px 20px;
+          padding: 16px 18px;
           display: flex;
           flex-direction: column;
           gap: 10px;
@@ -850,9 +838,9 @@ export default function BoardPodium() {
         }
 
         .orbit-runner-rank {
-          padding: 2px 7px;
+          padding: 2px 6px;
           border-radius: 4px;
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(var(--bg-rgb), 0.7);
           border: 1px solid;
           font-family: var(--font-mono);
           font-size: 12px;
@@ -864,9 +852,9 @@ export default function BoardPodium() {
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(var(--bg-rgb), 0.7);
           border: 1px solid;
           padding: 2px 6px;
           border-radius: 4px;
@@ -884,34 +872,30 @@ export default function BoardPodium() {
         }
 
         .orbit-prop-dot {
-          color: rgba(255, 255, 255, 0.2);
-        }
-
-        .orbit-prop-category {
-          font-weight: 700;
-        }
-
-        .orbit-prop-location {
-          color: #a8a69f;
-          font-weight: 500;
+          color: var(--text-muted);
         }
 
         .orbit-runner-name {
           font-family: var(--font-display);
-          font-size: 18px;
-          font-weight: 500;
-          letter-spacing: -0.018em;
-          color: #f7f5f0;
+          font-size: 17px;
+          font-weight: 400;
+          letter-spacing: -0.015em;
+          color: var(--text-primary);
           margin: 0;
-          line-height: 1.24;
+          line-height: 1.25;
+        }
+
+        .orbit-runner-name a {
+          color: inherit;
+          text-decoration: none;
         }
 
         .orbit-runner-stats {
           display: flex;
           align-items: center;
           gap: 14px;
-          padding-top: 9px;
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          padding-top: 8px;
+          border-top: 1px solid rgba(var(--text-primary-rgb), 0.06);
         }
 
         .orbit-runner-stat-item {
@@ -922,7 +906,7 @@ export default function BoardPodium() {
 
         .orbit-runner-stat-item strong {
           font-family: var(--font-mono);
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 700;
           font-variant-numeric: tabular-nums;
         }
@@ -931,24 +915,26 @@ export default function BoardPodium() {
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 500;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #a8a69f;
+          color: var(--text-muted);
         }
 
         .orbit-runner-save {
           margin-left: auto;
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          min-width: 44px;
+          min-height: 44px;
+          border: 1px solid rgba(var(--text-primary-rgb), 0.12);
           background: transparent;
           color: var(--text-secondary);
-          width: 30px;
-          height: 30px;
+          width: 32px;
+          height: 32px;
           border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.18s;
+          transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow);
         }
 
         .orbit-runner-save:hover {
@@ -958,34 +944,24 @@ export default function BoardPodium() {
 
         .orbit-runner-save.is-saved {
           background: var(--accent);
-          color: #0d0d0d;
+          color: var(--on-accent);
           border-color: var(--accent);
         }
 
         /* ── COMPLETE SHOWCASE PORTAL CALLOUT BANNER ── */
         .orbit-showcase-portal-card {
           position: relative;
-          background: rgba(15, 15, 18, 0.88);
-          border: 1px solid var(--accent);
-          border-radius: 18px;
-          padding: clamp(26px, 3.5vw, 36px) clamp(22px, 3.5vw, 40px);
+          background: rgba(var(--surface-rgb), 0.85);
+          border: 1px solid rgba(var(--accent-rgb), 0.28);
+          border-radius: 16px;
+          padding: clamp(24px, 3vw, 32px) clamp(20px, 3vw, 36px);
           backdrop-filter: blur(24px);
-          box-shadow: 0 16px 44px rgba(0, 0, 0, 0.6), 0 0 36px rgba(232, 174, 60, 0.12);
+          box-shadow: 0 14px 36px rgba(var(--bg-rgb), 0.45);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 32px;
+          gap: 28px;
           overflow: hidden;
-        }
-
-        .orbit-portal-glow {
-          position: absolute;
-          top: -50%;
-          right: 20%;
-          width: 320px;
-          height: 320px;
-          background: radial-gradient(circle, rgba(232, 174, 60, 0.14) 0%, transparent 70%);
-          pointer-events: none;
         }
 
         .orbit-portal-content {
@@ -1003,58 +979,58 @@ export default function BoardPodium() {
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.12em;
-          color: var(--accent-bright);
+          color: var(--accent);
           text-transform: uppercase;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .orbit-portal-title {
           font-family: var(--font-display);
-          font-size: clamp(22px, 2.6vw, 32px);
-          font-weight: 500;
-          letter-spacing: -0.024em;
-          color: #f7f5f0;
-          margin: 0 0 10px;
-          line-height: 1.18;
+          font-size: clamp(20px, 2.4vw, 28px);
+          font-weight: 400;
+          letter-spacing: -0.02em;
+          color: var(--text-primary);
+          margin: 0 0 8px;
+          line-height: 1.2;
         }
 
         .orbit-portal-desc {
           font-family: var(--font-body);
-          font-size: 14px;
+          font-size: 13.5px;
           font-weight: 400;
           line-height: 1.6;
-          letter-spacing: -0.01em;
-          color: #d8d6cf;
-          margin: 0 0 18px;
+          letter-spacing: -0.008em;
+          color: var(--text-secondary);
+          margin: 0 0 16px;
         }
 
         .orbit-portal-meta {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
+          gap: 8px;
         }
 
         .orbit-portal-pill {
           display: inline-flex;
           align-items: center;
-          gap: 7px;
-          padding: 6px 14px;
+          gap: 6px;
+          padding: 5px 12px;
           border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(var(--text-primary-rgb), 0.04);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.08);
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #e5e2e1;
+          color: var(--text-secondary);
         }
 
         .orbit-portal-action {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 7px;
+          gap: 6px;
           flex-shrink: 0;
           position: relative;
           z-index: 2;
@@ -1064,44 +1040,85 @@ export default function BoardPodium() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 9px;
-          padding: 15px 30px;
-          border-radius: 11px;
-          background: linear-gradient(135deg, #f7c64e, #e8ae3c);
-          color: #0d0d0d;
+          gap: 8px;
+          padding: 13px 26px;
+          border-radius: 9px;
+          background: var(--accent);
+          color: var(--on-accent);
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           text-decoration: none;
-          box-shadow: 0 4px 18px rgba(232, 174, 60, 0.35);
-          transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.22);
+          transition: background var(--transition-slow), transform var(--transition-slow);
           white-space: nowrap;
         }
 
         .orbit-portal-cta-btn:hover {
-          background: linear-gradient(135deg, #ffe082, #f7c64e);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 26px rgba(232, 174, 60, 0.5);
+          background: var(--accent-bright);
+          transform: translateY(-1px);
         }
 
         .orbit-portal-cta-sub {
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 500;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           color: var(--text-muted);
         }
 
+        .orbit-loading-state {
+          min-height: 180px;
+          padding: 34px clamp(20px, 4vw, 42px);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          display: grid;
+          align-content: center;
+          gap: 18px;
+          background: rgba(var(--surface-rgb), 0.72);
+          color: var(--text-secondary);
+          font-family: var(--font-mono);
+          font-size: 12px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          backdrop-filter: blur(18px);
+        }
+
+        .orbit-loading-lines {
+          display: grid;
+          gap: 9px;
+        }
+
+        .orbit-loading-lines i {
+          height: 10px;
+          border-radius: var(--radius-pill);
+          background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.06), rgba(var(--accent-rgb), 0.22), rgba(var(--accent-rgb), 0.06));
+          background-size: 220% 100%;
+          animation: orbitRead 1.8s linear infinite;
+        }
+
+        .orbit-loading-lines i:nth-child(2) { width: 76%; }
+        .orbit-loading-lines i:nth-child(3) { width: 48%; }
+
+        @keyframes orbitRead {
+          to { background-position: -220% 0; }
+        }
+
         .orbit-empty-state {
-          padding: 70px 20px;
+          padding: 60px 20px;
           text-align: center;
           color: var(--text-secondary);
-          background: rgba(13, 13, 16, 0.5);
-          border: 1px dashed rgba(255, 255, 255, 0.1);
-          border-radius: 15px;
+          background: rgba(var(--surface-rgb), 0.5);
+          border: 1px dashed rgba(var(--text-primary-rgb), 0.1);
+          border-radius: 14px;
+        }
+
+        .orbit-empty-icon {
+          color: var(--accent-muted);
+          margin: 0 auto 12px;
         }
 
         .orbit-empty-text {
@@ -1109,6 +1126,48 @@ export default function BoardPodium() {
           font-size: 14px;
           color: var(--text-secondary);
           margin: 0;
+        }
+
+        .orbit-filter-pill:focus-visible,
+        .orbit-primary-btn:focus-visible,
+        .orbit-save-btn:focus-visible,
+        .orbit-runner-name a:focus-visible,
+        .orbit-runner-save:focus-visible,
+        .orbit-portal-cta-btn:focus-visible {
+          outline: 2px solid var(--accent-bright);
+          outline-offset: 3px;
+        }
+
+        /* ── REDUCED MOTION ── */
+        @media (prefers-reduced-motion: reduce) {
+          .orbit-apex-card,
+          .orbit-runner-card,
+          .orbit-portal-cta-btn,
+          .orbit-filter-pill,
+          .orbit-save-btn,
+          .orbit-runner-save,
+          .orbit-loading-lines i {
+            transition: none !important;
+            animation: none !important;
+            transform: none !important;
+          }
+          .orbit-apex-card:hover,
+          .orbit-runner-card:hover,
+          .orbit-portal-cta-btn:hover {
+            transform: none !important;
+          }
+        }
+
+        @media (prefers-reduced-transparency: reduce) {
+          .orbit-mission-card,
+          .orbit-filter-rail,
+          .orbit-apex-card,
+          .orbit-runner-card,
+          .orbit-showcase-portal-card,
+          .orbit-loading-state {
+            backdrop-filter: none;
+            background: var(--surface);
+          }
         }
 
         /* ── RESPONSIVE BREAKPOINTS ── */
@@ -1134,10 +1193,24 @@ export default function BoardPodium() {
 
         @media (max-width: 640px) {
           .orbit-showcase-container {
+            padding-top: 34px;
+          }
+          .orbit-hero-split {
+            gap: 22px;
+            margin-bottom: 26px;
+          }
+          .orbit-mission-card {
+            padding: 18px;
+            border-radius: 16px;
+          }
+          .orbit-telemetry-badge {
+            max-width: 100%;
+          }
+          .orbit-showcase-container {
             padding-bottom: calc(88px + env(safe-area-inset-bottom));
           }
           .orbit-apex-media {
-            height: 200px;
+            height: 190px;
           }
           .orbit-apex-content {
             padding: 16px;
@@ -1155,8 +1228,8 @@ export default function BoardPodium() {
             padding-top: 8px;
           }
           .orbit-runner-save {
-            width: 32px;
-            height: 32px;
+            width: 44px;
+            height: 44px;
           }
           .orbit-portal-pill {
             width: 100%;

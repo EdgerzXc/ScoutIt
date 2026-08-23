@@ -54,12 +54,22 @@ export async function loadOwnProfile(userId) {
 // The view is now the only path a browser has to another user's profile, and
 // the sensitive columns are not in it. Do not "optimise" this back to the base
 // table.
-export async function loadPublicProfile(displayName) {
-  const { data, error } = await supabase
+export async function loadPublicProfile(identifier) {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier || "");
+  let { data, error } = await supabase
     .from('public_profiles')
     .select('*')
-    .eq('display_name', displayName)
+    .eq(isUuid ? 'id' : 'display_name', identifier)
     .maybeSingle();
+  // Legacy display-name URLs remain readable, but every newly emitted and
+  // canonical URL uses the immutable profile id to avoid name drift/collision.
+  if (isUuid && !error && !data) {
+    ({ data, error } = await supabase
+      .from('public_profiles')
+      .select('*')
+      .eq('display_name', identifier)
+      .maybeSingle());
+  }
   if (error || !data) return { data, error };
 
   // user_badges is own-rows-only under RLS, so an anon-client read returns []
@@ -107,7 +117,11 @@ export async function loadPublicProviders(providerType) {
   if (error || typeof window === "undefined") return { data: data || [], error };
   const enriched = await Promise.all((data || []).map(async (profile) => {
     const provenance = await loadPublicRoles(profile.id);
-    return { ...profile, is_pilot_participant: provenance.isPilotParticipant === true };
+    return {
+      ...profile,
+      is_pilot_participant: provenance.isPilotParticipant === true,
+      badges: (provenance.badges || []).map((badge) => ({ id: badge.badge_id, minted_at: badge.earned_at })),
+    };
   }));
   return { data: enriched, error: null };
 }
@@ -122,10 +136,10 @@ export async function loadPublicRoles(userId) {
     const res = await fetch(`/api/profile/public-roles?userId=${encodeURIComponent(userId)}`);
     if (!res.ok) return { publicRoles: [], isPilotParticipant: false, error: null };
     const data = await res.json();
-    return { publicRoles: data.publicRoles || [], isPilotParticipant: data.isPilotParticipant === true, error: null };
+    return { publicRoles: data.publicRoles || [], badges: data.badges || [], isPilotParticipant: data.isPilotParticipant === true, error: null };
   } catch (error) {
     console.error("Failed to load public roles", error);
-    return { publicRoles: [], isPilotParticipant: false, error };
+    return { publicRoles: [], badges: [], isPilotParticipant: false, error };
   }
 }
 
@@ -189,14 +203,14 @@ export async function updateProfilePublic(userId, isPublic) {
 }
 
 // ── BROKER PROFILE ────────────────────────────────────────────────────────────
-export async function loadBrokerProfile(userId) {
+export async function loadBrokerProfile(userId, { createIfMissing = true } = {}) {
   const { data, error } = await supabase
     .from('broker_profiles')
     .select('*')
     .eq('user_id', userId)
     .single();
 
-  if (error?.code === 'PGRST116') {
+  if (error?.code === 'PGRST116' && createIfMissing) {
     const { data: created, error: createErr } = await supabase
       .from('broker_profiles')
       .insert({ user_id: userId })
@@ -208,14 +222,14 @@ export async function loadBrokerProfile(userId) {
 }
 
 // ── RESEARCHER PROFILE ────────────────────────────────────────────────────────
-export async function loadResearcherProfile(userId) {
+export async function loadResearcherProfile(userId, { createIfMissing = true } = {}) {
   const { data, error } = await supabase
     .from('researcher_profiles')
     .select('*')
     .eq('user_id', userId)
     .single();
 
-  if (error?.code === 'PGRST116') {
+  if (error?.code === 'PGRST116' && createIfMissing) {
     const { data: created, error: createErr } = await supabase
       .from('researcher_profiles')
       .insert({ user_id: userId })

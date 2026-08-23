@@ -1,0 +1,50 @@
+.mark {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.gold,
+.white {
+  transition: color var(--transition-slow), text-shadow var(--transition-slow);
+}
+
+.gold {
+  color: var(--accent);
+}
+
+.white {
+  color: var(--text-primary);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.link:hover .gold,
+.link:focus-visible .gold {
+  color: var(--accent-bright);
+  text-shadow: 0 0 14px rgba(var(--accent-bright-rgb), 0.42);
+}
+
+.link:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold,
+  .white {
+    transition: none;
+  }
+}

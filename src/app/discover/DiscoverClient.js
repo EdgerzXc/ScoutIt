@@ -21,6 +21,7 @@ function getDBCategory(cat) {
 export default function DiscoverClient() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
+  const initialRegionParam = searchParams.get("region");
   const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === typeParam.toLowerCase()) || "Residential";
 
   const [allProperties, setAllProperties] = useState([]);
@@ -29,7 +30,14 @@ export default function DiscoverClient() {
   const [properties, setProperties] = useState([]);
   const [intel, setIntel] = useState([]);
   const [activeSpotlightId, setActiveSpotlightId] = useState(null);
-  const [activeRegion, setActiveRegion] = useState(null); // null = all regions
+
+  // Authoritative region selection state: string | null (null = All Regions)
+  const [activeRegion, setActiveRegion] = useState(() => {
+    if (initialRegionParam) {
+      return cityToRegion(initialRegionParam) || initialRegionParam;
+    }
+    return null;
+  });
 
   // Fetch live CMS data from Airtable
   useEffect(() => {
@@ -65,7 +73,7 @@ export default function DiscoverClient() {
                 slug: p.slug || p.id,
                 title: p.title,
                 city: p.city || "",
-                region: p.region || cityToRegion(p.city || ""),
+                region: regionOf(p),
                 location: p.location || "",
                 image: p.image || p.photos?.[0] || "",
                 density,
@@ -100,7 +108,7 @@ export default function DiscoverClient() {
                 slug: item.slug || item.id,
                 category: item.intelType || "BRIEFING",
                 date: item.date || "Just Now",
-                region: item.region || cityToRegion(item.city || item.location || ""),
+                region: regionOf(item),
                 title: item.title,
                 snippet: item.excerpt || ""
               });
@@ -116,34 +124,33 @@ export default function DiscoverClient() {
     fetchCMS();
   }, []);
 
-  // Region search (only surfaced when the list grows)
+  // Region search filter within the regions navigation bar
   const [regionQuery, setRegionQuery] = useState("");
 
-  // Update filtered selection on category change or live data load
+  // Update category listings on matchedCategory or CMS data load
   useEffect(() => {
     const dbCategory = getDBCategory(matchedCategory);
     const list = allProperties[dbCategory] || [];
     setProperties(list);
     setIntel(allIntel[dbCategory] || []);
-    setActiveSpotlightId(prev => {
-      const keep = prev && list.some(x => x.id === prev) ? prev : (list[0]?.id || null);
-      const sel = list.find(x => x.id === keep);
-      setActiveRegion(sel ? regionOf(sel) : null);
-      return keep;
-    });
+    setActiveSpotlightId(null);
+    setActiveRegion(initialRegionParam ? cityToRegion(initialRegionParam) : null);
     setRegionQuery("");
-  }, [matchedCategory, allProperties, allIntel]);
+  }, [matchedCategory, allProperties, allIntel, initialRegionParam]);
 
-  // Regions available in the current category (derived from spotlight records)
+  // Regions available in the current category (derived from BOTH properties and intel)
   const regions = useMemo(() => {
-    const seen = [];
+    const seen = new Set();
     properties.forEach(p => {
       const r = regionOf(p);
-      if (r && !seen.includes(r)) seen.push(r);
+      if (r) seen.add(r);
     });
-    return seen;
-  }, [properties]);
-
+    intel.forEach(n => {
+      const r = regionOf(n);
+      if (r) seen.add(r);
+    });
+    return Array.from(seen).sort((a, b) => a.localeCompare(b));
+  }, [properties, intel]);
 
   const shownRegions = useMemo(() => {
     const q = regionQuery.trim().toLowerCase();
@@ -151,19 +158,44 @@ export default function DiscoverClient() {
     return regions.filter(r => r.toLowerCase().includes(q));
   }, [regions, regionQuery]);
 
-  // News feed filtered to the active region (graceful fallback to all)
+  const regionCounts = useMemo(() => {
+    const counts = new Map();
+    const entryFor = (region) => counts.get(region) || { intel: 0, spaces: 0 };
+
+    properties.forEach((property) => {
+      const region = regionOf(property);
+      if (!region) return;
+      const entry = entryFor(region);
+      counts.set(region, { ...entry, spaces: entry.spaces + 1 });
+    });
+    intel.forEach((briefing) => {
+      const region = regionOf(briefing);
+      if (!region) return;
+      const entry = entryFor(region);
+      counts.set(region, { ...entry, intel: entry.intel + 1 });
+    });
+
+    return counts;
+  }, [properties, intel]);
+
+  // 1. Regional News Feed (filtered by authoritative activeRegion)
   const filteredIntel = useMemo(() => {
     if (!activeRegion) return intel;
-    return intel.filter(n => n.region === activeRegion);
+    return intel.filter(n => regionOf(n) === activeRegion);
   }, [intel, activeRegion]);
 
-  // Selecting a spotlight drives the active region for the news feed
+  // 3. Regional Spaces (filtered by authoritative activeRegion)
+  const filteredProperties = useMemo(() => {
+    if (!activeRegion) return properties;
+    return properties.filter(p => regionOf(p) === activeRegion);
+  }, [properties, activeRegion]);
+
+  // Selecting a space card focuses it without breaking the regional filter
   const selectSpotlight = (property) => {
-    setActiveSpotlightId(property.id);
-    setActiveRegion(regionOf(property));
+    setActiveSpotlightId(prev => (prev === property.id ? null : property.id));
   };
 
-  // ── Drag-to-scroll for any horizontal row (Spotlights + News Feed) ──
+  // ── Drag-to-scroll for any horizontal row (News Feed + Spaces) ──
   const dragState = useRef(null);
   const movedRef = useRef(false);
 
@@ -194,10 +226,9 @@ export default function DiscoverClient() {
     <div className="discoverLayout">
       <AtmosphereBackground variant="default" />
       {/* 1. Left Sidebar Navigation Strip */}
-      <aside className="catSidebar">
-        <div className="brandLogo">SCOUTIT</div>
+      <aside className="catSidebar" aria-label="Category Navigation">
         <nav className="navLinks">
-          <Link href="/dashboard" className="navLink" style={{ color: "var(--accent)", borderBottom: "0.5px solid rgba(232, 174, 60,0.3)", paddingBottom: "16px", marginBottom: "8px" }}>
+          <Link href="/dashboard" className="navLink" style={{ color: "var(--accent)", borderBottom: "0.5px solid rgba(var(--accent-rgb), 0.3)", paddingBottom: "16px", marginBottom: "8px" }}>
             ← Dashboard
           </Link>
           {CATEGORIES.map((cat) => {
@@ -207,6 +238,7 @@ export default function DiscoverClient() {
                 key={cat}
                 href={`?type=${cat.toLowerCase()}`}
                 className={`navLink ${isActive ? "active" : ""}`}
+                aria-current={isActive ? "page" : undefined}
               >
                 {cat}
               </Link>
@@ -232,130 +264,11 @@ export default function DiscoverClient() {
             </Link>
           </div>
 
-          {/* ── PRIMARY: the search engine. Articles are the main result;
-                 everything below this is the secondary property band. Layer
-                 03 Metropolis remains the real property directory — this is
-                 "and here are spaces around here", not a second catalogue. */}
+          {/* ── PRIMARY SEARCH ENGINE ── */}
           <DiscoverSearch />
 
-          {/* Zone 1: Spotlights — SECONDARY */}
-          <section className="discoverSecondary">
-            <div className="sectionHeader">
-              <span className="secondaryKicker">Also in this area</span>
-              <h2 className="sectionTitle">Spaces</h2>
-              <p className="sectionSubtitle">
-                Drag left &amp; right · Tap a space to load its local news ·{" "}
-                <Link href="/layer/metropolis" className="secondaryJump">
-                  Browse the full directory
-                </Link>
-              </p>
-            </div>
-            <div
-              className="spotlightMatrix"
-              onPointerDown={onRowPointerDown}
-            >
-              {properties.map((property) => {
-                const isSpotlight = activeSpotlightId === property.id;
-                return (
-                  <article
-                    key={property.id}
-                    className={`spotlightCard ${isSpotlight ? "spotlight" : ""}`}
-                    onClick={() => { if (!movedRef.current) selectSpotlight(property); }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="cardVisual">
-                      <div
-                        className="visualBg"
-                        style={{
-                          background: property.image
-                            ? `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${property.image}')`
-                            : "linear-gradient(135deg, rgba(var(--accent-rgb), 0.10), var(--bg))",
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }}
-                      />
-                      <div className="visualContent">
-                        <div className="cardHeader">
-                          <span className="cityBadge">{property.city}</span>
-                        </div>
-                        <div className="cardBody">
-                          <h3 className="cardTitleText">
-                            {property.title}
-                            <ProvenanceBadge record={property} />
-                          </h3>
-                          <div className="cardSpecTags">
-                            <span className="specBadge">{property.density}</span>
-                          </div>
-                          <div className="mobile-briefing-cta" onClick={(e) => e.stopPropagation()}>
-                            <Link href={`/property/${property.slug || property.id}`}>
-                              VIEW FULL BRIEFING →
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="expandedIntel">
-                      <div>
-                        <div className="intelHeader">
-                          <h4 className="intelTitle">Asset Specifications</h4>
-                        </div>
-                        <div className="affinityParams">
-                          <div className="affinityRow">
-                            <span className="affinityLabel">Location</span>
-                            <span className="affinityValue">{property.location}</span>
-                          </div>
-                          <div className="affinityRow">
-                            <span className="affinityLabel">Category</span>
-                            <span className="affinityValue">{matchedCategory}</span>
-                          </div>
-                          <div className="affinityRow">
-                            <span className="affinityLabel">Layout</span>
-                            <span className="affinityValue">{property.density}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: "12px", display: "flex", justifyContent: "flex-start" }} onClick={(e) => e.stopPropagation()}>
-                        <Link
-                          href={`/property/${property.slug || property.id}`}
-                          className="discover-briefing-btn"
-                          style={{
-                            display: "inline-block",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: "12px",
-                            color: "var(--accent)",
-                            textDecoration: "none",
-                            border: "1px solid rgba(232, 174, 60, 0.4)",
-                            padding: "6px 14px",
-                            borderRadius: "2px",
-                            transition: "all var(--transition-fast) ease",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em"
-                          }}
-                        >
-                          VIEW FULL BRIEFING →
-                        </Link>
-                      </div>
-
-                      <div className="discover-reaction-buttons-container" style={{ marginTop: "16px", width: "100%" }} onClick={(e) => e.stopPropagation()}>
-                        <ReactionButtons
-                          propertyId={property.id}
-                          propertyTitle={property.title}
-                          category={getDBCategory(matchedCategory)}
-                          city={property.city}
-                          small={true}
-                        />
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Zone 2: News Feed (location-linked) */}
-          <section style={{ marginTop: "40px" }}>
+          {/* ── 1. REGIONAL NEWS FEED (APPROVED PRODUCT ORDER: STEP 1) ── */}
+          <section className="discover-news-section" aria-label="Regional News Feed">
             <div className="sectionHeader">
               <h2 className="sectionTitle">News Feed</h2>
               <p className="sectionSubtitle">
@@ -364,7 +277,9 @@ export default function DiscoverClient() {
             </div>
             <div className="chronologicalNewsRow" onPointerDown={onRowPointerDown}>
               {filteredIntel.length === 0 ? (
-                <div className="newsEmpty">No news for this region yet.</div>
+                <div className="newsEmpty">
+                  No intelligence briefings recorded {activeRegion ? `for ${activeRegion}` : "for this category"} yet.
+                </div>
               ) : filteredIntel.map((news) => (
                 <Link
                   key={news.id}
@@ -372,24 +287,23 @@ export default function DiscoverClient() {
                   className="newsCapsule"
                   draggable={false}
                   onClick={(e) => { if (movedRef.current) { e.preventDefault(); } }}
-                  style={{ display: "block", textDecoration: "none" }}
                 >
                   <div className="capsuleMeta">
-                    <span className="where-badge">{news.category}</span>
-                    <span>{news.region || news.date}</span>
+                    <span className="capsuleCategory">{news.category}</span>
+                    <span className="capsuleDate">{regionOf(news) || news.date}</span>
                   </div>
                   <h3 className="capsuleTitle">{news.title}</h3>
-                  <p className="capsuleSnippet">{news.snippet}</p>
+                  <p className="capsuleExcerpt">{news.snippet}</p>
                 </Link>
               ))}
             </div>
           </section>
 
-          {/* Zone 3: Regions (drives the News Feed location) */}
-          <section style={{ marginTop: "40px" }}>
+          {/* ── 2. REGIONS NAVIGATION (APPROVED PRODUCT ORDER: STEP 2 DIRECTLY BENEATH FEED) ── */}
+          <section className="discover-regions-section" aria-label="Regions Navigation">
             <div className="sectionHeader" style={{ marginBottom: "16px" }}>
               <h2 className="sectionTitle">Regions</h2>
-              <p className="sectionSubtitle">Switch the location feeding the News Feed</p>
+              <p className="sectionSubtitle">Filter news and spaces by regional hub</p>
             </div>
             {regions.length > 6 && (
               <input
@@ -398,44 +312,208 @@ export default function DiscoverClient() {
                 placeholder="Search regions…"
                 value={regionQuery}
                 onChange={(e) => setRegionQuery(e.target.value)}
+                aria-label="Search available regions"
               />
             )}
-            <div className="contextGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>
-              <div
+            <div className="contextGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+              <button
+                type="button"
                 className={`contextCell ${activeRegion === null ? "regionActive" : ""}`}
                 onClick={() => setActiveRegion(null)}
-                style={{ cursor: "pointer" }}
+                aria-pressed={activeRegion === null}
               >
                 <div className="contextLabelBlock">
                   <span className="contextCode">00</span>
                   <span className="contextName">All Regions</span>
+                  <span className="contextMeta">{intel.length} briefs · {properties.length} spaces</span>
                 </div>
                 <span className="contextArrow">→</span>
-              </div>
-              {/* ⚠️ Guard on the QUERY, not on the result count. Until 2026-08-08
-                  this read `shownRegions.length === 0`, so on first paint —
-                  before regions had loaded, with regionQuery still "" — a
-                  stranger's first impression of Discover was an empty-search
-                  error quoting an empty string: No regions match "".
-                  A zero-state is only true after someone has actually searched. */}
+              </button>
               {shownRegions.length === 0 && regionQuery.trim().length > 0 && (
                 <div className="newsEmpty" style={{ gridColumn: "1 / -1" }}>No regions match “{regionQuery}”.</div>
               )}
-              {shownRegions.map((region, i) => (
-                <div
-                  key={region}
-                  className={`contextCell ${activeRegion === region ? "regionActive" : ""}`}
-                  onClick={() => setActiveRegion(region)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="contextLabelBlock">
-                    <span className="contextCode">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="contextName">{region}</span>
-                  </div>
-                  <span className="contextArrow">→</span>
-                </div>
-              ))}
+              {shownRegions.map((region, i) => {
+                const isSelected = activeRegion === region;
+                return (
+                  <button
+                    key={region}
+                    type="button"
+                    className={`contextCell ${isSelected ? "regionActive" : ""}`}
+                    onClick={() => setActiveRegion(region)}
+                    aria-pressed={isSelected}
+                  >
+                    <div className="contextLabelBlock">
+                      <span className="contextCode">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="contextName">{region}</span>
+                      <span className="contextMeta">
+                        {regionCounts.get(region)?.intel || 0} briefs · {regionCounts.get(region)?.spaces || 0} spaces
+                      </span>
+                    </div>
+                    <span className="contextArrow">→</span>
+                  </button>
+                );
+              })}
             </div>
+          </section>
+
+          {/* ── 3. SPACES FILTERED TO REGION (APPROVED PRODUCT ORDER: STEP 3) ── */}
+          <section className="discoverSecondary" aria-label="Regional Spaces">
+            <div className="sectionHeader">
+              <span className="secondaryKicker">Also in this area</span>
+              <h2 className="sectionTitle">Spaces</h2>
+              <p className="sectionSubtitle">
+                {activeRegion ? `Filtered to ${activeRegion} · ` : "All spaces in category · "}
+                Drag left &amp; right ·{" "}
+                <Link href="/layer/metropolis" className="secondaryJump">
+                  Browse the full directory
+                </Link>
+              </p>
+            </div>
+
+            {filteredProperties.length === 0 ? (
+              <div
+                className="spacesEmpty"
+                style={{
+                  padding: "40px 24px",
+                  textAlign: "center",
+                  background: "var(--surface2)",
+                  border: "1px dashed var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  color: "var(--text-secondary)"
+                }}
+              >
+                <p style={{ margin: "0 0 12px 0", fontSize: "14px" }}>
+                  No spaces recorded {activeRegion ? `in ${activeRegion}` : "for this category"} yet.
+                </p>
+                {activeRegion && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveRegion(null)}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid var(--accent)",
+                      color: "var(--accent)",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontFamily: "var(--font-mono)",
+                      cursor: "pointer",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em"
+                    }}
+                  >
+                    View All Regions
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div
+                className="spotlightMatrix"
+                onPointerDown={onRowPointerDown}
+              >
+                {filteredProperties.map((property) => {
+                  const isSpotlight = activeSpotlightId === property.id;
+                  return (
+                    <article
+                      key={property.id}
+                      className={`spotlightCard ${isSpotlight ? "spotlight" : ""}`}
+                      onClick={() => { if (!movedRef.current) selectSpotlight(property); }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="cardVisual">
+                        <div
+                          className="visualBg"
+                          style={{
+                            background: property.image
+                              ? `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${property.image}')`
+                              : "linear-gradient(135deg, rgba(var(--accent-rgb), 0.10), var(--bg))",
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }}
+                        />
+                        <div className="visualContent">
+                          <div className="cardHeader">
+                            <span className="cityBadge">{property.city || property.region}</span>
+                          </div>
+                          <div className="cardBody">
+                            <h3 className="cardTitleText">
+                              {property.title}
+                              <ProvenanceBadge record={property} />
+                            </h3>
+                            <div className="cardSpecTags">
+                              <span className="specBadge">{property.density}</span>
+                            </div>
+                            <div className="mobile-briefing-cta" onClick={(e) => e.stopPropagation()}>
+                              <Link href={`/property/${property.slug || property.id}`}>
+                                VIEW FULL BRIEFING →
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="expandedIntel">
+                        <div>
+                          <div className="intelHeader">
+                            <h4 className="intelTitle">Asset Specifications</h4>
+                          </div>
+                          <div className="affinityParams">
+                            <div className="affinityRow">
+                              <span className="affinityLabel">Location</span>
+                              <span className="affinityValue">{property.location || property.city}</span>
+                            </div>
+                            <div className="affinityRow">
+                              <span className="affinityLabel">Region</span>
+                              <span className="affinityValue">{regionOf(property)}</span>
+                            </div>
+                            <div className="affinityRow">
+                              <span className="affinityLabel">Category</span>
+                              <span className="affinityValue">{matchedCategory}</span>
+                            </div>
+                            <div className="affinityRow">
+                              <span className="affinityLabel">Layout</span>
+                              <span className="affinityValue">{property.density}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: "12px", display: "flex", justifyContent: "flex-start" }} onClick={(e) => e.stopPropagation()}>
+                          <Link
+                            href={`/property/${property.slug || property.id}`}
+                            className="discover-briefing-btn"
+                            style={{
+                              display: "inline-block",
+                              fontFamily: "var(--font-mono)",
+                              fontSize: "12px",
+                              color: "var(--accent)",
+                              textDecoration: "none",
+                              border: "1px solid rgba(var(--accent-rgb), 0.4)",
+                              padding: "6px 14px",
+                              borderRadius: "2px",
+                              transition: "all var(--transition-fast) ease",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em"
+                            }}
+                          >
+                            VIEW FULL BRIEFING →
+                          </Link>
+                        </div>
+
+                        <div className="discover-reaction-buttons-container" style={{ marginTop: "16px", width: "100%" }} onClick={(e) => e.stopPropagation()}>
+                          <ReactionButtons
+                            propertyId={property.id}
+                            propertyTitle={property.title}
+                            category={getDBCategory(matchedCategory)}
+                            city={property.city}
+                            small={true}
+                          />
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </section>
         </div>
         <Footer />

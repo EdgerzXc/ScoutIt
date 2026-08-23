@@ -1,0 +1,430 @@
+.root {
+  min-height: 100vh;
+  padding-top: 52px;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: var(--bg);
+  font-family: var(--font-body);
+}
+
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pane {
+  position: relative;
+  z-index: 10;
+}
+
+.experience {
+  display: grid;
+  grid-template-columns: minmax(210px, 270px) minmax(0, 1fr);
+  gap: clamp(24px, 5vw, 72px);
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: clamp(26px, 5vw, 64px) 0 clamp(56px, 8vw, 96px);
+  perspective: 1200px;
+}
+
+.sidebar {
+  align-self: start;
+  position: sticky;
+  top: 78px;
+}
+
+.sidebarLabel {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tabList {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(var(--bg-rgb), 0.68);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(18px) saturate(112%);
+}
+
+.tab {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 320ms ease-out, border-color 320ms ease-out, background 320ms ease-out, transform 320ms ease-out;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+  background: rgba(var(--text-primary-rgb), 0.035);
+  transform: translateX(3px);
+}
+
+.tab[aria-selected="true"] {
+  color: var(--text-primary);
+  border-color: rgba(var(--accent-rgb), 0.34);
+  background: linear-gradient(105deg, rgba(var(--accent-rgb), 0.11), rgba(var(--accent-rgb), 0.025));
+  box-shadow: inset 0 0 20px rgba(var(--accent-rgb), 0.045);
+}
+
+.tab:focus-visible,
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
+.tabIndex,
+.tabArrow {
+  color: var(--accent-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.tabName {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tab[aria-selected="true"] .tabIndex,
+.tab[aria-selected="true"] .tabArrow {
+  color: var(--accent);
+}
+
+.panel {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-radius: clamp(14px, 2vw, 22px);
+  background: linear-gradient(150deg, rgba(var(--surface-rgb), 0.9), rgba(var(--bg-rgb), 0.78));
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(var(--text-primary-rgb), 0.035);
+  backdrop-filter: blur(24px) saturate(112%);
+  transform-style: preserve-3d;
+  transition: transform 420ms ease-out, border-color 420ms ease-out;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  top: -260px;
+  right: -170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-rgb), 0) 68%);
+  pointer-events: none;
+}
+
+.panel:hover {
+  border-color: rgba(var(--accent-rgb), 0.32);
+  transform: translate3d(0, -3px, 14px);
+}
+
+.panelInner {
+  position: relative;
+  z-index: 1;
+  padding: clamp(24px, 4vw, 48px);
+}
+
+.panelHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px;
+  padding-bottom: clamp(22px, 4vw, 34px);
+  border-bottom: 1px solid var(--border);
+}
+
+.iconShell {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  color: var(--accent);
+  border: 1px solid rgba(var(--accent-rgb), 0.26);
+  border-radius: var(--radius-lg);
+  background: rgba(var(--accent-rgb), 0.06);
+  box-shadow: var(--shadow-md);
+}
+
+.eyebrow,
+.sectionLabel,
+.status,
+.rosterLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin: 2px 0 8px;
+  color: var(--accent);
+}
+
+.title {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.3vw, 52px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+}
+
+.summary {
+  max-width: 760px;
+  margin: 18px 0 0;
+  color: var(--text-secondary);
+  font-size: clamp(15px, 1.35vw, 18px);
+  line-height: 1.7;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--text-primary-rgb), 0.035);
+  white-space: nowrap;
+}
+
+.statusLive {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.34);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
+.dossierGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: clamp(24px, 4vw, 38px) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--border);
+}
+
+.dossierSection {
+  min-height: 190px;
+  padding: clamp(18px, 2.4vw, 26px);
+  background: rgba(var(--bg-rgb), 0.88);
+}
+
+.sectionLabel {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--accent-muted);
+}
+
+.dossierSection p,
+.boundary p,
+.rosterNote p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.boundary {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.28fr) minmax(0, 1fr);
+  gap: 20px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid rgba(var(--accent-rgb), 0.17);
+  border-radius: var(--radius-lg);
+  background: rgba(var(--accent-rgb), 0.035);
+}
+
+.boundary .sectionLabel {
+  margin: 0;
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: clamp(24px, 4vw, 34px);
+}
+
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 11px 18px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform 320ms ease-out, color 320ms ease-out, border-color 320ms ease-out, background 320ms ease-out;
+}
+
+.primaryAction {
+  color: var(--bg);
+  border: 1px solid var(--accent-bright);
+  background: var(--accent-bright);
+  box-shadow: 0 8px 24px rgba(var(--accent-bright-rgb), 0.16);
+}
+
+.secondaryAction {
+  color: var(--accent);
+  border: 1px solid rgba(var(--accent-rgb), 0.34);
+  background: transparent;
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+  transform: translateY(-2px);
+}
+
+.secondaryAction:hover {
+  color: var(--accent-bright);
+  border-color: var(--accent-bright);
+  background: rgba(var(--accent-rgb), 0.055);
+}
+
+.rosterNote {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.rosterLabel {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.rosterNote p {
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .experience {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    min-width: 0;
+  }
+
+  .tabList {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    flex: 0 0 min(230px, 72vw);
+    scroll-snap-align: start;
+  }
+
+  .dossierGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dossierSection {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .experience {
+    width: min(100% - 24px, 1180px);
+    padding-top: 20px;
+  }
+
+  .panelHeader {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .status {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .panelInner {
+    padding: 22px 18px;
+  }
+
+  .title {
+    font-size: clamp(28px, 10vw, 40px);
+  }
+
+  .boundary,
+  .rosterNote {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .rosterLabel {
+    white-space: normal;
+  }
+
+  .actions {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .panel,
+  .primaryAction,
+  .secondaryAction {
+    transition: none;
+  }
+
+  .tab:hover,
+  .panel:hover,
+  .primaryAction:hover,
+  .secondaryAction:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .tabList,
+  .panel {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}

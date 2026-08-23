@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { loadPublicProviders } from "@/lib/profileClient";
 import { activePilotParticipantIds } from "@/lib/pilotProvenance.server";
 import ResearchersClient from "./ResearchersClient";
+import { normalizeSupabaseProfessional } from "@/lib/professionalDirectory";
+import { publicBadgeGrantsByUserId } from "@/lib/professionalProvenance.server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,23 +12,14 @@ async function loadInitialResearchers() {
     const { data, error } = await loadPublicProviders("researcher");
     if (error) {
       console.error("[/researchers] server Supabase load failed:", error);
-      return [];
+      return { records: [], error: "The public researcher roster could not be loaded. Please try again shortly." };
     }
-    const pilotIds = await activePilotParticipantIds((data || []).map((profile) => profile.id));
-    return (data || []).map((p) => ({
-      name: p.display_name || "Unnamed Analyst",
-      location: p.location || "",
-      focus: p.service || "",
-      headline: p.headline || "",
-      bio: p.bio || "",
-      image: p.avatar_url || "",
-      isExample: !!p.is_example_account,
-      isPilot: pilotIds.has(p.id),
-      available: p.provider_availability !== false,
-    }));
+    const ids = (data || []).map((profile) => profile.id);
+    const [pilotIds, badgeGrants] = await Promise.all([activePilotParticipantIds(ids), publicBadgeGrantsByUserId(ids)]);
+    return { records: (data || []).map((p) => normalizeSupabaseProfessional({ ...p, badges: badgeGrants.get(p.id) || [], is_pilot_participant: pilotIds.has(p.id) }, "researcher")).filter(Boolean), error: "" };
   } catch (err) {
     console.error("[/researchers] server load exception:", err?.message);
-    return [];
+    return { records: [], error: "The public researcher roster could not be loaded. Please try again shortly." };
   }
 }
 
@@ -51,7 +44,7 @@ export default async function ResearchersRootPage() {
         </div>
       }
     >
-      <ResearchersClient initialResearchers={initialResearchers} />
+      <ResearchersClient initialRecords={initialResearchers.records} initialError={initialResearchers.error} />
     </Suspense>
   );
 }

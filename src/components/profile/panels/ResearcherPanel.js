@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { BookOpen, CheckCircle, Award, Zap } from "lucide-react";
 
-export default function ResearcherPanel({ data, isAnonymous = false }) {
+export default function ResearcherPanel({ data, isAnonymous = false, isPublic = false }) {
   const isEmpty =
     !data ||
     (data.intel_submissions === 0 && data.credibility_score === 0);
@@ -20,7 +20,11 @@ export default function ResearcherPanel({ data, isAnonymous = false }) {
         )}
       </div>
 
-      {isEmpty ? (
+      {isPublic ? (
+        <div style={emptyState}>
+          <p style={emptyText}>No public research accomplishment evidence is attached to this profile.</p>
+        </div>
+      ) : isEmpty ? (
         <div style={emptyState}>
           <p style={emptyText}>
             Submit your first Intel article to start building credibility.

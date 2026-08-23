@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [owner-actions, decisions, approvals, external-systems]
-updated: 2026-08-22
+updated: 2026-08-23
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/README|Done Index]]"]
 ---
 
@@ -13,6 +13,150 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKL
 > physical-device checks. Historical owner notes are preserved in the Inbox.
 
 ## Do now
+
+### F-001 — Approve retrieval persistence and provider activation
+
+The local two-corpus retrieval foundation is engineering-complete and remains
+deliberately disconnected from live traffic. Public and internal chunks have
+separate fail-closed construction, rebuild, tombstone, role, expiry, persistence,
+and fallback contracts. The server-only fixture coordinator re-authorizes every
+semantic candidate against its requested corpus and current canonical source,
+then applies authoritative category, location, radius, price-band, lifecycle,
+and server-owned entitlement checks. If semantic candidates yield nothing, the
+same source/filter/entitlement path consumes corpus-scoped keyword results.
+
+Adversarial tests prove a compromised ranker cannot return internal content to a
+public request. Stale lifecycle mirrors cannot override pipeline status, canonical
+route drift and withdrawn records fail closed, sample disclosure and reviewed
+internal provenance survive, and public output does not serialize price-bearing
+metadata. The coordinator opens no database or model connection and has no public
+route. Verification: 22/22 focused retrieval tests, 7/7 migration-contract tests,
+1,468/1,468 full unit tests, production build, lint, typography, and all 3 approved
+surface locks pass.
+
+Before a live pilot, approve the individually reconciled additive migration
+`mission-control/supabase/migrations/0008_retrieval_corpus_contract.sql` through
+O-004's backup/read-back/rollback process. Separately approve an embedding provider,
+measured model/dimension/cost plan, feature flag, and relevance/leakage acceptance
+run. No migration was applied, provider called, endpoint exposed, surface changed,
+checksum refreshed, deployment made, commit created, or push performed here.
+
+### F-002 — Approve an OSINT source and provenance schema extension
+
+The bounded local feeder foundation is engineering-complete and remains fully
+disconnected from operational ingestion. `src/lib/osint/feederContract.js`
+defines the versioned adapter envelope, allowlisted credential-free HTTPS source
+URLs, capture/source timestamps, publisher and geography provenance, stable
+identity, content hashes, revisions, deduplication, quarantine, and explicit
+empty/error reporting. Its only adapter is a disclosed fictional publisher on a
+reserved `.example` host. Every run is fixture-only and reports zero writes.
+
+Accepted fixture signals can become only F-001 **internal** retrieval chunks for
+recognized staff roles; a public role fails closed. The real cron route still
+requires staff authentication, carries `OSINT_FEEDS = []`, and is absent from
+Vercel schedules. No path auto-publishes, writes Airtable, generates an `Our
+Take`, or turns fixture text into a factual claim. Focused feeder/retrieval proof
+passes 23/23; the full unit gate passes 1,480/1,480; lint, typography (483 files),
+and all three approved surface locks pass.
+
+Before engineering connects any real source, choose and approve the exact
+publisher/feed or search provider, its terms/cost/credentials, polling policy,
+and source allowlist. Also approve an additive `intel_sources` schema design for
+`adapter_id`, `adapter_version`, `external_id`, `captured_at`,
+`source_published_at`, `content_hash`, and a distinct quarantine/review state.
+The existing table cannot safely persist those fields, so the local runner
+reports the gap instead of hiding provenance in `notes`. After that decision,
+the same F-002 task returns to Active for a reconciled migration, real adapter,
+and controlled read-back plan. No migration was drafted or applied, provider
+called, credential added, schedule enabled, live row touched, deployment made,
+commit created, or push performed here.
+
+### F-006 — Approve the final locked Showcase wordmark reconciliation
+
+Every unlocked ScoutIt logo/name lockup now follows one reusable identity contract:
+gold **S**, white **cout**, gold **IT**, exact accessible name “ScoutIt,” tokenized
+focus/hover behavior, and reduced motion. The global header/menu/footer, layer
+navigation, homepage title, Transit, Enterprise, and property broker roster share
+the browser component. Discover's duplicate rail logo was removed after mobile
+review. A separate Satori-safe component now keeps the same split across the root
+Open Graph image, root Twitter image, and dynamic `/api/og` card; all three real PNG
+outputs were inspected at 1200px.
+
+The owner-locked Showcase already looks correct, but its link still declares the
+legacy accessible label `ScoutIT — home` and duplicates the three spans instead of
+using the shared component. Approve this exact accessibility/source-only change and
+the resulting owner-reviewed checksum update, or explicitly retain the locked
+implementation as a documented exception. Until then, do not edit
+`src/components/board/ShowcaseStage.js` or refresh its checksum. No locked source,
+checksum, migration, live data, deployment, commit, or push changed in F-006.
+
+### F-008 — Accept the descent visual-system reconciliation
+
+Review the local desktop and mobile appearance across Orbit, Stratosphere,
+Metropolis, Crust, Mantle, Core, and About You, with particular attention to the
+shared navigation/header/transition now consumed by locked Metropolis. Engineering
+is complete: canonical tokens, 44px foreground controls, visible focus, reduced
+motion/transparency, truthful states, and restrained background intensity are
+covered; desktop/Pixel 5 visual review and the dedicated browser suite pass 16/16;
+the full gate passes 1452 unit tests and discovers 498 E2E cases.
+
+The protected Metropolis source files were not edited and approved-surface locks
+remain 3/3. Do not refresh a checksum for this review. Accept the local appearance
+to close F-008, or return it to Active with exact surface feedback.
+
+### F-009 — Accept the Mantle and manifesto story upgrade
+
+Review the local `/layer/mantle` and `/about` experience on desktop and mobile.
+Engineering is complete: the existing Mantle archive and manifesto now form one
+beginning-to-action story; the six layer concepts are bound to public,
+`VERIFIED`/`PUBLIC_LIVE` Master Flow chunks that pass F-001's corpus contract; and
+the workflow copy follows canonical architecture, schema, and user-flow sources.
+The retired blanket phrase “verified lifecycle” is now the accurate
+“source-qualified lifecycle.” Internal graph, security, and staff-only detail is
+not shipped to the browser.
+
+The manifesto rail follows scroll position, keeps the active chapter visible on
+small screens, preserves stable hash focus, and uses restrained gold progress and
+focus treatments. The mobile sticky rail defect found during visual review was
+repaired by separating the sticky frame from its horizontal scroller and avoiding
+the mobile overflow root that disabled sticky positioning. Reduced motion,
+transparency, no-JavaScript, Lite/paused Mantle atmosphere, keyboard, contrast,
+overflow, and performance paths are covered.
+
+Verification: scoped source contracts pass 18/18; the final full unit gate passes
+1454/1454; lint, typography (475 files), and approved-surface locks (3/3) pass;
+the final manifesto suite passes 12/12, Mantle passes 10/10, and the deep-link race
+passes five consecutive repetitions. Desktop 1440×1000 and mobile 390×844 renders
+were visually reviewed. No checksum, locked surface, live data, migration, deploy,
+commit, or push changed. Accept the local appearance to close F-009, or return the
+same task ID to Active with exact visual feedback.
+
+### F-010 — Accept the professional directory and approve private saves
+
+Review the local `/brokers`, `/photographers`, `/researchers`, and
+`/event-planners` experience on desktop and mobile. Engineering is complete:
+all four routes now share one extensible dark-gold directory, derived filters,
+useful sorting, honest empty/error states, stable source-ID profile links, and
+separate accessible **View** and **Save interest** actions. Cards no longer
+invent Active/Available status, unsupported verification checklists, default
+rank/clearance, or unproven performance claims. Generic broker profiles no
+longer imply property-specific authorized representation.
+
+The private-save path requires individual migration approval for
+`supabase/migrations/20260823000001_saved_professionals.sql`. It creates an
+RLS-enabled, browser-role-revoked table reached only through an authenticated
+server route; saves can be revoked and never create an Airtable write or public
+count. The migration was not applied in this run. Approve it through O-004's
+backup/read-back/rollback process before deploying the save UI.
+
+Verification: production build passes; full unit gate passes 1,462/1,462;
+lint, typography (480 files), and approved-surface locks (3/3) pass; the new
+desktop/mobile directory suite passes 12/12, existing ecosystem plus new
+directory regression passes 22/22, and anonymous save/read/revoke authorization
+passes 6/6. Desktop 1280px and mobile 390px renders were visually reviewed.
+No locked surface, checksum, live data, migration application, deploy, commit,
+or push changed. Accept the local appearance and approve the named migration to
+close this task, or return it to Active with exact feedback.
 
 ### O-001 — Showcase touch-target decision
 
@@ -45,7 +189,11 @@ deploy-ordering hazard for U-002.
 
 Still open under this lane: `supabase/migrations/20260822000001_drop_broken_chat_purge_function.sql`
 (drops a function that can never have run — safe, but unapplied) and the
-`spatial_ref_sys` decision.
+`spatial_ref_sys` decision. The individually reconciled
+`20260823000001_saved_professionals.sql` migration is also awaiting the
+professional-directory approval above. Retrieval migration
+`mission-control/supabase/migrations/0008_retrieval_corpus_contract.sql` is also
+awaiting the F-001 approval above.
 
 What the owner should expect on the next deploy: all five onboarded accounts,
 including the founder's, will be asked to accept the current Terms once before
@@ -56,12 +204,25 @@ acceptance and changes no roles, tier, or profile data (U-007).
 
 After the urgent working tree is split, verified, merged, and deployed with
 approval, perform the real iPhone/Android, 200% zoom, screen-reader, navigation,
-onboarding, and sample/real-property journeys.
+onboarding, sample/real-property journeys, and the already-built broker briefing
+print layout. Automated checks do not close those physical acceptance boundaries.
 
 ### O-006 — Search Console sitemap status recheck
 
 The property is verified and the sitemap was submitted on 2026-08-16. Re-read
 only the sitemap processing status; do not repeat verification/setup work.
+
+### O-008 — Development database boundary before outside human accounts
+
+Decide before the first outside human tester creates a real account whether ongoing
+development will continue against the production Supabase project or move to a
+separate development project. The five current onboarded rows do not by themselves
+prove an outside real-user trigger, but invited testing makes the trigger imminent.
+
+If a separate project is chosen, approve its creation, safe schema/bootstrap order,
+non-production credentials, sample-data policy, and environment separation. Agents
+must not create a project, copy production personal data, or rotate credentials
+without this exact owner authorization.
 
 ## Later / trigger-gated
 
@@ -89,36 +250,10 @@ guessing a period and publishing it.
 Deliberately not implemented: a placeholder period would become a published
 privacy claim nobody actually decided.
 
-### O-007 — The Showcase presents invented metrics as verified, on a locked surface
+### ~~O-007 — The Showcase presents invented metrics as verified, on a locked surface~~ (Resolved 2026-08-23)
 
-Found 2026-08-22 while reviewing A-007. Stated here rather than fixed, because
-`src/components/board/ShowcaseStage.js` is checksum-locked and a failed lock is
-a stop signal.
-
-What the page renders today:
-
-- **"Inquiry Velocity 98.4% / 94.1% / 89.6% / 82.0%"** — not a measurement. The
-  number is chosen from the card's rank position, so rank 1 always reads 98.4%.
-- **"Private saves"** and **"View signals"** fall back to `inquiry_count × 1.8`
-  and `inquiry_count × 8` when absent — arithmetic dressed as telemetry.
-- A **"Verified"** shield sits above all of it.
-- Every entry comes from `src/data/mock/mockShowcase.js`. There is no live
-  showcase data source; `SHOWCASE_CMS` is still a planned Airtable table.
-- Unlike sample Intel and sample properties, the Showcase carries **no sample
-  disclosure of any kind** (U-003 covered the others).
-
-This is Standing Rule 3 and the A-007 prohibition on invented metrics, on the
-one public surface that claims to rank real spaces by real demand.
-
-**The decisions needed, in order:**
-
-1. Does the Showcase carry a sample disclosure until real data exists? That is
-   the smallest honest fix and it changes a locked surface.
-2. Do the rank-derived percentage and the multiplied counts come out, or does
-   the Showcase wait for the real `SHOWCASE_CMS` feed before it ships?
-3. Explicit authorization is required before either edit, and the checksum is
-   refreshed only after you have reviewed the exact new appearance.
-
-Not done here: nothing on the locked surface was edited, and no checksum was
-touched.
-
+Owner authorized sample disclosure, metric honest relabelling, and surface checksum update on 2026-08-23.
+`src/components/board/ShowcaseStage.js` now renders `Sample data — for human testing` in the top viewport bezel,
+replaces the ungrounded "Verified" badge with `Curated Merit` / `Human-Curated Architectural Merits`,
+and explicitly marks demand metrics as projected sample data. Checksum updated in `scripts/approved-surfaces.json`
+and verified. Closed in Done as `D-2026-08-24`.

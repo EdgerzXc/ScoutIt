@@ -25,7 +25,9 @@ describe("controlled-pilot public profile provenance", () => {
     ]) {
       const source = read(page);
       expect(source, page).toContain("activePilotParticipantIds");
-      expect(source, page).toContain("isPilot: pilotIds.has(p.id)");
+      expect(source, page).toContain("is_pilot_participant: pilotIds.has(p.id)");
+      expect(source, page).toContain("normalizeSupabaseProfessional");
+      expect(source, page).toContain("publicBadgeGrantsByUserId");
     }
   });
 
@@ -35,15 +37,16 @@ describe("controlled-pilot public profile provenance", () => {
     expect(baseLayer).toContain("profile.is_pilot_participant === true");
     expect(badge).toContain("Sample profile &mdash; for human testing");
 
+    const normalizer = read("src/lib/professionalDirectory.js");
+    const sharedCard = read("src/components/professionals/ProfessionalCard.js");
+    expect(normalizer).toContain("isPilot: profile.is_pilot_participant === true");
+    expect(sharedCard).toContain("Sample · human testing");
+
     for (const clientPath of [
       "src/app/photographers/PhotographersClient.js",
       "src/app/researchers/ResearchersClient.js",
       "src/app/event-planners/EventPlannersClient.js",
-    ]) {
-      const source = read(clientPath);
-      expect(source, clientPath).toContain("isPilot: !!p.is_pilot_participant");
-      expect(source, clientPath).toContain("Sample Profile — For Human Testing");
-    }
+    ]) expect(read(clientPath), clientPath).toContain("ProfessionalDirectory");
   });
 
   // Re-aimed 2026-08-20, not deleted (Standing Rule 14). The indexability gate

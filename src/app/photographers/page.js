@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { loadPublicProviders } from "@/lib/profileClient";
 import { activePilotParticipantIds } from "@/lib/pilotProvenance.server";
 import PhotographersClient from "./PhotographersClient";
+import { normalizeSupabaseProfessional } from "@/lib/professionalDirectory";
+import { publicBadgeGrantsByUserId } from "@/lib/professionalProvenance.server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,23 +12,14 @@ async function loadInitialPhotographers() {
     const { data, error } = await loadPublicProviders("photographer");
     if (error) {
       console.error("[/photographers] server Supabase load failed:", error);
-      return [];
+      return { records: [], error: "The public photographer roster could not be loaded. Please try again shortly." };
     }
-    const pilotIds = await activePilotParticipantIds((data || []).map((profile) => profile.id));
-    return (data || []).map((p) => ({
-      name: p.display_name || "Unnamed Photographer",
-      location: p.location || "",
-      specialty: p.service || "",
-      headline: p.headline || "",
-      bio: p.bio || "",
-      image: p.avatar_url || "",
-      isExample: !!p.is_example_account,
-      isPilot: pilotIds.has(p.id),
-      available: p.provider_availability !== false,
-    }));
+    const ids = (data || []).map((profile) => profile.id);
+    const [pilotIds, badgeGrants] = await Promise.all([activePilotParticipantIds(ids), publicBadgeGrantsByUserId(ids)]);
+    return { records: (data || []).map((p) => normalizeSupabaseProfessional({ ...p, badges: badgeGrants.get(p.id) || [], is_pilot_participant: pilotIds.has(p.id) }, "photographer")).filter(Boolean), error: "" };
   } catch (err) {
     console.error("[/photographers] server load exception:", err?.message);
-    return [];
+    return { records: [], error: "The public photographer roster could not be loaded. Please try again shortly." };
   }
 }
 
@@ -51,7 +44,7 @@ export default async function PhotographersRootPage() {
         </div>
       }
     >
-      <PhotographersClient initialPhotographers={initialPhotographers} />
+      <PhotographersClient initialRecords={initialPhotographers.records} initialError={initialPhotographers.error} />
     </Suspense>
   );
 }

@@ -8,6 +8,7 @@ import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import dynamic from "next/dynamic";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 const BlackHoleCanvas = dynamic(() => import("@/components/descent/BlackHoleCanvas"), { ssr: false });
 const GoldenHorizonCanvas = dynamic(() => import("@/components/descent/GoldenHorizonCanvas"), { ssr: false });
 
@@ -611,11 +612,10 @@ export default function Home() {
             {fireId > 0 && <span key={fireId} className="title-beam" />}
           </div>
 
-          {/* ScoutIT wordmark */}
-          <div className={`scoutit-wordmark ${wordLit ? "lit" : ""}`} aria-label="ScoutIT">
-            <span className="word-s">S</span><span className="word-scout">cout</span><span className="word-it">IT</span>
+          {/* ScoutIt wordmark */}
+          <ScoutItWordmark className={`scoutit-wordmark ${wordLit ? "lit" : ""}`}>
             {flashId > 0 && <span key={`flash-${flashId}`} className="title-impact" />}
-          </div>
+          </ScoutItWordmark>
 
           {/* Discipline badge */}
           <div className="title-badge">SPACE &middot; INTELLIGENCE &middot; TECHNOLOGY</div>

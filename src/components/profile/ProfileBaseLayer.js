@@ -140,7 +140,6 @@ export default function ProfileBaseLayer({
           )}
           <ProfileProvenanceBadge isPilotParticipant={profile.is_pilot_participant === true} />
           {profile.is_verified && <TrustBadge badgeId="IDENTITY_VERIFIED" />}
-          {displayRoles.includes("broker") && <TrustBadge badgeId="AUTHORIZED_REPRESENTATION" />}
         </div>
 
         {/* Meta row */}

@@ -2,7 +2,7 @@
 section: "00_META"
 status: locked
 tags: [meta, index, moc]
-updated: 2026-08-18
+updated: 2026-08-23
 related: ["[[00_SOP]]", "[[00_COUNCIL]]", "[[OBSIDIAN_VAULT_GUIDE]]", "[[00_VAULT_CONVENTIONS]]", "[[00_LOGIC_HIERARCHY]]"]
 ---
 
@@ -131,13 +131,16 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
   `/layer/stratosphere` (Intel) · `/layer/metropolis` (Explore) · `/layer/crust` (Network) ·
   `/layer/mantle` (Archive) · `/layer/core` (Your Workspace). Nav pills show plain labels
   (e.g. "Stratosphere · Intel").
-- **The Showcase (`/showcase` / "The Board")** = a curated, luxury leaderboard ranking top
-  properties by earned demand, inquiry velocity, and spatial intelligence merit. 3-column
-  desktop HUD (Left = Inquiry Velocity, Center = 16:9 verified media, Right = Showcase
-  Distinction & Merits). Per-rank cosmic periphery backgrounds (Universe = deep-space nebula,
+- **The Showcase (`/showcase` / "The Board")** = a curated, luxury editorial presentation.
+  Its current human-testing entries and demand telemetry are explicitly disclosed as sample
+  or projected data; merit labels describe human curation, not external verification. The
+  3-column desktop HUD keeps demand context, 16:9 media, and curated distinctions separate.
+  Per-rank cosmic periphery backgrounds (Universe = deep-space nebula,
   Cluster = galactic gas clouds, Solar = planetary orbits, Starry = Van Gogh beach horizon).
-  Monthly operator curation per [[08_OPERATIONS_AND_BACKLOG/ACTION/ACTIVE#A-007 — Monthly Showcase merit curation|Active A-007]]. Raw data tables are banned from the
-  Showcase — they belong on the Property Page. See [[WEBSITE_ARCHITECTURE]] §8.
+  Operators may curate only source-evidenced merits; any locked-surface change requires the
+  exact owner review recorded by the Action router. Raw data tables are banned from the
+  Showcase — they belong on the Property Page. See [[WEBSITE_ARCHITECTURE]] §8 and
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|A-007 completion evidence]].
 - **The Ledger** = private, device-only wishlist (4 tags: Potential Fit / Interested /
   Inspired Me / Save). No account required.
 - **Property pages** use a **chapter-registry system** — 10 chapters, reframed per category
@@ -228,6 +231,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - [[02_ARCHITECTURE_AND_STRUCTURE/STRUCTURE|STRUCTURE]] — standing project context for AI sessions
 - [[WEBSITE_ARCHITECTURE]] — site/route map
 - [[MMC_AND_BRAIN_VISION]] — the Mission-Control-and-Brain long-term vision note
+- [[02_ARCHITECTURE_AND_STRUCTURE/SEMANTIC_RETRIEVAL_ARCHITECTURE|SEMANTIC_RETRIEVAL_ARCHITECTURE]] — two isolated vector-search products: public discovery across approved properties/articles/intel and internal retrieval across Brain/Flow/OSINT
 - `structure.txt` — raw folder tree snapshot
 - [[SECOND_BRAIN_FIVE_LEVELS]] — 🆕 draft (2026-07-08, from Dump): the five-level model for how
   this vault itself should mature as a "second brain"
@@ -236,6 +240,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - [[SCOUTIT_DESIGN_BRIEF]] — brand brief & visual system
 - [[SCOUTIT_DESIGN_BRIEF]] — design audit findings
 - [[BRAND_VOICE_AND_COPY_SOP]] — voice + copy rules
+- [[03_DESIGN/MANTLE_MANIFESTO_STORY_SYSTEM|MANTLE_MANIFESTO_STORY_SYSTEM]] — F-009 public story, source, motion, fallback, and verification contract
 - [[DASHBOARD_ATMOSPHERE_FRAMEWORK]] — 🆕 approved-direction, not-yet-built spec for dashboard
   structure (Identity → Status → Scout Insight → Workspace → Role Atmosphere) + per-role ambient
   differentiation — read before any dashboard design/UI work
@@ -285,10 +290,7 @@ different altitude. That is ScoutIT in the market. The UFO stays. Always.
 - [[USER_FLOWS]] — buyer & owner journeys
 - [[USER_EXPERIENCES]] — experience-level detail behind the flows
 - [[COMPARISON_TOOL_SPEC]] — side-by-side space comparison spec
-- [[SCOUTIT_SCROLLYTELLING_PROMPT]] — the cinematic manifesto build spec
-- [[scrollytelling-mission-text]] — locked manifesto copy
-- [[ORIGIN_STORY_SCROLLYTELLING]] — the parked origin-story scrollytelling spec
-- [[SCOUTIT_SCROLLYTELLING_PROMPT]] — onboarding prompt
+- [[03_DESIGN/MANTLE_MANIFESTO_STORY_SYSTEM|MANTLE_MANIFESTO_STORY_SYSTEM]] — the current cinematic Mantle and manifesto contract; replaces the missing legacy scrollytelling links
 - [[BROKER_HANDSHAKE_CHAT]] — broker handshake/chat build spec
 - [[VIRTUAL_TOUR_STRATEGY]] — virtual tour strategy
 - [[BROKER_FIELD_BRIEFING_AND_VOICE_COPILOT_SPEC]] — field briefing, voice copilot, and owner-intercom blueprint

@@ -92,9 +92,11 @@ These protect other parts of the platform. Breaking one to fix something else is
 - **Owner-approved surfaces are checksum-locked.** Run `npm run verify:surfaces` before and after edits. A failure is a stop signal: restore the accepted source unless the owner explicitly approved that exact visual change. Never refresh the manifest during unrelated work.
 - **Showcase Curation Invariant (The Board / Orbit Showcase).** The Showcase (`/showcase`)
   is ScoutIt's premier editorial and spatial showcase. It cannot be automated with generic
-  placeholders. Every month, operators calibrate property merits (fast connect reply speed,
-  heatmap location proximity, architectural accolades, earned demand standing) per
-  [[08_OPERATIONS_AND_BACKLOG/ACTION/ACTIVE#A-007 — Monthly Showcase merit curation|Active A-007]].
+  placeholders or unsourced claims. Operators may calibrate only source-evidenced merits;
+  sample and projected telemetry must remain explicitly labelled. Because the surface is
+  owner-approved and checksum-locked, every visual/source change requires its exact Action
+  item and owner review. See
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|A-007 completion evidence]].
 - **Security hardening is DONE (2026-07-09)** — RLS permissive-policy reset executed and
   verified, `mockOwnerId` gated in 17 routes. RLS is no longer dev-open: **never** add an
   always-true policy or a direct client write to a service-role-only table (`deals` inserts,

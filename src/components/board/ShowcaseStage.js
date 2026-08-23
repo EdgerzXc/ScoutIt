@@ -1349,7 +1349,7 @@ export default function ShowcaseStage({ mode = "full" }) {
                   {tierMeta.badge}
                 </span>
                 <span className="sc-viewport-divider">/</span>
-                <span className="sc-viewport-month">June 2026 Audit</span>
+                <span className="sc-viewport-month">Sample data &mdash; for human testing</span>
               </div>
 
               {/* Media Switcher for Top 3 */}
@@ -1393,7 +1393,7 @@ export default function ShowcaseStage({ mode = "full" }) {
               {/* Demand Velocity Gauge */}
               <div className="sc-velocity-panel">
                 <div className="sc-velocity-header">
-                  <span className="sc-velocity-label">Inquiry Velocity</span>
+                  <span className="sc-velocity-label">Projected Inquiry Velocity</span>
                   <strong className="sc-velocity-val" style={{ color: tierMeta.color }}>
                     {active.rank === 1 ? "98.4%" : active.rank === 2 ? "94.1%" : active.rank === 3 ? "89.6%" : "82.0%"}
                   </strong>
@@ -1411,15 +1411,15 @@ export default function ShowcaseStage({ mode = "full" }) {
                 <div className="sc-stat-grid">
                   <div className="sc-stat-cell">
                     <strong className="sc-stat-num">{active.inquiry_count}</strong>
-                    <span className="sc-stat-lbl">Inquiries / mo</span>
+                    <span className="sc-stat-lbl">Inquiries / mo (sample)</span>
                   </div>
                   <div className="sc-stat-cell">
                     <strong className="sc-stat-num">{active.saves || Math.round(active.inquiry_count * 1.8)}</strong>
-                    <span className="sc-stat-lbl">Private saves</span>
+                    <span className="sc-stat-lbl">Private saves (sample)</span>
                   </div>
                   <div className="sc-stat-cell">
                     <strong className="sc-stat-num">{active.views || active.inquiry_count * 8}</strong>
-                    <span className="sc-stat-lbl">View signals</span>
+                    <span className="sc-stat-lbl">View signals (sample)</span>
                   </div>
                 </div>
               </div>
@@ -1446,8 +1446,8 @@ export default function ShowcaseStage({ mode = "full" }) {
                   <span className="sc-distinction-title">Showcase Distinction</span>
                 </div>
                 <div className="sc-verified-tag">
-                  <ShieldCheck size={13} className="text-gold-accent" />
-                  <span>Verified</span>
+                  <Award size={13} className="text-gold-accent" />
+                  <span>Curated Merit</span>
                 </div>
               </div>
 
@@ -1486,9 +1486,9 @@ export default function ShowcaseStage({ mode = "full" }) {
                   <div className="sc-merit-content">
                     <span className="sc-merit-kicker">Curation Standard</span>
                     <p className="sc-merit-headline">
-                      100% Earned Demand Integrity
+                      Human-Curated Architectural Merits
                     </p>
-                    <span className="sc-merit-sub">Verified spatial vault intelligence</span>
+                    <span className="sc-merit-sub">Illustrative evaluation for invited testing</span>
                   </div>
                 </div>
               </div>
@@ -1505,7 +1505,7 @@ export default function ShowcaseStage({ mode = "full" }) {
       ) : (
         <div className="sc-empty-container">
           <Building2 size={36} className="text-white/70 mb-3" />
-          <p>No verified properties found in this category.</p>
+          <p>No properties found in this category.</p>
         </div>
       )}
 

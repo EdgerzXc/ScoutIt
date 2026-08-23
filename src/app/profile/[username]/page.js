@@ -70,8 +70,8 @@ export default function PublicProfilePage() {
       const showResearcher   = showProvider && provType === "researcher";
 
       const [brokerResult, researcherResult, photoResult] = await Promise.all([
-        showBroker        ? loadBrokerProfile(pub.id)           : Promise.resolve({ data: null }),
-        showResearcher    ? loadResearcherProfile(pub.id)        : Promise.resolve({ data: null }),
+        showBroker        ? loadBrokerProfile(pub.id, { createIfMissing: false }) : Promise.resolve({ data: null }),
+        showResearcher    ? loadResearcherProfile(pub.id, { createIfMissing: false }) : Promise.resolve({ data: null }),
         showPhotographer  ? loadPhotographerProjects(pub.id)     : Promise.resolve({ data: [] }),
       ]);
 
@@ -164,6 +164,7 @@ export default function PublicProfilePage() {
               <ResearcherPanel
                 data={researcherData}
                 isAnonymous={privacy?.anonymous_byline ?? false}
+                isPublic
               />
             )}
           </div>

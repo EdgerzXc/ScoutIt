@@ -271,11 +271,12 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
         const mergedIntel = [...baseIntel];
         airtableIntel.forEach(item => {
           if (!mergedIntel.some(x => x.slug === item.slug)) {
+            const catLower = (item.category || "").toLowerCase();
             let category = item.category || null;
-            if (category.toLowerCase() === "hospitality") category = "Hospitality";
-            if (category.toLowerCase() === "str") category = "STR";
-            if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Restaurants";
-            if (category.toLowerCase() === "venues" || category.toLowerCase() === "events") category = "Venues";
+            if (catLower === "hospitality") category = "Hospitality";
+            if (catLower === "str") category = "STR";
+            if (catLower === "culinary" || catLower === "restaurants") category = "Restaurants";
+            if (catLower === "venues" || catLower === "events") category = "Venues";
             mergedIntel.unshift({
               slug: item.slug || item.id,
               title: item.title,
@@ -379,11 +380,11 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
     // Search query matches title, city, location, category, or aesthetic tag
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
-      const matchTitle = p.title.toLowerCase().includes(q);
-      const matchCity = p.city.toLowerCase().includes(q);
-      const matchLocation = p.location.toLowerCase().includes(q);
-      const matchCategory = p.spaceCategory.toLowerCase().includes(q);
-      const matchAesthetic = p.aestheticTag.toLowerCase().includes(q);
+      const matchTitle = (p.title || "").toLowerCase().includes(q);
+      const matchCity = (p.city || "").toLowerCase().includes(q);
+      const matchLocation = (p.location || "").toLowerCase().includes(q);
+      const matchCategory = (p.spaceCategory || "").toLowerCase().includes(q);
+      const matchAesthetic = (p.aestheticTag || "").toLowerCase().includes(q);
       return matchTitle || matchCity || matchLocation || matchCategory || matchAesthetic;
     }
     return true;
@@ -393,7 +394,11 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
   const getWidgetArticles = () => {
     if (selectedLocations.length > 0) {
       // Find articles matching selected locations
-      return rawIntel.filter(art => selectedLocations.some(loc => art.title.toLowerCase().includes(loc.toLowerCase()) || art.slug.toLowerCase().includes(loc.toLowerCase().replace(/\s+/g, '-'))));
+      return rawIntel.filter(art => selectedLocations.some(loc => {
+        const titleMatch = (art.title || "").toLowerCase().includes(loc.toLowerCase());
+        const slugMatch = (art.slug || "").toLowerCase().includes(loc.toLowerCase().replace(/\s+/g, '-'));
+        return titleMatch || slugMatch;
+      }));
     }
     if (selectedSectors.length > 0) {
       // Find articles matching selected sectors

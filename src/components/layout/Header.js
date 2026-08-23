@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import AmbientRail from "@/components/layout/ambient/AmbientRail";
 import { menuEntries } from "@/lib/navigationManifest";
 
@@ -146,9 +147,7 @@ export default function Header({ ambientContext = null }) {
           <span className="header-back-label">Back</span>
         </button>
 
-        <Link href="/" className="header-brand" aria-label="ScoutIT — home">
-          <span className="brand-s" style={{ color: "var(--accent)" }}>S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
-        </Link>
+        <ScoutItWordmark href="/" className="header-brand" />
       </div>
 
       <div className="header-center">
@@ -189,11 +188,7 @@ export default function Header({ ambientContext = null }) {
           ref={menuPanelRef}
           aria-label="ScoutIt navigation"
         >
-          <div className="dropdown-brand">
-            <span className="brand-s" style={{ color: "var(--accent)" }}>S</span>
-            <span className="brand-scout">cout</span>
-            <span className="brand-it">IT</span>
-          </div>
+          <ScoutItWordmark className="dropdown-brand" />
           {menuEntries(Boolean(user)).map((entry) => (
             <Link
               key={entry.id}
@@ -751,4 +746,3 @@ export default function Header({ ambientContext = null }) {
     </header>
   );
 }
-

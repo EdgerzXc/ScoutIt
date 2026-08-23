@@ -41,12 +41,14 @@ describe("human-testing sample inventory contract", () => {
     expect(disclosure).toContain("Sample data &mdash; for human testing");
   });
 
-  it("keeps sample property and child-space routes out of indexing", () => {
+  it("keeps sample property, child-space, and intel routes out of indexing", () => {
     const propertyPage = read("src/app/property/[id]/page.js");
     const unitPage = read("src/app/property/[id]/unit/[unitId]/page.js");
+    const intelPage = read("src/app/intel/[article-slug]/page.js");
     const sitemap = read("src/app/sitemap.js");
     expect(propertyPage).toContain("robots: { index: false, follow: true }");
     expect(unitPage).toContain("robots: { index: false, follow: true }");
+    expect(intelPage).toContain("robots: { index: false, follow: true }");
     expect(sitemap).toContain(".filter((p) => p.slug && !p.is_sample)");
   });
 
@@ -54,5 +56,11 @@ describe("human-testing sample inventory contract", () => {
     const propertyPage = read("src/app/property/[id]/page.js");
     expect(propertyPage).toContain("if (match && !match.is_sample)");
     expect(propertyPage).toContain("{jsonLd && (");
+  });
+
+  it("discloses sample data on the Showcase stage without claiming false verification", () => {
+    const showcase = read("src/components/board/ShowcaseStage.js");
+    expect(showcase).toContain("Sample data &mdash; for human testing");
+    expect(showcase).not.toContain("<span>Verified</span>");
   });
 });

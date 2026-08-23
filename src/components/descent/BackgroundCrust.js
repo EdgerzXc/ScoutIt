@@ -25,9 +25,10 @@ export default function BackgroundCrust() {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
-    // Lite Mode: never start the WebGL scene on low-power devices — the CSS
-    // layer background stays, only the animated canvas is skipped.
-    if (isLiteMode()) return;
+    // Lite Mode and reduced motion never start the WebGL scene. The dark CSS
+    // atmosphere remains, while continuous camera and root animation stays off.
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (isLiteMode() || prefersReducedMotion) return;
 
     let cancelled = false, frameId, renderer, resizeObs;
     const disposables = [];

@@ -1,191 +1,202 @@
 "use client";
 
-import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
-import { useState } from "react";
-import { Building2, Camera, Search, CalendarDays } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Building2, CalendarDays, Camera, Search } from "lucide-react";
+
 import BackgroundCrust from "@/components/descent/BackgroundCrust";
 import LayerHeader from "@/components/descent/LayerHeader";
+import LayerNav from "@/components/descent/LayerNav";
 import LayerTransition from "@/components/descent/LayerTransition";
+import {
+  CRUST_SERVICE_DATA,
+  CRUST_SERVICE_KEYS,
+} from "@/components/descent/crustServiceData";
+import styles from "./page.module.css";
 
-const SERVICE_CATEGORIES = [
-  { key: "advisors", label: "Verified Advisors" },
-  { key: "photography", label: "Space Photography" },
-  { key: "research", label: "Site Research" },
-  { key: "events", label: "Event Design" },
-];
-
-const SERVICE_DATA = {
-  advisors: {
-    icon: Building2,
-    status: "LIVE",
-    statusClass: "live-badge",
-    title: "Verified Advisors",
-    desc: "Licensed real estate professionals who guide you through viewing, negotiating, and closing.",
-    cta: "CONNECT WITH ADVISOR →",
-    href: "/brokers",
-  },
-  photography: {
-    icon: Camera,
-    status: "PRE-REGISTER",
-    statusClass: "soon-badge",
-    title: "Space Photography",
-    desc: "Interior and architectural photographers who make every space look the way it deserves to.",
-    cta: "EXPLORE ROSTER →",
-    href: "/photographers",
-  },
-  research: {
-    icon: Search,
-    status: "PRE-REGISTER",
-    statusClass: "soon-badge",
-    title: "Site Research",
-    desc: "On-the-ground research, market data, and neighborhood profiles before you commit.",
-    cta: "EXPLORE ROSTER →",
-    href: "/researchers",
-  },
-  events: {
-    icon: CalendarDays,
-    status: "PRE-REGISTER",
-    statusClass: "soon-badge",
-    title: "Event Design",
-    desc: "Planners, stylists, and designers who turn great spaces into great events.",
-    cta: "EXPLORE ROSTER →",
-    href: "/event-planners",
-  },
+const SERVICE_ICONS = {
+  advisors: Building2,
+  photography: Camera,
+  research: Search,
+  events: CalendarDays,
 };
+
+function normalizeCategory(value) {
+  return CRUST_SERVICE_KEYS.includes(value) ? value : "advisors";
+}
 
 export default function CrustLayer() {
   const [activeCategory, setActiveCategory] = useState("advisors");
-  const service = SERVICE_DATA[activeCategory];
-  const Icon = service.icon;
+  const tabRefs = useRef({});
+  const service = CRUST_SERVICE_DATA[activeCategory];
+  const Icon = SERVICE_ICONS[activeCategory];
+
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      setActiveCategory(normalizeCategory(params.get("category")));
+    };
+
+    syncFromUrl();
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, []);
+
+  function selectCategory(key, { updateHistory = true, focus = false } = {}) {
+    const normalized = normalizeCategory(key);
+    setActiveCategory(normalized);
+
+    if (updateHistory) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("category", normalized);
+      window.history.pushState({ crustCategory: normalized }, "", url);
+    }
+    if (focus) tabRefs.current[normalized]?.focus();
+  }
+
+  function onTabKeyDown(event, currentKey) {
+    const currentIndex = CRUST_SERVICE_KEYS.indexOf(currentKey);
+    let nextIndex = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % CRUST_SERVICE_KEYS.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + CRUST_SERVICE_KEYS.length) % CRUST_SERVICE_KEYS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = CRUST_SERVICE_KEYS.length - 1;
+    }
+
+    if (nextIndex === null) return;
+    event.preventDefault();
+    selectCategory(CRUST_SERVICE_KEYS[nextIndex], { focus: true });
+  }
 
   return (
-    <main
-      className="min-h-screen bg-[#0d0d0d] text-white selection:bg-gold-accent selection:text-black overflow-hidden font-sans"
-      style={{ paddingTop: "52px" }}
-    >
+    <main className={styles.root}>
       <LayerNav
         prev={{ href: "/layer/metropolis", label: "Metropolis" }}
         next={{ href: "/layer/mantle", label: "Mantle" }}
       />
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className={styles.background} aria-hidden="true">
         <BackgroundCrust />
       </div>
 
-      <div className="layer-pane relative z-10">
-        <LayerHeader 
-          layerNum="04" 
-          layerName="Crust" 
-          title="The Service Ecosystem" 
-          description="Verified advisors, photographers, site researchers, and event designers. The professionals who help you evaluate and document spaces." 
-          missionText="The Crust connects you with verified spatial professionals. From licensed PRC brokers and site researchers to architectural photographers, these are the specialists who make space decisions grounded and accountable." 
-          ctaText="Meet Our Advisors →"
+      <div className={styles.pane}>
+        <LayerHeader
+          layerNum="04"
+          layerName="Crust"
+          title="The Service Ecosystem"
+          description="Understand each professional role, the evidence ScoutIt actually holds, and when that specialist belongs in your space decision."
+          missionText="Crust maps the people around a space decision without flattening them into one generic verified roster. Advisor license evidence is shown only when checked; provider profiles, pilot signals, examples, availability, and launch limits remain explicitly labelled."
+          ctaText="Review the advisor roster →"
           ctaHref="/brokers"
         />
 
-        <div className="descent-split">
-          {/* ── LEFT SIDEBAR ── */}
-          <aside className="descent-sidebar">
-            <nav className="descent-nav" aria-label="Layer categories">
-              {SERVICE_CATEGORIES.map(c => (
-                <button
-                  key={c.key}
-                  className={`descent-cat${activeCategory === c.key ? " on" : ""}`}
-                  onClick={() => setActiveCategory(c.key)}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </nav>
+        <section className={styles.experience} aria-labelledby="crust-professional-heading">
+          <aside className={styles.sidebar}>
+            <p className={styles.sidebarLabel} id="crust-professional-heading">Choose a professional lens</p>
+            <div
+              className={styles.tabList}
+              role="tablist"
+              aria-label="Professional categories"
+              aria-orientation="vertical"
+            >
+              {CRUST_SERVICE_KEYS.map((key, index) => {
+                const category = CRUST_SERVICE_DATA[key];
+                const selected = activeCategory === key;
+                return (
+                  <button
+                    key={key}
+                    ref={(node) => { tabRefs.current[key] = node; }}
+                    type="button"
+                    role="tab"
+                    id={`crust-tab-${key}`}
+                    aria-controls="crust-professional-panel"
+                    aria-selected={selected}
+                    tabIndex={selected ? 0 : -1}
+                    className={styles.tab}
+                    onClick={() => selectCategory(key)}
+                    onKeyDown={(event) => onTabKeyDown(event, key)}
+                  >
+                    <span className={styles.tabIndex}>{String(index + 1).padStart(2, "0")}</span>
+                    <span className={styles.tabName}>{category.navLabel}</span>
+                    <span className={styles.tabArrow} aria-hidden="true">→</span>
+                  </button>
+                );
+              })}
+            </div>
           </aside>
 
-          {/* ── RIGHT CONTENT ── */}
-          <div className="descent-content">
-            <Link href={service.href} className="service-card live-card" style={{ display: "block", textDecoration: "none" }}>
-              <div className="service-card-inner">
-                <div className="service-icon-wrapper">
-                  <Icon strokeWidth={1.5} size="1em" />
+          <article
+            className={styles.panel}
+            role="tabpanel"
+            id="crust-professional-panel"
+            aria-labelledby={`crust-tab-${activeCategory}`}
+            aria-live="polite"
+          >
+            <div className={styles.panelInner}>
+              <header className={styles.panelHeader}>
+                <div className={styles.iconShell} aria-hidden="true">
+                  <Icon size={25} strokeWidth={1.4} />
                 </div>
-                <div className={`service-status-badge ${service.statusClass}`}>{service.status}</div>
-                <h3 className="service-title">{service.title}</h3>
-                <p className="service-desc">{service.desc}</p>
-                <span className="service-cta">{service.cta}</span>
-              </div>
-            </Link>
-          </div>
-        </div>
+                <div>
+                  <p className={styles.eyebrow}>{service.eyebrow}</p>
+                  <h2 className={styles.title}>{service.title}</h2>
+                  <p className={styles.summary}>{service.summary}</p>
+                </div>
+                <span className={`${styles.status} ${service.statusTone === "live" ? styles.statusLive : ""}`}>
+                  {service.status}
+                </span>
+              </header>
 
-        <LayerTransition 
-          nextNum="05" 
-          nextName="Mantle" 
-          nextHref="/layer/mantle" 
-          teaser="Dig beneath the surface. The deep archive holds everything." 
+              <div className={styles.dossierGrid}>
+                <section className={styles.dossierSection}>
+                  <span className={styles.sectionLabel}>What they do</span>
+                  <p>{service.purpose}</p>
+                </section>
+                <section className={styles.dossierSection}>
+                  <span className={styles.sectionLabel}>What ScoutIt has checked</span>
+                  <p>{service.evidence}</p>
+                </section>
+                <section className={styles.dossierSection}>
+                  <span className={styles.sectionLabel}>When to engage</span>
+                  <p>{service.engage}</p>
+                </section>
+              </div>
+
+              <section className={styles.boundary} aria-label="ScoutIt role boundary">
+                <span className={styles.sectionLabel}>ScoutIt’s boundary</span>
+                <p>{service.boundary}</p>
+              </section>
+
+              <div className={styles.actions}>
+                <Link className={styles.primaryAction} href={service.href}>
+                  {service.cta} <span aria-hidden="true">→</span>
+                </Link>
+                {service.secondaryHref && (
+                  <Link className={styles.secondaryAction} href={service.secondaryHref}>
+                    {service.secondaryCta}
+                  </Link>
+                )}
+              </div>
+
+              <div className={styles.rosterNote}>
+                <span className={styles.rosterLabel}>Roster truth</span>
+                <p>{service.rosterNote}</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <LayerTransition
+          nextNum="05"
+          nextName="Mantle"
+          nextHref="/layer/mantle"
+          teaser="Dig beneath the surface. The deep archive holds everything."
         />
       </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .service-card {
-          border: 1px solid rgba(232, 174, 60, 0.1);
-          border-radius: 8px;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          background: rgba(18, 18, 18, 0.6);
-          max-width: 480px;
-        }
-        .service-card:hover {
-          border-color: rgba(232, 174, 60, 0.3);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-        }
-        .service-card-inner {
-          padding: 32px;
-        }
-        .service-icon-wrapper {
-          font-size: 28px;
-          color: var(--accent);
-          margin-bottom: 16px;
-        }
-        .service-status-badge {
-          display: inline-block;
-          font-family: var(--font-mono);
-          font-size: 12px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          padding: 4px 10px;
-          border-radius: 3px;
-          margin-bottom: 14px;
-        }
-        .live-badge {
-          background: rgba(232, 174, 60, 0.15);
-          color: var(--accent);
-          border: 1px solid rgba(232, 174, 60, 0.3);
-        }
-        .soon-badge {
-          background: rgba(255, 255, 255, 0.05);
-          color: var(--text-secondary);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .service-title {
-          font-family: var(--font-display);
-          font-size: 22px;
-          color: #f6efe6;
-          margin-bottom: 10px;
-        }
-        .service-desc {
-          font-family: var(--font-body);
-          font-size: 14px;
-          line-height: 1.65;
-          color: var(--text-secondary);
-          margin-bottom: 20px;
-        }
-        .service-cta {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--accent);
-        }
-      `}} />
     </main>
   );
 }

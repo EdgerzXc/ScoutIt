@@ -145,16 +145,18 @@ export async function fetchBrokers(apiKey, baseId) {
         subscriptionLabel: labelRaw,
         clearanceTier:    f.ClearanceTier   || "",
         rosterRank:       f.RosterRank      || "",
-        rosterStatus:     f.RosterStatus    || "Active",
+        // RosterStatus is editorial data, not a browser-presence signal.
+        // Missing stays absent; defaulting it to "Active" fabricated activity.
+        rosterStatus:     f.RosterStatus    || "",
         niche:            niche,
         // managedProperties is a linked record — returns record IDs only from Airtable
         // We resolve this via PROPERTIES_CMS slug matching on the frontend
         managedProperties: [],
         metrics: [
-          { label: "Roster Rank",   value: f.RosterRank   || "Advisor"  },
-          { label: "Clearance",     value: f.ClearanceTier || "Tier 3"  },
-          { label: "Roster Status", value: f.RosterStatus  || "Active"  },
-        ],
+          f.RosterRank ? { label: "Roster Rank", value: f.RosterRank } : null,
+          f.ClearanceTier ? { label: "Clearance", value: f.ClearanceTier } : null,
+          f.RosterStatus ? { label: "Roster Status", value: f.RosterStatus } : null,
+        ].filter(Boolean),
       };
     });
 }

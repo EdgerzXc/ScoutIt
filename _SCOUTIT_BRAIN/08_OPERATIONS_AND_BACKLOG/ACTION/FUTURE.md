@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [future, deferred, parked, roadmap]
-updated: 2026-08-13
+updated: 2026-08-23
 related:
   - "[[../00_START_HERE]]"
   - "[[00_MASTER_ACTION_PLAN]]"
@@ -25,10 +25,9 @@ related:
 | Item | Ref | Why parked |
 |---|---|---|
 | Successor / estate continuity list | §34.4 | Post-launch |
-| Mission Control internal RAG assistant | §10a | Internal leverage only, no user impact |
 | WebRTC calls / Twilio proxy | §20.2–20.3 | Owner decision, not started |
-| Voice AI co-pilot · FSBO intercom · Spatial OSINT · Briefing OS | §6, §7, §23, §33 | Owner-designated future phases |
-| Origin Story scrollytelling + Founding Team showcase | `ORIGIN_STORY_SCROLLYTELLING` | ~8h Three.js brand asset. Explicitly non-blocking for launch |
+| Voice AI co-pilot · FSBO intercom · Briefing OS | §6, §7, §33 | Owner-designated future phases; F-002's local Spatial OSINT foundation is complete and its real source/schema activation is owner-gated |
+| Manifesto celestial scrollytelling + Founding Team showcase | `ORIGIN_STORY_SCROLLYTELLING` | Direction approved 2026-08-23, implementation not authorized. One continuous founder/product story: realistic celestial bodies and meteor showers converge at the reused black-hole climax; gravitational lensing then disappears into a calm, clear resolution. Click-entry/lazy-loaded About experience only; homepage remains fast. Canonical logic: `03_DESIGN/MANTLE_MANIFESTO_STORY_SYSTEM.md` |
 | QuestIT | `QUESTIT_FUTURE/` | Parked feature. ⚠️ Reads 3 tables that do not exist |
 
 ⚠️ **QuestIT trap:** `proxy.js` blocks it while the `ai_search` flag is off, but
@@ -43,7 +42,6 @@ those tables exist.**
 | Cloudflare R2 media storage | First genuinely large media files. None yet |
 | Wishlist per-link revocation | Only if the 90-day expiry proves insufficient |
 | Read replicas, search index, heavier caching | A measured bottleneck, never a predicted one |
-| Separate dev Supabase project | ⚠️ The first real signup. The "40 real users" urgency was false, but the risk returns for real |
 
 ## 3. Scale-only performance pass — **explicitly not pre-launch**
 
@@ -68,7 +66,6 @@ so it stops resurfacing as "114 problems" and panicking a future session.
 
 ## 5. Post-pilot engineering hygiene
 
-- Broker briefing print layout — code complete, never seen by human eyes
 - The `property_id` type split: `uuid` in `analytics_events`/`deals`, `text` in
   `viewing_appointments`/`property_claims`. A legacy of
   `coerce_user_ref_columns_to_text`. Retyping a column live code filters on is

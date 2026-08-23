@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 
 // ═══════════════════════════════════════════════════════════════
 // SOCIAL LINKS — icons kept, URLs deliberately empty.
@@ -59,9 +60,7 @@ export default function Footer() {
     <footer className="global-footer">
       <div className="footer-container">
         <div className="footer-branding">
-          <Link href="/" className="footer-brand">
-            <span className="brand-s">S</span><span className="brand-scout">cout</span><span className="brand-it">IT</span>
-          </Link>
+          <ScoutItWordmark href="/" className="footer-brand" />
           <p className="footer-tagline">
             The Philippines&apos; first spatial commerce platform. We decode every kind of space into clear, verified intelligence. Homes, offices, venues, tables.
           </p>

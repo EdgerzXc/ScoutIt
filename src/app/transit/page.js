@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -22,7 +23,7 @@ export default function TransitPage() {
     <div className="directory-layout">
       <Header />
       <main className="transit-page-main">
-        <span className="vector-label">SCOUTIT · SPATIAL INTELLIGENCE</span>
+        <span className="vector-label"><ScoutItWordmark /> · SPATIAL INTELLIGENCE</span>
         <h1 className="transit-page-title">Metro Manila Rail Network</h1>
         <p className="transit-page-subtitle">
           Real-world LRT and MRT track geometry, rendered as a live 3D neon transit map —

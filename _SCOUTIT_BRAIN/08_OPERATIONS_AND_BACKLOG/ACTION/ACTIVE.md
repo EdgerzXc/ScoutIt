@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [active-work, engineering, pre-pilot]
-updated: 2026-08-22
+updated: 2026-08-23
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]"]
 ---
 
@@ -11,19 +11,8 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]"]
 > Maximum 25 open items. An agent may work here only after Urgent is stable and
 > after re-checking the named behavior against current code.
 
-## A-007 — Monthly Showcase merit curation
+## No active implementation items
 
-On the first operating cycle of each month, review featured spaces and record
-only sourced, human-curated demand standing, response/connect velocity, spatial
-location merits, and architectural distinctions. Raw specification tables stay
-on property briefings; paid rank manipulation and invented metrics are forbidden.
-
-**Boundary:** this is content/operations work. It does not authorize visual
-changes to the owner-locked Showcase stage.
-
-**Blocked on [[MASTER_OWNER_ACTIONS|O-007]] (2026-08-22):** curation cannot
-proceed honestly while the stage renders rank-derived percentages and multiplied
-counts under a "Verified" badge, with every entry coming from
-`src/data/mock/mockShowcase.js` and no sample disclosure. Curating merits onto
-that surface would dress invented telemetry as reviewed judgement. The surface
-is checksum-locked, so the fix needs explicit owner authorization first.
+The bounded F-series work is either verified in Done or held at an exact owner
+gate. Do not pull work from owner, waiting, future, specifications, or historical
+records without first verifying and promoting the same stable task ID here.

@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import ScoutItImageWordmark from '@/components/brand/ScoutItImageWordmark';
 
 export const runtime = 'edge';
 
@@ -22,7 +23,10 @@ export async function GET(request) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
-            backgroundColor: '#0d0d0d',
+            '--bg': '#0d0d0d',
+            '--accent': '#E8AE3C',
+            '--text-primary': '#ffffff',
+            backgroundColor: 'var(--bg)',
             ...(image ? { backgroundImage: `url(${image})` } : {}),
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -45,7 +49,6 @@ export async function GET(request) {
               display: 'flex',
               flexDirection: 'column',
               padding: '60px',
-              zIndex: 10,
             }}
           >
             {/* Logo/Brand */}
@@ -56,18 +59,7 @@ export async function GET(request) {
                 marginBottom: '20px',
               }}
             >
-              <div
-                style={{
-                  color: '#E8AE3C',
-                  fontSize: 28,
-                  fontWeight: 'bold',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  fontFamily: 'monospace',
-                }}
-              >
-                SCOUTIT
-              </div>
+              <ScoutItImageWordmark fontSize={28} fontWeight={700} letterSpacing="0.12em" />
             </div>
 
             {/* Title */}

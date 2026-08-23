@@ -49,6 +49,23 @@ test("Manifesto deep links expose a keyboard focus target", async ({ page }) => 
   await gotoAndSettle(page, "/about#trust");
   await expect(page.locator("#trust")).toBeFocused();
   await expect(page.getByRole("heading", { name: /trust comes from boundaries/i })).toBeVisible();
+  await expect(page.locator('.chapter-rail a[href="#trust"]')).toHaveAttribute("aria-current", "step");
+});
+
+test("Manifesto chapter rail follows the scroll-led reading position", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoAndSettle(page, "/about");
+  await page.locator("#people").scrollIntoViewIfNeeded();
+  await expect(page.locator('.chapter-rail a[href="#people"]')).toHaveAttribute("aria-current", "step");
+  await expect(page.locator("#people")).toHaveAttribute("data-active", "true");
+  const railTop = await page.locator(".chapter-rail-shell").evaluate((node) => node.getBoundingClientRect().top);
+  expect(railTop).toBeGreaterThanOrEqual(44);
+  expect(railTop).toBeLessThanOrEqual(46);
+  await expect.poll(async () => page.locator('.chapter-rail a[href="#people"]').evaluate((link) => {
+    const linkRect = link.getBoundingClientRect();
+    const railRect = link.closest(".chapter-rail").getBoundingClientRect();
+    return linkRect.left >= railRect.left && linkRect.right <= railRect.right;
+  })).toBe(true);
 });
 
 test("Manifesto honors reduced motion", async ({ page }) => {

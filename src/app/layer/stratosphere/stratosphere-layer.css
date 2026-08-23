@@ -21,7 +21,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  background: #0d0d0d;
+  background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-body);
   padding-bottom: calc(88px + env(safe-area-inset-bottom));
@@ -47,15 +47,15 @@
   background:
     radial-gradient(
       120% 78% at 72% 8%,
-      rgba(232, 174, 60, 0.09) 0%,
+      rgba(var(--accent-rgb), 0.09) 0%,
       transparent 58%
     ),
     linear-gradient(
       180deg,
-      rgba(13, 13, 13, 0.72) 0%,
-      rgba(13, 13, 13, 0.24) 34%,
-      rgba(13, 13, 13, 0.34) 62%,
-      rgba(13, 13, 13, 0.93) 100%
+      rgba(var(--bg-rgb), 0.72) 0%,
+      rgba(var(--bg-rgb), 0.24) 34%,
+      rgba(var(--bg-rgb), 0.34) 62%,
+      rgba(var(--bg-rgb), 0.93) 100%
     );
 }
 
@@ -66,7 +66,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  box-shadow: inset 0 0 clamp(120px, 18vw, 260px) rgba(0, 0, 0, 0.72);
+  box-shadow: inset 0 0 clamp(120px, 18vw, 260px) rgba(var(--bg-rgb), 0.72);
 }
 
 /* ── SHELL ──────────────────────────────────────────────────────────── */
@@ -127,9 +127,9 @@
   gap: 8px;
   margin: 0 0 14px;
   padding: 5px 12px;
-  border: 1px solid rgba(232, 174, 60, 0.25);
-  border-radius: 9999px;
-  background: rgba(232, 174, 60, 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--accent-rgb), 0.08);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 600;
@@ -163,7 +163,7 @@
   letter-spacing: -0.028em;
   text-wrap: balance;
   /* Light type on a moving scene needs a shadow to hold its edge. */
-  text-shadow: 0 2px 34px rgba(0, 0, 0, 0.72);
+  text-shadow: 0 2px 34px rgba(var(--bg-rgb), 0.72);
 }
 
 .strat-headline-accent {
@@ -178,7 +178,7 @@
   background: linear-gradient(
     90deg,
     var(--accent) 0%,
-    rgba(232, 174, 60, 0.08) 100%
+    rgba(var(--accent-rgb), 0.08) 100%
   );
 }
 
@@ -195,11 +195,11 @@
   /* 0.72, not lower. The blur is real at this alpha, but 0.58 dropped the
      9px gold status text to 3.2:1 where the panel crosses the brightest
      part of the metropolis bloom. 0.72 holds 4.85:1 in that worst case. */
-  background: rgba(16, 16, 16, 0.72);
+  background: rgba(var(--surface-rgb), 0.72);
   backdrop-filter: blur(14px) saturate(130%);
   box-shadow:
     inset 0 1px 0 var(--border),
-    0 24px 60px -20px rgba(0, 0, 0, 0.85);
+    0 24px 60px -20px rgba(var(--bg-rgb), 0.85);
   overflow: hidden;
 }
 
@@ -214,9 +214,9 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(232, 174, 60, 0.55) 22%,
-    rgba(247, 198, 78, 0.8) 50%,
-    rgba(232, 174, 60, 0.55) 78%,
+    rgba(var(--accent-rgb), 0.55) 22%,
+    rgba(var(--accent-bright-rgb), 0.8) 50%,
+    rgba(var(--accent-rgb), 0.55) 78%,
     transparent 100%
   );
 }
@@ -249,9 +249,9 @@
   height: 21px;
   margin-left: auto;
   padding: 0 6px;
-  border: 1px solid rgba(232, 174, 60, 0.3);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   border-radius: 4px;
-  background: rgba(232, 174, 60, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   font-size: 12px;
   color: var(--accent);
 }
@@ -278,8 +278,8 @@
   text-decoration: none;
   color: inherit;
   transition:
-    background-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    padding-left 200ms cubic-bezier(0.23, 1, 0.32, 1);
+    background-color var(--transition-slow),
+    padding-left var(--transition-slow);
 }
 
 /* The gold edge that lights up on hover — a rail, not a side-stripe
@@ -296,8 +296,8 @@
   transform-origin: center;
   opacity: 0;
   transition:
-    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
-    opacity 220ms cubic-bezier(0.23, 1, 0.32, 1);
+    transform var(--transition-slow),
+    opacity var(--transition-slow);
 }
 
 .strat-signal-index {
@@ -306,8 +306,8 @@
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.08em;
-  color: rgba(240, 237, 232, 0.34);
-  transition: color 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  color: rgba(var(--text-primary-rgb), 0.34);
+  transition: color var(--transition-slow);
 }
 
 .strat-signal-body {
@@ -370,17 +370,17 @@
 /* Targeted structurally: lucide-react replaces any className passed to
    its components, so a class hook on the icon never survives to the DOM. */
 .strat-signal-link > svg:last-child {
-  color: rgba(240, 237, 232, 0.36);
+  color: rgba(var(--text-primary-rgb), 0.36);
   transition:
-    color 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+    color var(--transition-slow),
+    transform var(--transition-slow);
 }
 
 /* Hover is gated: touch devices fire it on tap, which would flash every
    row's hover state on the way to navigating. */
 @media (hover: hover) and (pointer: fine) {
   .strat-signal-link:hover {
-    background: rgba(232, 174, 60, 0.06);
+    background: rgba(var(--accent-rgb), 0.06);
     padding-left: 26px;
   }
 
@@ -404,7 +404,7 @@
 }
 
 .strat-signal-link:focus-visible {
-  outline: 1.5px solid var(--accent);
+  outline: 2px solid var(--accent-bright);
   outline-offset: -2px;
 }
 
@@ -418,6 +418,7 @@
 
 .strat-door {
   position: relative;
+  min-height: 64px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 18px;
   align-items: center;
@@ -428,12 +429,12 @@
   overflow: hidden;
   text-decoration: none;
   color: var(--text-primary);
-  background: rgba(16, 16, 16, 0.72);
+  background: rgba(var(--surface-rgb), 0.72);
   backdrop-filter: blur(10px);
   transition:
-    border-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    background-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+    border-color var(--transition-slow),
+    background-color var(--transition-slow),
+    transform var(--transition-slow);
 }
 
 .strat-door-label {
@@ -456,26 +457,26 @@
 .strat-door > svg {
   grid-column: 2;
   grid-row: 1 / span 2;
-  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform var(--transition-slow);
 }
 
 .strat-door--primary {
   border-color: transparent;
   background: var(--accent-bright);
-  color: #0d0d0d;
+  color: var(--on-accent);
   backdrop-filter: none;
-  box-shadow: 0 16px 40px -18px rgba(247, 198, 78, 0.65);
+  box-shadow: 0 16px 40px -18px rgba(var(--accent-bright-rgb), 0.65);
 }
 
 .strat-door--primary .strat-door-sub {
   /* Dark-on-gold: a mid grey here would drop under 4.5:1. */
-  color: rgba(13, 13, 13, 0.74);
+  color: rgba(var(--bg-rgb), 0.74);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .strat-door:hover {
     border-color: var(--accent);
-    background: rgba(232, 174, 60, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
   }
 
   .strat-door--primary:hover {
@@ -493,8 +494,8 @@
 }
 
 .strat-door:focus-visible {
-  outline: 1.5px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 3px;
 }
 
 /* ── ENTRANCE ────────────────────────────────────────────────────────
@@ -546,13 +547,13 @@
   }
 }
 
-/* Reduced motion keeps the fade, drops every movement. */
+/* Reduced motion presents the final state immediately. */
 @media (prefers-reduced-motion: reduce) {
   .strat-intro,
   .strat-signals,
   .strat-doors,
   .strat-signal-row {
-    animation: stratFade 200ms ease both;
+    animation: none;
   }
 
   .strat-live-dot {
@@ -572,13 +573,25 @@
   }
 }
 
+@media (prefers-reduced-transparency: reduce) {
+  .strat-signals,
+  .strat-door {
+    backdrop-filter: none;
+    background: var(--surface);
+  }
+
+  .strat-door--primary {
+    background: var(--accent-bright);
+  }
+}
+
 /* Blur is expensive on low-end mobile GPUs and the panel is nearly
    full-width there, so it buys little. Fall back to a tonal surface. */
 @media (max-width: 720px) {
   .strat-signals,
   .strat-door {
     backdrop-filter: none;
-    background: rgba(16, 16, 16, 0.86);
+    background: rgba(var(--surface-rgb), 0.86);
   }
 
   .strat-door--primary {
