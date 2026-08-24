@@ -16,10 +16,10 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
 A-012, A-013 and A-014 were closed on 2026-08-24 with evidence in
 [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. [[URGENT]] is empty.
 
-⚠️ **Six fixes now sit in the working tree and nowhere else.** U-008, U-009,
-U-010, A-012, A-013 and A-014 are all uncommitted; `main` and `origin/main`
-remain at `1daddbb`. Production still behaves the way it did before any of this
-work. Do not read the Done ledger as a description of the live site — the push
+⚠️ **Six fixes are committed locally but not pushed.** U-008, U-009, U-010,
+A-012, A-013 and A-014 landed on local `main` as `a5d0797`; `origin/main` remains
+at `1daddbb`. Production still behaves the way it did before any of this work.
+Do not read the Done ledger as a description of the live site — the push
 decision is [[MASTER_OWNER_ACTIONS|O-009]].
 
 Do not pull work from owner, waiting, future, specifications, or historical

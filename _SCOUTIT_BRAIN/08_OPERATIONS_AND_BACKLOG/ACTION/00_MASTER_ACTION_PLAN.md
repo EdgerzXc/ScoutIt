@@ -36,10 +36,11 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   were security defects read directly out of current code, each fixed test-first
   and recorded with evidence in
   [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. [[URGENT]] is empty again.
-- ⚠️ **All six fixes are in the working tree only.** `main` and `origin/main`
-  are still at `1daddbb`, so the live site continues to carry the stored-XSS,
-  formula-injection, open-write, unmetered-spend and hanging-call defects until
-  the owner approves a push. Tracked as O-009 in [[MASTER_OWNER_ACTIONS]].
+- ⚠️ **All six fixes are committed locally and NOT pushed.** Local `main`
+  is at `a5d0797`; `origin/main` is still at `1daddbb`. The live site therefore
+  continues to carry the stored-XSS, formula-injection, open-write,
+  unmetered-spend and hanging-call defects until the owner approves a push.
+  Tracked as O-009 in [[MASTER_OWNER_ACTIONS]].
   **Do not treat the Done ledger as a description of production.**
 - U-010's honest-failure work surfaced a live configuration question:
   `AIRTABLE_REACTIONS_TABLE_ID` may never have been set, in which case every

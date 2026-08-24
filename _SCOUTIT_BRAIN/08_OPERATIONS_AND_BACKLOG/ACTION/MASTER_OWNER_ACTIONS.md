@@ -46,11 +46,15 @@ false success.
 
 ## O-009 — Approve the push that puts the 2026-08-23 security fixes live
 
-Three security defects were fixed on 2026-08-23 (U-008 stored XSS via JSON-LD,
-U-009 Airtable formula injection in `/api/geo-pricing`, U-010 unauthenticated
-unbounded writes to `/api/reactions`). **The fixes are in the working tree only.**
-`main` and `origin/main` remain at `1daddbb`, so the live site still carries all
-three until this is approved.
+Six items were fixed across 2026-08-23/24 (U-008 stored XSS via JSON-LD, U-009
+Airtable formula injection in `/api/geo-pricing`, U-010 unauthenticated unbounded
+writes to `/api/reactions`, plus A-012 rate limiting, A-013 third-party timeouts
+and A-014 AI Promote degradation).
+
+**They are committed on local `main` as `a5d0797` and have NOT been pushed.**
+`origin/main` remains at `1daddbb`, so the live site still carries all of them
+until this is approved. Pushing triggers a production deploy on both Vercel
+projects (`scout-it` is the main site).
 
 **Evidence already produced:** 1,513 unit tests pass, `npm run build` compiles,
 ESLint is clean, and `npm run verify:surfaces` passes 3/3 before and after.
