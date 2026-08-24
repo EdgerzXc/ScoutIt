@@ -46,6 +46,11 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   `AIRTABLE_REACTIONS_TABLE_ID` may never have been set, in which case every
   recorded reaction was silently discarded while the UI confirmed a save. Owner
   check O-010.
+- **A-015, A-016 and A-017 were closed on 2026-08-24**, continuing the owner's
+  "list of 10" at items 6 (secrets) and 8 (idempotency). [[ACTIVE]] now carries a
+  scoreboard for that list: everything still open on it sits behind an owner gate
+  (the parked security pass, or migrations in [[WAITING]] W-003) rather than
+  behind engineering effort.
 - **A-012, A-013 and A-014 were closed on 2026-08-24.** The repository's own
   rate limiter and `fetchWithRetry` now cover the routes that bypassed them, and
   AI Promote degrades to its local pack instead of dead-ending. A-014 was

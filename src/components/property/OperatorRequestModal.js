@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { getSession } from "../../lib/authClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check } from "lucide-react";
@@ -44,8 +44,19 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Synchronous in-flight latch for a paid action. Deliberately a ref and
+  // not state -- see the guard inside handleSubmit.
+  const submitInFlightRef = useRef(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // A-017: the money guard lives here, not only in the button.
+    // `status` is React state and is STALE within a tick -- two clicks
+    // dispatched before the next render would both read "composing" and both
+    // spend. A ref updates synchronously, so the second call sees the first.
+    if (submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
+
     setStatus("submitting");
     setErrorMsg("");
 
@@ -83,6 +94,8 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
       console.error("Operator request failed", err);
       setStatus("error");
       setErrorMsg("Couldn't send the request — check your connection.");
+    } finally {
+      submitInFlightRef.current = false;
     }
   };
 

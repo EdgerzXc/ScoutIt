@@ -35,6 +35,11 @@ yarn-error.log*
 
 # Environment and deployment state
 .env*
+# ...but the template MUST be tracked -- being committed is its entire purpose.
+# Without this negation a fresh clone gets zero environment documentation, which
+# is how 31 required variables went undocumented (A-015). Real .env files above
+# stay ignored; verify with: git check-ignore -v .env.local
+!.env.example
 .vercel/
 
 # Reference assets and local tool state
@@ -69,6 +74,9 @@ yarn-error.log*
 /scratch/
 /scratch_*.png
 /scratch_*.js
+# Agent review captures left at the repo root (e.g. .codex-profile-review.png).
+# The file stays on disk for whoever wants it; it just is not repo content.
+/.codex-*.png
 
 # ScoutIt Second Brain — local strategy/scenario knowledge base. It will move
 # to its own private location; only already-tracked handoff files remain in git.

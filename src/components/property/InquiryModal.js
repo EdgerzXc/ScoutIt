@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSession } from "../../lib/authClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -67,8 +67,19 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
     onClose();
   };
 
+  // Synchronous in-flight latch for a paid action. Deliberately a ref and
+  // not state -- see the guard inside handleSubmit.
+  const submitInFlightRef = useRef(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // A-017: the money guard lives here, not only in the button.
+    // `status` is React state and is STALE within a tick -- two clicks
+    // dispatched before the next render would both read "composing" and both
+    // spend. A ref updates synchronously, so the second call sees the first.
+    if (submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
+
     setStatus("submitting");
     setErrorMsg("");
 
@@ -134,6 +145,8 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
       console.error("Inquiry failed", err);
       setStatus("error");
       setErrorMsg("Couldn't send your message — check your connection.");
+    } finally {
+      submitInFlightRef.current = false;
     }
   };
 
