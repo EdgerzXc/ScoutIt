@@ -64,12 +64,14 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-018 through A-029 are the eleven Active items (A-028 is Done); Urgent is empty after U-011's verified closure.
-- **A-018 was promoted from Future on 2026-08-24 after current-code verification.**
-  The unfinished QuestIT feature remains parked, but its route gate currently
-  fails open when `ai_search` is missing or pre-launch mode is active. Active work
-  is limited to fail-closed containment plus regression coverage; it requires no
-  migration, credential, visual approval, or QuestIT product expansion.
+  A-019 through A-029 are the ten Active items (A-028 is Done); Urgent is empty
+  after U-011's verified closure.
+- **A-018 closed on 2026-08-24.** Every `/api/questit` and `/api/v1/questit/*`
+  route now fails closed before pre-launch feature logic unless `ai_search` is
+  explicitly true; the route-level helper uses the same disabled default and an
+  unexpected flag-resolution error returns the controlled 503 for QuestIT only.
+  The broader product and its missing tables remain parked; no migration,
+  credential, or paid-provider enablement was introduced.
   The pricing-benefit gap remains Future until the payment-enablement trigger fires.
 - **A-028 closed on 2026-08-24 after the full repository ownership audit.**
   Nine dead source/style files, five unreferenced tool captures, one broken

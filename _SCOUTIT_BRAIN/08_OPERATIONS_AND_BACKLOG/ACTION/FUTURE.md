@@ -31,8 +31,9 @@ related:
 | QuestIT | `QUESTIT_FUTURE/` | Parked feature. ⚠️ Reads 3 tables that do not exist |
 
 The feature and its missing tables remain parked. The independently actionable
-route-containment defect was verified against current code and promoted as
-[[ACTIVE#A-018 — Fail closed for parked QuestIT endpoints|A-018]] on 2026-08-24.
+route-containment defect closed as
+[[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|A-018]] on 2026-08-24; every
+QuestIT route now requires an explicitly enabled `ai_search` flag.
 **Do not enable `ai_search` until those tables exist.**
 
 ## 2. Trigger-gated — start when the trigger fires, not before

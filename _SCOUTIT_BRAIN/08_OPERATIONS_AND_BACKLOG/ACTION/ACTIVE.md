@@ -18,27 +18,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   Its statistics contract makes the read-only ScoutIt transaction record primary
   and keeps broker-editable historical career data secondary and clearly labelled.
 
-## A-018 — Fail closed for parked QuestIT endpoints
-
-**Owner outcome:** unfinished QuestIT routes never reach missing tables or paid
-provider calls unless the `ai_search` feature flag is explicitly present and
-enabled. The broader QuestIT product remains parked in
-[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]].
-
-**Current evidence (2026-08-24):** `src/proxy.js` gates the route only when
-`flags.ai_search === false`, and only after `pre_launch_free_mode` becomes false.
-A missing flag or today's pre-launch default therefore allows `/api/questit` and
-`/api/v1/questit/*` through. The v1 handlers read `questit_api_keys`,
-`questit_policies`, and `company_quests`, which are deliberately not provisioned.
-
-**Agent lane:** change only route containment and its regression coverage. Do
-not create QuestIT tables, enable the feature, or expand its product scope.
-
-**Exit test:** missing and false `ai_search` states return a controlled unavailable
-response for every QuestIT route; only an explicit true state passes. Existing
-global-read-only behavior, the full verification gate, build, and 3/3 approved
-surface locks remain green. No migration or owner credential is required.
-
 ## A-019 — Reframe the universal menu and Settings information architecture
 
 **Owner outcome:** the menu and Settings surfaces feel like one deliberate

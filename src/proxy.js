@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { isQuestItPath, shouldBlockQuestIt } from '@/lib/questItGate';
 
 // ── Rate limiting (B4) ──────────────────────────────────────────────────────
 // Sensitive routes (auth, uploads, AI) FAIL CLOSED when the limiter is
@@ -150,6 +151,7 @@ export async function proxy(request, event) {
   const ip = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
   const path = request.nextUrl.pathname;
   const sensitive = isSensitivePath(path);
+  const questItPath = isQuestItPath(path);
 
   // ── Feature-flag enforcement (A4) — fails safe/open (enforced in all envs) ──
   try {
@@ -165,18 +167,24 @@ export async function proxy(request, event) {
       );
     }
 
+    // QuestIT is parked behind an independent fail-closed gate. Pre-launch
+    // free mode never overrides this: missing/false blocks, explicit true opens.
+    if (shouldBlockQuestIt(path, flags)) {
+      return NextResponse.json({ error: 'AI search is not enabled right now.' }, { status: 503 });
+    }
+
     // Feature gates — honored only once pre-launch free mode ends, so the
     // currently-unlocked experience is unchanged until launch flips it.
     const freeMode = flags.pre_launch_free_mode !== false; // default true
     if (!freeMode) {
-      if (flags.ai_search === false && (path.startsWith('/api/questit') || path.startsWith('/api/v1/questit'))) {
-        return NextResponse.json({ error: 'AI search is not enabled right now.' }, { status: 503 });
-      }
       if (flags.deep_intel === false && path.startsWith('/api/intel/')) {
         return NextResponse.json({ error: 'Deep Intel is not enabled right now.' }, { status: 503 });
       }
     }
   } catch (err) {
+    if (questItPath) {
+      return NextResponse.json({ error: 'AI search is not enabled right now.' }, { status: 503 });
+    }
     console.error('[FeatureFlags] Error (failing open):', err?.message);
   }
 

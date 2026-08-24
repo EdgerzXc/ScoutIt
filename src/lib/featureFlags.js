@@ -49,7 +49,8 @@ export async function isPreLaunchFreeMode() {
 
 /** AI Search Engine (/api/questit) */
 export async function isAiSearchActive() {
-  return getFlag("ai_search", true);
+  // Fail closed while QuestIT is parked; only an explicit flag enables spend.
+  return getFlag("ai_search", false);
 }
 
 /** Deep Intelligence Studio (cap-rate & noise metrics) */
