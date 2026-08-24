@@ -94,7 +94,9 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 - **A-023 was owner-promoted on 2026-08-24 as the canonical Broker Dossier
   workstream.** It converges the Airtable broker page and Supabase broker panel
   into one identity, editor/live preview, generated Current Representations,
-  handshake-grounded rating record, sourced statistics, consented structured
+  a primary read-only ScoutIt transaction record, a mathematically isolated
+  secondary broker-editable Career History template, handshake-grounded rating,
+  consented structured
   recommendations, inspectable contributions, and one compliant Connect path.
   Raw public screenshots, broker-claimed properties, paid trust, hidden
   composite scoring, and unsupported backfills are excluded.

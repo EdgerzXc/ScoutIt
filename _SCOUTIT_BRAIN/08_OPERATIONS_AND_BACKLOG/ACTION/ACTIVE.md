@@ -15,6 +15,8 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
 
 - [[A-023_BROKER_DOSSIER|A-023 — Canonical Broker Dossier and editor]]
   is the complete authoritative plan for the broker master-page workstream.
+  Its statistics contract makes the read-only ScoutIt transaction record primary
+  and keeps broker-editable historical career data secondary and clearly labelled.
 
 ## A-018 — Fail closed for parked QuestIT endpoints
 

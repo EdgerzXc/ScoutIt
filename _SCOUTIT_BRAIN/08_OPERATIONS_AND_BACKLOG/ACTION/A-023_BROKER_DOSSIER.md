@@ -14,7 +14,7 @@ related: ["[[ACTIVE]]", "[[00_MASTER_ACTION_PLAN]]", "[[DATA_DICTIONARY]]", "[[U
 
 ## Outcome and current defect
 
-Build one premium broker master page with sourced mathematical signals,
+Build one premium broker master page with two separate statistics templates,
 authorized property representations, broker-written description, explainable
 Scout Rating, client recommendations, inspectable ScoutIt contributions, and one
 compliant Connect path. Editing uses the Property Review model: structured
@@ -37,8 +37,8 @@ claims; remove them in phase 1 rather than polishing contradictory trust copy.
 - Brokers edit declared facts only: portrait, biography, firm, markets,
   categories, languages, areas, working style, availability, and optional intro
   media.
-- Brokers never edit credentials, represented properties, rating events,
-  statistics, recommendations, contributions, or badges.
+- Brokers may edit Career History; they never edit credentials, represented properties,
+  ScoutIt events/statistics, recommendations, contributions, or badges.
 - Tier may change capacity/media limits; it never buys trust or rating.
 - Every public card says whether it is broker-declared, client-submitted,
   ScoutIt-computed, staff-verified, or source-linked.
@@ -48,10 +48,20 @@ claims; remove them in phase 1 rather than polishing contradictory trust copy.
 1. **Identity + rating:** specific PRC evidence, markets, specialties,
    availability, and Scout Rating. Insufficient data says **Building a ScoutIt
    record**, never zero stars.
-2. **Mathematical signals:** active accepted representations, completed
-   two-sided handshakes, response rate, median response time, recommendation
-   count, and freshness only where sourced. Show definition, window, sample,
-   source, and calculation date; low-sample/stale values stay absent.
+2. **Mathematical signals:** two isolated templates; the ScoutIt Record is primary.
+   - **ScoutIt Record — primary:** automatically computed only from auditable
+     activity completed through ScoutIt: qualifying two-sided transaction
+     handshakes, in-platform response rate and median response time, qualifying
+     recommendation count, transaction recency, and sample size. Brokers can
+     inspect this record but cannot edit it.
+   - **Career History — secondary:** broker-editable, self-reported experience
+     such as years practicing, historical transaction count or volume, markets,
+     property types, and date range. Every value requires a unit, coverage
+     period, source/evidence note, and broker attestation. It remains labelled
+     **Broker-declared** unless a named verification workflow has passed.
+   - Never add, average, normalize, or visually merge Career History into the
+     ScoutIt Record or Scout Rating. Low-sample, stale, disputed, or missing
+     ScoutIt values stay absent rather than being backfilled from history.
 3. **Current Representations:** compact cards derived only from active, visible,
    contactable, owner-accepted `property_broker_representations`. They link to
    canonical property pages without repeating chapters. Brokers cannot add,
@@ -77,6 +87,13 @@ claims; remove them in phase 1 rather than polishing contradictory trust copy.
 - Remove conflicting 5-point and 100-point displays. Any future composite needs
   a published formula, anti-gaming review, minimum sample, reversal/dispute and
   backfill rules, plus separate owner approval.
+- The ScoutIt Record always appears before Career History. Search/ranking,
+  Scout Rating, ScoutIt badges, and platform incentives may use only eligible
+  ScoutIt-owned events—not self-reported history, subscription tier, or paid
+  visibility. Real platform use earns a richer sourced record, not an artificial
+  score boost.
+- Exclude circular, duplicate, self-dealing, test, collusive, rapidly reversed,
+  or otherwise ineligible activity before aggregation.
 - Reversed, disputed, duplicate, test, refunded, or invalidated events do not
   contribute; aggregates reproduce from audited source events.
 - Recommendation authors choose full name, initials, role-only, or anonymous.
@@ -88,13 +105,13 @@ claims; remove them in phase 1 rather than polishing contradictory trust copy.
 - Structured left editor, exact live preview, autosaved private draft, explicit
   publish state, dirty-state protection, completeness, and provenance.
 - No custom font, palette, HTML, script, freeform layout, badge, property,
-  metric, or recommendation controls.
+  ScoutIt metric, or recommendation controls; Career History uses fixed fields, units, periods, evidence, and attestation.
 - Airtable `BROKERS_CMS` stays the public identity/content source; Supabase
   stays Auth plus private/operational authority. Broker drafts save to Supabase;
   an audited bridge publishes only allowed narrative fields to Airtable. Staff
   PRC/example/trust fields are excluded from broker payloads.
 - Supabase owns representations, handshakes, recommendations, contributions,
-  consent, disputes, and statistics. Public rendering consumes one allowlisted
+  consent, disputes, ScoutIt aggregates, and versioned Career History claims. Public rendering consumes one allowlisted
   server projection, never private deal/message data.
 - Link Auth UUID to BrokerID explicitly, never by mutable email/name.
 - `/brokers/[BrokerID]` is canonical; broker-shaped `/profile/[id]` output
@@ -130,4 +147,8 @@ contribution opens its artifact; low-sample/error states make no false claim;
 authorization, privacy, XSS/contact-leak, accessibility, metadata, responsive,
 full verification, build, and 3/3 surface locks pass. Live schema/data/deploy
 changes remain separately owner-approved.
+
+The two templates must remain mathematically isolated in storage, projection,
+UI, ranking, and rating tests. Historical edits must never alter the primary
+ScoutIt Record.
 
