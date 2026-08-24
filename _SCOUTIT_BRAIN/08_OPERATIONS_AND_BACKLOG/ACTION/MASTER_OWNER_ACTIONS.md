@@ -44,36 +44,6 @@ whether a reactions table exists in the Airtable base at all.
 today, and after U-010 a missing table produces an honest 503 instead of a
 false success.
 
-## O-009 — Approve the push that puts the 2026-08-23 security fixes live
-
-Nine task IDs were completed across 2026-08-23/24 (U-008 stored XSS via JSON-LD, U-009
-Airtable formula injection in `/api/geo-pricing`, U-010 unauthenticated unbounded
-writes to `/api/reactions`, plus A-012 rate limiting, A-013 third-party timeouts
-and A-014 AI Promote degradation, A-015 environment-contract coverage, A-016
-paid-action button hardening, and A-017 synchronous submit re-entry guards).
-
-**The batch is committed on local `main` through `b4d704a` and has NOT been
-pushed.** A-014's independently discovered one-line typography correction is
-verified but uncommitted. `origin/main` remains at `1daddbb`, so the live site
-still carries the production defects until a reviewed commit and push are
-approved. Pushing triggers a production deploy on both Vercel projects
-(`scout-it` is the main site).
-
-**Evidence already produced:** 1,563 unit tests pass, 518 E2E cases are
-discoverable, `npm run build` compiles, ESLint and typography are clean, and
-`npm run verify:surfaces` passes 3/3 before and after.
-Each fix was written test-first, and each test was watched fail for the right
-reason before the fix existed.
-
-**What the owner decides:** whether to review the complete local diff, authorize
-a small commit for the A-014 verification correction and documentation, and then
-push the reconciled batch to both Vercel projects.
-
-**Note:** U-009 changes behaviour for callers — `/api/geo-pricing` now returns
-400 for a category outside the six known ones, where it previously fell through
-to `Listed_Price`. That is the fix, but it is a visible change worth knowing
-about before it ships.
-
 ### F-001 — Approve retrieval persistence and provider activation
 
 The local two-corpus retrieval foundation is engineering-complete and remains

@@ -169,11 +169,10 @@ owner's explicit go-ahead** — they need migrations or the parked security pass
 
 ## Deployment state
 
-⚠️ Local `main` is ahead of `origin/main`. Nine task IDs (U-008 through A-017)
-are committed locally through `b4d704a` and **not pushed**; A-014's one-line
-typography verification correction is complete but uncommitted. `origin/main`
-remains at `1daddbb`. Production behaves as it did before this work. The push decision is
-[[MASTER_OWNER_ACTIONS|O-009]].
+Local `main` and `origin/main` are synchronized through `bab4a06`. The full
+release gate passed before the 2026-08-24 owner-approved push. GitHub delivery
+is confirmed; production deployment and behavior remain subject to the live
+website audit now in progress.
 
 ---
 

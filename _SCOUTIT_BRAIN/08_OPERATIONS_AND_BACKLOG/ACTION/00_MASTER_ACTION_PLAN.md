@@ -28,21 +28,22 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 
 ## Current truth — 2026-08-24
 
-- Production baseline: `origin/main` remains at `1daddbb` after
-  the owner-approved 2026-08-23 push. The items below are **not** in that commit.
+- GitHub baseline: local `main` and `origin/main` are synchronized through
+  `bab4a06` after the owner-approved 2026-08-24 push. The release gate passed
+  before push; production deployment and live behavior are being audited rather
+  than inferred from GitHub state.
+- The previous production baseline was `1daddbb` after the owner-approved
+  2026-08-23 push.
 - The pre-pilot stabilization gate closed 2026-08-22. U-001 through U-007 are
   in [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]].
 - **U-008, U-009 and U-010 were opened and closed on 2026-08-23.** All three
   were security defects read directly out of current code, each fixed test-first
   and recorded with evidence in
   [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. [[URGENT]] is empty again.
-- ⚠️ **Nine task IDs are complete locally and NOT pushed.** Local `main` is at
-  `b4d704a`, with A-014's one-line typography verification correction complete
-  but uncommitted; `origin/main` is still at `1daddbb`. The live site therefore
-  continues to carry the stored-XSS, formula-injection, open-write,
-  unmetered-spend and hanging-call defects until the owner approves a reviewed
-  commit and push. Tracked as O-009 in [[MASTER_OWNER_ACTIONS]].
-  **Do not treat the Done ledger as a description of production.**
+- **U-008 through A-017 are now pushed to GitHub.** O-009 closed with evidence
+  in [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. Treat the GitHub
+  release as source truth; do not call Vercel production current until the live
+  audit verifies deployment and behavior.
 - U-010's honest-failure work surfaced a live configuration question:
   `AIRTABLE_REACTIONS_TABLE_ID` may never have been set, in which case every
   recorded reaction was silently discarded while the UI confirmed a save. Owner
