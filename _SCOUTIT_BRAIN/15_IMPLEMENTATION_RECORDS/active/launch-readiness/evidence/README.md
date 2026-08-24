@@ -27,6 +27,7 @@ Supporting machine-readable and visual launch-readiness evidence.
 ### Supporting assets
 
 - `15_IMPLEMENTATION_RECORDS/active/launch-readiness/evidence/api-inventory.json`
+- `15_IMPLEMENTATION_RECORDS/active/launch-readiness/evidence/full-site-audit-2026-08-24.json`
 - `15_IMPLEMENTATION_RECORDS/active/launch-readiness/evidence/full-site-audit.json`
 - `15_IMPLEMENTATION_RECORDS/active/launch-readiness/evidence/mission-control-audit.json`
 - `15_IMPLEMENTATION_RECORDS/active/launch-readiness/evidence/page-inventory.json`

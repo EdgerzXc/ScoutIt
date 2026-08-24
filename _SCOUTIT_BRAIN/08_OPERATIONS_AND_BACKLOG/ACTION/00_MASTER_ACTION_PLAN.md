@@ -28,10 +28,9 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 
 ## Current truth — 2026-08-24
 
-- GitHub baseline: local `main` and `origin/main` are synchronized through
-  `bab4a06` after the owner-approved 2026-08-24 push. The release gate passed
-  before push; production deployment and live behavior are being audited rather
-  than inferred from GitHub state.
+- GitHub baseline includes the owner-approved release and O-009 action record
+  through `a35237d`. Production Vercel, API, Supabase, Airtable, and email
+  health were verified live.
 - The previous production baseline was `1daddbb` after the owner-approved
   2026-08-23 push.
 - The pre-pilot stabilization gate closed 2026-08-22. U-001 through U-007 are
@@ -39,11 +38,17 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 - **U-008, U-009 and U-010 were opened and closed on 2026-08-23.** All three
   were security defects read directly out of current code, each fixed test-first
   and recorded with evidence in
-  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. [[URGENT]] is empty again.
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]].
 - **U-008 through A-017 are now pushed to GitHub.** O-009 closed with evidence
-  in [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. Treat the GitHub
-  release as source truth; do not call Vercel production current until the live
-  audit verifies deployment and behavior.
+  in [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]].
+- **The 2026-08-24 production audit is complete.** Ninety-eight desktop/mobile
+  route observations, safe HTTP/security probes, repeat performance samples,
+  and a 314-case read-only browser subset verified broad public health and routed
+  only reproducible findings. U-011 owns nested property soft 404s; A-024 through
+  A-027 own unlocked semantic/auth-entry/audit-harness/performance work; O-011
+  owns Google production-origin configuration; locked Showcase semantics extend
+  F-006; partial canonical coverage stays under Future L-001. Evidence and
+  false-positive boundaries are in `15_IMPLEMENTATION_RECORDS/active/launch-readiness/PRODUCTION_AUDIT_2026-08-24.md`.
 - U-010's honest-failure work surfaced a live configuration question:
   `AIRTABLE_REACTIONS_TABLE_ID` may never have been set, in which case every
   recorded reaction was silently discarded while the UI confirmed a save. Owner
@@ -59,7 +64,7 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-018 through A-023 are now the six Active items.
+  A-018 through A-027 are now the ten Active items.
 - **A-018 was promoted from Future on 2026-08-24 after current-code verification.**
   The unfinished QuestIT feature remains parked, but its route gate currently
   fails open when `ai_search` is missing or pre-launch mode is active. Active work

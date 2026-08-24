@@ -62,6 +62,13 @@ instead of emergency account recovery or infrastructure archaeology.
 
 ### Search and index coverage
 
+- **Live audit evidence (2026-08-24):** core directories/layers emitted correct
+  canonicals, but public/indexable routes including `/`, `/discover`,
+  `/enterprise`, `/badges`, `/terms`, and `/privacy` emitted no canonical link.
+  The sitemap and robots files returned 200 on the canonical `www` host and the
+  sitemap listed 16 URLs. Private/noindex routes are excluded from this finding;
+  nonexistent nested property soft 404s are Urgent U-011. Reconcile these exact
+  gaps when L-001 is promoted; do not open a duplicate SEO task.
 - Audit the existing Google Search Console domain property, sitemap processing,
   canonical/index coverage, manual actions, structured-data enhancements, and URL
   inspection workflow. Preserve its DNS verification record through every DNS move.

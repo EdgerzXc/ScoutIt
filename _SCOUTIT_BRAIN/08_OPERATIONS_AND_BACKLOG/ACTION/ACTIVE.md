@@ -146,6 +146,91 @@ No analytics/marketing cookie, fingerprint, location, terms acceptance, or
 authentication state is created by preload. Only essential cache/preference
 state with documented purpose and expiry may be stored.
 
+## A-024 — Repair verified public semantic and contrast defects
+
+**Owner outcome:** Discovery, Descent, and Crust retain their approved visual
+composition while exposing one clear document title, distinguishable landmarks,
+valid tab semantics, and readable non-text decoration.
+
+**Current evidence (2026-08-24):** the live desktop/mobile axe sweep found two
+H1s and a duplicate unlabeled navigation landmark on `/discover`, two H1s on
+`/descent`, `role="tabpanel"` on an `article` in Crust, and a 2.69:1 inactive
+Crust tab index at 12px on mobile. Current JSX/CSS reproduces every finding.
+Locked Showcase findings are excluded and remain owner action F-006.
+
+**Agent lane:** make semantic/token changes with no composition redesign. Add
+focused axe/heading/landmark regressions for these exact routes and both profiles.
+
+**Exit test:** each route has one meaningful H1; multiple navs have distinct
+names; the tablist/panel relationship uses valid elements/roles; informative text
+meets WCAG AA; keyboard/history behavior remains; full verify/build and 3/3 locks
+pass without changing `ShowcaseStage.js`.
+
+## A-025 — Make signed-out workspace and auth entry fail quietly and honestly
+
+**Owner outcome:** a signed-out visitor sees an immediate deliberate sign-in
+handoff and ScoutIt makes no private workspace request until identity is proven.
+
+**Current evidence (2026-08-24):** production `/admin`, calendar, CRM, and inbox
+surfaces issue protected requests while anonymous and log expected 401 failures;
+inbox calls `/api/deals` before resolving a usable identity. Onboarding also asks
+for missing `/grain.png` on every auth-derived entry even though the root layout
+already provides the data-URI grain. APIs correctly deny access; this is an entry,
+noise, and wasted-request defect, not evidence of data exposure. Google origin
+configuration is separately owner-gated as O-011.
+
+**Agent lane:** centralize the verified signed-out boundary before private child
+effects mount, preserve localhost E2E isolation, remove the redundant missing
+asset request, and render an honest Google-unavailable state if GIS cannot render.
+Do not weaken server authorization or treat browser cache as identity.
+
+**Exit test:** anonymous workspace URLs make zero private API calls, emit no
+expected-auth console errors, and reach one accessible sign-in state/redirect;
+valid sessions retain deep links; no `/grain.png` 404 occurs; email/OTP remains
+usable when Google is unavailable; auth, mobile, and production-host tests pass.
+
+## A-026 — Make the browser audit portable and non-vacuous
+
+**Owner outcome:** the same read-only suite can audit localhost or a supplied
+production URL without false failures or accidentally measuring the wrong host.
+
+**Current evidence (2026-08-24):** six of 314 production-suite results failed for
+two deterministic harness bugs: the Manifesto no-JS case hardcodes
+`http://localhost:3000/about`, and Descent uses an unscoped ScoutIt-link locator
+that matches both layer navigation and footer. The application behavior passed;
+the tests did not honor their configured `baseURL` or landmark scope.
+
+**Agent lane:** derive new contexts from the configured target, keep the ScoutIt
+render anchor, scope locators to their owning landmark, and add regression checks
+for U-011/A-024 without making live tests destructive.
+
+**Exit test:** the curated production subset passes without a localhost server;
+a protected/interstitial host still fails the render anchor; no live test writes,
+publishes, spends, sends, or changes account state; local and remote modes pass.
+
+## A-027 — Stabilize measured production layout and foreground workload
+
+**Owner outcome:** key directories do not visibly jump as data hydrates, and the
+homepage remains responsive while preserving its cinematic identity.
+
+**Current evidence (2026-08-24):** three desktop production samples measured
+CLS near 0.26 on `/brokers`, 0.13 on `/property`, and 0.11 on warm `/discover`.
+Homepage paint/navigation entries were fast, but a nominal 3.5-second settle and
+evaluate cycle took about 20–30 seconds desktop and 7–8 seconds mobile, pointing
+to foreground/main-thread work rather than network latency. This is lab evidence;
+it does not identify the responsible component by itself.
+
+**Agent lane:** capture layout-shift sources and long tasks first; reserve real
+dimensions for async content; schedule/pause decorative work by visibility,
+reduced motion, Lite Mode, and device capability. Coordinate with A-022 warming
+so prefetch never hides or worsens the measured costs. Do not remove WebGL or
+cinematic layers on a guess.
+
+**Exit test:** three cold/warm desktop/mobile repetitions show CLS at or below
+0.10 on audited routes, no unexplained multi-second long task, responsive menu/
+primary interaction, no LCP regression, and preserved reduced-motion/Lite paths.
+Record trace evidence, not only a score; full verify/build and 3/3 locks pass.
+
 ## Where the owner's "list of 10" stands
 
 The ten items raised on 2026-08-23 as the ones that actually matter at this size:
@@ -169,10 +254,10 @@ owner's explicit go-ahead** — they need migrations or the parked security pass
 
 ## Deployment state
 
-Local `main` and `origin/main` are synchronized through `bab4a06`. The full
-release gate passed before the 2026-08-24 owner-approved push. GitHub delivery
-is confirmed; production deployment and behavior remain subject to the live
-website audit now in progress.
+GitHub and production are confirmed current through the 2026-08-24 release; the
+follow-up action record is at `a35237d`. The live API and its Supabase/Airtable
+dependencies reported healthy. The completed production audit routed U-011,
+A-024 through A-027, O-011, F-006, and L-001 without duplicating their authority.
 
 ---
 

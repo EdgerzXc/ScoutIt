@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [owner-actions, decisions, approvals, external-systems]
-updated: 2026-08-23
+updated: 2026-08-24
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/README|Done Index]]"]
 ---
 
@@ -17,9 +17,10 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKL
 ## O-010 — Check whether property reactions have ever been recorded
 
 `/api/reactions` writes to the Airtable table named by
-`AIRTABLE_REACTIONS_TABLE_ID`. That variable appears in exactly two places in the
-whole repository: the route that reads it, and the test that sets it. It is not
-in `.env.local`, not in any `.env.example`, and not in any document.
+`AIRTABLE_REACTIONS_TABLE_ID`. A-015 now documents it in `.env.example`, and the
+route plus tests enforce the configuration contract. Template documentation does
+not prove that a real table exists or that Vercel has the real table ID, which is
+the remaining owner question.
 
 Locally the route now answers `503 Reactions are not configured`. Before U-010
 the same condition returned `{ ok: true }` — the code checked for the three env
@@ -33,8 +34,8 @@ Vercel project environment (both projects — `scout-it` is the main site), and
 whether a reactions table exists in the Airtable base at all.
 
 **Then one of two things is true:**
-- The table exists and the variable is simply missing locally — set it in
-  `.env.local` and add it to the documented environment list.
+- The table exists and the value is missing in an intended environment — set it
+  there through the normal secret/configuration workflow; the template is current.
 - The table was never created — then the reaction tiles have been decorative
   since they shipped, and the owner decides whether to build the table or retire
   the feature. Local saving to Your Board works either way; it is only the
@@ -43,6 +44,28 @@ whether a reactions table exists in the Airtable base at all.
 **Note:** this is a data question, not an outage. Nothing is broken for users
 today, and after U-010 a missing table produces an honest 503 instead of a
 false success.
+
+## O-011 — Allow and prove Google sign-in on the production origin
+
+The 2026-08-24 live audit loaded the deployed Google Identity Services client
+on ScoutIt's onboarding/auth entry. Google returned 403 and logged: the given
+origin is not allowed for client ID
+`626088890600-iavfh4001lirqsrn2kjdl4i5049s7i0p.apps.googleusercontent.com`.
+The button therefore cannot be treated as a working production sign-in path.
+Email/password and OTP remain available; this is not a total login outage.
+
+**What the owner does:** in the Google Cloud OAuth client, verify the correct
+ScoutIt-owned project and add only the exact production JavaScript origins
+`https://scoutit.space` and `https://www.scoutit.space` as needed by the canonical
+redirect. Verify Supabase's Google provider/client-secret configuration and
+allowed redirect URLs, then confirm Vercel's `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+matches that same client in Production (and intended Preview scope). Do not paste
+a client secret, recovery code, or token into Git, chat, screenshots, or logs.
+
+**Exit evidence:** a fresh incognito desktop and mobile session renders the
+Google button without the origin error, completes one controlled sign-in to the
+expected Supabase Auth UUID, returns only to an allowlisted ScoutIt URL, and can
+sign out cleanly. A-025 separately owns the honest unavailable fallback.
 
 ### F-001 — Approve retrieval persistence and provider activation
 
@@ -112,11 +135,19 @@ review. A separate Satori-safe component now keeps the same split across the roo
 Open Graph image, root Twitter image, and dynamic `/api/og` card; all three real PNG
 outputs were inspected at 1200px.
 
-The owner-locked Showcase already looks correct, but its link still declares the
-legacy accessible label `ScoutIT — home` and duplicates the three spans instead of
-using the shared component. Approve this exact accessibility/source-only change and
-the resulting owner-reviewed checksum update, or explicitly retain the locked
-implementation as a documented exception. Until then, do not edit
+The owner-locked Showcase already looks correct, but the 2026-08-24 production
+audit confirmed three source-only accessibility defects inside the same locked
+file: its home link still declares legacy label `ScoutIT — home` and duplicates
+the shared wordmark; `ShowcaseStage` nests a second `<main>` inside the page's
+top-level `<main>`; and tray item names jump from H1 to H4. Axe reports duplicate/
+nested main landmarks and invalid heading order on desktop and mobile.
+
+Approve the exact accessibility-only reconciliation—shared wordmark, internal
+stage changed to a non-landmark container, and tray names changed to the correct
+non-skipping heading level—plus visual review and the resulting checksum update,
+or explicitly retain the locked implementation as a documented exception. No
+composition, copy, rank, motion, or navigation change is authorized. Until then,
+do not edit
 `src/components/board/ShowcaseStage.js` or refresh its checksum. No locked source,
 checksum, migration, live data, deployment, commit, or push changed in F-006.
 
