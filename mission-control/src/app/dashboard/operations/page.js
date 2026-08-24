@@ -28,6 +28,7 @@ import MediaReviewForms from "./MediaReviewForms";
 import { PROPERTY_MEDIA_OPERATION, getPropertyMediaOperationStatus } from "@/lib/propertyMediaOperation";
 import LifecycleReconciliationForms from "./LifecycleReconciliationForms";
 import { LIFECYCLE_RECONCILIATION_OPERATION, getLifecycleReconciliationStatus } from "@/lib/propertyLifecycleReconciliation";
+import DemoAuthorityTransferForm from "./DemoAuthorityTransferForm";
 
 function Status({ ok, label }) {
   const Icon = ok ? CheckCircle2 : CircleAlert;
@@ -110,6 +111,22 @@ export default async function SystemOperationsPage() {
           no uploaded or caller-provided query.
         </p>
       </header>
+
+      <section aria-labelledby="demo-authority-transfer-title" className="rounded-xl border border-gold-muted/60 bg-surface p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="label-mono text-gold">Private demo authority</p>
+            <h2 id="demo-authority-transfer-title" className="mt-2 text-lg font-semibold">Transfer eligible demo ownership</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/70">
+              Resolves one Supabase Auth email, inventories every known master-dev identity reference,
+              and transfers only private property ownership plus owner-type routing in one atomic RPC.
+              Broker, buyer, operator, wallet, OAuth, public Airtable, sample, and historical identities are never reassigned.
+            </p>
+          </div>
+          <Status ok={false} label="Dry-run required" />
+        </div>
+        <DemoAuthorityTransferForm />
+      </section>
 
       {statusError && <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger">{statusError}</div>}
       <section aria-labelledby="sample-data-title" className="rounded-xl border border-line bg-surface p-6">

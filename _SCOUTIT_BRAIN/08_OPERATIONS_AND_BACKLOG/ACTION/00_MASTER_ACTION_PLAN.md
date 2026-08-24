@@ -64,7 +64,8 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-020 through A-029 are the nine Active items (A-028 is Done); Urgent is empty
+  A-020, A-022 through A-027, and A-029 are the eight Active items (A-021 is
+  Waiting and A-028 is Done); Urgent is empty
   after U-011's verified closure.
 - **A-018 closed on 2026-08-24.** Every `/api/questit` and `/api/v1/questit/*`
   route now fails closed before pre-launch feature logic unless `ai_search` is
@@ -75,6 +76,10 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   The pricing-benefit gap remains Future until the payment-enablement trigger fires.
 - **A-028 closed on 2026-08-24 after the full repository ownership audit.**
   Nine dead source/style files, five unreferenced tool captures, one broken
+  gitlink, one unused dependency, and one overridden CSS block were removed;
+  retained exceptions and verification evidence are in
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]] and the canonical
+  repository ownership report.
 - **A-019 closed on 2026-08-24.** The universal menu now derives Account,
   Explore, Workspace, and Help groups from the one canonical manifest; Settings
   and Contact & Support are first-class destinations, and the Eye is truthfully
@@ -82,11 +87,14 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   Public profile, Privacy, Security, and Display & guide anchors with mobile-safe
   navigation. Authentication-entry changes remain owned by A-025, and the
   Master-Flow journey implementation remains A-020.
-
-  gitlink, one unused dependency, and one overridden CSS block were removed;
-  retained exceptions and verification evidence are in
-  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]] and the canonical
-  repository ownership report.
+- **A-021's engineering lane completed on 2026-08-24 and moved intact to
+  [[WAITING]].** The hidden Eye persona controls and browser-authority fallbacks
+  are gone; only the explicit localhost E2E fixture can use `master-dev`.
+  Mission Control now owns a Super-Admin-only dry-run and atomic transfer path
+  with unique Auth resolution, complete reference classification, reviewed-plan
+  hashing, strict audits, and post-verification. No live ownership was changed:
+  A-021 remains open until the prepared migration is owner-approved and the
+  exact plan is previewed and executed through Mission Control.
 - **A-029 owns the verified voice and display-typography findings from A-028.**
   It covers unsupported market-first/blanket-verification claims, the AI rewrite
   prompt's cliché vocabulary, and the owner-reviewed display-font decision;

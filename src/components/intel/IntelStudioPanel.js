@@ -24,11 +24,6 @@ export default function IntelStudioPanel() {
     const fd = new FormData();
     if (file) fd.append("file", file);
     if (!file && pastedText.trim()) fd.append("text", pastedText.trim());
-    // Dev sandbox bypass mirrors the rest of the dashboard toolbox.
-    try {
-      const mockStr = localStorage.getItem("scoutit_user");
-      if (mockStr && mockStr.includes("master-dev")) fd.append("mockOwnerId", "master-dev");
-    } catch { /* localStorage unavailable */ }
     Object.entries(extra).forEach(([k, v]) => fd.append(k, v));
     return fd;
   };

@@ -8,8 +8,8 @@ import { getSession, getUser } from "@/lib/authClient";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import { DashboardProvider } from "@/context/DashboardContext";
 
-// Same dev fallback the rest of the deals/messages routes use -- real
-// Supabase session first, "master-dev" localStorage convention otherwise.
+// Real Supabase session first; an explicit localhost E2E fixture may provide
+// read-only mock identity when the browser suite enables its public test flag.
 async function resolveAuth() {
   const [{ data: { user } }, { data: { session } }] = await Promise.all([getUser(), getSession()]);
   if (user && session?.access_token && session.user?.id === user.id) {

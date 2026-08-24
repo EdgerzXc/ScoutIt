@@ -15,12 +15,12 @@ describe("development mock identity boundary", () => {
     (userId) => expect(isDevelopmentMockId(userId)).toBe(false),
   );
 
-  it("allows the mock only on localhost in development", () => {
+  it("rejects an ordinary localhost development session without the E2E flag", () => {
     expect(isDevelopmentMockAllowed({
       nodeEnv: "development",
       hostname: "localhost",
       userId: "master-dev",
-    })).toBe(true);
+    })).toBe(false);
   });
 
   it("rejects the mock in production even on localhost", () => {
@@ -50,12 +50,17 @@ describe("development mock identity boundary", () => {
     })).toBe(false);
   });
 
-  it("reads only an allowed local development user from storage", () => {
+  it("reads the fixture only in an explicitly flagged local E2E build", () => {
     const storage = { getItem: () => JSON.stringify({ id: "master-dev", tags: ["owner"] }) };
+    expect(readDevelopmentMockUser(storage, {
+      nodeEnv: "production",
+      e2eFlag: "1",
+      hostname: "127.0.0.1",
+    })?.id).toBe("master-dev");
     expect(readDevelopmentMockUser(storage, {
       nodeEnv: "development",
       hostname: "127.0.0.1",
-    })?.id).toBe("master-dev");
+    })).toBeNull();
     expect(readDevelopmentMockUser(storage, {
       nodeEnv: "production",
       hostname: "127.0.0.1",

@@ -7,14 +7,13 @@ export function isDevelopmentMockId(userId) {
 }
 
 export function isDevelopmentMockAllowed({
-  nodeEnv = process.env.NODE_ENV,
   e2eFlag = PUBLIC_E2E_FLAG || process.env.SCOUTIT_E2E,
   hostname = "",
   userId = "",
 } = {}) {
   const localHost = LOCAL_DEVELOPMENT_HOSTS.has(String(hostname).toLowerCase());
-  const nonProductionRuntime = nodeEnv === "development" || e2eFlag === "1";
-  return localHost && nonProductionRuntime && isDevelopmentMockId(userId);
+  const explicitE2EFixture = e2eFlag === "1";
+  return localHost && explicitE2EFixture && isDevelopmentMockId(userId);
 }
 
 export function readDevelopmentMockUser(storage, runtime = {}) {

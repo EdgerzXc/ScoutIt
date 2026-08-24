@@ -45,37 +45,6 @@ and keyboard navigation, works at 360px, respects reduced motion/Lite Mode, and
 has tests proving graph-node/route/target validity plus server-verified role
 selection. No guide state grants access or changes an entitlement.
 
-## A-021 — Retire the product dev persona and transfer eligible demo authority
-
-**Owner outcome:** `jerzelguerra26@gmail.com` is the real authenticated owner of
-eligible ScoutIt demo properties and their owner-controlled relationships;
-visitors can no longer reveal a role/tier switcher from the Eye. Human-testing
-sample content remains available and truthfully labelled.
-
-**Current evidence (2026-08-24):** the Eye still contains a five-tap/`?dev=1`
-entry that creates the localhost `master-dev` persona and changes apparent
-roles and tiers in browser storage. The runtime boundary now limits that persona
-to localhost/non-production, but dashboard and test code still depend on it.
-Public editorial mocks and example profiles are separate from private Supabase
-property ownership and cannot truthfully be assigned wholesale to a person.
-
-**Agent lane:** remove the user-facing development controls and production
-query/gesture entry; retain only an explicitly isolated E2E fixture. Add an
-audited Mission Control dry-run and execute path that resolves the named email
-to its verified Supabase Auth UUID, inventories every `master-dev` reference,
-and transfers only private owner-authoritative rows and valid dependent
-relationships. Preserve public Airtable/sample/editorial records as labelled
-examples unless their schema has a truthful ownership field. Do not hard-code
-the email as authorization, grant staff/Mission-Control privileges, bypass RLS,
-or mutate providers directly.
-
-**Exit test:** the target Auth account must exist and be uniquely resolved; a
-dry-run lists every changed, skipped, and blocked row; the audited operation is
-atomic or safely resumable; ownership checks pass as that user; no orphaned
-deal/unit/representation references remain; sample disclosures remain; and
-`master-dev` is accepted only by the local E2E harness. Live mutation occurs
-only through Mission Control and produces an audit record.
-
 ## A-022 — Consent-safe first-visit warming for smoother navigation
 
 **Owner outcome:** after the initial page becomes interactive, ScoutIt quietly

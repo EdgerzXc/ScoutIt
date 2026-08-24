@@ -44,8 +44,8 @@ test.describe('Enterprise Mission Control Flow', () => {
     await page.click('button:has-text("Alignment")');
 
     // Click Assign Task — tasks now persist to the real crm_tasks table, so
-    // this test only verifies the form opens and STOPS (read-only safety:
-    // submitting would write a production row for master-dev).
+    // this test only verifies the form opens and STOPS. Browser fixture
+    // identity is never valid authority for a server mutation.
     await page.click('button:has-text("Assign Task")');
     await expect(page.locator('input[placeholder="e.g., Audit building Q3 compliance..."]')).toBeVisible();
     await expect(page.locator('input[type="date"]').first()).toBeVisible();

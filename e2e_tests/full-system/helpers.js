@@ -5,9 +5,8 @@
 //   read-and-render only: never publish, delete, archive, approve, spend
 //   Connects, or send inquiries. Opening modals/wizards without submitting
 //   is fine. The wishlist (scoutit_reactions) is device-local and safe.
-// - `master-dev` is the owner's real dev account with real production
-//   listings. The legacy MASTER_DEV_READONLY fixture is a local UI preview;
-//   its private network responses must be mocked and it must never mutate.
+// - `master-dev` is only a localhost E2E UI fixture. Its private network
+//   responses must be mocked and it must never mutate any provider.
 import { expect } from '@playwright/test';
 
 // Mock users. DashboardContext accepts this identity family only in the

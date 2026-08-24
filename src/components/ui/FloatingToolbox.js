@@ -1,24 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
-import { TIERS, TIER_LABELS } from "@/lib/entitlements";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
-import { DEVELOPMENT_MOCK_STORAGE_KEY } from "@/lib/developmentMock";
 import { notifyLightModeChanged } from "@/lib/lightMode";
 import { usePathname } from "next/navigation";
 import { guideForPath } from "@/lib/pageGuides";
 
-// Dev-only tier/role switcher lives inside this eye toolbox. It stays HIDDEN from
-// the public — revealed only by a secret gesture (tap the eye 5× quickly) or the
-// ?dev=1 URL. Toggling writes a mock user's tier/role to localStorage + reloads so
-// the entitlement gates re-read. ⚠️ remove before launch — scaffolding.
-const DEV_ROLES = ["seeker", "owner", "broker", "photographer", "researcher"];
-
-
 export default function FloatingToolbox({ showTrigger = true }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
@@ -64,12 +53,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const [reportSent, setReportSent] = useState(false);
   const [reportSending, setReportSending] = useState(false);
   const [reportFailed, setReportFailed] = useState(false);
-
-  // ── Dev tools (hidden) ──
-  const [devOn, setDevOn] = useState(false);
-  const [devTier, setDevTier] = useState("starry");
-  const [devRole, setDevRole] = useState("seeker");
-  const tapTimes = useRef([]);
 
   const containerRef = useRef(null);
   const isDragging = useRef(false);
@@ -121,27 +104,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
     setLite(getStoredLiteMode());
 
-    // Dev tools: ?dev=1 / ?dev=0 still work as a backup entry; otherwise read the
-    // stored flag. The 5-tap gesture toggles the same flag live (see onPointerUp).
-    const devParam = new URLSearchParams(window.location.search).get("dev");
-    if (devParam === "1") localStorage.setItem("scoutit_dev", "1");
-    if (devParam === "0") localStorage.removeItem("scoutit_dev");
-
-    setDevOn(localStorage.getItem("scoutit_dev") === "1");
-    try {
-      const u = JSON.parse(localStorage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY) || "null");
-      if (u) {
-
-        setDevTier(String(u.subscription_tier || u.tier || "starry").toLowerCase());
-        const r = (u.active_roles || u.tags || [])[0];
-        if (r) {
-
-          setDevRole(String(r).toLowerCase());
-        }
-      }
-    } catch {}
-
-
     setMounted(true);
 
     function handleOpenDisplay() {
@@ -168,56 +130,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
       detail: { open },
     }));
   }, [mounted, open]);
-  // Apply a mock tier/role and reload so entitlement gates re-read.
-  const applyDev = (nextTier, nextRole) => {
-    try {
-      let u = JSON.parse(localStorage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY) || "null");
-      if (!u) {
-        u = {
-          id: "master-dev",
-          full_name: "Master Developer",
-          email: "dev@scoutit.com",
-          connects_balance: 9999
-        };
-      }
-      u.subscription_tier = nextTier;
-      u.tier = nextTier;
-      u.active_roles = ["buyer", "owner", "broker"]; // User wanted a master account with everything
-      u.tags = ["buyer", "owner", "broker"];
-      localStorage.setItem(DEVELOPMENT_MOCK_STORAGE_KEY, JSON.stringify(u));
-      
-      if (window.location.pathname.includes("/onboarding")) {
-        router.push("/dashboard");
-      } else {
-        window.location.reload();
-      }
-    } catch {}
-  };
-
-  const turnOffDev = () => {
-    localStorage.removeItem("scoutit_dev");
-    setDevOn(false);
-  };
-
-  // Dev-only entry point into the in-app console PREVIEWS (SCOUTIT_MASTER_BUILD_SPEC.md
-  // §3) -- there is deliberately no way to reach this from normal account activation.
-  //
-  // ⚠️ These are previews inside the MAIN app. The real staff console is the
-  // SEPARATE `mission-control/` deployment and is NOT reachable from here.
-  const enterMissionControl = (modeId) => {
-    try {
-      let u = JSON.parse(localStorage.getItem(DEVELOPMENT_MOCK_STORAGE_KEY) || "null");
-      if (!u) {
-        u = { id: "master-dev", full_name: "Master Developer", email: "dev@scoutit.com", connects_balance: 9999 };
-      }
-      u.tags = [...new Set([...(u.tags || []), modeId])];
-      u.active_roles = [...new Set([...(u.active_roles || []), modeId])];
-      u.primaryMode = modeId;
-      localStorage.setItem(DEVELOPMENT_MOCK_STORAGE_KEY, JSON.stringify(u));
-      router.push("/dashboard");
-    } catch {}
-  };
-
   const changeMode = (m) => {
     setMode(m);
     applyTheme(m);
@@ -281,19 +193,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
     if (!isDragging.current) return;
     isDragging.current = false;
     if (!hasMoved.current) {
-      // Secret gesture: 5 quick taps on the eye toggle the hidden Dev Tools.
-      const now = Date.now();
-      tapTimes.current = tapTimes.current.filter((t) => now - t < 1500);
-      tapTimes.current.push(now);
-      if (tapTimes.current.length >= 5) {
-        tapTimes.current = [];
-        const next = localStorage.getItem("scoutit_dev") !== "1";
-        if (next) localStorage.setItem("scoutit_dev", "1");
-        else localStorage.removeItem("scoutit_dev");
-        setDevOn(next);
-        setOpen(true); // reveal the panel so the Dev Tools section is visible
-        return;
-      }
       setOpen((o) => !o);
     } else {
       const p = { ...livePos.current };
@@ -581,45 +480,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
             </button>
           </div>
 
-          {/* ── Dev Tools (hidden) — revealed by 5-tap on the eye, or ?dev=1 ── */}
-          {devOn && (
-            <>
-              <div style={{ height: 1, background: "rgba(232, 174, 60,0.18)", margin: "0 9px" }} />
-              <div style={{ padding: "9px 11px 11px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase" }}>Dev · Tier</span>
-                  <button onClick={turnOffDev} aria-label="Hide Developer Options" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>Hide ✕</button>
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 9 }}>
-                  {TIERS.map((t) => {
-                    const on = t === devTier;
-                    return (
-                      <button key={t} onClick={() => applyDev(t, devRole)} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{TIER_LABELS[t]}</button>
-                    );
-                  })}
-                </div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Role</span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {DEV_ROLES.map((r) => {
-                    const on = r === devRole;
-                    return (
-                      <button key={r} onClick={() => applyDev(devTier, r)} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "4px 7px", borderRadius: 4, cursor: "pointer", textTransform: "capitalize", border: "1px solid " + (on ? "#E8AE3C" : "rgba(255,255,255,0.12)"), background: on ? "#E8AE3C" : "transparent", color: on ? "#0e0e0e" : "#c8c8c8" }}>{r}</button>
-                    );
-                  })}
-                </div>
-
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", margin: "10px 0 6px" }}>In-app console previews</span>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <button onClick={() => enterMissionControl("mc_staff")} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
-                    Staff Console — simulated (not the real one)
-                  </button>
-                  <button onClick={() => enterMissionControl("mc_enterprise")} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "6px 8px", borderRadius: 4, cursor: "pointer", textAlign: "left", border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#c8c8c8" }}>
-                    Enterprise Console — preview (scoped to own)
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
         </div>
       )}
 

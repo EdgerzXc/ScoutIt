@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [waiting, blocked, decisions, dependencies]
-updated: 2026-08-23
+updated: 2026-08-24
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[MASTER_OWNER_ACTIONS]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]]"]
 ---
 
@@ -56,3 +56,29 @@ Verification and sitemap submission are already complete.
 
 **Unblocks when:** the submitted sitemap status is re-read and either records
 Success or produces a reproducible fetch defect.
+
+## A-021 — Retire the product dev persona and transfer eligible demo authority
+
+The engineering lane is complete. The public Eye no longer exposes its hidden
+five-tap/query-string role and tier switcher, and `master-dev` is now accepted
+only by the explicit localhost E2E fixture. Browser fallbacks can no longer
+authorize dashboard mutations or Intel workspaces. Mission Control now contains
+a Super-Admin-only, strictly audited dry-run/execute workflow that resolves one
+Supabase Auth email to one UUID; inventories eligible, blocked, retained, and
+undeployed relations; hashes the reviewed plan; and delegates the eligible
+property/owner-route change to a service-role-only atomic PostgreSQL function.
+Public Airtable, editorial, and sample content remains outside the transfer.
+
+Verification on 2026-08-24: 3/3 transfer contracts and the complete 57/57
+Mission Control security suite passed; both production builds passed; ScoutIt's
+full gate passed 3/3 surface locks, lint, the 483-file typography audit, 1,588
+unit tests, and discovery of all 522 E2E cases; the focused dashboard/Help &
+Display browser suite passed 11/11.
+
+**Unblocks when:** the owner approves and applies
+`20260824000001_demo_authority_transfer.sql`, signs into Mission Control as an
+existing Super Admin, previews the exact target email, resolves any reported
+active-reference blocker, and executes the unchanged plan with the required
+confirmation and audit reason. Close A-021 only after the post-check proves the
+target owns every transferred property, no legacy owner route remains, and the
+intent/completion audit records exist.

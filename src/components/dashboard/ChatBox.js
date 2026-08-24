@@ -196,9 +196,7 @@ const decodeAttachment = (body) => {
 };
 
 // Resolves { token, mockOwnerId, userId } for API calls -- real Supabase
-// session first, falling back to the dev toolbox's "master-dev" localStorage
-// convention (see FloatingToolbox.js) when there's no real session, matching
-// the same pattern InquiryModal/UnitInquiryModal/OperatorRequestModal use.
+// session first; the only fallback is the explicit localhost E2E fixture.
 async function resolveAuth() {
   const [{ data: { user } }, { data: { session } }] = await Promise.all([getUser(), getSession()]);
   if (user && session?.access_token && session.user?.id === user.id) {

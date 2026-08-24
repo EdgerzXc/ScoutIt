@@ -9,8 +9,8 @@
 //      host's Accept/Decline drives the confirm flow without touching the DB.
 import { test, expect } from '@playwright/test';
 
-// A mock owner whose id contains "master-dev" so DashboardContext keeps it
-// (anything else is wiped on mount unless a real Supabase session exists).
+// Explicit localhost E2E identity; the application accepts this family only
+// while the browser suite's public E2E flag is enabled.
 const MOCK_HOST = {
   id: 'master-dev-e2e-cal',
   name: 'E2E Host',

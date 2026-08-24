@@ -42,9 +42,6 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   const [leftWidth, setLeftWidth] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview'
-  
-  const { currentUser } = useDashboard() || {};
-  const isE2E = currentUser?.id === 'master-dev';
 
   const startResizing = useCallback((e) => {
     e.preventDefault();

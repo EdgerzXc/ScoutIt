@@ -459,7 +459,7 @@ export function DashboardProvider({ children }) {
   const closeListing = async (listingId) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || (currentUser?.id === 'master-dev' ? 'mock-e2e-token' : '');
+      const token = session?.access_token || '';
       const res = await fetch("/api/dashboard/archive", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -546,7 +546,7 @@ export function DashboardProvider({ children }) {
     addToast(declaration ? "Syncing to live network..." : "Preparing publication...", "⏳");
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || (currentUser.id === 'master-dev' ? 'mock-e2e-token' : '');
+      const token = session?.access_token || '';
 
       const body = { submissionId: listingId, userId: currentUser.id };
       if (declaration) {

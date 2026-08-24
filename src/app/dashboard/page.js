@@ -21,7 +21,7 @@ import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
 import { normalizeDashboardMode, normalizeDashboardModes } from "../../lib/dashboardModes";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
-import { Camera, Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
+import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 
 const TAG_LABELS = {
   buyer: "Buyer Workspace",
@@ -33,21 +33,6 @@ const TAG_LABELS = {
   mc_staff: "Staff Console · Simulated",
   mc_enterprise: "Enterprise Console · Preview",
 };
-
-// Roles a user can activate from the Workspace menu without re-onboarding
-const ACTIVATABLE_MODES = [
-  { id: "buyer", icon: "🏠", cta: "Buyer Workspace", desc: "Browse, save spaces, and evaluate market intelligence." },
-  { id: "owner", icon: "📋", cta: "Owner Workspace", desc: "List your property and review broker pitches." },
-  { id: "broker", icon: "🤝", cta: "Broker Workspace", desc: "Pitch owners and manage your transaction pipeline." },
-  { id: "provider", icon: <Camera strokeWidth={1.5} size="1em" />, cta: "Provider Workspace", desc: "Deliver photography, site research, or staging services." },
-  { id: "operator", icon: "🏢", cta: "Operator Workspace", desc: "Manage assigned units in commercial and residential developments." },
-];
-
-const PROVIDER_TYPES = [
-  { id: "photographer", label: "Photographer" },
-  { id: "researcher", label: "Site Researcher" },
-  { id: "designer", label: "Event Designer" },
-];
 
 function DashboardInner() {
   const router = useRouter();
@@ -67,9 +52,6 @@ function DashboardInner() {
   const [showConnectsBreakdown, setShowConnectsBreakdown] = useState(false);
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
-  const [activating, setActivating] = useState(null); // mode id being activated (broker/provider need extra info)
-  const [activationLicense, setActivationLicense] = useState("");
-  const [activationProviderType, setActivationProviderType] = useState("");
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
 
   const switcherRef = useRef(null);
@@ -150,7 +132,12 @@ function DashboardInner() {
     (async () => {
       try {
         const { data: { session } } = await getSession();
-        const mockOwnerId = !session?.access_token && user.id === "master-dev" ? "master-dev" : null;
+        const localFixture = !session?.access_token
+          ? readDevelopmentMockUser(localStorage, {
+              hostname: window.location.hostname,
+            })
+          : null;
+        const mockOwnerId = localFixture?.id === user.id ? localFixture.id : null;
         if (!session?.access_token && !mockOwnerId) return;
         const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
         const res = await fetch(`/api/deals${qs}`, {
@@ -199,41 +186,6 @@ function DashboardInner() {
     // The server-approved profile refresh is authoritative after navigation.
     setUser(updatedUser);
   };
-
-  // Existing server-approved roles remain switchable. New capabilities must be
-  // activated through a future authenticated server workflow; a real user must
-  // never grant themselves a role by editing browser storage. Keep the legacy
-  // activation controls available only to the explicit development toolbox user.
-  const addableModes = user.id === "master-dev"
-    ? ACTIVATABLE_MODES.filter(m => !user.tags.includes(m.id))
-    : [];
-
-  const startActivation = (modeId) => {
-    setShowDesktopSwitcher(false);
-    setShowMobileProfileMenu(false);
-    if (modeId === "broker" || modeId === "provider") {
-      setActivationLicense("");
-      setActivationProviderType("");
-      setActivating(modeId); // needs extra info first
-    } else {
-      finishActivation(modeId);
-    }
-  };
-
-  const finishActivation = (modeId, extra = {}) => {
-    const updatedUser = {
-      ...user,
-      ...extra,
-      tags: [...user.tags.filter(t => t !== "exploring" || modeId === "exploring"), modeId],
-      primaryMode: modeId,
-    };
-    // Do not persist role/profile changes in browser storage.
-    setUser(updatedUser);
-    setMode(modeId);
-    setActivating(null);
-  };
-
-  const prcFormatOk = /(\d{5,})/.test(activationLicense);
 
   const renderActiveMode = () => {
     switch (mode) {
@@ -310,25 +262,6 @@ function DashboardInner() {
                   ))}
                 </div>
 
-                {addableModes.length > 0 && (
-                  <>
-                    <div className="px-4 py-2 border-t border-surface-variant bg-surface-alt">
-                      <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Unlock More</span>
-                    </div>
-                    <div className="flex flex-col py-2">
-                      {addableModes.map(m => (
-                        <button
-                          key={m.id}
-                          className="text-left px-4 py-3 active:scale-[0.97] transition duration-160 ease-out hover:bg-surface-container group"
-                          onClick={() => startActivation(m.id)}
-                        >
-                          <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>
-                          <span className="block text-xs text-text-secondary mt-0.5">{m.desc}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
             )}
           </div>
@@ -498,67 +431,6 @@ function DashboardInner() {
         {primaryAction.label && <span className="text-[12px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
       </button>
 
-      {/* Role Activation Modal (broker license / provider type) */}
-      {activating && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">
-          <div className="w-full max-w-md bg-surface border border-surface-variant rounded-lg shadow-2xl p-6 animate-[slideUp_0.3s_ease-out]">
-            {activating === "broker" ? (
-              <>
-                <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Become a Broker</h3>
-                <p className="text-sm text-text-secondary mb-6">Enter your PRC Real Estate Broker license number to activate Broker Workspace. We check the format only — verification happens later.</p>
-                <input
-                  className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition uppercase mb-2"
-                  type="text"
-                  placeholder="PRC-REB-XXXXXXX"
-                  value={activationLicense}
-                  onChange={e => setActivationLicense(e.target.value)}
-                  autoFocus
-                />
-                {!prcFormatOk && activationLicense.length > 0 && (
-                  <p className="text-error text-xs mb-2">Should contain at least 5 digits.</p>
-                )}
-                <div className="flex gap-3 mt-4">
-                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition" onClick={() => setActivating(null)}>Cancel</button>
-                  <button
-                    className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={!prcFormatOk}
-                    onClick={() => finishActivation("broker", { prcLicense: activationLicense })}
-                  >
-                    Activate Broker Workspace
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Join as a Service Provider</h3>
-                <p className="text-sm text-text-secondary mb-6">What kind of work do you do?</p>
-                <div className="flex flex-col gap-2 mb-4">
-                  {PROVIDER_TYPES.map(pt => (
-                    <button
-                      key={pt.id}
-                      className={`text-left p-4 rounded border font-working-title text-sm transition ${activationProviderType === pt.id ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-text-secondary'}`}
-                      onClick={() => setActivationProviderType(pt.id)}
-                    >
-                      {pt.label} {activationProviderType === pt.id && "✓"}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-3 mt-4">
-                  <button className="flex-1 px-4 py-3 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition" onClick={() => setActivating(null)}>Cancel</button>
-                  <button
-                    className="flex-1 bg-gold-accent text-background font-working-title font-bold px-4 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={!activationProviderType}
-                    onClick={() => finishActivation("provider", { providerType: activationProviderType })}
-                  >
-                    Activate Provider Workspace
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Mobile Profile Menu Slide-out */}
       {showMobileProfileMenu && (
         <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end animate-[fadeIn_0.3s_ease-out]">
@@ -595,25 +467,6 @@ function DashboardInner() {
               ))}
             </div>
 
-            {addableModes.length > 0 && (
-              <>
-                <div className="mb-2">
-                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Unlock More</span>
-                </div>
-                <div className="flex flex-col gap-2 mb-6">
-                  {addableModes.map(m => (
-                    <button
-                      key={m.id}
-                      className="text-left p-4 rounded-lg border border-dashed border-gold-accent/40 bg-surface hover:border-gold-accent transition"
-                      onClick={() => startActivation(m.id)}
-                    >
-                      <span className="font-working-title text-sm text-gold-accent flex items-center gap-2">{m.icon} {m.cta}</span>
-                      <span className="block text-xs text-text-secondary mt-0.5">{m.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
 
             <div className="border-t border-surface-variant pt-4">
               <Link href="/settings" className="flex items-center gap-3 text-text-secondary hover:text-on-surface font-working-title text-sm py-2">

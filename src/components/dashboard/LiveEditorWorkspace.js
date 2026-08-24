@@ -8,6 +8,7 @@ import { supabase } from "../../lib/supabaseClient";
 import PhotoUploader from "./PhotoUploader";
 import GeoPricingGauge from "./GeoPricingGauge";
 import { getCurrentTier } from "../../lib/entitlements";
+import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
 import { useDashboard } from "../../context/DashboardContext";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
@@ -78,7 +79,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [leftWidth, setLeftWidth] = useState(45);
   const [isResizing, setIsResizing] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview'
-  const isE2E = currentUser?.id === 'master-dev';
+  const isE2E = typeof window !== "undefined" && isDevelopmentMockAllowed({
+    e2eFlag: process.env.NEXT_PUBLIC_SCOUTIT_E2E,
+    hostname: window.location.hostname,
+    userId: currentUser?.id,
+  });
 
   const startResizing = useCallback((e) => {
     e.preventDefault();
@@ -242,7 +247,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     }
   };
 
-  // isE2E is already declared above
   const mustHaves = {
     title: !!formData.title?.trim(),
     category: !!formData.category,
