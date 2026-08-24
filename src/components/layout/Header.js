@@ -154,7 +154,7 @@ export default function Header({ ambientContext = null }) {
         <AmbientRail user={user} context={ambientContext} />
       </div>
 
-      <nav className="header-nav" ref={menuRef}>
+      <nav className="header-nav" ref={menuRef} aria-label="Primary navigation">
         <button
           className={`header-eye-btn ${displaySettingsOpen ? "is-open" : ""}`}
           type="button"

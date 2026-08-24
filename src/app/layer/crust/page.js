@@ -129,7 +129,7 @@ export default function CrustLayer() {
             </div>
           </aside>
 
-          <article
+          <div
             className={styles.panel}
             role="tabpanel"
             id="crust-professional-panel"
@@ -187,7 +187,7 @@ export default function CrustLayer() {
                 <p>{service.rosterNote}</p>
               </div>
             </div>
-          </article>
+          </div>
         </section>
 
         <LayerTransition

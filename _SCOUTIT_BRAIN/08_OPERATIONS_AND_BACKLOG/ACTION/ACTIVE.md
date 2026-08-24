@@ -18,26 +18,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   Its statistics contract makes the read-only ScoutIt transaction record primary
   and keeps broker-editable historical career data secondary and clearly labelled.
 
-## A-024 — Repair verified public semantic and contrast defects
-
-**Owner outcome:** Discovery, Descent, and Crust retain their approved visual
-composition while exposing one clear document title, distinguishable landmarks,
-valid tab semantics, and readable non-text decoration.
-
-**Current evidence (2026-08-24):** the live desktop/mobile axe sweep found two
-H1s and a duplicate unlabeled navigation landmark on `/discover`, two H1s on
-`/descent`, `role="tabpanel"` on an `article` in Crust, and a 2.69:1 inactive
-Crust tab index at 12px on mobile. Current JSX/CSS reproduces every finding.
-Locked Showcase findings are excluded and remain owner action F-006.
-
-**Agent lane:** make semantic/token changes with no composition redesign. Add
-focused axe/heading/landmark regressions for these exact routes and both profiles.
-
-**Exit test:** each route has one meaningful H1; multiple navs have distinct
-names; the tablist/panel relationship uses valid elements/roles; informative text
-meets WCAG AA; keyboard/history behavior remains; full verify/build and 3/3 locks
-pass without changing `ShowcaseStage.js`.
-
 ## A-025 — Make signed-out workspace and auth entry fail quietly and honestly
 
 **Owner outcome:** a signed-out visitor sees an immediate deliberate sign-in

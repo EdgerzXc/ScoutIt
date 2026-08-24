@@ -94,9 +94,16 @@
   outline-offset: 3px;
 }
 
-.tabIndex,
+.tabIndex {
+  color: var(--text-secondary);
+}
+
 .tabArrow {
   color: var(--accent-muted);
+}
+
+.tabIndex,
+.tabArrow {
   font-family: var(--font-mono);
   font-size: 12px;
 }

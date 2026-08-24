@@ -152,10 +152,10 @@ export default function DiscoverSearch() {
           <SlidersHorizontal size={12} aria-hidden="true" />
           Search
         </p>
-        <h1 id="dsc-title" className="dsc-title">
+        <h2 id="dsc-title" className="dsc-title">
           Find what changed, and&nbsp;
           <span className="dsc-title-accent">where</span>.
-        </h1>
+        </h2>
       </header>
 
       {/* ── The query bar ── */}

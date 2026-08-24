@@ -90,9 +90,9 @@ export default function BoardPodium() {
               LAYER 01 // ORBIT · SAMPLE DEMAND INDEX
             </span>
           </div>
-          <h1 className="orbit-hero-title">
+          <h2 className="orbit-hero-title">
             Top-Ranked <span className="orbit-gold-accent">Spaces</span>
-          </h1>
+          </h2>
           <p className="orbit-hero-subtitle">
             Illustrative rankings across residential, commercial, and hospitality spaces, demonstrating ScoutIt&apos;s spatial demand and inquiry framework in preview.
           </p>

@@ -227,7 +227,7 @@ export default function DiscoverClient() {
       <AtmosphereBackground variant="default" />
       {/* 1. Left Sidebar Navigation Strip */}
       <aside className="catSidebar" aria-label="Category Navigation">
-        <nav className="navLinks">
+        <nav className="navLinks" aria-label="Discovery categories">
           <Link href="/dashboard" className="navLink" style={{ color: "var(--accent)", borderBottom: "0.5px solid rgba(var(--accent-rgb), 0.3)", paddingBottom: "16px", marginBottom: "8px" }}>
             ← Dashboard
           </Link>
