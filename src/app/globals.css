@@ -585,11 +585,9 @@ body.light-mode .spatial-intel-map-card {
   --red-dim: rgba(239, 68, 68, 0.15);
 
   /* Typography Stacks */
-  /* Georgia until 2026-08-07 (§64). A system serif is never downloaded, so it
-     rendered as a different typeface per OS and there was no way to see what a
-     visitor saw. Instrument Serif is high-contrast and narrow — editorial
-     without the antique. Georgia stays as the fallback, so a failed font load
-     degrades to the previous look rather than to Times. */
+  /* Geist Sans and Geist Mono are loaded once in the root layout with
+     next/font. Display and body currently share Geist Sans; a future editorial
+     display face requires an intentional owner-reviewed typography change. */
   --font-display: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-body: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-geist-mono), 'Courier New', monospace;
@@ -604,9 +602,7 @@ body.light-mode .spatial-intel-map-card {
   --type-label-tracking: 0.1em;
 
   /* ── DISPLAY TYPE SCALE ─────────────────────────────────────────────
-     Instrument Serif is drawn tight and high-contrast, so it needs NEGATIVE
-     tracking at display sizes and a line-height near 1 — the settings Georgia
-     did not want. Sizes are fluid so headings never need a media query.
+     Sizes are fluid so headings do not need per-route media queries.
      Optical rule: the bigger the type, the tighter the tracking. */
   --display-xl:   clamp(2.75rem, 6.2vw, 5rem);      /* hero */
   --display-lg:   clamp(2rem, 4.2vw, 3.25rem);      /* page title */
@@ -766,10 +762,8 @@ a:hover {
 .font-body { font-family: var(--font-body); }
 
 /* ── DISPLAY TYPE ────────────────────────────────────────────────────
-   Instrument Serif at display size wants tracking pulled IN. Set it once
-   here so no page has to remember; the optical rule is that the larger the
-   type, the tighter it goes. `text-wrap: balance` stops the one-word last
-   line that makes a heading look accidental. */
+   Larger display type uses tighter tracking. `text-wrap: balance` stops the
+   one-word last line that makes a heading look accidental. */
 .display-xl, .display-lg, .display-md, .display-sm {
   font-family: var(--font-display);
   font-weight: 400;

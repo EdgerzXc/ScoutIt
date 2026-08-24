@@ -1,6 +1,7 @@
 import UnitMasterPage from "@/components/property/UnitMasterPage";
+import { notFound } from "next/navigation";
 
-import { getCmsBundle } from "@/lib/cmsCache";
+import { loadPublicProperty, resolvePublicChildSpace } from "@/lib/publicPropertyRouteData";
 import { stripPremiumFields } from "@/lib/premiumFields";
 import { siteUrl } from "@/lib/siteUrl";
 import { childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
@@ -23,93 +24,50 @@ import { childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHiera
 // went from THREE data loads per request (metadata scan + page load + the
 // client's own /api/cms fetch) to one shared, cached read.
 // ═══════════════════════════════════════════════════════════════
-async function findProperty(idOrSlug) {
-  try {
-    const bundle = await getCmsBundle();
-    return (
-      (bundle?.properties || []).find(
-        (p) =>
-          (p.slug && p.slug.toLowerCase() === String(idOrSlug).toLowerCase()) ||
-          (p.id && p.id === idOrSlug)
-      ) || null
-    );
-  } catch (err) {
-    console.error("[unit page] CMS load failed:", err?.message);
-    return null;
-  }
-}
-
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
+  const match = await loadPublicProperty(resolvedParams.id);
+  if (!match) notFound();
+  const unit = resolvePublicChildSpace(match, resolvedParams.unitId);
+  if (!unit) notFound();
 
-  let seoTitle = `Child-space Intel — ${resolvedParams.id} — ScoutIt`;
-  let seoDescription = "Child-space level property intelligence.";
   let imageUrl = siteUrl("/og-default.jpg");
-  let url = siteUrl(`/property/${resolvedParams.id}/unit/${resolvedParams.unitId}`);
-  let isSample = false;
+  const isSample = Boolean(match.is_sample);
+  const unitIndex = match.units_inventory.indexOf(unit);
+  const hierarchy = getPropertyHierarchy(match);
+  const displayName = childSpaceDisplayName(unit.name, unitIndex, match);
+  const seoTitle = `${displayName} · ${match.title} | ScoutIt`;
+  const seoDescription = `${hierarchy.childLabel} at ${match.title}${unit.size ? `, ${unit.size} sqm` : ""}. Explore its floor plan, layout, and listing context on ScoutIt.`;
+  const url = siteUrl(`/property/${match.slug || resolvedParams.id}/unit/${resolvedParams.unitId}`);
+  const photo = Array.isArray(unit.photos) && unit.photos.length > 0
+    ? unit.photos.find(Boolean)
+    : (unit.image || unit.photo);
 
-  {
-    try {
-      const match = await findProperty(resolvedParams.id);
-      if (match) {
-        isSample = Boolean(match.is_sample);
-        const unitIndex = (match.units_inventory || []).findIndex(u => u.id === resolvedParams.unitId);
-        const unit = unitIndex >= 0 ? match.units_inventory[unitIndex] : null;
-        if (unit) {
-          const hierarchy = getPropertyHierarchy(match);
-          const displayName = childSpaceDisplayName(unit.name, unitIndex, match);
-          seoTitle = `${displayName} · ${match.title} | ScoutIt`;
-          seoDescription = `${hierarchy.childLabel} at ${match.title}${unit.size ? `, ${unit.size} sqm` : ""}. Explore its floor plan, layout, and listing context on ScoutIt.`;
-          
-          const photo = Array.isArray(unit.photos) && unit.photos.length > 0 
-            ? unit.photos.find(Boolean) 
-            : (unit.image || unit.photo);
-            
-          if (photo) {
-            imageUrl = photo;
-          } else {
-            // Fallback to property photo if unit has no photo
-            const propPhoto = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
-            if (propPhoto) imageUrl = propPhoto;
-          }
-        }
-        if (match.slug) url = siteUrl(`/property/${match.slug}/unit/${resolvedParams.unitId}`);
-      }
-    } catch {}
+  if (photo) {
+    imageUrl = photo;
+  } else {
+    const propPhoto = Array.isArray(match.photos) ? match.photos.find(Boolean) : (match.photo || match.image);
+    if (propPhoto) imageUrl = propPhoto;
   }
 
   return {
     title: seoTitle,
     description: seoDescription,
-    // ── A4 · A SAMPLE'S CHILDREN ARE SAMPLES TOO (2026-08-08) ─────────
-    // Marking the parent `noindex` does nothing for its unit pages — they are
-    // separate URLs with their own metadata. And unit pages are exactly where
-    // this bites hardest: they are the long-tail surface ("5BR Ridgeline",
-    // "Unit 3801"), so a fabricated parent would put invented, highly specific
-    // listings into the index at the greatest volume.
+    // A sample's children are samples too and must stay out of indexing.
     ...(isSample ? { robots: { index: false, follow: true } } : {}),
-    // Declare our own canonical, otherwise src/app/property/layout.js's
-    // "/property" canonical is inherited here too.
     alternates: { canonical: url },
     ...(isSample ? {} : {
       openGraph: {
         title: seoTitle,
         description: seoDescription,
-        url: url,
-        siteName: 'ScoutIt',
-        images: [
-          {
-            url: imageUrl,
-            width: 1200,
-            height: 630,
-            alt: seoTitle,
-          },
-        ],
-        locale: 'en_US',
-        type: 'website',
+        url,
+        siteName: "ScoutIt",
+        images: [{ url: imageUrl, width: 1200, height: 630, alt: seoTitle }],
+        locale: "en_US",
+        type: "website",
       },
       twitter: {
-        card: 'summary_large_image',
+        card: "summary_large_image",
         title: seoTitle,
         description: seoDescription,
         images: [imageUrl],
@@ -133,8 +91,9 @@ export async function generateMetadata({ params }) {
 // reaches the client — same guard as /property and /hubs/[slug] (§45).
 export default async function UnitRoute({ params }) {
   const resolvedParams = await params;
-  const match = await findProperty(resolvedParams.id);
-  const initialProperty = match ? stripPremiumFields(match, "starry") : null;
+  const match = await loadPublicProperty(resolvedParams.id);
+  if (!match || !resolvePublicChildSpace(match, resolvedParams.unitId)) notFound();
+  const initialProperty = stripPremiumFields(match, "starry");
 
   return (
     <UnitMasterPage

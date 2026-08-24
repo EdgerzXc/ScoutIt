@@ -5,12 +5,10 @@ import { isLiteMode, LITE_MODE_EVENT } from "@/lib/liteMode";
 import { isLightMode, LIGHT_MODE_EVENT } from "@/lib/lightMode";
 
 // ═══════════════════════════════════════════════════════════════
-// Hero black hole — Interactive Mode. Raymarched WebGL (source: owner's
-// Dump/Blackhole spec, "Golden Horizon", plus the richer AI Studio build:
-// photon ring w/ chromatic split, film grain, mouse-hover gravitational
-// lensing, click shockwaves, drag-to-orbit). Reserved for the unlockable
-// full experience — Balance mode (EventHorizonCanvas) is what everyone
-// else sees; this is heavier and meant to be.
+// Hero black hole — Balance Mode. Raymarched WebGL framing the homepage
+// wordmark for every visitor unless Lite Mode disables it. The separate Golden
+// Horizon canvas owns the unlockable simulator; the unreachable 2D fallback
+// was removed under A-028.
 //
 // Site conventions honored:
 //  - Lite Mode: never initializes, and tears down live on the toggle event

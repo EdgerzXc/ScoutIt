@@ -1,23 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════
    Shared wishlist board (public token link).
 
-   Extracted from a raw an inline style block block on 2026-08-08.
+   Extracted from a raw inline style block on 2026-08-08.
 
    WHY A .css FILE AND NOT `styled-jsx`:
    The page is a SERVER component and styled-jsx requires "use client".
    Converting would have pushed this route to client rendering — the opposite
-   of the D2 server-render work. And it could not stay a a raw inline style tag: React 19
+   of the D2 server-render work. And it could not stay a raw inline style tag: React 19
    hoists those as stylesheet RESOURCES, which is what froze /discover and
    /property in §65.
    ═══════════════════════════════════════════════════════════════ */
 
-  .page-wrapper { min-height: 100vh; background: #0e0e0e; color: #f0ede8; position: relative; }
-  .wishlist-main { max-width: 900px; margin: 0 auto; padding: 120px 24px 80px; position: relative; z-index: 1; }
-  .page-header { margin-bottom: 48px; }
-  .layer-label { display: block; font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: #E8AE3C; margin-bottom: 16px; }
-  .page-title { font-family: var(--font-display); font-size: 40px; font-weight: normal; color: #f0ede8; margin: 0; }
-
-/* second block, same file — merged 2026-08-08 */
+/* Canonical merged block — design tokens preserve theme behavior. */
   .page-wrapper { min-height: 100vh; background: var(--bg); color: var(--text-primary); position: relative; }
   .wishlist-main { max-width: 900px; margin: 0 auto; padding: 120px 24px 80px; position: relative; z-index: 1; }
   .page-header { margin-bottom: 48px; }

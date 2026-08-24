@@ -44,7 +44,7 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 - **The 2026-08-24 production audit is complete.** Ninety-eight desktop/mobile
   route observations, safe HTTP/security probes, repeat performance samples,
   and a 314-case read-only browser subset verified broad public health and routed
-  only reproducible findings. U-011 owns nested property soft 404s; A-024 through
+  only reproducible findings. U-011's nested-property soft 404s are now closed locally with production-mode evidence; A-024 through
   A-027 own unlocked semantic/auth-entry/audit-harness/performance work; O-011
   owns Google production-origin configuration; locked Showcase semantics extend
   F-006; partial canonical coverage stays under Future L-001. Evidence and
@@ -64,13 +64,23 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-018 through A-027 are now the ten Active items.
+  A-018 through A-029 are the eleven Active items (A-028 is Done); Urgent is empty after U-011's verified closure.
 - **A-018 was promoted from Future on 2026-08-24 after current-code verification.**
   The unfinished QuestIT feature remains parked, but its route gate currently
   fails open when `ai_search` is missing or pre-launch mode is active. Active work
   is limited to fail-closed containment plus regression coverage; it requires no
   migration, credential, visual approval, or QuestIT product expansion.
   The pricing-benefit gap remains Future until the payment-enablement trigger fires.
+- **A-028 closed on 2026-08-24 after the full repository ownership audit.**
+  Nine dead source/style files, five unreferenced tool captures, one broken
+  gitlink, one unused dependency, and one overridden CSS block were removed;
+  retained exceptions and verification evidence are in
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]] and the canonical
+  repository ownership report.
+- **A-029 owns the verified voice and display-typography findings from A-028.**
+  It covers unsupported market-first/blanket-verification claims, the AI rewrite
+  prompt's cliché vocabulary, and the owner-reviewed display-font decision;
+  A-023 retains all broker-rating and roster copy authority.
 - **A-019 through A-022 were owner-promoted on 2026-08-24 and verified against
   current code before entry.** They cover the menu/Settings information
   architecture, a Master-Flow-backed Eye guide for Buyer/Owner/Broker journeys,

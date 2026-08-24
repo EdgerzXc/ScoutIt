@@ -231,6 +231,43 @@ cinematic layers on a guess.
 primary interaction, no LCP regression, and preserved reduced-motion/Lite paths.
 Record trace evidence, not only a score; full verify/build and 3/3 locks pass.
 
+## A-029 — Establish a truthful human voice and deliberate display typography
+
+**Owner outcome:** ScoutIt sounds like a precise, confident Philippine property
+platform written by people who know the product—not a generic luxury generator—
+and its display typography is a conscious luxury-system decision rather than a
+misdocumented fallback.
+
+**Current evidence (2026-08-24):** Geist Sans and Geist Mono load correctly once
+through `next/font`, and the 489-file readability audit passes, but display and
+body both resolve to Geist Sans while stale CSS comments claimed Instrument
+Serif was active. Public metadata, homepage, footer, legal metadata, and JSON-LD
+repeat “the Philippines' first” and blanket “verified intelligence” without one
+cited authority or a definition that fits every content type. The authenticated
+AI rewrite endpoint explicitly asks Gemini for “bespoke, curated, panoramic,
+seamless, prestige, uncompromising,” manufacturing the exact AI-luxury voice this
+audit is meant to remove. Broker ranking contradictions stay in A-023.
+
+**Agent lane:** inventory public copy by claim type and content authority; define
+a compact ScoutIt voice guide with banned clichés, evidence language, unknown/
+sample/projection wording, and examples for property, Intel, professional, legal,
+empty, and error states. Replace unsupported superlatives and blanket
+verification with specific sourced meaning. Redesign the rewrite prompt to
+preserve owner facts and voice, prohibit invented claims and cliché stuffing, and
+return a transparent draft. Propose and browser-test the display-font decision
+against performance, Philippine glyphs/names, readability, and every owner-locked
+surface before changing `--font-display`. Do not use copy cleanup to change
+legal meaning, scores, tier promises, or locked composition.
+
+**Exit test:** no uncited market-first claim or undefined blanket verification
+remains in public metadata/JSON-LD/shell copy; generated descriptions preserve
+facts, uncertainty, and owner meaning and avoid the banned corpus; representative
+human review beats the current prompt on specificity without adding claims;
+font assets load once with no CLS/LCP regression and correct fallbacks; mobile,
+Lite, reduced-motion, metadata, accessibility, full verify/build/browser, and
+3/3 locks pass. Any display-font visual change requires explicit owner review
+before its checksum can move.
+
 ## Where the owner's "list of 10" stands
 
 The ten items raised on 2026-08-23 as the ones that actually matter at this size:

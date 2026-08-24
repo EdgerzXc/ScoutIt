@@ -24,7 +24,11 @@ Today `/brokers/[broker-slug]` reads Airtable but its
 `managedProperties` is always empty and it expects `broker.scoutRating`, which
 normalization never supplies. `/profile/[id]` separately renders a 5-point
 broker panel while the broker page expects 100 points. Identity, URL, and metric
-authority must converge before expansion.
+authority must converge before expansion. The property-scoped roster also
+claims its first broker is selected by an algorithm weighting subscription tier,
+then calls the full roster “strictly” independently rated, “purely meritocratic,”
+and untouched by commercial tier. No published formula or source supports those
+claims; remove them in phase 1 rather than polishing contradictory trust copy.
 
 ## Locked authority
 
