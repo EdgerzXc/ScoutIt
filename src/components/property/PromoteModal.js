@@ -202,7 +202,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
                     onClick={() => generateCopy(true)}
                     disabled={loading}
                     className="shrink-0 rounded border border-gold-accent/40 px-3 py-1.5
-                               font-mono text-[11px] uppercase tracking-[0.12em] text-gold-accent
+                               font-mono text-xs uppercase tracking-[0.12em] text-gold-accent
                                transition-[transform,background-color,border-color] duration-150 ease-out
                                hover:bg-gold-accent/10 hover:border-gold-accent/70
                                active:scale-[0.97]

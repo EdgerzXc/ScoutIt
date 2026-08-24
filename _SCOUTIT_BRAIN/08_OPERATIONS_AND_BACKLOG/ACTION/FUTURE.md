@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [future, deferred, parked, roadmap]
-updated: 2026-08-23
+updated: 2026-08-24
 related:
   - "[[../00_START_HERE]]"
   - "[[00_MASTER_ACTION_PLAN]]"
@@ -30,10 +30,10 @@ related:
 | Manifesto celestial scrollytelling + Founding Team showcase | `ORIGIN_STORY_SCROLLYTELLING` | Direction approved 2026-08-23, implementation not authorized. One continuous founder/product story: realistic celestial bodies and meteor showers converge at the reused black-hole climax; gravitational lensing then disappears into a calm, clear resolution. Click-entry/lazy-loaded About experience only; homepage remains fast. Canonical logic: `03_DESIGN/MANTLE_MANIFESTO_STORY_SYSTEM.md` |
 | QuestIT | `QUESTIT_FUTURE/` | Parked feature. ⚠️ Reads 3 tables that do not exist |
 
-⚠️ **QuestIT trap:** `proxy.js` blocks it while the `ai_search` flag is off, but
-the guard reads `=== false`, so a **missing** flag row fails open (Standing Rule
-6 shape) and produces 500s rather than 404s. **Do not enable `ai_search` until
-those tables exist.**
+The feature and its missing tables remain parked. The independently actionable
+route-containment defect was verified against current code and promoted as
+[[ACTIVE#A-018 — Fail closed for parked QuestIT endpoints|A-018]] on 2026-08-24.
+**Do not enable `ai_search` until those tables exist.**
 
 ## 2. Trigger-gated — start when the trigger fires, not before
 

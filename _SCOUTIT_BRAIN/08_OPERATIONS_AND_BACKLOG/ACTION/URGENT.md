@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [urgent, pre-pilot, current-work, security]
-updated: 2026-08-23
+updated: 2026-08-24
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[ACTIVE]]", "[[MASTER_OWNER_ACTIONS]]"]
 ---
 
@@ -19,4 +19,4 @@ U-008, U-009 and U-010 were opened and closed on 2026-08-23 with evidence in
 production still carries the three defects until the owner approves a push.
 That gap is tracked as O-009 in [[MASTER_OWNER_ACTIONS]].
 
-[[ACTIVE]] holds A-012 and A-013.
+[[ACTIVE]] holds A-018; A-012 and A-013 are closed in Done.
