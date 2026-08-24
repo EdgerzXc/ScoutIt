@@ -117,6 +117,101 @@ claims; remove them in phase 1 rather than polishing contradictory trust copy.
 - `/brokers/[BrokerID]` is canonical; broker-shaped `/profile/[id]` output
   redirects or becomes a non-indexed owner preview.
 
+## Broker metrics update pipeline
+
+The ScoutIt Record is event-driven and near-real-time; it is not recalculated
+from every private deal whenever a profile opens. Career History follows a
+separate broker-authored publishing path.
+
+```mermaid
+flowchart LR
+    A[ScoutIt inquiry or Connect] --> E[Append-only metric event ledger]
+    B[Broker response] --> E
+    C[Two-sided transaction confirmation] --> E
+    D[Dispute, reversal, refund, or invalidation] --> E
+
+    E --> Q{Eligibility engine}
+    Q -->|Pending| P[Pending evidence]
+    Q -->|Qualified| G[Eligible event stream]
+    Q -->|Excluded or reversed| X[Retained audit event; zero metric effect]
+
+    G --> S[Broker metric snapshot]
+    R[Nightly and on-demand reconciliation] --> S
+    E --> R
+
+    S --> RT[Broker dashboard realtime refresh]
+    S --> I[Invalidate public dossier cache]
+    I --> API[Allowlisted public broker projection]
+    API --> UI[Primary ScoutIt Record]
+
+    H[Broker edits Career History] --> HD[Private autosaved draft]
+    HD --> AT[Attestation and publish]
+    AT --> VH{Named evidence review}
+    VH -->|Not reviewed| BD[Broker-declared history]
+    VH -->|Reviewed| SV[ScoutIt-reviewed claim plus date]
+    BD --> HP[Secondary Career History projection]
+    SV --> HP
+    HP --> UI
+
+    HP -. never enters .-> Q
+```
+
+### Logical data boundaries
+
+Names below are logical contracts; A-023's prepared migration will select final
+table, view, function, and index names.
+
+- **Metric event ledger:** append-only event ID, broker Auth UUID/BrokerID,
+  event type, source entity, occurred-at time, eligibility state/reason,
+  policy version, idempotency key, and reversal link. No client writes it
+  directly.
+- **Metric snapshot:** one reproducible aggregate per broker and metric window,
+  including numerator, denominator, sample size, freshness, calculation time,
+  and policy version. It contains no message body, client identity, negotiation,
+  address, or private deal value.
+- **Career History claims:** broker-owned draft and published revisions with
+  fixed metric key, value, unit/currency, coverage dates, source/evidence note,
+  attestation, verification state, reviewer, and withdrawal history.
+- **Public projection:** allowlisted ScoutIt Record plus Career History under
+  distinct keys. It cannot expose the event ledger or join private deal data.
+
+### Update cadence and user experience
+
+| Signal | Becomes visible | Delivery |
+|---|---|---|
+| Broker response time | After a valid response event | Dashboard within seconds; public cache invalidated |
+| Response rate | After response or expiry closes an eligible inquiry | Snapshot refresh; show denominator/sample |
+| Transaction | Pending after both sides submit; official only after eligibility passes | Pending privately, then qualified snapshot |
+| Dispute/reversal | As soon as the authoritative state changes | Remove effect, retain audit/reversal link |
+| Recommendation count | After qualifying connection, consent, and moderation | Snapshot refresh |
+| Career History edit | Draft immediately; public only after attested publish | Separate secondary projection |
+| Evidence review | After named staff workflow completes | Claim label and review date update |
+| Reconciliation | Nightly, after policy changes, and operator-triggered | Rebuild snapshots and alert on drift |
+
+The broker's authenticated editor may subscribe to their snapshot and draft
+changes through Supabase Realtime. Anonymous public profiles use cache
+invalidation/revalidation rather than permanent sockets; target freshness is
+seconds to roughly one minute, while correctness and qualification take
+priority over cosmetic instant updates.
+
+### Calculation and integrity rules
+
+- Completed ScoutIt transactions count distinct qualified two-sided transaction
+  handshakes, never representations or unilateral clicks.
+- Response rate is eligible inquiries answered within the published window
+  divided by eligible inquiries whose window has closed.
+- Median response time uses only eligible responses and always shows its window
+  and sample; low samples are suppressed.
+- Every write is idempotent. A retried webhook, route, or job cannot double-count.
+- Qualification and snapshot refresh happen server-side, preferably in the same
+  transaction or through a durable outbox; the browser never awards trust.
+- Policy changes create a new calculation version and trigger reconciliation;
+  they do not silently rewrite history without an audit trail.
+- Failed aggregation leaves the last known snapshot marked stale and alerts
+  operations. It never substitutes Career History or a fabricated zero.
+- Public UI distinguishes **Pending**, **Building a ScoutIt record**,
+  **Qualified**, **Stale**, **Disputed**, and **Unavailable** where applicable.
+
 ## Delivery phases
 
 1. Converge live fields, canonical ID/URL, rating contract, and public-safe
