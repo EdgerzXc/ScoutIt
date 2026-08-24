@@ -18,33 +18,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   Its statistics contract makes the read-only ScoutIt transaction record primary
   and keeps broker-editable historical career data secondary and clearly labelled.
 
-## A-022 — Consent-safe first-visit warming for smoother navigation
-
-**Owner outcome:** after the initial page becomes interactive, ScoutIt quietly
-warms the small set of public code/data most likely needed next so the first
-navigation, guide step, and role handoff feel immediate on a capable browser.
-
-**Current evidence (2026-08-24):** the app has server-side CMS caching, route-
-specific caches, dynamic dashboard bundles, and a Metropolis destination
-preloader, but no single first-visit policy. Private API responses correctly use
-`no-store`, and existing localStorage keys hold explicit preferences or private
-device-local state; these must not be replaced by broad prefetching or silent
-consent.
-
-**Agent lane:** measure the actual cold path first, then use idle/intent-based
-Next route prefetch and bounded public-data warming. Prioritize the next guide
-step and universal-shell chunks; cap work by network/device signals and honor
-Save-Data, Lite Mode, reduced motion, offline/private-mode failures, and memory
-limits. Never prefetch authenticated/private APIs, Connect actions, full media
-libraries, third-party embeds, or paid AI calls.
-
-**Exit test:** measured first-transition latency improves without regressing
-initial LCP/INP or increasing failed requests; warm work starts only after the
-entry surface is usable, cancels cleanly, and has a strict byte/request budget.
-No analytics/marketing cookie, fingerprint, location, terms acceptance, or
-authentication state is created by preload. Only essential cache/preference
-state with documented purpose and expiry may be stored.
-
 ## A-024 — Repair verified public semantic and contrast defects
 
 **Owner outcome:** Discovery, Descent, and Crust retain their approved visual

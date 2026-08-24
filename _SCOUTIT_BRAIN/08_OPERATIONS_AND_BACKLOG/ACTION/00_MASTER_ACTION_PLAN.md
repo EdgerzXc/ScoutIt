@@ -64,8 +64,8 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-022 through A-027 and A-029 are the seven Active items (A-020 and A-028
-  are Done; A-021 is Waiting); Urgent is empty
+  A-023 through A-027 and A-029 are the six Active items (A-020, A-022 and
+  A-028 are Done; A-021 is Waiting); Urgent is empty
   after U-011's verified closure.
 - **A-018 closed on 2026-08-24.** Every `/api/questit` and `/api/v1/questit/*`
   route now fails closed before pre-launch feature logic unless `ai_search` is
@@ -114,6 +114,16 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   `jerzelguerra26@gmail.com`, and bounded consent-safe first-visit warming.
   Public sample/editorial content is not silently converted into a personal
   ownership claim; staff authority is not implied; private data is never
+- **A-022 closed on 2026-08-24.** A dynamically loaded first-visit warmer now
+  starts only after `load` plus browser idle time on capable sessions. It has a
+  hard budget of two stable static public route hints, one anonymous public-data
+  request, and 32 KiB; Save-Data, slow links, low memory/CPU, offline, Lite Mode,
+  reduced motion, private-storage failures, and unmount all fail quietly. The
+  projected snapshot carries only three records' slug/title/category/location,
+  uses no credentials or cookies, and stores only a six-hour session-cache
+  marker. A nine-sample same-build A/B reduced the measured Descent-to-About
+  transition median from 390 ms to 371 ms with zero internal request failures
+  and no entry timing regression. Dynamic directory prefetch remains with Next.
   prefetched; and live ownership mutation must run through audited Mission
   Control rather than a direct provider edit.
 - **A-023 was owner-promoted on 2026-08-24 as the canonical Broker Dossier
