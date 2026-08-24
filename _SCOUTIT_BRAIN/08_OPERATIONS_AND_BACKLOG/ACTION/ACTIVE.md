@@ -18,30 +18,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   Its statistics contract makes the read-only ScoutIt transaction record primary
   and keeps broker-editable historical career data secondary and clearly labelled.
 
-## A-019 — Reframe the universal menu and Settings information architecture
-
-**Owner outcome:** the menu and Settings surfaces feel like one deliberate
-control system instead of unrelated navigation, profile, display, privacy, and
-security panels. A first-time visitor can find Explore, their workspace, Help,
-and account controls without knowing ScoutIt's internal layer names.
-
-**Current evidence (2026-08-24):** universal navigation correctly comes from
-`src/lib/navigationManifest.js`, but the Eye calls itself Display Settings while
-also containing the guide, issue reporting, and hidden development controls.
-`/settings` is a long Edit Profile Settings form containing identity, roles,
-public-card editing, privacy, password, MFA, badges, and sign-out without a
-shared settings hierarchy.
-
-**Agent lane:** preserve the single navigation manifest and identical mobile/
-desktop destinations; improve grouping, labels, active state, and handoffs into
-Account, Privacy, Security, Display, and Guide controls. Do not introduce a
-client-side role gate or duplicate menu definitions.
-
-**Exit test:** every destination still resolves; mobile and desktop share one
-manifest; Settings sections are directly reachable and keyboard/focus behavior,
-Escape/outside dismissal, `aria-current`, 360px layout, and reduced motion pass.
-No Showcase checksum or unrelated header redesign is in scope.
-
 ## A-020 — Turn the Eye into a Master-Flow guide and assistance hub
 
 **Owner outcome:** the Eye offers purposeful choices—page help, start/restart a

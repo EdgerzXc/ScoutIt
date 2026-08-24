@@ -64,7 +64,7 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-019 through A-029 are the ten Active items (A-028 is Done); Urgent is empty
+  A-020 through A-029 are the nine Active items (A-028 is Done); Urgent is empty
   after U-011's verified closure.
 - **A-018 closed on 2026-08-24.** Every `/api/questit` and `/api/v1/questit/*`
   route now fails closed before pre-launch feature logic unless `ai_search` is
@@ -75,6 +75,14 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   The pricing-benefit gap remains Future until the payment-enablement trigger fires.
 - **A-028 closed on 2026-08-24 after the full repository ownership audit.**
   Nine dead source/style files, five unreferenced tool captures, one broken
+- **A-019 closed on 2026-08-24.** The universal menu now derives Account,
+  Explore, Workspace, and Help groups from the one canonical manifest; Settings
+  and Contact & Support are first-class destinations, and the Eye is truthfully
+  named Help & Display everywhere. `/settings` now exposes stable Account,
+  Public profile, Privacy, Security, and Display & guide anchors with mobile-safe
+  navigation. Authentication-entry changes remain owned by A-025, and the
+  Master-Flow journey implementation remains A-020.
+
   gitlink, one unused dependency, and one overridden CSS block were removed;
   retained exceptions and verification evidence are in
   [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]] and the canonical

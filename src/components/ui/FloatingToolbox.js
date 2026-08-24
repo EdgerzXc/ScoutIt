@@ -440,7 +440,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ cursor: "grab", opacity: 0.5, fontSize: 12, color: "var(--accent)" }}>⠿</span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent, #E8AE3C)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}>
-                Display Settings
+                Help & Display
               </span>
             </div>
             <button
@@ -451,7 +451,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
               }}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
-              aria-label="Close Display Settings"
+              aria-label="Close Help & Display"
               style={{
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid var(--border-mid, rgba(255,255,255,0.15))",

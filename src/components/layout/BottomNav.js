@@ -368,7 +368,7 @@ export default function BottomNav() {
         <div className="theme-sheet-overlay" onClick={() => setThemeSheetOpen(false)}>
           <div className="theme-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="theme-sheet-header">
-              <span className="theme-sheet-title">Display Settings</span>
+              <span className="theme-sheet-title">Help & Display</span>
               <button className="theme-sheet-close" onClick={() => setThemeSheetOpen(false)} aria-label="Close">✕</button>
             </div>
             <div className="theme-sheet-options">

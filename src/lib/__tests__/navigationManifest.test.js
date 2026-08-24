@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import {
   ACCOUNT_ENTRIES,
   PRIMARY_NAV_ENTRIES,
+  NAVIGATION_GROUPS,
+  menuGroups,
   accountEntry,
   menuEntries,
 } from "@/lib/navigationManifest";
@@ -29,7 +31,18 @@ describe("universal navigation manifest", () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const entry of all) {
       expect(entry.label.trim()).not.toBe("");
+
       expect(entry.href.startsWith("/")).toBe(true);
+    }
+  });
+
+  it("assigns every entry to one declared navigation group", () => {
+    const groupIds = new Set(NAVIGATION_GROUPS.map((group) => group.id));
+    for (const entry of all) expect(groupIds.has(entry.group)).toBe(true);
+
+    for (const signedIn of [false, true]) {
+      const grouped = menuGroups(signedIn).flatMap((group) => group.entries);
+      expect(grouped).toEqual(menuEntries(signedIn));
     }
   });
 
@@ -47,7 +60,7 @@ describe("universal navigation manifest", () => {
   it("is the only source the header menu renders from", () => {
     const header = readFileSync(resolve(process.cwd(), "src/components/layout/Header.js"), "utf8");
     const panel = header.slice(header.indexOf('id="header-menu-panel"'), header.indexOf("</nav>"));
-    expect(panel).toContain("menuEntries(Boolean(user))");
+    expect(panel).toContain("menuGroups(Boolean(user))");
     // A hand-written destination inside the panel would drift away from the
     // manifest silently, and nothing would route-check it.
     expect(panel).not.toMatch(/href="\//);

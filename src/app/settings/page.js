@@ -11,6 +11,7 @@ import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
 import { getCurrentTier } from "@/lib/entitlements";
+import { SETTINGS_SECTIONS } from "@/lib/settingsNavigation";
 
 const INTENT_TAGS = [
   { id: 'buyer', label: 'Looking to Buy/Rent', icon: <Search strokeWidth={1.5} size="1em" /> },
@@ -233,6 +234,10 @@ export default function SettingsPage() {
     }
   };
 
+  const openHelpAndDisplay = () => {
+    window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
+  };
+
   return (
     <div className={styles.settingsContainer}>
       <AtmosphereBackground variant="default" />
@@ -241,8 +246,27 @@ export default function SettingsPage() {
       </header>
 
       <main className={styles.content}>
-        <h1 className={styles.title}>Edit Profile Settings</h1>
-        
+        <div className={styles.intro}>
+          <span className={styles.eyebrow}>Control centre</span>
+          <h1 className={styles.title}>Settings</h1>
+          <p>Manage your account, public presence, privacy, security, and browsing experience.</p>
+        </div>
+
+        <nav className={styles.settingsNav} aria-label="Settings sections">
+          {SETTINGS_SECTIONS.map((section) => (
+            <a key={section.id} href={section.href}>
+              {section.label}
+            </a>
+          ))}
+        </nav>
+
+        <section id="account" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Account</span>
+            <h2>Identity & workspaces</h2>
+            <p>Your private account name and the ScoutIt workspaces attached to it.</p>
+          </div>
+
         <div className={styles.formGroup}>
           <label className={styles.label}>Display Name</label>
           <input 
@@ -273,6 +297,15 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
+
+        </section>
+
+        <section id="public-profile" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Public profile</span>
+            <h2>How ScoutIt introduces you</h2>
+            <p>Edit the public facts people see before they choose to connect.</p>
+          </div>
 
         {/* ── Public Card Editor ── */}
         <div className={styles.formGroup}>
@@ -374,7 +407,7 @@ export default function SettingsPage() {
         <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(var(--accent-rgb), 0.2)', borderRadius: 12, background: 'rgba(var(--accent-rgb), 0.03)' }}>
           <div className="flex items-center gap-3 mb-2">
             <ShieldCheck className="text-gold-accent" size={20} />
-            <h2 className="font-display text-lg text-on-surface">Honors & Badges</h2>
+            <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>
           </div>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
             Your exclusive ScoutIt honors. Badges grant lifetime privileges and discounts.
@@ -401,6 +434,8 @@ export default function SettingsPage() {
           </Link>
         </div>
 
+        </section>
+
         {/* ── Privacy & Anonymity Shield (W13 · C19 · §46.8) ──
             Placed ABOVE Security & Login deliberately. Privacy is the thing a
             ScoutIt user is anxious about; burying it under password fields
@@ -410,13 +445,20 @@ export default function SettingsPage() {
             the user's DEFAULT already is. Standing Rule 10: never gate a
             privacy control behind a tier. The role decides who sees it, and
             brokers correctly see nothing (being found is their whole value). */}
-        <PrivacyShieldPanel
-          role={tags.includes('broker') ? 'broker' : (tags.includes('owner') ? 'owner' : 'seeker')}
-          tier={shieldTier}
-        />
+        <section id="privacy" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Privacy</span>
+            <h2>Visibility & anonymity</h2>
+            <p>Choose what ScoutIt may reveal. Privacy controls never require a paid tier.</p>
+          </div>
+          <PrivacyShieldPanel
+            role={tags.includes('broker') ? 'broker' : (tags.includes('owner') ? 'owner' : 'seeker')}
+            tier={shieldTier}
+          />
+        </section>
 
         {/* ── Security & Login ── */}
-        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid var(--surface-variant)', borderRadius: 12, background: 'var(--surface)' }}>
+        <section id="security" className={styles.settingsSection} tabIndex="-1" style={{ padding: 24 }}>
           <div className="flex items-center gap-3 mb-2">
             <Lock className="text-on-surface" size={20} />
             <h2 className="font-display text-lg text-on-surface">Security & Login</h2>
@@ -547,7 +589,7 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
-        </div>
+        </section>
 
         <button
           className={styles.buttonPrimary}
@@ -556,6 +598,22 @@ export default function SettingsPage() {
         >
           Save Changes
         </button>
+
+        <section id="display-guide" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Display & guide</span>
+            <h2>Comfort, guidance & support</h2>
+            <p>Open page help, the guided journey, display preferences, or problem reporting.</p>
+          </div>
+          <div className={styles.handoffActions}>
+            <button type="button" onClick={openHelpAndDisplay}>
+              Open Help & Display
+            </button>
+            <Link href="/contact">
+              Contact support
+            </Link>
+          </div>
+        </section>
 
         <button
           className="w-full mt-4 border border-surface-variant text-text-secondary hover:text-error hover:border-error/50 font-working-title text-sm py-3 rounded transition-colors"

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import AmbientRail from "@/components/layout/ambient/AmbientRail";
-import { menuEntries } from "@/lib/navigationManifest";
+import { menuGroups } from "@/lib/navigationManifest";
 
 export default function Header({ ambientContext = null }) {
   const router = useRouter();
@@ -160,9 +160,9 @@ export default function Header({ ambientContext = null }) {
           type="button"
           onClick={openDisplaySettings}
 
-          aria-label="Display Settings (Dark / High Contrast / Lite Mode)"
+          aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
           aria-expanded={displaySettingsOpen}
-          title="Display Settings (Dark / High Contrast / Lite Mode)"
+          title="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -189,15 +189,20 @@ export default function Header({ ambientContext = null }) {
           aria-label="ScoutIt navigation"
         >
           <ScoutItWordmark className="dropdown-brand" />
-          {menuEntries(Boolean(user)).map((entry) => (
-            <Link
-              key={entry.id}
-              href={entry.href}
-              aria-current={pathname === entry.href ? "page" : undefined}
-              onClick={() => setMenuOpen(false)}
-            >
-              {entry.label}
-            </Link>
+          {menuGroups(Boolean(user)).map((group) => (
+            <div className="dropdown-group" key={group.id}>
+              <span className="dropdown-group-label">{group.label}</span>
+              {group.entries.map((entry) => (
+                <Link
+                  key={entry.id}
+                  href={entry.href}
+                  aria-current={pathname === entry.href ? "page" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {entry.label}
+                </Link>
+              ))}
+            </div>
           ))}
           <button
             type="button"
@@ -210,7 +215,7 @@ export default function Header({ ambientContext = null }) {
 
           >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <span>Display Settings</span>
+            <span>Help & Display</span>
           </button>
         </div>
       </nav>
@@ -472,6 +477,8 @@ export default function Header({ ambientContext = null }) {
              open with focus still on the page underneath. Delay it on close
              instead, so the fade-out stays visible for its full duration. */
           transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1), visibility 0s linear 180ms;
+          max-height: calc(100dvh - 88px);
+          overflow-y: auto;
           z-index: 1001;
         }
 
@@ -482,6 +489,21 @@ export default function Header({ ambientContext = null }) {
           transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1), visibility 0s linear;
         }
 
+        .dropdown-group + .dropdown-group {
+          margin-top: 6px;
+          padding-top: 6px;
+          border-top: 1px solid var(--border-subtle);
+        }
+
+        .dropdown-group-label {
+          display: block;
+          padding: 4px 14px 3px;
+          color: var(--text-muted);
+          font-family: var(--font-mono);
+          font-size: 12px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
         .header-dropdown :global(a) {
           display: block;
           padding: 10px 14px;

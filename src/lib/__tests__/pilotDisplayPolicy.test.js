@@ -13,7 +13,8 @@ describe("controlled-pilot display policy", () => {
 
   it("advertises only the accepted display controls in the universal header", () => {
     const header = read("src/components/layout/Header.js");
-    expect(header).toContain("Display Settings (Dark / High Contrast / Lite Mode)");
+    expect(header).toContain("Help & Display (Guide / Dark / High Contrast / Lite Mode)");
+    expect(header).not.toContain("Display Settings (Dark / High Contrast / Lite Mode)");
     expect(header).not.toContain("Display Settings (Light / Lite / Dark Mode)");
   });
 });

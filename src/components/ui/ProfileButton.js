@@ -65,8 +65,8 @@ export default function ProfileButton({ floating = false }) {
         type="button"
         className="profile-eye-btn"
         onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"))}
-        aria-label="Display Settings (Light / Lite / Dark Mode)"
-        title="Display Settings (Light / Lite / Dark Mode)"
+        aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
+        title="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />

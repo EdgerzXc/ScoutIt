@@ -112,6 +112,57 @@ test.describe('Owner with zero listings (safe mock)', () => {
   });
 });
 
+test.describe('Settings information architecture', () => {
+  test.use({ viewport: { width: 360, height: 800 } });
+
+  test('sections remain directly reachable at 360px without JavaScript', async ({ browser }) => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      viewport: { width: 360, height: 800 },
+    });
+    const page = await context.newPage();
+    try {
+      await page.goto('/settings', { waitUntil: 'domcontentloaded' });
+      const sectionNav = page.getByRole('navigation', { name: 'Settings sections' });
+      await expect(sectionNav).toBeVisible();
+      await expect(sectionNav.getByRole('link')).toHaveCount(5);
+
+      await sectionNav.getByRole('link', { name: 'Privacy' }).click();
+      await expect(page).toHaveURL(/\/settings#privacy$/);
+      await expect(page.locator('#privacy')).toBeVisible();
+
+      await sectionNav.getByRole('link', { name: 'Display & guide' }).click();
+      await expect(page).toHaveURL(/\/settings#display-guide$/);
+      await expect(page.locator('#display-guide')).toBeVisible();
+
+      const dimensions = await page.evaluate(() => ({
+        viewport: window.innerWidth,
+        document: document.documentElement.scrollWidth,
+        nav: document.querySelector('[aria-label="Settings sections"]')?.scrollWidth || 0,
+      }));
+      expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+      expect(dimensions.nav).toBeGreaterThan(dimensions.viewport / 2);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('the Eye opens the Help & Display hub at 360px', async ({ page }) => {
+    const errors = trackErrors(page);
+    await gotoAndSettle(page, '/discover');
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await expect(page.getByText('Explore', { exact: true })).toBeVisible();
+    await expect(page.getByText('Workspace', { exact: true })).toBeVisible();
+    await expect(page.getByText('Help', { exact: true })).toBeVisible();
+    await expect(page.getByText('Account', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
+    await expect(page.getByText('Help & Display', { exact: true }).last()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Close Help & Display' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
 test.describe('Calendar viewing lifecycle (fully mocked)', () => {
   test('host can confirm a pending viewing', async ({ page }) => {
     await signInAsMock(page, { ...MOCK_OWNER_EMPTY, id: 'master-dev-e2e-calendar-host' });
