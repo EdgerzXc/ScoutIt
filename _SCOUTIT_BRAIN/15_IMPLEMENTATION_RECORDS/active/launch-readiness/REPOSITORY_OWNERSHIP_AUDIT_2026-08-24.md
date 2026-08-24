@@ -124,6 +124,9 @@ composition.
 - GitHub's clean checkout exposed one test-only dependency on an ignored Brain
   audit document. The contract now verifies the tracked server-only retrieval
   coordinator and keyword fallback directly; its focused suite passes 5/5.
+- The subsequent Linux run also exposed a Windows-only Mission Control
+  action-path key. Both path forms are now recognized, and the complete Mission
+  Control security suite passes 54/54.
 - Focused production-mode browser audit over public, professional, design,
   accessibility, PDF, image, desktop, and mobile paths completed 178 passed and
   one skipped. One mobile Intel case logged an `ECONNRESET` during the

@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rbacPath = path.join(root, "src", "lib", "rbac.js");
 const authenticatedReadActions = new Set([
   "src\\app\\dashboard\\brain\\actions.js#askBrain",
+  "src/app/dashboard/brain/actions.js#askBrain",
 ]);
 
 async function loadTierPolicy() {
