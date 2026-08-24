@@ -29,7 +29,7 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 ## Current truth — 2026-08-24
 
 - GitHub baseline includes the owner-approved release and O-009 action record
-  through `a35237d`. Production Vercel, API, Supabase, Airtable, and email
+  through `e4c5ea0`. Production Vercel, API, Supabase, Airtable, and email
   health were verified live.
 - The previous production baseline was `1daddbb` after the owner-approved
   2026-08-23 push.
@@ -44,7 +44,7 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
 - **The 2026-08-24 production audit is complete.** Ninety-eight desktop/mobile
   route observations, safe HTTP/security probes, repeat performance samples,
   and a 314-case read-only browser subset verified broad public health and routed
-  only reproducible findings. U-011's nested-property soft 404s are now closed locally with production-mode evidence; A-024 through
+  only reproducible findings. U-011's nested-property soft 404s are now released live with production-mode and post-deploy evidence; A-024 through
   A-027 own unlocked semantic/auth-entry/audit-harness/performance work; O-011
   owns Google production-origin configuration; locked Showcase semantics extend
   F-006; partial canonical coverage stays under Future L-001. Evidence and

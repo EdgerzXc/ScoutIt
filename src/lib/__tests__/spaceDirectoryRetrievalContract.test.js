@@ -107,9 +107,10 @@ describe("F-005 Space Directory product and retrieval audit contract", () => {
       });
     }).toThrow();
 
-    const audit = read("_SCOUTIT_BRAIN/02_ARCHITECTURE_AND_STRUCTURE/SPACE_DIRECTORY_AND_RETRIEVAL_AUDIT.md");
-    expect(audit).toContain("server-only local coordinator");
-    expect(audit).toContain("do not currently exist");
+    const coordinator = read("src/lib/retrieval/retrievalCoordinator.server.js");
+    expect(coordinator).toContain('import "server-only"');
+    expect(coordinator).toContain("semanticCandidates");
+    expect(coordinator).toContain("keywordSearch");
     expect(existsSync(resolve(process.cwd(), "src/app/api/search/route.js"))).toBe(false);
     expect(existsSync(resolve(process.cwd(), "src/app/api/intel/search/route.js"))).toBe(false);
   });

@@ -121,6 +121,9 @@ composition.
 - Main Next 16.3 production build compiled and generated 121 pages.
 - Mission Control passed 54/54 security/operations tests and its Next 15.5
   production build generated 27 pages.
+- GitHub's clean checkout exposed one test-only dependency on an ignored Brain
+  audit document. The contract now verifies the tracked server-only retrieval
+  coordinator and keyword fallback directly; its focused suite passes 5/5.
 - Focused production-mode browser audit over public, professional, design,
   accessibility, PDF, image, desktop, and mobile paths completed 178 passed and
   one skipped. One mobile Intel case logged an `ECONNRESET` during the
