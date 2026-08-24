@@ -6,6 +6,8 @@ import { resolveUserId } from '@/lib/serverAuth';
 import { isPreLaunchFreeMode } from '@/lib/featureFlags';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { tierRank } from '@/lib/entitlements';
+import { createRateLimiter } from '@/lib/rateLimit';
+import { clientIp } from '@/lib/clientIp';
 
 // ── Tier is decided HERE, never by the caller ────────────────────────────────
 // This route used to read `tier` straight out of the request body, so anyone —
@@ -71,7 +73,36 @@ function renderFactSheet(property) {
   return lines.join('\n');
 }
 
+// ── SPEND CEILING (A-012) ────────────────────────────────────────────────────
+// This route is anonymous by design while `pre_launch_free_mode` is on, and
+// every accepted call can spend Gemini tokens. Anonymous + billed + unmetered
+// is the combination that turns a quiet week into an invoice.
+//
+// 10/minute is generous for the real interaction — a person opening the Promote
+// modal and pressing regenerate a few times — and useless for a loop.
+const PROMOTE_LIMIT_PER_MINUTE = 10;
+const checkPromoteRate = createRateLimiter({
+  limit: PROMOTE_LIMIT_PER_MINUTE,
+  windowMs: 60_000,
+  maxKeys: 20_000,
+});
+
 export async function POST(request) {
+  // Metered before the body is read: a refusal must cost less than an accept.
+  const rate = checkPromoteRate(clientIp(request));
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: 'Too many promote requests', retryAfterSeconds: rate.retryAfterSeconds },
+      {
+        status: 429,
+        headers: {
+          'Cache-Control': 'private, no-store',
+          'Retry-After': String(rate.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   let property, role, link;
   try {
     // `tier` is deliberately NOT read from the body — see resolveTier above.

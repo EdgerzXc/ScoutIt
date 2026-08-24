@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { X, Copy, Check, Lock, Sparkles } from "lucide-react";
 import { getCurrentRole, getCurrentTier } from "@/lib/entitlements";
 import GlassPanel from "../ui/GlassPanel";
-import { sanitizeError } from "@/lib/sanitizeError";
+import { buildPromoPack } from "@/lib/shareBriefing";
+import { promoteFailureState } from "@/components/property/promoteFallback";
 
 function MinorLockSection() {
   return (
@@ -79,11 +80,23 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [source, setSource] = useState(null);
-  const [error, setError] = useState(null);
+  // Non-null when the AI path failed and the local pack is standing in.
+  const [degraded, setDegraded] = useState(null);
+
+  // A-014: a failed AI call is not a reason to show the user nothing.
+  // buildPromoPack() produces the same three formats from this listing's own
+  // recorded facts with no network call at all, so every failure path below
+  // degrades to it instead of terminating. `source` stays truthful so the
+  // header never presents the local pack as the AI draft.
+  const degradeToLocalPack = (failure) => {
+    setDegraded(failure);
+    setData(buildPromoPack(propertyData, link));
+    setSource("factsheet");
+  };
 
   const generateCopy = async (regenerate = false) => {
     setLoading(true);
-    setError(null);
+    setDegraded(null);
     try {
       const res = await fetch("/api/ai/promote", {
         method: "POST",
@@ -95,14 +108,27 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
           tier
         }),
       });
-      const result = await res.json();
+      const result = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(result.error || "Failed to generate");
+      if (!res.ok) {
+        degradeToLocalPack(
+          promoteFailureState({
+            status: res.status,
+            // Present on a 429 from /api/ai/promote; a proxy can strip it,
+            // which promoteFailureState renders as words rather than a guess.
+            retryAfterSeconds: res.headers.get("Retry-After"),
+          })
+        );
+        return;
+      }
 
       setData(result.data);
       setSource(result.source || null);
     } catch (err) {
-      setError(sanitizeError(err, "Couldn't promote this listing."));
+      // A thrown fetch means offline or DNS — still no reason to show nothing,
+      // because the local pack needs neither. The advisory below carries the
+      // message, so there is no separate error string to sanitise and render.
+      degradeToLocalPack(promoteFailureState({ status: 0 }));
     } finally {
       setLoading(false);
     }
@@ -146,9 +172,48 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
             </div>
           )}
 
-          {error && (
-            <div className="bg-error/10 border border-error text-error p-4 rounded text-sm mb-4">
-              {error}
+          {/* A-014: this used to be a red error block that replaced the content.
+              It is now an advisory that sits ABOVE working content, because the
+              local pack below is a real answer rather than a consolation. Red
+              would overstate it — nothing is broken from the user's side, and
+              the only cool-shifted pixel on a black-and-gold page reads as an
+              alarm the situation does not warrant. */}
+          {degraded && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mb-5 rounded border border-gold-accent/25 bg-gold-accent/[0.06] p-4
+                         motion-safe:animate-[fadeIn_200ms_cubic-bezier(0.23,1,0.32,1)]"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent mb-1">
+                    {degraded.kind === "rate-limited" ? "AI drafting is busy" : "AI drafting is unavailable"}
+                  </div>
+                  <p className="text-sm text-text-secondary leading-relaxed">
+                    {degraded.message} The copy below is ready to use in the meantime.
+                  </p>
+                </div>
+
+                {/* Only offered where retrying is meaningful. A retry button on
+                    an unavailable service is a button that exists to disappoint. */}
+                {degraded.kind === "rate-limited" && (
+                  <button
+                    onClick={() => generateCopy(true)}
+                    disabled={loading}
+                    className="shrink-0 rounded border border-gold-accent/40 px-3 py-1.5
+                               font-mono text-[11px] uppercase tracking-[0.12em] text-gold-accent
+                               transition-[transform,background-color,border-color] duration-150 ease-out
+                               hover:bg-gold-accent/10 hover:border-gold-accent/70
+                               active:scale-[0.97]
+                               focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2
+                               focus-visible:outline-gold-accent
+                               disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    {loading ? "Retrying" : "Retry"}
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

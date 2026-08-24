@@ -24,6 +24,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const BASE_URL = "https://api.airtable.com/v0";
+import { fetchWithRetry } from "@/lib/fetchWithRetry";
 const INTEL_TABLE = "INTEL_CMS";
 
 /**
@@ -117,7 +118,10 @@ export async function pushBriefingToAirtable({
   baseId,
   briefing,
   relatedPropertyIds = [],
-  fetchImpl = fetch,
+  // A-013: the injectable seam stays (tests use it), but the DEFAULT is
+  // now the bounded client. Previously every production caller silently
+  // got a fetch with no timeout because that was the parameter default.
+  fetchImpl = fetchWithRetry,
 }) {
   if (!apiKey || !baseId) throw new Error("intelPublish: missing Airtable credentials");
 

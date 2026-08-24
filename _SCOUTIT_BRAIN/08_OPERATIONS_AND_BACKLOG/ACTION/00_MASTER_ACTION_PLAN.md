@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [canonical, action-router, execution-control]
-updated: 2026-08-23
+updated: 2026-08-24
 related: ["[[URGENT]]", "[[ACTIVE]]", "[[WAITING]]", "[[MASTER_OWNER_ACTIONS]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]]", "[[RULES]]"]
 ---
 
@@ -26,22 +26,46 @@ verifies its own changes with runnable evidence, and updates that item's truthfu
 disposition before ending the turn. Historical agent-workspace packets are
 implementation records only and assign no work. See [[RULES#PART D — DIRECT CODEX EXECUTION|RULES Part D]].
 
-## Current truth — 2026-08-23
+## Current truth — 2026-08-24
 
-- Production baseline: main and origin/main were at 89185c8 when this control
-  system was created.
-- The pre-pilot stabilization gate closed 2026-08-22. U-001 through U-005 are
-  in [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]], the working tree is
-  committed on main as six reviewed change sets, and nothing has been pushed,
-  merged, or deployed. [[URGENT]] is empty. The bounded F-series implementation
-  slices are either in Done or at exact owner gates. [[ACTIVE]] has no authorized
-  implementation item. New work must be verified
-  and promoted through this router before execution.
+- Production baseline: main and origin/main are synchronized at `1daddbb` after
+  the owner-approved 2026-08-23 push. The items below are **not** in that commit.
+- The pre-pilot stabilization gate closed 2026-08-22. U-001 through U-007 are
+  in [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]].
+- **U-008, U-009 and U-010 were opened and closed on 2026-08-23.** All three
+  were security defects read directly out of current code, each fixed test-first
+  and recorded with evidence in
+  [[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]]. [[URGENT]] is empty again.
+- ⚠️ **All six fixes are in the working tree only.** `main` and `origin/main`
+  are still at `1daddbb`, so the live site continues to carry the stored-XSS,
+  formula-injection, open-write, unmetered-spend and hanging-call defects until
+  the owner approves a push. Tracked as O-009 in [[MASTER_OWNER_ACTIONS]].
+  **Do not treat the Done ledger as a description of production.**
+- U-010's honest-failure work surfaced a live configuration question:
+  `AIRTABLE_REACTIONS_TABLE_ID` may never have been set, in which case every
+  recorded reaction was silently discarded while the UI confirmed a save. Owner
+  check O-010.
+- **A-012, A-013 and A-014 were closed on 2026-08-24.** The repository's own
+  rate limiter and `fetchWithRetry` now cover the routes that bypassed them, and
+  AI Promote degrades to its local pack instead of dead-ending. A-014 was
+  verified and promoted from current code during the same pass rather than
+  inherited from a list. [[ACTIVE]] is empty again.
+- Two claims in the original A-012/A-013 text were **wrong and are corrected in
+  the Done rows**: `/api/ai/*` and the inquiry paths are not unauthenticated, and
+  `src/lib/isochrone.js` was never unbounded. Both originated from greps that
+  matched the wrong signal. Verify route-by-route before trusting a scan.
+- Monitoring is **not** an open engineering task. Sentry is fully wired in code
+  and `/api/health` exists; the DSN value and alert rules are owner/ops state
+  owned by L-001. Do not open a duplicate.
 - The Showcase stage and its parent navigation are owner-approved and checksum
   locked. A broad Showcase/header redesign is **not** an active task.
 - The remaining Showcase control-size question is owner-gated in [[WAITING]].
 - The owner retired the Antigravity handoff workflow on 2026-08-23. A-010 was
   cancelled before implementation; Codex now works directly from these queues.
+- [[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE#L-001 — Launch operations, discoverability, and social readiness|L-001]]
+  records the owner-requested launch-readiness workstream for search, analytics,
+  Vercel, DNS/CDN/registrar controls, monitoring, and official social accounts.
+  It is planning-only and has no execution authority until promoted from Future.
 
 ## Execution order
 

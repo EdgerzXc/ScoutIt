@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sanitizeError } from '@/lib/sanitizeError';
 import { isEmailConfigured } from '@/lib/email';
+import { fetchWithRetry } from '@/lib/fetchWithRetry';
 
 // A service that is present but optional must not fail the rollup. Supabase and
 // Airtable already used "unconfigured" for this; "configured" is its counterpart
@@ -45,9 +46,14 @@ export async function GET(request) {
     const airtableBaseId = process.env.AIRTABLE_BASE_ID;
     const airtableKey = process.env.AIRTABLE_API_KEY;
     if (airtableBaseId && airtableKey) {
-      const atRes = await fetch(`https://api.airtable.com/v0/${airtableBaseId}/PROPERTIES_CMS?maxRecords=1`, {
-        headers: { Authorization: `Bearer ${airtableKey}` }
-      });
+      // A-013: the endpoint whose job is to report trouble must not be the
+      // one that hangs. A single short attempt is right here -- health is a
+      // snapshot, and retrying would report a slow upstream as a healthy one.
+      const atRes = await fetchWithRetry(
+        `https://api.airtable.com/v0/${airtableBaseId}/PROPERTIES_CMS?maxRecords=1`,
+        { headers: { Authorization: `Bearer ${airtableKey}` } },
+        { retries: 0, attemptTimeoutMs: 4000, circuit: null }
+      );
       results.services.airtable = atRes.ok ? "healthy" : "unhealthy";
     } else {
       results.services.airtable = "unconfigured";

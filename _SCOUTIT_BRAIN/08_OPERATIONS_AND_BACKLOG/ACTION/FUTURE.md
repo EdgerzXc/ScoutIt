@@ -43,6 +43,99 @@ those tables exist.**
 | Wishlist per-link revocation | Only if the 90-day expiry proves insufficient |
 | Read replicas, search index, heavier caching | A measured bottleneck, never a predicted one |
 
+## L-001 — Launch operations, discoverability, and social readiness
+
+**Status:** owner-requested future workstream; recorded 2026-08-23; implementation
+and external account creation are not authorized yet.
+
+**Trigger:** promote this same `L-001` ID into Active when the owner starts the
+pre-public-marketing readiness pass. External account, DNS, registrar, analytics,
+or deployment mutations require the relevant owner login and an explicit execution
+instruction. Do not duplicate W-006 or O-006: Google Search Console is already
+verified and the production sitemap has already been submitted; those existing
+items own its current processing-status follow-up.
+
+**Outcome:** ScoutIt enters public promotion with its discovery, measurement,
+domain, deployment, recovery, monitoring, and official-channel foundations already
+owned and documented. Routine product work can then concentrate on user-visible bugs
+instead of emergency account recovery or infrastructure archaeology.
+
+### Search and index coverage
+
+- Audit the existing Google Search Console domain property, sitemap processing,
+  canonical/index coverage, manual actions, structured-data enhancements, and URL
+  inspection workflow. Preserve its DNS verification record through every DNS move.
+- Establish Bing Webmaster Tools and IndexNow coverage, validate the production
+  sitemap and robots/canonical behavior there, and record ownership and recovery.
+- Verify discoverability from the major search surfaces relevant to the Philippine
+  audience. Add regional engines only when they have measurable audience value;
+  do not create decorative accounts that nobody will monitor.
+- Mozilla has no webmaster/search console. Cover Firefox through the browser and
+  accessibility test matrix instead of inventing a nonexistent submission step.
+- Prepare Google Business Profile, Bing Places, and Apple Business Connect only if
+  ScoutIt truthfully meets each platform's eligibility rules. Never invent an office,
+  service area, registration status, review, or operating claim.
+
+### Analytics, observability, and consent
+
+- Audit the existing GA4 installation rather than installing a duplicate property.
+  Confirm production traffic, internal-traffic exclusion, consent behavior, referral
+  exclusions, retention, data-sharing settings, and a small set of truthful key events.
+- Reconcile GA4 with Search Console, Vercel Analytics/Speed Insights, Sentry, and
+  Cloudflare analytics so each system has one named purpose and no double-counted event.
+- Define dashboards and alerts for availability, deploy failures, Web Vitals, API
+  errors, indexing loss, unusual traffic, domain/SSL expiry, and critical user journeys.
+- Record a privacy-safe measurement dictionary. Do not send private CRM, inbox,
+  profile, property-owner, or authentication data into public analytics tools.
+
+### Vercel, Cloudflare, GoDaddy, DNS, and recovery
+
+- Audit Vercel production/preview domains, environment-variable scope, deployment
+  protection, Git integration, function regions/limits, logs, alerts, rollback, and
+  access ownership. Keep previews from becoming indexable production duplicates.
+- Export and inventory the complete GoDaddy zone before any change. Confirm registrar
+  lock, auto-renew, billing continuity, registrant/recovery contacts, least-privilege
+  access, and offline recovery records.
+- Execute any GoDaddy-to-Cloudflare nameserver cutover only under its existing owner
+  action and verified order. Preserve Search Console, MX, SPF, DKIM, DMARC, Resend,
+  Vercel, Turnstile, and other validation records; establish rollback evidence before
+  enabling DNSSEC, proxying, WAF, rate limits, bot controls, or Access policies.
+- Keep the public Vercel host, Mission Control protection, Turnstile, email routing,
+  and future R2 storage as separate controls. Do not enable a Cloudflare product merely
+  to claim that another layer exists.
+- Maintain one credential/asset register containing account owner, purpose, recovery
+  contact, 2FA/passkey state, billing owner, renewal date, and last recovery test—never
+  raw secrets or recovery codes in Git.
+
+### Official social accounts and distribution
+
+- Reserve truthful, consistent ScoutIt handles on Facebook, Instagram, LinkedIn,
+  YouTube, TikTok, X, and Threads. Evaluate Pinterest only if the design/inspiration
+  audience becomes an active content lane; do not reserve unmanaged platforms blindly.
+- Use a dedicated brand-owned admin identity, password manager, passkeys or strong 2FA,
+  offline recovery codes, backup owner, and documented role access. No account may depend
+  permanently on one personal device, phone number, or undocumented email address.
+- Prepare a shared brand kit: canonical name, wordmark/avatar, bio, category description,
+  website URL, contact path, disclosure language, and platform-appropriate banner assets.
+- Define link ownership, UTM conventions, publishing permissions, moderation/escalation,
+  impersonation reporting, account-recovery drills, and a minimum sustainable content
+  cadence before any channel is publicly announced.
+- Connect social profiles through truthful same-as structured data only after the official
+  accounts are live and controlled by ScoutIt.
+
+### Exit evidence
+
+- One current account and infrastructure inventory with named owners and recovery paths.
+- Search engines accept the canonical production sitemap without a new blocking error.
+- Analytics and error monitoring receive a controlled production test without leaking
+  private data or double-counting the event.
+- Domain, DNS, email, SSL, Vercel deployment, rollback, and account-recovery checks are
+  rehearsed and documented.
+- Every announced social account is secured, branded consistently, linked from the
+  canonical site, and assigned to a sustainable publishing/response owner.
+- A quarterly access, billing, recovery, indexing, analytics, and platform-health review
+  is placed on the operating calendar.
+
 ## 3. Scale-only performance pass — **explicitly not pre-launch**
 
 **114 Supabase advisor lints:** 41 redundant permissive policies, 27 unindexed

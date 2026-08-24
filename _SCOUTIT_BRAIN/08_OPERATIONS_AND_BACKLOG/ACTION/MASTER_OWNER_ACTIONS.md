@@ -14,6 +14,57 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKL
 
 ## Do now
 
+## O-010 — Check whether property reactions have ever been recorded
+
+`/api/reactions` writes to the Airtable table named by
+`AIRTABLE_REACTIONS_TABLE_ID`. That variable appears in exactly two places in the
+whole repository: the route that reads it, and the test that sets it. It is not
+in `.env.local`, not in any `.env.example`, and not in any document.
+
+Locally the route now answers `503 Reactions are not configured`. Before U-010
+the same condition returned `{ ok: true }` — the code checked for the three env
+vars, skipped the write when any was missing, and reported success anyway. **So
+if this variable is also unset in Vercel, every reaction anyone has ever tapped
+was silently discarded and the interface said "Saved to Your Board." each time.**
+This was invisible by construction; the honest-failure work is what surfaced it.
+
+**What the owner checks:** whether `AIRTABLE_REACTIONS_TABLE_ID` is set in the
+Vercel project environment (both projects — `scout-it` is the main site), and
+whether a reactions table exists in the Airtable base at all.
+
+**Then one of two things is true:**
+- The table exists and the variable is simply missing locally — set it in
+  `.env.local` and add it to the documented environment list.
+- The table was never created — then the reaction tiles have been decorative
+  since they shipped, and the owner decides whether to build the table or retire
+  the feature. Local saving to Your Board works either way; it is only the
+  anonymous aggregate that was going nowhere.
+
+**Note:** this is a data question, not an outage. Nothing is broken for users
+today, and after U-010 a missing table produces an honest 503 instead of a
+false success.
+
+## O-009 — Approve the push that puts the 2026-08-23 security fixes live
+
+Three security defects were fixed on 2026-08-23 (U-008 stored XSS via JSON-LD,
+U-009 Airtable formula injection in `/api/geo-pricing`, U-010 unauthenticated
+unbounded writes to `/api/reactions`). **The fixes are in the working tree only.**
+`main` and `origin/main` remain at `1daddbb`, so the live site still carries all
+three until this is approved.
+
+**Evidence already produced:** 1,513 unit tests pass, `npm run build` compiles,
+ESLint is clean, and `npm run verify:surfaces` passes 3/3 before and after.
+Each fix was written test-first, and each test was watched fail for the right
+reason before the fix existed.
+
+**What the owner decides:** whether to review the diff first, and whether this
+goes out as its own push or waits to be batched with A-012/A-013.
+
+**Note:** U-009 changes behaviour for callers — `/api/geo-pricing` now returns
+400 for a category outside the six known ones, where it previously fell through
+to `Listed_Price`. That is the fix, but it is a visible change worth knowing
+about before it ships.
+
 ### F-001 — Approve retrieval persistence and provider activation
 
 The local two-corpus retrieval foundation is engineering-complete and remains

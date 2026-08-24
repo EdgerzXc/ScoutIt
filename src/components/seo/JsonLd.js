@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/siteUrl";
+import { escapeJsonLd } from "@/lib/jsonLdScript";
 
 // ═══════════════════════════════════════════════════════════════
 // SITE-WIDE STRUCTURED DATA — the entity signal
@@ -110,11 +111,11 @@ export default function JsonLd() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{ __html: escapeJsonLd(JSON.stringify(organizationSchema)) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        dangerouslySetInnerHTML={{ __html: escapeJsonLd(JSON.stringify(websiteSchema)) }}
       />
     </>
   );

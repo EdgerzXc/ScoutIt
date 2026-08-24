@@ -5,6 +5,7 @@ import { fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
 import { extractFacts } from "@/lib/shareBriefing";
 import { buildPropertyJsonLd, mergeFaqIntoOverride } from "@/lib/propertySchema";
+import { escapeJsonLd } from "@/lib/jsonLdScript";
 import { getAnsweredFaqs } from "@/lib/faqServer";
 import ResidentialFlow from "@/components/property/ResidentialFlow";
 import CommercialFlow from "@/components/property/CommercialFlow";
@@ -189,7 +190,7 @@ export default async function PropertyRoute({ params }) {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLd }}
+          dangerouslySetInnerHTML={{ __html: escapeJsonLd(jsonLd) }}
         />
       )}
       <article className="chameleon-content-wrapper">

@@ -35,6 +35,7 @@ import { getCmsBundle } from "@/lib/cmsCache";
 import { stripPremiumFields } from "@/lib/premiumFields";
 import { selectHubProperties, HUB_RADIUS_KM } from "@/lib/hubProperties";
 import { siteUrl } from "@/lib/siteUrl";
+import { escapeJsonLd } from "@/lib/jsonLdScript";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import "./hub.css";
@@ -133,7 +134,7 @@ export default async function HubPage({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: escapeJsonLd(JSON.stringify(jsonLd)) }}
       />
       <Header />
 

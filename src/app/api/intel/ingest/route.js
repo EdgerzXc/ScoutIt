@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { extractText, getDocumentProxy } from "unpdf";
 import Papa from "papaparse";
 import { createClient } from "@supabase/supabase-js";
@@ -211,7 +212,7 @@ async function createIntelRecord(article, publish) {
     return { error: "Airtable credentials are not configured on this server." };
   }
 
-  const res = await fetch(`${AIRTABLE_API}/${baseId}/INTEL_CMS`, {
+  const res = await fetchWithRetry(`${AIRTABLE_API}/${baseId}/INTEL_CMS`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,

@@ -5,6 +5,23 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { createHash } from "node:crypto";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+// ── WRITE CEILING (A-012) ────────────────────────────────────────────────────
+// Anonymous events are expected here — most viewers are not signed in — but
+// "anonymous" is not the same as "unbounded". This is a public write path with
+// no Turnstile in front of it.
+//
+// The limit is high on purpose: a real reader scrolling one property page emits
+// several chapter and dwell events in quick succession, and metering honest
+// telemetry into silence would corrupt the data this route exists to collect.
+const ANALYTICS_LIMIT_PER_MINUTE = 120;
+const checkAnalyticsRate = createRateLimiter({
+  limit: ANALYTICS_LIMIT_PER_MINUTE,
+  windowMs: 60_000,
+  maxKeys: 20_000,
+});
 
 // ═══════════════════════════════════════════════════════════════════════
 // ANALYTICS INTAKE — GIVEN A CALLER 2026-08-06 (§59 · W18.2)
@@ -46,6 +63,20 @@ const ALLOWED_EVENTS = new Set([
 ]);
 
 export async function POST(request) {
+  const rate = checkAnalyticsRate(clientIp(request));
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many analytics events" },
+      {
+        status: 429,
+        headers: {
+          "Cache-Control": "private, no-store",
+          "Retry-After": String(rate.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const { eventType, propertyId, propertySlug, chapterId, dwellSeconds, metadata } = body;

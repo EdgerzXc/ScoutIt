@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -53,7 +54,7 @@ async function stampAirtable(slug, isoDate) {
 
   try {
     const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
-    const findRes = await fetch(`${AIRTABLE_BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`, {
+    const findRes = await fetchWithRetry(`${AIRTABLE_BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     if (!findRes.ok) return false;
@@ -62,7 +63,7 @@ async function stampAirtable(slug, isoDate) {
     const recordId = found?.records?.[0]?.id;
     if (!recordId) return false; // not published to Airtable yet — fine
 
-    const patchRes = await fetch(`${AIRTABLE_BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`, {
+    const patchRes = await fetchWithRetry(`${AIRTABLE_BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${apiKey}`,

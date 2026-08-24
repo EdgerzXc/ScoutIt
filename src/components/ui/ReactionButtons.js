@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { Bookmark, Sparkles, Target, Heart } from "lucide-react";
+import { reactionFeedback } from "@/components/ui/reactionFeedback";
+import { reportError } from "@/lib/reportError";
 
 const REACTION_SHAPES = {
   "Save": {
@@ -45,7 +47,8 @@ const REACTION_SHAPES = {
 
 export default function ReactionButtons({ propertyId, propertyTitle, category, city, small = false, isBroker = false }) {
   const [activeReaction, setActiveReaction] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
+  // "idle" | "saved" | "removed" | "storage-failed" -- see reactionFeedback.js
+  const [status, setStatus] = useState("idle");
 
   // Read initial reaction state on mount
   useEffect(() => {
@@ -67,6 +70,10 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
   const handleReactionClick = (type) => {
     let nextReaction = null;
+
+    // The local write and the anonymous ping are two different promises to the
+    // user, and they get two different failure paths. Your Board is this
+    // localStorage entry -- if it lands, the action succeeded.
     try {
       const raw = localStorage.getItem("scoutit_reactions") || "[]";
       let parsed = JSON.parse(raw);
@@ -102,29 +109,50 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
       localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
       setActiveReaction(nextReaction);
-      setShowConfirm(true);
+      setStatus(nextReaction ? "saved" : "removed");
+    } catch (error) {
+      // Private browsing and a full quota both land here. Previously this was
+      // an empty catch and the success message rendered anyway.
+      setStatus("storage-failed");
+      return;
+    }
 
-      // Fire anonymous POST to analytics API
-      if (nextReaction) {
-        fetch("/api/reactions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ property_id: propertyId, reaction_type: nextReaction, city, category }),
-        }).catch(() => {});
-      }
-    } catch (e) {
-      // ignore
+    // Anonymous analytics. A 429 or a 502 here is not the user's problem and
+    // must not change what the interface just told them -- but it is somebody's
+    // problem, so it goes to Sentry rather than into an empty catch block.
+    if (nextReaction) {
+      fetch("/api/reactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ property_id: propertyId, reaction_type: nextReaction, city, category }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            reportError({
+              kind: "crash",
+              message: `Reaction ping failed with ${res.status}`,
+              context: { reaction_type: nextReaction },
+            });
+          }
+        })
+        .catch((error) => {
+          reportError({
+            kind: "crash",
+            message: `Reaction ping threw: ${error?.message || "unknown"}`,
+            context: { reaction_type: nextReaction },
+          });
+        });
     }
   };
 
   useEffect(() => {
-    if (showConfirm) {
-      const timer = setTimeout(() => {
-        setShowConfirm(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [showConfirm]);
+    if (status === "idle") return;
+    // A warning is worth a longer read than a confirmation.
+    const timer = setTimeout(() => setStatus("idle"), status === "storage-failed" ? 4000 : 2000);
+    return () => clearTimeout(timer);
+  }, [status]);
+
+  const feedback = reactionFeedback(status);
 
   return (
     <div className={`reaction-buttons-wrapper ${small ? "small" : ""}`}>
@@ -151,12 +179,19 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         })}
       </div>
 
-      <div className={`confirm-text ${showConfirm ? "visible" : ""}`}>
-        Saved to Your Board.
+      {/* aria-live because this line now reports state rather than decorating. */}
+      <div
+        className={`confirm-text ${feedback ? "visible" : ""} ${feedback?.tone === "warn" ? "warn" : ""}`}
+        role="status"
+        aria-live="polite"
+      >
+        {feedback?.message || ""}
       </div>
 
       <style jsx>{`
         .reaction-buttons-wrapper {
+          /* The stock CSS easings are too soft to read at these durations. */
+          --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -201,11 +236,14 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           padding: 0;
           border-radius: 8px;
           touch-action: manipulation;
-          transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 160ms var(--ease-out-strong);
         }
 
+        /* The !important here was fighting nothing -- hover targets the child
+           .shape-wrapper, press targets the tile. 0.92 also overshot the range
+           where a press reads as feedback rather than as the tile shrinking. */
         .reaction-tile:active {
-          transform: scale(0.92) !important;
+          transform: scale(0.96);
         }
 
         .reaction-tile:focus-visible {
@@ -220,7 +258,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: transform 0.25s ease;
+          transition: transform 220ms var(--ease-out-strong);
         }
 
         .shape-wrapper :global(svg) {
@@ -231,7 +269,9 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           fill: #1c1c1c;
           stroke: #4a4a4a;
           stroke-width: 3px;
-          transition: all 0.25s ease;
+          /* Named properties only. "all" also tweened stroke-width and the
+             drop-shadow filter, which is the expensive half of this rule. */
+          transition: fill 220ms ease, stroke 220ms ease, filter 220ms ease;
         }
 
         .icon-overlay {
@@ -241,18 +281,23 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           opacity: 0.85;
           color: #c8c8c8;
           user-select: none;
-          transition: all 0.25s ease;
+          transition: color 220ms ease, opacity 220ms ease;
         }
 
-        /* Hover states */
-        .reaction-tile:hover .shape-wrapper {
-          transform: scale(1.05);
-        }
+        /* Hover states.
+           Gated: on a touch screen every tap fires :hover and then STAYS there
+           until the next tap elsewhere, so a tile the user already released
+           keeps the gold glow and reads as still selected. */
+        @media (hover: hover) and (pointer: fine) {
+          .reaction-tile:hover .shape-wrapper {
+            transform: scale(1.05);
+          }
 
-        .reaction-tile:hover .shape-wrapper :global(svg) {
-          stroke: var(--accent-bright, #F7C64E);
-          stroke-width: 3px;
-          filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.35));
+          .reaction-tile:hover .shape-wrapper :global(svg) {
+            stroke: var(--accent-bright, #F7C64E);
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.35));
+          }
         }
 
         /* Active states */
@@ -280,8 +325,10 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           text-align: center;
         }
 
-        .reaction-tile:hover .tile-label {
-          color: var(--accent-bright, #F7C64E);
+        @media (hover: hover) and (pointer: fine) {
+          .reaction-tile:hover .tile-label {
+            color: var(--accent-bright, #F7C64E);
+          }
         }
 
         .reaction-tile.active .tile-label {
@@ -297,17 +344,50 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           text-transform: uppercase;
           margin-top: 16px;
           text-align: center;
+          min-height: 1em; /* row is reserved, so nothing below it shifts */
           opacity: 0;
-          visibility: hidden;
+          pointer-events: none;
           text-shadow: 0 0 8px rgba(232, 174, 60, 0.3);
           transform: translateY(4px);
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          /* Exit is quicker than entry: the message has already been read by
+             the time it leaves, so lingering only delays the next one. */
+          transition: opacity 160ms var(--ease-out-strong),
+                      transform 160ms var(--ease-out-strong),
+                      color 160ms ease;
         }
 
         .confirm-text.visible {
           opacity: 1;
-          visibility: visible;
           transform: translateY(0);
+          transition-duration: 220ms;
+        }
+
+        /* A blocked save is not a gold moment. Muted terracotta reads as
+           "something is off" while staying inside the warm palette -- a
+           system red would be the only cool-shifted pixel on the page. */
+        .confirm-text.warn {
+          color: #D08C6A;
+          text-shadow: none;
+        }
+
+        /* Reduced motion means less movement, not less information: the colour
+           and opacity changes that carry state are kept, the travel is not. */
+        @media (prefers-reduced-motion: reduce) {
+          .reaction-tile,
+          .shape-wrapper {
+            transition: none;
+          }
+          .reaction-tile:active,
+          .reaction-tile:hover .shape-wrapper {
+            transform: none;
+          }
+          .confirm-text,
+          .confirm-text.visible {
+            transform: none;
+          }
+          .confirm-text {
+            transition: opacity 160ms ease, color 160ms ease;
+          }
         }
 
         @media (max-width: 640px) {
