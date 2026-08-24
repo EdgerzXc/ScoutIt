@@ -161,6 +161,52 @@ test.describe('Settings information architecture', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
     expect(errors, errors.join('\n')).toEqual([]);
   });
+
+  test('page help is non-blocking, keyboard dismissible, and restores Eye focus', async ({ page }) => {
+    await gotoAndSettle(page, '/discover');
+    const eye = page.getByRole('button', { name: 'Menu', exact: true });
+    const help = page.getByRole('button', { name: 'Help for this page' });
+    if (!(await help.isVisible().catch(() => false))) {
+      await eye.click();
+      await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
+    }
+    await help.click();
+    const dialog = page.getByRole('dialog', { name: /filter, then narrow/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveAttribute('aria-modal', 'false');
+    await expect(page.locator('[data-scoutit-guide="scoutit-discover-search"]')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(eye).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+  });
+
+  test('a server-selected owner journey resumes after reload', async ({ page }) => {
+    await page.route('**/api/profile/me/role', (route) => route.fulfill({ status: 200, json: { role: 'owner' } }));
+    await gotoAndSettle(page, '/discover');
+    const menu = page.getByRole('button', { name: 'Menu', exact: true });
+    const openHelp = async () => {
+      await menu.click();
+      await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
+    };
+    await openHelp();
+    await page.getByRole('button', { name: 'Start guided journey' }).click();
+    let dialog = page.getByRole('dialog', { name: /owner workspace/i });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: /next/i }).click();
+    await expect(page.getByRole('dialog', { name: /create property listing/i })).toBeVisible();
+    await page.getByRole('button', { name: 'Dismiss guide' }).click();
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await openHelp();
+    await page.getByRole('button', { name: 'Resume guided journey' }).click();
+    dialog = page.getByRole('dialog', { name: /create property listing/i });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Restart journey' }).click();
+    await expect(page.getByRole('dialog', { name: /owner workspace/i })).toBeVisible();
+    await page.getByRole('button', { name: 'Dismiss guide' }).click();
+  });
 });
 
 test.describe('Calendar viewing lifecycle (fully mocked)', () => {

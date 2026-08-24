@@ -660,7 +660,7 @@ export default function Home() {
       {/* =========================================
           LAUNCHPAD (ELEVATOR MENU)
           ========================================= */}
-      <section className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
+      <section data-scoutit-guide="scoutit-home-launchpad" className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
         <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
           Browse Space Catalog
         </h2>

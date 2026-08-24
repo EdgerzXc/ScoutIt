@@ -418,7 +418,7 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
   const widgetArticles = getWidgetArticles().slice(0, 3);
 
   return (
-    <div className="directory-layout">
+    <div data-scoutit-guide="scoutit-property-directory" className="directory-layout">
       <AtmosphereBackground variant="default" />
       <Header />
       <main className="directory-main">

@@ -265,7 +265,9 @@ export default function DiscoverClient() {
           </div>
 
           {/* ── PRIMARY SEARCH ENGINE ── */}
-          <DiscoverSearch />
+          <div data-scoutit-guide="scoutit-discover-search">
+            <DiscoverSearch />
+          </div>
 
           {/* ── 1. REGIONAL NEWS FEED (APPROVED PRODUCT ORDER: STEP 1) ── */}
           <section className="discover-news-section" aria-label="Regional News Feed">

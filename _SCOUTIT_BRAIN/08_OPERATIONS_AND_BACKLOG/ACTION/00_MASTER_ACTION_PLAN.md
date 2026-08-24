@@ -64,8 +64,8 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-020, A-022 through A-027, and A-029 are the eight Active items (A-021 is
-  Waiting and A-028 is Done); Urgent is empty
+  A-022 through A-027 and A-029 are the seven Active items (A-020 and A-028
+  are Done; A-021 is Waiting); Urgent is empty
   after U-011's verified closure.
 - **A-018 closed on 2026-08-24.** Every `/api/questit` and `/api/v1/questit/*`
   route now fails closed before pre-launch feature logic unless `ai_search` is
@@ -85,11 +85,18 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   and Contact & Support are first-class destinations, and the Eye is truthfully
   named Help & Display everywhere. `/settings` now exposes stable Account,
   Public profile, Privacy, Security, and Display & guide anchors with mobile-safe
-  navigation. Authentication-entry changes remain owned by A-025, and the
-  Master-Flow journey implementation remains A-020.
+  navigation. Authentication-entry changes remain owned by A-025; the
+  Master-Flow journey implementation subsequently closed under A-020.
 - **A-021's engineering lane completed on 2026-08-24 and moved intact to
   [[WAITING]].** The hidden Eye persona controls and browser-authority fallbacks
   are gone; only the explicit localhost E2E fixture can use `master-dev`.
+- **A-020 closed on 2026-08-24.** Help & Display now separates neutral page
+  help from server-selected Seeker, Owner, and Broker journeys derived from the
+  Master Flow Graph. The public adapter admits only verified nodes with shipped
+  page routes and grounded targets; journey state can resume, skip, finish,
+  dismiss, and restart but grants no role or entitlement. The first visit opens
+  the non-blocking hub once, and the 360px guide supports Escape, focus return,
+  keyboard navigation, reduced motion, and Lite Mode.
   Mission Control now owns a Super-Admin-only dry-run and atomic transfer path
   with unique Auth resolution, complete reference classification, reviewed-plan
   hashing, strict audits, and post-verification. No live ownership was changed:

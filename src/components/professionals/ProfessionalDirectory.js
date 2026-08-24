@@ -20,7 +20,7 @@ export default function ProfessionalDirectory({ category, initialRecords = [], i
   const hasFilters = Boolean(query || specialty || location);
 
   return (
-    <div className={styles.page}>
+    <div data-scoutit-guide="broker-prc-license-form" className={styles.page}>
       <Header />
       <main>
         <section className={styles.hero} aria-labelledby="directory-title">

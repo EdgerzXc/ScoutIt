@@ -702,7 +702,7 @@ export default function OwnerMode() {
       );
     }
     return (
-      <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
+      <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
         <div className="mb-sm">
           <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is ready.</p>
@@ -712,7 +712,7 @@ export default function OwnerMode() {
           <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Add your first property</h3>
           <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Upload a brochure, flyer, or pitch deck to build a complete property dossier in under 10 minutes.</p>
           <div className="flex flex-col sm:flex-row gap-3 relative z-10 mt-2">
-            <button className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
+            <button data-scoutit-guide="owner-claim-submit-btn" className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
               Add Property →
             </button>
             <Link href="/property" className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-white/5 hover:text-on-surface">
@@ -844,7 +844,7 @@ export default function OwnerMode() {
 
   // --- VIEW: LAYER 2 - PROPERTY DOSSIER WORKSPACE ---
   return (
-    <div className="max-w-[1200px] mx-auto py-4 animate-slide-up-fade">
+    <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto py-4 animate-slide-up-fade">
 
       {/* Monthly re-verification gate (NEW_IDEAS.md §21). Non-blocking and
           dismissible for the calendar month — see the component header for

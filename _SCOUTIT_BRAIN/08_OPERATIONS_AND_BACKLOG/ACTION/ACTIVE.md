@@ -18,33 +18,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   Its statistics contract makes the read-only ScoutIt transaction record primary
   and keeps broker-editable historical career data secondary and clearly labelled.
 
-## A-020 — Turn the Eye into a Master-Flow guide and assistance hub
-
-**Owner outcome:** the Eye offers purposeful choices—page help, start/restart a
-guided journey, display/accessibility preferences, and report a problem. Its
-wizard helps seekers navigate ScoutIt, owners edit their properties, and brokers
-connect with owners through the real product paths.
-
-**Current evidence (2026-08-24):** `FloatingToolbox.js` already resolves a
-small per-page registry from `src/lib/pageGuides.js`. Separately,
-`src/lib/flow/subgraphExtractor.js` and generated `linearGuides.json` already
-provide Buyer, Owner, and Broker sequences from the Master Flow Graph. The Eye
-does not consume those sequences, track a journey across routes, or verify that
-each guide target exists before presenting it.
-
-**Agent lane:** build one public-safe guide adapter over the Master Flow Graph;
-select role variants only from `/api/profile/me/role`; expose only executable,
-currently shipped nodes with real routes/targets; keep neutral help for signed-
-out visitors. Planned graph nodes must be omitted or honestly labelled rather
-than presented as working actions.
-
-**Exit test:** Buyer, Owner, and Broker journeys can start, resume across route
-changes, skip, finish, dismiss, and deliberately restart. The guide appears
-once to a first-time visitor, never blocks use, restores focus, supports Escape
-and keyboard navigation, works at 360px, respects reduced motion/Lite Mode, and
-has tests proving graph-node/route/target validity plus server-verified role
-selection. No guide state grants access or changes an entitlement.
-
 ## A-022 — Consent-safe first-visit warming for smoother navigation
 
 **Owner outcome:** after the initial page becomes interactive, ScoutIt quietly

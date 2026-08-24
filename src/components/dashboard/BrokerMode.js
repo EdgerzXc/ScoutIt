@@ -638,7 +638,7 @@ export default function BrokerMode() {
 
   // --- VIEW: LAYER 1 - COMMAND CENTER (Opportunity Grid & Feed) ---
   return (
-    <div className="flex-1 flex flex-col w-full max-w-[1200px] mx-auto animate-[fadeIn_0.4s_ease] relative">
+    <div data-scoutit-guide="broker-lead-roster-view" className="flex-1 flex flex-col w-full max-w-[1200px] mx-auto animate-[fadeIn_0.4s_ease] relative">
       
       {/* Notification Banner */}
       {showNotification && !activeDealId && !showIdCard && (

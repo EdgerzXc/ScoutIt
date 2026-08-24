@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
-import { usePathname } from "next/navigation";
 import { guideForPath } from "@/lib/pageGuides";
+import { guideForVerifiedRole } from "@/lib/journeyGuides";
 
 export default function FloatingToolbox({ showTrigger = true }) {
+  const router = useRouter();
+  const previousFocusRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
@@ -41,10 +44,13 @@ export default function FloatingToolbox({ showTrigger = true }) {
   }, []);
 
   const activeGuide = guideForPath(pathname, role);
-  const WIZARD_STEPS = activeGuide.steps;
+  const verifiedJourney = guideForVerifiedRole(role);
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardKind, setWizardKind] = useState("page");
   const [wizardStep, setWizardStep] = useState(0);
+  const [journeyProgress, setJourneyProgress] = useState(null);
+  const wizardRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState({ x: 24, y: 450 });
 
@@ -101,6 +107,11 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
     setMode(savedMode);
     applyTheme(savedMode);
+    if (!localStorage.getItem("scoutit_help_seen_v1")) {
+      localStorage.setItem("scoutit_help_seen_v1", "1");
+      setOpen(true);
+    }
+
 
     setLite(getStoredLiteMode());
 
@@ -217,12 +228,98 @@ export default function FloatingToolbox({ showTrigger = true }) {
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "Escape") {
-        setOpen(false);
+        if (wizardOpen) {
+          setWizardOpen(false);
+          requestAnimationFrame(() => previousFocusRef.current?.focus?.());
+        } else {
+          setOpen(false);
+        }
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [wizardOpen]);
+
+  useEffect(() => {
+    if (!verifiedJourney) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem("scoutit_journey_guide_v1") || "null");
+      if (saved?.journeyId === verifiedJourney.id && Number.isInteger(saved.step)) {
+        setJourneyProgress({ journeyId: saved.journeyId, step: Math.min(saved.step, verifiedJourney.steps.length - 1) });
+      }
+    } catch { /* private mode or malformed prior state */ }
+  }, [verifiedJourney]);
+
+  const pageSteps = activeGuide.steps;
+  const journeySteps = verifiedJourney?.steps || [];
+  const wizardSteps = wizardKind === "journey" ? journeySteps : pageSteps;
+  const currentStep = wizardSteps[Math.min(wizardStep, Math.max(0, wizardSteps.length - 1))];
+
+  function rememberProgress(step) {
+    if (!verifiedJourney) return;
+    const next = { journeyId: verifiedJourney.id, step };
+    setJourneyProgress(next);
+    try { localStorage.setItem("scoutit_journey_guide_v1", JSON.stringify(next)); } catch {}
+  }
+
+  function openWizard(kind, trigger) {
+    previousFocusRef.current = document.querySelector('button[aria-label="Menu"]') || containerRef.current?.querySelector('[role="button"]') || trigger || document.activeElement;
+    setWizardKind(kind);
+    const step = kind === "journey" && journeyProgress?.journeyId === verifiedJourney?.id ? journeyProgress.step : 0;
+    setWizardStep(step || 0);
+    setWizardOpen(true);
+    setOpen(false);
+  }
+
+  function closeWizard() {
+    setWizardOpen(false);
+    requestAnimationFrame(() => previousFocusRef.current?.focus?.());
+  }
+
+  function changeWizardStep(nextStep) {
+    const bounded = Math.max(0, Math.min(nextStep, wizardSteps.length - 1));
+    setWizardStep(bounded);
+    if (wizardKind === "journey") rememberProgress(bounded);
+  }
+
+  function finishJourney() {
+    try { localStorage.setItem("scoutit_journey_guide_v1", JSON.stringify({ journeyId: verifiedJourney.id, step: 0, completed: true })); } catch {}
+    setJourneyProgress(null);
+    closeWizard();
+  }
+
+  function restartJourney(trigger) {
+    setJourneyProgress(null);
+    try { localStorage.removeItem("scoutit_journey_guide_v1"); } catch {}
+    previousFocusRef.current = document.querySelector('button[aria-label="Menu"]') || containerRef.current?.querySelector('[role="button"]') || trigger || document.activeElement;
+    setWizardKind("journey");
+    setWizardStep(0);
+    setWizardOpen(true);
+    setOpen(false);
+    rememberProgress(0);
+  }
+
+  function openJourneyStep() {
+    if (!currentStep?.route) return;
+    if (pathname !== currentStep.route) router.push(currentStep.route);
+    else document.querySelector(`[data-scoutit-guide="${currentStep.target}"]`)?.scrollIntoView({ behavior: lite ? "auto" : "smooth", block: "center" });
+  }
+
+  useEffect(() => {
+    if (!wizardOpen || wizardKind !== "journey" || !currentStep || pathname !== currentStep.route) return;
+    const timer = window.setTimeout(() => {
+      const target = document.querySelector(`[data-scoutit-guide="${currentStep.target}"]`);
+      if (!target) return;
+      if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ behavior: lite ? "auto" : "smooth", block: "center" });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [currentStep, lite, pathname, wizardKind, wizardOpen]);
+
+  useEffect(() => {
+    if (wizardOpen) window.setTimeout(() => wizardRef.current?.querySelector("button")?.focus(), 0);
+  }, [wizardOpen]);
 
   const onPanelPointerDown = (e) => {
     if (e.button !== 0) return;
@@ -442,10 +539,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
           {/* Divider */}
           <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "0 9px" }} />
 
-          {/* Wizard Guide */}
+          {/* Page help and server-verified journey */}
           <div style={{ padding: "8px 9px 4px" }}>
             <button
-              onClick={() => { setWizardStep(0); setWizardOpen(true); setOpen(false); }}
+              onClick={(event) => openWizard("page", event.currentTarget)}
               style={{
                 width: "100%",
                 background: "rgba(232, 174, 60,0.05)",
@@ -456,9 +553,24 @@ export default function FloatingToolbox({ showTrigger = true }) {
             >
               <span style={{ fontSize: 13 }}>◈</span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase" }}>
-                Wizard Guide
+                Help for this page
               </span>
             </button>
+            {verifiedJourney ? (
+              <button
+                onClick={(event) => journeyProgress ? openWizard("journey", event.currentTarget) : restartJourney(event.currentTarget)}
+                style={{ width: "100%", marginTop: 5, background: "rgba(232, 174, 60,0.1)", border: "1px solid rgba(232, 174, 60,0.28)", borderRadius: 5, padding: "9px 12px", cursor: "pointer", color: "#E8AE3C", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}
+              >
+                {journeyProgress ? "Resume guided journey" : "Start guided journey"}
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/login")}
+                style={{ width: "100%", marginTop: 5, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 5, padding: "9px 12px", cursor: "pointer", color: "rgba(255,255,255,0.62)", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "left" }}
+              >
+                Sign in for a role guide
+              </button>
+            )}
           </div>
 
           {/* Report Issue */}
@@ -483,53 +595,53 @@ export default function FloatingToolbox({ showTrigger = true }) {
         </div>
       )}
 
-      {/* ── Wizard Guide overlay ── */}
-      {wizardOpen && (
-        <div
-          className="toolbox-float"
-          style={{
-            position: "fixed", inset: 0, zIndex: 100000,
-            background: "rgba(0,0,0,0.8)", backdropFilter: "blur(10px)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-          }}
-          onClick={(e) => e.target === e.currentTarget && setWizardOpen(false)}
-        >
-          <div style={{ width: "100%", maxWidth: 460, background: "#111111", border: "1px solid rgba(232, 174, 60,0.2)", borderRadius: 12, overflow: "hidden" }}>
+      {/* Non-blocking guide card: the page remains usable around it. */}
+      {wizardOpen && currentStep && (
+          <div
+            ref={wizardRef}
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby="scoutit-guide-title"
+            className="toolbox-float"
+            style={{ position: "fixed", right: 12, bottom: 88, zIndex: 100000, width: "min(420px, calc(100vw - 24px))", maxHeight: "calc(100dvh - 112px)", overflowY: "auto", background: "#111111", border: "1px solid rgba(232, 174, 60,0.3)", borderRadius: 12, boxShadow: "0 18px 60px rgba(0,0,0,0.75)" }}
+          >
             {/* Wizard header */}
             <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
               <div>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
-                  Guide // {wizardStep + 1} of {WIZARD_STEPS.length}
+                  {`${wizardKind === "journey" ? `${verifiedJourney.role} journey` : activeGuide.label} // ${wizardStep + 1} of ${wizardSteps.length}`}
                 </span>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>
-                  {WIZARD_STEPS[wizardStep].title}
+                <h2 id="scoutit-guide-title" style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>
+                  {currentStep.title}
                 </h2>
               </div>
-              <button onClick={() => setWizardOpen(false)} aria-label="Close" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>✕</button>
+              <button onClick={closeWizard} aria-label="Dismiss guide" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.55)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 8, flexShrink: 0 }}>✕</button>
             </div>
 
             {/* Wizard body */}
-            <div style={{ padding: "32px 24px 20px", textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 40, color: "#E8AE3C", marginBottom: 20, lineHeight: 1 }}>
-                {WIZARD_STEPS[wizardStep].glyph}
-              </div>
-              <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.8, maxWidth: 380, margin: "0 auto" }}>
-                {WIZARD_STEPS[wizardStep].body}
+            <div style={{ padding: "24px 24px 18px" }}>
+              <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.8, margin: 0 }}>
+                {currentStep.body}
               </p>
+              {currentStep.tip && <p style={{ margin: "12px 0 0", color: "rgba(255,255,255,0.58)", fontSize: 12, lineHeight: 1.6 }}>Tip: {currentStep.tip}</p>}
+              {wizardKind === "journey" && (
+                <button onClick={openJourneyStep} style={{ marginTop: 16, width: "100%", padding: 11, background: "rgba(232,174,60,0.1)", color: "#E8AE3C", border: "1px solid rgba(232,174,60,0.3)", borderRadius: 6, cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  {pathname === currentStep.route ? "Show me on this page" : "Open this step"}
+                </button>
+              )}
             </div>
 
             {/* Step dots */}
             <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 20 }}>
-              {WIZARD_STEPS.map((_, i) => (
-                <div
+              {wizardSteps.map((_, i) => (
+                <button
                   key={i}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setWizardStep(i)}
+                  aria-label={`Go to guide step ${i + 1}`}
+                  onClick={() => changeWizardStep(i)}
                   style={{
                     width: i === wizardStep ? 22 : 6, height: 6, borderRadius: 3,
                     background: i === wizardStep ? "#E8AE3C" : "rgba(255,255,255,0.12)",
-                    cursor: "pointer", transition: "width 0.25s, background 0.2s",
+                    cursor: "pointer", transition: lite ? "none" : "width 0.25s, background 0.2s", border: 0, padding: 0,
                   }}
                 />
               ))}
@@ -539,19 +651,24 @@ export default function FloatingToolbox({ showTrigger = true }) {
             <div style={{ padding: "12px 24px 20px", display: "flex", gap: 10, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
               {wizardStep > 0 && (
                 <button
-                  onClick={() => setWizardStep((s) => s - 1)}
+                  onClick={() => changeWizardStep(wizardStep - 1)}
                   style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 6, color: "#c8c8c8", fontFamily: "var(--font-body)", fontSize: 13, cursor: "pointer" }}
                 >← Back</button>
               )}
               <button
-                onClick={() => wizardStep < WIZARD_STEPS.length - 1 ? setWizardStep((s) => s + 1) : setWizardOpen(false)}
+                onClick={() => wizardStep < wizardSteps.length - 1 ? changeWizardStep(wizardStep + 1) : (wizardKind === "journey" ? finishJourney() : closeWizard())}
                 style={{ flex: 1, padding: "11px 0", background: "#E8AE3C", border: "none", borderRadius: 6, color: "#000", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
               >
-                {wizardStep < WIZARD_STEPS.length - 1 ? "Next →" : "Got it ✓"}
+                {wizardStep < wizardSteps.length - 1 ? "Next →" : (wizardKind === "journey" ? "Finish ✓" : "Got it ✓")}
               </button>
             </div>
+            {wizardKind === "journey" && (
+              <div style={{ padding: "0 24px 18px", display: "flex", justifyContent: "space-between" }}>
+                <button onClick={() => changeWizardStep(Math.min(wizardStep + 1, wizardSteps.length - 1))} style={{ background: "none", border: 0, color: "rgba(255,255,255,0.58)", fontSize: 12, cursor: "pointer" }}>Skip step</button>
+                <button onClick={(event) => restartJourney(event.currentTarget)} style={{ background: "none", border: 0, color: "rgba(232,174,60,0.8)", fontSize: 12, cursor: "pointer" }}>Restart journey</button>
+              </div>
+            )}
           </div>
-        </div>
       )}
 
       {/* ── Report Problem overlay ── */}
