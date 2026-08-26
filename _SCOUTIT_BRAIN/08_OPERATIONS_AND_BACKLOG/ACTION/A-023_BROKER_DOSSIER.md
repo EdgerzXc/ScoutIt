@@ -243,6 +243,72 @@ A-023 remains Active: projection, generated representations, editor/publish,
 recommendations, contributions, metrics, migrations, responsive verification,
 and owner visual review are still open.
 
+### Phase 2 checkpoint — 2026-08-26
+
+The allowlisted public projection now exists and the dossier consumes it.
+
+**The identity link was already there and nobody had used it.** Airtable's
+`BrokerID` carries the broker's Supabase Auth UUID — verified against live data
+(`e7f3634b-65d7-4adc-90ea-0544b61d988d` resolves to Marco Villanueva in both
+systems). No migration was needed to generate representations. `BrokerID` is
+therefore the link, resolved by UUID shape and never by name or email; when the
+field is blank `fetchBrokers` falls back to an Airtable `rec…` id, which is not
+an Auth identity and is treated as unlinked.
+
+**Two defects closed:**
+
+1. `managedProperties` was hardcoded `[]` in `src/lib/airtable.js`, so the
+   dossier printed "No eligible public property representations are attached to
+   this dossier." without ever consulting the representation authority. That is
+   an assertion of absence produced by never asking (Rule 3, Rule 14). The
+   section now reads `property_broker_representations` through the existing
+   `isActiveRosterBroker`/`sortRoster` helpers and distinguishes four states:
+   `LISTED`, `NONE_ELIGIBLE` (the only one that claims emptiness),
+   `NOT_LINKED`, and `LOOKUP_FAILED`. State names are deliberately distinct from
+   `REPRESENTATION_STATES`; an overlapping `UNAVAILABLE` in both would read as
+   one condition and is two.
+2. Phase 1 took the legacy composites off the screen but `/api/cms` kept
+   shipping them. Live production was still publishing `rating: 92.5`,
+   `closures: 34` and a commercial `subscriptionLabel` on every page load —
+   public data regardless of whether a component read it (Rule 5). The broker
+   payload is now allowlisted at source; the dead `TIER_LABEL_TO_NUM` map went
+   with the field it fed.
+
+A representation becomes a public card only when three independent sources
+agree: the representation row is eligible, the Supabase property is live, and
+the property is in the public Airtable catalog.
+
+**Career History was deliberately not built.** Its claims table is
+migration-gated under W-003, and the safest isolation from the ScoutIt Record
+while no source exists is to publish no history at all. A contract test pins
+that absence so a later phase cannot quietly merge the two templates.
+
+**The loading state is NOT delivered and is carried forward.** A route-level
+`loading.js` was built and then removed: with any `loading.js` present on
+`/brokers/[broker-slug]`, the Suspense fallback stranded — `aria-busy="true"`
+stayed visible with nine skeletons while the resolved dossier sat in a hidden
+streaming div and was never swapped in. Removing the file restored correct
+rendering; a minimal fallback with no `Header`/`Footer` reproduced the same
+stall, so it is the boundary itself and not the fallback's content. SSR output
+was correct in both cases. Root cause is unresolved and could not be tested
+against a production server because `.next` was contended by another dev
+process. Recorded in the Inbox as
+`2026-08-26_ROUTE_LOADING_FALLBACK_STRANDS.md`.
+
+Verified: 25/25 focused A-023 contracts (16 projection + 9 authority-read),
+with the fail-closed guard mutation-tested — breaking the catch turns 3 tests
+red, restoring it returns 9/9. Full gate green (3/3 surface locks, lint,
+typography, 1,655/1,655 unit tests, 574 E2E cases discovered) and the production
+build compiles. Browser-verified against a running server at 375px and 1280px:
+zero horizontal overflow, one H1, grid collapses to a single column on mobile,
+the notice variant renders its muted-gold rule, and no legacy composite appears
+in the rendered text or the `/api/cms` payload.
+
+Boundary: `NOT_LINKED` and `LOOKUP_FAILED` are unit-tested and style-verified
+but not reachable with current data — all three live brokers carry a valid Auth
+UUID, and `property_broker_representations` holds zero rows, so the live dossier
+correctly renders `NONE_ELIGIBLE`. No deploy, migration, or live-data write.
+
 ## Boundary and exit test
 
 

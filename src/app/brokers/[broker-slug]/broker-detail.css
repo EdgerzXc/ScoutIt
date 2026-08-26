@@ -356,3 +356,20 @@
   font-size: 13px;
   font-style: italic;
 }
+
+/* A-023: a representation NOTICE is not an emptiness CLAIM.
+   `.empty-curations-msg` alone reads as "there are none", which is only true
+   for NONE_ELIGIBLE. Unlinked and failed-read states get a bordered, upright
+   treatment so the two are not mistaken for each other at a glance. */
+.empty-curations-msg.representation-notice {
+  font-style: normal;
+  text-align: left;
+  color: var(--text-secondary);
+  border: 1px solid var(--accent-muted);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  max-width: 62ch;
+  margin: 0 auto;
+  line-height: 1.6;
+}

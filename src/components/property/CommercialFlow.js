@@ -2321,7 +2321,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               {/* Commercial-only closing note. Labelled so it reads as a
                   sub-block of the chapter, not as a second chapter lede. */}
               <div style={{marginTop:"36px", paddingTop:"20px", borderTop:"1px solid var(--border)"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"10px"}}>Regulatory &amp; compliance</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>Regulatory &amp; compliance</div>
                 <p style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--text-secondary)", lineHeight:1.8, margin:0, maxWidth:"540px"}}>
                   Regulatory and municipal zoning intelligence for this asset — LEED mandates, building code compliance, and environmental covenants.
                 </p>

@@ -6,6 +6,13 @@ import ConnectionPortal from "@/components/connection/ConnectionPortal";
 
 import { getCmsBundle } from "@/lib/cmsCache";
 import { siteUrl } from "@/lib/siteUrl";
+import {
+  DOSSIER_REPRESENTATION_STATES,
+  buildRepresentationSection,
+  publicBrokerIdentity,
+  resolveBrokerAuthorityId,
+} from "@/lib/brokerDossier";
+import { loadBrokerRepresentationAuthority } from "@/lib/serverBrokerDossier";
 import "./broker-detail.css";
 
 export async function generateMetadata({ params }) {
@@ -22,6 +29,18 @@ export async function generateMetadata({ params }) {
   };
 }
 
+// A-023: what the Current Representations section is allowed to say in each
+// state. Only one of these four is an assertion that the broker represents
+// nothing; the other three say why we cannot make that claim.
+const REPRESENTATION_COPY = {
+  [DOSSIER_REPRESENTATION_STATES.NONE_ELIGIBLE]:
+    "No eligible public property representations are attached to this dossier.",
+  [DOSSIER_REPRESENTATION_STATES.NOT_LINKED]:
+    "This dossier is not yet linked to the representation record, so its properties cannot be shown here.",
+  [DOSSIER_REPRESENTATION_STATES.LOOKUP_FAILED]:
+    "The representation record could not be reached. This is a temporary read failure, not a statement about this advisor's properties.",
+};
+
 export default async function BrokerDetailPage({ params }) {
   const { "broker-slug": slug } = await params;
   const bundle = await getCmsBundle();
@@ -31,21 +50,39 @@ export default async function BrokerDetailPage({ params }) {
     notFound();
   }
 
+  // Everything below renders from the allowlisted projection, never from the
+  // raw Airtable record.
+  const identity = publicBrokerIdentity(broker);
+  if (!identity) {
+    notFound();
+  }
+
+  const authorityId = resolveBrokerAuthorityId(identity.id);
+  const { lookup, propertiesByAuthorityId } = await loadBrokerRepresentationAuthority(
+    authorityId,
+    bundle.properties,
+  );
+  const representations = buildRepresentationSection({
+    authorityId,
+    lookup,
+    propertiesByAuthorityId,
+  });
+
   return (
     <div className="page-wrapper">
       <Header />
-      
+
       <main className="broker-detail-main">
         {/* Profile Split layout */}
         <section className="profile-grid">
-          
+
           {/* Left Column: Avatar & Trust Credentials */}
           <div className="profile-left-column">
-            <div 
-              className="detail-avatar" 
-              style={{ backgroundImage: `url(${broker.image})` }}
+            <div
+              className="detail-avatar"
+              style={{ backgroundImage: `url(${identity.image})` }}
             ></div>
-            
+
             <div className="detail-closures-box">
               <span className="icon-badge">SCOUTIT RECORD</span>
               <p>Building a ScoutIt record</p>
@@ -56,14 +93,14 @@ export default async function BrokerDetailPage({ params }) {
           {/* Right Column: Bio & Specialties */}
           <div className="profile-right-column">
             <header className="profile-header">
-              <span className="vector-label">Advisory Profile &middot; {broker.clearanceTier}</span>
-              <h1 className="profile-name">{broker.name}</h1>
-              <p className="profile-title">{broker.title} {"//"} {broker.location}</p>
+              <span className="vector-label">Advisory Profile &middot; {identity.clearanceTier}</span>
+              <h1 className="profile-name">{identity.name}</h1>
+              <p className="profile-title">{identity.title} {"//"} {identity.location}</p>
               {/* RA 9646: badge renders only when staff ticked License_Verified
                   in Airtable after checking the PRC registry. */}
-              {broker.licenseVerified && (
+              {identity.licenseVerified && (
                 <span className="prc-verified-badge">
-                  ✓ PRC VERIFIED{broker.license ? ` · ${broker.license}` : ""}
+                  ✓ PRC VERIFIED{identity.license ? ` · ${identity.license}` : ""}
                 </span>
               )}
             </header>
@@ -71,43 +108,47 @@ export default async function BrokerDetailPage({ params }) {
             <div className="profile-body-content">
               <div className="detail-section">
                 <h2>Operational Profile biography</h2>
-                <p className="bio-paragraph">{broker.bio}</p>
+                <p className="bio-paragraph">{identity.bio}</p>
               </div>
 
               <div className="detail-section">
                 <h2>Operational Focus area</h2>
                 <div className="focus-pills-list">
-                  <span className="focus-pill">Specialty: {broker.specialty}</span>
-                  <span className="focus-pill">Location: {broker.location}</span>
-                  <span className="focus-pill">Clearance: {broker.clearanceTier}</span>
+                  <span className="focus-pill">Specialty: {identity.specialty}</span>
+                  <span className="focus-pill">Location: {identity.location}</span>
+                  <span className="focus-pill">Clearance: {identity.clearanceTier}</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Current representations come from the authority projection in phase 2. */}
+        {/* Current representations are generated from the Supabase
+            representation authority. Brokers cannot add or reorder them. */}
         <section className="detail-curations-section">
           <h2>Current Representations</h2>
           <p className="section-desc">Only active, visible, contactable, owner-accepted property representations appear here.</p>
-          
+
           <div className="detail-curations-grid">
-            {broker.managedProperties.map((prop) => (
-              <Link href={`/property/${prop.slug}`} key={prop.slug} className="curation-card">
-                <div 
-                  className="curation-card-img" 
-                  style={{ backgroundImage: `url(${prop.image})` }}
+            {representations.cards.map((card) => (
+              <Link href={card.href} key={card.slug} className="curation-card">
+                <div
+                  className="curation-card-img"
+                  style={{ backgroundImage: `url(${card.image})` }}
                 ></div>
                 <div className="curation-card-body">
-                  <span className="curation-card-cat">{prop.category}</span>
-                  <h3>{prop.title}</h3>
+                  <span className="curation-card-cat">{card.category}</span>
+                  <h3>{card.title}</h3>
                   <span className="curation-card-link">View Showcase Briefing →</span>
                 </div>
               </Link>
             ))}
-            {broker.managedProperties.length === 0 && (
-              <div className="empty-curations-msg">
-                No eligible public property representations are attached to this dossier.
+            {representations.state !== DOSSIER_REPRESENTATION_STATES.LISTED && (
+              <div
+                className={`empty-curations-msg${representations.claimsEmptiness ? "" : " representation-notice"}`}
+                role={representations.state === DOSSIER_REPRESENTATION_STATES.LOOKUP_FAILED ? "status" : undefined}
+              >
+                {REPRESENTATION_COPY[representations.state]}
               </div>
             )}
           </div>
@@ -115,7 +156,7 @@ export default async function BrokerDetailPage({ params }) {
 
         {/* Connection Form Component (Client Side) */}
         <section className="portal-section">
-          <ConnectionPortal brokerName={broker.name} brokerId={broker.id} />
+          <ConnectionPortal brokerName={identity.name} brokerId={identity.id} />
         </section>
 
 

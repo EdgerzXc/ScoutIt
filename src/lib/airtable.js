@@ -59,16 +59,9 @@ function deepIntelCategoryFor(spaceCategory) {
   return "";
 }
 
-// ── Tier label → number conversion ──────────────────────────────
-// Airtable stores SubscriptionLabel as text (Gold, Silver, etc.)
-// The UI uses numbers (1–5) for sorting and styling
-const TIER_LABEL_TO_NUM = {
-  Diamond:  1,
-  Platinum: 2,
-  Gold:     3,
-  Silver:   4,
-  Bronze:   5,
-};
+// A-023: the SubscriptionLabel → 1–5 conversion that used to live here is gone
+// with the field it fed. Commercial tier never ranked or rated a broker, and
+// publishing it invited exactly that reading.
 
 // ── Base fetch with auth and ISR cache ──────────────────────────
 async function fetchTable(tableId, apiKey, baseId, params = "") {
@@ -115,8 +108,6 @@ export async function fetchBrokers(apiKey, baseId) {
     .filter((r) => r.fields.Approved_For_Live_Site && r.fields.Name) // only published brokers with a name
     .map((r) => {
       const f = r.fields;
-      const labelRaw = f.SubscriptionLabel || "Bronze";
-      const subscriptionTier = TIER_LABEL_TO_NUM[labelRaw] ?? 5;
 
       // Niche: Airtable returns comma-separated string for multi-select
       const niche = f.Niche
@@ -139,24 +130,14 @@ export async function fetchBrokers(apiKey, baseId) {
         // RA 9646 trust badge — true only when staff ticked License_Verified
         // in Airtable after checking the PRC registry. Never assume.
         licenseVerified:  !!f.License_Verified,
-        closures:         f.Closures        || "",
-        rating:           Number(f.Rating)  || 0,
-        subscriptionTier: subscriptionTier,
-        subscriptionLabel: labelRaw,
+        // A-023: legacy trust/ranking composites are
+        // retired. Phase 1 stopped rendering them; they kept shipping in the
+        // public /api/cms payload, so an unsourced 92.5 "rating" and a
+        // commercial tier were still published on every page load. Data in the
+        // browser is public whether or not a component reads it (Rule 5).
+        // The Airtable columns stay; nothing in ScoutIt consumes them.
         clearanceTier:    f.ClearanceTier   || "",
-        rosterRank:       f.RosterRank      || "",
-        // RosterStatus is editorial data, not a browser-presence signal.
-        // Missing stays absent; defaulting it to "Active" fabricated activity.
-        rosterStatus:     f.RosterStatus    || "",
         niche:            niche,
-        // managedProperties is a linked record — returns record IDs only from Airtable
-        // We resolve this via PROPERTIES_CMS slug matching on the frontend
-        managedProperties: [],
-        metrics: [
-          f.RosterRank ? { label: "Roster Rank", value: f.RosterRank } : null,
-          f.ClearanceTier ? { label: "Clearance", value: f.ClearanceTier } : null,
-          f.RosterStatus ? { label: "Roster Status", value: f.RosterStatus } : null,
-        ].filter(Boolean),
       };
     });
 }

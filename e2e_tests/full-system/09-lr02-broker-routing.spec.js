@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { getCommercialListing, gotoAndSettle, expectRealContent, trackErrors } from './helpers';
+import { gotoAndSettle, expectRealContent, trackErrors } from './helpers';
 
 test.describe('LR-02 property-scoped broker roster', () => {
-  test('shows only the current property roster and routes selected contact to it', async ({ page, request }) => {
+  test('shows only the current property roster and routes selected contact to it', async ({ page }) => {
     const errors = trackErrors(page);
-    const listing = await getCommercialListing(request);
-    await page.route(`**/api/property/${listing.slug}/brokers`, async (route) => {
+    const slug = 'lr02-property';
+    await page.route(`**/api/property/${slug}/brokers`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         json: {
-          property: { id: 'lr02-property', title: listing.title, slug: listing.slug },
+          property: { id: slug, title: 'LR-02 Property', slug },
           represented: true,
           contactable: true,
           brokers: [{ id: 'broker-active', name: 'Active Broker', headline: 'Property Specialist', specializations: ['Commercial'] }],
@@ -23,7 +23,7 @@ test.describe('LR-02 property-scoped broker roster', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', json: { success: true, routedToRoster: true, recipientCount: 1 } });
     });
 
-    await gotoAndSettle(page, `/property/${listing.slug}/brokers`);
+    await gotoAndSettle(page, `/property/${slug}/brokers`);
     await expectRealContent(page);
     await expect(page.getByRole('heading', { name: /Authorized Broker Roster/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Active Broker' }).first()).toBeVisible();
@@ -39,17 +39,17 @@ test.describe('LR-02 property-scoped broker roster', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('shows the ordinary uploader/lister path when no broker qualifies', async ({ page, request }) => {
+  test('shows the ordinary uploader/lister path when no broker qualifies', async ({ page }) => {
     const errors = trackErrors(page);
-    const listing = await getCommercialListing(request);
-    await page.route(`**/api/property/${listing.slug}/brokers`, async (route) => {
+    const slug = 'lr02-unrepresented';
+    await page.route(`**/api/property/${slug}/brokers`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        json: { property: { id: 'lr02-unrepresented', title: listing.title, slug: listing.slug }, represented: false, contactable: true, brokers: [] },
+        json: { property: { id: slug, title: 'Unrepresented Property', slug }, represented: false, contactable: true, brokers: [] },
       });
     });
-    await gotoAndSettle(page, `/property/${listing.slug}/brokers`);
+    await gotoAndSettle(page, `/property/${slug}/brokers`);
     await expectRealContent(page);
     await expect(page.getByText(/No active broker representation/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /Contact uploader \/ lister/i })).toBeVisible();

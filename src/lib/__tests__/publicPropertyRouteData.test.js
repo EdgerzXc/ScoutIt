@@ -5,6 +5,7 @@ vi.mock("@/lib/cmsCache", () => ({ getCmsBundle }));
 
 const {
   PublicCmsUnavailableError,
+  resolveE2ePublicProperty,
   loadPublicProperty,
   resolvePublicChildSpace,
   resolvePublicProperty,
@@ -39,5 +40,18 @@ describe("public nested property route resolution", () => {
   it("loads through the shared cached CMS bundle", async () => {
     getCmsBundle.mockResolvedValue({ source: "upstash_redis", properties: [property] });
     await expect(loadPublicProperty("one-ecom-center")).resolves.toBe(property);
+  });
+
+  it("exposes LR-02 route fixtures only when both explicit E2E flags are enabled", () => {
+    expect(resolveE2ePublicProperty("lr02-property", {
+      e2eFlag: "1",
+      publicE2eFlag: "1",
+    })).toMatchObject({ id: "lr02-property", slug: "lr02-property" });
+    expect(resolveE2ePublicProperty("lr02-unrepresented", {
+      e2eFlag: "1",
+      publicE2eFlag: "1",
+    })).toMatchObject({ id: "lr02-unrepresented", slug: "lr02-unrepresented" });
+    expect(resolveE2ePublicProperty("lr02-property", { e2eFlag: "1" })).toBeNull();
+    expect(resolveE2ePublicProperty("real-property", { e2eFlag: "1", publicE2eFlag: "1" })).toBeNull();
   });
 });

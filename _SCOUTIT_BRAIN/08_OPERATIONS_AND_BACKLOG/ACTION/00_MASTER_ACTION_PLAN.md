@@ -175,8 +175,24 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   Phase 1's migration-free trust convergence landed on 2026-08-26: legacy
   rating composites and tier/rating roster claims are retired, missing evidence
   is an explicit building-record state, the roster preserves representation
-  authority order, and legacy broker-shaped profiles are non-indexed. The
-  projection, dossier/editor, evidence, metrics, and migration phases remain Active.
+  authority order, and legacy broker-shaped profiles are non-indexed.
+  **Phase 2 landed the same day.** The allowlisted public projection now exists
+  and the dossier consumes it. Two things were found by checking the live
+  systems rather than the documents: Airtable's `BrokerID` already carries the
+  broker's Supabase Auth UUID, so representations needed no migration to
+  generate; and `/api/cms` was still publishing the retired `rating`,
+  `closures` and commercial-tier fields that phase 1 had only stopped
+  rendering. The dossier's "no representations" line is now an earned answer
+  from the authority rather than a hardcoded empty array, and it is separated
+  from the two states that cannot make that claim. The loading state is the one
+  phase-2 item NOT delivered — see the Inbox note on stranded route-level
+  Suspense fallbacks. The editor/publish, recommendations, contributions,
+  metrics, and migration phases remain Active.
+- **A-030 closed on 2026-08-26.** The committed tree was failing its own
+  typography gate: commit `1daddbb`..`1a2aae8` shipped an 11px interface label
+  in `CommercialFlow.js` without re-running `npm run audit:typography`. Fixed to
+  the file's own 12px convention. Worth noting as a process signal — the gate
+  only protects what actually runs it.
 
 - Two claims in the original A-012/A-013 text were **wrong and are corrected in
   the Done rows**: `/api/ai/*` and the inquiry paths are not unauthenticated, and
