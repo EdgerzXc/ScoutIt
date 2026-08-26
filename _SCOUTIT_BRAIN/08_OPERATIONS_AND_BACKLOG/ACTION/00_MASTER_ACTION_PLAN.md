@@ -172,6 +172,11 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   recommendations, inspectable contributions, and one compliant Connect path.
   Raw public screenshots, broker-claimed properties, paid trust, hidden
   composite scoring, and unsupported backfills are excluded.
+  Phase 1's migration-free trust convergence landed on 2026-08-26: legacy
+  rating composites and tier/rating roster claims are retired, missing evidence
+  is an explicit building-record state, the roster preserves representation
+  authority order, and legacy broker-shaped profiles are non-indexed. The
+  projection, dossier/editor, evidence, metrics, and migration phases remain Active.
 
 - Two claims in the original A-012/A-013 text were **wrong and are corrected in
   the Done rows**: `/api/ai/*` and the inquiry paths are not unauthenticated, and

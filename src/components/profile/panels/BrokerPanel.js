@@ -1,47 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { Briefcase, Star, TrendingUp, Eye, CheckCircle, BarChart2, ShieldCheck } from "lucide-react";
-
-function RatingBar({ label, value, max = 100 }) {
-  const pct = Math.min(100, Math.max(0, value));
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex justify-between items-baseline">
-        <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.04em" }}>
-          {label}
-        </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C" }}>
-          {pct.toFixed(0)}%
-        </span>
-      </div>
-      <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden" }}>
-        <div
-          style={{
-            height: "100%",
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, #6E531A, #E8AE3C)",
-            borderRadius: 2,
-            transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+import { Briefcase, Eye, CheckCircle, BarChart2, ShieldCheck } from "lucide-react";
 
 export default function BrokerPanel({ data, isPublic = false, prcVerified = false, prcLicense = "" }) {
-  const isEmpty =
-    !data ||
-    (data.verified_closures === 0 &&
-      data.scout_rating === 0 &&
-      data.active_listings_count === 0);
+  const isEmpty = !data || (data.verified_closures === 0 && data.active_listings_count === 0);
 
   return (
     <section style={panelStyle}>
       <div style={panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Briefcase size={14} strokeWidth={1.5} color="#E8AE3C" />
+          <Briefcase size={14} strokeWidth={1.5} color="var(--accent)" />
           <span style={panelLabel}>Broker</span>
           {/* RA 9646 badge — renders ONLY when staff verified the credential
               against the PRC registry, never from the mere number. */}
@@ -64,84 +32,38 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
 
       {isPublic ? (
         <div style={emptyState}>
+          <strong style={recordState}>Building a ScoutIt record</strong>
           <p style={emptyText}>No public performance evidence is attached to this profile. Property-specific representation appears only on an accepted property roster.</p>
         </div>
       ) : isEmpty ? (
         <div style={emptyState}>
-          <p style={emptyText}>
-            Your Scout Rating starts the moment you log your first verified closure.
-          </p>
-          <Link href="/dashboard" style={emptyCta}>Log a Closure</Link>
+          <strong style={recordState}>Building a ScoutIt record</strong>
+          <p style={emptyText}>Qualified ScoutIt activity will appear after the versioned metric projection is available.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          {/* Scout Rating */}
           <div style={metricBlock}>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 16 }}>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 48, color: "var(--accent)", lineHeight: 1 }}>
-                {Number(data.scout_rating ?? 0).toFixed(1)}
-              </span>
-              <div style={{ display: "flex", flexDirection: "column", paddingBottom: 8 }}>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                  out of 5.0
-                </span>
-                <div style={{ display: "flex", gap: 3, marginTop: 4 }}>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      size={10}
-                      strokeWidth={1.5}
-                      fill={i <= Math.round(data.scout_rating ?? 0) ? "#E8AE3C" : "transparent"}
-                      color="#E8AE3C"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <RatingBar label="Active Retentions" value={data.active_retentions_score ?? 0} />
-              <RatingBar label="Continuity Score" value={data.continuity_score ?? 0} />
-              <RatingBar
-                label={`Stewardship Velocity +${Number(data.stewardship_velocity ?? 0).toFixed(0)} this month`}
-                value={Math.min(100, (data.stewardship_velocity ?? 0) * 10)}
-              />
-            </div>
-
-            <details style={{ marginTop: 12 }}>
-              <summary
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 12,
-                  color: "#E8AE3C",
-                  cursor: "pointer",
-                  letterSpacing: "0.04em",
-                  userSelect: "none",
-                }}
-              >
-                What improves your rating?
-              </summary>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", marginTop: 8, lineHeight: 1.6 }}>
-                Your Scout Rating is built from three signals: how many clients you actively retain (Active Retentions), how consistently you close within your committed timelines (Continuity Score), and how quickly you move new opportunities through your pipeline each month (Stewardship Velocity).
-              </p>
-            </details>
+            <strong style={recordState}>Building a ScoutIt record</strong>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", marginTop: 8, lineHeight: 1.6 }}>
+              Legacy five-point scores are retired. Only qualified activity from the versioned ScoutIt projection will appear here.
+            </p>
           </div>
 
           {/* Stats Row */}
           <div style={statsRow}>
             <div style={statCard}>
-              <CheckCircle size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
+              <CheckCircle size={14} strokeWidth={1.5} color="var(--accent)" style={{ marginBottom: 6 }} />
               <span style={statValue}>{data.verified_closures ?? 0}</span>
               <span style={statLabel}>Verified Closures</span>
             </div>
             <div style={statCard}>
-              <BarChart2 size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
+              <BarChart2 size={14} strokeWidth={1.5} color="var(--accent)" style={{ marginBottom: 6 }} />
               <span style={statValue}>{data.active_listings_count ?? 0}</span>
               <span style={statLabel}>Active Listings</span>
             </div>
             {!isPublic && (
               <div style={statCard}>
-                <Eye size={14} strokeWidth={1.5} color="#E8AE3C" style={{ marginBottom: 6 }} />
+                <Eye size={14} strokeWidth={1.5} color="var(--accent)" style={{ marginBottom: 6 }} />
                 <span style={statValue}>{data.profile_views_this_month ?? 0}</span>
                 <span style={statLabel}>Profile Views</span>
               </div>
@@ -185,16 +107,16 @@ const prcBadge = {
   fontSize: 12,
   fontWeight: 700,
   letterSpacing: "0.1em",
-  color: "#4caf7d",
-  background: "rgba(76, 175, 125, 0.1)",
-  border: "1px solid rgba(76, 175, 125, 0.3)",
+  color: "var(--success)",
+  background: "color-mix(in srgb, var(--success) 10%, transparent)",
+  border: "1px solid color-mix(in srgb, var(--success) 30%, transparent)",
   borderRadius: 3,
   padding: "2px 7px",
 };
 
 const metricBlock = {
-  background: "rgba(232, 174, 60,0.03)",
-  border: "1px solid rgba(232, 174, 60,0.08)",
+  background: "color-mix(in srgb, var(--accent) 3%, transparent)",
+  border: "1px solid color-mix(in srgb, var(--accent) 8%, transparent)",
   borderRadius: 6,
   padding: 16,
 };
@@ -219,7 +141,7 @@ const statCard = {
 const statValue = {
   fontFamily: "var(--font-display)",
   fontSize: 24,
-  color: "#e5e2e1",
+  color: "var(--on-surface)",
   lineHeight: 1.2,
 };
 
@@ -247,12 +169,10 @@ const emptyText = {
   lineHeight: 1.6,
 };
 
-const emptyCta = {
-  fontFamily: "var(--font-body)",
+const recordState = {
+  fontFamily: "var(--font-mono)",
   fontSize: 12,
-  color: "#E8AE3C",
-  letterSpacing: "0.06em",
-  textDecoration: "underline",
-  textUnderlineOffset: 3,
-  cursor: "pointer",
+  color: "var(--accent)",
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
 };

@@ -25,6 +25,13 @@ related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_S
 > `VOICE_AND_COPY_GUIDE.md`. The complete gate passes 1,624 unit tests, 574 E2E cases
 > discovered, lint, typography, production build, and 3/3 surface locks. The separate
 > first-visit Help-panel obstruction on non-auth pages remains in Inbox.
+>
+> **2026-08-26 A-023 phase-1 checkpoint:** broker trust surfaces now converge on
+> one honest interim contract: no legacy five/100-point composite, no
+> rating-based or subscription-tier roster ranking, no fabricated zero, and no
+> indexable broker-shaped legacy profile. The property roster keeps
+> representation-authority order and the public API withholds legacy rating and
+> closure fields pending the versioned broker projection. A-023 remains Active.
 
 > Metropolis foreground, and Metropolis WebGL background are protected by normalized
 > source checksums in `scripts/approved-surfaces.json`. `npm run verify:surfaces` and CI

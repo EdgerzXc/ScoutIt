@@ -62,7 +62,7 @@ export async function GET(_request, { params }) {
 
     const [{ data: profiles, error: profilesError }, { data: brokerProfiles, error: brokerProfilesError }] = await Promise.all([
       supabaseAdmin.from("user_profiles").select("id, display_name, avatar_url, headline, bio, firm, prc_license, is_profile_public").in("id", brokerIds),
-      supabaseAdmin.from("broker_profiles").select("user_id, scout_rating, verified_closures, specializations").in("user_id", brokerIds),
+      supabaseAdmin.from("broker_profiles").select("user_id, specializations").in("user_id", brokerIds),
     ]);
     if (profilesError || brokerProfilesError) {
       console.error("[PROPERTY BROKERS API] Profile lookup failed:", profilesError || brokerProfilesError);
@@ -74,7 +74,7 @@ export async function GET(_request, { params }) {
     const brokers = routing.roster
       .map((recipient) => {
         const profile = profileById.get(recipient.recipientId);
-        if (!profile) return null;
+        if (!profile || profile.is_profile_public !== true) return null;
         const metrics = metricsById.get(recipient.recipientId) || {};
         return {
           id: recipient.recipientId,
@@ -85,8 +85,6 @@ export async function GET(_request, { params }) {
           bio: profile.bio || "",
           firm: profile.firm || "",
           license: profile.prc_license || "",
-          rating: Number(metrics.scout_rating) || 0,
-          closures: Number(metrics.verified_closures) || 0,
           specializations: metrics.specializations || [],
         };
       })

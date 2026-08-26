@@ -113,13 +113,12 @@ export default function BrokersClient({ slug }) {
     );
   };
 
-  const renderBrokerCard = (broker, formIdPrefix) => {
-    const formKey = `${formIdPrefix}-${broker.id}`;
+  const renderBrokerCard = (broker) => {
+    const formKey = `roster-${broker.id}`;
     const isActiveForm = activeFormBroker === formKey;
-    const isMatch = formIdPrefix === "match";
 
     return (
-      <div key={formKey} className={`broker-item-card ${isMatch ? "recommended-card match-card" : ""}`}>
+      <div key={formKey} className="broker-item-card">
         <div className="broker-main-row">
           <div className="broker-avatar-img" style={broker.image ? { backgroundImage: `url(${broker.image})` } : undefined} aria-hidden="true" />
           <div className="broker-detail-col">
@@ -138,7 +137,7 @@ export default function BrokersClient({ slug }) {
             {broker.license && <p className="broker-closures-txt">PRC reference on file</p>}
             {broker.specializations?.length > 0 && <div className="niche-pills-row">{broker.specializations.map((tag) => <span key={tag} className="niche-pill-tag">{tag}</span>)}</div>}
           </div>
-          <div className="broker-rating-box"><span className="rating-num">{broker.rating || "—"}</span><span className="rating-lbl">SCOUT RATING</span></div>
+          <div className="broker-rating-box"><span className="rating-num">—</span><span className="rating-lbl">BUILDING RECORD</span></div>
         </div>
         <div className="broker-actions-row">
           <Link href={`/brokers/${broker.id}`} className="action-profile-btn">View Profile →</Link>
@@ -174,36 +173,17 @@ export default function BrokersClient({ slug }) {
           <>
             {represented ? (
               <div className="broker-layers-container">
-                {/* LAYER 2: SCOUTIT MATCH */}
                 {brokers.length > 0 && (
                   <section className="broker-layer scoutit-match-layer">
                     <header className="layer-header" style={{ marginBottom: "20px" }}>
-                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase" }}>RECOMMENDED REPRESENTATION</span>
-                      <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>ScoutIt Match ✦</h2>
+                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase" }}>CURRENT REPRESENTATION</span>
+                      <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>Authorized advisors</h2>
                       <p className="layer-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "8px", maxWidth: "700px" }}>
-                        Our recommendation algorithm weights verified ratings, detail completeness, and subscription tier. 
-                        Because detail relevance is a primary input, money alone cannot buy the top slot.
+                        Roster order follows current representation authority. It is not a rating, recommendation, or paid trust ranking.
                       </p>
                     </header>
                     <div className="brokers-cards-list property-roster-list">
-                      {brokers.slice(0, 1).map((broker) => renderBrokerCard(broker, "match"))}
-                    </div>
-                  </section>
-                )}
-
-                {/* LAYER 1: INDEPENDENT RATING (TOP RATED) */}
-                {brokers.length > 0 && (
-                  <section className="broker-layer top-rated-layer" style={{ marginTop: "48px" }}>
-                    <header className="layer-header" style={{ marginBottom: "20px" }}>
-                      <span className="gold-section-label" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase" }}>INDEPENDENT RATING</span>
-                      <h2 className="layer-title" style={{ fontFamily: "var(--font-body)", fontSize: "24px", color: "var(--on-surface)", marginTop: "4px" }}>Top Rated</h2>
-                      <p className="layer-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "8px", maxWidth: "700px" }}>
-                        The complete authorized roster for this property, ranked strictly by verified independent ratings. 
-                        This ranking is purely meritocratic and is untouched by commercial tier.
-                      </p>
-                    </header>
-                    <div className="brokers-cards-list property-roster-list">
-                      {[...brokers].sort((a, b) => b.rating - a.rating).map((broker) => renderBrokerCard(broker, "rated"))}
+                      {brokers.map((broker) => renderBrokerCard(broker))}
                     </div>
                   </section>
                 )}

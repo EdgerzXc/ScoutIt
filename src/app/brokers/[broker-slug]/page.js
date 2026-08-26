@@ -46,32 +46,11 @@ export default async function BrokerDetailPage({ params }) {
               style={{ backgroundImage: `url(${broker.image})` }}
             ></div>
             
-            {/* 3-Metric Block */}
-            <div className="detail-metrics-grid">
-              {broker.metrics.map((m, idx) => (
-                <div key={idx} className="detail-metric-card">
-                  <span className="metric-lbl">{m.label}</span>
-                  <span className="metric-val">{m.value}</span>
-                </div>
-              ))}
-            </div>
-
             <div className="detail-closures-box">
-              <span className="icon-badge">SECURE ROSTER LINK</span>
-              <p>{broker.closures}</p>
+              <span className="icon-badge">SCOUTIT RECORD</span>
+              <p>Building a ScoutIt record</p>
+              <small>Qualified platform activity will appear here only after the public metric projection is available.</small>
             </div>
-
-            {broker.scoutRating != null && (
-              <div className="scout-rating-box">
-                <span className="scout-rating-box-label">Scout Rating</span>
-                <span className="scout-rating-box-score" style={{ color: broker.scoutRating >= 85 ? "#4caf7d" : "#E8AE3C" }}>
-                  {broker.scoutRating}<span style={{ fontSize: "16px", color: "var(--text-muted)" }}>/100</span>
-                </span>
-                <div className="scout-rating-breakdown">
-                  <span>Active Retentions 40% &middot; Continuity 40% &middot; Stewardship 20%</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Column: Bio & Specialties */}
@@ -107,10 +86,10 @@ export default async function BrokerDetailPage({ params }) {
           </div>
         </section>
 
-        {/* Curated Spaces Grid */}
+        {/* Current representations come from the authority projection in phase 2. */}
         <section className="detail-curations-section">
-          <h2>Curated Spaces under Management</h2>
-          <p className="section-desc">Active listings and structural briefs managed by this advisor.</p>
+          <h2>Current Representations</h2>
+          <p className="section-desc">Only active, visible, contactable, owner-accepted property representations appear here.</p>
           
           <div className="detail-curations-grid">
             {broker.managedProperties.map((prop) => (
@@ -128,7 +107,7 @@ export default async function BrokerDetailPage({ params }) {
             ))}
             {broker.managedProperties.length === 0 && (
               <div className="empty-curations-msg">
-                No active property showcase spaces currently linked to this roster channel.
+                No eligible public property representations are attached to this dossier.
               </div>
             )}
           </div>

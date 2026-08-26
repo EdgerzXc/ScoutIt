@@ -7,14 +7,14 @@ async function publicProfileMetadata(username) {
 
   let { data: profile, error } = await supabaseAdmin
     .from("public_profiles")
-    .select("id, display_name, headline, is_example_account")
+    .select("id, display_name, headline, is_example_account, active_roles")
     .eq(isUuid ? "id" : "display_name", username)
     .maybeSingle();
 
   if (isUuid && !error && !profile) {
     ({ data: profile, error } = await supabaseAdmin
       .from("public_profiles")
-      .select("id, display_name, headline, is_example_account")
+      .select("id, display_name, headline, is_example_account, active_roles")
       .eq("display_name", username)
       .maybeSingle());
   }
@@ -73,7 +73,8 @@ export async function generateMetadata({ params }) {
   // archived). The view is the gate; this only adds what the view exposes
   // rather than enforces.
   const isRealPerson = profile.is_example_account !== true;
-  const isIndexable = isRealPerson && !isPilotParticipant;
+  const isBrokerShape = Array.isArray(profile.active_roles) && profile.active_roles.includes("broker");
+  const isIndexable = isRealPerson && !isPilotParticipant && !isBrokerShape;
 
   return {
     title: `${profile.display_name} · ScoutIt Profile`,

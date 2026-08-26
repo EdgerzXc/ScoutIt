@@ -3,7 +3,7 @@ section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 task_id: A-023
 tags: [active-work, broker-dossier, professional-profile, trust]
-updated: 2026-08-24
+updated: 2026-08-26
 related: ["[[ACTIVE]]", "[[00_MASTER_ACTION_PLAN]]", "[[DATA_DICTIONARY]]", "[[USER_FLOWS]]"]
 ---
 
@@ -227,7 +227,24 @@ priority over cosmetic instant updates.
 6. Complete metadata, mobile/Lite/reduced-motion, migration/rollback, and owner
    visual review.
 
+### Phase 1 checkpoint — 2026-08-26
+
+The migration-free trust-convergence slice is implemented. The canonical
+dossier and property roster no longer render the unsupported Airtable/legacy
+five-point or 100-point composites, default missing performance to zero, rank
+brokers by those values, or claim that subscription tier participates in a
+trust recommendation. The roster preserves representation-authority order and
+labels the absent metric projection **Building a ScoutIt record**. The public
+roster API no longer emits the legacy rating/closure fields, private broker
+profiles are excluded from its identity projection, and broker-shaped legacy
+profiles are non-indexed.
+
+A-023 remains Active: projection, generated representations, editor/publish,
+recommendations, contributions, metrics, migrations, responsive verification,
+and owner visual review are still open.
+
 ## Boundary and exit test
+
 
 Code and prepared migrations are Active; live application remains behind
 [[WAITING#W-003|W-003]]. Never fabricate/backfill scores, reviews, response
