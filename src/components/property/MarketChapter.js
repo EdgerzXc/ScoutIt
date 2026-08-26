@@ -248,10 +248,15 @@ export default function MarketChapter({
         <div style={{ height: "1px", background: "var(--border)" }} />
       </div>
 
-      <p className="market-chapter__lede">
-        What is being written about this space and the market around it — and,
-        for Verified Scouts, the numbers underneath.
-      </p>
+      {/* The subtitle above already says this. Render the lede only when a
+          flow passes no subtitle, so the two never stack as near-identical
+          sentences. */}
+      {!subtitle && (
+        <p className="market-chapter__lede">
+          What is being written about this space and the market around it — and,
+          for Verified Scouts, the numbers underneath.
+        </p>
+      )}
 
       <ArticlesBlock property={property} articles={articles} />
 

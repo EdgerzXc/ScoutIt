@@ -2282,17 +2282,21 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             </div>
           </div>
 
-          {/* ── HIDDEN INTEL (Ch. 6) ── */}
+          {/* ── THE MARKET (Ch. 6) ──────────────────────────────────────
+              ONE panel for this chapter. There were briefly two, both keyed to
+              `activeTab === "hiddenintel"` and both carrying id
+              "panel-hiddenintel": the old "Fine Print" panel and the newer
+              market panel. Both matched at once, so they rendered stacked on
+              top of each other — the market copy sat under the regulatory copy
+              and the sidebar showed Zoning and Cap rate overlapping. Whatever
+              belongs to chapter 06 belongs in THIS block; never add a second
+              panel for the same tab id.
+
+              MarketChapter itself is shared with ResidentialFlow, so commercial,
+              STR, hospitality, restaurants and venues cannot quietly miss the
+              market intelligence the way they did before. */}
           <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
             <div className="panel-content">
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['hiddenintel']?.chapterNumber || '06'} — {ch['hiddenintel']?.chapterLabel || 'The Fine Print'}</div>
-                {ch['hiddenintel']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['hiddenintel'].subtitle}</div>
-                )}
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
-
               <FloodRiskBadge floodRiskScore={d.flood_risk_score} floodZoneStatus={d.flood_zone_status} />
 
               {/* Stratosphere Curiosity Door (Ch 06 -> Commercial Signal / Decarbonization Ordinance) */}
@@ -2305,39 +2309,29 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 />
               )}
 
-              <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"540px"}}>
-                Regulatory and municipal zoning intelligence for this asset — LEED mandates, building code compliance, and environmental covenants.
-              </p>
-            </div>
-
-            <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Zoning Status</div><div className="sidebar-value">{d.zoning_type || "Verified Commercial"}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
-            </div>
-          </div>
-
-          {/* ── THE MARKET (Ch. 6) ──────────────────────────────────────
-              New on this flow. Commercial, STR, hospitality, restaurants and
-              venues all render through CommercialFlow and previously had NO
-              market intelligence — the entitlement was computed here and never
-              read. Cap rate and transaction history are commercial metrics
-              first, so the flow that lacked them was the one that needed them
-              most. Same component as ResidentialFlow: one definition, so a new
-              space category cannot quietly miss it. */}
-          <div className={`chapter-panel ${activeTab === "hiddenintel" ? "active" : ""}`} id="panel-hiddenintel">
-            <div className="panel-content">
               <MarketChapter
                 property={d}
                 articles={articles}
                 deepIntel={d.deepIntel}
-                chapterNumber="06"
-                chapterLabel="The Market"
+                chapterNumber={ch['hiddenintel']?.chapterNumber || '06'}
+                chapterLabel={ch['hiddenintel']?.chapterLabel || 'The Market'}
+                subtitle={ch['hiddenintel']?.subtitle || ''}
               />
+
+              {/* Commercial-only closing note. Labelled so it reads as a
+                  sub-block of the chapter, not as a second chapter lede. */}
+              <div style={{marginTop:"36px", paddingTop:"20px", borderTop:"1px solid var(--border)"}}>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"11px", color:"var(--text-muted)", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"10px"}}>Regulatory &amp; compliance</div>
+                <p style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--text-secondary)", lineHeight:1.8, margin:0, maxWidth:"540px"}}>
+                  Regulatory and municipal zoning intelligence for this asset — LEED mandates, building code compliance, and environmental covenants.
+                </p>
+              </div>
             </div>
 
             <div className="panel-sidebar">
               <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Zoning status</div><div className="sidebar-value">{d.zoning_type || "Verified Commercial"}</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
             </div>
           </div>
