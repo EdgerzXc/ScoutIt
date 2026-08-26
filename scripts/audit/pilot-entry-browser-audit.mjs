@@ -1,6 +1,6 @@
 import { chromium } from "@playwright/test";
 
-const baseUrl = process.env.SCOUTIT_AUDIT_BASE_URL || "http://127.0.0.1:3000";
+const baseUrl = process.env.SCOUTIT_AUDIT_BASE_URL || process.env.AUDIT_BASE_URL || process.env.SCOUTIT_E2E_BASE_URL || "http://127.0.0.1:3000";
 const viewports = [
   { name: "mobile", width: 390, height: 844 },
   { name: "desktop", width: 1280, height: 900 },
@@ -20,7 +20,7 @@ const results = [];
 
 try {
   for (const viewport of viewports) {
-    const context = await browser.newContext({ viewport });
+    const context = await browser.newContext({ viewport, baseURL: baseUrl });
     const page = await context.newPage();
 
     const onboardingErrors = [];

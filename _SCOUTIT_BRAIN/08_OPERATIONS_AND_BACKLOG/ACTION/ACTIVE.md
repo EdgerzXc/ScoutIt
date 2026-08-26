@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [active-work, engineering, pre-pilot]
-updated: 2026-08-24
+updated: 2026-08-26
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OWNER_ACTIONS]]"]
 ---
 
@@ -17,108 +17,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   is the complete authoritative plan for the broker master-page workstream.
   Its statistics contract makes the read-only ScoutIt transaction record primary
   and keeps broker-editable historical career data secondary and clearly labelled.
-
-## A-025 — Make signed-out workspace and auth entry fail quietly and honestly
-
-**Owner outcome:** a signed-out visitor sees an immediate deliberate sign-in
-handoff and ScoutIt makes no private workspace request until identity is proven.
-
-**Current evidence (2026-08-24):** production `/admin`, calendar, CRM, and inbox
-surfaces issue protected requests while anonymous and log expected 401 failures;
-inbox calls `/api/deals` before resolving a usable identity. Onboarding also asks
-for missing `/grain.png` on every auth-derived entry even though the root layout
-already provides the data-URI grain. APIs correctly deny access; this is an entry,
-noise, and wasted-request defect, not evidence of data exposure. Google origin
-configuration is separately owner-gated as O-011.
-
-**Agent lane:** centralize the verified signed-out boundary before private child
-effects mount, preserve localhost E2E isolation, remove the redundant missing
-asset request, and render an honest Google-unavailable state if GIS cannot render.
-Do not weaken server authorization or treat browser cache as identity.
-
-**Exit test:** anonymous workspace URLs make zero private API calls, emit no
-expected-auth console errors, and reach one accessible sign-in state/redirect;
-valid sessions retain deep links; no `/grain.png` 404 occurs; email/OTP remains
-usable when Google is unavailable; auth, mobile, and production-host tests pass.
-
-## A-026 — Make the browser audit portable and non-vacuous
-
-**Owner outcome:** the same read-only suite can audit localhost or a supplied
-production URL without false failures or accidentally measuring the wrong host.
-
-**Current evidence (2026-08-24):** six of 314 production-suite results failed for
-two deterministic harness bugs: the Manifesto no-JS case hardcodes
-`http://localhost:3000/about`, and Descent uses an unscoped ScoutIt-link locator
-that matches both layer navigation and footer. The application behavior passed;
-the tests did not honor their configured `baseURL` or landmark scope.
-
-**Agent lane:** derive new contexts from the configured target, keep the ScoutIt
-render anchor, scope locators to their owning landmark, and add regression checks
-for U-011/A-024 without making live tests destructive.
-
-**Exit test:** the curated production subset passes without a localhost server;
-a protected/interstitial host still fails the render anchor; no live test writes,
-publishes, spends, sends, or changes account state; local and remote modes pass.
-
-## A-027 — Stabilize measured production layout and foreground workload
-
-**Owner outcome:** key directories do not visibly jump as data hydrates, and the
-homepage remains responsive while preserving its cinematic identity.
-
-**Current evidence (2026-08-24):** three desktop production samples measured
-CLS near 0.26 on `/brokers`, 0.13 on `/property`, and 0.11 on warm `/discover`.
-Homepage paint/navigation entries were fast, but a nominal 3.5-second settle and
-evaluate cycle took about 20–30 seconds desktop and 7–8 seconds mobile, pointing
-to foreground/main-thread work rather than network latency. This is lab evidence;
-it does not identify the responsible component by itself.
-
-**Agent lane:** capture layout-shift sources and long tasks first; reserve real
-dimensions for async content; schedule/pause decorative work by visibility,
-reduced motion, Lite Mode, and device capability. Coordinate with A-022 warming
-so prefetch never hides or worsens the measured costs. Do not remove WebGL or
-cinematic layers on a guess.
-
-**Exit test:** three cold/warm desktop/mobile repetitions show CLS at or below
-0.10 on audited routes, no unexplained multi-second long task, responsive menu/
-primary interaction, no LCP regression, and preserved reduced-motion/Lite paths.
-Record trace evidence, not only a score; full verify/build and 3/3 locks pass.
-
-## A-029 — Establish a truthful human voice and deliberate display typography
-
-**Owner outcome:** ScoutIt sounds like a precise, confident Philippine property
-platform written by people who know the product—not a generic luxury generator—
-and its display typography is a conscious luxury-system decision rather than a
-misdocumented fallback.
-
-**Current evidence (2026-08-24):** Geist Sans and Geist Mono load correctly once
-through `next/font`, and the 489-file readability audit passes, but display and
-body both resolve to Geist Sans while stale CSS comments claimed Instrument
-Serif was active. Public metadata, homepage, footer, legal metadata, and JSON-LD
-repeat “the Philippines' first” and blanket “verified intelligence” without one
-cited authority or a definition that fits every content type. The authenticated
-AI rewrite endpoint explicitly asks Gemini for “bespoke, curated, panoramic,
-seamless, prestige, uncompromising,” manufacturing the exact AI-luxury voice this
-audit is meant to remove. Broker ranking contradictions stay in A-023.
-
-**Agent lane:** inventory public copy by claim type and content authority; define
-a compact ScoutIt voice guide with banned clichés, evidence language, unknown/
-sample/projection wording, and examples for property, Intel, professional, legal,
-empty, and error states. Replace unsupported superlatives and blanket
-verification with specific sourced meaning. Redesign the rewrite prompt to
-preserve owner facts and voice, prohibit invented claims and cliché stuffing, and
-return a transparent draft. Propose and browser-test the display-font decision
-against performance, Philippine glyphs/names, readability, and every owner-locked
-surface before changing `--font-display`. Do not use copy cleanup to change
-legal meaning, scores, tier promises, or locked composition.
-
-**Exit test:** no uncited market-first claim or undefined blanket verification
-remains in public metadata/JSON-LD/shell copy; generated descriptions preserve
-facts, uncertainty, and owner meaning and avoid the banned corpus; representative
-human review beats the current prompt on specificity without adding claims;
-font assets load once with no CLS/LCP regression and correct fallbacks; mobile,
-Lite, reduced-motion, metadata, accessibility, full verify/build/browser, and
-3/3 locks pass. Any display-font visual change requires explicit owner review
-before its checksum can move.
 
 ## Where the owner's "list of 10" stands
 

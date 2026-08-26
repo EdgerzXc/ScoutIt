@@ -4,6 +4,7 @@ import { activePilotParticipantIds } from "@/lib/pilotProvenance.server";
 import EventPlannersClient from "./EventPlannersClient";
 import { normalizeSupabaseProfessional } from "@/lib/professionalDirectory";
 import { publicBadgeGrantsByUserId } from "@/lib/professionalProvenance.server";
+import ProfessionalDirectorySkeleton from "@/components/professionals/ProfessionalDirectorySkeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -27,23 +28,7 @@ export default async function EventPlannersRootPage() {
   const initialPlanners = await loadInitialPlanners();
 
   return (
-    <Suspense
-      fallback={
-        <div
-          className="directory-layout"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100dvh",
-          }}
-        >
-          <h3 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
-            SCANNING THE ROSTER…
-          </h3>
-        </div>
-      }
-    >
+    <Suspense fallback={<ProfessionalDirectorySkeleton category="event_planner" />}>
       <EventPlannersClient initialRecords={initialPlanners.records} initialError={initialPlanners.error} />
     </Suspense>
   );

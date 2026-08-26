@@ -48,7 +48,7 @@ export const metadata = {
     template: "%s · ScoutIt",
   },
   description:
-    "The Philippines' first spatial commerce platform. ScoutIt turns homes, offices, venues and restaurants into clear, verified intelligence.",
+    "Property and space intelligence platform for the Philippines. ScoutIt decodes homes, offices, venues, and commercial spaces into clear, structured facts and spatial signals.",
   keywords: [
     "real estate",
     "Philippines",
@@ -65,8 +65,9 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ScoutIt — Property & Space Intelligence Philippines",
-    description: "The Philippines' first spatial commerce platform. ScoutIt turns homes, offices, venues and restaurants into clear, verified intelligence.",
+    description: "Property and space intelligence platform for the Philippines. ScoutIt decodes homes, offices, venues, and commercial spaces into clear, structured facts and spatial signals.",
   },
+
   ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
     : {}),

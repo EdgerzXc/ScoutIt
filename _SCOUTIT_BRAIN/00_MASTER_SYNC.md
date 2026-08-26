@@ -2,7 +2,7 @@
 section: "00_META"
 status: active
 tags: [master-sync, north-star, build-queue, decision-log, always-current]
-updated: 2026-08-18
+updated: 2026-08-26
 related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_START_HERE]]", "[[15_IMPLEMENTATION_RECORDS/README|Implementation Records]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN|MASTER ACTION PLAN]]", "[[13_EXTERNAL_INPUTS/README|External Inputs README]]"]
 ---
 
@@ -15,6 +15,17 @@ related: ["[[SCOUTIT_FULL_WORKFLOW]]", "[[SESSION_HANDOFF_2026-07-30]]", "[[00_S
 > chronology and cannot assign work.
 
 > **2026-08-21 Owner-approved surface lock checkpoint:** the accepted Showcase stage,
+> **2026-08-26 Action checkpoint:** A-025 through A-027 and A-029 are complete;
+> A-023 Broker Dossier is the sole Active engineering domain plan and remains
+> intentionally late and large. Signed-out private workspaces now resolve identity
+> before private requests and preserve safe onboarding deep links; audit tooling is
+> target-portable and rejects interstitial/non-ScoutIt responses; key public directories
+> and the homepage hold CLS at or below 0.10 in focused desktop/mobile coverage; and
+> public shell/AI writing contracts now use grounded ScoutIt voice with a tracked
+> `VOICE_AND_COPY_GUIDE.md`. The complete gate passes 1,624 unit tests, 574 E2E cases
+> discovered, lint, typography, production build, and 3/3 surface locks. The separate
+> first-visit Help-panel obstruction on non-auth pages remains in Inbox.
+
 > Metropolis foreground, and Metropolis WebGL background are protected by normalized
 > source checksums in `scripts/approved-surfaces.json`. `npm run verify:surfaces` and CI
 > fail on drift. Checksums may change only after the owner reviews and explicitly accepts

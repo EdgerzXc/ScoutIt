@@ -58,6 +58,7 @@ export function DashboardProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
+  const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
   // promise resolver so publishListing can await the user's answer.
@@ -73,9 +74,13 @@ export function DashboardProvider({ children }) {
 
     const fetchVerifiedUser = async () => {
       try {
+        setIdentityResolved(false);
+        setIsLoading(true);
         const { data: { user }, error } = await getUser();
         if (!error && user) {
-          await handleUserLogin(user);
+          const ready = await handleUserLogin(user);
+          setIdentityResolved(true);
+          if (!ready) setIsLoading(false);
           return;
         }
       } catch (error) {
@@ -85,13 +90,14 @@ export function DashboardProvider({ children }) {
       const mockUser = localDevelopmentUser();
       if (mockUser) {
         setCurrentUser(mockUser);
-        setIsLoading(false);
+        setIdentityResolved(true);
         fetchNotifications(mockUser.id);
         return;
       }
 
       localStorage.removeItem("scoutit_user");
       setCurrentUser(null);
+      setIdentityResolved(true);
       setIsLoading(false);
     };
     fetchVerifiedUser();
@@ -118,10 +124,12 @@ export function DashboardProvider({ children }) {
         setCurrentUser(null);
         setIsLoading(false);
         if (window.location.pathname !== "/onboarding") {
-          window.location.replace("/onboarding");
+          const returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          window.location.replace(`/onboarding?next=${encodeURIComponent(returnPath)}`);
         }
+        return false;
       }
-      return;
+      return false;
     }
 
     const mergedUser = {
@@ -143,6 +151,7 @@ export function DashboardProvider({ children }) {
     // (saved_intel has no unique(user_id, property_id) constraint), so it could
     // accumulate duplicate rows.
     fetchNotifications(authUser.id);
+    return true;
   };
 
   // ── Notifications (persisted — Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) ──
@@ -190,14 +199,31 @@ export function DashboardProvider({ children }) {
 
   // Fetch from Supabase
   useEffect(() => {
+    if (!identityResolved) return;
+    if (!currentUser?.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
     const fetchLiveIntelligence = async () => {
       setIsLoading(true);
       try {
+        const { data: { session } } = await getSession();
+        const token = session?.access_token;
+        const mockUser = !token
+          ? readDevelopmentMockUser(localStorage, {
+              nodeEnv: process.env.NODE_ENV,
+              hostname: window.location.hostname,
+            })
+          : null;
+
+        if (!token && mockUser?.id !== currentUser.id) return;
+
         // 1. Fetch Properties (Dossiers)
-        const { data: propertiesData, error: propError } = await supabase
-          .from('properties')
-          .select('*')
-          .order('created_at', { ascending: false });
+        const { data: propertiesData, error: propError } = token
+          ? await supabase.from('properties').select('*').order('created_at', { ascending: false })
+          : { data: [], error: null };
 
         let supabaseListings = [];
         if (!propError && propertiesData) {
@@ -267,10 +293,15 @@ export function DashboardProvider({ children }) {
         // the other party's real display name server-side; just remap that
         // into the field names BrokerMode/OwnerMode already read.
         try {
-          const { data: { session } } = await getSession();
-          const token = session?.access_token;
-          const dealsRes = await fetch(`/api/deals`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          // The localhost E2E fixture has no session token. `/api/deals`
+          // accepts the mock identity header only under SCOUTIT_E2E on a
+          // localhost host and only for reads (see lib/serverAuth.js).
+          const mockOwnerId = mockUser?.id || "";
+          const dealsRes = await fetch("/api/deals", {
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              ...(mockOwnerId ? { "x-mock-user-id": mockOwnerId } : {}),
+            },
           });
           if (dealsRes.ok) {
             const { deals: dealsData } = await dealsRes.json();
@@ -304,9 +335,9 @@ export function DashboardProvider({ children }) {
         }
 
         // 3. Fetch Saved Intel
-        const { data: savedData, error: savedError } = await supabase
-          .from('saved_intel')
-          .select('*');
+        const { data: savedData, error: savedError } = token
+          ? await supabase.from('saved_intel').select('*')
+          : { data: [], error: null };
           
         let supabaseSavedIds = [];
         if (!savedError && savedData) {
@@ -325,18 +356,21 @@ export function DashboardProvider({ children }) {
           }
         } catch(e) {}
 
-        setSavedIds([...new Set([...supabaseSavedIds, ...localSavedIds])]);
+        if (!cancelled) setSavedIds([...new Set([...supabaseSavedIds, ...localSavedIds])]);
 
       } catch (error) {
         console.error("Error fetching intelligence from Ledger:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchLiveIntelligence();
+    return () => { cancelled = true; };
+    // Loading is keyed to the resolved identity; presentation fields do not
+    // authorize or refetch private data.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [identityResolved, currentUser?.id]);
 
   // ── Toasts ──
   const addToast = (message, icon = "✓") => {

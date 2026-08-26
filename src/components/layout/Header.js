@@ -118,6 +118,14 @@ export default function Header({ ambientContext = null }) {
     return () => window.removeEventListener("scoutit:display-settings-state", syncDisplaySettings);
   }, []);
 
+  // One overlay at a time: the floating Help & Display panel is fixed above the
+  // page, so leaving it open while the navigation menu expands puts it on top of
+  // the menu's own controls on narrow viewports.
+  useEffect(() => {
+    if (!menuOpen) return;
+    window.dispatchEvent(new CustomEvent("scoutit:close-display-settings"));
+  }, [menuOpen]);
+
   function openDisplaySettings() {
     if (typeof window.__scoutitOpenDisplaySettings === "function") {
       window.__scoutitOpenDisplaySettings();
@@ -163,6 +171,8 @@ export default function Header({ ambientContext = null }) {
           aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
           aria-expanded={displaySettingsOpen}
           title="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
+
+
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -229,7 +239,9 @@ export default function Header({ ambientContext = null }) {
           and /property on "LOADING DIRECTORY LEDGER...", permanently, with no
           error in the console. Bisected 2026-08-07 (§65): a one-rule raw
           <style> is fine, this block is not. */}
+      <style precedence="high">{`.global-header { backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }`}</style>
       <style jsx>{`
+
         .global-header {
           position: sticky;
           top: 0;
@@ -627,38 +639,10 @@ export default function Header({ ambientContext = null }) {
           .header-menu-btn svg { width: 13px; height: 13px; }
 
           .header-dropdown {
-            position: fixed;
-            top: auto;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            min-width: 100%;
-            border-radius: 14px 14px 0 0;
-            border-left: none;
-            border-right: none;
-            border-bottom: none;
-            max-height: 60dvh;
-            overflow-y: auto;
-            padding: 12px;
-            box-shadow: 0 -6px 24px rgba(0,0,0,0.65);
+            width: min(calc(100vw - 24px), 260px);
+            max-height: calc(100dvh - 72px);
           }
 
-          .header-dropdown.open {
-            animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-
-          .header-dropdown :global(a) {
-            padding: 14px 12px;
-            font-size: 13px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            border-radius: 6px;
-          }
-
-          .header-dropdown :global(a):active {
-            background: rgba(232, 174, 60, 0.15);
-          }
 
           .header-dropdown .dropdown-brand {
             font-size: 12px;
@@ -731,8 +715,8 @@ export default function Header({ ambientContext = null }) {
             min-width: 0;
             min-height: 0;
           }
-          }
         }
+
 
 
         /* Animation for mobile dropdown */

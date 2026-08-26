@@ -136,7 +136,7 @@ export function buildShareText(property, url) {
     if (f.location) compact.push(f.location);
     compact.push(
       "",
-      "Now on record at ScoutIt, the Philippines' spatial commerce platform.",
+      "Now on record at ScoutIt — property and space intelligence for the Philippines.",
       "",
       "View the listing:",
       url,
@@ -157,9 +157,10 @@ export function buildShareText(property, url) {
   specs.forEach((s) => lines.push(`▸ ${s.charAt(0).toUpperCase() + s.slice(1)}`));
   lines.push(
     "",
-    "Verified specs and the complete operational briefing are on ScoutIt, the Philippines' spatial commerce platform.",
+    "Structured specs and the complete operational briefing are on ScoutIt, the Philippine space intelligence platform.",
     "",
     `Access the full dossier:`,
+
     url,
     "",
     hashTags(f)

@@ -18,14 +18,85 @@ function getDBCategory(cat) {
   return cat;
 }
 
-export default function DiscoverClient() {
+export function formatDiscoverDatasets(airtableProperties = [], airtableIntel = []) {
+  const nextProps = USE_MOCK_DATA ? {
+    Residential: DISCOVER_PROPERTIES.Residential.map((property) => ({ ...property, is_sample: true })),
+    Commercial: DISCOVER_PROPERTIES.Commercial.map((property) => ({ ...property, is_sample: true })),
+    STR: DISCOVER_PROPERTIES.STR.map((property) => ({ ...property, is_sample: true })),
+    Hospitality: DISCOVER_PROPERTIES.Hospitality.map((property) => ({ ...property, is_sample: true })),
+    Restaurants: DISCOVER_PROPERTIES.Restaurants.map((property) => ({ ...property, is_sample: true })),
+    Venues: DISCOVER_PROPERTIES.Venues.map((property) => ({ ...property, is_sample: true }))
+  } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
+
+  airtableProperties.forEach(p => {
+    if (!p.title || !p.slug || !p.spaceCategory) return;
+    let cat = p.spaceCategory;
+    if (nextProps[cat]) {
+      if (!nextProps[cat].some(x => x.id === p.id || x.id === p.slug || x.slug === p.slug)) {
+        let density = "";
+        if (cat === "Residential") {
+          density = `${p.beds || 0} Bedrooms · ${p.floor_sqm || 0} sqm`;
+        } else {
+          density = `${p.property_type || "Premium Space"} · ${p.floor_sqm || 0} sqm`;
+        }
+        nextProps[cat].push({
+          id: p.slug || p.id,
+          slug: p.slug || p.id,
+          title: p.title,
+          city: p.city || "",
+          region: regionOf(p),
+          location: p.location || "",
+          image: p.image || p.photos?.[0] || "",
+          density,
+          is_sample: p.is_sample === true,
+        });
+      }
+    }
+  });
+
+  const nextIntel = USE_MOCK_DATA ? {
+    Residential: [...DISCOVER_INTEL.Residential],
+    Commercial: [...DISCOVER_INTEL.Commercial],
+    STR: [...DISCOVER_INTEL.STR],
+    Hospitality: [...DISCOVER_INTEL.Hospitality],
+    Restaurants: [...DISCOVER_INTEL.Restaurants],
+    Venues: [...DISCOVER_INTEL.Venues]
+  } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
+
+  airtableIntel.forEach(item => {
+    let cat = item.category || "Residential";
+    if (cat.toLowerCase() === "hospitality") cat = "Hospitality";
+    if (cat.toLowerCase() === "str") cat = "STR";
+    if (cat.toLowerCase() === "culinary" || cat.toLowerCase() === "restaurants") cat = "Restaurants";
+    if (cat.toLowerCase() === "venues" || cat.toLowerCase() === "events") cat = "Venues";
+
+    if (nextIntel[cat]) {
+      if (!nextIntel[cat].some(x => x.slug === item.slug)) {
+        nextIntel[cat].push({
+          id: item.id,
+          slug: item.slug || item.id,
+          category: item.intelType || "BRIEFING",
+          date: item.date || "Just Now",
+          region: regionOf(item),
+          title: item.title,
+          snippet: item.excerpt || ""
+        });
+      }
+    }
+  });
+
+  return { properties: nextProps, intel: nextIntel };
+}
+
+export default function DiscoverClient({ initialProperties = [], initialIntel = [] }) {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
   const initialRegionParam = searchParams.get("region");
   const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === typeParam.toLowerCase()) || "Residential";
 
-  const [allProperties, setAllProperties] = useState([]);
-  const [allIntel, setAllIntel] = useState([]);
+  const initialDatasets = useMemo(() => formatDiscoverDatasets(initialProperties, initialIntel), [initialProperties, initialIntel]);
+  const [allProperties, setAllProperties] = useState(() => initialDatasets.properties);
+  const [allIntel, setAllIntel] = useState(() => initialDatasets.intel);
 
   const [properties, setProperties] = useState([]);
   const [intel, setIntel] = useState([]);
@@ -46,76 +117,9 @@ export default function DiscoverClient() {
         const res = await fetch("/api/cms");
         if (!res.ok) return;
         const data = await res.json();
-
-        const airtableProperties = data.properties || [];
-        const nextProps = USE_MOCK_DATA ? {
-          Residential: DISCOVER_PROPERTIES.Residential.map((property) => ({ ...property, is_sample: true })),
-          Commercial: DISCOVER_PROPERTIES.Commercial.map((property) => ({ ...property, is_sample: true })),
-          STR: DISCOVER_PROPERTIES.STR.map((property) => ({ ...property, is_sample: true })),
-          Hospitality: DISCOVER_PROPERTIES.Hospitality.map((property) => ({ ...property, is_sample: true })),
-          Restaurants: DISCOVER_PROPERTIES.Restaurants.map((property) => ({ ...property, is_sample: true })),
-          Venues: DISCOVER_PROPERTIES.Venues.map((property) => ({ ...property, is_sample: true }))
-        } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
-
-        airtableProperties.forEach(p => {
-          if (!p.title || !p.slug || !p.spaceCategory) return;
-          let cat = p.spaceCategory;
-          if (nextProps[cat]) {
-            if (!nextProps[cat].some(x => x.id === p.id || x.id === p.slug || x.slug === p.slug)) {
-              let density = "";
-              if (cat === "Residential") {
-                density = `${p.beds || 0} Bedrooms · ${p.floor_sqm || 0} sqm`;
-              } else {
-                density = `${p.property_type || "Premium Space"} · ${p.floor_sqm || 0} sqm`;
-              }
-              nextProps[cat].unshift({
-                id: p.slug || p.id,
-                slug: p.slug || p.id,
-                title: p.title,
-                city: p.city || "",
-                region: regionOf(p),
-                location: p.location || "",
-                image: p.image || p.photos?.[0] || "",
-                density,
-                is_sample: p.is_sample === true,
-              });
-            }
-          }
-        });
-        setAllProperties(nextProps);
-
-        const airtableIntel = data.intel || [];
-        const nextIntel = USE_MOCK_DATA ? {
-          Residential: [...DISCOVER_INTEL.Residential],
-          Commercial: [...DISCOVER_INTEL.Commercial],
-          STR: [...DISCOVER_INTEL.STR],
-          Hospitality: [...DISCOVER_INTEL.Hospitality],
-          Restaurants: [...DISCOVER_INTEL.Restaurants],
-          Venues: [...DISCOVER_INTEL.Venues]
-        } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
-
-        airtableIntel.forEach(item => {
-          let cat = item.category || "Residential";
-          if (cat.toLowerCase() === "hospitality") cat = "Hospitality";
-          if (cat.toLowerCase() === "str") cat = "STR";
-          if (cat.toLowerCase() === "culinary" || cat.toLowerCase() === "restaurants") cat = "Restaurants";
-          if (cat.toLowerCase() === "venues" || cat.toLowerCase() === "events") cat = "Venues";
-
-          if (nextIntel[cat]) {
-            if (!nextIntel[cat].some(x => x.slug === item.slug)) {
-              nextIntel[cat].unshift({
-                id: item.id,
-                slug: item.slug || item.id,
-                category: item.intelType || "BRIEFING",
-                date: item.date || "Just Now",
-                region: regionOf(item),
-                title: item.title,
-                snippet: item.excerpt || ""
-              });
-            }
-          }
-        });
-        setAllIntel(nextIntel);
+        const formatted = formatDiscoverDatasets(data.properties || [], data.intel || []);
+        setAllProperties(formatted.properties);
+        setAllIntel(formatted.intel);
       } catch (err) {
         console.error("Discover page CMS load error:", err);
       }
@@ -123,6 +127,7 @@ export default function DiscoverClient() {
 
     fetchCMS();
   }, []);
+
 
   // Region search filter within the regions navigation bar
   const [regionQuery, setRegionQuery] = useState("");

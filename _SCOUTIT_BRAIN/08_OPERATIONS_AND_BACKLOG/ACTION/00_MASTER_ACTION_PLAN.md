@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [canonical, action-router, execution-control]
-updated: 2026-08-24
+updated: 2026-08-26
 related: ["[[URGENT]]", "[[ACTIVE]]", "[[WAITING]]", "[[MASTER_OWNER_ACTIONS]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]]", "[[RULES]]"]
 ---
 
@@ -26,7 +26,7 @@ verifies its own changes with runnable evidence, and updates that item's truthfu
 disposition before ending the turn. Historical agent-workspace packets are
 implementation records only and assign no work. See [[RULES#PART D — DIRECT CODEX EXECUTION|RULES Part D]].
 
-## Current truth — 2026-08-24
+## Current truth — 2026-08-26
 
 - GitHub baseline includes the owner-approved release and O-009 action record
   through `e4c5ea0`. Production Vercel, API, Supabase, Airtable, and email
@@ -64,9 +64,37 @@ implementation records only and assign no work. See [[RULES#PART D — DIRECT CO
   re-verification found and corrected A-014's one sub-12px retry label; the
   complete gate now passes 1,563 unit tests, 518 E2E cases discovered, lint,
   typography, and 3/3 surface locks, followed by a successful production build.
-  A-023, A-025 through A-027, and A-029 are the five Active items (A-020,
-  A-022, A-024 and A-028 are Done; A-021 is Waiting); Urgent is empty
+  A-023 is the single Active domain plan item (A-020,
+  A-022, A-024, A-025, A-026, A-027, A-028, and A-029 are Done; A-021 is Waiting); Urgent is empty
   after U-011's verified closure.
+- **A-029 closed on 2026-08-25.** Truthful human voice established across public metadata,
+  Footer, Homepage, Terms of Service, JSON-LD Organization schema, and share briefings;
+  AI rewrite and assimilate prompts redesigned to prohibit luxury clichés ("bespoke", "curated",
+  "panoramic", "seamless", "prestige", "uncompromising", "oasis", "nestled", "boasts", "breathtaking")
+  and enforce strict factual grounding with GEO; canonical `VOICE_AND_COPY_GUIDE.md` authored;
+  deliberate single-load system display typography verified. 6/6 contract tests,
+  focused Help & Display browser coverage, the full gate, production build, and 3/3 surface locks pass.
+- **A-027 closed on 2026-08-25.** Production layout stability and foreground workload
+  stabilized across directories (`/property`, `/brokers`, `/discover`) and homepage `/`.
+  Server-side pre-fetching eliminated SSR hydration CLS jumps; `ProfessionalDirectorySkeleton`
+  and base SSR header CSS in `globals.css` prevent reflow; WebGL raymarch throttled; a 3/3
+  source contract keeps new skeleton colors tokenized. Fourteen layout tests pass with CLS <= 0.10;
+  the full gate, production build, and 3/3 surface locks pass.
+- **A-026 closed on 2026-08-25.** Browser audit and full-site audit harnesses
+  derive context from the configured target with environment fallback support;
+  brand/ScoutIt links are scoped to their owning navigation landmarks;
+  interstitial/protected walls are detected and rejected by the render anchor;
+  U-011 nested-property 404s and A-024 landmarks are verified in Playwright
+  without destructive writes. Eight focused browser cases, the full gate, production build,
+  and 3/3 surface locks pass.
+- **A-025 closed on 2026-08-24.** One `VerifiedWorkspaceBoundary` now stands in
+  front of every `/dashboard*` and `/admin*` page, and `DashboardProvider` is
+  identity-first, so a signed-out visitor issues zero private requests and gets
+  one accessible sign-in handoff that carries a validated same-site return path.
+  Onboarding degrades honestly when Google Identity cannot load. Server
+  authorization was not touched. Focused auth tests, 46/46 desktop/mobile dashboard and
+  boundary cases, the full gate, production build, and 3/3 surface locks pass; Google origin
+  configuration remains O-011.
 - **A-018 closed on 2026-08-24.** Every `/api/questit` and `/api/v1/questit/*`
   route now fails closed before pre-launch feature logic unless `ai_search` is
   explicitly true; the route-level helper uses the same disabled default and an

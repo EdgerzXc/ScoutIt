@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Check, AlertTriangle } from "lucide-react";
 import { DashboardProvider, useDashboard } from "../../../../context/DashboardContext";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import InventoryGridManager from "../../../../components/dashboard/InventoryGridManager";
 import DelegationRequests from "../../../../components/dashboard/DelegationRequests";
 import { getCurrentTier } from "../../../../lib/entitlements";
@@ -271,7 +272,9 @@ function InventoryInner({ params }) {
 export default function InventoryPage({ params }) {
   return (
     <DashboardProvider>
-      <InventoryInner params={params} />
+      <VerifiedWorkspaceBoundary>
+        <InventoryInner params={params} />
+      </VerifiedWorkspaceBoundary>
     </DashboardProvider>
   );
 }

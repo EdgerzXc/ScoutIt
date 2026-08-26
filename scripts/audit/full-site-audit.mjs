@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { chromium, devices } from 'playwright';
 
-const baseURL = process.env.AUDIT_BASE_URL || 'http://localhost:3000';
+const baseURL = process.env.AUDIT_BASE_URL || process.env.SCOUTIT_AUDIT_BASE_URL || process.env.SCOUTIT_E2E_BASE_URL || 'http://localhost:3000';
 const displayMode = process.env.AUDIT_DISPLAY_MODE || 'dark';
 const outputPath = process.env.AUDIT_OUTPUT || path.join(
   process.cwd(),
@@ -147,11 +147,29 @@ async function auditRoute(context, route) {
         })
         .filter((entry) => entry.fontSize < 12 || (entry.fontSize > 0 && entry.letterSpacing / entry.fontSize > 0.14))
         .slice(0, 30);
+      const bodyText = document.body.innerText.trim();
+      const isInterstitial = [
+        /authentication required/i,
+        /vercel authentication/i,
+        /deployment protection/i,
+        /log in to vercel/i,
+        /just a moment/i,
+        /checking your browser/i,
+        /attention required/i,
+      ].some((marker) => marker.test(bodyText));
+      const hasGrain = document.querySelectorAll('div.grain').length > 0;
+      const orgSchema = [...document.querySelectorAll('script[type="application/ld+json"]')].some(
+        (s) => s.textContent && s.textContent.includes('#organization'),
+      );
       return {
         url: location.href,
         title: document.title,
         lang: document.documentElement.lang || null,
-        bodyTextLength: document.body.innerText.trim().length,
+        bodyTextLength: bodyText.length,
+        isInterstitial,
+        hasGrain,
+        hasOrgSchema: orgSchema,
+        renderAnchorPassed: !isInterstitial && hasGrain && orgSchema,
         h1Count: document.querySelectorAll('h1').length,
         mainCount: document.querySelectorAll('main').length,
         navCount: document.querySelectorAll('nav').length,
@@ -230,7 +248,10 @@ const report = {
 };
 
 for (const [profileName, options] of Object.entries(profiles)) {
-  const context = await browser.newContext(options);
+  const context = await browser.newContext({
+    ...options,
+    baseURL,
+  });
   await context.addInitScript((mode) => {
     localStorage.setItem('scoutit_display_mode', mode);
     localStorage.setItem('scoutit-display-mode', mode);

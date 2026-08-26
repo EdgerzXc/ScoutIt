@@ -353,12 +353,13 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      // Raymarch cost scales with pixel count — phones render at 1x.
-      const dpr = Math.min(window.devicePixelRatio || 1, rect.width < 768 ? 1 : 1.5);
-      canvas.width = Math.max(1, Math.round(rect.width * dpr));
-      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      // The raymarch renders at CSS-pixel resolution (DPR 1) matching GoldenHorizonCanvas,
+      // avoiding fillrate stalls on high-DPI desktop screens while preserving glowing visuals.
+      canvas.width = Math.max(1, Math.floor(rect.width));
+      canvas.height = Math.max(1, Math.floor(rect.height));
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
+
 
     // Pointer parallax — the camera leans a few degrees toward the cursor
     // when idle. Dragging overrides this with direct orbit control, then

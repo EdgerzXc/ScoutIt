@@ -81,10 +81,10 @@ test("Manifesto honors reduced motion", async ({ page }) => {
 });
 
 
-test("Manifesto keeps its complete reading path without JavaScript", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+test("Manifesto keeps its complete reading path without JavaScript", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false });
   const page = await context.newPage();
-  const response = await page.goto("http://localhost:3000/about", { waitUntil: "domcontentloaded" });
+  const response = await page.goto("/about", { waitUntil: "domcontentloaded" });
 
   expect(response.status()).toBeLessThan(400);
   for (const heading of [

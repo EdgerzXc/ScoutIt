@@ -135,7 +135,7 @@ const cardVariants = {
 // the first HTML response instead of "LOADING THE DIRECTORY..." — the second
 // half of the 2026-08-08 fix. The useEffect below still runs and overwrites
 // this with a live fetch, so radius/filter changes behave exactly as before.
-function PropertyDirectoryContent({ initialProperties = [] }) {
+function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] }) {
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type");
 
@@ -149,7 +149,8 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
       .filter((p) => p.title && p.slug && p.spaceCategory)
       .map((p) => toCard(p, p.spaceCategory || null, "Vetted dynamic listing brief."))
   );
-  const [rawIntel, setRawIntel] = useState([]);
+  const [rawIntel, setRawIntel] = useState(() => initialIntel);
+
   // 🔴 Start "loaded" whenever the server already handed us cards. Defaulting
   // to `true` unconditionally is what made a crawler see the loading state even
   // after the markup was server-rendered — the HTML shipped correct data and
@@ -255,12 +256,13 @@ function PropertyDirectoryContent({ initialProperties = [] }) {
           airtableProperties.forEach(p => {
             if (!p.title || !p.slug || !p.spaceCategory) return;
             if (!mergedProperties.some(x => x.slug === p.slug || x.id === p.id)) {
-              mergedProperties.unshift(
+              mergedProperties.push(
                 toCard(p, p.spaceCategory || null, "Vetted dynamic listing brief.")
               );
             }
           });
         }
+
 
         setRawProperties(mergedProperties);
 

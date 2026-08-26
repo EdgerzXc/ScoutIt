@@ -107,11 +107,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
     setMode(savedMode);
     applyTheme(savedMode);
-    if (!localStorage.getItem("scoutit_help_seen_v1")) {
-      localStorage.setItem("scoutit_help_seen_v1", "1");
-      setOpen(true);
-    }
-
 
     setLite(getStoredLiteMode());
 
@@ -120,8 +115,12 @@ export default function FloatingToolbox({ showTrigger = true }) {
     function handleOpenDisplay() {
       setOpen(true);
     }
+    function handleCloseDisplay() {
+      setOpen(false);
+    }
     window.__scoutitOpenDisplaySettings = handleOpenDisplay;
     window.addEventListener("scoutit:open-display-settings", handleOpenDisplay);
+    window.addEventListener("scoutit:close-display-settings", handleCloseDisplay);
     if (window.__scoutitDisplaySettingsRequested) {
       delete window.__scoutitDisplaySettingsRequested;
       handleOpenDisplay();
@@ -129,11 +128,23 @@ export default function FloatingToolbox({ showTrigger = true }) {
     window.dispatchEvent(new CustomEvent("scoutit:display-settings-ready"));
     return () => {
       window.removeEventListener("scoutit:open-display-settings", handleOpenDisplay);
+      window.removeEventListener("scoutit:close-display-settings", handleCloseDisplay);
       if (window.__scoutitOpenDisplaySettings === handleOpenDisplay) {
         delete window.__scoutitOpenDisplaySettings;
       }
     };
   }, []);
+
+  // Never cover authentication controls with the first-visit help panel.
+  // If onboarding is the visitor's first route, defer the welcome until they
+  // reach a normal page instead of marking it seen without showing it.
+  useEffect(() => {
+    if (!mounted || pathname === "/onboarding") return;
+    if (!localStorage.getItem("scoutit_help_seen_v1")) {
+      localStorage.setItem("scoutit_help_seen_v1", "1");
+      setOpen(true);
+    }
+  }, [mounted, pathname]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -438,6 +449,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent, #E8AE3C)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}>
                 Help & Display
               </span>
+
             </div>
             <button
               type="button"

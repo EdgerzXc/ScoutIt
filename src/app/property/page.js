@@ -35,7 +35,11 @@
 import { Suspense } from "react";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { stripPremiumFields } from "@/lib/premiumFields";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import DirectoryClient from "./DirectoryClient";
+import "./property.css";
 
 // The directory reads live CMS data and ?type= filters, so it must not be
 // statically prerendered at build time. Same directive /discover uses.
@@ -67,28 +71,70 @@ async function loadInitialProperties() {
   }
 }
 
+async function loadInitialIntel() {
+  try {
+    const bundle = await getCmsBundle();
+    return bundle?.intel || [];
+  } catch (err) {
+    console.error("[/property] server CMS intel load failed:", err?.message);
+    return [];
+  }
+}
+
 export default async function PropertyRootPage() {
-  const initialProperties = await loadInitialProperties();
+  const [initialProperties, initialIntel] = await Promise.all([
+    loadInitialProperties(),
+    loadInitialIntel(),
+  ]);
 
   return (
+
     <Suspense
       fallback={
-        <div
-          className="directory-layout"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100dvh",
-          }}
-        >
-          <h1 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>
-            LOADING DIRECTORY LEDGER...
-          </h1>
+        <div data-scoutit-guide="scoutit-property-directory" className="directory-layout" aria-busy="true">
+          <AtmosphereBackground variant="default" />
+          <Header />
+          <main className="directory-main">
+            <header className="directory-header">
+              <span className="vector-label">Layer 3.1 // Directory Ledger</span>
+              <h1>The Space Directory</h1>
+              <p className="page-subtitle">Every home, office, and venue on ScoutIt — searchable in one place.</p>
+            </header>
+            <div className="directory-container">
+              <button
+                className="mobile-filters-toggle"
+                disabled
+                aria-hidden="true"
+                style={{ opacity: 0.6 }}
+              >
+                Filters
+                <span className="filter-chevron">▼</span>
+              </button>
+              <aside className="filters-sidebar" aria-hidden="true">
+                <div className="filter-card" style={{ height: "140px", opacity: 0.6 }} />
+                <div className="filter-card" style={{ height: "180px", opacity: 0.6 }} />
+                <div className="filter-card" style={{ height: "180px", opacity: 0.6 }} />
+              </aside>
+              <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+                <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
+                  <div style={{ flexGrow: 1, height: "48px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-solid)" }} />
+                  <div style={{ width: "180px", height: "44px", background: "var(--bg)", border: "1px solid var(--accent)" }} />
+                </div>
+                <div className="directory-grid">
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <div key={n} style={{ height: "380px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md, 6px)", opacity: 0.6 }} />
+                  ))}
+                </div>
+              </section>
+            </div>
+
+          </main>
+          <Footer />
         </div>
       }
     >
-      <DirectoryClient initialProperties={initialProperties} />
+      <DirectoryClient initialProperties={initialProperties} initialIntel={initialIntel} />
     </Suspense>
+
   );
 }

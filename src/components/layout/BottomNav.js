@@ -371,6 +371,7 @@ export default function BottomNav() {
               <span className="theme-sheet-title">Help & Display</span>
               <button className="theme-sheet-close" onClick={() => setThemeSheetOpen(false)} aria-label="Close">✕</button>
             </div>
+
             <div className="theme-sheet-options">
               {[
                 { key: "dark", label: "Dark Mode", desc: "Cosmic default", dotClass: "bg-surface border-on-surface/20" },

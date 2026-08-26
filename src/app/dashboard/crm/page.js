@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { DashboardProvider, useDashboard } from "../../../context/DashboardContext";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import AtmosphereBackground from "../../../components/ui/AtmosphereBackground";
 import KanbanBoard from "../../../components/dashboard/crm/KanbanBoard";
 import AppointmentsSheet from "../../../components/dashboard/crm/AppointmentsSheet";
@@ -343,7 +344,9 @@ function CRMPageInner() {
 export default function CRMPage() {
   return (
     <DashboardProvider>
-      <CRMPageInner />
+      <VerifiedWorkspaceBoundary>
+        <CRMPageInner />
+      </VerifiedWorkspaceBoundary>
     </DashboardProvider>
   );
 }

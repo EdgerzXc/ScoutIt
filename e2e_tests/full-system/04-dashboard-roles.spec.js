@@ -115,8 +115,9 @@ test.describe('Owner with zero listings (safe mock)', () => {
 test.describe('Settings information architecture', () => {
   test.use({ viewport: { width: 360, height: 800 } });
 
-  test('sections remain directly reachable at 360px without JavaScript', async ({ browser }) => {
+  test('sections remain directly reachable at 360px without JavaScript', async ({ browser, baseURL }) => {
     const context = await browser.newContext({
+      baseURL,
       javaScriptEnabled: false,
       viewport: { width: 360, height: 800 },
     });

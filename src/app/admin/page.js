@@ -9,9 +9,11 @@ import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
 import ConnectsRefundPanel from "@/components/admin/ConnectsRefundPanel";
 import PropertyVerifyPanel from "@/components/admin/PropertyVerifyPanel";
+import { DashboardProvider } from "@/context/DashboardContext";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { sanitizeError } from "@/lib/sanitizeError";
 
-export default function AdminPage() {
+function AdminPageInner() {
   const [activeTab, setActiveTab] = useState("flags");
   const [pendingProperties, setPendingProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -592,5 +594,15 @@ export default function AdminPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <DashboardProvider>
+      <VerifiedWorkspaceBoundary>
+        <AdminPageInner />
+      </VerifiedWorkspaceBoundary>
+    </DashboardProvider>
   );
 }

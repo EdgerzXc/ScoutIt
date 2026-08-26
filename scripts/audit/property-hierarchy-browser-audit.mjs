@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const baseUrl = process.env.SCOUTIT_AUDIT_BASE_URL || "http://127.0.0.1:3000";
+const baseUrl = process.env.SCOUTIT_AUDIT_BASE_URL || process.env.AUDIT_BASE_URL || process.env.SCOUTIT_E2E_BASE_URL || "http://127.0.0.1:3000";
 const routes = [
   ["/property/one-ecom-center?chapter=units", ["Property level", "Available Spaces", "Space 2"]],
   ["/property/the-ridgeline-at-capitol-commons", ["Property level", "Units"]],
@@ -15,7 +15,7 @@ const browser = await chromium.launch({ headless: true });
 const results = [];
 try {
   for (const viewport of viewports) {
-    const context = await browser.newContext({ viewport });
+    const context = await browser.newContext({ viewport, baseURL: baseUrl });
     for (const [route, expected] of routes) {
       const page = await context.newPage();
       const pageErrors = [];

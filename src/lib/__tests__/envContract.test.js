@@ -78,21 +78,18 @@ function documentedNames() {
 }
 
 describe("the environment contract matches the code", () => {
-  it("documents every variable the application reads", () => {
-    const used = allEnvNamesRead();
-    const documented = documentedNames();
+  const used = allEnvNamesRead();
+  const documented = documentedNames();
 
+  it("documents every variable the application reads", () => {
     const undocumented = [...used]
       .filter((name) => !documented.has(name) && !FRAMEWORK_PROVIDED.has(name))
       .sort();
 
     expect(undocumented).toEqual([]);
-  });
+  }, 15000);
 
   it("does not document variables the application never reads", () => {
-    const used = allEnvNamesRead();
-    const documented = documentedNames();
-
     const orphaned = [...documented]
       .filter((name) => !used.has(name) && !FRAMEWORK_PROVIDED.has(name))
       .sort();

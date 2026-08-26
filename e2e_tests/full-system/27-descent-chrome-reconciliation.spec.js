@@ -25,7 +25,7 @@ for (const viewport of [
 
       const nav = page.getByRole("navigation", { name: "Layer navigation" });
       await expect(nav, route).toBeVisible();
-      await expect(page.getByRole("link", { name: "ScoutIt", exact: true }), route).toBeVisible();
+      await expect(nav.getByRole("link", { name: "ScoutIt", exact: true }), route).toBeVisible();
       await expect(page.locator("h1").first(), route).toBeVisible();
 
       const geometry = await page.evaluate(() => {
@@ -53,7 +53,7 @@ for (const viewport of [
 
 test("shared chrome exposes a visible keyboard focus treatment", async ({ page }) => {
   await gotoAndSettle(page, "/layer/crust");
-  const brand = page.getByRole("link", { name: "ScoutIt", exact: true });
+  const brand = page.getByRole("navigation", { name: "Layer navigation" }).getByRole("link", { name: "ScoutIt", exact: true });
   await brand.focus();
   await expect(brand).toBeFocused();
   const focus = await brand.evaluate((node) => {

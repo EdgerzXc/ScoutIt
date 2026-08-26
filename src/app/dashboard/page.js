@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { DashboardProvider, useDashboard } from "../../context/DashboardContext";
 
 // Lazy-loaded mode components
@@ -489,7 +490,9 @@ function DashboardInner() {
 export default function UnifiedDashboard() {
   return (
     <DashboardProvider>
-      <DashboardInner />
+      <VerifiedWorkspaceBoundary>
+        <DashboardInner />
+      </VerifiedWorkspaceBoundary>
     </DashboardProvider>
   );
 }

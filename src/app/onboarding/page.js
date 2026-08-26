@@ -14,6 +14,7 @@ import {
   signUp,
   verifyOtp,
 } from "@/lib/authClient";
+import { normalizePrivateReturnPath } from "@/lib/authReturnPath";
 import { supabase } from "@/lib/supabaseClient";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import TurnstileGate from "@/components/ui/TurnstileGate";
@@ -89,6 +90,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const turnstileRef = useRef(null);
   const googleButtonRef = useRef(null);
+  const [googleStatus, setGoogleStatus] = useState("loading");
   const [step, setStep] = useState(1);
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -114,6 +116,15 @@ export default function OnboardingPage() {
     setToast({ message, type });
     window.setTimeout(() => setToast(null), 5000);
   };
+  const privateReturnPath = () => normalizePrivateReturnPath(
+    new URLSearchParams(window.location.search).get("next"),
+  );
+
+  const onboardingReturnUrl = () => {
+    const next = encodeURIComponent(privateReturnPath());
+    return `${window.location.origin}/onboarding?next=${next}`;
+  };
+
 
   const resetCaptcha = () => turnstileRef.current?.reset();
 
@@ -125,7 +136,7 @@ export default function OnboardingPage() {
       .maybeSingle();
 
     if (isOnboardingComplete(profile)) {
-      router.replace("/dashboard");
+      router.replace(privateReturnPath());
       return;
     }
 
@@ -201,7 +212,7 @@ export default function OnboardingPage() {
         formData.password,
         null,
         freshToken || "",
-        window.location.origin + "/onboarding",
+        onboardingReturnUrl(),
       );
       if (signUpError) throw signUpError;
 
@@ -225,7 +236,7 @@ export default function OnboardingPage() {
       const { error } = await resendSignupConfirmation(
         formData.email,
         freshToken || "",
-        window.location.origin + "/onboarding",
+        onboardingReturnUrl(),
       );
       if (error) throw error;
       showToast("A fresh confirmation email is on its way.", "success");
@@ -249,7 +260,10 @@ export default function OnboardingPage() {
   const initializeGoogleAuth = async () => {
     const googleIdentity = window.google?.accounts?.id;
     const button = googleButtonRef.current;
-    if (!googleIdentity || !button) return;
+    if (!googleIdentity || !button) {
+      setGoogleStatus("unavailable");
+      return;
+    }
 
     try {
       const nonce = createGoogleNonce();
@@ -291,6 +305,7 @@ export default function OnboardingPage() {
         width: Math.min(400, Math.max(240, button.clientWidth || 400)),
       });
     } catch (error) {
+      setGoogleStatus("unavailable");
       showToast(sanitizeError(error, "Google sign-in is temporarily unavailable."));
     }
   };
@@ -323,7 +338,7 @@ export default function OnboardingPage() {
       // authentication/profile data is never copied into browser storage.
       if (openOwnerWizard) localStorage.setItem("scoutit_open_wizard", "1");
       trackEvent(GA_EVENTS.SIGNUP_COMPLETED, { role: formData.primaryMode, opened_owner_wizard: Boolean(openOwnerWizard) });
-      router.replace("/dashboard");
+      router.replace(privateReturnPath());
     } catch (error) {
       console.error("Profile save error:", error);
       showToast(error instanceof Error ? error.message : "Failed to save profile.");
@@ -413,7 +428,10 @@ export default function OnboardingPage() {
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
         onReady={initializeGoogleAuth}
-        onError={() => showToast("Google sign-in is temporarily unavailable.")}
+        onError={() => {
+          setGoogleStatus("unavailable");
+          showToast("Google sign-in is temporarily unavailable.");
+        }}
       />
       <div
         ref={googleButtonRef}
@@ -421,7 +439,11 @@ export default function OnboardingPage() {
         role="group"
         aria-label="Continue with Google"
       >
-        <span className="text-xs text-text-muted">Loading secure Google sign-in…</span>
+        {googleStatus === "unavailable" ? (
+          <span className="text-xs text-text-secondary" role="status">Google sign-in is temporarily unavailable. Use email or a secure code instead.</span>
+        ) : (
+          <span className="text-xs text-text-muted">Loading secure Google sign-in…</span>
+        )}
       </div>
     </div>
   );
@@ -504,7 +526,6 @@ export default function OnboardingPage() {
     <div className="relative min-h-screen bg-background text-text-primary flex flex-col">
       <AtmosphereBackground variant="hero" />
       {toast && <div role="status" aria-live="polite" className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-surface border border-gold-accent/50 text-on-surface px-6 py-3 rounded-full shadow-2xl"><span className="text-sm font-working-title">{toast.message}</span></div>}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 mix-blend-overlay bg-[url('/grain.png')]" />
       <header className="relative z-40 p-6 md:p-8 grid grid-cols-3 items-center sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant">
         <button onClick={() => step === 1 ? router.back() : setStep((current) => current - 1)} className="justify-self-start text-text-secondary hover:text-gold-accent text-sm font-bold tracking-widest uppercase">← Back</button>
         <Link href="/" className="justify-self-center font-display-md text-2xl text-gold-accent tracking-tighter">S<span className="text-on-surface">cout</span>IT</Link>

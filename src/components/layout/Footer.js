@@ -62,8 +62,9 @@ export default function Footer() {
         <div className="footer-branding">
           <ScoutItWordmark href="/" className="footer-brand" />
           <p className="footer-tagline">
-            The Philippines&apos; first spatial commerce platform. We decode every kind of space into clear, verified intelligence. Homes, offices, venues, tables.
+            Space intelligence for the Philippines. Clear, structured property briefings, spatial signals, and direct connections across homes, offices, venues, and hospitality spaces.
           </p>
+
           {/* Renders nothing while every SOCIAL_LINKS url is null. */}
           {activeSocials.length > 0 && (
             <div className="footer-socials">

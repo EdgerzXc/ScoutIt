@@ -30,7 +30,7 @@ test.describe("controlled-pilot auth and display boundary", () => {
   test("offers only pilot-accepted display choices", async ({ page }) => {
     await gotoAndSettle(page, "/about");
     const displaySettingsButton = page.getByRole("button", {
-      name: "Display Settings (Dark / High Contrast / Lite Mode)",
+      name: "Help & Display (Guide / Dark / High Contrast / Lite Mode)",
     }).first();
 
     if ((page.viewportSize()?.width || 0) > 600) {
@@ -46,7 +46,7 @@ test.describe("controlled-pilot auth and display boundary", () => {
         if ((await menuButton.getAttribute("aria-expanded")) !== "true") await menuButton.click();
         return menuButton.getAttribute("aria-expanded");
       }, { timeout: 15000 }).toBe("true");
-      await page.getByRole("button", { name: "Display Settings", exact: true }).click();
+      await page.getByRole("button", { name: "Help & Display", exact: true }).click();
     }
 
     await expect(page.getByText("Dark Mode", { exact: true })).toBeVisible({ timeout: 15000 });

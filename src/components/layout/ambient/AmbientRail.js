@@ -173,12 +173,15 @@ export default function AmbientRail({ user, context = null }) {
           position: relative;
           width: 100%;
           min-width: 0;
+          height: 20px;
+          min-height: 20px;
           overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 2px 0;
         }
+
         .ambient-viewport::before,
         .ambient-viewport::after {
           content: "";

@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
 import { getSession, getUser } from "@/lib/authClient";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { DashboardProvider } from "@/context/DashboardContext";
 
 // Real Supabase session first; an explicit localhost E2E fixture may provide
@@ -487,7 +488,9 @@ function InboxInner() {
 export default function InboxPage() {
   return (
     <DashboardProvider>
-      <InboxInner />
+      <VerifiedWorkspaceBoundary>
+        <InboxInner />
+      </VerifiedWorkspaceBoundary>
     </DashboardProvider>
   );
 }

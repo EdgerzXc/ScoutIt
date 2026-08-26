@@ -3,6 +3,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { DashboardProvider } from "@/context/DashboardContext";
 import CalendarShell from "@/components/calendar/CalendarShell";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 
 function CalendarInner() {
   return (
@@ -30,7 +31,9 @@ function CalendarInner() {
 export default function CalendarPage() {
   return (
     <DashboardProvider>
-      <CalendarInner />
+      <VerifiedWorkspaceBoundary>
+        <CalendarInner />
+      </VerifiedWorkspaceBoundary>
     </DashboardProvider>
   );
 }

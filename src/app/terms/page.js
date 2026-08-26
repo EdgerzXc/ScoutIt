@@ -4,8 +4,9 @@ import { CURRENT_TERMS_EFFECTIVE_DATE, CURRENT_TERMS_VERSION } from "@/lib/legal
 export const metadata = {
   title: "Terms of Service",
   description:
-    "The terms for using ScoutIt — the Philippines' first spatial commerce platform. Intelligence first. Transactions never.",
+    "The terms of service for ScoutIt — property and space intelligence across the Philippines. Intelligence first. Transactions never.",
 };
+
 
 const SECTIONS = [
   {

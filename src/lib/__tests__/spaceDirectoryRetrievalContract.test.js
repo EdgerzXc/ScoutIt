@@ -13,8 +13,10 @@ describe("F-005 Space Directory product and retrieval audit contract", () => {
     expect(pageSource.startsWith('"use client"') || pageSource.startsWith("'use client'")).toBe(false);
     expect(pageSource).toContain("loadInitialProperties");
     expect(pageSource).toContain("stripPremiumFields");
-    expect(pageSource).toContain("<DirectoryClient initialProperties={initialProperties} />");
+    expect(pageSource).toContain("<DirectoryClient initialProperties={initialProperties}");
+    expect(pageSource).toContain("initialIntel={initialIntel}");
   });
+
 
   it("strips premium fields on anonymous directory data first-paint", () => {
     const rawListing = {

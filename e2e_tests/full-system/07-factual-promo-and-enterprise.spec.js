@@ -15,8 +15,6 @@ const {
   openYourMove,
 } = require('./helpers');
 
-const BASE = 'http://localhost:3000';
-
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -88,7 +86,7 @@ test.describe('Factual share & promote pipeline', () => {
     // The route itself caps the AI wait at 20s (then serves the fact sheet),
     // but leave headroom for a cold Next.js compile of the route.
     test.setTimeout(60000);
-    const res = await request.post(`${BASE}/api/ai/promote`, {
+    const res = await request.post('/api/ai/promote', {
       timeout: 45000,
       headers: { 'x-skip-ai': '1' },
       data: {
@@ -99,7 +97,7 @@ test.describe('Factual share & promote pipeline', () => {
           Floor_Area_Sqm: 120,
         },
         tier: 'solar',
-        link: `${BASE}/property/e2e-probe`,
+        link: '/property/e2e-probe',
       },
     });
     expect(res.ok()).toBeTruthy();
@@ -142,7 +140,7 @@ test.describe('Honest listing claims (RA 9646)', () => {
   });
 
   test('demo broker profile renders (PRC badge only when Airtable says so)', async ({ page }) => {
-    await gotoAndSettle(page, `${BASE}/brokers`);
+    await gotoAndSettle(page, '/brokers');
     await expectRealContent(page);
     const firstBroker = page.locator('a[href^="/brokers/"]').first();
     if ((await firstBroker.count()) > 0) {
@@ -154,7 +152,7 @@ test.describe('Honest listing claims (RA 9646)', () => {
 
 test.describe('Navigation labels', () => {
   test('footer separates Discover and Space Directory', async ({ page }) => {
-    await gotoAndSettle(page, `${BASE}/`);
+    await gotoAndSettle(page, '/');
     await expectRealContent(page);
     const footer = page.locator('footer');
     await expect(footer.getByRole('link', { name: 'Discover', exact: true })).toHaveAttribute('href', '/discover');
@@ -166,7 +164,7 @@ test.describe('Enterprise Mission Control (honest data)', () => {
   test('dashboard derives from real portfolio; Team tab does not crash', async ({ page }) => {
     const errors = trackErrors(page);
     await signInAsMock(page, { ...MASTER_DEV_READONLY, primaryMode: 'mc_enterprise', tags: ['owner', 'mc_enterprise'] });
-    await gotoAndSettle(page, `${BASE}/dashboard`);
+    await gotoAndSettle(page, '/dashboard');
     await expectRealContent(page);
 
     await page.getByRole('button', { name: /Open the Enterprise preview/i }).click();

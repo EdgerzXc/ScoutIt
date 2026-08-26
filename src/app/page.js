@@ -96,20 +96,44 @@ export default function Home() {
   // Auto-fire on load, then repeat every 6s so the beam stays visible on both mobile & desktop
   useEffect(() => {
     if (isLiteMode()) return; // Lite Mode: no beam loop
+
+    const startInterval = () => {
+      if (beamInterval.current || document.hidden) return;
+      beamInterval.current = setInterval(() => {
+        if (!document.hidden) fireBeam(false);
+      }, 6000);
+    };
+
+    const stopInterval = () => {
+      if (beamInterval.current) {
+        clearInterval(beamInterval.current);
+        beamInterval.current = null;
+      }
+    };
+
     const t = setTimeout(() => {
-      fireBeam(false);
-      beamInterval.current = setInterval(() => fireBeam(false), 6000);
+      if (!document.hidden) fireBeam(false);
+      startInterval();
     }, 2000);
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stopInterval();
+      } else {
+        startInterval();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       clearTimeout(t);
-      if (beamInterval.current) clearInterval(beamInterval.current);
+      stopInterval();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      beamTimers.current.forEach(clearTimeout);
     };
   }, [fireBeam]);
-  // Clear any pending beam timers on unmount
-  useEffect(() => () => {
-    beamTimers.current.forEach(clearTimeout);
-    if (beamInterval.current) clearInterval(beamInterval.current);
-  }, []);
+
 
 
   const [discoveryFeed, setDiscoveryFeed] = useState([]);
@@ -253,9 +277,10 @@ export default function Home() {
             }
           }
         });
- 
+
         // Dynamic Spotlight Match Logic
         const allArticles = [
+
           ...airtableIntel.map(item => {
             let category = String(item.category || "").trim();
             const catLower = category.toLowerCase();
@@ -263,7 +288,11 @@ export default function Home() {
             if (catLower === "str") category = "STR";
             if (catLower === "culinary" || catLower === "restaurants") category = "Restaurants";
             if (catLower === "venues" || catLower === "events") category = "Venues";
-            return { ...item, category };
+            return {
+              ...item,
+              category,
+              cityLower: (item.city || "").toLowerCase(),
+            };
           }),
           ...getArticles().map(art => {
             let category = String(art.category || "").trim();
@@ -272,22 +301,35 @@ export default function Home() {
             if (catLower === "str") category = "STR";
             if (catLower === "culinary" || catLower === "restaurants") category = "Restaurants";
             if (catLower === "venues" || catLower === "events") category = "Venues";
-            return { slug: art.slug, title: art.title, category, excerpt: art.excerpt };
+            return {
+              slug: art.slug,
+              title: art.title,
+              category,
+              excerpt: art.excerpt,
+              cityLower: (art.city || "").toLowerCase(),
+            };
           })
         ];
- 
+
+        const articlesByCategory = new Map();
+        for (const art of allArticles) {
+          if (!articlesByCategory.has(art.category)) articlesByCategory.set(art.category, []);
+          articlesByCategory.get(art.category).push(art);
+        }
+
         const findNewsForSpotlight = (spot, category) => {
-          const matchCity = allArticles.find(art => {
-            const spotLoc = spot.location || "";
-            const artCity = art.city || "";
-            return spotLoc && artCity && (spotLoc.toLowerCase().includes(artCity.toLowerCase()) || artCity.toLowerCase().includes(spotLoc.toLowerCase()));
-          });
-          if (matchCity) return matchCity;
+          const spotLoc = (spot.location || "").toLowerCase();
+          if (spotLoc) {
+            const matchCity = allArticles.find(art =>
+              art.cityLower && (spotLoc.includes(art.cityLower) || art.cityLower.includes(spotLoc))
+            );
+            if (matchCity) return matchCity;
+          }
           
-          const matchCategory = allArticles.find(art => art.category === category);
-          return matchCategory || null;
+          const catArticles = articlesByCategory.get(category);
+          return catArticles && catArticles.length > 0 ? catArticles[0] : null;
         };
- 
+
         for (const cat in updatedFeed) {
           updatedFeed[cat].spotlights = updatedFeed[cat].spotlights.map(spot => {
             const news = findNewsForSpotlight(spot, cat);
@@ -301,6 +343,7 @@ export default function Home() {
         }
         
         setDiscoveryFeed(updatedFeed);
+
         
       } catch (err) {
         console.error("Failed to load CMS data on homepage:", err);
@@ -354,11 +397,12 @@ export default function Home() {
     }
     
     const spawnRock = () => {
-      if (!active) return;
+      if (!active || (typeof document !== "undefined" && document.hidden)) return;
       
       // Limit max particles on mobile
       const maxParticles = isMobile ? 3 : 8;
       if (driftingRocks.length >= maxParticles) return;
+
       
       const id = Math.random().toString(36).substr(2, 9);
       
@@ -625,8 +669,9 @@ export default function Home() {
 
           {/* Plain-Language Value Proposition */}
           <p className="title-tagline-intro">
-            The Philippines&apos; first spatial commerce platform. We turn every kind of space into clear, verified intelligence. Homes, offices, venues, restaurants. No fake listings. No pressure. Just the signals that matter.
+            Space intelligence for the Philippines. Structured property briefings and spatial signals. Named sources. No manufactured urgency. Clear terms.
           </p>
+
 
           {/* Taglines */}
           <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>

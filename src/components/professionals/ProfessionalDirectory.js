@@ -4,10 +4,10 @@ import { Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import "@/app/property/property.css";
 import { directoryFacets, filterAndSortProfessionals, PROFESSIONAL_CATEGORIES } from "@/lib/professionalDirectory";
 import ProfessionalCard from "./ProfessionalCard";
 import styles from "./professionalDirectory.module.css";
+
 
 export default function ProfessionalDirectory({ category, initialRecords = [], initialError = "" }) {
   const config = PROFESSIONAL_CATEGORIES[category];

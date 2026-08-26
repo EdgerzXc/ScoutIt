@@ -15,7 +15,8 @@ RULES (non-negotiable):
 3. NEVER invent, estimate, or guess details not present in the document.
 4. For space_category, map ONLY to an existing choice: "residential", "commercial", "str", "hospitality", "restaurants", "venues". If unknown, leave null.
 5. For price, extract as a NUMBER only (strip ₱, commas, "per sqm" etc — keep the raw number).
-6. SEO OPTIMIZATION: When writing the "description", apply Generative Engine Optimization (GEO). Structure it with a citable summary and use bullet points for features. Apply ScoutIt's "White-Glove Luxury" brand voice (use cinematic, authoritative, and concise language like 'bespoke', 'premier'). Do not keyword stuff.
+6. SEO OPTIMIZATION: When writing the "description", apply Generative Engine Optimization (GEO). Structure it with an unambiguous citable summary and use bullet points for specific features and specifications. Use grounded, precise architectural language. NEVER invent facts, hallucinate amenities, or use AI luxury clichés (e.g., 'bespoke', 'premier', 'breathtaking', 'oasis', 'opulent'). Do not keyword stuff.
+
 7. Confidence: rate 0.0–1.0 how confident you are in the overall extraction based on the document quality.
 8. gaps: list field names that are part of the schema but were missing in the source document.
 
