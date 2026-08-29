@@ -71,14 +71,15 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col font-body">
       <div className="mb-6 flex justify-between items-center">
         <div className="relative w-72">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
           <input 
-            type="text" 
+            type="search"
+            aria-label="Search deals"
             placeholder="Search deals..." 
-            className="w-full bg-surface-alt border border-surface-variant rounded-full pl-11 pr-4 py-2 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
+            className="min-h-11 w-full !rounded-full border border-surface-variant !bg-surface-alt !py-2 !pl-11 !pr-4 font-body text-base text-on-surface transition-colors duration-200 ease-out placeholder:text-text-muted focus:border-gold-accent focus:outline-none"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -97,10 +98,10 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
               onDrop={(e) => handleDrop(e, col.id)}
             >
               <div className="flex justify-between items-center mb-4 px-1">
-                <h3 className="font-label-caps text-xs tracking-widest uppercase text-text-secondary">
+                <h3 className="font-label-caps text-label-caps uppercase text-text-secondary">
                   {viewingAs === "owner" ? col.ownerLabel : col.brokerLabel}
                 </h3>
-                <span className="text-xs bg-surface-alt text-text-muted px-2 py-0.5 rounded-full">{colDeals.length}</span>
+                <span className="rounded-full bg-surface-alt px-2 py-0.5 font-body text-sm font-medium text-text-muted tabular-nums">{colDeals.length}</span>
               </div>
               
               <div className="flex-1 overflow-y-auto space-y-3">
@@ -119,13 +120,13 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                       bg-surface/80 backdrop-blur-sm
                     `}
                   >
-                    <div className="font-working-title text-sm text-on-surface mb-1 truncate font-medium">{deal.propertyTitle}</div>
-                    <div className="text-xs text-text-secondary mb-3 flex items-center justify-between font-mono">
+                    <div className="mb-1 truncate font-body text-base font-semibold text-on-surface">{deal.propertyTitle}</div>
+                    <div className="mb-3 flex items-center justify-between gap-3 font-body text-sm text-text-secondary">
                       <span>{deal.otherParty}</span>
-                      <span className="capitalize text-gold-accent/80">{deal.myRole}</span>
+                      <span className="shrink-0 font-label-caps text-label-caps uppercase text-gold-accent/80">{deal.myRole}</span>
                     </div>
                     {deal.lastMessage && (
-                      <div className="text-xs text-text-muted truncate italic border-t border-surface-variant/40 pt-2 mt-2">
+                      <div className="mt-2 truncate border-t border-surface-variant/40 pt-2 font-body text-sm italic text-text-muted">
                         &quot;{deal.lastMessage}&quot;
                       </div>
                     )}
@@ -133,7 +134,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                 ))}
                 
                 {colDeals.length === 0 && (
-                  <div className="h-24 border border-dashed border-surface-variant/60 rounded-lg flex items-center justify-center text-text-muted text-xs font-mono tracking-wider uppercase bg-surface/20 hover:border-gold-accent/40 transition">
+                  <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-surface-variant/60 bg-surface/20 font-label-caps text-label-caps uppercase text-text-muted transition-colors duration-200 ease-out hover:border-gold-accent/40">
                     Drop deals here
                   </div>
                 )}

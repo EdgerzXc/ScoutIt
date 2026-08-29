@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { bucketOfDeal, isDeletedDeal } from "@/lib/deals/dealStatus";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
@@ -57,42 +58,13 @@ function toChatBoxDeal(d) {
   };
 }
 
-// Status buckets. Previously written as inline arrays in four places that had
-// drifted; `!d.status` also fell through into ACTIVE, meaning an unknown or
-// malformed status defaulted to the MOST permissive state (open composer,
-// contact actions). Unknown now sorts to CLOSED, which is the safe default.
-// Verified against the live `deals` table 2026-08-05: there is NO check
-// constraint on deals.status, the column default is 'pitching', and the live
-// distribution is connected / invited / accepted. Guessing at this set is how
-// a real status silently lands in the wrong tab.
-//
-// 'invited' = owner invited a broker and is waiting on their answer, which is
-// the same shape as a pending Connect request from the recipient's side.
-// 'pitching' = the column default, an open pitch in progress.
-const WAITING_STATUSES = ["pending", "invited"];
-const ACTIVE_STATUSES = ["active", "accepted", "connected", "pitching"];
-// 'expired' is retained ONLY so historical rows still bucket correctly.
-// Nothing writes it any more — requests no longer time out (§40.14).
-const CLOSED_STATUSES = ["closed", "declined", "expired", "reported", "withdrawn"];
-
-// A deleted request must not appear ANYWHERE. Filtered out before bucketing
-// rather than given a tab: "deleted" has to mean gone to the person who was
-// told it was deleted, or the word is a lie (§40.15).
-const isDeleted = (status) => status === "deleted";
-
-// §40.15: an archived request is still PENDING and still fully acceptable —
-// archiving moves it out of the way, it does not cancel it. So the bucket is
-// driven by archived_at, not by a separate status value. Using a status would
-// have made "archived" mutually exclusive with "pending", which is exactly
-// the confusion that turns archiving back into expiry.
-const bucketOf = (deal) => {
-  const status = deal?.status;
-  if (WAITING_STATUSES.includes(status)) {
-    return deal?.archived_at ? "archived" : "waiting";
-  }
-  if (ACTIVE_STATUSES.includes(status)) return "active";
-  return "closed";
-};
+// Status buckets, the deleted-request filter and the archived rule all live in
+// lib/deals/dealStatus.js now. They were inline arrays here, which meant the
+// dashboard attention rail would have had to re-derive them — and a second
+// copy of "is this request still waiting on someone" is exactly the drift the
+// original comment warned about.
+const isDeleted = (status) => isDeletedDeal(status);
+const bucketOf = (deal) => bucketOfDeal(deal);
 
 const byDateDesc = (key) => (a, b) => new Date(b[key] || 0) - new Date(a[key] || 0);
 

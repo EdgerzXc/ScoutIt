@@ -17,6 +17,7 @@ const MissionControlMode = dynamic(() => import("../../components/dashboard/Miss
 import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
+import AttentionRail from "../../components/dashboard/AttentionRail";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
@@ -416,6 +417,11 @@ function DashboardInner() {
       {/* Main Content Area (Mode determined) */}
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
         <Nudge mode={mode} />
+        {/* The cross-workspace signal comes before the role surface: whether
+            something is waiting in the Inbox, CRM or Calendar is the question
+            people open the dashboard to answer, and it is the same question
+            for every role. */}
+        <AttentionRail mockUserId={user.id} className="mb-6" />
         {renderActiveMode()}
       </main>
 

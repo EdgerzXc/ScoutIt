@@ -22,7 +22,13 @@ describe("LR-02 routing contracts", () => {
   it("makes routed brokers first-class deal parties", () => {
     const deals = read("src/app/api/deals/route.js");
     const messages = read("src/app/api/deals/[id]/messages/route.js");
-    expect(deals).toContain("deal_routing_recipients");
+    // Deal party membership moved into lib/deals/userDeals.js so the Inbox and
+    // the dashboard attention rail resolve it with the same code. The routed
+    // recipient must still be one of the parties it resolves.
+    const userDeals = read("src/lib/deals/userDeals.js");
+    expect(deals).toContain("loadUserDealRows");
+    expect(userDeals).toContain("deal_routing_recipients");
+    expect(userDeals).toContain("routedDealIds.includes(row.id)");
     expect(messages).toContain("isRoutedDealRecipient");
   });
 

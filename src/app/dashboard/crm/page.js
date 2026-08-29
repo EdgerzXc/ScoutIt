@@ -11,7 +11,7 @@ import NewDealModal from "../../../components/dashboard/crm/NewDealModal";
 import TaskRail from "../../../components/dashboard/crm/TaskRail";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
-import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft } from "lucide-react";
+import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -137,7 +137,7 @@ function CRMPageInner() {
     return (
       <div role="main" className="flex-1 flex justify-center items-center text-text-secondary h-screen">
         <AtmosphereBackground variant="dashboard" />
-        <span className="font-working-title animate-pulse relative z-10">Loading Pipeline...</span>
+        <span className="relative z-10 animate-pulse font-body text-base">Loading pipeline...</span>
       </div>
     );
   }
@@ -147,8 +147,8 @@ function CRMPageInner() {
       <div role="main" className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen px-6 relative">
         <AtmosphereBackground variant="dashboard" />
         <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">Master CRM</h1>
-        <p className="text-text-secondary text-sm max-w-sm relative z-10">Sign in to see your pipeline, appointments, and tasks.</p>
-        <Link href="/dashboard" className="relative z-10 border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded hover:bg-gold-accent hover:text-background transition text-sm font-bold">
+        <p className="relative z-10 max-w-sm font-body text-base leading-relaxed text-text-secondary">Sign in to see your pipeline, appointments, and tasks.</p>
+        <Link href="/dashboard" className="relative z-10 min-h-11 rounded border border-gold-accent px-6 py-3 font-label-caps text-label-caps uppercase tracking-widest text-gold-accent transition-colors duration-200 ease-out hover:bg-gold-accent hover:text-background">
           ← Back to Dashboard
         </Link>
       </div>
@@ -170,7 +170,7 @@ function CRMPageInner() {
   const pipelineValue = pricedDeals.reduce((sum, d) => sum + Number(d.propertyPrice), 0);
 
   return (
-    <div role="main" className="relative min-h-[calc(100dvh-80px)] flex flex-col p-4 md:p-6">
+    <div role="main" className="relative flex min-h-[calc(100dvh-80px)] flex-col p-4 font-body md:p-6">
       <AtmosphereBackground variant={viewingAs === "broker" ? "broker" : "dashboard"} />
       {/* Additional Atmosphere Layers for CRM per Handoff */}
       <div className="fixed inset-0 pointer-events-none z-[-1]" style={{
@@ -187,17 +187,17 @@ function CRMPageInner() {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <span className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent">
+            <span className="font-label-caps text-label-caps uppercase text-gold-accent">
               ScoutIt CRM
             </span>
-            <h1 className="font-headline-editorial text-3xl md:text-4xl text-on-surface flex items-center gap-3">
+            <h1 className="flex items-center gap-3 font-headline-editorial text-3xl font-semibold leading-tight tracking-tight text-on-surface md:text-4xl">
               Deal Intelligence
             </h1>
-            <p className="text-text-secondary mt-1 md:mt-2 text-sm md:text-base">Relationships, viewings, and next actions in one verified workspace.</p>
+            <p className="mt-2 max-w-2xl font-body text-base leading-relaxed text-text-secondary">Keep relationships, viewings, and next actions in one place.</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
           {/* Availability now lives inside the Appointments tab (unified
               schedule), so the separate top-nav shortcut was removed. */}
           <div className="relative" ref={lensMenuRef}>
@@ -206,7 +206,7 @@ function CRMPageInner() {
               aria-haspopup="menu"
               aria-expanded={showViewingMenu}
               aria-label={`Change pipeline lens. Current lens: ${viewingAs}`}
-              className="flex min-h-11 items-center gap-2 rounded-full border border-surface-variant bg-surface-alt px-4 py-2 font-mono text-[12px] uppercase tracking-wider text-on-surface transition-all duration-300 ease-out hover:border-gold-accent/50"
+              className="flex min-h-11 items-center gap-2 rounded-full border border-surface-variant bg-surface-alt px-4 py-2 font-label-caps text-label-caps uppercase text-on-surface transition-colors duration-200 ease-out hover:border-gold-accent/50"
             >
               <span className="text-text-muted">Pipeline lens</span>
               <span className="text-gold-accent">{viewingAs}</span>
@@ -218,9 +218,9 @@ function CRMPageInner() {
                   <button
                     key={role}
                     onClick={() => { setViewingAs(role); setShowViewingMenu(false); }}
-                    className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left font-mono text-[12px] uppercase tracking-wider transition-colors duration-300 ease-out hover:bg-surface-alt"
+                    className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out hover:bg-surface-alt"
                   >
-                    <span className="capitalize text-on-surface">{role}</span>
+                    <span className="text-on-surface">{role}</span>
                     {viewingAs === role && <Check size={14} className="text-gold-accent" />}
                   </button>
                 ))}
@@ -229,7 +229,7 @@ function CRMPageInner() {
           </div>
           <button
             onClick={() => setIsNewDealModalOpen(true)}
-            className="min-h-11 rounded bg-gold-accent px-4 py-2 font-mono text-[12px] font-bold uppercase tracking-widest text-background shadow-[0_0_18px_rgba(var(--accent-bright-rgb),0.25)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-gold-bright md:px-6"
+            className="min-h-11 rounded bg-gold-accent px-4 py-2 font-label-caps text-label-caps uppercase text-background shadow-[0_0_18px_rgba(var(--accent-bright-rgb),0.25)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-gold-bright active:scale-[0.97] md:px-6"
           >
             + New deal
           </button>
@@ -241,37 +241,37 @@ function CRMPageInner() {
       {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
         <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
-          <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Active Deals</div>
-          <div className="text-2xl font-working-title text-on-surface">{activeDeals}</div>
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Active Deals</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{activeDeals}</div>
         </div>
         <div className="card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
-          <div className="text-xs text-gold-accent uppercase tracking-widest font-label-caps mb-1">Pipeline Value</div>
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-gold-accent">Pipeline Value</div>
           {pricedDeals.length > 0 ? (
             <>
-              <div className="text-2xl font-working-title text-on-surface text-glow">₱{pipelineValue.toLocaleString()}</div>
-              <div className="text-[12px] text-text-muted mt-1">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
+              <div className="font-body text-2xl font-semibold tracking-tight text-on-surface text-glow tabular-nums">₱{pipelineValue.toLocaleString()}</div>
+              <div className="mt-1 font-body text-base leading-snug text-text-muted">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
             </>
           ) : (
             <>
-              <div className="text-2xl font-working-title text-text-secondary">—</div>
-              <div className="text-[12px] text-text-muted mt-1">No priced listings in your active pipeline yet</div>
+              <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">—</div>
+              <div className="mt-1 font-body text-base leading-snug text-text-muted">No priced listings in your active pipeline yet</div>
             </>
           )}
         </div>
         <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
-          <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Win Rate</div>
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Win Rate</div>
           {winRate !== null ? (
-            <div className="text-2xl font-working-title text-on-surface">{winRate}%</div>
+            <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{winRate}%</div>
           ) : (
             <>
-              <div className="text-2xl font-working-title text-text-secondary">—</div>
-              <div className="text-[12px] text-text-muted mt-1">No closed deals yet</div>
+              <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">—</div>
+              <div className="mt-1 font-body text-base leading-snug text-text-muted">No closed deals yet</div>
             </>
           )}
         </div>
         <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
-          <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Upcoming Viewings</div>
-          <div className="text-2xl font-working-title text-on-surface">{upcomingViewings}</div>
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Upcoming Viewings</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{upcomingViewings}</div>
         </div>
       </div>
 
@@ -280,19 +280,19 @@ function CRMPageInner() {
         <div className="flex gap-4 md:gap-6">
           <button
             onClick={() => setActiveTab("pipeline")}
-            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-mono text-[12px] uppercase tracking-widest transition-colors duration-300 ease-out ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Briefcase size={16} /> Pipeline
           </button>
           <button
             onClick={() => setActiveTab("appointments")}
-            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-mono text-[12px] uppercase tracking-widest transition-colors duration-300 ease-out ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Calendar size={16} /> Appointments
           </button>
           <button
             onClick={() => setActiveTab("tasks")}
-            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-mono text-[12px] uppercase tracking-widest transition-colors duration-300 ease-out ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <ListChecks size={16} /> Tasks
           </button>
@@ -301,15 +301,15 @@ function CRMPageInner() {
         <div className="hidden md:flex gap-3 pb-3">
           <button
             onClick={() => triggerLockedToast("Mass Email", "Cluster")}
-            className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition"
+            className="flex min-h-11 items-center gap-1.5 rounded-full border border-dashed border-text-muted px-3 py-2 font-label-caps text-label-caps uppercase text-text-muted transition-colors duration-200 ease-out hover:border-surface-variant hover:text-on-surface"
           >
-            <Mail size={12} /> Mass Email <span className="text-[12px] ml-1">🔒</span>
+            <Mail size={12} aria-hidden="true" /> Mass Email <LockKeyhole size={12} className="ml-1" aria-hidden="true" />
           </button>
           <button
             onClick={() => triggerLockedToast("Automations", "Universe")}
-            className="border border-dashed border-text-muted text-text-muted hover:text-on-surface hover:border-surface-variant rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-working-title transition"
+            className="flex min-h-11 items-center gap-1.5 rounded-full border border-dashed border-text-muted px-3 py-2 font-label-caps text-label-caps uppercase text-text-muted transition-colors duration-200 ease-out hover:border-surface-variant hover:text-on-surface"
           >
-            <Zap size={12} /> Automations <span className="text-[12px] ml-1">🔒</span>
+            <Zap size={12} aria-hidden="true" /> Automations <LockKeyhole size={12} className="ml-1" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -318,8 +318,8 @@ function CRMPageInner() {
       <div className="flex-1 relative z-10">
         {isUpdatingStatus && (
           <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-20 flex items-center justify-center">
-            <span className="bg-surface px-6 py-3 rounded-full font-working-title text-sm border border-gold-accent/50 text-gold-accent shadow-xl animate-pulse">
-              Updating Status...
+            <span className="animate-pulse rounded-full border border-gold-accent/50 bg-surface px-6 py-3 font-body text-base text-gold-accent shadow-xl">
+              Updating status...
             </span>
           </div>
         )}
@@ -373,8 +373,8 @@ function CRMPageInner() {
               : "border-gold-accent/30 text-gold-accent"
           }`}
         >
-          <p className="font-working-title text-sm flex items-center gap-2">
-            {toastTone === "locked" && <span className="text-xl">🔒</span>}
+          <p className="flex items-center gap-2 font-body text-base">
+            {toastTone === "locked" && <LockKeyhole size={18} aria-hidden="true" />}
             {showToast}
           </p>
         </div>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/deals/userDeals";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +14,8 @@ export const dynamic = "force-dynamic";
 // a replacement for that existing (separately flagged) mechanism.
 
 
-
-// No updated_at column on deals (yet) -- sort order is derived from
-// created_at + latest message timestamp instead, computed below.
-const DEAL_FIELDS = "id, status, pitch_message, private_notes, buyer_id, broker_id, unit_id, created_at, closed_at, expires_at, connects_spent, archived_at, pending_clock_reset_at, properties(id, title, slug, owner_id, price)";
-
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url);
     const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
@@ -29,44 +24,16 @@ export async function GET(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    // Three angles a user can be a party to a deal from -- merged and
-    // deduped below. No FK from buyer_id/broker_id/owner_id to a users
-    // table (they're plain text columns), so this can't be one query with
-    // an embedded join filter on the owner side; run it separately instead.
-    const { data: routedRecipients, error: routedRecipientsError } = await supabaseAdmin
-      .from("deal_routing_recipients")
-      .select("deal_id")
-      .eq("recipient_id", userId);
-    if (routedRecipientsError) {
-      console.error("[DEALS API] Routed recipient lookup error:", routedRecipientsError);
+    // Party membership is an authorization decision and lives in
+    // lib/deals/userDeals.js so the dashboard attention rail asks the same
+    // question of the same code rather than re-deriving the answer.
+    const { rows: deals, error: dealsError } = await loadUserDealRows(supabaseAdmin, userId);
+    if (dealsError === "routing_unavailable") {
       return NextResponse.json({ error: "Failed to load routed conversations" }, { status: 503 });
     }
-    const routedDealIds = [...new Set((routedRecipients || []).map((row) => row.deal_id).filter(Boolean))];
-
-    const [asBuyer, asBroker, asOwner, asRouted] = await Promise.all([
-      supabaseAdmin.from("deals").select(DEAL_FIELDS).eq("buyer_id", userId),
-      supabaseAdmin.from("deals").select(DEAL_FIELDS).eq("broker_id", userId),
-      supabaseAdmin.from("deals").select(DEAL_FIELDS).eq("properties.owner_id", userId).not("properties", "is", null),
-      routedDealIds.length ? supabaseAdmin.from("deals").select(DEAL_FIELDS).in("id", routedDealIds) : Promise.resolve({ data: [], error: null }),
-    ]);
-
-    const failed = [asBuyer, asBroker, asOwner, asRouted].find((r) => r.error);
-    if (failed) {
-      console.error("[DEALS API] GET error:", failed.error);
+    if (dealsError) {
       return NextResponse.json({ error: "Failed to load conversations" }, { status: 500 });
     }
-
-    const byId = new Map();
-    for (const row of [...(asBuyer.data || []), ...(asBroker.data || []), ...(asOwner.data || []), ...(asRouted.data || [])]) {
-      // The owner-side query embeds properties via an inner-filtered join;
-      // rows where the filter didn't match come back with properties: null
-      // from Supabase's left-join default -- skip those defensively.
-      if (routedDealIds.includes(row.id) || row.properties?.owner_id === userId || row.buyer_id === userId || row.broker_id === userId) {
-        byId.set(row.id, row);
-      }
-    }
-
-    const deals = [...byId.values()];
 
     // Best-effort display names for the "other party" -- these id columns
     // aren't real FKs so this is a manual lookup, not an embedded join.
@@ -86,31 +53,14 @@ export async function GET(request) {
       namesById = Object.fromEntries((profiles || []).map((p) => [p.id, p.display_name]));
     }
 
-    // Last message + unread count + last-activity time per deal, one query
-    // for all deals at once. Deals has no updated_at column, so "most recent
-    // conversation first" is derived here from message timestamps instead.
-    const dealIds = deals.map((d) => d.id);
-    let lastMessageByDeal = {};
-    let lastActivityByDeal = {};
-    let unreadByDeal = {};
-    if (dealIds.length > 0) {
-      const { data: messages } = await supabaseAdmin
-        .from("deal_messages")
-        .select("deal_id, sender_id, body, created_at, read_at")
-        .in("deal_id", dealIds)
-        .order("created_at", { ascending: true });
-      for (const m of messages || []) {
-        lastMessageByDeal[m.deal_id] = m.body;
-        lastActivityByDeal[m.deal_id] = m.created_at;
-        if (m.sender_id !== userId && !m.read_at) {
-          unreadByDeal[m.deal_id] = (unreadByDeal[m.deal_id] || 0) + 1;
-        }
-      }
-    }
+    // Deals has no updated_at column, so "most recent conversation first" is
+    // derived from message timestamps instead.
+    const { lastMessageByDeal, lastActivityByDeal, unreadByDeal } =
+      await loadDealMessageActivity(supabaseAdmin, deals.map((d) => d.id), userId);
 
     const result = deals
       .map((d) => {
-        const myRole = d.buyer_id === userId ? "buyer" : d.broker_id === userId ? "broker" : d.properties?.owner_id === userId ? "owner" : "broker";
+        const myRole = deriveMyRole(d, userId);
         const otherId = myRole === "buyer" ? (d.broker_id || d.properties?.owner_id) : myRole === "broker" ? d.properties?.owner_id : (d.broker_id || d.buyer_id);
         const otherRoleLabel = myRole === "buyer" ? (d.broker_id ? "Broker" : "Owner") : myRole === "broker" ? "Owner" : (d.broker_id ? "Broker" : "Buyer");
         return {

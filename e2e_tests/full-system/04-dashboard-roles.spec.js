@@ -312,6 +312,94 @@ test.describe('master-dev (isolated local preview)', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('dashboard home signals what needs the user across all three workspaces', async ({ page }) => {
+    const errors = trackErrors(page);
+    await signInAsMock(page, MASTER_DEV_READONLY);
+
+    // A fixed payload, so the rail's severity rules are what is under test —
+    // not whatever the local preview database happens to hold today.
+    await page.route('**/api/dashboard/attention**', (route) => route.fulfill({
+      status: 200,
+      json: {
+        severity: 'urgent',
+        urgentCount: 1,
+        attentionCount: 1,
+        totalCount: 4,
+        summary: '1 thing needs you now',
+        unavailable: [],
+        signals: [
+          {
+            id: 'inbox',
+            label: 'Inbox',
+            href: '/dashboard/inbox',
+            severity: 'attention',
+            count: 2,
+            headline: '2 unread messages',
+            detail: null,
+          },
+          {
+            id: 'crm',
+            label: 'CRM',
+            href: '/dashboard/crm',
+            severity: 'urgent',
+            count: 2,
+            headline: '2 overdue tasks',
+            detail: 'Send the term sheet',
+          },
+          {
+            id: 'calendar',
+            label: 'Calendar',
+            href: '/dashboard/calendar',
+            severity: 'clear',
+            count: 0,
+            headline: 'No viewings in the next 24 hours',
+            detail: null,
+          },
+        ],
+      },
+    }));
+
+    await gotoAndSettle(page, '/dashboard');
+    const rail = page.getByRole('region', { name: 'What needs you' });
+    await expect(rail).toBeVisible({ timeout: 30_000 });
+    await expect(rail.getByText('1 thing needs you now')).toBeVisible();
+    await expect(rail.getByRole('link', { name: /CRM/ })).toHaveAttribute('href', '/dashboard/crm');
+    await expect(rail.getByText('2 overdue tasks')).toBeVisible();
+    await expect(rail.getByText('Send the term sheet')).toBeVisible();
+    await expect(rail.getByText('2 unread messages')).toBeVisible();
+    await expect(rail.getByText('No viewings in the next 24 hours')).toBeVisible();
+
+    // A quiet workspace must not wear an urgency badge.
+    const calendarCard = rail.getByRole('link', { name: /Calendar/ });
+    await expect(calendarCard).not.toContainText(/^0$/);
+
+    const type = await page.evaluate(() => {
+      const region = document.querySelector('section[aria-label="What needs you"]');
+      const headline = [...region.querySelectorAll('span')]
+        .find((element) => element.textContent.trim() === '2 overdue tasks');
+      const label = [...region.querySelectorAll('span')]
+        .find((element) => element.textContent.trim() === 'CRM');
+      return {
+        headlineFamily: getComputedStyle(headline).fontFamily,
+        headlineSize: Number.parseFloat(getComputedStyle(headline).fontSize),
+        labelFamily: getComputedStyle(label).fontFamily,
+      };
+    });
+    expect(type.headlineFamily).toMatch(/Geist/i);
+    expect(type.headlineFamily).not.toMatch(/Mono/i);
+    expect(type.headlineSize).toBeGreaterThanOrEqual(16);
+    expect(type.labelFamily).toMatch(/Geist Mono/i);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(rail).toBeVisible();
+    const hasPageOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(hasPageOverflow).toBe(false);
+
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('inbox renders threads or a clean empty state', async ({ page }) => {
     const errors = trackErrors(page);
     await signInAsMock(page, MASTER_DEV_READONLY);
@@ -328,6 +416,43 @@ test.describe('master-dev (isolated local preview)', () => {
     await page.route('**/api/crm/tasks**', (route) => route.fulfill({ status: 200, json: { tasks: [] } }));
     await gotoAndSettle(page, '/dashboard/crm');
     await expectRealContent(page);
+    await expect(page.getByRole('heading', { name: 'Deal Intelligence' })).toBeVisible({ timeout: 20_000 });
+    const type = await page.evaluate(() => {
+      const styleFor = (selector) => getComputedStyle(document.querySelector(selector));
+      const heading = styleFor('h1');
+      const subtitle = styleFor('h1 + p');
+      const label = styleFor('[class*="text-label-caps"]');
+      const helper = [...document.querySelectorAll('div')]
+        .find((element) => element.textContent.trim() === 'No priced listings in your active pipeline yet');
+      const helperStyle = getComputedStyle(helper);
+      const search = styleFor('input[aria-label="Search deals"]');
+      return {
+        headingFamily: heading.fontFamily,
+        headingWeight: Number(heading.fontWeight),
+        subtitleFamily: subtitle.fontFamily,
+        subtitleSize: Number.parseFloat(subtitle.fontSize),
+        labelFamily: label.fontFamily,
+        labelSize: Number.parseFloat(label.fontSize),
+        helperSize: Number.parseFloat(helperStyle.fontSize),
+        searchPaddingLeft: Number.parseFloat(search.paddingLeft),
+        searchRadius: Number.parseFloat(search.borderRadius),
+      };
+    });
+    expect(type.headingFamily).toMatch(/Geist/i);
+    expect(type.subtitleFamily).toMatch(/Geist/i);
+    expect(type.headingWeight).toBeGreaterThanOrEqual(600);
+    expect(type.subtitleSize).toBeGreaterThanOrEqual(16);
+    expect(type.helperSize).toBeGreaterThanOrEqual(16);
+    expect(type.labelFamily).toMatch(/Geist Mono/i);
+    expect(type.labelFamily).not.toBe(type.subtitleFamily);
+    expect(type.labelSize).toBeGreaterThanOrEqual(12);
+    expect(type.searchPaddingLeft).toBeGreaterThanOrEqual(44);
+    expect(type.searchRadius).toBeGreaterThanOrEqual(9999);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole('heading', { name: 'Deal Intelligence' })).toBeVisible();
+    const hasPageOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(hasPageOverflow).toBe(false);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
