@@ -64,7 +64,7 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
       // does NOT expose unpublished drafts or raw `intel_sources`. The ticker
       // only ever needed published, public fields.
       try {
-        const res = await fetch("/api/cms");
+        const res = await fetch("/api/cms?scope=public");
         if (!alive || !res.ok) return;
         const data = await res.json();
         const intel = Array.isArray(data?.intel) ? data.intel : [];

@@ -71,7 +71,7 @@ export default function DiscoverSearch() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/cms");
+        const res = await fetch("/api/cms?scope=public");
         if (!res.ok) return;
         const data = await res.json();
         const rows = (data.intel || []).map(normalizeArticle).filter(Boolean);

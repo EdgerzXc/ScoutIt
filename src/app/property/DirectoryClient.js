@@ -234,7 +234,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
   useEffect(() => {
     async function loadCMSData() {
       try {
-        const res = await fetch(`/api/cms?radius=${radius}&lng=${centerLng}&lat=${centerLat}`);
+        const res = await fetch(`/api/cms?scope=public&radius=${radius}&lng=${centerLng}&lat=${centerLat}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
 

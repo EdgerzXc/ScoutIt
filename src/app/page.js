@@ -149,7 +149,7 @@ export default function Home() {
     async function loadCMSData() {
       try {
         setCmsError(false);
-        const res = await fetch("/api/cms");
+        const res = await fetch("/api/cms?scope=public");
         if (!res.ok) {
           setCmsError(true);
           return;

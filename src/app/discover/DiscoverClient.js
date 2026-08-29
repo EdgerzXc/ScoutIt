@@ -114,7 +114,7 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
   useEffect(() => {
     async function fetchCMS() {
       try {
-        const res = await fetch("/api/cms");
+        const res = await fetch("/api/cms?scope=public");
         if (!res.ok) return;
         const data = await res.json();
         const formatted = formatDiscoverDatasets(data.properties || [], data.intel || []);

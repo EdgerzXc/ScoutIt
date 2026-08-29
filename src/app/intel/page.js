@@ -59,7 +59,7 @@ export default function IntelPage() {
     let alive = true;
     async function loadCMSData() {
       try {
-        const res = await fetch("/api/cms");
+        const res = await fetch("/api/cms?scope=public");
         if (!alive) return;
         if (!res.ok) throw new Error();
         const data = await res.json();
