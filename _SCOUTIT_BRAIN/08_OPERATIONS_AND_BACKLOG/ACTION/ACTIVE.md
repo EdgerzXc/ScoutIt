@@ -24,6 +24,81 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   A-023 stays in Active only for the owner visual review; nothing in it is
   blocked on further implementation.
 
+## A-058 — Monthly Scout Wrap has a backend and no front end
+
+**Promoted 2026-08-30 on owner question, verified against live code and the
+live database before entry.** It has never had a live queue entry, which is
+the likeliest reason it stalled half-built: `RULES` forbids executing work
+directly from a specification, and a specification is all it had.
+
+**What exists.** `07_FEATURES_AND_FLOWS/MONTHLY_SCOUT_WRAP_IMPLEMENTATION_PLAN.md`
+is `status: locked` and headed **"OWNER PRIORITY — REQUIRED BEFORE THE
+CONTROLLED PUBLIC PILOT"**. It states the intent plainly: it "should feel like
+Spotify Wrapped, but every number must be reproducible from real ScoutIt
+events." `/api/wrap` is implemented for `property`, `owner_portfolio` and
+`broker`, is authentication-gated, and is covered by
+`monthlyScoutWrapApi.test.js`. The `monthly_scout_wraps` table is live.
+
+**What does not exist.**
+
+- **No caller.** A grep for `api/wrap` outside the route and the flow-graph
+  data returns nothing. Rule 13: an endpoint with no caller is a plan, not a
+  feature — the same defect A-038 records for the recommendation endpoints.
+- **No rows.** `monthly_scout_wraps` holds 0 records, so nothing has ever been
+  generated even server-side.
+- **No Mission Control generation button**, which the plan names as the way the
+  feature avoids depending on a paid scheduler before launch.
+- **No "your wrap is ready" notification**, though `notifyUser` now exists and
+  would carry it.
+
+**Acceptance.** An owner and a broker can open a real wrap for a completed
+month, every figure traceable to a recorded event rather than an estimate; a
+staff member can generate one on demand; the archive replays previous months;
+and nothing claims a deal "closed" or "sold" from a chat status, per the plan's
+own §98 prohibition.
+
+**Sequencing note.** The plan's honest-metrics rule means this is only worth
+opening once there is enough real activity to summarise. Against sample-only
+inventory a wrap would summarise nothing, so this sits behind A-059.
+
+## A-059 — The human-testing sample set is too thin to exercise the product
+
+**Promoted 2026-08-30 on owner direction.** The disclosure machinery is built
+and correct; the volume is not.
+
+**Built and working, not in question.** Every public listing is flagged
+`is_sample` and badged "SAMPLE DATA — FOR HUMAN TESTING" (owner-authorised
+2026-08-23, checksum updated). `lib/sampleInventory.js` allowlists sample slugs
+and validates inquiry recipients, so an inquiry on a sample property cannot
+email a real person. That guard must survive any expansion.
+
+**The problem, measured live on 2026-08-30.** The catalogue holds **7
+properties, 1 intel article, 3 brokers**:
+
+| Dimension | Coverage |
+| --- | --- |
+| Category | Commercial 2; STR, Hospitality, Residential, Restaurants, Venues 1 each |
+| City | Taguig 2; Pasay, Malay, Cebu City, Pasig, Makati 1 each |
+| Coordinates | 7/7 |
+| Images | 6/7 |
+
+Every filter the product ships is therefore untestable in any meaningful way. A
+category filter that returns one result cannot show sorting, pagination, an
+empty state, or a crowded map. A radius search over six cities cannot show
+clustering. One intel article cannot exercise the Intel layer's carousel,
+topic filter or radar at all.
+
+**What this needs.** Enough sample inventory that a tester can actually hit the
+edges: several properties per category, multiple properties in the same city so
+the map clusters, at least one category deliberately left empty to prove the
+empty state is honest, a property with no image, and enough intel articles to
+fill the carousel and the radar. The exact target is an owner call, but the
+current set cannot answer "does the filtering work" for anyone.
+
+**Boundary.** Sample inventory must never be presented as real. The
+`is_sample` flag, the badge, and the inquiry-recipient allowlist are load-bearing
+and are not optional on new records.
+
 ## A-038 — Post-deal satisfaction signal and client feedback, with moderation
 
 **Promoted 2026-08-27 on owner direction.** Closes the producer half of A-023
