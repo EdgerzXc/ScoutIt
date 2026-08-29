@@ -92,7 +92,16 @@ export async function GET(request) {
             // cached copy immediately and a new one is fetched behind them,
             // so a published listing appears within a minute without anyone
             // ever waiting on Airtable.
-            "Cache-Control": `public, s-maxage=${PUBLIC_SCOPE_MAX_AGE_S}, stale-while-revalidate=${PUBLIC_SCOPE_STALE_S}`,
+            //
+            // BOTH max-age and s-maxage, deliberately. Vercel consumes
+            // s-maxage at the edge and forwards only `public` downstream, so
+            // s-maxage alone caches for the CDN and not for the visitor —
+            // every navigation still paid a round trip to Singapore.
+            // Verified in production on 2026-08-29: with s-maxage alone the
+            // response reached the browser as a bare `Cache-Control: public`
+            // with no lifetime at all. max-age is what lets a browser reuse
+            // the copy it already has while moving between pages.
+            "Cache-Control": `public, max-age=${PUBLIC_SCOPE_MAX_AGE_S}, s-maxage=${PUBLIC_SCOPE_MAX_AGE_S}, stale-while-revalidate=${PUBLIC_SCOPE_STALE_S}`,
           }
         : {
             // The tier-resolved payload VARIES BY USER, so it must never be

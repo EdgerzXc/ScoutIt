@@ -45,7 +45,7 @@ describe("A-053 cacheable public catalogue scope", () => {
     expect(cmsRoute).toContain('Vary: "Authorization, Cookie"');
     expect(cmsRoute).toMatch(/publicScope\s*\n?\s*\?/);
 
-    const publicHeaderAt = cmsRoute.indexOf("public, s-maxage=");
+    const publicHeaderAt = cmsRoute.indexOf("public, max-age=");
     const privateHeaderAt = cmsRoute.indexOf('"no-store, private"');
     expect(publicHeaderAt).toBeGreaterThan(-1);
     expect(privateHeaderAt).toBeGreaterThan(publicHeaderAt);
@@ -62,6 +62,13 @@ describe("A-053 cacheable public catalogue scope", () => {
   it("keeps the agreed 60 second freshness window", () => {
     expect(cmsRoute).toContain("const PUBLIC_SCOPE_MAX_AGE_S = 60");
     expect(cmsRoute).toContain("stale-while-revalidate=${PUBLIC_SCOPE_STALE_S}");
+  });
+
+  it("caches in the browser as well as the CDN", () => {
+    // Vercel consumes s-maxage at the edge and forwards only `public`, so
+    // s-maxage alone leaves the visitor paying a round trip on every
+    // navigation. max-age is what makes the second page load free.
+    expect(cmsRoute).toContain("public, max-age=${PUBLIC_SCOPE_MAX_AGE_S}, s-maxage=${PUBLIC_SCOPE_MAX_AGE_S}");
   });
 
   it("only routes surfaces that read no premium field to the cached scope", () => {
