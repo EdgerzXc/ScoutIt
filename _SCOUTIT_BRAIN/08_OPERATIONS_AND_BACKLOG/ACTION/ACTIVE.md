@@ -28,6 +28,8 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
 
 **Opened 2026-08-30 on owner direction**, each verified against Mission
 Control's source, the main site's source, and the live database before entry.
+**Scheduled for the 2026-08-31 session** — the order and the pre-flight checks
+are in [[00_MASTER_ACTION_PLAN]] under "Next session".
 
 Mission Control is deployed and responding (`mission-control-sigma-one-89`),
 and most of it is genuinely built: 21 dashboard pages backed by 16 server-action

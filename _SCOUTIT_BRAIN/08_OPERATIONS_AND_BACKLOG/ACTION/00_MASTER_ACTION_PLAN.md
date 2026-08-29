@@ -88,6 +88,48 @@ new actions are present. A migration that "applied cleanly" proves the DDL ran,
 not that the write now lands — assuming that is what hid this defect in the
 first place.
 
+## Next session — 2026-08-31, Master Mission Control connectors
+
+**Agreed with the owner on 2026-08-30.** The main site is in good shape: the
+platform security audit is clean, the public catalogue caching is live and
+verified, and Urgent is empty. The next batch is Mission Control, and
+specifically the connectors — not new screens.
+
+**Read [[ACTIVE]] "Master Mission Control — four connector gaps" first.** The
+evidence is recorded there; it does not need re-deriving.
+
+**The shape of the problem, so it is not mistaken for a UI job.** Mission
+Control is deployed and mostly built — 21 pages, 16 server-action modules, RBAC
+tiers, 86 audit call sites. In three of the four gaps a well-built console is
+wired to the wrong end of the connector, which is exactly why the work looks
+finished and changes nothing.
+
+### Order, and why
+
+| # | Item | Why here |
+|---|---|---|
+| 1 | **A-061** dispute reconciliation | The only one a real user can trigger today. A party can file a dispute that no staff surface can see. It is empty now, so this is fixable before it has a victim rather than after |
+| 2 | **A-060** pin correction reaches Airtable | Smallest real fix. The validation and UI already exist; what is missing is the sync a published listing needs |
+| 3 | **A-063** system event log | Records what the system does on its own. Do it after A-060 so that fix is observable, and before A-058 because the wrap needs this event history to be reproducible |
+| 4 | **A-062** contact reply | Needs an owner decision on the channel before code: email out from the console, route to an authenticated deal room, or change the public promise |
+
+### Before touching code
+
+- Re-verify each defect against current code. All four were verified on
+  2026-08-30, but that was a different day and Rule 12 applies to this page too.
+- `deal_disputes` and `disputes` are both empty. Confirm that is still true
+  before choosing between folding the tables and reading both — a real row
+  changes the migration from a rename into a data move.
+- Mission Control is a **separate Next.js app with its own Vercel project**
+  (`mission-control-sigma-one-89`). It is deployed from the repository, not from
+  a working tree. Its verification gate is its own.
+
+### A-062 is owner-gated
+
+Do not build a reply channel before the owner picks one. The current page is
+honest about being triage only; adding a reply that lands nowhere would be
+worse than the gap.
+
 ## Current truth — 2026-08-27
 
 - **A reported conversation is retained forever, and nothing knows it exists.**
