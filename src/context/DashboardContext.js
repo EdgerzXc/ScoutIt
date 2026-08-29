@@ -4,6 +4,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { loadDeals } from "../lib/deals/dealsClient";
 import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
 import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWallet";
@@ -285,12 +286,9 @@ export function DashboardProvider({ children }) {
         const mockOwnerId = mockUser?.id || "";
         const inventoryPromise = settled(authedFetch('/api/dashboard/inventory'));
         const cmsPromise = settled(fetch('/api/cms'));
-        const dealsPromise = settled(fetch("/api/deals", {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(mockOwnerId ? { "x-mock-user-id": mockOwnerId } : {}),
-          },
-        }));
+        // Shared loader: the page mounting alongside this provider asks for
+        // the same rows at the same moment, and used to get its own request.
+        const dealsPromise = settled(loadDeals({ mockUserId: mockOwnerId || null }));
         const savedIntelPromise = token
           ? settled(supabase.from('saved_intel').select('*'))
           : Promise.resolve({ data: [], error: null });
@@ -371,10 +369,9 @@ export function DashboardProvider({ children }) {
           // The localhost E2E fixture has no session token. `/api/deals`
           // accepts the mock identity header only under SCOUTIT_E2E on a
           // localhost host and only for reads (see lib/serverAuth.js).
-          const dealsRes = await dealsPromise;
-          if (dealsRes?.ok) {
-            const { deals: dealsData } = await dealsRes.json();
-            const mappedDeals = (dealsData || []).map(d => ({
+          const dealsData = await dealsPromise;
+          if (dealsData) {
+            const mappedDeals = dealsData.map(d => ({
               id: d.id,
               listingId: d.propertyId,
               propertySlug: d.propertySlug,

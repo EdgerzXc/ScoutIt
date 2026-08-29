@@ -18,6 +18,7 @@ import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
+import { loadDeals } from "../../lib/deals/dealsClient";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
@@ -141,13 +142,13 @@ function DashboardInner() {
           : null;
         const mockOwnerId = localFixture?.id === user.id ? localFixture.id : null;
         if (!session?.access_token && !mockOwnerId) return;
-        const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
-        const res = await fetch(`/api/deals${qs}`, {
-          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
-        });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        const total = (data.deals || []).reduce((sum, d) => sum + (d.unreadCount || 0), 0);
+        // Shared loader — this badge and DashboardContext's role panels both
+        // want the same rows at the same moment, and used to fetch them twice.
+        // (The old call here also built a ?mockOwnerId= query the route never
+        // read, while omitting the header that actually carries it.)
+        const deals = await loadDeals({ mockUserId: mockOwnerId });
+        if (cancelled) return;
+        const total = deals.reduce((sum, d) => sum + (d.unreadCount || 0), 0);
         if (!cancelled) setUnreadInboxCount(total);
       } catch {
         // Inbox badge is a nice-to-have -- fail quietly, the bell still covers signaling.

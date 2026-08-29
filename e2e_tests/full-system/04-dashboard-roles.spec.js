@@ -432,6 +432,35 @@ test.describe('master-dev (isolated local preview)', () => {
     await cmsRequest;
   });
 
+  test('each dashboard surface asks for the deal list once', async ({ page }) => {
+    // DashboardContext loads deals for the role panels and the page loads them
+    // for its own view. A trace on 2026-08-29 caught both on all three
+    // surfaces, so every dashboard load asked the database for the same rows
+    // twice. They now share one in-flight request.
+    await signInAsMock(page, MASTER_DEV_READONLY);
+
+    for (const [path, ready] of [
+      ['/dashboard', 'section[aria-label="What needs you"]'],
+      ['/dashboard/crm', 'h1'],
+      ['/dashboard/inbox', 'body'],
+    ]) {
+      let dealListRequests = 0;
+      const count = (request) => {
+        const { pathname } = new URL(request.url());
+        if (pathname === '/api/deals') dealListRequests += 1;
+      };
+      page.on('request', count);
+      await page.goto(path);
+      await page.locator(ready).first().waitFor({ timeout: 30000 });
+      // Let any straggling mount effect fire before counting.
+      await page.waitForTimeout(2500);
+      page.off('request', count);
+
+      expect(dealListRequests, `${path} requested /api/deals ${dealListRequests} times`)
+        .toBeLessThanOrEqual(1);
+    }
+  });
+
   test('inbox renders threads or a clean empty state', async ({ page }) => {
     const errors = trackErrors(page);
     await signInAsMock(page, MASTER_DEV_READONLY);

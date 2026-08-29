@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { bucketOfDeal, isDeletedDeal } from "@/lib/deals/dealStatus";
+import { loadDeals as fetchSharedDeals } from "@/lib/deals/dealsClient";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
@@ -123,17 +124,8 @@ function InboxInner() {
     setLoading(true);
     setError(null);
     try {
-      const { token, mockOwnerId } = await resolveAuth();
-      const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
-      const res = await fetch(`/api/deals${qs}`, {
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...(mockOwnerId ? { "x-mock-user-id": mockOwnerId } : {})
-        },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Couldn't load your conversations.");
-      const fetchedDeals = (data?.deals || []).map(toChatBoxDeal);
+      const { mockOwnerId } = await resolveAuth();
+      const fetchedDeals = (await fetchSharedDeals({ mockUserId: mockOwnerId })).map(toChatBoxDeal);
       const realIds = new Set(fetchedDeals.map((d) => d.id));
       const filteredDemo = SHOW_DEMO_DEALS ? DEMO_DEALS.filter((d) => !realIds.has(d.id)) : [];
       setDeals([...fetchedDeals, ...filteredDemo]);

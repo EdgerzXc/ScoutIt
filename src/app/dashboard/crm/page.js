@@ -11,6 +11,7 @@ import NewDealModal from "../../../components/dashboard/crm/NewDealModal";
 import TaskRail from "../../../components/dashboard/crm/TaskRail";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
+import { loadDeals } from "../../../lib/deals/dealsClient";
 import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -84,10 +85,10 @@ function CRMPageInner() {
     // allSettled so one failing feed doesn't blank the other (e.g. an
     // appointments error must not hide the deal pipeline).
     const [dealsRes, apptsRes] = await Promise.allSettled([
-      crmFetch("/api/deals", { mockUserId: currentUser.id }),
+      loadDeals({ mockUserId: currentUser.id }),
       crmFetch("/api/viewing-appointments", { mockUserId: currentUser.id }),
     ]);
-    if (dealsRes.status === "fulfilled") setDeals(dealsRes.value.deals || []);
+    if (dealsRes.status === "fulfilled") setDeals(dealsRes.value);
     if (apptsRes.status === "fulfilled") setAppointments(apptsRes.value.appointments || []);
     if (dealsRes.status === "rejected" || apptsRes.status === "rejected") {
       console.error("CRM fetch failed", dealsRes.reason || apptsRes.reason);
