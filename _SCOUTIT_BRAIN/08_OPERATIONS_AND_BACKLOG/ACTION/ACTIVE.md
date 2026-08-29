@@ -24,6 +24,103 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   A-023 stays in Active only for the owner visual review; nothing in it is
   blocked on further implementation.
 
+## Master Mission Control — four connector gaps
+
+**Opened 2026-08-30 on owner direction**, each verified against Mission
+Control's source, the main site's source, and the live database before entry.
+
+Mission Control is deployed and responding (`mission-control-sigma-one-89`),
+and most of it is genuinely built: 21 dashboard pages backed by 16 server-action
+modules, RBAC tiers, and 86 audit call sites writing to
+`mission_control_actions`. The gaps are not missing screens. **In three of the
+four cases below a well-built console is wired to the wrong end of the
+connector**, which is why the work looks finished and changes nothing.
+
+## A-060 — A staff pin correction never reaches the public map
+
+**The Position Queue is the best-built page in the console and currently has no
+effect on anything a visitor sees after publication.**
+
+`dashboard/coordinates` flags every listing the geocoder could not place at
+building level, validates a staff correction properly — rejects off-Earth
+values, and catches a transposed lat/lng with a Philippines bounding box — and
+writes `properties.coordinates` plus a `details.geo` record of who decided it.
+
+**Where it breaks.** Public properties come from Airtable, not Supabase.
+`/api/dashboard/publish` carries `coordinates` into Airtable `Latitude`/
+`Longitude` **at publish time only**, and `/api/cms` geocodes from the location
+text only when those are missing. `setVerifiedCoordinates` writes to Supabase
+and stops — there is no Airtable sync.
+
+So a pin fixed **before** publication flows through, and a pin fixed **after**
+publication never leaves Supabase. That is the wrong way round: staff notice a
+wrong pin *because it is live on the map*.
+
+**Fix:** `setVerifiedCoordinates` must push the corrected pair to the Airtable
+record for an already-published listing, the way the publish route already
+does, and say so in the audit entry.
+
+## A-061 — The dispute console cannot see a single dispute a user filed
+
+**Two tables. Staff are reading the wrong one.**
+
+- A party files from the main site through `/api/deals/[id]/dispute`, which
+  writes **`deal_disputes`** (10 columns). The chat-purge job reads that same
+  table for its hold exemption, so filing is what stops a thread being wiped.
+- Mission Control's `dashboard/disputes` reads and writes **`disputes`** (15
+  columns) with a `dispute_events` thread. A grep for `deal_disputes` across
+  all of `mission-control/src` returns **nothing**.
+
+The console's `openDispute` takes free-text complainant and respondent, so it
+models a dispute a staff member types up — not one a real user raised. Both
+tables are empty today, which is the only reason this has not yet produced a
+user who filed a dispute nobody can see.
+
+This is A-044 with a sharper cause: the problem is not only that nothing closes
+a dispute, it is that the surface built to close them is looking somewhere
+else. **A-044 stays the owner of the closure workflow; this item owns the
+reconciliation** — decide whether `deal_disputes` is folded into `disputes` or
+the console reads both, then make filing and mediation one pipeline.
+
+## A-062 — Contact triage has no reply, so it is not the live chat it is taken for
+
+`dashboard/contact` moves a `contact_messages` row through
+new → in_progress → resolved → spam, with tier gating and `handled_at`/
+`handled_by` recorded, and deliberately leaves those null while a message is
+open so "nobody picked it up" stays distinguishable from "someone picked it up
+and did nothing". That part is correct.
+
+`setContactStatus` is the **only** exported action. There is no send, no reply,
+no thread. The page says so itself: someone who has not signed up "has no
+identity and no inbox here", and "the honest upgrade path is a real threaded
+reply". Marking something resolved is not answering it.
+
+`contact_messages` holds 0 rows, so nobody has been left unanswered yet.
+
+**Decide before launch:** either replies go out by email from the console, or
+contact is routed to an authenticated deal room, or the public page stops
+implying a conversation will happen.
+
+## A-063 — There is no system activity log, only a staff action log
+
+`mission_control_actions` works — 4 real rows, 86 call sites, and `revertAction`
+can restore a previous state for properties, blocked access and verification
+requests. But every one of those entries is **a person pressing a button**.
+
+Nothing records what the system does on its own: geocoding runs and their
+confidence, CMS bundle rebuilds and whether they came from Airtable or the
+Redis copy, the four production cron jobs, cache purges after a takedown, or
+Airtable sync failures. Mission Control contains no cron and no scheduler.
+
+That is the gap behind "an activity log for our auto-updating maps": when a pin
+moves on its own, or a listing silently stops refreshing, there is no record to
+read. It also means A-060's fix would be invisible without it.
+
+**Scope note:** this wants a system-event table distinct from
+`mission_control_actions`, because mixing automated events into a human
+accountability log makes both harder to read — and the wrap plan (A-058) needs
+exactly this kind of event history to be reproducible.
+
 ## A-058 — Monthly Scout Wrap has a backend and no front end
 
 **Promoted 2026-08-30 on owner question, verified against live code and the
