@@ -21,7 +21,15 @@ function CRMPageInner() {
   // mockOwnerId=master-dev into every request, so every visitor was reading
   // and writing the master-dev account's real deals. All requests now carry
   // the real session token; the mock id only applies without one (dev toolbox).
-  const { currentUser, isLoading: userLoading, addToast } = useDashboard();
+  // identityResolved, NOT the general isLoading flag. isLoading also covers
+  // inventory, the Airtable CMS proxy, deals and saved-intel hydration, which
+  // DashboardContext fetches in series and which this page never renders.
+  // Gating on it made the CRM wait for all of them: measured 2026-08-29 on an
+  // empty local database, 2,217ms to first paint against 546ms for the Inbox
+  // and 500ms for the dashboard home, with /api/cms alone costing 2.5s cold in
+  // production. The CRM needs one thing before it can fetch — who you are.
+  const { currentUser, identityResolved, addToast } = useDashboard();
+  const userLoading = !identityResolved;
   const [deals, setDeals] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,7 +141,11 @@ function CRMPageInner() {
     flashToast(`Unlock ${feature} at ${tier} tier.`, "locked");
   };
 
-  if (userLoading || loading) {
+  // Only an unknown identity justifies covering the whole page. Waiting for
+  // the pipeline itself no longer hides the header, the workspace nav and the
+  // tabs — those are ready immediately, and blanking them made the CRM feel
+  // slow even when the data arrived at the same time as everywhere else.
+  if (userLoading) {
     return (
       <div role="main" className="flex-1 flex justify-center items-center text-text-secondary h-screen">
         <AtmosphereBackground variant="dashboard" />
@@ -238,15 +250,20 @@ function CRMPageInner() {
 
       <WorkspaceCommandBar active="crm" className="relative z-20 mb-6 w-full md:max-w-xl" />
 
-      {/* KPI Strip */}
+      {/* KPI Strip.
+          While the pipeline is still loading these show a placeholder rather
+          than a number. A "0 Active Deals" that is really "we do not know yet"
+          is the same lie as an invented figure. */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
         <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Active Deals</div>
-          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{activeDeals}</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : activeDeals}</div>
         </div>
         <div className="card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-gold-accent">Pipeline Value</div>
-          {pricedDeals.length > 0 ? (
+          {loading ? (
+            <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">—</div>
+          ) : pricedDeals.length > 0 ? (
             <>
               <div className="font-body text-2xl font-semibold tracking-tight text-on-surface text-glow tabular-nums">₱{pipelineValue.toLocaleString()}</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
@@ -260,7 +277,9 @@ function CRMPageInner() {
         </div>
         <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Win Rate</div>
-          {winRate !== null ? (
+          {loading ? (
+            <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">—</div>
+          ) : winRate !== null ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{winRate}%</div>
           ) : (
             <>
@@ -271,7 +290,7 @@ function CRMPageInner() {
         </div>
         <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Upcoming Viewings</div>
-          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{upcomingViewings}</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : upcomingViewings}</div>
         </div>
       </div>
 
@@ -324,7 +343,12 @@ function CRMPageInner() {
           </div>
         )}
 
-        {activeTab === "pipeline" && (
+        {activeTab === "pipeline" && loading && (
+          <p className="animate-pulse py-10 text-center font-body text-base text-text-secondary">
+            Loading your pipeline…
+          </p>
+        )}
+        {activeTab === "pipeline" && !loading && (
           <KanbanBoard
             deals={deals}
             viewingAs={viewingAs}
@@ -332,7 +356,12 @@ function CRMPageInner() {
             onDealClick={setSelectedDeal}
           />
         )}
-        {activeTab === "appointments" && (
+        {activeTab === "appointments" && loading && (
+          <p className="animate-pulse py-10 text-center font-body text-base text-text-secondary">
+            Loading your viewings…
+          </p>
+        )}
+        {activeTab === "appointments" && !loading && (
           <AppointmentsSheet
             appointments={appointments}
             onStatusUpdate={handleAppointmentUpdate}

@@ -271,20 +271,44 @@ export function DashboardProvider({ children }) {
 
         if (!token && mockUser?.id !== currentUser.id) return;
 
+        // These four reads do not depend on each other, but they used to be
+        // awaited one after the next: inventory, then the Airtable CMS proxy,
+        // then deals, then saved intel. That made the slowest of them delay
+        // everything behind it, and every surface gated on isLoading waited
+        // for the whole chain. Start them together and await each where its
+        // result is actually needed.
+        //
+        // Each carries its own catch so that one rejecting early cannot become
+        // an unhandled rejection while the others are still in flight; a null
+        // here means "this read failed", which the code below already handles.
+        const settled = (promise) => promise.catch(() => null);
+        const mockOwnerId = mockUser?.id || "";
+        const inventoryPromise = settled(authedFetch('/api/dashboard/inventory'));
+        const cmsPromise = settled(fetch('/api/cms'));
+        const dealsPromise = settled(fetch("/api/deals", {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(mockOwnerId ? { "x-mock-user-id": mockOwnerId } : {}),
+          },
+        }));
+        const savedIntelPromise = token
+          ? settled(supabase.from('saved_intel').select('*'))
+          : Promise.resolve({ data: [], error: null });
+
         // 1. Fetch the signed-in owner's private dossiers through the
         // authenticated server boundary. This works for real sessions and the
         // localhost-only read fixture without exposing a direct table query.
         let supabaseListings = [];
-        const inventoryRes = await authedFetch('/api/dashboard/inventory');
-        if (inventoryRes.ok) {
+        const inventoryRes = await inventoryPromise;
+        if (inventoryRes?.ok) {
           const inventoryData = await inventoryRes.json();
           supabaseListings = mapSupabaseProperties(inventoryData.properties || []);
         }
 
         let airtableListings = [];
         try {
-          const cmsRes = await fetch('/api/cms');
-          if (cmsRes.ok) {
+          const cmsRes = await cmsPromise;
+          if (cmsRes?.ok) {
             const cmsData = await cmsRes.json();
             if (cmsData.properties) {
               airtableListings = cmsData.properties.map(p => ({
@@ -347,14 +371,8 @@ export function DashboardProvider({ children }) {
           // The localhost E2E fixture has no session token. `/api/deals`
           // accepts the mock identity header only under SCOUTIT_E2E on a
           // localhost host and only for reads (see lib/serverAuth.js).
-          const mockOwnerId = mockUser?.id || "";
-          const dealsRes = await fetch("/api/deals", {
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              ...(mockOwnerId ? { "x-mock-user-id": mockOwnerId } : {}),
-            },
-          });
-          if (dealsRes.ok) {
+          const dealsRes = await dealsPromise;
+          if (dealsRes?.ok) {
             const { deals: dealsData } = await dealsRes.json();
             const mappedDeals = (dealsData || []).map(d => ({
               id: d.id,
@@ -386,9 +404,8 @@ export function DashboardProvider({ children }) {
         }
 
         // 3. Fetch Saved Intel
-        const { data: savedData, error: savedError } = token
-          ? await supabase.from('saved_intel').select('*')
-          : { data: [], error: null };
+        const { data: savedData, error: savedError } = (await savedIntelPromise)
+          || { data: [], error: null };
           
         let supabaseSavedIds = [];
         if (!savedError && savedData) {

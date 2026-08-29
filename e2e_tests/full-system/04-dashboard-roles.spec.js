@@ -400,6 +400,38 @@ test.describe('master-dev (isolated local preview)', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('CRM pipeline does not wait for workspace data it never renders', async ({ page }) => {
+    // The CRM gated its whole page on DashboardContext's general isLoading
+    // flag, which stays true until inventory, the Airtable CMS proxy, deals
+    // and saved intel have all resolved -- in series. None of that appears on
+    // this page. Measured 2026-08-29 on an empty local database: CRM 2,217ms
+    // to first paint against Inbox 546ms and dashboard home 500ms, with
+    // /api/cms alone taking 2.5s cold in production.
+    await signInAsMock(page, MASTER_DEV_READONLY);
+
+    await page.route('**/api/cms**', async (route) => {
+      // Far longer than the budget below: if the CRM still blocks on this
+      // request, the assertion that follows cannot pass by luck.
+      await new Promise((resolve) => setTimeout(resolve, 8000));
+      await route.fulfill({ status: 200, json: { properties: [] } });
+    });
+
+    // Armed before navigating, so proving the stalled route was exercised
+    // does not race the assertion that the page rendered without it.
+    const cmsRequest = page.waitForRequest('**/api/cms**', { timeout: 20000 });
+
+    const startedAt = Date.now();
+    await page.goto('/dashboard/crm');
+    await expect(page.getByRole('heading', { name: 'Deal Intelligence' }))
+      .toBeVisible({ timeout: 6000 });
+    const visibleAfter = Date.now() - startedAt;
+
+    // The pipeline must be on screen well before the stalled CMS call could
+    // possibly have returned.
+    expect(visibleAfter).toBeLessThan(6000);
+    await cmsRequest;
+  });
+
   test('inbox renders threads or a clean empty state', async ({ page }) => {
     const errors = trackErrors(page);
     await signInAsMock(page, MASTER_DEV_READONLY);
