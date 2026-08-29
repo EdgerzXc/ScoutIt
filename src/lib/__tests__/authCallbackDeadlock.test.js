@@ -82,15 +82,20 @@ describe("onAuthStateChange callbacks cannot deadlock supabase-js", () => {
     expect(body).toMatch(/nextUserId === resolvedUserIdRef\.current/);
   });
 
-  it("the workspace boundary bounces to sign-in at most once per mount", () => {
+  it("the workspace boundary gates identity resolution, not dashboard data loading", () => {
     const source = readFileSync(
       join(ROOT, "components/auth/VerifiedWorkspaceBoundary.js"),
       "utf8",
     );
-    // /onboarding sends a session-holding visitor straight back here, so an
-    // unguarded redirect ping-pongs forever.
-    expect(source).toMatch(/redirectedRef/);
-    expect(source).toMatch(/if \(redirectedRef\.current\) return;/);
+    // DashboardContext also uses isLoading for inventory/CMS hydration. If the
+    // auth boundary reads that flag, a verified dashboard is replaced by the
+    // access spinner every time private workspace data refreshes.
+    expect(source).toMatch(/currentUser, identityResolved/);
+    expect(source).not.toMatch(/currentUser, isLoading/);
+    expect(source).not.toMatch(/redirectedRef/);
+
+    const context = read("context/DashboardContext.js");
+    expect(context).toMatch(/identityResolved,/);
   });
 
   it("ProfileButton actually releases its subscription on unmount", () => {
