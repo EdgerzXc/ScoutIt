@@ -373,3 +373,578 @@
   margin: 0 auto;
   line-height: 1.6;
 }
+
+/* ── A-023 dossier loading skeleton ──────────────────────────────────────
+   Shares the dossier's own layout classes; these rules only supply the
+   placeholder surfaces. The shimmer is a single 1.4s sweep on background-
+   position (compositor-cheap, no layout work) and is switched off entirely
+   under prefers-reduced-motion, where the bars simply rest at their base
+   surface colour. */
+
+.dossier-skeleton-status {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 28px;
+}
+
+.dossier-skeleton-bar,
+.dossier-skeleton-block {
+  display: block;
+  background-color: var(--surface-variant);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(var(--accent-ch) / 0.07) 50%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: dossier-skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+.dossier-skeleton-bar {
+  margin-bottom: 10px;
+}
+
+.focus-pills-list .dossier-skeleton-bar {
+  display: inline-block;
+  margin-bottom: 0;
+}
+
+.detail-avatar.dossier-skeleton-block {
+  filter: none;
+}
+
+@keyframes dossier-skeleton-sweep {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dossier-skeleton-bar,
+  .dossier-skeleton-block {
+    animation: none;
+    background-image: none;
+  }
+}
+
+/* ── A-023 phase 4: recommendations and contributions ────────────────────
+   Written 390px-first. Gold is deliberately absent from both sections: the
+   dossier's single gold action is Connect, and a verified recommendation is a
+   *status*, so it reuses the same green treatment the PRC badge already
+   established rather than introducing a second gold. */
+
+.recommendation-list,
+.contribution-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.recommendation-card {
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 22px 20px;
+}
+
+.recommendation-body {
+  margin: 0 0 16px;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--on-surface);
+}
+
+.recommendation-body::before { content: "C"; }
+.recommendation-body::after { content: "D"; }
+
+.recommendation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.recommendation-author {
+  font-weight: 700;
+  color: var(--on-surface);
+  text-transform: uppercase;
+}
+
+.recommendation-relationship,
+.recommendation-date {
+  text-transform: uppercase;
+}
+
+.recommendation-source {
+  margin-left: auto;
+  border: 1px solid var(--border-solid);
+  border-radius: 3px;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.recommendation-source-verified {
+  color: #4caf7d;
+  background: rgba(76, 175, 125, 0.1);
+  border-color: rgba(76, 175, 125, 0.3);
+}
+
+.contribution-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  min-height: 44px;
+  align-content: center;
+  padding: 14px 16px;
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color 160ms ease-out, transform 160ms ease-out;
+}
+
+.contribution-row:hover,
+.contribution-row:focus-visible {
+  border-color: var(--accent-muted);
+}
+
+.contribution-row:active {
+  transform: translateY(1px);
+}
+
+.contribution-row:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+.contribution-kind,
+.contribution-date {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.contribution-title {
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--on-surface);
+}
+
+@media (min-width: 768px) {
+  .contribution-row {
+    grid-template-columns: 190px 1fr auto;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contribution-row {
+    transition: none;
+  }
+  .contribution-row:active {
+    transform: none;
+  }
+}
+
+/* ── A-023 phase 5: ScoutIt Record panel ─────────────────────────────────
+   No gold here. The record is evidence, not a call to action, and Connect
+   remains the dossier's single gold element. A suppressed metric is rendered
+   in muted text at the same size as a published one, so absence reads as a
+   deliberate answer rather than a rendering failure. */
+
+.record-metric-list {
+  margin: 14px 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.record-metric {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-solid);
+}
+
+.record-metric:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.record-metric dt {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.record-metric dd {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.record-metric dd strong {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--on-surface);
+  font-weight: 600;
+}
+
+.record-metric-sample {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.record-metric-absent {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.record-stale-flag {
+  margin: 10px 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.example-profile-flag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: 1px dashed var(--border-solid);
+  border-radius: 3px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* A-023: provenance marker. Deliberately quiet — it states where a claim came
+   from, it does not compete with the claim itself. */
+.provenance-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── A-023 Career History (secondary template) ───────────────────────────
+   Visually quieter than the ScoutIt Record on purpose. The record uses
+   display type at 26px; a declared figure uses 20px body weight and always
+   sits beside its provenance label and coverage period. The difference in
+   emphasis is the last half of "never visually merged". */
+
+.career-claim-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.career-claim {
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 18px 20px;
+}
+
+.career-claim-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.career-claim-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.career-claim-head .provenance-label {
+  margin-bottom: 0;
+}
+
+.career-claim-value {
+  margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.career-claim-value strong {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.career-claim-unit {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.career-claim-period,
+.career-claim-source {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.career-claim-source {
+  margin-top: 4px;
+  color: var(--text-muted);
+}
+
+@media (min-width: 768px) {
+  .career-claim-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── RA 9646 credential states ───────────────────────────────────────────
+   A lapsed or undated registration is stated, not hidden. Both use neutral
+   text rather than the verified green, so only a current licence carries the
+   colour that reads as trust. */
+
+.prc-expiry-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.prc-lapsed-badge,
+.prc-undated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-solid);
+  border-radius: 3px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.prc-lapsed-badge {
+  border-color: rgba(232, 200, 74, 0.35);
+  background: rgba(232, 200, 74, 0.08);
+  color: #e8c84a;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   A-037 · ScoutIt Record — at-a-glance chart
+   Sits top-right beside the advisor identity.
+
+   The three metrics carry incompatible units, so they are NOT drawn
+   on a shared axis (a count, a percentage and a duration have no
+   common scale). Each row is encoded by what its number actually is;
+   see src/lib/brokerRecordChart.js for the reasoning.
+
+   Gold is the data ink here and is confined to the marks themselves —
+   the figures wear text tokens, never the series colour, so the 95/5
+   balance survives and the numbers stay the most readable thing.
+   ───────────────────────────────────────────────────────────── */
+
+.record-chart {
+  border: 1px solid var(--border-solid);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 16px 18px 14px;
+  inline-size: 100%;
+  max-inline-size: 268px;
+}
+
+.record-chart-heading {
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.record-chart-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.record-chart-row {
+  display: grid;
+  gap: 3px;
+}
+
+.record-chart-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.record-chart-value {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 7px;
+  /* Proportional figures: tabular-nums makes a standalone value look loose. */
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+/* Keeps a two-word figure such as "26 min" on one line; the context text
+   beside it may wrap freely. */
+.record-chart-figure {
+  white-space: nowrap;
+}
+
+.record-chart-context {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+}
+
+/* Meter — the only true ratio of the three (answered ÷ eligible).
+   Track is a muted step of the same gold ramp, so the unfilled
+   remainder still reads as part of the same measure. */
+.record-chart-track {
+  display: block;
+  block-size: 6px;
+  border-radius: 3px;
+  background: var(--accent-muted);
+  overflow: hidden;
+  margin-block-start: 3px;
+}
+
+.record-chart-fill {
+  display: block;
+  block-size: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+/* Unit ticks — one tick is one completed transaction. A count has no
+   natural maximum, so nothing is normalised and no scale is invented. */
+.record-chart-ticks {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-block-start: 5px;
+  min-block-size: 6px;
+}
+
+.record-chart-tick {
+  block-size: 6px;
+  inline-size: 10px;
+  border-radius: 2px;
+  background: var(--accent);
+  flex: 0 1 auto;
+}
+
+.record-chart-tick-overflow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-inline-start: 3px;
+}
+
+.record-chart-row--absent .record-chart-absent {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.record-chart-foot {
+  margin: 14px 0 0;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--border-solid);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* Below the grid breakpoint the card stops being a sidebar and becomes a
+   full-width band, so it never squeezes the advisor's name. */
+@media (max-width: 900px) {
+  .record-chart {
+    max-inline-size: none;
+  }
+}
+
+/* A-037 · the identity header becomes two columns so the record sits top-right
+   beside the advisor's name. Mobile-first: it stacks by default and only
+   becomes a sidebar once there is room, so the name never gets squeezed. */
+.profile-header--with-record {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.profile-header-identity {
+  min-inline-size: 0;
+}
+
+@media (min-width: 901px) {
+  .profile-header--with-record {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+  }
+  .profile-header-identity {
+    flex: 1 1 auto;
+  }
+  .profile-header--with-record .record-chart {
+    flex: 0 0 268px;
+  }
+}

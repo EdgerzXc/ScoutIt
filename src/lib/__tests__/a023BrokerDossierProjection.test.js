@@ -253,15 +253,32 @@ describe("A-023 phase 2 - public broker dossier projection", () => {
   });
 
   describe("template isolation", () => {
-    it("ships no Career History surface until its source exists", () => {
-      // A-023 keeps broker-declared history mathematically isolated from the
-      // ScoutIt Record. The safest isolation while the claims table is
-      // migration-gated is to publish no history at all.
+    // RE-AIMED 2026-08-27. This assertion originally required Career History to
+    // be ABSENT, which was the correct isolation while its claims table was
+    // migration-gated — and it did its job: it went red the moment G4 built the
+    // surface. Career History now exists deliberately, so the guard is pointed
+    // at what it was always protecting (the two templates never merging)
+    // rather than at the absence that used to imply it (Rule 14).
+    it("keeps the identity projection free of any career-history concern", () => {
       const dossierModule = read("src/lib/brokerDossier.js");
       expect(dossierModule).not.toMatch(/careerHistory/i);
+    });
 
+    it("never lets a career claim reach the ScoutIt Record projection", () => {
+      const metrics = read("src/lib/brokerMetrics.js");
+      expect(metrics).not.toMatch(/careerHistory|career_claims|brokerCareerHistory/);
+
+      const career = read("src/lib/brokerCareerHistory.js");
+      expect(career).not.toMatch(/brokerMetrics|completedTransactions|responseRate/);
+    });
+
+    it("renders the ScoutIt Record before Career History and from separate lookups", () => {
       const page = read("src/app/brokers/[broker-slug]/page.js");
-      expect(page).not.toMatch(/career history/i);
+      expect(page.indexOf("<BrokerDossierIdentity")).toBeLessThan(
+        page.indexOf("<BrokerCareerHistory"),
+      );
+      expect(page).not.toMatch(/buildCareerHistorySection\([^)]*metricLookup/);
+      expect(page).not.toMatch(/buildScoutItRecord\([^)]*careerLookup/);
     });
   });
 

@@ -6,8 +6,17 @@ const read = (file) => readFileSync(resolve(process.cwd(), file), "utf8");
 describe("A-023 broker phase-one trust contract", () => {
   it("does not publish an unsupported composite rating on the canonical dossier", () => {
     const page = read("src/app/brokers/[broker-slug]/page.js");
+    // A-023 phase 3 extracted the identity block into one shared presentational
+    // component so the public dossier and the editor preview cannot drift. The
+    // honest-record guarantee moved with the markup; it did not go away.
+    const identity = read("src/components/brokers/BrokerDossierIdentity.js");
 
-    expect(page).toContain("Building a ScoutIt record");
+    expect(page).toContain("<BrokerDossierIdentity");
+    expect(identity).toContain("Building a ScoutIt record");
+    for (const source of [page, identity]) {
+      expect(source).not.toContain("scoutRating");
+      expect(source).not.toContain("/100");
+    }
     expect(page).not.toContain("broker.scoutRating");
     expect(page).not.toContain("broker.metrics");
     expect(page).not.toContain("broker.closures");

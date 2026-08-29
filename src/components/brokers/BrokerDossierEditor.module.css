@@ -1,0 +1,214 @@
+.workspace {
+  width: min(1680px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 110px 0 72px;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.28fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.editor,
+.preview {
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.editor {
+  position: sticky;
+  top: 92px;
+  padding: 28px;
+  display: grid;
+  gap: 16px;
+  max-height: calc(100dvh - 116px);
+  overflow-y: auto;
+}
+
+.editor h2 {
+  margin: 0;
+  color: var(--on-surface);
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 40px);
+  line-height: 1.04;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.intro,
+.boundary,
+.previewEmpty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.status {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent-muted);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.editor label {
+  display: grid;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.editor input,
+.editor textarea,
+.editor select {
+  width: 100%;
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-md);
+  background: var(--surface-variant);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 12px 13px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.editor textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.editor input:focus-visible,
+.editor textarea:focus-visible,
+.editor select:focus-visible,
+.actions button:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+.editor :disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.actions .publish {
+  border-color: var(--accent-bright);
+  background: var(--accent-bright);
+  color: var(--bg);
+}
+
+.actions button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actions button:not(:disabled):active {
+    transform: none;
+  }
+}
+
+.preview {
+  min-width: 0;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.preview > .eyebrow {
+  display: block;
+  margin-bottom: 22px;
+}
+
+.preview :global(.profile-grid) {
+  margin: 0;
+}
+
+@media (max-width: 1050px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .editor {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .workspace {
+    width: min(100% - 24px, 1680px);
+    padding-top: 88px;
+  }
+
+  .editor,
+  .preview {
+    padding: 20px;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+/* Separates fields that reach the public dossier from fields that only ever
+   reach the private draft. Without this the editor offered ten fields that
+   looked equally publishable and eight of them silently could not be. */
+.groupLabel {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-solid);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.groupNote {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}

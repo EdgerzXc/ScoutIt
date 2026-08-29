@@ -71,6 +71,26 @@ export function resolveBrokerAuthorityId(dossierId) {
   return UUID_PATTERN.test(candidate) ? candidate : null;
 }
 
+/**
+ * Find the broker a dossier URL refers to.
+ *
+ * `generateMetadata` and the page body must resolve the SAME broker; when they
+ * each carried their own `find(b => b.id === slug)` they could disagree, which
+ * is how a page renders one advisor and titles itself another. Matching is
+ * case-insensitive for Auth UUIDs because a hand-typed or lower-cased URL is
+ * still the same identity, while non-UUID ids keep exact matching.
+ */
+export function findPublicBroker(brokers = [], slug) {
+  const wanted = text(slug);
+  if (!wanted) return null;
+  const exact = brokers.find((broker) => text(broker?.id) === wanted);
+  if (exact) return exact;
+
+  const authorityId = resolveBrokerAuthorityId(wanted);
+  if (!authorityId) return null;
+  return brokers.find((broker) => resolveBrokerAuthorityId(broker?.id) === authorityId) || null;
+}
+
 /** Strip an Airtable broker record down to the publishable identity. */
 export function publicBrokerIdentity(broker) {
   if (!broker) return null;

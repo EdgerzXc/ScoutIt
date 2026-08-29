@@ -885,7 +885,6 @@ export default function BrokerMode() {
       {/* Embedded Radar Map */}
       {showMap && (
         <div id="broker-map-section" className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)] mb-8 scroll-mt-24">
-          <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
           
           {mapError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 text-error z-20 p-8 text-center">
