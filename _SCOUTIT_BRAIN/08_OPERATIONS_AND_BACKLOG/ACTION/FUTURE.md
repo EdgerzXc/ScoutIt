@@ -301,6 +301,47 @@ and reduce operational cost?**
 
 ---
 
+## O-014 — Turn on leaked-password protection in Supabase Auth
+
+**Found by the 2026-08-30 security audit. Moved here from the owner queue on
+2026-08-30: the owner confirmed it is a launch-hardening item, not a now item,
+and that the setting is available on the free plan.**
+
+Supabase can check every new or changed password against the HaveIBeenPwned
+breach corpus and refuse ones already in a public dump. It is off today, so a
+user can choose a password attackers already have.
+
+One toggle, no code: Authentication → Policies, project
+`yyixsuaimdzyiocswcgc`. An agent cannot set it; it is a project setting.
+
+**Trigger:** the launch-hardening pass, alongside O-015. Cheap enough that it
+should simply be done then rather than re-evaluated.
+
+## O-015 — `pre_launch_free_mode` off at 200 listings, and the Vault URL tail
+
+**Found by the 2026-08-30 audit. Moved here from the owner queue the same day:
+the owner confirmed the flag is by design and that the trigger is the 200
+listing milestone, not a date.**
+
+`feature_flags.pre_launch_free_mode` is `true`, so every visitor — anonymous
+included — resolves to the top `universe` tier and nothing is stripped.
+Verified live: a plain `curl` of `/api/cms` returns **18 gated values** with
+zero properties locked. This is the intended seeding posture. The public
+catalogue route was deliberately built to be unaffected: the cacheable
+`?scope=public` branch pins the anonymous tier and returned **0** gated values
+in the same test, so nothing premium has ever entered the CDN.
+
+**The part still worth a decision when the flag flips.** Vault URLs are links
+to hosted assets. Flipping the flag stops the API from *serving* them; it does
+not move the files. Anything harvested during free mode keeps resolving
+afterwards. So at the 200 listing gate, decide whether hosted Vault assets are
+re-keyed, moved, or put behind signed URLs — otherwise the paywall is
+retroactively porous for exactly the listings that were public longest.
+
+**Trigger:** the 200th live listing (the milestone already recorded in
+[[../../01_IDENTITY_AND_VISION/SCOUTIT_BIBLE|the Bible]] as the pre-monetisation
+north star).
+
 ## A-056 — Remove `unsafe-inline` and `unsafe-eval` from the CSP
 
 **Found by the 2026-08-30 full-platform audit. Parked because it is a real

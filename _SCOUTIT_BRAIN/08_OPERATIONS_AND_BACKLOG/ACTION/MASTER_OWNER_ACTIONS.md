@@ -14,46 +14,6 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKL
 
 ## Do now
 
-## O-014 — Turn on leaked-password protection in Supabase Auth
-
-**Found by the 2026-08-30 full-platform security audit. One dashboard toggle,
-no code.**
-
-Supabase can check every new or changed password against the
-HaveIBeenPwned breach corpus and refuse ones that already appear in a public
-dump. It is currently off, so a user can set a password that is already
-known to attackers.
-
-Authentication → Policies → enable leaked password protection, in the
-Supabase dashboard for project `yyixsuaimdzyiocswcgc`. An agent cannot do
-this; it is a project setting, not a migration.
-
-## O-015 — Decide the launch gate for `pre_launch_free_mode`
-
-**Found by the 2026-08-30 audit. Not a defect — a state the owner should be
-holding deliberately.**
-
-`feature_flags.pre_launch_free_mode` is `true` in production. Every visitor,
-including an anonymous one, therefore resolves to the top `universe` tier and
-`stripPremiumFields` strips nothing. Verified live: a plain `curl` of
-`/api/cms` returns **18 gated values** — deep intel, Vault URLs, floor plans —
-with zero properties locked. That is the intended seeding posture, and the
-public catalogue route was deliberately built to be unaffected by it (the
-cacheable `?scope=public` branch pins the anonymous tier and returned **0**
-gated values in the same test).
-
-**The part that needs a decision is the tail.** Vault URLs are links to hosted
-assets. Anyone who scrapes the catalogue while this flag is on keeps working
-links *after* it is switched off, because flipping the flag does not move the
-files. So the question is not only "when do we turn the paywall on" but
-"do any Vault assets need new URLs at launch".
-
-Two things to settle before launch:
-1. When this flag flips off, and what is verified immediately afterwards.
-2. Whether hosted Vault assets are re-keyed or moved behind signed URLs at that
-   point, so anything harvested during free mode stops resolving.
-
-
 ## O-013 — Decide how ScoutIt represents salespersons and DHSUD registration
 
 Raised by the 2026-08-27 RA 9646 audit. Both parts are product decisions, not
