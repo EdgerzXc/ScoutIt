@@ -10,10 +10,14 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // First get the user's properties to filter units
+    // Return the authenticated owner's property rows through the same boundary
+    // used for their unit statistics. DashboardContext consumes `properties`;
+    // Mission Control consumes `units` and `stats`. Keeping both here prevents
+    // the private owner workspace from drifting back to a browser-side table
+    // query and gives read-only E2E a real server boundary to intercept.
     const { data: userProps, error: propError } = await supabaseAdmin
       .from('properties')
-      .select('id')
+      .select('*')
       .eq('owner_id', userId);
 
     if (propError) {
@@ -24,7 +28,7 @@ export async function GET(request) {
     const propIds = userProps.map(p => p.id);
 
     if (propIds.length === 0) {
-      return NextResponse.json({ units: [], stats: { total: 0, occupied: 0, vacant: 0, maintenance: 0 } }, { status: 200 });
+      return NextResponse.json({ properties: [], units: [], stats: { total: 0, occupied: 0, vacant: 0, maintenance: 0 } }, { status: 200 });
     }
 
     // Now get the units
@@ -63,7 +67,8 @@ export async function GET(request) {
       else vacant++; // default/available
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
+      properties: userProps,
       units, 
       stats: { total, occupied, vacant, maintenance, saved_intel_count: savedCount || 0 } 
     }, { status: 200 });

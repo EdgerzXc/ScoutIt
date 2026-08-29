@@ -66,6 +66,20 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const anchor = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
   const livePos = useRef({ x: 24, y: 450 });
 
+  function rememberPanelTrigger() {
+    previousFocusRef.current = document.activeElement;
+  }
+
+  function restorePanelTriggerFocus() {
+    const remembered = previousFocusRef.current;
+    const fallback =
+      document.querySelector('button[aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"]') ||
+      document.querySelector('button[aria-label="Menu"]') ||
+      containerRef.current?.querySelector('[role="button"]');
+    const target = remembered?.isConnected ? remembered : fallback;
+    requestAnimationFrame(() => target?.focus?.());
+  }
+
   // Apply theme classes to body
   function applyTheme(m) {
     if (typeof document === 'undefined') return;
@@ -113,6 +127,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
     setMounted(true);
 
     function handleOpenDisplay() {
+      rememberPanelTrigger();
       setOpen(true);
     }
     function handleCloseDisplay() {
@@ -229,6 +244,22 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const panelRef = useRef(null);
   const panelAnchor = useRef({ clientX: 0, clientY: 0, posX: 0, posY: 0 });
 
+  useEffect(() => {
+    if (!open || wizardOpen || reportOpen) return;
+
+    function handleOutsidePointer(event) {
+      if (isDraggingPanel.current) return;
+      if (panelRef.current?.contains(event.target)) return;
+      if (containerRef.current?.contains(event.target)) return;
+      // Capture observes the pointer but never cancels it. The outside press
+      // closes the panel and continues normally to the page beneath it.
+      setOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handleOutsidePointer, true);
+    return () => document.removeEventListener("pointerdown", handleOutsidePointer, true);
+  }, [open, reportOpen, wizardOpen]);
+
   const viewW = typeof window !== 'undefined' ? window.innerWidth : 1000;
   const viewH = typeof window !== 'undefined' ? window.innerHeight : 800;
   const defaultPanelX = Math.max(16, Math.min(viewW - 250, pos.x > viewW - 290 ? viewW - 250 : pos.x));
@@ -242,14 +273,15 @@ export default function FloatingToolbox({ showTrigger = true }) {
         if (wizardOpen) {
           setWizardOpen(false);
           requestAnimationFrame(() => previousFocusRef.current?.focus?.());
-        } else {
+        } else if (open) {
           setOpen(false);
+          restorePanelTriggerFocus();
         }
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [wizardOpen]);
+  }, [open, wizardOpen]);
 
   useEffect(() => {
     if (!verifiedJourney) return;
@@ -421,6 +453,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
         <div
           ref={panelRef}
           className="toolbox-float"
+          role="complementary"
+          aria-label="Help & Display"
           style={{
             position: "fixed", left: activePanelX, top: activePanelY,
             zIndex: 99998, width: 228,
@@ -503,7 +537,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
                   <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: mode === key ? "#E8AE3C" : "#e5e2e1", fontWeight: mode === key ? 600 : 400, lineHeight: 1.3 }}>
                     {label}
                   </div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.3, marginTop: 1 }}>
                     {desc}
                   </div>
                 </div>
@@ -529,7 +563,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "#E8AE3C" : "#e5e2e1", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
                   Lite Mode {lite ? "· On" : "· Off"}
                 </div>
-                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.3, marginTop: 1 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.3, marginTop: 1 }}>
                   Stops animations for older devices
                 </div>
               </div>

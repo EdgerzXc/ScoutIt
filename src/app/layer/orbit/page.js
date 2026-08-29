@@ -16,7 +16,7 @@ export default function OrbitLayer() {
       </div>
 
       <main className={styles.main}>
-        <BoardPodium />
+        <BoardPodium headingLevel={1} />
         <LayerTransition
           nextNum="02"
           nextName="Stratosphere"

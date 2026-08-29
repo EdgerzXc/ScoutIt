@@ -28,7 +28,7 @@ const TIER_THEME = {
   },
 };
 
-export default function BoardPodium() {
+export default function BoardPodium({ headingLevel = 2 }) {
   const [entries, setEntries] = useState([]);
   const [category, setCategory] = useState("All");
   const [savedSlugs, setSavedSlugs] = useState(new Set());
@@ -57,6 +57,7 @@ export default function BoardPodium() {
 
   const hero = allRanked[0];
   const runners = allRanked.slice(1, 3);
+  const HeroHeading = headingLevel === 1 ? "h1" : "h2";
 
   const categoryCounts = useMemo(() => {
     const counts = { All: entries.length };
@@ -90,9 +91,9 @@ export default function BoardPodium() {
               LAYER 01 // ORBIT · SAMPLE DEMAND INDEX
             </span>
           </div>
-          <h2 className="orbit-hero-title">
+          <HeroHeading className="orbit-hero-title">
             Top-Ranked <span className="orbit-gold-accent">Spaces</span>
-          </h2>
+          </HeroHeading>
           <p className="orbit-hero-subtitle">
             Illustrative rankings across residential, commercial, and hospitality spaces, demonstrating ScoutIt&apos;s spatial demand and inquiry framework in preview.
           </p>

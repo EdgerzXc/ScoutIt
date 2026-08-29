@@ -53,7 +53,9 @@ test.describe('@P1 @CMS Airtable starter catalog', () => {
     await test.step('Open the Airtable broker directory', async () => {
       await gotoAndSettle(page, '/brokers');
       await expectRealContent(page, 100);
-      await expect(page.locator('.broker-card')).toHaveCount(3, { timeout: 20000 });
+      const directory = page.getByRole('region', { name: 'Verified Advisors directory' });
+      await expect(directory).toBeVisible({ timeout: 20000 });
+      await expect(directory.getByRole('article')).toHaveCount(3, { timeout: 20000 });
       for (const brokerName of EXPECTED_BROKERS) {
         await expect(page.getByText(brokerName, { exact: true }).first()).toBeVisible();
       }

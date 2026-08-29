@@ -74,6 +74,11 @@ test('showcase keeps explicit parent and home navigation', async ({ page }) => {
 test('metropolis category surface stays operable', async ({ page }) => {
   await gotoAndSettle(page, '/layer/metropolis');
 
+  const helpPanel = page.getByRole('complementary', { name: 'Help & Display' });
+  await expect(helpPanel).toBeVisible();
+  await page.getByRole('heading', { name: 'Explore by Category' }).click();
+  await expect(helpPanel).toBeHidden();
+
   const commercialCategory = page.getByRole('button', { name: 'Commercial' });
   await expect(commercialCategory).toBeVisible();
   await commercialCategory.click();

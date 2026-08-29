@@ -14,6 +14,7 @@ for (const [path, heading] of directories) {
     const response = await gotoAndSettle(page, path);
     expect(response.status()).toBeLessThan(400);
     await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
+    await expect(page.getByText("Scanning verified directory roster…")).toHaveCount(0);
     await expect(page.getByText("Named signals only")).toBeVisible();
     await expect(page.getByPlaceholder("SEARCH NAME, PLACE, OR SPECIALTY")).toBeVisible();
     await expect(page.getByText("Private saves never create a public count")).toBeVisible();
@@ -27,8 +28,15 @@ test("professional cards expose stable profile and private-interest actions with
   const firstCard = page.locator("article").first();
   await expect(firstCard.getByRole("link", { name: /View advisor/i })).toHaveAttribute("href", /\/brokers\//);
   await expect(firstCard.locator("a button, button a")).toHaveCount(0);
-  await firstCard.getByRole("button", { name: /Save interest/i }).click();
-  await expect(firstCard.getByText(/Sign in to keep this interest private/i)).toBeVisible();
+  const saveButton = firstCard.getByRole("button", { name: /Save interest/i });
+  const signedOutMessage = firstCard.getByText(/Sign in to keep this interest private/i);
+  // The server-rendered card can become actionable before the client island's
+  // handler is attached on a constrained phone. Retry real, actionability-
+  // checked clicks until the signed-out state confirms hydration; never force.
+  await expect.poll(async () => {
+    if (!(await signedOutMessage.isVisible().catch(() => false))) await saveButton.click();
+    return signedOutMessage.isVisible().catch(() => false);
+  }, { timeout: 15000 }).toBe(true);
   await expect(firstCard.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
 });
 

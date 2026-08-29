@@ -54,6 +54,14 @@ const EMPTY_BUNDLE = {
 let cache = { bundle: null, fetchedAt: 0 };
 let inflight = null; // dedupe concurrent rebuilds into one Airtable fan-out
 
+export async function invalidateCmsBundle() {
+  // Do not let a rebuild that started before the publish repopulate the cache
+  // after invalidation. Wait for it, then clear both cache layers.
+  if (inflight) await inflight.catch(() => null);
+  cache = { bundle: null, fetchedAt: 0 };
+  if (redis) await redis.del("cms_bundle");
+}
+
 async function fetchDevelopmentLiveCms() {
   if (process.env.NODE_ENV !== "development") return null;
 

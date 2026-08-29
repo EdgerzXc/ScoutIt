@@ -18,24 +18,28 @@ test.describe('LR-01 mobile owner controls', () => {
     await signInAsMock(page, MOCK_OWNER_EMPTY);
 
     // Read-only fixture: the browser never submits a lifecycle mutation.
-    await page.route('**/rest/v1/properties*', async (route) => {
+    await page.route('**/api/dashboard/inventory**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        json: [{
-          id: 'lr01-mobile-fixture',
-          owner_id: MOCK_OWNER_EMPTY.id,
-          title: 'LR-01 Mobile Property',
-          slug: 'lr-01-mobile-property',
-          canonical_slug: 'lr-01-mobile-property',
-          lifecycle_state: 'live',
-          pipeline_status: 'approved',
-          type: 'Commercial',
-          space_category: 'Commercial',
-          location: 'BGC, Taguig',
-          details: {},
-          created_at: '2026-08-01T00:00:00.000Z',
-        }],
+        json: {
+          properties: [{
+            id: 'lr01-mobile-fixture',
+            owner_id: MOCK_OWNER_EMPTY.id,
+            title: 'LR-01 Mobile Property',
+            slug: 'lr-01-mobile-property',
+            canonical_slug: 'lr-01-mobile-property',
+            lifecycle_state: 'live',
+            pipeline_status: 'approved',
+            type: 'Commercial',
+            space_category: 'Commercial',
+            location: 'BGC, Taguig',
+            details: {},
+            created_at: '2026-08-01T00:00:00.000Z',
+          }],
+          units: [],
+          stats: { total: 0, occupied: 0, vacant: 0, maintenance: 0 },
+        },
       });
     });
     await page.route('**/api/crm/activity**', async (route) => {

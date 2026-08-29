@@ -220,14 +220,14 @@ export function DashboardProvider({ children }) {
 
         if (!token && mockUser?.id !== currentUser.id) return;
 
-        // 1. Fetch Properties (Dossiers)
-        const { data: propertiesData, error: propError } = token
-          ? await supabase.from('properties').select('*').order('created_at', { ascending: false })
-          : { data: [], error: null };
-
+        // 1. Fetch the signed-in owner's private dossiers through the
+        // authenticated server boundary. This works for real sessions and the
+        // localhost-only read fixture without exposing a direct table query.
         let supabaseListings = [];
-        if (!propError && propertiesData) {
-          supabaseListings = mapSupabaseProperties(propertiesData);
+        const inventoryRes = await authedFetch('/api/dashboard/inventory');
+        if (inventoryRes.ok) {
+          const inventoryData = await inventoryRes.json();
+          supabaseListings = mapSupabaseProperties(inventoryData.properties || []);
         }
 
         let airtableListings = [];

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { getFreshness } from "@/lib/freshness";
+import { stampAirtableFreshness } from "@/lib/airtableFreshness";
 
 // ─────────────────────────────────────────────────────────────────────────
 // RE-VERIFICATION GATE  (NEW_IDEAS.md §21)
@@ -32,52 +32,12 @@ import { getFreshness } from "@/lib/freshness";
 // rather than pretending everything worked.
 // ─────────────────────────────────────────────────────────────────────────
 
-const AIRTABLE_BASE_URL = "https://api.airtable.com/v0";
-
 const schema = z.object({
   propertyIds: z.array(z.string().uuid()).min(1).max(50),
 });
 
 function fail(message, status = 400) {
   return NextResponse.json({ success: false, message }, { status });
-}
-
-/**
- * Stamps Last_Verified_Date on an Airtable PROPERTIES_CMS record.
- * Returns true on success. Never throws — a CMS hiccup must not lose the
- * owner's confirmation, which is already safe in Supabase.
- */
-async function stampAirtable(slug, isoDate) {
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  if (!apiKey || !baseId || !slug) return false;
-
-  try {
-    const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
-    const findRes = await fetchWithRetry(`${AIRTABLE_BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!findRes.ok) return false;
-
-    const found = await findRes.json();
-    const recordId = found?.records?.[0]?.id;
-    if (!recordId) return false; // not published to Airtable yet — fine
-
-    const patchRes = await fetchWithRetry(`${AIRTABLE_BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      // Last_Verified_Date ONLY. Never Slug — it's a formula field.
-      body: JSON.stringify({ fields: { Last_Verified_Date: isoDate }, typecast: true }),
-    });
-
-    return patchRes.ok;
-  } catch (error) {
-    console.error("[verify-freshness] Airtable stamp failed:", error.message);
-    return false;
-  }
 }
 
 // ── GET: portfolio freshness ─────────────────────────────────────────────
@@ -170,8 +130,8 @@ export async function POST(req) {
     const airtableResults = [];
     for (const property of owned) {
       if (!property.slug) continue;
-      const ok = await stampAirtable(property.slug, iso);
-      airtableResults.push({ slug: property.slug, synced: ok });
+      const result = await stampAirtableFreshness({ slug: property.slug, isoDate: iso });
+      airtableResults.push({ slug: property.slug, synced: result.ok });
     }
 
     const failedSync = airtableResults.filter((r) => !r.synced).map((r) => r.slug);

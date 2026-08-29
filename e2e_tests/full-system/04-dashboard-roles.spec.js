@@ -163,6 +163,33 @@ test.describe('Settings information architecture', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('first-visit Help & Display closes on an outside touch without swallowing the page', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.removeItem('scoutit_help_seen_v1'));
+    await gotoAndSettle(page, '/layer/metropolis');
+
+    const panel = page.getByRole('complementary', { name: 'Help & Display' });
+    await expect(panel).toBeVisible();
+    await page.getByRole('heading', { name: 'Explore by Category' }).click();
+    await expect(panel).toBeHidden();
+
+    const commercial = page.getByRole('button', { name: 'Commercial' });
+    await commercial.click();
+    await expect(commercial).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('Escape closes Help & Display and restores a sensible trigger', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('scoutit_help_seen_v1', 'true'));
+    await gotoAndSettle(page, '/discover');
+    const menu = page.getByRole('button', { name: 'Menu', exact: true });
+    await menu.click();
+    await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
+    await expect(page.getByRole('complementary', { name: 'Help & Display' })).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('complementary', { name: 'Help & Display' })).toBeHidden();
+    await expect(menu).toBeFocused();
+  });
+
   test('page help is non-blocking, keyboard dismissible, and restores Eye focus', async ({ page }) => {
     await gotoAndSettle(page, '/discover');
     const eye = page.getByRole('button', { name: 'Menu', exact: true });

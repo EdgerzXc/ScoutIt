@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const header = readFileSync(resolve(process.cwd(), "src/components/layout/Header.js"), "utf8");
+const globals = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
 
 describe("universal header menu operating layer", () => {
   it("dismisses on Escape and hands focus back to the trigger", () => {
@@ -37,6 +38,14 @@ describe("universal header menu operating layer", () => {
   it("uses dvh for the mobile sheet, because vh lies under the iOS toolbar", () => {
     const sheet = header.slice(header.indexOf(".header-dropdown {"));
     expect(sheet).not.toMatch(/max-height:\s*\d+vh/);
+    const globalMobileSheet = globals.slice(
+      globals.indexOf("/* â”€â”€ DROPDOWN POSITIONING FIX"),
+      globals.indexOf("/* â”€â”€ SEARCH INPUT OPTIMIZATION"),
+    );
+    expect(globalMobileSheet).not.toMatch(/max-height:\s*\d+vh/);
+    expect(globalMobileSheet).toContain("env(safe-area-inset-top");
+    expect(globalMobileSheet).toContain("env(safe-area-inset-bottom");
+    expect(globalMobileSheet).toContain("overscroll-behavior: contain");
   });
 
   // styled-jsx does not attach its scoping class to elements rendered from a

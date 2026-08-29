@@ -9,6 +9,7 @@ import { getFreshness } from "@/lib/freshness";
 import { findProperty } from "@/lib/propertyLookup";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { stampAirtableFreshness } from "@/lib/airtableFreshness";
 
 /**
  * POST /api/property/verify
@@ -55,7 +56,7 @@ export async function POST(request) {
     const { property: prop, error: propErr } = await findProperty(
       supabaseAdmin,
       propertyId,
-      ["id", "slug", "canonical_slug", "owner_id", "lifecycle_state", "pipeline_status", "title"]
+      ["id", "slug", "canonical_slug", "owner_id", "lifecycle_state", "pipeline_status", "title", "last_verified_date"]
     );
 
     if (propErr) {
@@ -72,9 +73,9 @@ export async function POST(request) {
       );
     }
 
-    // Check authority: user must be property owner or staff
-    if (prop.owner_id && prop.owner_id !== userId) {
-      // Check if user is admin
+    // Fail closed: exact owner authority requires a non-null owner_id. An
+    // unowned listing is staff-only; absence of an owner never grants access.
+    if (prop.owner_id !== userId) {
       const { data: profile } = await supabaseAdmin
         .from("user_profiles")
         .select("active_roles")
@@ -114,6 +115,38 @@ export async function POST(request) {
       );
     }
 
+    // Public pages read Airtable, not this Supabase row. A published listing is
+    // not successfully verified until both stores carry the same timestamp.
+    const publicSlug = prop.canonical_slug || prop.slug;
+    const isPublished = prop.pipeline_status === "approved" && Boolean(publicSlug);
+    if (isPublished) {
+      const cmsSync = await stampAirtableFreshness({ slug: publicSlug, isoDate: nowIso });
+      if (!cmsSync.ok) {
+        // Compensate the private write so a failed public projection does not
+        // leave two authoritative timestamps silently diverged.
+        const { error: rollbackError } = await supabaseAdmin
+          .from("properties")
+          .update({ last_verified_date: prop.last_verified_date ?? null })
+          .eq("id", prop.id);
+
+        if (rollbackError) {
+          console.error("[PROPERTY VERIFY API] Freshness rollback failed:", rollbackError);
+        }
+
+        const missingConfig = cmsSync.reason === "missing_configuration";
+        return NextResponse.json(
+          {
+            error: missingConfig
+              ? "Public verification service is not configured. No verification was recorded."
+              : "Could not update the public verification record. No verification was recorded.",
+            cmsSyncFailed: true,
+            rollbackFailed: Boolean(rollbackError),
+          },
+          { status: missingConfig ? 503 : 502 },
+        );
+      }
+    }
+
     // 3. Compute new freshness status
     const freshness = getFreshness(nowIso);
 
@@ -139,6 +172,7 @@ export async function POST(request) {
       lastVerifiedDate: nowIso,
       freshness,
       message: "Property freshness re-verified successfully.",
+      publicCmsUpdated: isPublished,
     });
   } catch (err) {
     console.error("[PROPERTY VERIFY API] POST failed:", err);

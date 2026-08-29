@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '@/app/api/property/verify/route';
 import * as serverAuth from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { stampAirtableFreshness } from '@/lib/airtableFreshness';
 
 // ─────────────────────────────────────────────────────────────────────────
 // ⚠️ REWRITTEN 2026-08-06 (§56). The previous version mocked `.or()` and fed
@@ -23,6 +24,10 @@ vi.mock('@/lib/supabaseAdmin', () => ({
   supabaseAdmin: { from: vi.fn() },
 }));
 
+vi.mock('@/lib/airtableFreshness', () => ({
+  stampAirtableFreshness: vi.fn(),
+}));
+
 const REAL_ROW = {
   id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301',
   slug: 'bgc-condo',
@@ -31,6 +36,7 @@ const REAL_ROW = {
   owner_id: 'user-owner',
   lifecycle_state: 'live',
   pipeline_status: 'approved',
+  last_verified_date: '2026-07-01T00:00:00.000Z',
 };
 
 /**
@@ -52,7 +58,7 @@ export const REAL_PROPERTY_COLUMNS = new Set([
   'pdf_source_url', 'lister_relationship', 'owner_claim_agreed',
 ]);
 
-function mockDb({ row = REAL_ROW, error = null, roles = [], updateError = null } = {}) {
+function mockDb({ row = REAL_ROW, error = null, roles = [], updateErrors = [] } = {}) {
   const eqCalls = [];
   const updates = [];
   const audits = [];
@@ -70,7 +76,8 @@ function mockDb({ row = REAL_ROW, error = null, roles = [], updateError = null }
         // column cannot detect a column that does not exist.
         update: vi.fn().mockImplementation((payload) => {
           updates.push(payload);
-          return { eq: vi.fn().mockResolvedValue({ error: updateError }) };
+          const nextError = updateErrors[updates.length - 1] || null;
+          return { eq: vi.fn().mockResolvedValue({ error: nextError }) };
         }),
       };
     }
@@ -111,6 +118,7 @@ describe('/api/property/verify API endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-owner');
+    vi.mocked(stampAirtableFreshness).mockResolvedValue({ ok: true, recordId: 'rec-public' });
   });
 
   it('rejects unauthenticated requests with 401', async () => {
@@ -166,6 +174,16 @@ describe('/api/property/verify API endpoint', () => {
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(403);
   });
 
+  it('rejects an ordinary caller when owner_id is null without any write', async () => {
+    vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('ordinary-user');
+    const calls = mockDb({ row: { ...REAL_ROW, owner_id: null }, roles: [] });
+
+    expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(403);
+    expect(calls.updates).toHaveLength(0);
+    expect(calls.audits).toHaveLength(0);
+    expect(stampAirtableFreshness).not.toHaveBeenCalled();
+  });
+
   // W12's staff surface depends on this path: staff verify listings they do
   // not own.
   it('allows staff to verify a listing they do not own', async () => {
@@ -174,8 +192,47 @@ describe('/api/property/verify API endpoint', () => {
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(200);
   });
 
+  it('allows canonical staff authority to verify an unowned listing', async () => {
+    vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('staff-1');
+    mockDb({ row: { ...REAL_ROW, owner_id: null }, roles: ['staff'] });
+    expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(200);
+  });
+
+  it('mirrors a published verification to Airtable before reporting success', async () => {
+    const calls = mockDb();
+    const res = await POST(req({ propertyId: 'bgc-condo', verificationType: 'staff_attestation' }));
+
+    expect(res.status).toBe(200);
+    expect(stampAirtableFreshness).toHaveBeenCalledTimes(1);
+    expect(stampAirtableFreshness).toHaveBeenCalledWith({
+      slug: REAL_ROW.canonical_slug,
+      isoDate: calls.updates[0].last_verified_date,
+    });
+  });
+
+  it('rolls Supabase back and refuses public success when Airtable fails', async () => {
+    vi.mocked(stampAirtableFreshness).mockResolvedValue({ ok: false, reason: 'patch_failed' });
+    const calls = mockDb();
+
+    const res = await POST(req({ propertyId: 'bgc-condo', verificationType: 'staff_attestation' }));
+    expect(res.status).toBe(502);
+    expect(calls.updates).toHaveLength(2);
+    expect(calls.updates[1]).toEqual({ last_verified_date: REAL_ROW.last_verified_date });
+    expect(calls.audits).toHaveLength(0);
+  });
+
+  it('fails closed on missing Airtable credentials for a published property', async () => {
+    vi.mocked(stampAirtableFreshness).mockResolvedValue({ ok: false, reason: 'missing_configuration' });
+    const calls = mockDb();
+
+    const res = await POST(req({ propertyId: 'bgc-condo' }));
+    expect(res.status).toBe(503);
+    expect(calls.updates).toHaveLength(2);
+    expect(calls.audits).toHaveLength(0);
+  });
+
   it('surfaces a failed update as a 500 rather than a false success', async () => {
-    mockDb({ updateError: new Error('write failed') });
+    mockDb({ updateErrors: [new Error('write failed')] });
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(500);
   });
 

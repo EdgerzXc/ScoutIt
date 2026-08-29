@@ -1235,18 +1235,15 @@ html.lite-mode .drifting-container {
 @media (max-width: 480px) {
   .header-dropdown {
     position: fixed !important;
-    top: auto !important;
-    bottom: 0 !important;
+    top: calc(env(safe-area-inset-top, 0px) + 64px) !important;
+    bottom: env(safe-area-inset-bottom, 0px) !important;
     right: 0 !important;
     left: 0 !important;
     min-width: 100% !important;
     border-radius: 16px 16px 0 0 !important;
-    max-height: 70vh !important;
+    max-height: none !important;
     overflow-y: auto !important;
-  }
-  
-  .header-dropdown.open {
-    animation: slideUpFrom slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overscroll-behavior: contain;
   }
 }
 

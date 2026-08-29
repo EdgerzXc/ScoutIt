@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -77,5 +77,34 @@ describe("configured Vercel cron routes", () => {
 
     expect(paths).toContain("/api/cron/check-stale-listings");
     expect(paths).toContain("/api/cron/sweep-pending-requests");
+  });
+
+  // A cron route that exists on disk but is registered nowhere never runs.
+  // This was a real gap: `recompute-broker-metrics` shipped with no caller,
+  // which made the function behind it a plan rather than a feature (Rule 13).
+  // Enumerating from disk means a new job cannot be added and silently never
+  // scheduled; the allowlist keeps the one deliberate exception visible rather
+  // than letting a blanket assertion hide it.
+  it("registers every cron route on disk, or names it as deliberately unscheduled", () => {
+    const DELIBERATELY_UNSCHEDULED = new Set([
+      // Disarmed 2026-08-06: it fabricated PSE disclosures attributed to real
+      // listed companies. It must stay unscheduled until it reads real sources.
+      "osint-scraper",
+    ]);
+
+    const cronDir = resolve(process.cwd(), "src/app/api/cron");
+    const onDisk = readdirSync(cronDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+
+    const config = JSON.parse(readFileSync(resolve(process.cwd(), "vercel.json"), "utf8"));
+    const registered = new Set(config.crons.map((cron) => cron.path));
+
+    const unregistered = onDisk.filter(
+      (name) =>
+        !DELIBERATELY_UNSCHEDULED.has(name) && !registered.has(`/api/cron/${name}`),
+    );
+
+    expect(unregistered).toEqual([]);
   });
 });

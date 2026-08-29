@@ -4,6 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { Users, Shield, Clock, X, ChevronDown, Check, Activity, Mail, CheckSquare, Plus, AlertCircle, Key, CheckCircle, Link2, History } from "lucide-react";
 import { useDashboard } from "../../../context/DashboardContext";
 import { crmFetch } from "../../../lib/crmClient";
+import { OPEN_TASK_STATUSES } from "@/lib/crm/taskModel";
+
+// A task is open while it is still to do or in progress. Splitting on
+// completedAt alone left CANCELLED tasks showing as outstanding work forever,
+// because a cancelled task carries no completion time.
+const isOpenTask = (task) =>
+  OPEN_TASK_STATUSES.includes(task.status || (task.completedAt ? "done" : "todo"));
 
 // Seats a real estate enterprise actually staffs — brokers, developer project
 // managers, strata/property managers, co-working operators, finance.
@@ -284,9 +291,9 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       {/* Live load indicators — open tasks + active chatboxes */}
                       {member.id === 'current_user' && (
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {(memberTasks || []).filter((t) => !t.completedAt).length > 0 && (
+                          {(memberTasks || []).filter((t) => isOpenTask(t)).length > 0 && (
                             <div className="text-[12px] font-mono bg-gold-accent/20 text-gold-accent px-1.5 py-0.5 rounded">
-                              {(memberTasks || []).filter((t) => !t.completedAt).length} Tasks
+                              {(memberTasks || []).filter((t) => isOpenTask(t)).length} Tasks
                             </div>
                           )}
                           {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length > 0 && (
@@ -556,7 +563,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                         <>
                           {/* Open tasks — persisted crm_tasks rows */}
                           <div className="space-y-2">
-                            {memberTasks.filter((t) => !t.completedAt).map((task) => {
+                            {memberTasks.filter((t) => isOpenTask(t)).map((task) => {
                               const overdue = task.dueAt && new Date(task.dueAt) < new Date();
                               return (
                                 <div key={task.id} className="group p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 hover:border-white/20 transition flex flex-col gap-2 relative overflow-hidden">
@@ -580,26 +587,26 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                 </div>
                               );
                             })}
-                            {memberTasks.filter((t) => !t.completedAt).length === 0 && (
+                            {memberTasks.filter((t) => isOpenTask(t)).length === 0 && (
                               <div className="text-xs text-white/70 italic text-center py-6">No open tasks. Everything&apos;s done.</div>
                             )}
                           </div>
 
                           {/* Task history — completed crm_tasks rows */}
-                          {memberTasks.filter((t) => t.completedAt).length > 0 && (
+                          {memberTasks.filter((t) => !isOpenTask(t)).length > 0 && (
                             <div className="mt-6">
                               <button
                                 onClick={() => setShowTaskHistory((s) => !s)}
                                 className="flex items-center gap-2 text-[12px] uppercase font-bold tracking-wider text-white/70 hover:text-white transition"
                               >
                                 <History size={12} />
-                                Task History ({memberTasks.filter((t) => t.completedAt).length})
+                                Task History ({memberTasks.filter((t) => !isOpenTask(t)).length})
                                 <ChevronDown size={12} className={`transition-transform ${showTaskHistory ? 'rotate-180' : ''}`} />
                               </button>
                               {showTaskHistory && (
                                 <div className="space-y-1.5 mt-3 animate-in fade-in">
                                   {memberTasks
-                                    .filter((t) => t.completedAt)
+                                    .filter((t) => !isOpenTask(t))
                                     .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
                                     .map((task) => (
                                       <div key={task.id} className="p-2.5 bg-black/30 border border-white/5 rounded-lg flex items-center justify-between gap-3">

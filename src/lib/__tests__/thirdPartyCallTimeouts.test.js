@@ -15,7 +15,7 @@ const BYPASSING_FILES = [
   "src/app/api/geo-pricing/route.js",
   "src/app/api/health/route.js",
   "src/app/api/intel/ingest/route.js",
-  "src/app/api/dashboard/verify-freshness/route.js",
+  "src/lib/airtableFreshness.js",
   "src/lib/intelPublish.js",
 ];
 

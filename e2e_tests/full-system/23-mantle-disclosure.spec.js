@@ -57,6 +57,11 @@ test("every Mantle disclosure has stable deep-link state", async ({ page }) => {
 test("Mantle restores focus after pointer and keyboard disclosure changes", async ({ page }) => {
   await gotoAndSettle(page, "/layer/mantle");
 
+  const helpPanel = page.getByRole("complementary", { name: "Help & Display" });
+  await expect(helpPanel).toBeVisible();
+  await page.getByRole("heading", { name: /how scoutit thinks/i }).click();
+  await expect(helpPanel).toBeHidden();
+
   await page.getByRole("button", { name: /platform architecture/i }).click();
   await expect(page).toHaveURL(/#architecture$/);
   await expect(page.getByRole("heading", { name: /two data systems/i })).toBeFocused();
@@ -70,6 +75,11 @@ test("Mantle restores focus after pointer and keyboard disclosure changes", asyn
 
 test("Mantle atmosphere can be paused and reduced motion never starts WebGL", async ({ page }) => {
   await gotoAndSettle(page, "/layer/mantle");
+  const helpPanel = page.getByRole("complementary", { name: "Help & Display" });
+  await expect(helpPanel).toBeVisible();
+  await page.getByRole("heading", { name: /how scoutit thinks/i }).click();
+  await expect(helpPanel).toBeHidden();
+
   const toggle = page.locator(".atmosphere-toggle");
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
