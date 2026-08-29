@@ -96,12 +96,25 @@ const nextConfig = {
           //   · NO preload. Preload is effectively permanent and requires
           //     includeSubDomains plus a long max-age.
           //
-          // RAMP: once HTTPS is confirmed stable on the custom domain (§27),
-          // raise max-age to 31536000 and add includeSubDomains. Only then
-          // consider preload.
+          // RAMP COMPLETED 2026-08-30. HTTPS has been stable on the custom
+          // domain through the Seoul region move and repeated production
+          // verification, so the documented step from one day to one year is
+          // taken. At 86400 the header was close to decorative: a visitor who
+          // had not returned within a day was unprotected again, which is the
+          // window a downgrade attack wants.
+          //
+          // includeSubDomains commits EVERY *.scoutit.space name to valid
+          // HTTPS for a year in any browser that has seen this header. That is
+          // safe here — Vercel issues certificates automatically for every
+          // domain attached to the project, and Mission Control lives on a
+          // vercel.app host rather than a subdomain of this one.
+          //
+          // STILL NO PRELOAD. Preload is a submission to a browser-vendor list
+          // and is effectively permanent; it deserves its own decision, not a
+          // side effect of this change.
           {
             key: 'Strict-Transport-Security',
-            value: 'max-age=86400',
+            value: 'max-age=31536000; includeSubDomains',
           },
         ],
       },

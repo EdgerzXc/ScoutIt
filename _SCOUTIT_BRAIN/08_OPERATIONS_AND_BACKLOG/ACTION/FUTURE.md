@@ -301,6 +301,53 @@ and reduce operational cost?**
 
 ---
 
+## A-056 — Remove `unsafe-inline` and `unsafe-eval` from the CSP
+
+**Found by the 2026-08-30 full-platform audit. Parked because it is a real
+migration, not a header edit.**
+
+`script-src` currently carries both `'unsafe-inline'` and `'unsafe-eval'`,
+which is most of what a Content-Security-Policy is for. With them present, an
+injected `<script>` or a `javascript:` payload executes normally, so the CSP
+stops being a second line of defence against XSS and becomes mainly an
+origin allowlist.
+
+Removing them means adopting a per-request nonce and proving nothing depends on
+inline execution — Next's own hydration bootstrap, the theme/Lite-Mode no-flash
+script in `layout.js`, Google Tag Manager, and Turnstile all need checking
+individually. `'unsafe-eval'` additionally needs whatever pulls it in
+(historically a mapping or animation dependency) identified first.
+
+**Trigger:** the next time authenticated surfaces render third-party or
+user-supplied HTML, or before any bug-bounty/pen-test engagement. Until then
+the practical XSS exposure is limited by React escaping output by default and
+by `lib/sanitize.js` on the paths that do render HTML.
+
+## A-057 — PostGIS schema hygiene
+
+**Found by the 2026-08-30 audit. Low severity, listed so it stops being
+rediscovered as new.**
+
+Three Supabase advisor findings that all trace to the PostGIS/vector
+extensions rather than to ScoutIt's own schema:
+
+- `spatial_ref_sys` is a public table with RLS disabled. It holds coordinate
+  system definitions — reference data shipped by PostGIS, containing nothing
+  about anyone.
+- `postgis` and `vector` are installed in the `public` schema rather than a
+  dedicated one.
+- `st_estimatedextent(...)` is a `SECURITY DEFINER` function executable by
+  `anon`. It returns a bounding-box estimate from table statistics.
+
+None of these expose user data. Moving an extension between schemas rewrites
+every dependent object, so this is deliberately not worth doing on a live
+database for advisor tidiness alone.
+
+**Trigger:** a planned migration that already touches the spatial stack, or a
+compliance review that requires a clean advisor report.
+
+---
+
 ## Why this page exists
 
 Three separate sessions independently rediscovered the 114 advisor lints and
