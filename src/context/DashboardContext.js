@@ -2,7 +2,7 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
@@ -77,6 +77,9 @@ export function DashboardProvider({ children }) {
   const [savedIds, setSavedIds] = useState([]);
   const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // Which identity the provider has already resolved. Auth events that do not
+  // change it are ignored, which is what stops the re-verification loop.
+  const resolvedUserIdRef = useRef(null);
   // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
   // promise resolver so publishListing can await the user's answer.
   const [declarationPrompt, setDeclarationPrompt] = useState(null);
@@ -99,6 +102,7 @@ export function DashboardProvider({ children }) {
         // sign-in rather than stranding them on a spinner.
         const { data: { user }, error } = await withAuthTimeout(getUser());
         if (!error && user) {
+          resolvedUserIdRef.current = user.id;
           const ready = await handleUserLogin(user);
           setIdentityResolved(true);
           if (!ready) setIsLoading(false);
@@ -116,6 +120,7 @@ export function DashboardProvider({ children }) {
         return;
       }
 
+      resolvedUserIdRef.current = null;
       localStorage.removeItem("scoutit_user");
       setCurrentUser(null);
       setIdentityResolved(true);
@@ -134,8 +139,20 @@ export function DashboardProvider({ children }) {
     // The callback must therefore stay synchronous and defer the real work
     // out of the lock. INITIAL_SESSION is skipped because the direct
     // fetchVerifiedUser() call above already covers first paint.
-    const { data: { subscription } } = onAuthStateChange((event) => {
-      if (event === "INITIAL_SESSION") return;
+    // Only an identity TRANSITION is worth re-verifying. Reacting to every
+    // event re-entered getUser(), and getUser() can itself trigger a token
+    // refresh, which fires TOKEN_REFRESHED, which re-entered it again — an
+    // endless loop that flickered the workspace between its spinner and the
+    // dashboard. INITIAL_SESSION is already covered by the call above, and
+    // TOKEN_REFRESHED / USER_UPDATED do not change who is signed in.
+    //
+    // The id comparison is what makes this safe: a repeated SIGNED_IN for the
+    // same person is a no-op rather than another full round trip.
+    const { data: { subscription } } = onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
+      const nextUserId = session?.user?.id || null;
+      if (nextUserId === resolvedUserIdRef.current) return;
+      resolvedUserIdRef.current = nextUserId;
       setTimeout(() => { fetchVerifiedUser(); }, 0);
     });
 

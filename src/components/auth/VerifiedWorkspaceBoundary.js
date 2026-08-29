@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useDashboard } from "@/context/DashboardContext";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
@@ -9,9 +9,20 @@ export default function VerifiedWorkspaceBoundary({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { currentUser, isLoading } = useDashboard();
+  // At most one bounce per mount. /onboarding sends a session-holding visitor
+  // straight back here, so if the two ever disagree about whether someone is
+  // signed in, an unguarded redirect ping-pongs forever and the screen just
+  // flickers. One attempt either works or leaves them on a page they can act
+  // on, which is always better than a strobe.
+  const redirectedRef = useRef(false);
 
   useEffect(() => {
-    if (isLoading || currentUser?.id) return;
+    if (isLoading || currentUser?.id) {
+      if (currentUser?.id) redirectedRef.current = false;
+      return;
+    }
+    if (redirectedRef.current) return;
+    redirectedRef.current = true;
     const returnPath = `${pathname}${window.location.search}${window.location.hash}`;
     router.replace(`/onboarding?next=${encodeURIComponent(returnPath)}`);
   }, [currentUser?.id, isLoading, pathname, router]);

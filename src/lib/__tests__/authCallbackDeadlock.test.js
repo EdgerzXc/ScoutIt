@@ -73,6 +73,26 @@ describe("onAuthStateChange callbacks cannot deadlock supabase-js", () => {
     expect(source).toMatch(/resolve\(\{\s*data:\s*\{\s*user:\s*null\s*\}/);
   });
 
+  it("DashboardContext re-verifies only on a real identity change", () => {
+    const body = callbackSource(read("context/DashboardContext.js"));
+    // Reacting to TOKEN_REFRESHED re-entered getUser(), which can itself
+    // trigger a refresh and fire the event again — the loop that flickered
+    // the workspace between its spinner and the dashboard.
+    expect(body).toMatch(/event !== "SIGNED_IN" && event !== "SIGNED_OUT"/);
+    expect(body).toMatch(/nextUserId === resolvedUserIdRef\.current/);
+  });
+
+  it("the workspace boundary bounces to sign-in at most once per mount", () => {
+    const source = readFileSync(
+      join(ROOT, "components/auth/VerifiedWorkspaceBoundary.js"),
+      "utf8",
+    );
+    // /onboarding sends a session-holding visitor straight back here, so an
+    // unguarded redirect ping-pongs forever.
+    expect(source).toMatch(/redirectedRef/);
+    expect(source).toMatch(/if \(redirectedRef\.current\) return;/);
+  });
+
   it("ProfileButton actually releases its subscription on unmount", () => {
     const source = read("components/ui/ProfileButton.js");
     // The old code returned a cleanup from inside .then(), which React never
