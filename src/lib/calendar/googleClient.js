@@ -1,16 +1,26 @@
 // Google Calendar REST client — plain fetch, zero SDK. Operates on the user's
 // primary calendar. All calls take an already-valid access token (see
 // connectionStore.getValidGoogleAccessToken).
+import { fetchWithRetry } from "../fetchWithRetry";
+
 const CAL_BASE = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
 
 async function gfetch(url, accessToken, init = {}) {
-  const res = await fetch(url, {
+  const method = (init.method || "GET").toUpperCase();
+  const idempotentWrite = method === "PATCH" || method === "DELETE";
+  const res = await fetchWithRetry(url, {
     ...init,
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
       ...(init.headers || {}),
     },
+  }, {
+    retries: method === "GET" || idempotentWrite ? 2 : 0,
+    budgetMs: 7000,
+    attemptTimeoutMs: 4000,
+    circuit: "google-calendar",
+    idempotent: idempotentWrite,
   });
   if (res.status === 204) return null; // delete returns no content
   const data = await res.json().catch(() => ({}));
@@ -23,8 +33,13 @@ async function gfetch(url, accessToken, init = {}) {
   return data;
 }
 
-/** List events in [timeMin, timeMax] (ISO). singleEvents expands recurring. */
-export function listEvents(accessToken, { timeMin, timeMax, maxResults = 250 }) {
+/** List one events page in [timeMin, timeMax]. singleEvents expands recurring. */
+export function listEvents(accessToken, {
+  timeMin,
+  timeMax,
+  maxResults = 2500,
+  pageToken = null,
+}) {
   const qs = new URLSearchParams({
     timeMin,
     timeMax,
@@ -33,6 +48,7 @@ export function listEvents(accessToken, { timeMin, timeMax, maxResults = 250 }) 
     maxResults: String(maxResults),
     showDeleted: "true", // so remote deletions can be mirrored
   });
+  if (pageToken) qs.set("pageToken", pageToken);
   return gfetch(`${CAL_BASE}?${qs}`, accessToken);
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { DashboardProvider, useDashboard } from "../../../context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import AtmosphereBackground from "../../../components/ui/AtmosphereBackground";
@@ -9,6 +9,7 @@ import AppointmentsSheet from "../../../components/dashboard/crm/AppointmentsShe
 import DealFileSlideOver from "../../../components/dashboard/crm/DealFileSlideOver";
 import NewDealModal from "../../../components/dashboard/crm/NewDealModal";
 import TaskRail from "../../../components/dashboard/crm/TaskRail";
+import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
 import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -27,10 +28,32 @@ function CRMPageInner() {
   const [activeTab, setActiveTab] = useState("pipeline"); // pipeline | appointments | tasks
   const [viewingAs, setViewingAs] = useState("owner");
   const [showViewingMenu, setShowViewingMenu] = useState(false);
+  const lensMenuRef = useRef(null);
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  // The toast carries a tone. Errors used to render with the same padlock as
+  // the tier-lock upsells, so "Couldn't update the deal" read as a paywall.
   const [showToast, setShowToast] = useState("");
+  const [toastTone, setToastTone] = useState("locked"); // "locked" | "error"
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
+
+  // The lens menu had no way out but re-clicking its own trigger: clicking the
+  // page, or pressing Escape, left it hovering over the pipeline.
+  useEffect(() => {
+    if (!showViewingMenu) return;
+    const onPointerDown = (e) => {
+      if (lensMenuRef.current && !lensMenuRef.current.contains(e.target)) setShowViewingMenu(false);
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setShowViewingMenu(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showViewingMenu]);
 
   // Default the lens to the mode the dashboard was last in.
   useEffect(() => {
@@ -41,6 +64,12 @@ function CRMPageInner() {
   }, []);
 
   const mockUserId = currentUser?.id;
+
+  const flashToast = useCallback((message, tone = "error") => {
+    setToastTone(tone);
+    setShowToast(message);
+    setTimeout(() => setShowToast(""), 4000);
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!currentUser?.id) return;
@@ -54,11 +83,10 @@ function CRMPageInner() {
     if (apptsRes.status === "fulfilled") setAppointments(apptsRes.value.appointments || []);
     if (dealsRes.status === "rejected" || apptsRes.status === "rejected") {
       console.error("CRM fetch failed", dealsRes.reason || apptsRes.reason);
-      setShowToast("Some of your pipeline data couldn't load — check your connection.");
-      setTimeout(() => setShowToast(""), 4000);
+      flashToast("Some of your pipeline data couldn't load — check your connection.");
     }
     setLoading(false);
-  }, [currentUser]);
+  }, [currentUser, flashToast]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -77,8 +105,7 @@ function CRMPageInner() {
       setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status: newStatus } : d)));
     } catch (e) {
       console.error(e);
-      setShowToast(sanitizeError(e, "Couldn't update the deal."));
-      setTimeout(() => setShowToast(""), 4000);
+      flashToast(sanitizeError(e, "Couldn't update the deal."));
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -98,14 +125,12 @@ function CRMPageInner() {
       setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
     } catch (e) {
       console.error(e);
-      setShowToast(sanitizeError(e, "Couldn't update the appointment."));
-      setTimeout(() => setShowToast(""), 4000);
+      flashToast(sanitizeError(e, "Couldn't update the appointment."));
     }
   };
 
   const triggerLockedToast = (feature, tier) => {
-    setShowToast(`Unlock ${feature} at ${tier} tier.`);
-    setTimeout(() => setShowToast(""), 3000);
+    flashToast(`Unlock ${feature} at ${tier} tier.`, "locked");
   };
 
   if (userLoading || loading) {
@@ -149,7 +174,7 @@ function CRMPageInner() {
       <AtmosphereBackground variant={viewingAs === "broker" ? "broker" : "dashboard"} />
       {/* Additional Atmosphere Layers for CRM per Handoff */}
       <div className="fixed inset-0 pointer-events-none z-[-1]" style={{
-        background: "radial-gradient(circle at 80% 20%, rgba(232, 174, 60, 0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(232, 174, 60, 0.02) 0%, transparent 60%)"
+        background: "radial-gradient(circle at 80% 20%, rgba(var(--accent-rgb), 0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.02) 0%, transparent 60%)"
       }}></div>
 
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8 relative z-30">
@@ -162,23 +187,29 @@ function CRMPageInner() {
             <ArrowLeft size={20} />
           </Link>
           <div>
+            <span className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent">
+              ScoutIt CRM
+            </span>
             <h1 className="font-headline-editorial text-3xl md:text-4xl text-on-surface flex items-center gap-3">
-              Master CRM
+              Deal Intelligence
             </h1>
-            <p className="text-text-secondary font-working-title mt-1 md:mt-2 text-sm md:text-base">Manage relationships, pipeline, and appointments.</p>
+            <p className="text-text-secondary mt-1 md:mt-2 text-sm md:text-base">Relationships, viewings, and next actions in one verified workspace.</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           {/* Availability now lives inside the Appointments tab (unified
               schedule), so the separate top-nav shortcut was removed. */}
-          <div className="relative">
+          <div className="relative" ref={lensMenuRef}>
             <button
               onClick={() => setShowViewingMenu(!showViewingMenu)}
-              className="flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition"
+              aria-haspopup="menu"
+              aria-expanded={showViewingMenu}
+              aria-label={`Change pipeline lens. Current lens: ${viewingAs}`}
+              className="flex min-h-11 items-center gap-2 rounded-full border border-surface-variant bg-surface-alt px-4 py-2 font-mono text-[12px] uppercase tracking-wider text-on-surface transition-all duration-300 ease-out hover:border-gold-accent/50"
             >
-              <span className="text-text-muted">Viewing as:</span>
-              <span className="text-gold-accent capitalize">{viewingAs}</span>
+              <span className="text-text-muted">Pipeline lens</span>
+              <span className="text-gold-accent">{viewingAs}</span>
               <ChevronDown size={14} className="text-text-muted ml-1" />
             </button>
             {showViewingMenu && (
@@ -187,7 +218,7 @@ function CRMPageInner() {
                   <button
                     key={role}
                     onClick={() => { setViewingAs(role); setShowViewingMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-sm font-working-title flex items-center justify-between hover:bg-surface-alt transition"
+                    className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left font-mono text-[12px] uppercase tracking-wider transition-colors duration-300 ease-out hover:bg-surface-alt"
                   >
                     <span className="capitalize text-on-surface">{role}</span>
                     {viewingAs === role && <Check size={14} className="text-gold-accent" />}
@@ -198,12 +229,14 @@ function CRMPageInner() {
           </div>
           <button
             onClick={() => setIsNewDealModalOpen(true)}
-            className="bg-gold-accent text-background font-bold font-working-title px-4 md:px-6 py-2 rounded shadow-[0_0_15px_rgba(247,198,78,0.4)] hover:-translate-y-1 transition-transform"
+            className="min-h-11 rounded bg-gold-accent px-4 py-2 font-mono text-[12px] font-bold uppercase tracking-widest text-background shadow-[0_0_18px_rgba(var(--accent-bright-rgb),0.25)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-gold-bright md:px-6"
           >
-            + New Deal
+            + New deal
           </button>
         </div>
       </div>
+
+      <WorkspaceCommandBar active="crm" className="relative z-20 mb-6 w-full md:max-w-xl" />
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
@@ -211,7 +244,7 @@ function CRMPageInner() {
           <div className="text-xs text-text-secondary uppercase tracking-widest font-label-caps mb-1">Active Deals</div>
           <div className="text-2xl font-working-title text-on-surface">{activeDeals}</div>
         </div>
-        <div className="bg-gradient-to-br from-[#211a14] to-[#131110] border border-gold-accent/30 shadow-[0_10px_30px_rgba(0,0,0,0.4),0_0_40px_rgba(232,174,60,0.1)] rounded-lg p-4 md:p-5 relative overflow-hidden">
+        <div className="card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
           <div className="text-xs text-gold-accent uppercase tracking-widest font-label-caps mb-1">Pipeline Value</div>
           {pricedDeals.length > 0 ? (
             <>
@@ -247,19 +280,19 @@ function CRMPageInner() {
         <div className="flex gap-4 md:gap-6">
           <button
             onClick={() => setActiveTab("pipeline")}
-            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-mono text-[12px] uppercase tracking-widest transition-colors duration-300 ease-out ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Briefcase size={16} /> Pipeline
           </button>
           <button
             onClick={() => setActiveTab("appointments")}
-            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-mono text-[12px] uppercase tracking-widest transition-colors duration-300 ease-out ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Calendar size={16} /> Appointments
           </button>
           <button
             onClick={() => setActiveTab("tasks")}
-            className={`pb-3 font-working-title text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-mono text-[12px] uppercase tracking-widest transition-colors duration-300 ease-out ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <ListChecks size={16} /> Tasks
           </button>
@@ -331,9 +364,18 @@ function CRMPageInner() {
 
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-surface-alt border border-gold-accent/30 text-gold-accent px-6 py-3 rounded shadow-2xl z-50 animate-[slideUp_0.2s_ease-out]">
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded shadow-2xl z-50 animate-[slideUp_0.2s_ease-out] border bg-surface-alt ${
+            toastTone === "error"
+              ? "border-error/40 text-error"
+              : "border-gold-accent/30 text-gold-accent"
+          }`}
+        >
           <p className="font-working-title text-sm flex items-center gap-2">
-            <span className="text-xl">🔒</span> {showToast}
+            {toastTone === "locked" && <span className="text-xl">🔒</span>}
+            {showToast}
           </p>
         </div>
       )}

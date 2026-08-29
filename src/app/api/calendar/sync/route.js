@@ -26,6 +26,9 @@ export async function POST(request) {
     if (result.skipped === "token_error") {
       return NextResponse.json({ error: "Reconnect Google Calendar" }, { status: 409 });
     }
+    if (result.skipped === "no_db") {
+      return NextResponse.json({ error: "Calendar database is not configured" }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {

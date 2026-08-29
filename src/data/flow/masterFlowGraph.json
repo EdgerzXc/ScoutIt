@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "c856cf8b17bbe3c5519437ba7ac000240d018cf2",
+  "dataRevision": "5d59c0eecb401c429858030e7961275e4c748e7e",
   "lastVerifiedAt": "2026-08-19",
-  "generatedAt": "2026-08-21T07:42:33.656Z",
+  "generatedAt": "2026-08-29T04:26:19.663Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+    "commitSha": "5d59c0eecb401c429858030e7961275e4c748e7e"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+    "commitSha": "5d59c0eecb401c429858030e7961275e4c748e7e"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+    "commitSha": "5d59c0eecb401c429858030e7961275e4c748e7e"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -125,6 +125,14 @@
         "to": "CANCELLED",
         "source": "src/app/api/viewing-appointments/[id]/route.js",
         "status": "IMPLEMENTED"
+      },
+      {
+        "lifecycle": "VIEWING",
+        "stateMachineId": "viewing.lifecycle",
+        "from": "CONFIRMED",
+        "to": "PENDING",
+        "source": "src/app/api/viewing-appointments/[id]/route.js",
+        "status": "IMPLEMENTED"
       }
     ],
     "plannedNotImplemented": [
@@ -204,7 +212,7 @@
   },
   "stats": {
     "totalNodes": 128,
-    "totalEdges": 246,
+    "totalEdges": 247,
     "verifiedNodes": 89,
     "partialNodes": 10,
     "plannedNodes": 29,
@@ -19624,7 +19632,9 @@
       },
       "version": "2.2.0",
       "lastVerifiedAt": "2026-08-21",
-      "parents": [],
+      "parents": [
+        "state_runtime_viewing_confirmed"
+      ],
       "children": [
         "state_runtime_viewing_confirmed",
         "state_runtime_viewing_cancelled"
@@ -19740,6 +19750,7 @@
         "state_runtime_viewing_pending"
       ],
       "children": [
+        "state_runtime_viewing_pending",
         "state_runtime_viewing_completed",
         "state_runtime_viewing_cancelled"
       ],
@@ -33984,6 +33995,61 @@
       "stateTransition": {
         "fromState": "PENDING",
         "toState": "CONFIRMED"
+      }
+    },
+    {
+      "id": "e_runtime_viewing_confirmed_to_pending",
+      "source": "state_runtime_viewing_confirmed",
+      "target": "state_runtime_viewing_pending",
+      "type": "SYSTEM",
+      "label": "VIEWING: CONFIRMED -> PENDING",
+      "trigger": "Authorized PATCH reschedule to a new time",
+      "conditions": [
+        "Requested time passes the host availability gate",
+        "Parent deal is not closed"
+      ],
+      "roles": [
+        "staff",
+        "admin"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "effects": [
+        "Move the viewing to a new time and return it to PENDING for re-confirmation"
+      ],
+      "apiRefs": [
+        "src/app/api/viewing-appointments/[id]/route.js"
+      ],
+      "reversible": false,
+      "recoveryTarget": null,
+      "guideInstruction": "Rescheduling re-opens confirmation: the host agreed to a specific time, so a new time needs a new acceptance. Enforced by the reschedule branch's availability gate, not by canTransitionWorkflow.",
+      "guideTarget": "#node-state_runtime_viewing_pending",
+      "telemetryEvent": "flow_runtime_viewing_confirmed_pending",
+      "implementationStatus": "VERIFIED",
+      "evidence": [
+        {
+          "kind": "CODE",
+          "path": "src/lib/calendar/availabilityService.js",
+          "symbol": "assertSlotBookable",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "PENDING_A047"
+        },
+        {
+          "kind": "API",
+          "path": "src/app/api/viewing-appointments/[id]/route.js",
+          "symbol": "PATCH",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "PENDING_A047"
+        }
+      ],
+      "stateMachineId": "viewing.lifecycle",
+      "stateTransition": {
+        "fromState": "CONFIRMED",
+        "toState": "PENDING"
       }
     },
     {

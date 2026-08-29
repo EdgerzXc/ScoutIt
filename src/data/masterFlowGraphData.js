@@ -14013,35 +14013,55 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "deal"
     ],
-    "implementationStatus": "PARTIAL",
-    "purpose": "Existing chat and booking controls can propose another slot; a dedicated persisted reschedule lifecycle is not implemented.",
-    "description": "The current UI supports appointment coordination, but there is no RescheduleModal component or RESCHEDULE_PENDING status.",
+    "implementationStatus": "VERIFIED",
+    "purpose": "Move an existing viewing through the host's verified live slots while preserving the appointment, Meet room, CRM timeline, and deal-room context.",
+    "description": "Either appointment party can choose a new live slot in ChatBox. PATCH rechecks availability, updates the same viewing_appointments row, moves its Google event best-effort, and returns the viewing to pending for host confirmation.",
     "actions": [
-      "Use existing booking controls to propose another slot",
-      "Coordinate the change in private chat"
+      "Load the host's current available slots",
+      "Select a verified replacement time",
+      "Update the existing appointment",
+      "Return the viewing to pending host confirmation",
+      "Reflect the same row in ChatBox, CRM, Calendar, and the deal timeline"
     ],
     "conditions": [
-      "Active deal room session"
+      "Active deal room session",
+      "Caller is the appointment host or guest",
+      "Viewing status is pending or confirmed",
+      "Replacement slot passes the canonical availability gate"
     ],
     "systems": [
       "src/components/dashboard/BookingModal.js",
-      "src/components/dashboard/ChatBox.js"
+      "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/ViewingWorkspaceCard.js",
+      "src/app/api/viewing-appointments/[id]/route.js",
+      "src/lib/calendar/availabilityService.js"
     ],
     "components": [
       "BookingModal.js",
-      "ChatBox.js"
+      "ChatBox.js",
+      "ViewingWorkspaceCard.js"
     ],
-    "apis": [],
+    "apis": [
+      "GET /api/deals/[id]/slots",
+      "PATCH /api/viewing-appointments/[id]"
+    ],
     "dataRefs": [
-      "Existing viewing appointments"
+      "viewing_appointments",
+      "user_availability",
+      "calendar_events",
+      "crm_activity_log"
     ],
-    "database": "Supabase viewing appointments",
+    "database": "Supabase viewing_appointments, user_availability, calendar_events, crm_activity_log",
     "auth": "seeker",
     "exceptions": [
-      "None"
+      "Replacement slot is no longer available",
+      "Calendar busy state cannot be verified",
+      "Caller is not an appointment party",
+      "Conversation or appointment is closed"
     ],
     "recovery": [
-      "Restores deal room to scheduled viewing state"
+      "Reload live slots and choose another time",
+      "Retain the existing appointment and Google identifiers when an external move fails"
     ],
     "evidence": [
       {
@@ -14050,7 +14070,7 @@ export const MASTER_FLOW_NODES = [
         "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "PENDING_A047"
       },
       {
         "kind": "COMPONENT",
@@ -14058,7 +14078,15 @@ export const MASTER_FLOW_NODES = [
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "PENDING_A047"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "PENDING_A047"
       }
     ],
     "brainRefs": [
@@ -14068,7 +14096,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-08-29",
     "x": 4650,
     "y": 1500,
     "parents": [
@@ -14094,7 +14122,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_reschedule_modal_behavior",
-        "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
+        "text": "ChatBox rescheduling selects a verified host slot and PATCHes the existing viewing appointment; the row returns to pending and remains the shared source for CRM, Calendar, Google-event reconciliation, and the deal timeline.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -14149,7 +14177,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "exc_missing_pdf_metric",
@@ -34004,6 +34032,61 @@ export const MASTER_FLOW_EDGES = [
     "stateTransition": {
       "fromState": "PENDING",
       "toState": "CONFIRMED"
+    }
+  },
+  {
+    "id": "e_runtime_viewing_confirmed_to_pending",
+    "source": "state_runtime_viewing_confirmed",
+    "target": "state_runtime_viewing_pending",
+    "type": "SYSTEM",
+    "label": "VIEWING: CONFIRMED -> PENDING",
+    "trigger": "Authorized PATCH reschedule to a new time",
+    "conditions": [
+      "Requested time passes the host availability gate",
+      "Parent deal is not closed"
+    ],
+    "roles": [
+      "staff",
+      "admin"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "effects": [
+      "Move the viewing to a new time and return it to PENDING for re-confirmation"
+    ],
+    "apiRefs": [
+      "src/app/api/viewing-appointments/[id]/route.js"
+    ],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Rescheduling re-opens confirmation: the host agreed to a specific time, so a new time needs a new acceptance. Enforced by the reschedule branch's availability gate, not by canTransitionWorkflow.",
+    "guideTarget": "#node-state_runtime_viewing_pending",
+    "telemetryEvent": "flow_runtime_viewing_confirmed_pending",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/calendar/availabilityService.js",
+        "symbol": "assertSlotBookable",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "PENDING_A047"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "PENDING_A047"
+      }
+    ],
+    "stateMachineId": "viewing.lifecycle",
+    "stateTransition": {
+      "fromState": "CONFIRMED",
+      "toState": "PENDING"
     }
   },
   {

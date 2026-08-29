@@ -1,68 +1,90 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import * as Icons from "lucide-react";
 import { crmFetch } from "../../../lib/crmClient";
+import { describeActivity } from "@/lib/crm/activityRegistry";
 
 // Per-deal / per-property Timeline backed by crm_activity_log. Pass exactly
 // one of dealId / propertyId; with neither it renders the caller's merged
 // feed (all their deals + owned properties). Read-only — writes happen in
 // the lifecycle API routes via lib/crmActivity.js.
+//
+// Labels, icons, and metadata rendering all come from lib/crm/activityRegistry.js,
+// which the API also validates against. This component used to carry its own
+// label map and its own metadata reader, so a type registered in one place
+// rendered as a raw snake_case string in the other.
 
-const TYPE_LABELS = {
-  inquiry: { icon: "💬", label: "New inquiry" },
-  operator_request: { icon: "🏢", label: "Operator request" },
-  deal_created: { icon: "📂", label: "Deal created" },
-  status_change: { icon: "🔁", label: "Status changed" },
-  note_added: { icon: "📝", label: "Notes updated" },
-  viewing_scheduled: { icon: "📅", label: "Viewing scheduled" },
-  viewing_confirmed: { icon: "✅", label: "Viewing confirmed" },
-  viewing_cancelled: { icon: "🚫", label: "Viewing cancelled" },
-  viewing_completed: { icon: "🏁", label: "Viewing completed" },
-  delegation_accepted: { icon: "🤝", label: "Units delegated" },
-  delegation_declined: { icon: "🚫", label: "Delegation declined" },
+const TONE_CLASSES = {
+  accent: "text-gold-accent",
+  success: "text-success",
+  error: "text-error",
+  neutral: "text-text-secondary",
 };
 
-function describe(item) {
-  const meta = item.metadata || {};
-  switch (item.activityType) {
-    case "status_change":
-      return meta.from && meta.to ? `${meta.from} → ${meta.to}` : null;
-    case "viewing_scheduled":
-      return meta.scheduledAt ? `For ${new Date(meta.scheduledAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : null;
-    case "inquiry":
-      if (meta.source === "public_form") {
-        const who = meta.name || meta.email || "A visitor";
-        return `${who}${meta.message ? `: "${meta.message.slice(0, 120)}"` : " reached out via the property page"}`;
-      }
-      return null;
-    case "delegation_accepted":
-      return meta.unitCount ? `${meta.unitCount} unit${meta.unitCount === 1 ? "" : "s"} handed to the operator` : null;
-    default:
-      return null;
-  }
+/** Lucide component by registry name, with a safe fallback. */
+function ActivityIcon({ name, className }) {
+  const Component = Icons[name] || Icons.Dot;
+  // lucide-react drops className on some builds, so the wrapper carries the
+  // colour and the icon only carries geometry.
+  return (
+    <span className={className} aria-hidden="true">
+      <Component size={14} />
+    </span>
+  );
 }
 
-export default function DealTimeline({ dealId = null, propertyId = null, mockUserId, showPropertyTitles = false, limit = 25 }) {
+export default function DealTimeline({
+  dealId = null,
+  propertyId = null,
+  mockUserId,
+  showPropertyTitles = false,
+  limit = 25,
+}) {
   const [items, setItems] = useState(null); // null = loading
+  const [cursor, setCursor] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  const buildUrl = useCallback((nextCursor) => {
+    const params = new URLSearchParams();
+    if (dealId) params.set("dealId", dealId);
+    else if (propertyId) params.set("propertyId", propertyId);
+    params.set("limit", String(limit));
+    if (nextCursor) params.set("cursor", nextCursor);
+    return `/api/crm/activity?${params.toString()}`;
+  }, [dealId, propertyId, limit]);
 
   const load = useCallback(async () => {
     try {
-      const params = new URLSearchParams();
-      if (dealId) params.set("dealId", dealId);
-      else if (propertyId) params.set("propertyId", propertyId);
-      const qs = params.toString();
       if (!mockUserId && process.env.NODE_ENV === "development") return;
-      const data = await crmFetch(`/api/crm/activity${qs ? `?${qs}` : ""}`, { mockUserId });
-      setItems((data.activity || []).slice(0, limit));
+      const data = await crmFetch(buildUrl(null), { mockUserId });
+      setItems(data.activity || []);
+      setCursor(data.nextCursor || null);
     } catch (e) {
       console.error("Failed to load timeline", e);
       setItems([]);
       setFailed(true);
     }
-  }, [dealId, propertyId, mockUserId, limit]);
+  }, [buildUrl, mockUserId]);
 
   useEffect(() => { load(); }, [load]);
+
+  // "Load more" walks a keyset cursor. The old component sliced a fixed
+  // response client-side, so anything past the first page was unreachable.
+  const loadMore = async () => {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await crmFetch(buildUrl(cursor), { mockUserId });
+      setItems((prev) => [...(prev || []), ...(data.activity || [])]);
+      setCursor(data.nextCursor || null);
+    } catch (e) {
+      console.error("Failed to load more timeline", e);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   if (items === null) {
     return <p className="text-text-muted text-sm py-4 text-center animate-pulse">Loading timeline…</p>;
@@ -79,26 +101,42 @@ export default function DealTimeline({ dealId = null, propertyId = null, mockUse
   }
 
   return (
-    <div className="border-l border-surface-variant ml-2 pl-4 flex flex-col gap-4">
-      {items.map((item, idx) => {
-        const type = TYPE_LABELS[item.activityType] || { icon: "•", label: item.activityType.replace(/_/g, " ") };
-        const detail = describe(item);
-        return (
-          <div key={item.id} className="relative">
-            <div className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-surface ${idx === 0 ? "bg-gold-accent" : "bg-surface-variant"}`}></div>
-            <p className="text-[12px] text-text-muted font-data-tabular mb-0.5">
-              {new Date(item.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-            </p>
-            <p className="text-sm text-on-surface flex items-center gap-1.5">
-              <span aria-hidden="true">{type.icon}</span> {type.label}
-              {showPropertyTitles && item.propertyTitle && (
-                <span className="text-text-secondary">— {item.propertyTitle}</span>
-              )}
-            </p>
-            {detail && <p className="text-xs text-text-secondary mt-0.5">{detail}</p>}
-          </div>
-        );
-      })}
+    <div className="flex flex-col gap-3">
+      <div className="border-l border-surface-variant ml-2 pl-4 flex flex-col gap-4">
+        {items.map((item, idx) => {
+          const { label, icon, tone, detail } = describeActivity(item);
+          return (
+            <div key={item.id} className="relative">
+              <div
+                className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-surface ${idx === 0 ? "bg-gold-accent" : "bg-surface-variant"}`}
+              />
+              <p className="text-[12px] text-text-muted font-data-tabular mb-0.5">
+                {new Date(item.createdAt).toLocaleString(undefined, {
+                  month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+                })}
+              </p>
+              <p className="text-sm text-on-surface flex items-center gap-1.5">
+                <ActivityIcon name={icon} className={TONE_CLASSES[tone] || TONE_CLASSES.neutral} />
+                {label}
+                {showPropertyTitles && item.propertyTitle && (
+                  <span className="text-text-secondary">— {item.propertyTitle}</span>
+                )}
+              </p>
+              {detail && <p className="text-xs text-text-secondary mt-0.5">{detail}</p>}
+            </div>
+          );
+        })}
+      </div>
+
+      {cursor && (
+        <button
+          onClick={loadMore}
+          disabled={loadingMore}
+          className="self-start ml-2 text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition disabled:opacity-50"
+        >
+          {loadingMore ? "Loading…" : "Load more"}
+        </button>
+      )}
     </div>
   );
 }

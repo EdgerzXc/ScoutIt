@@ -27,7 +27,10 @@ import ViewingDetailModal from "./ViewingDetailModal";
 import AvailabilityPanel from "./AvailabilityPanel";
 import ConnectCalendarPanel from "./ConnectCalendarPanel";
 
-const VIEWING_DURATION_MS = 60 * 60 * 1000;
+// Length of a NEW block the host drags out on the calendar, and the fallback
+// for a legacy viewing row that carries no duration.
+const DEFAULT_VIEWING_MINUTES = 60;
+const VIEWING_DURATION_MS = DEFAULT_VIEWING_MINUTES * 60 * 1000;
 const VALID_VIEWS = ["month", "week", "agenda"];
 
 // Fetch window for the active view. Month/agenda use the visible 6-week grid;
@@ -42,8 +45,15 @@ function getRange(view, viewDate) {
 }
 
 // Turn a viewing appointment into the calendar's normalized event shape.
+//
+// The end time is the one the API stores, not an assumption. This used to add a
+// flat VIEWING_DURATION_MS to every viewing, so a 30- or 90-minute booking was
+// drawn as an hour and the block on the calendar disagreed with the booking.
+// The fallback only covers rows written before viewings carried a duration.
 function normalizeViewing(appt) {
   const start = new Date(appt.scheduledAt);
+  const endsAt = appt.endsAt
+    || new Date(start.getTime() + (appt.durationMinutes || DEFAULT_VIEWING_MINUTES) * 60 * 1000).toISOString();
   return {
     id: appt.id,
     kind: "viewing",
@@ -51,7 +61,7 @@ function normalizeViewing(appt) {
     description: appt.notes || "",
     location: "",
     startsAt: appt.scheduledAt,
-    endsAt: new Date(start.getTime() + VIEWING_DURATION_MS).toISOString(),
+    endsAt,
     allDay: false,
     status: appt.status,
     color: "blue",
@@ -73,7 +83,14 @@ export default function CalendarShell() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlView = params.get("view");
-    if (VALID_VIEWS.includes(urlView)) setView(urlView);
+    if (VALID_VIEWS.includes(urlView)) {
+      setView(urlView);
+    } else if (window.matchMedia("(max-width: 639px)").matches) {
+      // A seven-column month grid is not a useful first view on a phone.
+      // Keep explicit deep links intact, but make the default mobile entry the
+      // legible agenda used for actual viewing decisions.
+      setView("agenda");
+    }
     const dateStr = params.get("date");
     if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) setViewDate(fromDateTimeInputs(dateStr));
   }, []);
@@ -81,6 +98,9 @@ export default function CalendarShell() {
   const [events, setEvents] = useState([]); // free-form calendar_events
   const [viewings, setViewings] = useState([]); // read-only appointments
   const [loading, setLoading] = useState(true);
+  // A failed fetch used to be indistinguishable from an empty week: both
+  // rendered a blank grid. The banner keeps whatever did load visible.
+  const [loadError, setLoadError] = useState("");
 
   const [editorSeed, setEditorSeed] = useState(null); // null=closed
   const [detailViewing, setDetailViewing] = useState(null);
@@ -105,12 +125,22 @@ export default function CalendarShell() {
       crmFetch("/api/viewing-appointments", { mockUserId: userId }),
     ]);
 
-    setEvents(eventsRes.status === "fulfilled" ? eventsRes.value : []);
-    const appts =
-      viewingsRes.status === "fulfilled" && Array.isArray(viewingsRes.value.appointments)
-        ? viewingsRes.value.appointments
-        : [];
-    setViewings(appts.map(normalizeViewing));
+    if (eventsRes.status === "fulfilled") setEvents(eventsRes.value);
+    if (viewingsRes.status === "fulfilled") {
+      const appts = Array.isArray(viewingsRes.value.appointments) ? viewingsRes.value.appointments : [];
+      setViewings(appts.map(normalizeViewing));
+    }
+
+    const failed = [
+      eventsRes.status === "rejected" ? "your events" : null,
+      viewingsRes.status === "rejected" ? "your viewings" : null,
+    ].filter(Boolean);
+    if (failed.length) {
+      console.error("Calendar load failed", eventsRes.reason || viewingsRes.reason);
+      setLoadError(`Couldn't load ${failed.join(" or ")}. This calendar may be incomplete.`);
+    } else {
+      setLoadError("");
+    }
     setLoading(false);
   }, [view, viewDate, userId]);
 
@@ -227,6 +257,22 @@ export default function CalendarShell() {
         onToday={goToday}
         onNewEvent={handleNewEvent}
       />
+
+      {loadError && (
+        <div
+          role="alert"
+          className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-error/40 bg-error/10 px-4 py-3"
+        >
+          <p className="font-mono text-[12px] uppercase tracking-wider text-error">{loadError}</p>
+          <button
+            type="button"
+            onClick={loadData}
+            className="shrink-0 rounded border border-error/40 px-3 py-1 font-mono text-[12px] uppercase tracking-wider text-error transition-colors hover:bg-error/15"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Calendar surface */}
       <div className="flex-1 min-h-0 bg-[#121212] border border-surface-variant rounded-lg overflow-hidden relative">

@@ -2,13 +2,23 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
+import ViewingWorkspaceCard from "./ViewingWorkspaceCard";
 import { uploadAttachment } from "../../lib/storage";
 import { getSession, getUser } from "../../lib/authClient";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { maskContactDetails } from "@/lib/contactLeakFilter";
+import { EXPORT_DISCLAIMER_LINES } from "@/lib/conversationExport";
+import {
+  CHAT_RETENTION_DAYS,
+  DISPUTE_REASONS,
+  DISPUTE_REASON_LABELS,
+  MAX_DISPUTE_DETAILS,
+  describeDisputeWindow,
+} from "@/lib/chatRetention";
 import { lifecycleNotice } from "@/lib/pendingRequestLifecycle";
 import { reportError } from "@/lib/reportError";
+import { crmFetch } from "@/lib/crmClient";
 
 // Statuses where the conversation is over. Kept as one constant because it
 // was previously duplicated across six inline arrays that had already drifted
@@ -17,14 +27,17 @@ const CLOSED_STATUSES = ["closed", "declined", "expired", "reported"];
 const isClosed = (status) => CLOSED_STATUSES.includes(status);
 
 // Safe Link Parser to prevent XSS + Rich Interactive Card Renderer
-const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcceptReschedule } = {}) => {
+const renderTextWithLinks = (
+  text,
+  { onAcceptViewing, onRescheduleViewing, onAcceptReschedule, viewingStatus } = {},
+) => {
   if (!text) return null;
 
   // 1. Initial Viewing Request
   if (text.startsWith("[SYSTEM] I have requested a live viewing for:")) {
     const timeStr = text.replace("[SYSTEM] I have requested a live viewing for:", "").trim();
     return (
-      <div className="p-3.5 bg-[#16161b] border border-gold-accent/40 rounded-xl space-y-3 my-1 shadow-lg">
+      <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/40 flex items-center justify-center text-gold-accent shrink-0 text-lg">
             📅
@@ -34,29 +47,39 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
               <h4 className="text-[12px] font-mono uppercase tracking-widest text-gold-bright font-bold">
                 Live Viewing Requested
               </h4>
-              <span className="text-[12px] font-mono uppercase bg-gold-accent/20 text-gold-accent px-1.5 py-0.5 rounded">
-                Pending Approval
+              <span className={`text-[12px] font-mono uppercase px-1.5 py-0.5 rounded ${
+                viewingStatus === "confirmed"
+                  ? "bg-success/10 text-success"
+                  : viewingStatus === "cancelled"
+                    ? "bg-error/10 text-error"
+                    : "bg-gold-accent/20 text-gold-accent"
+              }`}>
+                {viewingStatus === "confirmed" ? "Confirmed" : viewingStatus === "cancelled" ? "Cancelled" : "Pending approval"}
               </span>
             </div>
             <p className="text-xs font-semibold text-on-surface mt-0.5">{timeStr}</p>
           </div>
         </div>
-        <div className="flex gap-2 pt-2 border-t border-white/10">
-          <button
-            onClick={onAcceptViewing}
-            disabled={!onAcceptViewing}
-            className="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[12px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold disabled:opacity-40"
-          >
-            ✓ Accept Viewing
-          </button>
-          <button
-            onClick={onRescheduleViewing}
-            disabled={!onRescheduleViewing}
-            className="py-2 px-3 rounded-lg bg-white/5 text-text-secondary border border-white/10 text-[12px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition disabled:opacity-40"
-          >
-            Reschedule
-          </button>
-        </div>
+        {(onAcceptViewing || onRescheduleViewing) && (
+          <div className="flex gap-2 pt-2 border-t border-surface-variant">
+            {onAcceptViewing && (
+              <button
+                onClick={onAcceptViewing}
+                className="flex-1 py-2 px-3 rounded-lg bg-success/10 text-success border border-success/35 text-[12px] font-mono uppercase tracking-wider hover:bg-success/15 transition-all duration-300 ease-out font-bold"
+              >
+                ✓ Confirm viewing
+              </button>
+            )}
+            {onRescheduleViewing && (
+              <button
+                onClick={onRescheduleViewing}
+                className="py-2 px-3 rounded-lg bg-surface-variant/50 text-text-secondary border border-surface-variant text-[12px] font-mono uppercase tracking-wider hover:border-gold-accent/30 hover:text-on-surface transition-all duration-300 ease-out"
+              >
+                Move
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -65,37 +88,43 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
   if (text.startsWith("[SYSTEM] Reschedule requested for:")) {
     const details = text.replace("[SYSTEM] Reschedule requested for:", "").trim();
     return (
-      <div className="p-3.5 bg-[#181822] border border-amber-500/50 rounded-xl space-y-3 my-1 shadow-lg">
+      <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 text-lg">
+          <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/35 flex items-center justify-center text-gold-accent shrink-0 text-lg">
             🔄
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="text-[12px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+              <h4 className="text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold">
                 Reschedule Proposed
               </h4>
-              <span className="text-[12px] font-mono uppercase bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">
+              <span className="text-[12px] font-mono uppercase bg-gold-accent/15 text-gold-bright px-1.5 py-0.5 rounded">
                 Action Required
               </span>
             </div>
             <p className="text-xs font-semibold text-on-surface mt-0.5">{details}</p>
           </div>
         </div>
-        <div className="flex gap-2 pt-2 border-t border-white/10">
-          <button
-            onClick={() => onAcceptReschedule?.(details)}
-            className="flex-1 py-2 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[12px] font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition font-bold"
-          >
-            ✓ Accept New Slot
-          </button>
-          <button
-            onClick={onRescheduleViewing}
-            className="py-2 px-3 rounded-lg bg-white/5 text-text-secondary border border-white/10 text-[12px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition"
-          >
-            Propose Other
-          </button>
-        </div>
+        {(onAcceptReschedule || onRescheduleViewing) && (
+          <div className="flex gap-2 pt-2 border-t border-surface-variant">
+            {onAcceptReschedule && (
+              <button
+                onClick={() => onAcceptReschedule(details)}
+                className="flex-1 py-2 px-3 rounded-lg bg-success/10 text-success border border-success/35 text-[12px] font-mono uppercase tracking-wider hover:bg-success/15 transition-all duration-300 ease-out font-bold"
+              >
+                ✓ Confirm new slot
+              </button>
+            )}
+            {onRescheduleViewing && (
+              <button
+                onClick={onRescheduleViewing}
+                className="py-2 px-3 rounded-lg bg-surface-variant/50 text-text-secondary border border-surface-variant text-[12px] font-mono uppercase tracking-wider hover:border-gold-accent/30 hover:text-on-surface transition-all duration-300 ease-out"
+              >
+                Propose other
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -103,12 +132,12 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
   // 3. Viewing Accepted Confirmation
   if (text.startsWith("[SYSTEM] Viewing accepted")) {
     return (
-      <div className="p-3.5 bg-[#122018] border border-emerald-500/40 rounded-xl space-y-2 my-1">
+      <div className="p-3.5 bg-success/10 border border-success/35 rounded-xl space-y-2 my-1">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">✅</span>
           <div>
-            <h4 className="text-[12px] font-mono uppercase tracking-widest text-emerald-400 font-bold">
-              Viewing Confirmed &amp; Calendar Synced
+            <h4 className="text-[12px] font-mono uppercase tracking-widest text-success font-bold">
+              Viewing Confirmed in ScoutIt
             </h4>
             <p className="text-xs text-text-secondary mt-0.5">{text.replace("[SYSTEM] ", "")}</p>
           </div>
@@ -120,7 +149,7 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
   // 4. Deal Room Concluded
   if (text.startsWith("[SYSTEM] Deal Room concluded")) {
     return (
-      <div className="p-3.5 bg-[#18181c] border border-white/15 rounded-xl space-y-2 my-1">
+      <div className="p-3.5 bg-surface border border-surface-variant rounded-xl space-y-2 my-1">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">🔒</span>
           <div>
@@ -137,11 +166,11 @@ const renderTextWithLinks = (text, { onAcceptViewing, onRescheduleViewing, onAcc
   // 5. Staff Incident Escalation Notice
   if (text.startsWith("[SYSTEM] 🛡️ Staff Support Incident")) {
     return (
-      <div className="p-3.5 bg-[#121824] border border-blue-500/40 rounded-xl space-y-2 my-1">
+      <div className="p-3.5 bg-surface border border-surface-variant rounded-xl space-y-2 my-1">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">🛡️</span>
           <div>
-            <h4 className="text-[12px] font-mono uppercase tracking-widest text-blue-400 font-bold">
+            <h4 className="text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold">
               Staff Diagnostic Incident Logged
             </h4>
             <p className="text-xs text-text-secondary mt-0.5">{text.replace("[SYSTEM] ", "")}</p>
@@ -214,6 +243,34 @@ function authHeaders(token) {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function normalizeViewingAppointment(row, deal, fallback = {}) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    dealId: row.dealId || row.deal_id || deal.id,
+    propertyId: row.propertyId || row.property_id || null,
+    propertyTitle: row.propertyTitle || deal.property_title || "Property viewing",
+    scheduledAt: row.scheduledAt || row.scheduled_at,
+    endsAt: row.endsAt || row.ends_at || null,
+    durationMinutes: row.durationMinutes || row.duration_minutes || fallback.durationMinutes || null,
+    status: row.status || fallback.status || "pending",
+    isHost: row.isHost ?? fallback.isHost ?? false,
+    meetLink: row.meetLink || row.meet_link || fallback.meetLink || null,
+  };
+}
+
+function selectCurrentViewing(rows, deal) {
+  const active = (rows || [])
+    .filter((row) => (row.dealId || row.deal_id) === deal.id)
+    .filter((row) => ["pending", "confirmed"].includes(row.status))
+    .map((row) => normalizeViewingAppointment(row, deal))
+    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+  if (active.length === 0) return null;
+  const now = Date.now();
+  return active.find((row) => new Date(row.endsAt || row.scheduledAt).getTime() >= now)
+    || active[active.length - 1];
+}
+
 const messageVariants = {
   initial: { opacity: 0, y: 15 },
   animate: { opacity: 1, y: 0 }
@@ -246,13 +303,10 @@ export default function ChatBox({
 
   const [showConfirmReport, setShowConfirmReport] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  
-  // Rescheduling state
-  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
-  const [rescheduleDate, setRescheduleDate] = useState("");
-  const [rescheduleTime, setRescheduleTime] = useState("14:00");
-  const [rescheduleMode, setRescheduleMode] = useState("Physical On-Site");
-  const [rescheduleReason, setRescheduleReason] = useState("Schedule adjustment");
+  const [bookingMode, setBookingMode] = useState("create");
+  const [activeViewing, setActiveViewing] = useState(null);
+  const [viewingBusy, setViewingBusy] = useState(false);
+  const [viewingError, setViewingError] = useState(null);
 
   // Staff Support / Glitch reporting state
   const [showStaffModal, setShowStaffModal] = useState(false);
@@ -260,6 +314,25 @@ export default function ChatBox({
   const [staffMessage, setStaffMessage] = useState("");
   const [staffSubmitting, setStaffSubmitting] = useState(false);
   const [staffSuccess, setStaffSuccess] = useState(false);
+
+  // A-043 — downloading your own copy. `downloadState` is one of
+  // idle | working | done, so the button can say what it is doing without a
+  // second boolean that can disagree with the first.
+  const [downloadState, setDownloadState] = useState("idle");
+  const [downloadError, setDownloadError] = useState(null);
+
+  // A-045 — reporting a problem, and seeing what happened to the report.
+  // `disputeLoad` is the four-state machine for the banner: loading | ready |
+  // error. `dispute` is null when there is none, which is the empty state —
+  // deliberately distinct from "we have not looked yet", because rendering
+  // "no dispute" while still loading tells someone their report vanished.
+  const [dispute, setDispute] = useState(null);
+  const [disputeLoad, setDisputeLoad] = useState("loading");
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [disputeDetails, setDisputeDetails] = useState("");
+  const [disputeSubmitting, setDisputeSubmitting] = useState(false);
+  const [disputeError, setDisputeError] = useState(null);
 
   const [showConfirmHandshake, setShowConfirmHandshake] = useState(false);
   const [showDealFile, setShowDealFile] = useState(false);
@@ -278,6 +351,7 @@ export default function ChatBox({
   const contactRevealed = deal.handshakeState === "linked" || deal.contactRevealed === true;
 
   const closed = isClosed(deal.status);
+  const hasOpenViewing = activeViewing && ["pending", "confirmed"].includes(activeViewing.status);
   const isWaiting = deal.status === "pending";
   // The buyer is always the party who spent the Connect to open the thread,
   // so buyer === sender and everyone else === recipient of the request.
@@ -328,10 +402,34 @@ export default function ChatBox({
     }
   }, [deal.id, mapMessage]);
 
+  const loadActiveViewing = useCallback(async () => {
+    setViewingError(null);
+    try {
+      const { userId } = await resolveAuth();
+      if (!userId) {
+        setActiveViewing(null);
+        return;
+      }
+      const data = await crmFetch("/api/viewing-appointments", { mockUserId: userId });
+      setActiveViewing(selectCurrentViewing(data.appointments, {
+        id: deal.id,
+        property_title: deal.property_title,
+      }));
+    } catch (err) {
+      console.error("Failed to load the deal's viewing", err);
+      setActiveViewing(null);
+      setViewingError("Couldn't check the live viewing status. CRM and Calendar may have newer information.");
+    }
+  }, [deal.id, deal.property_title]);
+
   useEffect(() => {
     loadMessages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deal.id]);
+
+  useEffect(() => {
+    loadActiveViewing();
+  }, [loadActiveViewing]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -439,6 +537,116 @@ export default function ChatBox({
     }
   };
 
+  // ── A-043. Download your own copy of this conversation ──
+  //
+  // A plain <a href> cannot be used: the export route is authenticated by a
+  // Bearer token that only this component can attach. So the file is fetched,
+  // turned into a blob, and handed to a synthetic anchor. The object URL is
+  // revoked immediately after — leaving it alive pins the whole transcript in
+  // memory for as long as the tab is open.
+  const handleDownloadCopy = async () => {
+    setDownloadError(null);
+    setDownloadState("working");
+    let objectUrl = null;
+    try {
+      const { token, mockOwnerId, userId } = await resolveAuth();
+      if (!userId) throw new Error("Please log in to download this conversation.");
+      const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
+      const res = await fetch(`/api/deals/${deal.id}/export${qs}`, {
+        headers: authHeaders(token),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Couldn't prepare your copy.");
+      }
+      // The server names the file; the browser only needs to be told to save
+      // it. Parsing the name out of Content-Disposition keeps one namer.
+      const disposition = res.headers.get("Content-Disposition") || "";
+      const named = /filename="?([^"]+)"?/.exec(disposition);
+      const blob = await res.blob();
+      objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = named?.[1] || `scoutit-conversation-${deal.id}.txt`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setDownloadState("done");
+    } catch (err) {
+      setDownloadState("idle");
+      setDownloadError(sanitizeError(err, "Couldn't prepare your copy. Please try again."));
+      setTimeout(() => setDownloadError(null), 6000);
+    } finally {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    }
+  };
+
+  // ── A-045. Report a problem, and see what came of it ──
+  //
+  // A-041 built the filing route and nothing called it, so in practice nobody
+  // could file (Rule 13). These two functions are that missing caller.
+  const loadDispute = useCallback(async () => {
+    setDisputeLoad("loading");
+    try {
+      const { token, mockOwnerId, userId } = await resolveAuth();
+      if (!userId) {
+        setDisputeLoad("error");
+        return;
+      }
+      const qs = mockOwnerId ? `?mockOwnerId=${mockOwnerId}` : "";
+      const res = await fetch(`/api/deals/${deal.id}/dispute${qs}`, {
+        headers: authHeaders(token),
+      });
+      if (!res.ok) {
+        setDisputeLoad("error");
+        return;
+      }
+      const data = await res.json();
+      setDispute(data.dispute || null);
+      setDisputeLoad("ready");
+    } catch {
+      // A failed status read must never look like "no dispute exists".
+      setDisputeLoad("error");
+    }
+  }, [deal.id]);
+
+  useEffect(() => {
+    loadDispute();
+  }, [loadDispute]);
+
+  const submitDispute = async (e) => {
+    if (e) e.preventDefault();
+    if (!disputeReason || disputeSubmitting) return;
+    setDisputeSubmitting(true);
+    setDisputeError(null);
+    try {
+      const { token, mockOwnerId, userId } = await resolveAuth();
+      if (!userId) throw new Error("Please log in to report a problem.");
+      const res = await fetch(`/api/deals/${deal.id}/dispute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({
+          reason: disputeReason,
+          details: disputeDetails.trim() || undefined,
+          mockOwnerId,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Couldn't send your report.");
+      // Re-read rather than trusting the POST's echo: the banner must show what
+      // the database actually holds, including the case where a hold already
+      // existed and this filing joined it instead of creating one.
+      await loadDispute();
+      setShowDisputeModal(false);
+      setDisputeReason("");
+      setDisputeDetails("");
+    } catch (err) {
+      setDisputeError(sanitizeError(err, "Couldn't send your report. Please try again."));
+    } finally {
+      setDisputeSubmitting(false);
+    }
+  };
+
   const handleReportConversation = async () => {
     try {
       const { token, mockOwnerId } = await resolveAuth();
@@ -487,38 +695,76 @@ export default function ChatBox({
     }
   };
 
-  const acceptViewing = async () => {
+  const updateViewingStatus = async (status) => {
+    if (!activeViewing?.id || viewingBusy) return;
+    setViewingBusy(true);
+    setViewingError(null);
     try {
-      await sendMessageBody("[SYSTEM] Viewing accepted. See you then.");
+      await crmFetch(`/api/viewing-appointments/${activeViewing.id}`, {
+        method: "PATCH",
+        mockUserId: myUserId,
+        body: { status },
+      });
+      setActiveViewing((current) => current ? { ...current, status } : current);
+      window.dispatchEvent(new Event("calendar:refresh"));
+
+      const notice = status === "confirmed"
+        ? "[SYSTEM] Viewing accepted. The appointment is confirmed in ScoutIt Calendar."
+        : "[SYSTEM] Viewing cancelled. The appointment was removed from the active schedule.";
+      try {
+        await sendMessageBody(notice);
+      } catch (messageError) {
+        console.error("Appointment updated but its conversation notice failed", messageError);
+        setViewingError(
+          `The viewing is ${status}, but the conversation notice could not be posted. CRM and Calendar are already correct.`,
+        );
+      }
     } catch (err) {
-      setUploadError(sanitizeError(err, "Couldn't send your reply."));
-      setTimeout(() => setUploadError(null), 5000);
+      setViewingError(sanitizeError(err, "Couldn't update this viewing."));
+    } finally {
+      setViewingBusy(false);
     }
   };
 
-  const handleAcceptReschedule = async (details) => {
-    try {
-      await sendMessageBody(`[SYSTEM] Viewing accepted for proposed slot: ${details}. See you then.`);
-    } catch (err) {
-      setUploadError(sanitizeError(err, "Couldn't send your confirmation."));
-      setTimeout(() => setUploadError(null), 5000);
-    }
+  const acceptViewing = () => updateViewingStatus("confirmed");
+  const cancelViewing = () => updateViewingStatus("cancelled");
+
+  const openViewingPicker = (mode = "create") => {
+    setBookingMode(mode);
+    setShowBookingModal(true);
   };
 
   const rescheduleViewing = () => {
-    setShowRescheduleModal(true);
+    if (!activeViewing?.id) {
+      setViewingError("No active viewing is available to move. Refresh the deal room or request a new viewing.");
+      return;
+    }
+    openViewingPicker("reschedule");
   };
 
-  const submitReschedule = async (e) => {
-    if (e) e.preventDefault();
-    if (!rescheduleDate) return;
+  const handleViewingScheduled = async (appointment) => {
+    const wasReschedule = bookingMode === "reschedule";
+    const normalized = normalizeViewingAppointment(appointment, deal, {
+      isHost: wasReschedule ? activeViewing?.isHost : false,
+      meetLink: activeViewing?.meetLink,
+      durationMinutes: activeViewing?.durationMinutes,
+    });
+    setActiveViewing(normalized);
+    setShowBookingModal(false);
+    setViewingError(null);
+    window.dispatchEvent(new Event("calendar:refresh"));
+
+    const when = new Date(normalized.scheduledAt).toLocaleString();
+    const notice = wasReschedule
+      ? `[SYSTEM] Reschedule requested for: ${when}. This time came from the host's live availability.`
+      : `[SYSTEM] I have requested a live viewing for: ${when}`;
     try {
-      const summary = `[SYSTEM] Reschedule requested for: ${rescheduleDate} at ${rescheduleTime} (${rescheduleMode}) — Reason: ${rescheduleReason || "Schedule adjustment"}`;
-      await sendMessageBody(summary);
-      setShowRescheduleModal(false);
+      await sendMessageBody(notice);
     } catch (err) {
-      setUploadError(sanitizeError(err, "Couldn't send reschedule request."));
-      setTimeout(() => setUploadError(null), 5000);
+      console.error("Viewing saved but its conversation notice failed", err);
+      setViewingError(
+        "The viewing is saved in CRM and Calendar, but the conversation notice could not be posted.",
+      );
     }
   };
 
@@ -790,7 +1036,7 @@ export default function ChatBox({
       {/* Handshake Confirmation Modal */}
       {showConfirmHandshake && (
         <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-surface-alt border border-gold-accent/50 p-6 rounded-lg max-w-sm text-center shadow-[0_0_30px_rgba(232,174,60,0.15)]">
+          <div className="bg-surface-alt border border-gold-accent/50 p-6 rounded-lg max-w-sm text-center shadow-[0_0_30px_rgba(var(--accent-rgb),0.15)]">
             <div className="text-4xl mb-4">⚠️</div>
             <h3 className="text-xl font-headline-editorial text-gold-accent mb-2">Exchange Contact Info?</h3>
             <p className="text-sm text-text-secondary mb-6">
@@ -826,7 +1072,7 @@ export default function ChatBox({
           transition={loadingLineTransition}
         />
         <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-          <line x1="0" y1="2" x2="100%" y2="2" stroke="rgba(232, 174, 60, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
+          <line x1="0" y1="2" x2="100%" y2="2" stroke="var(--accent)" opacity="0.2" strokeWidth="1" strokeDasharray="4 4" />
         </svg>
       </div>
 
@@ -834,7 +1080,7 @@ export default function ChatBox({
       <div className="p-3 sm:p-4 border-b border-surface-variant flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-working-title text-md text-on-surface truncate">
+            <h3 className="font-headline-editorial text-xl text-on-surface truncate">
               {deal.other_party}
             </h3>
             {/* Was hardcoded "3 Connects Spent" on every deal. The ledger
@@ -852,10 +1098,47 @@ export default function ChatBox({
             Inquiry for <strong>{deal.property_title}</strong>
           </p>
         </div>
-        {!closed && (
-          // Five buttons in a no-wrap row overflowed the viewport at 375px.
-          // Wraps now, and scrolls horizontally as a last resort.
-          <div className="flex gap-2 items-center flex-wrap sm:flex-nowrap overflow-x-auto -mx-1 px-1 pb-1 sm:pb-0">
+        {/* A-043. Downloading your own copy is deliberately OUTSIDE the
+            !closed block. The export is least useful exactly when it is
+            needed most: after the conversation ends, while the seven-day
+            window is running down. A control that disappeared at close would
+            be missing during the only period that matters. */}
+        <div className="flex gap-2 items-center flex-wrap sm:flex-nowrap overflow-x-auto -mx-1 px-1 pb-1 sm:pb-0">
+          <button
+            onClick={handleDownloadCopy}
+            disabled={downloadState === "working"}
+            className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 active:bg-white/15 transition-colors duration-150 ease-out flex items-center gap-1.5 whitespace-nowrap min-h-[44px] disabled:opacity-50"
+            title={`Save your own copy of this conversation. ScoutIt keeps messages for ${CHAT_RETENTION_DAYS} days after a conversation closes.`}
+          >
+            <span aria-hidden="true">⤓</span>
+            <span>
+              {downloadState === "working"
+                ? "Preparing…"
+                : downloadState === "done"
+                  ? "Saved"
+                  : "Download copy"}
+            </span>
+          </button>
+
+          {/* A-045. Also outside the !closed block, and for the same reason as
+              the download: a dispute is filed AGAINST a conversation that has
+              already ended, so a control that vanished at close would be
+              missing at exactly the moment it is needed. Distinct from the 🚩
+              Report & Unmatch control below, which closes the thread — this one
+              preserves it. */}
+          {!dispute && (
+            <button
+              onClick={() => setShowDisputeModal(true)}
+              className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 active:bg-white/15 transition-colors duration-150 ease-out flex items-center gap-1.5 whitespace-nowrap min-h-[44px]"
+              title="Ask ScoutIt to review this conversation and keep the record while we do"
+            >
+              <span aria-hidden="true">⚠</span>
+              <span>Report a problem</span>
+            </button>
+          )}
+
+          {!closed && (
+          <>
             <button
               onClick={() => setShowDealFile(true)}
               className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 transition flex items-center gap-1.5 whitespace-nowrap"
@@ -888,12 +1171,14 @@ export default function ChatBox({
               </button>
             )}
 
-            <button
-              onClick={() => setShowBookingModal(true)}
-              className="bg-gold-accent text-background px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-bright transition shadow-[0_0_10px_rgba(232,174,60,0.2)] whitespace-nowrap"
-            >
-              Request Live Viewing
-            </button>
+            {!hasOpenViewing && (
+              <button
+                onClick={() => openViewingPicker("create")}
+                className="min-h-11 whitespace-nowrap rounded bg-gold-accent px-3 py-2 font-mono text-[12px] font-bold uppercase tracking-widest text-background shadow-[0_0_14px_rgba(var(--accent-rgb),0.18)] transition-all duration-300 ease-out hover:bg-gold-bright"
+              >
+                Request live viewing
+              </button>
+            )}
             <button
               onClick={() => setShowConfirmClose(true)}
               className="border border-error/50 text-error px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-error/10 transition whitespace-nowrap"
@@ -902,7 +1187,7 @@ export default function ChatBox({
             </button>
             <button
               onClick={() => setShowStaffModal(true)}
-              className="border border-blue-500/40 text-blue-400 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-blue-500/10 transition whitespace-nowrap flex items-center gap-1"
+              className="border border-gold-accent/30 text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/10 transition-all duration-300 ease-out whitespace-nowrap flex items-center gap-1"
               title="Report Glitch or Request Staff Review"
             >
               <span>🛡️ Staff Support</span>
@@ -914,13 +1199,108 @@ export default function ChatBox({
             >
               🚩
             </button>
-          </div>
-        )}
+          </>
+          )}
+        </div>
       </div>
+
+      <ViewingWorkspaceCard
+        appointment={activeViewing}
+        busy={viewingBusy}
+        onConfirm={acceptViewing}
+        onReschedule={rescheduleViewing}
+        onCancel={cancelViewing}
+      />
+
+      {viewingError && (
+        <div role="status" className="border-b border-gold-accent/20 bg-gold-accent/5 px-4 py-2 text-[12px] text-text-secondary">
+          {viewingError}{" "}
+          <button
+            type="button"
+            onClick={loadActiveViewing}
+            className="font-mono uppercase tracking-wider text-gold-accent underline underline-offset-2"
+          >
+            Refresh
+          </button>
+        </div>
+      )}
+
+      {/* A-043 download failure. Its own line rather than the shared upload
+          banner: a failed download and a failed upload need different words,
+          and reusing one banner is how "Upload failed" ends up shown to
+          someone who was trying to save a copy. */}
+      {downloadError && (
+        <div className="bg-error/15 border-b border-error/30 px-4 py-2 text-xs text-error">
+          {downloadError}
+        </div>
+      )}
+
+      {/* A-045 — the state of a report, which is the half A-041 could not
+          deliver. All four states are here on purpose:
+            loading  — a skeleton line, never "no report" before we have looked
+            empty    — no banner at all; the header control is the affordance
+            error    — says the status is unknown rather than implying none
+            success  — the banner below, in the words the reader needs */}
+      {disputeLoad === "loading" && (
+        <div className="border-b border-surface-variant px-4 py-2">
+          <div className="h-3 w-48 rounded bg-white/5 motion-safe:animate-pulse" />
+        </div>
+      )}
+
+      {disputeLoad === "error" && (
+        <div className="bg-surface-variant/30 border-b border-surface-variant px-4 py-2 text-[12px] text-text-muted">
+          Couldn&apos;t check whether this conversation is under review.{" "}
+          <button
+            type="button"
+            onClick={loadDispute}
+            className="underline underline-offset-2 text-on-surface hover:text-gold-accent transition-colors duration-150 ease-out"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {disputeLoad === "ready" && dispute && (
+        <div className="bg-surface-variant/40 border-b border-surface-variant px-4 py-3">
+          <p className="text-[12px] font-mono uppercase tracking-widest text-text-secondary">
+            {dispute.onHold ? "Under review" : "Review closed"}
+          </p>
+          <p className="mt-1 text-[12px] text-text-secondary leading-relaxed">
+            {dispute.onHold ? (
+              <>
+                ScoutIt is reviewing this conversation.{" "}
+                <strong className="text-on-surface">
+                  These messages are kept in full until the review finishes
+                </strong>{" "}
+                — the {CHAT_RETENTION_DAYS}-day clock does not apply while it is open.
+              </>
+            ) : (
+              <>
+                The review of this conversation has finished. Normal retention applies
+                again: ScoutIt keeps these messages for {CHAT_RETENTION_DAYS} days after
+                the conversation closes.
+              </>
+            )}
+          </p>
+          {/* Only the person who filed sees what was filed. The other party is
+              told the thread is held — never the ground, which is the
+              reporter's account of THEM. That filtering is done by the API;
+              this branch would render nothing even if it were not. */}
+          {dispute.isMine && dispute.reason && (
+            <p className="mt-1.5 text-[12px] text-text-muted">
+              You reported this on{" "}
+              {dispute.filedAt ? new Date(dispute.filedAt).toLocaleDateString() : "an earlier date"}:{" "}
+              <span className="text-text-secondary">
+                {DISPUTE_REASON_LABELS[dispute.reason] || "Something else"}
+              </span>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Pitch Drawer */}
       {deal.pitch_message && (
-        <div className="bg-[#1a1a1a] border-b border-surface-variant flex flex-col z-0">
+        <div className="bg-surface-alt border-b border-surface-variant flex flex-col z-0">
           <button 
             className="w-full flex justify-between items-center px-4 py-2 text-xs font-mono tracking-widest uppercase text-text-secondary hover:text-on-surface hover:bg-white/5 transition"
             onClick={() => setIsPitchExpanded(!isPitchExpanded)}
@@ -953,7 +1333,7 @@ export default function ChatBox({
       {/* Warnings & Banners */}
       {deal.status === 'accepted' ? (
         <div className="bg-surface border-b border-surface-variant p-6 flex flex-col items-center">
-          <div className="max-w-md w-full bg-gradient-to-br from-[#1a1a1a] to-background border border-gold-accent/30 rounded-xl p-6 shadow-[0_10px_40px_rgba(232,174,60,0.05)] flex flex-col items-center animate-[fadeIn_0.5s_ease]">
+          <div className="card-atmosphere-gold max-w-md w-full rounded-xl p-6 flex flex-col items-center animate-[fadeIn_0.5s_ease]">
             <span className="text-3xl mb-3">🛡️</span>
             <span className="font-label-caps text-[12px] tracking-widest uppercase text-success bg-success/10 px-2 py-1 rounded mb-4">Verified Advisor Active</span>
             
@@ -977,12 +1357,12 @@ export default function ChatBox({
 
             <div className="flex flex-wrap gap-2 justify-center w-full">
               {deal.other_party_contact?.phone && (
-                <a href={`https://wa.me/${deal.other_party_contact.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 px-3 py-2 rounded text-center text-xs font-working-title hover:bg-[#25D366]/30 transition">
+                <a href={`https://wa.me/${deal.other_party_contact.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 min-w-[120px] bg-success/10 text-success border border-success/30 px-3 py-2 rounded text-center font-mono text-[12px] uppercase tracking-wider hover:bg-success/15 transition-all duration-300 ease-out">
                   WhatsApp
                 </a>
               )}
-              <button onClick={() => setShowBookingModal(true)} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded text-xs font-working-title hover:bg-gold-accent/30 transition">
-                Schedule Call
+              <button onClick={() => hasOpenViewing ? rescheduleViewing() : openViewingPicker("create")} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded font-mono text-[12px] uppercase tracking-wider hover:bg-gold-accent/30 transition-all duration-300 ease-out">
+                {hasOpenViewing ? "Move viewing" : "Request live viewing"}
               </button>
               <button className="flex-1 min-w-[120px] bg-surface-variant text-text-secondary border border-white/10 px-3 py-2 rounded text-xs font-working-title hover:text-white transition" onClick={() => alert("Vault access coming soon.")}>
                 📂 Open Vault
@@ -995,8 +1375,26 @@ export default function ChatBox({
           <span className="mr-2">🚩</span> This conversation was reported and permanently closed. Our Trust &amp; Safety team is reviewing the interaction.
         </div>
       ) : closed ? (
-        <div className="bg-error/10 text-error p-3 text-center text-xs font-mono tracking-widest uppercase border-b border-error/20">
-          This conversation is closed. The history stays here for your records.
+        // A-043. This used to read "The history stays here for your records",
+        // which is the opposite of what happens: bodies are replaced
+        // CHAT_RETENTION_DAYS after close. Telling someone their record is
+        // safe while it counts down is the version of this screen that costs
+        // them the evidence.
+        <div className="bg-error/10 text-error px-3 py-2.5 text-center border-b border-error/20">
+          <p className="text-xs font-mono tracking-widest uppercase">This conversation is closed.</p>
+          <p className="mt-1 text-[12px] normal-case tracking-normal font-sans text-text-secondary">
+            ScoutIt keeps these messages for {CHAT_RETENTION_DAYS} days after closing, then replaces
+            their contents.{" "}
+            <button
+              type="button"
+              onClick={handleDownloadCopy}
+              disabled={downloadState === "working"}
+              className="underline underline-offset-2 text-on-surface hover:text-gold-accent transition-colors duration-150 ease-out disabled:opacity-50"
+            >
+              {downloadState === "done" ? "Copy saved" : "Download your copy"}
+            </button>
+            .
+          </p>
         </div>
       ) : daysLeft !== null ? (
         <div className="bg-surface-container-low p-2 text-center text-[12px] uppercase font-mono tracking-widest text-text-secondary border-b border-surface-variant">
@@ -1043,7 +1441,12 @@ export default function ChatBox({
                     backfill or re-fetch. */}
                 {renderTextWithLinks(
                   maskContactDetails(msg.body, contactRevealed),
-                  { onAcceptViewing: acceptViewing, onRescheduleViewing: rescheduleViewing, onAcceptReschedule: handleAcceptReschedule },
+                  {
+                    onAcceptViewing: activeViewing?.isHost && activeViewing.status === "pending" ? acceptViewing : null,
+                    onRescheduleViewing: activeViewing && ["pending", "confirmed"].includes(activeViewing.status) ? rescheduleViewing : null,
+                    onAcceptReschedule: activeViewing?.isHost && activeViewing.status === "pending" ? acceptViewing : null,
+                    viewingStatus: activeViewing?.status || null,
+                  },
                 )}
 
                 {/* Render Attachments */}
@@ -1135,7 +1538,7 @@ export default function ChatBox({
           <button
             type="submit"
             disabled={closed || isSubmitting || !input.trim()}
-            className="ml-auto bg-gold-accent text-background px-6 py-2.5 rounded-full text-sm font-working-title disabled:opacity-50 hover:bg-gold-bright transition shadow-[0_4px_10px_rgba(232,174,60,0.1)]"
+            className="ml-auto bg-gold-accent text-background px-6 py-2.5 rounded-full font-mono text-[12px] uppercase tracking-wider disabled:opacity-50 hover:bg-gold-bright transition-all duration-300 ease-out shadow-[0_4px_10px_rgba(var(--accent-rgb),0.1)]"
           >
             {isSubmitting ? "..." : "Send"}
           </button>
@@ -1145,7 +1548,7 @@ export default function ChatBox({
       {/* ── Structured Conclude / Cancel Deal Room Modal ── */}
       {showConfirmClose && (
         <div className="absolute inset-0 bg-background/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-[#121216] border border-gold-accent/30 rounded-xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4">
+          <div className="bg-surface border border-gold-accent/30 rounded-xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
               <span className="text-2xl">🔒</span>
               <div>
@@ -1185,9 +1588,36 @@ export default function ChatBox({
               />
             </div>
 
-            <p className="text-[12px] text-text-muted leading-relaxed">
-              Closing locks the active composer. All message history, attachments, and timestamps remain accessible in read-only audit mode for both parties.
-            </p>
+            {/* A-043. This paragraph used to say history "remains accessible
+                in read-only audit mode for both parties" — which is not what
+                the platform does. Bodies are replaced CHAT_RETENTION_DAYS
+                after close (lib/chatRetention.js). The old copy told people
+                their record was safe at the exact moment it started expiring.
+                The day count comes from the shared constant so this sentence
+                cannot drift away from the job that enforces it. */}
+            <div className="space-y-2.5 rounded-lg border border-surface-variant bg-surface/60 p-3">
+              <p className="text-[12px] text-text-muted leading-relaxed">
+                Closing locks the composer. ScoutIt then keeps these messages for{" "}
+                <strong className="text-on-surface">{CHAT_RETENTION_DAYS} days</strong> and replaces
+                their contents after that. Save your own copy now, while the conversation is
+                complete — it stays yours afterwards.
+              </p>
+              <button
+                type="button"
+                onClick={handleDownloadCopy}
+                disabled={downloadState === "working"}
+                className="w-full min-h-[44px] rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-mono uppercase tracking-wider text-on-surface hover:bg-white/10 active:bg-white/15 transition-colors duration-150 ease-out disabled:opacity-50"
+              >
+                {downloadState === "working"
+                  ? "Preparing…"
+                  : downloadState === "done"
+                    ? "✓ Copy saved"
+                    : "⤓ Download my copy first"}
+              </button>
+              <p className="text-[12px] text-text-muted leading-relaxed">
+                {EXPORT_DISCLAIMER_LINES[1]}
+              </p>
+            </div>
 
             <div className="flex gap-2.5 pt-2">
               <button
@@ -1209,110 +1639,10 @@ export default function ChatBox({
         </div>
       )}
 
-      {/* ── Reschedule Viewing Modal ── */}
-      {showRescheduleModal && (
-        <div className="absolute inset-0 bg-background/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-[#14141a] border border-amber-500/40 rounded-xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🔄</span>
-              <div>
-                <h3 className="font-working-title text-lg text-on-surface">Propose Viewing Reschedule</h3>
-                <p className="text-xs text-text-secondary">Propose an updated time slot for this appointment.</p>
-              </div>
-            </div>
-
-            <form onSubmit={submitReschedule} className="space-y-3.5">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
-                    New Date
-                  </label>
-                  <input
-                    type="date"
-                    value={rescheduleDate}
-                    onChange={(e) => setRescheduleDate(e.target.value)}
-                    required
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
-                    Preferred Time
-                  </label>
-                  <input
-                    type="time"
-                    value={rescheduleTime}
-                    onChange={(e) => setRescheduleTime(e.target.value)}
-                    required
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
-                  Viewing Format
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {["Physical On-Site", "Virtual Video Tour"].map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setRescheduleMode(m)}
-                      className={`py-2 px-3 rounded-lg text-xs font-mono uppercase tracking-wider border transition ${
-                        rescheduleMode === m
-                          ? "bg-gold-accent/20 border-gold-accent text-gold-accent font-bold"
-                          : "bg-surface border-surface-variant text-text-secondary hover:text-on-surface"
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
-                  Adjustment Reason
-                </label>
-                <select
-                  value={rescheduleReason}
-                  onChange={(e) => setRescheduleReason(e.target.value)}
-                  className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
-                >
-                  <option value="Schedule conflict">Schedule conflict</option>
-                  <option value="Delayed in transit / traffic">Delayed in transit / traffic</option>
-                  <option value="Inclement weather / typhoon advisory">Inclement weather / typhoon advisory</option>
-                  <option value="Switched to virtual walkthrough">Switched to virtual walkthrough</option>
-                  <option value="Other adjustment">Other adjustment</option>
-                </select>
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowRescheduleModal(false)}
-                  className="flex-1 py-2.5 rounded-lg border border-surface-variant text-xs text-text-secondary hover:text-on-surface transition font-mono uppercase tracking-wider"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!rescheduleDate}
-                  className="flex-1 py-2.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/50 text-xs font-mono uppercase tracking-wider hover:bg-amber-500/30 transition font-bold disabled:opacity-40"
-                >
-                  Send Proposal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* ── In-Chat Staff Support & Glitch Incident Modal ── */}
       {showStaffModal && (
         <div className="absolute inset-0 bg-background/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-[#101522] border border-blue-500/40 rounded-xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4">
+          <div className="bg-surface border border-gold-accent/25 rounded-xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
               <span className="text-2xl">🛡️</span>
               <div>
@@ -1332,13 +1662,13 @@ export default function ChatBox({
             ) : (
               <form onSubmit={submitStaffSupport} className="space-y-3.5">
                 <div>
-                  <label className="block text-[12px] font-mono uppercase tracking-widest text-blue-400 font-bold mb-1">
+                  <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
                     Assistance Type
                   </label>
                   <select
                     value={staffCategory}
                     onChange={(e) => setStaffCategory(e.target.value)}
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-blue-400 outline-none"
+                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
                   >
                     <option value="glitch">Technical Glitch / Upload Error</option>
                     <option value="no_show">Client / Broker Viewing No-Show</option>
@@ -1357,7 +1687,7 @@ export default function ChatBox({
                     placeholder="Provide details so staff can review and fix things..."
                     rows={3}
                     required
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-blue-400 outline-none"
+                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
                   />
                 </div>
 
@@ -1372,7 +1702,7 @@ export default function ChatBox({
                   <button
                     type="submit"
                     disabled={staffSubmitting || !staffMessage.trim()}
-                    className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/50 text-xs font-mono uppercase tracking-wider hover:bg-blue-500/30 transition font-bold disabled:opacity-40"
+                    className="flex-1 py-2.5 rounded-lg bg-gold-accent/15 text-gold-accent border border-gold-accent/40 text-xs font-mono uppercase tracking-wider hover:bg-gold-accent/25 transition-all duration-300 ease-out font-bold disabled:opacity-40"
                   >
                     {staffSubmitting ? "Dispatching..." : "Dispatch to Staff"}
                   </button>
@@ -1386,12 +1716,32 @@ export default function ChatBox({
       {/* Report Modal */}
       {showConfirmReport && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-surface border border-error/50 rounded-lg p-6 max-w-sm w-full shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+          <div className="bg-surface border border-error/50 rounded-lg p-6 max-w-sm w-full shadow-2xl">
             <h3 className="font-working-title text-lg text-error mb-2 flex items-center gap-2">
               <span>🚩</span> Report &amp; Unmatch
             </h3>
-            <p className="text-sm text-text-secondary mb-6">
+            <p className="text-sm text-text-secondary mb-3">
               This will permanently close the chat and flag the user. Connects will be reviewed by our Trust &amp; Safety team. Are you sure?
+            </p>
+            {/* A-045. This is the control people reach for when something is
+                wrong, and it ENDS the conversation. If what they actually want
+                is ScoutIt to look at what was said, that is a different button
+                and it keeps the record instead of closing it. Saying so here is
+                cheaper than discovering the difference afterwards. Behaviour of
+                this control is unchanged. */}
+            <p className="text-[12px] text-text-muted mb-6 leading-relaxed">
+              Want us to review what was said instead? Close this and choose{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowConfirmReport(false);
+                  setShowDisputeModal(true);
+                }}
+                className="underline underline-offset-2 text-on-surface hover:text-gold-accent transition-colors duration-150 ease-out"
+              >
+                Report a problem
+              </button>{" "}
+              — it keeps this conversation instead of ending it.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -1411,19 +1761,130 @@ export default function ChatBox({
         </div>
       )}
 
+      {/* ── A-045 · Report a problem ──
+          The one screen that calls A-041's filing route. Mobile-first: the
+          panel scrolls inside itself rather than pushing the actions off a
+          390px viewport, and every control clears 44px. */}
+      {showDisputeModal && (
+        <div className="absolute inset-0 bg-background/85 backdrop-blur-md z-[100] flex items-end sm:items-center justify-center p-3 sm:p-6 motion-safe:animate-[fadeIn_0.2s_ease]">
+          <div className="bg-surface border border-surface-variant rounded-xl w-full max-w-md max-h-[90dvh] overflow-y-auto p-5 sm:p-6 space-y-4 shadow-2xl">
+            <div>
+              <h3 className="font-working-title text-lg text-on-surface">
+                Report a problem with this conversation
+              </h3>
+              <p className="mt-1 text-xs text-text-secondary leading-relaxed">
+                This goes to ScoutIt, not to the other person. They are not told what you
+                said here.
+              </p>
+            </div>
+
+            {/* What filing actually does. A-045: this is the reassurance that
+                makes filing feel worth doing, so it is stated before the form
+                rather than in fine print underneath it. */}
+            <div className="rounded-lg border border-surface-variant bg-surface/60 p-3 space-y-2">
+              <p className="text-[12px] text-text-secondary leading-relaxed">
+                <strong className="text-on-surface">Filing keeps the record.</strong> The
+                moment you send this, this conversation is protected from deletion for as
+                long as the review takes.
+              </p>
+              {/* The window, computed for THIS deal rather than one line of
+                  copy that is true in one case and misleading in the others. */}
+              <p className="text-[12px] text-text-muted leading-relaxed">
+                {describeDisputeWindow({ status: deal.status, closedAt: deal.closed_at }).message}
+              </p>
+            </div>
+
+            <form onSubmit={submitDispute} className="space-y-4">
+              <fieldset className="space-y-2">
+                <legend className="text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
+                  What happened?
+                </legend>
+                {DISPUTE_REASONS.map((key) => (
+                  <label
+                    key={key}
+                    className={`flex items-start gap-3 rounded-lg border p-3 min-h-[44px] cursor-pointer transition-colors duration-150 ease-out ${
+                      disputeReason === key
+                        ? "border-gold-accent/60 bg-gold-accent/10"
+                        : "border-surface-variant hover:bg-white/5"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="dispute-reason"
+                      value={key}
+                      checked={disputeReason === key}
+                      onChange={() => setDisputeReason(key)}
+                      className="mt-0.5 shrink-0"
+                    />
+                    {/* The label, never the stored key — DISPUTE_REASON_LABELS
+                        lives beside DISPUTE_REASONS so the two cannot drift. */}
+                    <span className="text-[13px] text-on-surface leading-snug">
+                      {DISPUTE_REASON_LABELS[key]}
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="dispute-details"
+                  className="block text-[12px] font-mono uppercase tracking-widest text-text-muted"
+                >
+                  Anything you want to add (optional)
+                </label>
+                <textarea
+                  id="dispute-details"
+                  value={disputeDetails}
+                  onChange={(e) => setDisputeDetails(e.target.value.slice(0, MAX_DISPUTE_DETAILS))}
+                  rows={4}
+                  placeholder="What you tell us here helps staff understand the conversation."
+                  className="w-full bg-surface border border-surface-variant rounded-lg p-2.5 text-sm text-on-surface focus:border-gold-accent outline-none resize-y"
+                />
+                <p className="text-[12px] text-text-muted text-right">
+                  {disputeDetails.length} / {MAX_DISPUTE_DETAILS}
+                </p>
+              </div>
+
+              {disputeError && (
+                <p role="alert" className="text-[12px] text-error leading-relaxed">
+                  {disputeError}
+                </p>
+              )}
+
+              <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDisputeModal(false);
+                    setDisputeError(null);
+                  }}
+                  className="flex-1 min-h-[44px] rounded-lg border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-on-surface transition-colors duration-150 ease-out"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!disputeReason || disputeSubmitting}
+                  className="flex-1 min-h-[44px] rounded-lg bg-gold-accent text-background text-xs font-mono uppercase tracking-wider font-bold hover:bg-gold-bright active:scale-[0.98] transition disabled:opacity-40 disabled:active:scale-100"
+                >
+                  {disputeSubmitting ? "Sending…" : "Send report"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Booking Modal */}
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
         brokerName={deal.other_party}
         dealId={deal.id}
-        onSchedule={(scheduledAt) => {
-          sendMessageBody(`[SYSTEM] I have requested a live viewing for: ${new Date(scheduledAt).toLocaleString()}`).catch((err) => {
-            setUploadError(sanitizeError(err, "Upload failed. Please try again."));
-            setTimeout(() => setUploadError(null), 5000);
-          });
-          setShowBookingModal(false);
-        }}
+        mode={bookingMode}
+        appointmentId={activeViewing?.id || null}
+        durationMinutes={activeViewing?.durationMinutes || null}
+        onSchedule={handleViewingScheduled}
       />
 
       {/* Private Notes & CRM Timeline SlideOver */}

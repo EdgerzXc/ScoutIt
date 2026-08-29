@@ -1,108 +1,95 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { logActivity } from "@/lib/crmActivity";
+import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { bookViewing } from "@/lib/viewings/bookingService";
+import { isValidTimeZone } from "@/lib/calendar/timezone";
+
+export const dynamic = "force-dynamic";
+
+// POST /api/deals/[id]/schedule — request a live viewing from inside the chat.
+//
+// The booking RULES no longer live here. They live in lib/viewings/
+// bookingService.js, which POST /api/viewing-appointments also calls. Two
+// endpoints wrote this table with different rules before, so the looser one was
+// a way around the stricter one's guardrails; now both share one gate, and that
+// gate validates the requested time against the host's real availability.
+//
+// What stays here is this endpoint's own concern: announcing the request in the
+// deal conversation.
+
+const postSchema = z.object({
+  // Was an unvalidated `scheduled_at` string that went straight into a
+  // timestamptz insert.
+  scheduled_at: z.string().datetime({ offset: true }),
+  duration_minutes: z.number().int().min(5).max(480).optional(),
+  timezone: z.string().min(1).max(64)
+    .refine(isValidTimeZone, "Unrecognised timezone")
+    .optional(),
+  notes: z.string().max(2000).optional(),
+});
 
 export async function POST(request, { params }) {
   try {
     const { id: dealId } = await params;
-    
-    // Auth check
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-    
-    if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { scheduled_at, notes } = await request.json();
-    if (!scheduled_at) {
-      return NextResponse.json({ error: "Missing scheduled_at" }, { status: 400 });
+    const userId = await resolveUserId(request);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    // Validate access to the deal and fetch host_id (the broker/owner)
-    const { data: deal, error: dealError } = await supabaseAdmin
-      .from('deals')
-      .select('status, buyer_id, broker_id, property_id, properties(owner_id)')
-      .eq('id', dealId)
-      .single();
-
-    if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
-
-    if (deal.status === 'closed') {
-      return NextResponse.json({ error: "Cannot schedule a viewing for a closed chat." }, { status: 403 });
+    const parsed = postSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues?.[0]?.message || "Invalid data format" },
+        { status: 400 },
+      );
     }
+    const { scheduled_at: scheduledAt, duration_minutes: durationMinutes, timezone, notes } = parsed.data;
 
-    if (deal.buyer_id !== user.id) {
-      return NextResponse.json({ error: "Only the buyer can request a schedule" }, { status: 403 });
-    }
-
-    const hostId = deal.broker_id || deal.properties?.owner_id;
-
-    if (!hostId) {
-      return NextResponse.json({ error: "Could not determine host" }, { status: 500 });
-    }
-
-    // Insert the pending appointment
-    const { data: appointment, error: insertError } = await supabaseAdmin
-      .from('viewing_appointments')
-      .insert([{
-        deal_id: dealId,
-        host_id: hostId,
-        guest_id: user.id,
-        property_id: deal.property_id,
-        scheduled_at: scheduled_at,
-        notes: notes || '',
-        status: 'pending'
-      }])
-      .select()
-      .single();
-
-    if (insertError) {
-      return NextResponse.json({ error: "Failed to save appointment" }, { status: 500 });
-    }
-
-    // Optionally: Automatically insert a system message into the chat 
-    // to notify the host that a schedule was requested.
-    await supabaseAdmin.from('deal_messages').insert([{
-      deal_id: dealId,
-      sender_id: user.id,
-      sender_role: 'buyer',
-      body: `[SYSTEM] The buyer has requested a live viewing for: ${new Date(scheduled_at).toLocaleString()}`
-    }]);
-
-    // No inactivity write-back here, deliberately. `deals` has NO `updated_at`
-    // column (verified against the live database 2026-08-06, §58/C28), so the
-    // statement this replaced failed on every scheduled viewing, and nothing
-    // checked its error — the "reset chat inactivity timer" it claimed to do
-    // has never once happened.
-    //
-    // The same bug was already found and fixed in /api/deals/[id]/messages,
-    // which documents the resolution: "most recent conversation" is derived
-    // from `deal_messages.created_at`, so no write-back is needed. This route
-    // inserts a [SYSTEM] deal_message just above, which is exactly that
-    // signal — the timer is already reset by the message itself.
-    //
-    // `pending_clock_reset_at` is deliberately NOT touched: it drives the
-    // pending-request archive/delete sweep for requests nobody has answered,
-    // and a scheduling action is not an answer. Repurposing it here would
-    // change a lifecycle rule, which is an owner decision, not a bug fix.
-
-    await logActivity(supabaseAdmin, {
+    const result = await bookViewing(supabaseAdmin, {
       dealId,
-      propertyId: deal.property_id,
-      activityType: "viewing_scheduled",
-      actorId: user.id,
-      metadata: { scheduledAt: scheduled_at, appointmentId: appointment.id },
+      requesterId: userId,
+      scheduledAt,
+      durationMinutes,
+      timezone,
+      notes: notes || "",
     });
 
-    return NextResponse.json({ success: true, appointment });
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.error, reason: result.reason || null },
+        { status: result.status },
+      );
+    }
+
+    // Announce it in the conversation. Best-effort: the appointment is already
+    // real, and a failed system message must not undo a successful booking.
+    //
+    // The chat inactivity timer needs no write-back — `deals` has no updated_at
+    // column, and "most recent conversation" is derived from
+    // deal_messages.created_at, so inserting this message IS the reset.
+    // pending_clock_reset_at is deliberately untouched: it drives the sweep for
+    // unanswered requests, and scheduling is not an answer.
+    const when = new Date(result.appointment.scheduled_at).toLocaleString("en-PH", {
+      timeZone: timezone || result.timezone,
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const { error: messageError } = await supabaseAdmin.from("deal_messages").insert([{
+      deal_id: dealId,
+      sender_id: userId,
+      sender_role: result.requesterRole,
+      body: `[SYSTEM] A live viewing has been requested for: ${when}`,
+    }]);
+    if (messageError) {
+      console.error("[SCHEDULE API] system message insert failed:", messageError);
+    }
+
+    return NextResponse.json({ success: true, appointment: result.appointment });
   } catch (error) {
+    console.error("[SCHEDULE API] POST error:", error);
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
   }
 }

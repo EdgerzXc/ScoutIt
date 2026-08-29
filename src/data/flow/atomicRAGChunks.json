@@ -36152,6 +36152,51 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
+    "chunk_id": "edge_e_runtime_viewing_confirmed_to_pending",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "state_runtime_viewing_confirmed",
+    "target": "state_runtime_viewing_pending",
+    "transition_type": "SYSTEM",
+    "label": "VIEWING: CONFIRMED -> PENDING",
+    "preconditions": [],
+    "postconditions": [],
+    "stateTransition": {
+      "fromState": "CONFIRMED",
+      "toState": "PENDING"
+    },
+    "status": "VERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/calendar/availabilityService.js",
+        "symbol": "assertSlotBookable",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "PENDING_A047"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "PENDING_A047"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
     "chunk_id": "edge_e_runtime_viewing_pending_to_cancelled",
     "chunk_type": "EDGE_TRANSITION",
     "chunkType": "EDGE_TRANSITION",

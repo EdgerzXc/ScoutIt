@@ -97,26 +97,43 @@ export async function pullInbound(userId, { from, to }) {
   }
   if (!token) return { skipped: "not_connected" };
 
-  const data = await listEvents(token, { timeMin: from, timeMax: to });
-  const items = Array.isArray(data?.items) ? data.items : [];
+  // Google Calendar paginates expanded recurring instances. Reading only the
+  // first page silently omitted busy time for active calendars.
+  const items = [];
+  let pageToken = null;
+  for (let page = 0; page < 20; page += 1) {
+    const data = await listEvents(token, { timeMin: from, timeMax: to, pageToken });
+    if (Array.isArray(data?.items)) items.push(...data.items);
+    pageToken = data?.nextPageToken || null;
+    if (!pageToken) break;
+  }
+  if (pageToken) {
+    throw new Error("Google Calendar sync exceeded the 20-page safety limit");
+  }
   const counts = { created: 0, updated: 0, deleted: 0, skipped: 0, conflicts: 0 };
 
   for (const g of items) {
     if (!g.id) continue;
-    const { data: local } = await supabaseAdmin
+    const { data: local, error: lookupError } = await supabaseAdmin
       .from("calendar_events")
       .select("*")
       .eq("owner_user_id", userId)
       .eq("google_event_id", g.id)
       .maybeSingle();
+    if (lookupError && lookupError.code !== "PGRST116") {
+      throw new Error(`Calendar event lookup failed: ${lookupError.message}`);
+    }
 
     // Remote deletion -> tombstone locally.
     if (g.status === "cancelled") {
       if (local && !local.is_deleted) {
-        await supabaseAdmin
+        const { error: deleteError } = await supabaseAdmin
           .from("calendar_events")
           .update({ is_deleted: true, status: "cancelled" })
           .eq("id", local.id);
+        if (deleteError) {
+          throw new Error(`Calendar deletion sync failed: ${deleteError.message}`);
+        }
         counts.deleted++;
       }
       continue;
@@ -127,7 +144,7 @@ export async function pullInbound(userId, { from, to }) {
     const remoteHash = computeContentHash(canonical);
 
     if (!local) {
-      await supabaseAdmin.from("calendar_events").insert({
+      const { error: insertError } = await supabaseAdmin.from("calendar_events").insert({
         owner_user_id: userId,
         title: canonical.title,
         description: canonical.description || null,
@@ -142,6 +159,9 @@ export async function pullInbound(userId, { from, to }) {
         content_hash: remoteHash,
         last_synced_hash: remoteHash,
       });
+      if (insertError) {
+        throw new Error(`Calendar event insert failed: ${insertError.message}`);
+      }
       counts.created++;
       continue;
     }
@@ -164,7 +184,7 @@ export async function pullInbound(userId, { from, to }) {
       if (!remoteNewer) continue;
     }
 
-    await supabaseAdmin
+    const { error: updateError } = await supabaseAdmin
       .from("calendar_events")
       .update({
         title: canonical.title,
@@ -179,6 +199,9 @@ export async function pullInbound(userId, { from, to }) {
         last_synced_hash: remoteHash,
       })
       .eq("id", local.id);
+    if (updateError) {
+      throw new Error(`Calendar event update failed: ${updateError.message}`);
+    }
     counts.updated++;
   }
 

@@ -80,9 +80,9 @@
   "ghostNodes": [],
   "staleEvidenceItems": [],
   "stateMachineTransitions": {
-    "implemented": 13,
-    "registryMapped": 13,
-    "visualEdgeMappings": 13,
+    "implemented": 14,
+    "registryMapped": 14,
+    "visualEdgeMappings": 14,
     "plannedNotImplemented": [
       "OFFER: DRAFT -> SUBMITTED",
       "OFFER: SUBMITTED -> ACCEPTED",
@@ -135,6 +135,7 @@
     "allDiscoveredRoutes": [
       "/about",
       "/about-you",
+      "/admin/flow",
       "/admin",
       "/api/admin/approve",
       "/api/admin/connects-refund",
@@ -155,6 +156,10 @@
       "/api/badges/claim",
       "/api/badges",
       "/api/broker/briefing-log",
+      "/api/broker/contributions",
+      "/api/broker/dossier",
+      "/api/broker/recommendations",
+      "/api/broker/recommendations/[id]",
       "/api/calendar/connection",
       "/api/calendar/events",
       "/api/calendar/events/[id]",
@@ -166,6 +171,8 @@
       "/api/crm/tasks/[id]",
       "/api/cron/check-stale-listings",
       "/api/cron/osint-scraper",
+      "/api/cron/purge-chat-messages",
+      "/api/cron/recompute-broker-metrics",
       "/api/cron/sweep-pending-requests",
       "/api/dashboard/archive",
       "/api/dashboard/bulk-insert",
@@ -184,10 +191,13 @@
       "/api/deals/pitch",
       "/api/deals",
       "/api/deals/[id]/close",
+      "/api/deals/[id]/dispute",
+      "/api/deals/[id]/export",
       "/api/deals/[id]/messages",
       "/api/deals/[id]/notes",
       "/api/deals/[id]",
       "/api/deals/[id]/schedule",
+      "/api/deals/[id]/slots",
       "/api/deals/[id]/unarchive",
       "/api/faqs/appeal",
       "/api/faqs/preflight",
@@ -206,6 +216,8 @@
       "/api/oauth/google/start",
       "/api/off-market",
       "/api/og",
+      "/api/preload/public",
+      "/api/professionals/saved",
       "/api/profile/me/role",
       "/api/profile/public-roles",
       "/api/property/claim",
@@ -282,7 +294,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 148,
+    "totalCodebaseRoutesDiscovered": 160,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],
@@ -471,8 +483,8 @@
       "failingItems": []
     },
     "stateMachineCoverageScore": {
-      "numerator": 13,
-      "denominator": 13,
+      "numerator": 14,
+      "denominator": 14,
       "percentage": "100%",
       "formula": "implemented transitions enforced by runtime routes and published in the shared state-machine registry",
       "failingItems": []

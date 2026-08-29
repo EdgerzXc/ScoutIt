@@ -19,7 +19,8 @@ import {
   updateCalendarEvent,
   deleteCalendarEvent,
 } from "@/lib/calendar/calendarClient";
-import { formatTime, toDateInputValue, fromDateTimeInputs } from "@/lib/calendar/calendarDates";
+import { formatShortRange, toDateInputValue, fromDateTimeInputs } from "@/lib/calendar/calendarDates";
+import { OPEN_TASK_STATUSES } from "@/lib/crm/taskModel";
 import ConnectCalendarPanel from "@/components/calendar/ConnectCalendarPanel";
 import AvailabilityPanel from "@/components/calendar/AvailabilityPanel";
 import EventEditorModal from "@/components/calendar/EventEditorModal";
@@ -37,6 +38,7 @@ function buildScheduleItems({ appointments, events, tasks }) {
       key: `appt-${a.id}`,
       kind: "viewing",
       when: new Date(a.scheduledAt),
+      endsAt: a.endsAt ? new Date(a.endsAt) : null,
       title: a.propertyTitle || "Property viewing",
       subtitle: a.contactName ? `With ${a.contactName}` : null,
       status: a.status,
@@ -59,9 +61,11 @@ function buildScheduleItems({ appointments, events, tasks }) {
   }
 
   // Only tasks that carry a due time land on the schedule (that's their
-  // "time limit"). Untimed / completed tasks stay in the Tasks tab.
+  // "time limit"). Untimed and closed tasks stay in the Tasks tab. "Closed"
+  // is status-based now: a cancelled task has no completedAt but is just as
+  // finished as a done one, and used to sit on the schedule forever.
   for (const t of tasks) {
-    if (!t.dueAt || t.completedAt) continue;
+    if (!t.dueAt || !OPEN_TASK_STATUSES.includes(t.status || (t.completedAt ? "done" : "todo"))) continue;
     items.push({
       key: `task-${t.id}`,
       kind: "task",
@@ -263,7 +267,11 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, u
 // A single schedule row — viewing / event / task, each with its own affordances.
 function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent }) {
   const now = new Date();
-  const timeLabel = item.allDay ? "All day" : formatTime(item.when);
+  // Show the real range when the item has an end. Viewings carry one now, so
+  // a 90-minute booking no longer reads as a bare start time.
+  const timeLabel = item.allDay
+    ? "All day"
+    : formatShortRange(item.when, item.endsAt, false);
   const dateLabel = item.when.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 
   // Left accent + icon per kind.

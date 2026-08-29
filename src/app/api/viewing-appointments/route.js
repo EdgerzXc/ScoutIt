@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
-import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { createViewingMeet } from "@/lib/calendar/meetLink";
+import { bookViewing } from "@/lib/viewings/bookingService";
+import { isValidTimeZone } from "@/lib/calendar/timezone";
 
 
 
@@ -27,7 +27,8 @@ export async function GET(request) {
     const { data: appointments, error } = await supabaseAdmin
       .from("viewing_appointments")
       .select(`
-        id, deal_id, host_id, guest_id, property_id, scheduled_at, status, notes, created_at, meet_link
+        id, deal_id, host_id, guest_id, property_id, scheduled_at, ends_at,
+        duration_minutes, booked_timezone, status, notes, created_at, meet_link
       `)
       .or(`host_id.eq.${userId},guest_id.eq.${userId}`)
       .order("scheduled_at", { ascending: true });
@@ -88,6 +89,11 @@ export async function GET(request) {
         propertyId: appt.property_id,
         propertyTitle: property?.title || "Unknown Property",
         scheduledAt: appt.scheduled_at,
+        // A viewing is a range now, so every consumer can lay it out on a
+        // calendar instead of guessing at a length.
+        endsAt: appt.ends_at,
+        durationMinutes: appt.duration_minutes,
+        bookedTimezone: appt.booked_timezone,
         status: appt.status,
         notes: appt.notes,
         isHost,
@@ -108,109 +114,55 @@ export async function GET(request) {
 }
 
 const postSchema = z.object({
-  dealId: z.string(),
-  scheduledAt: z.string(),
-  notes: z.string().optional(),
-  });
+  dealId: z.string().uuid(),
+  // Was a bare z.string(): any text at all passed validation and went straight
+  // into a timestamptz insert.
+  scheduledAt: z.string().datetime({ offset: true }),
+  durationMinutes: z.number().int().min(5).max(480).optional(),
+  timezone: z.string().min(1).max(64)
+    .refine(isValidTimeZone, "Unrecognised timezone")
+    .optional(),
+  notes: z.string().max(2000).optional(),
+});
 
+// All booking rules live in lib/viewings/bookingService.js, shared with
+// POST /api/deals/[id]/schedule. This route no longer decides who may book,
+// whether the deal is still open, or whether the time is available — it could
+// previously answer all three differently from the other endpoint.
 export async function POST(request) {
   try {
     const parsed = postSchema.safeParse(await request.json());
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.issues?.[0]?.message || "Invalid data format" },
+        { status: 400 },
+      );
     }
-    const { dealId, scheduledAt, notes  } = parsed.data;
+    const { dealId, scheduledAt, durationMinutes, timezone, notes } = parsed.data;
+
     const userId = await resolveUserId(request);
-    
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // Verify deal access and determine host
-    const { data: deal, error: dealError } = await supabaseAdmin
-      .from("deals")
-      .select("buyer_id, broker_id, properties(id, owner_id)")
-      .eq("id", dealId)
-      .single();
-
-    if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
-
-    const isBuyer = deal.buyer_id === userId;
-    const isBroker = deal.broker_id === userId;
-    const isOwner = deal.properties?.owner_id === userId;
-
-    if (!isBuyer && !isBroker && !isOwner) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    // Determine host vs guest.
-    // Usually, the person requesting (creating) is the guest, and the other party is the host.
-    let hostId = null;
-    if (isBuyer) hostId = deal.broker_id || deal.properties.owner_id;
-    else if (isBroker) hostId = deal.properties.owner_id; // assuming broker books with owner
-    else if (isOwner) hostId = deal.broker_id || deal.buyer_id;
-
-    if (!hostId) return NextResponse.json({ error: "Could not determine host" }, { status: 400 });
-
-    const newAppt = {
-      deal_id: dealId,
-      host_id: hostId,
-      guest_id: userId,
-      property_id: deal.properties.id,
-      scheduled_at: scheduledAt,
-      status: "pending",
-      notes: notes || ""
-    };
-
-    const { data: inserted, error: insertError } = await supabaseAdmin
-      .from("viewing_appointments")
-      .insert(newAppt)
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("[APPOINTMENTS API] Insert error:", insertError);
-      return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 });
-    }
-
-    // ── Google Meet room (NEW_IDEAS.md §20.1) ──────────────────────────
-    // Minted on the HOST's calendar — they own the meeting. Strictly
-    // best-effort and AFTER the insert: most hosts won't have connected
-    // Google, and a booking must never fail because a video link couldn't
-    // be created. A null meet_link is a perfectly valid appointment.
-    let meetLink = null;
-    try {
-      const { data: property } = await supabaseAdmin
-        .from("properties")
-        .select("title, location")
-        .eq("id", deal.properties.id)
-        .maybeSingle();
-
-      const meet = await createViewingMeet(hostId, {
-        propertyTitle: property?.title,
-        location: property?.location,
-        scheduledAt,
-        notes,
-      });
-
-      if (meet.meetLink || meet.googleEventId) {
-        meetLink = meet.meetLink;
-        await supabaseAdmin
-          .from("viewing_appointments")
-          .update({ meet_link: meet.meetLink, google_event_id: meet.googleEventId })
-          .eq("id", inserted.id);
-      }
-    } catch (meetErr) {
-      console.error("[APPOINTMENTS API] Meet generation failed:", meetErr?.message);
-    }
-
-    await logActivity(supabaseAdmin, {
+    const result = await bookViewing(supabaseAdmin, {
       dealId,
-      propertyId: deal.properties?.id || null,
-      activityType: "viewing_scheduled",
-      actorId: userId,
-      metadata: { scheduledAt, appointmentId: inserted.id },
+      requesterId: userId,
+      scheduledAt,
+      durationMinutes,
+      timezone,
+      notes: notes || "",
     });
 
-    return NextResponse.json({ success: true, appointment: { ...inserted, meet_link: meetLink } });
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.error, reason: result.reason || null },
+        { status: result.status },
+      );
+    }
+
+    return NextResponse.json({ success: true, appointment: result.appointment });
   } catch (err) {
     console.error("[APPOINTMENTS API] POST error:", err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

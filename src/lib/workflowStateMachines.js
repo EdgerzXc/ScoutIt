@@ -12,8 +12,12 @@ export const WORKFLOW_STATE_MACHINES = Object.freeze({
     id: "viewing.lifecycle",
     source: "src/app/api/viewing-appointments/[id]/route.js",
     transitions: Object.freeze({
+      // A reschedule returns a confirmed viewing to `pending`: the host agreed
+      // to a specific time, so a new time needs a new confirmation. That edge
+      // is enforced by the reschedule branch of the PATCH route, which runs the
+      // availability gate rather than this table.
       pending: Object.freeze(["confirmed", "cancelled"]),
-      confirmed: Object.freeze(["completed", "cancelled"]),
+      confirmed: Object.freeze(["completed", "cancelled", "pending"]),
     }),
   }),
 });

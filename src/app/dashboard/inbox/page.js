@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
+import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { getSession, getUser } from "@/lib/authClient";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { DashboardProvider } from "@/context/DashboardContext";
+import { MessageSquareText } from "lucide-react";
 
 // Real Supabase session first; an explicit localhost E2E fixture may provide
 // read-only mock identity when the browser suite enables its public test flag.
@@ -138,6 +140,7 @@ const DEMO_DEALS = [
 ];
 
 function InboxInner() {
+  const reduceMotion = useReducedMotion();
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(null);
   const [inboxTab, setInboxTab] = useState("active"); // "waiting" | "active" | "declined"
@@ -324,21 +327,32 @@ function InboxInner() {
       {/* dvh, not vh: on mobile Safari/Chrome, 100vh is the height WITHOUT the
           browser chrome, so the composer sat under the address bar and the
           user had to scroll the page to reach Send. */}
-      <div className="flex flex-col md:flex-row h-[calc(100dvh-64px)] md:h-[calc(100vh-64px)] bg-background overflow-hidden">
+      <div className="relative flex h-[calc(100dvh-64px)] flex-col overflow-hidden bg-background md:h-[calc(100vh-64px)] md:flex-row">
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{ background: "radial-gradient(circle at 12% 8%, rgba(var(--accent-rgb), 0.07), transparent 34%)" }}
+        />
 
         {/* Left Sidebar - Deal List */}
-        <div className={`w-full md:w-1/3 min-h-0 border-r border-surface-variant flex-col bg-background ${selectedDeal ? "hidden md:flex" : "flex"}`}>
-          <div className="p-5 border-b border-surface-variant shrink-0">
-            <h1 className="font-working-title text-2xl text-on-surface">Leads &amp; Inbox</h1>
+        <div className={`relative z-10 w-full min-h-0 border-r border-surface-variant flex-col bg-background/85 backdrop-blur-xl md:w-[38%] xl:w-[34%] ${selectedDeal ? "hidden md:flex" : "flex"}`}>
+          <div className="shrink-0 border-b border-surface-variant p-4 sm:p-5">
+            <span className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent">
+              ScoutIt deal rooms
+            </span>
+            <h1 className="font-headline-editorial text-3xl text-on-surface">Inbox</h1>
             <p className="text-sm text-text-secondary mt-1">
-              Manage your active negotiations.
+              Conversations, live viewings, and private deal records.
               {activeUnread > 0 && (
                 <span className="text-gold-accent"> · {activeUnread} unread</span>
               )}
             </p>
 
+            <WorkspaceCommandBar active="inbox" className="mt-4" />
+
             {/* Three-State Inbox Tab Bar (Section 38) */}
-            <div className="flex gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
+            <div className="grid grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
               {[
                 { id: "waiting", label: "WAITING", count: waitingDeals.length },
                 { id: "active", label: "ACTIVE", count: activeDeals.length },
@@ -353,10 +367,10 @@ function InboxInner() {
                     // min-h-11 -> a real 44px touch target. These were 26px
                     // tall, well under the WCAG / iOS minimum, which on a
                     // phone means mis-taps between three adjacent tabs.
-                    className={`flex-1 min-h-11 py-1.5 px-2 rounded-md text-[12px] font-mono tracking-wider transition ${
+                    className={`min-h-11 rounded-md border px-1 py-1.5 font-mono text-[12px] tracking-wider transition-all duration-300 ease-out ${
                       isActive
                         ? "bg-gold-accent/20 text-gold-bright border border-gold-accent/50 font-bold"
-                        : "text-text-secondary hover:text-on-surface hover:bg-white/5 border border-transparent"
+                        : "text-text-secondary hover:text-on-surface hover:bg-surface-variant/50 border border-transparent"
                     }`}
                   >
                     {tab.label} ({tab.count})
@@ -385,11 +399,11 @@ function InboxInner() {
               currentList.map((deal, index) => (
                 <motion.div
                   key={deal.id}
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={reduceMotion ? false : { opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.05 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.3, delay: reduceMotion ? 0 : index * 0.05 }}
                   onClick={() => handleSelectDeal(deal)}
-                  className={`p-4 min-h-16 border-b border-surface-variant cursor-pointer transition ${selectedDealId === deal.id ? 'bg-surface-variant' : 'hover:bg-surface-variant/50 active:bg-surface-variant'}`}
+                  className={`min-h-20 cursor-pointer border-b border-surface-variant p-4 transition-all duration-300 ease-out ${selectedDealId === deal.id ? 'border-l-2 border-l-gold-accent bg-surface-variant/80' : 'border-l-2 border-l-transparent hover:bg-surface-variant/40 active:bg-surface-variant/60'}`}
                 >
                   <div className="flex justify-between items-start mb-1 gap-2">
                     <h3 className="font-working-title text-sm text-on-surface truncate pr-2">
@@ -401,14 +415,14 @@ function InboxInner() {
                       {deal.unreadCount > 0 && bucketOf(deal) === "active" && (
                         <motion.span 
                           className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold-accent text-background text-[12px] font-bold font-mono flex items-center justify-center"
-                          animate={{ boxShadow: ["0px 0px 0px rgba(232,174,60,0)", "0px 0px 10px rgba(232,174,60,0.8)", "0px 0px 0px rgba(232,174,60,0)"] }}
-                          transition={{ repeat: Infinity, duration: 2 }}
+                          animate={reduceMotion ? undefined : { opacity: [0.75, 1, 0.75], scale: [1, 1.06, 1] }}
+                          transition={reduceMotion ? undefined : { repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
                         >
                           {deal.unreadCount}
                         </motion.span>
                       )}
                       {bucketOf(deal) === "archived" ? (
-                        <span className="px-2 py-0.5 rounded bg-white/5 text-text-secondary border border-white/15 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-surface-variant/60 text-text-secondary border border-surface-variant text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
                           Archived
                         </span>
                       ) : bucketOf(deal) === "waiting" ? (
@@ -432,7 +446,7 @@ function InboxInner() {
                             : "Closed"}
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-success/10 text-success border border-success/30 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
                           Active
                         </span>
                       )}
@@ -447,7 +461,7 @@ function InboxInner() {
         </div>
 
         {/* Right Content - ChatBox */}
-        <div className={`w-full md:w-2/3 min-h-0 flex-col bg-background relative ${selectedDeal ? "flex" : "hidden md:flex"}`}>
+        <div className={`relative z-10 w-full min-h-0 flex-col bg-background/70 md:w-[62%] xl:w-[66%] ${selectedDeal ? "flex" : "hidden md:flex"}`}>
           {selectedDeal && (
             <button
               onClick={() => setSelectedDealId(null)}
@@ -468,11 +482,12 @@ function InboxInner() {
               onUnarchive={handleUnarchive}
             />
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-50">
-              <div className="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-4">
-                <span className="text-2xl">💬</span>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-gold-accent/20 bg-surface/70 text-gold-accent shadow-[0_0_28px_rgba(var(--accent-rgb),0.08)]">
+                <MessageSquareText size={26} strokeWidth={1.5} aria-hidden="true" />
               </div>
-              <h2 className="font-working-title text-xl text-on-surface mb-2">Select a Conversation</h2>
+              <span className="font-mono text-[12px] uppercase tracking-[0.12em] text-gold-accent">Private deal room</span>
+              <h2 className="font-headline-editorial text-2xl text-on-surface mb-2">Select a conversation</h2>
               <p className="text-sm text-text-secondary max-w-sm">
                 Choose a lead from the sidebar to continue the negotiation or schedule a viewing.
               </p>

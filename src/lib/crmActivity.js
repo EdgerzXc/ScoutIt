@@ -5,10 +5,21 @@
 // Callers pass a Supabase service-role client (RLS on these tables only
 // grants reads to deal parties / property owners; writes are server-side).
 
+import { isKnownActivityType } from "./crm/activityRegistry";
+
 // Best-effort: timeline logging must never break the primary mutation it
 // rides along with, so failures are logged and swallowed.
 export async function logActivity(serviceClient, { dealId = null, propertyId = null, activityType, actorId = null, metadata = {} }) {
   if (!activityType || (!dealId && !propertyId)) return null;
+
+  // The registry in lib/crm/activityRegistry.js is what the timeline renders
+  // from. Writing a type it does not know still succeeds — dropping a real
+  // lifecycle event would be worse than showing it plainly — but it is loud in
+  // the logs, because the fix is to register the type, not to leave it bare.
+  if (!isKnownActivityType(activityType)) {
+    console.warn(`[crmActivity] Unregistered activity type "${activityType}" — add it to ACTIVITY_TYPES.`);
+  }
+
   const { error } = await serviceClient.from("crm_activity_log").insert([{
     deal_id: dealId,
     property_id: propertyId,
@@ -41,13 +52,21 @@ export async function logNoteActivityDeduped(serviceClient, { dealId, propertyId
   return logActivity(serviceClient, { dealId, propertyId, activityType: "note_added", actorId });
 }
 
-export async function createTask(serviceClient, { ownerUserId, title, dueAt = null, dealId = null }) {
+export async function createTask(serviceClient, {
+  ownerUserId, title, dueAt = null, dealId = null, propertyId = null, priority = "normal",
+}) {
   if (!ownerUserId || !title) return null;
   const { data, error } = await serviceClient.from("crm_tasks").insert([{
     owner_user_id: ownerUserId,
+    // Unassigned work belongs to whoever it was created for, so it shows up in
+    // the assignee-scoped queries too.
+    assignee_user_id: ownerUserId,
     title,
     due_at: dueAt,
     deal_id: dealId,
+    property_id: propertyId,
+    status: "todo",
+    priority,
   }]).select().single();
   if (error) {
     console.error("[crmActivity] Failed to create task:", error);

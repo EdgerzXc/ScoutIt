@@ -240,9 +240,9 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     const audit = auditGraphAgainstCodebase(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, publicRAGChunks);
     expect(audit.ghostNodes).toEqual([]);
     expect(audit.staleEvidenceItems).toEqual([]);
-    expect(audit.stateMachineTransitions.implemented).toBe(13);
-    expect(audit.stateMachineTransitions.registryMapped).toBe(13);
-    expect(audit.stateMachineTransitions.visualEdgeMappings).toBe(13);
+    expect(audit.stateMachineTransitions.implemented).toBe(14);
+    expect(audit.stateMachineTransitions.registryMapped).toBe(14);
+    expect(audit.stateMachineTransitions.visualEdgeMappings).toBe(14);
     expect(audit.stateMachineTransitions.plannedNotImplemented).toHaveLength(9);
     expect(audit.stateMachineTransitions.staleVisualTransitions).toEqual([]);
     expect(audit.stateMachineTransitions.missing).toEqual([]);
