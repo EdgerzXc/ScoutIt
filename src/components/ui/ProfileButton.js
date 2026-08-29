@@ -40,18 +40,24 @@ export default function ProfileButton({ floating = false }) {
     
     loadUser();
 
-    // Optionally handle auth state changes
+    // loadUser() calls into supabase.auth, so it is deferred out of the
+    // callback rather than started while supabase-js still holds its lock.
+    let subscription;
     import("@/lib/authClient").then(({ onAuthStateChange }) => {
-      const { data: { subscription } } = onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      const sub = onAuthStateChange((event) => {
         if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-          loadUser();
+          setTimeout(() => { if (mounted) loadUser(); }, 0);
         }
       });
-      return () => subscription?.unsubscribe();
+      // Returning a cleanup from inside .then() did nothing — React never
+      // saw it — so this subscription was never released on unmount.
+      subscription = sub?.data?.subscription;
     });
 
     return () => {
       mounted = false;
+      subscription?.unsubscribe();
     };
   }, []);
 

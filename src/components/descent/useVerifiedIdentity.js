@@ -19,13 +19,17 @@ export default function useVerifiedIdentity() {
     };
 
     refresh();
+    // refresh() calls supabase.auth.getUser(), and supabase-js holds a lock
+    // for the duration of this callback — starting that call from inside it
+    // races the lock's release. Deferring past the current task means the
+    // callback has always returned before the auth call asks for the lock.
     const { data: { subscription } } = onAuthStateChange((_event, session) => {
       if (!active) return;
       if (!session) {
         setState({ status: "signed-out", user: null });
         return;
       }
-      refresh();
+      setTimeout(() => { if (active) refresh(); }, 0);
     });
 
     return () => {

@@ -50,6 +50,23 @@ export function useDashboard() {
   return context || DEFAULT_CONTEXT_VALUE;
 }
 
+// An auth call that never settles must not become a permanent spinner. This
+// resolves to a signed-out shape instead, so the UI can move on and offer
+// sign-in. Generous on purpose: this is a deadlock guard, not a latency budget.
+const AUTH_RESOLVE_TIMEOUT_MS = 15000;
+
+function withAuthTimeout(promise, ms = AUTH_RESOLVE_TIMEOUT_MS) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) =>
+      setTimeout(() => {
+        console.warn("Auth check did not settle in time; treating as signed out.");
+        resolve({ data: { user: null }, error: new Error("auth-timeout") });
+      }, ms)
+    ),
+  ]);
+}
+
 export function DashboardProvider({ children }) {
   const [listings, setListings] = useState([]);
   const [pitches, setPitches] = useState([]);
@@ -76,7 +93,11 @@ export function DashboardProvider({ children }) {
       try {
         setIdentityResolved(false);
         setIsLoading(true);
-        const { data: { user }, error } = await getUser();
+        // Bounded, so a never-settling auth call can never leave the
+        // workspace boundary showing "Verifying your access…" forever. A
+        // timeout is treated as "not signed in", which sends the visitor to
+        // sign-in rather than stranding them on a spinner.
+        const { data: { user }, error } = await withAuthTimeout(getUser());
         if (!error && user) {
           const ready = await handleUserLogin(user);
           setIdentityResolved(true);
@@ -102,8 +123,20 @@ export function DashboardProvider({ children }) {
     };
     fetchVerifiedUser();
 
-    const { data: { subscription } } = onAuthStateChange(async () => {
-      await fetchVerifiedUser();
+    // supabase-js holds an internal lock for the duration of this callback.
+    // Calling any supabase.auth.* method inside it — which is what awaiting
+    // fetchVerifiedUser() did, via getUser() — deadlocks: the call waits for
+    // the lock the callback still holds, so its promise never settles and
+    // isLoading stays true. Clicking an emailed magic link fires this event,
+    // which is why sign-in hung on "Verifying your access…" every time while
+    // an ordinary page load was fine.
+    //
+    // The callback must therefore stay synchronous and defer the real work
+    // out of the lock. INITIAL_SESSION is skipped because the direct
+    // fetchVerifiedUser() call above already covers first paint.
+    const { data: { subscription } } = onAuthStateChange((event) => {
+      if (event === "INITIAL_SESSION") return;
+      setTimeout(() => { fetchVerifiedUser(); }, 0);
     });
 
     return () => subscription?.unsubscribe();
