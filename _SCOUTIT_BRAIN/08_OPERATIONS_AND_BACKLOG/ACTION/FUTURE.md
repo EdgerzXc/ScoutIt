@@ -144,6 +144,91 @@ instead of emergency account recovery or infrastructure archaeology.
 - A quarterly access, billing, recovery, indexing, analytics, and platform-health review
   is placed on the operating calendar.
 
+## A-042 — AI-assisted, evidence-based dispute adjudication with a human gate
+
+**Recorded 2026-08-27 on owner direction. Trigger-gated: this does not authorize
+a build.** Promote it into [[ACTIVE]] only when **A-041 exists** (nothing can
+file a dispute today, so there is nothing to adjudicate) and **the owner has
+engaged legal counsel** for the standard the model is asked to apply.
+
+### The owner's position, recorded as given
+
+All-time satisfaction is deliberate and its permanence is the point: a broker's
+record follows them, and that is what makes the signal worth reading. The owner
+accepts this is harsh on incompetence and considers it necessary rather than
+incidental. The dispute inbox is the counterweight — not leniency in the metric,
+but a real path to remove a response that evidence does not support. Adjudication
+is to be assisted by an AI applied strictly to law and evidence, with a human in
+the loop, and a lawyer retained for it later.
+
+### What the AI may and may not do
+
+**It proposes; a human disposes.** The defensible division, and the one this task
+is scoped to:
+
+| The model may | The model may never |
+|---|---|
+| Summarise a thread against a named ground | Remove, uphold, or publish anything |
+| Quote the passages it relies on | Act without a human decision recorded separately |
+| State which ground is and is not met | Infer a ground nobody filed |
+| Say the evidence is insufficient | Fill a gap in evidence with plausibility |
+
+**No automated removal, ever — including the "obvious" cases.** A determination
+here affects a licensed professional's public reputation and livelihood in a
+regulated profession. Human-in-the-loop must be a gate that can and does return
+"disagree", not a confirmation step someone clicks through. If reviewers approve
+everything the model proposes, the gate is decorative and the design has failed;
+measure that rather than assume it.
+
+### The hazard that must be designed for first
+
+**The evidence is attacker-controlled text.** A dispute is adjudicated against a
+conversation written by the two parties, one of whom wants a specific outcome. A
+party can type instructions to the model directly into the chat — months before
+any dispute exists, in a thread nobody was reading with suspicion.
+
+Treat every message body as **untrusted data, never as instructions**. The
+adjudication prompt must be structurally incapable of taking direction from the
+evidence it reads: content fenced and labelled as quoted material, the ground
+and the standard supplied only by the system, and any instruction-shaped text
+inside the evidence reported as a finding rather than obeyed. This is not
+hypothetical — it is the cheapest attack on the whole mechanism and it costs the
+attacker one sentence.
+
+**Adversarially test it before it decides anything.** Seed threads containing
+direct instructions, role-play framing, fake system messages, and text claiming
+prior staff authorisation. A model that follows any of them is not shippable.
+
+### Other requirements
+
+- **Evidence must exist to adjudicate against.** A-038's open question — that a
+  response is permanent while the thread lives seven days — becomes sharper
+  here, not softer. An adjudicator reasoning over
+  `[Purged after 7 days retention policy]` will produce confident, well-written
+  nonsense. Settle the retention decision **before** this is built.
+- **The model never sees more than the ground requires.** Adjudicating a
+  retaliation claim does not require deal value, negotiation history, or the
+  parties' other threads. Scope the evidence to the case.
+- **Both the proposal and the decision are audited**, separately and
+  attributably: what the model was shown, what it proposed, on what ground, and
+  what the human decided — including when they overrode it.
+- **The standard is written down before it is automated.** "Evidence-based" is
+  not a specification. The grounds list in A-038 is the starting point, and it
+  is what counsel should review; a model applying an unwritten standard is
+  applying its own.
+- **Disclosed, not hidden.** A broker whose dispute was assessed with model
+  assistance should be told so, and be able to reach a human.
+- **Model choice is not settled here.** Note that `GEMINI_API_KEY` has been an
+  open owner to-do; do not assume any provider is configured.
+
+### Boundaries
+
+Legal counsel owns the standard; ScoutIt owns the mechanism. Nothing in this
+task creates a legal opinion, and no output should be presented to a user as
+one. This item confers no authority to enable a paid provider, mutate live data,
+or change the published retention promise.
+
+
 ## 3. Scale-only performance pass — **explicitly not pre-launch**
 
 **114 Supabase advisor lints:** 41 redundant permissive policies, 27 unindexed

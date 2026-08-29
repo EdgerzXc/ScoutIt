@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: locked
 tags: [rules, standards, frontend, lessons, binding]
-updated: 2026-08-22
+updated: 2026-08-27
 related:
   - "[[../00_START_HERE]]"
   - "[[00_MASTER_ACTION_PLAN]]"
@@ -94,8 +94,52 @@ Standards consulted together for architecture, frontend, and action control:
 
 ## Load before writing a component
 
-Present in `.agents/skills/` — load them, do not paraphrase from memory:
-`taste-skill`, `ui-ux-pro-max`, `emil-design-eng`, `make-interfaces-feel-better`, `motion-ui`.
+Skills reach this repo by two different mechanisms, and confusing them is how
+this section came to name two files that do not exist. Check which kind you are
+reaching for.
+
+**1 — Invocable skills.** Loaded by name through the Skill tool. Nothing is
+cloned and nothing lives in this repo. For frontend work:
+`ui-ux-pro-max`, `emil-design-eng`, `impeccable`, `frontend-design`,
+`design-taste-frontend`, `apple-design`, and for motion specifically
+`animate`, `improve-animations`, `find-animation-opportunities`.
+
+**2 — Reference skills on disk.** Files under `.agents/skills/`, read like any
+other file. `taste-skill` is the one Part B depends on that exists only here.
+
+Load them. Do not paraphrase from memory.
+
+> **Corrected 2026-08-27.** This section previously ordered every component
+> author to load `make-interfaces-feel-better` and `motion-ui`. **Neither has
+> ever existed**, under that name or any other, in `.agents/skills/` or as an
+> invocable skill. A binding rule pointed at two missing files, so the only way
+> to comply was to ignore it. Motion guidance now names skills that resolve.
+
+### The Anthropic skills are already available — do not install them
+
+`github.com/anthropics/skills` is **not** installed on this machine and must not
+be. Verified 2026-08-27: no registered marketplace points at that repository,
+`installed_plugins.json` holds five plugins and none is it, and no matching
+directory exists on disk.
+
+It is unnecessary. Those skills ship with Claude Code and are invocable now
+under the `anthropic-skills:` namespace — `docx`, `pdf`, `pptx`, `xlsx`,
+`canvas-design`, `skill-creator`, `mcp-builder`, `web-artifacts-builder`.
+
+**Cloning the repo would make things worse, not better.** A local copy is a
+fork frozen at the moment it was taken: it never updates, and it shadows the
+maintained version with a stale one. The failure is silent — the skill still
+loads, it is simply older than the one it replaced.
+
+Two are directly load-bearing for ScoutIt rather than incidental:
+
+| Skill | Where it already applies |
+|---|---|
+| `pdf` | The owner-PDF-to-listing path, which AGENTS.md section 2.4 singles out as the one draft that must be verified against its source document before publication |
+| `docx` / `pptx` / `xlsx` | Any owner-facing export; the broker briefing print layout in W-004's acceptance pass is the nearest live surface |
+
+Reach for these before hand-rolling document parsing or generation. Hand-rolled
+PDF handling is how the DOMPurify/jsdom class of failure gets reintroduced.
 
 **"Impeccable" is not a skill file — it is the bar.** Nothing ships that you
 would not screenshot and post. If you would caveat it, it is not done.

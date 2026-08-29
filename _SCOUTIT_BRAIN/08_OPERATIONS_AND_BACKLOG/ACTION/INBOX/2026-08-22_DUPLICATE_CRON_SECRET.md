@@ -1,6 +1,6 @@
 ---
 section: "08_OPERATIONS_AND_BACKLOG/ACTION/INBOX"
-status: unverified
+status: promoted-to-O-012
 tags: [inbox, configuration, cron, non-executable]
 updated: 2026-08-22
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[MASTER_OWNER_ACTIONS]]"]
@@ -34,3 +34,17 @@ the purge function that never ran.
 
 Not checked here: this needs the owner's Vercel dashboard, and reading or
 rotating a deployment secret is owner-gated.
+
+---
+
+## PROMOTED 2026-08-27 → [[MASTER_OWNER_ACTIONS|O-012]]
+
+Independently reproduced on a second, unrelated cron route
+(`/api/cron/recompute-broker-metrics`, built the same day): the first
+`CRON_SECRET` value returns 401, the second returns 200
+(`{"ok":true,"scanned":3,"recomputed":3,"failed":0}`). The last definition
+wins locally, and the two values genuinely differ.
+
+That removes the "unverified" caveat: this is not specific to the purge job,
+it is the shared secret. Four scheduled jobs now depend on it. Owner action
+O-012 carries the Vercel check.

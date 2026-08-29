@@ -82,3 +82,11 @@ active-reference blocker, and executes the unchanged plan with the required
 confirmation and audit reason. Close A-021 only after the post-check proves the
 target owns every transferred property, no legacy owner route remains, and the
 intent/completion audit records exist.
+
+## A-046 — CLOSED 2026-08-29. Moved to
+[[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08|Done]].
+
+The `audit_logs_action_check` allow-list was replaced with a shape check on
+owner approval, and an application audit action was proven to insert against the
+live database. Deliberately not a wider allow-list: enumerating today's five
+action names would have re-armed the identical trap for the sixth.

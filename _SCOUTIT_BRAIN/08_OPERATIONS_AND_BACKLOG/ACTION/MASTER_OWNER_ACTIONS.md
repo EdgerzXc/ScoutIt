@@ -14,6 +14,72 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKL
 
 ## Do now
 
+## O-013 — Decide how ScoutIt represents salespersons and DHSUD registration
+
+Raised by the 2026-08-27 RA 9646 audit. Both parts are product decisions, not
+engineering work, which is why they are here rather than in Active.
+
+**Part 1 — the salesperson gap.** Under RA 9646 a real estate **salesperson**
+is *accredited*, not licensed: they must practise under the direct supervision
+of a named licensed broker, independent selling is illegal, the accreditation
+renews every two years, and there may be at most twenty salespersons per broker.
+
+ScoutIt has no such role. Live roles are `admin`, `broker`, `provider`. A
+salesperson signing up today is carried as a "broker" and rendered on a dossier
+headed **Advisory Profile** with a PRC licence field — presenting an accredited
+person as a licensed one.
+
+The decision needed: does ScoutIt (a) admit salespersons as a distinct role with
+a required supervising-broker link and its own badge, (b) admit licensed brokers
+only and say so at onboarding, or (c) defer until a salesperson actually applies?
+Option (b) is the cheapest honest answer today, because no salesperson has
+signed up yet — but it needs to be stated somewhere a user reads, not just
+assumed.
+
+**Part 2 — DHSUD.** `dhsud_number` is collected in the broker dashboard and is
+deliberately **not** published, because DHSUD certificates renew annually and
+there is no expiry column to check currency against. Publishing it would repeat
+the PRC-expiry defect in a different field.
+
+DHSUD registration (PD 957) governs subdivision and condominium sales, and
+ScoutIt does list residential inventory, so this matters if the platform grows
+into project selling. Displaying it requires an expiry column and a renewal
+policy first.
+
+Nothing is broken today. Both parts become real the moment a salesperson signs
+up or a subdivision/condo project is listed.
+
+## O-012 — Confirm which CRON_SECRET Vercel actually holds
+
+**Promoted from the Inbox 2026-08-27 after independent reproduction.** The
+2026-08-22 note was unverified; it is now confirmed on a second, unrelated
+cron route.
+
+`.env.local` defines `CRON_SECRET` **twice, with two different values**. Tested
+empirically against the new `/api/cron/recompute-broker-metrics`: a request
+signed with the **first** value returns 401; the **second** value returns 200
+(`{"ok":true,"scanned":3,"recomputed":3,"failed":0}`). The last definition wins
+locally. One of the two values is dead.
+
+**Why this now matters more.** Four scheduled jobs authenticate with this one
+secret: `check-stale-listings`, `sweep-pending-requests`,
+`purge-chat-messages`, and the new `recompute-broker-metrics`. If the value set
+in the Vercel project is the dead one, **all four return 401 every night and
+silently do nothing.** The failure leaves no user-visible trace: stale listings
+are never flagged, pending requests are never swept, chat is never purged, and
+every broker's ScoutIt Record freezes permanently.
+
+**The one thing to check:** open the Vercel project's environment variables,
+read `CRON_SECRET`, and confirm it matches the value that returns 200 — the
+**second** of the two in `.env.local`. Then delete the dead line from
+`.env.local` so the next person does not have to rediscover this.
+
+Worth also checking once: whether any of the three older cron paths has ever
+returned 200 in production logs. If none has, they have never run.
+
+This is owner-gated because it requires the Vercel dashboard, and reading or
+rotating a deployment secret is not something an agent should do.
+
 ## O-010 — Check whether property reactions have ever been recorded
 
 `/api/reactions` writes to the Airtable table named by

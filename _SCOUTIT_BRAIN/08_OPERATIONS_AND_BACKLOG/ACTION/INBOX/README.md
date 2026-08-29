@@ -27,3 +27,10 @@ To revive an item:
 - [[2026-08-22_LEGACY_OWNER_LEDGER]] — former 858-line mixed current/historical owner ledger
 - 2026-08-22_LEGACY_ACTION_README.md — superseded Action folder router
 - 2026-08-22_LEGACY_OPERATIONS_ROUTER.md — superseded Operations section router
+
+## Current audit intake
+
+- [[2026-08-27_FULL_STACK_GAP_AUDIT]] — evidence-ranked application, backend,
+  Node/dependency, deployment, automation, documentation, desktop-browser, and
+  Pixel 5 mobile gaps. Nothing in the note is executable unless promoted to
+  exactly one live queue; U-012, U-013, and A-031 already have live homes.
