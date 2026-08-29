@@ -132,6 +132,35 @@ export function pickPremiumFields(property, tier) {
   return out;
 }
 
+/**
+ * Last line of defence before a payload is marked publicly cacheable.
+ *
+ * `stripPremiumFields` is what actually removes gated values, and the public
+ * scope in /api/cms calls it with a constant tier so a session can never widen
+ * the result. This function assumes neither of those held, and checks the
+ * finished array for any gated field that still carries data.
+ *
+ * The point is the blast radius. A mistake in the stripping is bad; the same
+ * mistake on a response carrying `Cache-Control: public` is far worse, because
+ * a CDN then serves one subscriber's unlocked catalogue to every anonymous
+ * visitor for the length of the cache window. This turns that silent, shared,
+ * durable leak into a loud log and an uncacheable response.
+ *
+ * @param {object[]} properties the already-stripped array about to be sent
+ * @returns {{slug: string, field: string}|null} the first offender, or null
+ */
+export function findPremiumLeak(properties) {
+  for (const property of properties || []) {
+    if (!property || typeof property !== "object") continue;
+    for (const field of ALL_PREMIUM_FIELDS) {
+      if (hasValue(property[field])) {
+        return { slug: String(property.slug || property.id || "unknown"), field };
+      }
+    }
+  }
+  return null;
+}
+
 function hasValue(v) {
   if (v == null) return false;
   if (Array.isArray(v)) return v.length > 0;

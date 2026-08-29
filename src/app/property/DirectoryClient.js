@@ -242,7 +242,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
         
         let mergedProperties = [];
         
-        if (data.source === "supabase_radius") {
+        if (data.source === "radius") {
           // Strict Radius Search: Only show properties returned by the PostGIS query
           mergedProperties = airtableProperties.map(p =>
             toCard(p, p.spaceCategory || null, "Premium curated property briefing.")

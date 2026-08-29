@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { resolveServerTier } from "@/lib/serverAuth";
-import { stripPremiumFields } from "@/lib/premiumFields";
+import { findPremiumLeak, stripPremiumFields } from "@/lib/premiumFields";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +18,23 @@ export const dynamic = 'force-dynamic';
 // scope and get a CDN- and browser-cacheable answer instead of a fresh
 // Airtable round trip on every page view.
 const PUBLIC_SCOPE_TIER = "starry";
+
+// Metro Manila to the far end of the archipelago is under 2,000km; anything
+// larger is not a search, it is a way to mint cache keys.
+const MAX_RADIUS_KM = 2000;
+const DEFAULT_CENTER_LNG = 121.0215;
+const DEFAULT_CENTER_LAT = 14.5547;
+// What `source` is allowed to say out loud.
+//
+// Internally it carries the backing store and health: "airtable",
+// "upstash_redis", "supabase_osint", "empty_fallback_on_error", "..._stale".
+// That is useful in a log and nobody else's business on a public endpoint —
+// it names our vendors, sketches the cache topology, and announces when a
+// backend is degraded. The only thing any caller actually needs is whether a
+// radius filter was applied, which is what DirectoryClient reads it for.
+const PUBLIC_SOURCE_RADIUS = "radius";
+const PUBLIC_SOURCE_CATALOG = "catalog";
+
 const PUBLIC_SCOPE_MAX_AGE_S = 60;
 const PUBLIC_SCOPE_STALE_S = 300;
 
@@ -28,17 +45,32 @@ export async function GET(request) {
   const lngParam = searchParams.get("lng");
   const latParam = searchParams.get("lat");
 
+  // Radius, longitude and latitude land in the URL, and the URL is the CDN
+  // cache key. Unvalidated they let anyone mint unlimited distinct keys, each
+  // one a fresh origin request that runs the Haversine filter over the whole
+  // catalogue. Rejecting values that are not real coordinates bounds both the
+  // key space and the work, and a NaN can no longer silently filter every
+  // property out of the response.
+  const radiusKmRaw = radius && radius !== "any" ? Number.parseFloat(radius) : null;
+  const validRadius = Number.isFinite(radiusKmRaw) && radiusKmRaw > 0 && radiusKmRaw <= MAX_RADIUS_KM;
+
+  // An unreadable centre falls back to the default rather than cancelling the
+  // filter. Skipping it would answer a radius search with the whole catalogue
+  // and no indication the radius was ignored, which is a worse answer than a
+  // slightly wrong one — the caller asked to see less, not more.
+  const inRange = (value, limit) => Number.isFinite(value) && value >= -limit && value <= limit;
+  const parsedLng = lngParam !== null ? Number.parseFloat(lngParam) : Number.NaN;
+  const parsedLat = latParam !== null ? Number.parseFloat(latParam) : Number.NaN;
+  const centerLng = inRange(parsedLng, 180) ? parsedLng : DEFAULT_CENTER_LNG;
+  const centerLat = inRange(parsedLat, 90) ? parsedLat : DEFAULT_CENTER_LAT;
+
   const bundle = await getCmsBundle();
   let { properties } = bundle;
-  let source = bundle.source;
+  let radiusApplied = false;
 
   // ── Apply Radius Filter (Haversine) ───────────────────────────
-  if (radius && radius !== "any") {
-    console.log(`[CMS] Applying Javascript Radius Search: ${radius}km`);
-
-    const centerLng = lngParam ? parseFloat(lngParam) : 121.0215;
-    const centerLat = latParam ? parseFloat(latParam) : 14.5547;
-    const radiusKm = parseFloat(radius);
+  if (validRadius) {
+    const radiusKm = radiusKmRaw;
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       var R = 6371;
@@ -56,8 +88,9 @@ export async function GET(request) {
       return dist <= radiusKm;
     });
 
-    // Make sure frontend knows this is a radius search so it drops the un-filtered local merge fallback
-    source = "supabase_radius";
+    // Tells the frontend this is a radius search, so it drops the un-filtered
+    // local merge fallback.
+    radiusApplied = true;
   }
 
   // ── Tier gate (NEW_IDEAS.md §25.1 / §45) ──────────────────────
@@ -75,6 +108,19 @@ export async function GET(request) {
   const tier = publicScope ? PUBLIC_SCOPE_TIER : (await resolveServerTier(request)).tier;
   const gated = (properties || []).map((p) => stripPremiumFields(p, tier));
 
+  // Belt and braces before anything is marked publicly cacheable. The stripping
+  // above is the control; this is the check that it worked. A leak here would
+  // otherwise be copied into the CDN and served to every visitor for the whole
+  // cache window, so on any doubt the response falls back to uncacheable.
+  const leak = publicScope ? findPremiumLeak(gated) : null;
+  if (leak) {
+    console.error(
+      `[CMS] Refusing to cache: gated field "${leak.field}" still carries data on "${leak.slug}". ` +
+      `Serving uncacheable instead.`,
+    );
+  }
+  const cacheable = publicScope && !leak;
+
   // ── Return Payload ─────────────────────────────────────────────
   return NextResponse.json(
     {
@@ -82,10 +128,10 @@ export async function GET(request) {
       intel: bundle.intel,
       brokers: bundle.brokers,
       homepage: bundle.homepage,
-      source,
+      source: radiusApplied ? PUBLIC_SOURCE_RADIUS : PUBLIC_SOURCE_CATALOG,
     },
     {
-      headers: publicScope
+      headers: cacheable
         ? {
             // Identical for every caller, so it is safe to share. 60s of
             // freshness with a 5 minute stale window: a visitor gets the
