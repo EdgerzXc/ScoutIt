@@ -11,6 +11,7 @@ import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { DISCOVER_INTEL, DISCOVER_PROPERTIES, USE_MOCK_DATA } from "@/data/mock";
 import DiscoverSearch from "@/components/discover/DiscoverSearch";
 import "./discover.css";
+import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
 
 const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
 function getDBCategory(cat) {
@@ -114,9 +115,7 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
   useEffect(() => {
     async function fetchCMS() {
       try {
-        const res = await fetch("/api/cms?scope=public");
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await loadPublicCatalog();
         const formatted = formatDiscoverDatasets(data.properties || [], data.intel || []);
         setAllProperties(formatted.properties);
         setAllIntel(formatted.intel);

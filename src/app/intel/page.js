@@ -28,6 +28,7 @@ function getArticleType(art) {
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getArticles } from "@/data/mock/mockArticles";
+import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
 
 
 export default function IntelPage() {
@@ -59,10 +60,7 @@ export default function IntelPage() {
     let alive = true;
     async function loadCMSData() {
       try {
-        const res = await fetch("/api/cms?scope=public");
-        if (!alive) return;
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const data = await loadPublicCatalog();
         if (!alive) return;
 
         // 1. Setup properties for asset back-linking

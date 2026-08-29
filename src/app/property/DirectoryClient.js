@@ -22,6 +22,7 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import ComparisonMatrix from "@/components/property/ComparisonMatrix";
 import { motion, AnimatePresence } from "framer-motion";
 import "./property.css";
+import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
 
 
 // Carry the category-spec + price fields through the card mappers (the source
@@ -234,9 +235,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
   useEffect(() => {
     async function loadCMSData() {
       try {
-        const res = await fetch(`/api/cms?scope=public&radius=${radius}&lng=${centerLng}&lat=${centerLat}`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const data = await loadPublicCatalog({ radius, lng: centerLng, lat: centerLat });
 
         // 1. Group and format properties
         const airtableProperties = data.properties || [];

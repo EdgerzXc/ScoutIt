@@ -14,6 +14,7 @@ import {
   getTerritories,
 } from "@/data/mock/mockArticles";
 import "./discover-search.css";
+import { loadPublicCatalog } from "@/lib/cms/publicCatalog";
 
 /*
  * DISCOVER — the search engine.
@@ -71,9 +72,7 @@ export default function DiscoverSearch() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/cms?scope=public");
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await loadPublicCatalog();
         const rows = (data.intel || []).map(normalizeArticle).filter(Boolean);
         if (!cancelled) setLiveArticles(rows);
       } catch {

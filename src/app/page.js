@@ -27,6 +27,7 @@ import {
   INTERACTIVE_MODE_EVENT,
 } from "@/lib/liteMode";
 import { getArticles } from "@/data/mock/mockArticles";
+import { loadPublicCatalog } from "../lib/cms/publicCatalog";
 
 function getDBCategory(cat) {
   if (cat === "Venues/Events") return "Venues";
@@ -149,12 +150,9 @@ export default function Home() {
     async function loadCMSData() {
       try {
         setCmsError(false);
-        const res = await fetch("/api/cms?scope=public");
-        if (!res.ok) {
-          setCmsError(true);
-          return;
-        }
-        const data = await res.json();
+        // A failed load throws; the catch below already sets cmsError, so
+        // the banner behaves exactly as it did on a non-OK response.
+        const data = await loadPublicCatalog();
         
         // 1. Group/format Properties for categoryPreviews
         const airtableProperties = data.properties || [];

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { loadPublicCatalog } from "@/lib/cms/publicCatalog";
 
 // ─────────────────────────────────────────────────────────────────────────
 // 🔴 THE FABRICATED FEED THAT USED TO LIVE HERE — REMOVED 2026-08-06 (§59)
@@ -64,9 +65,8 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
       // does NOT expose unpublished drafts or raw `intel_sources`. The ticker
       // only ever needed published, public fields.
       try {
-        const res = await fetch("/api/cms?scope=public");
-        if (!alive || !res.ok) return;
-        const data = await res.json();
+        const data = await loadPublicCatalog();
+        if (!alive) return;
         const intel = Array.isArray(data?.intel) ? data.intel : [];
         if (!alive || intel.length === 0) return;
 

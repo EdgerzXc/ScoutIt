@@ -5,6 +5,7 @@ const read = (path) => readFileSync(path, "utf8");
 
 const cmsRoute = read("src/app/api/cms/route.js");
 const premiumFields = read("src/lib/premiumFields.js");
+const publicCatalog = read("src/lib/cms/publicCatalog.js");
 
 // Surfaces that were switched to the cacheable public scope. Each one was
 // checked against every gated field name before the switch; if any of them
@@ -72,9 +73,16 @@ describe("A-053 cacheable public catalogue scope", () => {
   });
 
   it("only routes surfaces that read no premium field to the cached scope", () => {
+    // They reach the route only through the shared loader, which is the one
+    // place scope=public is spelled — so no caller can quietly drop it and
+    // start pulling a tier-resolved, uncacheable payload instead.
+    expect(publicCatalog).toContain('new URLSearchParams({ scope: "public" })');
     for (const file of PUBLIC_SCOPE_CALLERS) {
       const source = read(file);
-      expect(source, `${file} should use the cached public scope`).toContain("/api/cms?scope=public");
+      expect(source, `${file} should load through the shared public catalogue`)
+        .toContain("loadPublicCatalog");
+      expect(source, `${file} should not build its own /api/cms URL`)
+        .not.toMatch(/fetch\(\s*[`"']\/api\/cms/);
       for (const field of GATED_FIELDS) {
         expect(source, `${file} reads gated field ${field} but uses the stripped public scope`)
           .not.toContain(field);
