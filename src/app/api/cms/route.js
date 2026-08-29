@@ -36,7 +36,14 @@ const PUBLIC_SOURCE_RADIUS = "radius";
 const PUBLIC_SOURCE_CATALOG = "catalog";
 
 const PUBLIC_SCOPE_MAX_AGE_S = 60;
-const PUBLIC_SCOPE_STALE_S = 300;
+
+// Deliberately short. A takedown purges the Redis bundle and the in-process
+// copy immediately (see the dashboard archive/delete routes), but nothing can
+// reach a copy already held by the CDN or a visitor's browser — those can only
+// age out. This value is therefore the hard floor on how long a withdrawn
+// listing can still be served, so it buys freshness rather than throughput:
+// 60s fresh plus 60s stale caps that at about two minutes.
+const PUBLIC_SCOPE_STALE_S = 60;
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

@@ -7,6 +7,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { isGlobalReadOnly } from "@/lib/featureFlags";
 import { buildFirstPublicationUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { validateDeclaration, hasValidAgreement } from "@/lib/listerRelationship";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 export async function POST(request) {
 
@@ -174,6 +175,13 @@ export async function POST(request) {
     } else {
       return NextResponse.json({ error: "Publication is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
     }
+
+    // The public catalogue is cached; without this the change is invisible
+    // for up to ten minutes. Logged, never propagated — the write already
+    // succeeded and must not be reported as failed over a cache purge.
+    await invalidateCmsBundle().catch((cacheError) => {
+      console.error("[PUBLISH] Catalogue cache purge failed after publication:", cacheError?.message);
+    });
 
     return NextResponse.json({ success: true });
 

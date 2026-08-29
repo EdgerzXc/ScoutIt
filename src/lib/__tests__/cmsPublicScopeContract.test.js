@@ -65,6 +65,13 @@ describe("A-053 cacheable public catalogue scope", () => {
     expect(cmsRoute).toContain("stale-while-revalidate=${PUBLIC_SCOPE_STALE_S}");
   });
 
+  it("caps how long a withdrawn listing can still be served", () => {
+    // A takedown purges Redis and memory at once, but nothing can reach a copy
+    // already held by the CDN or a browser. This window is the hard floor on
+    // continued public visibility, so it is kept short on purpose.
+    expect(cmsRoute).toContain("const PUBLIC_SCOPE_STALE_S = 60");
+  });
+
   it("caches in the browser as well as the CDN", () => {
     // Vercel consumes s-maxage at the edge and forwards only `public`, so
     // s-maxage alone leaves the visitor paying a round trip on every

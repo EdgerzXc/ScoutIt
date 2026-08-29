@@ -5,6 +5,7 @@ import { updateProperty } from "@/lib/airtable";
 import { buildWithdrawUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { z } from "zod";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 const schema = z.object({
   propertyIds: z.array(z.string()).min(1).max(100).optional(),
@@ -95,6 +96,17 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+
+    // A withdrawn or removed listing must stop being served publicly now, not
+    // when a TTL expires. /api/cms is backed by a Redis bundle held for ten
+    // minutes and a per-instance memory copy held for sixty seconds; without
+    // this the property stays in the public catalogue for up to ten minutes
+    // after the owner takes it down. Failure is logged, never propagated: the
+    // takedown itself has already succeeded and must not be reported as failed
+    // because a cache purge could not complete.
+    await invalidateCmsBundle().catch((cacheError) => {
+      console.error("[ARCHIVE] Catalogue cache purge failed after withdrawal:", cacheError?.message);
+    });
 
     return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.OFF_MARKET, withdrawnCount: updated?.length || owned.length, withdrawnIds: owned.map((property) => property.id), auditWarning: auditError ? "Lifecycle changed; audit event retry is required" : undefined });
   } catch (error) {

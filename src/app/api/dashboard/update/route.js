@@ -7,6 +7,7 @@ import { sanitizeObject, stripAllTags } from "@/lib/sanitize";
 import { notifyAttachedBrokers } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { canChangeDisplayTitle, isPermanentlyRemoved, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 // Price/status-ish keys across every category's details shape (Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md — "Price + status + units"
@@ -194,6 +195,13 @@ export async function POST(request) {
         console.warn("[UPDATE API] Airtable credentials missing, skipping sync.");
       }
     }
+
+    // The public catalogue is cached; without this the change is invisible
+    // for up to ten minutes. Logged, never propagated — the write already
+    // succeeded and must not be reported as failed over a cache purge.
+    await invalidateCmsBundle().catch((cacheError) => {
+      console.error("[UPDATE] Catalogue cache purge failed after an edit:", cacheError?.message);
+    });
 
     return NextResponse.json({ success: true });
 
