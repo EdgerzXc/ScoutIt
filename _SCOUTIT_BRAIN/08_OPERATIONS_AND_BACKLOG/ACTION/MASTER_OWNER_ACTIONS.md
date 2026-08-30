@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [owner-actions, decisions, approvals, external-systems]
-updated: 2026-08-24
+updated: 2026-08-30
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/DONE/README|Done Index]]"]
 ---
 
@@ -13,6 +13,53 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[WAITING]]", "[[08_OPERATIONS_AND_BACKL
 > physical-device checks. Historical owner notes are preserved in the Inbox.
 
 ## Do now
+
+## O-016 — Mission Control does not rebuild when we push
+
+**Found 2026-08-30 while pushing the connector batch, and it is the reason none
+of that batch is usable yet.**
+
+There is **one** GitHub repository, `EdgerzXc/ScoutIt`, holding both apps: the
+public site in `src/` and the staff console in `mission-control/`. Everything is
+committed and pushed — `gh repo list` shows no second repository, and the branch
+is level with origin. **The code is not the problem.**
+
+The problem is deployment. Evidence:
+
+- GitHub's own deployment records for the repo contain exactly two environments
+  ever, Preview and Production, and both belong to the **scout-it** project.
+  There is **no environment for Mission Control**, so a push has never triggered
+  a Mission Control build.
+- The Vercel project recorded in `mission-control/.vercel/project.json`
+  (`prj_ihtbarGRHZiFGB5lPvfz3eN1HOkg`) returns **404** from the API for this
+  account, by id and by slug, and `list_projects` for the team returns only
+  `scout-it`.
+- `https://mission-control-sigma-one-89.vercel.app` is nevertheless **live** and
+  answers 200, with an `Age` header of roughly **28 days** on its root.
+
+Read together: the console is running a build from about a month ago, from a
+Vercel project this account cannot see, and it has never been wired to the
+repository.
+
+**So every Mission Control improvement since that build is in GitHub and not in
+front of staff** — including the whole 2026-08-30 batch: the Disputes Hub
+adoption, the Position Queue's Airtable sync, System Activity, the fixed OSINT
+Control Center, Ownership Claims and Deal Oversight.
+
+**The fix, once, in the Vercel dashboard:** open the Mission Control project,
+connect it to the `EdgerzXc/ScoutIt` repository, and set **Root Directory** to
+`mission-control`. After that a push updates both apps, and this class of
+"shipped but invisible" stops recurring. If the project genuinely no longer
+exists, create it against the same repo with the same root directory and the
+four environment variables the console needs.
+
+**Why an agent cannot do it:** the Vercel CLI here is installed but reports *Not
+authorized*, and the project is invisible to the connected account. Creating a
+second project unasked would risk a duplicate console on a new URL.
+
+Worth confirming while there: whether the local
+`mission-control/.vercel/project.json` should be corrected or deleted, since it
+currently points at a project id that resolves to nothing.
 
 ## O-013 — Decide how ScoutIt represents salespersons and DHSUD registration
 
@@ -79,6 +126,43 @@ returned 200 in production logs. If none has, they have never run.
 
 This is owner-gated because it requires the Vercel dashboard, and reading or
 rotating a deployment secret is not something an agent should do.
+
+**Update 2026-08-30 — half of this is now closed, and the rest answers itself.**
+
+The owner reported changing the Vercel value. Checked:
+
+- **The dead line is gone.** `.env.local` had two `CRON_SECRET` declarations;
+  the earlier one was dead because Next loads the later declaration. The dead
+  line was removed and the survivor annotated as local-dev only. Verified after:
+  exactly one declaration, no other key touched, and a local cron still returns
+  200 with it and 401 without.
+- **Production has a secret set.** `www.scoutit.space` answers **401**, not 503,
+  and `authorizeCronRequest` returns 503 only when the variable is unset. So this
+  is no longer a "the variable may be missing" question.
+- **The Vercel value has been rotated** — neither former local value is accepted
+  by production. That is fine; local and production need not match.
+
+**What is still unknown:** whether the *scheduler* authenticates. Runtime logs
+cannot answer it — a 7-day query returned only the three manual probes made
+minutes earlier, so retention on the Hobby plan is about an hour. **Do not read
+that absence as proof the crons never ran.**
+
+**It is now self-answering and needs no engineer.** A-063 shipped 2026-08-30, so
+the first scheduled run after that date writes a `cron.completed` row to
+`system_events`. Jobs run at 00:00–03:00 UTC.
+
+> Open **Mission Control → System Activity** after 03:00 UTC.
+> **Four `cron.completed` rows = the secret is right and the jobs are running.**
+> **No rows = the scheduler is still being rejected**, and the Vercel value needs
+> correcting.
+
+⚠️ **Caveat that may matter more than the secret.** This Vercel account is on the
+**Hobby** plan, and `vercel.json` declares **four** cron jobs. Hobby allows a
+smaller number of cron jobs and runs them approximately once a day rather than
+at the stated times. If fewer than four rows appear, the cause may be the plan
+rather than the secret. Check the plan's current cron limits before concluding
+the secret is wrong. **This depends on O-016 being done first** — System Activity
+is not live until Mission Control is actually deployed.
 
 ## O-010 — Check whether property reactions have ever been recorded
 
