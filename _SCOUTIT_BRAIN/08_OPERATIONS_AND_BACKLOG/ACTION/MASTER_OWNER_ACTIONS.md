@@ -513,3 +513,30 @@ competing with the real domain.
 
 Root Directory has since been set to `mission-control`. **Saving that setting
 does not rebuild** — a fresh deployment is required before it takes effect.
+
+**O-016 RESOLVED 2026-08-30.** Mission Control now builds from the repository on
+every push and serves the current code. Verified from outside: the title is
+"ScoutIt Mission Control" rather than the public site's, and `/dashboard/system`,
+`/dashboard/claims` and `/dashboard/deals` all exist — three pages that did not
+exist in the Aug 2 build, so their presence is proof the new build is live.
+
+Two settings had to be right, and each failed differently:
+
+1. **Root Directory blank** → Vercel built the repo root and served the *public
+   site* at the console address, with a crawlable robots.txt. Fixed by setting
+   `mission-control`.
+2. **"Include files outside the root directory" ON** → dragged the repo root
+   into the console build, which then tried to compile the public site's
+   `instrumentation.js` and `sentry.*.config.js`. Those import `@sentry/nextjs`
+   and `./src/lib/sentryEventPolicy`, neither of which exists in this app. Builds
+   ran 35s and died with `module-not-found`. Fixed by turning it off.
+
+**Why this took so long, recorded so it does not repeat.** Every local build
+passed, because this app builds standalone and never sees the repo root. The
+failure existed only in Vercel's environment, and the build log was the only
+place the real cause appeared — three outside-in hypotheses (env vars, filename
+casing, the Root Directory value) were all wrong. **Read the build log first
+next time.** The settings are now documented in `mission-control/README.md`,
+in the folder they apply to.
+
+Both fixes are settings, not code, so they persist. Nothing further is owed here.
