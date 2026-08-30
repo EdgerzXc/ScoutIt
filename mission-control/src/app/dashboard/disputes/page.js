@@ -1,11 +1,36 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { openDispute, addDisputeNote, claimDispute, closeDispute } from "./actions";
-import { Scale, Plus, MessageSquare, Gavel, CheckCircle2, XCircle, UserCheck } from "lucide-react";
+import {
+  openDispute,
+  addDisputeNote,
+  claimDispute,
+  closeDispute,
+  adoptPartyDispute,
+} from "./actions";
+import {
+  PARTY_HOLD_STATUSES,
+  PARTY_REASON_LABELS,
+} from "@/lib/partyDisputePolicy.mjs";
+import {
+  Scale,
+  Plus,
+  MessageSquare,
+  Gavel,
+  CheckCircle2,
+  XCircle,
+  UserCheck,
+  ShieldAlert,
+  Inbox,
+} from "lucide-react";
 
 // Disputes Hub — mediation workflow. Reads disputes + dispute_events
 // (service-role). Degrades to an empty hub if 0006 is not yet applied.
+//
+// A-061: it also reads `deal_disputes`, which is where a dispute a real user
+// filed actually lands. Until this page read that table, the console could
+// only see conflicts a staff member had typed up themselves — a queue that was
+// always empty of exactly the disputes that matter most.
 
 async function safe(promise) {
   try {
@@ -72,6 +97,26 @@ export default async function DisputesPage() {
     (eventsByDispute[ev.dispute_id] ||= []).push(ev);
   }
 
+  // ── A-061: filings nobody has picked up yet ─────────────────────────────
+  // A party's dispute is on the queue from the moment it is filed, whether or
+  // not staff have adopted it. Anything already mirrored is filtered out here
+  // rather than in the query, because "which filings have a mirror" is a fact
+  // about this console and belongs beside the list it hides them from.
+  const filings = await safe(
+    admin
+      .from("deal_disputes")
+      .select("id, deal_id, reporter_id, reason, details, status, hold_placed_at, created_at")
+      .in("status", PARTY_HOLD_STATUSES)
+      .order("created_at", { ascending: true })
+      .limit(50)
+  );
+
+  const mirrored = await safe(
+    admin.from("disputes").select("deal_dispute_id").not("deal_dispute_id", "is", null)
+  );
+  const adopted = new Set(mirrored.data.map((row) => row.deal_dispute_id));
+  const unadopted = filings.data.filter((f) => !adopted.has(f.id));
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -116,6 +161,67 @@ export default async function DisputesPage() {
           </div>
         </div>
       </div>
+
+      {/* A-061 — filed by a party, not yet in mediation */}
+      <section className="bg-[#121212] border border-[rgba(232,174,60,0.25)] rounded-xl p-5 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-medium text-white/90 flex items-center gap-2">
+            <Inbox className="w-4 h-4 text-[#E8AE3C]" />
+            Filed by a party
+          </h2>
+          <span className="text-[12px] uppercase tracking-wide text-white/70">
+            {unadopted.length} awaiting mediation
+          </span>
+        </div>
+        <p className="text-xs text-white/60">
+          Raised from a deal conversation on the main site. Filing places a hold that stops that
+          conversation being purged — taking it into mediation keeps the hold; closing it releases
+          it.
+        </p>
+
+        {filings.error ? (
+          <div className="text-xs text-white/70 bg-white/5 border border-white/10 rounded-lg p-3">
+            Party filings unavailable ({filings.error}).
+          </div>
+        ) : unadopted.length === 0 ? (
+          <p className="text-xs text-white/70">
+            No unattended filings. Anything a party raised has been taken into mediation below.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {unadopted.map((f) => (
+              <div key={f.id} className="bg-black/40 border border-white/10 rounded-lg p-4">
+                <div className="flex flex-wrap items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-white/90">
+                        {PARTY_REASON_LABELS[f.reason] || f.reason}
+                      </span>
+                      <span className="text-[12px] uppercase tracking-wide text-[#E8AE3C] border border-[rgba(232,174,60,0.25)] bg-[rgba(232,174,60,0.08)] rounded-full px-2 py-0.5 flex items-center gap-1">
+                        <ShieldAlert className="w-3 h-3" />
+                        Held · {f.status}
+                      </span>
+                    </div>
+                    {f.details && <p className="text-xs text-white/60 mt-2">{f.details}</p>}
+                    <div className="text-[12px] text-white/70 mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                      <span className="font-mono">deal {f.deal_id}</span>
+                      <span className="font-mono">reporter {f.reporter_id}</span>
+                      <span>filed {new Date(f.created_at).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <form action={adoptPartyDispute}>
+                    <input type="hidden" name="dealDisputeId" value={f.id} />
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors whitespace-nowrap">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      Take mediation
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Open a new dispute */}
       <details className="bg-[#121212] border border-white/5 rounded-xl overflow-hidden">
@@ -198,6 +304,12 @@ export default async function DisputesPage() {
                     <span className="text-[12px] uppercase tracking-wide text-white/70 border border-white/10 rounded-full px-2 py-0.5">
                       {d.status}
                     </span>
+                    {d.deal_dispute_id && (
+                      <span className="text-[12px] uppercase tracking-wide text-[#E8AE3C] border border-[rgba(232,174,60,0.25)] bg-[rgba(232,174,60,0.08)] rounded-full px-2 py-0.5 flex items-center gap-1">
+                        <ShieldAlert className="w-3 h-3" />
+                        Party filing · conversation held
+                      </span>
+                    )}
                   </div>
                   {d.description && <p className="text-xs text-white/60 mt-2">{d.description}</p>}
                   <div className="text-[12px] text-white/70 mt-2 flex flex-wrap gap-x-3 gap-y-1">
@@ -249,8 +361,16 @@ export default async function DisputesPage() {
 
               {/* Close (Ops Manager+) */}
               {canClose && (
-                <form action={closeDispute} className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t border-white/5">
+                <form action={closeDispute} className="flex flex-col gap-2 mt-3 pt-3 border-t border-white/5">
                   <input type="hidden" name="disputeId" value={d.id} />
+                  {d.deal_dispute_id && (
+                    <p className="text-[12px] text-[#E8AE3C] flex items-start gap-1.5">
+                      <ShieldAlert className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      Closing this releases the retention hold. The conversation becomes purgeable
+                      seven days after the deal closed — read what you need first.
+                    </p>
+                  )}
+                  <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     name="resolution"
                     required
@@ -274,6 +394,7 @@ export default async function DisputesPage() {
                       <XCircle className="w-4 h-4" />
                       Dismiss
                     </button>
+                    </div>
                   </div>
                 </form>
               )}

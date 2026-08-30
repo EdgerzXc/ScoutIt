@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [active-work, engineering, pre-pilot]
-updated: 2026-08-29
+updated: 2026-08-30
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OWNER_ACTIONS]]"]
 ---
 
@@ -61,28 +61,6 @@ wrong pin *because it is live on the map*.
 **Fix:** `setVerifiedCoordinates` must push the corrected pair to the Airtable
 record for an already-published listing, the way the publish route already
 does, and say so in the audit entry.
-
-## A-061 — The dispute console cannot see a single dispute a user filed
-
-**Two tables. Staff are reading the wrong one.**
-
-- A party files from the main site through `/api/deals/[id]/dispute`, which
-  writes **`deal_disputes`** (10 columns). The chat-purge job reads that same
-  table for its hold exemption, so filing is what stops a thread being wiped.
-- Mission Control's `dashboard/disputes` reads and writes **`disputes`** (15
-  columns) with a `dispute_events` thread. A grep for `deal_disputes` across
-  all of `mission-control/src` returns **nothing**.
-
-The console's `openDispute` takes free-text complainant and respondent, so it
-models a dispute a staff member types up — not one a real user raised. Both
-tables are empty today, which is the only reason this has not yet produced a
-user who filed a dispute nobody can see.
-
-This is A-044 with a sharper cause: the problem is not only that nothing closes
-a dispute, it is that the surface built to close them is looking somewhere
-else. **A-044 stays the owner of the closure workflow; this item owns the
-reconciliation** — decide whether `deal_disputes` is folded into `disputes` or
-the console reads both, then make filing and mediation one pipeline.
 
 ## A-062 — Contact triage has no reply, so it is not the live chat it is taken for
 

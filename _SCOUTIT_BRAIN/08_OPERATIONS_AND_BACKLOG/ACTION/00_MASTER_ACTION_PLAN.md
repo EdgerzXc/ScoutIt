@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION"
 status: active
 tags: [canonical, action-router, execution-control]
-updated: 2026-08-27
+updated: 2026-08-30
 related: ["[[URGENT]]", "[[ACTIVE]]", "[[WAITING]]", "[[MASTER_OWNER_ACTIONS]]", "[[08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE|FUTURE]]", "[[RULES]]"]
 ---
 
@@ -108,7 +108,7 @@ finished and changes nothing.
 
 | # | Item | Why here |
 |---|---|---|
-| 1 | **A-061** dispute reconciliation | The only one a real user can trigger today. A party can file a dispute that no staff surface can see. It is empty now, so this is fixable before it has a victim rather than after |
+| ~~1~~ | **A-061** dispute reconciliation — **DONE 2026-08-30** | Closed. Migration 0009 applied to live Supabase; a real record verified end to end through adopt and close; evidence in `DONE/2026-08.md`. The console now sees a dispute a party filed |
 | 2 | **A-060** pin correction reaches Airtable | Smallest real fix. The validation and UI already exist; what is missing is the sync a published listing needs |
 | 3 | **A-063** system event log | Records what the system does on its own. Do it after A-060 so that fix is observable, and before A-058 because the wrap needs this event history to be reproducible |
 | 4 | **A-062** contact reply | Needs an owner decision on the channel before code: email out from the console, route to an authenticated deal room, or change the public promise |
