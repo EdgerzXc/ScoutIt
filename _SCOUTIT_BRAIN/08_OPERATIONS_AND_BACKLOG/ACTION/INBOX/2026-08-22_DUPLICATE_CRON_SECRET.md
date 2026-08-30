@@ -75,3 +75,53 @@ a job that is being rejected shows up as a **gap** in `cron.completed` on
 **Next step is owner access, not code:** read the `CRON_SECRET` value in the
 Vercel project, confirm it matches the line-39 value, then delete the dead
 line-15 declaration so the file stops being ambiguous.
+
+---
+
+## Half fixed, and one thing still unknown — 2026-08-30 (owner asked for confirmation)
+
+**Owner reported having changed the Vercel value. Checked, and here is what is
+now true.**
+
+### Fixed
+
+The duplicate declaration in `.env.local` is gone. The file had two
+`CRON_SECRET` lines with different values; the earlier one was dead (Next loads
+the later declaration). The dead line was removed and the surviving line
+annotated to say it is local-dev only. Verified afterwards: the file has exactly
+one `CRON_SECRET`, no other key changed, and a local cron call still returns
+`200` with it and `401` without it.
+
+### Confirmed about production
+
+`https://www.scoutit.space/api/cron/purge-chat-messages` answers **401**, not
+503. That distinction matters: `authorizeCronRequest` returns 503 when
+`CRON_SECRET` is unset and 401 when it is set but the token does not match. So
+**a secret IS configured on Vercel** — this is no longer a "the variable might
+be missing" question.
+
+**Neither value that was in `.env.local` is accepted by production.** The owner
+has rotated the Vercel value to something new. That is fine and expected; local
+and production secrets do not need to match.
+
+### Still unknown, and how it gets answered
+
+Whether Vercel's *scheduler* successfully authenticates cannot be confirmed from
+here, because the correct production value is only in Vercel.
+
+Runtime logs are **not** evidence either way: a 7-day query returned only the
+three manual probes made minutes earlier, which means log retention on this plan
+is roughly an hour, not that the scheduler never fired. **Do not read that
+absence as proof.**
+
+The four jobs are scheduled at 00:00, 01:00, 02:00 and 03:00 UTC
+(`vercel.json`). Today's runs happened *before* A-063 deployed, so they left no
+row. **The first scheduled run after 2026-08-30 will write a `cron.completed`
+row to `system_events`**, visible on `/dashboard/system`.
+
+So the check is now trivial and needs no engineer: open **System Activity**
+after 03:00 UTC and look for four `cron.completed` rows. Four rows means the
+secret is right and the jobs are running. **No rows means the scheduler is still
+being rejected**, and the Vercel value needs correcting.
+
+This item stays open until that observation is made.
