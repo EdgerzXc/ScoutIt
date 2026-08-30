@@ -501,3 +501,15 @@ Owner authorized sample disclosure, metric honest relabelling, and surface check
 replaces the ungrounded "Verified" badge with `Curated Merit` / `Human-Curated Architectural Merits`,
 and explicitly marks demand metrics as projected sample data. Checksum updated in `scripts/approved-surfaces.json`
 and verified. Closed in Done as `D-2026-08-24`.
+
+<!-- O-016 addendum, 2026-08-30 -->
+**First build went to the wrong folder.** Connecting the repository without
+setting Root Directory made Vercel build the repo root — the public site — and
+serve it at the console address. Confirmed from outside: the title read
+"ScoutIt — Property & Space Intelligence Philippines", `/showcase` and `/intel`
+returned 200, every `/dashboard/*` route returned 404, and the host served a
+crawlable `robots.txt` advertising its own sitemap, i.e. a duplicate public site
+competing with the real domain.
+
+Root Directory has since been set to `mission-control`. **Saving that setting
+does not rebuild** — a fresh deployment is required before it takes effect.
