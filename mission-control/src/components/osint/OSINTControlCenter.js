@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
+  addOsintSignal,
+  generateOsintPrompt,
+  loadOsintWorkspace,
+  publishOsintBriefing,
+} from "@/app/dashboard/osint/actions";
+import {
   Radio,
   Plus,
   Copy,
@@ -56,26 +62,28 @@ export default function OSINTControlCenter() {
   const [statusMessage, setStatusMessage] = useState(null);
 
   // Base API Host lookup
-  const API_ENDPOINT = process.env.NEXT_PUBLIC_MAIN_SITE_URL || "";
+  // The cross-app endpoint is gone. This page reads and writes Supabase and
+  // Airtable through Mission Control's own server actions, which enforce the
+  // tier and write the audit entry. See src/lib/crossAppPolicy.mjs.
 
   // 1. Fetch OSINT Data
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_ENDPOINT}/api/admin/osint`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setSources(data.sources || []);
-          setBriefings(data.briefings || []);
-        }
-      }
+      const data = await loadOsintWorkspace();
+      setSources(data.sources || []);
+      setBriefings(data.briefings || []);
+      // An unreadable queue and an empty queue look identical on screen and
+      // mean opposite things, so the failure is shown rather than logged.
+      setStatusMessage(
+        data.error ? { type: "error", text: `Could not read the OSINT queue: ${data.error}` } : null
+      );
     } catch (err) {
-      console.error("[MMC OSINT] Failed to load OSINT feeds:", err);
+      setStatusMessage({ type: "error", text: `Could not read the OSINT queue: ${err.message}` });
     } finally {
       setLoading(false);
     }
-  }, [API_ENDPOINT]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -96,17 +104,10 @@ export default function OSINTControlCenter() {
     setIsActionLoading(true);
     setStatusMessage(null);
     try {
-      const res = await fetch(`${API_ENDPOINT}/api/admin/osint`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "manual_input",
-          ...quickInput,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
+      const form = new FormData();
+      for (const [k, v] of Object.entries(quickInput)) form.append(k, String(v ?? ""));
+      const data = await addOsintSignal(form);
+      if (data.ok) {
         setStatusMessage({ type: "success", text: "Raw OSINT signal added to repository!" });
         setShowQuickInputModal(false);
         setQuickInput({
@@ -121,7 +122,7 @@ export default function OSINTControlCenter() {
         });
         loadData();
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Failed to save signal" });
+        setStatusMessage({ type: "error", text: data.message || "Failed to save signal" });
       }
     } catch (err) {
       setStatusMessage({ type: "error", text: err.message });
@@ -135,24 +136,16 @@ export default function OSINTControlCenter() {
     if (selectedSourceIds.length === 0) return;
     setIsActionLoading(true);
     try {
-      const res = await fetch(`${API_ENDPOINT}/api/admin/osint`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "generate_prompt",
-          sourceIds: selectedSourceIds,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setGeneratedPrompt(data.masterPrompt);
+      const data = await generateOsintPrompt(selectedSourceIds);
+      if (data.ok) {
+        setGeneratedPrompt(data.prompt);
         setShowPromptModal(true);
-        loadData();
+        setStatusMessage(null);
       } else {
-        alert(data.error || "Failed to generate prompt");
+        setStatusMessage({ type: "error", text: data.message || "Failed to generate prompt" });
       }
     } catch (err) {
-      alert("Error: " + err.message);
+      setStatusMessage({ type: "error", text: err.message });
     } finally {
       setIsActionLoading(false);
     }
@@ -210,26 +203,26 @@ export default function OSINTControlCenter() {
     setStatusMessage(null);
     try {
       const selectedSource = sources.find((s) => selectedSourceIds.includes(s.id));
-      const res = await fetch(`${API_ENDPOINT}/api/admin/osint`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "publish_briefing",
-          sourceId: selectedSource ? selectedSource.id : null,
-          briefingData: parsedPreview,
-        }),
+      const data = await publishOsintBriefing({
+        briefingData: parsedPreview,
+        sourceId: selectedSource ? selectedSource.id : null,
       });
-
-      const data = await res.json();
-      if (data.success) {
-        setStatusMessage({ type: "success", text: "Briefing published live & synced to 3D Map!" });
+      if (data.ok) {
+        // The old copy claimed the article was live and on the map whatever
+        // happened, including when the Airtable hop failed. A draft that never
+        // reached Airtable is not on the public site, so the message is now
+        // whatever actually occurred.
+        setStatusMessage({
+          type: data.airtable?.status === "published" ? "success" : "error",
+          text: data.message,
+        });
         setShowPublishModal(false);
         setRawAiJson("");
         setParsedPreview(null);
         setSelectedSourceIds([]);
         loadData();
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Failed to publish" });
+        setStatusMessage({ type: "error", text: data.message || "Failed to publish" });
       }
     } catch (err) {
       setStatusMessage({ type: "error", text: err.message });
