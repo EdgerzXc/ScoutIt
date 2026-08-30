@@ -24,19 +24,21 @@ related: ["[[00_MASTER_ACTION_PLAN]]", "[[URGENT]]", "[[WAITING]]", "[[MASTER_OW
   A-023 stays in Active only for the owner visual review; nothing in it is
   blocked on further implementation.
 
-## Master Mission Control — four connector gaps
+## Master Mission Control — connector gaps
 
 **Opened 2026-08-30 on owner direction**, each verified against Mission
 Control's source, the main site's source, and the live database before entry.
-**Scheduled for the 2026-08-31 session** — the order and the pre-flight checks
-are in [[00_MASTER_ACTION_PLAN]] under "Next session".
 
-Mission Control is deployed and responding (`mission-control-sigma-one-89`),
-and most of it is genuinely built: 21 dashboard pages backed by 16 server-action
-modules, RBAC tiers, and 86 audit call sites writing to
-`mission_control_actions`. The gaps are not missing screens. **In three of the
-four cases below a well-built console is wired to the wrong end of the
-connector**, which is why the work looks finished and changes nothing.
+**Three of the four are closed (2026-08-30), with evidence in `DONE/2026-08.md`:**
+A-061 dispute reconciliation, A-060 pin correction reaching Airtable, and A-063
+the system event log. The OSINT Control Center was fixed in the same batch and
+settled the cross-app question once — Mission Control reaches Supabase and
+Airtable directly rather than calling the main site's API, enforced by
+`test/cross-app-boundary.test.mjs`. Ownership claims and deal oversight, the two
+domains where a real person had no remedy, shipped with them.
+
+**A-062 is the one that remains, and it is blocked on an owner decision**, not
+on engineering. It is below.
 
 ## A-062 — Contact triage has no reply, so it is not the live chat it is taken for
 
