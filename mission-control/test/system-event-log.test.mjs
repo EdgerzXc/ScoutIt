@@ -39,6 +39,8 @@ test("every event name the vocabulary declares is actually emitted somewhere", a
   const emitters = await Promise.all([
     read(root, "src", "app", "dashboard", "coordinates", "actions.js"),
     read(root, "src", "app", "dashboard", "cms", "actions.js"),
+    read(root, "src", "app", "dashboard", "osint", "actions.js"),
+    read(root, "src", "app", "dashboard", "claims", "actions.js"),
     read(mainRoot, "src", "lib", "cronEventLog.js"),
     read(mainRoot, "src", "lib", "cmsCache.js"),
   ]);

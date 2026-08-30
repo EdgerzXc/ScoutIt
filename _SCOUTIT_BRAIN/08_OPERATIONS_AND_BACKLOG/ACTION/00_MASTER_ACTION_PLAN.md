@@ -112,6 +112,7 @@ finished and changes nothing.
 | ~~2~~ | **A-060** pin correction reaches Airtable — **DONE 2026-08-30** | Closed. Was wider than recorded: Mission Control also never sent coordinates at publish. Both halves fixed and verified against the live Airtable CMS; evidence in `DONE/2026-08.md` |
 | ~~3~~ | **A-063** system event log — **DONE 2026-08-30** | Closed. `system_events` live; four real cron runs and a real catalogue rebuild recorded; System Activity page shipped. Found hard evidence for the duplicate CRON_SECRET. Evidence in `DONE/2026-08.md` |
 | ~~+~~ | **OSINT Control Center** — **DONE 2026-08-30** | Closed out of band, after A-063. It had never worked: no Authorization header and `NEXT_PUBLIC_MAIN_SITE_URL` set nowhere. Settled as the cross-app decision — Mission Control reaches Supabase and Airtable directly, enforced by `test/cross-app-boundary.test.mjs`. Evidence in `DONE/2026-08.md` |
+| ~~+~~ | **Ownership claims + deal pipeline** — **DONE 2026-08-30** | Closed. Claims can now be reviewed and approving one really transfers the listing (Super Admin, reason required, previous holder recorded). Deal Oversight ships read-only with message bodies sealed unless a dispute is open. Evidence in `DONE/2026-08.md` |
 | 4 | **A-062** contact reply | Needs an owner decision on the channel before code: email out from the console, route to an authenticated deal room, or change the public promise |
 
 ### Before touching code

@@ -41,6 +41,10 @@ export const EVENTS = Object.freeze({
   // Position — a correction that was saved but had nowhere public to go
   COORDINATES_VERIFIED: "coordinates.verified",
 
+  // Ownership — a listing changing hands is not routine, and the person who
+  // lost it is not the person pressing the button
+  LISTING_OWNERSHIP_TRANSFERRED: "listing.ownership.transferred",
+
   // Scheduled work
   CRON_COMPLETED: "cron.completed",
   CRON_FAILED: "cron.failed",
