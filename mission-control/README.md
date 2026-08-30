@@ -9,8 +9,40 @@ its **own Vercel project**, from this same repository.
 | --- | --- |
 | Repository | `EdgerzXc/ScoutIt` |
 | **Root Directory** | **`mission-control`** |
+| **Include files outside the root directory** | **OFF** |
 | Production branch | `main` |
 | Framework | Next.js (auto-detected) |
+
+## The two settings that broke this, in order
+
+Both cost a working console on 2026-08-30. Neither produced an error a reader
+could act on.
+
+### 1. Root Directory blank → the wrong app ships
+
+See below. Set it to `mission-control`.
+
+### 2. "Include files outside the root directory" ON → module not found
+
+This app builds **standalone**: `npm ci && npm run build` inside this folder
+succeeds with nothing else present. Turning that setting on drags the repo root
+into the build, and the repo root belongs to the *public site*:
+
+```
+instrumentation.js
+sentry.edge.config.js     imports "@sentry/nextjs"
+sentry.server.config.js   imports "./src/lib/sentryEventPolicy"
+```
+
+Neither exists here — this app has no Sentry dependency and no
+`src/lib/sentryEventPolicy.js`. The build compiled them anyway and died after
+~35 seconds with `module-not-found`, pointing at files that are not part of this
+application at all.
+
+**Leave it OFF.** Nothing in `mission-control/src` imports from outside this
+folder; every local import was checked. The one place that reads across the
+boundary is `test/system-event-log.test.mjs`, which reads the main site's
+`chatRetention.js` as a drift guard — a test, never part of the build.
 
 **If Root Directory is blank, Vercel builds the repo root — the public website —
 and serves it at the console's address.** That happened on 2026-08-30: the
