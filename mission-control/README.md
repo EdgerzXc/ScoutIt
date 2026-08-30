@@ -1,81 +1,74 @@
-# ScoutIt Mission Control
+# Mission Control
 
-Internal staff console — separate deployment from the public ScoutIt site, same Supabase project.
-Full architecture/rationale: see [`MISSION_CONTROL_SPEC.md`](./MISSION_CONTROL_SPEC.md).
+The staff console. A **separate Next.js app** from the public site, deployed as
+its **own Vercel project**, from this same repository.
 
-## What's live in this build
+## Deployment — the one setting that matters
 
-- **Staff auth** — Supabase magic-link sign-in (`/`, `/auth/callback`, `/auth/signout`), separate
-  identity system from the public site's own (localStorage-based) end-user accounts.
-- **RBAC core** — `admin_users` table (Tier 1 Agent / Tier 2 Ops Manager / Tier 3 Super Admin),
-  resolved server-side in `src/lib/rbac.js`. The sidebar nav and every Server Action check tier
-  before doing anything.
-- **User CRM** (`/dashboard/crm`) — search `user_profiles`, edit minor fields, shadowban/unshadowban
-  (Tier 1+), archive/unarchive — soft delete only, never a hard `DELETE` (Tier 2+).
-- **Property Review Queue** (`/dashboard/cms`) — approve / reject-with-reason / archive against the
-  Supabase `properties` table (owner submissions). Does **not** yet touch the Airtable
-  `PROPERTIES_CMS` gate (`Approved_For_ScoutIt`) — that's still the existing Airtable Interface
-  described in `_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/MISSION_CONTROL_SOP.md`. See spec §5 for
-  the plan to bring that in too.
-- **Audit Log** (`/dashboard/audit`, Tier 2+) — every mutation above writes an immutable row to
-  `mission_control_actions` in the same request; this page just reads it back.
-- **Feature Gates & Global Banner** (`/dashboard/features`, Tier 3) — toggle switches backed by
-  `feature_gates` (public-readable so the live site can gate on them), plus a single-active-banner
-  flow backed by `site_banners`.
-- **Staff IAM** (`/dashboard/staff`, Tier 3) — invite staff (real Supabase Auth invite email + an
-  `admin_users` row at the chosen tier), change anyone else's tier, deactivate/reactivate. You
-  can't change your own tier or deactivate yourself from here — ask another Super Admin, so one
-  person can't accidentally lock themselves out.
-- **Badges** (`/dashboard/badges`) — a dynamic `badge_definitions` catalog (Tier 3 creates/retires
-  badge types), award/revoke to a real Supabase Auth end user by email (Tier 1+ award, Tier 2+
-  revoke). Seeded from the 10 badges already hardcoded in the main app's `src/lib/badges.js` and
-  `src/lib/BadgeEngine.js`. **Important:** the public site doesn't read from this table yet —
-  see the banner on the page itself and spec §5 before assuming a new badge is live.
-- **Bulk property import** (`/dashboard/cms/import`, Tier 1+) — upload a CSV, each row lands in the
-  Review Queue as pending. Required columns: `title`, `type`, `location`; optional: `price`,
-  `description`, `media_link`, `owner_id`.
-- **Metrics** (`/dashboard/metrics`, Tier 2+) — supply (properties by status/category, completeness,
-  pending queue age), demand/monetization (roles, subscriptions, connects), ops health (rejection
-  reasons, staff activity volume). Computed live, capped at 5,000 rows per query for now.
-- **System Operations** (`/dashboard/operations`, Tier 3) — fixed, checksum-locked database
-  operations with schema/backfill preview, current backup evidence, privacy checks, and immutable
-  intent/completion/failure events. There is no SQL editor or caller-provided query path.
+| Setting | Value |
+| --- | --- |
+| Repository | `EdgerzXc/ScoutIt` |
+| **Root Directory** | **`mission-control`** |
+| Production branch | `main` |
+| Framework | Next.js (auto-detected) |
 
-Not built yet (scaffolded nav links only): Media processing, Notifications, Billing/Disputes,
-Airtable-side property gate, and wiring the public site to actually read `badge_definitions`.
-See spec §7 for phasing.
+**If Root Directory is blank, Vercel builds the repo root — the public website —
+and serves it at the console's address.** That happened on 2026-08-30: the
+console URL returned the public site's homepage, `/showcase` and `/intel`
+answered 200, every `/dashboard/*` route returned 404, and the host served a
+crawlable `robots.txt` advertising its own sitemap — a duplicate public site
+competing with the real domain. Nothing was lost, but the console was gone until
+the setting was corrected.
 
-## Setup
+There is deliberately **no `vercel.json` in this folder**. Next.js is
+auto-detected, and the repo-root `vercel.json` declares the *public site's* four
+cron jobs, which must not run under this project.
 
-1. `npm install`
-2. `.env.local` needs (already present in this checkout, shared with the main ScoutIt project):
-   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-   Fixed database operations additionally require server-only SUPABASE_ACCESS_TOKEN in the
-   Mission Control deployment. It must never be added to the public ScoutIt Vercel project.
-   The service role key must never be exposed to the client — see `src/lib/supabase/admin.js`.
-   Optionally set `NEXT_PUBLIC_APP_URL` (e.g. `https://mc.scoutit.ph`) so staff invite emails link
-   back to the right `/auth/callback` — without it, Supabase falls back to your project's
-   configured Site URL.
-3. Apply, in order, against the **same** Supabase project the main ScoutIt app uses (not a
-   separate database) via `supabase db push` or the SQL Editor:
-   - `supabase/migrations/0001_mission_control_rbac.sql`
-   - `supabase/migrations/0002_feature_gates_and_banners.sql`
-   - `supabase/migrations/0003_badge_definitions.sql`
-4. Bootstrap the first Tier 3 account — sign in once via the magic link (this creates your
-   `auth.users` row even before you have `admin_users` access), then run the `insert into
-   admin_users (...)` statement at the bottom of `0001_mission_control_rbac.sql` with your own
-   auth user id. Every account after that can be invited through Staff IAM instead.
-5. `npm run dev`
+### Two things that surprise people
 
-## Conventions for adding new modules
+1. **Connecting the repository does not deploy.** It only registers the link.
+   Vercel builds on the next push.
+2. **After Root Directory is set, only changes inside `mission-control/` trigger
+   a build.** A commit that touches just `src/` or `_SCOUTIT_BRAIN/` is skipped
+   here — correctly, but it means "I pushed and nothing happened" is expected,
+   not broken. Use **Redeploy** in the dashboard to force one.
 
-Every module follows the same shape — copy an existing one (`dashboard/crm` is the clearest
-example) rather than inventing a new pattern:
+## Why this is a separate app, not a folder in the public site
 
-1. A Server Component page that reads with the service-role client (`lib/supabase/admin.js`).
-2. A `"use server"` `actions.js` file: resolve `getCurrentStaff()`, `assertTier(...)`, do the
-   mutation, `logAction(...)`, `revalidatePath(...)`.
-3. Nothing mutates through the browser Supabase client (`lib/supabase.js`) — that client is for
-   reading the staff member's own auth session only.
-4. Destructive actions (archive/reject/ban) require a `reason` and are gated at Tier 2+; routine
-   moderation (shadowban, edits, approve) is Tier 1+.
+Keeping the console on its own deployment is a security decision, not an
+accident of history:
+
+- **A second lock can sit in front of the whole thing** — Vercel Authentication,
+  a password, or an IP allowlist. That is impossible for an `/admin` route on a
+  site whose front door must stay open to anonymous visitors.
+- **Blast radius.** A bug in the public site does not run in the same process as
+  the service-role key and the staff surfaces.
+- **Caching.** The public site is deliberately cached hard at the edge with
+  `public` headers. Admin responses must never be. One deployment tuned for both
+  is how a cached admin page reaches a stranger.
+- **Incident response.** A broken public deploy must not take down the console
+  you need in order to fix it.
+
+The real cost of the split is duplicated code — `intelPublish.js`,
+`systemEventPolicy.mjs`, `propertyFieldMapping.js` and others exist in both
+trees. **The answer to that is a shared package, not merging the runtimes.**
+Each duplicate is currently guarded by a drift test that fails if the copies
+diverge.
+
+## Verification gates
+
+```bash
+npm run test:security   # this app's gate
+npm run build
+```
+
+The public site has its own gate, `npm run verify:surfaces`, run from the repo
+root.
+
+## Cross-app rule
+
+Mission Control does **not** call the public site's HTTP API. It reaches the
+same Supabase and the same Airtable directly, under its own RBAC and audit
+trail. See `src/lib/crossAppPolicy.mjs` for the decision and what was rejected;
+`test/cross-app-boundary.test.mjs` fails the build if a call to the main site
+reappears.
