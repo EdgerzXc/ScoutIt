@@ -22,6 +22,7 @@
 
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
 import { escapeAirtableFormulaString } from "./airtableFormula.mjs";
+import { parsePointToLatLng } from "./geoPoint.mjs";
 
 const BASE_URL = "https://api.airtable.com/v0";
 const TABLE = "PROPERTIES_CMS";
@@ -49,6 +50,18 @@ function photoFields(property) {
       : [];
   if (!list.length) return {};
   return { Photos: list.join(","), Image: list[0] };
+}
+
+// A-060. The public map reads Airtable Latitude/Longitude; /api/cms only
+// geocodes from the location text when they are MISSING. So a record published
+// from here without them keeps whatever coarse guess the geocoder made, and a
+// staff pin correction has nowhere to land. The main app has always sent these
+// two fields at publish; this client did not, which is the same omission class
+// as finding W3 above.
+function coordinateFields(property) {
+  const point = parsePointToLatLng(property?.coordinates);
+  if (!point) return {};
+  return { Latitude: point.lat, Longitude: point.lng };
 }
 
 function cap(s) {
@@ -79,6 +92,7 @@ function listingFields(property) {
     ...(property.details?.units_inventory
       ? { Units_JSON: JSON.stringify(property.details.units_inventory) }
       : {}),
+    ...coordinateFields(property),
     ...photoFields(property),
   };
 }
@@ -158,4 +172,52 @@ export async function publishPropertyToAirtable(property) {
     throw new Error("Airtable created the record but returned no computed Slug.");
   }
   return { slug: record.fields.Slug, recordId: record.id, mode: "created" };
+}
+
+/**
+ * A-060 — push a corrected pin to an ALREADY-PUBLISHED Airtable record.
+ *
+ * The Position Queue exists because staff notice a wrong pin *by seeing it on
+ * the live map*, which means the listing is published by definition. Publishing
+ * again to move two numbers would rewrite ninety fields and re-assert the live
+ * gate, so this is deliberately a narrow PATCH: Latitude and Longitude, nothing
+ * else. It cannot publish an unpublished record, and it cannot unpublish one.
+ *
+ * Throws on any failure. A pin that silently did not reach the public map is
+ * exactly the defect this closes, so the caller must be told.
+ *
+ * @param {{slug: string, lat: number, lng: number}} input
+ * @returns {Promise<{recordId: string}>}
+ */
+export async function syncCoordinatesToAirtable({ slug, lat, lng }) {
+  const { apiKey, baseId } = getCreds();
+
+  if (!slug) throw new Error("No published slug — nothing to correct in Airtable.");
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    throw new Error("Latitude and longitude must both be numbers.");
+  }
+
+  const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
+  if (!recordId) {
+    throw new Error(
+      `No Airtable record for slug '${slug}'. The listing is marked published in Supabase ` +
+        `but is not in the public CMS — publish it rather than correcting it.`
+    );
+  }
+
+  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields: { Latitude: lat, Longitude: lng } }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Airtable coordinate update failed: ${res.status} ${errText}`);
+  }
+
+  return { recordId };
 }

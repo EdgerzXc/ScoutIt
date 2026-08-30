@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { assertTier, getCurrentStaff, TIERS } from "@/lib/rbac";
+import { assertTier, getCurrentStaff, logAction, TIERS } from "@/lib/rbac";
+import { syncCoordinatesToAirtable } from "@/lib/airtable";
+import { purgePublicCatalogueCache } from "@/lib/publicCatalogueCache";
 
 // Staff correction of a listing's position.
 //
@@ -52,7 +54,7 @@ export async function setVerifiedCoordinates(formData) {
 
   const { data: row, error: readErr } = await supabase
     .from("properties")
-    .select("id, details")
+    .select("id, slug, title, details, pipeline_status")
     .eq("id", id)
     .single();
 
@@ -72,6 +74,57 @@ export async function setVerifiedCoordinates(formData) {
     source: "staff",
   };
 
+  // A-060. A pin fixed BEFORE publication already flowed to Airtable through
+  // the publish route. A pin fixed AFTER publication stopped here, in Supabase,
+  // which is the wrong way round: staff notice a wrong pin precisely because it
+  // is live on the public map. Anything already published therefore has to be
+  // corrected in Airtable too, and the cache in front of it dropped.
+  const isPublished = row.pipeline_status === "approved" && Boolean(row.slug);
+  let publicSync = null;
+
+  if (isPublished) {
+    try {
+      const { recordId } = await syncCoordinatesToAirtable({ slug: row.slug, lat, lng });
+      const cache = await purgePublicCatalogueCache();
+      publicSync = {
+        state: "synced",
+        recordId,
+        cachePurged: cache.purged,
+        detail: cache.detail,
+        at: new Date().toISOString(),
+      };
+    } catch (err) {
+      // Do NOT write the Supabase correction on top of a failed public sync and
+      // call it verified. The queue decides what staff look at next, so a row
+      // that leaves it while the public map is still wrong is a wrong pin
+      // nobody will be shown again.
+      await logAction({
+        staff,
+        action: "coordinates.verify.failed",
+        targetTable: "properties",
+        targetId: id,
+        reason: err.message,
+        metadata: { lat, lng, slug: row.slug, stage: "airtable" },
+      });
+      return {
+        ok: false,
+        message:
+          `Saved nothing. The public map could not be updated: ${err.message} ` +
+          `The listing is still showing its old position — try again.`,
+      };
+    }
+  } else {
+    publicSync = {
+      state: "not_published",
+      detail: "Not published yet; the pin will travel with it when it is.",
+      at: new Date().toISOString(),
+    };
+  }
+
+  // Recorded on the row so the provenance of a live pin is readable later:
+  // who moved it, when, and whether the public site actually took it.
+  details.geo.publicSync = publicSync;
+
   const { error: writeErr } = await supabase
     .from("properties")
     .update({ coordinates: `POINT(${lng} ${lat})`, details })
@@ -79,8 +132,32 @@ export async function setVerifiedCoordinates(formData) {
 
   if (writeErr) return { ok: false, message: writeErr.message };
 
+  await logAction({
+    staff,
+    action: "coordinates.verify",
+    targetTable: "properties",
+    targetId: id,
+    metadata: {
+      lat,
+      lng,
+      slug: row.slug,
+      published: isPublished,
+      public_sync: publicSync.state,
+      cache_purged: publicSync.cachePurged ?? null,
+    },
+  });
+
   revalidatePath("/dashboard/coordinates");
-  return { ok: true, message: "Position verified" };
+
+  if (!isPublished) {
+    return { ok: true, message: "Position verified. Not published yet, so nothing to update publicly." };
+  }
+  return {
+    ok: true,
+    message: publicSync.cachePurged
+      ? "Position verified and the public map updated."
+      : `Position verified and sent to the public listing. ${publicSync.detail}`,
+  };
 }
 
 /**

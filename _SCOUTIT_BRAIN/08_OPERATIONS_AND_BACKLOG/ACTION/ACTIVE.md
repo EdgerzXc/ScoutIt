@@ -38,30 +38,6 @@ modules, RBAC tiers, and 86 audit call sites writing to
 four cases below a well-built console is wired to the wrong end of the
 connector**, which is why the work looks finished and changes nothing.
 
-## A-060 — A staff pin correction never reaches the public map
-
-**The Position Queue is the best-built page in the console and currently has no
-effect on anything a visitor sees after publication.**
-
-`dashboard/coordinates` flags every listing the geocoder could not place at
-building level, validates a staff correction properly — rejects off-Earth
-values, and catches a transposed lat/lng with a Philippines bounding box — and
-writes `properties.coordinates` plus a `details.geo` record of who decided it.
-
-**Where it breaks.** Public properties come from Airtable, not Supabase.
-`/api/dashboard/publish` carries `coordinates` into Airtable `Latitude`/
-`Longitude` **at publish time only**, and `/api/cms` geocodes from the location
-text only when those are missing. `setVerifiedCoordinates` writes to Supabase
-and stops — there is no Airtable sync.
-
-So a pin fixed **before** publication flows through, and a pin fixed **after**
-publication never leaves Supabase. That is the wrong way round: staff notice a
-wrong pin *because it is live on the map*.
-
-**Fix:** `setVerifiedCoordinates` must push the corrected pair to the Airtable
-record for an already-published listing, the way the publish route already
-does, and say so in the audit entry.
-
 ## A-062 — Contact triage has no reply, so it is not the live chat it is taken for
 
 `dashboard/contact` moves a `contact_messages` row through
