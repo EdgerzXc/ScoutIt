@@ -61,6 +61,39 @@ Worth confirming while there: whether the local
 `mission-control/.vercel/project.json` should be corrected or deleted, since it
 currently points at a project id that resolves to nothing.
 
+**Update 2026-08-30, later — the repository is connected; the first build is
+the remaining step.**
+
+Owner connected the Mission Control project to the repository. The dashboard
+corroborated the diagnosis above: the project card had read **"Connect Git
+Repository"** in place of a repository name, with a last deployment of
+**Aug 2** — matching the ~28-day `Age` measured from outside.
+
+**Connecting does not deploy.** It registers the link only; Vercel builds on
+the *next* push. Immediately after connection the console was still serving the
+old build — `Age` 27.7 days, `X-Vercel-Cache: HIT`, and no occurrence of
+"System Activity", "Ownership Claims" or "Deal Oversight" in the served HTML.
+GitHub deployment records still showed only the two `scout-it` environments.
+
+A push was therefore made to trigger the first build.
+
+**Verify by the menu, not by the absence of an error.** Open Mission Control
+and look for **System Activity**, **Ownership Claims** and **Deal Oversight**
+in the sidebar. None of the three existed in the Aug 2 build, so their presence
+proves the new build is live and their absence proves it is not.
+
+**One setting to re-check if the build fails or serves the wrong app:** Root
+Directory must be `mission-control`. Both apps share one repository, so without
+it Vercel builds the public site under the console address. There is no
+`vercel.json` inside `mission-control/`, which is correct — Next.js is
+auto-detected, and the repo-root `vercel.json`, which declares the four public
+cron jobs, must not apply to this project.
+
+Note for anyone re-running the earlier investigation: the Vercel API lists only
+projects that have a repository attached. That is why `mission-control` and
+`receipt-auditor-app` returned 404 by id and by slug while plainly existing in
+the dashboard — a symptom of this item, not a separate fault.
+
 ## O-013 — Decide how ScoutIt represents salespersons and DHSUD registration
 
 Raised by the 2026-08-27 RA 9646 audit. Both parts are product decisions, not
