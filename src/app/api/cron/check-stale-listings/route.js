@@ -4,6 +4,7 @@ import { fetchPropertyVerificationDates } from "@/lib/airtable";
 import { notifyUser } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { authorizeCronRequest } from "@/lib/cronAuth";
+import { withCronEventLog } from "@/lib/cronEventLog";
 
 // Daily Vercel Cron (see vercel.json). Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md. Flags approved
@@ -14,7 +15,7 @@ import { authorizeCronRequest } from "@/lib/cronAuth";
 // notification within the STALE_DAYS window, so this doesn't re-fire daily.
 const STALE_DAYS = 30;
 
-export async function GET(request) {
+async function handleCron(request) {
   const authFailure = authorizeCronRequest(request);
   if (authFailure) return authFailure;
 
@@ -107,3 +108,8 @@ export async function GET(request) {
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
+
+// A-063. Every run of this job is recorded in `system_events`; an
+// unauthorized probe is not, so a job that stops firing is visible as a
+// gap rather than buried among rejected calls.
+export const GET = withCronEventLog("check-stale-listings", handleCron);

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
 import { publishPropertyToAirtable } from "@/lib/airtable";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
 /**
  * Approve & Publish — the full publishing loop.
@@ -40,7 +42,33 @@ export async function approveProperty(formData) {
   }
 
   // 1. Live-site publish. Throws on failure — nothing below runs.
-  const published = await publishPropertyToAirtable(property);
+  //
+  // A-063. Recorded either way. A publish that reached Airtable and then
+  // failed to record approval in Supabase is the one state staff cannot
+  // infer from the console, because the listing is live and the queue
+  // still says it is not.
+  let published;
+  try {
+    published = await publishPropertyToAirtable(property);
+  } catch (err) {
+    await recordSystemEvent({
+      event: EVENTS.AIRTABLE_PUBLISH_FAILED,
+      severity: "error",
+      subjectTable: "properties",
+      subjectId: propertyId,
+      summary: `Publish to the public CMS failed: ${err.message}`,
+      detail: { slug: property.slug || null, error: err.message },
+    });
+    throw err;
+  }
+
+  await recordSystemEvent({
+    event: EVENTS.AIRTABLE_PUBLISH_OK,
+    subjectTable: "properties",
+    subjectId: propertyId,
+    summary: `Published ${published.slug} to the public CMS (${published.mode})`,
+    detail: { slug: published.slug, mode: published.mode, recordId: published.recordId },
+  });
 
   // 2. Airtable succeeded — now mark approved in Supabase with the canonical slug.
   const { error } = await admin

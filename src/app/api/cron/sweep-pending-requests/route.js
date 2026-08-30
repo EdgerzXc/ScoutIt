@@ -5,6 +5,7 @@ import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ARCHIVE_AFTER_DAYS, DELETE_AFTER_DAYS } from "@/lib/pendingRequestLifecycle";
 import { authorizeCronRequest } from "@/lib/cronAuth";
+import { withCronEventLog } from "@/lib/cronEventLog";
 
 // ═══════════════════════════════════════════════════════════════
 // PENDING REQUEST SWEEP — 7-day archive, 30-day delete
@@ -35,7 +36,7 @@ const BATCH_LIMIT = 200;
 const daysAgoIso = (days) =>
   new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-export async function GET(request) {
+async function handleCron(request) {
   const authFailure = authorizeCronRequest(request);
   if (authFailure) return authFailure;
 
@@ -184,3 +185,8 @@ async function sweepArchives() {
 
   return { count: done.size, capped: stale.length === BATCH_LIMIT };
 }
+
+// A-063. Every run of this job is recorded in `system_events`; an
+// unauthorized probe is not, so a job that stops firing is visible as a
+// gap rather than buried among rejected calls.
+export const GET = withCronEventLog("sweep-pending-requests", handleCron);

@@ -57,26 +57,6 @@ reply". Marking something resolved is not answering it.
 contact is routed to an authenticated deal room, or the public page stops
 implying a conversation will happen.
 
-## A-063 — There is no system activity log, only a staff action log
-
-`mission_control_actions` works — 4 real rows, 86 call sites, and `revertAction`
-can restore a previous state for properties, blocked access and verification
-requests. But every one of those entries is **a person pressing a button**.
-
-Nothing records what the system does on its own: geocoding runs and their
-confidence, CMS bundle rebuilds and whether they came from Airtable or the
-Redis copy, the four production cron jobs, cache purges after a takedown, or
-Airtable sync failures. Mission Control contains no cron and no scheduler.
-
-That is the gap behind "an activity log for our auto-updating maps": when a pin
-moves on its own, or a listing silently stops refreshing, there is no record to
-read. It also means A-060's fix would be invisible without it.
-
-**Scope note:** this wants a system-event table distinct from
-`mission_control_actions`, because mixing automated events into a human
-accountability log makes both harder to read — and the wrap plan (A-058) needs
-exactly this kind of event history to be reproducible.
-
 ## A-058 — Monthly Scout Wrap has a backend and no front end
 
 **Promoted 2026-08-30 on owner question, verified against live code and the

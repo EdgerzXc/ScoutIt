@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeCronRequest } from "@/lib/cronAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { withCronEventLog } from "@/lib/cronEventLog";
 
 // ═══════════════════════════════════════════════════════════════
 // BROKER METRIC RECOMPUTE — A-023 phase 5's missing caller
@@ -23,7 +24,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 
 const BATCH_LIMIT = 500;
 
-export async function GET(request) {
+async function handleCron(request) {
   const authFailure = authorizeCronRequest(request);
   if (authFailure) return authFailure;
 
@@ -93,3 +94,8 @@ export async function GET(request) {
     );
   }
 }
+
+// A-063. Every run of this job is recorded in `system_events`; an
+// unauthorized probe is not, so a job that stops firing is visible as a
+// gap rather than buried among rejected calls.
+export const GET = withCronEventLog("recompute-broker-metrics", handleCron);

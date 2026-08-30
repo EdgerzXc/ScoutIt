@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { authorizeCronRequest } from "@/lib/cronAuth";
+import { withCronEventLog } from "@/lib/cronEventLog";
 import {
   CHAT_RETENTION_DAYS,
   DISPUTE_HOLD_STATUSES,
@@ -22,7 +23,7 @@ import {
 
 const BATCH_LIMIT = 500;
 
-export async function GET(request) {
+async function handleCron(request) {
   const authFailure = authorizeCronRequest(request);
   if (authFailure) return authFailure;
 
@@ -94,3 +95,8 @@ export async function GET(request) {
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }
+
+// A-063. Every run of this job is recorded in `system_events`; an
+// unauthorized probe is not, so a job that stops firing is visible as a
+// gap rather than buried among rejected calls.
+export const GET = withCronEventLog("purge-chat-messages", handleCron);

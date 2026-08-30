@@ -155,6 +155,8 @@ async function geocodeMissingCoords(properties) {
 }
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
 async function buildBundle() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -222,8 +224,33 @@ async function buildBundle() {
     }
   });
 
+  const positioned = await geocodeMissingCoords(properties);
+
+  // A-063. One row per rebuild, not one per property: geocoding runs once
+  // for every un-positioned listing inside this same function, so an event
+  // each would bury the log in the hot path it is meant to make readable.
+  // The counts are the signal — a rising `approximate` is listings drifting
+  // onto city centroids instead of their own address.
+  const approximate = positioned.filter((x) => x.coordsApproximate).length;
+  const unplaced = positioned.filter((x) => !x.lat || !x.lng).length;
+  await recordSystemEvent({
+    event: EVENTS.CMS_BUNDLE_REBUILT,
+    severity: unplaced > 0 ? "warning" : "info",
+    summary:
+      `Public catalogue rebuilt from Airtable: ${positioned.length} properties, ` +
+      `${approximate} on an approximate position, ${unplaced} with none`,
+    detail: {
+      source: "airtable",
+      properties: positioned.length,
+      intel: mergedIntel.length,
+      brokers: (brokers || []).length,
+      approximatePositions: approximate,
+      unplacedProperties: unplaced,
+    },
+  });
+
   return {
-    properties: await geocodeMissingCoords(properties),
+    properties: positioned,
     intel: mergedIntel,
     brokers,
     homepage,

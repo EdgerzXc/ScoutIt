@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import {
   Shield, LayoutDashboard, Users, Database, Flag, Video, LogOut, Bell,
   ScrollText, KeyRound, Award, BarChart3, Radar, Inbox, BadgeCheck,
-  Scale, BrainCircuit, Radio, Wrench, Crosshair, Mail,
-} from "lucide-react";
+  Scale, BrainCircuit, Radio, Wrench, Crosshair, Mail, Cpu } from "lucide-react";
 import { getCurrentStaff, TIER_LABELS, TIERS } from "@/lib/rbac";
 import SidebarNav from "@/components/dashboard/SidebarNav";
 import SensitiveWorkspaceGuard from "@/components/security/SensitiveWorkspaceGuard";
@@ -35,6 +34,7 @@ export default async function DashboardLayout({ children }) {
 
     { group: "Administration", name: "Security", href: "/dashboard/security", icon: <Radar className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "Audit Log", href: "/dashboard/audit", icon: <ScrollText className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Administration", name: "System Activity", href: "/dashboard/system", icon: <Cpu className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "System Operations", href: "/dashboard/operations", icon: <Wrench className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "Feature Flags", href: "/dashboard/features", icon: <Flag className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "Staff IAM", href: "/dashboard/staff", icon: <KeyRound className={iconClass} />, minTier: TIERS.SUPER_ADMIN },

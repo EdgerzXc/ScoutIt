@@ -2,7 +2,7 @@
 section: "08_OPERATIONS_AND_BACKLOG/ACTION/INBOX"
 status: promoted-to-O-012
 tags: [inbox, configuration, cron, non-executable]
-updated: 2026-08-22
+updated: 2026-08-30
 related: ["[[00_MASTER_ACTION_PLAN]]", "[[MASTER_OWNER_ACTIONS]]"]
 ---
 
@@ -48,3 +48,30 @@ wins locally, and the two values genuinely differ.
 That removes the "unverified" caveat: this is not specific to the purge job,
 it is the shared secret. Four scheduled jobs now depend on it. Owner action
 O-012 carries the Vercel check.
+
+---
+
+## Hard evidence, 2026-08-30 (found while verifying A-063)
+
+Forcing a real cron run required picking the right secret, which settled which
+one is live:
+
+- `.env.local` declares `CRON_SECRET` on **line 15** and again on **line 39**,
+  with **different 64-character values**.
+- Against a running dev server, the **first** value returns **401**. The
+  **second** returns **200** and the job runs. Next's env loader takes the later
+  declaration.
+
+So the line-15 value is dead. **The live risk is Vercel**: if the production
+`CRON_SECRET` holds the dead value, all four scheduled jobs have been answering
+401 and nothing has ever reported it. Until 2026-08-30 there was no place that
+could have reported it.
+
+That part is now checkable rather than invisible: `withCronEventLog` records a
+run in `system_events` and deliberately does **not** record a rejected probe, so
+a job that is being rejected shows up as a **gap** in `cron.completed` on
+`/dashboard/system`, not as noise.
+
+**Next step is owner access, not code:** read the `CRON_SECRET` value in the
+Vercel project, confirm it matches the line-39 value, then delete the dead
+line-15 declaration so the file stops being ambiguous.

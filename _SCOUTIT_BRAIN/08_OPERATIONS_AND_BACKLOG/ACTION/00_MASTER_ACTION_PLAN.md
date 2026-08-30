@@ -110,7 +110,7 @@ finished and changes nothing.
 |---|---|---|
 | ~~1~~ | **A-061** dispute reconciliation — **DONE 2026-08-30** | Closed. Migration 0009 applied to live Supabase; a real record verified end to end through adopt and close; evidence in `DONE/2026-08.md`. The console now sees a dispute a party filed |
 | ~~2~~ | **A-060** pin correction reaches Airtable — **DONE 2026-08-30** | Closed. Was wider than recorded: Mission Control also never sent coordinates at publish. Both halves fixed and verified against the live Airtable CMS; evidence in `DONE/2026-08.md` |
-| 3 | **A-063** system event log | Records what the system does on its own. Do it after A-060 so that fix is observable, and before A-058 because the wrap needs this event history to be reproducible |
+| ~~3~~ | **A-063** system event log — **DONE 2026-08-30** | Closed. `system_events` live; four real cron runs and a real catalogue rebuild recorded; System Activity page shipped. Found hard evidence for the duplicate CRON_SECRET. Evidence in `DONE/2026-08.md` |
 | 4 | **A-062** contact reply | Needs an owner decision on the channel before code: email out from the console, route to an authenticated deal room, or change the public promise |
 
 ### Before touching code

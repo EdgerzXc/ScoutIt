@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTier, getCurrentStaff, logAction, TIERS } from "@/lib/rbac";
 import { syncCoordinatesToAirtable } from "@/lib/airtable";
 import { purgePublicCatalogueCache } from "@/lib/publicCatalogueCache";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
 // Staff correction of a listing's position.
 //
@@ -93,11 +95,39 @@ export async function setVerifiedCoordinates(formData) {
         detail: cache.detail,
         at: new Date().toISOString(),
       };
+
+      // A-063. The audit entry below records that a person decided this.
+      // These record what the machinery did about it — which is what you
+      // read when a pin is wrong on the public map and nobody remembers
+      // touching it.
+      await recordSystemEvent({
+        event: EVENTS.AIRTABLE_SYNC_OK,
+        subjectTable: "properties",
+        subjectId: id,
+        summary: `Pin for ${row.slug} pushed to the public CMS`,
+        detail: { lat, lng, slug: row.slug, recordId },
+      });
+      await recordSystemEvent({
+        event: cache.purged ? EVENTS.CACHE_PURGED : EVENTS.CACHE_PURGE_FAILED,
+        severity: cache.purged ? "info" : "warning",
+        subjectTable: "properties",
+        subjectId: id,
+        summary: cache.detail,
+        detail: { slug: row.slug },
+      });
     } catch (err) {
       // Do NOT write the Supabase correction on top of a failed public sync and
       // call it verified. The queue decides what staff look at next, so a row
       // that leaves it while the public map is still wrong is a wrong pin
       // nobody will be shown again.
+      await recordSystemEvent({
+        event: EVENTS.AIRTABLE_SYNC_FAILED,
+        severity: "error",
+        subjectTable: "properties",
+        subjectId: id,
+        summary: `Pin for ${row.slug} did not reach the public CMS`,
+        detail: { lat, lng, slug: row.slug, error: err.message },
+      });
       await logAction({
         staff,
         action: "coordinates.verify.failed",
@@ -119,6 +149,13 @@ export async function setVerifiedCoordinates(formData) {
       detail: "Not published yet; the pin will travel with it when it is.",
       at: new Date().toISOString(),
     };
+    await recordSystemEvent({
+      event: EVENTS.COORDINATES_VERIFIED,
+      subjectTable: "properties",
+      subjectId: id,
+      summary: `Pin set for an unpublished listing (${row.title || id})`,
+      detail: { lat, lng, published: false },
+    });
   }
 
   // Recorded on the row so the provenance of a live pin is readable later:
