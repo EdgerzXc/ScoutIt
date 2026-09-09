@@ -92,6 +92,19 @@ describe('public profile indexability', () => {
     expect(m.robots).toEqual({ index: true, follow: true });
   });
 
+  it('does not index when the pilot read itself fails', async () => {
+    // A-091: a failed pilot lookup (a missing table returns an error, not a
+    // row) must never resolve to "not a participant" — that would index an
+    // invited tester as an ordinary real person, the exact disclosure the
+    // pilot flag exists to prevent. Fail closed on the disclosure axis.
+    maybeSingle.mockReset();
+    maybeSingle
+      .mockResolvedValueOnce({ data: realPublicProfile, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: 'relation "pilot_participants" does not exist' } });
+    const m = await meta();
+    expect(m.robots).toEqual({ index: false, follow: true });
+  });
+
   it('always emits an explicit robots directive, never an absent one', async () => {
     // "No directive" is the failure this whole file exists to prevent.
     for (const profile of [null, realPublicProfile, { ...realPublicProfile, is_example_account: true }]) {

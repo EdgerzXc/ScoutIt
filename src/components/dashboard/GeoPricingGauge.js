@@ -103,7 +103,7 @@ export default function GeoPricingGauge({ location, category, price }) {
           margin-bottom: 24px;
           color: var(--text-primary);
           font-family: var(--font-sans, sans-serif);
-          transition: all 0.3s ease;
+          transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
         }
 
         .gauge-header {

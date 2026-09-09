@@ -370,9 +370,12 @@ function InboxInner() {
                   className={`min-h-20 cursor-pointer border-b border-surface-variant p-4 transition-all duration-300 ease-out ${selectedDealId === deal.id ? 'border-l-2 border-l-gold-accent bg-surface-variant/80' : 'border-l-2 border-l-transparent hover:bg-surface-variant/40 active:bg-surface-variant/60'}`}
                 >
                   <div className="flex justify-between items-start mb-1 gap-2">
-                    <h3 className="font-working-title text-sm text-on-surface truncate pr-2">
+                    {/* A-096: h2, not h3 — the page outline is H1 Inbox, and
+                        the empty-state heading is already h2. Level only;
+                        styling untouched. */}
+                    <h2 className="font-working-title text-sm text-on-surface truncate pr-2">
                       {deal.property_title}
-                    </h3>
+                    </h2>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {/* Unread pips only in ACTIVE (§38.4). A pulsing badge on
                           a declined thread is a notification for nothing. */}

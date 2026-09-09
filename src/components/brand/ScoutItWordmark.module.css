@@ -30,10 +30,17 @@
   text-decoration: none;
 }
 
-.link:hover .gold,
 .link:focus-visible .gold {
   color: var(--accent-bright);
   text-shadow: 0 0 14px rgba(var(--accent-bright-rgb), 0.42);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover .gold {
+    color: var(--accent-bright);
+    text-shadow: 0 0 14px rgba(var(--accent-bright-rgb), 0.42);
+  }
 }
 
 .link:focus-visible {
@@ -48,3 +55,10 @@
     transition: none;
   }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.link:active { transform: scale(0.98); transition-duration: 120ms; }

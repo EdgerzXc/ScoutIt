@@ -74,9 +74,28 @@ export default function ConnectsRefundPanel() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Refund failed.");
+      // A-110: this used to read `data.newBalance`, a key the route has never
+      // returned, so a successful refund rendered "New balance: undefined" over
+      // a credit that had actually happened.
+      //
+      // The route returns ONE of two keys and names which in `balanceAuthority`,
+      // because they are not the same quantity: the canonical account-permanent
+      // balance and the legacy spendable balance answer different questions.
+      // Reading whichever is present and printing it under one label would
+      // manufacture a claim about which wallet moved, so the receipt names the
+      // authority it is quoting. A null balance is reported as unread rather
+      // than as a number — the credit still succeeded, and the ledger id is the
+      // part that proves it.
+      const canonical = data.balanceAuthority === "canonical_account_permanent";
+      const balance = canonical ? data.accountPermanentBalance : data.legacySpendableBalance;
+      const balanceText =
+        typeof balance === "number"
+          ? `${canonical ? "Account permanent balance" : "Legacy spendable balance"}: ${balance}.`
+          : "Balance could not be read back — the credit and its ledger entry below are unaffected.";
+
       setMsg({
         type: "success",
-        text: `${amount} Connect${amount === 1 ? "" : "s"} credited. New balance: ${data.newBalance}. Ledger entry ${data.transactionId}.`,
+        text: `${amount} Connect${amount === 1 ? "" : "s"} credited. ${balanceText} Ledger entry ${data.transactionId}.`,
       });
       setReason("");
       setRefId("");

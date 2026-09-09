@@ -207,7 +207,7 @@ export default function Footer() {
           border-radius: 50%;
           border: 1px solid rgba(255, 255, 255, 0.1);
           color: var(--text-secondary, #c8c8c8);
-          transition: all 0.25s ease;
+          transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
         }
 
         .social-link svg {
@@ -247,7 +247,7 @@ export default function Footer() {
           font-size: 13px;
           color: var(--text-secondary, #c8c8c8);
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
           width: fit-content;
         }
 

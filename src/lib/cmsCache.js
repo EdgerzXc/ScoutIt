@@ -22,6 +22,11 @@ import { CITY_HUB } from "@/lib/transit";
 import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "@/lib/cmsFallback";
 import { normalizeSampleBundle } from "@/lib/sampleInventory";
 import { getServerMapboxToken } from "@/lib/mapboxToken";
+import {
+  PUBLISHED_BRIEFING_FILTER,
+  isPublishedBriefing,
+  mapBriefingToIntel,
+} from "@/lib/intelBriefingMapper";
 
 let redis = null;
 export const CMS_REDIS_FETCH_CACHE = "default";
@@ -177,41 +182,21 @@ async function buildBundle() {
     fetchHomepageConfig(apiKey, baseId),
   ]);
 
-  // Fetch published briefings from Supabase OSINT repository
+  // Fetch published briefings from Supabase OSINT repository.
+  // U-021: the comment used to say "published" while the query filtered on
+  // nothing, so every unpublished draft reached the public bundle. The filter
+  // and the mapper now live in `intelBriefingMapper.js` where they can be
+  // tested by calling them. `isPublishedBriefing` re-checks client-side so the
+  // guard holds even if the query is ever loosened.
   let supabaseIntel = [];
   try {
     const { data: briefings } = await supabaseAdmin
       .from("intel_briefings")
       .select("*")
+      .eq(PUBLISHED_BRIEFING_FILTER.column, PUBLISHED_BRIEFING_FILTER.value)
       .order("created_at", { ascending: false });
 
-    if (briefings && briefings.length > 0) {
-      supabaseIntel = briefings.map((b) => ({
-        id: b.id,
-        slug: b.slug,
-        title: b.title,
-        category: b.category || "MARKET INTEL",
-        intelType: b.category || "BRIEFING",
-        date: b.published_at
-          ? new Date(b.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-          : "Just Now",
-        city: b.city || "BGC, Taguig",
-        region: b.region || "Metro Manila",
-        location: b.location || b.district || b.city || "",
-        district: b.district || "",
-        lat: Number(b.lat) || 14.5547,
-        lng: Number(b.lng) || 121.0244,
-        image: b.cover_image_url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",
-        excerpt: b.excerpt || "",
-        lead: b.lead || "",
-        ourTake: b.our_take || "",
-        sourceName: b.source_name || "OSINT Public Filing",
-        sourceUrl: b.source_url || "",
-        body: Array.isArray(b.body_json) ? b.body_json : [],
-        bodyJson: Array.isArray(b.body_json) ? JSON.stringify(b.body_json) : b.body_json,
-        source: "supabase_osint",
-      }));
-    }
+    supabaseIntel = (briefings || []).filter(isPublishedBriefing).map(mapBriefingToIntel);
   } catch (err) {
     console.warn("[CMS] Supabase intel_briefings fetch error:", err.message);
   }

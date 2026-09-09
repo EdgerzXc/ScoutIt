@@ -54,8 +54,16 @@ export default function OwnProfilePage() {
         return;
       }
 
-      // Sync localStorage → Supabase and get back the canonical profile
-      const { data: syncedProfile } = await upsertProfile(localUser);
+      // Sync localStorage → Supabase and get back the canonical profile.
+      // U-027: the error used to be discarded entirely, which is how a write
+      // that had been failing with 42501 since 2026-09-04 stayed invisible for
+      // five days. The local fallback below is still the right render — it is
+      // a display fallback, not a claim that anything saved — but a rejected
+      // write must never be silent (Standing Rule 18).
+      const { data: syncedProfile, error: syncError } = await upsertProfile(localUser);
+      if (syncError) {
+        console.error("[PROFILE] Profile sync was rejected; rendering local data:", syncError);
+      }
       const activeProfile = syncedProfile ?? {
         id: localUser.id,
         display_name: localUser.name,

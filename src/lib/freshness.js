@@ -149,6 +149,30 @@ export function freshnessAgeLabel(lastVerifiedDate, now = Date.now()) {
 }
 
 /**
+ * The public "Intel source" value on a property page (A-067).
+ *
+ * `CommercialFlow` and `ResidentialFlow` each hardcoded the string
+ * "ScoutIt Verified" here. It was derived from nothing, so every listing
+ * asserted it — including `one-ecom-center`, which has no `last_verified_date`
+ * at all. A listing ScoutIt has never verified stated that ScoutIt verified
+ * its intel.
+ *
+ * The unverified case is a stated value rather than a blank, per the Honest
+ * Blank Rule: a reader must be told the listing is unverified, not left to
+ * infer it from an empty field.
+ *
+ * @param {string|Date|null} lastVerifiedDate
+ * @param {number} [now]
+ * @returns {string}
+ */
+export function intelSourceLabel(lastVerifiedDate, now = Date.now()) {
+  if (daysSinceVerified(lastVerifiedDate, now) === null) {
+    return "Owner-submitted — not yet verified";
+  }
+  return freshnessAgeLabel(lastVerifiedDate, now).replace(/^Verified/, "ScoutIt verified");
+}
+
+/**
  * Splits a portfolio into what needs attention and what doesn't. Powers the
  * monthly audit modal.
  *

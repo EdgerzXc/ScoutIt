@@ -265,6 +265,13 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
   const canvasRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
   const [lightActive, setLightActive] = useState(false);
+  // A-098: a lost GL context otherwise freezes the hero on its last frame
+  // with the loop spending frames on a dead context. The session bump
+  // re-runs the setup effect; the CSS `.event-horizon` glow behind this
+  // canvas carries the scene meanwhile — the honest static fallback Lite
+  // Mode, light mode, and no-WebGL devices already get.
+  const [contextLost, setContextLost] = useState(false);
+  const [glSession, setGlSession] = useState(0);
   const paramsRef = useRef({ ...DEFAULT_PARAMS, ...paramsProp });
 
   useEffect(() => {
@@ -490,6 +497,20 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
     window.addEventListener(LITE_MODE_EVENT, onLiteToggle);
     window.addEventListener(LIGHT_MODE_EVENT, onLiteToggle);
     window.addEventListener("resize", resize);
+    // A-098: preventDefault keeps restoration possible; without it the
+    // canvas can never recover and the hero stays dead for the session.
+    const onContextLost = (e) => {
+      e.preventDefault();
+      killed = true;
+      stop();
+      setContextLost(true);
+    };
+    const onContextRestored = () => {
+      setContextLost(false);
+      setGlSession((s) => s + 1);
+    };
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
     if (!reducedMotion) {
       canvas.addEventListener("pointermove", onPointerMove, { passive: true });
       canvas.addEventListener("pointerdown", onPointerDown);
@@ -510,6 +531,8 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       window.removeEventListener(LITE_MODE_EVENT, onLiteToggle);
       window.removeEventListener(LIGHT_MODE_EVENT, onLiteToggle);
       window.removeEventListener("resize", resize);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
@@ -526,7 +549,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       gl.deleteShader(fs);
       gl.deleteBuffer(buffer);
     };
-  }, [onSnapshotReady, lightActive]);
+  }, [onSnapshotReady, lightActive, glSession]);
 
   return (
     <canvas
@@ -534,7 +557,7 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
       className="event-horizon-canvas"
       aria-hidden="true"
       style={{
-        opacity: revealed ? 1 : 0,
+        opacity: revealed && !contextLost ? 1 : 0,
         transition: "opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1)",
         cursor: "grab",
         touchAction: "pan-y",

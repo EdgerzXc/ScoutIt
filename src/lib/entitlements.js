@@ -128,7 +128,10 @@ function normalizeRole(role, defaultRole = null) {
   if (!role || typeof role !== "string") return defaultRole;
   const r = role.trim().toLowerCase();
   if (r === "buyer") return "seeker";
-  if (["seeker", "owner", "broker", "photographer", "researcher"].includes(r)) return r;
+  // A-114: kept in step with SUPPORTED_CONNECT_ROLES in connectsWallet.js. A
+  // role this list rejects reaches CONNECTS_ALLOWANCE as `seeker`, so an
+  // omission here is a silent allowance change, not a missing feature.
+  if (["seeker", "owner", "broker", "photographer", "researcher", "designer", "event-planner"].includes(r)) return r;
   return null;
 }
 
@@ -159,12 +162,28 @@ export function canSee(feature, tier) {
 }
 
 // Monthly free Connects allowance by role + tier (the locked ladder).
+//
+// A-114: `designer` and `event-planner` are shipped professions — DesignerHUD
+// renders, `/event-planners` is a public directory, and CONNECT_COSTS prices an
+// event-planner commission — but neither had a row here. `monthlyAllowance`
+// falls back to `CONNECTS_ALLOWANCE.seeker`, so both would silently have drawn
+// the SEEKER ladder: a pricing claim nobody made, arrived at by omission.
+//
+// They are given the provider ladder explicitly. This invents no number: the two
+// existing provider professions already share one identical row, so "the
+// provider ladder" is a value that exists rather than one chosen here. Whether
+// each profession should eventually differ is a pricing decision and belongs to
+// [[MASTER_OWNER_ACTIONS|O-022]], not to this file.
+const PROVIDER_LADDER = { starry: 1, solar: 5, cluster: 12, universe: 25 };
+
 export const CONNECTS_ALLOWANCE = {
   seeker: { starry: 1, solar: 6, cluster: 15, universe: 40 },
   owner: { starry: 1, solar: 6, cluster: 18, universe: 40 },
   broker: { starry: 1, solar: 8, cluster: 20, universe: 50 },
-  photographer: { starry: 1, solar: 5, cluster: 12, universe: 25 },
-  researcher: { starry: 1, solar: 5, cluster: 12, universe: 25 },
+  photographer: { ...PROVIDER_LADDER },
+  researcher: { ...PROVIDER_LADDER },
+  designer: { ...PROVIDER_LADDER },
+  "event-planner": { ...PROVIDER_LADDER },
 };
 
 export function monthlyAllowance(role, tier) {

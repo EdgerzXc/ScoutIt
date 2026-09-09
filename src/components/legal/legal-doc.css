@@ -157,10 +157,32 @@
   color: var(--accent, #E8AE3C);
   text-decoration: underline;
 }
-.legal-footer-note a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .legal-footer-note a:hover {
+    text-decoration: underline;
+  }
 }
 
 @media (max-width: 640px) {
   .legal-main { padding: 60px 16px 80px; }
+}
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.legal-footer-note a:active { opacity: 0.75; transition-duration: 120ms; }
+
+/* A-074. Added with the :active state above — press feedback introduces a
+   transition, so it needs the same reduced-motion answer every other
+   stylesheet gives. Opacity is kept: it carries the feedback. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

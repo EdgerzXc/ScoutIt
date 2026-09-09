@@ -15,11 +15,13 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { ATTRIBUTION_MODES } from "@/lib/brokerRecommendations";
+import { isSatisfactionLevel } from "@/lib/brokerSatisfaction";
 
 export const MAX_RECOMMENDATION_LENGTH = 2000;
 
 const SUBMISSION_KEYS = Object.freeze([
   "brokerId",
+  "satisfactionLevel",
   "body",
   "attributionMode",
   "authorDisplayName",
@@ -40,7 +42,7 @@ const UNSUPPORTED_CLAIM =
 const clean = (value) => String(value ?? "").trim().replace(/\s+/g, " ");
 
 function bodyError(body) {
-  if (!body) return "Write a few words about working with this advisor.";
+  if (!body) return null;
   if (body.length > MAX_RECOMMENDATION_LENGTH) {
     return `Must be ${MAX_RECOMMENDATION_LENGTH} characters or fewer.`;
   }
@@ -73,6 +75,11 @@ export function validateRecommendationSubmission(input = {}) {
 
   const brokerId = clean(source.brokerId);
   if (!brokerId) errors.brokerId = "A broker is required.";
+
+  const satisfactionLevel = clean(source.satisfactionLevel);
+  if (!isSatisfactionLevel(satisfactionLevel)) {
+    errors.satisfactionLevel = "Choose one of the four satisfaction levels.";
+  }
 
   const body = clean(source.body);
   const bodyProblem = bodyError(body);
@@ -109,6 +116,7 @@ export function validateRecommendationSubmission(input = {}) {
     errors,
     value: {
       brokerId,
+      satisfactionLevel,
       body,
       attributionMode,
       authorDisplayName,

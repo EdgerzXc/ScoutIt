@@ -71,8 +71,8 @@ export default function ProfileButton({ floating = false }) {
         type="button"
         className="profile-eye-btn"
         onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"))}
-        aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
-        title="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
+        aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode / Simple Mode)"
+        title="Help & Display (Guide / Dark / High Contrast / Lite Mode / Simple Mode)"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -123,7 +123,7 @@ export default function ProfileButton({ floating = false }) {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.25s ease;
+          transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
         }
 
@@ -149,7 +149,7 @@ export default function ProfileButton({ floating = false }) {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          transition: all 0.25s ease;
+          transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
         }
 
         .profile-btn :global(svg) {

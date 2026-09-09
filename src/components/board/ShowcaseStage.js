@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import { rankBoard, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mock/mockShowcase";
 import { isLiteMode } from "@/lib/liteMode";
 import {
@@ -1193,11 +1194,10 @@ export default function ShowcaseStage({ mode = "full" }) {
         {/* ROW 1: BRAND, DESKTOP AWARDS, & ORBIT RETURN */}
         <div className="sc-top-primary-row">
           <div className="sc-top-brand-block">
-            <Link href="/" className="sc-brand-logo" aria-label="ScoutIT — home">
-              <span className="brand-s">S</span>
-              <span className="brand-scout">cout</span>
-              <span className="brand-it">IT</span>
-            </Link>
+            {/* F-006: shared wordmark. Segments keep the brand-* classes the
+                :global selectors below target, so host styling is unchanged;
+                the accessible name now matches the identity contract. */}
+            <ScoutItWordmark href="/" className="sc-brand-logo" />
             <div className="sc-telemetry-chip">
               <span className="sc-pulse-dot" />
               <span className="sc-telemetry-text">
@@ -1314,7 +1314,7 @@ export default function ShowcaseStage({ mode = "full" }) {
 
       {/* ── 2. ARCHITECTURAL COMMAND STAGE ── */}
       {active ? (
-        <main className="sc-command-stage">
+        <div className="sc-command-stage">
           {/* CENTER STAGE: Widescreen Architectural Viewport */}
           <section className="sc-viewport-stage" style={{ "--glow-color": tierMeta.rgb }}>
             <div className="sc-viewport-glass">
@@ -1501,7 +1501,7 @@ export default function ShowcaseStage({ mode = "full" }) {
               </Link>
             </div>
           </section>
-        </main>
+        </div>
       ) : (
         <div className="sc-empty-container">
           <Building2 size={36} className="text-white/70 mb-3" />
@@ -1569,7 +1569,7 @@ export default function ShowcaseStage({ mode = "full" }) {
                 </div>
                 <div className="sc-tray-info">
                   <span className="sc-tray-cat" style={{ color: theme.color }}>{item.category}</span>
-                  <h4 className="sc-tray-name">{item.name}</h4>
+                  <h2 className="sc-tray-name">{item.name}</h2>
                   <span className="sc-tray-inq">{item.inquiry_count} inq/mo</span>
                 </div>
               </button>

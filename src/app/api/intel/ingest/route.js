@@ -258,6 +258,33 @@ export async function POST(request) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
+    // ── U-020: the staff requirement belongs ABOVE the paid model call ──
+    // This gate used to sit further down, guarding only `publish`. Everything
+    // between it and `authenticate()` ran for any registered account, and that
+    // included a Gemini call on a document of up to 20 MB against a single
+    // shared GEMINI_API_KEY. Sign up, upload, repeat — the owner is billed and
+    // sustained abuse degrades Intel ingest for staff too.
+    //
+    // The decision, recorded rather than assumed (U-020's boundary asks for
+    // it): **ingest is staff-only**, not metered-for-everyone. Two reasons.
+    // Its only producer is the staff Intel Studio on /admin. And this route
+    // creates INTEL_CMS *article* records — editorial content — not property
+    // listings, so AGENTS.md §2.4's owner-submitted PDF-to-listing path is a
+    // different pipeline and is not closed by this. A per-user quota was the
+    // alternative; it needs a metering table (a migration, owner-gated under
+    // O-004) and would still let every account spend real money. Staff-only
+    // is smaller, needs no schema, and fails closed.
+    const staff = await requireAdmin(request, { label: "INTEL INGEST" });
+    if (staff.error) {
+      return NextResponse.json(
+        {
+          error:
+            "Intel ingest is staff-only. Parsing a document runs ScoutIt's paid editorial model, so it requires ScoutIt staff privileges.",
+        },
+        { status: staff.status === 401 ? 401 : 403 }
+      );
+    }
+
     const source = await extractSource(formData.get("file"), formData.get("text"));
     if (source.error) {
       return NextResponse.json({ error: source.error }, { status: 422 });
@@ -285,21 +312,10 @@ export async function POST(request) {
 
     // ── Publishing is a staff act (§1.0B) ──
     // `Approved_For_Live_Site` puts an article on the public /intel surface.
-    // Any authenticated account could previously set it, bypassing Mission
-    // Control review entirely. Ingest stays open to authenticated users;
-    // publishing requires a verified staff/admin role, checked server-side.
-    const requestedPublish = formData.get("publish") === "true";
-    let publish = false;
-    if (requestedPublish) {
-      const staff = await requireAdmin(request, { label: "INTEL INGEST" });
-      if (staff.error) {
-        return NextResponse.json(
-          { error: "Publishing to the live Intel surface requires ScoutIt staff privileges." },
-          { status: staff.status === 401 ? 401 : 403 }
-        );
-      }
-      publish = true;
-    }
+    // The staff check that used to live here now runs at the top of the handler
+    // (see U-020), so reaching this line already proves staff authority; the
+    // flag is simply honoured rather than re-verified.
+    const publish = formData.get("publish") === "true";
 
     const saved = await createIntelRecord(article, publish);
     if (saved.error) {

@@ -168,9 +168,9 @@ export default function Header({ ambientContext = null }) {
           type="button"
           onClick={openDisplaySettings}
 
-          aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
+          aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode / Simple Mode)"
           aria-expanded={displaySettingsOpen}
-          title="Help & Display (Guide / Dark / High Contrast / Lite Mode)"
+          title="Help & Display (Guide / Dark / High Contrast / Lite Mode / Simple Mode)"
 
 
         >

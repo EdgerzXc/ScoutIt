@@ -13,15 +13,18 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
 
   const isEmpty = !projects || projects.length === 0;
 
+  // A-092: the optimistic toggle is reverted when the write fails — a failed
+  // write must not leave the UI showing a state that never persisted.
   const toggleAvailability = async () => {
     if (!isOwnView) return;
     const next = !available;
     setAvailable(next);
     setSaving(true);
-    await supabase
+    const { error } = await supabase
       .from("user_profiles")
       .update({ provider_availability: next, updated_at: new Date().toISOString() })
       .eq("id", userId);
+    if (error) setAvailable(available);
     setSaving(false);
   };
 

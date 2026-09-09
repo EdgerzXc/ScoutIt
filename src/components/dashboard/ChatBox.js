@@ -647,9 +647,33 @@ export default function ChatBox({
     }
   };
 
+  // A-103: Report & Unmatch files a dispute hold at report time through the
+  // A-041 producer — previously it only stamped `reported`, writing no
+  // `deal_disputes` row, so the thread was invisible to the staff queue the
+  // dispute-modal path feeds (retained + invisible). Filing places the hold
+  // immediately, surfaces the case in Mission Control's disputes queue, and
+  // exempts the thread from the purge until review closes. The ground is
+  // `other` with its provenance stated: Report & Unmatch offers no ground
+  // picker, and inventing a specific ground would be a claim nobody made.
+  // Fail-closed: if the hold cannot be placed, the report is NOT marked —
+  // a `reported` thread with no hold is the evidence vacuum this closes.
   const handleReportConversation = async () => {
     try {
       const { token, mockOwnerId } = await resolveAuth();
+      const filing = await fetch(`/api/deals/${deal.id}/dispute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({
+          reason: "other",
+          details:
+            "Filed automatically when the participant chose Report & Unmatch; no specific ground was selected.",
+          mockOwnerId,
+        }),
+      });
+      if (!filing.ok) {
+        const data = await filing.json().catch(() => ({}));
+        throw new Error(data.error || "Couldn't protect this conversation for review.");
+      }
       const res = await fetch(`/api/deals/${deal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", ...authHeaders(token) },
@@ -659,6 +683,7 @@ export default function ChatBox({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Couldn't submit this report.");
       }
+      await loadDispute();
       onCloseDeal(deal.id, "reported");
       setShowConfirmReport(false);
     } catch (err) {
@@ -1124,8 +1149,8 @@ export default function ChatBox({
               the download: a dispute is filed AGAINST a conversation that has
               already ended, so a control that vanished at close would be
               missing at exactly the moment it is needed. Distinct from the 🚩
-              Report & Unmatch control below, which closes the thread — this one
-              preserves it. */}
+              Report & Unmatch control below, which closes the thread AND now
+              files a hold too (A-103) — this one preserves without closing. */}
           {!dispute && (
             <button
               onClick={() => setShowDisputeModal(true)}

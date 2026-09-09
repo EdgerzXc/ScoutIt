@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useDashboard } from "../../context/DashboardContext";
 import PhotographerHUD from "./providers/PhotographerHUD";
 import ResearcherHUD from "./providers/ResearcherHUD";
 import DesignerHUD from "./providers/DesignerHUD";
 import { MOCK_QUESTS, USE_MOCK_DATA } from "@/data/mock";
 
 export default function ProviderMode({ type }) {
-  const { addToast } = useDashboard();
-  
   // Define which services are currently active for the MVP
   const ACTIVE_SERVICES = ["photographer", "researcher", "designer"];
   const isActiveService = ACTIVE_SERVICES.includes(type?.toLowerCase());
@@ -18,23 +15,25 @@ export default function ProviderMode({ type }) {
   const [quests, setQuests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch live bounties from the QuestIT API we built
-  useEffect(() => {
-    async function fetchQuests() {
-      try {
-        const res = await fetch("/api/v1/questit/quests");
-        if (res.ok) {
-          const data = await res.json();
-          setQuests(data.quests || (USE_MOCK_DATA ? MOCK_QUESTS : []));
-        } else {
-          setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
-        }
-      } catch (err) {
+  // Fetch live bounties from the QuestIT API we built. Lifted to component
+  // scope (A-092) so Refresh Board re-runs the same read instead of toasting
+  // a completion nothing performed.
+  async function fetchQuests() {
+    try {
+      const res = await fetch("/api/v1/questit/quests");
+      if (res.ok) {
+        const data = await res.json();
+        setQuests(data.quests || (USE_MOCK_DATA ? MOCK_QUESTS : []));
+      } else {
         setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
-      } finally {
-        setLoading(false);
       }
+    } catch (err) {
+      setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
+    } finally {
+      setLoading(false);
     }
+  }
+  useEffect(() => {
     fetchQuests();
   }, []);
 
@@ -54,31 +53,34 @@ export default function ProviderMode({ type }) {
             The <strong>{providerLabel}</strong> ecosystem is currently in Phase 2 development. We are allowing top-tier professionals to create their accounts and establish their verified identities now, ahead of the official marketplace launch.
           </p>
           <div className="flex gap-4 relative z-10">
-            <button 
+            <button
               className="bg-gold-accent text-black font-working-title font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(232,174,60,0.3)] hover:shadow-[0_0_30px_rgba(247,198,78,0.5)] hover:-translate-y-1 transition-all duration-300 ease-out active:scale-95"
-              onClick={() => addToast("Your account is secured in the waitlist database.", "✅")}
+              onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: type?.toLowerCase(), source: "provider-roster" } }))}
             >
               Secure Your Position
             </button>
           </div>
         </div>
 
-        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card cursor-pointer" onClick={() => addToast("Join the exclusive Slack channel", "💬")}>
+        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card">
           <span className="text-2xl mb-4 opacity-70">💬</span>
           <h3 className="text-white font-medium mb-2">Provider Community</h3>
           <p className="text-xs text-text-secondary leading-relaxed">Connect with other top-tier operators while you wait.</p>
+          <span className="mt-3 font-mono text-[12px] uppercase tracking-widest text-text-secondary">Phase 2</span>
         </div>
 
-        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card cursor-pointer" onClick={() => addToast("Downloading quality standards...", "📥")}>
+        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card">
           <span className="text-2xl mb-4 opacity-70">📑</span>
           <h3 className="text-white font-medium mb-2">Quality Standards</h3>
           <p className="text-xs text-text-secondary leading-relaxed">Review the minimum requirements for the ScoutIt roster.</p>
+          <span className="mt-3 font-mono text-[12px] uppercase tracking-widest text-text-secondary">Phase 2</span>
         </div>
 
-        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card cursor-pointer" onClick={() => addToast("Checking vetting status...", "⏳")}>
+        <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card">
           <span className="text-2xl mb-4 opacity-70">🛡️</span>
           <h3 className="text-white font-medium mb-2">Vetting Status</h3>
           <p className="text-xs text-text-secondary leading-relaxed">Track your application through the curation pipeline.</p>
+          <span className="mt-3 font-mono text-[12px] uppercase tracking-widest text-text-secondary">Phase 2</span>
         </div>
       </div>
     );
@@ -112,9 +114,10 @@ export default function ProviderMode({ type }) {
           <h1 className="font-display-md text-3xl md:text-5xl text-on-surface mb-2">{providerLabel} Command Center</h1>
         </div>
         <div className="flex gap-4">
-          <button 
-            className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity"
-            onClick={() => addToast("Bounty refresh complete.", "🔄")}
+          <button
+            className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
+            disabled={loading}
+            onClick={async () => { setLoading(true); await fetchQuests(); }}
           >
             Refresh Board
           </button>

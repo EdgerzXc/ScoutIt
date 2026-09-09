@@ -7,6 +7,7 @@ import BrokerDossierIdentity from "@/components/brokers/BrokerDossierIdentity";
 import BrokerRecommendations from "@/components/brokers/BrokerRecommendations";
 import BrokerContributions from "@/components/brokers/BrokerContributions";
 import BrokerCareerHistory from "@/components/brokers/BrokerCareerHistory";
+import SimpleDetail from "@/components/ui/SimpleDetail";
 
 import { getCmsBundle } from "@/lib/cmsCache";
 import { siteUrl } from "@/lib/siteUrl";
@@ -183,16 +184,34 @@ export default async function BrokerDetailPage({ params }) {
         </section>
 
         {/* Secondary template. A-023 requires the ScoutIt Record (rendered in
-            the identity block above) to always precede Career History. */}
-        <BrokerCareerHistory section={careerHistory} />
+            the identity block above) to always precede Career History.
+
+            A-083 6.5: Career History and ScoutIt Contributions are `detail`.
+            Identity, the ScoutIt Record, Current Representations and Client
+            Recommendations are core. Every attribution and verification label
+            inside them is core and unmarked, so A-023's guarantees hold with
+            no extra work — which is the allowlist doing its job. */}
+        <SimpleDetail label="Career History">
+          <BrokerCareerHistory section={careerHistory} />
+        </SimpleDetail>
 
         <BrokerRecommendations section={recommendations} />
 
-        <BrokerContributions section={contributions} />
+        <SimpleDetail label="ScoutIt Contributions">
+          <BrokerContributions section={contributions} />
+        </SimpleDetail>
 
         {/* Connection Form Component (Client Side) */}
         <section className="portal-section">
-          <ConnectionPortal brokerName={identity.name} brokerId={identity.id} />
+          {/* U-023: the portal needs a listing identity, because
+              /api/deals/initiate requires one. The representation cards already
+              carry the advisor's public roster, so the space picker is built
+              from the same authority the dossier renders — never invented. */}
+          <ConnectionPortal
+            brokerName={identity.name}
+            brokerId={identity.id}
+            spaces={(representations.cards || []).map((card) => ({ slug: card.slug, title: card.title }))}
+          />
         </section>
 
 

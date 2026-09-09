@@ -33,6 +33,8 @@ for (const viewport of VIEWPORTS) {
 test("Manifesto diagrams explain state changes without changing routes", async ({ page }) => {
   await gotoAndSettle(page, "/about");
 
+  await page.getByRole("button", { name: "Close Help & Display", exact: true }).click();
+  await expect(page.getByRole("complementary", { name: "Help & Display", exact: true })).toBeHidden();
   await page.getByRole("button", { name: /05 mantle system disclosure/i }).click();
   await expect(page.locator("#layer-detail")).toContainText("architecture, data philosophy");
   await expect(page.getByRole("button", { name: /05 mantle system disclosure/i })).toHaveAttribute("aria-pressed", "true");

@@ -46,10 +46,27 @@ describe("A-023 phase 4 - social proof wiring", () => {
 
   it("keeps the public reader's column list explicit for both tables", () => {
     const server = readCode(SERVER);
-    expect(server).toContain("RECOMMENDATION_COLUMNS");
+    expect(server).toContain("RECOMMENDATION_BASE_COLUMNS");
     expect(server).toContain("CONTRIBUTION_COLUMNS");
     expect(server).toContain("attribution_mode");
     expect(server).toContain("qualifying_handshake_id");
+
+    // The list stays explicit — never `select("*")` on a table holding consent
+    // records and private moderation evidence.
+    expect(server).not.toMatch(/\.select\("\*"\)/);
+    expect(server).not.toContain("evidence_url");
+  });
+
+  it("asks for satisfaction_level only when the column exists", () => {
+    // Naming a column the live table lacks makes PostgREST reject the entire
+    // select, and the fail-closed rule then reports "could not be loaded" —
+    // which took the whole recommendations section dark on every dossier until
+    // 2026-08-31. The column is owner-gated under W-003, so the reader has to
+    // work both before and after it is applied.
+    const server = readCode(SERVER);
+    expect(server).toContain("satisfaction_level");
+    expect(server).toMatch(/if \(await isSatisfactionSignalReady\(supabaseAdmin\)\)/);
+    expect(server).not.toMatch(/RECOMMENDATION_BASE_COLUMNS = \[[^\]]*satisfaction_level/s);
   });
 });
 

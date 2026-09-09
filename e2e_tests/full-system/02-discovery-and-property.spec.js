@@ -9,7 +9,7 @@ test.describe('Discovery engine', () => {
     const errors = trackErrors(page);
     await gotoAndSettle(page, '/discover');
 
-    await expect(page.locator('.discoverTitle')).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 20000 });
     const cards = page.locator('.spotlightCard');
     await expect(cards.first()).toBeVisible({ timeout: 20000 });
     const residentialCount = await cards.count();
@@ -17,7 +17,7 @@ test.describe('Discovery engine', () => {
 
     // Category switch via querystring-backed sidebar nav.
     await gotoAndSettle(page, '/discover?type=commercial');
-    await expect(page.locator('.discoverTitle')).toContainText(/commercial/i, { timeout: 20000 });
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/commercial/i, { timeout: 20000 });
     await expect(page.locator('.spotlightCard').first()).toBeVisible({ timeout: 20000 });
 
     expect(errors, errors.join('\n')).toEqual([]);
@@ -156,4 +156,23 @@ test.describe('The Ledger (device-only wishlist)', () => {
     // Clean the device ledger so reruns stay deterministic.
     await page.evaluate(() => localStorage.removeItem('scoutit_reactions'));
   });
+});
+
+test('empty catalogue fallback keeps an existing saved-property link', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('scoutit_reactions', JSON.stringify([{
+      property_id: 'one-ecom-center', property_title: 'Saved property outage check',
+      reaction_type: 'Save', timestamp: 1788940000000,
+    }]));
+  });
+  await page.route('**/api/cms**', route => route.fulfill({
+    status: 200,
+    json: { properties: [], intel: [], brokers: [], source: 'catalog' },
+  }));
+  const catalogue = page.waitForResponse(response => response.url().includes('/api/cms'));
+  await gotoAndSettle(page, '/wishlist');
+  await catalogue;
+  await expect(page.getByRole('link', { name: 'Saved property outage check', exact: true }))
+    .toHaveAttribute('href', '/property/one-ecom-center');
+  await expect(page.getByText('Listing removed', { exact: true })).toHaveCount(0);
 });

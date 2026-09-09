@@ -103,8 +103,10 @@
   transition: border-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.contact-input:hover:not(:disabled) {
-  border-color: var(--accent-muted, #6E531A);
+@media (hover: hover) and (pointer: fine) {
+  .contact-input:hover:not(:disabled) {
+    border-color: var(--accent-muted, #6E531A);
+  }
 }
 
 .contact-input:focus {
@@ -176,10 +178,12 @@
     background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.contact-submit:hover:not(:disabled) {
-  background: var(--accent, #E8AE3C);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 26px rgba(232, 174, 60, 0.25);
+@media (hover: hover) and (pointer: fine) {
+  .contact-submit:hover:not(:disabled) {
+    background: var(--accent, #E8AE3C);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 26px rgba(232, 174, 60, 0.25);
+  }
 }
 
 .contact-submit:active:not(:disabled) {
@@ -237,9 +241,11 @@
   transition: border-color 160ms ease, color 160ms ease;
 }
 
-.contact-secondary:hover {
-  border-color: var(--accent, #E8AE3C);
-  color: var(--text-primary, #f0ede8);
+@media (hover: hover) and (pointer: fine) {
+  .contact-secondary:hover {
+    border-color: var(--accent, #E8AE3C);
+    color: var(--text-primary, #f0ede8);
+  }
 }
 
 /* ── Aside ────────────────────────────────────────────────────────────── */
@@ -285,7 +291,9 @@
   .contact-secondary {
     transition: none;
   }
-  .contact-submit:hover:not(:disabled) {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .contact-submit:hover:not(:disabled) {
+        transform: none;
+      }
   }
 }

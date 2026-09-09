@@ -335,7 +335,15 @@ export function getTerritories() {
  * different categories).
  */
 export function getSignals() {
-  return ARTICLES.filter((a) => Boolean(a.status));
+  // `isSample` is stamped here for the same reason `getArticles` stamps it:
+  // these are the SAME records, and a reader cannot be told they are
+  // illustrative on one surface and not on another.
+  //
+  // It was missing, and Stratosphere renders each signal under its `status`
+  // label — "REGISTRY CONFIRMED", "ORDINANCE RATIFIED", "TITLES MOVING". That
+  // is an affirmative claim about a public record, so an undisclosed sample
+  // there reads as verified fact rather than as scaffolding.
+  return ARTICLES.filter((a) => Boolean(a.status)).map((a) => ({ ...a, isSample: true }));
 }
 
 /**

@@ -246,6 +246,11 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     expect(audit.stateMachineTransitions.plannedNotImplemented).toHaveLength(9);
     expect(audit.stateMachineTransitions.staleVisualTransitions).toEqual([]);
     expect(audit.stateMachineTransitions.missing).toEqual([]);
+    // A-097: the coverage metric is named for what it measures (a curated
+    // list, not whole-repo coverage) — a bare "routeCoverage" must not return.
+    expect(audit.scores.canonicalRouteCoverageScore).toBeDefined();
+    expect(audit.scores.canonicalRouteCoverageScore.formula).toMatch(/NOT whole-repo coverage/);
+    expect(audit.scores.routeCoverageScore).toBeUndefined();
     expect(audit.repositoryFidelityReport.canonicalRoutes.length).toBeGreaterThan(0);
     expect(audit.repositoryFidelityReport.apiRoutesMapped.length).toBeGreaterThan(0);
     expect(audit.scores.overallTrustScore.penalties).toBeDefined();

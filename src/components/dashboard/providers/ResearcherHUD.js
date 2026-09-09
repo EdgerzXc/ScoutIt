@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useDashboard } from "../../../context/DashboardContext";
 
 const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
@@ -9,6 +8,9 @@ const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
     <button type="button"
       className={`w-10 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${checked ? (primary ? 'bg-intel-cyan' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
     </button>
@@ -16,7 +18,6 @@ const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
 );
 
 export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId }) {
-  const { addToast } = useDashboard();
   const [activeTab, setActiveTab] = useState("audits"); // 'audits' | 'credentials'
 
   // Credentials State
@@ -45,11 +46,12 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
             <button className="text-text-secondary hover:text-intel-cyan text-sm mb-2" onClick={() => setActiveQuestId(null)}>← Back to Audit List</button>
             <h2 className="font-display-md text-3xl text-on-surface">Data Audit: {quest.title}</h2>
           </div>
-          <button 
-            className="bg-intel-cyan text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition"
-            onClick={() => addToast("Verification Report Submitted.", "✅")}
+          <button
+            disabled
+            title="Submissions open in Phase 2 — previews only today."
+            className="bg-intel-cyan text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
           >
-            Submit Audit
+            Submit Audit · Phase 2
           </button>
         </div>
 
@@ -192,6 +194,9 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                   <button type="button"
                     className={`w-12 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${acceptingAudits ? 'bg-intel-cyan' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingAudits(!acceptingAudits)}
+                    role="switch"
+                    aria-checked={acceptingAudits}
+                    aria-label="Accepting new audits"
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingAudits ? 'translate-x-6' : 'translate-x-0'}`}></div>
                   </button>
@@ -252,11 +257,12 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                 </div>
               </div>
               
-              <button 
-                className="w-full mt-4 bg-surface border border-intel-cyan/50 text-intel-cyan font-working-title font-bold px-4 py-4 rounded hover:bg-intel-cyan/10 transition uppercase tracking-wider text-sm"
-                onClick={() => addToast("Investigator Dossier Updated.", "🔐")}
+              <button
+                disabled
+                title="Profile saving opens in Phase 2 — previews only today."
+                className="w-full mt-4 bg-surface border border-intel-cyan/50 text-intel-cyan font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed"
               >
-                Save Dossier Security Profile
+                Save Dossier Security Profile · Phase 2
               </button>
             </div>
           </div>

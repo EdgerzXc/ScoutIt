@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, memo } from "react";
 import LiveEditorWorkspace from "./LiveEditorWorkspace";
+import GeoPricingGauge from "./GeoPricingGauge";
 import DeepIntelligenceStudio from "./DeepIntelligenceStudio";
 import BulkImporterMode from "./BulkImporterMode";
 import { useDashboard } from "../../context/DashboardContext";
@@ -22,6 +23,7 @@ import MonthlyFreshnessModal from './MonthlyFreshnessModal';
 import LeadExportButton from './crm/LeadExportButton';
 import { sanitizeError } from "@/lib/sanitizeError";
 import TurnstileGate from "@/components/ui/TurnstileGate";
+import SimpleDetail from "@/components/ui/SimpleDetail";
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading } = useDashboard();
@@ -394,9 +396,15 @@ export default function OwnerMode() {
                     description: draft.description || '',
                     media_link: draft.media_link || '',
                     pipeline_status: 'pending',
+                    // A-076: ScoutIt built this listing from the owner's document,
+                    // so AGENTS.md §2.4 requires a staff check against that source
+                    // before it can go public. Tagging it is what makes the
+                    // publish route's 422 gate apply — without this the draft is
+                    // indistinguishable from a hand-typed one.
+                    creationSource: 'pdf_assisted',
                     details: { ...draft.details, ai_confidence: draft.confidence, ai_gaps: draft.gaps }
                   });
-                  addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields.`, "✅");
+                  addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields — a reviewer checks it against your PDF before it goes live.`, "✅");
                 }
               } catch (err) {
                 console.error('[Concierge]', err);
@@ -915,6 +923,21 @@ export default function OwnerMode() {
         </div>
       </div>
 
+      {/* A-113: the pricing signal was built and wired but mounted only inside
+          the live editor, so an owner reading their own dossier saw no pricing
+          context at all — the one screen where "is my number sensible" is the
+          question being asked. Same component, same props, same /api/geo-pricing
+          route; it renders nothing until location, category and price are all
+          present, so a draft dossier is unaffected. */}
+      <section className="mt-6" aria-labelledby="listing-pricing-heading">
+        <h2 id="listing-pricing-heading" className="font-label-caps text-[12px] tracking-[0.12em] text-text-secondary mb-2">MARKET PRICING SIGNAL</h2>
+        <GeoPricingGauge
+          location={activeListing.location || activeListing.loc}
+          category={activeListing.spaceCategory}
+          price={activeListing.price}
+        />
+      </section>
+
       <section className="mt-6 rounded border border-surface-variant bg-surface-alt/70 p-4 md:p-5" aria-labelledby="listing-lifecycle-heading">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -1033,6 +1056,11 @@ export default function OwnerMode() {
             })()}
           </div>
 
+          {/* A-083 6.4: Engagement Analytics is `detail`. The attestation and
+              publish-consequence copy elsewhere on this dashboard is core and
+              deliberately unmarked — protected by not being on the allowlist,
+              so nobody has to remember to protect it. */}
+          <SimpleDetail label="Engagement Analytics">
           <div className="card-atmosphere rounded-lg p-6">
             <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Engagement Analytics</h3>
             {activeListing.pipelineStatus === 'ai_drafting' ? (
@@ -1059,6 +1087,7 @@ export default function OwnerMode() {
                </>
             )}
           </div>
+          </SimpleDetail>
 
           {/* Search readiness (SEO-01 · W11). Sits next to Listing Strength on
               purpose: Strength answers "is this listing complete?", this

@@ -12,6 +12,7 @@ import {
   PARTY_HOLD_STATUSES,
   PARTY_REASON_LABELS,
 } from "@/lib/partyDisputePolicy.mjs";
+import { disputeAge } from "@/lib/disputeAgePolicy.mjs";
 import {
   Scale,
   Plus,
@@ -55,6 +56,20 @@ const PRIORITY_STYLE = {
   normal: "text-white/70 border-white/10",
   low: "text-white/70 border-white/10",
 };
+
+function DisputeAge({ createdAt }) {
+  const age = disputeAge(createdAt);
+  if (!age) return null;
+  return (
+    <span
+      className={`text-[12px] uppercase tracking-wide border rounded-full px-2 py-0.5 ${
+        age.overdue ? "text-warn border-warn/25 bg-warn/10" : "text-white/60 border-line"
+      }`}
+    >
+      {age.label}
+    </span>
+  );
+}
 
 export default async function DisputesPage() {
   const staff = await getCurrentStaff();
@@ -211,7 +226,7 @@ export default async function DisputesPage() {
                   </div>
                   <form action={adoptPartyDispute}>
                     <input type="hidden" name="dealDisputeId" value={f.id} />
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors whitespace-nowrap">
+                    <button className="flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-lg text-xs bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors whitespace-nowrap">
                       <UserCheck className="w-3.5 h-3.5" />
                       Take mediation
                     </button>
@@ -274,7 +289,7 @@ export default async function DisputesPage() {
             <textarea name="description" rows={2} placeholder="What happened?" className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70" />
           </label>
           <div className="sm:col-span-2">
-            <button className="px-4 py-2 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors">
+            <button className="min-h-11 px-4 py-2 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors">
               Open dispute
             </button>
           </div>
@@ -304,6 +319,7 @@ export default async function DisputesPage() {
                     <span className="text-[12px] uppercase tracking-wide text-white/70 border border-white/10 rounded-full px-2 py-0.5">
                       {d.status}
                     </span>
+                    <DisputeAge createdAt={d.created_at} />
                     {d.deal_dispute_id && (
                       <span className="text-[12px] uppercase tracking-wide text-[#E8AE3C] border border-[rgba(232,174,60,0.25)] bg-[rgba(232,174,60,0.08)] rounded-full px-2 py-0.5 flex items-center gap-1">
                         <ShieldAlert className="w-3 h-3" />
@@ -321,7 +337,7 @@ export default async function DisputesPage() {
                 {d.status === "open" && (
                   <form action={claimDispute}>
                     <input type="hidden" name="disputeId" value={d.id} />
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 transition-colors whitespace-nowrap">
+                    <button className="flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-lg text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 transition-colors whitespace-nowrap">
                       <UserCheck className="w-3.5 h-3.5" />
                       Take mediation
                     </button>
@@ -353,7 +369,7 @@ export default async function DisputesPage() {
                   placeholder="Add a mediation note…"
                   className="flex-1 min-w-0 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
                 />
-                <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 transition-colors whitespace-nowrap">
+                <button className="flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 transition-colors whitespace-nowrap">
                   <MessageSquare className="w-3.5 h-3.5" />
                   Note
                 </button>
@@ -381,7 +397,7 @@ export default async function DisputesPage() {
                     <button
                       name="outcome"
                       value="resolved"
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 border border-emerald-400/20 transition-colors whitespace-nowrap"
+                      className="flex min-h-11 items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 border border-emerald-400/20 transition-colors whitespace-nowrap"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       Resolve
@@ -389,7 +405,7 @@ export default async function DisputesPage() {
                     <button
                       name="outcome"
                       value="dismissed"
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 transition-colors whitespace-nowrap"
+                      className="flex min-h-11 items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 transition-colors whitespace-nowrap"
                     >
                       <XCircle className="w-4 h-4" />
                       Dismiss

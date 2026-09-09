@@ -57,7 +57,7 @@ export async function POST(request) {
 
     const { source, payload } = await request.json();
 
-    console.log(`[Assimilate] source=${source} items=${payload?.length ?? 0}`);
+
 
     if (!payload || !Array.isArray(payload) || payload.length === 0) {
       return NextResponse.json({ error: 'Empty or invalid payload' }, { status: 400 });

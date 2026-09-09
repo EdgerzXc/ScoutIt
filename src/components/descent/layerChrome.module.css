@@ -59,13 +59,23 @@
   transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
 }
 
-.pill:hover,
 .pill:focus-visible {
   border-color: var(--accent-bright);
   background: var(--accent-bright);
   color: var(--on-accent);
   box-shadow: var(--shadow-glow-soft);
   transform: translateY(-1px) translateZ(10px);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover {
+    border-color: var(--accent-bright);
+    background: var(--accent-bright);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-glow-soft);
+    transform: translateY(-1px) translateZ(10px);
+  }
 }
 
 .pill:focus-visible,
@@ -83,19 +93,37 @@
   transition: color var(--transition-slow), transform var(--transition-slow);
 }
 
-.pill:hover .arrow,
 .pill:focus-visible .arrow {
   color: var(--on-accent);
 }
 
-.pill:hover .arrowPrev,
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover .arrow {
+    color: var(--on-accent);
+  }
+}
+
 .pill:focus-visible .arrowPrev {
   transform: translateX(-2px);
 }
 
-.pill:hover .arrowNext,
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover .arrowPrev {
+    transform: translateX(-2px);
+  }
+}
+
 .pill:focus-visible .arrowNext {
   transform: translateX(2px);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover .arrowNext {
+    transform: translateX(2px);
+  }
 }
 
 .plain {
@@ -103,9 +131,15 @@
   font-weight: 500;
 }
 
-.pill:hover .plain,
 .pill:focus-visible .plain {
   color: var(--on-accent);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover .plain {
+    color: var(--on-accent);
+  }
 }
 
 .brand {
@@ -138,10 +172,17 @@
   transition: opacity var(--transition-slow), transform var(--transition-slow);
 }
 
-.brand:hover::before,
 .brand:focus-visible::before {
   opacity: 1;
   transform: scale(1.15);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .brand:hover::before {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
 .brandGold {
@@ -267,13 +308,23 @@
   transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
 }
 
-.primaryCta:hover,
 .primaryCta:focus-visible {
   border-color: var(--accent-bright);
   background: var(--accent-bright);
   color: var(--on-accent);
   box-shadow: var(--shadow-glow-soft);
   transform: translateY(-2px) translateZ(12px);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .primaryCta:hover {
+    border-color: var(--accent-bright);
+    background: var(--accent-bright);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-glow-soft);
+    transform: translateY(-2px) translateZ(12px);
+  }
 }
 
 .mission {
@@ -339,12 +390,21 @@
   transition: border-color var(--transition-slow), background var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
 }
 
-.transitionLink:hover,
 .transitionLink:focus-visible {
   border-color: rgba(var(--accent-bright-rgb), 0.5);
   background: linear-gradient(145deg, rgba(var(--surface-rgb), 0.86), rgba(var(--accent-rgb), 0.07));
   box-shadow: var(--shadow-lg), var(--shadow-glow-soft);
   transform: perspective(900px) translateY(-3px) translateZ(16px);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .transitionLink:hover {
+    border-color: rgba(var(--accent-bright-rgb), 0.5);
+    background: linear-gradient(145deg, rgba(var(--surface-rgb), 0.86), rgba(var(--accent-rgb), 0.07));
+    box-shadow: var(--shadow-lg), var(--shadow-glow-soft);
+    transform: perspective(900px) translateY(-3px) translateZ(16px);
+  }
 }
 
 .transitionBadgeRow {
@@ -425,12 +485,15 @@
   .brand::before,
   .primaryCta,
   .transitionLink { transition: none; transform: none; }
-  .pill:hover,
   .pill:focus-visible,
-  .primaryCta:hover,
   .primaryCta:focus-visible,
-  .transitionLink:hover,
   .transitionLink:focus-visible { transform: none; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pill:hover,
+      .primaryCta:hover,
+      .transitionLink:hover { transform: none; }
+  }
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -438,3 +501,12 @@
   .header,
   .transitionLink { backdrop-filter: none; background: var(--surface); }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.pill:active,
+.primaryCta:active,
+.transitionLink:active { transform: scale(0.97); transition-duration: 120ms; }

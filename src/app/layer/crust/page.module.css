@@ -73,11 +73,13 @@
   transition: color 320ms ease-out, border-color 320ms ease-out, background 320ms ease-out, transform 320ms ease-out;
 }
 
-.tab:hover {
-  color: var(--text-primary);
-  border-color: var(--border-mid);
-  background: rgba(var(--text-primary-rgb), 0.035);
-  transform: translateX(3px);
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover {
+    color: var(--text-primary);
+    border-color: var(--border-mid);
+    background: rgba(var(--text-primary-rgb), 0.035);
+    transform: translateX(3px);
+  }
 }
 
 .tab[aria-selected="true"] {
@@ -146,9 +148,11 @@
   pointer-events: none;
 }
 
-.panel:hover {
-  border-color: rgba(var(--accent-rgb), 0.32);
-  transform: translate3d(0, -3px, 14px);
+@media (hover: hover) and (pointer: fine) {
+  .panel:hover {
+    border-color: rgba(var(--accent-rgb), 0.32);
+    transform: translate3d(0, -3px, 14px);
+  }
 }
 
 .panelInner {
@@ -313,15 +317,19 @@
   background: transparent;
 }
 
-.primaryAction:hover,
-.secondaryAction:hover {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .primaryAction:hover,
+  .secondaryAction:hover {
+    transform: translateY(-2px);
+  }
 }
 
-.secondaryAction:hover {
-  color: var(--accent-bright);
-  border-color: var(--accent-bright);
-  background: rgba(var(--accent-rgb), 0.055);
+@media (hover: hover) and (pointer: fine) {
+  .secondaryAction:hover {
+    color: var(--accent-bright);
+    border-color: var(--accent-bright);
+    background: rgba(var(--accent-rgb), 0.055);
+  }
 }
 
 .rosterNote {
@@ -420,11 +428,13 @@
     transition: none;
   }
 
-  .tab:hover,
-  .panel:hover,
-  .primaryAction:hover,
-  .secondaryAction:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .tab:hover,
+      .panel:hover,
+      .primaryAction:hover,
+      .secondaryAction:hover {
+        transform: none;
+      }
   }
 }
 
@@ -435,3 +445,12 @@
     backdrop-filter: none;
   }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.tab:active,
+.primaryAction:active,
+.secondaryAction:active { transform: scale(0.97); transition-duration: 120ms; }

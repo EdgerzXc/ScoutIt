@@ -8,6 +8,7 @@ import { ReactionBadge } from "@/components/ui/ReactionButtons";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { supabase } from "@/lib/supabaseClient";
 import { getSession } from "@/lib/authClient";
+import { classifySavedItem, liveSlugSet } from "@/lib/wishlistLiveness";
 
 const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 
@@ -24,6 +25,26 @@ export default function WishlistPage() {
   const [accountSavedIds, setAccountSavedIds] = useState(() => new Set());
   const [merging, setMerging] = useState(false);
   const [mergeMessage, setMergeMessage] = useState(null);
+
+  // A-102: live catalogue slugs for removed-listing markers. Null until the
+  // fetch lands — and a failed fetch leaves it null, so nothing is ever
+  // marked removed from an unreadable catalogue (fail-open display, and the
+  // link stays rather than breaking on a network blip).
+  const [liveSlugs, setLiveSlugs] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/cms")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.properties)) {
+          setLiveSlugs(liveSlugSet(data.properties));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -184,7 +205,11 @@ export default function WishlistPage() {
               <section key={group.type} className="reaction-group">
                 <h2 className="group-label">{group.type}</h2>
                 <div className="cards-grid">
-                  {group.items.map((item, index) => (
+                  {group.items.map((item, index) => {
+                    // A-102: a slug absent from the loaded catalogue is a dead
+                    // listing — render a non-link marker, never a broken link.
+                    const removed = classifySavedItem(item, liveSlugs) === "removed";
+                    return (
                     <div
                       key={item.timestamp}
                       className={`board-card stagger-enter ${fadingOut.has(item.timestamp) ? "fading" : ""}`}
@@ -194,7 +219,12 @@ export default function WishlistPage() {
                         <ReactionBadge reactionType={item.reaction_type} />
                       </div>
                       <div className="card-body">
-                        {item.is_broker ? (
+                        {removed ? (
+                          <>
+                            <h3 className="card-title">{item.property_title}</h3>
+                            <span className="removed-marker">Listing removed</span>
+                          </>
+                        ) : item.is_broker ? (
                           <Link href={`/brokers/${encodeURIComponent(item.property_id)}`} style={{ textDecoration: "none" }}>
                             <h3 className="card-title">{item.property_title}</h3>
                           </Link>
@@ -225,7 +255,8 @@ export default function WishlistPage() {
                         </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}
@@ -479,6 +510,21 @@ export default function WishlistPage() {
 
         .card-title:hover {
           color: #E8AE3C;
+        }
+
+        /* A-102: dead-listing marker. Muted, non-interactive, unmistakable —
+           it must never read as a link or a badge of honor. */
+        .removed-marker {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: var(--text-muted);
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 2px 8px;
+          margin-top: 6px;
+          display: inline-block;
         }
 
         .card-meta {

@@ -81,48 +81,39 @@ yarn-error.log*
 # The file stays on disk for whoever wants it; it just is not repo content.
 /.codex-*.png
 
-# ScoutIt Second Brain — local strategy/scenario knowledge base. It will move
-# to its own private location; only already-tracked handoff files remain in git.
-# The tracked Section 15 shelf preserves those former root records in one place.
-/_SCOUTIT_BRAIN/*
-!/_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/
-!/_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/**
-
-# The execution-control system is deliberately tracked. Keep the rest of the
-# private Brain ignored; these narrow exceptions prevent the live queue and its
-# preserved migration inbox from disappearing between machines.
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/
-/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/*
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/00_START_HERE.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/VERIFICATION_CONTRACT.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/
-/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/*
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/00_MASTER_ACTION_PLAN.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/URGENT.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/ACTIVE.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/WAITING.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/A-023_BROKER_DOSSIER.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/MASTER_OWNER_ACTIONS.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/FUTURE.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/RULES.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/README.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/DONE/
-/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/DONE/*
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/DONE/README.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/DONE/2026-08.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/
-/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/*
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/README.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_LEGACY_MASTER_LEDGER.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_LEGACY_OWNER_LEDGER.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_LEGACY_ACTION_README.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_LEGACY_OPERATIONS_ROUTER.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_SAMPLE_INTEL_INDEXABILITY.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_DUPLICATE_CRON_SECRET.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_OWNER_MOBILE_CREATE_CONTROL.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-22_DESKTOP_PRICED_PROPERTY_CONTACT.md
-!/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-08-27_FULL_STACK_GAP_AUDIT.md
+# O-021 decided 2026-09-09 (option 2): the Brain is tracked by default.
+# Only genuinely local things stay ignored: the personal daily log, vendored
+# external tools, tool state, owner-supplied external inputs, and the two
+# September audits below. Those two contain a working step-by-step
+# reproduction of U-022 -- fine in a private repo, not in a public one -- and
+# stay ignored until O-019 lands, per the owner's standing call. Secrets scan
+# 2026-09-09 found no keys/tokens/private keys anywhere in the Brain, but
+# staging/committing remains a separate owner decision: this edit only makes
+# files trackable, it tracks nothing.
+/_SCOUTIT_BRAIN/00_DAILY_LOG/
+/_SCOUTIT_BRAIN/12_EXTERNAL_TOOLS/
+/_SCOUTIT_BRAIN/.impeccable/
+/_SCOUTIT_BRAIN/13_EXTERNAL_INPUTS/
+/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-09-01_FULL_STACK_GAP_AUDIT.md
+/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-09-03_FULL_STACK_GAP_AUDIT.md
 
 # FUSE artifacts left by in-place edits over a mounted filesystem.
 # Not source; they are stale open handles to replaced files.
 .fuse_hidden*
+
+# A-089, 2026-09-09 triage. Lab clutter at the repo root is local experiment
+# material, not review content: manifesto cinematic lookdev, one-off transition
+# runner, dev-server log. Ignored with reason recorded here; files stay on disk.
+# Migrations 20260831*/20260904*/20260905* + DONE/2026-09 + A-083/A-085 plans
+# are trackable (not ignored) — content unchanged. Staging/committing them is a
+# separate owner decision; this edit only makes lab noise ignorable.
+# CRLF: .gitattributes already enforces LF (* text=auto eol=lf). The 60+ file
+# warnings are expected normalization noise until the owner approves the
+# one-time `git add --renormalize .` commit named in .gitattributes.
+/manifesto-lab/
+/apply-transitions.mjs
+/lab-server.log
+# Tool-cache churn is not review content. The already-tracked
+# mission-control/.impeccable/hook.cache.json keeps showing modified until the
+# owner approves `git rm --cached` for it; ignore future cache copies only.
+**/.impeccable/hook.cache.json

@@ -21,7 +21,7 @@ async function publicProfileMetadata(username) {
 
   if (error || !profile) return null;
 
-  const { data: pilotParticipant } = await supabaseAdmin
+  const { data: pilotParticipant, error: pilotError } = await supabaseAdmin
     .from("pilot_participants")
     .select("user_id")
     .eq("user_id", profile.id)
@@ -30,7 +30,13 @@ async function publicProfileMetadata(username) {
 
   return {
     profile,
-    isPilotParticipant: Boolean(pilotParticipant?.user_id),
+    // A-091: a failed pilot read — including the table not existing — must
+    // never resolve to "not a participant", or an invited tester gets indexed
+    // as an ordinary real person. Fail closed on the disclosure axis: an
+    // unknown pilot state excludes exactly like a confirmed one. A transient
+    // outage may briefly hide real profiles from search; that is a support
+    // ticket, while the alternative is a privacy incident Google caches.
+    isPilotParticipant: Boolean(pilotParticipant?.user_id) || Boolean(pilotError),
   };
 }
 

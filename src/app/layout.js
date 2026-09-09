@@ -82,7 +82,15 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    // The no-flash scripts below add `lite-mode` / `interactive-mode` /
+    // `simple-mode` to documentElement.classList before React hydrates, so the
+    // client <html> legitimately differs from the server's. This suppresses the
+    // warning for THIS element's attributes only.
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Lite Mode no-flash: apply the class before paint so low-end phones
             never render the heavy cosmic layers. Defaults on for users who ask
@@ -91,6 +99,19 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html:
               "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on;if(v===null){var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;var mem=navigator.deviceMemory||8;var cores=navigator.hardwareConcurrency||8;var conn=(navigator.connection||{}).effectiveType||'4g';var weakPhone=window.matchMedia('(pointer: coarse)').matches&&(mem<=4||cores<=4||conn==='2g'||conn==='slow-2g'||conn==='3g');on=reduced||weakPhone;}else{on=(v==='1');}if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
+          }}
+        />
+
+        {/* A-083 phase 0. Simple Mode's no-flash class, beside Lite's and for
+            the same reason: reloading in Simple must never paint Pro first.
+            Unlike Lite there is NO device heuristic and no reduced-motion
+            inference — Simple is a reading preference, so it is off unless the
+            person turned it on. A user who never opens the toggle sees today's
+            product, unchanged, forever. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if(localStorage.getItem('scoutit_simple_mode')==='1')document.documentElement.classList.add('simple-mode');}catch(e){}})();",
           }}
         />
       </head>

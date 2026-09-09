@@ -801,7 +801,7 @@ export default function MasterFlowGraph({ onNavigate }) {
               className="bg-black/70 border border-white/25 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/55 focus:outline-none focus:border-[#E8AE3C] w-44 transition font-medium"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2 text-white/60 hover:text-white text-xs font-bold">×</button>
+              <button aria-label="Clear the search" onClick={() => setSearchQuery("")} className="absolute right-2 text-white/60 hover:text-white text-xs font-bold">×</button>
             )}
           </div>
 
@@ -876,7 +876,7 @@ export default function MasterFlowGraph({ onNavigate }) {
               Trace
             </button>
             {activeTracePath && (
-              <button onClick={() => setActiveTracePath(null)} className="p-1 text-white/60 hover:text-white text-xs">
+              <button aria-label="Clear the traced path" onClick={() => setActiveTracePath(null)} className="p-1 text-white/60 hover:text-white text-xs">
                 <X size={13} />
               </button>
             )}
@@ -1076,7 +1076,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                     <span>{STATUS_CONFIG[selectedNode.implementationStatus]?.icon}</span>
                     <span>{STATUS_CONFIG[selectedNode.implementationStatus]?.label}</span>
                   </span>
-                  <button onClick={() => setIsInspectorOpen(false)} className="text-white/60 hover:text-white p-1">
+                  <button aria-label="Close the inspector" onClick={() => setIsInspectorOpen(false)} className="text-white/60 hover:text-white p-1">
                     <X size={15} />
                   </button>
                 </div>

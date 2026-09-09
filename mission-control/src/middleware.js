@@ -42,7 +42,7 @@ export async function middleware(request) {
 
   const isAuthPage = request.nextUrl.pathname === "/" || request.nextUrl.pathname.startsWith("/auth");
   // The scan-worker cron route authenticates itself with CRON_SECRET (no
-  // browser session exists on a cron call) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â let it through to its own check.
+  // browser session exists on a cron call) — let it through to its own check.
   const isCronRoute = request.nextUrl.pathname === "/api/scan/process";
 
   if (!user && !isAuthPage && !isCronRoute) {

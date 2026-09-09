@@ -22,12 +22,37 @@
   .group-label { font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--border-solid); }
   .cards-grid { display: flex; flex-direction: column; gap: 8px; }
   .board-card { display: flex; align-items: center; justify-content: space-between; background: var(--surface2); border: 1px solid var(--border); padding: 16px 20px; transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; }
+  @media (hover: hover) and (pointer: fine) {
   .board-card:hover { transform: translateY(-3px); border-color: rgba(var(--accent-rgb), 0.3); box-shadow: var(--shadow-md), var(--shadow-glow-soft); }
+}
   .badge-corner { position: absolute; top: -8px; right: -8px; z-index: 10; }
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--text-primary); margin: 0 0 4px; transition: color 0.2s ease; }
+  @media (hover: hover) and (pointer: fine) {
   .card-title:hover { color: var(--accent); }
+}
   .card-meta { font-family: system-ui, sans-serif; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
   .meta-dot { color: var(--text-muted); }
   .card-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .reaction-badge { font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); border: 1px solid rgba(var(--accent-rgb), 0.3); padding: 4px 10px; white-space: nowrap; }
+  /* A-102: dead-listing marker — muted, non-interactive, unmistakable. */
+  .removed-marker { font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); border: 1px solid var(--border); border-radius: 2px; padding: 2px 8px; margin-top: 6px; display: inline-block; }
+
+/* A-074. Motion here had no reduced-motion answer. The rule the rest of the
+   codebase follows: keep colour and opacity, which carry meaning, and drop
+   movement and duration, which do not. 23 of 29 stylesheets already did this;
+   these were the omissions, not a missing standard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [class*="shared-"]:hover,
+  [class*="shared-"]:active {
+    transform: none !important;
+  }
+}

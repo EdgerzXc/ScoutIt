@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
+import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import {
   PARTY_REASON_LABELS,
   mirrorStatusFor,
@@ -16,13 +16,14 @@ const VALID_PRIORITIES = ["low", "normal", "high", "critical"];
 
 /** Append one row to the mediation thread. Internal helper. */
 async function addEvent(admin, { disputeId, staff, eventType, body }) {
-  await admin.from("dispute_events").insert({
+  const { error } = await admin.from("dispute_events").insert({
     dispute_id: disputeId,
     author_id: staff.id,
     author_email: staff.email,
     event_type: eventType,
     body,
   });
+  if (error) throw new Error(`Could not record dispute event: ${error.message}`);
 }
 
 /**
@@ -109,7 +110,7 @@ export async function openDispute(formData) {
     body: `Opened: ${title}`,
   });
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "dispute.open",
     targetTable: "disputes",
@@ -204,7 +205,7 @@ export async function adoptPartyDispute(formData) {
       `The conversation stays protected from deletion (${synced.status}).`,
   });
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "dispute.adopt",
     targetTable: "deal_disputes",
@@ -242,7 +243,7 @@ export async function addDisputeNote(formData) {
     .update({ updated_at: new Date().toISOString() })
     .eq("id", disputeId);
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "dispute.note",
     targetTable: "disputes",
@@ -290,7 +291,7 @@ export async function claimDispute(formData) {
       (synced ? ` The party's filing is now ${synced.status} and still protected.` : ""),
   });
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "dispute.claim",
     targetTable: "disputes",
@@ -353,7 +354,7 @@ export async function closeDispute(formData) {
         : ""),
   });
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: `dispute.${outcome}`,
     targetTable: "disputes",

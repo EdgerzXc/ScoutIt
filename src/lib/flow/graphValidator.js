@@ -850,7 +850,11 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
   // Audit every repository-backed evidence item, not only nodes whose entire
   // evidence collection is missing. A mixed valid/stale evidence list must not
   // pass silently.
-  const repositoryEvidenceKinds = new Set(['CODE', 'COMPONENT', 'API', 'TEST', 'SCRIPT']);
+  // A-097: ROUTE and SCOUTIT_BRAIN evidence paths are plain repo-relative file
+  // paths (proven by sampling masterFlowGraph.json), so they are checked too —
+  // previously a renamed page or a moved brain note went stale silently here.
+  // DATABASE is deliberately excluded: its paths are table names, not files.
+  const repositoryEvidenceKinds = new Set(['CODE', 'COMPONENT', 'API', 'TEST', 'SCRIPT', 'ROUTE', 'SCOUTIT_BRAIN']);
   const evidenceEntities = [
     ...nodes.map(node => ({ entityType: 'NODE', entityId: node.id, evidence: node.evidence || [] })),
     ...edges.map(edge => ({ entityType: 'EDGE', entityId: edge.id, evidence: edge.evidence || [] }))
@@ -890,11 +894,16 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     failingItems: [...new Set([...nodes.filter(n => n.implementationStatus !== 'VERIFIED').map(n => n.id), ...ghostNodes])]
   };
 
-  const routeCoverage = {
+  // A-097: this was reported as bare "routeCoverage: 100%" over 15 hand-picked
+  // routes while the repo holds ~160, so the headline read as whole-repo
+  // coverage. Renamed to what it measures; the denominator is a curated list
+  // by design, and the whole-repo discovered count ships alongside it in
+  // repositoryFidelityReport.totalCodebaseRoutesDiscovered.
+  const canonicalRouteCoverage = {
     numerator: canonicalProductRoutes.length - unmappedRoutes.length,
     denominator: canonicalProductRoutes.length,
     percentage: `${Math.round(((canonicalProductRoutes.length - unmappedRoutes.length) / canonicalProductRoutes.length) * 100)}%`,
-    formula: 'mapped canonical product routes / total canonical product routes',
+    formula: 'mapped canonical product routes / total canonical product routes (curated list — NOT whole-repo coverage)',
     failingItems: unmappedRoutes
   };
 
@@ -956,7 +965,7 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
 
   const rawWeightedScore = (
     (parseInt(graphEvidence.percentage) * 0.25) +
-    (parseInt(routeCoverage.percentage) * 0.15) +
+    (parseInt(canonicalRouteCoverage.percentage) * 0.15) +
     (parseInt(ghostGraph.percentage) * 0.15) +
     (parseInt(workflowIntegrity.percentage) * 0.15) +
     (parseInt(guideIntegrity.percentage) * 0.15) +
@@ -967,7 +976,7 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
 
   const overallTrustScore = {
     percentage: `${finalScore}%`,
-    formula: 'weighted sum: (evidence * 0.25) + (route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties',
+    formula: 'weighted sum: (evidence * 0.25) + (canonical-route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties',
     penalties: {
       placeholderPredicates: placeholderPredicateCount,
       unmappedRoutes: unmappedRoutes.length,
@@ -1016,7 +1025,7 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     scores: {
       schemaValidityScore: schemaValidity,
       graphEvidenceScore: graphEvidence,
-      routeCoverageScore: routeCoverage,
+      canonicalRouteCoverageScore: canonicalRouteCoverage,
       workflowIntegrityScore: workflowIntegrity,
       guideIntegrityScore: guideIntegrity,
       ragSafetyScore: ragSafety,

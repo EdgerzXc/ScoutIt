@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { blockHash, unblockHash } from "./actions";
 import { ShieldAlert, ShieldBan, ShieldCheck, Activity, Radar, DatabaseZap } from "lucide-react";
 import SecuritySpatialMap from "@/components/security/SecuritySpatialMap";
 import { getDatabaseSecurityReadiness } from "@/lib/databaseSecurityReadiness";
@@ -75,10 +74,10 @@ export default async function SecurityCenterPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <Radar className="w-5 h-5 text-[#E8AE3C]" />
-            Security Center
+            Traffic &amp; Access Log
           </h1>
           <p className="text-[12px] uppercase tracking-wide text-white/70 mt-1">
-            Masked-IP anomaly guard · no raw IPs are ever stored
+            Masked-session activity · no raw IPs are ever stored
           </p>
         </div>
         <span className="text-xs text-white/70">
@@ -105,10 +104,23 @@ export default async function SecurityCenterPage() {
         </>}
       </section>
 
+      {/* A-080, owner decision 2026-09-04 — say what this page is, before any number on it.
+          The previous copy called this a Security Center and told staff "the ban list below
+          already works". Neither was true: the log is product telemetry, and the middleware
+          guard that would have read the ban list was deleted because it had never been wired.
+          A console that overstates its own reach is the defect A-070 closed elsewhere. */}
+      <div className="text-xs leading-5 text-white/80 bg-warn/10 border border-warn/25 rounded-xl p-4">
+        <strong className="text-warn">This page reports traffic. It does not block anything.</strong>{" "}
+        Rows come from the product telemetry endpoint, so most of them are ordinary anonymous
+        visitors, and &ldquo;flagged&rdquo; here means a product event was recorded — not that an
+        attack was detected. <strong>Blocking an entry has no effect on the public site:</strong> the
+        middleware guard that would have enforced it was never wired up and was removed on
+        2026-09-04. Treat this as a usage log until a real security feed exists.
+      </div>
+
       {(flagged.error || velocity.error) && (
         <div className="text-xs text-white/70 bg-white/5 border border-white/10 rounded-xl p-4">
-          Traffic log unavailable ({flagged.error || velocity.error}). The log fills once the
-          Phase-2 middleware guard on the public site is enabled — the ban list below already works.
+          Traffic log unavailable ({flagged.error || velocity.error}).
         </div>
       )}
 
@@ -161,30 +173,15 @@ export default async function SecurityCenterPage() {
           Blocked Access
         </h2>
 
-        {/* Manual block */}
-        <form action={blockHash} className="flex flex-wrap items-end gap-2 mb-5 pb-5 border-b border-white/5">
-          <label className="text-xs text-white/70 flex-1 min-w-[220px]">
-            Masked IP hash
-            <input
-              name="maskedIp"
-              required
-              placeholder="ip_anon_…"
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-white/70"
-            />
-          </label>
-          <label className="text-xs text-white/70 flex-1 min-w-[220px]">
-            Reason (required)
-            <input
-              name="reason"
-              required
-              placeholder="e.g. scraper hammering /api/cms"
-              className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
-            />
-          </label>
-          <button className="px-4 py-2 rounded-lg text-sm font-medium bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors">
-            Block
-          </button>
-        </form>
+        {/* A-105, 2026-09-09 — the manual Block form is retired with the
+            A-080 enforcement retirement. This section is a read-only log now:
+            adding rows to a list nothing reads invites exactly the punitive
+            rows below to recur. Do NOT re-add a writer here — re-wiring
+            enforcement is a deliberate owner decision, not a form. */}
+        {/* LIVE-DATA BOUNDARY: `blocked_access` still holds the two rows that
+            banned one visitor for abandoning an inquiry modal. Deleting or
+            annotating them is a live-database write with no agent gate — it
+            needs the owner through the O-004 lane, not a commit. */}
 
         {blocked.data.length === 0 ? (
           <p className="text-xs text-white/70">No active blocks.</p>
@@ -197,14 +194,10 @@ export default async function SecurityCenterPage() {
                 <span className="text-xs text-white/70 truncate flex-1">
                   {b.reason} · {new Date(b.created_at).toLocaleString()}
                 </span>
-                <form action={unblockHash}>
-                  <input type="hidden" name="blockId" value={b.id} />
-                  <input type="hidden" name="maskedIp" value={b.value} />
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 transition-colors">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    Unblock
-                  </button>
-                </form>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-white/5 border border-white/10 text-white/70">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Read-only
+                </span>
               </div>
             ))}
           </div>
@@ -233,13 +226,9 @@ function TrafficRow({ row, isBlocked }) {
           blocked
         </span>
       ) : (
-        <form action={blockHash}>
-          <input type="hidden" name="maskedIp" value={row.masked_ip} />
-          <input type="hidden" name="reason" value={row.flag_reason || `High velocity: ${row.request_count} requests on ${row.route_accessed}`} />
-          <button className="text-[12px] uppercase tracking-wide text-red-400/80 hover:text-red-400 border border-red-400/20 hover:bg-red-400/10 rounded-full px-2 py-0.5 transition-colors">
-            block
-          </button>
-        </form>
+        <span className="text-[12px] uppercase tracking-wide text-white/70 border border-white/10 rounded-full px-2 py-0.5">
+          logged
+        </span>
       )}
     </div>
   );

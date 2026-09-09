@@ -68,8 +68,10 @@
   transition: filter var(--transition-slow);
 }
 
-.detail-avatar:hover {
-  filter: grayscale(0%) contrast(1.15);
+@media (hover: hover) and (pointer: fine) {
+  .detail-avatar:hover {
+    filter: grayscale(0%) contrast(1.15);
+  }
 }
 
 .detail-metrics-grid {
@@ -249,12 +251,14 @@
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
 }
 
-.curation-card:hover {
-  border-color: var(--accent-border);
-  transform: translateY(-4px);
+@media (hover: hover) and (pointer: fine) {
+  .curation-card:hover {
+    border-color: var(--accent-border);
+    transform: translateY(-4px);
+  }
 }
 
 .curation-card-img {
@@ -303,4 +307,25 @@
   color: var(--text-muted);
   font-size: 13px;
   font-style: italic;
+}
+
+/* A-074. Motion here had no reduced-motion answer. The rule the rest of the
+   codebase follows: keep colour and opacity, which carry meaning, and drop
+   movement and duration, which do not. 23 of 29 stylesheets already did this;
+   these were the omissions, not a missing standard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Movement is removed; colour and opacity transitions survive above. */
+  [class*="detail-"]:hover,
+  [class*="detail-"]:active {
+    transform: none !important;
+  }
 }

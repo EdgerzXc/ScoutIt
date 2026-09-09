@@ -38,7 +38,6 @@ export async function POST(request) {
     }
 
     // 2. Insert into Airtable
-    console.log(`[ADMIN API] Syncing ${submissionId} to Airtable...`);
     const airtableRecord = await insertProperty(apiKey, baseId, submission);
 
     // 3. Update Supabase status to 'approved'

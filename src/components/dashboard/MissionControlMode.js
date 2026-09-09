@@ -1143,7 +1143,11 @@ export default function MissionControlMode() {
                   </div>
                   <div className="relative">
                     <input type="text" placeholder="Portfolio Q&A unlocks when the Concierge goes live..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition" disabled />
-                    <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-text-secondary hover:text-white" disabled>
+                    <button
+                      aria-label="Open — not available yet"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-text-secondary hover:text-white"
+                      disabled
+                    >
                       <ArrowRight size={16} />
                     </button>
                   </div>
@@ -1232,11 +1236,13 @@ export default function MissionControlMode() {
                         />
                       </div>
 
-                      <div className="pt-4 border-t border-white/10 flex justify-end">
-                        <button 
-                          onClick={() => addToast("Organization profile updated", "✅")}
-                          className="px-6 py-2 bg-gold-accent text-black rounded-lg text-sm font-medium hover:bg-gold-accent-bright transition">
-                          Save Changes
+                      <div className="pt-4 border-t border-white/10 flex justify-end items-center gap-3">
+                        <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">Org saving opens in Phase 2</span>
+                        <button
+                          disabled
+                          title="Organization saving opens in Phase 2 — edits stay local today."
+                          className="px-6 py-2 bg-gold-accent text-black rounded-lg text-sm font-medium opacity-60 cursor-not-allowed">
+                          Save Changes · Phase 2
                         </button>
                       </div>
                     </div>

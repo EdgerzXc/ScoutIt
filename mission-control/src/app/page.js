@@ -137,7 +137,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={status === "loading" || !email}
-              className="w-full bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7C64E]"
             >
               {status === "loading" ? (
                 "Sending..."
@@ -160,7 +160,7 @@ function LoginForm() {
                   type="button"
                   onClick={handleGoogle}
                   disabled={status === "loading"}
-                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7C64E]"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="#EA4335" d="M12 5.04c1.61 0 3.05.55 4.19 1.64l3.12-3.12C17.4 1.77 14.9.75 12 .75 7.61.75 3.82 3.27 1.98 6.94l3.66 2.84C6.5 7.09 9.02 5.04 12 5.04z" />

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { isQuestItPath, shouldBlockQuestIt } from '@/lib/questItGate';
+import { isSensitivePath, rateLimitTier } from '@/lib/sensitiveRoutes';
 
 // ── Rate limiting (B4) ──────────────────────────────────────────────────────
 // Sensitive routes (auth, uploads, AI) FAIL CLOSED when the limiter is
@@ -38,24 +39,25 @@ function initLimiters() {
   }
 }
 
-// Routes where an unmetered window is worse than a brief outage.
-function isSensitivePath(path) {
-  return (
-    path.startsWith('/api/auth/') ||
-    path.startsWith('/api/ai/') ||
-    path.startsWith('/api/storage/')
-  );
-}
-
-// ── Masked-IP anomaly guard (A7 Phase 2) ────────────────────────────────────
-// Privacy-preserving: the raw IP is hashed with a server-side salt in-memory
-// and immediately discarded — only `ip_anon_<sha256>` ever leaves this file.
-// Counting happens in a service-role-locked RPC (log_masked_access); bans are
-// read from blocked_access with a 60s in-isolate cache. The guard FAILS OPEN:
-// any error here must never take down the site.
-
-const BAN_CACHE_TTL_MS = 60 * 1000;
-let banCache = { set: new Set(), fetchedAt: 0 };
+// ── The masked-IP anomaly guard was RETIRED here on 2026-09-04 (A-080) ──────
+// Owner decision. This file used to define `maskIp`, `getBanSet`,
+// `recordAccess` and their caches, written for "A7 Phase 2" — and never wired
+// into `proxy()`. Nothing called them, so `blocked_access` had no reader and
+// blocking an IP in Mission Control did nothing at all.
+//
+// Finishing it would have been worse than deleting it. The table the console
+// ranks on, `security_access_logs`, is fed by `/api/telemetry/device`: 1,755 of
+// its 1,820 rows are anonymous visitor analytics, so its "velocity" ordering is
+// page views and every flagged anomaly is one product event,
+// `abandoned_inquiry_modal`. The two live `blocked_access` rows are the same
+// visitor two seconds apart under that reason — someone who gave up on a form.
+// Switching enforcement on would have started banning real visitors for
+// hesitating.
+//
+// Do not reintroduce a ban lookup here without first giving the log a real
+// security feed. `src/lib/__tests__/proxyBanGuardRetired.test.js` fails if this
+// file regains a `blocked_access` read or a `log_masked_access` write.
+// `/api/contact` has its own unrelated `maskIp` and is untouched.
 
 // ── Feature flags (A4) ──────────────────────────────────────────────────────
 // 30s edge-cached read of feature_flags so Mission Control toggles propagate
@@ -87,20 +89,6 @@ async function getFlags() {
   return flagCache.flags;
 }
 
-async function sha256Hex(text) {
-  const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-async function maskIp(ip) {
-  const salt = process.env.IP_SALT;
-  if (!salt) return null; // guard disabled until IP_SALT is configured
-  return 'ip_anon_' + (await sha256Hex(ip + salt));
-}
-
 function supabaseHeaders() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   return {
@@ -108,42 +96,6 @@ function supabaseHeaders() {
     Authorization: `Bearer ${key}`,
     'Content-Type': 'application/json',
   };
-}
-
-async function getBanSet() {
-  const now = Date.now();
-  if (now - banCache.fetchedAt < BAN_CACHE_TTL_MS) return banCache.set;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return banCache.set;
-
-  try {
-    const res = await fetch(
-      `${url}/rest/v1/blocked_access?type=eq.ip&select=value&limit=1000`,
-      { headers: supabaseHeaders() }
-    );
-    if (res.ok) {
-      const rows = await res.json();
-      banCache = { set: new Set(rows.map((r) => r.value)), fetchedAt: now };
-    }
-  } catch {
-    // fail open — keep the stale cache
-  }
-  return banCache.set;
-}
-
-function recordAccess(maskedIp, path, event) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return;
-  // Fire-and-forget via waitUntil so logging never adds request latency.
-  const p = fetch(`${url}/rest/v1/rpc/log_masked_access`, {
-    method: 'POST',
-    headers: supabaseHeaders(),
-    body: JSON.stringify({ p_masked_ip: maskedIp, p_route: path }),
-  }).catch(() => {});
-  if (event?.waitUntil) event.waitUntil(p);
 }
 
 export async function proxy(request, event) {
@@ -170,7 +122,10 @@ export async function proxy(request, event) {
     // QuestIT is parked behind an independent fail-closed gate. Pre-launch
     // free mode never overrides this: missing/false blocks, explicit true opens.
     if (shouldBlockQuestIt(path, flags)) {
-      return NextResponse.json({ error: 'AI search is not enabled right now.' }, { status: 503 });
+      // A-099: this gate fronts the whole parked QuestIT surface — AI search
+      // AND the bounty board provider dashboards read — so the message names
+      // both instead of reporting a bounty outage as an AI-search outage.
+      return NextResponse.json({ error: 'QuestIT (AI search and bounties) is not enabled right now.' }, { status: 503 });
     }
 
     // Feature gates — honored only once pre-launch free mode ends, so the
@@ -183,7 +138,7 @@ export async function proxy(request, event) {
     }
   } catch (err) {
     if (questItPath) {
-      return NextResponse.json({ error: 'AI search is not enabled right now.' }, { status: 503 });
+      return NextResponse.json({ error: 'QuestIT (AI search and bounties) is not enabled right now.' }, { status: 503 });
     }
     console.error('[FeatureFlags] Error (failing open):', err?.message);
   }
@@ -212,10 +167,11 @@ export async function proxy(request, event) {
     return NextResponse.next();
   }
 
+  const tier = rateLimitTier(path);
   let limiterToUse = standardLimiter;
-  if (path.startsWith('/api/auth/')) {
-    limiterToUse = strictLimiter;
-  } else if (path.startsWith('/api/ai/')) {
+  if (tier === 'strict') {
+    limiterToUse = strictLimiter || standardLimiter;
+  } else if (tier === 'ai') {
     limiterToUse = aiLimiter || standardLimiter;
   }
 

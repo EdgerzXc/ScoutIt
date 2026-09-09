@@ -104,7 +104,6 @@ export default function SpatialCanvas({
   routeDestination = "",
   routeDestCoords = null,
   routeLabel = "",
-  mapboxToken = "",
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -648,7 +647,6 @@ export default function SpatialCanvas({
           routeDestination,
           routeDestCoords,
           routeLabel,
-          mapboxToken,
           onQuakesLoaded: setRecentQuakes,
           onFiresLoaded: setFireCount,
         });
@@ -708,7 +706,6 @@ export default function SpatialCanvas({
     routeDestination,
     routeDestCoords,
     routeLabel,
-    mapboxToken,
   });
 
   useEffect(() => {
@@ -719,9 +716,8 @@ export default function SpatialCanvas({
       routeDestination,
       routeDestCoords,
       routeLabel,
-      mapboxToken,
     };
-  }, [vicinityData, lifestylePois, nearbyListings, routeDestination, routeDestCoords, routeLabel, mapboxToken]);
+  }, [vicinityData, lifestylePois, nearbyListings, routeDestination, routeDestCoords, routeLabel]);
 
   // Handle switching lenses smoothly without moving camera
   const handleSwitchLens = useCallback(

@@ -84,7 +84,9 @@ export default function IntelPage() {
         const baseArticles = [...getArticles()];
         airtableIntel.forEach(item => {
           if (!baseArticles.some(x => x.slug === item.slug)) {
-            let category = item.category || "Residential";
+            // A-106: honest fallback is "General" (the fetchIntel vocabulary),
+            // never an invented vertical.
+            let category = item.category || "General";
             if (category.toLowerCase() === "hospitality") category = "Hospitality";
             if (category.toLowerCase() === "str") category = "STR";
             if (category.toLowerCase() === "culinary" || category.toLowerCase() === "restaurants") category = "Culinary";
@@ -94,7 +96,8 @@ export default function IntelPage() {
               slug: item.slug || item.id,
               title: item.title,
               category,
-              date: item.date || "Just Now",
+              // A-106: absent renders absent.
+              date: item.date || "",
               excerpt: item.excerpt || "",
               image: item.image || "",
               sourceName: item.sourceName || item.source || "",
@@ -807,7 +810,7 @@ export default function IntelPage() {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          transition: all var(--transition-fast);
+          transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
           flex-grow: 1;
         }
 
@@ -996,7 +999,7 @@ export default function IntelPage() {
           padding: 8px 18px;
           cursor: pointer;
           border-radius: 4px;
-          transition: all var(--transition-fast);
+          transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
         }
 
         .filter-btn:hover {
@@ -1308,7 +1311,7 @@ export default function IntelPage() {
           justify-content: center;
           cursor: pointer;
           border-radius: 2px;
-          transition: all 0.2s ease;
+          transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
           z-index: 2;
         }
         .side-panel-close:active {
@@ -1399,7 +1402,7 @@ export default function IntelPage() {
           letter-spacing: 0.08em;
           text-decoration: none;
           border-radius: 4px;
-          transition: all 0.2s ease;
+          transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
           align-self: flex-start;
         }
         .side-panel-cta:active {

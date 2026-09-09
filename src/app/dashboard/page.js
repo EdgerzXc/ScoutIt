@@ -199,7 +199,17 @@ function DashboardInner() {
       case "provider": return <ProviderMode type={user.providerType} />;
       case "operator": return <OperatorMode />;
       case "mc_enterprise": return <MissionControlMode />;
-      default: return <div>Unknown Mode</div>;
+      // A-096: an unrecognised mode used to render bare "Unknown Mode" text
+      // with no heading, no branding, and no way back. Branded, headed, and
+      // with a door (the doorway principle) — the mode is still unknown.
+      default: return (
+        <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+          <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[12px] mb-2 block">Workspace</span>
+          <h1 className="font-headline-editorial text-3xl text-on-surface mb-3">Workspace unavailable</h1>
+          <p className="text-text-secondary text-sm max-w-md mb-6">Your account role did not match a known workspace. Nothing is lost — continue exploring, or contact support if this keeps happening.</p>
+          <Link href="/discover" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent hover:underline">Continue exploring →</Link>
+        </div>
+      );
     }
   };
 
@@ -210,7 +220,11 @@ function DashboardInner() {
     exploring: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
     provider: { icon: "🖼️", label: "Portfolio" },
   };
-  const primaryAction = PRIMARY_ACTIONS[mode] || { icon: "●", label: "" };
+  // A-096: operator and enterprise have no entry, and no mode component of
+  // theirs hears the primary-action event — so the old `{icon:"●",label:""}`
+  // fallback rendered a dead button whose aria-label="" actively REMOVED its
+  // accessible name. No entry now means no button rather than a dead one.
+  const primaryAction = PRIMARY_ACTIONS[mode] || null;
 
   // Mode components listen for this to run their own primary action
   // (owner → open wizard, buyer → focus search, broker → jump to feed)
@@ -429,15 +443,18 @@ function DashboardInner() {
       <Toasts />
       <ConciergeAI />
 
-      {/* Primary Action FAB (Floating above global BottomNav) */}
+      {/* Primary Action FAB (Floating above global BottomNav). Rendered only
+          for modes that define one — see PRIMARY_ACTIONS above. */}
+      {primaryAction && (
       <button
         className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(232,174,60,0.4)] hover:opacity-90 transition border-2 border-surface-alt"
         onClick={firePrimaryAction}
         aria-label={primaryAction.label}
       >
         <span className="text-xl leading-none font-bold">{primaryAction.icon}</span>
-        {primaryAction.label && <span className="text-[12px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>}
+        <span className="text-[12px] font-working-title font-bold mt-0.5 tracking-tighter uppercase leading-none">{primaryAction.label}</span>
       </button>
+      )}
 
       {/* Mobile Profile Menu Slide-out */}
       {showMobileProfileMenu && (

@@ -64,9 +64,51 @@ function deepIntelCategoryFor(spaceCategory) {
 // publishing it invited exactly that reading.
 
 // ── Base fetch with auth and ISR cache ──────────────────────────
-async function fetchTable(tableId, apiKey, baseId, params = "") {
-  const url = `${BASE_URL}/${baseId}/${encodeURIComponent(tableId)}${params ? `?${params}` : ""}`;
-  
+// ── A-079: Airtable pages at 100 records ─────────────────────────────────
+// The REST API returns at most 100 records per request and hands back an
+// `offset` token when there are more. `fetchTable` used to issue one request
+// and return `data.records`, so every bulk fetch silently stopped at 100.
+// Against the 200-listing pre-launch north star the public catalogue would
+// have served half the inventory — and a truncated list looks exactly like a
+// correct short list, so nothing would have reported it.
+//
+// The caps exist because this loop runs inside the CMS bundle fill, which
+// fans out to four of these in parallel plus Mapbox geocoding, all inside
+// Vercel's ~10s function ceiling. A base that kept returning an offset — or a
+// token that never advanced — must cost a bounded number of requests, not an
+// unbounded one. 20 pages is 2,000 records: ten times the north star, and far
+// below anything that could exhaust the per-base rate limit in one fill.
+export const AIRTABLE_MAX_PAGES = 20;
+export const AIRTABLE_MAX_RECORDS = 2000;
+
+async function fetchTable(tableId, apiKey, baseId, params = "", options = {}) {
+  const records = [];
+  let offset;
+
+  for (let page = 0; page < AIRTABLE_MAX_PAGES; page += 1) {
+    const query = new URLSearchParams(params);
+    if (offset) query.set("offset", offset);
+    const suffix = query.toString();
+    const pageRecords = await fetchTablePage(
+      `${BASE_URL}/${baseId}/${encodeURIComponent(tableId)}${suffix ? `?${suffix}` : ""}`,
+      apiKey,
+      tableId,
+      options
+    );
+
+    records.push(...pageRecords.records);
+    offset = pageRecords.offset;
+
+    // Stop on the last page, and stop rather than truncate mid-page if the
+    // total cap is reached — a caller gets everything up to the cap, never a
+    // silently half-filled page.
+    if (!offset || records.length >= AIRTABLE_MAX_RECORDS) break;
+  }
+
+  return records;
+}
+
+async function fetchTablePage(url, apiKey, tableId, options = {}) {
   const fetchOptions = {
     headers: { Authorization: `Bearer ${apiKey}` },
   };
@@ -84,10 +126,22 @@ async function fetchTable(tableId, apiKey, baseId, params = "") {
   // GET, so retries are safe. Budget is deliberately tight: a CMS bundle fans
   // out to 4 of these in parallel plus Mapbox geocoding, all inside Vercel's
   // ~10s function ceiling.
+  // A-116 — the budget belongs to the CALLER, not to this function.
+  //
+  // 5000/2500 is sized for the CMS bundle, which fans out to four of these in
+  // parallel plus Mapbox geocoding inside Vercel's ~10s page ceiling. The
+  // nightly `check-stale-listings` cron makes ONE call and has no such
+  // ceiling, but inherited the tight budget anyway — so a merely slow Airtable
+  // returned 500 and the whole staleness sweep was skipped for that night.
+  // Observed twice in `system_events`: 2026-09-02 and 2026-09-08, both
+  // `durationMs: 5006`, which is this budget to the millisecond.
+  //
+  // The defaults are unchanged, so every existing caller behaves exactly as
+  // before; only a caller that knows it has more room asks for more.
   const res = await fetchWithRetry(url, fetchOptions, {
     circuit: "airtable",
-    budgetMs: 5000,
-    attemptTimeoutMs: 2500, // §17.2's latency threshold
+    budgetMs: options.budgetMs ?? 5000,
+    attemptTimeoutMs: options.attemptTimeoutMs ?? 2500, // §17.2's latency threshold
   });
 
   if (!res.ok) {
@@ -95,7 +149,7 @@ async function fetchTable(tableId, apiKey, baseId, params = "") {
   }
 
   const data = await res.json();
-  return data.records || [];
+  return { records: data.records || [], offset: data.offset };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -382,12 +436,13 @@ export async function fetchProperties(apiKey, baseId) {
 // doesn't have to pull every field of every approved property just to check
 // one date.
 // ═══════════════════════════════════════════════════════════════
-export async function fetchPropertyVerificationDates(apiKey, baseId) {
+export async function fetchPropertyVerificationDates(apiKey, baseId, options = {}) {
   const records = await fetchTable(
     "PROPERTIES_CMS",
     apiKey,
     baseId,
-    "fields%5B%5D=Slug&fields%5B%5D=Title&fields%5B%5D=Last_Verified_Date&fields%5B%5D=Approved_For_ScoutIt"
+    "fields%5B%5D=Slug&fields%5B%5D=Title&fields%5B%5D=Last_Verified_Date&fields%5B%5D=Approved_For_ScoutIt",
+    options
   );
   return records
     .filter((r) => r.fields.Approved_For_ScoutIt && r.fields.Slug)

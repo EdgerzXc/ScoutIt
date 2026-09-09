@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { Building2, Eye, MessageSquare, Users } from "lucide-react";
+import { COMPLETENESS_UNKNOWN_LABEL, completenessScoreOf } from "@/lib/dashboardListings";
 
 export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
   const isEmpty = listings.length === 0;
@@ -67,7 +68,11 @@ export default function OwnerPanel({ listings = [], inquiryCount = 0 }) {
                     borderRadius: 20,
                   }}
                 >
-                  {l.verified ? "Verified" : `${l.completeness_score ?? 0}%`}
+                  {l.verified
+                    ? "Verified"
+                    : completenessScoreOf(l) === null
+                      ? COMPLETENESS_UNKNOWN_LABEL
+                      : `${completenessScoreOf(l)}%`}
                 </span>
               </div>
             </div>

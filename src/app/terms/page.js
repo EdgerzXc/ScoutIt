@@ -81,7 +81,7 @@ Bounties tied to specific private properties require Cluster-tier or higher owne
     title: "Temporary communication and ephemeral chat retention",
     body: `Handshake Chat provides a private, temporary communication space for connected parties. Closing a chat thread converts it to read-only status for seven (7) days as an operational retention benchmark. Upon expiration of the 7-day window, message body text is permanently purged from active database storage, while non-message transaction metadata (timestamps, participant IDs, status flags) is retained for audit trails.
 
-Every chat interface displays the following mandatory operational disclosure: "Notice: This conversation is temporary. When the chat closes it becomes read-only, and its message contents are deleted after 7 days. ScoutIt is not a party to any agreement made here."
+Every chat interface displays the following mandatory operational disclosure: "Notice: This conversation is temporary. When the chat ends — closed, declined, withdrawn or expired — it becomes read-only, and its message contents are deleted after 7 days, except threads under Trust & Safety review, which are kept until the review closes. ScoutIt is not a party to any agreement made here."
 
 Disputed or reported chat threads are placed under restricted administrative holds for Trust & Safety review until resolved. Exchanging personal contact details within the chat is done entirely at your own risk; ScoutIt cannot un-share information once transmitted.`,
   },

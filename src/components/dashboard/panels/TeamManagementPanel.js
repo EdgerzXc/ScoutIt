@@ -227,7 +227,11 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
             <div className="bg-surface border border-gold-accent/30 rounded-xl p-6 w-full max-w-md shadow-2xl">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-white">Invite New Member</h3>
-                <button onClick={() => setIsInvitingMember(false)} className="text-white/70 hover:text-white transition">
+                <button
+                  aria-label="Cancel inviting a team member"
+                  onClick={() => setIsInvitingMember(false)}
+                  className="text-white/70 hover:text-white transition"
+                >
                   <X size={18} />
                 </button>
               </div>

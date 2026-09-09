@@ -1,5 +1,16 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // A-074. The hand-written stylesheets now wrap every `:hover` rule in
+  // `@media (hover: hover) and (pointer: fine)`, but that only covered 26
+  // files — most interactive surfaces are styled with Tailwind's `hover:`
+  // utilities, which compiled to a bare `:hover` and therefore still stuck
+  // after a tap on a phone. This flag compiles every `hover:` utility into the
+  // same capability guard, which is what makes A-074's first acceptance test
+  // ("tapping a card leaves no stuck hover state anywhere") true rather than
+  // true-for-the-CSS-files-only. It is the default in Tailwind v4.
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",

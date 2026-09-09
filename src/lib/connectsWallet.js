@@ -17,20 +17,41 @@ import { monthlyAllowance } from "./entitlements";
 const STORAGE_KEY = "scoutit_connects_wallet";
 
 // Cost table — mirrors CONNECT_COSTS seeded in Airtable
+//
+// A-114: the three `commission*` keys have **zero spenders anywhere in the
+// repository** — verified by grep, not assumed. They are priced and unreachable.
+// They are deliberately NOT deleted here: whether providers are commissioned
+// through Connects at all, and at what price, is the open question in
+// [[MASTER_OWNER_ACTIONS|O-022]]. Removing them would answer it by attrition;
+// leaving them undocumented is what let them look implemented. Recorded instead.
 export const CONNECT_COSTS = {
   handshake:    1,  // owner invites broker OR broker pitches owner
   brokerContact: 1, // seeker contacts a broker directly
+  // ── UNREACHABLE pending O-022 — no caller spends any of these ──
   commissionPhotographer: 2,
   commissionResearcher:   2,
   commissionEventPlanner: 2,
 };
 
+// The subset that a real code path actually spends. A key outside this set is a
+// price with no purchase behind it.
+export const SPENDABLE_CONNECT_COSTS = Object.freeze(["handshake", "brokerContact"]);
+
+// A-114: every profession that ships a dashboard or a public directory must
+// resolve here. `designer` (DesignerHUD) and `event-planner` (/event-planners)
+// were missing, and `normalizeConnectRole` fails closed to null — so a designer
+// asking for their wallet got `{ error: "invalid_role" }` and a balance of 0.
+// Kept in step with `normalizeRole` in entitlements.js; the two lists are
+// asserted equal by `connectsRoleContract.test.js`, because they drifted apart
+// silently once already.
 export const SUPPORTED_CONNECT_ROLES = [
   "seeker",
   "owner",
   "broker",
   "photographer",
   "researcher",
+  "designer",
+  "event-planner",
 ];
 
 // ── Role Normalization ────────────────────────────────────────

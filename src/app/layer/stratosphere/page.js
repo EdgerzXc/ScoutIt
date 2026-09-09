@@ -8,6 +8,7 @@ import LayerNav from "@/components/descent/LayerNav";
 import LayerTransition from "@/components/descent/LayerTransition";
 import DescentBackdrop from "@/components/descent/DescentBackdrop";
 import { getSignals } from "@/data/mock/mockArticles";
+import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 import "./stratosphere-layer.css";
 
 /*
@@ -101,7 +102,14 @@ export default function StratospherePreview() {
                     </span>
 
                     <span className="strat-signal-body">
-                      <span className="strat-signal-status">{signal.status}</span>
+                      <span className="strat-signal-status">
+                        {signal.status}
+                        {/* The status reads as a public-record assertion, so
+                            the disclosure belongs beside it rather than at the
+                            foot of the page — the same rule /intel, /discover
+                            and the directory already follow. */}
+                        {signal.isSample ? <SampleIntelDisclosure compact /> : null}
+                      </span>
                       <span className="strat-signal-title">{signal.title}</span>
                       <span className="strat-signal-meta">
                         <MapPin size={11} aria-hidden="true" />

@@ -53,7 +53,7 @@
      · as a FILL → true gold, carrying near-black text (7.8:1)
    Every value below is contrast-verified; the numbers are in the
    comments and are checked by scripts/verify-contrast.mjs.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 body.light-mode {
   color-scheme: light;
 
@@ -189,7 +189,7 @@ body.light-mode .grain { opacity: 0.25; }
    here from a gold bloom on black to a warm gold bloom on near-white.
 
    Cheapest correct answer, and it fixes the hero for no-WebGL devices too.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 /* 🔴 REMOVED 2026-08-17 — this rule was the "hero wordmark is white-on-white in
    light mode" defect (§1.0D). It repainted the hero near-white while the
    inverted-island rule below (`body.light-mode .cinematic-container`) kept the
@@ -248,8 +248,10 @@ body.light-mode .nav-chapter .chapter-icon {
   opacity: 0.75 !important;
 }
 
-body.light-mode .nav-chapter:hover:not(.active) .chapter-label {
-  color: var(--accent) !important;
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .nav-chapter:hover:not(.active) .chapter-label {
+    color: var(--accent) !important;
+  }
 }
 
 body.light-mode .unit-z3-row {
@@ -366,7 +368,7 @@ body.light-mode .scoutit-wordmark .word-it {
    dossier on a phone in Manila sunlight; nobody needs the starfield to
    be white. Scoping it this way is a decision, not an omission — do not
    "finish the job" by lightening the cinematic surfaces.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 /* `.descent-root` (src/app/descent/descent.css) joins the list on the same
    grounds: it is the scroll-snapped descent sequence, five full-bleed animated
    nebula frames on #05060a. Its 85 hardcoded colours are ART, not theme — a
@@ -442,10 +444,10 @@ body.light-mode .spatial-intel-map-card {
   background-color: #0d0d0d;
 }
 
-/* ═══════════════════════════════════════════════════════════════ 
+/* ═══════════════════════════════════════════════════════════════
    SCOUTIT — GLOBAL DESIGN TOKENS & BASE STYLES
    Visual DNA v6 · Space Intelligence Platform
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 
 /* ── RESET ── */
 *, *::before, *::after {
@@ -655,7 +657,7 @@ body.light-mode .spatial-intel-map-card {
   --shadow-glow-soft: 0 0 24px rgba(232, 174, 60, 0.18);
 }
 
-/* â”€â”€ BASE ELEMENTS â”€â”€ */
+/* ── BASE ELEMENTS ── */
 html {
   height: 100%;
   color-scheme: dark;
@@ -687,18 +689,20 @@ p {
   line-height: 1.65;
 }
 
-/* â”€â”€ LINKS â”€â”€ */
+/* ── LINKS ── */
 a {
   color: inherit;
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
-a:hover {
-  color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    color: var(--accent);
+  }
 }
 
-/* â”€â”€ SCROLLBAR THEMING â”€â”€ */
+/* ── SCROLLBAR THEMING ── */
 ::-webkit-scrollbar {
   width: 3px;
 }
@@ -712,8 +716,10 @@ a:hover {
   border-radius: 2px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
 
 /* Firefox */
@@ -722,7 +728,7 @@ a:hover {
   scrollbar-color: var(--border-mid) transparent;
 }
 
-/* â”€â”€ FILM GRAIN TEXTURE â”€â”€ */
+/* ── FILM GRAIN TEXTURE ── */
 .grain {
   position: fixed;
   inset: 0;
@@ -733,19 +739,19 @@ a:hover {
   background-size: 128px;
 }
 
-/* â”€â”€ SELECTION â”€â”€ */
+/* ── SELECTION ── */
 ::selection {
   background: rgba(232, 174, 60, 0.25);
   color: var(--text-primary);
 }
 
-/* â”€â”€ FOCUS STATES â”€â”€ */
+/* ── FOCUS STATES ── */
 :focus-visible {
   outline: 1.5px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* â”€â”€ UTILITY CLASSES â”€â”€ */
+/* ── UTILITY CLASSES ── */
 .text-accent { color: var(--accent); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
@@ -805,13 +811,15 @@ a:hover {
     border-color 200ms var(--ease-out-custom);
 }
 
-.hov-card:hover {
-  /* Was translateY(-6px) scale(1.01) over 400ms with a bounce curve. A card
-     you hover dozens of times a session should acknowledge the pointer, not
-     perform. 2px and 200ms reads as responsive; 6px and 400ms reads as slow. */
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-mid);
+@media (hover: hover) and (pointer: fine) {
+  .hov-card:hover {
+    /* Was translateY(-6px) scale(1.01) over 400ms with a bounce curve. A card
+       you hover dozens of times a session should acknowledge the pointer, not
+       perform. 2px and 200ms reads as responsive; 6px and 400ms reads as slow. */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-mid);
+  }
 }
 
 .hov-card:active { transform: translateY(-1px) scale(0.995); }
@@ -826,10 +834,12 @@ a:hover {
     border-color 200ms var(--ease-out-custom);
 }
 
-.hov-glow:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
-  border-color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .hov-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+    border-color: var(--accent);
+  }
 }
 
 .hov-glow:active { transform: translateY(-1px) scale(0.995); }
@@ -973,7 +983,7 @@ body.light-mode .text-gold-glow { text-shadow: none; }
 }
 
 
-/* â”€â”€ HOMEPAGE DESCENT ARCHITECTURE â”€â”€ */
+/* ── HOMEPAGE DESCENT ARCHITECTURE ── */
 [data-descent-layer] {
   /* Default progress to 0% if not set */
   --sp: 0;
@@ -982,9 +992,9 @@ body.light-mode .text-gold-glow { text-shadow: none; }
   overflow: hidden;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════
    MOBILE-FIRST RESPONSIVE DESIGN SYSTEM
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════*/
 
 /* ── RESPONSIVE TYPOGRAPHY CONTRACT ────────────────────────────────
    Do not shrink reading text on smaller screens. Viewport pressure is solved
@@ -998,7 +1008,7 @@ body.light-mode .text-gold-glow { text-shadow: none; }
   }
 }
 
-/* â”€â”€ MOBILE SPACING ADJUSTMENTS â”€â”€ */
+/* ── MOBILE SPACING ADJUSTMENTS ── */
 @media (max-width: 768px) {
   :root {
     --space-lg: 20px;
@@ -1017,7 +1027,7 @@ body.light-mode .text-gold-glow { text-shadow: none; }
   }
 }
 
-/* â”€â”€ TOUCH TARGET OPTIMIZATION â”€â”€ */
+/* ── TOUCH TARGET OPTIMIZATION ── */
 @media (hover: none) and (pointer: coarse) {
   button, a, [role="button"] {
     min-height: 48px;
@@ -1147,7 +1157,7 @@ html.lite-mode .drifting-container {
   animation: none !important;
 }
 
-/* â”€â”€ MOBILE LAYOUT CONTAINERS â”€â”€ */
+/* ── MOBILE LAYOUT CONTAINERS ── */
 @media (max-width: 768px) {
   /* Bottom nav clearance — prevents content from hiding behind the fixed nav.
      The nav is ~74px tall (8px pad + 6px item pad + 28px icon + 4px gap + 10px
@@ -1168,7 +1178,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ GRID RESPONSIVENESS â”€â”€ */
+/* ── GRID RESPONSIVENESS ── */
 @media (max-width: 900px) {
   .discover-feed-preview > div > div[style*="grid"] {
     display: flex !important;
@@ -1203,7 +1213,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ MENU BUTTON FIXES â”€â”€ */
+/* ── MENU BUTTON FIXES ── */
 @media (max-width: 768px) {
   .menu-nav {
     display: flex !important;
@@ -1231,7 +1241,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ DROPDOWN POSITIONING FIX â”€â”€ */
+/* ── DROPDOWN POSITIONING FIX ── */
 @media (max-width: 480px) {
   .header-dropdown {
     position: fixed !important;
@@ -1247,7 +1257,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ SEARCH INPUT OPTIMIZATION â”€â”€ */
+/* ── SEARCH INPUT OPTIMIZATION ── */
 @media (max-width: 768px) {
   .vector-search-input {
     font-size: 16px !important;
@@ -1259,7 +1269,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ IMAGE OPTIMIZATION â”€â”€ */
+/* ── IMAGE OPTIMIZATION ── */
 @media (max-width: 640px) {
   img {
     max-width: 100%;
@@ -1271,7 +1281,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ HERO SECTION MOBILE â”€â”€ */
+/* ── HERO SECTION MOBILE ── */
 @media (max-width: 900px) {
   .section-hook {
     min-height: 60vh !important;
@@ -1288,7 +1298,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ TEXT OVERFLOW HANDLING â”€â”€ */
+/* ── TEXT OVERFLOW HANDLING ── */
 @media (max-width: 480px) {
   .matrix-legend-caption,
   .ledger-tags-guide {
@@ -1302,7 +1312,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ PERFORMANCE: DISABLE ANIMATIONS ON LOW-END MOBILE â”€â”€ */
+/* ── PERFORMANCE: DISABLE ANIMATIONS ON LOW-END MOBILE ── */
 @media (max-width: 480px) and (prefers-reduced-motion: no-preference) {
   /* Reduce animation complexity on small screens */
   .drifting-container {
@@ -1310,7 +1320,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ SCROLLBAR HIDE ON MOBILE â”€â”€ */
+/* ── SCROLLBAR HIDE ON MOBILE ── */
 @media (max-width: 768px) {
   ::-webkit-scrollbar {
     display: none;
@@ -1321,7 +1331,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ BUTTON GROUP RESPONSIVE â”€â”€ */
+/* ── BUTTON GROUP RESPONSIVE ── */
 @media (max-width: 640px) {
   .menu-footer {
     padding: 0 !important;
@@ -1334,7 +1344,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ FLEXBOX STACKING â”€â”€ */
+/* ── FLEXBOX STACKING ── */
 @media (max-width: 768px) {
   [style*="display: 'flex'"][style*="justifyContent: 'space-between'"] {
     flex-direction: column !important;
@@ -1342,7 +1352,7 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ CARD STYLING FOR MOBILE â”€â”€ */
+/* ── CARD STYLING FOR MOBILE ── */
 @media (max-width: 640px) {
   .discover-spotlight-card-link,
   .mini-preview-card,
@@ -1355,16 +1365,16 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* â”€â”€ SWIPE-FRIENDLY TAP AREAS â”€â”€ */
+/* ── SWIPE-FRIENDLY TAP AREAS ── */
 @media (hover: none) and (pointer: coarse) {
   a, button {
     -webkit-tap-highlight-color: rgba(232, 174, 60, 0.2);
   }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════
    FORM INPUT OPTIMIZATION FOR MOBILE
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════*/
 
 /* Base form input styles — checkboxes/radios/ranges excluded so they keep
    their compact native rendering instead of becoming padded text boxes */
@@ -1376,7 +1386,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, 
   border-radius: var(--radius-md);
   padding: 12px 14px;
   font-size: 16px;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
 }
 
 input:focus, textarea:focus, select:focus {
@@ -1461,9 +1471,9 @@ label {
   }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════
    HIGH-CONTRAST ACCESSIBILITY MODE
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════*/
 body.high-contrast {
   /* Push all CSS design tokens to maximum contrast */
   --bg:           #000000;
@@ -1497,7 +1507,7 @@ body.high-contrast nav {
   color: #ffffff !important;
 }
 
-/* All text nodes â€” cascade over inline-style colour values */
+/* All text nodes — cascade over inline-style colour values */
 body.high-contrast p,
 body.high-contrast li,
 body.high-contrast td,
@@ -1527,15 +1537,17 @@ body.high-contrast h4,
 body.high-contrast h5,
 body.high-contrast h6 { font-size: clamp(18px, 2.5vw, 24px) !important; }
 
-/* Links â€” make them clearly gold + underlined */
+/* Links — make them clearly gold + underlined */
 body.high-contrast a {
   color: #E8AE3C !important;
   text-decoration: underline !important;
   text-underline-offset: 3px;
 }
-body.high-contrast a:hover { color: #F7C64E !important; }
+@media (hover: hover) and (pointer: fine) {
+  body.high-contrast a:hover { color: #F7C64E !important; }
+}
 
-/* Span, label, small â€” override inline colours */
+/* Span, label, small — override inline colours */
 body.high-contrast span,
 body.high-contrast label,
 body.high-contrast small,
@@ -1549,14 +1561,14 @@ body.high-contrast [class*="accent"] {
   color: #E8AE3C !important;
 }
 
-/* Buttons â€” increase contrast and size */
+/* Buttons — increase contrast and size */
 body.high-contrast button {
   font-size: 15px !important;
   font-weight: 600 !important;
   min-height: 44px;
 }
 
-/* Inputs â€” pure white text on dark bg */
+/* Inputs — pure white text on dark bg */
 body.high-contrast input,
 body.high-contrast textarea,
 body.high-contrast select {
@@ -1570,12 +1582,12 @@ body.high-contrast textarea::placeholder {
   color: #c8c8c8 !important;
 }
 
-/* All borders â€” make them visible */
+/* All borders — make them visible */
 body.high-contrast *[style*="border"] {
   border-color: rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Focus rings â€” thick gold ring */
+/* Focus rings — thick gold ring */
 body.high-contrast :focus-visible {
   outline: 3px solid #E8AE3C !important;
   outline-offset: 3px !important;
@@ -1605,11 +1617,11 @@ body.high-contrast :focus-visible {
    Light mode is now a real token theme — see the top of this file.
    The counter-invert rules are unnecessary once nothing is inverted:
    images, video, canvas and the toolbox render normally by default.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 
-/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+/* ══════════════════════════════════════════════════════════════
    LAYER 01: STRATOSPHERE ENTRY ANIMATIONS
-   â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
+   ══════════════════════════════════════════════════════════════ */
 .perspective-container {
   perspective: 800px;
   perspective-origin: center center;
@@ -1702,9 +1714,9 @@ body.high-contrast :focus-visible {
   mix-blend-mode: screen;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════
    BOTTOM NAV / THEME SHEET (Moved from inline to prevent FOUC)
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════*/
 .bottom-nav {
   display: none;
 }
@@ -1776,7 +1788,7 @@ body.high-contrast :focus-visible {
     transition: stroke 0.2s ease;
   }
 
-  /* Active state â€” a soft gold "pill" behind the icon, on-brand glow,
+  /* Active state — a soft gold "pill" behind the icon, on-brand glow,
      and a gold accent bar riding the top edge. Reads instantly as "you are here". */
   .bottom-nav-item.active .bottom-nav-icon {
     background: rgba(232, 174, 60, 0.12);
@@ -1813,8 +1825,8 @@ body.high-contrast :focus-visible {
     box-shadow: 0 0 8px rgba(232, 174, 60, 0.7);
   }
 
-  /* â”€â”€ Property action bar: the primary CTA (Inquire) reads as one clear,
-        raised gold action so there's a single obvious next step on mobile. â”€â”€ */
+  /* ── Property action bar: the primary CTA (Inquire) reads as one clear,
+        raised gold action so there's a single obvious next step on mobile. ── */
   .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-icon {
     background: var(--accent-bright, #F7C64E);
     border-color: var(--accent-bright, #F7C64E);
@@ -1918,7 +1930,7 @@ body.high-contrast :focus-visible {
     align-items: center;
     gap: 16px;
     text-align: left;
-    transition: all 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s, filter 0.2s;
   }
 
   .theme-option.active {
@@ -1972,15 +1984,15 @@ body.high-contrast :focus-visible {
   }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   LITE MODE â€” performance switch for low-end phones.
+/* ═══════════════════════════════════════════════════════════════
+   LITE MODE — performance switch for low-end phones.
    Class lives on <html> (toggled via the Display panel / Theme sheet).
    Freezes all motion, drops expensive backdrop-blur + film grain, and
    hides the cosmic decorative layers. The homepage 2D canvas, title beam,
    and particles are also stopped in JS (see liteMode.js + page.js); the
    layer-page WebGL canvases are hidden here, scoped to .layer-route so
    property-page maps (Mapbox/Leaflet) are never affected.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════════════*/
 html.lite-mode *,
 html.lite-mode *::before,
 html.lite-mode *::after {
@@ -2014,7 +2026,7 @@ html.lite-mode .title-ufo-underglow {
   display: none !important;
 }
 
-/* Hide the layer-page WebGL backgrounds â€” scoped so maps are untouched */
+/* Hide the layer-page WebGL backgrounds — scoped so maps are untouched */
 html.lite-mode .layer-route canvas {
   display: none !important;
 }
@@ -2022,7 +2034,7 @@ html.lite-mode .layer-route canvas {
 /* ==========================================================================
    ATMOSPHERE SYSTEM (dark/gold depth upgrade)
    Layered background + gradient card surfaces + lift/glow hover motion.
-   Presentation-only â€” reuses --accent-rgb / --accent-bright-rgb / --shadow-glow-soft
+   Presentation-only — reuses --accent-rgb / --accent-bright-rgb / --shadow-glow-soft
    already defined in :root above. Reposition the glow per-screen with the
    --glow-x / --glow-y custom properties (default: top-right).
    ========================================================================== */
@@ -2174,10 +2186,12 @@ body.light-mode .card-atmosphere-gold {
   transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 300ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease;
 }
 
-.hov-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .hov-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
 }
 
 .hov-card:active {
@@ -2188,18 +2202,20 @@ body.light-mode .card-atmosphere-gold {
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-.hov-glow:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 48px rgba(var(--accent-rgb), 0.12);
-  border-color: rgba(var(--accent-rgb), 0.45);
+@media (hover: hover) and (pointer: fine) {
+  .hov-glow:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 48px rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.45);
+  }
 }
 
-/* Gold text glow â€” wordmark/headlines/kickers only, applied sparingly */
+/* Gold text glow — wordmark/headlines/kickers only, applied sparingly */
 .text-glow {
   text-shadow: 0 0 18px rgba(var(--accent-bright-rgb), 0.35);
 }
 
-/* CTA pulse â€” primary gold buttons only, not every gold element */
+/* CTA pulse — primary gold buttons only, not every gold element */
 @keyframes ctaPulse {
   0%, 100% { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.18), 0 4px 16px rgba(0, 0, 0, 0.35); }
   50% { box-shadow: 0 0 32px rgba(var(--accent-rgb), 0.5), 0 4px 16px rgba(0, 0, 0, 0.35); }
@@ -2274,13 +2290,24 @@ button, [role="button"], a[class*="btn"], a[class*="cta"], .reaction-tile, .card
   will-change: transform;
 }
 
-button:not(:disabled):hover, [role="button"]:not([aria-disabled="true"]):hover, a[class*="btn"]:hover, a[class*="cta"]:hover {
-  /* Fallback glow */
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover,
+  [role="button"]:not([aria-disabled="true"]):hover,
+  a[class*="btn"]:hover,
+  a[class*="cta"]:hover {
+    /* Fallback glow */
+  }
 }
 
-.hero-cta-primary:hover, .nf-btn-primary:hover, .ay-cta-primary:hover, .btn-contact:hover, .dl-cta:hover {
-  box-shadow: var(--shadow-glow);
-  color: var(--brand);
+@media (hover: hover) and (pointer: fine) {
+  .hero-cta-primary:hover,
+  .nf-btn-primary:hover,
+  .ay-cta-primary:hover,
+  .btn-contact:hover,
+  .dl-cta:hover {
+    box-shadow: var(--shadow-glow);
+    color: var(--brand);
+  }
 }
 
 button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active, a[class*="btn"]:active, a[class*="cta"]:active, .reaction-tile:not(:disabled):active, .card:active, [class*="card"]:active, .hov-card:active {
@@ -2379,7 +2406,7 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
    nothing above 769px. These two are declared here, unscoped, so the motion
    runs at every width. Curve is the strong ease-out; durations sit inside the
    tooltip (125–200ms) and dropdown (150–250ms) budgets.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 
 @keyframes badgePopIn {
   from { opacity: 0; transform: scale(0.96); }
@@ -2394,7 +2421,7 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
 /* ═══════════════════════════════════════════════════════════════
    GLOBAL HEADER BASE SSR LAYOUT STABILITY
    Prevents initial unstyled-block layout expansion before hydration.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════*/
 .global-header {
   position: sticky;
   top: 0;
@@ -2518,5 +2545,49 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
 @media (prefers-reduced-motion: reduce) {
   .header-gold-thread span {
     display: none !important;
+  }
+}
+
+/* A-083. The section-level `detail` expander, shared by every surface wired
+   from phase 2 onward. Only ever rendered in Simple; in Pro the section
+   renders inline exactly as it always has. Styled as the surface's own
+   section heading rather than as a button, because it is a disclosure that
+   replaces a heading, not a new action. */
+.simple-detail-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 0;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-working-title, var(--font-body));
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.simple-detail-toggle:active {
+  transform: scale(0.995);
+  transition-duration: 120ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .simple-detail-toggle:hover {
+    color: var(--accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simple-detail-toggle,
+  .simple-detail-toggle:active {
+    transform: none;
+    transition: none;
   }
 }

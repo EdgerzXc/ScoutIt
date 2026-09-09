@@ -35,6 +35,10 @@ test("Core previews a role and hands it to About You without granting permission
   await page.emulateMedia({ reducedMotion: "reduce" });
   await gotoAndSettle(page, "/layer/core");
 
+  // Dismiss the first-visit help overlay through its real control before using the page.
+  await page.getByRole("button", { name: "Close Help & Display", exact: true }).click();
+  await expect(page.getByRole("complementary", { name: "Help & Display", exact: true })).toBeHidden();
+
   const owner = page.getByRole("button", { name: /owner owner or developer/i });
   await owner.click();
   await expect(owner).toHaveAttribute("aria-pressed", "true");

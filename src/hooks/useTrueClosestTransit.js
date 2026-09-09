@@ -13,7 +13,7 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city, mapboxToken) {
+export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city) {
   const [closestTransit, setClosestTransit] = useState(null);
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city, m
     evaluateTravelTimes();
 
     return () => { isMounted = false; };
-  }, [propertyLat, propertyLng, mapboxToken]);
+  }, [propertyLat, propertyLng]);
 
   return closestTransit;
 }

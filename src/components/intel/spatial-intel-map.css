@@ -189,8 +189,10 @@
     brightness(95%);
 }
 
-.spatial-intel-map-card .maplibregl-ctrl-group button:hover {
-  background: rgba(232, 174, 60, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .spatial-intel-map-card .maplibregl-ctrl-group button:hover {
+    background: rgba(232, 174, 60, 0.12);
+  }
 }
 
 /* Collapsed to the info toggle by default. The attribution stays reachable,
@@ -231,3 +233,11 @@
     background-size: 20px 20px;
   }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.sim-reset:active,
+.spatial-intel-map-card .maplibregl-ctrl-group button:active { transform: scale(0.95); transition-duration: 120ms; }

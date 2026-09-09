@@ -4,9 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
+import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
 import { guideForPath } from "@/lib/pageGuides";
-import { guideForVerifiedRole } from "@/lib/journeyGuides";
+// A-093: `@/lib/journeyGuides` pulls the ~1MB internal system graph
+// (`masterFlowGraphData`) into this layout-mounted chunk. It is imported
+// dynamically below, gated on the fetched role, so anonymous readers
+// download no internal paths. journeyGuides keeps its sync exports for
+// tests and staff surfaces; only THIS call site goes lazy.
 
 export default function FloatingToolbox({ showTrigger = true }) {
   const router = useRouter();
@@ -14,6 +19,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
+  const [simple, setSimple] = useState(false);
   // The guide is resolved from the surface the reader is actually on. It was
   // one fixed four-card sequence shown identically everywhere, which is why it
   // never landed — see src/lib/pageGuides.js.
@@ -44,7 +50,20 @@ export default function FloatingToolbox({ showTrigger = true }) {
   }, []);
 
   const activeGuide = guideForPath(pathname, role);
-  const verifiedJourney = guideForVerifiedRole(role);
+  // A-093: the verified journey (and the internal graph behind it) loads
+  // only after the role fetch above resolves to a real role. Signed-out
+  // readers stay on the role-neutral guide and download nothing internal.
+  // This is code-splitting, not access control — the journey is help copy,
+  // and anything granting access re-derives the role server-side.
+  const [verifiedJourney, setVerifiedJourney] = useState(null);
+  useEffect(() => {
+    if (!role) { setVerifiedJourney(null); return; }
+    let cancelled = false;
+    import("@/lib/journeyGuides").then((m) => {
+      if (!cancelled) setVerifiedJourney(m.guideForVerifiedRole(role));
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [role]);
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardKind, setWizardKind] = useState("page");
@@ -73,7 +92,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   function restorePanelTriggerFocus() {
     const remembered = previousFocusRef.current;
     const fallback =
-      document.querySelector('button[aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode)"]') ||
+      document.querySelector('button[aria-label="Help & Display (Guide / Dark / High Contrast / Lite Mode / Simple Mode)"]') ||
       document.querySelector('button[aria-label="Menu"]') ||
       containerRef.current?.querySelector('[role="button"]');
     const target = remembered?.isConnected ? remembered : fallback;
@@ -123,6 +142,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
     applyTheme(savedMode);
 
     setLite(getStoredLiteMode());
+    setSimple(getStoredSimpleMode());
 
     setMounted(true);
 
@@ -177,6 +197,17 @@ export default function FloatingToolbox({ showTrigger = true }) {
     const next = !lite;
     setLite(next);
     setLiteMode(next);
+  };
+
+  // A-083. Simple is a reading level, not a performance switch — it is an
+  // independent axis from Lite, Interactive and the theme, and combines with
+  // all of them. It never hides a control the user may use and never removes a
+  // disclosure; it drops explanatory prose and folds secondary blocks behind
+  // an expander.
+  const toggleSimple = () => {
+    const next = !simple;
+    setSimple(next);
+    setSimpleMode(next);
   };
 
   const submitReport = async () => {
@@ -577,6 +608,42 @@ export default function FloatingToolbox({ showTrigger = true }) {
                   position: "absolute", top: 1.5, left: 1.5, width: 14, height: 14, borderRadius: "50%",
                   background: "#0e0e0e", transition: "transform 0.2s",
                   transform: lite ? "translateX(15px)" : "translateX(0)",
+                }} />
+              </span>
+            </button>
+          </div>
+
+          {/* Simple Mode toggle — fewer words, same product (A-083) */}
+          <div style={{ padding: "0 9px 8px" }}>
+            <button
+              onClick={toggleSimple}
+              aria-pressed={simple}
+              style={{
+                width: "100%",
+                background: simple ? "rgba(232, 174, 60,0.09)" : "rgba(255,255,255,0.025)",
+                border: `1px solid ${simple ? "rgba(232, 174, 60,0.3)" : "rgba(255,255,255,0.06)"}`,
+                borderRadius: 5, padding: "8px 10px",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: simple ? "#E8AE3C" : "#e5e2e1", fontWeight: simple ? 600 : 400, lineHeight: 1.3 }}>
+                  Simple Mode {simple ? "· On" : "· Off"}
+                </div>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.3, marginTop: 1 }}>
+                  Fewer words. Nothing is removed
+                </div>
+              </div>
+              <span style={{
+                flexShrink: 0, width: 34, height: 19, borderRadius: 999,
+                background: simple ? "#F7C64E" : "rgba(255,255,255,0.14)",
+                border: `1px solid ${simple ? "#F7C64E" : "rgba(255,255,255,0.18)"}`,
+                position: "relative", transition: "background 0.2s",
+              }}>
+                <span style={{
+                  position: "absolute", top: 1.5, left: 1.5, width: 14, height: 14, borderRadius: "50%",
+                  background: "#0e0e0e", transition: "transform 0.2s",
+                  transform: simple ? "translateX(15px)" : "translateX(0)",
                 }} />
               </span>
             </button>

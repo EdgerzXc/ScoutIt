@@ -162,6 +162,7 @@ export function buildScoutItRecord({ lookup = { ok: false }, now = new Date().to
       claimsEmptiness: false,
       staleSince: null,
       policyVersion: null,
+      isExampleSeed: false,
     };
   }
 
@@ -176,6 +177,7 @@ export function buildScoutItRecord({ lookup = { ok: false }, now = new Date().to
       claimsEmptiness: true,
       staleSince: null,
       policyVersion: null,
+      isExampleSeed: false,
     };
   }
 
@@ -198,5 +200,11 @@ export function buildScoutItRecord({ lookup = { ok: false }, now = new Date().to
     staleSince: isStale ? snapshot.calculatedAt || null : null,
     policyVersion: snapshot.policyVersion || null,
     lastTransactionAt: snapshot.lastTransactionAt || null,
+    // A-065. `source` is the column that separates seeded demo figures from
+    // earned ones, and it stopped here: the loader computed `isExampleSeed`
+    // and this builder dropped it, so no surface could tell the difference.
+    // The provenance note asserts these numbers were computed from real
+    // ScoutIt activity, which is false for a seeded row.
+    isExampleSeed: snapshot.isExampleSeed === true,
   };
 }

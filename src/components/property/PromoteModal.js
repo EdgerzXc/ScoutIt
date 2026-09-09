@@ -155,7 +155,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
               <Sparkles size={18} />
               <h2 className="font-mono text-sm uppercase tracking-[0.12em] font-semibold text-gold-accent">1-Click AI Promote</h2>
             </div>
-            <button onClick={onClose} className="p-1 text-[#f0ede8]/50 hover:text-white transition-colors rounded">
+            <button aria-label="Close" onClick={onClose} className="p-1 text-[#f0ede8]/50 hover:text-white transition-colors rounded">
               <X size={20} />
             </button>
           </div>

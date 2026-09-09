@@ -22,6 +22,7 @@ import {
 
 const valid = (over = {}) => ({
   brokerId: "e7f3634b-65d7-4adc-90ea-0544b61d988d",
+  satisfactionLevel: "happy",
   body: "They flagged the chiller schedule we would have missed, twice.",
   attributionMode: "initials",
   // `initials` and `full_name` both need a name to derive from; the fixture
@@ -104,8 +105,8 @@ describe("A-023 recommendation submission applies the same content controls", ()
     expect(result.ok).toBe(false);
   });
 
-  it("refuses an empty body and one beyond the length limit", () => {
-    expect(validateRecommendationSubmission(valid({ body: "   " })).ok).toBe(false);
+  it("allows the settled optional comment and refuses one beyond the length limit", () => {
+    expect(validateRecommendationSubmission(valid({ body: "   " })).ok).toBe(true);
     expect(
       validateRecommendationSubmission(valid({ body: "a".repeat(MAX_RECOMMENDATION_LENGTH + 1) })).ok,
     ).toBe(false);
@@ -133,4 +134,19 @@ describe("A-023 recommendation submission applies the same content controls", ()
     expect(result.errors.unknownFields).toContain("moderationState");
     expect(result.errors.unknownFields).toContain("qualifyingHandshakeId");
   });
+});
+
+describe("A-038 recommendation submission carries one satisfaction level", () => {
+  it.each(["angry", "sad", "smile", "happy"])("accepts %s", (satisfactionLevel) => {
+    expect(validateRecommendationSubmission(valid({ satisfactionLevel })).ok).toBe(true);
+  });
+
+  it.each([undefined, null, "", "neutral", "5-stars"])(
+    "rejects %s",
+    (satisfactionLevel) => {
+      const result = validateRecommendationSubmission(valid({ satisfactionLevel }));
+      expect(result.ok).toBe(false);
+      expect(result.errors.satisfactionLevel).toBeTruthy();
+    },
+  );
 });

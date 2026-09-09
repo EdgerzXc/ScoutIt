@@ -1,4 +1,4 @@
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════
 // STAFF PROPERTY SECTION SAVE
 //
 // The staff-console counterpart to the main app's /api/admin/property.
@@ -8,12 +8,12 @@
 //
 // Why a route handler and not a Server Action: the vendored component calls
 // `fetch(endpoint, { method: "PATCH" })`. Changing it to use an action would
-// fork the copy and defeat the drift guard â€” the exact failure (W3) this whole
+// fork the copy and defeat the drift guard — the exact failure (W3) this whole
 // change set exists to fix.
 //
 // AUTH: cookie session -> getCurrentStaff() -> assertTier. Unlike the main app
 // there is no bearer token; every staff request here is already cookie-scoped.
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -29,7 +29,7 @@ import { publishPropertyToAirtable } from "@/lib/airtable";
 // the moment a field's visibility changes.
 import { isInternal } from "@/lib/propertyFieldRegistry";
 
-// â”€â”€ GET /api/property?id=â€¦ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── GET /api/property?id=… ──────────────────────────────────────
 // Returns the FULL row (including `details`), fetched only when a staff member
 // actually expands a row. The CMS list query deliberately omits `details` so a
 // 200-listing queue stays one cheap request instead of hauling every blob.
@@ -115,7 +115,7 @@ export async function PATCH(request) {
       console.warn(`[MC PROPERTY] Ignored internal keys from client: ${rejected.join(", ")}`);
     }
 
-    // MERGE, never replace. Saving "Commercial" must not wipe "Residential" â€”
+    // MERGE, never replace. Saving "Commercial" must not wipe "Residential" —
     // the editor deliberately posts one section at a time.
     const patch = { details: { ...(current.details || {}), ...safeDetails } };
     for (const key of ["title", "location", "seo_title", "seo_description"]) {
@@ -135,7 +135,7 @@ export async function PATCH(request) {
     }
 
     // Mirror to the public CMS only for listings that are actually live.
-    // An Airtable failure must NOT discard the Supabase write â€” return success
+    // An Airtable failure must NOT discard the Supabase write — return success
     // with a warning so the staff member knows the public site lagged behind.
     let warning = null;
     if (current.pipeline_status === "approved") {
@@ -151,7 +151,7 @@ export async function PATCH(request) {
         }
       } catch (airtableErr) {
         console.error("[MC PROPERTY] Airtable sync failed:", airtableErr);
-        warning = "Saved, but the public site sync failed â€” it will retry on the next save.";
+        warning = "Saved, but the public site sync failed — it will retry on the next save.";
       }
     }
 

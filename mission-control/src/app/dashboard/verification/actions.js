@@ -55,10 +55,23 @@ export async function createVerificationRequest(formData) {
 }
 
 /**
- * Approve — the subject becomes verified. Agent (Tier 1)+.
- * The decision is authoritative here + audit-logged. Downstream badge sync
- * (broker_profiles.verified, property price flags) is a deliberate follow-up
- * so this action can never half-fail across two systems.
+ * Approve — records the review decision. Agent (Tier 1)+.
+ *
+ * A-070: this writes `verification_requests.status` and an audit row, and
+ * NOTHING ELSE. It does not set `user_profiles.prc_verified`, does not touch
+ * `broker_profiles`, and lights no badge. The original comment here called
+ * downstream sync "a deliberate follow-up so this action can never half-fail
+ * across two systems" — that judgement stands and is deliberately preserved.
+ *
+ * Adding the write here would make this the SECOND independent writer of
+ * `prc_verified` (`/api/admin/prc` on the main site is the first), and A-070's
+ * own acceptance test names two independent writers of one flag as the defect,
+ * not the remedy. Reconciling them requires an owner decision about which
+ * surface is authoritative; it is tracked in WAITING.
+ *
+ * What was fixed instead is the promise the console made: the control now
+ * reads "Record approval", and the queue states plainly that no badge is
+ * applied. See `src/lib/verificationEffectPolicy.mjs`.
  * @param {FormData} formData
  */
 export async function approveVerification(formData) {

@@ -25,7 +25,9 @@ async function getLiveArticle(slug) {
       const airtableArticles = await fetchIntel(apiKey, baseId);
       const matched = airtableArticles.find(a => a.slug === slug);
       if (matched) {
-        let category = matched.category || "Residential";
+        // A-106: no invented category — fetchIntel already falls back to
+        // "General", the honest label for uncategorized CMS rows.
+        let category = matched.category || "General";
         if (category.toLowerCase() === "hospitality") category = "Hospitality";
         if (category.toLowerCase() === "culinary") category = "Culinary";
         return {
@@ -54,7 +56,8 @@ async function getLiveRelated(slug) {
       const airtableArticles = await fetchIntel(apiKey, baseId);
       airtableArticles.forEach(item => {
         if (!baseArticles.some(x => x.slug === item.slug)) {
-          let category = item.category || "Residential";
+          // A-106: see above — "General", never an invented vertical.
+          let category = item.category || "General";
           if (category.toLowerCase() === "hospitality") category = "Hospitality";
           if (category.toLowerCase() === "culinary") category = "Culinary";
           
@@ -62,7 +65,8 @@ async function getLiveRelated(slug) {
             slug: item.slug || item.id,
             title: item.title,
             category,
-            date: item.date || "Just Now",
+            // A-106: a missing date renders absent, never a recency claim.
+            date: item.date || "",
             excerpt: item.excerpt || "",
             image: item.image || ""
           });
@@ -213,9 +217,12 @@ export default async function IntelArticlePage({ params, searchParams }) {
                   <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">
                     APPLY THIS INTELLIGENCE
                   </span>
-                  <h4 className="font-serif text-lg text-text-primary mb-1">
+                  {/* A-096: h2, not h4 — the page outline is h1, and the
+                      Related section below is h3 with h4 items. Level only;
+                      styling untouched. */}
+                  <h2 className="font-serif text-lg text-text-primary mb-1">
                     Explore spaces connected to this briefing
-                  </h4>
+                  </h2>
                   <p className="font-sans text-xs text-text-secondary m-0 max-w-md">
                     {article.city
                       ? `Discover verified listings, developments, and opportunities across ${article.city}.`

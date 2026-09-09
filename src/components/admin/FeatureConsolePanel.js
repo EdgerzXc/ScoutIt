@@ -198,6 +198,7 @@ export default function FeatureConsolePanel() {
                       }`}
                       role="switch"
                       aria-checked={isActive}
+                      aria-label={`${flag.name}: ${isActive ? "on" : "off"}`}
                     >
                       <span
                         aria-hidden="true"

@@ -33,7 +33,9 @@
 .dl-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 5vw, 60px); line-height: 1.05; color: #f5f1ea; margin: 0 0 14px; max-width: 16ch; }
 .dl-sub { font-family: var(--font-display); font-size: clamp(15px, 1.6vw, 19px); line-height: 1.7; color: #d6d2c8; max-width: 52ch; margin: 0 0 30px; }
 .dl-cta { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; font-family: var(--font-mono, monospace); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-bright); text-decoration: none; border: 1px solid rgba(232, 174, 60, 0.45); padding: 13px 22px; border-radius: 4px; transition: background 0.2s ease, border-color 0.2s ease; }
-.dl-cta:hover { background: rgba(232, 174, 60, 0.12); border-color: var(--gold-bright); }
+@media (hover: hover) and (pointer: fine) {
+  .dl-cta:hover { background: rgba(232, 174, 60, 0.12); border-color: var(--gold-bright); }
+}
 .dl-cta.solid { background: var(--gold-bright); color: #0e0e0e; border-color: var(--gold-bright); }
 
 /* ============================================================
@@ -276,3 +278,10 @@
   .inner-core { padding: 18px; }
   .ic-links { gap: 10px; }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.dl-cta:active { transform: scale(0.97); transition-duration: 120ms; }

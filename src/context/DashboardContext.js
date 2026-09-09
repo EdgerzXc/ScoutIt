@@ -13,12 +13,12 @@ import { isOnboardingComplete } from "../lib/onboardingProfile";
 import { readDevelopmentMockUser } from "../lib/developmentMock";
 import { trackEvent, GA_EVENTS } from "../lib/analytics";
 import { assessGeocode } from "../lib/geocodeConfidence";
+import { completenessScoreOf, mapCatalogueListing } from "@/lib/dashboardListings";
 
 const DashboardContext = createContext();
 
 // Default Center: Makati CBD
 const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 const DEFAULT_CONTEXT_VALUE = {
   listings: [],
@@ -309,34 +309,7 @@ export function DashboardProvider({ children }) {
           if (cmsRes?.ok) {
             const cmsData = await cmsRes.json();
             if (cmsData.properties) {
-              airtableListings = cmsData.properties.map(p => ({
-                id: p.id,
-                slug: p.slug,
-                type: p.property_type || 'Property',
-                title: p.title,
-                desc: '',
-                loc: p.location || p.city,
-                location: p.location || p.city,
-                hasMedia: !!p.image,
-                mediaLink: p.image,
-                price: p.tenure,
-                tag: 'LIVE',
-                tagClass: 'bg-success/20 text-success',
-                time: 'Verified',
-                ownerId: 'scoutit-cms',
-                spaceCategory: p.spaceCategory || p.property_type,
-                details: {},
-                pipelineStatus: 'approved',
-                completenessScore: 100,
-                verified: true,
-                coordinates: p.lat && p.lng ? `POINT(${p.lng} ${p.lat})` : null,
-                signals: {
-                  ownerAge: 'Verified',
-                  ownerAgeClass: 'text-success',
-                  accountAge: 'ScoutIt Verified',
-                  completeness: '100%'
-                }
-              }));
+              airtableListings = cmsData.properties.map(p => (mapCatalogueListing(p)));
             }
           }
         } catch (e) {
@@ -490,16 +463,24 @@ export function DashboardProvider({ children }) {
   };
 
   // ── QuestIT (Raise a Quest) ──
+  // A-092: the insert result is read — a failed write toasts the failure and
+  // returns false instead of claiming success unconditionally. The
+  // column-existence half still needs a live-schema read-back before the
+  // write is re-aimed (ACTIVE A-092 boundary).
   const raiseQuest = async (propertyId, questScope) => {
     if (currentUser?.id) {
       // Create bounty claim for the Guild (Quest posting is now free)
-      await supabase.from('bounty_claims').insert([{
+      const { error } = await supabase.from('bounty_claims').insert([{
         target_field: questScope,
         property_id: propertyId,
         initiator_id: currentUser.id,
         status: 'open',
         payout_connects: 0
       }]);
+      if (error) {
+        addToast("Couldn't raise that Data Quest — check your connection.", "❌");
+        return false;
+      }
     }
 
     addToast(`Data Quest raised for ${questScope} — Free to post`, "✨");
@@ -749,8 +730,20 @@ export function DashboardProvider({ children }) {
       description: listing.description,
       media_link: listing.mediaLink,
       completeness_score: listing.completenessScore,
-      verified: listing.verified,
+      // `verified` is deliberately NOT sent (U-015, 2026-09-04). It defaults to
+      // false in the database, and the wizard only ever sent false — so this
+      // removes a claim the browser was making rather than a value it was
+      // choosing. The column is now server-only by grant: naming it here would
+      // make every listing creation fail with a permission error.
       pipeline_status: 'pending',
+      // A-076: how this draft came into being. AGENTS.md §2.4 requires a
+      // ScoutIt-built PDF draft to be checked against its source document
+      // before publication, and /api/dashboard/publish enforces that with a
+      // 422 keyed on exactly this column. Until 2026-09-05 nothing set it, so
+      // every PDF-assisted listing looked hand-typed and walked straight past
+      // the gate. `pdf_verified` is NOT sent — it is server-only by grant, and
+      // only staff may assert it, through /api/admin/pdf-verify.
+      creation_source: listing.creationSource || 'manual',
       // Persist the uploaded photo URLs (Supabase Storage) inside details so
       // the publish route — which re-reads the row from Supabase — can mirror
       // them into Airtable's Photos/Image columns for the public page.
@@ -788,10 +781,12 @@ export function DashboardProvider({ children }) {
       tagClass: 'bg-gold-accent/20 text-gold-accent',
       time: 'Just now',
       signals: {
-        ownerAge: 'New — no data',
-        ownerAgeClass: 'text-text-secondary',
-        accountAge: 'New',
-        completeness: listing.completenessScore + '%'
+        // A-081: owner tenure is not recorded anywhere yet, so it is absent
+        // rather than the invented "New". `ownerAge`/`ownerAgeClass` had no
+        // consumer and `signals.completeness` is read by nothing — BrokerMode
+        // and OwnerMode both derive completeness from computeListingStrength
+        // and say so in their own comments.
+        accountAge: null,
       }
     };
 
@@ -900,10 +895,8 @@ export function DashboardProvider({ children }) {
       completenessScore: 0,
       verified: false,
       signals: {
-        ownerAge: 'New — no data',
-        ownerAgeClass: 'text-text-secondary',
-        accountAge: 'New',
-        completeness: '0%'
+        // A-081: see the note on the publish path above.
+        accountAge: null,
       }
     };
     
@@ -1130,8 +1123,11 @@ export function DashboardProvider({ children }) {
   const searchByRadius = async (radiusKm, centerLng = DEFAULT_MAP_CENTER[0], centerLat = DEFAULT_MAP_CENTER[1]) => {
     setIsLoading(true);
     try {
-      // Always fetch all from Supabase
-      const { data: propertiesData, error: propError } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
+      // A-094: bounded, not unbounded. 2000 is ten times the 200-listing
+      // north star (the same headroom A-079's Airtable caps use), newest
+      // first so a cap clips the oldest rows, never the owner's latest.
+      // RLS applies before the limit, so this bounds cost, not access.
+      const { data: propertiesData, error: propError } = await supabase.from('properties').select('*').order('created_at', { ascending: false }).limit(2000);
       
       let supabaseListings = [];
       if (!propError && propertiesData) {
@@ -1145,33 +1141,7 @@ export function DashboardProvider({ children }) {
         if (cmsRes.ok) {
           const cmsData = await cmsRes.json();
           if (cmsData.properties) {
-            airtableListings = cmsData.properties.map(p => ({
-              id: p.id,
-              type: p.property_type || 'Property',
-              title: p.title,
-              desc: '',
-              loc: p.location || p.city,
-              location: p.location || p.city,
-              hasMedia: !!p.image,
-              mediaLink: p.image,
-              price: p.tenure,
-              tag: 'LIVE',
-              tagClass: 'bg-success/20 text-success',
-              time: 'Verified',
-              ownerId: 'scoutit-cms',
-              spaceCategory: p.spaceCategory || p.property_type,
-              details: {},
-              pipelineStatus: 'approved',
-              completenessScore: 100,
-              verified: true,
-              coordinates: p.lat && p.lng ? `POINT(${p.lng} ${p.lat})` : null,
-              signals: {
-                ownerAge: 'Verified',
-                ownerAgeClass: 'text-success',
-                accountAge: 'ScoutIt Verified',
-                completeness: '100%'
-              }
-            }));
+            airtableListings = cmsData.properties.map(p => (mapCatalogueListing(p)));
           }
         }
       } catch (e) {
@@ -1249,14 +1219,14 @@ export function DashboardProvider({ children }) {
       lifecycleState: p.lifecycle_state || null,
       canonicalSlug: p.canonical_slug || p.slug || null,
       quietlyOpenToOffers: p.quietly_open_to_offers === true,
-      completenessScore: p.completeness_score ?? 50,
+      completenessScore: completenessScoreOf(p),
       verified: !!p.verified,
       coordinates: p.coordinates || null,
       signals: {
-        ownerAge: 'Verified',
-        ownerAgeClass: 'text-success',
-        accountAge: 'Active',
-        completeness: '50%'
+        // A-081: `ownerAge`/`ownerAgeClass` had no consumer and were pre-styled
+        // green; the completeness string here was a number nobody measured.
+        // Owner tenure is not recorded anywhere yet, so it is reported absent.
+        accountAge: null,
       }
     }));
   };
@@ -1288,7 +1258,6 @@ export function DashboardProvider({ children }) {
       markNotificationsRead,
       clearAllNotifications,
       searchByRadius,
-      MAPBOX_TOKEN,
       DEFAULT_MAP_CENTER,
       authedFetch
     }}>

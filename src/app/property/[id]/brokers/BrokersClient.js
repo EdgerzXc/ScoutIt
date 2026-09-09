@@ -153,7 +153,9 @@ export default function BrokersClient({ slug }) {
   return (
     <div className="brokers-wrapper">
       <nav className="brokers-sticky-nav" aria-label="Property broker roster navigation">
-        <Link href={`/property/${slug || "batasan-hills"}`} className="nav-back-link">← Back to Property</Link>
+        {slug ? (
+        <Link href={`/property/${slug}`} className="nav-back-link">← Back to Property</Link>
+        ) : null}
         <ScoutItWordmark href="/" className="nav-brand-logo" />
         <span className="nav-prop-info">{property?.title || "Property Profile"}</span>
       </nav>

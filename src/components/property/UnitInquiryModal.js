@@ -191,7 +191,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                           🛑 <strong>NEVER pay upfront reservation fees or deposits</strong> prior to in-person physical inspection and title/contract verification. ScoutIt does not manage or hold funds.
                         </p>
                         <p className="mb-1.5">
-                          ⏱️ <strong>7-Day Purge Window:</strong> Temporary chatboxes remain accessible in your archive for <strong>7 days</strong>, after which all raw messages are <strong>permanently deleted forever</strong> from servers.
+                          ⏱️ <strong>7-Day Purge Window:</strong> Temporary chatboxes remain accessible in your archive for <strong>7 days</strong> after the conversation ends (closed, declined, withdrawn or expired), after which all raw messages are <strong>permanently deleted forever</strong> from servers. Threads under Trust &amp; Safety review are kept until the review closes.
                         </p>
                         <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-[#888]">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.

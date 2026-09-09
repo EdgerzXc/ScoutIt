@@ -82,6 +82,7 @@ export default function ConciergeAI() {
       <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-200 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
         <button
           onClick={() => setIsOpen(true)}
+          aria-label="Open the ScoutIt concierge"
           className="relative group w-14 h-14 bg-surface border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)] transition hover:scale-105"
         >
           {/* Rotating glow */}
@@ -178,6 +179,7 @@ export default function ConciergeAI() {
             />
             <button
               type="submit"
+              aria-label="Send message"
               disabled={!input.trim() || isTyping}
               className="absolute right-2 w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background disabled:opacity-50 disabled:bg-surface-variant disabled:text-text-muted transition hover:bg-gold-accent-bright"
             >

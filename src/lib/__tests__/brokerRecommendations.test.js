@@ -148,3 +148,34 @@ describe("A-023 recommendation section states", () => {
     expect(JSON.stringify(section)).not.toMatch(/average|stars?|rating|score/i);
   });
 });
+
+describe("A-038 public satisfaction projection", () => {
+  const satisfactionRows = ["happy", "happy", "smile", "sad", "angry"].map(
+    (satisfaction_level, index) =>
+      row({
+        id: `satisfaction-${index}`,
+        body: "",
+        satisfaction_level,
+        qualifying_handshake_id: `handshake-${index}`,
+      }),
+  );
+
+  it("publishes the share and denominator without turning empty comments into cards", () => {
+    const section = build(satisfactionRows);
+    expect(section.cards).toHaveLength(0);
+    expect(section.satisfaction).toMatchObject({
+      state: "published",
+      total: 5,
+      positiveShare: 60,
+      distribution: { angry: 1, sad: 1, smile: 1, happy: 2 },
+    });
+  });
+
+  it("does not claim a satisfaction result when the authority read failed", () => {
+    const section = buildRecommendationSection({
+      authorityId: "e7f3634b-65d7-4adc-90ea-0544b61d988d",
+      lookup: { ok: false },
+    });
+    expect(section.satisfaction).toBeNull();
+  });
+});

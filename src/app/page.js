@@ -801,7 +801,7 @@ export default function Home() {
           border: 1px solid var(--accent);
           padding: 16px 32px;
           border-radius: 4px;
-          transition: all var(--transition-fast);
+          transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
           text-decoration: none;
         }
 
@@ -1694,7 +1694,7 @@ export default function Home() {
           padding: 20px 48px;
           border-radius: 2px;
           cursor: pointer;
-          transition: all var(--transition);
+          transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition), opacity var(--transition), filter var(--transition);
           animation: fadeUp 1.2s ease 3.6s forwards;
           opacity: 0;
         }
@@ -1898,7 +1898,7 @@ export default function Home() {
           font-family: var(--font-display);
           padding: 13px 24px;
           cursor: pointer;
-          transition: all var(--transition);
+          transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition), opacity var(--transition), filter var(--transition);
           border-radius: var(--radius-sm);
           white-space: nowrap;
           overflow: hidden;
@@ -2150,7 +2150,7 @@ export default function Home() {
         }
 
         .curated-collection-btn {
-          transition: all var(--transition-fast);
+          transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
         }
         .curated-collection-btn:hover {
           border-color: var(--accent-bright) !important;
@@ -2164,7 +2164,7 @@ export default function Home() {
           padding: 12px;
           margin: 0 -12px;
           border-radius: 4px;
-          transition: all var(--transition-fast);
+          transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
           text-decoration: none;
         }
         .discover-news-item-link:hover {
@@ -2231,7 +2231,7 @@ export default function Home() {
           display: flex;
           align-items: flex-end;
           padding: 40px;
-          transition: all var(--transition);
+          transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition), opacity var(--transition), filter var(--transition);
         }
 
         .preview-card:hover {
@@ -2334,7 +2334,7 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           text-align: center;
-          transition: all 0.3s ease;
+          transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
           cursor: default;
         }
 
@@ -2455,7 +2455,7 @@ export default function Home() {
           border-radius: 8px;
           text-decoration: none;
           display: block;
-          transition: all 0.3s ease;
+          transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
           position: relative;
           overflow: hidden;
         }

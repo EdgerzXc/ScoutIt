@@ -151,7 +151,7 @@ If a user asks to save a property, use the save_to_wishlist tool.`;
         else if (name === "save_to_wishlist") {
           const { property_id } = input;
           // Mock saving to wishlist
-          console.log(`[QuestIT] Saved property ${property_id} to wishlist`);
+
           toolResults.push({
             type: "tool_result",
             tool_use_id: id,

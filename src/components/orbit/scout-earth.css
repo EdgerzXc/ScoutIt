@@ -92,3 +92,26 @@
 /* Reduced motion is handled in JS, not here: Globe.gl reads no CSS, so the
    auto-rotation is switched off against the same media query inside
    ScoutEarth.js. The planet stays; the drift stops. */
+
+/* A-074. Motion here had no reduced-motion answer. The rule the rest of the
+   codebase follows: keep colour and opacity, which carry meaning, and drop
+   movement and duration, which do not. 23 of 29 stylesheets already did this;
+   these were the omissions, not a missing standard. */
+@media (prefers-reduced-motion: reduce) {
+  /* The raymarched WebGL hero is the most motion-heavy surface on the site
+     and was the one ignoring the setting. The canvas keeps rendering — the
+     globe is the content — but nothing in the surrounding chrome moves, and
+     the JS entry point reads the same media query to stop auto-rotation. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .scout-earth,
+  .scout-earth * {
+    transform: none !important;
+  }
+}

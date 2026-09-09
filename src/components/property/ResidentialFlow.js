@@ -123,6 +123,9 @@ function isNearManilaRail(lat, lng) {
 // referentially stable across renders (avoids effect-dep loops).
 // ═══════════════════════════════════════════════════
 import { resolveTransitHub } from "@/lib/transit";
+import { intelSourceLabel } from "@/lib/freshness";
+import ChapterSubtitle from "@/components/property/ChapterSubtitle";
+import SidebarDetails from "@/components/property/SidebarDetails";
 
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
@@ -473,13 +476,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
   }, [isLightboxOpen, propertyData]);
 
   // ── Hook calls that must run before early returns ──
-  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
   const publicTransitObj = useTrueClosestTransit(
     propertyData?.whereTo, 
     propertyData?.lat || propertyData?.latitude, 
     propertyData?.lng || propertyData?.longitude, 
-    propertyData?.city, 
-    mapboxToken
+    propertyData?.city
   );
 
   // ── Derived values (memoized at top to respect React Rules of Hooks) ──
@@ -1354,9 +1355,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
-                {ch['space']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['space'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['space']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1492,7 +1491,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             </div>
             <div className="panel-sidebar">
               <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "var(--accent)"}}/><div className="sidebar-label" style={{color: "var(--accent)"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">ScoutIT Pros</div></div>
+              <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">{intelSourceLabel(d.last_verified_date)}</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Cluster Tier Only</div></div>
             </div>
           </div>
@@ -1503,9 +1502,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
-                {ch['location']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['location'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['location']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1580,7 +1577,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       routeDestination={transitDestination}
                       routeDestCoords={transitDestCoords}
                       routeLabel={transitLabel}
-                      mapboxToken={mapboxToken}
                     />
                   )}
                 </InViewport>
@@ -1698,9 +1694,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
-                {ch['life']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['life'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['life']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1755,7 +1749,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             <div className="panel-sidebar">
               {d.lifestyle_vibe && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Vibe</div><div className="sidebar-value">{d.lifestyle_vibe}</div></div>}
               {d.best_for && <div className="sidebar-block"><div className="sidebar-label">Best for</div><div className="sidebar-value">{d.best_for}</div></div>}
-              {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
+              {/* A-085 phase 1: the same environment field as the commercial
+                  flow's Acoustics group, folded by the same rule. Vibe and
+                  Best for stay inline. */}
+              <SidebarDetails>
+                {d.street_type && <div className="sidebar-block"><div className="sidebar-label">Street type</div><div className="sidebar-value">{d.street_type}</div></div>}
+              </SidebarDetails>
             </div>
           </div>
 
@@ -1765,9 +1764,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
-                {ch['whereto']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['whereto'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['whereto']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -1806,7 +1803,6 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                       propertyTitle={d.title}
                       vicinityData={d.whereTo}
                       lifestylePois={lifestylePois}
-                      mapboxToken={mapboxToken}
                       isochrone={isochroneData?.geojson || null}
                       contours={isochroneData?.contours || []}
                     />
@@ -1895,9 +1891,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
-                {ch['buildplans']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['buildplans'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['buildplans']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2010,14 +2004,22 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             </div>
 
             <div className="panel-sidebar">
+              {/* A-085 phase 1: zoning folds in both branches. Short-Let
+                  Status stays inline — it is the regulatory answer a
+                  short-let buyer came for, and it is the branch's only other
+                  field, so folding it would empty the sidebar. */}
               {isHospitality ? (
                 <>
                   {d.short_let_legal && <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: d.short_let_legal.includes("Permitted") && !d.short_let_legal.includes("Not") ? "var(--green)" : d.short_let_legal.includes("Not") ? "var(--red)" : "var(--accent)"}}/><div className="sidebar-label">Short-Let Status</div><div className="sidebar-value" style={{fontSize:"13px", lineHeight:1.4}}>{d.short_let_legal}</div></div>}
-                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                  <SidebarDetails>
+                    {d.zoning_type && <div className="sidebar-block"><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                  </SidebarDetails>
                 </>
               ) : (
                 <>
-                  {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                  <SidebarDetails>
+                    {d.zoning_type && <div className="sidebar-block"><div className="sidebar-accent-line"/><div className="sidebar-label">Zoning</div><div className="sidebar-value">{d.zoning_type}</div></div>}
+                  </SidebarDetails>
                   {d.developer_name && <div className="sidebar-block"><div className="sidebar-label">Developer</div><div className="sidebar-value">{d.developer_name}</div></div>}
                   {d.year_built && <div className="sidebar-block"><div className="sidebar-label">Year built</div><div className="sidebar-value">{d.year_built}</div></div>}
                 </>
@@ -2059,9 +2061,14 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">ScoutIt Verified</div></div>
+              {/* A-083 6.1: tier-gated and secondary fields. Inline in Pro,
+                  behind one expander in Simple. "Intel source" and
+                  "Verification" stay inline — they are provenance. */}
+              <SidebarDetails>
+                <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Cap rate est.</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+                <div className="sidebar-block"><div className="sidebar-label">Price trend</div><div className="sidebar-value" style={{color:"var(--text-muted)"}}><Lock size={13} strokeWidth={1.5} style={{verticalAlign:"-2px", marginRight:"5px"}} />Locked</div></div>
+              </SidebarDetails>
+              <div className="sidebar-block"><div className="sidebar-label">Intel source</div><div className="sidebar-value">{intelSourceLabel(d.last_verified_date)}</div></div>
             </div>
           </div>
 
@@ -2071,9 +2078,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
-                {ch['units']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['units'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['units']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2189,9 +2194,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
-                {ch['universe']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['universe'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['universe']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2274,9 +2277,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
-                {ch['services']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['services'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['services']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2321,9 +2322,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div style={{marginBottom:"32px"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
-                {ch['yourmove']?.subtitle && (
-                  <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>{ch['yourmove'].subtitle}</div>
-                )}
+                <ChapterSubtitle text={ch['yourmove']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -2343,7 +2342,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
 
               <div className="reactions-container" style={{marginTop:"0", display:"flex", flexDirection:"column", gap:"10px"}}>
                 <p style={{fontFamily:"var(--font-mono)", fontSize:"12px", textTransform:"uppercase", letterSpacing:"0.12em", color:"var(--text-muted)", marginBottom:"16px"}}>HOW DOES THIS SPACE MAKE YOU FEEL?</p>
-                <ReactionButtons propertyId={slug || "batasan-hills"} propertyTitle={d.title} category={d.property_type} city={d.city}/>
+                {/* A-102: no fallback slug — without a real slug there is
+                    nothing truthful to save against, and attributing the save
+                    to an unrelated live property is worse than no control. */}
+                {slug ? (
+                <ReactionButtons propertyId={slug} propertyTitle={d.title} category={d.property_type} city={d.city}/>
+                ) : null}
               </div>
 
               {/* Price — only when an authorized party has provided one ("N/A"/empty suppresses it) */}
@@ -2373,9 +2377,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                         <p style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
                           No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
                         </p>
-                        <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", textDecoration:"none", letterSpacing:"0.01em"}}>
+                        {slug ? (
+                        <Link href={`/property/${slug}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", textDecoration:"none", letterSpacing:"0.01em"}}>
                           Inquire with an authorized broker →
                         </Link>
+                        ) : null}
                       </GlassPanel>
                     )}
                   </>
@@ -2396,7 +2402,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(232,174,60,0.03)" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
-                  <Link href={`/property/${slug || "batasan-hills"}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
+                  {slug ? (
+                  <Link href={`/property/${slug}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
+                  ) : null}
                 </div>
               )}
 

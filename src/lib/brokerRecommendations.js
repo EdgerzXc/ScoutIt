@@ -1,4 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
+
+import { buildSatisfactionSignal } from "@/lib/brokerSatisfaction";
 // A-023 phase 4 — client recommendations, public projection.
 //
 // This module is pure. It decides two things and nothing else: what a
@@ -115,13 +117,24 @@ function card(row) {
  */
 export function buildRecommendationSection({ authorityId = null, lookup = { ok: false } } = {}) {
   if (!authorityId) {
-    return { state: RECOMMENDATION_SECTION_STATES.NOT_LINKED, cards: [], claimsEmptiness: false };
+    return {
+      state: RECOMMENDATION_SECTION_STATES.NOT_LINKED,
+      cards: [],
+      claimsEmptiness: false,
+      satisfaction: null,
+    };
   }
   if (!lookup?.ok) {
-    return { state: RECOMMENDATION_SECTION_STATES.LOOKUP_FAILED, cards: [], claimsEmptiness: false };
+    return {
+      state: RECOMMENDATION_SECTION_STATES.LOOKUP_FAILED,
+      cards: [],
+      claimsEmptiness: false,
+      satisfaction: null,
+    };
   }
 
-  const cards = (lookup.recommendations || [])
+  const rows = lookup.recommendations || [];
+  const cards = rows
     .filter(isPublishableRecommendation)
     .map(card)
     .sort((a, b) => String(b.submittedAt || "").localeCompare(String(a.submittedAt || "")));
@@ -132,5 +145,6 @@ export function buildRecommendationSection({ authorityId = null, lookup = { ok: 
       : RECOMMENDATION_SECTION_STATES.NONE_PUBLISHABLE,
     cards,
     claimsEmptiness: cards.length === 0,
+    satisfaction: buildSatisfactionSignal(rows),
   };
 }

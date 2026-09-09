@@ -67,7 +67,13 @@ export async function POST(request) {
     }
 
     if (currentSubmission.creation_source === 'pdf_assisted' && !currentSubmission.pdf_verified) {
-      return NextResponse.json({ error: "PDF-assisted listing drafts must be verified against source document before initial publication." }, { status: 422 });
+      // A-076: a refusal an owner cannot act on is a dead end. Say who is doing
+      // what, and that no action is required from them — this draft is already
+      // in the reviewer's queue (/api/admin/pdf-verify).
+      return NextResponse.json({
+        error: "We built this listing from your document, so a reviewer checks it against that file before it goes public. It is already in the queue — you do not need to resubmit. You can keep editing while you wait.",
+        reason: "pdf_verification_pending",
+      }, { status: 422 });
     }
 
     const currentLifecycle = normalizeLifecycleState(currentSubmission);
@@ -110,7 +116,7 @@ export async function POST(request) {
 
     if (apiKey && baseId) {
       try {
-        console.log(`[PUBLISH API] Syncing slug ${currentSubmission.slug} to Airtable...`);
+
         // Supabase stores the position as PostGIS POINT(lng lat); Airtable
         // wants two numbers. Parsed here so the public page inherits the exact
         // coordinate the owner's listing resolved to, instead of re-geocoding

@@ -24,8 +24,10 @@
   font-weight: 500;
 }
 
-.nav-back-link:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .nav-back-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .nav-brand-logo {
@@ -120,8 +122,10 @@
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 
-.broker-item-card:hover {
-  border-color: var(--border-mid);
+@media (hover: hover) and (pointer: fine) {
+  .broker-item-card:hover {
+    border-color: var(--border-mid);
+  }
 }
 
 .scoutit-pick-badge {
@@ -264,12 +268,14 @@
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s, filter 0.2s;
 }
 
-.action-profile-btn:hover {
-  color: var(--text-primary);
-  border-color: var(--border-mid);
+@media (hover: hover) and (pointer: fine) {
+  .action-profile-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-mid);
+  }
 }
 
 .action-retain-btn {
@@ -286,8 +292,10 @@
   transition: background 0.2s;
 }
 
-.action-retain-btn:hover {
-  background: #d4b87a;
+@media (hover: hover) and (pointer: fine) {
+  .action-retain-btn:hover {
+    background: #d4b87a;
+  }
 }
 
 .action-retain-btn.active {
@@ -366,12 +374,14 @@
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s, filter 0.2s;
 }
 
-.form-submit-btn:hover {
-  background: var(--accent-fill);
-  color: var(--on-accent);
+@media (hover: hover) and (pointer: fine) {
+  .form-submit-btn:hover {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+  }
 }
 
 .brokers-compliance-footer {
@@ -609,4 +619,23 @@
   color: var(--error, #ef6b6b);
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* A-074. Motion here had no reduced-motion answer. The rule the rest of the
+   codebase follows: keep colour and opacity, which carry meaning, and drop
+   movement and duration, which do not. 23 of 29 stylesheets already did this;
+   these were the omissions, not a missing standard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [class*="broker"]:hover,
+  [class*="broker"]:active {
+    transform: none !important;
+  }
 }

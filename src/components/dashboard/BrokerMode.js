@@ -6,7 +6,6 @@ import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
-import { supabase } from "../../lib/supabaseClient";
 import ScoutInsightPanel from './panels/ScoutInsightPanel';
 import MeshHero from '../ui/MeshHero';
 import TaskRail from "./crm/TaskRail";
@@ -19,9 +18,10 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
+import { ownerTenureLabel } from "@/lib/dashboardListings";
 
 export default function BrokerMode() {
-  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
+  const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
 
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
@@ -43,24 +43,48 @@ export default function BrokerMode() {
     }
   }, [currentUser]);
 
+  // U-025: this used to write `user_profiles` directly. U-022 made all five
+  // credential columns server-only by grant, so the direct write has failed
+  // with 42501 on every save since 2026-09-04 — the toast said "Failed to
+  // update license" and nobody could get past it. The write now goes through
+  // /api/broker/credential, which owns the "a changed credential is an
+  // unverified one" rule so the client cannot skip it.
+  const CREDENTIAL_FIELD = {
+    prc_license: "prcLicense",
+    prc_expiry: "prcExpiry",
+    dhsud_number: "dhsudNumber",
+  };
+
   const handleUpdateLicense = async (field, value) => {
     if (!currentUser) return;
+    const key = CREDENTIAL_FIELD[field];
+    if (!key) return;
     try {
-      // Changing any credential invalidates a previously issued badge —
-      // staff must re-check the new number against the PRC registry.
-      const patch = { [field]: value || null };
-      if (["prc_license", "prc_expiry", "dhsud_number"].includes(field)) {
-        patch.prc_verified = false;
-        patch.prc_verified_at = null;
+      const { data: { session } } = await getSession();
+      if (!session) {
+        if (addToast) addToast("Session expired — sign in again to save your licence", "❌");
+        return;
       }
-      const { error } = await supabase
-        .from('user_profiles')
-        .update(patch)
-        .eq('id', currentUser.id);
 
-      if (error) throw error;
-      setPrcVerified(false);
-      if (addToast) addToast("License updated — pending re-verification", "✅");
+      const res = await fetch("/api/broker/credential", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ [key]: value || null }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      // A rejected save must never render as a saved one (A-092's rule). The
+      // badge state follows the value the server read back, not an assumption.
+      if (!res.ok) {
+        if (addToast) addToast(data.error || "Failed to update license", "❌");
+        return;
+      }
+
+      setPrcVerified(data?.credential?.prcVerified === true);
+      if (addToast) addToast(data.message || "License updated — pending re-verification", "✅");
     } catch (err) {
       console.error("Failed to update license:", err);
       if (addToast) addToast("Failed to update license", "❌");
@@ -104,10 +128,11 @@ export default function BrokerMode() {
   const [mapError, setMapError] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Initialize searchByRadius to 5km on mount so the list matches the map overlay
+  // A-094: setting the centre is what triggers the search (the [radarCenter]
+  // effect below owns it with the same 5km default), so the mount effect must
+  // not also fire searchByRadius — that ran the full-table read twice.
   useEffect(() => {
     setRadarCenter(DEFAULT_MAP_CENTER);
-    searchByRadius("5", DEFAULT_MAP_CENTER[0], DEFAULT_MAP_CENTER[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const mapContainerRef = useRef(null);
@@ -127,6 +152,13 @@ export default function BrokerMode() {
     }
   };
 
+  // A-112: `accepted` is pitches this broker made that an owner accepted. It is
+  // NOT a closed deal and NOT a verified closure — the snapshot chain
+  // (serverBrokerMetrics → buildScoutItRecord) owns `verified_closures`, and the
+  // public dossier renders that. Surfaces here used to say "Deals Won" and
+  // "Verified Advisory Portfolio" over this count, which claimed a two-sided
+  // handshake from a one-sided acceptance. The labels now say what this is.
+  // Pinned by `brokerLabelSource.test.js`.
   // ⚡ Bolt Optimization: Memoize derived pipelines
   const { myPitches, pending, accepted, activePitches, feed } = useMemo(() => {
     const _myPitches = pitches.filter(p => p.isCurrentUserBroker);
@@ -830,10 +862,12 @@ export default function BrokerMode() {
       <header className="lg:hidden pt-4 pb-6 mb-6 border-b border-surface-variant flex items-end justify-between gap-4 mesh-bg-hero px-4 rounded-xl shadow-lg">
         <div>
           <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[12px] mb-1 block">Command Center</span>
-          <h2 className="font-headline-editorial text-3xl text-gradient-gold">Broker Intelligence</h2>
+          {/* A-096: h1 (mobile twin of the desktop h1 below — the responsive-
+              variant pattern: one reaches the tree at a time). */}
+          <h1 className="font-headline-editorial text-3xl text-gradient-gold">Broker Intelligence</h1>
         </div>
         <div className="text-right shrink-0">
-          <span className="block text-[12px] font-label-caps uppercase tracking-widest text-text-secondary">Deals Won</span>
+          <span className="block text-[12px] font-label-caps uppercase tracking-widest text-text-secondary">Accepted Mandates</span>
           <span className="text-on-surface font-data-tabular text-lg font-bold">{accepted.length}</span>
         </div>
       </header>
@@ -850,12 +884,13 @@ export default function BrokerMode() {
       <MeshHero className="py-6 lg:py-10 px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex rounded-2xl shadow-xl border border-[rgba(255,255,255,0.05)]">
         <div>
           <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
-          <h2 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h2>
+          {/* A-096: h1 (desktop twin — see mobile header above). */}
+          <h1 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h1>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
             <span className="block text-[12px] font-label-caps uppercase tracking-widest text-text-secondary">Pipeline Health</span>
-            <span className="text-on-surface font-working-title text-sm">{accepted.length} Deals Won</span>
+            <span className="text-on-surface font-working-title text-sm">{accepted.length} Accepted Mandates</span>
           </div>
           {/* Permanent entry point — the dismissible "new feature" banner must
               not be the only way to reach the ID card */}
@@ -904,6 +939,7 @@ export default function BrokerMode() {
             </div>
             
             <select
+              aria-label="Search radius"
               className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] text-on-surface text-sm rounded-xl px-4 py-3 w-full focus:outline-none focus:border-gold-accent/50 transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               value={radius}
               onChange={handleRadiusChange}
@@ -996,20 +1032,20 @@ export default function BrokerMode() {
 
           <div className="flex justify-between items-end border-b border-surface-variant pb-2 mt-8">
             <h3 className="font-working-title text-xl text-on-surface flex items-center gap-2">
-              <span className="text-gold-accent">✦</span> Verified Advisory Portfolio
+              <span className="text-gold-accent">✦</span> Accepted Advisory Mandates
             </h3>
             <span className="text-text-secondary font-label-caps text-[12px] tracking-widest uppercase">{accepted.length} Properties</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {isLoading && accepted.length === 0 && (
-              <div className="col-span-full"><RowListSkeleton count={2} label="Loading verified properties" /></div>
+              <div className="col-span-full"><RowListSkeleton count={2} label="Loading accepted mandates" /></div>
             )}
             {!isLoading && accepted.length === 0 && (
               <div className="col-span-full py-12 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-success/5 rounded-full blur-[60px]" />
                 <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">🛡️</span>
-                <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Verified Advisory Mandates</p>
+                <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Accepted Advisory Mandates</p>
                 <p className="text-sm text-text-secondary relative z-10 max-w-sm mb-4 leading-relaxed">When property owners accept your representation handshake, your authorized advisory files will appear here.</p>
                 <Link
                   href="/property"
@@ -1092,7 +1128,7 @@ export default function BrokerMode() {
                 <div className="grid grid-cols-2 gap-2 mt-4 p-3 bg-background rounded border border-surface-variant text-center">
                   <div>
                     <div className="text-[12px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Owner Tenure</div>
-                    <div className="text-on-surface font-data-tabular text-xs">{item.signals?.accountAge || 'New'}</div>
+                    <div className="text-on-surface font-data-tabular text-xs">{ownerTenureLabel(item.signals?.accountAge)}</div>
                   </div>
                   <div>
                     <div className="text-[12px] text-text-secondary uppercase tracking-wider mb-1 font-label-caps">Completeness</div>

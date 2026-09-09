@@ -31,10 +31,14 @@
 .resultMeta { display: flex; justify-content: space-between; gap: 16px; padding: 21px 2px 18px; color: var(--text-muted); border-bottom: 1px solid var(--border-solid); }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; padding-top: 22px; perspective: 1200px; }
 .card { --card-x: 0deg; --card-y: 0deg; position: relative; min-width: 0; display: grid; grid-template-columns: minmax(180px, 36%) 1fr; overflow: hidden; border: 1px solid var(--border-solid); background: linear-gradient(145deg, rgba(24,24,22,.94), rgba(14,14,14,.98)); box-shadow: 0 22px 55px rgba(0,0,0,.22); transform: rotateX(var(--card-y)) rotateY(var(--card-x)); transform-style: preserve-3d; transition: transform .22s ease, border-color .25s ease, box-shadow .25s ease; }
-.card:hover { border-color: var(--accent-muted); box-shadow: 0 30px 80px rgba(0,0,0,.4), 0 0 34px rgba(232,174,60,.055); }
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { border-color: var(--accent-muted); box-shadow: 0 30px 80px rgba(0,0,0,.4), 0 0 34px rgba(232,174,60,.055); }
+}
 .portrait { position: relative; min-height: 100%; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 26%, rgba(232,174,60,.15), transparent 35%), linear-gradient(155deg, #1b1915, #0e0e0e 70%); }
 .portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(.78) contrast(1.08); transition: filter .45s ease, transform .55s ease; }
-.card:hover .portrait img { filter: grayscale(.15) contrast(1.04); transform: scale(1.025); }
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .portrait img { filter: grayscale(.15) contrast(1.04); transform: scale(1.025); }
+}
 .portrait > span:not(.sampleFlag):not(.sourceFlag) { color: var(--accent); font-family: var(--font-display); font-size: 54px; letter-spacing: -.05em; }
 .portraitShade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,13,13,.74), transparent 55%); }
 .sampleFlag,.sourceFlag { position: absolute; left: 12px; right: 12px; width: fit-content; max-width: calc(100% - 24px); padding: 6px 8px; color: var(--text-secondary); background: rgba(13,13,13,.8); border: 1px dashed var(--accent-muted); backdrop-filter: blur(8px); }
@@ -62,7 +66,12 @@
 .availability small { flex-basis: 100%; padding-left: 13px; text-transform: none; letter-spacing: 0; }
 .cardActions { display: grid; grid-template-columns: auto minmax(126px, 1fr); align-items: end; gap: 10px; margin-top: auto; padding-top: 22px; }
 .profileLink,.saveButton { min-height: 44px; display: inline-flex; justify-content: center; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid var(--accent-muted); color: var(--accent-bright); background: rgba(232,174,60,.035); font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease; }
-.profileLink:hover,.saveButton:hover,.saveButtonActive { color: #0d0d0d; border-color: var(--accent-bright); background: var(--accent-bright); }
+.saveButtonActive { color: #0d0d0d; border-color: var(--accent-bright); background: var(--accent-bright); }
+
+@media (hover: hover) and (pointer: fine) {
+  .profileLink:hover,
+  .saveButton:hover { color: #0d0d0d; border-color: var(--accent-bright); background: var(--accent-bright); }
+}
 .saveWrap { min-width: 0; }
 .saveButton { width: 100%; }
 .saveButton:disabled { opacity: .58; cursor: wait; }
@@ -77,3 +86,11 @@
 @media (max-width: 680px) { .hero { min-height: auto; padding: 86px 20px 46px; } .hero h1 { font-size: clamp(48px, 16vw, 72px); } .truthPanel { padding: 19px; } .orbit { width: 290px; height: 290px; right: -80px; top: 15px; } .directory { padding: 0 20px 70px; } .toolbar { padding: 10px; } .selects { display: grid; grid-template-columns: 1fr; } .selects > svg { display: none; } .selects select { width: 100%; max-width: none; } .resultMeta { flex-direction: column; line-height: 1.5; } .card { grid-template-columns: 1fr; transform: none !important; } .portrait { min-height: 210px; } .cardBody { padding: 21px; } .cardActions { grid-template-columns: 1fr; } }
 
 @media (prefers-reduced-motion: reduce) { .orbit span:nth-child(2) { animation: none; } .card,.portrait img { transition: none; transform: none !important; } }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.profileLink:active,
+.saveButton:active { transform: scale(0.97); transition-duration: 120ms; }

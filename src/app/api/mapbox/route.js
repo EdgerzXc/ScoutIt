@@ -102,9 +102,22 @@ export async function GET(req) {
     if (op === "geocode") {
       const q = (params.get("q") || "").trim();
       if (!q || q.length > 256) return bad("q is required");
+
+      // A-078: InteractiveMap biases its destination lookup to the property's
+      // own vicinity, so the proxy has to carry that or the migrated call
+      // returns a worse answer than the direct one it replaced. Validated the
+      // same way as every other coordinate here — a single lng,lat pair, or
+      // rejected outright, never forwarded unparsed.
+      const proximity = parseCoordinates(params.get("proximity"));
+      if (params.get("proximity") && (!proximity || proximity.split(";").length !== 1)) {
+        return bad("Invalid proximity");
+      }
+
       upstream =
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
-        `?country=ph&limit=1&access_token=${token}`;
+        `?country=ph&limit=1` +
+        (proximity ? `&proximity=${proximity}` : "") +
+        `&access_token=${token}`;
     } else if (op === "directions" || op === "matrix") {
       const profile = params.get("profile") || "driving";
       if (!PROFILES.has(profile)) return bad("Unsupported profile");

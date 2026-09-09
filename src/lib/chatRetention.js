@@ -2,13 +2,32 @@
  * The retention rule ScoutIt states publicly, in one place.
  *
  * Privacy section 04 and the deal-close response both promise that message
- * bodies are purged seven days after a chat closes. Until 2026-08-22 that
- * promise had no working implementation: the SQL function written for it was
- * never called by anything, and it addressed a `content` column that does not
- * exist on the live `deal_messages` table.
+ * bodies are purged seven days after a conversation ends (closed, declined,
+ * withdrawn, expired) — except threads under Trust & Safety review, which
+ * are kept until the review closes. Until 2026-08-22 that promise had no
+ * working implementation: the SQL function written for it was never called
+ * by anything, and it addressed a `content` column that does not exist on
+ * the live `deal_messages` table.
  */
 
 export const CHAT_RETENTION_DAYS = 7;
+
+/**
+ * A-103. The purge candidate set for the ordinary seven-day rule. The UI
+ * decline path writes `declined` and the sender-withdraw path writes
+ * `withdrawn`, both stamping `closed_at` — selecting only `closed` kept those
+ * threads' bodies forever against the published promise. `reported` is
+ * deliberately NOT here: Report & Unmatch files a dispute hold at report
+ * time (see ChatBox `handleReportConversation`), and purging a thread under
+ * review would destroy the evidence the hold exists to protect. The purge
+ * job imports this list rather than restating it.
+ */
+export const PURGE_ELIGIBLE_STATUSES = Object.freeze([
+  "closed",
+  "declined",
+  "withdrawn",
+  "expired",
+]);
 
 /** Statuses that keep a thread under Trust & Safety hold, exempt from purging. */
 export const DISPUTE_HOLD_STATUSES = Object.freeze(["open_hold", "under_review"]);

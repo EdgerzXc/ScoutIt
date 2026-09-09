@@ -97,8 +97,10 @@
   transition: background var(--transition-fast);
 }
 
-.filter-trigger:hover {
-  background: rgba(255, 255, 255, 0.02);
+@media (hover: hover) and (pointer: fine) {
+  .filter-trigger:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
 }
 
 .filter-chevron {
@@ -134,8 +136,10 @@
   transform: scale(0.98);
 }
 
-.filter-checkbox-label:hover {
-  color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .filter-checkbox-label:hover {
+    color: var(--accent);
+  }
 }
 
 .filter-checkbox {
@@ -197,8 +201,10 @@
   transition: transform var(--transition-fast);
 }
 
-.intel-widget-item:hover {
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .intel-widget-item:hover {
+    transform: translateX(4px);
+  }
 }
 
 .intel-widget-item h4 {
@@ -280,10 +286,12 @@
   transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.property-preview-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(247, 198, 78, 0.55);
-  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.4)), var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18));
+@media (hover: hover) and (pointer: fine) {
+  .property-preview-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(247, 198, 78, 0.55);
+    box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.4)), var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18));
+  }
 }
 
 .property-preview-card:focus-visible {
@@ -307,9 +315,11 @@
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter var(--transition-fast);
 }
 
-.property-preview-card:hover .property-card-img {
-  transform: scale(1.03);
-  filter: grayscale(0%) contrast(1.1);
+@media (hover: hover) and (pointer: fine) {
+  .property-preview-card:hover .property-card-img {
+    transform: scale(1.03);
+    filter: grayscale(0%) contrast(1.1);
+  }
 }
 
 .property-city-badge {
@@ -391,9 +401,11 @@
   transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
-.property-action-btn:hover {
-  color: var(--accent-bright);
-  text-shadow: 0 0 8px rgba(232, 174, 60, 0.4);
+@media (hover: hover) and (pointer: fine) {
+  .property-action-btn:hover {
+    color: var(--accent-bright);
+    text-shadow: 0 0 8px rgba(232, 174, 60, 0.4);
+  }
 }
 
 .directory-empty {
@@ -437,10 +449,12 @@
   transition: background 160ms var(--ease-out-custom), color 160ms var(--ease-out-custom);
 }
 
-.directory-empty .founding-cta:hover {
-  background: var(--accent-fill);
-  color: var(--on-accent);
-  border-color: var(--accent-fill);
+@media (hover: hover) and (pointer: fine) {
+  .directory-empty .founding-cta:hover {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    border-color: var(--accent-fill);
+  }
 }
 
 .directory-empty .founding-cta:active { transform: scale(0.98); }
@@ -660,11 +674,13 @@
   padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s, filter 0.2s;
 }
 
-.compare-toggle-btn:hover {
-  background: rgba(232, 174, 60, 0.1);
+@media (hover: hover) and (pointer: fine) {
+  .compare-toggle-btn:hover {
+    background: rgba(232, 174, 60, 0.1);
+  }
 }
 
 .compare-toggle-btn.active {
@@ -714,12 +730,14 @@
   letter-spacing: 0.1em;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s, filter 0.2s;
 }
 
-.compare-clear:hover {
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.4);
+@media (hover: hover) and (pointer: fine) {
+  .compare-clear:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
 }
 
 .compare-view {
@@ -734,12 +752,14 @@
   letter-spacing: 0.1em;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s, filter 0.2s;
 }
 
-.compare-view:hover {
-  background: var(--accent-fill);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .compare-view:hover {
+    background: var(--accent-fill);
+    transform: translateY(-2px);
+  }
 }
 
 @keyframes slideUp {

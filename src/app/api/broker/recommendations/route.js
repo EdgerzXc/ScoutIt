@@ -6,6 +6,10 @@ import { createRateLimiter } from "@/lib/rateLimit";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { validateRecommendationSubmission } from "@/lib/brokerRecommendationSubmission";
 import { resolveBrokerAuthorityId } from "@/lib/brokerDossier";
+import {
+  isSatisfactionSignalReady,
+  resolveQualifyingHandshakeId,
+} from "@/lib/brokerRecommendationEligibility";
 
 // ═══════════════════════════════════════════════════════════════
 // CLIENT RECOMMENDATION SUBMISSION — A-023 audit gap G1
@@ -53,6 +57,16 @@ export async function POST(request) {
     const body = await request.json().catch(() => null);
     if (!body) return json({ error: "Invalid request body" }, 400);
 
+    // Fail closed before reading the person's words. The satisfaction column
+    // is owner-gated under W-003; accepting a submission the database will
+    // then refuse loses what the client wrote, which is the whole content.
+    if (!(await isSatisfactionSignalReady(supabaseAdmin))) {
+      return json(
+        { error: "Client feedback is not open yet. Nothing was saved." },
+        503,
+      );
+    }
+
     const validated = validateRecommendationSubmission(body);
     if (!validated.ok) {
       return json({ error: "Invalid recommendation", fields: validated.errors }, 422);
@@ -67,18 +81,22 @@ export async function POST(request) {
       return json({ error: "You cannot recommend yourself" }, 403);
     }
 
-    // The relationship gate: the author must have an actual deal with this
-    // broker. Any deal qualifies to WRITE; only a completed two-sided
-    // transaction handshake qualifies to be labelled verified.
-    const { data: deals, error: dealError } = await supabaseAdmin
-      .from("deals")
-      .select("id")
-      .eq("broker_id", brokerId)
-      .eq("buyer_id", userId)
-      .limit(50);
+    // The relationship gate starts with a real deal, then tightens to the
+    // completed two-sided transaction handshake. A pending inquiry or a
+    // one-sided signature is not enough to create permanent public feedback.
+    //
+    // The rule itself lives in brokerRecommendationEligibility so the
+    // invitation panel offers the prompt on exactly the same terms this route
+    // accepts it on. Two copies of this question drift; one cannot.
+    const eligibility = await resolveQualifyingHandshakeId(supabaseAdmin, { userId, brokerId });
 
-    if (dealError) return json({ error: "Could not verify your connection" }, 503);
-    if (!deals?.length) {
+    if (!eligibility.ok) {
+      return eligibility.stage === "deals"
+        ? json({ error: "Could not verify your connection" }, 503)
+        : json({ error: "Could not verify your completed connection" }, 503);
+    }
+
+    if (!eligibility.hasDeal) {
       return json(
         { error: "Only a client who has worked with this advisor through ScoutIt can recommend them" },
         403,
@@ -86,18 +104,13 @@ export async function POST(request) {
     }
 
     // Verification is resolved from the authority, never accepted from input.
-    const dealIds = deals.map((deal) => deal.id);
-    const { data: handshakes } = await supabaseAdmin
-      .from("deal_handshakes")
-      .select("id, deal_id")
-      .in("deal_id", dealIds)
-      .eq("handshake_type", "transaction_handshake")
-      .eq("status", "completed")
-      .not("party_a_signed_at", "is", null)
-      .not("party_b_signed_at", "is", null)
-      .limit(1);
-
-    const qualifyingHandshakeId = handshakes?.[0]?.id || null;
+    const qualifyingHandshakeId = eligibility.handshakeId;
+    if (!qualifyingHandshakeId) {
+      return json(
+        { error: "You can share feedback after both parties complete the two-sided ScoutIt handshake" },
+        403,
+      );
+    }
 
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from("broker_recommendations")
@@ -107,6 +120,7 @@ export async function POST(request) {
         author_display_name: validated.value.authorDisplayName,
         attribution_mode: validated.value.attributionMode,
         relationship_type: validated.value.relationshipType,
+        satisfaction_level: validated.value.satisfactionLevel,
         body: validated.value.body,
         consent_granted: true,
         consent_recorded_at: new Date().toISOString(),
@@ -137,7 +151,8 @@ export async function POST(request) {
         event_type: "recommendation_submitted",
         event_payload: {
           attribution_mode: validated.value.attributionMode,
-          verified_connection: Boolean(qualifyingHandshakeId),
+          satisfaction_level: validated.value.satisfactionLevel,
+          verified_connection: true,
         },
       })
       .then(null, () => null);
@@ -146,7 +161,7 @@ export async function POST(request) {
       {
         id: inserted.id,
         state: inserted.moderation_state,
-        verifiedConnection: Boolean(qualifyingHandshakeId),
+        verifiedConnection: true,
         message: "Thank you. Your recommendation is with ScoutIt for review before it appears.",
       },
       201,

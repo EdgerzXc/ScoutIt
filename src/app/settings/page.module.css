@@ -28,8 +28,10 @@
   letter-spacing: 0.1em;
 }
 
-.backBtn:hover {
-  color: var(--text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .backBtn:hover {
+    color: var(--text-primary);
+  }
 }
 
 .content {
@@ -95,11 +97,19 @@
   transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
 }
 
-.settingsNav a:hover,
 .settingsNav a:focus-visible {
   color: var(--accent-bright);
   border-color: var(--accent-muted);
   background: rgba(var(--accent-rgb), 0.08);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .settingsNav a:hover {
+    color: var(--accent-bright);
+    border-color: var(--accent-muted);
+    background: rgba(var(--accent-rgb), 0.08);
+  }
 }
 
 .settingsSection {
@@ -205,13 +215,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
 }
 
-.tagCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md), var(--shadow-glow-soft);
-  border-color: rgba(var(--accent-rgb), 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .tagCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+    border-color: rgba(var(--accent-rgb), 0.3);
+  }
 }
 
 .tagCard.selected {
@@ -260,9 +272,21 @@
   cursor: pointer;
   width: 100%;
   margin-top: 32px;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
 }
 
-.buttonPrimary:hover {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .buttonPrimary:hover {
+    transform: translateY(-2px);
+  }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.backBtn:active,
+.settingsNav a:active,
+.tagCard:active,
+.buttonPrimary:active { transform: scale(0.97); transition-duration: 120ms; }

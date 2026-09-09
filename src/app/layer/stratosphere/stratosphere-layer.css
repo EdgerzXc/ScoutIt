@@ -318,6 +318,12 @@
 }
 
 .strat-signal-status {
+  /* Flex so the sample disclosure sits beside the status rather than
+     inheriting its letter-spacing and uppercase transform. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
@@ -613,6 +619,20 @@
 
   .strat-door {
     padding: 16px 17px;
+  }
+
+  /* The sample disclosure qualifies the status label. The signal column is
+     241px at this breakpoint and the sentence needs ~289px even at zero
+     tracking, so it cannot be made to fit one line without dropping under
+     the 12px readability floor that audit:typography enforces. It is given
+     its own row and allowed to wrap to two lines instead: legible beats
+     compact, and the tightened tracking and padding keep it from growing
+     further. The wording is untouched — it is the same sentence every other
+     surface shows. */
+  .strat-signal-status .inline-flex {
+    flex-basis: 100%;
+    letter-spacing: 0.04em;
+    padding-inline: 5px;
   }
 }
 

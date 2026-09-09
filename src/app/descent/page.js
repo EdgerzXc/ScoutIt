@@ -142,8 +142,11 @@ export default function DescentPage() {
           <h2 className="dl-title">News travels in the air.</h2>
           <p className="dl-sub">Before your feet touch the ground — what&apos;s moving, what&apos;s shifting, what&apos;s worth knowing. The market, read from above.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
+            {/* A-098: key was `a.href` — all three cards link to /intel, so
+                three siblings shared one key and React warned on /descent.
+                Titles are the unique field here. */}
             {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel" }].map((a) => (
-              <Link key={a.href} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
+              <Link key={a.t} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 10 }}>{a.k}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
               </Link>

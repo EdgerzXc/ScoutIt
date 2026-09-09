@@ -23,9 +23,16 @@ describe("chat retention purge", () => {
     expect(PURGED_BODY).toMatch(/Purged/);
   });
 
-  it("only touches closed deals past the cutoff", () => {
-    expect(route).toContain('.eq("status", "closed")');
+  it("purges every terminal status past the cutoff — not only closed", () => {
+    // A-103: the UI decline path writes `declined` and the sender-withdraw
+    // path writes `withdrawn`, both stamping `closed_at` — but the job only
+    // selected `closed`, so those threads kept bodies forever against the
+    // published seven-day promise. The candidate set is the shared terminal
+    // list; `reported` is deliberately absent (it files a dispute hold at
+    // report time instead — purging it would destroy evidence under review).
+    expect(route).toContain("PURGE_ELIGIBLE_STATUSES");
     expect(route).toContain('.lte("closed_at", cutoff)');
+    expect(route).not.toMatch(/\.eq\("status",\s*"closed"\)/);
   });
 
   it("exempts threads under an active dispute hold", () => {

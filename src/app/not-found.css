@@ -130,9 +130,11 @@
   border-radius: 2px;
   transition: background 0.2s ease, transform 0.2s ease;
 }
-.nf-btn-primary:hover {
-  background: var(--accent-bright, #F7C64E);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .nf-btn-primary:hover {
+    background: var(--accent-bright, #F7C64E);
+    transform: translateY(-1px);
+  }
 }
 
 .nf-btn-secondary {
@@ -148,8 +150,31 @@
   border-radius: 2px;
   transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
-.nf-btn-secondary:hover {
-  border-color: var(--accent, #E8AE3C);
-  color: var(--accent, #E8AE3C);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .nf-btn-secondary:hover {
+    border-color: var(--accent, #E8AE3C);
+    color: var(--accent, #E8AE3C);
+    transform: translateY(-1px);
+  }
+}
+
+/* A-074. Motion here had no reduced-motion answer. The rule the rest of the
+   codebase follows: keep colour and opacity, which carry meaning, and drop
+   movement and duration, which do not. 23 of 29 stylesheets already did this;
+   these were the omissions, not a missing standard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .nf-btn-primary:hover,
+  .nf-btn-secondary:hover,
+  .nf-btn-primary:active,
+  .nf-btn-secondary:active {
+    transform: none !important;
+  }
 }

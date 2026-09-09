@@ -69,7 +69,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
             text-transform: uppercase;
           }
 

@@ -14,6 +14,7 @@ import {
   releasesHold,
   titleForFiling,
 } from "../src/lib/partyDisputePolicy.mjs";
+import { disputeAge } from "../src/lib/disputeAgePolicy.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const mainSiteRetention = await readFile(
@@ -145,4 +146,28 @@ test("adoption is tier-gated and enforces the tier before it touches data", () =
 test("closing a party filing warns that the hold is about to be released", () => {
   assert.match(page, /releases the retention hold/i);
   assert.match(actions, /retention hold on that conversation is released/i);
+});
+
+test("the ageing view is calculated from a fixed instant", () => {
+  const now = new Date("2026-08-31T04:00:00.000Z");
+  assert.deepEqual(disputeAge("2026-08-31T03:30:00.000Z", now), {
+    label: "Open 30m",
+    overdue: false,
+  });
+  assert.deepEqual(disputeAge("2026-08-20T04:00:00.000Z", now), {
+    label: "Open 11d",
+    overdue: true,
+  });
+  assert.equal(disputeAge(null, now), null);
+  assert.match(page, /<DisputeAge createdAt=\{d\.created_at\}/);
+});
+
+test("dispute transitions require both the event and immutable audit write to land", () => {
+  assert.match(actions, /if \(error\) throw new Error\(`Could not record dispute event:/);
+  for (const name of ["openDispute", "adoptPartyDispute", "addDisputeNote", "claimDispute", "closeDispute"]) {
+    const start = actions.indexOf(`export async function ${name}(`);
+    const next = actions.indexOf("export async function ", start + 1);
+    const body = actions.slice(start, next === -1 ? actions.length : next);
+    assert.match(body, /await logActionStrict\(/, `${name} allows its immutable audit to fail silently`);
+  }
 });

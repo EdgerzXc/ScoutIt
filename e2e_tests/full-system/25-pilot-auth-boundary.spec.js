@@ -30,7 +30,7 @@ test.describe("controlled-pilot auth and display boundary", () => {
   test("offers only pilot-accepted display choices", async ({ page }) => {
     await gotoAndSettle(page, "/about");
     const displaySettingsButton = page.getByRole("button", {
-      name: "Help & Display (Guide / Dark / High Contrast / Lite Mode)",
+      name: "Help & Display (Guide / Dark / High Contrast / Lite Mode / Simple Mode)",
     }).first();
 
     if ((page.viewportSize()?.width || 0) > 600) {
@@ -51,6 +51,7 @@ test.describe("controlled-pilot auth and display boundary", () => {
 
     await expect(page.getByText("Dark Mode", { exact: true })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText("High Contrast", { exact: true })).toBeVisible();
+    await expect(page.getByText(/Simple Mode/).first()).toBeVisible();
     await expect(page.getByText(/Lite Mode/).first()).toBeVisible();
     await expect(page.getByText("Light Mode", { exact: true })).toHaveCount(0);
   });

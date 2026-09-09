@@ -1,6 +1,7 @@
 import { RECORD_STATES } from "@/lib/brokerMetrics";
 import { CREDENTIAL_STATES } from "@/lib/brokerCredential";
 import BrokerRecordChart from "@/components/brokers/BrokerRecordChart";
+import { recordPanelPresentation } from "@/lib/brokerRecordPanel";
 
 /**
  * A-023 — the identity block, shared verbatim by the canonical dossier and the
@@ -19,14 +20,19 @@ const RECORD_COPY = {
 };
 
 function ScoutItRecord({ record }) {
-  const heading =
-    record.state === RECORD_STATES.BUILDING || record.state === RECORD_STATES.UNAVAILABLE;
+  // A-039. When the at-a-glance chart renders it already carries the
+  // "ScoutIt Record" heading, so repeating it here over a single line of
+  // provenance is the duplication A-039 reports — and a full bordered box
+  // around one line of small print is what made the panel read as an orphan.
+  // In BUILDING and UNAVAILABLE the chart returns null and this panel IS the
+  // record, so it keeps both. See lib/brokerRecordPanel.js.
+  const { showBadge, framed, explains } = recordPanelPresentation(record);
 
   return (
-    <div className="detail-closures-box">
-      <span className="icon-badge">SCOUTIT RECORD</span>
+    <div className={framed ? "detail-closures-box" : "detail-record-note"}>
+      {showBadge && <span className="icon-badge">SCOUTIT RECORD</span>}
 
-      {heading ? (
+      {explains ? (
         <>
           <p>
             {record.state === RECORD_STATES.BUILDING
@@ -54,10 +60,22 @@ function ScoutItRecord({ record }) {
               is exactly the condition under which the chart renders — so no
               state can reach here with the numbers now shown nowhere. The
               method note below stays, because provenance is this panel's job. */}
-          <small>
-            Computed only from activity completed through ScoutIt. Self-reported career history
-            never contributes to these figures.
-          </small>
+          {/* A-065. The provenance note must describe where these numbers
+              actually came from. A seeded snapshot (`source = 'example_seed'`)
+              was rendering under the sentence claiming it was computed from
+              real ScoutIt activity, which is the one thing this note exists to
+              guarantee. Demo scaffolding says so in its own words instead. */}
+          {record.isExampleSeed ? (
+            <small className="record-example-note">
+              Demonstration figures on an example profile. These are seeded for testing and were
+              not computed from real ScoutIt activity.
+            </small>
+          ) : (
+            <small>
+              Computed only from activity completed through ScoutIt. Self-reported career history
+              never contributes to these figures.
+            </small>
+          )}
         </>
       )}
     </div>

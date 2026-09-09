@@ -132,11 +132,11 @@ export default async function MissionInboxPage() {
     },
     {
       key: "security",
-      title: "Security flags",
-      subtitle: isOps ? "Masked IPs flagged for anomalous traffic" : "Ops Manager access required",
+      title: "Traffic flags",
+      subtitle: isOps ? "Masked sessions flagged by product telemetry — not enforced" : "Ops Manager access required",
       icon: <Radar className="w-4 h-4 text-red-400" />,
       href: "/dashboard/security",
-      cta: "Open Security Center",
+      cta: "Open traffic log",
       count: flags.length,
       hidden: !isOps,
       items: flags.map((f) => ({

@@ -5,7 +5,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { hasBadge } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
-import Link from "next/link";
 import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
 
 export default function BadgeRegistryPage() {
@@ -117,7 +116,7 @@ export default function BadgeRegistryPage() {
             ScoutIt Badge Registry
           </h1>
           <p className="font-body text-text-secondary text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            A public ledger of the platform&apos;s most exclusive honors. Badges grant lifetime privileges, massive discounts, and elevated status. Once a cohort is full, it is permanently locked.
+            A public ledger of the platform&apos;s earned honors. Badges are staff-granted for verified contributions or claimed through the pioneer flow — they are never sold and confer no priced benefit today. Once a cohort is full, it is permanently locked.
           </p>
         </div>
 
@@ -203,9 +202,9 @@ export default function BadgeRegistryPage() {
                       {claimingId === badge.id ? 'CLAIMING...' : 'CLAIM FREE BADGE →'}
                     </button>
                   ) : (
-                    <Link href="/pricing" className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-text-secondary hover:text-white">
-                      Unlock Now →
-                    </Link>
+                    <span className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/5 bg-white/5 text-text-secondary">
+                      Staff-granted honor — no purchase path
+                    </span>
                   )
                 )}
               </div>

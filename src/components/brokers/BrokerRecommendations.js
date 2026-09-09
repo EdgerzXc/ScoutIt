@@ -1,6 +1,8 @@
 import {
   RECOMMENDATION_SECTION_STATES,
 } from "@/lib/brokerRecommendations";
+import { MIN_SATISFACTION_SAMPLE, SATISFACTION_LEVELS } from "@/lib/brokerSatisfaction";
+import SatisfactionFace from "@/components/brokers/SatisfactionFace";
 
 /**
  * A-023 phase 4 — Client Recommendations.
@@ -18,6 +20,13 @@ const RECOMMENDATION_COPY = {
     "Client recommendations could not be loaded just now. This is a temporary read failure, not a statement that none exist.",
 };
 
+const SATISFACTION_LABELS = {
+  angry: "Angry",
+  sad: "Sad",
+  smile: "Smile",
+  happy: "Happy",
+};
+
 function formatMonth(iso) {
   if (!iso) return null;
   const date = new Date(iso);
@@ -27,6 +36,7 @@ function formatMonth(iso) {
 
 export default function BrokerRecommendations({ section }) {
   const listed = section.state === RECOMMENDATION_SECTION_STATES.LISTED;
+  const satisfaction = section.satisfaction;
 
   return (
     <section className="detail-curations-section" aria-labelledby="broker-recommendations-title">
@@ -35,6 +45,47 @@ export default function BrokerRecommendations({ section }) {
         Written by clients, attributed exactly as each client chose, and published only after
         consent and moderation. ScoutIt never edits them and this advisor cannot add or remove them.
       </p>
+
+      {satisfaction && (
+        <div className="satisfaction-instrument" aria-label="Client satisfaction distribution">
+          <div className="satisfaction-reading">
+            {satisfaction.state === "published" ? (
+              <>
+                <strong>{satisfaction.positiveShare}% positive</strong>
+                <span>· {satisfaction.total} responses</span>
+              </>
+            ) : (
+              <>
+                <strong>Building</strong>
+                <span>
+                  {satisfaction.total} of {MIN_SATISFACTION_SAMPLE} responses needed
+                </span>
+              </>
+            )}
+          </div>
+          <ul className="satisfaction-distribution">
+            {SATISFACTION_LEVELS.map((level) => {
+              const count = satisfaction.distribution[level];
+              const share = satisfaction.total ? (count / satisfaction.total) * 100 : 0;
+              return (
+                <li key={level} className={`satisfaction-level satisfaction-level-${level}`}>
+                  <div className="satisfaction-level-label">
+                    <SatisfactionFace level={level} label={SATISFACTION_LABELS[level]} />
+                    <span>{SATISFACTION_LABELS[level]}</span>
+                    <strong>{count}</strong>
+                  </div>
+                  <span className="satisfaction-track" aria-hidden="true">
+                    <span className="satisfaction-segment" style={{ "--segment-size": `${share}%` }} />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="satisfaction-method">
+            Completed ScoutIt connections only · all time · moderated · no star average
+          </p>
+        </div>
+      )}
 
       {listed ? (
         <ul className="recommendation-list">

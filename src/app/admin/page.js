@@ -16,7 +16,16 @@ import { sanitizeError } from "@/lib/sanitizeError";
 function AdminPageInner() {
   const [activeTab, setActiveTab] = useState("flags");
   const [pendingProperties, setPendingProperties] = useState([]);
+  const [pendingError, setPendingError] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // A-076: PDF-assisted drafts awaiting their source-document check. AGENTS.md
+  // §2.4 requires this before publication, and until now nothing in the product
+  // could perform it — the publish route's 422 had no matching key.
+  const [pdfQueue, setPdfQueue] = useState([]);
+  const [pdfLoading, setPdfLoading] = useState(true);
+  const [pdfError, setPdfError] = useState(null);
+  const [pdfProcessingId, setPdfProcessingId] = useState(null);
   const [processingId, setProcessingId] = useState(null);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
 
@@ -64,23 +73,71 @@ function AdminPageInner() {
     }
   };
 
+  // A-073: reads through a staff-authorized server route, NOT directly from the
+  // browser. The old client-direct query was constrained by RLS to rows the
+  // viewer owns, so staff saw an empty queue instead of third-party submissions.
+  // See the header of /api/admin/pending for the full reasoning.
   async function fetchPending() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('pipeline_status', 'pending')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setPendingProperties(data);
+    setPendingError(null);
+    try {
+      const res = await fetch("/api/admin/pending", { headers: await authHeaders() });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Could not load the submission queue.");
+      setPendingProperties(result.properties || []);
+    } catch (err) {
+      // An empty queue and a failed load look identical to a reviewer. Say which
+      // one this is, rather than rendering "no submissions" over an error.
+      console.error("Failed to load pending submissions", err);
+      setPendingProperties([]);
+      setPendingError(sanitizeError(err, "Could not load the submission queue."));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  // A-076: the queue of PDF-assisted drafts a staff member must check against
+  // their source document before the owner can publish.
+  async function fetchPdfQueue() {
+    setPdfLoading(true);
+    setPdfError(null);
+    try {
+      const res = await fetch("/api/admin/pdf-verify", { headers: await authHeaders() });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Could not load the verification queue.");
+      setPdfQueue(result.drafts || []);
+    } catch (err) {
+      console.error("Failed to load PDF verification queue", err);
+      setPdfQueue([]);
+      setPdfError(sanitizeError(err, "Could not load the verification queue."));
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
+  async function handleVerifyPdfDraft(propertyId) {
+    setPdfProcessingId(propertyId);
+    try {
+      const res = await fetch("/api/admin/pdf-verify", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({ propertyId }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Could not record the verification.");
+      setMessage({ type: "success", text: "Draft verified against its source document. The owner can now publish." });
+      await fetchPdfQueue();
+    } catch (err) {
+      setMessage({ type: "error", text: sanitizeError(err) });
+    } finally {
+      setPdfProcessingId(null);
+    }
+  }
 
   useEffect(() => {
     fetchPending();
     fetchPrcQueue();
+    fetchPdfQueue();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -125,7 +182,11 @@ function AdminPageInner() {
       <main className="admin-main">
         <header className="admin-header">
           <span className="vector-label">LAYER 00 // RESTRICTED ACCESS</span>
-          <h1 className="page-title">Mission Control</h1>
+          {/* A-073: NOT "Mission Control" — that name belongs to exactly one
+              thing, the separate staff console in `mission-control/`. See the
+              rule in MissionControlMode.js:23-30; the collision cost real time
+              once already. */}
+          <h1 className="page-title">Admin Console</h1>
           <p className="page-subtitle">Master feature switches, verification queues, and system parameters.</p>
         </header>
 
@@ -172,6 +233,18 @@ function AdminPageInner() {
           >
             <ShieldCheck size={15} />
             PRC Verification ({prcQueue.filter((p) => !p.prc_verified).length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("pdf")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "pdf"
+                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <FileText size={15} />
+            PDF Drafts ({pdfQueue.length})
           </button>
 
           <button
@@ -245,6 +318,16 @@ function AdminPageInner() {
 
               {loading ? (
                 <div className="loading-state">Scanning secure submissions...</div>
+              ) : pendingError ? (
+                /* A-073: a failed load must never render as "the queue is clear" —
+                   a reviewer cannot tell the difference, and the wrong one means
+                   real submissions sit unreviewed. */
+                <div className="error-state" role="alert">
+                  <p>{pendingError}</p>
+                  <button type="button" className="btn-retry" onClick={fetchPending}>
+                    Try again
+                  </button>
+                </div>
               ) : pendingProperties.length === 0 ? (
                 <div className="empty-state">
                   <p>No pending properties. The queue is clear.</p>
@@ -277,6 +360,76 @@ function AdminPageInner() {
                           onClick={() => handleApprove(prop.id)}
                         >
                           {processingId === prop.id ? "SYNCING..." : "APPROVE TO AIRTABLE"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "pdf" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>PDF Draft Verification</h2>
+                <span className="count-badge">{pdfQueue.length}</span>
+              </div>
+
+              {pdfLoading ? (
+                <div className="loading-state">Loading PDF-assisted drafts...</div>
+              ) : pdfError ? (
+                <div className="error-state" role="alert">
+                  <p>{pdfError}</p>
+                  <button type="button" className="btn-retry" onClick={fetchPdfQueue}>
+                    Try again
+                  </button>
+                </div>
+              ) : pdfQueue.length === 0 ? (
+                <div className="empty-state">
+                  <p>
+                    No PDF-assisted drafts awaiting verification. These appear when an owner
+                    builds a listing from an uploaded document.
+                  </p>
+                </div>
+              ) : (
+                <div className="submission-list">
+                  {pdfQueue.map((draft) => (
+                    <div key={draft.id} className="submission-card">
+                      <div className="submission-info">
+                        <div className="info-primary">
+                          <FileText size={16} color="#E8AE3C" />
+                          <h3>{draft.title}</h3>
+                        </div>
+                        <div className="info-secondary">
+                          {draft.type && <span className="info-tag">{draft.type}</span>}
+                          {draft.location && <span className="info-tag">{draft.location}</span>}
+                          <span className="info-tag coords">
+                            {draft.pdf_source_url ? "Source attached" : "No source file"}
+                          </span>
+                        </div>
+                        <div className="info-meta">
+                          {/* Says what the staff member is attesting to, not just
+                              "approve" — the attestation is the whole point. */}
+                          Compare every field against the owner&apos;s document before verifying.
+                          {draft.pdf_source_url && (
+                            <>
+                              {" "}
+                              <a href={draft.pdf_source_url} target="_blank" rel="noopener noreferrer">
+                                Open source document
+                              </a>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="submission-actions">
+                        <button
+                          className="btn-approve"
+                          disabled={pdfProcessingId === draft.id}
+                          onClick={() => handleVerifyPdfDraft(draft.id)}
+                        >
+                          {pdfProcessingId === draft.id ? "RECORDING..." : "VERIFIED AGAINST SOURCE"}
                         </button>
                       </div>
                     </div>
@@ -382,7 +535,11 @@ function AdminPageInner() {
         .vector-label {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
-          color: #ff3333; /* Red accent for restricted/admin */
+          /* A-074. AGENTS.md section 1 locks the palette to deep black plus
+             gold; a raw #ff3333 was the only place on the platform breaking
+             it. --red is the tokenised semantic red the rest of the app
+             already uses, and it themes with the rest of the system. */
+          color: var(--red);
           text-transform: uppercase;
           letter-spacing: 0.12em;
           display: block;
@@ -422,9 +579,9 @@ function AdminPageInner() {
         }
 
         .admin-alert.error {
-          background: rgba(255, 51, 51, 0.1);
-          border: 1px solid rgba(255, 51, 51, 0.3);
-          color: #ff3333;
+          background: var(--red-dim);
+          border: 1px solid var(--red);
+          color: var(--red);
         }
 
         .admin-panel {
@@ -471,7 +628,7 @@ function AdminPageInner() {
           border-radius: 20px;
         }
 
-        .loading-state, .empty-state {
+        .loading-state, .empty-state, .error-state {
           padding: 64px;
           text-align: center;
           font-family: var(--font-mono), monospace;
@@ -479,6 +636,41 @@ function AdminPageInner() {
           color: var(--text-muted);
           text-transform: uppercase;
           letter-spacing: 0.1em;
+        }
+
+        /* A-073: reads as a fault, not as an empty queue. Signal red is status
+           only — the retry stays the panel's neutral control, so the error does
+           not spend the screen's one gold accent. */
+        .error-state {
+          color: var(--red);
+        }
+        .error-state .btn-retry {
+          margin-top: 16px;
+          min-height: 44px;
+          padding: 0 20px;
+          background: transparent;
+          border: 1px solid var(--border-mid);
+          border-radius: var(--radius-md);
+          color: var(--text-secondary);
+          font-family: inherit;
+          font-size: inherit;
+          text-transform: inherit;
+          letter-spacing: inherit;
+          cursor: pointer;
+          transition: border-color 160ms ease-out, color 160ms ease-out;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .error-state .btn-retry:hover {
+            border-color: var(--accent-muted);
+            color: var(--text-primary);
+          }
+        }
+        .error-state .btn-retry:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+        .error-state .btn-retry:active {
+          transform: translateY(1px);
         }
 
         .submission-list {
@@ -562,7 +754,7 @@ function AdminPageInner() {
           padding: 12px 24px;
           border-radius: 4px;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
         }
 
         .btn-approve:hover:not(:disabled) {

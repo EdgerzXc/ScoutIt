@@ -6,6 +6,7 @@ import { withCronEventLog } from "@/lib/cronEventLog";
 import {
   CHAT_RETENTION_DAYS,
   DISPUTE_HOLD_STATUSES,
+  PURGE_ELIGIBLE_STATUSES,
   PURGED_BODY,
   retentionCutoffIso,
 } from "@/lib/chatRetention";
@@ -14,12 +15,16 @@ import {
 // CHAT BODY PURGE — the named consumer for the 7-day retention promise
 // ═══════════════════════════════════════════════════════════════
 //
-// A closed thread stays readable for seven days, then its message bodies are
-// replaced. The rows remain: participants, timestamps and deal metadata are
-// the audit trail, and deleting them would orphan the Connect ledger.
+// An ended thread (closed, declined, withdrawn, expired) stays readable for
+// seven days, then its message bodies are replaced. The rows remain:
+// participants, timestamps and deal metadata are the audit trail, and
+// deleting them would orphan the Connect ledger.
 //
-// A thread under an active dispute hold is exempt until the case resolves —
-// purging evidence mid-review would destroy the only record of what happened.
+// A reported thread is NOT a candidate here — Report & Unmatch files a
+// dispute hold at report time, and the hold below exempts it until the case
+// resolves. Purging evidence mid-review would destroy the only record of
+// what happened. The lawful-retention classification behind longer holds
+// stays with W-009 and counsel; this job only enforces the ordinary rule.
 
 const BATCH_LIMIT = 500;
 
@@ -37,10 +42,12 @@ async function handleCron(request) {
   try {
     const cutoff = retentionCutoffIso();
 
+    // A-103: every terminal status the UI can stamp — never only `closed`.
+    // `reported` is excluded by construction (see PURGE_ELIGIBLE_STATUSES).
     const { data: closed, error: closedErr } = await supabaseAdmin
       .from("deals")
       .select("id")
-      .eq("status", "closed")
+      .in("status", PURGE_ELIGIBLE_STATUSES)
       .lte("closed_at", cutoff)
       .limit(BATCH_LIMIT);
 

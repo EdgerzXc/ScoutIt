@@ -1,30 +1,62 @@
 import { supabase } from './supabaseClient';
 import { anonymityShieldDefaultsOn } from './entitlements';
+import { completenessScoreOf } from "@/lib/dashboardListings";
 
-// ── PROFILE UPSERT ────────────────────────────────────────────────────────────
-// Called on /profile page load. Syncs localStorage user data into Supabase.
+// ── PROFILE SYNC ──────────────────────────────────────────────────────────────
+// Called on /profile page load. Pushes the browser's own editable profile
+// fields into Supabase and returns the canonical row.
+//
+// U-027 — WHAT THIS USED TO DO, AND WHY IT STOPPED WORKING
+// --------------------------------------------------------
+// This was an `upsert` that also sent `subscription_tier`, `connects_balance`,
+// `member_since`, `provider_type` and `prc_license` — read out of
+// localStorage. That is the browser asserting its own paid tier, its own
+// wallet balance and its own professional credential, which is precisely the
+// escalation U-022 closed: none of those five is in the ten-column grant, and
+// `authenticated` holds no INSERT on `user_profiles` at all. So since
+// 2026-09-04 the whole call has failed with 42501 and every legitimate field
+// in it — display name, headline, bio, location, firm, service — silently
+// stopped syncing too. The caller discards the error, so nobody saw it.
+//
+// Removing those five columns is not a loss of function. The row is created by
+// the signup trigger (`auto_provision_user_profile_on_signup`), so no INSERT is
+// needed; tier and balance are server-owned and were never the browser's to
+// state; and `prc_license` now goes through /api/broker/credential, which also
+// enforces the re-verification reset that this path never did.
+//
+// Anything added here must be in the grant. `PROFILE_SYNC_COLUMNS` is asserted
+// against the live column privileges by `profileWriteGrantContract.test.js`.
+export const PROFILE_SYNC_COLUMNS = Object.freeze([
+  'display_name',
+  'location',
+  'headline',
+  'bio',
+  'firm',
+  'service',
+  'provider_availability',
+  'active_roles',
+  'updated_at',
+]);
+
 export async function upsertProfile(localUser) {
   const profile = {
-    id: localUser.id,
     display_name: localUser.name || null,
     location: localUser.publicProfile?.location || null,
     headline: localUser.publicProfile?.headline || null,
     bio: localUser.publicProfile?.bio || null,
     firm: localUser.publicProfile?.firm || null,
     service: localUser.publicProfile?.service || null,
-    prc_license: localUser.broker?.prcLicense || null,
-    provider_type: localUser.providerType || null,
     provider_availability: localUser.provider?.availability ?? true,
-    member_since: localUser.created_at || new Date().toISOString(),
-    subscription_tier: localUser.tier || localUser.subscription_tier || 'starry',
-    connects_balance: localUser.connects_balance ?? 0,
     active_roles: localUser.tags || [],
     updated_at: new Date().toISOString(),
   };
 
+  // `update`, not `upsert`: the row already exists, and an upsert would need
+  // an INSERT grant that `authenticated` deliberately does not have.
   const { data, error } = await supabase
     .from('user_profiles')
-    .upsert(profile, { onConflict: 'id' })
+    .update(profile)
+    .eq('id', localUser.id)
     .select()
     .single();
 
@@ -134,7 +166,11 @@ export async function loadPublicProviders(providerType) {
 export async function loadPublicRoles(userId) {
   try {
     const res = await fetch(`/api/profile/public-roles?userId=${encodeURIComponent(userId)}`);
-    if (!res.ok) return { publicRoles: [], isPilotParticipant: false, error: null };
+    // A-091: a failed read resolves pilot to false everywhere downstream, so
+    // the failure must travel as an error, not as a silent null — every
+    // reader treats false as "ordinary person". (All current readers only
+    // display on an explicit === true, so this changes no rendering today.)
+    if (!res.ok) return { publicRoles: [], isPilotParticipant: false, error: new Error(`public-roles unavailable (${res.status})`) };
     const data = await res.json();
     return { publicRoles: data.publicRoles || [], badges: data.badges || [], isPilotParticipant: data.isPilotParticipant === true, error: null };
   } catch (error) {
@@ -194,12 +230,40 @@ export async function updatePrivacySettings(userId, patch) {
   return { data, error };
 }
 
+// U-026: this used to write `is_profile_public` straight from the browser.
+// U-022 made it server-only by grant, so since 2026-09-04 the write has been
+// refused with 42501 while `PrivacyControls` flipped the switch and reported
+// success — a privacy control that says "you are public" when the database
+// still says private. Standing Rule 5 in the other direction: the browser
+// cannot be the one to assert a visibility state.
+//
+// `/api/user/privacy-settings` already owned this column server-side and was
+// simply not being used from here. `userId` is no longer a parameter of the
+// write — the route resolves the caller from the session, so a client cannot
+// name whose profile it is changing.
 export async function updateProfilePublic(userId, isPublic) {
-  const { error } = await supabase
-    .from('user_profiles')
-    .update({ is_profile_public: isPublic, updated_at: new Date().toISOString() })
-    .eq('id', userId);
-  return { error };
+  try {
+    const { getSession } = await import('./authClient');
+    const { data: { session } } = await getSession();
+    if (!session) return { error: new Error('Session expired. Sign in again to change this.') };
+
+    const res = await fetch('/api/user/privacy-settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ isProfilePublic: isPublic }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return { error: new Error(data.error || 'Could not update profile visibility.') };
+
+    // The route re-reads the row, so this is the stored value, not the asked-for
+    // one. The caller renders from it.
+    return { error: null, isProfilePublic: data?.settings?.isProfilePublic === true };
+  } catch (err) {
+    return { error: err instanceof Error ? err : new Error('Could not update profile visibility.') };
+  }
 }
 
 // ── BROKER PROFILE ────────────────────────────────────────────────────────────
@@ -277,7 +341,7 @@ export async function loadOwnerListings(userId) {
     location: p.location,
     type: p.type,
     verified: !!p.verified,
-    completeness_score: p.completeness_score ?? 50
+    completeness_score: completenessScoreOf(p)
   }));
 
   return { data: mappedData, error };

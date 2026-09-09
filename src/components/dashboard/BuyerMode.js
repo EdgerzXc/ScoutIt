@@ -7,6 +7,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import { Bookmark, Search } from "lucide-react";
 import PostMoveEcosystem from "./PostMoveEcosystem";
+import RecommendationInvitation from "./RecommendationInvitation";
 import VaultOfHonor from "./VaultOfHonor";
 
 const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonMatrix"), { ssr: false });
@@ -15,6 +16,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
+import SimpleDetail from "@/components/ui/SimpleDetail";
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
@@ -26,7 +28,7 @@ export default function BuyerMode() {
   // Area watch — device-local (same pattern as Your Board), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
   const [areaWatch, setAreaWatch] = useState(false);
-  const { listings, savedIds, toggleSave, addToast, searchByRadius, MAPBOX_TOKEN, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
+  const { listings, savedIds, toggleSave, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
   const searchRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
@@ -49,10 +51,11 @@ export default function BuyerMode() {
   const [mapError, setMapError] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Initialize searchByRadius to 5km on mount so the list matches the map overlay
+  // A-094: setting the centre is what triggers the search (the [radarCenter]
+  // effect below owns it with the same 5km default), so the mount effect must
+  // not also fire searchByRadius — that ran the full-table read twice.
   useEffect(() => {
     setRadarCenter(DEFAULT_MAP_CENTER);
-    searchByRadius("5", DEFAULT_MAP_CENTER[0], DEFAULT_MAP_CENTER[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -341,8 +344,18 @@ export default function BuyerMode() {
             >
               {isSelected ? "✓" : "+"}
             </button>
+            {/* A-084. Icon-only, so it needs a name; and it is a toggle, so it
+                needs an announced state. Without aria-pressed a screen-reader
+                user cannot tell a saved item from an unsaved one — the label
+                and the state have to move together. */}
             <button 
               className="text-xl drop-shadow-md hover:scale-110 transition-transform p-0.5"
+              aria-pressed={savedIds.includes(item.id)}
+              aria-label={
+                savedIds.includes(item.id)
+                  ? `Remove ${item.title} from your board`
+                  : `Save ${item.title} to your board`
+              }
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -370,8 +383,16 @@ export default function BuyerMode() {
           <div className="font-working-title text-on-surface mb-1 truncate group-hover:underline">{item.title}</div>
           <div className="text-xs text-text-secondary truncate">{item.loc || 'Location hidden'}</div>
         </div>
+        {/* A-084. See the note on the compact card's toggle above: the pair
+            must stay identical or one of them silently loses its state. */}
         <button 
           className="absolute top-4 right-4 text-2xl drop-shadow-md hover:scale-110 transition-transform bg-background/20 rounded-full p-1"
+          aria-pressed={savedIds.includes(item.id)}
+          aria-label={
+            savedIds.includes(item.id)
+              ? `Remove ${item.title} from your board`
+              : `Save ${item.title} to your board`
+          }
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -388,7 +409,10 @@ export default function BuyerMode() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8 pb-24 animate-[fadeIn_0.5s_ease-out]">
-      
+      {/* A-096: the buyer lens rendered zero h1 — every other role lens has
+          one. Screen-reader-only: the visual composition is unchanged. */}
+      <h1 className="sr-only">Buyer workspace</h1>
+
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.04] pb-6">
         <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 flex-1">
@@ -405,7 +429,8 @@ export default function BuyerMode() {
           </div>
           
           {/* Proximity / Radius Filter */}
-          <select 
+          <select
+            aria-label="Search radius"
             className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full px-5 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 cursor-pointer w-full md:w-auto shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
             value={radius}
             onChange={handleRadiusChange}
@@ -424,6 +449,9 @@ export default function BuyerMode() {
             <button 
               className={`w-12 h-6 rounded-full p-1 transition relative ${showMap ? 'bg-gold-accent' : 'bg-surface-variant'}`}
               onClick={() => setShowMap(!showMap)}
+              role="switch"
+              aria-checked={showMap}
+              aria-label="Show the map"
             >
               <div className={`w-4 h-4 bg-on-surface rounded-full transition-transform absolute top-1 ${showMap ? 'translate-x-6' : 'translate-x-0'}`}></div>
             </button>
@@ -474,6 +502,13 @@ export default function BuyerMode() {
         </div>
       ) : (
         <>
+          {/* A-038 — feedback invitation for a completed two-sided handshake.
+              Above the archive because it is time-sensitive and below the
+              search because it must never come before what the buyer opened
+              the dashboard to do. Renders nothing at all unless the server
+              says this person actually has a qualifying connection. */}
+          <RecommendationInvitation />
+
           {/* Intelligence Archive (Saved Items) */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-surface-variant pb-2">
@@ -584,7 +619,13 @@ export default function BuyerMode() {
             </div>
           </div>
 
-          {/* Intel Teaser Rail */}
+          {/* Intel Teaser Rail.
+              A-083 6.3: the Market Intel rail is `detail` — a whole secondary
+              block. It collapses behind its own heading in Simple and is
+              untouched in Pro. The property cards, Your Board, the search and
+              every empty state above are core and unmarked, so they survive
+              automatically rather than by anyone remembering to protect them. */}
+          <SimpleDetail label="Market Intelligence">
           <div className="flex flex-col gap-4 mt-8">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
               Market Intelligence
@@ -638,6 +679,7 @@ export default function BuyerMode() {
 
             </div>
           </div>
+          </SimpleDetail>
 
           {/* Post-Move Ecosystem */}
           <PostMoveEcosystem />

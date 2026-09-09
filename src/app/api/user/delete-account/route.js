@@ -127,14 +127,24 @@ export async function POST(request) {
       );
     }
 
-    // 3. Revoke auth user and sessions
+    // 3. Revoke auth user and sessions.
+    //
+    // A-075: `shouldSoftDelete = true` used to be justified as preserving "FK
+    // references for audit logs". That reason was factually wrong — `audit_logs`
+    // has NO foreign key to `auth.users` (verified via `pg_constraint`; 13 such
+    // FKs exist in `public` and this is not one of them), so nobody had actually
+    // decided this. Soft-delete is kept because a hard delete cannot be undone
+    // if an erasure is later disputed, and because the 13 real FKs elsewhere in
+    // `public` do reference `auth.users`. It retains the `auth.users` row,
+    // including the email, which is the open retention question recorded as this
+    // task's remaining boundary — not something this change settles.
     const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(
       userId,
-      true // shouldSoftDelete = true to preserve FK references for audit logs
+      true
     );
 
     if (deleteUserError) {
-      console.error("[ACCOUNT DELETION] Auth deletion warning:", deleteUserError.message);
+      console.error("[ACCOUNT DELETION] Auth deletion failed:", deleteUserError.message);
     }
 
     // 4. Record the audit entry. This is the EVIDENCE that an erasure request
@@ -154,8 +164,36 @@ export async function POST(request) {
       },
     });
 
+    // A-075: if the auth deletion failed, this request did NOT do what the
+    // person asked. Their private data is erased, but their sign-in still
+    // works — so saying "Your account and private data have been deleted" is
+    // false, and it is false about the one thing they would notice.
+    //
+    // The route already reported an *audit-write* failure honestly, with a
+    // `warning` and a comment about not implying a complete paper trail. The
+    // auth failure — more consequential — was only `console.error`ed and
+    // recorded as `auth_user_removed: false` in audit metadata the person never
+    // sees. That contrast is what made it a slip rather than a policy, and it
+    // is the half of A-075 fixed here.
+    if (deleteUserError) {
+      return NextResponse.json(
+        {
+          success: false,
+          accountAccessRevoked: false,
+          error:
+            "Your private data was erased, but your sign-in could not be closed — you may still be able to sign in. " +
+            "The request has been recorded and needs to be completed manually. Please contact support so this is finished.",
+          erased,
+          retryable: true,
+          auditRecorded: audit.ok,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
+      accountAccessRevoked: true,
       message: "Your account and private data have been deleted.",
       erased,
       // Honest reporting: the deletion did happen, but if the audit record

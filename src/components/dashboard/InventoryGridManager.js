@@ -634,18 +634,21 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                 {!isOperatorMode && !lockedForOwner && (
                                   <>
                                     <button
+                                      aria-label="Duplicate this unit"
                                       onClick={() => duplicateUnit(unit.id)}
                                       className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
                                     >
                                       <Copy size={15} />
                                     </button>
                                     <button
+                                      aria-label="Subdivide this unit"
                                       onClick={() => setSubdivideUnitId(unit.id)}
                                       className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
                                     >
                                       <Split size={15} />
                                     </button>
                                     <button
+                                      aria-label="Remove this unit"
                                       onClick={() => removeUnit(unit.id)}
                                       className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition"
                                     >
@@ -702,7 +705,11 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt border border-gold-accent/20 text-[12px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                     {feature}
                                     {!structuralReadOnly && (
-                                      <button onClick={() => removeFeature(unit.id, feature)} className="text-text-muted hover:text-error transition">
+                                      <button
+                                        aria-label={`Remove the feature ${feature}`}
+                                        onClick={() => removeFeature(unit.id, feature)}
+                                        className="text-text-muted hover:text-error transition"
+                                      >
                                         <X size={10} />
                                       </button>
                                     )}

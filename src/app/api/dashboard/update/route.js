@@ -183,7 +183,6 @@ export async function POST(request) {
         }
 
         try {
-          console.log(`[UPDATE API] Syncing updates for slug ${slug} to Airtable...`);
           await updateProperty(apiKey, baseId, slug, supabasePayload);
           
           // Never replace the first-publication canonical slug with Airtable's formula result.

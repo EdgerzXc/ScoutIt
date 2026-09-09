@@ -65,7 +65,10 @@ export function formatDiscoverDatasets(airtableProperties = [], airtableIntel = 
   } : { Residential: [], Commercial: [], STR: [], Hospitality: [], Restaurants: [], Venues: [] };
 
   airtableIntel.forEach(item => {
-    let cat = item.category || "Residential";
+    // A-106: uncategorized rows keep the honest "General" label. There is
+    // no General tab, so they skip tab bucketing rather than wearing a
+    // vertical they were never filed under — they stay listed on /intel.
+    let cat = item.category || "General";
     if (cat.toLowerCase() === "hospitality") cat = "Hospitality";
     if (cat.toLowerCase() === "str") cat = "STR";
     if (cat.toLowerCase() === "culinary" || cat.toLowerCase() === "restaurants") cat = "Restaurants";
@@ -77,7 +80,7 @@ export function formatDiscoverDatasets(airtableProperties = [], airtableIntel = 
           id: item.id,
           slug: item.slug || item.id,
           category: item.intelType || "BRIEFING",
-          date: item.date || "Just Now",
+          date: item.date || "",
           region: regionOf(item),
           title: item.title,
           snippet: item.excerpt || ""

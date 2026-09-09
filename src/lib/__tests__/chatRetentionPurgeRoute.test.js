@@ -73,6 +73,18 @@ describe("purge-chat-messages route", () => {
     expect(opArgs("deal_messages", "neq")).toEqual(["body", PURGED_BODY]);
   });
 
+  it("selects every terminal status — declined and withdrawn threads purge too", async () => {
+    // A-103: the candidate set is the shared terminal list, never only
+    // `closed`. Asserted behaviourally against the mock chain: the deals
+    // read filters by the widened set past the cutoff.
+    await GET(request);
+    expect(opArgs("deals", "in")).toEqual([
+      "status",
+      ["closed", "declined", "withdrawn", "expired"],
+    ]);
+    expect(opArgs("deals", "lte")).toEqual(["closed_at", expect.any(String)]);
+  });
+
   it("writes nothing when every closed thread is under a dispute hold", async () => {
     mocks.tables.deal_disputes = { data: [{ deal_id: "deal-old" }, { deal_id: "deal-disputed" }], error: null };
 
@@ -82,13 +94,15 @@ describe("purge-chat-messages route", () => {
     expect(mocks.calls.some((c) => c.table === "deal_messages")).toBe(false);
   });
 
-  it("writes nothing when no thread has passed the retention window", async () => {
+  it("mutates no product data when no thread has passed the retention window", async () => {
     mocks.tables.deals = { data: [], error: null };
 
     const payload = await (await GET(request)).json();
 
     expect(payload).toMatchObject({ purged: 0, eligibleDeals: 0 });
-    expect(mocks.calls.some((c) => c.table !== "deals")).toBe(false);
+    expect(mocks.calls.some((c) => c.table === "deal_disputes")).toBe(false);
+    expect(mocks.calls.some((c) => c.table === "deal_messages")).toBe(false);
+    expect(mocks.calls.some((c) => c.table === "system_events")).toBe(true);
   });
 
   it("touches nothing at all when the cron caller is not authorised", async () => {

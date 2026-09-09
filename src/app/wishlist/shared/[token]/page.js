@@ -1,4 +1,5 @@
 import { decodeWishlistShareToken, isWishlistShareRevoked } from "@/lib/wishlistCrypto";
+import { classifySavedItem } from "@/lib/wishlistLiveness";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fetchProperties } from "@/lib/airtable";
 import Header from "@/components/layout/Header";
@@ -73,7 +74,11 @@ export default async function SharedWishlistPage({ params }) {
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
   const allProperties = await fetchProperties(apiKey, baseId);
-  const propMap = Object.fromEntries(allProperties.map(p => [p.id, p]));
+  // A-102: saved ids are slugs (ReactionButtons stores the slug) while the
+  // CMS row id is the Airtable record id — keying by id missed everything and
+  // every shared title read "Unknown Property". Key by slug, fall back to id.
+  const propMap = Object.fromEntries(allProperties.map(p => [p.slug || p.id, p]));
+  const liveSlugs = new Set(allProperties.map(p => p.slug).filter(Boolean));
 
   const enrichedItems = savedItems.map(item => {
     const prop = propMap[item.property_id];
@@ -84,7 +89,9 @@ export default async function SharedWishlistPage({ params }) {
       city: prop?.city || "",
       category: prop?.spaceCategory || "",
       reaction_type: item.reaction_type,
-      is_broker: false // Simplifying for shared view
+      is_broker: false, // Simplifying for shared view
+      // A-102: slug absent from the live set renders a non-link marker below.
+      removed: classifySavedItem(item, liveSlugs) === "removed",
     };
   });
 
@@ -118,9 +125,16 @@ export default async function SharedWishlistPage({ params }) {
                       <ReactionBadge reactionType={item.reaction_type} />
                     </div>
                     <div className="card-body">
+                      {item.removed ? (
+                        <>
+                          <h3 className="card-title">{item.property_title}</h3>
+                          <span className="removed-marker">Listing removed</span>
+                        </>
+                      ) : (
                       <Link href={`/property/${encodeURIComponent(item.property_id)}`} style={{ textDecoration: "none" }}>
                         <h3 className="card-title">{item.property_title}</h3>
                       </Link>
+                      )}
                       <div className="card-meta">
                         {item.city && <span>{item.city}</span>}
                         {item.category && !item.is_broker && (

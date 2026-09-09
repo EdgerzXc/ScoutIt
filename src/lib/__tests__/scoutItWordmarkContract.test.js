@@ -12,6 +12,7 @@ const SHARED_CONSUMERS = [
   "src/components/descent/LayerNav.js",
   "src/components/layout/Header.js",
   "src/components/layout/Footer.js",
+  "src/components/board/ShowcaseStage.js",
 ];
 
 describe("F-006 ScoutIt wordmark contract", () => {
@@ -36,11 +37,25 @@ describe("F-006 ScoutIt wordmark contract", () => {
     expect(read("src/app/property/[id]/brokers/BrokersClient.js")).not.toContain('className="nav-brand-logo">SCOUTIT');
   });
 
-  it("preserves the correct split on the owner-locked Showcase without editing it", () => {
+  it("uses the shared lockup on the owner-approved Showcase reconciliation (F-006)", () => {
+    // Owner approved the exact accessibility-only reconciliation 2026-09-09:
+    // shared wordmark, stage de-nested to a non-landmark container, tray
+    // names at the non-skipping level. Per Rule 14 this test is part of that
+    // change — re-aimed, not deleted. Host styles stay: the shared segments
+    // keep the brand-* classes the :global selectors target.
     const showcase = read("src/components/board/ShowcaseStage.js");
-    expect(showcase).toContain('<span className="brand-s">S</span>');
-    expect(showcase).toContain('<span className="brand-scout">cout</span>');
-    expect(showcase).toContain('<span className="brand-it">IT</span>');
+    expect(showcase).toContain("ScoutItWordmark");
+    expect(showcase).toContain('className="sc-brand-logo"');
+    expect(showcase).not.toContain('aria-label="ScoutIT');
+    expect(showcase).not.toContain('<span className="brand-s">S</span>');
+    // One main per page: the nested stage landmark is a div now (the page's
+    // own <main> in showcase/page.js is the single landmark).
+    expect(showcase).not.toMatch(/<main[\s>]/);
+    expect(showcase).toContain('<div className="sc-command-stage">');
+    // Tray names no longer skip from h1 to h4; the class (and its explicit
+    // 12px/600 styling) is unchanged, so no pixels move.
+    expect(showcase).not.toContain('<h4 className="sc-tray-name">');
+    expect(showcase).toContain('<h2 className="sc-tray-name">');
   });
 
   it("uses an ImageResponse-safe split across generated social cards", () => {

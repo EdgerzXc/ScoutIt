@@ -56,9 +56,11 @@
     color 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.scc-chip:hover {
-  border-color: var(--accent-muted, #6E531A);
-  color: var(--text-primary, #f0ede8);
+@media (hover: hover) and (pointer: fine) {
+  .scc-chip:hover {
+    border-color: var(--accent-muted, #6E531A);
+    color: var(--text-primary, #f0ede8);
+  }
 }
 
 .scc-chip:focus-visible {
@@ -82,8 +84,10 @@
   border-color: transparent;
 }
 
-.scc-chip--lens:hover {
-  background: var(--scc-chip-bg);
+@media (hover: hover) and (pointer: fine) {
+  .scc-chip--lens:hover {
+    background: var(--scc-chip-bg);
+  }
 }
 
 .scc-chip--lens.is-active {
@@ -204,13 +208,17 @@
   transition: color 160ms ease, background-color 160ms ease;
 }
 
-.scoutit-popup .maplibregl-popup-close-button:hover {
-  color: var(--accent-bright, #F7C64E);
-  background: rgba(232, 174, 60, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .scoutit-popup .maplibregl-popup-close-button:hover {
+    color: var(--accent-bright, #F7C64E);
+    background: rgba(232, 174, 60, 0.12);
+  }
 }
 
-.scoutit-popup a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .scoutit-popup a:hover {
+    text-decoration: underline;
+  }
 }
 
 @media (pointer: coarse) {
@@ -241,8 +249,10 @@
   filter: invert(85%) sepia(18%) saturate(360%) hue-rotate(357deg) brightness(95%);
 }
 
-.spatial-canvas-root .maplibregl-ctrl-group button:hover {
-  background: rgba(232, 174, 60, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .spatial-canvas-root .maplibregl-ctrl-group button:hover {
+    background: rgba(232, 174, 60, 0.12);
+  }
 }
 
 /* Tilt buttons. MapLibre's own controls draw their glyph as a background
@@ -280,8 +290,10 @@
   border-left: 1px solid var(--scc-chip-border);
 }
 
-.spatial-canvas-root .scc-tilt-btn:hover {
-  background: rgba(232, 174, 60, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .spatial-canvas-root .scc-tilt-btn:hover {
+    background: rgba(232, 174, 60, 0.12);
+  }
 }
 
 .spatial-canvas-root .scc-tilt-btn:focus-visible {
@@ -447,3 +459,13 @@
     right: 6px;
   }
 }
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.scc-chip:active,
+.scoutit-popup .maplibregl-popup-close-button:active,
+.spatial-canvas-root .maplibregl-ctrl-group button:active,
+.spatial-canvas-root .scc-tilt-btn:active { transform: scale(0.95); transition-duration: 120ms; }

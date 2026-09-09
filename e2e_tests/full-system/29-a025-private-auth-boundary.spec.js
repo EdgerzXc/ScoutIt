@@ -38,7 +38,7 @@ test.describe("A-025 verified private-workspace boundary", () => {
     await gotoAndSettle(page, "/dashboard/inbox");
 
     await expect(page).toHaveURL(/\/dashboard\/inbox/);
-    await expect(page.getByRole("heading", { name: /Leads & Inbox/i })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Inbox", level: 1, exact: true })).toBeVisible({ timeout: 20_000 });
     expect(errors, errors.join("\n")).toEqual([]);
   });
 

@@ -31,7 +31,13 @@ export async function generateMetadata({ params }) {
   const unit = resolvePublicChildSpace(match, resolvedParams.unitId);
   if (!unit) notFound();
 
-  let imageUrl = siteUrl("/og-default.jpg");
+  // A-118: this was `/og-default.jpg`, a file that does not exist in `public/`.
+  // Every share card that fell back to it pointed at a 404 — and for units that
+  // is the COMMON path, not the edge one, because the fallback survives whenever
+  // a unit has no photo of its own. `/api/og` is the branded card this codebase
+  // already builds and maintains (same wordmark as the root OG image), needs no
+  // parameters, and cannot drift from the brand the way a checked-in jpg would.
+  let imageUrl = siteUrl("/api/og");
   const isSample = Boolean(match.is_sample);
   const unitIndex = match.units_inventory.indexOf(unit);
   const hierarchy = getPropertyHierarchy(match);

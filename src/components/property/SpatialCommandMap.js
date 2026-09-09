@@ -1064,7 +1064,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
             <span style={{ color: "var(--accent)", fontWeight: "bold", fontSize: "12px" }}>🕸️ ENTITY & COMPLEX GRAPH</span>
-            <button onClick={() => setShowEntityGraph(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
+            <button aria-label="Close the entity graph" onClick={() => setShowEntityGraph(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
           </div>
 
           <div style={{ fontSize: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -1132,7 +1132,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               <span style={{ color: "var(--accent)", fontWeight: "bold", fontSize: "12px", letterSpacing: "1px" }}>
                 📍 SPATIAL LOCATION DOSSIER
               </span>
-              <button onClick={() => setShowDossierModal(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
+              <button aria-label="Close the dossier" onClick={() => setShowDossierModal(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "12px" }}>

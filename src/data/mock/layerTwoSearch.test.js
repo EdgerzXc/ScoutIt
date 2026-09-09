@@ -45,9 +45,25 @@ describe("article dataset integrity", () => {
   test("a signal is an article carrying a status badge", () => {
     const signals = getSignals();
     expect(signals.length).toBeGreaterThan(0);
+
+    const bySlug = new Map(ARTICLES.map((a) => [a.slug, a]));
     for (const s of signals) {
       expect(s.status).toBeTruthy();
-      expect(ARTICLES).toContain(s);
+      // Matched by slug rather than object identity: `getSignals` stamps
+      // `isSample` onto a copy, exactly as `getArticles` does, so the two
+      // surfaces cannot describe the same record differently.
+      expect(bySlug.has(s.slug)).toBe(true);
+      expect(s.title).toBe(bySlug.get(s.slug).title);
+    }
+  });
+
+  test("every signal is disclosed as sample data", () => {
+    // Stratosphere renders each signal under its status — "REGISTRY
+    // CONFIRMED", "ORDINANCE RATIFIED" — which reads as an assertion about a
+    // public record. Undisclosed, fabricated signals there read as verified
+    // fact. `getArticles` has always stamped this; `getSignals` had not.
+    for (const s of getSignals()) {
+      expect(s.isSample).toBe(true);
     }
   });
 

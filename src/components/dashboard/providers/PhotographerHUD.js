@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useDashboard } from "../../../context/DashboardContext";
 
 const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
@@ -9,6 +8,9 @@ const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
     <button type="button"
       className={`w-10 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
       onClick={() => onChange(!checked)}
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
     >
       <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
     </button>
@@ -16,7 +18,6 @@ const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
 );
 
 export default function PhotographerHUD({ projects, activeProjectId, setActiveProjectId, setActiveProjectDetails }) {
-  const { addToast } = useDashboard();
   const [activeTab, setActiveTab] = useState("bounties"); // 'bounties' | 'showcase'
   
   // Showcase State (Core)
@@ -53,11 +54,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
             <button className="text-text-secondary hover:text-gold-accent text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Gallery</button>
             <h2 className="font-display-md text-3xl text-on-surface">{project.title}</h2>
           </div>
-          <button 
-            className="bg-gold-accent text-background active:scale-95 font-working-title font-bold px-4 py-2 rounded text-sm hover:opacity-90 transition"
-            onClick={() => addToast("Final Gallery Submitted.", "📸")}
+          <button
+            disabled
+            title="Submissions open in Phase 2 — previews only today."
+            className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
           >
-            Submit Final Gallery
+            Submit Final Gallery · Phase 2
           </button>
         </div>
 
@@ -163,6 +165,9 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                   <button type="button"
                     className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
                     onClick={() => setAcceptingProjects(!acceptingProjects)}
+                    role="switch"
+                    aria-checked={acceptingProjects}
+                    aria-label="Accepting new projects"
                   >
                     <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingProjects ? 'translate-x-6' : 'translate-x-0'}`}></div>
                   </button>
@@ -242,11 +247,12 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 </div>
               </div>
               
-              <button 
-                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent active:scale-95 font-working-title font-bold px-4 py-4 rounded hover:bg-gold-accent/10 transition uppercase tracking-wider text-sm"
-                onClick={() => addToast("Elite Roster Profile Updated.", "✨")}
+              <button
+                disabled
+                title="Profile saving opens in Phase 2 — previews only today."
+                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed"
               >
-                Save Showcase Profile
+                Save Showcase Profile · Phase 2
               </button>
             </div>
           </div>

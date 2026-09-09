@@ -30,12 +30,13 @@ test.describe('@P1 @CMS Airtable starter catalog', () => {
   test('serves the original category properties and broker roster without local fixtures', async ({ page, request }) => {
     const errors = trackErrors(page);
 
-    await test.step('Verify the CMS API is Airtable-backed', async () => {
+    await test.step('Verify the public catalogue contract and starter inventory', async () => {
       const response = await request.get('/api/cms');
       expect(response.ok()).toBe(true);
       const body = await response.json();
 
-      expect(body.source).toMatch(/^(airtable|upstash_redis)/);
+      // Provider/cache topology is intentionally private; inventory checks below remain exact.
+      expect(body.source).toBe('catalog');
       expect(body.properties.map((property) => property.slug).sort()).toEqual(EXPECTED_PROPERTIES);
       expect([...new Set(body.properties.map((property) => property.spaceCategory))].sort()).toEqual(EXPECTED_CATEGORIES);
       expect(body.brokers.map((broker) => broker.name).sort()).toEqual(EXPECTED_BROKERS);

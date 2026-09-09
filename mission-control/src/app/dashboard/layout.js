@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import {
   Shield, LayoutDashboard, Users, Database, Flag, Video, LogOut, Bell,
   ScrollText, KeyRound, Award, BarChart3, Radar, Inbox, BadgeCheck,
-  Scale, BrainCircuit, Radio, Wrench, Crosshair, Mail, Cpu, Gavel, Briefcase } from "lucide-react";
+  Scale, BrainCircuit, Radio, Wrench, Crosshair, Mail, Cpu, Gavel, Briefcase,
+  MessageSquareQuote, Stamp } from "lucide-react";
 import { getCurrentStaff, TIER_LABELS, TIERS } from "@/lib/rbac";
 import SidebarNav from "@/components/dashboard/SidebarNav";
 import SensitiveWorkspaceGuard from "@/components/security/SensitiveWorkspaceGuard";
@@ -24,6 +25,8 @@ export default async function DashboardLayout({ children }) {
     { group: "Content & People", name: "Verification", href: "/dashboard/verification", icon: <BadgeCheck className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Position Queue", href: "/dashboard/coordinates", icon: <Crosshair className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Disputes", href: "/dashboard/disputes", icon: <Scale className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Content & People", name: "Recommendations", href: "/dashboard/recommendations", icon: <MessageSquareQuote className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Content & People", name: "Contributions", href: "/dashboard/contributions", icon: <Stamp className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Ownership Claims", href: "/dashboard/claims", icon: <Gavel className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Deal Oversight", href: "/dashboard/deals", icon: <Briefcase className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Contact Queue", href: "/dashboard/contact", icon: <Mail className={iconClass} />, minTier: TIERS.OPS_MANAGER },
@@ -34,7 +37,7 @@ export default async function DashboardLayout({ children }) {
     { group: "Intelligence", name: "Team Brain", href: "/dashboard/brain", icon: <BrainCircuit className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Intelligence", name: "Metrics", href: "/dashboard/metrics", icon: <BarChart3 className={iconClass} />, minTier: TIERS.OPS_MANAGER },
 
-    { group: "Administration", name: "Security", href: "/dashboard/security", icon: <Radar className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Administration", name: "Traffic Log", href: "/dashboard/security", icon: <Radar className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "Audit Log", href: "/dashboard/audit", icon: <ScrollText className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "System Activity", href: "/dashboard/system", icon: <Cpu className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "System Operations", href: "/dashboard/operations", icon: <Wrench className={iconClass} />, minTier: TIERS.SUPER_ADMIN },

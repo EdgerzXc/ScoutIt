@@ -74,7 +74,15 @@ export default function BrokerRecordChart({ record }) {
         ))}
       </div>
 
-      <p className="record-chart-foot">Measured on ScoutIt activity only</p>
+      {/* A-065. The second copy of the provenance claim. The detail panel's
+          note was corrected first, and this footer still asserted ScoutIt
+          activity over the same seeded figures — a page must not answer the
+          same question two ways. */}
+      <p className="record-chart-foot">
+        {record.isExampleSeed
+          ? "Demonstration figures — not measured on real ScoutIt activity"
+          : "Measured on ScoutIt activity only"}
+      </p>
     </aside>
   );
 }

@@ -6,7 +6,11 @@ import {
   approveVerification,
   rejectVerification,
 } from "./actions";
-import { BadgeCheck, ShieldCheck, ShieldX, Clock, Plus } from "lucide-react";
+import { BadgeCheck, ShieldAlert, ShieldCheck, ShieldX, Clock, Plus } from "lucide-react";
+import {
+  DECISION_EFFECT_NOTICE,
+  decisionButtonLabel,
+} from "@/lib/verificationEffectPolicy.mjs";
 
 // Trust & Verification Center — the queue that turns claims into verified
 // status. Reads verification_requests (service-role). Degrades to an empty
@@ -68,6 +72,14 @@ export default async function VerificationPage() {
         </div>
         <span className="text-xs text-white/70 whitespace-nowrap">{pending.data.length} pending</span>
       </div>
+
+      {/* A-070: this queue records a review; it does not apply one. Saying so
+          here is the difference between an honest audit trail and a staff
+          member believing they lit a badge that never lit. */}
+      <p className="flex items-start gap-2 text-xs leading-relaxed text-white/70 bg-white/5 border border-white/10 rounded-xl p-4">
+        <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-[#E8AE3C]" aria-hidden="true" />
+        <span>{DECISION_EFFECT_NOTICE}</span>
+      </p>
 
       {pending.error && (
         <div className="text-xs text-white/70 bg-white/5 border border-white/10 rounded-xl p-4">
@@ -195,7 +207,7 @@ export default async function VerificationPage() {
                   />
                   <button className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 border border-emerald-400/20 transition-colors whitespace-nowrap">
                     <ShieldCheck className="w-4 h-4" />
-                    Verify
+                    {decisionButtonLabel("approved")}
                   </button>
                 </form>
                 <form action={rejectVerification} className="flex gap-2">
@@ -208,7 +220,7 @@ export default async function VerificationPage() {
                   />
                   <button className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors whitespace-nowrap">
                     <ShieldX className="w-4 h-4" />
-                    Reject
+                    {decisionButtonLabel("rejected")}
                   </button>
                 </form>
               </div>

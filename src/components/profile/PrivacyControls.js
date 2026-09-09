@@ -33,19 +33,37 @@ export default function PrivacyControls({
     public_roles: privacy?.public_roles ?? [],
   });
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const hasBuyer     = activeRoles.includes("buyer");
   const hasBroker    = activeRoles.includes("broker");
   const hasProvider  = activeRoles.includes("provider");
   const isResearcher = providerType === "researcher";
 
+  // U-026: the optimistic flip stayed on screen even when the write was
+  // refused, so someone could be told their profile was public while the
+  // database still said private. A privacy control is the last place a
+  // failure may be swallowed — on error the switch goes back to what is
+  // actually stored and says so.
   const togglePublicProfile = async () => {
+    const previous = publicProfile;
     const next = !publicProfile;
     setPublicProfile(next);
     setSaving(true);
-    await updateProfilePublic(userId, next);
+    setSaveError("");
+    const { error, isProfilePublic: stored } = await updateProfilePublic(userId, next);
     setSaving(false);
-    onUpdate?.({ isProfilePublic: next });
+
+    if (error) {
+      setPublicProfile(previous);
+      setSaveError(error.message || "Could not change your profile visibility. Try again.");
+      return;
+    }
+
+    // Render the stored value, not the requested one.
+    const settled = stored ?? next;
+    setPublicProfile(settled);
+    onUpdate?.({ isProfilePublic: settled });
   };
 
   const toggleRole = async (role) => {
@@ -100,6 +118,19 @@ export default function PrivacyControls({
           </div>
           <Toggle on={publicProfile} />
         </div>
+        {saveError && (
+          <p
+            role="alert"
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              color: "var(--red)",
+              margin: "8px 0 0",
+            }}
+          >
+            {saveError}
+          </p>
+        )}
       </div>
 
       {/* Role visibility */}

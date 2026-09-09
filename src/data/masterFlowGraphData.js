@@ -13157,7 +13157,7 @@ export const MASTER_FLOW_NODES = [
       },
       {
         "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -13217,7 +13217,7 @@ export const MASTER_FLOW_NODES = [
           },
           {
             "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+            "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -26512,7 +26512,7 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"

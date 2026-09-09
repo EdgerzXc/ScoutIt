@@ -69,8 +69,10 @@
   transition: filter var(--transition-slow);
 }
 
-.detail-avatar:hover {
-  filter: grayscale(0%) contrast(1.15);
+@media (hover: hover) and (pointer: fine) {
+  .detail-avatar:hover {
+    filter: grayscale(0%) contrast(1.15);
+  }
 }
 
 .detail-metrics-grid {
@@ -116,6 +118,24 @@
   border-radius: 4px;
   padding: 16px 20px;
   text-align: center;
+}
+
+/* A-039. When the at-a-glance chart renders, this panel holds one line of
+   provenance and nothing else. A bordered, centred, padded box around a single
+   line of small print is what made it read as an orphan under the avatar — the
+   frame promised a panel and delivered a caption. Unframed, left-aligned and
+   tight to the avatar, it reads as what it is: the method note for the figures
+   shown beside the advisor's name. The copy is unchanged. */
+.detail-record-note {
+  padding: 2px 0 0;
+  text-align: left;
+}
+
+.detail-record-note small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
 }
 
 .icon-badge {
@@ -301,12 +321,14 @@
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast);
 }
 
-.curation-card:hover {
-  border-color: var(--accent-border);
-  transform: translateY(-4px);
+@media (hover: hover) and (pointer: fine) {
+  .curation-card:hover {
+    border-color: var(--accent-border);
+    transform: translateY(-4px);
+  }
 }
 
 .curation-card-img {
@@ -453,6 +475,100 @@
   padding: 22px 20px;
 }
 
+.satisfaction-instrument {
+  --satisfaction-angry: #c0392b;
+  --satisfaction-sad: #e8a05c;
+  --satisfaction-smile: #7cc4ee;
+  --satisfaction-happy: #3d8bd4;
+  margin: 0 0 22px;
+  padding: 20px;
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.satisfaction-reading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.satisfaction-reading strong {
+  color: var(--on-surface);
+  font-family: var(--font-mono), monospace;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.satisfaction-reading span,
+.satisfaction-method {
+  color: var(--text-secondary);
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.satisfaction-distribution {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.satisfaction-level-label {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.satisfaction-face {
+  width: 24px;
+  height: 24px;
+}
+
+.satisfaction-level-angry { color: var(--satisfaction-angry); }
+.satisfaction-level-sad { color: var(--satisfaction-sad); }
+.satisfaction-level-smile { color: var(--satisfaction-smile); }
+.satisfaction-level-happy { color: var(--satisfaction-happy); }
+
+.satisfaction-track {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border-solid);
+}
+
+.satisfaction-segment {
+  display: block;
+  width: var(--segment-size);
+  height: 100%;
+  background: currentColor;
+}
+
+.satisfaction-method {
+  margin: 18px 0 0;
+}
+
+@media (max-width: 560px) {
+  .satisfaction-distribution {
+    grid-template-columns: 1fr;
+  }
+}
+
 .recommendation-body {
   margin: 0 0 16px;
   font-size: 16px;
@@ -515,9 +631,15 @@
   transition: border-color 160ms ease-out, transform 160ms ease-out;
 }
 
-.contribution-row:hover,
 .contribution-row:focus-visible {
   border-color: var(--accent-muted);
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .contribution-row:hover {
+    border-color: var(--accent-muted);
+  }
 }
 
 .contribution-row:active {
@@ -629,6 +751,16 @@
   font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--text-secondary);
+}
+
+/* A-065 — a seeded record states its own provenance. Warmer than the
+   neutral method note so it reads as a caveat rather than a footnote, but it
+   stays inside the gold system rather than introducing an alert colour. */
+.record-example-note {
+  display: block;
+  margin-top: 10px;
+  color: var(--accent);
+  opacity: 0.85;
 }
 
 .example-profile-flag {

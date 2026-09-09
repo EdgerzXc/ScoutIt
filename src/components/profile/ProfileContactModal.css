@@ -38,10 +38,33 @@
   z-index: 10;
 }
 
-.contact-close:hover {
-  color: var(--text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .contact-close:hover {
+    color: var(--text-primary);
+  }
 }
 
 .contact-modal-body {
   padding: 24px;
+}
+
+/* A-074. Press feedback. Without a visible :active state a control gives no
+   evidence it heard the tap; on a slow connection people tap again, and on a
+   submit that means duplicate requests. 100-160ms and a small scale, so it
+   reads as a press rather than an animation. Paired with the reduced-motion
+   block, which removes the movement and keeps the control usable. */
+.contact-close:active { transform: scale(0.95); transition-duration: 120ms; }
+
+/* A-074. Motion here had no reduced-motion answer. The rule the rest of the
+   codebase follows: keep colour and opacity, which carry meaning, and drop
+   movement and duration, which do not. 23 of 29 stylesheets already did this;
+   these were the omissions, not a missing standard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

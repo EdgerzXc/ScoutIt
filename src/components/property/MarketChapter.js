@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Lock, MapPin } from "lucide-react";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
 import { articlesForProperty, areaIntelHref } from "@/lib/propertyArticles";
+import { useSimpleMode } from "@/hooks/useSimpleMode";
+import { shouldRender } from "@/lib/simpleMode";
 
 // Styles live in app/property/[id]/property-detail.css, NOT in a styled-jsx
 // block here. styled-jsx scopes its generated class to JSX written inside the
@@ -238,20 +240,34 @@ export default function MarketChapter({
     setUnlocked(canSee("marketIntel", getCurrentTier()));
   }, []);
 
+  // A-083. Chapter subtitles and the lede are `description`; Simple omits
+  // them. Everything else on this chapter — the entitlement boundary, the
+  // locked-state copy, every label and figure — is core and untouched.
+  const simple = useSimpleMode();
+  const showDescriptions = shouldRender({ role: "description", simple });
+
   return (
     <>
       <div style={{ marginBottom: "32px" }}>
         <div className="market-chapter__eyebrow">
           {chapterNumber} — {chapterLabel}
         </div>
-        {subtitle && <div className="market-chapter__subtitle">{subtitle}</div>}
+        {subtitle && showDescriptions && (
+          <div className="market-chapter__subtitle">{subtitle}</div>
+        )}
         <div style={{ height: "1px", background: "var(--border)" }} />
       </div>
 
       {/* The subtitle above already says this. Render the lede only when a
           flow passes no subtitle, so the two never stack as near-identical
-          sentences. */}
-      {!subtitle && (
+          sentences.
+
+          A-083: both are `description`, so Simple drops both. The lede is
+          gated on `showDescriptions` too rather than relying on `!subtitle` —
+          otherwise hiding the subtitle in Simple would make `!subtitle` newly
+          true and the lede would appear exactly where a sentence was meant to
+          be removed. */}
+      {!subtitle && showDescriptions && (
         <p className="market-chapter__lede">
           What is being written about this space and the market around it — and,
           for Verified Scouts, the numbers underneath.

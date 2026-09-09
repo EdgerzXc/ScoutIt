@@ -3,13 +3,18 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-export default function ConnectionPortal({ brokerName, brokerId, isModal = false }) {
+// `spaces` is the advisor's public representation roster — `{ slug, title }`
+// each. A handshake is always opened ABOUT a space (Standing Rule 9: a tier
+// buys data about a property, never access to a person), and the initiate route
+// enforces that by requiring a listing identity. With an empty roster there is
+// no honest handshake to offer, so the form is replaced by a statement of why.
+export default function ConnectionPortal({ brokerName, brokerId, spaces = [], isModal = false }) {
   const [user, setUser] = useState(null);
   const [intent, setIntent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [connectsBalance, setConnectsBalance] = useState(null);
+  const [space, setSpace] = useState(spaces.length === 1 ? spaces[0].slug : "");
 
   useEffect(() => {
     let mounted = true;
@@ -20,14 +25,6 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
 
         if (session?.user && mounted) {
           setUser(session.user);
-          // Fetch user's connects balance
-          try {
-            const { getConnectsBalance } = await import("@/lib/profileClient");
-            const bal = await getConnectsBalance(session.user.id);
-            if (mounted) setConnectsBalance(bal?.total_balance ?? 10);
-          } catch (e) {
-            if (mounted) setConnectsBalance(10);
-          }
         }
       } catch (e) {
         if (mounted) setUser(null);
@@ -40,6 +37,17 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
   const handleHandshakeSubmit = async (e) => {
     e.preventDefault();
     if (!intent || submitting) return;
+
+    // U-023: `/api/deals/initiate` requires a listing identity and 400s without
+    // one. This form used to send `{ broker_id, acquisition_brief }` — two
+    // fields the route does not read — so every submission was rejected and the
+    // catch below rendered the success screen anyway. Refusing here, before the
+    // request, is the honest version of the same guard.
+    if (!space) {
+      setErrorMsg("Choose which space this is about — a handshake is always opened about a specific space.");
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg("");
 
@@ -59,26 +67,31 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
           "Content-Type": "application/json",
           "Authorization": `Bearer ${session.access_token}`
         },
+        // The field names the route actually reads. `preferredBrokerId` is how
+        // it learns this handshake was opened from a particular advisor's
+        // dossier rather than routed to the whole roster.
         body: JSON.stringify({
-          broker_id: brokerId,
-          acquisition_brief: intent
+          propertySlug: space,
+          message: intent,
+          ...(brokerId ? { preferredBrokerId: brokerId } : {}),
         })
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
+      // A rejected initiate must never render the success screen. The previous
+      // version threw here and the catch marked the form submitted regardless,
+      // so a user was told their deal workspace had been created while nothing
+      // existed and no Connect had been spent.
       if (!res.ok) {
-        throw new Error(data.error || "Failed to initiate handshake.");
+        setErrorMsg(data.error || "Could not open the handshake. No Connect was spent.");
+        return;
       }
 
       setSubmitted(true);
-      if (data.newBalance !== undefined) {
-        setConnectsBalance(data.newBalance);
-      }
     } catch (err) {
       console.error("[HANDSHAKE FAILED]", err);
-      // Fallback optimistic success for demo if database table is mock-mode
-      setSubmitted(true);
+      setErrorMsg("Could not reach ScoutIt to open the handshake. No Connect was spent — try again.");
     } finally {
       setSubmitting(false);
     }
@@ -198,7 +211,7 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
             <span className="highlight-critical">🛑 UPFRONT PAYMENT WARNING: NEVER pay upfront reservation fees, deposits, or earnest money before conducting an in-person physical inspection and verifying official land titles/lease contracts.</span> ScoutIt DOES NOT manage, process, hold, or guarantee monetary transactions.
           </p>
           <p className="disclaimer-paragraph">
-            ⏱️ <strong>7-Day Retention Protocol:</strong> Temporary chatboxes remain active in your archive for <strong>7 days</strong>, after which all raw messages are <strong>permanently purged forever</strong> from system servers.
+            ⏱️ <strong>7-Day Retention Protocol:</strong> Temporary chatboxes remain active in your archive for <strong>7 days</strong> after the conversation ends (closed, declined, withdrawn or expired), after which all raw messages are <strong>permanently purged forever</strong> from system servers. Threads under Trust &amp; Safety review are kept until the review closes.
           </p>
           <div className="disclaimer-footer-compliance">
             Operating in strict compliance with <strong>Republic Act No. 9646 (Real Estate Service Act of the Philippines)</strong>.
@@ -216,16 +229,58 @@ export default function ConnectionPortal({ brokerName, brokerId, isModal = false
           <p>Establish a high-priority, spam-protected direct channel with <strong>{brokerName}</strong>.</p>
         </div>
 
-        {user ? (
+        {user && spaces.length === 0 ? (
+          /* U-023: no public space means no listing identity, and the initiate
+             route refuses without one. Offering the form here would reproduce
+             the exact defect this item closed — a button that cannot succeed.
+             Saying so is the honest state (the Honest Blank Rule). */
+          <div className="portal-empty-state">
+            <p>
+              A handshake is always opened about a specific space, and
+              <strong> {brokerName}</strong> has no publicly listed spaces right now.
+            </p>
+            <p>
+              Find a space you are interested in and open the conversation from
+              its page — it reaches this advisor the same way.
+            </p>
+            <Link href="/discover" className="portal-empty-cta">Browse spaces →</Link>
+          </div>
+        ) : user ? (
           <form className="portal-form" onSubmit={handleHandshakeSubmit}>
-            {connectsBalance !== null && (
-              <div className="wallet-status-bar">
-                <span className="wallet-lbl">Your Wallet:</span>
-                <span className="wallet-val">✦ {connectsBalance} Connects Available</span>
+            {/* U-024: a wallet bar used to sit here claiming every visitor had
+                ten Connects. It imported a balance helper that does not exist
+                anywhere in the repository, so the destructured value was
+                undefined, calling it threw, and the catch rendered a fixed
+                number as if it were a measurement. No server route returns a
+                signed-in user's balance today, and the localStorage wallet is
+                documented display-only — so there is nothing to source it from.
+                Standing Rule 3: omit it. The COST of the action is sourceable
+                and is still stated, in the header badge and on the button. */}
+
+            {spaces.length > 1 && (
+              <div className="form-group-item">
+                <label htmlFor="handshake-space">Which space is this about?</label>
+                <select
+                  id="handshake-space"
+                  value={space}
+                  onChange={(e) => setSpace(e.target.value)}
+                  required
+                >
+                  <option value="">Choose a space…</option>
+                  {spaces.map((s) => (
+                    <option key={s.slug} value={s.slug}>{s.title || s.slug}</option>
+                  ))}
+                </select>
               </div>
             )}
 
-            {errorMsg && <div className="error-alert">{errorMsg}</div>}
+            {spaces.length === 1 && (
+              <p className="portal-space-note">
+                About <strong>{spaces[0].title || spaces[0].slug}</strong>.
+              </p>
+            )}
+
+            {errorMsg && <div className="error-alert" role="alert">{errorMsg}</div>}
 
             <div className="form-group-item">
               <label>Acquisition / Requirement Brief</label>

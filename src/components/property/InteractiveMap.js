@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], lifestylePois = [], routeDestination = "", routeDestCoords = null, routeLabel = "", mapboxToken = "", isochrone = null, contours = [] }) {
+export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData = [], lifestylePois = [], routeDestination = "", routeDestCoords = null, routeLabel = "", isochrone = null, contours = [] }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const hoveredRef = useRef(null);
@@ -195,21 +195,26 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       // ── Optional: Mapbox Directions gold route line ──
       // Uses explicit destination coordinates when provided (reliable),
       // otherwise falls back to geocoding the destination name.
-      if ((routeDestCoords || routeDestination) && mapboxToken) {
+      if (routeDestCoords || routeDestination) {
         (async () => {
           try {
             let destLat, destLng;
             if (Array.isArray(routeDestCoords) && routeDestCoords.length === 2) {
               [destLat, destLng] = routeDestCoords;
             } else {
-              // Geocode the destination name, biased to the property's vicinity (PH only)
+              // Geocode the destination name, biased to the property's vicinity
+              // (PH only). A-078: routed through our own server. This used to
+              // call Mapbox directly with the public token in the query string,
+              // on every public property page — the exact exposure /api/mapbox
+              // was written to remove.
               const geoUrl =
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(routeDestination)}.json` +
-                `?proximity=${position[1]},${position[0]}&country=ph&limit=1&access_token=${mapboxToken}`;
+                `/api/mapbox?op=geocode&q=${encodeURIComponent(routeDestination)}` +
+                `&proximity=${encodeURIComponent(`${position[1]},${position[0]}`)}`;
               const geoRes = await fetch(geoUrl);
-              const geoData = await geoRes.json();
-              if (!geoData.features || geoData.features.length === 0) return;
-              [destLng, destLat] = geoData.features[0].center;
+              const geoJson = await geoRes.json();
+              const features = geoJson?.data?.features;
+              if (!features || features.length === 0) return;
+              [destLng, destLat] = features[0].center;
             }
             // Prefer the caller-supplied display label
             const destName = routeLabel || routeDestination || "Nearest transit hub";
@@ -217,13 +222,13 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             // 2. Driving directions FROM the transit hub TO the property
             //    (this map answers "how do I get to this property?")
             const dirUrl =
-              `https://api.mapbox.com/directions/v5/mapbox/driving/` +
-              `${destLng},${destLat};${position[1]},${position[0]}` +
-              `?geometries=geojson&overview=full&access_token=${mapboxToken}`;
+              `/api/mapbox?op=directions&profile=driving&coordinates=` +
+              encodeURIComponent(`${destLng},${destLat};${position[1]},${position[0]}`);
             const dirRes = await fetch(dirUrl);
-            const dirData = await dirRes.json();
-            if (!dirData.routes || dirData.routes.length === 0) return;
-            const route = dirData.routes[0];
+            const dirJson = await dirRes.json();
+            const routes = dirJson?.data?.routes;
+            if (!routes || routes.length === 0) return;
+            const route = routes[0];
             const latlngs = route.geometry.coordinates.map((c) => [c[1], c[0]]);
 
             if (!mapInstance.current) return;
@@ -385,7 +390,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
     // We use JSON.stringify for arrays/objects to prevent reference-equality React loops 
     // that destroy and recreate the Leaflet map unnecessarily.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), JSON.stringify(lifestylePois), routeDestination, JSON.stringify(routeDestCoords), routeLabel, mapboxToken]);
+  }, [lat, lng, propertyTitle, JSON.stringify(vicinityData), JSON.stringify(lifestylePois), routeDestination, JSON.stringify(routeDestCoords), routeLabel]);
 
   // ── Isochrone overlay (NEW_IDEAS.md §3) ─────────────────────────────
   // Reachability polygons arrive asynchronously from /api/whereto, well
@@ -684,7 +689,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
           opacity: 0;
           visibility: hidden;
-          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           z-index: 100;
           display: flex;
           flex-direction: column;
@@ -845,7 +850,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           background: #c8c8c8;
           border: 1px solid #1a1a1a;
           box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
-          transition: all 0.2s ease;
+          transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
         }
 
         /* Route origin (transit hub) — gold ring marking where the journey starts */
@@ -890,7 +895,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           background-color: #121212 !important;
           color: #c8c8c8 !important;
           border-bottom: 0.5px solid #262626 !important;
-          transition: all 0.2s ease;
+          transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
         }
 
         .leaflet-bar a:hover {
