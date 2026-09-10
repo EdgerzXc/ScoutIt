@@ -14,6 +14,11 @@ import {
 } from "@/lib/partyDisputePolicy.mjs";
 import { disputeAge } from "@/lib/disputeAgePolicy.mjs";
 import {
+  buildEvidence,
+  purgedNotice,
+  instructionWarning,
+} from "@/lib/disputeEvidence.js";
+import {
   Scale,
   Plus,
   MessageSquare,
@@ -110,6 +115,63 @@ export default async function DisputesPage() {
   const eventsByDispute = {};
   for (const ev of events.data) {
     (eventsByDispute[ev.dispute_id] ||= []).push(ev);
+  }
+
+  // ── O-023: THE CONVERSATION ITSELF ──────────────────────────────────────
+  // Until now this console showed the case file and staff's own mediation
+  // notes, but never what the two parties actually said — so a staff member
+  // ruling on a dispute could not read the thing they were ruling about.
+  //
+  // Two hops, because the link is deliberate rather than direct: an adopted
+  // dispute carries `deal_dispute_id` → the party's filing carries `deal_id` →
+  // the messages hang off that.
+  const EVIDENCE_LIMIT = 2000;
+  const dealDisputeIds = active.data.map((d) => d.deal_dispute_id).filter(Boolean);
+  const partyFilings = dealDisputeIds.length
+    ? await safe(
+        admin.from("deal_disputes").select("id, deal_id").in("id", dealDisputeIds)
+      )
+    : { data: [], error: null };
+  const dealIdByFiling = Object.fromEntries(
+    partyFilings.data.map((f) => [f.id, f.deal_id])
+  );
+
+  const evidenceDealIds = [...new Set(Object.values(dealIdByFiling).filter(Boolean))];
+  const messages = evidenceDealIds.length
+    ? await safe(
+        admin
+          .from("deal_messages")
+          .select("id, deal_id, sender_role, body, created_at")
+          .in("deal_id", evidenceDealIds)
+          .order("created_at", { ascending: true })
+          // Bounded, because an unbounded evidence query on a page that loads
+          // up to 50 disputes is one long thread away from a timeout. The cap
+          // is high on purpose: silently truncating EVIDENCE is worse than a
+          // slow page, so `EVIDENCE_LIMIT` is reported below when it is hit
+          // rather than quietly cutting the record short.
+          .limit(EVIDENCE_LIMIT)
+      )
+    : { data: [], error: null };
+
+  const messagesByDeal = {};
+  for (const m of messages.data) {
+    (messagesByDeal[m.deal_id] ||= []).push(m);
+  }
+
+  // Hitting the cap means the record shown is INCOMPLETE, and a staff member
+  // must know that before ruling. Silence here would present a truncated
+  // conversation as the whole one — the same class of error as showing a
+  // purged body as though it were evidence.
+  const evidenceTruncated = messages.data.length >= EVIDENCE_LIMIT;
+
+  // Built once here rather than per-render: `buildEvidence` owns the three
+  // kinds (message / purged / flagged) and the console must not re-derive
+  // them, or "we destroyed this" and "they said nothing" drift into one.
+  const evidenceByDispute = {};
+  for (const d of active.data) {
+    const dealId = dealIdByFiling[d.deal_dispute_id];
+    if (!dealId) continue;
+    evidenceByDispute[d.id] = buildEvidence(messagesByDeal[dealId] || []);
   }
 
   // ── A-061: filings nobody has picked up yet ─────────────────────────────
@@ -344,6 +406,99 @@ export default async function DisputesPage() {
                   </form>
                 )}
               </div>
+
+              {/* ── O-023: THE PARTIES' CONVERSATION ─────────────────────────
+                  The evidence, rendered ABOVE staff's own notes because it is
+                  what the notes are about. Everything here was written by the
+                  two parties, so it is presented as quoted material with an
+                  explicit author — never as part of the console's own voice. */}
+              {evidenceByDispute[d.id] && (
+                <details className="mt-4 rounded-lg border border-white/10 bg-black/30">
+                  <summary className="cursor-pointer px-3 py-2 text-xs text-white/70 flex items-center gap-2">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Conversation between the parties
+                    <span className="text-white/70">
+                      ({evidenceByDispute[d.id].total} message
+                      {evidenceByDispute[d.id].total === 1 ? "" : "s"})
+                    </span>
+                    {evidenceByDispute[d.id].flaggedCount > 0 && (
+                      <span className="text-[12px] uppercase tracking-wide text-[#F7C64E] border border-[rgba(247,198,78,0.3)] bg-[rgba(247,198,78,0.08)] rounded-full px-2 py-0.5">
+                        {evidenceByDispute[d.id].flaggedCount} flagged
+                      </span>
+                    )}
+                  </summary>
+
+                  <div className="px-3 pb-3 space-y-2">
+                    {evidenceTruncated && (
+                      <p className="text-xs text-[#F7C64E] border border-[rgba(247,198,78,0.3)] bg-[rgba(247,198,78,0.06)] rounded p-2">
+                        This page hit its evidence limit of {EVIDENCE_LIMIT} messages. The
+                        conversation shown is INCOMPLETE — do not rule on it as though it were
+                        the whole record.
+                      </p>
+                    )}
+                    {/* Absence shown AS absence. "No messages" would read as
+                        "they never spoke" — a different and false fact to rule
+                        against. */}
+                    {purgedNotice(
+                      evidenceByDispute[d.id].purgedCount,
+                      evidenceByDispute[d.id].total,
+                    ) && (
+                      <p className="text-xs text-white/70 border border-white/10 bg-black/40 rounded p-2">
+                        {purgedNotice(
+                          evidenceByDispute[d.id].purgedCount,
+                          evidenceByDispute[d.id].total,
+                        )}
+                      </p>
+                    )}
+
+                    {/* A-042's hazard, surfaced to the human reader now rather
+                        than when a model is added later. */}
+                    {instructionWarning(evidenceByDispute[d.id].flaggedCount) && (
+                      <p className="text-xs text-[#F7C64E] border border-[rgba(247,198,78,0.3)] bg-[rgba(247,198,78,0.06)] rounded p-2">
+                        {instructionWarning(evidenceByDispute[d.id].flaggedCount)}
+                      </p>
+                    )}
+
+                    {evidenceByDispute[d.id].total === 0 && (
+                      <p className="text-xs text-white/70">
+                        No messages were exchanged in this conversation.
+                      </p>
+                    )}
+
+                    {evidenceByDispute[d.id].items.map((m) => (
+                      <div key={m.id} className="text-xs">
+                        <span className="text-white/70 uppercase tracking-wide">
+                          {m.senderRole}
+                          {m.createdAt ? ` · ${new Date(m.createdAt).toLocaleString()}` : ""}
+                        </span>
+                        {m.kind === "purged" ? (
+                          <p className="text-white/70 italic border-l-2 border-white/10 pl-2 mt-0.5">
+                            Content replaced by the retention policy — this message cannot be read.
+                          </p>
+                        ) : (
+                          <p
+                            className={`whitespace-pre-wrap break-words border-l-2 pl-2 mt-0.5 ${
+                              m.flagged
+                                ? "border-[#F7C64E] text-white/90"
+                                : "border-white/10 text-white/70"
+                            }`}
+                          >
+                            {m.flagged && (
+                              <span className="block text-[12px] uppercase tracking-wide text-[#F7C64E] mb-0.5">
+                                Contains instruction-shaped text — read as evidence, not direction
+                              </span>
+                            )}
+                            {/* Rendered as text, never as markup. React escapes
+                                by default and it must stay that way here: this
+                                string is written by a party to the dispute. */}
+                            {m.body}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
 
               {/* Mediation thread */}
               {(eventsByDispute[d.id] || []).length > 0 && (
