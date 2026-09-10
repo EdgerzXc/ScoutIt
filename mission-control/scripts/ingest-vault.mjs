@@ -89,6 +89,13 @@ const env = {
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
 const GEMINI_KEY = env.GEMINI_API_KEY || null;
+/**
+ * A BOOLEAN, never the key. CodeQL flagged `js/clear-text-logging` (high) on a
+ * status line that read `GEMINI_KEY ? EMBED_MODEL : "NONE"` — it never printed
+ * the secret, but a secret flowing into a log expression is one careless edit
+ * away from doing so. The key stops here; only this boolean travels.
+ */
+const HAS_EMBEDDING_KEY = Boolean(GEMINI_KEY);
 // Must match mission-control/src/lib/brain.js exactly. Vectors written here
 // and query vectors built there are compared to each other; two models, or two
 // widths, make every similarity score meaningless without erroring.
@@ -292,7 +299,7 @@ async function main() {
   console.log(`Vault documents to ingest : ${docs.length}`);
   console.log(`Chunks                    : ${totalChunks}`);
   console.log(`Missing an updated: date  : ${undated.length}`);
-  console.log(`Embedding                 : ${GEMINI_KEY ? EMBED_MODEL : "NONE (keyword-only)"}`);
+  console.log(`Embedding                 : ${HAS_EMBEDDING_KEY ? EMBED_MODEL : "NONE (keyword-only)"}`);
   if (undated.length) {
     console.log("\nUndated - these cite as date unknown, never as fresh:");
     for (const d of undated.slice(0, 20)) console.log(`  ${d.relPath}`);
