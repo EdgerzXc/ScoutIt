@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { bucketOfDeal, isDeletedDeal } from "@/lib/deals/dealStatus";
 import { loadDeals as fetchSharedDeals } from "@/lib/deals/dealsClient";
+import { readDealIdFromSearch } from "@/lib/deals/dealThreadLink";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import ChatBox from "@/components/dashboard/ChatBox";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
@@ -66,6 +67,12 @@ function toChatBoxDeal(d) {
 // original comment warned about.
 const isDeleted = (status) => isDeletedDeal(status);
 const bucketOf = (deal) => bucketOfDeal(deal);
+
+// The tab names and the status buckets are NOT the same vocabulary: the
+// "closed" bucket is shown under the tab labelled "declined". Deep-linking
+// straight to bucketOf()'s answer would set a tab that does not exist and
+// render an empty list.
+const tabForBucket = (bucket) => (bucket === "closed" ? "declined" : bucket);
 
 const byDateDesc = (key) => (a, b) => new Date(b[key] || 0) - new Date(a[key] || 0);
 
@@ -143,6 +150,37 @@ function InboxInner() {
   useEffect(() => {
     loadDeals();
   }, [loadDeals]);
+
+  // A-111: honour ?dealId= so a card elsewhere in the product can open its
+  // own thread. Read once, after the deals arrive -- the id has to be matched
+  // against a real deal before it can select anything, and the tab has to
+  // follow the deal's bucket or a waiting request deep-links into a list it is
+  // not in and reads as missing.
+  //
+  // `location.search` rather than useSearchParams: this page is one client
+  // tree with no Suspense boundary of its own, and useSearchParams would opt
+  // the route into a boundary requirement to read a parameter that is only
+  // ever needed after an async fetch has already resolved.
+  const deepLinkApplied = useRef(false);
+  useEffect(() => {
+    if (deepLinkApplied.current || loading || deals.length === 0) return;
+    const requested = readDealIdFromSearch(window.location.search);
+    if (!requested) {
+      deepLinkApplied.current = true;
+      return;
+    }
+    const match = deals.find((d) => d.id === requested);
+    if (!match || isDeleted(match.status)) {
+      deepLinkApplied.current = true;
+      return;
+    }
+    deepLinkApplied.current = true;
+    setInboxTab(tabForBucket(bucketOf(match)));
+    setSelectedDealId(match.id);
+    if (match.unreadCount > 0) {
+      setDeals((prev) => prev.map((d) => (d.id === match.id ? { ...d, unreadCount: 0 } : d)));
+    }
+  }, [deals, loading]);
 
   // Sorting per §38.4 -- there was none before, so the list arrived in
   // whatever order the API happened to return and reshuffled on every refetch.

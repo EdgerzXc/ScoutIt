@@ -2,11 +2,42 @@
 
 import { useActionState } from "react";
 import { askBrain } from "./actions";
-import { Sparkles, Search, FileText, Loader2 } from "lucide-react";
+import { Sparkles, Search, FileText, Loader2, AlertTriangle } from "lucide-react";
 
 // Client island for the Brain Q&A. Uses useActionState so the server action
 // can return an answer + sources without a page navigation. The rest of the
 // Brain page (ingest form, document list) stays a Server Component.
+
+// A-124: a source is never shown without its date. "date unknown" is a real
+// answer here -- omitting the line entirely would let an undated document read
+// as current, which is the whole failure the freshness contract exists to
+// prevent. The date shown is the SOURCE DOCUMENT's, not the ingestion row's;
+// buildCitation keeps those apart and labels which one this is.
+function SourceCitation({ citation }) {
+  if (!citation) return null;
+  const unknown = citation.dateKind === "unknown";
+  const verb = citation.dateKind === "vault" ? "updated" : "recorded";
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-white/70">
+      {citation.path && <span className="font-mono truncate">{citation.path}</span>}
+      {unknown ? (
+        <span className="text-amber-300/80">date unknown</span>
+      ) : (
+        <span>
+          {verb} {citation.date}
+          {citation.ageLabel ? ` · ${citation.ageLabel}` : ""}
+        </span>
+      )}
+      {citation.isStale && (
+        <span className="inline-flex items-center gap-1 text-amber-300/90">
+          <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+          check this is still true
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function BrainSearch({ aiAvailable }) {
   const [state, formAction, isPending] = useActionState(askBrain, null);
 
@@ -63,6 +94,13 @@ export default function BrainSearch({ aiAvailable }) {
             <span className="text-[12px] uppercase tracking-wide text-[#E8AE3C]">Brain answer</span>
           </div>
           <p className="text-sm text-white/85 whitespace-pre-wrap leading-relaxed">{state.answer}</p>
+          {state.sources?.some((s) => s.citation?.isStale) && (
+            <p className="mt-3 flex items-start gap-2 text-[12px] text-amber-300/90">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px" aria-hidden="true" />
+              This answer leans on at least one document that has not been updated
+              recently. Check the dated sources below before acting on it.
+            </p>
+          )}
         </div>
       )}
 
@@ -88,6 +126,7 @@ export default function BrainSearch({ aiAvailable }) {
                 )}
               </div>
               <p className="text-xs text-white/70 leading-relaxed">{s.snippet}</p>
+              <SourceCitation citation={s.citation} />
             </div>
           ))}
         </div>

@@ -1,4 +1,5 @@
 import LegalDoc from "@/components/legal/LegalDoc";
+import { CONTACT_RETENTION_DAYS } from "@/lib/contactRetention";
 import { CURRENT_TERMS_EFFECTIVE_DATE, CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 export const metadata = {
@@ -70,6 +71,8 @@ Under Section 21 of the DPA (Accountability for Transfer) and NPC Circular 2023-
     num: "08",
     title: "Data retention and PII-Detachment Purge rules",
     body: `Personal data is retained only for as long as necessary to fulfill account operations, satisfy legal obligations, or resolve active disputes.
+
+Messages sent through the public Contact form are handled under their own rule, separate from Handshake Chat in Section 03. Once ScoutIt has answered and closed such a message, the sender's name and email address are retained for ${CONTACT_RETENTION_DAYS} days and are then cleared, together with the request's masked network identifier. The question and ScoutIt's answer are retained without them, so the support record remains auditable while the sender ceases to be identifiable from it.
 
 Upon receiving a verified Data Subject Erasure Request under Section 09 of the DPA, ScoutIt executes a PII-Detachment Purge. Personally Identifiable Information (name, email, phone, PRC credentials) is permanently deleted from active account tables. To protect platform spatial history and ecosystem integrity, underlying non-personal spatial telemetry, derivative 3D Vault media, architectural intelligence, and historical transaction milestones are retained, with ownership attributed to an unlinked system archive.`,
   },

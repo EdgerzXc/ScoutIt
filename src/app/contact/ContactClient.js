@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import TurnstileGate from "@/components/ui/TurnstileGate";
+import { CONTACT_RETENTION_NOTICE } from "@/lib/contactRetention";
 
 // The contact form.
 //
@@ -151,6 +152,11 @@ export default function ContactClient() {
           {error}
         </p>
       )}
+
+      {/* A-002: the retention promise is rendered from the same module the
+          nightly job imports, so the sentence and the behaviour cannot drift
+          into two different numbers. */}
+      <p className="contact-hint">{CONTACT_RETENTION_NOTICE}</p>
 
       <button type="submit" className="contact-submit" disabled={sending || !token}>
         {sending ? "Sending…" : "Send message"}

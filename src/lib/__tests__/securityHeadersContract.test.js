@@ -25,4 +25,34 @@ describe("A-055 transport security headers", () => {
     expect(nextConfig).toContain("Referrer-Policy");
     expect(nextConfig).toContain("Permissions-Policy");
   });
+
+  // ── A-123 — browser source maps are not shipped ───────────────────────────
+  //
+  // `productionBrowserSourceMaps: true` emitted 178 `.js.map` files: **44 MB of
+  // a 57 MB build**, against ~13 MB of actual JavaScript. They were deployed on
+  // every release and addressable by anyone who guessed the path — the original
+  // source of a public site, served from the site.
+  //
+  // Sentry does not need them. Its build plugin generates and uploads its own
+  // maps (gated on SENTRY_AUTH_TOKEN, not on this flag), so stack traces stay
+  // de-minified. `hideSourceMaps` only removed the `sourceMappingURL` comment;
+  // the files still shipped, which is why the problem survived that setting.
+  //
+  // Verified by rebuild on 2026-09-10: 181 new `.js` files, **0 new `.js.map`**.
+  describe("A-123 source maps", () => {
+    it("does not emit browser source maps in production builds", () => {
+      expect(nextConfig).toContain("productionBrowserSourceMaps: false");
+      expect(nextConfig).not.toMatch(/productionBrowserSourceMaps:\s*true/);
+    });
+
+    it("deletes any map that is generated anyway, after Sentry has uploaded it", () => {
+      // Belt and braces: if the flag above is ever flipped back, or the Sentry
+      // plugin emits its own, the client output still must not carry them.
+      expect(nextConfig).toContain("deleteSourcemapsAfterUpload: true");
+    });
+
+    it("keeps hideSourceMaps, so a re-enable does not silently re-expose them", () => {
+      expect(nextConfig).toContain("hideSourceMaps: true");
+    });
+  });
 });

@@ -10,7 +10,11 @@ import { CardGridSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
-import { sanitizeObject } from '../../lib/sanitize';
+// A-120: `sanitizeObject` was imported here and never called — an orphaned
+// import that made the security checklist read as though owner input was
+// filtered on write when nothing filtered it. Sanitisation now happens at the
+// actual write, in DashboardContext.addListing, on the specific free-text
+// fields. Removed rather than wired here, so there is one place to look.
 import { canSee, getCurrentTier } from '../../lib/entitlements';
 import { supabase } from '../../lib/supabaseClient';
 import DealTimeline from './crm/DealTimeline';
@@ -20,8 +24,8 @@ import OwnerListingCard from './cards/OwnerListingCard';
 import FAQPreflightPanel from './FAQPreflightPanel';
 import SeoReadinessPanel from './SeoReadinessPanel';
 import MonthlyFreshnessModal from './MonthlyFreshnessModal';
-import LeadExportButton from './crm/LeadExportButton';
 import { sanitizeError } from "@/lib/sanitizeError";
+import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import SimpleDetail from "@/components/ui/SimpleDetail";
 
@@ -1240,46 +1244,31 @@ export default function OwnerMode() {
                     </div>
                   )}
       
-                  {pitch.status === 'accepted' && pitch.brokerContact && (
-                    <div className="mt-2 p-4 bg-success/5 border border-success/20 rounded">
-                      <div className="font-label-caps text-[12px] tracking-widest text-success uppercase mb-3">Intelligence Unlocked</div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <span className="block text-[12px] text-text-secondary mb-1">Direct Phone</span>
-                          <span className="font-working-title text-on-surface text-sm">{pitch.brokerContact.phone}</span>
-                        </div>
-                        <div>
-                          <span className="block text-[12px] text-text-secondary mb-1">Direct Email</span>
-                          <span className="font-working-title text-on-surface text-sm">{pitch.brokerContact.email}</span>
-                        </div>
-                      </div>
-
-                      {/* Lead export (NEW_IDEAS.md §8). Deliberately inside the
-                          accepted-handshake gate — this must never become a
-                          side door around the contact reveal. */}
-                      <div className="mt-4 pt-4 border-t border-success/20">
-                        <LeadExportButton
-                          lead={{
-                            name: pitch.brokerName || pitch.broker?.name,
-                            email: pitch.brokerContact.email,
-                            phone: pitch.brokerContact.phone,
-                            propertyTitle: activeListing?.title,
-                            propertySlug: activeListing?.slug,
-                            status: pitch.status,
-                            pitch_message: pitch.message || pitch.pitchMessage,
-                            created_at: pitch.createdAt || pitch.created_at,
-                          }}
-                          label="Take this to your CRM"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
                   {pitch.status === 'declined' && (
                     <div className="mt-2 p-3 bg-surface-alt border border-surface-variant rounded text-center">
                       <span className="text-xs text-text-secondary font-working-title uppercase tracking-wider">Inquiry Declined</span>
                     </div>
                   )}
+                  {/* A-111 (owner decision 2026-09-10): this was a contact grid
+                      gated on a per-pitch contact object that nothing has ever
+                      set -- so the branch was dead and the card had no route to
+                      its thread. Contact is revealed by the handshake inside the
+                      conversation, not by viewing this page, so the card links
+                      through instead of restating details it does not hold. */}
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-surface-variant pt-3">
+                    <span className="text-xs text-text-secondary">
+                      {pitch.status === 'accepted'
+                        ? 'Contact details are exchanged inside this conversation.'
+                        : 'Messages for this inquiry stay in your inbox.'}
+                    </span>
+                    <Link
+                      href={dealThreadHref(pitch.id)}
+                      className="inline-flex min-h-[44px] items-center gap-2 font-working-title text-sm text-gold-accent transition hover:underline"
+                    >
+                      Open conversation <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                  </div>
+
                 </div>
               ))}
             </div>

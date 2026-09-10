@@ -19,6 +19,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ownerTenureLabel } from "@/lib/dashboardListings";
+import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 
 export default function BrokerMode() {
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
@@ -539,7 +540,7 @@ export default function BrokerMode() {
                     label="Take this to your CRM"
                   />
 
-                  <Link href="/dashboard/inbox" className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
+                  <Link href={dealThreadHref(deal.id)} className="text-sm font-working-title text-gold-accent flex items-center gap-2 hover:underline">
                     Open conversation <span>→</span>
                   </Link>
                 </div>

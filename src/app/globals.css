@@ -1036,12 +1036,12 @@ body.light-mode .text-gold-glow { text-shadow: none; }
   }
 
   /* Map library controls draw their own compact chrome — the blanket 48px
-     button rule was blowing up MapLibre/Leaflet zoom buttons into huge
-     white panels on phones. Restore their native sizing. */
+     button rule was blowing up MapLibre zoom buttons into huge white panels
+     on phones. Restore their native sizing.
+     A-121: the .leaflet-bar / .leaflet-control-zoom selectors were dropped
+     when the last Leaflet surface was ported; nothing renders that DOM now. */
   .maplibregl-ctrl button,
-  .mapboxgl-ctrl button,
-  .leaflet-bar a,
-  .leaflet-control-zoom a {
+  .mapboxgl-ctrl button {
     min-height: 0;
     min-width: 0;
     padding: 0;

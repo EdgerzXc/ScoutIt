@@ -19,6 +19,10 @@
     {
       "path": "/api/cron/recompute-broker-metrics",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/purge-contact-messages",
+      "schedule": "30 2 * * *"
     }
   ]
 }

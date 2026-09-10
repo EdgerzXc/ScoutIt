@@ -541,12 +541,41 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         </div>
       `;
 
+      // U-028: this was `.setHTML(...)` with `propertyTitle` interpolated into
+      // the string. `setHTML` assigns to innerHTML, and `propertyTitle` is
+      // `property.title` — typed by the OWNER in the listing wizard and never
+      // sanitized on write (`sanitizeObject` is imported in OwnerMode.js and
+      // never called). So an owner could put markup in their own listing title
+      // and have it execute for every visitor to that public unit page.
+      //
+      // MapLibre's own `DOM.sanitize()` is not a defence here: CVE-2026-85061
+      // (CVSS 10.0) is a bypass in exactly that function, unfixed until 6.4.1
+      // and we are on 5.24.0. But the upgrade is not what makes this safe —
+      // not building HTML from user text is. Every other popup in this codebase
+      // already does it this way; `lenses/location.js` even carries the comment
+      // explaining why, for OpenStreetMap names. This one was the exception.
+      //
+      // textContent cannot be parsed as markup, so the value is inert whatever
+      // it contains.
+      const popupNode = document.createElement("div");
+
+      const titleEl = document.createElement("strong");
+      titleEl.style.color = "var(--accent)";
+      titleEl.textContent = propertyTitle;
+      popupNode.appendChild(titleEl);
+
+      popupNode.appendChild(document.createElement("br"));
+
+      const subtitleEl = document.createElement("span");
+      subtitleEl.style.color = "var(--text-secondary)";
+      subtitleEl.style.fontSize = "12px";
+      subtitleEl.textContent = "Target Space";
+      popupNode.appendChild(subtitleEl);
+
       markerRef.current = new maplibregl.Marker({ element: el })
         .setLngLat([targetLng, targetLat])
         .setPopup(
-          new maplibregl.Popup({ offset: 25, className: "scoutit-popup" }).setHTML(
-            `<strong style="color:var(--accent)">${propertyTitle}</strong><br/><span style="color:var(--text-secondary);font-size:12px;">Target Space</span>`
-          )
+          new maplibregl.Popup({ offset: 25, className: "scoutit-popup" }).setDOMContent(popupNode)
         )
         .addTo(map);
 

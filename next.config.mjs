@@ -6,14 +6,14 @@ const __impeccableLiveDev =
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://www.googletagmanager.com https://accounts.google.com https://challenges.cloudflare.com https://va.vercel-scripts.com${__impeccableLiveDev};
-    style-src 'self' 'unsafe-inline' https://unpkg.com https://accounts.google.com/gsi/style;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://challenges.cloudflare.com https://va.vercel-scripts.com${__impeccableLiveDev};
+    style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style;
     img-src 'self' blob: data: https:;
     font-src 'self' data:;
     worker-src 'self' blob:;
     child-src 'self' blob:;
     frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai https://accounts.google.com https://challenges.cloudflare.com;
-    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://unpkg.com https://*.cartocdn.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://va.vercel-scripts.com${__impeccableLiveDev};
+    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://*.cartocdn.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://va.vercel-scripts.com${__impeccableLiveDev};
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -23,7 +23,20 @@ const cspHeader = `
 
 const nextConfig = {
   allowedDevOrigins: ['127.0.0.1', '192.168.100.42'],
-  productionBrowserSourceMaps: true,
+  // A-123: was `true`, which emitted 178 `.js.map` files — **44 MB of a 57 MB
+  // build**, against only ~13 MB of actual JavaScript. They were deployed on
+  // every release and addressable by anyone who guessed the path.
+  //
+  // Turning this off does NOT cost Sentry its readable stack traces. The Sentry
+  // build plugin generates its own source maps, uploads them, and does not rely
+  // on Next's browser-facing copies — that upload is gated on SENTRY_AUTH_TOKEN,
+  // not on this flag. `hideSourceMaps` below only stripped the
+  // `sourceMappingURL` comment so browsers stopped auto-fetching them; the files
+  // still shipped. This is the setting that stops them being built at all.
+  //
+  // If a browser-debuggable build is ever wanted, set it per-deploy rather than
+  // committing `true` — a debug aid is not a default.
+  productionBrowserSourceMaps: false,
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
@@ -142,6 +155,14 @@ export default withSentryConfig(nextConfig, {
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
   widenClientFileUpload: true,
   transpileClientSDK: false,
+  // A-123: kept, but it is no longer what protects the source. It only removes
+  // the `sourceMappingURL` comment; with productionBrowserSourceMaps now false
+  // there is no browser map to point at in the first place. Left in place so a
+  // future re-enable of that flag does not silently re-expose them.
   hideSourceMaps: true,
   disableLogger: true,
+  // A-123: belt and braces. If a map is ever generated again — by this config or
+  // by the Sentry plugin itself — delete it from the client output after upload
+  // so it cannot be served. Sentry keeps its own copy for de-minification.
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
 });

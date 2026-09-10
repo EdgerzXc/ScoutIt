@@ -46,7 +46,10 @@ test.describe("shared accessibility roots", () => {
     const locationTab = page.getByRole("tab", { name: "Location" }).first();
     await expect(locationTab).toBeVisible({ timeout: 20000 });
     await locationTab.click();
-    await expect(page.locator(".maplibregl-marker, .leaflet-marker-icon").first()).toBeVisible({ timeout: 20000 });
+    // A-121: the `.leaflet-marker-icon` alternative was dropped when the last
+    // Leaflet surface was ported. Leaving it would let this assertion pass on
+    // DOM that can no longer exist, which is an assertion that protects nothing.
+    await expect(page.locator(".maplibregl-marker").first()).toBeVisible({ timeout: 20000 });
     let violations = await scanRules(page, rules);
     expect(violations.filter(({ impact }) => impact === "critical" || impact === "serious")).toEqual([]);
 

@@ -12,6 +12,7 @@ import ListerDeclarationModal from "../components/dashboard/ListerDeclarationMod
 import { isOnboardingComplete } from "../lib/onboardingProfile";
 import { readDevelopmentMockUser } from "../lib/developmentMock";
 import { trackEvent, GA_EVENTS } from "../lib/analytics";
+import { stripAllTags } from '../lib/sanitize';
 import { assessGeocode } from "../lib/geocodeConfidence";
 import { completenessScoreOf, mapCatalogueListing } from "@/lib/dashboardListings";
 
@@ -721,13 +722,29 @@ export function DashboardProvider({ children }) {
     const coordinates = (lat != null && lng != null) ? `POINT(${lng} ${lat})` : null;
     const { data, error } = await supabase.from('properties').insert([{
       owner_id: currentUser?.id || null,
-      title: listing.title || `${listing.type} in ${listing.location}`,
+      // A-120: owner free text is stripped of tag-shaped content before it is
+      // stored, so the database holds plain text rather than markup.
+      //
+      // BE PRECISE ABOUT WHAT THIS BUYS. This runs in the browser, and a gate
+      // the client evaluates is a suggestion (Standing Rule 5) — a crafted
+      // PostgREST call bypasses it entirely. It is hygiene on the honest path,
+      // not a security boundary.
+      //
+      // The security boundary is that NO renderer builds markup from this text.
+      // React escapes by default, and the one place that did not — a map popup
+      // using `setHTML` — was closed in U-028 and is now swept by
+      // `mapPopupInjection.test.js`. That is what makes the data safe.
+      //
+      // The unbypassable version of THIS layer is a BEFORE INSERT/UPDATE trigger
+      // in Postgres, which is a migration and therefore owner-gated under O-004.
+      // Recorded in A-120 rather than implied by this line.
+      title: stripAllTags(listing.title) || `${listing.type} in ${listing.location}`,
       type: listing.type,
       space_category: listing.category || listing.type,
       slug,
-      location: listing.location,
+      location: stripAllTags(listing.location),
       price: listing.price ? parseFloat(listing.price) : null,
-      description: listing.description,
+      description: stripAllTags(listing.description),
       media_link: listing.mediaLink,
       completeness_score: listing.completenessScore,
       // `verified` is deliberately NOT sent (U-015, 2026-09-04). It defaults to

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
 import { embed, generateAnswer, chunkText, brainHasAI } from "@/lib/brain";
+import { buildCitation, citationLine } from "@/lib/brainCitation";
 
 /**
  * Ingest a document into the Brain. Agent (Tier 1)+.
@@ -153,14 +154,29 @@ export async function askBrain(_prev, formData) {
     const docIds = [...new Set(chunks.map((c) => c.document_id))];
     const { data: docs } = await admin
       .from("brain_documents")
-      .select("id, title, category")
+      .select("id, title, category, source, updated_at")
       .in("id", docIds);
-    const titleById = Object.fromEntries((docs || []).map((d) => [d.id, d.title]));
 
-    const contexts = chunks.map((c) => ({
-      title: titleById[c.document_id] || "Untitled",
-      content: c.content,
-    }));
+    // A-124: the citation is built here, once, and both the prompt and the UI
+    // read the same object. Two independent formatters is how a displayed date
+    // and a cited date drift apart.
+    const citationById = Object.fromEntries(
+      (docs || []).map((d) => [
+        d.id,
+        buildCitation({ title: d.title, source: d.source, rowUpdatedAt: d.updated_at }),
+      ])
+    );
+    const citationFor = (chunk) =>
+      citationById[chunk.document_id] || buildCitation({ title: "Untitled" });
+
+    const contexts = chunks.map((c) => {
+      const citation = citationFor(c);
+      return {
+        title: citation.title,
+        citation: citationLine(citation),
+        content: c.content,
+      };
+    });
 
     const answer = await generateAnswer(question, contexts);
 
@@ -168,12 +184,19 @@ export async function askBrain(_prev, formData) {
       answer,
       mode,
       aiAvailable: brainHasAI(),
-      sources: chunks.map((c) => ({
-        id: c.id,
-        title: titleById[c.document_id] || "Untitled",
-        snippet: c.content.length > 320 ? c.content.slice(0, 320) + "…" : c.content,
-        similarity: typeof c.similarity === "number" ? c.similarity : null,
-      })),
+      sources: chunks.map((c) => {
+        const citation = citationFor(c);
+        return {
+          id: c.id,
+          title: citation.title,
+          // Every source carries its own provenance. An answer without a dated
+          // citation is the failure mode A-124 exists to prevent, so this is
+          // never conditional on the document having been tidy.
+          citation,
+          snippet: c.content.length > 320 ? c.content.slice(0, 320) + "…" : c.content,
+          similarity: typeof c.similarity === "number" ? c.similarity : null,
+        };
+      }),
     };
   } catch (err) {
     return { error: err.message || "Search failed. Has migration 0007 been applied?" };
