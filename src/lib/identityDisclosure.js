@@ -79,27 +79,46 @@ export function isIdentityPublic(profile) {
  *
  *  1. **The deal reached acceptance.** The recipient chose to open the
  *     conversation, and that act is the reveal.
- *  2. **The viewer sent the request AND the counterparty's identity is already
- *     public.** This is the subtle one, and it is why the sender is not simply
- *     trusted: the old reasoning was "the sender already knows who they
- *     contacted". That holds only while the counterparty publishes their name.
- *     An owner who has turned their name off was never known to the sender, so
- *     showing it at the moment of contact would leak precisely what they
- *     switched off.
+ *  2. **That person has published themselves.** `is_profile_public` is opt-in
+ *     and defaults to FALSE, so this is an affirmative choice to be seen.
+ *
+ * ── WHY THIS IS SYMMETRIC, AND WHY IT USED TO BE ASYMMETRIC (2026-09-10) ──
+ * This function previously read `viewerIsSender === true && counterpartyIsPublic
+ * === true` — a public person was shown only to the person who had contacted
+ * them, and stayed hidden from a recipient until acceptance.
+ *
+ * The owner settled it the other way, and the reason is that the asymmetry
+ * created TWO answers to one question:
+ *
+ *   "the first connect is anon, it IS the default — they need to turn on that
+ *    option... it's either anon or not, there can't be a way two exist at the
+ *    same time. The thing is, anon CAN reveal themselves."
+ *
+ * So anonymity is a **property of the person**, not of the direction they are
+ * being looked at from. Someone who has switched their profile public was never
+ * anonymous, and pretending otherwise to one side of a conversation is the kind
+ * of split that produced the `/api/deals` leak this module exists to prevent.
+ *
+ * `viewerIsSender` is deliberately GONE rather than retained-and-ignored: a
+ * parameter that no longer affects the answer is an invitation to reintroduce
+ * the asymmetry. Who sent the request is still a real question for the UI, and
+ * `viewerIsRequestSender()` below still answers it — it just does not decide
+ * identity any more.
+ *
+ * The default remains PRIVATE and an unset flag is never consent (Rule 14), so
+ * this widens disclosure only for people who asked to be seen.
  *
  * @param {object} input
- * @param {boolean} input.viewerIsSender      did this viewer open the request
  * @param {string}  input.dealStatus          the deal's current status
  * @param {boolean} input.counterpartyIsPublic result of isIdentityPublic()
  * @returns {boolean}
  */
 export function canSeeCounterpartyName({
-  viewerIsSender = false,
   dealStatus = "",
   counterpartyIsPublic = false,
 } = {}) {
   if (IDENTITY_REVEALING_STATUSES.includes(dealStatus)) return true;
-  return viewerIsSender === true && counterpartyIsPublic === true;
+  return counterpartyIsPublic === true;
 }
 
 /**
@@ -116,14 +135,13 @@ export function canSeeCounterpartyName({
  * disclose which one it is.
  */
 export function counterpartyDisplayName({
-  viewerIsSender = false,
   dealStatus = "",
   counterpartyIsPublic = false,
   name = "",
   roleLabel = "Member",
 } = {}) {
   const label = roleLabel || "Member";
-  if (!canSeeCounterpartyName({ viewerIsSender, dealStatus, counterpartyIsPublic })) {
+  if (!canSeeCounterpartyName({ dealStatus, counterpartyIsPublic })) {
     return label;
   }
   const clean = typeof name === "string" ? name.trim() : "";

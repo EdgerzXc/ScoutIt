@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
-import {
-  isIdentityPublic,
-  counterpartyDisplayName,
-  viewerIsRequestSender,
-} from "@/lib/identityDisclosure";
+import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
 import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/deals/userDeals";
 
 export const dynamic = "force-dynamic";
@@ -89,7 +85,6 @@ export async function GET(request) {
           // so the Inbox list showed the very name the panel beside it promised
           // to withhold.
           otherParty: counterpartyDisplayName({
-            viewerIsSender: viewerIsRequestSender(myRole),
             dealStatus: d.status,
             counterpartyIsPublic: otherId ? publicById[otherId] === true : false,
             name: otherId ? namesById[otherId] : "",

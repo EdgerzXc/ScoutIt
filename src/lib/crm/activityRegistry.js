@@ -104,6 +104,23 @@ export const ACTIVITY_TYPES = Object.freeze({
       ? `${meta.unitCount} unit${meta.unitCount === 1 ? "" : "s"} handed to the operator`
       : null),
   },
+  // A-131. `deals` has no close-reason column and adding one is owner-gated
+  // (O-004), so this row IS the record of why those conversations closed —
+  // both the broker's own delegation and the buyer threads that closed with
+  // it. Without it a revoke is indistinguishable from everyone happening to
+  // close their chats on the same afternoon.
+  delegation_revoked: {
+    label: "Delegation ended",
+    icon: "Handshake",
+    tone: "error",
+    describe: (meta) => {
+      const buyers = Number(meta.buyerThreadsClosed) || 0;
+      if (!buyers) return "The owner ended this broker's arrangement";
+      return `The owner ended this broker's arrangement — ${buyers} buyer conversation${
+        buyers === 1 ? "" : "s"
+      } closed with it`;
+    },
+  },
   delegation_declined: {
     label: "Delegation declined",
     icon: "Ban",

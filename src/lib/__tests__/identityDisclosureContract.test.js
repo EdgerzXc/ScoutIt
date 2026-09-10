@@ -24,11 +24,15 @@ const privacyRoute = stripComments(read("src/app/api/user/privacy-settings/route
 // their name off their own listings entirely.
 describe("identity disclosure — a pending Connect is anonymous", () => {
   it("withholds the sender's name from the recipient while the request is pending", () => {
+    // The owner's rule, 2026-09-10: anonymity is the DEFAULT and it is a
+    // property of the PERSON — "the first connect is anon, it IS the default,
+    // they need to turn on that option". So the person who has NOT published
+    // themselves is withheld, and that is the case that describes almost
+    // everyone, because `is_profile_public` defaults to false.
     expect(
       counterpartyDisplayName({
-        viewerIsSender: false,
         dealStatus: "pending",
-        counterpartyIsPublic: true,
+        counterpartyIsPublic: false,
         name: "Ana Cruz",
         roleLabel: "Broker",
       })
@@ -115,6 +119,57 @@ describe("identity disclosure — an owner can keep their name off their listing
     ).toBe("Ana Cruz");
   });
 
+  it("shows a public person's name to the RECIPIENT too — anonymity is one state, not a direction", () => {
+    // The owner's rule, 2026-09-10: "it's either anon or not, there can't be a
+    // way two exist at the same time." Before this, a public person was shown
+    // to the sender and hidden from the recipient — the same person, two
+    // answers. A broker receiving a request from someone who published
+    // themselves now sees who it is, exactly as that person asked for.
+    expect(
+      counterpartyDisplayName({
+        dealStatus: "pending",
+        counterpartyIsPublic: true,
+        name: "Ana Cruz",
+        roleLabel: "Buyer",
+      })
+    ).toBe("Ana Cruz");
+  });
+
+  it("only a real boolean true reveals — a truthy value is not consent", () => {
+    // Found by mutation on 2026-09-10: loosening `counterpartyIsPublic === true`
+    // to `!!counterpartyIsPublic` passed every other test in this file, so the
+    // strictness was unguarded here even though `isIdentityPublic` has its own
+    // check. That only holds while every caller goes through `isIdentityPublic`.
+    // A caller that passes a raw column value straight in — a string "false"
+    // from a form, a 1 from a driver that does not map booleans — would leak a
+    // name on a truthy check. This is the guard for the layer that decides.
+    for (const notABoolean of ["true", "false", 1, "yes", {}, [], "0"]) {
+      expect(
+        canSeeCounterpartyName({ dealStatus: "pending", counterpartyIsPublic: notABoolean }),
+        `${JSON.stringify(notABoolean)} must NOT reveal`
+      ).toBe(false);
+    }
+    expect(canSeeCounterpartyName({ dealStatus: "pending", counterpartyIsPublic: true })).toBe(true);
+  });
+
+  it("gives the same answer whichever side is looking", () => {
+    // The property under test IS the symmetry. If some future edit reintroduces
+    // a direction-dependent branch, these two stop matching.
+    for (const isPublic of [true, false]) {
+      for (const status of ["pending", "invited", "accepted", "declined"]) {
+        const asSender = canSeeCounterpartyName({
+          dealStatus: status,
+          counterpartyIsPublic: isPublic,
+        });
+        const asRecipient = canSeeCounterpartyName({
+          dealStatus: status,
+          counterpartyIsPublic: isPublic,
+        });
+        expect(asSender, `${status}/${isPublic} must not depend on direction`).toBe(asRecipient);
+      }
+    }
+  });
+
   it("an unset privacy flag is not consent (Rule 14: a NULL is never an assertion)", () => {
     expect(isIdentityPublic({ is_profile_public: null })).toBe(false);
     expect(isIdentityPublic({})).toBe(false);
@@ -127,7 +182,11 @@ describe("identity disclosure — an owner can keep their name off their listing
 describe("identity disclosure — the rule is applied, not just defined", () => {
   it("the deals API decides through the shared rule, never handing out a raw name", () => {
     expect(dealsRoute).toContain("counterpartyDisplayName({");
-    expect(dealsRoute).toContain("viewerIsRequestSender(myRole)");
+    // `viewerIsSender` is deliberately NOT passed any more — identity stopped
+    // depending on which direction the viewer is looking from (2026-09-10).
+    // Asserting its ABSENCE is what stops the asymmetry being reintroduced by
+    // someone who thinks the missing argument is a bug.
+    expect(dealsRoute).not.toContain("viewerIsSender");
     // The exact expression that leaked: the name with no status and no
     // privacy check, role label as a mere fallback for a missing name.
     expect(dealsRoute).not.toMatch(/otherParty:\s*otherId\s*\?\s*\(namesById/);

@@ -6,6 +6,7 @@ import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
+import { staleCardNotice } from "../../lib/deals/delegationRevoke";
 import ScoutInsightPanel from './panels/ScoutInsightPanel';
 import MeshHero from '../ui/MeshHero';
 import TaskRail from "./crm/TaskRail";
@@ -161,17 +162,30 @@ export default function BrokerMode() {
   // handshake from a one-sided acceptance. The labels now say what this is.
   // Pinned by `brokerLabelSource.test.js`.
   // ⚡ Bolt Optimization: Memoize derived pipelines
-  const { myPitches, pending, accepted, activePitches, feed } = useMemo(() => {
+  const { myPitches, pending, accepted, activePitches, stale, feed } = useMemo(() => {
     const _myPitches = pitches.filter(p => p.isCurrentUserBroker);
     const _pending = [];
     const _accepted = [];
     const _activePitches = [];
+    // A-131. A `closed` pitch matched NO bucket, while its listingId still
+    // suppressed the property from the feed — so an ended representation made
+    // the property vanish from this dashboard entirely, with no trace and no
+    // explanation. The owner's decision was the opposite: "on broker's lens the
+    // property listing should still be there, but like stale property cards —
+    // we need to state there that they are no longer connected."
+    //
+    // This deliberately does NOT try to say WHY it closed. `deals` has no
+    // close-reason column (adding one is owner-gated, O-004), and the stale
+    // card states a fact that is true either way: the broker is not connected
+    // to this listing any more. The reason lives in the activity log.
+    const _stale = [];
     const pitchedListingIds = new Set();
-    
+
     _myPitches.forEach(p => {
       pitchedListingIds.add(p.listingId);
       if (p.status === 'pending') _pending.push(p);
       if (p.status === 'accepted') _accepted.push(p);
+      if (p.status === 'closed') _stale.push(p);
       if (p.status !== 'accepted' && p.status !== 'closed') _activePitches.push(p);
     });
 
@@ -182,6 +196,7 @@ export default function BrokerMode() {
       pending: _pending,
       accepted: _accepted,
       activePitches: _activePitches,
+      stale: _stale,
       feed: _feed
     };
   }, [pitches, listings]);
@@ -1086,6 +1101,56 @@ export default function BrokerMode() {
               );
             })}
           </div>
+
+          {/* A-131 — stale representations. Rendered only when there are any:
+              a permanent empty state here would invite brokers to read an
+              absence as a loss. Deliberately muted rather than alarming — this
+              is a record of work done, not a warning. */}
+          {stale.length > 0 && (
+            <>
+              <div className="flex justify-between items-end border-b border-surface-variant pb-2 mt-8">
+                <h3 className="font-working-title text-xl text-text-secondary flex items-center gap-2">
+                  <span className="text-text-muted">◦</span> Past Representations
+                </h3>
+                <span className="text-text-secondary font-label-caps text-[12px] tracking-widest uppercase">
+                  {stale.length} {stale.length === 1 ? "Property" : "Properties"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {stale.map((deal) => (
+                  <div
+                    key={deal.id}
+                    className="rounded-2xl p-6 flex flex-col h-52 border border-white/[0.06] bg-surface/30 backdrop-blur-xl opacity-70 relative overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-label-caps text-[12px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-white/[0.04] text-text-muted">
+                        Ended
+                      </span>
+                    </div>
+
+                    <div className="mt-2 mb-auto pr-2">
+                      <h4 className="font-working-title text-base text-text-secondary truncate">
+                        {dealTitle(deal)}
+                      </h4>
+                      <p className="text-xs text-text-muted mt-1 line-clamp-2 break-words">
+                        {deal.loc || "Location details hidden"}
+                      </p>
+                    </div>
+
+                    <div className="border-t border-surface-variant pt-3 mt-4 text-xs">
+                      {/* One wording, one place — `staleCardNotice` owns the
+                          sentence so this card and any future surface cannot
+                          drift into two different claims. */}
+                      <p className="text-text-muted leading-relaxed">
+                        {staleCardNotice(dealTitle(deal))}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right Column: Tasks + Feed */}

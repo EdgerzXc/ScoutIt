@@ -88,6 +88,60 @@ export default function OwnerMode() {
     }, 800);
   };
 
+  // A-131 — removing a broker from a property.
+  //
+  // Confirmed before it runs, because it is not reversible by a second click:
+  // the representation ends, every conversation about the property closes
+  // (including buyers the broker was mid-conversation with), and no Connects
+  // are refunded. The confirm text names all three, since the buyer threads and
+  // the non-refund are what an owner would not otherwise expect.
+  //
+  // The route is given `dealId` only — it resolves the property and the broker
+  // server-side, so this component never handles a counterparty's user id.
+  const [removingBrokerId, setRemovingBrokerId] = useState(null);
+  const handleRemoveBroker = async (pitch) => {
+    const who = pitch.brokerName || "this broker";
+    const ok = window.confirm(
+      `Remove ${who} from this property?\n\n` +
+        `• They stop receiving enquiries for it\n` +
+        `• Every conversation about it closes, including buyers they were already talking to\n` +
+        `• Connects already spent are not refunded\n\n` +
+        `This cannot be undone — they would have to pitch again.`
+    );
+    if (!ok) return;
+
+    setRemovingBrokerId(pitch.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch('/api/dashboard/representation/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ dealId: pitch.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        // Report what the server said. A generic "something went wrong" here
+        // would hide the retryable partial-write case, which is the one an
+        // owner most needs to act on.
+        addToast(data?.error || "Could not remove this broker.", "⚠️");
+        return;
+      }
+      const closed = Number(data?.buyerThreadsClosed) || 0;
+      addToast(
+        closed > 0
+          ? `${who} removed. ${closed} buyer conversation${closed === 1 ? "" : "s"} closed.`
+          : `${who} removed from this property.`,
+        "✅"
+      );
+    } catch (err) {
+      console.error('Failed to remove broker', err);
+      addToast("Could not remove this broker.", "⚠️");
+    } finally {
+      setRemovingBrokerId(null);
+    }
+  };
+
   // New Dossier State
   const [viewingDossierId, setViewingDossierId] = useState(null);
   const [inviteName, setInviteName] = useState("");
@@ -1244,6 +1298,36 @@ export default function OwnerMode() {
                     </div>
                   )}
       
+                  {/* A-131 — the owner's exit. There is deliberately NO owner
+                      veto over how a broker runs a delegated listing ("we don't
+                      transact"), and that boundary only holds because leaving
+                      is a real, findable action. Before this button the exit
+                      existed only as an API route.
+
+                      Shown for an accepted BROKER representation only: a buyer
+                      inquiry has no representation to end, and the route
+                      rejects one rather than pretending. */}
+                  {pitch.status === 'accepted' && pitch.otherPartyRole === 'Broker' && (
+                    <div className="mt-4 border-t border-surface-variant pt-3">
+                      <button
+                        type="button"
+                        disabled={removingBrokerId === pitch.id}
+                        onClick={() => handleRemoveBroker(pitch)}
+                        className="min-h-[44px] w-full rounded border border-surface-variant px-4 text-sm font-working-title text-text-secondary transition hover:border-error hover:text-error disabled:opacity-50"
+                      >
+                        {removingBrokerId === pitch.id ? "Removing…" : "Remove this broker"}
+                      </button>
+                      {/* Said before the click, not discovered after it. The
+                          buyer threads and the non-refund are the parts an
+                          owner would not otherwise expect. */}
+                      <p className="mt-2 text-[12px] leading-relaxed text-text-muted">
+                        They stop receiving enquiries for this property, and every conversation
+                        about it closes — including buyers they were already talking to. Connects
+                        already spent are not refunded.
+                      </p>
+                    </div>
+                  )}
+
                   {pitch.status === 'declined' && (
                     <div className="mt-2 p-3 bg-surface-alt border border-surface-variant rounded text-center">
                       <span className="text-xs text-text-secondary font-working-title uppercase tracking-wider">Inquiry Declined</span>
