@@ -261,8 +261,36 @@ export default function SpatialCanvas({
       map.addControl(new TiltControl(), "top-right");
     } catch (err) {}
 
+    // ── THIS HANDLER USED TO SWALLOW EVERYTHING ──────────────────────────
+    // It read:
+    //
+    //   map.on("error", (e) => {
+    //     if (e?.error?.message?.includes("tile") || e?.error?.status === 0) return;
+    //   });
+    //
+    // The early return was the whole body. Every other error — a style that
+    // will not load, a bad source, a failed sprite — hit the end of the
+    // function and vanished. Worse, registering ANY error handler replaces
+    // MapLibre's own default, which logs to the console. So attaching this
+    // made the map quieter than having no handler at all.
+    //
+    // That cost real time on 2026-09-10: a maplibre-gl 6.x evaluation spent an
+    // afternoon on "the map fails with no error in the console". There was an
+    // error. Nothing was printing it.
+    //
+    // The tile/status-0 filter is kept and is worth keeping: a map that pans
+    // past the edge of coverage emits a stream of harmless per-tile 404s and
+    // aborted requests, and logging those buries anything real. Everything
+    // else is now reported.
     map.on("error", (e) => {
-      if (e?.error?.message?.includes("tile") || e?.error?.status === 0) return;
+      const message = e?.error?.message || "";
+      const isTileNoise = message.includes("tile") || e?.error?.status === 0;
+      if (isTileNoise) return;
+      console.error(
+        "[SpatialCanvas] MapLibre error:",
+        message || e?.error || "unknown error",
+        { status: e?.error?.status, sourceId: e?.sourceId },
+      );
     });
 
     map.on("contextmenu", (e) => {
