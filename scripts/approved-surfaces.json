@@ -6,7 +6,9 @@
     {
       "name": "Showcase stage and parent navigation",
       "path": "src/components/board/ShowcaseStage.js",
-      "sha256": "8633959bc8d9b29fa185313c9ff8deb17e6ddde7356e8d26b3f9abfe0cd979db"
+      "sha256": "b158224e473a8586a8d6598d7e60a4a3f349bcdd3f6d517d838f3932b0abbbd1",
+      "acceptedAt": "2026-09-10",
+      "acceptedChange": "F-006. Owner reviewed the running page and accepted it: 'I am already alright with the showcase... right now its good.' Three accessibility repairs, no visual change: the hand-written wordmark became the shared ScoutItWordmark (accessible name 'ScoutIT — home' -> 'ScoutIt'), a duplicate <main> landmark became a <div>, and a tray <h4> became an <h2>. Styling verified unchanged - the host's :global(.sc-brand-logo .brand-*) rules still win on specificity, no CSS targets <main> by tag, and .sc-tray-name sets its own font-size and margin."
     },
     {
       "name": "Metropolis foreground surface",
