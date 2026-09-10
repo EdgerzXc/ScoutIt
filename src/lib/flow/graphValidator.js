@@ -859,9 +859,23 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     ...nodes.map(node => ({ entityType: 'NODE', entityId: node.id, evidence: node.evidence || [] })),
     ...edges.map(edge => ({ entityType: 'EDGE', entityId: edge.id, evidence: edge.evidence || [] }))
   ];
+  /* An evidence path that git deliberately does not carry is ABSENT, not
+     STALE — the same distinction `validateBrainReferences` already draws
+     between "unavailable" and "unresolved", applied here.
+
+     This is the second place in this file to be caught by it. On 2026-09-10
+     the vault stopped being tracked, and every graph node whose only evidence
+     was a canonical Brain document became a ghost — 101 of them — but ONLY in
+     CI and only in a fresh clone, because the files still sit on the author's
+     machine. Main went red and the local suite stayed green, which is the
+     exact failure mode the sibling function's comment describes: it was
+     testing the checkout, not the graph. */
+  const evidenceIsMissing = (ev) =>
+    Boolean(ev.path) && !isPrivateBrainRef(ev.path) && !fs.existsSync(path.resolve(ev.path));
+
   const staleEvidenceItems = evidenceEntities.flatMap(entity =>
     entity.evidence
-      .filter(ev => repositoryEvidenceKinds.has(ev.kind) && ev.path && !fs.existsSync(path.resolve(ev.path)))
+      .filter(ev => repositoryEvidenceKinds.has(ev.kind) && evidenceIsMissing(ev))
       .map(ev => ({ entityType: entity.entityType, entityId: entity.entityId, kind: ev.kind, path: ev.path, symbol: ev.symbol || null }))
   );
 
@@ -869,8 +883,20 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
   const ghostNodes = nodes.filter(n => {
     if (n.implementationStatus !== 'VERIFIED') return false;
     if (!n.evidence || n.evidence.length === 0) return true;
-    return n.evidence.every(ev => ev.provenance === 'UNVERIFIED' || !ev.path || !fs.existsSync(path.resolve(ev.path)));
+    /* A private-vault path counts as evidence that EXISTS but cannot be read
+       from here. Counting it as failure would mark a node unverified on the
+       strength of a file git is configured never to provide. */
+    return n.evidence.every(
+      ev => ev.provenance === 'UNVERIFIED' || !ev.path || evidenceIsMissing(ev)
+    );
   }).map(n => n.id);
+
+  /* Kept countable rather than silent: if a vault reference is the ONLY thing
+     standing behind a "VERIFIED" node, that is worth being able to see, even
+     though it is not a build failure. */
+  const privateEvidenceNodes = nodes
+    .filter(n => (n.evidence || []).some(ev => ev.path && isPrivateBrainRef(ev.path)))
+    .map(n => n.id);
 
   const verifiedNodes = nodes.filter(n => n.implementationStatus === 'VERIFIED');
   const failingEvidenceNodes = [...new Set([
@@ -1010,6 +1036,9 @@ export function auditGraphAgainstCodebase(nodes = MASTER_FLOW_NODES, edges = MAS
     unmappedRoutes,
     routeClassifications: routeAuditResults,
     ghostNodes,
+    // Exposed so the count is visible without being a failure. A vault-only
+    // node is a fact about where the evidence lives, not a defect.
+    privateEvidenceNodes,
     staleEvidenceItems,
     stateMachineTransitions: {
       implemented: implementedStateTransitions.length,
