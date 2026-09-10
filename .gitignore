@@ -90,12 +90,31 @@ yarn-error.log*
 # 2026-09-09 found no keys/tokens/private keys anywhere in the Brain, but
 # staging/committing remains a separate owner decision: this edit only makes
 # files trackable, it tracks nothing.
-/_SCOUTIT_BRAIN/00_DAILY_LOG/
-/_SCOUTIT_BRAIN/12_EXTERNAL_TOOLS/
-/_SCOUTIT_BRAIN/.impeccable/
-/_SCOUTIT_BRAIN/13_EXTERNAL_INPUTS/
-/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-09-01_FULL_STACK_GAP_AUDIT.md
-/_SCOUTIT_BRAIN/08_OPERATIONS_AND_BACKLOG/ACTION/INBOX/2026-09-03_FULL_STACK_GAP_AUDIT.md
+# ── THE VAULT IS NOT PUBLISHED (owner decision, 2026-09-10) ──────────
+#
+# The repository is PUBLIC and GitHub is used only as a place to push code.
+# The vault is working material: operational ledgers, architecture internals,
+# security status, audit findings. None of it needs to be on the internet.
+#
+# WHY THE OLD LIST WAS NOT ENOUGH, and this is the lesson worth keeping:
+# it named a few folders and two audit files, and it looked like protection.
+# **.gitignore does not untrack what is already tracked**, so 126 vault files
+# had been public since they were first committed. They were removed from
+# tracking on 2026-09-10 with `git rm --cached` — which leaves every file on
+# disk and only stops publishing them.
+#
+# Everything under the vault is ignored, with ONE deliberate exception below.
+/_SCOUTIT_BRAIN/*
+
+# The exception: a test reads this file. `truthfulVoiceContract.test.js` asserts
+# the canonical Voice & Copy Guide exists and still contains the banned-cliché
+# table, so CI needs it present in a fresh clone. It is brand guidance — no
+# credentials, no security posture, nothing an attacker gains from. Unignoring a
+# file inside an ignored directory requires unignoring each parent first, which
+# is what these three lines do.
+!/_SCOUTIT_BRAIN/01_IDENTITY_AND_VISION/
+/_SCOUTIT_BRAIN/01_IDENTITY_AND_VISION/*
+!/_SCOUTIT_BRAIN/01_IDENTITY_AND_VISION/VOICE_AND_COPY_GUIDE.md
 
 # FUSE artifacts left by in-place edits over a mounted filesystem.
 # Not source; they are stale open handles to replaced files.
