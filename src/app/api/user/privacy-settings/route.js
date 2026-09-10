@@ -57,7 +57,11 @@ export async function GET(request) {
     return NextResponse.json({
       success: true,
       settings: {
-        isProfilePublic: profile?.is_profile_public ?? true,
+        // The column's own default is FALSE and a NULL is never an assertion
+        // (Standing Rule 14). Reporting  for an unset flag told a user
+        // their profile was public when the database said the opposite — a
+        // privacy control failing OPEN (Standing Rule 6).
+        isProfilePublic: profile?.is_profile_public === true,
         telemetryOptOut: profile?.telemetry_opt_out ?? false,
         marketingOptOut: profile?.marketing_opt_out ?? false,
         // `?? false` is the honest default here: a missing row means the shield
@@ -180,7 +184,10 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       settings: {
-        isProfilePublic: profileAfter?.is_profile_public ?? true,
+        // Same fail-open as the GET above, in the read-back after a save. A
+        // person who has just switched their profile to private must not be
+        // told it is public because the column came back null.
+        isProfilePublic: profileAfter?.is_profile_public === true,
         telemetryOptOut: profileAfter?.telemetry_opt_out ?? false,
         marketingOptOut: profileAfter?.marketing_opt_out ?? false,
         anonymousBrowsing: shieldAfter?.anonymous_browsing ?? false,

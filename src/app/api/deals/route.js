@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
+import {
+  isIdentityPublic,
+  counterpartyDisplayName,
+  viewerIsRequestSender,
+} from "@/lib/identityDisclosure";
 import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/deals/userDeals";
 
 export const dynamic = "force-dynamic";
@@ -45,12 +50,17 @@ export async function GET(request) {
     }
 
     let namesById = {};
+    let publicById = {};
     if (otherPartyIds.size > 0) {
       const { data: profiles } = await supabaseAdmin
         .from("user_profiles")
-        .select("id, display_name")
+        .select("id, display_name, is_profile_public")
         .in("id", [...otherPartyIds]);
       namesById = Object.fromEntries((profiles || []).map((p) => [p.id, p.display_name]));
+      // The privacy flag travels with the name so the disclosure rule below can
+      // ask about it. Fetching the name without it is what made the leak
+      // possible: the value was always available, nothing consulted it.
+      publicById = Object.fromEntries((profiles || []).map((p) => [p.id, isIdentityPublic(p)]));
     }
 
     // Deals has no updated_at column, so "most recent conversation first" is
@@ -71,7 +81,20 @@ export async function GET(request) {
           propertySlug: d.properties?.slug || null,
           propertyPrice: d.properties?.price ?? null,
           myRole,
-          otherParty: otherId ? (namesById[otherId] || otherRoleLabel) : otherRoleLabel,
+          // A pending Connect is anonymous: the recipient learns the intent and
+          // the tier, not the identity (§38.3). Acceptance is the act that
+          // reveals a name; the handshake later reveals contact details. This
+          // used to hand out the real display name to whoever asked, with no
+          // check on status and no check on the person's own privacy setting —
+          // so the Inbox list showed the very name the panel beside it promised
+          // to withhold.
+          otherParty: counterpartyDisplayName({
+            viewerIsSender: viewerIsRequestSender(myRole),
+            dealStatus: d.status,
+            counterpartyIsPublic: otherId ? publicById[otherId] === true : false,
+            name: otherId ? namesById[otherId] : "",
+            roleLabel: otherRoleLabel,
+          }),
           otherPartyRole: otherRoleLabel, // "Broker" | "Buyer" | "Owner" — which template a UI card should use
           lastMessage: lastMessageByDeal[d.id] || d.pitch_message || "",
           pitch_message: d.pitch_message,

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { viewerIsRequestSender } from "@/lib/identityDisclosure";
 import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
@@ -355,7 +356,9 @@ export default function ChatBox({
   const isWaiting = deal.status === "pending";
   // The buyer is always the party who spent the Connect to open the thread,
   // so buyer === sender and everyone else === recipient of the request.
-  const isRequestSender = (deal.myRole || "buyer") === "buyer";
+  // One rule, imported rather than restated — the API applies the same one to
+  // decide whether it may send a name at all (see lib/identityDisclosure.js).
+  const isRequestSender = viewerIsRequestSender(deal.myRole);
 
   const mapMessage = useCallback((m, currentUserId) => {
     const attachment = decodeAttachment(m.body);
