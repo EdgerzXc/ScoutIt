@@ -14,14 +14,14 @@ export const NAVIGATION_GROUPS = Object.freeze([
   Object.freeze({ id: "help", label: "Help" }),
 ]);
 
+// A-136 (2026-09-11): the menu carries only what people use. "Home" is gone
+// because the header's ScoutIt logo already links to `/`. Photographers,
+// Researchers and Event Planners are gone because they are deliberately "coming
+// soon" — their pages stay live at their URLs; add each back when it launches.
 export const PRIMARY_NAV_ENTRIES = Object.freeze([
   { id: "settings", href: "/settings", label: "Settings", group: "account" },
-  { id: "home", href: "/", label: "Home", group: "explore" },
   { id: "discover", href: "/discover", label: "Discover", group: "explore" },
   { id: "brokers", href: "/brokers", label: "Brokers", group: "explore" },
-  { id: "photographers", href: "/photographers", label: "Photographers", group: "explore" },
-  { id: "researchers", href: "/researchers", label: "Researchers", group: "explore" },
-  { id: "event-planners", href: "/event-planners", label: "Event Planners", group: "explore" },
   { id: "wishlist", href: "/wishlist", label: "Your Board", group: "workspace" },
   { id: "dashboard", href: "/dashboard", label: "Dashboard", group: "workspace" },
   { id: "about", href: "/about", label: "About ScoutIt", group: "help" },

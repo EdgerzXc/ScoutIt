@@ -132,9 +132,9 @@ test.describe('Settings information architecture', () => {
       await expect(page).toHaveURL(/\/settings#privacy$/);
       await expect(page.locator('#privacy')).toBeVisible();
 
-      await sectionNav.getByRole('link', { name: 'Display & guide' }).click();
-      await expect(page).toHaveURL(/\/settings#display-guide$/);
-      await expect(page.locator('#display-guide')).toBeVisible();
+      await sectionNav.getByRole('link', { name: 'Delete account' }).click();
+      await expect(page).toHaveURL(/\/settings#delete-account$/);
+      await expect(page.locator('#delete-account')).toBeVisible();
 
       const dimensions = await page.evaluate(() => ({
         viewport: window.innerWidth,

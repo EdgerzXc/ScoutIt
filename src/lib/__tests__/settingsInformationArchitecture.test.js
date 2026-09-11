@@ -38,7 +38,6 @@ describe("menu and Settings information architecture", () => {
       "public-profile",
       "privacy",
       "security",
-      "display-guide",
       "delete-account",
     ]);
     for (const section of SETTINGS_SECTIONS) {
@@ -58,7 +57,8 @@ describe("menu and Settings information architecture", () => {
     for (const section of SETTINGS_SECTIONS) {
       expect(settings).toContain(`id=\"${section.id}\"`);
     }
-    expect(settings).toContain('new CustomEvent("scoutit:open-display-settings")');
+    // A-136: Settings no longer repeats Help & Display; the header owns it.
+    expect(header).toContain('new CustomEvent("scoutit:open-display-settings")');
   });
 
   it("preserves keyboard, route-change, and reduced-motion menu contracts", () => {

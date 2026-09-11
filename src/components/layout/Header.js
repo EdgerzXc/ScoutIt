@@ -385,6 +385,13 @@ export default function Header({ ambientContext = null }) {
         .dropdown-display-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
         .dropdown-display-btn:hover { background: var(--surface2); }
         .dropdown-display-btn:active { transform: scale(.985); }
+        /* A-136 — one Help & Display entry per screen size. The eye button
+           beside the menu is hidden at 640px and below, so on a phone this
+           menu copy is the only way in; on wider screens the eye is visible
+           and this copy would be a duplicate. */
+        @media (min-width: 641px) {
+          .dropdown-display-btn { display: none; }
+        }
 
         .header-profile-btn {
           width: 44px;

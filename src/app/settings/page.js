@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
-import { Camera, Search, ShieldCheck, Lock } from "lucide-react";
-import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
+import { Camera, Search, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
 import DeleteAccountPanel from "@/components/profile/DeleteAccountPanel";
@@ -41,7 +40,6 @@ export default function SettingsPage() {
   // decide whether the control is shown (Standing Rule 10).
   const [shieldTier, setShieldTier] = useState(null);
   useEffect(() => { setShieldTier(getCurrentTier()); }, []);
-  const [badges, setBadges] = useState([]);
   const [publicProfile, setPublicProfile] = useState({
     headline: "",
     bio: "",
@@ -96,7 +94,6 @@ export default function SettingsPage() {
         firm: profile.firm || "",
         service: profile.service || "",
       }));
-      setBadges([{ id: "FOUNDING_SEEKER" }]);
     }
     loadSettings();
   }, [router]);
@@ -235,9 +232,6 @@ export default function SettingsPage() {
     }
   };
 
-  const openHelpAndDisplay = () => {
-    window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
-  };
 
   return (
     <div className={styles.settingsContainer}>
@@ -404,38 +398,18 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* ── Honors & Badges ── */}
-        <div className={styles.formGroup} style={{ marginTop: 24, padding: 24, border: '1px solid rgba(var(--accent-rgb), 0.2)', borderRadius: 12, background: 'rgba(var(--accent-rgb), 0.03)' }}>
-          <div className="flex items-center gap-3 mb-2">
-            <ShieldCheck className="text-gold-accent" size={20} />
-            <h3 className="font-display text-lg text-on-surface">Honors & Badges</h3>
-          </div>
-          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            Your exclusive ScoutIt honors. Badges grant lifetime privileges and discounts.
-          </p>
-          
-          <div className="flex gap-3 flex-wrap mb-6">
-            {badges.map(b => {
-              const def = BADGE_DEFINITIONS[b.id];
-              if (!def) return null;
-              return (
-                <div key={b.id} className="flex items-center gap-2 px-3 py-2 rounded border" style={{ borderColor: `${def.color}30`, background: `${def.color}10` }}>
-                  <ShieldCheck size={14} color={def.color} />
-                  <span className="font-mono text-[12px] tracking-widest uppercase" style={{ color: def.color }}>{def.name}</span>
-                </div>
-              );
-            })}
-            {badges.length === 0 && (
-              <span className="text-text-muted text-sm italic">No honors yet.</span>
-            )}
-          </div>
-
-          <Link href="/badges" className="inline-block border border-gold-accent text-gold-accent font-working-title text-sm px-4 py-2 rounded hover:bg-gold-accent hover:text-background transition-colors">
-            View Milestones & Achievements →
-          </Link>
-        </div>
 
         </section>
+
+        {/* A-136 — saves the name, role tags and public card above it. It
+            used to sit below Password/2FA, which it does not save. */}
+        <button
+          className={styles.buttonPrimary}
+          onClick={handleSave}
+          disabled={tags.length === 0}
+        >
+          Save name & profile
+        </button>
 
         {/* ── Privacy & Anonymity Shield (W13 · C19 · §46.8) ──
             Placed ABOVE Security & Login deliberately. Privacy is the thing a
@@ -589,30 +563,6 @@ export default function SettingsPage() {
                 </button>
               </div>
             )}
-          </div>
-        </section>
-
-        <button
-          className={styles.buttonPrimary}
-          onClick={handleSave}
-          disabled={tags.length === 0}
-        >
-          Save Changes
-        </button>
-
-        <section id="display-guide" className={styles.settingsSection} tabIndex="-1">
-          <div className={styles.sectionHeader}>
-            <span>Display & guide</span>
-            <h2>Comfort, guidance & support</h2>
-            <p>Open page help, the guided journey, display preferences, or problem reporting.</p>
-          </div>
-          <div className={styles.handoffActions}>
-            <button type="button" onClick={openHelpAndDisplay}>
-              Open Help & Display
-            </button>
-            <Link href="/contact">
-              Contact support
-            </Link>
           </div>
         </section>
 
