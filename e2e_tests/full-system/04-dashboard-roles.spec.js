@@ -126,7 +126,7 @@ test.describe('Settings information architecture', () => {
       await page.goto('/settings', { waitUntil: 'domcontentloaded' });
       const sectionNav = page.getByRole('navigation', { name: 'Settings sections' });
       await expect(sectionNav).toBeVisible();
-      await expect(sectionNav.getByRole('link')).toHaveCount(5);
+      await expect(sectionNav.getByRole('link')).toHaveCount(6);
 
       await sectionNav.getByRole('link', { name: 'Privacy' }).click();
       await expect(page).toHaveURL(/\/settings#privacy$/);

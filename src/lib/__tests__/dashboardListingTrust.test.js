@@ -104,8 +104,6 @@ describe("A-077 · one fallback for a missing completeness score, everywhere", (
 
   it.each([
     "src/context/DashboardContext.js",
-    "src/lib/profileClient.js",
-    "src/components/profile/panels/OwnerPanel.js",
   ])("%s uses the one fallback rather than its own", (file) => {
     const source = read(file);
     expect(source).toContain("completenessScoreOf");

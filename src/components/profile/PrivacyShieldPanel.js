@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { canUseAnonymityShield, anonymityShieldDefaultsOn } from "@/lib/entitlements";
+import { PUBLIC_ROLE_CHOICES, PUBLIC_ROLE_LABELS } from "@/lib/publicRoles";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PRIVACY & ANONYMITY SHIELD — WORK ORDER W13 · C19 · §46.8
@@ -35,7 +36,7 @@ import { canUseAnonymityShield, anonymityShieldDefaultsOn } from "@/lib/entitlem
 
 const MONO = "'Courier New',monospace";
 
-export default function PrivacyShieldPanel({ role, tier }) {
+export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -104,6 +105,9 @@ export default function PrivacyShieldPanel({ role, tier }) {
   };
 
   const shieldApplies = canUseAnonymityShield(role);
+  // A-135: which of this person's roles may appear on their public profile.
+  // Moved here from /profile so privacy has one home and one writer.
+  const roleChoices = PUBLIC_ROLE_CHOICES.filter((r) => activeRoles.includes(r));
   const defaultsOn = anonymityShieldDefaultsOn(tier, role);
 
   const ROWS = [
@@ -318,6 +322,38 @@ export default function PrivacyShieldPanel({ role, tier }) {
               </div>
             );
           })}
+          {settings.isProfilePublic === true && roleChoices.length > 0 && (
+            <>
+              <div className="ps-row">
+                <div className="ps-row__main">
+                  <div className="ps-row__t">Roles shown on your public profile</div>
+                  <div className="ps-row__b">Your owner role is never shown publicly.</div>
+                  {saved === "publicRoles" && <div className="ps-row__saved">Saved</div>}
+                </div>
+              </div>
+              {roleChoices.map((r) => {
+                const current = Array.isArray(settings.publicRoles) ? settings.publicRoles : [];
+                const on = current.includes(r);
+                const label = `Show my ${PUBLIC_ROLE_LABELS[r]} role`;
+                return (
+                  <div className="ps-row" key={r}>
+                    <div className="ps-row__main">
+                      <div className="ps-row__t">{label}</div>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={on}
+                      aria-label={`${label} publicly`}
+                      className="ps-toggle"
+                      disabled={savingKey === "publicRoles"}
+                      onClick={() => update("publicRoles", on ? current.filter((x) => x !== r) : [...current, r])}
+                    />
+                  </div>
+                );
+              })}
+            </>
+          )}
           {error && <p className="ps-err" role="alert">{error}</p>}
         </>
       )}

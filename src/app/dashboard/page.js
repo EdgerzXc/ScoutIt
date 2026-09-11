@@ -23,6 +23,7 @@ import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
 import { normalizeDashboardMode, normalizeDashboardModes } from "../../lib/dashboardModes";
+import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 
@@ -278,6 +279,20 @@ function DashboardInner() {
                     </button>
                   ))}
                 </div>
+                {/* A-137: the switcher lists earned lenses only. Locked lenses
+                    are never named here — the footer is the one quiet door to
+                    Settings, where broker / provider are earned by verification. */}
+                {missingLenses(user.tags).length > 0 && (
+                  <div className="border-t border-surface-variant px-4 py-2">
+                    <Link
+                      href="/settings#account"
+                      onClick={() => setShowDesktopSwitcher(false)}
+                      className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
+                    >
+                      Unlock more workspaces →
+                    </Link>
+                  </div>
+                )}
 
               </div>
             )}
@@ -386,7 +401,7 @@ function DashboardInner() {
           {/* Desktop User Menu (Hidden on mobile) */}
           <div className="hidden md:flex items-center gap-3">
             <Link href="/settings" title="Account Settings" className="text-lg text-text-secondary hover:text-on-surface transition">⚙️</Link>
-            <Link href={`/profile/${encodeURIComponent(user.name)}`} title="View Public Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition">
+            <Link href="/profile" title="Your Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition">
               {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
             </Link>
             <button 
@@ -468,7 +483,7 @@ function DashboardInner() {
                 </div>
                 <div>
                   <h3 className="font-working-title text-on-surface">{user.name}</h3>
-                  <Link href={`/profile/${encodeURIComponent(user.name)}`} className="text-xs text-gold-accent hover:underline">View Public Profile</Link>
+                  <Link href="/profile" className="text-xs text-gold-accent hover:underline">View Your Profile</Link>
                 </div>
               </div>
               <button className="text-text-secondary" aria-label="Close" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
@@ -479,7 +494,7 @@ function DashboardInner() {
               <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
             </div>
             )}
-            <div className="flex flex-col gap-2 mb-4">
+            <div className="flex flex-col gap-2 mb-2">
               {user.tags.length > 1 && user.tags.map(tagId => (
                 <button
                   key={tagId}
@@ -490,6 +505,17 @@ function DashboardInner() {
                   {mode === tagId && <span>✓</span>}
                 </button>
               ))}
+              {/* A-137: earned lenses only above; locked lenses stay unnamed
+                  here — the unlock path lives in Settings behind verification. */}
+              {missingLenses(user.tags).length > 0 && (
+                <Link
+                  href="/settings#account"
+                  onClick={() => setShowMobileProfileMenu(false)}
+                  className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
+                >
+                  Need another workspace? Unlock in Settings →
+                </Link>
+              )}
             </div>
 
 

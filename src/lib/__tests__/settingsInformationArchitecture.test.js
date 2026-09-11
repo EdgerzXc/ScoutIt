@@ -37,6 +37,7 @@ describe("menu and Settings information architecture", () => {
       "account",
       "public-profile",
       "privacy",
+      "plan",
       "security",
       "delete-account",
     ]);

@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { PROFILE_SYNC_COLUMNS } from "@/lib/profileClient";
 
 const read = (file) => readFileSync(resolve(process.cwd(), file), "utf8");
 
@@ -61,29 +60,13 @@ const FORBIDDEN_IN_BROWSER_WRITES = Object.freeze([
 ]);
 
 describe("A-115 user_profiles browser-write grant contract", () => {
-  it("the profile sync sends only granted columns", () => {
-    for (const column of PROFILE_SYNC_COLUMNS) {
-      expect(GRANTED_COLUMNS, `PROFILE_SYNC_COLUMNS names ${column}`).toContain(column);
-    }
-  });
-
-  it("the profile sync updates an existing row rather than upserting one", () => {
-    // `authenticated` holds no INSERT on user_profiles, so an upsert fails
-    // outright — taking the granted columns travelling with it down too.
-    const source = read("src/lib/profileClient.js");
-    const syncBody = source.slice(
-      source.indexOf("export async function upsertProfile"),
-      source.indexOf("export async function loadOwnProfile")
-    );
-    expect(syncBody).toContain(".update(profile)");
-    expect(syncBody).not.toContain(".upsert(");
-  });
+  // A-138: the profile sync the two tests here guarded is retired;
+  // myProfileContract.test.js pins that it stays gone.
 
   it("no browser writer names a server-only user_profiles column", () => {
     const browserWriters = [
       "src/lib/profileClient.js",
       "src/components/dashboard/BrokerMode.js",
-      "src/components/profile/PrivacyControls.js",
       "src/components/profile/panels/PhotographerPanel.js",
       "src/app/settings/page.js",
     ];

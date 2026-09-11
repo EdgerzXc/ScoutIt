@@ -1,145 +1,89 @@
 "use client";
 
-// /profile — OWN VIEW
-// Authenticated users only. Redirects to /onboarding if no session.
-// Shows all active role panels, connects balance, and privacy controls.
+// /profile — OWN VIEW (A-138)
+// How others see you, read from your account. Editing happens in Settings.
+//
+// This page used to read the browser's `scoutit_user` copy and write it back
+// into the account on every visit (`upsertProfile`). That reverted Settings
+// edits, blanked any field the copy lacked, let the editable copy re-add a
+// gated role past A-137's licence check, and sent signed-in people on a new
+// device to onboarding. It now reads only the account, and writes no profile
+// field. The private Seeker / Owner panels were removed with it: they repeated
+// the dashboard's numbers and never appear to anyone else.
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProfileBaseLayer from "@/components/profile/ProfileBaseLayer";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
-import PrivacyControls from "@/components/profile/PrivacyControls";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
 import ResearcherPanel from "@/components/profile/panels/ResearcherPanel";
-import SeekerPanel from "@/components/profile/panels/SeekerPanel";
-import OwnerPanel from "@/components/profile/panels/OwnerPanel";
+import { getUser } from "@/lib/authClient";
 import {
-  upsertProfile,
+  loadOwnProfile,
   loadPrivacySettings,
   loadBrokerProfile,
   loadResearcherProfile,
   loadPhotographerProjects,
-  loadSeekerSavedCount,
-  loadOwnerListings,
-  loadOwnerInquiryCount,
 } from "@/lib/profileClient";
 
 export default function OwnProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [profile, setProfile] = useState(null);
   const [privacy, setPrivacy] = useState(null);
   const [brokerData, setBrokerData] = useState(null);
   const [researcherData, setResearcherData] = useState(null);
   const [photographerProjects, setPhotographerProjects] = useState([]);
-  const [savedCount, setSavedCount] = useState(0);
-  const [ownerListings, setOwnerListings] = useState([]);
-  const [ownerInquiries, setOwnerInquiries] = useState(0);
 
   useEffect(() => {
     const init = async () => {
-      const raw = localStorage.getItem("scoutit_user");
-      if (!raw) {
+      const { data: { user } = {} } = await getUser();
+      if (!user) {
         router.push("/onboarding");
         return;
       }
 
-      let localUser;
-      try {
-        localUser = JSON.parse(raw);
-      } catch {
-        router.push("/onboarding");
+      const { data: activeProfile, error } = await loadOwnProfile(user.id);
+      if (error || !activeProfile) {
+        setLoadError("We couldn't load your profile. Refresh the page, or try again in a moment.");
+        setLoading(false);
         return;
       }
-
-      // Sync localStorage → Supabase and get back the canonical profile.
-      // U-027: the error used to be discarded entirely, which is how a write
-      // that had been failing with 42501 since 2026-09-04 stayed invisible for
-      // five days. The local fallback below is still the right render — it is
-      // a display fallback, not a claim that anything saved — but a rejected
-      // write must never be silent (Standing Rule 18).
-      const { data: syncedProfile, error: syncError } = await upsertProfile(localUser);
-      if (syncError) {
-        console.error("[PROFILE] Profile sync was rejected; rendering local data:", syncError);
-      }
-      const activeProfile = syncedProfile ?? {
-        id: localUser.id,
-        display_name: localUser.name,
-        subscription_tier: localUser.tier || "starry",
-        connects_balance: localUser.connects_balance ?? 0,
-        active_roles: localUser.tags || [],
-        provider_type: localUser.providerType || null,
-        location: localUser.publicProfile?.location || null,
-        headline: localUser.publicProfile?.headline || null,
-        bio: localUser.publicProfile?.bio || null,
-        firm: localUser.publicProfile?.firm || null,
-        member_since: localUser.created_at || new Date().toISOString(),
-        is_profile_public: false,
-        provider_availability: localUser.provider?.availability ?? true,
-      };
       setProfile(activeProfile);
 
       const roles = activeProfile.active_roles || [];
       const provType = activeProfile.provider_type;
-      const userId = activeProfile.id;
 
-      // Load all panel data in parallel
-      const [
-        privacyResult,
-        brokerResult,
-        researcherResult,
-        photoProjResult,
-        savedResult,
-        ownerListResult,
-      ] = await Promise.all([
+      const [privacyResult, brokerResult, researcherResult, photoProjResult] = await Promise.all([
         // Tier + role decide only the INITIAL state of the anonymity shield
-        // (§46.8) — Cluster+ seekers and owners start with it on. Passed here
-        // because this is the one place the row gets created; the toggle
-        // itself stays free for everyone at every tier.
-        loadPrivacySettings(userId, {
+        // (§46.8) — Cluster+ seekers and owners start with it on. The tier now
+        // comes from the account, not the browser copy. The toggle itself stays
+        // free for everyone at every tier.
+        loadPrivacySettings(user.id, {
           tier: activeProfile.subscription_tier,
           role: roles[0],
         }),
-        roles.includes("broker") ? loadBrokerProfile(userId) : Promise.resolve({ data: null }),
+        roles.includes("broker") ? loadBrokerProfile(user.id) : Promise.resolve({ data: null }),
         roles.includes("provider") && provType === "researcher"
-          ? loadResearcherProfile(userId)
+          ? loadResearcherProfile(user.id)
           : Promise.resolve({ data: null }),
         roles.includes("provider") && provType === "photographer"
-          ? loadPhotographerProjects(userId)
+          ? loadPhotographerProjects(user.id)
           : Promise.resolve({ data: [] }),
-        roles.includes("buyer") ? loadSeekerSavedCount(userId) : Promise.resolve({ count: 0 }),
-        roles.includes("owner") ? loadOwnerListings(userId) : Promise.resolve({ data: [] }),
       ]);
 
       setPrivacy(privacyResult.data);
       setBrokerData(brokerResult.data);
       setResearcherData(researcherResult.data);
       setPhotographerProjects(photoProjResult.data ?? []);
-      setSavedCount(savedResult.count ?? 0);
-
-      const listings = ownerListResult.data ?? [];
-      setOwnerListings(listings);
-      if (listings.length > 0) {
-        const { count } = await loadOwnerInquiryCount(listings.map((l) => l.id));
-        setOwnerInquiries(count ?? 0);
-      }
-
       setLoading(false);
     };
 
     init();
   }, [router]);
-
-  const handlePrivacyUpdate = ({ isProfilePublic, privacy: nextPrivacy } = {}) => {
-    if (isProfilePublic !== undefined) {
-      setProfile((p) => ({ ...p, is_profile_public: isProfilePublic }));
-    }
-    if (nextPrivacy !== undefined) {
-      setPrivacy((p) => ({ ...p, ...nextPrivacy }));
-    }
-  };
 
   if (loading) {
     return (
@@ -151,6 +95,16 @@ export default function OwnProfilePage() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div style={loadingScreen}>
+        <p role="alert" style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-secondary)", maxWidth: 420, textAlign: "center", padding: 24 }}>
+          {loadError}
+        </p>
+      </div>
+    );
+  }
+
   if (!profile) return null;
 
   const roles = profile.active_roles ?? [];
@@ -158,32 +112,34 @@ export default function OwnProfilePage() {
   const isBroker = roles.includes("broker");
   const isPhotographer = roles.includes("provider") && provType === "photographer";
   const isResearcher = roles.includes("provider") && provType === "researcher";
-  const isBuyer = roles.includes("buyer");
-  const isOwner = roles.includes("owner");
 
   return (
     <div style={pageWrap}>
       <AtmosphereBackground variant="default" />
-      {/* Nav */}
       <header style={navBar}>
         <Link href="/dashboard" style={backLink}>
           ← Dashboard
         </Link>
-        <span style={navTitle}>Profile</span>
-        <Link href={`/profile/${encodeURIComponent(profile.display_name || "")}`} style={publicLink}>
-          View Public
-        </Link>
+        <span style={navTitle}>Your Profile</span>
+        {/* Public pages are addressed by the permanent id, so a name change
+            never breaks the link. A private profile has no public page. */}
+        {profile.is_profile_public === true ? (
+          <Link href={`/profile/${encodeURIComponent(profile.id)}`} style={publicLink}>
+            View public
+          </Link>
+        ) : (
+          <span style={privateNote}>Private profile</span>
+        )}
       </header>
 
       <main style={mainContent}>
-        {/* Base Layer */}
         <ProfileBaseLayer
           profile={profile}
           isOwnView
           publicRoles={privacy?.public_roles ?? []}
         />
 
-        {/* Role Panels */}
+        {/* Only the panels other people can see. */}
         <div style={panelsGrid}>
           {isBroker && (
             <BrokerPanel
@@ -207,33 +163,30 @@ export default function OwnProfilePage() {
               isAnonymous={privacy?.anonymous_byline ?? false}
             />
           )}
-
-          {/* PRIVATE PANELS — own view only, never on public */}
-          {isBuyer && (
-            <SeekerPanel
-              savedCount={savedCount}
-              isAnonymous={privacy?.anonymous_browsing ?? false}
-            />
-          )}
-          {isOwner && (
-            <OwnerPanel listings={ownerListings} inquiryCount={ownerInquiries} />
-          )}
         </div>
 
-        {/* Privacy Controls */}
-        <PrivacyControls
-          userId={profile.id}
-          username={encodeURIComponent(profile.display_name || "")}
-          isProfilePublic={profile.is_profile_public}
-          privacy={privacy}
-          activeRoles={roles}
-          providerType={provType}
-          onUpdate={handlePrivacyUpdate}
-        />
+        {/* A-135 — privacy has one home: Settings → Privacy. */}
+        <Link href="/settings#privacy" style={privacyLink}>
+          Privacy & anonymity settings →
+        </Link>
       </main>
     </div>
   );
 }
+
+const privacyLink = {
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 44,
+  padding: "0 16px",
+  border: "1px solid var(--border-solid)",
+  borderRadius: 6,
+  color: "var(--accent)",
+  fontFamily: "var(--font-body)",
+  fontSize: 13,
+  textDecoration: "none",
+  alignSelf: "flex-start",
+};
 
 const pageWrap = {
   minHeight: "100vh",
@@ -278,6 +231,13 @@ const publicLink = {
   fontSize: 12,
   color: "#E8AE3C",
   textDecoration: "none",
+  letterSpacing: "0.06em",
+};
+
+const privateNote = {
+  fontFamily: "var(--font-body)",
+  fontSize: 12,
+  color: "var(--text-secondary)",
   letterSpacing: "0.06em",
 };
 

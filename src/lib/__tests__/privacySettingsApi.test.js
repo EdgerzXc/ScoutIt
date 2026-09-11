@@ -186,4 +186,25 @@ describe('/api/user/privacy-settings API endpoint', () => {
     mockDb({ upsertError: new Error('write failed') });
     expect((await POST(post({ anonymousBrowsing: true }))).status).toBe(500);
   });
+
+  // A-135: role visibility moved here from a browser-direct write on /profile.
+  it('saves the roles shown publicly and reads them back', async () => {
+    const writes = mockDb({ shield: { anonymous_browsing: false, anonymous_byline: false, public_roles: ['broker'] } });
+    const res = await POST(post({ publicRoles: ['broker', 'broker'] }));
+    expect(res.status).toBe(200);
+    expect(writes.shield[0]).toMatchObject({ user_id: 'user-123', public_roles: ['broker'] });
+    expect((await res.json()).settings.publicRoles).toEqual(['broker']);
+  });
+
+  it('refuses a role that may not be shown publicly, whole — never partly', async () => {
+    const writes = mockDb();
+    expect((await POST(post({ publicRoles: ['broker', 'owner'] }))).status).toBe(400);
+    expect((await POST(post({ publicRoles: 'broker' }))).status).toBe(400);
+    expect(writes.shield).toHaveLength(0);
+  });
+
+  it('reports no public roles when none were ever chosen', async () => {
+    mockDb({ shield: null });
+    expect((await (await GET(getReq())).json()).settings.publicRoles).toEqual([]);
+  });
 });

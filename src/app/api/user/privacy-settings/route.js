@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { normalizePublicRoles } from "@/lib/publicRoles";
 
 /**
  * GET /api/user/privacy-settings
@@ -50,7 +51,7 @@ export async function GET(request) {
     // Standing Rule 10: defaults may differ by tier, access never may.
     const { data: shield } = await supabaseAdmin
       .from("privacy_settings")
-      .select("anonymous_browsing, anonymous_byline")
+      .select("anonymous_browsing, anonymous_byline, public_roles")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -70,6 +71,9 @@ export async function GET(request) {
         // than the tidiness.
         anonymousBrowsing: shield?.anonymous_browsing ?? false,
         anonymousByline: shield?.anonymous_byline ?? false,
+        // A-135: which roles show on the public profile. Unset means none —
+        // never "all", for the same fail-closed reason as the flags above.
+        publicRoles: normalizePublicRoles(shield?.public_roles) ?? [],
         // "unknown" is the honest default, not "declared_adult" (§47).
         // Reporting an attestation the user never made is how a legal-capacity
         // claim gets fabricated by a fallback value.
@@ -121,6 +125,19 @@ export async function POST(request) {
     }
     if (typeof body.anonymousByline === "boolean") {
       shieldUpdates.anonymous_byline = body.anonymousByline;
+    }
+    // A-135: role visibility moved here from the browser-direct write on
+    // /profile, so privacy has one writer. Only an array of allowed role names
+    // is accepted; anything else is refused whole, never partly applied.
+    if (body.publicRoles !== undefined) {
+      const roles = normalizePublicRoles(body.publicRoles);
+      if (roles === null) {
+        return NextResponse.json(
+          { error: "publicRoles must be a list of Seeker, Broker or Provider roles." },
+          { status: 400 }
+        );
+      }
+      shieldUpdates.public_roles = roles;
     }
 
     if (Object.keys(updates).length === 0 && Object.keys(shieldUpdates).length === 0) {
@@ -177,7 +194,7 @@ export async function POST(request) {
       .maybeSingle();
     const { data: shieldAfter } = await supabaseAdmin
       .from("privacy_settings")
-      .select("anonymous_browsing, anonymous_byline")
+      .select("anonymous_browsing, anonymous_byline, public_roles")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -192,6 +209,7 @@ export async function POST(request) {
         marketingOptOut: profileAfter?.marketing_opt_out ?? false,
         anonymousBrowsing: shieldAfter?.anonymous_browsing ?? false,
         anonymousByline: shieldAfter?.anonymous_byline ?? false,
+        publicRoles: normalizePublicRoles(shieldAfter?.public_roles) ?? [],
       },
       message: "Privacy settings updated successfully.",
     });

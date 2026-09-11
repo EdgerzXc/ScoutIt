@@ -1,73 +1,26 @@
 import { supabase } from './supabaseClient';
 import { anonymityShieldDefaultsOn } from './entitlements';
-import { completenessScoreOf } from "@/lib/dashboardListings";
 
-// ── PROFILE SYNC ──────────────────────────────────────────────────────────────
-// Called on /profile page load. Pushes the browser's own editable profile
-// fields into Supabase and returns the canonical row.
-//
-// U-027 — WHAT THIS USED TO DO, AND WHY IT STOPPED WORKING
-// --------------------------------------------------------
-// This was an `upsert` that also sent `subscription_tier`, `connects_balance`,
-// `member_since`, `provider_type` and `prc_license` — read out of
-// localStorage. That is the browser asserting its own paid tier, its own
-// wallet balance and its own professional credential, which is precisely the
-// escalation U-022 closed: none of those five is in the ten-column grant, and
-// `authenticated` holds no INSERT on `user_profiles` at all. So since
-// 2026-09-04 the whole call has failed with 42501 and every legitimate field
-// in it — display name, headline, bio, location, firm, service — silently
-// stopped syncing too. The caller discards the error, so nobody saw it.
-//
-// Removing those five columns is not a loss of function. The row is created by
-// the signup trigger (`auto_provision_user_profile_on_signup`), so no INSERT is
-// needed; tier and balance are server-owned and were never the browser's to
-// state; and `prc_license` now goes through /api/broker/credential, which also
-// enforces the re-verification reset that this path never did.
-//
-// Anything added here must be in the grant. `PROFILE_SYNC_COLUMNS` is asserted
-// against the live column privileges by `profileWriteGrantContract.test.js`.
-export const PROFILE_SYNC_COLUMNS = Object.freeze([
-  'display_name',
-  'location',
-  'headline',
-  'bio',
-  'firm',
-  'service',
-  'provider_availability',
-  'active_roles',
-  'updated_at',
-]);
-
-export async function upsertProfile(localUser) {
-  const profile = {
-    display_name: localUser.name || null,
-    location: localUser.publicProfile?.location || null,
-    headline: localUser.publicProfile?.headline || null,
-    bio: localUser.publicProfile?.bio || null,
-    firm: localUser.publicProfile?.firm || null,
-    service: localUser.publicProfile?.service || null,
-    provider_availability: localUser.provider?.availability ?? true,
-    active_roles: localUser.tags || [],
-    updated_at: new Date().toISOString(),
-  };
-
-  // `update`, not `upsert`: the row already exists, and an upsert would need
-  // an INSERT grant that `authenticated` deliberately does not have.
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .update(profile)
-    .eq('id', localUser.id)
-    .select()
-    .single();
-
-  return { data, error };
-}
+// ── PROFILE SYNC — RETIRED (A-138) ────────────────────────────────────────────
+// `upsertProfile` copied the browser's `scoutit_user` into the account on every
+// /profile visit. It reverted Settings edits, blanked any field the copy lacked,
+// and let an editable browser copy re-add a gated role past A-137's licence
+// check. My Profile now reads the account (loadOwnProfile) and nothing writes
+// profile fields from browser state. Do not reintroduce it.
 
 // ── OWN PROFILE LOAD ──────────────────────────────────────────────────────────
+// A-138: named columns, never `*`. One column later restricted for the browser
+// would otherwise fail the whole read with 42501 and take the page down.
+// Every column here was confirmed readable by `authenticated` on 2026-09-11.
+const OWN_PROFILE_COLUMNS =
+  'id, display_name, avatar_url, subscription_tier, active_roles, provider_type, ' +
+  'location, headline, bio, firm, service, member_since, is_profile_public, ' +
+  'provider_availability, prc_verified, prc_license, is_example_account';
+
 export async function loadOwnProfile(userId) {
   const { data, error } = await supabase
     .from('user_profiles')
-    .select('*')
+    .select(OWN_PROFILE_COLUMNS)
     .eq('id', userId)
     .single();
   return { data, error };
@@ -221,14 +174,9 @@ export async function loadPrivacySettings(userId, { tier = null, role = null } =
   return { data, error };
 }
 
-export async function updatePrivacySettings(userId, patch) {
-  const { data, error } = await supabase
-    .from('privacy_settings')
-    .upsert({ user_id: userId, ...patch }, { onConflict: 'user_id' })
-    .select()
-    .single();
-  return { data, error };
-}
+// A-135: `updatePrivacySettings` (a browser-direct upsert of privacy_settings)
+// was removed with the /profile privacy control it served. Every privacy write
+// now goes through /api/user/privacy-settings, so there is one writer.
 
 // U-026: this used to write `is_profile_public` straight from the browser.
 // U-022 made it server-only by grant, so since 2026-09-04 the write has been
@@ -315,48 +263,8 @@ export async function loadPhotographerProjects(userId) {
   return { data: data || [], error };
 }
 
-// ── SEEKER SAVED COUNT ────────────────────────────────────────────────────────
-// Private only — reads from saved_intel for own profile view.
-export async function loadSeekerSavedCount(userId) {
-  const { count, error } = await supabase
-    .from('saved_intel')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
-  return { count: count ?? 0, error };
-}
-
-// ── OWNER LISTINGS ────────────────────────────────────────────────────────────
-// Private only — reads from properties for own profile view.
-export async function loadOwnerListings(userId) {
-  const { data, error } = await supabase
-    .from('properties')
-    .select('id, title, location, type, pipeline_status, verified, completeness_score, created_at')
-    .eq('owner_id', userId)
-    .order('created_at', { ascending: false });
-
-  // Map to the expected shape for OwnerPanel
-  const mappedData = (data || []).map(p => ({
-    id: p.id,
-    title: p.title,
-    location: p.location,
-    type: p.type,
-    verified: !!p.verified,
-    completeness_score: completenessScoreOf(p)
-  }));
-
-  return { data: mappedData, error };
-}
-
-// ── OWNER INQUIRY COUNT ───────────────────────────────────────────────────────
-// Private only — counts deals against owner's properties.
-export async function loadOwnerInquiryCount(propertyIds) {
-  if (!propertyIds?.length) return { count: 0, error: null };
-  const { count, error } = await supabase
-    .from('deals')
-    .select('*', { count: 'exact', head: true })
-    .in('property_id', propertyIds);
-  return { count: count ?? 0, error };
-}
+// Seeker / Owner private-panel loaders were removed with those panels (A-138):
+// they repeated the dashboard's numbers on a page that shows how others see you.
 
 // ── INCREMENT PROFILE VIEWS ───────────────────────────────────────────────────
 export async function incrementBrokerProfileViews(userId) {

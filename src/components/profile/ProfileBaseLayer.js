@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import ProfileContactModal from "./ProfileContactModal";
 import ProfileProvenanceBadge from "./ProfileProvenanceBadge";
-import TrustBadge from "@/components/ui/TrustBadge";
 import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
@@ -139,7 +138,6 @@ export default function ProfileBaseLayer({
             </div>
           )}
           <ProfileProvenanceBadge isPilotParticipant={profile.is_pilot_participant === true} />
-          {profile.is_verified && <TrustBadge badgeId="IDENTITY_VERIFIED" />}
         </div>
 
         {/* Meta row */}
@@ -184,24 +182,15 @@ export default function ProfileBaseLayer({
           <p style={firmText}>{profile.firm}</p>
         )}
 
-        {/* Connects — own view only, never on public */}
-        {isOwnView && profile.connects_balance != null && (
-          <div style={connectsBlock}>
-            <span className="text-gold-accent font-mono text-[13px]">
-              ◈ {profile.connects_balance}
-            </span>
-            <span className="font-body text-[12px] text-text-secondary tracking-widest uppercase">
-              Connects
-            </span>
-          </div>
-        )}
-
+        {/* A-138: no Connects number here. It read a leftover profile
+            column, not the wallet that paid actions spend
+            from; Settings → Plan & Connects is the one place for it. */}
         {/* Actions */}
         <div style={actionsRow}>
           {isOwnView ? (
             <Link href="/settings" style={editBtn}>
               <Edit2 size={12} strokeWidth={1.5} />
-              Edit Profile
+              Edit in Settings
             </Link>
           ) : (
             <button
@@ -211,11 +200,6 @@ export default function ProfileBaseLayer({
               <MessageSquare size={12} strokeWidth={1.5} />
               Contact
             </button>
-          )}
-          {isOwnView && (
-            <Link href="/settings" style={settingsLink}>
-              Settings
-            </Link>
           )}
         </div>
       </div>
@@ -338,17 +322,6 @@ const firmText = {
   marginBottom: 14,
 };
 
-const connectsBlock = {
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  background: "rgba(232, 174, 60,0.07)",
-  border: "1px solid var(--accent-muted)",
-  borderRadius: 20,
-  padding: "6px 14px",
-  marginBottom: 16,
-};
-
 const actionsRow = {
   display: "flex",
   alignItems: "center",
@@ -386,10 +359,3 @@ const contactBtn = {
   fontWeight: 600,
 };
 
-const settingsLink = {
-  fontFamily: "var(--font-body)",
-  fontSize: 12,
-  color: "var(--text-secondary)",
-  textDecoration: "none",
-  letterSpacing: "0.04em",
-};

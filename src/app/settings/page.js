@@ -10,15 +10,25 @@ import { Camera, Search, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
 import DeleteAccountPanel from "@/components/profile/DeleteAccountPanel";
+import PlanPanel from "@/components/profile/PlanPanel";
 import { getCurrentTier } from "@/lib/entitlements";
 import { SETTINGS_SECTIONS } from "@/lib/settingsNavigation";
+import { canAddRole } from "@/lib/workspaceUnlock";
 
-const INTENT_TAGS = [
+const SELF_SERVICE_TAGS = [
   { id: 'buyer', label: 'Looking to Buy/Rent', icon: <Search strokeWidth={1.5} size="1em" /> },
   { id: 'owner', label: 'I Own Property', icon: '📋' },
-  { id: 'broker', label: 'Licensed Broker', icon: '🤝' },
-  { id: 'provider', label: 'Service Provider', icon: <Camera strokeWidth={1.5} size="1em" /> }
 ];
+
+// A-137: broker / provider are earned lenses, not one-click tags. Broker
+// needs a PRC licence claim (public verification stays a separate staff
+// review); provider needs its Services Offered line filled in.
+const GATED_TAGS = [
+  { id: 'broker', label: 'Licensed Broker', icon: '🤝', requirement: 'PRC licence number required — claim recorded, verified separately by staff.' },
+  { id: 'provider', label: 'Service Provider', icon: <Camera strokeWidth={1.5} size="1em" />, requirement: 'Services Offered line required below, so the roster knows what you do.' },
+];
+
+const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -34,6 +44,15 @@ export default function SettingsPage() {
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
   const [primaryMode, setPrimaryMode] = useState("");
+  // A-137: the roles the account held when this screen loaded. Only *adding*
+  // a gated lens is verified; removing one is always allowed.
+  const [initialTags, setInitialTags] = useState([]);
+  // A-137: PRC claim typed here when adding the broker lens. The browser can
+  // never read or write prc_license directly (U-022 server-only grant), so a
+  // returning broker is never asked to re-prove — this field only gates the
+  // moment broker is *added*, and is then stated through
+  // POST /api/broker/credential after the profile save.
+  const [brokerClaim, setBrokerClaim] = useState("");
   // Read in an effect, not during render: getCurrentTier() touches
   // localStorage, which does not exist on the server and would break SSR.
   // Only used to say whether the shield is already on by default — never to
@@ -85,6 +104,7 @@ export default function SettingsPage() {
       setName(profile.display_name || "");
       const nextTags = Array.isArray(profile.active_roles) ? profile.active_roles : [];
       setTags(nextTags);
+      setInitialTags(nextTags);
       setPrimaryMode(profile.primary_mode || profile.role || nextTags[0] || "");
       setPublicProfile((current) => ({
         ...current,
@@ -110,6 +130,23 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSecurityMessage({ type: "", text: "" });
+    // A-137: gated lenses are earned, not toggled. Only newly ADDED lenses
+    // are checked — removing one is always allowed, and buyer / owner pass
+    // with no evidence. The refusal names the task, not a wall.
+    const addedRoles = tags.filter((t) => !initialTags.includes(t));
+    for (const role of addedRoles) {
+      const evidence = role === "broker"
+        ? { prcLicense: brokerClaim }
+        : { services: publicProfile.service };
+      const gate = canAddRole(role, evidence);
+      if (!gate.ok) {
+        const suffix = role === "broker"
+          ? " This records your claim; public verification stays a separate staff review."
+          : "";
+        setSecurityMessage({ type: "error", text: `${gate.reason}${suffix}` });
+        return;
+      }
+    }
     const { data: { user }, error: userError } = await getUser();
     if (userError || !user) {
       router.replace("/onboarding");
@@ -136,6 +173,32 @@ export default function SettingsPage() {
     if (error) {
       setSecurityMessage({ type: "error", text: "Profile update failed. Please try again." });
       return;
+    }
+
+    // A-137: the profile save above grants the lens; this states the PRC
+    // claim through the only writer allowed to touch it
+    // (POST /api/broker/credential), which also forces prc_verified = false
+    // server-side. Without this, a self-added broker badge would mean nothing.
+    if (tags.includes("broker") && !initialTags.includes("broker") && brokerClaim.trim() !== "") {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch("/api/broker/credential", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ prcLicense: brokerClaim.trim() }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setSecurityMessage({ type: "error", text: data.error || "Workspace saved, but the PRC claim could not be recorded. Re-enter it below and save again." });
+          return;
+        }
+      } catch {
+        setSecurityMessage({ type: "error", text: "Workspace saved, but the PRC claim could not be recorded. Check your connection and save again." });
+        return;
+      }
     }
     
     // Supabase is the only persistent profile store.
@@ -274,14 +337,14 @@ export default function SettingsPage() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label} style={{marginTop: 16}}>Your Intent Tags (Dashboards)</label>
+          <label className={styles.label} style={{marginTop: 16}}>Your workspaces</label>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            Select all the roles you play on ScoutIt. Each tag unlocks a dedicated workspace in your Mode Switcher.
+            Buyer and owner are ready when you are. The dashboard switcher shows only the workspaces you hold.
           </p>
-          
+
           <div className={styles.tagGrid}>
-            {INTENT_TAGS.map(tag => (
-              <div 
+            {SELF_SERVICE_TAGS.map(tag => (
+              <div
                 key={tag.id}
                 className={`${styles.tagCard} ${tags.includes(tag.id) ? styles.selected : ''}`}
                 onClick={() => toggleTag(tag.id)}
@@ -290,6 +353,51 @@ export default function SettingsPage() {
                 <span style={{fontSize: 14}}>{tag.label}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} style={{marginTop: 16}}>Need another lens?</label>
+          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
+            Broker and provider workspaces are earned by verification, not toggled. Add yours here and save — the dashboard switcher stays clean until then.
+          </p>
+
+          <div className={styles.tagGrid}>
+            {GATED_TAGS.map(tag => {
+              const held = tags.includes(tag.id);
+              const newlyAdding = held && !initialTags.includes(tag.id);
+              const heldNote = tag.id === 'broker'
+                ? "Held — licence changes re-verify in the Broker workspace."
+                : "Held — keep your Services Offered line below up to date.";
+              return (
+                <div key={tag.id}>
+                  <div
+                    className={`${styles.tagCard} ${held ? styles.selected : ''}`}
+                    onClick={() => toggleTag(tag.id)}
+                  >
+                    <span className={styles.tagIcon}>{tag.icon}</span>
+                    <span style={{fontSize: 14}}>{tag.label}</span>
+                  </div>
+                  <p style={{color: 'var(--text-secondary)', fontSize: 12, marginTop: 8}}>
+                    {held && !newlyAdding ? heldNote : (held ? tag.requirement : `Locked — select to begin: ${tag.requirement}`)}
+                  </p>
+                  {tag.id === 'broker' && newlyAdding && (
+                    <>
+                      <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>PRC licence number</label>
+                      <input
+                        type="text"
+                        className={styles.input}
+                        placeholder="PRC-REB-XXXXXXX"
+                        aria-label="PRC licence number"
+                        maxLength={80}
+                        value={brokerClaim}
+                        onChange={(e) => setBrokerClaim(e.target.value)}
+                      />
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -429,7 +537,19 @@ export default function SettingsPage() {
           <PrivacyShieldPanel
             role={tags.includes('broker') ? 'broker' : (tags.includes('owner') ? 'owner' : 'seeker')}
             tier={shieldTier}
+            activeRoles={tags}
           />
+        </section>
+
+        {/* ── Plan & Connects (A-135) ── read from the account, never from
+            localStorage. Plan name only: no price until pricing is final. */}
+        <section id="plan" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Plan & Connects</span>
+            <h2>Your plan</h2>
+            <p>What your account is on, and the Connects you hold.</p>
+          </div>
+          <PlanPanel />
         </section>
 
         {/* ── Security & Login ── */}
