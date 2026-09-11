@@ -94,7 +94,7 @@ const masterGraphJson = {
   graphVersion: BUNDLE_VERSION,
   bundleVersion: BUNDLE_VERSION,
   dataRevision: currentCommit,
-  lastVerifiedAt: "2026-08-19",
+  lastVerifiedAt: "2026-09-11",
   generatedAt: GENERATED_TIMESTAMP,
   repo: {
     repository: "ScoutIt",

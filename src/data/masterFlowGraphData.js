@@ -134,7 +134,8 @@ export const MASTER_FLOW_NODES = [
       "badges",
       "privacy_page",
       "terms_page",
-      "login"
+      "login",
+      "global_account_menu"
     ],
     "actorRoles": [
       "visitor",
@@ -4444,8 +4445,8 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "sys_velocity_radar",
     "canonicalId": "sentinel.velocity_radar",
-    "name": "System: Sentinel Velocity Radar & Trajectory Detection",
-    "label": "System: Sentinel Velocity Radar & Trajectory Detection",
+    "name": "Planned AI · System: Sentinel Velocity Radar & Trajectory Detection",
+    "label": "Planned AI · System: Sentinel Velocity Radar & Trajectory Detection",
     "type": "SYSTEM",
     "nodeType": "SYSTEM",
     "domain": "sentinel",
@@ -4465,7 +4466,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "Monitors session request velocity (e.g. 50 properties in 60s), scraping trajectories, and 404 directory scanning.",
-    "description": "Behavioral telemetry engine protecting Airtable 5 req/s CMS limits and Mapbox geocoding budgets without tracking raw identity.",
+    "description": "Planned AI, not built: no code exists. Behavioral telemetry engine protecting Airtable 5 req/s CMS limits and Mapbox geocoding budgets without tracking raw identity.",
     "actions": [
       "Evaluate Request Velocity",
       "Analyze Access Trajectory",
@@ -4516,7 +4517,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 750,
     "y": 4250,
     "parents": [
@@ -8554,8 +8555,8 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "sys_gemini_ocr_extractor",
     "canonicalId": "owner.pdf.gemini_ocr",
-    "name": "System: Gemini OCR & Fact Extractor (Phase-1 Ingest)",
-    "label": "System: Gemini OCR & Fact Extractor (Phase-1 Ingest)",
+    "name": "System: PDF Text & Fact Extractor (Gemini)",
+    "label": "System: PDF Text & Fact Extractor (Gemini)",
     "type": "SYSTEM",
     "nodeType": "SYSTEM",
     "domain": "layer",
@@ -8575,7 +8576,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "PARTIAL",
     "purpose": "Extracts hard factual dimensions (FloorSqm, LotSqm, Beds, Baths, Parking, YearBuilt) directly from PDF source.",
-    "description": "Maps PDF text into structured fields. If a fact is missing from the PDF, it strictly leaves the field blank.",
+    "description": "Reads the PDF's text layer (/api/ai/read-pdf, unpdf), then one Gemini pass maps it to listing fields and is told to leave a missing fact empty (/api/ai/assimilate). There is no OCR: a scanned, image-only PDF has no text layer to read.",
     "actions": [
       "Run OCR & Text Extraction",
       "Map Hard Facts to Schema",
@@ -8605,6 +8606,21 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "API",
+        "path": "src/app/api/ai/read-pdf/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/ai/assimilate/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -8626,7 +8642,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 2250,
     "y": 3200,
     "parents": [
@@ -8652,19 +8668,26 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_sys_gemini_ocr_extractor_behavior",
-        "text": "System: Gemini OCR & Fact Extractor (Phase-1 Ingest) enforces defined layer behavioral contracts and access rules.",
+        "text": "Extracts a PDF's text layer and maps it to listing fields with one Gemini pass; scanned PDFs are not OCR'd.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/ai/read-pdf/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/ai/assimilate/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -8699,14 +8722,14 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "DOCUMENTED",
+    "evidenceStatus": "CODE_GROUNDED",
     "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "sys_web_researcher",
     "canonicalId": "owner.pdf.web_researcher",
-    "name": "System: Web Researcher Agent & Citation Verifier",
-    "label": "System: Web Researcher Agent & Citation Verifier",
+    "name": "Planned AI · System: Web Researcher Agent & Citation Verifier",
+    "label": "Planned AI · System: Web Researcher Agent & Citation Verifier",
     "type": "SYSTEM",
     "nodeType": "SYSTEM",
     "domain": "discovery",
@@ -8726,7 +8749,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "Finds cited external spatial facts and performs Same-Property Verification to prevent namesake misattribution.",
-    "description": "Enriches the cold-start draft with cited coordinates, nearby anchors, and developer provenance.",
+    "description": "Planned AI, not built: no code exists. Enriches the cold-start draft with cited coordinates, nearby anchors, and developer provenance.",
     "actions": [
       "Search External Spatial Data",
       "Verify Same-Property Identity",
@@ -8777,7 +8800,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 2250,
     "y": 3450,
     "parents": [
@@ -10019,7 +10042,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "VERIFIED",
     "purpose": "Enforces double opt-in for broker representation (Owner invites broker OR Broker pitches owner).",
-    "description": "Paid by the initiator (1 Connect). Recipient confirms for free. Link becomes Active only after mutual confirmation.",
+    "description": "Paid by the initiator (1 Connect). Recipient confirms for free. Link becomes Active only after mutual confirmation. Only the property owner may answer a broker's request, so a broker cannot accept their own pitch (U-032). Before accepting, the owner is shown what accepting hands over, in the Owner workspace and in the Inbox, and both answer routes share one transition, so accepting from the Inbox also attaches the broker to the listing (A-134).",
     "actions": [
       "Deduct 1 Connect from Initiator",
       "Create Pending Representation Link",
@@ -10027,7 +10050,9 @@ export const MASTER_FLOW_NODES = [
       "Confirm & Activate"
     ],
     "conditions": [
-      "Initiator pays 1 Connect; broker selected from verified directory"
+      "Initiator pays 1 Connect; broker selected from verified directory",
+      "Only the property owner may answer a broker's request",
+      "The owner sees what accepting hands over before accepting"
     ],
     "systems": [
       "/api/dashboard/invite",
@@ -10037,7 +10062,9 @@ export const MASTER_FLOW_NODES = [
     "components": [],
     "apis": [
       "/api/dashboard/invite",
-      "/api/deals/pitch"
+      "/api/deals/pitch",
+      "/api/dashboard/deals/update",
+      "/api/deals/[id]"
     ],
     "dataRefs": [
       "Supabase deals & Airtable BROKERS_CMS"
@@ -10065,6 +10092,44 @@ export const MASTER_FLOW_NODES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/deals/delegationDisclosure.js",
+        "symbol": "DELEGATION_ACCEPT_NOTICE",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/deals/update/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/representationAnswerRoutes.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/delegationAcceptanceContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
     "telemetry": {
@@ -10081,7 +10146,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3050,
     "y": 1700,
     "parents": [
@@ -10109,7 +10174,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_sys_double_optin_handshake_behavior",
-        "text": "System: Two-Sided Representation Handshake enforces defined deal behavioral contracts and access rules.",
+        "text": "Representation becomes active only after the other side confirms; only the owner answers a broker's request, and the owner is told what accepting hands over.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -10125,10 +10190,43 @@ export const MASTER_FLOW_NODES = [
             "path": "src/lib/__tests__/brokerRepresentation.test.js",
             "provenance": "EXTRACTED",
             "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/deals/delegationDisclosure.js",
+            "symbol": "DELEGATION_ACCEPT_NOTICE",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/deals/update/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/deals/[id]/route.js",
+            "symbol": "PATCH",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/representationAnswerRoutes.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/delegationAcceptanceContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -10165,7 +10263,7 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "CODE_GROUNDED",
+    "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE"
   },
   {
@@ -10379,7 +10477,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "PARTIAL",
     "purpose": "Coordinates the entire extraction pipeline: OCR ingest, web research, multi-voice council deliberation, and Arbiter routing.",
-    "description": "Turns thin PDF documents into rich, factually honest property dossiers. Enforces Honest Blank and Holder of Truth rules.",
+    "description": "Built today: an owner uploads a PDF in the Owner workspace; /api/ai/read-pdf extracts its text layer; /api/ai/assimilate makes one Gemini pass that fills the listing fields, leaves a missing fact empty and lists it as a gap; the draft is tagged pdf_assisted and cannot publish until staff verify it against the source in /admin. Not built: web research, the four-voice council and the arbiter.",
     "actions": [
       "Coordinate AI Sub-Pipelines",
       "Manage Fact vs Editorial Routing",
@@ -10413,6 +10511,58 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/OwnerMode.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/ai/read-pdf/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/ai/assimilate/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/admin/pdf-verify/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/publish/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/pdfDraftProducerContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/pdfDraftVerification.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -10433,7 +10583,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3050,
     "y": 2150,
     "parents": [
@@ -10462,19 +10612,58 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_ai_listing_engine_behavior",
-        "text": "System: AI Listing Engine Coordinator enforces defined owner behavioral contracts and access rules.",
+        "text": "An owner PDF becomes a draft through text extraction and one Gemini pass, and staff must verify it against the source before it publishes. Research, council and arbiter stages are not built.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/OwnerMode.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/ai/read-pdf/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/ai/assimilate/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/admin/pdf-verify/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/publish/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/pdfDraftProducerContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/pdfDraftVerification.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -10509,14 +10698,14 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "DOCUMENTED",
+    "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "sys_ai_council",
     "canonicalId": "owner.ai.council",
-    "name": "System: The AI Council (4-Voice Expert Panel)",
-    "label": "System: The AI Council (4-Voice Expert Panel)",
+    "name": "Planned AI · System: The AI Council (4-Voice Expert Panel)",
+    "label": "Planned AI · System: The AI Council (4-Voice Expert Panel)",
     "type": "SYSTEM",
     "nodeType": "SYSTEM",
     "domain": "layer",
@@ -10534,9 +10723,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "layer"
     ],
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "NOT_STARTED",
     "purpose": "4-voice panel debating facts vs editorial: Design Expert, Owner Advocate, Buyer Advocate, Category Master.",
-    "description": "Weighs sourced evidence per field. Domain experts frame aesthetic tags; Owner vs Buyer advocates balance honesty vs presentation.",
+    "description": "Planned AI, not built: no code exists. Weighs sourced evidence per field. Domain experts frame aesthetic tags; Owner vs Buyer advocates balance honesty vs presentation.",
     "actions": [
       "Convene 4-Voice Panel",
       "Adjudicate Sourced Facts",
@@ -10588,7 +10777,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3050,
     "y": 2350,
     "parents": [
@@ -10614,9 +10803,9 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_sys_ai_council_behavior",
-        "text": "System: The AI Council (4-Voice Expert Panel) enforces defined layer behavioral contracts and access rules.",
+        "text": "Not built. No council, arbiter or deadlock logic exists in the codebase; the dashboard's 'Council AI' wording describes one AI drafting pass.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PARTIAL",
+        "status": "PROPOSED",
         "evidence": [
           {
             "kind": "SCOUTIT_BRAIN",
@@ -10625,8 +10814,8 @@ export const MASTER_FLOW_NODES = [
             "confidence": 0.8
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -10662,13 +10851,13 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "sys_ai_arbiter",
     "canonicalId": "owner.ai.arbiter",
-    "name": "System: The AI Arbiter & Loop Cap Judge",
-    "label": "System: The AI Arbiter & Loop Cap Judge",
+    "name": "Planned AI · System: The AI Arbiter & Loop Cap Judge",
+    "label": "Planned AI · System: The AI Arbiter & Loop Cap Judge",
     "type": "SYSTEM",
     "nodeType": "SYSTEM",
     "domain": "layer",
@@ -10688,9 +10877,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "layer"
     ],
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "NOT_STARTED",
     "purpose": "Independent judge evaluating council output against hard rules; enforces 2-round maximum loop cap.",
-    "description": "Routes high confidence to publishing queue; borderlines back to Council (max 2 rounds); stalemates to human approval.",
+    "description": "Planned AI, not built: no code exists. Routes high confidence to publishing queue; borderlines back to Council (max 2 rounds); stalemates to human approval.",
     "actions": [
       "Check Field Sourcing Confidence",
       "Enforce Max 2 Round Loop Cap",
@@ -10740,7 +10929,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3050,
     "y": 2550,
     "parents": [
@@ -10770,9 +10959,9 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_sys_ai_arbiter_behavior",
-        "text": "System: The AI Arbiter & Loop Cap Judge enforces defined layer behavioral contracts and access rules.",
+        "text": "Not built. No council, arbiter or deadlock logic exists in the codebase; the dashboard's 'Council AI' wording describes one AI drafting pass.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PARTIAL",
+        "status": "PROPOSED",
         "evidence": [
           {
             "kind": "SCOUTIT_BRAIN",
@@ -10781,8 +10970,8 @@ export const MASTER_FLOW_NODES = [
             "confidence": 0.8
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -10818,7 +11007,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "api_publish_listing",
@@ -11009,23 +11198,26 @@ export const MASTER_FLOW_NODES = [
       "legal"
     ],
     "implementationStatus": "VERIFIED",
-    "purpose": "DPO-authorized Right to Erasure protocol: hard-purges human PII while retaining spatial intelligence assets.",
-    "description": "Hard-deletes name, phone, email, and PRC license from `user_profiles` and `auth.users`. Retains Spatial Vault 3D media with `owner_id: null`.",
+    "purpose": "A person deletes their own account from Settings (RA 10173 right to erasure).",
+    "description": "Settings > Delete account shows what is and is not deleted, then requires typing DELETE MY ACCOUNT. The route deletes eight kinds of private data (saved properties, viewing and search history, privacy choices, notifications, availability, calendar events and connected calendars), anonymises the profile row (kept so records that point to it stay intact), closes sign-in with a soft delete that keeps the sign-in record and its email, and writes an audit entry. Listings and Connects are not removed. A partial erasure is reported as partial, never as done.",
     "actions": [
-      "Verify DPO Authorization",
-      "Hard-Purge PII Fields",
-      "Nullify Property Owner ID",
-      "Revert Listing to Unclaimed Estate"
+      "Show what is and is not deleted",
+      "Confirm by typing DELETE MY ACCOUNT",
+      "Delete private data",
+      "Anonymise the profile",
+      "Close sign-in (soft delete)",
+      "Write the audit entry"
     ],
     "conditions": [
       "Formal Data Privacy Act RA 10173 request verified by DPO"
     ],
     "systems": [
-      "/api/user/dpo-erasure",
-      "SentinelLayer.js"
+      "src/app/api/user/delete-account/route.js",
+      "src/lib/accountErasure.js",
+      "src/components/profile/DeleteAccountPanel.js"
     ],
     "components": [
-      "SentinelLayer.js"
+      "DeleteAccountPanel.js"
     ],
     "apis": [
       "/api/user/delete-account"
@@ -11036,10 +11228,11 @@ export const MASTER_FLOW_NODES = [
     "database": "Supabase user_profiles, auth.users, properties",
     "auth": "staff",
     "exceptions": [
-      "Active legal dispute on property prevents immediate erasure"
+      "A private-data table could not be erased",
+      "Sign-in could not be closed"
     ],
     "recovery": [
-      "Hold in legal compliance quarantine pending dispute resolution"
+      "Reported as partial with a way to contact support; nothing is shown as done"
     ],
     "evidence": [
       {
@@ -11056,6 +11249,36 @@ export const MASTER_FLOW_NODES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/profile/DeleteAccountPanel.js",
+        "symbol": "DeleteAccountPanel",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/accountErasure.js",
+        "symbol": "ERASED_DATA_LABELS",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/accountErasureContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/erasureHonesty.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
     "telemetry": {
@@ -11071,11 +11294,12 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3050,
     "y": 2950,
     "parents": [
-      "mission_control"
+      "mission_control",
+      "page_settings"
     ],
     "children": [
       "pep"
@@ -11097,7 +11321,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_scenario_pii_erasure_behavior",
-        "text": "System: PII-Detachment & Estate Retention (RA 10173) enforces defined legal behavioral contracts and access rules.",
+        "text": "Self-service erasure deletes eight private-data tables, anonymises the profile, soft-deletes sign-in (the record and email remain) and audits the request; a partial result is reported as partial.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -11113,10 +11337,36 @@ export const MASTER_FLOW_NODES = [
             "path": "src/lib/__tests__/deleteAccountApi.test.js",
             "provenance": "EXTRACTED",
             "confidence": 1
+          },
+          {
+            "kind": "COMPONENT",
+            "path": "src/components/profile/DeleteAccountPanel.js",
+            "symbol": "DeleteAccountPanel",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/accountErasure.js",
+            "symbol": "ERASED_DATA_LABELS",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/accountErasureContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/erasureHonesty.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -11147,7 +11397,7 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "CODE_GROUNDED",
+    "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE"
   },
   {
@@ -11159,7 +11409,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "OUTCOME",
     "domain": "connects",
     "category": "scenario",
-    "route": "/lib/connectRules.js",
+    "route": "/dashboard/inbox",
     "layer": "global",
     "roles": [
       "seeker",
@@ -11178,37 +11428,78 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "connects"
     ],
-    "implementationStatus": "NOT_STARTED",
-    "purpose": "Enforces that spent Connects are non-refundable on decline, timeout, or non-response.",
-    "description": "Protects platform tokenomics. Only severe administrative errors receive discretionary staff corrections in Mission Control.",
+    "implementationStatus": "VERIFIED",
+    "purpose": "A spent Connect is not returned when a request is declined, withdrawn or never answered.",
+    "description": "Unanswered requests are archived after 7 days and removed after a month, and the sender is told the Connect is not returned. The single exception is a verifiable ScoutIt system error, such as a failed delivery or a double charge, which staff correct by hand with a written reason on the record.",
     "actions": [
       "Enforce Non-Refundable Spend Rule",
       "Log Delivered Gesture Record"
     ],
     "conditions": [
-      "Inquiry or pitch sent"
+      "A Connect was spent to send a request"
     ],
     "systems": [
-      "connectRules.js",
-      "DisputesHub.js"
+      "src/app/api/cron/sweep-pending-requests/route.js",
+      "src/app/api/admin/connects-refund/route.js",
+      "src/components/admin/ConnectsRefundPanel.js"
     ],
     "components": [
-      "connectRules.js",
-      "DisputesHub.js"
+      "ConnectsRefundPanel.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/cron/sweep-pending-requests",
+      "/api/admin/connects-refund"
+    ],
     "dataRefs": [
       "Supabase connect_transactions"
     ],
     "database": "Supabase connect_transactions",
     "auth": "seeker",
     "exceptions": [
-      "Confirmed administrative platform bug caused delivery failure"
+      "ScoutIt failed to deliver the request or charged twice"
     ],
     "recovery": [
-      "Discretionary staff manual credit adjustment via Mission Control"
+      "Staff correct the balance by hand, with a written reason recorded"
     ],
     "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/sweep-pending-requests/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/admin/connects-refund/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/admin/ConnectsRefundPanel.js",
+        "symbol": "ConnectsRefundPanel",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/admin/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/connectsRefundApi.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
       {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
@@ -11221,7 +11512,7 @@ export const MASTER_FLOW_NODES = [
       "eventName": "flow_scenario_non_refundable_connect_viewed",
       "properties": {
         "domain": "connects",
-        "route": "/lib/connectRules.js"
+        "route": "/dashboard/inbox"
       }
     },
     "brainRefs": [
@@ -11231,7 +11522,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3050,
     "y": 3200,
     "parents": [
@@ -11259,19 +11550,46 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_scenario_non_refundable_connect_behavior",
-        "text": "Playbook 3.1 — Non-Refundable Connect Spend & Discretionary Correction enforces defined connects behavioral contracts and access rules.",
+        "text": "Spent Connects are not refunded on decline, withdrawal or non-response; only a verified system error is corrected, by staff, with a recorded reason.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/cron/sweep-pending-requests/route.js",
+            "symbol": "GET",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/admin/connects-refund/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "COMPONENT",
+            "path": "src/components/admin/ConnectsRefundPanel.js",
+            "symbol": "ConnectsRefundPanel",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "ROUTE",
+            "path": "src/app/admin/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/connectsRefundApi.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -11301,9 +11619,9 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE"
   },
   {
     "id": "exc_bot_quarantine",
@@ -11637,7 +11955,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "PARTIAL",
     "purpose": "30-second catchup banner summarizing price changes, status updates, and new spaces in watched areas since last login.",
-    "description": "Eliminates repetitive re-scouting. If nothing changed, renders confident all-clear acknowledgment.",
+    "description": "Eliminates repetitive re-scouting. If nothing changed, renders confident all-clear acknowledgment. Built as logic only: buildReturnBrief (src/lib/contextBridges.js, tested) assembles a 'Since your last visit' brief, but no screen renders it.",
     "actions": [
       "Inspect Changed Spaces",
       "Review Inactive Status Flags",
@@ -11668,6 +11986,21 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "CODE",
+        "path": "src/lib/contextBridges.js",
+        "symbol": "buildReturnBrief",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/contextBridges.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -11689,7 +12022,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3850,
     "y": 450,
     "parents": [
@@ -11709,19 +12042,26 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_comp_return_brief_buyer_behavior",
-        "text": "Component: Buyer Return Brief Catchup enforces defined layer behavioral contracts and access rules.",
+        "text": "The return-brief logic exists and is tested, but no screen renders it.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
+        "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "CODE",
+            "path": "src/lib/contextBridges.js",
+            "symbol": "buildReturnBrief",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/contextBridges.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -11752,8 +12092,8 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE"
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "dashboard_owner",
@@ -11846,7 +12186,8 @@ export const MASTER_FLOW_NODES = [
       "auth_onboarding_flow",
       "sys_monthly_scout_wrap",
       "rec_confirm_freshness_click",
-      "auth_enterprise_sso"
+      "auth_enterprise_sso",
+      "action_owner_remove_broker"
     ],
     "children": [
       "owner_creation_pipeline",
@@ -11854,7 +12195,8 @@ export const MASTER_FLOW_NODES = [
       "comp_return_brief_owner",
       "scenario_offmarket_pitch",
       "sys_monthly_scout_wrap",
-      "sys_freshness_staleness_engine"
+      "sys_freshness_staleness_engine",
+      "action_owner_remove_broker"
     ],
     "actorRoles": [
       "owner"
@@ -11943,7 +12285,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "PARTIAL",
     "purpose": "Highlights unread buyer leads, pending broker representation pitches, and 90-day listing freshness check.",
-    "description": "Provides owners immediate operational clarity on who is engaging with their spaces.",
+    "description": "Partly built as the dashboard Attention rail (AttentionRail, /api/dashboard/attention, lib/dashboardAttention.js): unanswered messages, Connect requests close to archiving, overdue tasks and unconfirmed viewings. Not built here: the 90-day listing-freshness check.",
     "actions": [
       "Review Unread Inquiries",
       "Accept/Decline Broker Pitch",
@@ -11974,6 +12316,43 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/AttentionRail.js",
+        "symbol": "AttentionRail",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/attention/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/dashboardAttention.js",
+        "symbol": "computeAttention",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/dashboardAttention.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -11995,7 +12374,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3850,
     "y": 900,
     "parents": [
@@ -12017,19 +12396,45 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_comp_return_brief_owner_behavior",
-        "text": "Component: Owner Leads & Freshness Brief enforces defined layer behavioral contracts and access rules.",
+        "text": "The dashboard Attention rail shows unanswered messages, requests close to archiving, overdue tasks and unconfirmed viewings; freshness is not part of it.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
+        "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/AttentionRail.js",
+            "symbol": "AttentionRail",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/attention/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/dashboardAttention.js",
+            "symbol": "computeAttention",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "ROUTE",
+            "path": "src/app/dashboard/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/dashboardAttention.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -12064,7 +12469,7 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "DOCUMENTED",
+    "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "LIMITED_LIVE"
   },
   {
@@ -12258,7 +12663,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "PARTIAL",
     "purpose": "Summarizes today's viewing appointments, pending client representation responses, and active deal milestones.",
-    "description": "Focuses broker attention on currently available appointment and inquiry information; a dedicated viewing-calendar component is not implemented.",
+    "description": "Partly built as the dashboard Attention rail: viewings within 48 hours that are still unconfirmed, requests close to archiving, overdue tasks and unanswered messages. Not built: a dedicated viewing-calendar view in this brief.",
     "actions": [
       "Check Today's Viewing Agenda",
       "Open Pending Client Deal Rooms",
@@ -12287,6 +12692,43 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/AttentionRail.js",
+        "symbol": "AttentionRail",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/attention/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/dashboardAttention.js",
+        "symbol": "computeAttention",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/dashboardAttention.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -12308,7 +12750,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 3850,
     "y": 1350,
     "parents": [
@@ -12328,19 +12770,45 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_comp_return_brief_broker_behavior",
-        "text": "Component: Broker Schedule & Pipeline Brief enforces defined layer behavioral contracts and access rules.",
+        "text": "The dashboard Attention rail covers unconfirmed viewings, requests close to archiving, overdue tasks and unanswered messages.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "VERIFIED",
+        "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/AttentionRail.js",
+            "symbol": "AttentionRail",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/attention/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/dashboardAttention.js",
+            "symbol": "computeAttention",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "ROUTE",
+            "path": "src/app/dashboard/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/dashboardAttention.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -12375,7 +12843,7 @@ export const MASTER_FLOW_NODES = [
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
-    "evidenceStatus": "DOCUMENTED",
+    "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "LIMITED_LIVE"
   },
   {
@@ -13547,13 +14015,13 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "exc_contact_leak_blocked",
     "canonicalId": "sentinel.exc.contact_leak",
-    "name": "Exception: Contact Information Leak Redacted",
-    "label": "Exception: Contact Information Leak Redacted",
+    "name": "Exception: Contact Details Blocked",
+    "label": "Exception: Contact Details Blocked",
     "type": "EXCEPTION",
     "nodeType": "EXCEPTION",
     "domain": "sentinel",
     "category": "scenario",
-    "route": "/lib/sanitize.js",
+    "route": "/api/faqs",
     "layer": "global",
     "roles": [
       "visitor",
@@ -13566,9 +14034,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "sentinel"
     ],
-    "implementationStatus": "NOT_STARTED",
-    "purpose": "Triggered when public FAQ question contains raw phone numbers, email addresses, or Viber handles.",
-    "description": "The sanitize filter intercepts the string to prevent off-platform disintermediation.",
+    "implementationStatus": "VERIFIED",
+    "purpose": "Keeps phone numbers, emails and messaging handles out of the public questions and answers on a listing.",
+    "description": "A question or answer that contains contact details (a phone number, an email, a messaging handle or an outside link) is refused before it is posted, with the reason shown, and the attempt is counted. Nothing is posted and nothing is redacted. Private contact happens through a Connect.",
     "actions": [
       "Detect Regex Contact Match",
       "Trigger Redaction Warning"
@@ -13577,24 +14045,67 @@ export const MASTER_FLOW_NODES = [
       "Pattern matches phone/email regex in public FAQ"
     ],
     "systems": [
-      "sanitize.js"
+      "src/app/api/faqs/route.js",
+      "src/app/api/faqs/preflight/route.js",
+      "src/lib/contactLeakFilter.js"
     ],
     "components": [
       "sanitize.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/faqs",
+      "/api/faqs/preflight"
+    ],
     "dataRefs": [
       "None"
     ],
     "database": "None",
     "auth": "public",
     "exceptions": [
-      "Attempt to circumvent with spelled-out words"
+      "The text contains a phone number, email, messaging handle or outside link"
     ],
     "recovery": [
-      "Phonetic word normalizer catches spelled-out digits"
+      "The author sees why and can rewrite the text without contact details"
     ],
     "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/faqs/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/faqs/preflight/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/contactLeakFilter.js",
+        "symbol": "rejectIfContactLeak",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/faqContactLeakTelemetry.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/contactLeakFilter.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
       {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
@@ -13607,7 +14118,7 @@ export const MASTER_FLOW_NODES = [
       "eventName": "flow_exc_contact_leak_blocked_viewed",
       "properties": {
         "domain": "sentinel",
-        "route": "/lib/sanitize.js"
+        "route": "/api/faqs"
       }
     },
     "brainRefs": [
@@ -13616,7 +14127,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 900,
     "parents": [
@@ -13640,19 +14151,46 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_exc_contact_leak_blocked_behavior",
-        "text": "Exception: Contact Information Leak Redacted enforces defined sentinel behavioral contracts and access rules.",
+        "text": "A public FAQ question or answer containing contact details is refused with the reason and counted; it is never posted or redacted.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/faqs/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/faqs/preflight/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/contactLeakFilter.js",
+            "symbol": "rejectIfContactLeak",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/faqContactLeakTelemetry.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/contactLeakFilter.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -13682,9 +14220,9 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE"
   },
   {
     "id": "rec_redact_contact_faq",
@@ -13710,7 +14248,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "Replaces leaked contact string with safe token and posts redacted question to public board.",
-    "description": "Inserts `[CONTACT REDACTED: SPEND 1 CONNECT TO MESSAGE BROKER]` in place of the leaked numbers.",
+    "description": "Not built, and not how ScoutIt behaves today: contact details in a public question or answer are refused (exc_contact_leak_blocked), never redacted and posted. An owner can appeal a blocked answer, but appeals stay switched off until the staff review screen exists (A-133). Whether redact-and-post is still wanted is a product decision.",
     "actions": [
       "Apply Tokenized Redaction",
       "Post Cleaned Question to Public FAQ"
@@ -13761,7 +14299,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 1100,
     "parents": [
@@ -13785,7 +14323,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_rec_redact_contact_faq_behavior",
-        "text": "Recovery: Redact Contact & Post Safe FAQ Text enforces defined faq behavioral contracts and access rules.",
+        "text": "Not built. The shipped behaviour refuses contact details instead of redacting and posting them.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "PROPOSED",
         "evidence": [
@@ -13796,8 +14334,8 @@ export const MASTER_FLOW_NODES = [
             "confidence": 0.8
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -14185,9 +14723,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "owner"
     ],
-    "implementationStatus": "NOT_STARTED",
+    "implementationStatus": "PARTIAL",
     "purpose": "Triggered when AI Listing Engine cannot locate a specific metric (e.g. ceiling height) in the owner's PDF.",
-    "description": "The AI never invents or hallucinates data. It leaves the field blank and flags the record for the human review queue.",
+    "description": "Held by instruction, not by code: the drafting prompt (/api/ai/assimilate) tells the model to leave a missing fact empty, never invent one, and list it as a gap. Nothing checks the output against the PDF automatically; the backstop is that every PDF-assisted draft needs staff verification before it can publish.",
     "actions": [
       "Flag Field as Honest Blank",
       "Create Verification Queue Item",
@@ -14217,6 +14755,36 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "API",
+        "path": "src/app/api/ai/assimilate/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/publish/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/admin/pdf-verify/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/pdfDraftVerification.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -14237,7 +14805,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 1750,
     "parents": [
@@ -14262,19 +14830,39 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_exc_missing_pdf_metric_behavior",
-        "text": "Playbook 2.1 — Honest Blank Rule Exception enforces defined owner behavioral contracts and access rules.",
+        "text": "The model is instructed to leave missing facts empty and list them as gaps; staff verification of every PDF draft is the enforced backstop.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/ai/assimilate/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/publish/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/admin/pdf-verify/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/pdfDraftVerification.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -14308,9 +14896,9 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "rec_owner_manual_override",
@@ -14321,7 +14909,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "RECOVERY",
     "domain": "layer",
     "category": "scenario",
-    "route": "/dashboard/create/advanced",
+    "route": "/dashboard",
     "layer": "mantle",
     "roles": [
       "owner"
@@ -14332,9 +14920,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "layer"
     ],
-    "implementationStatus": "NOT_STARTED",
+    "implementationStatus": "PARTIAL",
     "purpose": "Owner exercises absolute sovereignty to manually input or correct any field left blank by the AI.",
-    "description": "Owner-supplied facts override AI extraction, preserving data integrity without forcing approval delays.",
+    "description": "An owner can edit their listing's fields from the Owner workspace, including any the AI left empty (the dashboard's listing update, /api/dashboard/update). Owner-authored listings publish on attestation, but a PDF-assisted draft still needs staff verification before its first publication, so owner edits do not skip that review.",
     "actions": [
       "Input Verified Metric Manually",
       "Attest to Accuracy",
@@ -14349,7 +14937,9 @@ export const MASTER_FLOW_NODES = [
     "components": [
       "AdvancedChapterEditor.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/dashboard/update"
+    ],
     "dataRefs": [
       "Supabase properties"
     ],
@@ -14363,6 +14953,29 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "API",
+        "path": "src/app/api/dashboard/update/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/context/DashboardContext.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/publish/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -14374,7 +14987,7 @@ export const MASTER_FLOW_NODES = [
       "eventName": "flow_rec_owner_manual_override_viewed",
       "properties": {
         "domain": "layer",
-        "route": "/dashboard/create/advanced"
+        "route": "/dashboard"
       }
     },
     "brainRefs": [
@@ -14384,7 +14997,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 1950,
     "parents": [
@@ -14406,19 +15019,33 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_rec_owner_manual_override_behavior",
-        "text": "Playbook 2.2 — Holder of Truth (Owner Override) enforces defined layer behavioral contracts and access rules.",
+        "text": "Owners can fill or correct any listing field; a PDF-assisted draft still waits for staff verification before first publication.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/dashboard/update/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/context/DashboardContext.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/publish/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -14452,15 +15079,15 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "exc_ai_deadlock",
     "canonicalId": "owner.ai.exc.deadlock",
-    "name": "Playbook 2.3 — AI Council Deadlock Exception",
-    "label": "Playbook 2.3 — AI Council Deadlock Exception",
+    "name": "Planned AI · Playbook 2.3 — AI Council Deadlock Exception",
+    "label": "Planned AI · Playbook 2.3 — AI Council Deadlock Exception",
     "type": "EXCEPTION",
     "nodeType": "EXCEPTION",
     "domain": "layer",
@@ -14476,9 +15103,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "layer"
     ],
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "NOT_STARTED",
     "purpose": "Triggered when government documentation contradicts the owner's pitch deck, creating an AI stalemate.",
-    "description": "The AI Council forces a stalemate and routes the listing to Mission Control manual verification queue.",
+    "description": "Planned AI, not built: no code exists. The AI Council forces a stalemate and routes the listing to Mission Control manual verification queue.",
     "actions": [
       "Freeze Automatic Publish",
       "Route to Mission Control Approval Queue",
@@ -14530,7 +15157,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 2150,
     "parents": [
@@ -14553,9 +15180,9 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_exc_ai_deadlock_behavior",
-        "text": "Playbook 2.3 — AI Council Deadlock Exception enforces defined layer behavioral contracts and access rules.",
+        "text": "Not built. No council, arbiter or deadlock logic exists in the codebase; the dashboard's 'Council AI' wording describes one AI drafting pass.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PARTIAL",
+        "status": "PROPOSED",
         "evidence": [
           {
             "kind": "SCOUTIT_BRAIN",
@@ -14564,8 +15191,8 @@ export const MASTER_FLOW_NODES = [
             "confidence": 0.8
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -14601,7 +15228,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "DOCUMENTED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "rec_manual_approval_queue",
@@ -14612,7 +15239,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "RECOVERY",
     "domain": "layer",
     "category": "scenario",
-    "route": "/mission-control/approval",
+    "route": "/admin",
     "layer": "mantle",
     "roles": [
       "staff"
@@ -14623,9 +15250,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "layer"
     ],
-    "implementationStatus": "NOT_STARTED",
+    "implementationStatus": "PARTIAL",
     "purpose": "Human operator reviews contradictory documents, cross-checks registry, and resolves stalemate.",
-    "description": "Staff verifies ground truth and manually approves or requests clarification from the owner.",
+    "description": "Staff open the PDF tab in /admin, see every unverified PDF-assisted draft (/api/admin/pdf-verify GET) and mark one verified against its source (POST, audited). Every PDF draft reaches this queue; there is no council deadlock to route from. Not built: sending a draft back to the owner with a question. The /admin page check is a disclosure, not a gate (A-073); the route itself requires an admin.",
     "actions": [
       "Inspect Contradictory Records",
       "Confirm Ground Truth",
@@ -14640,7 +15267,9 @@ export const MASTER_FLOW_NODES = [
     "components": [
       "MissionControlDashboard.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/admin/pdf-verify"
+    ],
     "dataRefs": [
       "Supabase properties"
     ],
@@ -14654,6 +15283,35 @@ export const MASTER_FLOW_NODES = [
     ],
     "evidence": [
       {
+        "kind": "API",
+        "path": "src/app/api/admin/pdf-verify/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/admin/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/pdfDraftVerification.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/pdfDraftProducerContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
         "provenance": "INFERRED",
@@ -14665,7 +15323,7 @@ export const MASTER_FLOW_NODES = [
       "eventName": "flow_rec_manual_approval_queue_viewed",
       "properties": {
         "domain": "layer",
-        "route": "/mission-control/approval"
+        "route": "/admin"
       }
     },
     "brainRefs": [
@@ -14675,7 +15333,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 2350,
     "parents": [
@@ -14698,19 +15356,38 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_rec_manual_approval_queue_behavior",
-        "text": "Playbook 2.3 — Mission Control Approval Queue enforces defined layer behavioral contracts and access rules.",
+        "text": "Staff verify PDF-assisted drafts against their source from /admin; there is no path to return a draft to the owner.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "PARTIAL",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/admin/pdf-verify/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "ROUTE",
+            "path": "src/app/admin/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/pdfDraftVerification.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/pdfDraftProducerContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -14744,9 +15421,9 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "scenario_churned_owner_escrow",
@@ -15064,7 +15741,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "When broker's PRC license expires, system provides a 30-day renewal grace period before badge downgrade.",
-    "description": "Broker receives 30 days to upload renewal. If missed, badge downgrades to 'Unverified' and representation privileges freeze.",
+    "description": "Broker receives 30 days to upload renewal. If missed, badge downgrades to 'Unverified' and representation privileges freeze. Checked 2026-09-11: an expired licence is detected and shown as expired straight away (lib/brokerCredential.js); there is no grace period, notice or privilege freeze.",
     "actions": [
       "Send 30-Day Expiry Notice",
       "Track Renewal Countdown",
@@ -15116,7 +15793,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 3100,
     "parents": [
@@ -15214,7 +15891,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "Strict routing isolation: unit-level inquiries route to Co-Working Operator; building-level route to Building Broker.",
-    "description": "Prevents lead theft and operator collision by isolating inquiry endpoints based on the target entity.",
+    "description": "Prevents lead theft and operator collision by isolating inquiry endpoints based on the target entity. Checked 2026-09-11: every inquiry, unit-level included, goes to the property's active broker roster or, failing that, the owner (create_routed_buyer_deal); a unit's operator is named only in the ledger text.",
     "actions": [
       "Inspect Inquiry Target Entity",
       "Route Unit Leads to Co-Working Operator",
@@ -15265,7 +15942,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 3350,
     "parents": [
@@ -15350,7 +16027,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "OUTCOME",
     "domain": "layer",
     "category": "scenario",
-    "route": "/dashboard/property/[id]/settings",
+    "route": "/dashboard",
     "layer": "core",
     "roles": [
       "owner",
@@ -15363,9 +16040,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "layer"
     ],
-    "implementationStatus": "NOT_STARTED",
-    "purpose": "Owner toggle controlling whether dormant off-market Vault listings accept incoming buyer pitches.",
-    "description": "Allows high-net-worth owners to test market interest without public listing exposure or pricing leak.",
+    "implementationStatus": "VERIFIED",
+    "purpose": "Lets the owner of an off-market listing decide whether entitled buyers may contact them.",
+    "description": "An owner switches 'quietly open to offers' on an off-market listing from the Owner workspace. While it is off, entitled members can view the listing but not contact the owner; while it is on, they can send a request. The listing stays off the public market either way.",
     "actions": [
       "Toggle 'Quietly Open to Offers' State",
       "Permit Cluster+ Seekers to Submit Unsolicited Inquiries",
@@ -15375,25 +16052,84 @@ export const MASTER_FLOW_NODES = [
       "Property marked off-market/withdrawn"
     ],
     "systems": [
-      "PropertySettings.js",
-      "VaultListingLifecycle.md"
+      "src/components/dashboard/OwnerMode.js",
+      "src/lib/propertyLifecycle.js",
+      "src/app/api/deals/initiate/route.js",
+      "src/app/api/off-market/route.js"
     ],
     "components": [
-      "PropertySettings.js"
+      "OwnerMode.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/dashboard/update",
+      "/api/deals/initiate",
+      "/api/off-market"
+    ],
     "dataRefs": [
       "Supabase properties.is_quietly_open"
     ],
     "database": "Supabase properties.is_quietly_open",
     "auth": "owner",
     "exceptions": [
-      "Unauthenticated user attempts to view off-market property"
+      "The owner has not opened quiet offers"
     ],
     "recovery": [
-      "Display non-contactable 'Listing Removed' placeholder marker"
+      "Contact is refused and the listing stays view-only"
     ],
     "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/OwnerMode.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/update/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/propertyLifecycle.js",
+        "symbol": "canContactProperty",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/initiate/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/off-market/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/propertyLifecycle.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/propertyLifecycleApiContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
       {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
@@ -15406,7 +16142,7 @@ export const MASTER_FLOW_NODES = [
       "eventName": "flow_scenario_offmarket_pitch_viewed",
       "properties": {
         "domain": "layer",
-        "route": "/dashboard/property/[id]/settings"
+        "route": "/dashboard"
       }
     },
     "brainRefs": [
@@ -15416,7 +16152,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 3600,
     "parents": [
@@ -15440,19 +16176,59 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_scenario_offmarket_pitch_behavior",
-        "text": "Playbook 5.3 — Off-Market Pitch Toggle ('Quietly open to offers') enforces defined layer behavioral contracts and access rules.",
+        "text": "An off-market listing accepts contact only while its owner has switched on 'quietly open to offers'; otherwise contact is refused.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/OwnerMode.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/update/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/propertyLifecycle.js",
+            "symbol": "canContactProperty",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/deals/initiate/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/off-market/route.js",
+            "symbol": "GET",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/propertyLifecycle.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/propertyLifecycleApiContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -15486,9 +16262,9 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "scenario_chat_purge",
@@ -15499,7 +16275,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "OUTCOME",
     "domain": "deal",
     "category": "scenario",
-    "route": "/api/cron/purge-messages",
+    "route": "/api/cron/purge-chat-messages",
     "layer": "core",
     "roles": [
       "staff",
@@ -15516,9 +16292,9 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "deal"
     ],
-    "implementationStatus": "NOT_STARTED",
-    "purpose": "Closed deal chats become read-only for 7 days, after which message contents are permanently purged.",
-    "description": "Enforces Data Privacy Act compliance. Message text is deleted while transaction metadata is retained for CRM integrity.",
+    "implementationStatus": "VERIFIED",
+    "purpose": "An ended conversation stays readable for 7 days but takes no new messages; after that its message text is erased.",
+    "description": "When a conversation ends (closed, declined, withdrawn or expired) it can no longer send. Seven days later a daily job replaces its message text; who took part and when stay on record for the Connect history. A conversation that was reported is held back from erasure until the report is resolved.",
     "actions": [
       "Mark Closed Deal Chat Read-Only",
       "Track 7-Day Expiry Window",
@@ -15529,12 +16305,15 @@ export const MASTER_FLOW_NODES = [
       "Deal status = 'closed' or 'completed' for >= 7 days"
     ],
     "systems": [
-      "/api/cron/purge-messages",
-      "Supabase pg_cron"
+      "src/app/api/cron/purge-chat-messages/route.js",
+      "src/lib/chatRetention.js",
+      "vercel.json"
     ],
-    "components": [],
+    "components": [
+      "ChatBox.js"
+    ],
     "apis": [
-      "/api/cron/purge-messages"
+      "/api/cron/purge-chat-messages"
     ],
     "dataRefs": [
       "Supabase messages & deals"
@@ -15542,12 +16321,58 @@ export const MASTER_FLOW_NODES = [
     "database": "Supabase messages & deals",
     "auth": "staff",
     "exceptions": [
-      "Chat reported to Trust & Safety for dispute"
+      "The conversation was reported and is under review"
     ],
     "recovery": [
-      "Freeze purge job and quarantine messages until dispute resolved in Mission Control"
+      "Kept intact until the review ends"
     ],
     "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-chat-messages/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/chatRetention.js",
+        "symbol": "PURGE_ELIGIBLE_STATUSES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "isClosed",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "vercel.json",
+        "symbol": "crons",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/chatRetentionPurge.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/chatRetentionPurgeRoute.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
       {
         "kind": "SCOUTIT_BRAIN",
         "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
@@ -15560,7 +16385,7 @@ export const MASTER_FLOW_NODES = [
       "eventName": "flow_scenario_chat_purge_viewed",
       "properties": {
         "domain": "deal",
-        "route": "/api/cron/purge-messages"
+        "route": "/api/cron/purge-chat-messages"
       }
     },
     "brainRefs": [
@@ -15570,7 +16395,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 3850,
     "parents": [
@@ -15598,19 +16423,53 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_scenario_chat_purge_behavior",
-        "text": "Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge enforces defined deal behavioral contracts and access rules.",
+        "text": "An ended conversation cannot send; seven days later a daily job replaces its message text, keeping participants and timestamps. A reported conversation under review is exempt.",
         "kind": "PRODUCT_BEHAVIOR",
-        "status": "PROPOSED",
+        "status": "VERIFIED",
         "evidence": [
           {
-            "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/00_MASTER_SYNC.md",
-            "provenance": "INFERRED",
-            "confidence": 0.8
+            "kind": "API",
+            "path": "src/app/api/cron/purge-chat-messages/route.js",
+            "symbol": "GET",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/chatRetention.js",
+            "symbol": "PURGE_ELIGIBLE_STATUSES",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/ChatBox.js",
+            "symbol": "isClosed",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "vercel.json",
+            "symbol": "crons",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/chatRetentionPurge.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/chatRetentionPurgeRoute.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
           }
         ],
-        "confidence": 0.95,
-        "machineVerifiedBy": "Automated Grounding Engine",
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
         "humanReviewedBy": null,
         "reviewStatus": "RESEARCHED",
         "reviewedAt": null
@@ -15644,9 +16503,9 @@ export const MASTER_FLOW_NODES = [
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
-    "productStatus": "PROPOSED",
-    "evidenceStatus": "UNVERIFIED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE"
   },
   {
     "id": "rec_turnstile_challenge",
@@ -15671,7 +16530,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "Interactive challenge presented to quarantined sessions to confirm human agency and release temporary throttle.",
-    "description": "Upon passing invisible Turnstile challenge, session hash is cleared from `blocked_sessions` and browsing resumes.",
+    "description": "Upon passing invisible Turnstile challenge, session hash is cleared from `blocked_sessions` and browsing resumes. Checked 2026-09-11: Turnstile guards sign-up and contact forms (lib/turnstile.js); there is no session quarantine for it to release.",
     "actions": [
       "Solve Turnstile Challenge",
       "Clear Session Hash from blocked_sessions",
@@ -15721,7 +16580,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 4650,
     "y": 4050,
     "parents": [
@@ -17688,7 +18547,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "implementationStatus": "NOT_STARTED",
     "purpose": "Community FAQ voting & verification engine with verified broker/owner response badges.",
-    "description": "Maintains high signal-to-noise space intelligence by letting verified local residents and brokers answer common questions with community upvoting.",
+    "description": "Maintains high signal-to-noise space intelligence by letting verified local residents and brokers answer common questions with community upvoting. Checked 2026-09-11: no FAQ voting exists. A separate appeal path for blocked FAQ answers is built but switched off (/api/faqs/appeal, A-133).",
     "actions": [
       "Submit Space Question",
       "Cast Upvote / Downvote",
@@ -17742,7 +18601,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "terminal": false,
     "version": "2.1.0",
-    "lastVerifiedAt": "2026-08-19",
+    "lastVerifiedAt": "2026-09-11",
     "x": 1680,
     "y": 1950,
     "parents": [
@@ -19999,6 +20858,588 @@ export const MASTER_FLOW_NODES = [
     "children": [],
     "auth": "staff",
     "database": "Supabase viewing_appointments"
+  },
+  {
+    "id": "action_owner_remove_broker",
+    "canonicalId": "owner.representation.revoke",
+    "name": "Action: Owner Removes a Broker",
+    "label": "Action: Owner Removes a Broker",
+    "type": "ACTION",
+    "nodeType": "ACTION",
+    "domain": "owner",
+    "category": "scenario",
+    "route": "/dashboard",
+    "layer": "core",
+    "roles": [
+      "owner"
+    ],
+    "visibility": [
+      "OWNER"
+    ],
+    "goals": [
+      "deal"
+    ],
+    "implementationStatus": "VERIFIED",
+    "purpose": "An owner ends a broker's handling of their property whenever they choose.",
+    "description": "An accepted broker on a listing has a 'Remove this broker' button in the Owner workspace. The route checks the caller owns the property, ends the representation, closes that broker's conversations about the property, records it on the CRM timeline and notifies the broker (A-131). The rules live in lib/deals/delegationRevoke.js.",
+    "actions": [
+      "Choose 'Remove this broker'",
+      "End the representation",
+      "Close the broker's conversations about this property",
+      "Notify the broker"
+    ],
+    "conditions": [
+      "The caller owns the property",
+      "The broker's representation is active"
+    ],
+    "systems": [
+      "src/app/api/dashboard/representation/revoke/route.js",
+      "src/lib/deals/delegationRevoke.js",
+      "src/components/dashboard/OwnerMode.js"
+    ],
+    "components": [
+      "OwnerMode.js"
+    ],
+    "apis": [
+      "/api/dashboard/representation/revoke"
+    ],
+    "dataRefs": [
+      "property_broker_representations",
+      "deals"
+    ],
+    "database": "Supabase property_broker_representations, deals",
+    "auth": "owner",
+    "exceptions": [
+      "The caller is not the owner",
+      "The property or representation is not found"
+    ],
+    "recovery": [
+      "Nothing changes and the reason is shown"
+    ],
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/OwnerMode.js",
+        "symbol": "handleRemoveBroker",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/representation/revoke/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/deals/delegationRevoke.js",
+        "symbol": "revokePlanFor",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/delegationRevokeContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/representationRevokeRouteContract.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "telemetry": {
+      "eventName": "flow_action_owner_remove_broker_viewed",
+      "properties": {
+        "domain": "owner",
+        "route": "/dashboard"
+      }
+    },
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/REPRESENTATION_AND_DISCLOSURE_RULES.md"
+    ],
+    "terminal": false,
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-09-11",
+    "x": 4250,
+    "y": 900,
+    "parents": [
+      "dashboard_owner"
+    ],
+    "children": [
+      "dashboard_owner"
+    ],
+    "actorRoles": [
+      "owner"
+    ],
+    "uiAudience": [
+      "OWNER"
+    ],
+    "knowledgeScope": [
+      "AUTHENTICATED"
+    ],
+    "securityClassification": "AUTHENTICATED",
+    "claims": [
+      {
+        "id": "claim_action_owner_remove_broker_behavior",
+        "text": "An owner can remove an accepted broker at any time; the representation ends and that broker's conversations about the property close.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "COMPONENT",
+            "path": "src/components/dashboard/OwnerMode.js",
+            "symbol": "handleRemoveBroker",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "API",
+            "path": "src/app/api/dashboard/representation/revoke/route.js",
+            "symbol": "POST",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/deals/delegationRevoke.js",
+            "symbol": "revokePlanFor",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/delegationRevokeContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/representationRevokeRouteContract.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "legalReviewStatus": "RESEARCHED",
+    "requiredCapabilities": [],
+    "resourceRelationship": [],
+    "ownershipRequirement": true,
+    "dealParticipationRequired": false,
+    "representationRequired": false,
+    "governance": {
+      "domainOwner": "Transactions Guild",
+      "reviewer": null,
+      "riskLevel": "STANDARD",
+      "approvedAt": null,
+      "validFrom": null,
+      "reviewAfter": null,
+      "deprecatedBy": null,
+      "changeReason": "A-139: behaviour shipped 2026-09-10/11 was missing from the graph"
+    },
+    "guideability": "NONE",
+    "isTerminal": false,
+    "machineVerifiedBy": "A-139 re-verification 2026-09-11",
+    "humanReviewedBy": null,
+    "machineVerificationStatus": "VERIFIED",
+    "approvedAt": null,
+    "productReviewStatus": "RESEARCHED",
+    "securityReviewStatus": "RESEARCHED",
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE"
+  },
+  {
+    "id": "global_account_menu",
+    "canonicalId": "core.account_menu",
+    "name": "Header Menu",
+    "label": "Header Menu",
+    "type": "SECTION",
+    "nodeType": "SECTION",
+    "domain": "core",
+    "category": "architecture",
+    "route": "/",
+    "layer": "global",
+    "roles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "PUBLIC"
+    ],
+    "goals": [],
+    "implementationStatus": "VERIFIED",
+    "purpose": "One menu, the same on every page, holding only the places people use.",
+    "description": "Signed in, eight links in four groups: My Profile and Settings; Discover and Brokers; Your Board and Dashboard; About ScoutIt and Contact & Support. Signed out, Create Account takes My Profile's place. On phones the menu also holds Help & Display, because the header's display button is hidden on small screens.",
+    "actions": [
+      "Open the menu",
+      "Go to a section"
+    ],
+    "conditions": [
+      "Available on every page"
+    ],
+    "systems": [
+      "src/components/layout/Header.js",
+      "src/lib/navigationManifest.js"
+    ],
+    "components": [
+      "Header.js"
+    ],
+    "apis": [],
+    "dataRefs": [],
+    "database": "None",
+    "auth": "public",
+    "exceptions": [
+      "None"
+    ],
+    "recovery": [
+      "None"
+    ],
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/layout/Header.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/navigationManifest.js",
+        "symbol": "menuGroups",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/menuAndSettingsTightening.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/headerMenuBehavior.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "telemetry": {
+      "eventName": "flow_global_account_menu_viewed",
+      "properties": {
+        "domain": "core",
+        "route": "/"
+      }
+    },
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "terminal": false,
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-09-11",
+    "x": 500,
+    "y": 2000,
+    "parents": [
+      "hero"
+    ],
+    "children": [
+      "page_settings"
+    ],
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "uiAudience": [
+      "PUBLIC"
+    ],
+    "knowledgeScope": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "claims": [
+      {
+        "id": "claim_global_account_menu_behavior",
+        "text": "The header menu holds eight links for a signed-in person, with Help & Display added on phones.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "COMPONENT",
+            "path": "src/components/layout/Header.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/navigationManifest.js",
+            "symbol": "menuGroups",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/menuAndSettingsTightening.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/headerMenuBehavior.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "legalReviewStatus": "RESEARCHED",
+    "requiredCapabilities": [],
+    "resourceRelationship": [],
+    "ownershipRequirement": false,
+    "dealParticipationRequired": false,
+    "representationRequired": false,
+    "governance": {
+      "domainOwner": "Core Product Engineering",
+      "reviewer": null,
+      "riskLevel": "STANDARD",
+      "approvedAt": null,
+      "validFrom": null,
+      "reviewAfter": null,
+      "deprecatedBy": null,
+      "changeReason": "A-139: behaviour shipped 2026-09-10/11 was missing from the graph"
+    },
+    "guideability": "NONE",
+    "isTerminal": false,
+    "machineVerifiedBy": "A-139 re-verification 2026-09-11",
+    "humanReviewedBy": null,
+    "machineVerificationStatus": "VERIFIED",
+    "approvedAt": null,
+    "productReviewStatus": "RESEARCHED",
+    "securityReviewStatus": "RESEARCHED",
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE"
+  },
+  {
+    "id": "page_settings",
+    "canonicalId": "account.settings",
+    "name": "Settings: Account, Privacy, Security & Erasure",
+    "label": "Settings: Account, Privacy, Security & Erasure",
+    "type": "PAGE",
+    "nodeType": "PAGE",
+    "domain": "auth",
+    "category": "architecture",
+    "route": "/settings",
+    "layer": "global",
+    "roles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "SEEKER",
+      "OWNER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "goals": [],
+    "implementationStatus": "VERIFIED",
+    "purpose": "Where a signed-in person manages their name, workspaces, public card, privacy, sign-in security and account deletion.",
+    "description": "Five sections (settingsNavigation.js): Identity & workspaces, How ScoutIt introduces you, Visibility & anonymity, Security & Login (including two-factor), and Your right to erasure. 'Save name & profile' sits after the fields it saves. A-136 removed a 'Founding Seeker' badge shown to everyone without being earned, and a section that only repeated the menu.",
+    "actions": [
+      "Edit name, role tags and public card",
+      "Set visibility",
+      "Manage sign-in security",
+      "Delete the account"
+    ],
+    "conditions": [
+      "Signed in"
+    ],
+    "systems": [
+      "src/app/settings/page.js",
+      "src/lib/settingsNavigation.js"
+    ],
+    "components": [
+      "DeleteAccountPanel.js"
+    ],
+    "apis": [
+      "/api/user/privacy-settings",
+      "/api/user/delete-account"
+    ],
+    "dataRefs": [
+      "user_profiles",
+      "privacy_settings"
+    ],
+    "database": "Supabase user_profiles, privacy_settings",
+    "auth": "authenticated",
+    "exceptions": [
+      "Not signed in"
+    ],
+    "recovery": [
+      "Sent to sign in"
+    ],
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/settings/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/settingsNavigation.js",
+        "symbol": "SETTINGS_SECTIONS",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/settingsInformationArchitecture.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/menuAndSettingsTightening.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "telemetry": {
+      "eventName": "flow_page_settings_viewed",
+      "properties": {
+        "domain": "auth",
+        "route": "/settings"
+      }
+    },
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+    ],
+    "terminal": false,
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-09-11",
+    "x": 3450,
+    "y": 2950,
+    "parents": [
+      "global_account_menu"
+    ],
+    "children": [
+      "scenario_pii_erasure"
+    ],
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "uiAudience": [
+      "SEEKER",
+      "OWNER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "knowledgeScope": [
+      "AUTHENTICATED"
+    ],
+    "securityClassification": "AUTHENTICATED",
+    "claims": [
+      {
+        "id": "claim_page_settings_behavior",
+        "text": "Settings has five sections, ending with account deletion.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "ROUTE",
+            "path": "src/app/settings/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "CODE",
+            "path": "src/lib/settingsNavigation.js",
+            "symbol": "SETTINGS_SECTIONS",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/settingsInformationArchitecture.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          },
+          {
+            "kind": "TEST",
+            "path": "src/lib/__tests__/menuAndSettingsTightening.test.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "machineVerifiedBy": "A-139 re-verification 2026-09-11",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "legalReviewStatus": "RESEARCHED",
+    "requiredCapabilities": [],
+    "resourceRelationship": [],
+    "ownershipRequirement": false,
+    "dealParticipationRequired": false,
+    "representationRequired": false,
+    "governance": {
+      "domainOwner": "Core Product Engineering",
+      "reviewer": null,
+      "riskLevel": "STANDARD",
+      "approvedAt": null,
+      "validFrom": null,
+      "reviewAfter": null,
+      "deprecatedBy": null,
+      "changeReason": "A-139: behaviour shipped 2026-09-10/11 was missing from the graph"
+    },
+    "guideability": "NONE",
+    "isTerminal": false,
+    "machineVerifiedBy": "A-139 re-verification 2026-09-11",
+    "humanReviewedBy": null,
+    "machineVerificationStatus": "VERIFIED",
+    "approvedAt": null,
+    "productReviewStatus": "RESEARCHED",
+    "securityReviewStatus": "RESEARCHED",
+    "productStatus": "APPROVED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE"
   }
 ];
 
@@ -26020,10 +27461,10 @@ export const MASTER_FLOW_EDGES = [
     "source": "action_ask_faq",
     "target": "exc_contact_leak_blocked",
     "type": "FAILURE",
-    "label": "Action: Ask Public Question (Community FAQ) → Exception: Contact Information Leak Redacted",
+    "label": "Action: Ask Public Question (Community FAQ) → Exception: Contact Details Blocked",
     "trigger": "System Flow / State Transition",
     "conditions": [
-      "Action: Ask Public Question (Community FAQ) → Exception: Contact Information Leak Redacted",
+      "Action: Ask Public Question (Community FAQ) → Exception: Contact Details Blocked",
       "status == \"ERROR\""
     ],
     "roles": [
@@ -26040,10 +27481,10 @@ export const MASTER_FLOW_EDGES = [
     "apiRefs": [],
     "reversible": false,
     "recoveryTarget": "rec_redact_contact_faq",
-    "guideInstruction": "Navigate from Action: Ask Public Question (Community FAQ) to Exception: Contact Information Leak Redacted",
+    "guideInstruction": "Navigate from Action: Ask Public Question (Community FAQ) to Exception: Contact Details Blocked",
     "guideTarget": "exc_contact_leak_blocked",
     "telemetryEvent": "flow_transition_action_ask_faq_exc_contact_leak_blocked",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "VERIFIED",
     "evidence": [
       {
         "kind": "API",
@@ -26059,6 +27500,14 @@ export const MASTER_FLOW_EDGES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/contactLeakFilter.js",
+        "symbol": "rejectIfContactLeak",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
     "branchKey": "FAILURE_EXC_CONTACT_LEAK_BLOCKED",
@@ -26423,7 +27872,7 @@ export const MASTER_FLOW_EDGES = [
     "guideInstruction": "Navigate from Exception: Zero Connects Balance to Recovery: Top-Up Connects Pack Checkout",
     "guideTarget": "rec_topup_connects",
     "telemetryEvent": "flow_transition_exc_insufficient_connects_rec_topup_connects",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "NOT_STARTED",
     "evidence": [
       {
         "kind": "CODE",
@@ -26485,7 +27934,7 @@ export const MASTER_FLOW_EDGES = [
     "guideInstruction": "Navigate from Recovery: Top-Up Connects Pack Checkout to Inquiry & Direct Lead Modal (1 Connect)",
     "guideTarget": "send-inquiry-modal-btn",
     "telemetryEvent": "flow_transition_rec_topup_connects_inquiry_modal",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "NOT_STARTED",
     "evidence": [
       {
         "kind": "ROUTE",
@@ -26617,7 +28066,7 @@ export const MASTER_FLOW_EDGES = [
     "guideInstruction": "Navigate from System: Connects Wallet & Deduct RPC to Playbook 3.1 — Non-Refundable Connect Spend & Discretionary Correction",
     "guideTarget": "scenario_non_refundable_connect",
     "telemetryEvent": "flow_transition_sys_connect_wallet_scenario_non_refundable_connect",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "VERIFIED",
     "evidence": [
       {
         "kind": "CODE",
@@ -26641,6 +28090,14 @@ export const MASTER_FLOW_EDGES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/sweep-pending-requests/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
     "branchKey": "BRANCH_SYS_CONNECT_WALLET_TO_SCENARIO_NON_REFUNDABLE_CONNECT",
@@ -29012,7 +30469,7 @@ export const MASTER_FLOW_EDGES = [
     "guideInstruction": "Navigate from Exception: Viewing No-Show / Cancellation to Recovery: Viewing Reschedule Modal",
     "guideTarget": "reschedule_modal",
     "telemetryEvent": "flow_transition_exc_viewing_noshow_reschedule_modal",
-    "implementationStatus": "VERIFIED",
+    "implementationStatus": "NOT_STARTED",
     "evidence": [
       {
         "kind": "SCOUTIT_BRAIN",
@@ -29373,7 +30830,7 @@ export const MASTER_FLOW_EDGES = [
     "guideInstruction": "Navigate from Outcome: Deal Closed / Archived to Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge",
     "guideTarget": "scenario_chat_purge",
     "telemetryEvent": "flow_transition_terminal_deal_closed_scenario_chat_purge",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "VERIFIED",
     "evidence": [
       {
         "kind": "API",
@@ -29381,6 +30838,22 @@ export const MASTER_FLOW_EDGES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-chat-messages/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/chatRetention.js",
+        "symbol": "PURGE_ELIGIBLE_STATUSES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
     "branchKey": "BRANCH_TERMINAL_DEAL_CLOSED_TO_SCENARIO_CHAT_PURGE",
@@ -29770,7 +31243,7 @@ export const MASTER_FLOW_EDGES = [
     "guideInstruction": "Navigate from Owner Workspace & Property Management to Playbook 5.3 — Off-Market Pitch Toggle ('Quietly open to offers')",
     "guideTarget": "scenario_offmarket_pitch",
     "telemetryEvent": "flow_transition_dashboard_owner_scenario_offmarket_pitch",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "VERIFIED",
     "evidence": [
       {
         "kind": "COMPONENT",
@@ -29778,6 +31251,14 @@ export const MASTER_FLOW_EDGES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/update/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
     "branchKey": "BRANCH_DASHBOARD_OWNER_TO_SCENARIO_OFFMARKET_PITCH",
@@ -34212,5 +35693,253 @@ export const MASTER_FLOW_EDGES = [
       "fromState": "CONFIRMED",
       "toState": "CANCELLED"
     }
+  },
+  {
+    "id": "e_hero_to_global_account_menu_222",
+    "source": "hero",
+    "target": "global_account_menu",
+    "type": "NAVIGATE",
+    "label": "Open the header menu",
+    "trigger": "User Click / Action",
+    "conditions": [
+      "Open the header menu"
+    ],
+    "roles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "PUBLIC"
+    ],
+    "effects": [],
+    "apiRefs": [],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Open the header menu",
+    "guideTarget": "global_account_menu",
+    "telemetryEvent": "flow_transition_hero_global_account_menu",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/layout/Header.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "branchKey": "BRANCH_HERO_TO_GLOBAL_ACCOUNT_MENU",
+    "predicate": {
+      "field": "navigation.action",
+      "operator": "==",
+      "value": "navigated",
+      "quality": "GENERIC_NAVIGATION"
+    },
+    "preconditions": [],
+    "postconditions": [],
+    "quality": "GENERIC_NAVIGATION"
+  },
+  {
+    "id": "e_global_account_menu_to_page_settings_223",
+    "source": "global_account_menu",
+    "target": "page_settings",
+    "type": "NAVIGATE",
+    "label": "Settings",
+    "trigger": "User Click / Action",
+    "conditions": [
+      "Settings"
+    ],
+    "roles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "SEEKER",
+      "OWNER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "effects": [],
+    "apiRefs": [],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Settings",
+    "guideTarget": "page_settings",
+    "telemetryEvent": "flow_transition_global_account_menu_page_settings",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "CODE",
+        "path": "src/lib/navigationManifest.js",
+        "symbol": "PRIMARY_NAV_ENTRIES",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "branchKey": "BRANCH_GLOBAL_ACCOUNT_MENU_TO_PAGE_SETTINGS",
+    "predicate": {
+      "field": "navigation.action",
+      "operator": "==",
+      "value": "navigated",
+      "quality": "GENERIC_NAVIGATION"
+    },
+    "preconditions": [],
+    "postconditions": [],
+    "quality": "GENERIC_NAVIGATION"
+  },
+  {
+    "id": "e_page_settings_to_scenario_pii_erasure_224",
+    "source": "page_settings",
+    "target": "scenario_pii_erasure",
+    "type": "ACTION",
+    "label": "Delete account (type DELETE MY ACCOUNT)",
+    "trigger": "User Click / Action",
+    "conditions": [
+      "Delete account (type DELETE MY ACCOUNT)"
+    ],
+    "roles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "SEEKER",
+      "OWNER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "effects": [
+      "Private data erased, profile anonymised, sign-in closed"
+    ],
+    "apiRefs": [],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Delete account (type DELETE MY ACCOUNT)",
+    "guideTarget": "scenario_pii_erasure",
+    "telemetryEvent": "flow_transition_page_settings_scenario_pii_erasure",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/profile/DeleteAccountPanel.js",
+        "symbol": "DeleteAccountPanel",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "branchKey": "BRANCH_PAGE_SETTINGS_TO_SCENARIO_PII_ERASURE",
+    "predicate": {
+      "field": "confirmation.phrase",
+      "operator": "==",
+      "value": "DELETE MY ACCOUNT",
+      "quality": "DOMAIN_DECISION"
+    },
+    "preconditions": [],
+    "postconditions": [
+      "Private data erased, profile anonymised, sign-in closed"
+    ],
+    "quality": "DOMAIN_DECISION"
+  },
+  {
+    "id": "e_dashboard_owner_to_action_owner_remove_broker_225",
+    "source": "dashboard_owner",
+    "target": "action_owner_remove_broker",
+    "type": "ACTION",
+    "label": "Remove this broker",
+    "trigger": "User Click / Action",
+    "conditions": [
+      "Remove this broker"
+    ],
+    "roles": [
+      "owner"
+    ],
+    "visibility": [
+      "OWNER"
+    ],
+    "effects": [],
+    "apiRefs": [],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Remove this broker",
+    "guideTarget": "action_owner_remove_broker",
+    "telemetryEvent": "flow_transition_dashboard_owner_action_owner_remove_broker",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/OwnerMode.js",
+        "symbol": "handleRemoveBroker",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "branchKey": "BRANCH_DASHBOARD_OWNER_TO_ACTION_OWNER_REMOVE_BROKER",
+    "predicate": {
+      "field": "representation.status",
+      "operator": "==",
+      "value": "active",
+      "quality": "DOMAIN_DECISION"
+    },
+    "preconditions": [],
+    "postconditions": [],
+    "quality": "DOMAIN_DECISION"
+  },
+  {
+    "id": "e_action_owner_remove_broker_to_dashboard_owner_226",
+    "source": "action_owner_remove_broker",
+    "target": "dashboard_owner",
+    "type": "SUCCESS",
+    "label": "Broker removed; their conversations about this property are closed",
+    "trigger": "System",
+    "conditions": [
+      "Broker removed; their conversations about this property are closed"
+    ],
+    "roles": [
+      "owner"
+    ],
+    "visibility": [
+      "OWNER"
+    ],
+    "effects": [
+      "Representation ended; the broker's conversations about the property closed"
+    ],
+    "apiRefs": [],
+    "reversible": false,
+    "recoveryTarget": null,
+    "guideInstruction": "Broker removed; their conversations about this property are closed",
+    "guideTarget": "dashboard_owner",
+    "telemetryEvent": "flow_transition_action_owner_remove_broker_dashboard_owner",
+    "implementationStatus": "VERIFIED",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/representation/revoke/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
+      }
+    ],
+    "branchKey": "BRANCH_ACTION_OWNER_REMOVE_BROKER_TO_DASHBOARD_OWNER",
+    "predicate": {
+      "field": "representation.status",
+      "operator": "==",
+      "value": "ended",
+      "quality": "DOMAIN_DECISION"
+    },
+    "preconditions": [],
+    "postconditions": [
+      "Representation ended; the broker's conversations about the property closed"
+    ],
+    "quality": "DOMAIN_DECISION"
   }
 ];

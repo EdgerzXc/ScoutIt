@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "generatedAt": "2026-09-11T08:17:52.388Z",
+  "generatedAt": "2026-09-11T09:01:42.750Z",
   "positions": {
     "hero": {
       "x": 80,
@@ -513,6 +513,18 @@
     "state_runtime_viewing_completed": {
       "x": 1210,
       "y": 6500
+    },
+    "action_owner_remove_broker": {
+      "x": 4250,
+      "y": 900
+    },
+    "global_account_menu": {
+      "x": 500,
+      "y": 2000
+    },
+    "page_settings": {
+      "x": 3450,
+      "y": 2950
     }
   }
 }

@@ -5020,6 +5020,122 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
+    "chunk_id": "fact_connects.policy.non_refundable",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "connects.policy.non_refundable",
+    "canonicalId": "connects.policy.non_refundable",
+    "title": "Playbook 3.1 — Non-Refundable Connect Spend & Discretionary Correction",
+    "domain": "connects",
+    "layer": "global",
+    "route": "/dashboard/inbox",
+    "roles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "staff"
+    ],
+    "visibility": [
+      "SEEKER",
+      "OWNER",
+      "BROKER",
+      "PROVIDER",
+      "STAFF"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "A spent Connect is not returned when a request is declined, withdrawn or never answered.",
+    "description": "Unanswered requests are archived after 7 days and removed after a month, and the sender is told the Connect is not returned. The single exception is a verifiable ScoutIt system error, such as a failed delivery or a double charge, which staff correct by hand with a written reason on the record.",
+    "available_actions": [
+      "Enforce Non-Refundable Spend Rule",
+      "Log Delivered Gesture Record"
+    ],
+    "entry_conditions": [
+      "A Connect was spent to send a request"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_scenario_non_refundable_connect_behavior",
+        "text": "Spent Connects are not refunded on decline, withdrawal or non-response; only a verified system error is corrected, by staff, with a recorded reason.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "PRODUCT_BEHAVIOR",
+            "provenance": "SCOUTIT_PRODUCT_GRAPH",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "legalReviewStatus": "RESEARCHED"
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
+    "chunk_id": "rec_connects.policy.non_refundable",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "connects.policy.non_refundable",
+    "canonicalId": "connects.policy.non_refundable",
+    "title": "Recovery Protocol: Playbook 3.1 — Non-Refundable Connect Spend & Discretionary Correction",
+    "domain": "connects",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "SEEKER",
+      "OWNER",
+      "BROKER",
+      "PROVIDER",
+      "STAFF"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "ScoutIt failed to deliver the request or charged twice"
+    ],
+    "recovery_mechanisms": [
+      "Staff correct the balance by hand, with a written reason recorded"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
     "chunk_id": "fact_seeker.dashboard",
     "chunk_type": "NODE_FACT",
     "chunkType": "NODE_FACT",
@@ -5380,6 +5496,335 @@
     "graphVersion": "2.1.0",
     "last_verified_at": "2026-08-19",
     "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "fact_sentinel.exc.contact_leak",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "sentinel.exc.contact_leak",
+    "canonicalId": "sentinel.exc.contact_leak",
+    "title": "Exception: Contact Details Blocked",
+    "domain": "sentinel",
+    "layer": "global",
+    "route": "/api/faqs",
+    "roles": [
+      "visitor",
+      "seeker",
+      "provider"
+    ],
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Keeps phone numbers, emails and messaging handles out of the public questions and answers on a listing.",
+    "description": "A question or answer that contains contact details (a phone number, an email, a messaging handle or an outside link) is refused before it is posted, with the reason shown, and the attempt is counted. Nothing is posted and nothing is redacted. Private contact happens through a Connect.",
+    "available_actions": [
+      "Detect Regex Contact Match",
+      "Trigger Redaction Warning"
+    ],
+    "entry_conditions": [
+      "Pattern matches phone/email regex in public FAQ"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_exc_contact_leak_blocked_behavior",
+        "text": "A public FAQ question or answer containing contact details is refused with the reason and counted; it is never posted or redacted.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "PRODUCT_BEHAVIOR",
+            "provenance": "SCOUTIT_PRODUCT_GRAPH",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "legalReviewStatus": "RESEARCHED"
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
+    "chunk_id": "rec_sentinel.exc.contact_leak",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "sentinel.exc.contact_leak",
+    "canonicalId": "sentinel.exc.contact_leak",
+    "title": "Recovery Protocol: Exception: Contact Details Blocked",
+    "domain": "sentinel",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "The text contains a phone number, email, messaging handle or outside link"
+    ],
+    "recovery_mechanisms": [
+      "The author sees why and can rewrite the text without contact details"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
+    "chunk_id": "fact_broker.pitch.offmarket",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.pitch.offmarket",
+    "canonicalId": "broker.pitch.offmarket",
+    "title": "Playbook 5.3 — Off-Market Pitch Toggle ('Quietly open to offers')",
+    "domain": "layer",
+    "layer": "core",
+    "route": "/dashboard",
+    "roles": [
+      "owner",
+      "seeker"
+    ],
+    "visibility": [
+      "OWNER",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Lets the owner of an off-market listing decide whether entitled buyers may contact them.",
+    "description": "An owner switches 'quietly open to offers' on an off-market listing from the Owner workspace. While it is off, entitled members can view the listing but not contact the owner; while it is on, they can send a request. The listing stays off the public market either way.",
+    "available_actions": [
+      "Toggle 'Quietly Open to Offers' State",
+      "Permit Cluster+ Seekers to Submit Unsolicited Inquiries",
+      "Block Pitches when Toggle Off"
+    ],
+    "entry_conditions": [
+      "Property marked off-market/withdrawn"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_scenario_offmarket_pitch_behavior",
+        "text": "An off-market listing accepts contact only while its owner has switched on 'quietly open to offers'; otherwise contact is refused.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "PRODUCT_BEHAVIOR",
+            "provenance": "SCOUTIT_PRODUCT_GRAPH",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "legalReviewStatus": "RESEARCHED"
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
+    "chunk_id": "rec_broker.pitch.offmarket",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "broker.pitch.offmarket",
+    "canonicalId": "broker.pitch.offmarket",
+    "title": "Recovery Protocol: Playbook 5.3 — Off-Market Pitch Toggle ('Quietly open to offers')",
+    "domain": "layer",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "OWNER",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "The owner has not opened quiet offers"
+    ],
+    "recovery_mechanisms": [
+      "Contact is refused and the listing stays view-only"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
+    "chunk_id": "fact_deal.chat.purge",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.chat.purge",
+    "canonicalId": "deal.chat.purge",
+    "title": "Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge",
+    "domain": "deal",
+    "layer": "core",
+    "route": "/api/cron/purge-chat-messages",
+    "roles": [
+      "staff",
+      "seeker",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "STAFF",
+      "SEEKER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "An ended conversation stays readable for 7 days but takes no new messages; after that its message text is erased.",
+    "description": "When a conversation ends (closed, declined, withdrawn or expired) it can no longer send. Seven days later a daily job replaces its message text; who took part and when stay on record for the Connect history. A conversation that was reported is held back from erasure until the report is resolved.",
+    "available_actions": [
+      "Mark Closed Deal Chat Read-Only",
+      "Track 7-Day Expiry Window",
+      "Purge Message Text from Database",
+      "Retain Deal Audit Ledger"
+    ],
+    "entry_conditions": [
+      "Deal status = 'closed' or 'completed' for >= 7 days"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_scenario_chat_purge_behavior",
+        "text": "An ended conversation cannot send; seven days later a daily job replaces its message text, keeping participants and timestamps. A reported conversation under review is exempt.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "PRODUCT_BEHAVIOR",
+            "provenance": "SCOUTIT_PRODUCT_GRAPH",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "legalReviewStatus": "RESEARCHED"
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
+  },
+  {
+    "chunk_id": "rec_deal.chat.purge",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "deal.chat.purge",
+    "canonicalId": "deal.chat.purge",
+    "title": "Recovery Protocol: Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "SEEKER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "The conversation was reported and is under review"
+    ],
+    "recovery_mechanisms": [
+      "Kept intact until the review ends"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
   },
   {
     "chunk_id": "fact_deal.terminal.handshake_success",
@@ -5776,6 +6221,77 @@
     "graphVersion": "2.1.0",
     "last_verified_at": "2026-08-19",
     "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "fact_core.account_menu",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "core.account_menu",
+    "canonicalId": "core.account_menu",
+    "title": "Header Menu",
+    "domain": "core",
+    "layer": "global",
+    "route": "/",
+    "roles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ],
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "One menu, the same on every page, holding only the places people use.",
+    "description": "Signed in, eight links in four groups: My Profile and Settings; Discover and Brokers; Your Board and Dashboard; About ScoutIt and Contact & Support. Signed out, Create Account takes My Profile's place. On phones the menu also holds Help & Display, because the header's display button is hidden on small screens.",
+    "available_actions": [
+      "Open the menu",
+      "Go to a section"
+    ],
+    "entry_conditions": [
+      "Available on every page"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_global_account_menu_behavior",
+        "text": "The header menu holds eight links for a signed-in person, with Help & Display added on phones.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "PRODUCT_BEHAVIOR",
+            "provenance": "SCOUTIT_PRODUCT_GRAPH",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "legalReviewStatus": "RESEARCHED"
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-09-11",
+    "lastVerifiedAt": "2026-09-11"
   },
   {
     "chunk_id": "edge_e_hero_to_orbit_7",
@@ -8458,6 +8974,46 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
+    "chunk_id": "edge_e_action_ask_faq_to_exc_contact_leak_blocked_96",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "action_ask_faq",
+    "target": "exc_contact_leak_blocked",
+    "transition_type": "FAILURE",
+    "label": "Action: Ask Public Question (Community FAQ) → Exception: Contact Details Blocked",
+    "branchKey": "FAILURE_EXC_CONTACT_LEAK_BLOCKED",
+    "predicate": {
+      "field": "status",
+      "operator": "==",
+      "value": "ERROR",
+      "quality": "DOMAIN_DECISION"
+    },
+    "preconditions": [
+      "Non-empty question text"
+    ],
+    "postconditions": [
+      "Transition from property.faq.ask to sentinel.exc.contact_leak"
+    ],
+    "status": "VERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
     "chunk_id": "edge_e_inquiry_modal_to_exc_insufficient_connects_101",
     "chunk_type": "EDGE_TRANSITION",
     "chunkType": "EDGE_TRANSITION",
@@ -8522,6 +9078,44 @@
     "status": "VERIFIED",
     "visibility": [
       "SEEKER",
+      "PROVIDER"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_terminal_deal_closed_to_scenario_chat_purge_155",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "terminal_deal_closed",
+    "target": "scenario_chat_purge",
+    "transition_type": "TERMINATE",
+    "label": "Outcome: Deal Closed / Archived → Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge",
+    "branchKey": "BRANCH_TERMINAL_DEAL_CLOSED_TO_SCENARIO_CHAT_PURGE",
+    "predicate": null,
+    "preconditions": [
+      "Deal concluded"
+    ],
+    "postconditions": [
+      "Transition from deal.terminal.closed to deal.chat.purge"
+    ],
+    "status": "VERIFIED",
+    "visibility": [
+      "SEEKER",
+      "BROKER",
+      "OWNER",
       "PROVIDER"
     ],
     "securityClassification": "PUBLIC",
@@ -8803,6 +9397,42 @@
     "status": "VERIFIED",
     "visibility": [
       "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_hero_to_global_account_menu_222",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "hero",
+    "target": "global_account_menu",
+    "transition_type": "NAVIGATE",
+    "label": "Open the header menu",
+    "branchKey": "BRANCH_HERO_TO_GLOBAL_ACCOUNT_MENU",
+    "predicate": {
+      "field": "navigation.action",
+      "operator": "==",
+      "value": "navigated",
+      "quality": "GENERIC_NAVIGATION"
+    },
+    "preconditions": [],
+    "postconditions": [],
+    "status": "VERIFIED",
+    "visibility": [
+      "PUBLIC"
     ],
     "securityClassification": "PUBLIC",
     "source_type": "TRANSITION_CONTRACT",

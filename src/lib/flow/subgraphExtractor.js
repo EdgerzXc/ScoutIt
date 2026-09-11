@@ -661,7 +661,11 @@ export function getAtomicRAGChunks(
   });
 
   // 5. Generate EDGE_TRANSITION Chunks
+  // The node rule applies to transitions too (A-139): a public corpus carries
+  // only verified behaviour, so a PARTIAL or NOT_STARTED edge between two
+  // verified nodes stays out of it.
   edges.forEach(edge => {
+    if (!includePlanned && !isAdminOrStaff && edge.implementationStatus !== 'VERIFIED') return;
     if (allowedNodeIds.has(edge.source) && allowedNodeIds.has(edge.target)) {
       chunks.push({
         chunk_id: `edge_${edge.id || `${edge.source}_to_${edge.target}`}`,
@@ -676,7 +680,9 @@ export function getAtomicRAGChunks(
         preconditions: isPublic ? (edge.preconditions || []).map(sanitizePublicText) : (edge.preconditions || []),
         postconditions: isPublic ? (edge.postconditions || []).map(sanitizePublicText) : (edge.postconditions || []),
         stateTransition: edge.stateTransition,
-        status: edge.implementationStatus || 'VERIFIED',
+        // An edge that declares no status has not been verified; saying
+        // "VERIFIED" here is how an unchecked transition read as built.
+        status: edge.implementationStatus || 'UNVERIFIED',
         visibility: edge.visibility || ['PUBLIC'],
         securityClassification: edge.securityClassification || 'PUBLIC',
         source_type: "TRANSITION_CONTRACT",

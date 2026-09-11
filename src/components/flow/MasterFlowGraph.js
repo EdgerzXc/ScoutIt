@@ -48,6 +48,10 @@ const TYPE_CONFIG = {
 const STATUS_CONFIG = {
   VERIFIED:     { color: "#10B981", bg: "rgba(16,185,129,0.18)", border: "rgba(16,185,129,0.60)", label: "Verified", icon: "🛡️" },
   PARTIAL:      { color: "#F59E0B", bg: "rgba(245,158,11,0.18)", border: "rgba(245,158,11,0.60)", label: "Partial", icon: "⚙️" },
+  // Every planned node — the AI council among them — is NOT_STARTED. Without
+  // this entry the lookup below fell back to VERIFIED and drew them as built.
+  NOT_STARTED:  { color: "#94A3B8", bg: "rgba(148,163,184,0.10)", border: "rgba(148,163,184,0.55)", label: "Not built", icon: "○" },
+  UNKNOWN:      { color: "#EF4444", bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.60)", label: "Unknown status", icon: "?" },
   PLANNED:      { color: "#A855F7", bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.60)", label: "Planned", icon: "⏳" },
   PROPOSED:     { color: "#818CF8", bg: "rgba(129,140,248,0.18)", border: "rgba(129,140,248,0.60)", label: "Proposed", icon: "💡" },
   CONTRADICTED: { color: "#EF4444", bg: "rgba(239,68,68,0.20)", border: "rgba(239,68,68,0.80)", label: "Conflict", icon: "⚠️" },
@@ -68,7 +72,7 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
   onDragStart, onClick, onMouseEnter, onMouseLeave, onToggleFocus
 }) {
   const tc = TYPE_CONFIG[node.nodeType || node.type] || TYPE_CONFIG.PAGE;
-  const sc = STATUS_CONFIG[node.implementationStatus] || STATUS_CONFIG.VERIFIED;
+  const sc = STATUS_CONFIG[node.implementationStatus] || STATUS_CONFIG.UNKNOWN;
   const isArch = node.category === "architecture";
 
   return (
@@ -815,6 +819,7 @@ export default function MasterFlowGraph({ onNavigate }) {
               <option value="all">Status: All</option>
               <option value="VERIFIED">🛡️ Verified Only</option>
               <option value="PARTIAL">⚙️ Partial</option>
+              <option value="NOT_STARTED">○ Not built</option>
               <option value="PLANNED">⏳ Planned</option>
               <option value="PROPOSED">💡 Proposed</option>
             </select>

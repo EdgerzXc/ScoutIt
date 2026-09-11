@@ -1,6 +1,6 @@
 {
   "AUTH_ACCOUNT": {
-    "totalNodes": 8,
+    "totalNodes": 9,
     "happyPathCoverage": {
       "numerator": 3,
       "denominator": 4,
@@ -80,9 +80,9 @@
   "CONNECTS_WALLET": {
     "totalNodes": 5,
     "happyPathCoverage": {
-      "numerator": 3,
+      "numerator": 4,
       "denominator": 4,
-      "percentage": "75%",
+      "percentage": "100%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {
@@ -119,9 +119,9 @@
   "VIEWING_TRANSACTION": {
     "totalNodes": 24,
     "happyPathCoverage": {
-      "numerator": 3,
+      "numerator": 4,
       "denominator": 4,
-      "percentage": "75%",
+      "percentage": "100%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {
@@ -158,9 +158,9 @@
   "OFFER_NEGOTIATION": {
     "totalNodes": 24,
     "happyPathCoverage": {
-      "numerator": 3,
+      "numerator": 4,
       "denominator": 4,
-      "percentage": "75%",
+      "percentage": "100%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {
@@ -197,9 +197,9 @@
   "HANDSHAKE_CLOSURE": {
     "totalNodes": 24,
     "happyPathCoverage": {
-      "numerator": 3,
+      "numerator": 4,
       "denominator": 4,
-      "percentage": "75%",
+      "percentage": "100%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {
@@ -234,7 +234,7 @@
     }
   },
   "OWNERSHIP_CLAIM": {
-    "totalNodes": 19,
+    "totalNodes": 20,
     "happyPathCoverage": {
       "numerator": 2,
       "denominator": 4,
@@ -275,9 +275,9 @@
   "BROKER_REPRESENTATION": {
     "totalNodes": 9,
     "happyPathCoverage": {
-      "numerator": 2,
+      "numerator": 3,
       "denominator": 4,
-      "percentage": "50%",
+      "percentage": "75%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {
@@ -314,9 +314,9 @@
   "SECURITY_SENTINEL": {
     "totalNodes": 11,
     "happyPathCoverage": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 4,
-      "percentage": "25%",
+      "percentage": "50%",
       "formula": "implemented expected happy paths / total expected happy paths"
     },
     "failureCoverage": {

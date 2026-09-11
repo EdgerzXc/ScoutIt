@@ -346,7 +346,9 @@
     ],
     "redirectAliases": [],
     "componentsReferenced": [
+      "src/components/admin/ConnectsRefundPanel.js",
       "src/components/connects/ConnectsReceipt.js",
+      "src/components/dashboard/AttentionRail.js",
       "src/components/dashboard/BookingModal.js",
       "src/components/dashboard/BrokerFieldBriefing.js",
       "src/components/dashboard/BrokerMode.js",
@@ -363,6 +365,7 @@
       "src/components/descent/BlackHoleCanvas.js",
       "src/components/layout/Header.js",
       "src/components/orbit/ScoutEarthClient.js",
+      "src/components/profile/DeleteAccountPanel.js",
       "src/components/property/ClaimPropertyPanel.js",
       "src/components/property/CommercialFlow.js",
       "src/components/property/ComparisonMatrix.js",
@@ -389,7 +392,6 @@
     "apiRoutesMissing": [],
     "graphOnlyRoutes": [
       "/api/auth/refresh",
-      "/api/cron/purge-messages",
       "/api/deals/escrow-trap",
       "/api/deals/offer-review",
       "/api/deals/route-lead",
@@ -404,19 +406,13 @@
       "/blocked",
       "/bounties",
       "/challenge",
-      "/dashboard/create/advanced",
-      "/dashboard/property/[id]/settings",
       "/lib/aiListingEngine.js",
-      "/lib/connectRules.js",
-      "/lib/sanitize.js",
       "/lib/sentinel/velocityRadar.js",
       "/lib/webResearcher.js",
-      "/mission-control/approval",
       "/mission-control/prc-audit"
     ],
     "plannedGraphOnlyRoutes": [
       "/api/auth/refresh",
-      "/api/cron/purge-messages",
       "/api/deals/escrow-trap",
       "/api/deals/offer-review",
       "/api/deals/route-lead",
@@ -431,32 +427,28 @@
       "/blocked",
       "/bounties",
       "/challenge",
-      "/dashboard/create/advanced",
-      "/dashboard/property/[id]/settings",
-      "/lib/aiListingEngine.js",
-      "/lib/connectRules.js",
-      "/lib/sanitize.js",
       "/lib/sentinel/velocityRadar.js",
       "/lib/webResearcher.js",
-      "/mission-control/approval",
       "/mission-control/prc-audit"
     ],
-    "staleReleasedGraphOnlyRoutes": [],
-    "verifiedCodeEvidenceCount": 90,
+    "staleReleasedGraphOnlyRoutes": [
+      "/lib/aiListingEngine.js"
+    ],
+    "verifiedCodeEvidenceCount": 97,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
     "schemaValidityScore": {
-      "numerator": 128,
-      "denominator": 128,
+      "numerator": 131,
+      "denominator": 131,
       "percentage": "100%",
       "formula": "schema-valid nodes / total nodes",
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 90,
-      "denominator": 128,
-      "percentage": "70%",
+      "numerator": 97,
+      "denominator": 131,
+      "percentage": "74%",
       "formula": "verified nodes with existing grounded code evidence / total nodes",
       "failingItems": [
         "sys_velocity_radar",
@@ -468,13 +460,11 @@
         "ai_listing_engine",
         "sys_ai_council",
         "sys_ai_arbiter",
-        "scenario_non_refundable_connect",
         "exc_bot_quarantine",
         "comp_return_brief_buyer",
         "comp_return_brief_owner",
         "comp_return_brief_broker",
         "rec_topup_connects",
-        "exc_contact_leak_blocked",
         "rec_redact_contact_faq",
         "exc_viewing_noshow",
         "exc_missing_pdf_metric",
@@ -485,8 +475,6 @@
         "scenario_listing_cap_limit",
         "scenario_prc_expired_notice",
         "scenario_broker_lead_collision",
-        "scenario_offmarket_pitch",
-        "scenario_chat_purge",
         "rec_turnstile_challenge",
         "terminal_edge_blacklist",
         "provider_bounty_handshake",
@@ -521,8 +509,8 @@
       "failingItems": []
     },
     "ragSafetyScore": {
-      "numerator": 188,
-      "denominator": 188,
+      "numerator": 200,
+      "denominator": 200,
       "percentage": "100%",
       "formula": "public chunks passing access and content sanitization checks / total public chunks",
       "failingItems": []
@@ -542,14 +530,14 @@
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 90,
-      "denominator": 90,
+      "numerator": 97,
+      "denominator": 97,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
-      "percentage": "92.5%",
+      "percentage": "93.5%",
       "formula": "weighted sum: (evidence * 0.25) + (canonical-route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
@@ -559,5 +547,5 @@
       "failingItems": []
     }
   },
-  "auditScore": "92.5% TRUST GROUNDED"
+  "auditScore": "93.5% TRUST GROUNDED"
 }

@@ -121,11 +121,11 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     const report = validateMasterGraph(MASTER_FLOW_NODES, MASTER_FLOW_EDGES);
     expect(report.valid).toBe(true);
     expect(report.errors).toEqual([]);
-    expect(report.stats.totalNodes).toBe(128);
+    expect(report.stats.totalNodes).toBe(131);
     expect(report.stats.totalEdges).toBeGreaterThanOrEqual(246);
     // Truth reconciliation lowered overstated nodes instead of preserving an artificial score.
     expect(report.stats.verifiedCount).toBeGreaterThanOrEqual(78);
-    expect(report.stats.uniqueCanonicalIds).toBe(128);
+    expect(report.stats.uniqueCanonicalIds).toBe(131);
   });
 
   // 7. Predicate Quality & Machine-Readable Conditions
