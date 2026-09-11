@@ -12,7 +12,7 @@
         "title": "Global Search & Filters",
         "action": "Enter desired city or property type in the hero search.",
         "tip": "Use natural language search.",
-        "guideTarget": "hero-search-input"
+        "guideTarget": "scoutit-home-launchpad"
       },
       {
         "step": 2,
@@ -20,7 +20,7 @@
         "title": "Catalog & Neighborhood Intel",
         "action": "Filter listings and view spatial map intelligence.",
         "tip": "Toggle Satellite and Traffic layers.",
-        "guideTarget": "property-catalog-grid"
+        "guideTarget": "scoutit-discover-search"
       },
       {
         "step": 3,
@@ -28,7 +28,7 @@
         "title": "Property Detail Exploration",
         "action": "Review chapters, verified title documents, and pricing.",
         "tip": "Scroll to Chapter 10: Your Move.",
-        "guideTarget": "property-detail-container"
+        "guideTarget": "scoutit-property-directory"
       },
       {
         "step": 4,
@@ -84,7 +84,7 @@
         "nodeId": "owner_creation_pipeline",
         "title": "Create Property Listing",
         "action": "Configure property details, unit types, pricing, and amenities.",
-        "tip": "Automated OCR extracts building data.",
+        "tip": "PDF text extraction plus one AI drafting pass; staff verify against the source before publish.",
         "guideTarget": "owner-claim-submit-btn"
       },
       {
@@ -93,7 +93,7 @@
         "title": "Leads & Freshness Intelligence",
         "action": "Review active buyer leads and freshness metrics.",
         "tip": "Keep listing fresh to rank higher.",
-        "guideTarget": "owner-leads-brief"
+        "guideTarget": "attention-rail"
       },
       {
         "step": 4,
@@ -142,7 +142,7 @@
         "title": "Field Briefing & Client Management",
         "action": "Access tactical property briefing notes and verified clients.",
         "tip": "Ensures legal compliance.",
-        "guideTarget": "broker-client-agreement-panel"
+        "guideTarget": "broker-field-briefing"
       },
       {
         "step": 4,

@@ -59,9 +59,9 @@
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
-      "numerator": 3,
+      "numerator": 2,
       "denominator": 4,
-      "percentage": "75%",
+      "percentage": "50%",
       "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
     },
     "telemetryCoverage": {
@@ -137,9 +137,9 @@
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
-      "numerator": 2,
+      "numerator": 3,
       "denominator": 3,
-      "percentage": "67%",
+      "percentage": "100%",
       "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
     },
     "telemetryCoverage": {
@@ -176,9 +176,9 @@
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
-      "numerator": 2,
+      "numerator": 3,
       "denominator": 3,
-      "percentage": "67%",
+      "percentage": "100%",
       "formula": "VERIFIED guideable actions with real UI targets / total guideable actions"
     },
     "telemetryCoverage": {

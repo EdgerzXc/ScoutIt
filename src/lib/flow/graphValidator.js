@@ -146,6 +146,36 @@ function isPrivateBrainRef(ref) {
   return !normalised.startsWith("_SCOUTIT_BRAIN/15_IMPLEMENTATION_RECORDS/");
 }
 
+const uiMarkerCache = new Map();
+
+/**
+ * Every literal `data-scoutit-guide="…"` value a component renders, read from
+ * `src/` with comments stripped, so a marker named only in a comment does not
+ * count (the A-080 trap). A-139 found 34 of the 36 markers the graph named were
+ * rendered by nothing; a guide step is only grounded if it points at one of these.
+ */
+export function collectUiGuideMarkers(rootDir = process.cwd()) {
+  if (uiMarkerCache.has(rootDir)) return uiMarkerCache.get(rootDir);
+  const markers = new Set();
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name !== '__tests__' && entry.name !== 'data') walk(full);
+      } else if (/\.(js|jsx|ts|tsx)$/.test(entry.name)) {
+        const code = fs.readFileSync(full, 'utf8')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/(^|[^:])\/\/.*$/gm, '$1');
+        for (const match of code.matchAll(/data-scoutit-guide="([^"$]+)"/g)) markers.add(match[1]);
+      }
+    }
+  };
+  const srcDir = path.resolve(rootDir, 'src');
+  if (fs.existsSync(srcDir)) walk(srcDir);
+  uiMarkerCache.set(rootDir, markers);
+  return markers;
+}
+
 /**
  * 3. MASTER GRAPH STRUCTURAL & SEMANTIC VALIDATOR
  */
@@ -431,9 +461,12 @@ export function validateGuideSafety(guides, nodes = MASTER_FLOW_NODES, edges = M
           violations.push(`EXECUTABLE guide "${guideKey}" step ${step.step} uses non-verified node "${node.id}" (status: ${node.implementationStatus})`);
         }
 
-        // Executable guides require a real UI guide target
+        // Executable guides require a real UI guide target — one a component
+        // renders. Presence of a string was all this used to check (A-139).
         if (!step.guideTarget || step.guideTarget.startsWith('#node-')) {
           violations.push(`EXECUTABLE guide "${guideKey}" step ${step.step} missing grounded DOM target (has "${step.guideTarget}")`);
+        } else if (!collectUiGuideMarkers().has(step.guideTarget)) {
+          violations.push(`EXECUTABLE guide "${guideKey}" step ${step.step} targets "${step.guideTarget}", which no component renders`);
         }
 
         // Check directed path continuity to next step with actor role preservation

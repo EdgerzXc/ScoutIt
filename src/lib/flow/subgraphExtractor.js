@@ -283,9 +283,9 @@ export const LINEAR_GUIDE_DEFINITIONS = {
     role: "seeker",
     description: "Step-by-step verified workflow guide for property seekers.",
     steps: [
-      { step: 1, nodeId: "hero", title: "Global Search & Filters", action: "Enter desired city or property type in the hero search.", tip: "Use natural language search.", guideTarget: "hero-search-input" },
-      { step: 2, nodeId: "discover_directory", title: "Catalog & Neighborhood Intel", action: "Filter listings and view spatial map intelligence.", tip: "Toggle Satellite and Traffic layers.", guideTarget: "property-catalog-grid" },
-      { step: 3, nodeId: "pep", title: "Property Detail Exploration", action: "Review chapters, verified title documents, and pricing.", tip: "Scroll to Chapter 10: Your Move.", guideTarget: "property-detail-container" },
+      { step: 1, nodeId: "hero", title: "Global Search & Filters", action: "Enter desired city or property type in the hero search.", tip: "Use natural language search.", guideTarget: "scoutit-home-launchpad" },
+      { step: 2, nodeId: "discover_directory", title: "Catalog & Neighborhood Intel", action: "Filter listings and view spatial map intelligence.", tip: "Toggle Satellite and Traffic layers.", guideTarget: "scoutit-discover-search" },
+      { step: 3, nodeId: "pep", title: "Property Detail Exploration", action: "Review chapters, verified title documents, and pricing.", tip: "Scroll to Chapter 10: Your Move.", guideTarget: "scoutit-property-directory" },
       { step: 4, nodeId: "pep_ch10_your_move", title: "Initiate Deal or Inquiry", action: "Click 'Inquire' or 'Schedule Viewing'.", tip: "Requires 1 Connect token.", guideTarget: "property-your-move-actions" },
       { step: 5, nodeId: "inquiry_modal", title: "Direct Connect Authorization", action: "Authorize 1 Connect to establish private communication.", tip: "Protected by Zero-Knowledge masking.", guideTarget: "send-inquiry-modal-btn" },
       { step: 6, nodeId: "deal_room", title: "Private Inquiry Workspace", action: "Enter the private workspace with the owner or broker.", tip: "Coordinate messages and viewing appointments here.", guideTarget: "deal-room-negotiation-panel" },
@@ -300,8 +300,8 @@ export const LINEAR_GUIDE_DEFINITIONS = {
     description: "Step-by-step verified guide for property owners.",
     steps: [
       { step: 1, nodeId: "dashboard_owner", title: "Owner Workspace", action: "View current property listings and performance metrics.", tip: "Check inquiry response rates.", guideTarget: "owner-portfolio-table" },
-      { step: 2, nodeId: "owner_creation_pipeline", title: "Create Property Listing", action: "Configure property details, unit types, pricing, and amenities.", tip: "Automated OCR extracts building data.", guideTarget: "owner-claim-submit-btn" },
-      { step: 3, nodeId: "comp_return_brief_owner", title: "Leads & Freshness Intelligence", action: "Review active buyer leads and freshness metrics.", tip: "Keep listing fresh to rank higher.", guideTarget: "owner-leads-brief" },
+      { step: 2, nodeId: "owner_creation_pipeline", title: "Create Property Listing", action: "Configure property details, unit types, pricing, and amenities.", tip: "PDF text extraction plus one AI drafting pass; staff verify against the source before publish.", guideTarget: "owner-claim-submit-btn" },
+      { step: 3, nodeId: "comp_return_brief_owner", title: "Leads & Freshness Intelligence", action: "Review active buyer leads and freshness metrics.", tip: "Keep listing fresh to rank higher.", guideTarget: "attention-rail" },
       { step: 4, nodeId: "deal_room", title: "Review Private Inquiries", action: "Respond to buyer inquiries and coordinate viewing details.", tip: "Structured offer negotiation remains planned.", guideTarget: "deal-room-negotiation-panel" },
       { step: 5, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "Co-confirm two-sided deal closure and transaction milestones.", tip: "Unlocks seller rating reward.", guideTarget: "deal-handshake-two-sided-signature" }
     ]
@@ -315,7 +315,7 @@ export const LINEAR_GUIDE_DEFINITIONS = {
     steps: [
       { step: 1, nodeId: "dashboard_broker", title: "Broker Command Hub", action: "View assigned leads, roster listings, and client communications.", tip: "RESA Law compliant.", guideTarget: "broker-lead-roster-view" },
       { step: 2, nodeId: "brokers_roster", title: "Verified Broker Directory", action: "View verified broker directory and client representation roster.", tip: "PRC accredited.", guideTarget: "broker-prc-license-form" },
-      { step: 3, nodeId: "broker_field_briefing", title: "Field Briefing & Client Management", action: "Access tactical property briefing notes and verified clients.", tip: "Ensures legal compliance.", guideTarget: "broker-client-agreement-panel" },
+      { step: 3, nodeId: "broker_field_briefing", title: "Field Briefing & Client Management", action: "Access tactical property briefing notes and verified clients.", tip: "Ensures legal compliance.", guideTarget: "broker-field-briefing" },
       { step: 4, nodeId: "deal_room", title: "Coordinate Private Inquiries", action: "Guide parties through communication and viewing logistics.", tip: "Structured offer negotiation remains planned.", guideTarget: "deal-room-negotiation-panel" },
       { step: 5, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "Co-confirm two-sided deal closure and transaction milestones.", tip: "Boosts public broker trust score.", guideTarget: "deal-handshake-two-sided-signature" }
     ]

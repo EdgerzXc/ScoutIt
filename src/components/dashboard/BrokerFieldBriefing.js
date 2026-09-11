@@ -143,7 +143,7 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
   });
 
   return (
-    <div className="bfb-overlay">
+    <div className="bfb-overlay" data-scoutit-guide="broker-field-briefing">
       <style jsx global>{`
         /* ── SCREEN, MOBILE FIRST ─────────────────────────────────────── */
         .bfb-overlay {

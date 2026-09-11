@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import MasterFlowGraph from "@/components/flow/MasterFlowGraph";
 import { DashboardProvider } from "@/context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { ArrowLeft } from "lucide-react";
+
+// The viewer carries the ~1MB graph source. Code-split it so the admin route
+// shell (and its role check) paints without waiting for it; staff see the
+// existing pulse skeleton meanwhile. ssr:false — the canvas viewer is
+// pointer-driven and never meaningful as server HTML.
+const MasterFlowGraph = dynamic(() => import("@/components/flow/MasterFlowGraph"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full animate-pulse bg-surface/50" aria-label="Loading" />,
+});
 
 // A-093: the internal system map no longer renders to every signed-in user.
 // The map shows only for staff roles read from the server-side role route

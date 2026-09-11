@@ -2317,7 +2317,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           </div>
 
           {/* ── YOUR MOVE ── */}
-          <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
+          <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove" data-scoutit-guide="property-your-move-actions">
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>

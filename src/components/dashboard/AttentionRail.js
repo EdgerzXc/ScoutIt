@@ -83,7 +83,7 @@ export default function AttentionRail({ mockUserId, className = "" }) {
 
   if (state.status === "loading") {
     return (
-      <section aria-label="What needs you" className={className}>
+      <section aria-label="What needs you" data-scoutit-guide="attention-rail" className={className}>
         <div className="h-[124px] animate-pulse rounded-lg border border-surface-variant bg-surface/40" />
       </section>
     );
@@ -91,7 +91,7 @@ export default function AttentionRail({ mockUserId, className = "" }) {
 
   if (state.status === "error") {
     return (
-      <section aria-label="What needs you" className={className}>
+      <section aria-label="What needs you" data-scoutit-guide="attention-rail" className={className}>
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-surface-variant bg-surface/50 p-4">
           <ShieldAlert size={16} className="text-text-muted" aria-hidden="true" />
           <p className="font-body text-base text-text-secondary">
@@ -112,7 +112,7 @@ export default function AttentionRail({ mockUserId, className = "" }) {
   const { signals = [], summary, severity, unavailable = [] } = state.data || {};
 
   return (
-    <section aria-label="What needs you" className={className}>
+    <section aria-label="What needs you" data-scoutit-guide="attention-rail" className={className}>
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-label-caps text-label-caps uppercase text-text-secondary">
           What needs you

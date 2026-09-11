@@ -668,16 +668,24 @@ export default function MasterFlowGraph({ onNavigate }) {
     setTimeout(() => setExportNotice(null), 3000);
   }, [activeSlice, graphMode]);
 
-  const handleExportRAG = useCallback(() => {
-    const data = JSON.stringify(getAtomicRAGChunks(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, { role: "admin", includePlanned: true }), null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `scoutit_rag_knowledge_base_v2.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setExportNotice("🧠 Atomic RAG Knowledge Base downloaded!");
+  const handleExportRAG = useCallback(async () => {
+    // 639-chunk generation is synchronous and blocks the main thread for a
+    // noticeable beat. Announce it and yield so the notice paints first.
+    setExportNotice("🧠 Building knowledge base…");
+    await new Promise((r) => setTimeout(r, 30));
+    try {
+      const data = JSON.stringify(getAtomicRAGChunks(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, { role: "admin", includePlanned: true }), null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `scoutit_rag_knowledge_base_v2.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExportNotice("🧠 Atomic RAG Knowledge Base downloaded!");
+    } catch {
+      setExportNotice("⚠️ Export failed — try again.");
+    }
     setTimeout(() => setExportNotice(null), 3000);
   }, []);
 

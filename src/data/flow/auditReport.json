@@ -509,8 +509,8 @@
       "failingItems": []
     },
     "ragSafetyScore": {
-      "numerator": 200,
-      "denominator": 200,
+      "numerator": 188,
+      "denominator": 188,
       "percentage": "100%",
       "formula": "public chunks passing access and content sanitization checks / total public chunks",
       "failingItems": []

@@ -202,7 +202,7 @@
     ],
     "securityClassification": "PUBLIC",
     "instruction": "Serves as the root landing environment. Directs visitors to the 6-layer altitude descent, curated showcase leaderboard, and searchable directory.",
-    "ui_target": "hero-search-input",
+    "ui_target": "scoutit-home-launchpad",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -3231,7 +3231,7 @@
     ],
     "securityClassification": "PUBLIC",
     "instruction": "Fetches live Airtable properties via `/api/cms/route.js`. Allows filtering across 6 space categories and geographic radius.",
-    "ui_target": "discover_directory",
+    "ui_target": "scoutit-discover-search",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -3473,7 +3473,7 @@
     ],
     "securityClassification": "PUBLIC",
     "instruction": "Dynamic result grid linking matching spaces directly to their individual Property Experience Pages.",
-    "ui_target": "search_results-view",
+    "ui_target": "scoutit-property-directory",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -3669,48 +3669,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/property/SpatialCommandMap.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "TEST",
-        "path": "src/lib/__tests__/spatialCanvasLenses.test.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_discovery.spatial_canvas",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "discovery.spatial_canvas",
-    "canonicalId": "discovery.spatial_canvas",
-    "title": "User Walkthrough: Spatial Canvas (2D/3D Infinite Map)",
-    "domain": "discovery",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Pan-and-zoom spatial interface with cluster markers, live inquiry pins, and district boundary overlays.",
-    "ui_target": "spatial_canvas-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "COMPONENT",
@@ -3945,48 +3903,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_seeker.wishlist",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "seeker.wishlist",
-    "canonicalId": "seeker.wishlist",
-    "title": "User Walkthrough: The Ledger (Private Wishlist)",
-    "domain": "seeker",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Stores reactions in local `localStorage` without requiring an account. Authenticated users can explicitly merge into Supabase `saved_intel`.",
-    "ui_target": "wishlist-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/wishlist/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "CODE",
-        "path": "src/lib/wishlistCrypto.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_seeker.wishlist",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -4165,41 +4081,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/intel/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_intel.articles",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "intel.articles",
-    "canonicalId": "intel.articles",
-    "title": "User Walkthrough: Spatial Intelligence Newsroom & Briefings",
-    "domain": "layer",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Data-dense articles examining real estate yield shifts, zoning transformations, and lifestyle migration trends.",
-    "ui_target": "intel_articles-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "ROUTE",
@@ -4394,48 +4275,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/hubs/[slug]/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "CODE",
-        "path": "src/lib/hubProperties.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_discovery.hubs",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "discovery.hubs",
-    "canonicalId": "discovery.hubs",
-    "title": "User Walkthrough: Regional Transport & Location Hubs",
-    "domain": "discovery",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Catalogs major Philippine transit anchors and indexes spaces within commuter catchment zones.",
-    "ui_target": "hubs-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "ROUTE",
@@ -4669,48 +4508,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_discovery.transit",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "discovery.transit",
-    "canonicalId": "discovery.transit",
-    "title": "User Walkthrough: Arterial Transit Corridors & LRT/MRT Lines",
-    "domain": "discovery",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Maps properties along mass transit corridors with station walk times and arterial highway connections.",
-    "ui_target": "transit-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/transit/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "CODE",
-        "path": "src/lib/transit.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_discovery.transit",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -4919,7 +4716,7 @@
     ],
     "securityClassification": "PUBLIC",
     "instruction": "Presents verified broker profiles with RESA RA 9646 license numbers, completed transaction handshake counts, and territory focus.",
-    "ui_target": "brokers_roster-view",
+    "ui_target": "broker-prc-license-form",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -5119,41 +4916,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_roster.photographers",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "roster.photographers",
-    "canonicalId": "roster.photographers",
-    "title": "User Walkthrough: Architectural & Drone Media Directory",
-    "domain": "discovery",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Connects owners and brokers with approved spatial media creators for 4K video reels and Spatial Vault capture.",
-    "ui_target": "photographers_roster-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/photographers/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_roster.photographers",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -5316,41 +5078,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/researchers/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_roster.researchers",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "roster.researchers",
-    "canonicalId": "roster.researchers",
-    "title": "User Walkthrough: Spatial Researchers & Bounty Workforce",
-    "domain": "discovery",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Specialists who verify title status, foot traffic counts, zoning clearances, and local neighborhood dynamics.",
-    "ui_target": "researchers_roster-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "ROUTE",
@@ -5542,41 +5269,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_roster.planners",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "roster.planners",
-    "canonicalId": "roster.planners",
-    "title": "User Walkthrough: Event Designers & Venue Curators",
-    "domain": "discovery",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Curated professionals for commercial fit-outs, restaurant concepts, and large-scale event production.",
-    "ui_target": "planners_roster-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/event-planners/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_roster.planners",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -5752,48 +5444,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/badges/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "CODE",
-        "path": "src/lib/BadgeEngine.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_gamification.badges",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "gamification.badges",
-    "canonicalId": "gamification.badges",
-    "title": "User Walkthrough: Trust & Verification Badges Standard",
-    "domain": "layer",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Details the verification standards that earn properties and brokers their gold shield badges.",
-    "ui_target": "badges-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "ROUTE",
@@ -6264,7 +5914,7 @@
     ],
     "securityClassification": "PUBLIC",
     "instruction": "High-altitude to unit-level briefing presenting verified photos, location transit, life/workday profile, build plans, unit inventory, and action cockpit.",
-    "ui_target": "property-detail-container",
+    "ui_target": "scoutit-property-directory",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -9704,49 +9354,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_deal.viewing.modal",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "deal.viewing.modal",
-    "canonicalId": "deal.viewing.modal",
-    "title": "User Walkthrough: Viewing Booking & Schedule Modal",
-    "domain": "deal",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "SEEKER",
-      "PROVIDER"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Initiates calendar booking request. Verifies broker calendar availability and checks for scheduling conflicts.",
-    "ui_target": "schedule-viewing-time-slots",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/dashboard/BookingModal.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "API",
-        "path": "src/app/api/viewing-appointments/route.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_deal.viewing.modal",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -10431,7 +10038,7 @@
     ],
     "securityClassification": "AUTHENTICATED",
     "instruction": "Offers Build from Scratch, Advanced 10-Chapter Editor, CSV Portfolio Import, and PDF Pitch Deck Extraction.",
-    "ui_target": "owner_creation_pipeline",
+    "ui_target": "owner-claim-submit-btn",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -13660,6 +13267,51 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
+    "chunk_id": "guide_deal.transaction.handshake",
+    "chunk_type": "UI_GUIDE",
+    "chunkType": "UI_GUIDE",
+    "canonical_id": "deal.transaction.handshake",
+    "canonicalId": "deal.transaction.handshake",
+    "title": "User Walkthrough: System: Two-Sided Transaction Handshake",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "SEEKER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "securityClassification": "INTERNAL",
+    "instruction": "Both parties co-confirm the deal milestone from the conversation.",
+    "ui_target": "deal-handshake-two-sided-signature",
+    "source_type": "WIZARD_SYSTEM",
+    "sourceType": "WIZARD_SYSTEM",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/handshake/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/dealHandshakeApi.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
     "chunk_id": "impl_deal.transaction.handshake",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -15746,48 +15398,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_seeker.dashboard",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "seeker.dashboard",
-    "canonicalId": "seeker.dashboard",
-    "title": "User Walkthrough: Buyer Workspace (Management & Continuity)",
-    "domain": "layer",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "SEEKER"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Central workspace for buyers. Does not duplicate public discovery; focuses on continuity, comparisons, and active viewings.",
-    "ui_target": "dashboard_buyer",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "ROUTE",
-        "path": "src/app/dashboard/page.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/dashboard/BuyerMode.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_seeker.dashboard",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -16232,7 +15842,7 @@
     ],
     "securityClassification": "AUTHENTICATED",
     "instruction": "Dashboard for individual property owners. Displays live leads, freshness reminders, and representation status.",
-    "ui_target": "dashboard_owner",
+    "ui_target": "owner-portfolio-table",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -16785,7 +16395,7 @@
     ],
     "securityClassification": "AUTHENTICATED",
     "instruction": "Professional cockpit for PRC brokers. Tracks active listings against tier cap (Starry: 3, Solar: 15, Cluster: 50, Universe: ∞).",
-    "ui_target": "dashboard_broker",
+    "ui_target": "broker-lead-roster-view",
     "source_type": "WIZARD_SYSTEM",
     "sourceType": "WIZARD_SYSTEM",
     "evidence": [
@@ -17318,41 +16928,6 @@
     "lastVerifiedAt": "2026-08-19"
   },
   {
-    "chunk_id": "guide_provider.dashboard",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "provider.dashboard",
-    "canonicalId": "provider.dashboard",
-    "title": "User Walkthrough: Provider Workspace & QuestIT Bounties",
-    "domain": "layer",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PROVIDER"
-    ],
-    "securityClassification": "AUTHENTICATED",
-    "instruction": "Enables spatial creators and researchers to earn Connects and bounties by completing verified spatial assignments.",
-    "ui_target": "dashboard_provider",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
-    "evidence": [
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/dashboard/ProviderMode.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
     "chunk_id": "impl_provider.dashboard",
     "chunk_type": "IMPLEMENTATION_REFERENCE",
     "chunkType": "IMPLEMENTATION_REFERENCE",
@@ -17548,6 +17123,60 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/messages/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/crm/AppointmentsSheet.js",
+        "symbol": "AppointmentsSheet",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "guide_deal.room.chat",
+    "chunk_type": "UI_GUIDE",
+    "chunkType": "UI_GUIDE",
+    "canonical_id": "deal.room.chat",
+    "canonicalId": "deal.room.chat",
+    "title": "User Walkthrough: Private Inquiry Workspace & Scheduling",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "SEEKER",
+      "BROKER",
+      "OWNER",
+      "PROVIDER"
+    ],
+    "securityClassification": "AUTHENTICATED",
+    "instruction": "The private inquiry workspace: messages, viewing coordination and the handshake live here.",
+    "ui_target": "deal-room-negotiation-panel",
+    "source_type": "WIZARD_SYSTEM",
+    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "COMPONENT",
@@ -17785,49 +17414,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/dashboard/MissionControlMode.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "CODE",
-        "path": "src/lib/adminGuard.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_admin.mission_control",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "admin.mission_control",
-    "canonicalId": "admin.mission_control",
-    "title": "User Walkthrough: Mission Control (Staff Operations Hub)",
-    "domain": "admin",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PRIVATE_PILOT",
-    "visibility": [
-      "STAFF",
-      "ADMIN"
-    ],
-    "securityClassification": "INTERNAL",
-    "instruction": "Internal operations center for ScoutIt operators. Resolves AI Council deadlocks, monitors scrapers, and audits listings.",
-    "ui_target": "mission_control",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "COMPONENT",
@@ -22890,41 +22476,6 @@
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
-    "evidence": [
-      {
-        "kind": "COMPONENT",
-        "path": "src/components/property/ComparisonMatrix.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      }
-    ],
-    "graph_version": "2.1.0",
-    "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
-  },
-  {
-    "chunk_id": "guide_seeker.compare.matrix",
-    "chunk_type": "UI_GUIDE",
-    "chunkType": "UI_GUIDE",
-    "canonical_id": "seeker.compare.matrix",
-    "canonicalId": "seeker.compare.matrix",
-    "title": "User Walkthrough: Side-by-Side Spatial Comparison Matrix",
-    "domain": "property",
-    "status": "VERIFIED",
-    "productStatus": "APPROVED",
-    "implementationStatus": "VERIFIED",
-    "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE",
-    "visibility": [
-      "PUBLIC"
-    ],
-    "securityClassification": "PUBLIC",
-    "instruction": "Allows comparing up to 4 spaces side-by-side on technical specs only. Pricing and monetary rates are intentionally excluded to protect real estate broker compliance.",
-    "ui_target": "compare_specs_matrix-view",
-    "source_type": "WIZARD_SYSTEM",
-    "sourceType": "WIZARD_SYSTEM",
     "evidence": [
       {
         "kind": "COMPONENT",

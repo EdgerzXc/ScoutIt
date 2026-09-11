@@ -91,7 +91,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Serves as the root landing environment. Directs visitors to the 6-layer altitude descent, curated showcase leaderboard, and searchable directory.",
-      "target": "hero-search-input",
+      "target": "scoutit-home-launchpad",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -2569,7 +2569,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Fetches live Airtable properties via `/api/cms/route.js`. Allows filtering across 6 space categories and geographic radius.",
-      "target": "discover_directory",
+      "target": "scoutit-discover-search",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -2738,7 +2738,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Dynamic result grid linking matching spaces directly to their individual Property Experience Pages.",
-      "target": "search_results-view",
+      "target": "scoutit-property-directory",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -2899,7 +2899,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Pan-and-zoom spatial interface with cluster markers, live inquiry pins, and district boundary overlays.",
-      "target": "spatial_canvas-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -3068,7 +3067,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Stores reactions in local `localStorage` without requiring an account. Authenticated users can explicitly merge into Supabase `saved_intel`.",
-      "target": "wishlist-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -3234,7 +3232,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Data-dense articles examining real estate yield shifts, zoning transformations, and lifestyle migration trends.",
-      "target": "intel_articles-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -3392,7 +3389,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Catalogs major Philippine transit anchors and indexes spaces within commuter catchment zones.",
-      "target": "hubs-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -3559,7 +3555,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Maps properties along mass transit corridors with station walk times and arterial highway connections.",
-      "target": "transit-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -3723,7 +3718,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Presents verified broker profiles with RESA RA 9646 license numbers, completed transaction handshake counts, and territory focus.",
-      "target": "brokers_roster-view",
+      "target": "broker-prc-license-form",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -3883,7 +3878,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Connects owners and brokers with approved spatial media creators for 4K video reels and Spatial Vault capture.",
-      "target": "photographers_roster-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -4037,7 +4031,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Specialists who verify title status, foot traffic counts, zoning clearances, and local neighborhood dynamics.",
-      "target": "researchers_roster-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -4189,7 +4182,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Curated professionals for commercial fit-outs, restaurant concepts, and large-scale event production.",
-      "target": "planners_roster-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -4348,7 +4340,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Details the verification standards that earn properties and brokers their gold shield badges.",
-      "target": "badges-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -4683,7 +4674,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "High-altitude to unit-level briefing presenting verified photos, location transit, life/workday profile, build plans, unit inventory, and action cockpit.",
-      "target": "property-detail-container",
+      "target": "scoutit-property-directory",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -7314,7 +7305,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Initiates calendar booking request. Verifies broker calendar availability and checks for scheduling conflicts.",
-      "target": "schedule-viewing-time-slots",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -7403,7 +7393,7 @@ export const MASTER_FLOW_NODES = [
       "deprecatedBy": null,
       "changeReason": null
     },
-    "guideability": "EXECUTABLE",
+    "guideability": "MACRO",
     "isTerminal": false,
     "machineVerifiedBy": "Automated Grounding Engine",
     "humanReviewedBy": null,
@@ -7659,7 +7649,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Requires upload of Land Title (TCT/CCT), Tax Declaration, and valid government ID for staff review in Mission Control.",
-      "target": "claim_listing_modal",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -7833,7 +7822,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Offers Build from Scratch, Advanced 10-Chapter Editor, CSV Portfolio Import, and PDF Pitch Deck Extraction.",
-      "target": "owner_creation_pipeline",
+      "target": "owner-claim-submit-btn",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -10451,7 +10440,12 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE"
+    "releaseStatus": "PUBLIC_LIVE",
+    "guide": {
+      "target": "deal-handshake-two-sided-signature",
+      "instruction": "Both parties co-confirm the deal milestone from the conversation.",
+      "sequenceOrder": 1
+    }
   },
   {
     "id": "ai_listing_engine",
@@ -11840,7 +11834,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Central workspace for buyers. Does not duplicate public discovery; focuses on continuity, comparisons, and active viewings.",
-      "target": "dashboard_buyer",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -12162,7 +12155,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Dashboard for individual property owners. Displays live leads, freshness reminders, and representation status.",
-      "target": "dashboard_owner",
+      "target": "owner-portfolio-table",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -12539,7 +12532,7 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Professional cockpit for PRC brokers. Tracks active listings against tier cap (Starry: 3, Solar: 15, Cluster: 50, Universe: ∞).",
-      "target": "dashboard_broker",
+      "target": "broker-lead-roster-view",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -12910,7 +12903,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Enables spatial creators and researchers to earn Connects and bounties by completing verified spatial assignments.",
-      "target": "dashboard_provider",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -13182,7 +13174,7 @@ export const MASTER_FLOW_NODES = [
       "deprecatedBy": null,
       "changeReason": null
     },
-    "guideability": "NONE",
+    "guideability": "EXECUTABLE",
     "isTerminal": false,
     "machineVerifiedBy": "Automated Grounding Engine",
     "humanReviewedBy": null,
@@ -13193,7 +13185,12 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "LIMITED_LIVE",
+    "guide": {
+      "target": "deal-room-negotiation-panel",
+      "instruction": "The private inquiry workspace: messages, viewing coordination and the handshake live here.",
+      "sequenceOrder": 1
+    }
   },
   {
     "id": "mission_control",
@@ -13269,7 +13266,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Internal operations center for ScoutIt operators. Resolves AI Council deadlocks, monitors scrapers, and audits listings.",
-      "target": "mission_control",
       "sequenceOrder": 1
     },
     "telemetry": {
@@ -17166,7 +17162,6 @@ export const MASTER_FLOW_NODES = [
     ],
     "guide": {
       "instruction": "Allows comparing up to 4 spaces side-by-side on technical specs only. Pricing and monetary rates are intentionally excluded to protect real estate broker compliance.",
-      "target": "compare_specs_matrix-view",
       "sequenceOrder": 1
     },
     "telemetry": {
