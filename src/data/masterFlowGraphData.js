@@ -7281,7 +7281,6 @@ export const MASTER_FLOW_NODES = [
       "ViewingScheduler.js"
     ],
     "apis": [
-      "/api/deals/[id]/schedule",
       "/api/viewing-appointments",
       "/api/calendar/sync"
     ],
@@ -7300,14 +7299,6 @@ export const MASTER_FLOW_NODES = [
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/BookingModal.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "API",
-        "path": "src/app/api/deals/[id]/schedule/route.js",
-        "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -7374,13 +7365,6 @@ export const MASTER_FLOW_NODES = [
           {
             "kind": "COMPONENT",
             "path": "src/components/dashboard/BookingModal.js",
-            "provenance": "EXTRACTED",
-            "confidence": 1
-          },
-          {
-            "kind": "API",
-            "path": "src/app/api/deals/[id]/schedule/route.js",
-            "symbol": "POST",
             "provenance": "EXTRACTED",
             "confidence": 1
           },
@@ -12600,7 +12584,7 @@ export const MASTER_FLOW_NODES = [
       "/api/deals",
       "/api/deals/[id]",
       "/api/deals/[id]/messages",
-      "/api/deals/[id]/schedule",
+      "/api/viewing-appointments",
       "/api/deals/handshake"
     ],
     "dataRefs": [
@@ -13266,7 +13250,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "EXCEPTION",
     "domain": "layer",
     "category": "scenario",
-    "route": "/api/deals/[id]/schedule",
+    "route": "/api/viewing-appointments",
     "layer": "core",
     "roles": [
       "seeker",
@@ -13312,7 +13296,7 @@ export const MASTER_FLOW_NODES = [
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/deals/[id]/schedule/route.js",
+        "path": "src/app/api/viewing-appointments/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -13364,7 +13348,7 @@ export const MASTER_FLOW_NODES = [
         "evidence": [
           {
             "kind": "API",
-            "path": "src/app/api/deals/[id]/schedule/route.js",
+            "path": "src/app/api/viewing-appointments/route.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -13417,7 +13401,7 @@ export const MASTER_FLOW_NODES = [
     "nodeType": "RECOVERY",
     "domain": "layer",
     "category": "scenario",
-    "route": "/api/deals/[id]/schedule",
+    "route": "/api/viewing-appointments",
     "layer": "core",
     "roles": [
       "seeker",
@@ -26836,14 +26820,6 @@ export const MASTER_FLOW_EDGES = [
       },
       {
         "kind": "API",
-        "path": "src/app/api/deals/[id]/schedule/route.js",
-        "symbol": "POST",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "API",
         "path": "src/app/api/viewing-appointments/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
@@ -26905,7 +26881,7 @@ export const MASTER_FLOW_EDGES = [
     "evidence": [
       {
         "kind": "API",
-        "path": "src/app/api/deals/[id]/schedule/route.js",
+        "path": "src/app/api/viewing-appointments/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -27006,14 +26982,6 @@ export const MASTER_FLOW_EDGES = [
       {
         "kind": "COMPONENT",
         "path": "src/components/dashboard/BookingModal.js",
-        "provenance": "EXTRACTED",
-        "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-      },
-      {
-        "kind": "API",
-        "path": "src/app/api/deals/[id]/schedule/route.js",
-        "symbol": "POST",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"

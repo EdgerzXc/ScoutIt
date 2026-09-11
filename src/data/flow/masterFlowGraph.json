@@ -7436,7 +7436,6 @@
         "ViewingScheduler.js"
       ],
       "apis": [
-        "/api/deals/[id]/schedule",
         "/api/viewing-appointments",
         "/api/calendar/sync"
       ],
@@ -7455,14 +7454,6 @@
         {
           "kind": "COMPONENT",
           "path": "src/components/dashboard/BookingModal.js",
-          "provenance": "EXTRACTED",
-          "confidence": 1,
-          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-        },
-        {
-          "kind": "API",
-          "path": "src/app/api/deals/[id]/schedule/route.js",
-          "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -7527,13 +7518,6 @@
             {
               "kind": "COMPONENT",
               "path": "src/components/dashboard/BookingModal.js",
-              "provenance": "EXTRACTED",
-              "confidence": 1
-            },
-            {
-              "kind": "API",
-              "path": "src/app/api/deals/[id]/schedule/route.js",
-              "symbol": "POST",
               "provenance": "EXTRACTED",
               "confidence": 1
             },
@@ -12691,7 +12675,7 @@
         "/api/deals",
         "/api/deals/[id]",
         "/api/deals/[id]/messages",
-        "/api/deals/[id]/schedule",
+        "/api/viewing-appointments",
         "/api/deals/handshake"
       ],
       "dataRefs": [
@@ -13349,7 +13333,7 @@
       "nodeType": "EXCEPTION",
       "domain": "layer",
       "category": "scenario",
-      "route": "/api/deals/[id]/schedule",
+      "route": "/api/viewing-appointments",
       "layer": "core",
       "roles": [
         "seeker",
@@ -13395,7 +13379,7 @@
       "evidence": [
         {
           "kind": "API",
-          "path": "src/app/api/deals/[id]/schedule/route.js",
+          "path": "src/app/api/viewing-appointments/route.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -13445,7 +13429,7 @@
           "evidence": [
             {
               "kind": "API",
-              "path": "src/app/api/deals/[id]/schedule/route.js",
+              "path": "src/app/api/viewing-appointments/route.js",
               "provenance": "EXTRACTED",
               "confidence": 1
             }
@@ -13498,7 +13482,7 @@
       "nodeType": "RECOVERY",
       "domain": "layer",
       "category": "scenario",
-      "route": "/api/deals/[id]/schedule",
+      "route": "/api/viewing-appointments",
       "layer": "core",
       "roles": [
         "seeker",
@@ -26799,14 +26783,6 @@
         },
         {
           "kind": "API",
-          "path": "src/app/api/deals/[id]/schedule/route.js",
-          "symbol": "POST",
-          "provenance": "EXTRACTED",
-          "confidence": 1,
-          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-        },
-        {
-          "kind": "API",
           "path": "src/app/api/viewing-appointments/route.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
@@ -26868,7 +26844,7 @@
       "evidence": [
         {
           "kind": "API",
-          "path": "src/app/api/deals/[id]/schedule/route.js",
+          "path": "src/app/api/viewing-appointments/route.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -26969,14 +26945,6 @@
         {
           "kind": "COMPONENT",
           "path": "src/components/dashboard/BookingModal.js",
-          "provenance": "EXTRACTED",
-          "confidence": 1,
-          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
-        },
-        {
-          "kind": "API",
-          "path": "src/app/api/deals/[id]/schedule/route.js",
-          "symbol": "POST",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"

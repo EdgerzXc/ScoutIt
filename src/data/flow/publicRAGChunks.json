@@ -5280,7 +5280,7 @@
     "title": "Exception: Viewing Slot Schedule Conflict",
     "domain": "layer",
     "layer": "core",
-    "route": "/api/deals/[id]/schedule",
+    "route": "/api/viewing-appointments",
     "roles": [
       "seeker",
       "broker",
