@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { viewerIsRequestSender } from "@/lib/identityDisclosure";
+import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
@@ -989,6 +990,11 @@ export default function ChatBox({
                 and their Connect is not returned. Take the time you need; nothing here
                 expires on a short timer.
               </p>
+              {/* A-134 — an owner accepting a broker is handing over how the
+                  listing is run, with no veto afterwards. Said before the click. */}
+              {deal.otherPartyRole === "Broker" && (
+                <p className="text-sm text-text-secondary mb-5">{DELEGATION_ACCEPT_NOTICE}</p>
+              )}
               {/* Stacked on mobile: two side-by-side buttons at 375px put an
                   irreversible Decline a thumb-slip away from Accept. */}
               <div className="flex flex-col sm:flex-row gap-2.5">

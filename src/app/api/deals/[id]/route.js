@@ -6,6 +6,12 @@ import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { canTransitionWorkflow } from "@/lib/workflowStateMachines";
+import { representationStatusUpdate } from "@/lib/brokerRepresentation";
+import {
+  isBrokerRepresentationDeal,
+  mayAnswerBrokerRequest,
+  representationStateForAnswer,
+} from "@/lib/deals/delegationDisclosure";
 
 // 'withdrawn' = the SENDER took their own pending request back (§40.15).
 // Kept distinct from 'declined' on purpose: declined means the recipient said
@@ -85,6 +91,21 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    // U-032 / A-134 — a broker↔owner request is answered only by the side that
+    // did not start it, and answering it moves the representation. The inbox
+    // reaches this route; before this it changed the deal and left the
+    // representation 'pending', so an owner who accepted a broker from the inbox
+    // got an accepted conversation and no broker on the listing.
+    const representationState = isBrokerRepresentationDeal(deal)
+      ? representationStateForAnswer(status)
+      : null;
+    if (representationState && !mayAnswerBrokerRequest(deal, userId)) {
+      return NextResponse.json(
+        { error: "Only the other side of this request can answer it." },
+        { status: 403 },
+      );
+    }
+
     const updateData = { status };
     if (TERMINAL_STATUSES.includes(status)) {
        updateData.closed_at = new Date().toISOString();
@@ -100,6 +121,22 @@ export async function PATCH(request, { params }) {
     if (updateError) {
       console.error("[DEALS API] Failed to update status:", updateError);
       return NextResponse.json({ error: "Failed to update status" }, { status: 500 });
+    }
+
+    if (representationState) {
+      const { error: representationError } = await supabaseAdmin
+        .from("property_broker_representations")
+        .update(representationStatusUpdate({ status: representationState }))
+        .eq("property_id", deal.property_id)
+        .eq("broker_id", deal.broker_id)
+        .in("status", ["pending", "active"]);
+      if (representationError) {
+        console.error("[DEALS API] Representation state update failed:", representationError);
+        return NextResponse.json(
+          { error: "Deal changed, but representation state needs reconciliation", retryable: true },
+          { status: 503 },
+        );
+      }
     }
 
     await logActivity(supabaseAdmin, {

@@ -26,6 +26,7 @@ import SeoReadinessPanel from './SeoReadinessPanel';
 import MonthlyFreshnessModal from './MonthlyFreshnessModal';
 import { sanitizeError } from "@/lib/sanitizeError";
 import { dealThreadHref } from "@/lib/deals/dealThreadLink";
+import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import SimpleDetail from "@/components/ui/SimpleDetail";
 
@@ -1281,6 +1282,14 @@ export default function OwnerMode() {
                     />
                   </div>
 
+                  {pitch.status === 'pending' && pitch.otherPartyRole === 'Broker' && (
+                    /* A-134 — said before the click. Once accepted, how the
+                       listing is run is the broker's call, with no veto; this
+                       is the only moment the owner learns that. */
+                    <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">
+                      {DELEGATION_ACCEPT_NOTICE}
+                    </p>
+                  )}
                   {pitch.status === 'pending' && (
                     <div className="flex gap-3">
                       <button 

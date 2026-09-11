@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
-import { representationStatusUpdate, REPRESENTATION_STATES } from "@/lib/brokerRepresentation";
+import { representationStatusUpdate } from "@/lib/brokerRepresentation";
+import {
+  isBrokerRepresentationDeal,
+  mayAnswerBrokerRequest,
+  representationStateForAnswer,
+} from "@/lib/deals/delegationDisclosure";
 
 export async function POST(request) {
   try {
@@ -51,10 +56,20 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: You are not a party to this deal" }, { status: 403 });
     }
 
-    // Optional: add strict rules about who can accept/decline what.
-    // e.g. If status is 'invited', the broker must be the one to accept.
     if (deal.status === 'invited' && newStatus === 'accepted' && !isBroker) {
       return NextResponse.json({ error: "Only the broker can accept an invitation" }, { status: 403 });
+    }
+
+    // U-032 — the side that started a broker request never answers it. Before
+    // this, a broker could POST 'accepted' on their OWN pitch: they are a party
+    // to the deal, the only guard above covers invitations, and the block below
+    // then switched the representation to active — a broker making themselves
+    // an owner's broker without the owner ever agreeing.
+    const representationState = isBrokerRepresentationDeal(deal)
+      ? representationStateForAnswer(newStatus)
+      : null;
+    if (representationState && !mayAnswerBrokerRequest(deal, userId)) {
+      return NextResponse.json({ error: "Only the other side of this request can answer it." }, { status: 403 });
     }
 
     // 2. Update the deal
@@ -69,10 +84,12 @@ export async function POST(request) {
     }
 
 
-    if (deal.broker_id && (newStatus === "accepted" || newStatus === "declined")) {
-      const representationUpdate = representationStatusUpdate({
-        status: newStatus === "accepted" ? REPRESENTATION_STATES.ACTIVE : REPRESENTATION_STATES.DECLINED,
-      });
+    // Only a broker↔owner request moves a representation. A buyer inquiry that
+    // carries the broker it was routed to is not one: before this, a broker
+    // declining a single buyer's request declined their whole representation
+    // of the property.
+    if (representationState) {
+      const representationUpdate = representationStatusUpdate({ status: representationState });
       const { error: representationError } = await supabaseAdmin
         .from("property_broker_representations")
         .update(representationUpdate)
