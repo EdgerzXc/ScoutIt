@@ -13,6 +13,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { ERASURE_CONFIRMATION } from "@/lib/accountErasure";
 
 export async function POST(request) {
   try {
@@ -25,9 +26,11 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    if (body.confirm !== "DELETE MY ACCOUNT") {
+    // The phrase lives in lib/accountErasure.js so the screen that asks for it
+    // and the route that checks it cannot drift apart (A-126).
+    if (body.confirm !== ERASURE_CONFIRMATION) {
       return NextResponse.json(
-        { error: "Confirmation text 'DELETE MY ACCOUNT' is required" },
+        { error: `Confirmation text '${ERASURE_CONFIRMATION}' is required` },
         { status: 400 }
       );
     }

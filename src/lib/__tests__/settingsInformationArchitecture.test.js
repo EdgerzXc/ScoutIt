@@ -39,6 +39,7 @@ describe("menu and Settings information architecture", () => {
       "privacy",
       "security",
       "display-guide",
+      "delete-account",
     ]);
     for (const section of SETTINGS_SECTIONS) {
       expect(section.href).toBe(`#${section.id}`);

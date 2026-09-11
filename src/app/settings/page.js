@@ -10,6 +10,7 @@ import { Camera, Search, ShieldCheck, Lock } from "lucide-react";
 import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
+import DeleteAccountPanel from "@/components/profile/DeleteAccountPanel";
 import { getCurrentTier } from "@/lib/entitlements";
 import { SETTINGS_SECTIONS } from "@/lib/settingsNavigation";
 
@@ -613,6 +614,17 @@ export default function SettingsPage() {
               Contact support
             </Link>
           </div>
+        </section>
+
+        {/* ── Delete account (A-126) ── RA 10173 §16(e). The route existed and
+            nothing could reach it; this is the way in. */}
+        <section id="delete-account" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Delete account</span>
+            <h2>Your right to erasure</h2>
+            <p>Delete your private data and close your sign-in. You see exactly what goes and what stays before you confirm.</p>
+          </div>
+          <DeleteAccountPanel />
         </section>
 
         <button
