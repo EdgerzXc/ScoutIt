@@ -14054,7 +14054,7 @@ export const MASTER_FLOW_NODES = [
         "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       },
       {
         "kind": "COMPONENT",
@@ -14062,7 +14062,7 @@ export const MASTER_FLOW_NODES = [
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       },
       {
         "kind": "API",
@@ -14070,7 +14070,7 @@ export const MASTER_FLOW_NODES = [
         "symbol": "PATCH",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       }
     ],
     "brainRefs": [
@@ -14161,7 +14161,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "NOT_DEPLOYED"
+    "releaseStatus": "LIMITED_LIVE"
   },
   {
     "id": "exc_missing_pdf_metric",
@@ -34040,7 +34040,7 @@ export const MASTER_FLOW_EDGES = [
         "symbol": "assertSlotBookable",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       },
       {
         "kind": "API",
@@ -34048,7 +34048,7 @@ export const MASTER_FLOW_EDGES = [
         "symbol": "PATCH",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       }
     ],
     "stateMachineId": "viewing.lifecycle",

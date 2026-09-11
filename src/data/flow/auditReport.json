@@ -78,6 +78,47 @@
     }
   ],
   "ghostNodes": [],
+  "privateEvidenceNodes": [
+    "sys_velocity_radar",
+    "pep",
+    "inquiry_modal",
+    "method_pdf",
+    "sys_gemini_ocr_extractor",
+    "sys_web_researcher",
+    "gate_viewing",
+    "gate_offer",
+    "ai_listing_engine",
+    "sys_ai_council",
+    "sys_ai_arbiter",
+    "scenario_non_refundable_connect",
+    "exc_bot_quarantine",
+    "comp_return_brief_buyer",
+    "comp_return_brief_owner",
+    "comp_return_brief_broker",
+    "rec_topup_connects",
+    "exc_contact_leak_blocked",
+    "rec_redact_contact_faq",
+    "exc_viewing_noshow",
+    "exc_missing_pdf_metric",
+    "rec_owner_manual_override",
+    "exc_ai_deadlock",
+    "rec_manual_approval_queue",
+    "scenario_churned_owner_escrow",
+    "scenario_listing_cap_limit",
+    "scenario_prc_expired_notice",
+    "scenario_broker_lead_collision",
+    "scenario_offmarket_pitch",
+    "scenario_chat_purge",
+    "rec_turnstile_challenge",
+    "terminal_edge_blacklist",
+    "provider_bounty_handshake",
+    "sys_faq_appeal_engine",
+    "exc_sso_domain_mismatch",
+    "rec_sso_idp_reauth",
+    "sys_ephemeral_secret_engine",
+    "exc_ephemeral_token_expired",
+    "rec_silent_token_refresh"
+  ],
   "staleEvidenceItems": [],
   "stateMachineTransitions": {
     "implemented": 14,
@@ -142,6 +183,8 @@
       "/api/admin/feature-flags",
       "/api/admin/generate-seo",
       "/api/admin/osint",
+      "/api/admin/pdf-verify",
+      "/api/admin/pending",
       "/api/admin/prc",
       "/api/admin/property",
       "/api/ai/assimilate",
@@ -156,8 +199,9 @@
       "/api/badges/claim",
       "/api/badges",
       "/api/broker/briefing-log",
-      "/api/broker/contributions",
+      "/api/broker/credential",
       "/api/broker/dossier",
+      "/api/broker/recommendations/eligibility",
       "/api/broker/recommendations",
       "/api/broker/recommendations/[id]",
       "/api/calendar/connection",
@@ -172,9 +216,11 @@
       "/api/cron/check-stale-listings",
       "/api/cron/osint-scraper",
       "/api/cron/purge-chat-messages",
+      "/api/cron/purge-contact-messages",
       "/api/cron/recompute-broker-metrics",
       "/api/cron/sweep-pending-requests",
       "/api/dashboard/archive",
+      "/api/dashboard/attention",
       "/api/dashboard/bulk-insert",
       "/api/dashboard/deals/update",
       "/api/dashboard/delete",
@@ -182,6 +228,7 @@
       "/api/dashboard/invite",
       "/api/dashboard/operator/units",
       "/api/dashboard/publish",
+      "/api/dashboard/representation/revoke",
       "/api/dashboard/units/delegate",
       "/api/dashboard/units",
       "/api/dashboard/update",
@@ -196,7 +243,6 @@
       "/api/deals/[id]/messages",
       "/api/deals/[id]/notes",
       "/api/deals/[id]",
-      "/api/deals/[id]/schedule",
       "/api/deals/[id]/slots",
       "/api/deals/[id]/unarchive",
       "/api/faqs/appeal",
@@ -294,7 +340,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 160,
+    "totalCodebaseRoutesDiscovered": 165,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],
@@ -396,7 +442,7 @@
       "/mission-control/prc-audit"
     ],
     "staleReleasedGraphOnlyRoutes": [],
-    "verifiedCodeEvidenceCount": 89,
+    "verifiedCodeEvidenceCount": 90,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
@@ -408,7 +454,7 @@
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 89,
+      "numerator": 90,
       "denominator": 128,
       "percentage": "70%",
       "formula": "verified nodes with existing grounded code evidence / total nodes",
@@ -431,7 +477,6 @@
         "exc_contact_leak_blocked",
         "rec_redact_contact_faq",
         "exc_viewing_noshow",
-        "reschedule_modal",
         "exc_missing_pdf_metric",
         "rec_owner_manual_override",
         "exc_ai_deadlock",
@@ -454,11 +499,11 @@
         "rec_silent_token_refresh"
       ]
     },
-    "routeCoverageScore": {
+    "canonicalRouteCoverageScore": {
       "numerator": 15,
       "denominator": 15,
       "percentage": "100%",
-      "formula": "mapped canonical product routes / total canonical product routes",
+      "formula": "mapped canonical product routes / total canonical product routes (curated list — NOT whole-repo coverage)",
       "failingItems": []
     },
     "workflowIntegrityScore": {
@@ -497,15 +542,15 @@
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 89,
-      "denominator": 89,
+      "numerator": 90,
+      "denominator": 90,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
       "percentage": "92.5%",
-      "formula": "weighted sum: (evidence * 0.25) + (route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
+      "formula": "weighted sum: (evidence * 0.25) + (canonical-route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
         "unmappedRoutes": 0,

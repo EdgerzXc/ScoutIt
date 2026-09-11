@@ -17021,7 +17021,7 @@
       },
       {
         "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -17042,7 +17042,7 @@
           },
           {
             "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+            "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -17100,7 +17100,7 @@
       },
       {
         "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -17148,7 +17148,7 @@
       },
       {
         "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -17169,7 +17169,7 @@
           },
           {
             "kind": "SCOUTIT_BRAIN",
-            "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+            "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
             "provenance": "EXTRACTED",
             "confidence": 1
           }
@@ -18016,19 +18016,25 @@
       "PROVIDER"
     ],
     "securityClassification": "AUTHENTICATED",
-    "status": "PARTIAL",
+    "status": "VERIFIED",
     "productStatus": "APPROVED",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
     "releaseStatus": "LIMITED_LIVE",
-    "purpose": "Existing chat and booking controls can propose another slot; a dedicated persisted reschedule lifecycle is not implemented.",
-    "description": "The current UI supports appointment coordination, but there is no RescheduleModal component or RESCHEDULE_PENDING status.",
+    "purpose": "Move an existing viewing through the host's verified live slots while preserving the appointment, Meet room, CRM timeline, and deal-room context.",
+    "description": "Either appointment party can choose a new live slot in ChatBox. PATCH rechecks availability, updates the same viewing_appointments row, moves its Google event best-effort, and returns the viewing to pending for host confirmation.",
     "available_actions": [
-      "Use existing booking controls to propose another slot",
-      "Coordinate the change in private chat"
+      "Load the host's current available slots",
+      "Select a verified replacement time",
+      "Update the existing appointment",
+      "Return the viewing to pending host confirmation",
+      "Reflect the same row in ChatBox, CRM, Calendar, and the deal timeline"
     ],
     "entry_conditions": [
-      "Active deal room session"
+      "Active deal room session",
+      "Caller is the appointment host or guest",
+      "Viewing status is pending or confirmed",
+      "Replacement slot passes the canonical availability gate"
     ],
     "source_type": "MASTER_FLOW_GRAPH",
     "sourceType": "MASTER_FLOW_GRAPH",
@@ -18039,7 +18045,7 @@
         "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       },
       {
         "kind": "COMPONENT",
@@ -18047,13 +18053,21 @@
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       }
     ],
     "claims": [
       {
         "id": "claim_reschedule_modal_behavior",
-        "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
+        "text": "ChatBox rescheduling selects a verified host slot and PATCHes the existing viewing appointment; the row returns to pending and remains the shared source for CRM, Calendar, Google-event reconciliation, and the deal timeline.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -18083,8 +18097,70 @@
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.1.0",
     "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
+    "last_verified_at": "2026-08-29",
+    "lastVerifiedAt": "2026-08-29"
+  },
+  {
+    "chunk_id": "rec_deal.viewing.reschedule",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "deal.viewing.reschedule",
+    "canonicalId": "deal.viewing.reschedule",
+    "title": "Recovery Protocol: Viewing Reschedule Coordination",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "SEEKER",
+      "BROKER",
+      "PROVIDER"
+    ],
+    "securityClassification": "AUTHENTICATED",
+    "exceptions": [
+      "Replacement slot is no longer available",
+      "Calendar busy state cannot be verified",
+      "Caller is not an appointment party",
+      "Conversation or appointment is closed"
+    ],
+    "recovery_mechanisms": [
+      "Reload live slots and choose another time",
+      "Retain the existing appointment and Google identifiers when an external move fails"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/BookingModal.js",
+        "symbol": "BookingModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/ChatBox.js",
+        "symbol": "ChatBox",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
+      }
+    ],
+    "graph_version": "2.1.0",
+    "graphVersion": "2.1.0",
+    "last_verified_at": "2026-08-29",
+    "lastVerifiedAt": "2026-08-29"
   },
   {
     "chunk_id": "impl_deal.viewing.reschedule",
@@ -18094,9 +18170,9 @@
     "canonicalId": "deal.viewing.reschedule",
     "title": "Implementation Evidence: Viewing Reschedule Coordination",
     "domain": "deal",
-    "status": "PARTIAL",
+    "status": "VERIFIED",
     "productStatus": "APPROVED",
-    "implementationStatus": "PARTIAL",
+    "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
     "releaseStatus": "LIMITED_LIVE",
     "visibility": [
@@ -18106,14 +18182,21 @@
     "securityClassification": "INTERNAL",
     "systems": [
       "src/components/dashboard/BookingModal.js",
-      "src/components/dashboard/ChatBox.js"
+      "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/ViewingWorkspaceCard.js",
+      "src/app/api/viewing-appointments/[id]/route.js",
+      "src/lib/calendar/availabilityService.js"
     ],
     "components": [
       "BookingModal.js",
-      "ChatBox.js"
+      "ChatBox.js",
+      "ViewingWorkspaceCard.js"
     ],
-    "apis": [],
-    "database": "Supabase viewing appointments",
+    "apis": [
+      "GET /api/deals/[id]/slots",
+      "PATCH /api/viewing-appointments/[id]"
+    ],
+    "database": "Supabase viewing_appointments, user_availability, calendar_events, crm_activity_log",
     "evidence": [
       {
         "kind": "COMPONENT",
@@ -18121,7 +18204,7 @@
         "symbol": "BookingModal",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       },
       {
         "kind": "COMPONENT",
@@ -18129,13 +18212,21 @@
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/viewing-appointments/[id]/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       }
     ],
     "claims": [
       {
         "id": "claim_reschedule_modal_behavior",
-        "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
+        "text": "ChatBox rescheduling selects a verified host slot and PATCHes the existing viewing appointment; the row returns to pending and remains the shared source for CRM, Calendar, Google-event reconciliation, and the deal timeline.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -18164,8 +18255,8 @@
     "sourceType": "CODEBASE_EVIDENCE",
     "graph_version": "2.1.0",
     "graphVersion": "2.1.0",
-    "last_verified_at": "2026-08-19",
-    "lastVerifiedAt": "2026-08-19"
+    "last_verified_at": "2026-08-29",
+    "lastVerifiedAt": "2026-08-29"
   },
   {
     "chunk_id": "fact_owner.pdf.exc.missing_metric",
@@ -30024,7 +30115,7 @@
       },
       {
         "kind": "SCOUTIT_BRAIN",
-        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/PRICING_MODEL.md",
+        "path": "_SCOUTIT_BRAIN/06_MONETIZATION/SCOUTIT_PRICING_STRATEGY.md",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -36117,7 +36208,7 @@
         "symbol": "assertSlotBookable",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       },
       {
         "kind": "API",
@@ -36125,7 +36216,7 @@
         "symbol": "PATCH",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "PENDING_A047"
+        "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
       }
     ],
     "graph_version": "2.2.0",

@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "5d59c0eecb401c429858030e7961275e4c748e7e",
+  "dataRevision": "c36b39788cf08b7b06276ce5cfb3f81072d238b4",
   "lastVerifiedAt": "2026-08-19",
-  "generatedAt": "2026-08-29T04:26:19.663Z",
+  "generatedAt": "2026-09-11T08:17:52.388Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "5d59c0eecb401c429858030e7961275e4c748e7e"
+    "commitSha": "c36b39788cf08b7b06276ce5cfb3f81072d238b4"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "5d59c0eecb401c429858030e7961275e4c748e7e"
+    "commitSha": "c36b39788cf08b7b06276ce5cfb3f81072d238b4"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "5d59c0eecb401c429858030e7961275e4c748e7e"
+    "commitSha": "c36b39788cf08b7b06276ce5cfb3f81072d238b4"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -213,8 +213,8 @@
   "stats": {
     "totalNodes": 128,
     "totalEdges": 247,
-    "verifiedNodes": 89,
-    "partialNodes": 10,
+    "verifiedNodes": 90,
+    "partialNodes": 9,
     "plannedNodes": 29,
     "proposedNodes": 0
   },
@@ -226,9 +226,9 @@
   },
   "implementationStats": {
     "notStarted": 29,
-    "partial": 10,
+    "partial": 9,
     "implemented": 0,
-    "verified": 89,
+    "verified": 90,
     "contradicted": 0
   },
   "evidenceStats": {
@@ -14070,35 +14070,55 @@
       "goals": [
         "deal"
       ],
-      "implementationStatus": "PARTIAL",
-      "purpose": "Existing chat and booking controls can propose another slot; a dedicated persisted reschedule lifecycle is not implemented.",
-      "description": "The current UI supports appointment coordination, but there is no RescheduleModal component or RESCHEDULE_PENDING status.",
+      "implementationStatus": "VERIFIED",
+      "purpose": "Move an existing viewing through the host's verified live slots while preserving the appointment, Meet room, CRM timeline, and deal-room context.",
+      "description": "Either appointment party can choose a new live slot in ChatBox. PATCH rechecks availability, updates the same viewing_appointments row, moves its Google event best-effort, and returns the viewing to pending for host confirmation.",
       "actions": [
-        "Use existing booking controls to propose another slot",
-        "Coordinate the change in private chat"
+        "Load the host's current available slots",
+        "Select a verified replacement time",
+        "Update the existing appointment",
+        "Return the viewing to pending host confirmation",
+        "Reflect the same row in ChatBox, CRM, Calendar, and the deal timeline"
       ],
       "conditions": [
-        "Active deal room session"
+        "Active deal room session",
+        "Caller is the appointment host or guest",
+        "Viewing status is pending or confirmed",
+        "Replacement slot passes the canonical availability gate"
       ],
       "systems": [
         "src/components/dashboard/BookingModal.js",
-        "src/components/dashboard/ChatBox.js"
+        "src/components/dashboard/ChatBox.js",
+        "src/components/dashboard/ViewingWorkspaceCard.js",
+        "src/app/api/viewing-appointments/[id]/route.js",
+        "src/lib/calendar/availabilityService.js"
       ],
       "components": [
         "BookingModal.js",
-        "ChatBox.js"
+        "ChatBox.js",
+        "ViewingWorkspaceCard.js"
       ],
-      "apis": [],
+      "apis": [
+        "GET /api/deals/[id]/slots",
+        "PATCH /api/viewing-appointments/[id]"
+      ],
       "dataRefs": [
-        "Existing viewing appointments"
+        "viewing_appointments",
+        "user_availability",
+        "calendar_events",
+        "crm_activity_log"
       ],
-      "database": "Supabase viewing appointments",
+      "database": "Supabase viewing_appointments, user_availability, calendar_events, crm_activity_log",
       "auth": "seeker",
       "exceptions": [
-        "None"
+        "Replacement slot is no longer available",
+        "Calendar busy state cannot be verified",
+        "Caller is not an appointment party",
+        "Conversation or appointment is closed"
       ],
       "recovery": [
-        "Restores deal room to scheduled viewing state"
+        "Reload live slots and choose another time",
+        "Retain the existing appointment and Google identifiers when an external move fails"
       ],
       "evidence": [
         {
@@ -14107,7 +14127,7 @@
           "symbol": "BookingModal",
           "provenance": "EXTRACTED",
           "confidence": 1,
-          "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+          "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
         },
         {
           "kind": "COMPONENT",
@@ -14115,7 +14135,15 @@
           "symbol": "ChatBox",
           "provenance": "EXTRACTED",
           "confidence": 1,
-          "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+          "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
+        },
+        {
+          "kind": "API",
+          "path": "src/app/api/viewing-appointments/[id]/route.js",
+          "symbol": "PATCH",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
         }
       ],
       "brainRefs": [
@@ -14125,7 +14153,7 @@
       ],
       "terminal": false,
       "version": "2.1.0",
-      "lastVerifiedAt": "2026-08-19",
+      "lastVerifiedAt": "2026-08-29",
       "parents": [
         "exc_viewing_noshow"
       ],
@@ -14149,7 +14177,7 @@
       "claims": [
         {
           "id": "claim_reschedule_modal_behavior",
-          "text": "Existing booking and chat controls support coordinating another viewing slot; a dedicated persisted reschedule lifecycle is not implemented.",
+          "text": "ChatBox rescheduling selects a verified host slot and PATCHes the existing viewing appointment; the row returns to pending and remains the shared source for CRM, Calendar, Google-event reconciliation, and the deal timeline.",
           "kind": "PRODUCT_BEHAVIOR",
           "status": "VERIFIED",
           "evidence": [
@@ -34003,7 +34031,7 @@
           "symbol": "assertSlotBookable",
           "provenance": "EXTRACTED",
           "confidence": 1,
-          "commitSha": "PENDING_A047"
+          "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
         },
         {
           "kind": "API",
@@ -34011,7 +34039,7 @@
           "symbol": "PATCH",
           "provenance": "EXTRACTED",
           "confidence": 1,
-          "commitSha": "PENDING_A047"
+          "commitSha": "6314c04489fbee3a30db039f17e9ad1ec61444c2"
         }
       ],
       "stateMachineId": "viewing.lifecycle",

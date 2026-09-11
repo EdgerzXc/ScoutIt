@@ -204,15 +204,9 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     });
   });
 
-  // 12. Checksums Manifest Integrity
-  it("verifies checksums manifest covers index.js and README.md with dataRevision", () => {
-    const checksumsPath = path.resolve("src/data/flow/checksums.json");
-    expect(fs.existsSync(checksumsPath)).toBe(true);
-    const checksumsData = JSON.parse(fs.readFileSync(checksumsPath, "utf8"));
-    expect(checksumsData.dataRevision).toBeDefined();
-    expect(checksumsData.checksums["index.js"]).toBeDefined();
-    expect(checksumsData.checksums["README.md"]).toBeDefined();
-  });
+  // 12. Checksums: flowBundleIntegrity.test.js compares the real hashes and the
+  // bundle against the source (A-139). The presence-only check that stood here
+  // passed while three files were stale.
 
   // 13. Mathematical Coverage Formulas & Bounded Percentages
   it("calculates accurate lifecycle coverage metrics strictly bounded between 0% and 100%", () => {
