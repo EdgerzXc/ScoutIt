@@ -1,7 +1,10 @@
 -- ═════════════════════════════════════════════════════════════════════════════
 -- SCOUTIT MIGRATION PROPOSAL: Connect Wallet Role Scope & Authority Unification
 --
--- STATUS: PROPOSAL ONLY — NOT APPLIED TO LIVE DATABASE
+-- STATUS: APPLIED TO LIVE DATABASE 2026-09-11 — owner-approved, with companion
+--         20260911000001_connect_accounts_and_holds_server_only.sql
+--         (this file never revokes the default browser grants on the two tables
+--         it creates; the companion does)
 -- REVIEWED UNDER: T0-1.0D-CONNECT-LEDGER-ROLE-SCOPE-CORRECTION-4-2026-08-14
 -- ═════════════════════════════════════════════════════════════════════════════
 --

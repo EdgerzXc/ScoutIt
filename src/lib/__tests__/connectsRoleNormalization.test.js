@@ -327,7 +327,8 @@ describe("Connects Role Scope, Schema Gate & Cutover Safety Contract", () => {
 
     it("verifies forward migration proposal enforces pairwise conflict checks and grant conservation", () => {
       const content = fs.readFileSync(migrationPath, "utf-8");
-      expect(content).toContain("STATUS: PROPOSAL ONLY — NOT APPLIED TO LIVE DATABASE");
+      expect(content).toContain("STATUS: APPLIED TO LIVE DATABASE 2026-09-11");
+      expect(content).toContain("20260911000001_connect_accounts_and_holds_server_only.sql");
       expect(content).toContain("T0-1.0D-CONNECT-LEDGER-ROLE-SCOPE-CORRECTION-4-2026-08-14");
 
       // Pairwise checks
