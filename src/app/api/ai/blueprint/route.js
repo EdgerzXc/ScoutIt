@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GEMINI_MODEL } from '@/lib/geminiModel';
+import { generateWithFallback } from '@/lib/geminiModel';
 import { GoogleGenAI, Type } from '@google/genai';
 import { resolveUserId } from '@/lib/serverAuth';
 
@@ -49,8 +49,7 @@ export async function POST(request) {
       Return ONLY a JSON object mapping every raw CSV header (key) to either a Core Schema Key or "details" (value).
     `;
 
-    const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
+    const response = await generateWithFallback(ai, {
         contents: prompt,
         config: {
             responseMimeType: 'application/json',

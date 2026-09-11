@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GEMINI_MODEL } from '@/lib/geminiModel';
+import { generateWithFallback } from '@/lib/geminiModel';
 import { GoogleGenAI, Type } from '@google/genai';
 import { resolveUserId } from '@/lib/serverAuth';
 
@@ -83,8 +83,7 @@ ${JSON.stringify(item, null, 2)}
 
 Return a single JSON object following the ScoutIt Schema exactly.`;
 
-        const response = await ai.models.generateContent({
-          model: GEMINI_MODEL,
+        const response = await generateWithFallback(ai, {
           contents: prompt,
           config: {
             responseMimeType: 'application/json',

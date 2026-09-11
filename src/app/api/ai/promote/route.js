@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { extractFacts, factSpecs, buildPromoPack } from '@/lib/shareBriefing';
 import { SITE_URL } from '@/lib/siteUrl';
-import { GEMINI_MODEL } from '@/lib/geminiModel';
+import { generateWithFallback } from '@/lib/geminiModel';
 import { resolveUserId } from '@/lib/serverAuth';
 import { isPreLaunchFreeMode } from '@/lib/featureFlags';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
@@ -149,8 +149,7 @@ Return a JSON object containing the three string fields: fastPitch, executiveSum
       // the deterministic factual pack instead.
       const AI_TIMEOUT_MS = 20000;
       const response = await Promise.race([
-        ai.models.generateContent({
-          model: GEMINI_MODEL,
+        generateWithFallback(ai, {
           contents: prompt,
           config: {
             responseMimeType: 'application/json',

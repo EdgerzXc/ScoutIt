@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GEMINI_MODEL } from '@/lib/geminiModel';
+import { generateWithFallback } from '@/lib/geminiModel';
 import { GoogleGenAI } from '@google/genai';
 import { resolveUserId } from '@/lib/serverAuth';
 
@@ -63,8 +63,7 @@ Raw Description:
 ${text}
 `;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateWithFallback(ai, {
       contents: `${SEO_OPTIMIZE_PROMPT}\n${contextPrompt}`,
     });
 

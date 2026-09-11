@@ -5,7 +5,7 @@ import Papa from "papaparse";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/adminGuard";
 import { GoogleGenAI, Type } from "@google/genai";
-import { GEMINI_MODEL } from "@/lib/geminiModel";
+import { generateWithFallback } from "@/lib/geminiModel";
 import {
   ingestedArticleSchema,
   articleBlocksSchema,
@@ -140,8 +140,7 @@ async function structureWithGemini(source) {
     ? `CSV DATA (first row is headers):\n${Papa.unparse(source.rows.slice(0, 120))}`
     : source.text.slice(0, 60000);
 
-  const response = await ai.models.generateContent({
-    model: GEMINI_MODEL,
+  const response = await generateWithFallback(ai, {
     contents: `${STRUCTURE_PROMPT}\n\nDocument filename: ${source.name}\n\nRAW DOCUMENT:\n${docText}\n\nReturn one JSON object: {title, category, intelType, city, excerpt, lead, recommendation, blocks}.`,
     config: {
       responseMimeType: "application/json",
