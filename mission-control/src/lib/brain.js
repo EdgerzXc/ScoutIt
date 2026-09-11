@@ -36,6 +36,17 @@ const BASE = "https://generativelanguage.googleapis.com/v1beta";
 // Floats on purpose. Mirrors src/lib/geminiModel.js in the main app.
 const GEN_MODEL = `models/${process.env.GEMINI_MODEL || "gemini-flash-latest"}`;
 
+// A-124 fix 2 — the backup when the main model is busy. Measured 2026-09-11:
+// `gemini-flash-latest` returned 503 "high demand" 3 of 3 times while this one
+// answered on the same key. Same free key, so no new account and nothing leaves
+// Google. It floats for the same reason GEN_MODEL does.
+const FALLBACK_GEN_MODEL = `models/${process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest"}`;
+
+// Worth handing to the backup: the model is busy (429 / 5xx) or retired (404).
+// Not worth it: 400 / 401 / 403 — a bad request or key fails the same way on
+// every model, and trying again only spends the free quota.
+const HAND_OVER_STATUSES = new Set([404, 429, 500, 502, 503, 504]);
+
 // Pinned on purpose. Changing it requires re-embedding every stored chunk and
 // rebuilding the ivfflat index — see A-124.
 //
@@ -140,6 +151,8 @@ export async function embed(text) {
  * model's half of the contract, not the guarantee.
  *
  * @param {{title:string, content:string, citation?:string}[]} contexts
+ * @returns {Promise<{text: string, model: string} | null>} the answer and the
+ *   model that wrote it (the backup when the main model was busy), or null.
  */
 export async function generateAnswer(question, contexts) {
   if (!GEMINI_KEY || !contexts?.length) return null;
@@ -159,8 +172,19 @@ ${sources}
 
 Answer:`;
 
+  // Main model first, then the backup. A Set, so a GEMINI_MODEL override that
+  // equals the backup is not asked twice.
+  for (const model of new Set([GEN_MODEL, FALLBACK_GEN_MODEL])) {
+    const outcome = await askModel(model, prompt);
+    if (outcome.text) return { text: outcome.text, model: model.replace(/^models\//, "") };
+    if (!outcome.handOver) return null;
+  }
+  return null;
+}
+
+async function askModel(model, prompt) {
   try {
-    const res = await fetch(`${BASE}/${GEN_MODEL}:generateContent?key=${GEMINI_KEY}`, {
+    const res = await fetch(`${BASE}/${model}:generateContent?key=${GEMINI_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -169,16 +193,17 @@ Answer:`;
       }),
     });
     if (!res.ok) {
-      console.error("brain.generateAnswer failed:", res.status, await res.text().catch(() => ""));
-      return null;
+      console.error("brain.generateAnswer failed:", model, res.status, await res.text().catch(() => ""));
+      return { text: null, handOver: HAND_OVER_STATUSES.has(res.status) };
     }
     const json = await res.json();
     const parts = json?.candidates?.[0]?.content?.parts;
     const text = parts?.map((p) => p.text).join("").trim();
-    return text || null;
+    // A 200 with no text (empty or blocked) is not an answer; the backup may give one.
+    return { text: text || null, handOver: !text };
   } catch (err) {
-    console.error("brain.generateAnswer error:", err);
-    return null;
+    console.error("brain.generateAnswer error:", model, err);
+    return { text: null, handOver: true };
   }
 }
 

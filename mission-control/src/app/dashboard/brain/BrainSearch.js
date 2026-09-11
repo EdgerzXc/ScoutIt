@@ -92,6 +92,9 @@ export default function BrainSearch({ aiAvailable }) {
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-[#E8AE3C]" />
             <span className="text-[12px] uppercase tracking-wide text-[#E8AE3C]">Brain answer</span>
+            {state.answeredBy && (
+              <span className="text-[12px] text-white/60">· written by {state.answeredBy}</span>
+            )}
           </div>
           <p className="text-sm text-white/85 whitespace-pre-wrap leading-relaxed">{state.answer}</p>
           {state.sources?.some((s) => s.citation?.isStale) && (

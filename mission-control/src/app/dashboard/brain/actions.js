@@ -178,10 +178,13 @@ export async function askBrain(_prev, formData) {
       };
     });
 
-    const answer = await generateAnswer(question, contexts);
+    // A-124 fix 2: the answer carries the model that wrote it, so an answer
+    // from the backup model is labelled as one.
+    const generated = await generateAnswer(question, contexts);
 
     return {
-      answer,
+      answer: generated?.text ?? null,
+      answeredBy: generated?.model ?? null,
       mode,
       aiAvailable: brainHasAI(),
       sources: chunks.map((c) => {
