@@ -1,9 +1,47 @@
+import { MARK_PATH, MARK_VIEWBOX } from '@/components/brand/markPath';
+
 function cssColorTuple(variableName, fallback) {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
   const match = /^#([0-9a-f]{6})$/i.exec(raw);
   if (!match) return fallback;
 
   return [0, 2, 4].map((offset) => Number.parseInt(match[1].slice(offset, offset + 2), 16));
+}
+
+/**
+ * The mark as a PNG data URL, for jsPDF's addImage.
+ *
+ * jsPDF cannot draw SVG paths without a plugin, and bundling a pre-rendered
+ * PNG would ship ~5kb of base64 to every visitor for a button most never
+ * press. Rasterising here costs nothing until the download is actually
+ * requested, and renders at 4x so the mark stays crisp when the PDF is
+ * zoomed or printed.
+ *
+ * Returns null rather than throwing: a tear sheet without the mark is still a
+ * usable tear sheet, so a canvas failure must not lose the user their download.
+ */
+async function renderMarkPng(fill, size = 256) {
+  try {
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MARK_VIEWBOX}">` +
+      `<path fill="${fill}" fill-rule="evenodd" d="${MARK_PATH}"/></svg>`;
+    const url = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    canvas.getContext('2d').drawImage(image, 0, 0, size, size);
+    return canvas.toDataURL('image/png');
+  } catch {
+    return null;
+  }
 }
 
 function safeFilenamePart(value) {
@@ -47,11 +85,16 @@ export async function downloadPropertyTearSheet({ element, title }) {
   pdf.setLineWidth(1.25);
   pdf.line(52, 56, pageWidth - 52, 56);
 
+  const markPng = await renderMarkPng(`rgb(${accent.join(",")})`);
+  const MARK_PT = 26;
+  if (markPng) pdf.addImage(markPng, 'PNG', 52, 20, MARK_PT, MARK_PT);
+  const eyebrowX = markPng ? 52 + MARK_PT + 12 : 52;
+
   pdf.setFont('courier', 'bold');
   pdf.setFontSize(9);
   pdf.setCharSpace(2.2);
   pdf.setTextColor(...accent);
-  pdf.text(briefLabel.toUpperCase(), 52, 42);
+  pdf.text(briefLabel.toUpperCase(), eyebrowX, 42);
 
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(32);

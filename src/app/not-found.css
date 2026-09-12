@@ -85,6 +85,13 @@
   padding: 32px 24px;
 }
 
+.nf-mark {
+  color: var(--accent, #E8AE3C);
+  display: block;
+  margin: 0 auto 18px;
+  opacity: 0.9;
+}
+
 .nf-layer-label {
   font-size: 12px;
   letter-spacing: 0.12em;

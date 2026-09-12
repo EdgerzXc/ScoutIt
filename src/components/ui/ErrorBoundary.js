@@ -3,6 +3,7 @@
 import { Component } from "react";
 import Link from "next/link";
 import { reportError } from "@/lib/reportError";
+import ScoutItMark from "@/components/brand/ScoutItMark";
 
 /**
  * Global crash catcher. If any child component throws during render, this shows a
@@ -34,7 +35,7 @@ export default class ErrorBoundary extends Component {
 
     return (
       <div className="min-h-screen bg-background text-text-primary flex flex-col items-center justify-center px-6 text-center">
-        <div className="text-5xl mb-6">🛸</div>
+        <ScoutItMark size={64} className="text-gold-accent mb-6" />
         <h1 className="font-headline-editorial text-3xl md:text-4xl text-on-surface mb-3">
           Something went sideways.
         </h1>

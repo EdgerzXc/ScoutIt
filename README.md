@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="src/app/icon.svg" width="72" height="72" alt="ScoutIt">
+</p>
+
 # ScoutIt
 
 ScoutIt is a premium Philippine spatial-commerce platform for residential,

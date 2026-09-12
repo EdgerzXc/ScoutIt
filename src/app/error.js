@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import ScoutItMark from "@/components/brand/ScoutItMark";
 import { sanitizeError, errorReference } from "@/lib/sanitizeError";
 import { reportError } from "@/lib/reportError";
 
@@ -35,6 +36,7 @@ export default function GlobalError({ error, reset }) {
   return (
     <div className="err-root">
       <div className="err-card" role="alert">
+        <ScoutItMark size={44} className="err-mark" />
         <div className="err-eyebrow">Signal Interrupted</div>
 
         <h1 className="err-title">Unable to load this section</h1>
@@ -70,6 +72,12 @@ export default function GlobalError({ error, reset }) {
           border-radius: 4px;
           padding: 28px 20px;
           box-shadow: 0 0 40px rgba(232, 174, 60, 0.06);
+        }
+        .err-mark {
+          color: var(--accent, #E8AE3C);
+          display: block;
+          margin: 0 auto 16px;
+          opacity: 0.9;
         }
         .err-eyebrow {
           font-family: var(--font-mono, 'Courier New', monospace);

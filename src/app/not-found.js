@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ScoutItMark from "@/components/brand/ScoutItMark";
 import "./not-found.css";
 
 export const metadata = {
@@ -22,6 +23,7 @@ export default function NotFound() {
       </div>
 
       <div className="nf-content">
+        <ScoutItMark size={52} className="nf-mark" />
         <span className="nf-layer-label">LAYER ∞ // UNCHARTED SPACE</span>
         <h1 className="nf-title">Signal Lost</h1>
         <p className="nf-sub">

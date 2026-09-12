@@ -1,5 +1,7 @@
 "use client";
 
+import { MARK_PATH, MARK_VIEWBOX } from "@/components/brand/markPath";
+
 export default function GlobalError({ error, reset }) {
   return (
     <html lang="en">
@@ -29,6 +31,16 @@ export default function GlobalError({ error, reset }) {
             boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
           }}
         >
+          <svg
+            viewBox={MARK_VIEWBOX}
+            width="48"
+            height="48"
+            role="img"
+            aria-label="ScoutIt"
+            style={{ display: "block", marginBottom: "18px", opacity: 0.9 }}
+          >
+            <path fill="#E8AE3C" fillRule="evenodd" d={MARK_PATH} />
+          </svg>
           <div
             style={{
               fontSize: "12px",
