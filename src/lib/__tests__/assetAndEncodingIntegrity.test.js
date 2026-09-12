@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve, extname } from "node:path";
 import { describe, expect, it } from "vitest";
+import manifest from "@/app/manifest";
 
 const ROOT = process.cwd();
 
@@ -78,11 +79,25 @@ describe("A-118 referenced public assets exist", () => {
     }
   });
 
-  it("structured data asserts no logo while there is no file to point at", () => {
-    // Standing Rule 3 applied to a URL: a logo resolving to nothing is worse
-    // than no logo. The field returns when A-109's mark ships.
+  it("A-109's Organization logo and every manifest icon resolve to shipped assets", () => {
     const jsonLd = stripComments(readFileSync(resolve(ROOT, "src/components/seo/JsonLd.js"), "utf8"));
-    expect(jsonLd).not.toMatch(/^\s*logo:/m);
+    expect(jsonLd).toContain('logo: `${url}/icon.svg`');
+
+    const specialAppAssets = new Map([
+      ["/icon.svg", "src/app/icon.svg"],
+    ]);
+    const iconAsset = (src) => specialAppAssets.get(src) || `public${src}`;
+    const icons = manifest().icons;
+
+    expect(icons.length).toBeGreaterThan(0);
+    for (const icon of icons) {
+      expect(icon.src).toMatch(/^\//);
+      expect(existsSync(resolve(ROOT, iconAsset(icon.src))), `${icon.src} resolves`).toBe(true);
+    }
+
+    for (const metadataAsset of ["src/app/apple-icon.png", "src/app/favicon.ico"]) {
+      expect(existsSync(resolve(ROOT, metadataAsset)), `${metadataAsset} ships`).toBe(true);
+    }
   });
 });
 

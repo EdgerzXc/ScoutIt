@@ -44,16 +44,10 @@ export default function JsonLd() {
     // aerospace/satellite "space intelligence" in a single word.
     alternateName: ["ScoutIt Philippines", "ScoutIt Space Intelligence"],
     url: url,
-    // A-118: `logo` pointed at /assets/scoutit_logo.png, which does not exist —
-    // `public/assets/` holds one file and it is not this. Google was being told
-    // the organisation's logo lives at a 404 on every page of the site.
-    //
-    // The field is REMOVED rather than repointed. Structured data is a claim
-    // about the entity, and Standing Rule 3 applies to a URL exactly as it does
-    // to a number: a logo that resolves to nothing is worse than no logo, and
-    // substituting the 1200x630 OG banner would assert a wrong-shaped image as
-    // the mark. The real mark is still being decided with the owner under A-109;
-    // `logo` returns when there is a file to point it at, and not before.
+    // A-109: this is the same square SIT mark served by Next's app-icon route.
+    // Keep it aligned with manifest.js; the asset contract fails if either URL
+    // stops resolving to the checked-in source file.
+    logo: `${url}/icon.svg`,
 
     // Matches the positioning already landing in the index, rather than the
     // earlier "real estate directory" framing that /about explicitly rejects.
