@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const read = (file) => readFileSync(resolve(process.cwd(), file), "utf8");
 
 const SHARED_CONSUMERS = [
-  "src/app/page.js",
+  "src/app/HomeClient.js",
   "src/app/enterprise/page.js",
   "src/app/transit/page.js",
   "src/app/property/[id]/brokers/BrokersClient.js",

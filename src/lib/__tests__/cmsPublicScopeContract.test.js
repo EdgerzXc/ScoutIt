@@ -11,7 +11,7 @@ const publicCatalog = read("src/lib/cms/publicCatalog.js");
 // checked against every gated field name before the switch; if any of them
 // starts reading premium data, the cached copy would be missing it.
 const PUBLIC_SCOPE_CALLERS = [
-  "src/app/page.js",
+  "src/app/HomeClient.js",
   "src/app/discover/DiscoverClient.js",
   "src/app/intel/page.js",
   "src/app/property/DirectoryClient.js",

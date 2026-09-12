@@ -34,7 +34,7 @@ describe("A-020 public Master Flow guide adapter", () => {
 
   it("grounds every public target in the shipped UI", () => {
     const files = [
-      "src/app/page.js",
+      "src/app/HomeClient.js",
       "src/app/discover/DiscoverClient.js",
       "src/app/property/DirectoryClient.js",
       "src/components/dashboard/OwnerMode.js",

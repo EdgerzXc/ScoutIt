@@ -90,7 +90,7 @@ export const BASELINE_HEX_FILES = Object.freeze([
   "src/app/global-error.js",
   "src/app/intel/page.js",
   "src/app/opengraph-image.js",
-  "src/app/page.js",
+  "src/app/HomeClient.js",
   "src/app/profile/page.js",
   "src/app/profile/[username]/page.js",
   "src/app/property/DirectoryClient.js",
