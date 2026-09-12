@@ -3,6 +3,7 @@ import { CONTACT_RETENTION_DAYS } from "@/lib/contactRetention";
 import { CURRENT_TERMS_EFFECTIVE_DATE, CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 export const metadata = {
+  alternates: { canonical: "/privacy" },
   title: "Privacy Policy",
   description:
     "How ScoutIt currently collects, uses, retains, and protects data during the invited pilot.",

@@ -2,6 +2,7 @@ import LegalDoc from "@/components/legal/LegalDoc";
 import { CURRENT_TERMS_EFFECTIVE_DATE, CURRENT_TERMS_VERSION } from "@/lib/legalVersions";
 
 export const metadata = {
+  alternates: { canonical: "/terms" },
   title: "Terms of Service",
   description:
     "The terms of service for ScoutIt — property and space intelligence across the Philippines. Intelligence first. Transactions never.",

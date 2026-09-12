@@ -10,6 +10,7 @@ import "./discover.css";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
+  alternates: { canonical: "/discover" },
   title: "Discover",
   description:
     "Browse intelligent property briefings across major Philippine hubs. Filter by city and structural specifications.",

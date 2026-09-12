@@ -2,6 +2,7 @@ import ContactClient from "./ContactClient";
 import "./contact.css";
 
 export const metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact · ScoutIt",
   description:
     "Reach the ScoutIt team. Questions about a listing, joining as a broker or provider, or anything else about the platform.",
