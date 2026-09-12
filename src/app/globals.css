@@ -2496,6 +2496,10 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
     flex: 0 0 auto;
     gap: 6px;
   }
+  /* The compact header already runs a back button, brand, centre slot and nav
+     inside 52px at 4px gaps. The mark is the only piece carrying nothing the
+     wordmark doesn't, so it is the one that gives up the space. */
+  .global-header .header-brand > span:first-child { display: none; }
   .header-center {
     flex: 1 1 0%;
     max-width: none;

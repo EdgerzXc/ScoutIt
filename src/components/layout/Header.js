@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
+import ScoutItMark from "@/components/brand/ScoutItMark";
 import AmbientRail from "@/components/layout/ambient/AmbientRail";
 import { menuGroups } from "@/lib/navigationManifest";
 
@@ -155,7 +156,7 @@ export default function Header({ ambientContext = null }) {
           <span className="header-back-label">Back</span>
         </button>
 
-        <ScoutItWordmark href="/" className="header-brand" />
+        <ScoutItWordmark href="/" className="header-brand" leading={<ScoutItMark />} />
       </div>
 
       <div className="header-center">
@@ -313,22 +314,6 @@ export default function Header({ ambientContext = null }) {
         .header-back-btn:active {
           transform: scale(0.96);
         }
-
-        .header-brand {
-          font-family: var(--font-display);
-          font-weight: 400;
-          font-size: 30px;
-          letter-spacing: 0.12em;
-          text-decoration: none;
-          white-space: nowrap;
-          line-height: 1;
-        }
-
-        .header-brand .brand-scout { color: var(--text-primary); }
-        .header-brand .brand-s,
-        .header-brand .brand-it { color: var(--accent); transition: text-shadow 0.3s ease; }
-        .header-brand:hover .brand-s,
-        .header-brand:hover .brand-it { text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.55); }
 
         .header-nav {
           position: relative;
@@ -540,18 +525,6 @@ export default function Header({ ambientContext = null }) {
           padding-left: 18px;
         }
 
-        .header-dropdown .dropdown-brand {
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--accent);
-          padding: 8px 14px 4px;
-          pointer-events: none;
-          border-bottom: 1px solid var(--border-solid);
-          margin-bottom: 6px;
-        }
-
         /* ── MOBILE OPTIMIZATIONS ── */
         @keyframes headerThreadPass {
           0% { transform: translate3d(-240px,0,0); opacity: 0; }
@@ -565,10 +538,6 @@ export default function Header({ ambientContext = null }) {
             padding: 10px 16px;
           }
 
-          .header-brand {
-            font-size: 24px;
-            letter-spacing: 0.12em;
-          }
 
           .header-back-btn {
             font-size: 12px;
@@ -616,10 +585,6 @@ export default function Header({ ambientContext = null }) {
             gap: 4px;
           }
 
-          .header-brand {
-            font-size: 19px;
-            letter-spacing: 0.12em;
-          }
 
           /* 44px, not 36px. The reduction was an over-correction made while
              fighting the header onto one line: measured at 320, 360 and 390 the
@@ -651,18 +616,12 @@ export default function Header({ ambientContext = null }) {
           }
 
 
-          .header-dropdown .dropdown-brand {
-            font-size: 12px;
-            padding: 8px 12px 4px;
-            margin-bottom: 8px;
-          }
         }
 
         @media (max-width: 480px) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
           .header-left { gap: 4px; }
           .header-back-btn { font-size: 12px; padding: 0 6px; min-height: 44px; letter-spacing: 0.06em; border-radius: 14px; }
-          .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
           .header-menu-btn { width: 44px; height: 44px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
         }

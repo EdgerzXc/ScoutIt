@@ -10,6 +10,34 @@
   white-space: nowrap;
 }
 
+/* Optional mark slot. Sized in `em` so it tracks the wordmark's font-size at
+   every breakpoint instead of needing a width override per media query. The
+   colour lives here rather than in a consumer's `<style jsx>` block: that is
+   scoped, so it cannot reach the SVG inside this component and silently does
+   nothing. */
+.leading {
+  display: inline-flex;
+  align-self: center;
+  flex: none;
+  margin-right: 0.34em;
+  color: var(--accent);
+  transition: filter var(--transition-slow);
+}
+
+.leading svg {
+  display: block;
+  width: 0.95em;
+  height: 0.95em;
+}
+
+.link:focus-visible .leading {
+  filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.5));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leading { transition: none; }
+}
+
 .gold,
 .white {
   transition: color var(--transition-slow), text-shadow var(--transition-slow);
@@ -40,6 +68,10 @@
   .link:hover .gold {
     color: var(--accent-bright);
     text-shadow: 0 0 14px rgba(var(--accent-bright-rgb), 0.42);
+  }
+
+  .link:hover .leading {
+    filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.5));
   }
 }
 

@@ -12,11 +12,19 @@ function Segments() {
   );
 }
 
-/** One visual and accessibility contract for ScoutIt brand lockups. */
-export default function ScoutItWordmark({ href = null, className = "", children = null }) {
+/**
+ * One visual and accessibility contract for ScoutIt brand lockups.
+ *
+ * `leading` renders before the letterforms, for lockups that pair the mark
+ * with the wordmark. It sits inside the link so the whole lockup is one
+ * target, and it is decorative — the accessible name stays "ScoutIt" alone,
+ * so a screen reader does not announce the brand twice.
+ */
+export default function ScoutItWordmark({ href = null, className = "", children = null, leading = null }) {
   if (href) {
     return (
       <Link href={href} className={`${styles.mark} ${styles.link} ${className}`.trim()} aria-label="ScoutIt" data-scoutit-wordmark>
+        {leading ? <span className={styles.leading}>{leading}</span> : null}
         <Segments />
         {children}
       </Link>
@@ -25,6 +33,7 @@ export default function ScoutItWordmark({ href = null, className = "", children 
 
   return (
     <span className={`${styles.mark} ${className}`.trim()} role="img" aria-label="ScoutIt" data-scoutit-wordmark>
+      {leading ? <span className={styles.leading}>{leading}</span> : null}
       <Segments />
       {children}
     </span>

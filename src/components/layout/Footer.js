@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
+import ScoutItMark from "@/components/brand/ScoutItMark";
 
 // ═══════════════════════════════════════════════════════════════
 // SOCIAL LINKS — icons kept, URLs deliberately empty.
@@ -60,7 +61,7 @@ export default function Footer() {
     <footer className="global-footer">
       <div className="footer-container">
         <div className="footer-branding">
-          <ScoutItWordmark href="/" className="footer-brand" />
+          <ScoutItWordmark href="/" className="footer-brand" leading={<ScoutItMark />} />
           <p className="footer-tagline">
             Space intelligence for the Philippines. Clear, structured property briefings, spatial signals, and direct connections across homes, offices, venues, and hospitality spaces.
           </p>
