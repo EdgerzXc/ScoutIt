@@ -2439,6 +2439,60 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
 }
 
 
+/* ─────────────────────────────────────────────────────────────────────────
+   HEADER BRAND LOCKUP
+
+   These live here rather than in Header.js's `<style jsx>` because styled-jsx
+   only stamps its scope class onto DOM elements it can see. `header-brand`
+   and `dropdown-brand` are passed as a className INTO <ScoutItWordmark />, so
+   the element never received the hash and every rule compiled to
+   `.header-brand.jsx-xxxx` matched nothing. The header wordmark had been
+   rendering at an inherited 16px instead of 30px, with no letter-spacing -
+   and the mark, which sizes in `em`, shrank with it to 15px.
+
+   Scoped under `.global-header` / `.header-dropdown` so they outrank the
+   `font-size: inherit` on the wordmark's own CSS module regardless of which
+   stylesheet the bundler emits first.
+
+   Colour and hover are deliberately not repeated here: ScoutItWordmark.module
+   .css owns them, and its hover sits inside the `(hover: hover)` capability
+   guard A-074 requires.
+   ───────────────────────────────────────────────────────────────────────── */
+.global-header .header-brand {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.header-dropdown .dropdown-brand {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 8px 14px 4px;
+  pointer-events: none;
+  border-bottom: 1px solid var(--border-solid);
+  margin-bottom: 6px;
+}
+
+@media (max-width: 768px) {
+  .global-header .header-brand { font-size: 24px; letter-spacing: 0.12em; }
+}
+
+@media (max-width: 640px) {
+  .global-header .header-brand { font-size: 19px; letter-spacing: 0.12em; }
+}
+
+@media (max-width: 480px) {
+  .global-header .header-brand { font-size: 16px; margin: 0; letter-spacing: 1px; }
+  .header-dropdown .dropdown-brand { font-size: 12px; padding: 8px 12px 4px; margin-bottom: 8px; }
+}
+
 .header-left {
   display: flex;
   align-items: center;

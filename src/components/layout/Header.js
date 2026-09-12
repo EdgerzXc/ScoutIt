@@ -266,17 +266,25 @@ export default function Header({ ambientContext = null }) {
         .header-gold-thread::before { content: ""; position: absolute; inset: 0; height: 1px; background: linear-gradient(90deg, transparent 4%, rgba(var(--accent-rgb),.14) 24%, rgba(var(--accent-rgb),.32) 50%, rgba(var(--accent-rgb),.14) 76%, transparent 96%); }
         .header-gold-thread span { position: absolute; top: 0; left: 0; width: 220px; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.26), var(--accent-bright), rgba(var(--accent-rgb),.26), transparent); filter: drop-shadow(0 0 4px rgba(var(--accent-rgb),.42)); animation: headerThreadPass 1.4s var(--ease-out-custom) 180ms both; }
 
+        /* The brand sizes to its content and never shrinks. It used to be
+           flex:1 of a 1:2:1 split with min-width:0, which capped it at 25% of
+           the bar - 172px at a 783px viewport. The lockup needs 258px, and
+           because it is white-space:nowrap it overflowed into the centre slot
+           rather than shrinking. That cap is why the wordmark could never be
+           shown at its designed size. */
         .header-left {
           display: flex;
           align-items: center;
           gap: 20px;
-          flex: 1;
-          min-width: 0;
+          flex: 0 0 auto;
         }
 
+        /* Takes whatever is left and gives way first: it is a decorative
+           ambient rail with its own 70px floor, so it is the right thing to
+           squeeze, not the brand. */
         .header-center {
           position: relative;
-          flex: 2;
+          flex: 1 1 0%;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -315,14 +323,14 @@ export default function Header({ ambientContext = null }) {
           transform: scale(0.96);
         }
 
+        /* Measured at 88px of buttons; flex:1 was reserving 172. */
         .header-nav {
           position: relative;
           display: flex;
           align-items: center;
           gap: 10px;
-          flex: 1;
+          flex: 0 0 auto;
           justify-content: flex-end;
-          min-width: 0;
         }
 
         .header-eye-btn {
