@@ -122,9 +122,23 @@ function hashTags(f) {
   return `#ScoutIt ${catTag} ${locTag} #RealEstatePH`.replace(/\s+/g, " ").trim();
 }
 
+// ── X / Twitter length budget ──────────────────────────────────────────
+// X replaces every URL with a t.co wrapper, so a link always costs 23
+// characters no matter how long it really is. Measuring raw `.length`
+// over-counts our UTM-tagged URLs by ~80 and would shorten copy that
+// already fits.
+export const X_LIMIT = 280;
+const X_URL_WEIGHT = 23;
+
+export function xLength(text, url) {
+  const raw = String(text || "");
+  if (!url || !raw.includes(url)) return raw.length;
+  return raw.length - String(url).length + X_URL_WEIGHT;
+}
+
 // The structured "Market Intelligence Briefing" text used by every Share
 // button (native share sheet + ShareModal). 100% factual.
-export function buildShareText(property, url) {
+function buildBriefingText(property, url) {
   const f = extractFacts(property);
   const specs = factSpecs(f);
 
@@ -215,4 +229,53 @@ export function buildPromoPack(property, link) {
   ].join("\n");
 
   return { fastPitch, executiveSummary, editorialHook };
+}
+
+// Progressively shorter shapes, tried in order until one fits the limit.
+// Each one still states only facts the listing carries.
+function buildTightText(property, url, shapes) {
+  const f = extractFacts(property);
+  const specs = factSpecs(f);
+  const locTag = f.location
+    ? "#" + String(f.location).split(",")[0].replace(/[^a-zA-Z0-9]/g, "")
+    : "";
+
+  const head = `${f.title} — ${f.category}`;
+  const specLine = specs.join(" · ");
+
+  const candidates = [
+    // keep location and specs
+    [head, f.location, specLine, "", url, "", `#ScoutIt ${locTag} #RealEstatePH`],
+    // drop specs
+    [head, f.location, "", url, "", `#ScoutIt ${locTag} #RealEstatePH`],
+    // drop location line, keep the tag
+    [head, "", url, "", `#ScoutIt #RealEstatePH`],
+    // last resort: title and link only
+    [head, "", url],
+  ];
+
+  for (const lines of candidates) {
+    const text = lines
+      .filter((l) => l !== undefined && l !== null && l !== false)
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    if (shapes(text) <= X_LIMIT) return text;
+  }
+  return [head, url].join("\n");
+}
+
+/**
+ * Share copy for a channel.
+ *
+ * `limit: "x"` measures with X's t.co rule and falls back through shorter
+ * shapes until the post actually fits. Every other channel keeps the full
+ * briefing unchanged — measured against the live catalogue, all five listings
+ * overflowed X by 40-186 characters, so X was the only channel that needed it.
+ */
+export function buildShareText(property, url, { limit } = {}) {
+  const full = buildBriefingText(property, url);
+  if (limit !== "x") return full;
+  if (xLength(full, url) <= X_LIMIT) return full;
+  return buildTightText(property, url, (t) => xLength(t, url));
 }

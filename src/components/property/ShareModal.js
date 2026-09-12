@@ -178,9 +178,14 @@ export default function ShareModal({
   // Text for a given channel: rebuilt against that channel's attributed URL so
   // the link inside the copy matches the link the platform receives. Without a
   // property object we fall back to the pre-built string the caller passed.
+  // X is the one channel with a hard ceiling. Measured against the live
+  // catalogue, every listing overflowed 280 by 40-186 characters, so the
+  // composer opened with the post button dead and the sender had to hand-cut
+  // the copy. `limit: "x"` measures with X's t.co rule (a link always costs
+  // 23) and steps down to a shorter factual shape only when it has to.
   const textFor = (channelKey) => {
     const url = buildShareUrl(baseUrl, { channel: channelKey, ref });
-    if (property) return buildShareText(property, url);
+    if (property) return buildShareText(property, url, channelKey === "x" ? { limit: "x" } : undefined);
     return shareText || url;
   };
 

@@ -4,6 +4,8 @@ import {
   factSpecs,
   briefingShape,
   buildShareText,
+  xLength,
+  X_LIMIT,
   buildPromoPack,
 } from "../shareBriefing";
 
@@ -189,5 +191,40 @@ describe("shareBriefing — extractFacts field aliasing", () => {
 
   it("does not throw on malformed details JSON", () => {
     expect(() => extractFacts({ details: "{not json" })).not.toThrow();
+  });
+});
+
+describe("shareBriefing - X length budget", () => {
+  // A UTM-tagged property URL is ~105 characters, but X rewrites every link
+  // through t.co, so it always costs 23. Counting raw `.length` would shorten
+  // copy that already fits.
+  const X_URL =
+    "https://www.scoutit.space/property/cyber-sigma-tower-3?utm_source=x&utm_medium=social&utm_campaign=share";
+
+  it("counts a link as 23 characters, not its real length", () => {
+    const text = `head\n${X_URL}`;
+    expect(text.length).toBeGreaterThan(100);
+    expect(xLength(text, X_URL)).toBe("head\n".length + 23);
+  });
+
+  it("keeps the full briefing for every channel except X", () => {
+    const text = buildShareText(FULL_COMMERCIAL, X_URL);
+    expect(text).toContain("MARKET INTELLIGENCE BRIEFING");
+    expect(xLength(text, X_URL)).toBeGreaterThan(X_LIMIT);
+  });
+
+  it("fits X, and still carries only facts the listing has", () => {
+    const text = buildShareText(FULL_COMMERCIAL, X_URL, { limit: "x" });
+    expect(xLength(text, X_URL)).toBeLessThanOrEqual(X_LIMIT);
+    expect(text).toContain("Cyber Sigma Tower 3");
+    expect(text).toContain(X_URL);
+    // the compliance rule survives the shorter shape
+    expect(text).not.toMatch(/1,250,000|25,000|PHP|₱|\$/);
+  });
+
+  it("leaves copy alone when it already fits X", () => {
+    const short = { title: "A", spaceCategory: "Office" };
+    const url = "https://x.test/p";
+    expect(buildShareText(short, url, { limit: "x" })).toBe(buildShareText(short, url));
   });
 });

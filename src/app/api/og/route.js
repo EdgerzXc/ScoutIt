@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import ScoutItImageWordmark from '@/components/brand/ScoutItImageWordmark';
+import ScoutItImageMark from '@/components/brand/ScoutItImageMark';
 
 export const runtime = 'edge';
 
@@ -59,6 +60,8 @@ export async function GET(request) {
                 marginBottom: '20px',
               }}
             >
+              <ScoutItImageMark fill="#E8AE3C" size={34} marginBottom="0" />
+              <div style={{ display: 'flex', width: '12px' }} />
               <ScoutItImageWordmark fontSize={28} fontWeight={700} letterSpacing="0.12em" />
             </div>
 
@@ -141,6 +144,18 @@ export async function GET(request) {
       {
         width: 1200,
         height: 630,
+        headers: {
+          // The card is a pure function of the query string - same params in,
+          // same pixels out - so it is safe to cache hard and there is no
+          // revalidation to do.
+          //
+          // It previously served `max-age=0, must-revalidate`, so every
+          // Facebook, X, LinkedIn and Viber scrape re-rendered a ~1MB PNG from
+          // scratch AND re-fetched the source photo from its origin. A scrape
+          // that times out renders no card at all, which is the whole point of
+          // the image. Cached, the first scrape pays and the rest are free.
+          'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
+        },
       }
     );
   } catch (e) {
