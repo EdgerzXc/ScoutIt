@@ -4,6 +4,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Airtable with no validation, no allowlist, no length caps and no rate limit.
 // It also caught every error and returned { ok: true } regardless, so a total
 // write failure was indistinguishable from a success.
+//
+// A-142 — the Airtable table never existed, so every reaction was lost.
+// Reactions now land in Supabase `property_reactions`, anonymously.
+
+const mocks = vi.hoisted(() => {
+  const insert = vi.fn();
+  const from = vi.fn(() => ({ insert }));
+  return { insert, from, client: { from } };
+});
+
+vi.mock("@/lib/supabaseAdmin", () => ({
+  get supabaseAdmin() {
+    return mocks.client;
+  },
+}));
 
 const { POST, REACTION_TYPES } = await import("@/app/api/reactions/route");
 
@@ -16,6 +31,8 @@ const request = (body, ip) =>
       // Each test gets its own identity so the in-process limiter does not
       // leak state between cases.
       "x-forwarded-for": ip || `198.51.100.${(ipCounter += 1)}`,
+      "user-agent": "vitest-agent",
+      authorization: "Bearer someone-signed-in",
     },
     body: JSON.stringify(body),
   });
@@ -29,55 +46,73 @@ const validBody = (overrides = {}) => ({
 });
 
 describe("/api/reactions", () => {
-  let fetchSpy;
-
   beforeEach(() => {
-    process.env.AIRTABLE_API_KEY = "keyTest";
-    process.env.AIRTABLE_BASE_ID = "appTest";
-    process.env.AIRTABLE_REACTIONS_TABLE_ID = "tblTest";
-    fetchSpy = vi
-      .spyOn(globalThis, "fetch")
-      .mockImplementation(async () => new Response(JSON.stringify({ id: "rec1" }), { status: 200 }));
+    mocks.client = { from: mocks.from };
+    mocks.insert.mockReset().mockResolvedValue({ error: null });
+    mocks.from.mockClear();
   });
 
   afterEach(() => vi.restoreAllMocks());
 
-  it("accepts a well-formed reaction", async () => {
+  it("records a well-formed reaction in property_reactions", async () => {
     const res = await POST(request(validBody()));
 
     expect(res.status).toBe(200);
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(mocks.from).toHaveBeenCalledWith("property_reactions");
+    expect(mocks.insert).toHaveBeenCalledTimes(1);
+  });
+
+  it("stores the reaction anonymously — exactly four fields, no identity", async () => {
+    await POST(request(validBody()));
+
+    const row = mocks.insert.mock.calls[0][0];
+    expect(row).toEqual({
+      property_ref: "rec1234567890",
+      reaction_type: "Save",
+      city: "Taguig",
+      category: "commercial",
+    });
+    expect(JSON.stringify(row)).not.toMatch(/198\.51\.100|vitest-agent|someone-signed-in/);
   });
 
   it("rejects a reaction_type outside the allowlist without writing", async () => {
     const res = await POST(request(validBody({ reaction_type: "arbitrary-string" })));
 
     expect(res.status).toBe(400);
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
   });
 
-  it("rejects an oversized field instead of forwarding it to Airtable", async () => {
+  it("rejects an oversized field instead of writing it", async () => {
     const res = await POST(request(validBody({ city: "x".repeat(5000) })));
 
     expect(res.status).toBe(400);
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
   });
 
   it("rejects a property_id that is not a plausible record reference", async () => {
     const res = await POST(request(validBody({ property_id: { $ne: null } })));
 
     expect(res.status).toBe(400);
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
   });
 
-  it("reports a failed Airtable write instead of claiming success", async () => {
-    fetchSpy.mockResolvedValue(new Response("upstream exploded", { status: 500 }));
+  it("reports a failed write instead of claiming success", async () => {
+    mocks.insert.mockResolvedValue({ error: { code: "42P01", message: "relation missing" } });
 
     const res = await POST(request(validBody()));
     const payload = await res.json();
 
-    expect(res.status).toBeGreaterThanOrEqual(500);
+    expect(res.status).toBe(502);
     expect(payload.ok).not.toBe(true);
+  });
+
+  it("answers 503 when no service client is configured", async () => {
+    mocks.client = null;
+
+    const res = await POST(request(validBody()));
+
+    expect(res.status).toBe(503);
+    expect(mocks.insert).not.toHaveBeenCalled();
   });
 
   it("rate-limits a flood from one identity", async () => {
@@ -90,8 +125,8 @@ describe("/api/reactions", () => {
     expect(results).toContain(429);
   });
 
-  it("does not leak upstream error text to the caller", async () => {
-    fetchSpy.mockResolvedValue(new Response("AIRTABLE_KEY=secret leaked", { status: 500 }));
+  it("does not leak database error text to the caller", async () => {
+    mocks.insert.mockResolvedValue({ error: { code: "XX000", message: "SUPABASE_KEY=secret leaked" } });
 
     const payload = await (await POST(request(validBody()))).json();
 
@@ -99,11 +134,11 @@ describe("/api/reactions", () => {
   });
 });
 
-// The allowlist and the UI are two lists that must stay identical. This test is
-// here because the first draft of the allowlist invented its own vocabulary
+// The allowlist, the UI and the database are three lists that must stay
+// identical. The first draft of the allowlist invented its own vocabulary
 // ("love", "saved") and would have rejected every real reaction the product
 // actually sends. A drift guard is cheaper than that outage.
-describe("the allowlist matches what the UI actually sends", () => {
+describe("the allowlist matches what the UI sends and the database accepts", () => {
   const fs = require("node:fs");
 
   it("accepts every reaction_type defined in ReactionButtons", () => {
@@ -123,5 +158,27 @@ describe("the allowlist matches what the UI actually sends", () => {
 
     expect(match).not.toBeNull();
     expect(REACTION_TYPES).toContain(match[1]);
+  });
+
+  it("the migration's CHECK constraint holds the same four types", () => {
+    const sql = fs.readFileSync("supabase/migrations/20260911000005_property_reactions.sql", "utf8");
+    const check = sql.match(/reaction_type IN \(([^)]*)\)/);
+
+    expect(check).not.toBeNull();
+    const dbTypes = [...check[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+    expect([...dbTypes].sort()).toEqual([...REACTION_TYPES].sort());
+  });
+
+  it("the migration keeps the table server-only and identity-free", () => {
+    const sql = fs
+      .readFileSync("supabase/migrations/20260911000005_property_reactions.sql", "utf8")
+      .replace(/--.*$/gm, "");
+
+    expect(sql).toMatch(/ENABLE ROW LEVEL SECURITY/);
+    expect(sql).toMatch(/REVOKE ALL ON TABLE public\.property_reactions FROM PUBLIC, anon, authenticated/);
+    // The columns, not the table comment (which names what is absent).
+    const columns = sql.slice(sql.indexOf("CREATE TABLE"), sql.indexOf("CREATE INDEX"));
+    expect(columns).toContain("property_ref");
+    expect(columns).not.toMatch(/user|viewer|device|\bip\b|ip_address|agent/i);
   });
 });

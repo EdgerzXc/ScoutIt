@@ -81,7 +81,7 @@ const OwnerListingCard = memo(({
             <div className="bg-surface-alt/50 p-2.5 rounded border border-surface-variant flex items-center justify-center gap-2 relative overflow-hidden">
               <div className="absolute inset-0 bg-gold-accent/5 opacity-50 animate-pulse"></div>
               <span className="animate-spin text-gold-accent text-xs">⚙️</span>
-              <span className="text-[12px] text-text-secondary font-label-caps uppercase tracking-widest z-10">COUNCIL AI IS DRAFTING...</span>
+              <span className="text-[12px] text-text-secondary font-label-caps uppercase tracking-widest z-10">With the ScoutIt team</span>
             </div>
           </div>
         ) : (

@@ -47,7 +47,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       return;
     }
     setIsOptimizing(true);
-    addToast("SEO Council AI is rewriting your description...", "🤖");
+    addToast("Our AI is rewriting your description for search...", "🤖");
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
@@ -380,7 +380,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="text-gold-accent">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
               </div>
-              <h2 className="text-2xl font-headline-editorial text-gold-accent">The AI Council is analyzing your document...</h2>
+              <h2 className="text-2xl font-headline-editorial text-gold-accent">Our AI is reading your document...</h2>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4">

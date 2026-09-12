@@ -548,7 +548,10 @@ export default function OwnerMode() {
     };
 
     const handleJoinQueue = async () => {
-      await addConciergeListing(`[Vault — ScoutIt Team] ${activeListing?.title || "Property"}`);
+      const queued = await addConciergeListing(`[Vault — ScoutIt Team] ${activeListing?.title || "Property"}`);
+      // A-141: addConciergeListing already said what went wrong; do not follow
+      // a failed request with "You're in the queue".
+      if (!queued) return;
       addToast("You're in the queue — our team will reach out to schedule your recording.", "success");
       setVaultBuildOption(null);
       setShowWizard(false);
@@ -1053,9 +1056,9 @@ export default function OwnerMode() {
         <div className="card-atmosphere-gold rounded-lg p-5 mb-8 flex items-start gap-4">
            <span className="text-2xl mt-1">🤖</span>
            <div>
-             <h4 className="font-working-title text-gold-accent text-lg mb-1">AI Drafting in Progress</h4>
+             <h4 className="font-working-title text-gold-accent text-lg mb-1">With the ScoutIt Team</h4>
              <p className="text-sm text-text-secondary leading-relaxed">
-               Your pitch deck <strong className="text-on-surface">{activeListing.details?.source_pdf}</strong> is currently being analyzed. The Council AI is extracting facts and structuring the dossier. This process usually takes 2-5 minutes. We will notify you when it&apos;s ready for your final review.
+               Your request <strong className="text-on-surface">{activeListing.details?.source_pdf}</strong> is in the ScoutIt team&apos;s queue. The team will reach out to you about the next step.
              </p>
            </div>
         </div>

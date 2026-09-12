@@ -864,12 +864,10 @@ export function DashboardProvider({ children }) {
   };
 
   const addConciergeListing = async (fileName) => {
-    addToast("Uploading document securely...", "⏳");
+    // A-141: this is a request to the ScoutIt team (OwnerMode "join the queue"),
+    // not an upload and not an AI run — nothing is uploaded or parsed here, so
+    // nothing below may say so. It returns whether the request was recorded.
     
-    // Simulate upload delay
-    await new Promise(r => setTimeout(r, 1500));
-    addToast("Document uploaded. Initializing AI Draft...", "🤖");
-    await new Promise(r => setTimeout(r, 800));
 
     const title = `Drafting from PDF: ${fileName}`;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -880,14 +878,14 @@ export function DashboardProvider({ children }) {
       type: 'Unknown',
       space_category: 'Unknown',
       slug,
-      location: 'Pending AI Extraction',
+      location: 'Pending',
       pipeline_status: 'ai_drafting',
       details: { source_pdf: fileName }
     }]).select();
 
     if (error || !data) {
-      addToast("Error starting Concierge AI.", "❌");
-      return;
+      addToast("Could not send your request to the ScoutIt team. Please try again.", "❌");
+      return false;
     }
 
     const newDbListing = data[0];
@@ -897,8 +895,8 @@ export function DashboardProvider({ children }) {
       type: 'Unknown',
       title: title,
       desc: '',
-      loc: 'Pending AI Extraction',
-      location: 'Pending AI Extraction',
+      loc: 'Pending',
+      location: 'Pending',
       hasMedia: false,
       mediaLink: null,
       price: null,
@@ -918,14 +916,14 @@ export function DashboardProvider({ children }) {
     };
     
     setListings(prev => [newListing, ...prev]);
-    addToast("Pitch deck sent to Council AI for drafting", "✅");
     addNotification({
-      title: "AI Drafting Started",
-      desc: `Your document '${fileName}' is being parsed. We'll notify you when the draft is ready.`,
+      title: "Request received",
+      desc: `'${fileName}' is in the ScoutIt team's queue. The team will reach out about the next step.`,
       icon: "🤖",
       propertyId: newListing.id,
       notificationType: "property_drafting"
     });
+    return true;
   };
 
   const sendPitch = async (listingId, message) => {

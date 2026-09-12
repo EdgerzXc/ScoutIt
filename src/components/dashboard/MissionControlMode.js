@@ -40,7 +40,7 @@ const STATUS_STYLES = {
   approved: { label: "Approved", textClass: "text-success", bgClass: "bg-success" },
   pending: { label: "Pending", textClass: "text-gold-accent", bgClass: "bg-gold-accent" },
   draft: { label: "Draft", textClass: "text-text-secondary", bgClass: "bg-surface-variant" },
-  ai_drafting: { label: "AI Drafting", textClass: "text-tertiary", bgClass: "bg-tertiary" },
+  ai_drafting: { label: "Team Queue", textClass: "text-tertiary", bgClass: "bg-tertiary" },
 };
 
 function statusStyle(status) {
@@ -1168,7 +1168,7 @@ export default function MissionControlMode() {
                           <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
                             <div className="bg-blue-500 h-full rounded-full w-1/2 animate-pulse" />
                           </div>
-                          <div className="text-[12px] text-text-secondary mt-1">Council AI is composing this dossier</div>
+                          <div className="text-[12px] text-text-secondary mt-1">Queued for the ScoutIt team</div>
                         </div>
                       ))}
                     </div>
