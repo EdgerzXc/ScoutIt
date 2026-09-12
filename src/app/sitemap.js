@@ -1,4 +1,4 @@
-import { fetchProperties } from "@/lib/airtable";
+import { fetchBrokers, fetchIntel, fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
 import { LOCATION_HUB_SLUGS } from "@/lib/locationHubs";
 
@@ -76,5 +76,61 @@ export default async function sitemap() {
     console.error("Sitemap: Failed to fetch property routes from Airtable", error);
   }
 
-  return [...staticRoutes, ...hubRoutes, ...propertyRoutes];
+  // Published intel articles.
+  //
+  // /intel/[article-slug] has existed since the article system shipped and was
+  // never advertised here, so nothing published would have been submitted -
+  // a silent failure that only surfaces the day the first article goes live.
+  //
+  // fetchIntel already filters to Approved_For_Live_Site, so an unapproved
+  // draft cannot reach this list.
+  let intelRoutes = [];
+  try {
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    const baseId = process.env.AIRTABLE_BASE_ID;
+    if (apiKey && baseId) {
+      const articles = await fetchIntel(apiKey, baseId);
+      intelRoutes = articles
+        .filter((a) => a.slug)
+        .map((a) => ({
+          url: `${baseUrl}/intel/${a.slug}`,
+          lastModified: currentDate,
+          changeFrequency: "monthly",
+          priority: 0.7,
+        }));
+    }
+  } catch (error) {
+    console.error("Sitemap: Failed to fetch intel routes from Airtable", error);
+  }
+
+  // Public broker dossiers, addressed by record id the way the page resolves
+  // them (see findPublicBroker).
+  //
+  // ── A4 AGAIN · EXAMPLES ARE NEVER SUBMITTED ────────────────────────────
+  // brokerDossierRobots() emits `index: false` for an example advisor, and a
+  // sitemap entry plus a noindex tag is the exact contradiction the property
+  // block above already paid for: Google crawls the URL anyway to read the
+  // tag, spending budget on a page we have said not to index. All three
+  // brokers are flagged isExample today, so this list is empty until a real
+  // advisor is published - which is the correct behaviour, not a bug.
+  let brokerRoutes = [];
+  try {
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    const baseId = process.env.AIRTABLE_BASE_ID;
+    if (apiKey && baseId) {
+      const brokers = await fetchBrokers(apiKey, baseId);
+      brokerRoutes = brokers
+        .filter((b) => b.id && b.isExample !== true)
+        .map((b) => ({
+          url: `${baseUrl}/brokers/${b.id}`,
+          lastModified: currentDate,
+          changeFrequency: "weekly",
+          priority: 0.7,
+        }));
+    }
+  } catch (error) {
+    console.error("Sitemap: Failed to fetch broker routes from Airtable", error);
+  }
+
+  return [...staticRoutes, ...hubRoutes, ...propertyRoutes, ...intelRoutes, ...brokerRoutes];
 }

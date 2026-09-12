@@ -12,6 +12,10 @@
 /coverage/
 /test-results/
 /playwright-report/
+# Playwright writes debug captures here during a run. Test output, not source -
+# 872K of PNG was sitting untracked. /test-results/ above was already ignored;
+# this directory was simply missed.
+/e2e_tests/screenshots/
 /.lighthouseci/
 /audit_report.json
 /lighthouse-report.json
