@@ -855,66 +855,56 @@
   box-shadow: 0 24px 70px rgba(var(--bg-rgb), 0.9), inset 0 1px 0 rgba(var(--accent-rgb), 0.1);
 }
 
-/* Layer 2 guide: quiet controls, with one clear active stage. */
-.strat-journey {
-  width: min(100% - 40px, 1220px);
-  margin: 8px auto 22px;
-  padding: 17px 18px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: rgba(var(--surface-rgb), 0.82);
-  backdrop-filter: blur(12px);
-}
-.strat-journey-lead {
-  margin: 0 0 13px;
+
+/* The layer is a cinematic entrance. The workspace lives at /stratosphere. */
+.strat-main--entry { gap: 30px; }
+.strat-intro--entry { max-width: 780px; }
+.strat-entry-copy {
+  max-width: 520px;
+  margin: 22px 0 0;
   color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 16px;
+  line-height: 1.55;
 }
-.strat-journey-stages {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7px;
-}
-.strat-journey-stage {
-  min-height: 62px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
+.strat-entry-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: 56px;
+  margin-top: 24px;
+  padding: 0 20px;
   border-radius: 6px;
-  background: rgba(var(--bg-rgb), 0.45);
-  color: var(--text-primary);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 180ms ease, background-color 180ms ease;
-}
-.strat-journey-stage span {
-  display: block;
+  background: var(--accent-bright);
+  color: var(--on-accent);
   font-family: var(--font-mono);
   font-size: 12px;
-  letter-spacing: .06em;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-decoration: none;
   text-transform: uppercase;
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
-.strat-journey-stage small {
-  display: block;
-  margin-top: 5px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1.35;
+.strat-entry-cta:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 4px; }
+.strat-entry-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(var(--accent-rgb), .18); }
+.strat-entry-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: min(100% - 40px, 1120px);
+  margin: 0 auto;
 }
-.strat-journey-stage.is-active {
-  border-color: var(--accent-muted);
-  background: rgba(var(--accent-rgb), 0.09);
+.strat-entry-step {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(var(--surface-rgb), .7);
+  backdrop-filter: blur(12px);
 }
-.strat-journey-stage.is-active span { color: var(--accent-bright); }
-.strat-journey-stage:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
-.strat-journey-empty { margin: 13px 0 0; color: var(--text-secondary); font-size: 13px; }
-@media (max-width: 760px) {
-  .strat-journey-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .strat-journey-stage { min-height: 58px; }
-}
-
-.strat-signal-row.is-returned { background: rgba(var(--accent-rgb), 0.08); }
-
-@media (hover: hover) and (pointer: fine) {
-  .strat-journey-stage:hover { border-color: var(--accent-muted); background: rgba(var(--accent-rgb), 0.09); }
+.strat-entry-step svg { color: var(--accent); }
+.strat-entry-step h2 { margin: 10px 0 5px; font-size: 16px; color: var(--text-primary); }
+.strat-entry-step p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+@media (max-width: 640px) {
+  .strat-entry-steps { grid-template-columns: 1fr; }
+  .strat-entry-step { padding: 15px 17px; }
 }

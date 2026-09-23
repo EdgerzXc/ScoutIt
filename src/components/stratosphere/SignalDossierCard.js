@@ -87,7 +87,7 @@ export default function SignalDossierCard({
     e.stopPropagation();
     if (signal.actionType === "EXPLORE_DATA" && signal.id?.startsWith("pipeline-") && signal.id.slice(9)) {
       const place = new URLSearchParams(window.location.search).get("place");
-      const query = new URLSearchParams({ fromLayer: "1", stage: returnStage, signal: signal.id });
+      const query = new URLSearchParams({ fromStratosphere: "1", view: "radar", stage: returnStage, signal: signal.id });
       if (place) query.set("place", place);
       router.push(`/intel/${encodeURIComponent(signal.id.slice(9))}?${query}`);
       return;

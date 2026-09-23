@@ -113,14 +113,15 @@ export default async function IntelArticlePage({ params, searchParams }) {
     ? sp.fromProperty
     : null;
   const door = typeof sp.door === "string" ? sp.door : null;
-  const fromLayer = !fromProperty && sp.fromLayer === "1";
-  const layerReturn = new URLSearchParams();
-  const layerStage = validJourneyStage(sp.stage);
-  if (layerStage !== "all") layerReturn.set("stage", layerStage);
-  if (typeof sp.place === "string" && sp.place.length <= 80) layerReturn.set("place", sp.place);
-  if (typeof sp.signal === "string" && sp.signal.length <= 120) layerReturn.set("signal", sp.signal);
-  if (sp.view === "descent") layerReturn.set("view", "descent");
-  const layerHref = `/layer/stratosphere${layerReturn.size ? `?${layerReturn}` : ""}`;
+  const fromWorkspace = !fromProperty && (sp.fromStratosphere === "1" || sp.fromLayer === "1");
+  const workspaceReturn = new URLSearchParams();
+  const workspaceStage = validJourneyStage(sp.stage);
+  if (workspaceStage !== "all") workspaceReturn.set("stage", workspaceStage);
+  if (typeof sp.place === "string" && sp.place.length <= 80) workspaceReturn.set("place", sp.place);
+  if (typeof sp.signal === "string" && sp.signal.length <= 120) workspaceReturn.set("signal", sp.signal);
+  if (typeof sp.q === "string" && sp.q.length <= 120) workspaceReturn.set("q", sp.q);
+  if (sp.view === "radar") workspaceReturn.set("view", "radar");
+  const workspaceHref = `/stratosphere${workspaceReturn.size ? `?${workspaceReturn}` : ""}`;
   const article = await getLiveArticle(slug);
 
   if (!article) {
@@ -148,10 +149,10 @@ export default async function IntelArticlePage({ params, searchParams }) {
       ) : null}
 
       <main className="article-main">
-        {fromLayer ? (
-          <nav className="article-layer-return" aria-label="Layer 2 return">
-            <Link href={layerHref}>← Back to your Layer 2 view</Link>
-            <span>Your area and building stage are kept.</span>
+        {fromWorkspace ? (
+          <nav className="article-layer-return" aria-label="Stratosphere return">
+            <Link href={workspaceHref}>← Back to Stratosphere</Link>
+            <span>Your article view and filters are kept.</span>
           </nav>
         ) : null}
         {/* Dynamic Hero Banner */}
@@ -242,7 +243,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
                 </div>
               </GlassPanel>
             ) : null}
-            {fromLayer ? <p className="article-layer-return-end"><Link href={layerHref}>← Return to your Layer 2 view</Link></p> : null}
+            {fromWorkspace ? <p className="article-layer-return-end"><Link href={workspaceHref}>← Return to Stratosphere</Link></p> : null}
           </div>
         </section>
 

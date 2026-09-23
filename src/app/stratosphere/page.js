@@ -1,20 +1,19 @@
 import Header from "@/components/layout/Header";
-import StratosphereTerminal from "@/components/stratosphere/StratosphereTerminal";
+import Footer from "@/components/layout/Footer";
+import StratosphereWorkspace from "@/components/stratosphere/StratosphereWorkspace";
 
 export const metadata = {
-  title: "Stratosphere — Community Spatial Radar | ScoutIt",
-  description:
-    "Spatial intelligence terminal and community demand radar across Metro Manila's commercial and residential landscape.",
+  title: "Stratosphere — Articles & Spatial Radar | ScoutIt",
+  description: "Browse ScoutIt articles and explore sourced building updates by stage and area.",
   alternates: { canonical: "/stratosphere" },
 };
 
 export default function StratospherePage() {
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-white flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans" style={{ background: "var(--bg)", color: "var(--text-primary)" }}>
       <Header />
-      <main className="flex-1 w-full flex flex-col">
-        <StratosphereTerminal initialViewMode="SPATIAL" />
-      </main>
+      <StratosphereWorkspace />
+      <Footer />
     </div>
   );
 }
