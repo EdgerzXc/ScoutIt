@@ -119,7 +119,7 @@ ESSENTIAL — the product does not work without these:
 — scout_did device identifier (localStorage, mirrored to a cookie): a random device id used to keep anonymous telemetry attributable to a device rather than a person. The cookie mirror carries path=/, a lifetime of one year (max-age=31536000), and SameSite=Lax. No name, email, or account id is stored in it.
 
 FUNCTIONAL — remembers choices you made:
-— scoutit_lite_mode, scoutit_simple_mode, scoutit_interactive_mode (localStorage): your display-mode preferences.
+— scoutit_lite_mode, scoutit_simple_mode (localStorage): your display-mode preferences. The optional Interactive homepage simulator is temporary and resets on a new page load.
 — The Ledger (localStorage): your private wishlist and saved spaces, on your device by default per Section 03.
 
 ANALYTICS — only with your consent:

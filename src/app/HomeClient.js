@@ -23,7 +23,6 @@ import Footer from "@/components/layout/Footer";
 import { Building2, Camera, Search, CalendarDays } from "lucide-react";
 import {
   isLiteMode,
-  isInteractiveMode,
   setInteractiveMode,
   INTERACTIVE_MODE_EVENT,
 } from "@/lib/liteMode";
@@ -71,10 +70,15 @@ export default function HomeClient() {
   const ufoTapTimes = useRef([]);
 
   useEffect(() => {
-    setInteractiveModeState(isInteractiveMode());
+    // Every homepage visit starts with the simple black hole, even when an
+    // older browser still has the former saved Interactive preference.
+    setInteractiveMode(false);
     const onToggle = (e) => setInteractiveModeState(!!e.detail?.on);
     window.addEventListener(INTERACTIVE_MODE_EVENT, onToggle);
-    return () => window.removeEventListener(INTERACTIVE_MODE_EVENT, onToggle);
+    return () => {
+      window.removeEventListener(INTERACTIVE_MODE_EVENT, onToggle);
+      setInteractiveMode(false);
+    };
   }, []);
 
   const fireBeam = useCallback((withPower) => {

@@ -84,8 +84,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    // The no-flash scripts below add `lite-mode` / `interactive-mode` /
-    // `simple-mode` to documentElement.classList before React hydrates, so the
+    // The no-flash scripts below add `lite-mode` and `simple-mode` to documentElement.classList before React hydrates, so the
     // client <html> legitimately differs from the server's. This suppresses the
     // warning for THIS element's attributes only.
     <html
@@ -114,17 +113,6 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html:
               "(function(){try{if(localStorage.getItem('scoutit_simple_mode')==='1')document.documentElement.classList.add('simple-mode');}catch(e){}})();",
-          }}
-        />
-
-        {/* A-146: Interactive Mode's no-flash class. The layout comment always
-            claimed three pre-paint scripts; only two existed, so reloading
-            with Interactive on flashed the Balance hero first. Off unless the
-            visitor unlocked it — no heuristic, no inference. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{if(localStorage.getItem('scoutit_interactive_mode')==='1')document.documentElement.classList.add('interactive-mode');}catch(e){}})();",
           }}
         />
       </head>

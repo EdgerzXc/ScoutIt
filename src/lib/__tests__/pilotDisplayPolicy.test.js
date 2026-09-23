@@ -41,9 +41,14 @@ describe("controlled-pilot display policy", () => {
     expect(nav).toContain("Simple Mode");
   });
 
-  it("applies the interactive no-flash class before paint like lite and simple", () => {
+  it("starts each homepage visit with the simple black hole", () => {
     const layout = read("src/app/layout.js");
-    expect(layout).toContain("scoutit_interactive_mode");
-    expect(layout).toContain("interactive-mode");
+    const homepage = read("src/app/HomeClient.js");
+    const mode = read("src/lib/liteMode.js");
+    expect(layout).not.toContain("scoutit_interactive_mode");
+    expect(homepage).toContain("setInteractiveMode(false);");
+    expect(homepage).toContain("<BlackHoleCanvas />");
+    expect(mode).not.toContain("localStorage.setItem(INTERACTIVE_MODE_KEY");
+    expect(mode).toContain("localStorage.removeItem(LEGACY_INTERACTIVE_MODE_KEY)");
   });
 });
