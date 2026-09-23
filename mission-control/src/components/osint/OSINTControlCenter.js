@@ -694,6 +694,7 @@ export default function OSINTControlCenter() {
                   <option value="">Not pipeline — ordinary intel</option>
                   <option value="planned">Planned</option>
                   <option value="construction">Under construction</option>
+                  <option value="completed">Finished</option>
                 </select>
               </label>
               <label className="text-xs font-mono text-white/60 block">

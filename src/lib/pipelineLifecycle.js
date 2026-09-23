@@ -15,6 +15,7 @@ export const LIFECYCLE = {
   PLANNED: "PLANNED",
   CONSTRUCTION: "UNDER CONSTRUCTION",
   OPENING_TODAY: "OPENING TODAY",
+  COMPLETED: "COMPLETED",
 };
 
 // Local calendar day as YYYY-MM-DD. Local, not UTC: "opening today" is
@@ -30,6 +31,7 @@ function normalizeLifecycle(value) {
   const v = String(value || "").trim().toLowerCase().replace(/[_\s]+/g, " ");
   if (v === "planned") return LIFECYCLE.PLANNED;
   if (v === "construction" || v === "under construction") return LIFECYCLE.CONSTRUCTION;
+  if (v === "completed" || v === "finished") return LIFECYCLE.COMPLETED;
   return null;
 }
 
@@ -52,6 +54,7 @@ export function normalizeLifecycleInput(value) {
   if (v === "" || v === "none") return "";
   if (v === "planned") return "planned";
   if (v === "construction" || v === "under construction") return "construction";
+  if (v === "completed" || v === "finished") return "completed";
   return "";
 }
 
@@ -80,11 +83,13 @@ export function normalizeOpeningDate(value) {
 // An opening date of today wins over a stored lifecycle value.
 export function effectiveLifecycle(signal, now = new Date()) {
   if (!signal || typeof signal !== "object") return null;
+  const stored = normalizeLifecycle(signal.lifecycle);
+  if (stored === LIFECYCLE.COMPLETED) return stored;
   const od = openingDay(signal.openingDate);
   if (od && od === todayISO(now)) {
     return LIFECYCLE.OPENING_TODAY;
   }
-  return normalizeLifecycle(signal.lifecycle);
+  return stored;
 }
 
 export function isPipelineSignal(signal, now = new Date()) {
@@ -95,7 +100,7 @@ export function isPipelineSignal(signal, now = new Date()) {
 // means unfiltered — a bad filter value must never hide the feed.
 export function filterByLifecycle(signals, lifecycle) {
   if (!Array.isArray(signals)) return [];
-  if (lifecycle !== LIFECYCLE.PLANNED && lifecycle !== LIFECYCLE.CONSTRUCTION && lifecycle !== LIFECYCLE.OPENING_TODAY) {
+  if (lifecycle !== LIFECYCLE.PLANNED && lifecycle !== LIFECYCLE.CONSTRUCTION && lifecycle !== LIFECYCLE.OPENING_TODAY && lifecycle !== LIFECYCLE.COMPLETED) {
     return signals;
   }
   const now = new Date();
@@ -158,6 +163,7 @@ export function evidenceDepth(signal) {
 // exists — never "soon", never a countdown to nothing. A passed date
 // says the RECORD needs a check, never that the building failed.
 export function timingLine(signal, now = new Date()) {
+  if (effectiveLifecycle(signal, now) === LIFECYCLE.COMPLETED) return "Marked finished";
   const days = daysToOpening(signal, now);
   if (effectiveLifecycle(signal, now) === LIFECYCLE.OPENING_TODAY || days === 0) {
     return "Opens today";
@@ -237,6 +243,8 @@ export function liveIntelToSignals(intelList, now = new Date()) {
       image: item.image || "",
       sourceName: item.sourceName || "",
       sourceUrl: item.sourceUrl || "",
+      lat: item.lat ?? null,
+      lng: item.lng ?? null,
       isSample: false,
     });
   }

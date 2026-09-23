@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Search, Filter, Layers, ListFilter, Compass, Radio, X } from "lucide-react";
 import SpatialSignalRadar from "./SpatialSignalRadar";
 import SignalDossierCard from "./SignalDossierCard";
@@ -11,11 +11,14 @@ import {
   COMMUNITY_SIGNALS,
   filterSignals,
 } from "@/lib/communitySignalsAdapter";
+import { matchesJourneyStage } from "@/lib/layerTwoJourney";
 import "./stratosphere-terminal.css";
 
 export default function StratosphereTerminal({
   initialSignals = COMMUNITY_SIGNALS,
   initialViewMode = "SPATIAL", // 'SPATIAL' | 'SIGNALS'
+  stageFilter = "all",
+  onClearStage = () => {},
 }) {
   const [viewMode, setViewMode] = useState(initialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,18 +33,44 @@ export default function StratosphereTerminal({
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [connectModalSignal, setConnectModalSignal] = useState(null);
 
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 680px)").matches) setViewMode("SIGNALS");
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const place = params.get("place");
+    if (place) setSelectedDistrict(place);
+  }, []);
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("signal");
+    if (wanted) setSelectedSignal(initialSignals.find((signal) => signal.id === wanted) || null);
+  }, [initialSignals]);
+
+  const stageSignals = useMemo(
+    () => initialSignals.filter((signal) => matchesJourneyStage(signal, stageFilter)),
+    [initialSignals, stageFilter]
+  );
+  useEffect(() => {
+    if (!selectedSignal || stageSignals.some((signal) => signal.id === selectedSignal.id)) return;
+    setSelectedSignal(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("signal");
+    window.history.replaceState(null, "", url);
+  }, [selectedSignal, stageSignals]);
+
   // Sync selectedDistrict into filters or vice versa
   const activeDistrict = selectedDistrict || filters.district;
 
   // Filtered signal dataset
   const filteredSignals = useMemo(() => {
-    return filterSignals(initialSignals, {
+    return filterSignals(stageSignals, {
       query: searchQuery,
       signalType: filters.signalType,
       spaceType: filters.spaceType,
       district: activeDistrict,
     });
-  }, [initialSignals, searchQuery, filters, activeDistrict]);
+  }, [stageSignals, searchQuery, filters, activeDistrict]);
 
   const activeFilterCount =
     (filters.signalType ? 1 : 0) +
@@ -51,16 +80,27 @@ export default function StratosphereTerminal({
   const handleSelectDistrict = useCallback((dist) => {
     setSelectedDistrict(dist);
     setFilters((prev) => ({ ...prev, district: dist }));
+    const url = new URL(window.location.href);
+    if (dist) url.searchParams.set("place", dist);
+    else url.searchParams.delete("place");
+    window.history.replaceState(null, "", url);
   }, []);
 
   const handleResetFilters = useCallback(() => {
     setFilters({ signalType: null, spaceType: null, district: null });
     setSelectedDistrict(null);
     setSearchQuery("");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("place");
+    window.history.replaceState(null, "", url);
   }, []);
 
   const handleSelectSignal = useCallback((signal) => {
     setSelectedSignal(signal);
+    const url = new URL(window.location.href);
+    if (signal?.id) url.searchParams.set("signal", signal.id);
+    else url.searchParams.delete("signal");
+    window.history.replaceState(null, "", url);
   }, []);
 
   const handleHoverSignal = useCallback((id) => {
@@ -72,7 +112,7 @@ export default function StratosphereTerminal({
   }, []);
 
   return (
-    <div className="st-terminal" role="region" aria-label="Stratosphere Spatial Radar Terminal">
+    <div className={`st-terminal${viewMode === "SIGNALS" ? " st-terminal--feed" : ""}`} role="region" aria-label="Stratosphere Spatial Radar Terminal">
       {/* ── TOP CONTROL BAR ── */}
       <header className="st-control-bar">
         <div className="st-search-cluster">
@@ -140,7 +180,7 @@ export default function StratosphereTerminal({
       <DistrictIntelligenceStrip
         selectedDistrict={activeDistrict}
         onSelectDistrict={handleSelectDistrict}
-        signals={initialSignals}
+        signals={stageSignals}
       />
 
       {/* ── MAIN WORKSPACE ── */}
@@ -149,7 +189,7 @@ export default function StratosphereTerminal({
         {viewMode === "SPATIAL" && (
           <section className="st-radar-pane" aria-label="3D Metro Manila Spatial Signal Radar">
             <SpatialSignalRadar
-              allSignals={initialSignals}
+              allSignals={stageSignals}
               filteredSignals={filteredSignals}
               selectedSignal={selectedSignal}
               hoveredSignalId={hoveredSignalId}
@@ -186,12 +226,12 @@ export default function StratosphereTerminal({
             {filteredSignals.length === 0 ? (
               <div className="st-empty-state">
                 <Compass size={28} className="st-empty-icon" aria-hidden="true" />
-                <h4 className="st-empty-title">Zero Signals in Sector</h4>
+                <h4 className="st-empty-title">No updates for this selection</h4>
                 <p className="st-empty-desc">
-                  No active community signals match your query parameters. Try broadening your search or resetting district filters.
+                  {stageFilter === "all" ? "Try another area or clear your search and filters." : "No updates are confirmed at this stage here yet. See all updates or choose another stage."}
                 </p>
-                <button type="button" className="st-empty-reset-btn" onClick={handleResetFilters}>
-                  RESET ALL FILTERS
+                <button type="button" className="st-empty-reset-btn" onClick={() => { handleResetFilters(); if (stageFilter !== "all") onClearStage(); }}>
+                  {stageFilter === "all" ? "CLEAR SEARCH AND FILTERS" : "SEE ALL UPDATES"}
                 </button>
               </div>
             ) : (
@@ -204,6 +244,7 @@ export default function StratosphereTerminal({
                   onSelect={handleSelectSignal}
                   onHover={handleHoverSignal}
                   onConnect={handleOpenConnect}
+                  returnStage={stageFilter}
                 />
               ))
             )}
@@ -219,6 +260,10 @@ export default function StratosphereTerminal({
         onChange={(newFilters) => {
           setFilters(newFilters);
           setSelectedDistrict(newFilters.district);
+          const url = new URL(window.location.href);
+          if (newFilters.district) url.searchParams.set("place", newFilters.district);
+          else url.searchParams.delete("place");
+          window.history.replaceState(null, "", url);
         }}
         onReset={handleResetFilters}
       />

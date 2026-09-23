@@ -20,6 +20,7 @@ function normalizeLifecycleInput(value) {
   if (v === "" || v === "none") return "";
   if (v === "planned") return "planned";
   if (v === "construction" || v === "under construction") return "construction";
+  if (v === "completed" || v === "finished") return "completed";
   return "";
 }
 

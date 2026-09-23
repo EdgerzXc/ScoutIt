@@ -496,11 +496,7 @@ export function getDistrictsSummary(signals = COMMUNITY_SIGNALS) {
   return [...summaryMap.values()]
     .filter((d) => d.count > 0)
     .map((d) => {
-      let trendLabel = `+${d.count * 8}% Demand`;
-      if (d.district === "Ortigas Center") trendLabel = "Supply +12%";
-      else if (d.district === "Alabang") trendLabel = "7 Expansion Searches";
-      else if (d.district === "Makati CBD") trendLabel = "18 New Signals";
-      else if (d.district === "BGC") trendLabel = "Demand +32%";
+      const trendLabel = `${d.count} ${d.count === 1 ? "update" : "updates"}`;
 
       return {
         ...d,
@@ -568,7 +564,7 @@ export function filterSignals(signals = COMMUNITY_SIGNALS, {
 // - signalType is always UPCOMING_SUPPLY (emerald = supply, one color
 //   one meaning). Timing text differentiates stages, not new types.
 // - Coordinates are NEVER invented: unresolvable district or non-numeric
-//   lat/lng skips the beacon (honest absence beats a misplaced pin).
+//   lat/lng leaves the dossier update unpinned (honest absence beats a misplaced pin).
 // - No budget, no specs, no author: shells carry none, so none is set.
 //   Beacon pillars render shorter for it — correctly modest.
 // - Every bridged record is stamped isSample while its source is mock,
@@ -623,10 +619,14 @@ export function pipelineArticleToSignal(article, now = new Date()) {
   if (!article || typeof article !== "object") return null;
   const lc = effectiveLifecycle(article, now);
   if (!lc) return null;
-  const district = resolvePipelineDistrict(article);
-  const lat = Number(article.lat);
-  const lng = Number(article.lng);
-  if (!district || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const mappedDistrict = resolvePipelineDistrict(article);
+  const district = mappedDistrict || String(article.city || "").trim();
+  const lat = article.lat == null || article.lat === "" ? NaN : Number(article.lat);
+  const lng = article.lng == null || article.lng === "" ? NaN : Number(article.lng);
+  if (!district) return null;
+  // Keep a sourced update in the dossier when coordinates are absent.
+  // The map generator skips it rather than inventing a pin.
+  const coords = mappedDistrict && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
   if (!article.slug || !article.title) return null;
   return {
     id: `pipeline-${article.slug}`,
@@ -636,8 +636,10 @@ export function pipelineArticleToSignal(article, now = new Date()) {
     spaceType: article.category || "",
     location: article.city || "",
     district,
-    city: DISTRICT_COORDS[district].city,
-    coords: { lat, lng },
+    city: DISTRICT_COORDS[district]?.city || article.city || "",
+    coords,
+    lifecycle: article.lifecycle || "",
+    openingDate: article.openingDate || "",
     timing: timingLine(article, now),
     summary: article.excerpt || "",
     sourceName: article.sourceName || "",

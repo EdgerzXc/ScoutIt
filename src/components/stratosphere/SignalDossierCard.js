@@ -27,6 +27,7 @@ export default function SignalDossierCard({
   onSelect = () => {},
   onHover = () => {},
   onConnect = () => {},
+  returnStage = "all",
 }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -84,21 +85,40 @@ export default function SignalDossierCard({
 
   const handlePrimaryAction = (e) => {
     e.stopPropagation();
+    if (signal.actionType === "EXPLORE_DATA" && signal.id?.startsWith("pipeline-") && signal.id.slice(9)) {
+      const place = new URLSearchParams(window.location.search).get("place");
+      const query = new URLSearchParams({ fromLayer: "1", stage: returnStage, signal: signal.id });
+      if (place) query.set("place", place);
+      router.push(`/intel/${encodeURIComponent(signal.id.slice(9))}?${query}`);
+      return;
+    }
+    if (signal.isSample) {
+      setExpanded(true);
+      return;
+    }
+    if (signal.actionType === "VIEW_SPACE") {
+      const slug = signal.matchingSpaces?.[0]?.slug;
+      if (slug) router.push(`/property/${encodeURIComponent(slug)}`);
+      else setExpanded(true);
+      return;
+    }
     if (signal.actionType === "PROPOSE_SPACE" || signal.actionType === "VIEW_MATCHES") {
-      if (signal.matchingSpaces && signal.matchingSpaces.length > 0) {
-        setShowMetropolisMatches(!showMetropolisMatches);
+      if (signal.matchingSpaces?.length) {
+        setShowMetropolisMatches(true);
         setExpanded(true);
       } else {
         onConnect(signal);
       }
-    } else if (signal.actionType === "EXPLORE_DATA") {
-      router.push("/intel");
-    } else {
-      onConnect(signal);
+      return;
     }
+    if (signal.actionType === "VIEW_DETAILS") setExpanded(true);
+    else onConnect(signal);
   };
 
   const renderActionButton = () => {
+    if (signal.isSample && signal.actionType !== "EXPLORE_DATA") {
+      return <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>VIEW EXAMPLE <ArrowRight size={13} aria-hidden="true" /></button>;
+    }
     switch (signal.actionType) {
       case "PROPOSE_SPACE":
         return (
@@ -110,14 +130,14 @@ export default function SignalDossierCard({
       case "VIEW_SPACE":
         return (
           <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>
-            <span>VIEW SPACE</span>
+            <span>{signal.matchingSpaces?.length ? "VIEW SPACE" : "VIEW DETAILS"}</span>
             <ArrowRight size={13} aria-hidden="true" />
           </button>
         );
       case "EXPLORE_DATA":
         return (
           <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>
-            <span>EXPLORE INTEL</span>
+            <span>READ UPDATE</span>
             <ArrowRight size={13} aria-hidden="true" />
           </button>
         );
@@ -169,6 +189,7 @@ export default function SignalDossierCard({
       <div className="sdc-main-split">
         <div className="sdc-content-col">
           <h3 className="sdc-title">{signal.title}</h3>
+          {signal.isSample ? <span className="sdc-sample-tag">SAMPLE — FOR EXPLORING ONLY</span> : null}
 
           {/* Quick Specifications Strip */}
           <div className="sdc-specs-strip">
@@ -220,7 +241,7 @@ export default function SignalDossierCard({
 
       {/* ── CARD METRICS & ACTIONS ── */}
       <div className="sdc-footer">
-        <div className="sdc-metric-group">
+        {!signal.isSample ? <div className="sdc-metric-group">
           {/* Relevant to Me (Demand Aggregation) */}
           <button
             type="button"
@@ -263,7 +284,7 @@ export default function SignalDossierCard({
           >
             <Bookmark size={13} aria-hidden="true" />
           </button>
-        </div>
+        </div> : null}
 
         <div className="sdc-cta-group">
           {renderActionButton()}
@@ -303,10 +324,10 @@ export default function SignalDossierCard({
           )}
 
           {/* Metropolis Space Matches Bridge */}
-          {showMetropolisMatches && signal.matchingSpaces && signal.matchingSpaces.length > 0 && (
+          {!signal.isSample && showMetropolisMatches && signal.matchingSpaces && signal.matchingSpaces.length > 0 && (
             <div className="sdc-matches-drawer">
               <h4 className="sdc-section-heading">
-                METROPOLIS VERIFIED INVENTORY ({signal.matchingSpaces.length})
+                RELATED SPACES ({signal.matchingSpaces.length})
               </h4>
               <ul className="sdc-matches-list">
                 {signal.matchingSpaces.map((space, i) => (

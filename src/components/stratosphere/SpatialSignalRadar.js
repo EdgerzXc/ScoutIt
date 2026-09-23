@@ -301,7 +301,7 @@ export default function SpatialSignalRadar({
         </div>
         <div className="ssr-hud-top-right">
           <span className="ssr-hud-text">
-            BEACONS: {filteredSignals.length} ACTIVE / {allSignals.length} TOTAL
+            PINS: {filteredSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} SHOWN / {allSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} TOTAL
           </span>
         </div>
         <div className="ssr-hud-bottom-left">

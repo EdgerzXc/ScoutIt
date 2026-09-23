@@ -81,9 +81,13 @@ describe("pipeline bridge — signal mapping", () => {
     expect(pipelineArticleToSignal(null, noon(2026, 9, 22))).toBe(null);
   });
 
-  it("skips unresolvable districts and non-numeric coords", () => {
-    expect(pipelineArticleToSignal({ ...BASE, city: "Atlantis" }, noon(2026, 9, 22))).toBe(null);
-    expect(pipelineArticleToSignal({ ...BASE, lat: "far" }, noon(2026, 9, 22))).toBe(null);
+  it("keeps unpinned updates in the dossier without inventing a map pin", () => {
+    const unknown = pipelineArticleToSignal({ ...BASE, city: "Atlantis" }, noon(2026, 9, 22));
+    const unlocated = pipelineArticleToSignal({ ...BASE, lat: "far" }, noon(2026, 9, 22));
+    expect(unknown.district).toBe("Atlantis");
+    expect(unknown.coords).toBe(null);
+    expect(unlocated.coords).toBe(null);
+    expect(generateBeaconGeoJSON([unknown, unlocated], new Set([unknown.id, unlocated.id])).beacons.features).toHaveLength(0);
     expect(pipelineArticleToSignal({ ...BASE, slug: "" }, noon(2026, 9, 22))).toBe(null);
   });
 
@@ -103,7 +107,8 @@ describe("pipeline bridge — beacon generation", () => {
     const ids = bridged.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
     const geo = generateBeaconGeoJSON(bridged, new Set(ids));
-    expect(geo.beacons.features.length).toBe(bridged.length);
+    expect(geo.beacons.features.length).toBe(bridged.filter((signal) => signal.coords).length);
+    expect(bridged.some((signal) => !signal.coords)).toBe(true);
     for (const f of geo.beacons.features) {
       expect(f.properties.color).toBe("#10b981");
       expect(f.properties.signalTypeLabel).toBe("Upcoming Supply");

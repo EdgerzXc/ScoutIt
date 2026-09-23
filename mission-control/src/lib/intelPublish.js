@@ -93,6 +93,7 @@ export function buildIntelFields(briefing, relatedPropertyIds = []) {
       .replace(/[_\s]+/g, " ");
     if (v === "planned") return "Planned";
     if (v === "construction" || v === "under construction") return "Under Construction";
+    if (v === "completed" || v === "finished") return "Completed";
     return "";
   })();
   const pipelineOpening = (() => {

@@ -4,7 +4,7 @@ import StratosphereTerminal from "@/components/stratosphere/StratosphereTerminal
 export const metadata = {
   title: "Community — Spatial Radar & Market Signals | ScoutIt",
   description:
-    "Real-time geospatial intelligence terminal and community demand radar across Metro Manila's commercial and residential landscape.",
+    "Spatial intelligence terminal and community demand radar across Metro Manila's commercial and residential landscape.",
   alternates: { canonical: "/community" },
 };
 

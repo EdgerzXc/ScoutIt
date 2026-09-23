@@ -388,3 +388,15 @@
     transition: none;
   }
 }
+
+@media (max-width: 680px) {
+  .st-terminal--feed,
+  .st-terminal--feed .st-workspace,
+  .st-terminal--feed .st-feed-layout,
+  .st-terminal--feed .st-dossier-pane {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .st-terminal--feed .st-dossier-scroll { overflow: visible; }
+}

@@ -14,6 +14,7 @@ import { getInvestigation } from "@/data/mock/investigations";
 import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
+import { validJourneyStage } from "@/lib/layerTwoJourney";
 import "./article-detail.css";
 
 async function getLiveArticle(slug) {
@@ -112,6 +113,14 @@ export default async function IntelArticlePage({ params, searchParams }) {
     ? sp.fromProperty
     : null;
   const door = typeof sp.door === "string" ? sp.door : null;
+  const fromLayer = !fromProperty && sp.fromLayer === "1";
+  const layerReturn = new URLSearchParams();
+  const layerStage = validJourneyStage(sp.stage);
+  if (layerStage !== "all") layerReturn.set("stage", layerStage);
+  if (typeof sp.place === "string" && sp.place.length <= 80) layerReturn.set("place", sp.place);
+  if (typeof sp.signal === "string" && sp.signal.length <= 120) layerReturn.set("signal", sp.signal);
+  if (sp.view === "descent") layerReturn.set("view", "descent");
+  const layerHref = `/layer/stratosphere${layerReturn.size ? `?${layerReturn}` : ""}`;
   const article = await getLiveArticle(slug);
 
   if (!article) {
@@ -139,6 +148,12 @@ export default async function IntelArticlePage({ params, searchParams }) {
       ) : null}
 
       <main className="article-main">
+        {fromLayer ? (
+          <nav className="article-layer-return" aria-label="Layer 2 return">
+            <Link href={layerHref}>← Back to your Layer 2 view</Link>
+            <span>Your area and building stage are kept.</span>
+          </nav>
+        ) : null}
         {/* Dynamic Hero Banner */}
         <section className="article-hero" style={{ backgroundImage: `url(${article.image})` }}>
           <div className="hero-overlay"></div>
@@ -209,34 +224,25 @@ export default async function IntelArticlePage({ params, searchParams }) {
               </GlassPanel>
             ) : null}
 
-            {/* Bi-Directional Discovery Gateway */}
-            <GlassPanel className="p-6 mt-10 bg-surface-alt/90 border border-gold-accent/30 rounded-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl pointer-events-none" />
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-                <div>
-                  <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">
-                    APPLY THIS INTELLIGENCE
-                  </span>
-                  {/* A-096: h2, not h4 — the page outline is h1, and the
-                      Related section below is h3 with h4 items. Level only;
-                      styling untouched. */}
-                  <h2 className="font-serif text-lg text-text-primary mb-1">
-                    Explore spaces connected to this briefing
-                  </h2>
-                  <p className="font-sans text-xs text-text-secondary m-0 max-w-md">
-                    {article.city
-                      ? `Discover verified listings, developments, and opportunities across ${article.city}.`
-                      : `View verified properties matching the ${article.category || 'market'} intelligence profile.`}
-                  </p>
+            {/* Each briefing retains its own body and dossier. A broad directory
+                search is offered only for a real article; it is not a claim
+                that a sample briefing has verified matching properties. */}
+            {!article.isSample ? (
+              <GlassPanel className="p-6 mt-10 bg-surface-alt/90 border border-gold-accent/30 rounded-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">EXPLORE THE AREA</span>
+                    <h2 className="font-serif text-lg text-text-primary mb-1">{article.city ? `Browse spaces in ${article.city}` : "Browse the space directory"}</h2>
+                    <p className="font-sans text-xs text-text-secondary m-0 max-w-md">This opens a broader search. Spaces shown are not automatically linked to this briefing.</p>
+                  </div>
+                  <Link href={article.city ? `/property?q=${encodeURIComponent(article.city)}` : "/property"}
+                    className="font-mono text-[12px] tracking-wider uppercase font-semibold text-background bg-gold-accent hover:opacity-90 px-5 py-3 rounded text-center shrink-0">
+                    Browse spaces →
+                  </Link>
                 </div>
-                <Link
-                  href={article.city ? `/property?q=${encodeURIComponent(article.city)}` : `/property?type=${encodeURIComponent(article.category || 'Commercial')}`}
-                  className="font-mono text-[12px] tracking-wider uppercase font-semibold text-background bg-gold-accent hover:opacity-90 px-5 py-3 rounded transition-all active:scale-95 text-center shrink-0 shadow-[0_0_15px_rgba(232,174,60,0.25)]"
-                >
-                  Explore Affected Spaces →
-                </Link>
-              </div>
-            </GlassPanel>
+              </GlassPanel>
+            ) : null}
+            {fromLayer ? <p className="article-layer-return-end"><Link href={layerHref}>← Return to your Layer 2 view</Link></p> : null}
           </div>
         </section>
 

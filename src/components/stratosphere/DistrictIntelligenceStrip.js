@@ -12,10 +12,9 @@ export default function DistrictIntelligenceStrip({
   const districts = React.useMemo(() => getDistrictsSummary(signals), [signals]);
 
   return (
-    <nav className="dis-strip" aria-label="District intelligence hot zones">
+    <nav className="dis-strip" aria-label="Choose an area">
       <div className="dis-header">
-        <span className="dis-live-indicator" aria-hidden="true" />
-        <span className="dis-label">METRO PULSE</span>
+        <span className="dis-label">CHOOSE AN AREA</span>
       </div>
 
       <div className="dis-track" role="tablist">

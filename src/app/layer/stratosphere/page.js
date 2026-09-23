@@ -18,7 +18,6 @@ import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 import {
   LIFECYCLE,
   effectiveLifecycle,
-  filterByLifecycle,
   isOverdue,
   isPipelineSignal,
   timingLine,
@@ -27,14 +26,8 @@ import {
   liveIntelToSignals,
   mergeLivePipeline,
 } from "@/lib/pipelineLifecycle";
+import { JOURNEY_STAGES, matchesJourneyStage, validJourneyStage } from "@/lib/layerTwoJourney";
 import "./stratosphere-layer.css";
-
-const LIFECYCLE_FILTERS = [
-  { key: "all", label: "All signals" },
-  { key: LIFECYCLE.PLANNED, label: "Planned" },
-  { key: LIFECYCLE.CONSTRUCTION, label: "Under construction" },
-  { key: LIFECYCLE.OPENING_TODAY, label: "Opening today" },
-];
 
 // Lifecycle pill beside the status badge. Renders nothing for signals
 // without lifecycle data — most of the feed — so existing rows are
@@ -83,6 +76,21 @@ function PipelinePulse({ pulse }) {
 
 export default function StratospherePreview() {
   const [viewMode, setViewMode] = useState("RADAR"); // "RADAR" | "DESCENT"
+  const [journeyStage, setJourneyStage] = useState("all");
+  const [returnSignal, setReturnSignal] = useState(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setJourneyStage(validJourneyStage(params.get("stage")));
+    setReturnSignal(params.get("signal"));
+    if (params.get("view") === "descent") setViewMode("DESCENT");
+  }, []);
+  const chooseStage = (stage) => {
+    setJourneyStage(stage);
+    const url = new URL(window.location.href);
+    if (stage === "all") url.searchParams.delete("stage");
+    else url.searchParams.set("stage", stage);
+    window.history.replaceState(null, "", url);
+  };
   // Live pipeline intel merges over the mock feed (A-156): lifecycle rows
   // from the CMS join as real records; everything else about this page —
   // mocks included — behaves exactly as before when none exist.
@@ -102,14 +110,13 @@ export default function StratospherePreview() {
     () => mergeLivePipeline(getSignals(), livePipeline),
     [livePipeline]
   );
-  const [lifecycleFilter, setLifecycleFilter] = useState("all");
   // The full feed keeps its existing order (non-pipeline rows are never
   // reshuffled). A lifecycle view sorts by attention: now, nearest dated,
   // sourced, stable — see pipelineLifecycle.sortByAttention.
   const visibleSignals = useMemo(() => {
-    const filtered = filterByLifecycle(signals, lifecycleFilter);
-    return lifecycleFilter === "all" ? filtered : sortByAttention(filtered);
-  }, [signals, lifecycleFilter]);
+    const filtered = signals.filter((signal) => matchesJourneyStage(signal, journeyStage));
+    return journeyStage === "all" ? filtered : sortByAttention(filtered);
+  }, [signals, journeyStage]);
   const pulse = useMemo(() => pipelinePulse(signals), [signals]);
   // Phase 2: pipeline intel rides the radar as UPCOMING_SUPPLY beacons
   // through the terminal's own `initialSignals` prop — strip, beacons,
@@ -117,7 +124,7 @@ export default function StratospherePreview() {
   // source to drift. Bridged ids are `pipeline-` prefixed; community ids
   // are `sig-` prefixed; the two sets cannot collide.
   const radarSignals = useMemo(
-    () => [...COMMUNITY_SIGNALS, ...pipelineArticlesToSignals(signals)],
+    () => [...pipelineArticlesToSignals(signals), ...COMMUNITY_SIGNALS],
     [signals]
   );
 
@@ -174,9 +181,26 @@ export default function StratospherePreview() {
           </header>
         </div>
 
+        <section className="strat-journey" aria-label="Explore Layer 2">
+          <p className="strat-journey-lead">Choose a building stage and area, then open an update to see what is known.</p>
+          <div className="strat-journey-stages" role="group" aria-label="Building stage">
+            {JOURNEY_STAGES.map((stage) => (
+              <button key={stage.key} type="button" aria-pressed={journeyStage === stage.key}
+                className={`strat-journey-stage${journeyStage === stage.key ? " is-active" : ""}`}
+                onClick={() => chooseStage(stage.key)}>
+                <span>{stage.label}</span>
+                <small>{stage.hint}</small>
+              </button>
+            ))}
+          </div>
+          {journeyStage !== "all" && visibleSignals.length === 0 ? (
+            <p className="strat-journey-empty">No {JOURNEY_STAGES.find((s) => s.key === journeyStage)?.label.toLowerCase()} updates are confirmed here yet. Choose another stage or see all updates.</p>
+          ) : null}
+        </section>
+
         {viewMode === "RADAR" ? (
           <div className="strat-radar-wrapper">
-            <StratosphereTerminal initialViewMode="SPATIAL" initialSignals={radarSignals} />
+            <StratosphereTerminal initialViewMode="SPATIAL" initialSignals={radarSignals} stageFilter={journeyStage} onClearStage={() => chooseStage("all")} />
           </div>
         ) : (
           <div className="strat-container">
@@ -195,33 +219,19 @@ export default function StratospherePreview() {
 
               <PipelinePulse pulse={pulse} />
 
-              <div className="strat-lifecycle-filter" role="group" aria-label="Filter by supply lifecycle">
-                {LIFECYCLE_FILTERS.map((f) => (
-                  <button
-                    key={f.key}
-                    type="button"
-                    aria-pressed={lifecycleFilter === f.key}
-                    className={`strat-lifecycle-chip${lifecycleFilter === f.key ? " active" : ""}`}
-                    onClick={() => setLifecycleFilter(f.key)}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-
               <ul className="strat-signal-list">
                 {visibleSignals.length === 0 && (
                   <li className="strat-signal-empty">
-                    Nothing in this stage right now — the rest of the feed is one tap away.
+                    No confirmed updates at this stage. Choose another stage above.
                   </li>
                 )}
                 {visibleSignals.map((signal, i) => (
                   <li
                     key={signal.slug}
-                    className="strat-signal-row"
+                    className={`strat-signal-row${returnSignal === signal.slug ? " is-returned" : ""}`}
                     style={{ "--row-index": i }}
                   >
-                    <Link href={`/intel/${signal.slug}`} className="strat-signal-link">
+                    <Link href={`/intel/${signal.slug}?fromLayer=1&view=descent&stage=${journeyStage}&signal=${encodeURIComponent(signal.slug)}`} className="strat-signal-link">
                       <span className="strat-signal-index" aria-hidden="true">
                         {String(i + 1).padStart(2, "0")}
                       </span>
@@ -259,25 +269,12 @@ export default function StratospherePreview() {
               </ul>
             </section>
 
-            {/* Portals into Stratosphere and Metropolis */}
-            <nav className="strat-doors" aria-label="Continue into Stratosphere">
-              <Link href="/stratosphere" className="strat-door strat-door--primary">
-                <span className="strat-door-label">Full Radar Terminal</span>
-                <span className="strat-door-sub">Direct workspace view</span>
+            <nav className="strat-doors" aria-label="Return to radar">
+              <button type="button" className="strat-door strat-door--primary" onClick={() => setViewMode("RADAR")}>
+                <span className="strat-door-label">Back to the radar</span>
+                <span className="strat-door-sub">Keep this building stage</span>
                 <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-
-              <Link href="/discover" className="strat-door">
-                <span className="strat-door-label">See it on the map</span>
-                <span className="strat-door-sub">Where it is happening</span>
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-
-              <Link href="/intel" className="strat-door">
-                <span className="strat-door-label">Read the intel</span>
-                <span className="strat-door-sub">What has been written</span>
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
+              </button>
             </nav>
           </div>
         )}

@@ -28,6 +28,7 @@ describe("pipelineLifecycle — status resolution", () => {
     expect(effectiveLifecycle({ lifecycle: "construction" }, now)).toBe(LIFECYCLE.CONSTRUCTION);
     expect(effectiveLifecycle({ lifecycle: "Under Construction" }, now)).toBe(LIFECYCLE.CONSTRUCTION);
     expect(effectiveLifecycle({ lifecycle: "under_construction" }, now)).toBe(LIFECYCLE.CONSTRUCTION);
+    expect(effectiveLifecycle({ lifecycle: "completed" }, now)).toBe(LIFECYCLE.COMPLETED);
   });
 
   it("an opening date of today wins over any stored lifecycle", () => {
@@ -191,6 +192,7 @@ describe("pipelineLifecycle — staff input normalization (A-156)", () => {
     expect(normalizeLifecycleInput("Planned")).toBe("planned");
     expect(normalizeLifecycleInput("UNDER_CONSTRUCTION")).toBe("construction");
     expect(normalizeLifecycleInput("under construction")).toBe("construction");
+    expect(normalizeLifecycleInput("finished")).toBe("completed");
     expect(normalizeLifecycleInput("")).toBe("");
     expect(normalizeLifecycleInput("none")).toBe("");
     expect(normalizeLifecycleInput("opening soon!!")).toBe("");
