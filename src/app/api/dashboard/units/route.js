@@ -287,14 +287,19 @@ export async function POST(request) {
     // added/removed), not every field edit on an existing unit (Track 1,
     // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md).
     if (property.pipeline_status === 'approved' && (toInsert.length > 0 || toDelete.length > 0)) {
-      await notifyAttachedBrokers(serviceClient, {
-        propertyId: propertyId,
-        title: "Unit inventory changed",
-        desc: `"${property.title}" had units added or removed.`,
-        icon: "🏢",
-        notificationType: "property_changed",
-        excludeUserId: userId,
-      });
+      // A-146: isolated like the dashboard update alert.
+      try {
+        await notifyAttachedBrokers(serviceClient, {
+          propertyId: propertyId,
+          title: "Unit inventory changed",
+          desc: `"${property.title}" had units added or removed.`,
+          icon: "🏢",
+          notificationType: "property_changed",
+          excludeUserId: userId,
+        });
+      } catch (notifyError) {
+        console.warn("[UNITS API] Broker alert not delivered for", propertyId, notifyError?.message);
+      }
     }
 
     // Map any client temp ids back so the caller can reconcile local state.

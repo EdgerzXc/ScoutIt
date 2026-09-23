@@ -111,13 +111,27 @@ export default function ScoutItManifesto() {
     const sections = CHAPTERS
       .map(([id]) => document.getElementById(id))
       .filter(Boolean);
-    const observer = new IntersectionObserver((entries) => {
+    const updateActiveChapter = () => {
       if (hashChapterLock.current) return;
-      const activeEntry = entries.find((entry) => entry.isIntersecting);
-      if (activeEntry?.target?.id) setActiveChapter(activeEntry.target.id);
-    }, { rootMargin: "-24% 0px -64% 0px", threshold: 0 });
+      const readingLine = window.innerHeight * 0.3;
+      const current = sections.find((section) => {
+        const rect = section.getBoundingClientRect();
+        return rect.top <= readingLine && rect.bottom > readingLine;
+      });
+      if (current) setActiveChapter(current.id);
+    };
+    const observer = new IntersectionObserver(updateActiveChapter, {
+      rootMargin: "-24% 0px -64% 0px", threshold: 0,
+    });
     sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    window.addEventListener("scroll", updateActiveChapter, { passive: true });
+    window.addEventListener("resize", updateActiveChapter);
+    updateActiveChapter();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", updateActiveChapter);
+      window.removeEventListener("resize", updateActiveChapter);
+    };
   }, []);
 
   useEffect(() => {

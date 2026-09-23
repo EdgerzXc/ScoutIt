@@ -51,7 +51,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
       <div className="flex flex-col gap-6 animate-slide-up-fade">
         <div className="flex justify-between items-end border-b border-surface-variant pb-4">
           <div>
-            <button className="text-text-secondary hover:text-gold-accent text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Gallery</button>
+            <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Gallery</button>
             <h2 className="font-display-md text-3xl text-on-surface">{project.title}</h2>
           </div>
           <button
@@ -138,7 +138,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
           ))}
           
           {projects.length === 0 && (
-            <div className="col-span-full p-12 text-center border border-dashed border-surface-variant rounded-lg">
+            <div className="col-span-full p-8 md:p-12 text-center border border-dashed border-surface-variant rounded-lg">
               <span className="text-3xl mb-2 block opacity-50">📷</span>
               <p className="text-text-secondary text-sm">No active photography bounties available.</p>
             </div>

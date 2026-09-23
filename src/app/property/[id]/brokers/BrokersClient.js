@@ -1,28 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
-import TurnstileGate from "@/components/ui/TurnstileGate";
 import TrustBadge from "@/components/ui/TrustBadge";
-import { trackEvent, GA_EVENTS } from "@/lib/analytics";
+import BrokerConnectForm from "./BrokerConnectForm";
 import "./brokers.css";
 
-const EMPTY_FORM = { name: "", phone: "", message: "" };
 
 export default function BrokersClient({ slug }) {
   const [brokers, setBrokers] = useState([]);
   const [property, setProperty] = useState(null);
   const [represented, setRepresented] = useState(false);
   const [contactable, setContactable] = useState(false);
+  // A-147: uploader/lister disclosure for the unrepresented state —
+  // "Anonymous" or the public owner's name, resolved server-side.
+  const [uploader, setUploader] = useState(null);
+  const [ownerFreeContact, setOwnerFreeContact] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeFormBroker, setActiveFormBroker] = useState(null);
-  const [formData, setFormData] = useState(EMPTY_FORM);
-  const [submittedBrokerId, setSubmittedBrokerId] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const turnstileRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +33,8 @@ export default function BrokersClient({ slug }) {
           setBrokers(Array.isArray(data.brokers) ? data.brokers : []);
           setRepresented(data.represented === true);
           setContactable(data.contactable === true);
+          setUploader(typeof data.uploader === "string" ? data.uploader : null);
+          setOwnerFreeContact(data.ownerFreeContact === true);
         }
       } catch (loadError) {
         if (!cancelled) setError(loadError.message || "Property roster unavailable");
@@ -49,68 +48,7 @@ export default function BrokersClient({ slug }) {
 
   const toggleForm = (formKey = null) => {
     setActiveFormBroker(activeFormBroker === formKey ? null : formKey);
-    setSubmittedBrokerId(null);
     setError("");
-    setTurnstileToken("");
-    turnstileRef.current?.reset();
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((previous) => ({ ...previous, [name]: value }));
-  };
-
-  const handleSubmit = async (event, brokerId = null) => {
-    event.preventDefault();
-    setSubmitting(true);
-    setError("");
-    try {
-      const response = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertySlug: slug,
-          preferredBrokerId: brokerId || undefined,
-          turnstileToken,
-          ...formData,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Inquiry could not be routed");
-      setSubmittedBrokerId(brokerId || "lister");
-      setFormData(EMPTY_FORM);
-      trackEvent(GA_EVENTS.INQUIRY_SENT, { channel: 'broker_form', property_slug: slug, routed_to: brokerId ? 'broker' : 'lister' });
-    } catch (submitError) {
-      setError(submitError.message || "Inquiry could not be routed");
-      turnstileRef.current?.reset();
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const renderForm = (brokerId = null, formKey = null) => {
-    const key = formKey || brokerId || "lister";
-    if (submittedBrokerId === (brokerId || "lister")) {
-      return <div className="form-success-alert" role="status">✓ Inquiry routed to the current property recipient.</div>;
-    }
-    return (
-      <form onSubmit={(event) => handleSubmit(event, brokerId)} className="intent-form">
-        <h4 className="form-title">Send a property inquiry</h4>
-        <div className="form-fields-grid">
-          <input type="text" name="name" required placeholder="Your Full Name" value={formData.name} onChange={handleInputChange} className="form-input-field" />
-          <input type="tel" name="phone" required placeholder="Contact Number (e.g. +63 917 ...)" value={formData.phone} onChange={handleInputChange} className="form-input-field" />
-          <textarea name="message" required rows="3" placeholder="Tell the recipient what you want to verify." value={formData.message} onChange={handleInputChange} className="form-textarea-field" />
-        </div>
-        <TurnstileGate
-          ref={turnstileRef}
-          action="property-inquiry"
-          onToken={setTurnstileToken}
-          onError={setError}
-        />
-        {error && <p className="form-error-alert" role="alert">{error}</p>}
-        <button type="submit" className="form-submit-btn" disabled={submitting || !turnstileToken}>{submitting ? "Routing inquiry…" : "Send inquiry"}</button>
-      </form>
-    );
   };
 
   const renderBrokerCard = (broker) => {
@@ -142,10 +80,10 @@ export default function BrokersClient({ slug }) {
         <div className="broker-actions-row">
           <Link href={`/brokers/${broker.id}`} className="action-profile-btn">View Profile →</Link>
           <button type="button" className={`action-retain-btn ${isActiveForm ? "active" : ""}`} onClick={() => toggleForm(formKey)}>
-            {isActiveForm ? "Cancel" : "Contact Broker"}
+            {isActiveForm ? "Cancel" : broker.freeContact ? "Contact Broker · Free" : "Contact Broker · 1 Connect"}
           </button>
         </div>
-        {isActiveForm && <div className="inline-intent-form-container">{renderForm(broker.id, formKey)}</div>}
+        {isActiveForm && <div className="inline-intent-form-container"><BrokerConnectForm propertySlug={slug} brokerId={broker.id} freeContact={broker.freeContact === true} /></div>}
       </div>
     );
   };
@@ -194,8 +132,9 @@ export default function BrokersClient({ slug }) {
               <section className="roster-empty-state">
                 <h2>No active broker representation</h2>
                 <p>This property is currently unrepresented. New inquiries route to the verified uploader or lister.</p>
-                <button type="button" className="action-retain-btn" onClick={() => toggleForm("lister")}>{activeFormBroker === "lister" ? "Cancel" : "Contact uploader / lister"}</button>
-                {activeFormBroker === "lister" && <div className="inline-intent-form-container">{renderForm(null)}</div>}
+                {uploader ? <p>Listed by {uploader}</p> : null}
+                <button type="button" className="action-retain-btn" onClick={() => toggleForm("lister")}>{activeFormBroker === "lister" ? "Cancel" : ownerFreeContact ? "Contact lister · Free" : "Contact lister · 1 Connect"}</button>
+                {activeFormBroker === "lister" && <div className="inline-intent-form-container"><BrokerConnectForm propertySlug={slug} freeContact={ownerFreeContact} recipientLabel="owner" /></div>}
               </section>
             ) : (
               <section className="roster-empty-state" role="status">

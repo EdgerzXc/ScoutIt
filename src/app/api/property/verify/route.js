@@ -150,11 +150,12 @@ export async function POST(request) {
     // 3. Compute new freshness status
     const freshness = getFreshness(nowIso);
 
-    // Log verification audit event
+    // Log verification audit event. Best-effort like the claim path: the
+    // verification stands, but a missing row must be findable in the logs.
     // `supabase_audit_logs` does not exist (the table is `audit_logs`), and the
     // payload used `actor_id`/`details`, neither of which is a column. The
     // `.catch(() => null)` meant nobody ever saw it. See lib/auditTrail.js.
-    await writeAuditLog(supabaseAdmin, {
+    const audit = await writeAuditLog(supabaseAdmin, {
       action: "PROPERTY_VERIFIED",
       tableName: "properties",
       recordId: prop.id,
@@ -164,6 +165,9 @@ export async function POST(request) {
         verified_at: nowIso,
       },
     });
+    if (!audit.ok) {
+      console.error("[PROPERTY VERIFY] Audit event not recorded for property", prop.id, audit.error);
+    }
 
     return NextResponse.json({
       success: true,

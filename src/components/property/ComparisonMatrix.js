@@ -2,12 +2,18 @@
 
 import React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
+import { isLiteMode } from "@/lib/liteMode";
 
 export default function ComparisonMatrix({ properties, onClose }) {
   if (!properties || properties.length === 0) return null;
 
+  // A-146: framer drives inline styles per frame, which the Lite CSS
+  // kill-switch cannot reach. MotionConfig hands the decision to the OS
+  // setting — and to Lite, read once at mount (a mid-session toggle takes
+  // effect on next open, same boundary as the canvas guards).
   return (
+    <MotionConfig reducedMotion={isLiteMode() ? "always" : "user"}>
     <motion.div 
       className="matrix-overlay" 
       onClick={onClose}
@@ -295,5 +301,6 @@ export default function ComparisonMatrix({ properties, onClose }) {
         }
       `}</style>
     </motion.div>
+    </MotionConfig>
   );
 }

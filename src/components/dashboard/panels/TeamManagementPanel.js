@@ -230,7 +230,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                 <button
                   aria-label="Cancel inviting a team member"
                   onClick={() => setIsInvitingMember(false)}
-                  className="text-white/70 hover:text-white transition"
+                  className="min-h-11 min-w-11 inline-flex items-center justify-center text-white/70 hover:text-white transition"
                 >
                   <X size={18} />
                 </button>
@@ -257,7 +257,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
-                <button type="submit" className="w-full py-2 mt-2 bg-gold-accent text-black font-medium text-sm rounded hover:bg-gold-bright transition">
+                <button type="submit" className="w-full min-h-11 py-2 mt-2 bg-gold-accent text-black font-medium text-sm rounded hover:bg-gold-bright transition">
                   Send Invitation
                 </button>
               </form>
@@ -522,7 +522,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                         <div className="text-xs text-white/70 uppercase tracking-widest">Delegated Tasks</div>
                         <button 
                           onClick={() => setIsAssigningTask(!isAssigningTask)}
-                          className={`text-[12px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(232,174,60,0.1)]'}`}
+                          className={`min-h-11 text-[12px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(232,174,60,0.1)]'}`}
                         >
                           {isAssigningTask ? <X size={12} /> : <Plus size={12} />} 
                           {isAssigningTask ? 'Cancel' : 'Assign Task'}
@@ -551,7 +551,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                               className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition [color-scheme:dark]"
                             />
                           </div>
-                          <button type="submit" disabled={isSavingTask} className="w-full mt-2 bg-gold-accent hover:bg-gold-bright disabled:opacity-50 text-black font-medium py-2 rounded-lg text-sm transition">
+                          <button type="submit" disabled={isSavingTask} className="w-full min-h-11 mt-2 bg-gold-accent hover:bg-gold-bright disabled:opacity-50 text-black font-medium py-2 rounded-lg text-sm transition">
                             {isSavingTask ? "Saving…" : `Delegate to ${activeMember.name.split(' ')[0]}`}
                           </button>
                         </form>
@@ -578,8 +578,9 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                     </div>
                                     <button
                                       onClick={() => handleMarkTaskDone(task.id)}
-                                      className="text-white/70 hover:text-green-400 transition shrink-0"
+                                      className="min-h-11 min-w-11 inline-flex items-center justify-center -m-2 text-white/70 hover:text-green-400 transition shrink-0"
                                       title="Mark as Done"
+                                      aria-label="Mark task as done"
                                     >
                                       <CheckCircle size={14} />
                                     </button>
@@ -601,7 +602,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                             <div className="mt-6">
                               <button
                                 onClick={() => setShowTaskHistory((s) => !s)}
-                                className="flex items-center gap-2 text-[12px] uppercase font-bold tracking-wider text-white/70 hover:text-white transition"
+                                className="min-h-11 inline-flex items-center gap-2 text-[12px] uppercase font-bold tracking-wider text-white/70 hover:text-white transition"
                               >
                                 <History size={12} />
                                 Task History ({memberTasks.filter((t) => !isOpenTask(t)).length})

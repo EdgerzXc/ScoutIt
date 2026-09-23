@@ -22,6 +22,7 @@ describe('sitemap generator', () => {
     const urls = routes.map((r) => r.url);
     expect(urls).toContain('https://www.scoutit.space');
     expect(urls).toContain('https://www.scoutit.space/discover');
+    expect(urls).toContain('https://www.scoutit.space/property');
     expect(urls).toContain('https://www.scoutit.space/property/bgc-luxury-suite-1');
   });
 

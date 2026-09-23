@@ -201,7 +201,7 @@ function AdminPageInner() {
         <div className="flex border-b border-[#222] mb-8 overflow-x-auto gap-2">
           <button
             onClick={() => setActiveTab("flags")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "flags"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -213,7 +213,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("approvals")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "approvals"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -225,7 +225,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("prc")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "prc"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -237,7 +237,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("pdf")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "pdf"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -249,7 +249,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("intel")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "intel"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -264,7 +264,7 @@ function AdminPageInner() {
               SQL that moved a balance and recorded nothing. */}
           <button
             onClick={() => setActiveTab("refunds")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "refunds"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -277,7 +277,7 @@ function AdminPageInner() {
           {/* ACQ-01 · W12 — /api/property/verify had no caller until now (§51). */}
           <button
             onClick={() => setActiveTab("verify")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "verify"
                 ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
@@ -562,6 +562,7 @@ function AdminPageInner() {
         .admin-alert {
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
           gap: 12px;
           padding: 16px;
           border-radius: 4px;
@@ -570,6 +571,8 @@ function AdminPageInner() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.05em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .admin-alert.success {
@@ -699,12 +702,16 @@ function AdminPageInner() {
           display: flex;
           flex-direction: column;
           gap: 12px;
+          min-width: 0;
+          flex: 1;
+          width: 100%;
         }
 
         .info-primary {
           display: flex;
           align-items: center;
           gap: 12px;
+          min-width: 0;
         }
 
         .info-primary h3 {
@@ -712,12 +719,16 @@ function AdminPageInner() {
           font-size: 18px;
           color: #fff;
           margin: 0;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .info-secondary {
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
+          min-width: 0;
         }
 
         .info-tag {
@@ -729,6 +740,9 @@ function AdminPageInner() {
           border-radius: 2px;
           text-transform: uppercase;
           letter-spacing: 0.05em;
+          max-width: 100%;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .info-tag.coords {
@@ -740,6 +754,9 @@ function AdminPageInner() {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           color: var(--text-muted);
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          min-width: 0;
         }
 
         .btn-approve {
@@ -770,10 +787,35 @@ function AdminPageInner() {
         }
 
         @media (max-width: 768px) {
+          /* U-033: desktop-only spacing squeezed 390px viewports — cards
+             looked off-center with clipped text. Center within the shell. */
+          .admin-main {
+            padding: 64px 16px;
+          }
+          .page-title {
+            font-size: 28px;
+            overflow-wrap: anywhere;
+          }
+          .page-subtitle {
+            font-size: 14px;
+          }
+          .panel-header {
+            padding: 16px;
+          }
+          .panel-hint {
+            padding: 12px 16px 0;
+          }
+          .admin-panel :global(.intel-studio) {
+            padding: 16px;
+          }
+          .loading-state, .empty-state, .error-state {
+            padding: 32px 16px;
+          }
           .submission-card {
             flex-direction: column;
             align-items: flex-start;
-            gap: 24px;
+            gap: 16px;
+            padding: 16px;
           }
           
           .submission-actions {
@@ -783,6 +825,47 @@ function AdminPageInner() {
           .btn-approve {
             width: 100%;
           }
+        }
+
+        /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): this block is
+           scoped, so lens rules need the :global prefix. Dark untouched. */
+        :global(body.light-mode) .page-title,
+        :global(body.light-mode) .panel-header h2,
+        :global(body.light-mode) .info-primary h3 {
+          color: var(--text-primary);
+        }
+        :global(body.light-mode) .admin-panel {
+          background: var(--surface);
+          border-color: var(--border);
+        }
+        :global(body.light-mode) .panel-header {
+          border-bottom-color: var(--border);
+          background: rgba(17, 17, 19, 0.03);
+        }
+        :global(body.light-mode) .submission-card {
+          border-bottom-color: var(--border);
+        }
+        @media (hover: hover) and (pointer: fine) {
+          :global(body.light-mode) .submission-card:hover {
+            background: rgba(17, 17, 19, 0.03);
+          }
+        }
+        :global(body.light-mode) .info-tag {
+          background: rgba(17, 17, 19, 0.05);
+        }
+        :global(body.light-mode) .info-tag.coords {
+          color: var(--text-secondary);
+          background: rgba(17, 17, 19, 0.05);
+        }
+        :global(body.light-mode) .count-badge,
+        :global(body.light-mode) .btn-approve {
+          background: var(--accent-fill);
+          color: var(--on-accent);
+        }
+        :global(body.light-mode) .admin-alert.success {
+          background: var(--green-dim);
+          border-color: var(--green);
+          color: var(--green);
         }
       `}</style>
     </div>

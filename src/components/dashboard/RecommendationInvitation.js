@@ -273,7 +273,7 @@ function InvitationCard({ invitation, isExpanded, onToggle, onDismiss, onComplet
           type="button"
           onClick={onDismiss}
           aria-label={dismissLabel}
-          className="shrink-0 rounded p-1 text-text-muted hover:bg-surface-variant hover:text-on-surface"
+          className="shrink-0 rounded min-h-11 min-w-11 inline-flex items-center justify-center text-text-muted hover:bg-surface-variant hover:text-on-surface"
         >
           <X size={14} aria-hidden="true" />
         </button>
@@ -283,7 +283,7 @@ function InvitationCard({ invitation, isExpanded, onToggle, onDismiss, onComplet
         <button
           type="button"
           onClick={onToggle}
-          className="mt-3 rounded border border-gold-accent/50 px-3 py-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-gold-accent hover:bg-gold-accent/10"
+          className="mt-3 min-h-11 inline-flex items-center rounded border border-gold-accent/50 px-3 py-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-gold-accent hover:bg-gold-accent/10"
         >
           Share feedback
         </button>
@@ -300,7 +300,7 @@ function InvitationCard({ invitation, isExpanded, onToggle, onDismiss, onComplet
                   type="button"
                   aria-pressed={level === option}
                   onClick={() => setLevel(option)}
-                  className={`flex min-w-[4.5rem] flex-col items-center gap-1 rounded border px-3 py-2 text-xs transition-colors ${
+                  className={`flex min-h-11 min-w-[4.5rem] flex-col items-center justify-center gap-1 rounded border px-3 py-2 text-xs transition-colors ${
                     level === option
                       ? "border-gold-accent bg-gold-accent/10 text-on-surface"
                       : "border-surface-variant text-text-secondary hover:border-gold-accent/45"

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import MapCreditControl from "@/components/maps/MapCreditControl";
 import { circlePolygon, footprintPolygon } from "@/lib/geo";
 import "./spatial-intel-map.css";
 
@@ -143,6 +144,8 @@ export default function SpatialIntelMap({
     if (!mapContainerRef.current || mapInstanceRef.current) return undefined;
 
     const map = new maplibregl.Map({
+      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+      attributionControl: false,
       container: mapContainerRef.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
       center: [DEFAULT_CENTER.lng, DEFAULT_CENTER.lat],
@@ -158,6 +161,7 @@ export default function SpatialIntelMap({
       new maplibregl.NavigationControl({ showCompass: false }),
       "top-right"
     );
+    map.addControl(new MapCreditControl(), "bottom-right");
 
     map.on("load", () => {
       map.addSource("zone-areas-src", { type: "geojson", data: { type: "FeatureCollection", features: [] } });

@@ -118,7 +118,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
             exit="exit"
             transition={modalTransition}
           >
-            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
+            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] contact-lens-modal">
               <button 
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
                 onClick={onClose} 

@@ -72,4 +72,12 @@ describe("wishlist share-link API", () => {
     expect(payload.revoked_before).toBeTruthy();
     expect(JSON.stringify(payload)).not.toContain("shareToken");
   });
+
+  it("A-146: meters a mint loop before any database work", async () => {
+    const statuses = [];
+    for (let i = 0; i < 12; i += 1) {
+      statuses.push((await POST(request("POST"))).status);
+    }
+    expect(statuses).toContain(429);
+  });
 });

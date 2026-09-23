@@ -7,6 +7,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { createHash } from "node:crypto";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/clientIp";
+import { detectContactLeak } from "@/lib/contactLeakFilter";
 
 // ── WRITE CEILING (A-012) ────────────────────────────────────────────────────
 // Anonymous events are expected here — most viewers are not signed in — but
@@ -58,9 +59,38 @@ const checkAnalyticsRate = createRateLimiter({
 const ALLOWED_EVENTS = new Set([
   "property_view",
   "property_save",
-  "chapter_view",
-  "contact_intent",
 ]);
+
+// A-146: metadata is caller-supplied free shape landing in a stored JSONB
+// column. chapter_view/contact_intent were removed from the allow-list in the
+// same change (zero callers — PropertyViewTracker sends only property_view —
+// so they were write-only rows no report counts). What remains is scrubbed:
+// primitives only, bounded length, and any key carrying contact details or a
+// URL is dropped rather than stored.
+const URL_LIKE = /https?:\/\/|www\.|[?&][^\s=]+=|%3f|%26/i;
+const CONTACT_LIKE = /@|(?:\+?\d[\s().-]*){7,}/;
+const SAFE_META_KEY = /^[A-Za-z0-9_-]{1,64}$/;
+
+export function sanitizeServerMetadata(metadata) {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return {};
+  const clean = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    if (!SAFE_META_KEY.test(key)) continue;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      clean[key] = value;
+      continue;
+    }
+    if (typeof value === "boolean") {
+      clean[key] = value;
+      continue;
+    }
+    if (typeof value !== "string" || value.length === 0 || value.length > 200) continue;
+    if (URL_LIKE.test(value) || CONTACT_LIKE.test(value)) continue;
+    if (!detectContactLeak(value).clean) continue;
+    clean[key] = value;
+  }
+  return clean;
+}
 
 export async function POST(request) {
   const rate = checkAnalyticsRate(clientIp(request));
@@ -135,7 +165,7 @@ export async function POST(request) {
       userId: userId || null,
       chapterId,
       dwellSeconds: Number(dwellSeconds) || 0,
-      metadata,
+      metadata: sanitizeServerMetadata(metadata),
     });
 
     return NextResponse.json({ success, recorded: success });

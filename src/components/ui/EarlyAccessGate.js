@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import PrivacyNotice from "@/components/ui/PrivacyNotice";
+import { useModalDialog } from "@/components/ui/useModalDialog";
 
 // ─────────────────────────────────────────────────────────────────
 // RESTRICTED ACCESS BANNER
@@ -12,8 +14,8 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
     <div className="restricted-banner">
       <div className="restricted-banner-inner">
         <div className="restricted-icon-col">
-          <div className="restricted-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <div className="restricted-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
@@ -179,6 +181,10 @@ export function RestrictedCardWrapper({ children, rosterType = "this roster" }) 
 export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  // A-153 — mounted only while open, so active is constant true. Escape
+  // closes exactly like the ✕ button and the overlay click.
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: true, onClose });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -195,11 +201,18 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
 
   return (
     <div className="gate-modal-overlay" onClick={onClose}>
-      <div className="gate-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="gate-modal"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Request early access"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="gate-close-btn" onClick={onClose} aria-label="Close">✕</button>
 
         <div className="gate-lock-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
@@ -231,6 +244,8 @@ export function EarlyAccessModal({ rosterType = "this roster", onClose }) {
                 Register Interest →
               </button>
             </div>
+            {/* A-150: explicit Privacy Policy link — this form collects emails (RA 10173 §11). */}
+            <PrivacyNotice />
           </form>
         ) : (
           <div className="gate-success">
@@ -434,8 +449,8 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
       <div className="detail-gate-strip">
         <div className="detail-gate-inner">
           <div className="detail-gate-left">
-            <div className="detail-gate-lock">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="detail-gate-lock" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>

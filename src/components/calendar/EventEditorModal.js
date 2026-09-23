@@ -114,7 +114,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
     >
       <div
         className="w-full sm:max-w-lg bg-[#121212] border border-surface-variant rounded-t-2xl sm:rounded-lg
-          shadow-2xl max-h-[90vh] overflow-y-auto"
+          shadow-2xl max-h-[90dvh] overflow-y-auto cal-lens"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
@@ -124,7 +124,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
           <button
             type="button"
             onClick={onClose}
-            className="text-text-muted hover:text-on-surface text-xl leading-none"
+            className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-on-surface text-xl leading-none"
             aria-label="Close"
           >
             ×
@@ -219,7 +219,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
                   type="button"
                   onClick={() => set({ color: c })}
                   aria-label={c}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform ${EVENT_COLOR_STYLES[c]}
+                  className={`w-11 h-11 sm:w-7 sm:h-7 rounded-full border-2 transition-transform ${EVENT_COLOR_STYLES[c]}
                     ${form.color === c ? "scale-110 ring-2 ring-offset-2 ring-offset-[#121212] ring-gold-accent" : "opacity-70"}`}
                 />
               ))}

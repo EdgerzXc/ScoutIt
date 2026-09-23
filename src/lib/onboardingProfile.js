@@ -35,5 +35,10 @@ export function sanitizeLocationFocus(value) {
 }
 
 export function isPrcLicenseFormatValid(value) {
-  return typeof value === "string" && /\d{5,}/.test(value.trim());
+  // A-146: mirrors the server rule in complete-onboarding/route.js
+  // (normalizeLicense: 7 or 8 digits). The client previously accepted 5+,
+  // so calibration passed claims the server then 400s.
+  if (typeof value !== "string") return false;
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 8;
 }

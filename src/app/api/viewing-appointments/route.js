@@ -1,3 +1,4 @@
+import { resolveContactExchange } from "@/lib/handshakeExchange";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
@@ -56,6 +57,33 @@ export async function GET(request) {
       propsMap = Object.fromEntries((props || []).map(p => [p.id, p]));
     }
 
+    // A-149: contact-exchange state per deal, read from the handshake rows
+    // server-side (same source the export route trusts). A failed lookup is
+    // UNKNOWN, not "no handshake" — those appointments carry
+    // contactExchange: null and the schedule renders no affordance, rather
+    // than offering against a state it could not read. Never a thrown 500
+    // for the whole schedule, and never a guessed state.
+    let handshakeByDeal = {};
+    let handshakeUnknown = false;
+    if (dealIds.length > 0) {
+      try {
+        const { data: handshakes, error: handshakeError } = await supabaseAdmin
+          .from("deal_handshakes")
+          .select("deal_id, status, party_a_id, party_b_id, party_a_signed_at, party_b_signed_at")
+          .in("deal_id", dealIds)
+          .eq("handshake_type", "transaction_handshake");
+        if (!handshakeError) {
+          handshakeByDeal = Object.fromEntries((handshakes || []).map(h => [h.deal_id, h]));
+        } else {
+          handshakeUnknown = true;
+          console.error("[APPOINTMENTS API] Handshake lookup failed:", handshakeError);
+        }
+      } catch (handshakeException) {
+        handshakeUnknown = true;
+        console.error("[APPOINTMENTS API] Handshake lookup threw:", handshakeException);
+      }
+    }
+
     // Get profiles for contact info
     const otherPartyIds = new Set();
     for (const appt of appts) {
@@ -82,6 +110,18 @@ export async function GET(request) {
       // Mask contact info if deal is not accepted
       const isAccepted = deal?.status === "accepted";
       const otherName = namesById[otherId] || "Unknown User";
+
+      // A-149: what this appointment may offer for contact exchange — the
+      // handshake row decides, never the client. No deal, no offer. An
+      // unreadable lookup is null (render nothing), not a guessed state.
+      const contactExchange = !appt.deal_id || handshakeUnknown
+        ? (appt.deal_id ? null : { state: "unavailable", offeredByMe: false })
+        : resolveContactExchange({
+            dealStatus: deal?.status || null,
+            viewingStatus: appt.status || null,
+            handshake: handshakeByDeal[appt.deal_id] || null,
+            userId,
+          });
       
       return {
         id: appt.id,
@@ -99,6 +139,7 @@ export async function GET(request) {
         isHost,
         contactName: isAccepted ? otherName : "🔒 Hidden (Accept deal to view)",
         dealStatus: deal?.status,
+        contactExchange,
         // Safe to expose: this query already scopes to appointments where the
         // caller is host or guest, so they're a party to the meeting. A Meet
         // room for your own viewing isn't a contact detail.

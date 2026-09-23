@@ -142,7 +142,7 @@ export async function POST(request) {
 
     // Audit is best-effort and must never fail the submission the client
     // already completed; a lost audit row is recoverable, a lost consent
-    // record is not.
+    // record is not. A-146: best-effort is not silent — a gap must be findable.
     await supabaseAdmin
       .from("broker_social_proof_audit_events")
       .insert({
@@ -155,7 +155,9 @@ export async function POST(request) {
           verified_connection: true,
         },
       })
-      .then(null, () => null);
+      .then(null, (auditError) => {
+        console.warn("[recommendations] consent audit not recorded for", inserted.id, auditError);
+      });
 
     return json(
       {

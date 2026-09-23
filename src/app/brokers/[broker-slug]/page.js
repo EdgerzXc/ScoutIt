@@ -42,6 +42,13 @@ export async function generateMetadata({ params }) {
   const identity = publicBrokerIdentity(broker);
   const canonical = siteUrl(`/brokers/${identity?.id || slug}`);
   const title = identity ? `${identity.name} · Advisor Profile` : "Advisor Profile";
+  // A-146: social images must be absolute to the production domain. Airtable
+  // serves absolute URLs, which pass through untouched; a relative path gets
+  // the canonical base instead of shipping as a broken relative image.
+  const rawImage = identity?.image || null;
+  const absoluteImage = rawImage
+    ? (/^https?:\/\//i.test(rawImage) ? rawImage : siteUrl(rawImage))
+    : null;
   const description = identity?.bio || "Vetted space intelligence advisor.";
 
   return {
@@ -60,13 +67,13 @@ export async function generateMetadata({ params }) {
       description,
       url: canonical,
       siteName: "ScoutIt",
-      images: identity?.image ? [{ url: identity.image, alt: identity.name }] : undefined,
+      images: absoluteImage ? [{ url: absoluteImage, alt: identity.name }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: identity?.image ? [identity.image] : undefined,
+      images: absoluteImage ? [absoluteImage] : undefined,
     },
   };
 }

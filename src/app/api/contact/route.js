@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { turnstileGuard, clientIpFrom } from "@/lib/turnstile";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 import { sendEmail, renderEmail, isEmailConfigured } from "@/lib/email";
 
 // Public contact intake — the logged-out path for someone who has not signed up
@@ -38,6 +40,10 @@ const schema = z.object({
   turnstileToken: z.string().min(1, "Captcha token is required"),
 });
 
+// A-146: anonymous stranger + stored PII = the loop target. 10/min/IP, the
+// same ceiling as /api/inquiries — generous to humans, closed to loops.
+const checkContactRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 20_000 });
+
 async function sha256Hex(value) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest))
@@ -55,6 +61,17 @@ async function maskIp(request) {
 }
 
 export async function POST(request) {
+  // Unauthenticated PII write: meter per IP before any other work (same
+  // pattern as /api/inquiries — 10/min). Turnstile stops bots; this stops a
+  // loop. The IP is metering-only (maskIp below is what gets stored, salted).
+  const rate = checkContactRate(clientIp(request));
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { ok: false, message: "Too many messages. Please wait and try again." },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
+    );
+  }
+
   let parsed;
   try {
     parsed = schema.safeParse(await request.json());

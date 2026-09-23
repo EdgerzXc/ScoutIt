@@ -131,7 +131,7 @@ test.describe('universal menu behaviour', () => {
     await gotoAndSettle(page, PROPERTY_ROUTE);
     const trigger = await openMenu(page);
 
-    const firstItem = page.locator('#header-menu-panel a[href], #header-menu-panel button').first();
+    const firstItem = page.locator('#header-menu-panel a[href]:visible, #header-menu-panel button:not([disabled]):visible').first();
     await expect(firstItem).toBeFocused();
 
     await page.keyboard.press('Escape');
@@ -143,7 +143,7 @@ test.describe('universal menu behaviour', () => {
     await gotoAndSettle(page, PROPERTY_ROUTE);
     await openMenu(page);
 
-    const items = page.locator('#header-menu-panel a[href], #header-menu-panel button');
+    const items = page.locator('#header-menu-panel a[href]:visible, #header-menu-panel button:not([disabled]):visible');
     const count = await items.count();
     expect(count).toBeGreaterThan(1);
 

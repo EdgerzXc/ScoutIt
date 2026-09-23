@@ -12,6 +12,7 @@ import TaskRail from "../../../components/dashboard/crm/TaskRail";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
 import { loadDeals } from "../../../lib/deals/dealsClient";
+import { normalizeDashboardMode } from "../../../lib/dashboardModes";
 import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -64,13 +65,29 @@ function CRMPageInner() {
     };
   }, [showViewingMenu]);
 
+  // A-146: the lens used to default from localStorage (client display hint
+  // as identity) and the menu always offered owner+broker. Both now derive
+  // from the server profile: only held lenses are offered, defaulting to the
+  // dashboard's last mode when held, else owner.
+  const heldLenses = (Array.isArray(currentUser?.active_roles) ? currentUser.active_roles : [])
+    .map(normalizeDashboardMode)
+    .filter((role) => role === "owner" || role === "broker");
+  const lensOptions = heldLenses.length > 0 ? [...new Set(heldLenses)] : ["owner", "broker"];
+
   // Default the lens to the mode the dashboard was last in.
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("scoutit_user") || "{}");
-      if (saved.primaryMode === "broker") setViewingAs("broker");
-    } catch (e) { /* default stays owner */ }
-  }, []);
+      const lastMode = normalizeDashboardMode(saved.primaryMode);
+      if (lastMode === "broker" && lensOptions.includes("broker")) setViewingAs("broker");
+      else if (lensOptions.includes("owner")) setViewingAs("owner");
+      else setViewingAs(lensOptions[0]);
+    } catch (e) {
+      if (lensOptions.includes("owner")) setViewingAs("owner");
+      else setViewingAs(lensOptions[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [identityResolved]);
 
   const mockUserId = currentUser?.id;
 
@@ -194,7 +211,7 @@ function CRMPageInner() {
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
-            className="p-2 border border-surface-variant rounded-full text-text-secondary hover:text-on-surface hover:border-gold-accent/50 transition shrink-0"
+            className="min-h-11 min-w-11 inline-flex items-center justify-center p-2 border border-surface-variant rounded-full text-text-secondary hover:text-on-surface hover:border-gold-accent/50 transition shrink-0"
             title="Go back to Dashboard"
           >
             <ArrowLeft size={20} />
@@ -227,7 +244,7 @@ function CRMPageInner() {
             </button>
             {showViewingMenu && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-surface-variant rounded-lg shadow-2xl py-2 z-50">
-                {["owner", "broker"].map(role => (
+                {lensOptions.map(role => (
                   <button
                     key={role}
                     onClick={() => { setViewingAs(role); setShowViewingMenu(false); }}
@@ -256,17 +273,17 @@ function CRMPageInner() {
           than a number. A "0 Active Deals" that is really "we do not know yet"
           is the same lie as an invented figure. */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
-        <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
+        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Active Deals</div>
-          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : activeDeals}</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : activeDeals}</div>
         </div>
-        <div className="card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
+        <div className="min-w-0 card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-gold-accent">Pipeline Value</div>
           {loading ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">—</div>
           ) : pricedDeals.length > 0 ? (
             <>
-              <div className="font-body text-2xl font-semibold tracking-tight text-on-surface text-glow tabular-nums">₱{pipelineValue.toLocaleString()}</div>
+              <div className="font-body text-2xl font-semibold tracking-tight text-on-surface text-glow tabular-nums break-words">₱{pipelineValue.toLocaleString()}</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
             </>
           ) : (
@@ -276,12 +293,12 @@ function CRMPageInner() {
             </>
           )}
         </div>
-        <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
+        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Win Rate</div>
           {loading ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">—</div>
           ) : winRate !== null ? (
-            <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{winRate}%</div>
+            <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{winRate}%</div>
           ) : (
             <>
               <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">—</div>
@@ -289,9 +306,9 @@ function CRMPageInner() {
             </>
           )}
         </div>
-        <div className="bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
+        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Upcoming Viewings</div>
-          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : upcomingViewings}</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : upcomingViewings}</div>
         </div>
       </div>
 
@@ -300,19 +317,19 @@ function CRMPageInner() {
         <div className="flex gap-4 md:gap-6">
           <button
             onClick={() => setActiveTab("pipeline")}
-            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex min-h-11 items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "pipeline" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Briefcase size={16} /> Pipeline
           </button>
           <button
             onClick={() => setActiveTab("appointments")}
-            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex min-h-11 items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "appointments" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <Calendar size={16} /> Appointments
           </button>
           <button
             onClick={() => setActiveTab("tasks")}
-            className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
+            className={`flex min-h-11 items-center gap-2 whitespace-nowrap border-b-2 pb-3 font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out ${activeTab === "tasks" ? "border-gold-accent text-gold-accent" : "border-transparent text-text-secondary hover:text-on-surface"}`}
           >
             <ListChecks size={16} /> Tasks
           </button>
@@ -366,6 +383,7 @@ function CRMPageInner() {
           <AppointmentsSheet
             appointments={appointments}
             onStatusUpdate={handleAppointmentUpdate}
+            onRefresh={fetchData}
             userId={mockUserId}
             addToast={addToast}
           />
@@ -397,14 +415,14 @@ function CRMPageInner() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded shadow-2xl z-50 animate-[slideUp_0.2s_ease-out] border bg-surface-alt ${
+          className={`fixed bottom-[calc(90px+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 -translate-x-1/2 max-w-[calc(100vw-2rem)] px-6 py-3 rounded shadow-2xl z-[70] animate-[slideUp_0.2s_ease-out] border bg-surface-alt ${
             toastTone === "error"
               ? "border-error/40 text-error"
               : "border-gold-accent/30 text-gold-accent"
           }`}
         >
-          <p className="flex items-center gap-2 font-body text-base">
-            {toastTone === "locked" && <LockKeyhole size={18} aria-hidden="true" />}
+          <p className="flex items-center gap-2 font-body text-base break-words">
+            {toastTone === "locked" && <LockKeyhole size={18} aria-hidden="true" className="shrink-0" />}
             {showToast}
           </p>
         </div>

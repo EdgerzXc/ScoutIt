@@ -146,3 +146,37 @@ test("the vendored intel bridge keeps the main app's field mapping", async () =>
     "the two copies publish different article shapes depending on which app pressed the button",
   );
 });
+
+// ── A-156: pipeline supply input chain ───────────────────────────────
+
+test("both intel bridges map lifecycle the same way", async () => {
+  const mine = await readFile(path.join(root, "src", "lib", "intelPublish.js"), "utf8");
+  const theirs = await readFile(path.join(root, "..", "src", "lib", "intelPublish.js"), "utf8");
+  for (const needle of [
+    "fields.Lifecycle_Status = pipelineLifecycle;",
+    "fields.Opening_Date = pipelineOpening;",
+  ]) {
+    assert.ok(mine.includes(needle), `Mission Control bridge lost: ${needle}`);
+    assert.ok(theirs.includes(needle), `main-site bridge lost: ${needle}`);
+  }
+});
+
+test("the OSINT insert degrades when the lifecycle migration is unapplied", () => {
+  assert.match(actions, /lifecycleDropped/);
+  assert.match(actions, /PGRST204|schema cache|does not exist/);
+  // The human-readable reason lives in the component that renders it, not
+  // in the action that flags it — assert each where it actually sits.
+  assert.match(
+    component,
+    /lifecycle migration is not applied yet/,
+    "staff must be told why pipeline fields did not persist",
+  );
+});
+
+test("the publish modal carries pipeline fields into the briefing", () => {
+  assert.match(component, /publishLifecycle/);
+  assert.match(component, /publishOpeningDate/);
+  assert.match(component, /type="date"/);
+  // Staff override wins over AI JSON; blank means ordinary intel.
+  assert.match(component, /lifecycle: publishLifecycle \|\| parsedPreview\.lifecycle/);
+});

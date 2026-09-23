@@ -468,7 +468,11 @@ export async function fetchIntel(apiKey, baseId) {
         slug:         f.Slug             || "",
         title:        f.Title            || "Untitled Intel",
         category:     f.SpaceCategory    || "General",
-        intelType:    f.IntelType        || "BRIEFING",
+        intelType:    f.IntelType    || "BRIEFING",
+        // Pipeline supply (A-156). Optional Airtable columns; absent =
+        // ordinary intel, never a default stage.
+        lifecycle:    f.Lifecycle_Status || "",
+        openingDate:  f.Opening_Date     || "",
         date:         f.Date             || "",
         city:         f.City             || "",
         region:       f.Region           || cityToRegion(f.City || ""),
@@ -588,7 +592,7 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
   // precedence over the legacy details.units_inventory blob when provided —
   // see src/app/api/dashboard/units/route.js.
   const unitsJson = JSON.stringify(unitsOverride || data.details?.units_inventory || []);
-  const categoryFields = reverseMapCategoryFields(data.details);
+  const categoryFields = reverseMapCategoryFields(data.details, data.space_category || data.category || data.type);
 
   const payload = {
     records: [
@@ -602,6 +606,12 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
             "Unknown",
           Units_JSON: unitsJson,
           Approved_For_ScoutIt: true,
+          // Insert must carry what update carries: a first-published row that
+          // omits SEO ships without it until an update happens. Conditional so
+          // an absent value writes nothing (never a blank claim).
+          ...(data.seo_title ? { SEO_Title: data.seo_title } : {}),
+          ...(data.seo_description ? { SEO_Description: data.seo_description } : {}),
+          ...(data.seo_json_ld ? { SEO_JSON_LD: data.seo_json_ld } : {}),
           // Carry the position the owner's submission already resolved. Without
           // these, publish sent only the location TEXT and the public page had
           // to geocode it a second time — a different lookup that can land
@@ -682,7 +692,7 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
     fieldsToUpdate.Units_JSON = JSON.stringify(data.details.units_inventory);
   }
   
-  const categoryFields = reverseMapCategoryFields(data.details);
+  const categoryFields = reverseMapCategoryFields(data.details, data.space_category || data.category || data.type);
   Object.assign(fieldsToUpdate, categoryFields);
   
   Object.assign(fieldsToUpdate, photoFields(data));

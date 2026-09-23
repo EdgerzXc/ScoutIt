@@ -89,17 +89,17 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
               {new Date(req.createdAt).toLocaleDateString()}
             </span>
           </div>
-          <p className="text-sm text-on-surface mb-1">
+          <p className="text-sm text-on-surface mb-1 break-words [overflow-wrap:anywhere]">
             <span className="text-gold-accent font-bold">{req.operatorDisplayName}</span> wants to operate units in this building.
           </p>
-          {req.message && <p className="text-xs text-text-secondary mb-3">{req.message}</p>}
+          {req.message && <p className="text-xs text-text-secondary mb-3 break-words [overflow-wrap:anywhere]">{req.message}</p>}
 
           {activeDealId !== req.dealId ? (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 disabled={busy}
-                className="bg-gold-accent text-background font-working-title font-bold px-5 py-2 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
+                className="min-h-11 bg-gold-accent text-background font-working-title font-bold px-5 py-2 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
                 onClick={() => setActiveDealId(req.dealId)}
               >
                 Accept &amp; Pick Units
@@ -107,7 +107,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
               <button
                 type="button"
                 disabled={busy}
-                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error px-5 py-2 rounded transition text-sm font-working-title disabled:opacity-50"
+                className="min-h-11 border border-surface-variant text-text-secondary hover:text-error hover:border-error px-5 py-2 rounded transition text-sm font-working-title disabled:opacity-50"
                 onClick={() => respond(req.dealId, "decline")}
               >
                 Decline
@@ -142,11 +142,11 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
                   ))}
                 </div>
               )}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   disabled={busy || selectedUnitIds.size === 0}
-                  className="bg-gold-accent text-background font-working-title font-bold px-5 py-2 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
+                  className="min-h-11 bg-gold-accent text-background font-working-title font-bold px-5 py-2 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
                   onClick={() => respond(req.dealId, "accept", [...selectedUnitIds])}
                 >
                   Confirm Delegation ({selectedUnitIds.size})
@@ -154,7 +154,7 @@ export default function DelegationRequests({ propertyId, units, onDelegated }) {
                 <button
                   type="button"
                   disabled={busy}
-                  className="border border-surface-variant text-text-secondary hover:text-on-surface px-5 py-2 rounded transition text-sm font-working-title disabled:opacity-50"
+                  className="min-h-11 border border-surface-variant text-text-secondary hover:text-on-surface px-5 py-2 rounded transition text-sm font-working-title disabled:opacity-50"
                   onClick={() => { setActiveDealId(null); setSelectedUnitIds(new Set()); }}
                 >
                   Cancel

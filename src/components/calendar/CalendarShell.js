@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useDashboard } from "@/context/DashboardContext";
 import { crmFetch } from "@/lib/crmClient";
 import {
@@ -98,6 +98,7 @@ export default function CalendarShell() {
   const [events, setEvents] = useState([]); // free-form calendar_events
   const [viewings, setViewings] = useState([]); // read-only appointments
   const [loading, setLoading] = useState(true);
+  const loadGeneration = useRef(0);
   // A failed fetch used to be indistinguishable from an empty week: both
   // rendered a blank grid. The banner keeps whatever did load visible.
   const [loadError, setLoadError] = useState("");
@@ -117,6 +118,7 @@ export default function CalendarShell() {
   }, [view, viewDate]);
 
   const loadData = useCallback(async () => {
+    const generation = ++loadGeneration.current;
     setLoading(true);
     const { from, to } = getRange(view, viewDate);
 
@@ -124,6 +126,8 @@ export default function CalendarShell() {
       fetchCalendarEvents({ from: from.toISOString(), to: to.toISOString(), userId }),
       crmFetch("/api/viewing-appointments", { mockUserId: userId }),
     ]);
+
+    if (generation !== loadGeneration.current) return;
 
     if (eventsRes.status === "fulfilled") setEvents(eventsRes.value);
     if (viewingsRes.status === "fulfilled") {
@@ -236,6 +240,9 @@ export default function CalendarShell() {
     setRespondingId(id);
     try {
       await crmFetch(`/api/viewing-appointments/${id}`, { method: "PATCH", body: { status }, mockUserId: userId });
+      // An older read must not restore the status from before this write.
+      loadGeneration.current += 1;
+      setLoading(false);
       setViewings((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
       setDetailViewing((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
       addToast?.(status === "confirmed" ? "Viewing confirmed" : "Viewing declined", status === "confirmed" ? "✅" : "🚫");
@@ -275,7 +282,7 @@ export default function CalendarShell() {
       )}
 
       {/* Calendar surface */}
-      <div className="flex-1 min-h-0 bg-[#121212] border border-surface-variant rounded-lg overflow-hidden relative">
+      <div className="flex-1 min-h-0 bg-[#121212] border border-surface-variant rounded-lg overflow-hidden relative cal-lens">
         {loading && (
           <div className="absolute top-2 right-3 text-[12px] uppercase tracking-wider font-mono text-text-muted animate-pulse z-30">
             Loading…

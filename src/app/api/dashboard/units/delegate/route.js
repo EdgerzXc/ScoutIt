@@ -157,14 +157,25 @@ export async function POST(request) {
     }
 
     if (action === "decline") {
-      await supabaseAdmin.from("deals").update({ status: "declined" }).eq("id", dealId);
-      await logActivity(supabaseAdmin, {
-        dealId,
-        propertyId: property.id,
-        activityType: "delegation_declined",
-        actorId: userId,
-        metadata: { operatorId: deal.buyer_id },
-      });
+      // A-146: the update was unchecked — success:true with the row still
+      // open shows "declined" for a live delegation. The activity write stays
+      // best-effort (revoke-path convention) but loudly so, never silent.
+      const { error: declineError } = await supabaseAdmin.from("deals").update({ status: "declined" }).eq("id", dealId);
+      if (declineError) {
+        console.error("[units/delegate] decline update failed:", declineError.message);
+        return NextResponse.json({ error: "Could not decline the delegation" }, { status: 500 });
+      }
+      try {
+        await logActivity(supabaseAdmin, {
+          dealId,
+          propertyId: property.id,
+          activityType: "delegation_declined",
+          actorId: userId,
+          metadata: { operatorId: deal.buyer_id },
+        });
+      } catch (activityError) {
+        console.warn("[units/delegate] decline activity not recorded:", activityError?.message);
+      }
       return NextResponse.json({ success: true, status: "declined" });
     }
 

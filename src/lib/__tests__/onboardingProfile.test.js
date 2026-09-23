@@ -66,7 +66,10 @@ describe("onboarding profile contract", () => {
     expect(sanitizeLocationFocus("  BGC,   Makati  ")).toBe("BGC, Makati");
     expect(sanitizeLocationFocus("   ")).toBeNull();
     expect(sanitizeLocationFocus("x".repeat(200))).toHaveLength(160);
-    expect(isPrcLicenseFormatValid("PRC-REB-12345")).toBe(true);
+    expect(isPrcLicenseFormatValid("PRC-REB-1234567")).toBe(true);
+    expect(isPrcLicenseFormatValid("PRC-12345678")).toBe(true);
+    expect(isPrcLicenseFormatValid("PRC-REB-12345")).toBe(false);
     expect(isPrcLicenseFormatValid("PRC-1234")).toBe(false);
+    expect(isPrcLicenseFormatValid("PRC-123456789")).toBe(false);
   });
 });

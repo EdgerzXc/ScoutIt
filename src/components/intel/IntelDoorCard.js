@@ -209,7 +209,7 @@ export default function IntelDoorCard({
               boxShadow: "0 2px 10px rgba(232, 174, 60, 0.25)",
               transition: "transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease",
             }}
-            className="tactile"
+            className="tactile lens-gold-btn"
           >
             <Sparkles size={13} />
             <span>Investigate Impact (Layer 02)</span>

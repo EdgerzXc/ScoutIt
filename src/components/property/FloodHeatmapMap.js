@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import MapCreditControl from '@/components/maps/MapCreditControl';
 import { Protocol } from 'pmtiles';
 
 // Free, open-licensed UP NOAH flood hazard data, self-served as cloud-optimized vector
@@ -80,6 +81,8 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
     ensurePmtilesProtocol();
 
     const map = new maplibregl.Map({
+      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+      attributionControl: false,
       container: mapContainerRef.current,
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: [lng, lat],
@@ -87,6 +90,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new MapCreditControl(), 'bottom-right');
 
     map.on('load', () => {
       try {

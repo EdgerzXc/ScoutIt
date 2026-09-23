@@ -275,6 +275,37 @@ export default function PropertySectionEditor({
           .grid { grid-template-columns: 1fr 1fr; }
           .field:has(textarea) { grid-column: 1 / -1; }
         }
+
+        /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): scoped styles
+           need in-file :global rules. Dark untouched. */
+        :global(body.light-mode) .editor .sec {
+          background: var(--surface);
+          border-color: var(--border);
+        }
+        :global(body.light-mode) .editor .sec.staff {
+          background: rgba(17, 17, 19, 0.04);
+          border-color: var(--border);
+        }
+        :global(body.light-mode) .editor h3,
+        :global(body.light-mode) .editor button {
+          color: var(--text-secondary);
+        }
+        :global(body.light-mode) .editor button {
+          border-color: var(--border-mid);
+        }
+        :global(body.light-mode) .editor .lbl em {
+          color: var(--text-muted);
+        }
+        :global(body.light-mode) .editor input,
+        :global(body.light-mode) .editor textarea {
+          color: var(--text-primary);
+        }
+        :global(body.light-mode) .editor input:focus,
+        :global(body.light-mode) .editor textarea:focus {
+          border-color: var(--border-mid);
+        }
+        :global(body.light-mode) .editor .msg.ok { color: var(--green); }
+        :global(body.light-mode) .editor .msg.err { color: var(--red); }
       `}</style>
     </div>
   );

@@ -47,7 +47,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
       <div className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
         <div className="flex justify-between items-end border-b border-surface-variant pb-4">
           <div>
-            <button className="text-text-secondary hover:text-intel-magenta text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Workspace</button>
+            <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-intel-magenta text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Workspace</button>
             <h2 className="font-display-md text-3xl text-on-surface">Space Staging: {project.title}</h2>
           </div>
           <button
@@ -143,7 +143,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           ))}
           
           {projects.length === 0 && (
-            <div className="col-span-full p-12 text-center border border-dashed border-surface-variant rounded-lg">
+            <div className="col-span-full p-8 md:p-12 text-center border border-dashed border-surface-variant rounded-lg">
               <span className="text-3xl mb-2 block opacity-50">📐</span>
               <p className="text-text-secondary text-sm">No active design staging bounties available.</p>
             </div>

@@ -179,9 +179,9 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         }
         .mf-check {
           flex: 0 0 auto;
-          width: 20px;
-          height: 20px;
-          margin-top: 2px;
+          width: 28px;
+          height: 28px;
+          margin-top: 0;
           accent-color: var(--accent);
           cursor: pointer;
         }

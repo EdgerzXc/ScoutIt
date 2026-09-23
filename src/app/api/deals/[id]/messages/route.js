@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
+import { canPostInDealStatus } from "@/lib/deals/dealStatus";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,14 @@ export async function POST(request, { params }) {
 
     if (deal.status === 'closed') {
       return NextResponse.json({ error: "This conversation has been closed and is read-only." }, { status: 403 });
+    }
+
+    // A-144 §10.10: chat is an accepted-relationship act. Waiting rows
+    // (pending/invited) and finished rows (declined/withdrawn/...) cannot
+    // post — membership alone is not permission before acceptance. The open
+    // conversation states (active/accepted/connected/pitching) post free.
+    if (!canPostInDealStatus(deal.status)) {
+      return NextResponse.json({ error: "This conversation isn't open yet — messages unlock on acceptance." }, { status: 403 });
     }
 
     const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);

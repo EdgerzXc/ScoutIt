@@ -21,16 +21,20 @@ const STORAGE_KEY = "scoutit_connects_wallet";
 // A-114: the three `commission*` keys have **zero spenders anywhere in the
 // repository** — verified by grep, not assumed. They are priced and unreachable.
 // They are deliberately NOT deleted here: whether providers are commissioned
-// through Connects at all, and at what price, is the open question in
+// through Connects at all is the open question in
 // [[MASTER_OWNER_ACTIONS|O-022]]. Removing them would answer it by attrition;
 // leaving them undocumented is what let them look implemented. Recorded instead.
+//
+// A-144 (Connect Rules v1 invariant #1): never consume more than 1 Connect for
+// a single send action. All priced actions are therefore 1 until an owner
+// decision explicitly changes the invariant — no silent 2-Connect actions.
 export const CONNECT_COSTS = {
   handshake:    1,  // owner invites broker OR broker pitches owner
   brokerContact: 1, // seeker contacts a broker directly
   // ── UNREACHABLE pending O-022 — no caller spends any of these ──
-  commissionPhotographer: 2,
-  commissionResearcher:   2,
-  commissionEventPlanner: 2,
+  commissionPhotographer: 1,
+  commissionResearcher:   1,
+  commissionEventPlanner: 1,
 };
 
 // The subset that a real code path actually spends. A key outside this set is a

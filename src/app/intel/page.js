@@ -222,6 +222,63 @@ export default function IntelPage() {
               }
             />
           </InViewport>
+          {/* Radar proximity control docked to the map (bottom bar) — it
+              lives WITH the instrument, so detecting never shoves the page.
+              Dark glass in both themes: it floats over/against the dark map,
+              same doctrine as the map's own overlays. */}
+          <div className="intel-radar-dock" role="group" aria-label="Radar proximity filter">
+            <div className="intel-radar-strip">
+              {radar ? (
+                <>
+                  <label className="intel-radar-label" htmlFor="intel-radius">
+                    Radius
+                    <output className="intel-radar-value">{radar.radiusKm} km</output>
+                  </label>
+                  <input
+                    id="intel-radius"
+                    type="range"
+                    min="1"
+                    max="80"
+                    step="1"
+                    value={radar.radiusKm}
+                    onChange={(e) =>
+                      setRadar((r) => ({ ...r, radiusKm: Number(e.target.value) }))
+                    }
+                    className="intel-radar-range"
+                  />
+                  <span className="intel-radar-result">
+                    {filteredArticles.length}{" "}
+                    {filteredArticles.length === 1 ? "signal" : "signals"} inside
+                  </span>
+                  <button
+                    type="button"
+                    className="intel-radar-clear"
+                    onClick={() => setRadar(null)}
+                  >
+                    Clear radar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="intel-radar-idle">
+                    Drop a radar to see only what is near one place.
+                  </span>
+                  <button
+                    type="button"
+                    className="intel-radar-start"
+                    onClick={() =>
+                      setRadar({ lat: 14.5547, lng: 121.0244, radiusKm: 12 })
+                    }
+                  >
+                    Drop a radar
+                  </button>
+                  <Link href="/discover" className="intel-radar-search-link">
+                    Need to search? Open Discover
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
         </section>
 
         {/* Active Location Filter Banner */}
@@ -349,57 +406,6 @@ export default function IntelPage() {
         {/* Filter Section. There is deliberately no search box here — Intel
             is browsed, Discover is queried. */}
         <section className="controls-section" id="intel-dispatches-grid">
-          <div className="intel-radar-strip">
-            {radar ? (
-              <>
-                <label className="intel-radar-label" htmlFor="intel-radius">
-                  Radius
-                  <output className="intel-radar-value">{radar.radiusKm} km</output>
-                </label>
-                <input
-                  id="intel-radius"
-                  type="range"
-                  min="1"
-                  max="80"
-                  step="1"
-                  value={radar.radiusKm}
-                  onChange={(e) =>
-                    setRadar((r) => ({ ...r, radiusKm: Number(e.target.value) }))
-                  }
-                  className="intel-radar-range"
-                />
-                <span className="intel-radar-result">
-                  {filteredArticles.length}{" "}
-                  {filteredArticles.length === 1 ? "signal" : "signals"} inside
-                </span>
-                <button
-                  type="button"
-                  className="intel-radar-clear"
-                  onClick={() => setRadar(null)}
-                >
-                  Clear radar
-                </button>
-              </>
-            ) : (
-              <>
-                <span className="intel-radar-idle">
-                  Drop a radar to see only what is near one place.
-                </span>
-                <button
-                  type="button"
-                  className="intel-radar-start"
-                  onClick={() =>
-                    setRadar({ lat: 14.5547, lng: 121.0244, radiusKm: 12 })
-                  }
-                >
-                  Drop a radar
-                </button>
-                <Link href="/discover" className="intel-radar-search-link">
-                  Need to search? Open Discover
-                </Link>
-              </>
-            )}
-          </div>
           <div className="filter-tabs-wrapper">
             {categories.map(cat => (
               <button
@@ -871,6 +877,34 @@ export default function IntelPage() {
           align-items: center;
           flex-wrap: wrap;
           gap: 14px;
+        }
+
+        /* ── RADAR DOCK (bottom bar of the map) ─────────────────────
+           Dark instrument glass in BOTH themes — it sits against the dark
+           map, so its inks are hardcoded light (same doctrine as the map's
+           own overlays). Fixed min-height: idle/active swaps never move
+           the page. */
+        .intel-radar-dock {
+          margin-top: 10px;
+          display: flex;
+          align-items: center;
+          min-height: 68px;
+          padding: 12px 16px;
+          border: 1px solid rgba(232, 174, 60, 0.3);
+          border-radius: 4px;
+          background: rgba(13, 13, 13, 0.94);
+        }
+        .intel-radar-dock .intel-radar-label,
+        .intel-radar-dock .intel-radar-idle {
+          color: #c8c8c8;
+        }
+        .intel-radar-dock .intel-radar-value,
+        .intel-radar-dock .intel-radar-result {
+          color: #E8AE3C;
+        }
+        .intel-radar-dock .intel-radar-search-link {
+          color: #c8c8c8;
+          border-color: rgba(232, 174, 60, 0.35);
         }
 
         .intel-radar-idle {

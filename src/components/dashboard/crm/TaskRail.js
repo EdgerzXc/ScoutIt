@@ -175,7 +175,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
           onChange={(e) => setTitle(e.target.value)}
           maxLength={300}
         />
-        <div className="flex gap-2 w-full">
+        <div className="flex flex-wrap gap-2 w-full">
           <input
             type="date"
             aria-label="Due date"
@@ -222,12 +222,12 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
               <button
                 onClick={() => advanceTask(task)}
                 aria-label={NEXT_STATUS_LABEL[task.status] || "Advance this task"}
-                className={`mt-0.5 transition shrink-0 ${inProgress ? "text-gold-accent" : "text-text-muted hover:text-gold-accent"}`}
+                className={`transition shrink-0 flex min-h-11 min-w-11 items-center justify-center -m-2 ${inProgress ? "text-gold-accent" : "text-text-muted hover:text-gold-accent"}`}
               >
                 {inProgress ? <CircleDashed size={18} /> : <Circle size={18} />}
               </button>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-on-surface leading-snug">{task.title}</p>
+                <p className="text-sm text-on-surface leading-snug break-words [overflow-wrap:anywhere]">{task.title}</p>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
                   {inProgress && (
                     <span className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent">
@@ -254,7 +254,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
               <button
                 onClick={() => deleteTask(task)}
                 aria-label="Delete task"
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-text-muted hover:text-error transition shrink-0 p-1"
+                className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100 focus:opacity-100 text-text-muted hover:text-error transition shrink-0 min-h-11 min-w-11 flex items-center justify-center -m-1"
               >
                 <Trash2 size={14} />
               </button>
@@ -267,7 +267,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
         <div className="border-t border-surface-variant pt-2">
           <button
             onClick={() => setShowDone((v) => !v)}
-            className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition"
+            className="min-h-11 inline-flex items-center text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition"
           >
             {showDone ? "Hide" : "Show"} completed ({closed.length})
           </button>
@@ -278,12 +278,12 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
                   <button
                     onClick={() => advanceTask(task)}
                     aria-label={NEXT_STATUS_LABEL[task.status] || "Reopen this task"}
-                    className="mt-0.5 text-success shrink-0"
+                    className="text-success shrink-0 flex min-h-11 min-w-11 items-center justify-center -m-2"
                   >
                     <CheckCircle2 size={18} />
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-text-secondary line-through leading-snug">{task.title}</p>
+                    <p className="text-sm text-text-secondary line-through leading-snug break-words [overflow-wrap:anywhere]">{task.title}</p>
                     {task.status === "cancelled" && (
                       <span className="text-[12px] font-label-caps tracking-widest uppercase text-text-muted">
                         Cancelled
@@ -293,7 +293,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
                   <button
                     onClick={() => deleteTask(task)}
                     aria-label="Delete task"
-                    className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error transition shrink-0 p-1"
+                    className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-text-muted hover:text-error transition shrink-0 min-h-11 min-w-11 flex items-center justify-center -m-1"
                   >
                     <Trash2 size={14} />
                   </button>

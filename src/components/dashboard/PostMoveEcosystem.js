@@ -57,7 +57,7 @@ export default function PostMoveEcosystem() {
               {checklist.map(item => (
                 <li key={item.id}>
                   <button type="button"
-                    className="flex items-center gap-3 cursor-pointer group text-left block w-full"
+                    className="flex min-h-11 items-center gap-3 cursor-pointer group text-left block w-full"
                     onClick={() => toggleCheck(item.id)}
                   >
                     <div className="text-gold-accent shrink-0 transition-transform group-hover:scale-110">
@@ -75,7 +75,7 @@ export default function PostMoveEcosystem() {
 
         {/* Right Column: Utilities CTA */}
         <div className="lg:col-span-7 flex flex-col justify-center">
-          <Link href="/layer/crust#wire" className="relative overflow-hidden bg-surface-alt border border-surface-variant rounded-lg p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-gold-accent group transition h-full min-h-[220px]">
+          <Link href="/layer/crust#wire" className="relative overflow-hidden bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-gold-accent group transition h-full min-h-[220px]">
             <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
             
             <div className="flex flex-col gap-3 relative z-10 w-full max-w-sm">

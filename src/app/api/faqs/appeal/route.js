@@ -7,8 +7,16 @@ import { stripAllTags } from "@/lib/sanitize";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { detectContactLeak } from "@/lib/contactLeakFilter";
 import { isFaqAppealActive } from "@/lib/faqAppealGate";
+import { turnstileGuard } from "@/lib/turnstile";
+import { createRateLimiter } from "@/lib/rateLimit";
 
-const appealSchema = z.object({ evidenceId: z.string().uuid(), explanation: z.string().min(10).max(500) }).strict();
+const appealSchema = z.object({
+  evidenceId: z.string().uuid(),
+  explanation: z.string().min(10).max(500),
+  // A-146: abuse-prone authed submit. The token is single-use; the panel
+  // resets the widget after any failed submit (see FAQPreflightPanel).
+  turnstileToken: z.string().min(1, "Captcha token is required"),
+}).strict();
 const reviewSchema = z.object({
   appealId: z.string().uuid(),
   expectedStatus: z.enum(["pending", "under_review"]),
@@ -25,14 +33,23 @@ function requireCapability() {
   return null;
 }
 
+// A-146: authenticated, but each submit costs an RPC + reviewer attention.
+// Keyed on the verified user (no NAT sharing); 20/min is generous to humans.
+// The RPC's own APPEAL_LIMIT stays the semantic cap — this is the loop brake.
+const checkAppealRate = createRateLimiter({ limit: 20, windowMs: 60_000, maxKeys: 20_000 });
+
 export async function POST(req) {
   try {
     const unavailable = requireCapability();
     if (unavailable) return unavailable;
     const userId = await resolveUserId(req);
     if (!userId) return fail("Authentication required.", 401);
+    const appealRate = checkAppealRate(userId);
+    if (!appealRate.allowed) return fail("Too many appeals. Please wait and try again.", 429);
     const parsed = appealSchema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return fail("Invalid appeal evidence or explanation.", 400);
+    const blocked = await turnstileGuard(req, parsed.data.turnstileToken);
+    if (blocked) return fail("Bot check did not pass. Please try again.", 403);
     const explanation = stripAllTags(parsed.data.explanation).trim();
     if (explanation.length < 10) return fail("Please provide a clear explanation.", 400);
     if (!detectContactLeak(explanation).clean) {

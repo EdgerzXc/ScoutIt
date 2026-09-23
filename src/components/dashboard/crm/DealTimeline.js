@@ -115,14 +115,16 @@ export default function DealTimeline({
                   month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
                 })}
               </p>
-              <p className="text-sm text-on-surface flex items-center gap-1.5">
-                <ActivityIcon name={icon} className={TONE_CLASSES[tone] || TONE_CLASSES.neutral} />
-                {label}
-                {showPropertyTitles && item.propertyTitle && (
-                  <span className="text-text-secondary">— {item.propertyTitle}</span>
-                )}
+              <p className="text-sm text-on-surface flex items-start gap-1.5">
+                <ActivityIcon name={icon} className={`${TONE_CLASSES[tone] || TONE_CLASSES.neutral} shrink-0 mt-0.5`} />
+                <span className="min-w-0 break-words [overflow-wrap:anywhere]">
+                  {label}
+                  {showPropertyTitles && item.propertyTitle && (
+                    <span className="text-text-secondary"> — {item.propertyTitle}</span>
+                  )}
+                </span>
               </p>
-              {detail && <p className="text-xs text-text-secondary mt-0.5">{detail}</p>}
+              {detail && <p className="text-xs text-text-secondary mt-0.5 break-words [overflow-wrap:anywhere]">{detail}</p>}
             </div>
           );
         })}
@@ -132,7 +134,7 @@ export default function DealTimeline({
         <button
           onClick={loadMore}
           disabled={loadingMore}
-          className="self-start ml-2 text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition disabled:opacity-50"
+          className="self-start ml-2 min-h-11 inline-flex items-center text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-on-surface transition disabled:opacity-50"
         >
           {loadingMore ? "Loading…" : "Load more"}
         </button>

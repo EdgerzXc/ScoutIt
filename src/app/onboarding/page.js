@@ -164,6 +164,13 @@ export default function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // A-146: onboarding step drops were unwired — every abandonment looked like
+  // never arriving. One effect, not per-button calls, so a new step cannot be
+  // added without measurement.
+  useEffect(() => {
+    trackEvent(GA_EVENTS.ONBOARDING_STEP, { step });
+  }, [step]);
+
   const setEmail = (email) => {
     setEmailConfirmationSent(false);
     setFormData((current) => ({ ...current, email }));
@@ -399,6 +406,7 @@ export default function OnboardingPage() {
             <button type="button" className="min-h-11 px-4 rounded border border-success/40 text-success text-xs font-bold disabled:opacity-50" disabled={confirmationBusy || !captchaToken} onClick={handleResendConfirmation}>
               {confirmationBusy ? "Sending…" : "Resend confirmation email"}
             </button>
+            {!captchaToken && <p className="text-xs text-text-muted leading-relaxed mt-3">Waiting on the bot check above — the resend unlocks once it passes.</p>}
             <button type="button" className="min-h-11 px-4 rounded border border-surface-variant text-on-surface text-xs font-bold" onClick={handleDifferentEmail}>
               Use a different email
             </button>
@@ -498,7 +506,7 @@ export default function OnboardingPage() {
         <div className="bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 mb-8">
           {mode === "buyer" && <><h3 className="font-working-title text-xl text-on-surface mb-2">Where are you scouting?</h3><p className="text-text-secondary text-sm mb-6">Optional and private. This helps personalize your discovery feed.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full" maxLength={160} placeholder="e.g. BGC, Makati, Siargao" value={formData.locationFocus} onChange={(event) => setFormData({ ...formData, locationFocus: event.target.value })} /></>}
           {mode === "owner" && <><h3 className="font-working-title text-xl text-on-surface mb-2">Ready to list a property?</h3><p className="text-text-secondary text-sm">You can open the listing builder immediately after your account setup succeeds, or explore the dashboard first.</p></>}
-          {mode === "broker" && <><h3 className="font-working-title text-xl text-on-surface mb-2">Broker license</h3><p className="text-text-secondary text-sm mb-3">Enter your PRC Real Estate Broker license number. This records your claim; public verification remains a separate review.</p><p className="text-text-secondary text-sm mb-6">ScoutIt lists <span className="text-on-surface">licensed real estate brokers</span>. A salesperson accreditation is a different credential and cannot be entered here — if that is what you hold, ask your supervising broker to register.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full uppercase" maxLength={80} placeholder="PRC-REB-XXXXXXX" value={formData.prcLicense} onChange={(event) => setFormData({ ...formData, prcLicense: event.target.value })} />{formData.prcLicense && !isPrcLicenseFormatValid(formData.prcLicense) && <p className="text-error text-sm mt-3">Enter a license number containing at least five digits.</p>}</>}
+          {mode === "broker" && <><h3 className="font-working-title text-xl text-on-surface mb-2">Broker license</h3><p className="text-text-secondary text-sm mb-3">Enter your PRC Real Estate Broker license number. This records your claim; public verification remains a separate review.</p><p className="text-text-secondary text-sm mb-6">ScoutIt lists <span className="text-on-surface">licensed real estate brokers</span>. A salesperson accreditation is a different credential and cannot be entered here — if that is what you hold, ask your supervising broker to register.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full uppercase" maxLength={80} placeholder="PRC-REB-XXXXXXX" value={formData.prcLicense} onChange={(event) => setFormData({ ...formData, prcLicense: event.target.value })} />{formData.prcLicense && !isPrcLicenseFormatValid(formData.prcLicense) && <p className="text-error text-sm mt-3">Enter a 7- or 8-digit PRC license number.</p>}</>}
         </div>
         <label className="mb-6 flex min-h-11 cursor-pointer items-start gap-3 rounded border border-surface-variant bg-surface p-4 text-sm text-text-secondary">
           <input

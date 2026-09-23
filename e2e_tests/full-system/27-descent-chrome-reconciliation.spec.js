@@ -117,7 +117,12 @@ test("Stratosphere route-local motion and focus match the shared system", async 
   const headline = page.locator(".strat-intro");
   expect(await headline.evaluate((node) => getComputedStyle(node).animationName)).toBe("none");
 
+  const cinematic = page.getByRole("button", { name: /Cinematic Descent/i });
   const mapDoor = page.getByRole("link", { name: /See it on the map/i });
+  await expect.poll(async () => {
+    if (!(await mapDoor.isVisible())) await cinematic.click();
+    return mapDoor.isVisible();
+  }, { timeout: 15000 }).toBe(true);
   await mapDoor.focus();
   await expect(mapDoor).toBeFocused();
   const focus = await mapDoor.evaluate((node) => getComputedStyle(node).outlineWidth);

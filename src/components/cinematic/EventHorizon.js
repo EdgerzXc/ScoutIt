@@ -6,6 +6,7 @@
    Pauses when off-screen or the tab is hidden; respects reduced-motion. */
 
 import { useEffect, useRef } from "react";
+import { isLiteMode } from "@/lib/liteMode";
 
 export default function EventHorizon({ className = "" }) {
   const ref = useRef(null);
@@ -156,7 +157,9 @@ export default function EventHorizon({ className = "" }) {
       });
     };
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // A-146: reduced-motion took the still path, but Lite Mode — the
+    // device-can't-afford-it switch — animated anyway. Same still frame.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isLiteMode()) {
       resize(); draw(0);
       const onResize = () => { resize(); draw(0); };
       window.addEventListener("resize", onResize);

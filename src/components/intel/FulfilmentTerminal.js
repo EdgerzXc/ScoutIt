@@ -284,7 +284,7 @@ export default function FulfilmentTerminal({
               boxShadow: "0 4px 18px rgba(232, 174, 60, 0.35)",
               transition: "all 0.15s ease",
             }}
-            className="tactile"
+            className="tactile lens-gold-btn"
           >
             <Sparkles size={14} />
             <span>Return to Your Move with Finding Attached</span>

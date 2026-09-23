@@ -120,6 +120,7 @@ import HoverCard from "@/components/ui/HoverCard";
 import MeshHero from "@/components/ui/MeshHero";
 import Image from "next/image";
 import { intelSourceLabel } from "@/lib/freshness";
+import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import ChapterSubtitle from "@/components/property/ChapterSubtitle";
 import SidebarDetails from "@/components/property/SidebarDetails";
 
@@ -448,15 +449,22 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   const [propertyRoster, setPropertyRoster] = useState([]);
   const [rosterLoaded, setRosterLoaded] = useState(false);
   const [rosterUnavailable, setRosterUnavailable] = useState(false);
+  // A-147: the uploader/lister disclosure for unrepresented properties —
+  // "Anonymous" or the public owner's name, resolved server-side. Null until
+  // the roster answers, and null whenever representation exists.
+  const [rosterUploader, setRosterUploader] = useState(null);
   useEffect(() => {
     if (isDraftMode || !slug) return undefined;
     let cancelled = false;
     fetch(`/api/property/${encodeURIComponent(slug)}/brokers`, { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
-        if (!cancelled) setPropertyRoster(Array.isArray(data?.brokers) ? data.brokers : []);
+        if (!cancelled) {
+          setPropertyRoster(Array.isArray(data?.brokers) ? data.brokers : []);
+          setRosterUploader(typeof data?.uploader === "string" ? data.uploader : null);
+        }
       })
-      .catch(() => { if (!cancelled) { setPropertyRoster([]); setRosterUnavailable(true); } })
+      .catch(() => { if (!cancelled) { setPropertyRoster([]); setRosterUploader(null); setRosterUnavailable(true); } })
       .finally(() => { if (!cancelled) setRosterLoaded(true); });
     return () => { cancelled = true; };
   }, [slug, isDraftMode]);
@@ -1111,7 +1119,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
       setTimeout(() => {
         document.querySelector('.zone-story')
           ?.scrollIntoView({ 
-            behavior: 'smooth', 
+            behavior: motionSafeScrollBehavior(), 
             block: 'start' 
           });
       }, 50);
@@ -2454,7 +2462,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                           key={u.name}
                           onClick={() => {
                             const el = document.getElementById(`unit-row-${ui}`);
-                            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                            if (el) el.scrollIntoView({ behavior: motionSafeScrollBehavior(), block: "center" });
                           }}
                           style={{display:"flex", alignItems:"baseline", gap:"10px", width:"100%", textAlign:"left", background:"none", border:"none", borderBottom:"1px solid var(--border)", padding:"9px 0", cursor:"pointer"}}
                         >
@@ -2688,6 +2696,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(232,174,60,0.03)" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
+                  {rosterLoaded && !rosterUnavailable && propertyRoster.length === 0 && rosterUploader ? (
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "8px" }}>Listed by {rosterUploader}</div>
+                  ) : null}
                   {slug ? (
                   <Link href={`/property/${slug}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
                   ) : null}

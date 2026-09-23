@@ -3,6 +3,7 @@ import HoverCard from '../../ui/HoverCard';
 import ShareModal from "@/components/property/ShareModal";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { buildShareText } from "@/lib/shareBriefing";
+import { COMPLETENESS_UNKNOWN_LABEL } from "@/lib/dashboardListings";
 
 const OwnerListingCard = memo(({ 
   listing, 
@@ -40,7 +41,7 @@ const OwnerListingCard = memo(({
   return (
     <>
       <HoverCard
-        className="p-5 md:p-6 flex flex-col cursor-pointer h-auto min-h-[12rem] md:h-64 shrink-0 w-[85vw] snap-center md:w-auto md:shrink"
+        className="p-5 md:p-6 flex flex-col cursor-pointer h-auto min-h-[12rem] md:h-64 shrink-0 w-[80vw] max-w-[340px] snap-center md:w-auto md:max-w-none md:shrink"
         isSelected={isSelected}
         isCta={pendingPitchesCount > 0}
         index={index}
@@ -57,13 +58,16 @@ const OwnerListingCard = memo(({
         )}
         <div className="flex justify-between items-start mb-auto">
           <div className="pr-4">
-            <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline">
+            <h3 className="font-working-title text-xl text-on-surface mb-1 group-hover:underline break-words min-w-0 [overflow-wrap:anywhere]">
               {listing.title || 'Untitled Property'}
               <ProvenanceBadge record={listing} />
             </h3>
-            <p className="text-xs text-text-secondary">{listing.location || 'Location missing'}</p>
+            <p className="text-xs text-text-secondary break-words [overflow-wrap:anywhere]">{listing.location || 'Location missing'}</p>
           </div>
           {!selectMode && (
+            // A-146: null means unknown (dashboardListings completenessScoreOf),
+            // never "null%" — a stated absence, not a computed-looking zero.
+            Number.isFinite(completeness) ? (
             <div className="relative w-10 h-10 shrink-0" title={`${completeness}% complete`}>
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path className="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
@@ -73,6 +77,9 @@ const OwnerListingCard = memo(({
                 <span className="font-data-tabular font-bold text-[12px] text-text-primary leading-none">{completeness}%</span>
               </div>
             </div>
+            ) : (
+              <span className="shrink-0 font-label-caps text-[12px] tracking-widest uppercase text-text-secondary" title="Listing strength has not been computed yet">{COMPLETENESS_UNKNOWN_LABEL}</span>
+            )
           )}
         </div>
 

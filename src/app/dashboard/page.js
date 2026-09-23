@@ -22,7 +22,7 @@ import { loadDeals } from "../../lib/deals/dealsClient";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
-import { normalizeDashboardMode, normalizeDashboardModes } from "../../lib/dashboardModes";
+import { normalizeDashboardModes, pickPrimaryRole } from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
@@ -79,7 +79,7 @@ function DashboardInner() {
       }
 
       parsed.tags = normalizeDashboardModes(parsed.tags, parsed.primaryMode);
-      parsed.primaryMode = normalizeDashboardMode(parsed.primaryMode) || parsed.tags[0];
+      parsed.primaryMode = pickPrimaryRole(parsed.tags, parsed.primaryMode);
       if (!parsed.primaryMode || parsed.tags.length === 0) {
         router.replace("/onboarding");
         return;
@@ -108,7 +108,7 @@ function DashboardInner() {
       currentUser.active_roles,
       currentUser.primary_mode || currentUser.role,
     );
-    const primaryMode = normalizeDashboardMode(currentUser.primary_mode) || tags[0];
+    const primaryMode = pickPrimaryRole(tags, currentUser.primary_mode);
     if (!primaryMode || tags.length === 0) {
       router.push("/onboarding");
       return;
@@ -330,6 +330,10 @@ function DashboardInner() {
             </Link>
           )}
 
+          {(mode === "owner" || mode === "broker" || mode === "operator") && (
+            <Link href="/dashboard/open-gate" className="font-mono text-[12px] uppercase tracking-wider text-gold-accent hover:underline" aria-label="Open Gate settings">Open Gate</Link>
+          )}
+
           <Link
             href="/dashboard/inbox"
             className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition"
@@ -473,7 +477,7 @@ function DashboardInner() {
 
       {/* Mobile Profile Menu Slide-out */}
       {showMobileProfileMenu && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end animate-[fadeIn_0.3s_ease-out]">
+        <div className="md:hidden fixed inset-0 z-[100001] flex flex-col justify-end animate-[fadeIn_0.3s_ease-out]">
           <button type="button" aria-label="Close Mobile Profile Menu" className="absolute inset-0 w-full h-full block bg-background/60 backdrop-blur-sm" onClick={() => setShowMobileProfileMenu(false)}></button>
           <div className="bg-surface border-t border-surface-variant rounded-t-2xl w-full p-6 animate-[slideUp_0.3s_ease-out] relative z-10">
             <div className="flex justify-between items-center mb-6">

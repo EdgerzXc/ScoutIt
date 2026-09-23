@@ -7,6 +7,14 @@ describe("private auth return paths", () => {
     expect(normalizePrivateReturnPath("/admin")).toBe("/admin");
   });
 
+  // A-146: settings and wishlist are auth-gated app surfaces too — a deep
+  // link there must survive the login stub, same-origin only, same as above.
+  it("preserves settings and wishlist deep links", () => {
+    expect(normalizePrivateReturnPath("/settings")).toBe("/settings");
+    expect(normalizePrivateReturnPath("/wishlist")).toBe("/wishlist");
+    expect(normalizePrivateReturnPath("/settings?tab=privacy")).toBe("/settings?tab=privacy");
+  });
+
   it.each([
     "https://attacker.example/dashboard",
     "//attacker.example/dashboard",

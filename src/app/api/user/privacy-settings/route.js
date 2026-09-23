@@ -49,11 +49,15 @@ export async function GET(request) {
     //
     // ⚠️ NOT TIER-GATED, and this route must never learn to check a tier.
     // Standing Rule 10: defaults may differ by tier, access never may.
-    const { data: shield } = await supabaseAdmin
-      .from("privacy_settings")
-      .select("anonymous_browsing, anonymous_byline, public_roles")
-      .eq("user_id", userId)
-      .maybeSingle();
+    //
+    // A-152: email_alerts rides the same table but lands via its own
+    // migration (O-004 item 7). Until that migration is applied the column
+    // does not exist — readShield degrades to the honest default instead of
+    // 500ing (the A-144/A-148 pattern: never 500 on a missing column).
+    const { shield, emailAlertsStored } = await readShield(
+      supabaseAdmin,
+      userId,
+    );
 
     return NextResponse.json({
       success: true,
@@ -74,6 +78,11 @@ export async function GET(request) {
         // A-135: which roles show on the public profile. Unset means none —
         // never "all", for the same fail-closed reason as the flags above.
         publicRoles: normalizePublicRoles(shield?.public_roles) ?? [],
+        // A-152: unset (or pre-migration) means the effective default — email
+        // fallback ON — because that is what the server actually does today.
+        // Reporting OFF would promise silence the fallback does not keep.
+        emailAlerts: shield?.email_alerts ?? true,
+        emailAlertsStored,
         // "unknown" is the honest default, not "declared_adult" (§47).
         // Reporting an attestation the user never made is how a legal-capacity
         // claim gets fabricated by a fallback value.
@@ -126,6 +135,19 @@ export async function POST(request) {
     if (typeof body.anonymousByline === "boolean") {
       shieldUpdates.anonymous_byline = body.anonymousByline;
     }
+    // A-152: email-fallback preference. A boolean only; anything else is
+    // refused whole, never partly applied.
+    let emailAlertsRequested;
+    if (body.emailAlerts !== undefined) {
+      if (typeof body.emailAlerts !== "boolean") {
+        return NextResponse.json(
+          { error: "emailAlerts must be true or false." },
+          { status: 400 },
+        );
+      }
+      emailAlertsRequested = body.emailAlerts;
+    }
+
     // A-135: role visibility moved here from the browser-direct write on
     // /profile, so privacy has one writer. Only an array of allowed role names
     // is accepted; anything else is refused whole, never partly applied.
@@ -140,7 +162,11 @@ export async function POST(request) {
       shieldUpdates.public_roles = roles;
     }
 
-    if (Object.keys(updates).length === 0 && Object.keys(shieldUpdates).length === 0) {
+    if (
+      Object.keys(updates).length === 0 &&
+      Object.keys(shieldUpdates).length === 0 &&
+      emailAlertsRequested === undefined
+    ) {
       return NextResponse.json(
         { error: "No valid privacy settings provided to update." },
         { status: 400 }
@@ -185,6 +211,28 @@ export async function POST(request) {
       }
     }
 
+    // A-152: written separately from the shield upsert above. If the
+    // email_alerts migration (O-004 item 7) has not been applied, this write
+    // 42703s — that must degrade to an honest stored:false, not fail the
+    // whole save (the other fields above really did save).
+    let emailAlertsStored = true;
+    if (emailAlertsRequested !== undefined) {
+      const { error } = await supabaseAdmin
+        .from("privacy_settings")
+        .upsert(
+          { user_id: userId, email_alerts: emailAlertsRequested },
+          { onConflict: "user_id" },
+        );
+      if (error && error.code === "42703") {
+        emailAlertsStored = false;
+      } else if (error) {
+        return NextResponse.json(
+          { error: sanitizeError(error, "Could not update your notification settings.") },
+          { status: 500 }
+        );
+      }
+    }
+
     // Read the whole set back rather than echoing the request. The client
     // renders what it is told, so it must be told what is actually stored.
     const { data: profileAfter } = await supabaseAdmin
@@ -192,11 +240,11 @@ export async function POST(request) {
       .select("is_profile_public, telemetry_opt_out, marketing_opt_out")
       .eq("id", userId)
       .maybeSingle();
-    const { data: shieldAfter } = await supabaseAdmin
-      .from("privacy_settings")
-      .select("anonymous_browsing, anonymous_byline, public_roles")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const { shield: shieldAfter, emailAlertsStored: storedAfter } =
+      await readShield(supabaseAdmin, userId);
+    // The read-back is the truth about storage whether or not this request
+    // touched the preference: a missing column reads stored:false.
+    emailAlertsStored = storedAfter;
 
     return NextResponse.json({
       success: true,
@@ -210,6 +258,8 @@ export async function POST(request) {
         anonymousBrowsing: shieldAfter?.anonymous_browsing ?? false,
         anonymousByline: shieldAfter?.anonymous_byline ?? false,
         publicRoles: normalizePublicRoles(shieldAfter?.public_roles) ?? [],
+        emailAlerts: shieldAfter?.email_alerts ?? true,
+        emailAlertsStored,
       },
       message: "Privacy settings updated successfully.",
     });
@@ -220,4 +270,28 @@ export async function POST(request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * A-152 — tolerant read of the privacy_settings row. email_alerts lands via
+ * its own migration (O-004 item 7); until then selecting it raises 42703
+ * (undefined column). That degrades to stored:false with the pre-migration
+ * columns, never to a 500. Any other error keeps the historical behavior —
+ * a null row — because the callers already fail safe on it.
+ */
+async function readShield(client, userId) {
+  const attempt = await client
+    .from("privacy_settings")
+    .select("anonymous_browsing, anonymous_byline, public_roles, email_alerts")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (attempt.error && attempt.error.code === "42703") {
+    const fallback = await client
+      .from("privacy_settings")
+      .select("anonymous_browsing, anonymous_byline, public_roles")
+      .eq("user_id", userId)
+      .maybeSingle();
+    return { shield: fallback.data ?? null, emailAlertsStored: false };
+  }
+  return { shield: attempt.data ?? null, emailAlertsStored: true };
 }

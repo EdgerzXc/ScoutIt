@@ -5,8 +5,9 @@ import { join } from "node:path";
 // A-096 — interface contracts a screen reader and a tab bar depend on.
 // Render tests are impossible in this repo (JSX in .js), so these pin the
 // structure by reading source. County of exception, recorded once:
-// - /off-market gets NO title here (indexability undecided — adding metadata
-//   that improves its ranking first is the wrong order).
+// - /off-market is titled ONLY beside noindex (A-146): private inventory must
+//   never be indexed, and a title-only layout would have improved its ranking
+//   before excluding it. The noindex layout landed first, title with it.
 // - /showcase heading/landmark fixes touch a locked surface: scoped to O-001
 //   review, not this task.
 // - The two axe contrast readings (#f44336, #fb923c) reproduce from no source
@@ -72,7 +73,7 @@ describe("A-096 — controls announce themselves", () => {
   });
 });
 
-describe("A-096 — every route names its tab (except undecided /off-market)", () => {
+describe("A-096 — every route names its tab (off-market: titled, noindexed)", () => {
   const titled = {
     "src/app/dashboard/layout.js": "Dashboard",
     "src/app/dashboard/inbox/layout.js": "Inbox",
@@ -87,11 +88,33 @@ describe("A-096 — every route names its tab (except undecided /off-market)", (
     "src/app/transit/layout.js": "Transit",
     "src/app/onboarding/layout.js": "Create Account",
     "src/app/descent/layout.js": "Descent",
+    "src/app/off-market/layout.js": "Off-Market",
+    "src/app/login/layout.js": "Sign In",
   };
   it.each(Object.entries(titled))("%s exports its title", (file, title) => {
     expect(existsSync(join(process.cwd(), file))).toBe(true);
     const src = read(file);
     expect(src).toContain(`title: "${title}"`);
     expect(src).toContain("{children}");
+  });
+
+  it("off-market is titled but never indexed (private inventory)", () => {
+    const src = read("src/app/off-market/layout.js");
+    expect(src).toContain("index: false");
+  });
+
+  // A-146: title-only layouts on private surfaces (D4). A title without
+  // noindex is a ranking invitation; robots.txt disallow is not noindex.
+  it("private layouts carry noindex with their titles", () => {
+    for (const file of [
+      "src/app/off-market/layout.js",
+      "src/app/login/layout.js",
+      "src/app/onboarding/layout.js",
+      "src/app/admin/layout.js",
+      "src/app/dashboard/layout.js",
+      "src/app/settings/layout.js",
+    ]) {
+      expect(read(file)).toContain("index: false");
+    }
   });
 });

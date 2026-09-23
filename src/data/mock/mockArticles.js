@@ -1,3 +1,12 @@
+import { todayISO } from "../../lib/pipelineLifecycle";
+
+// Pipeline shells (PIPELINE_SUPPLY_SPEC): announced / rising / opening
+// buildings carried as thin signals — name, place, lifecycle, date,
+// named source. No specs, no prices, no listing pages. The opening entry
+// resolves its date at load so "opening today" is always demonstrable
+// without editing a fixture.
+const PIPELINE_OPENING_TODAY_ISO = todayISO();
+
 export const DISCOVER_INTEL = {
   Residential: [
     { id: "n1", slug: "bgc-spatial-movement", category: "Residential", date: "July 2026", region: "BGC, Taguig", title: "BGC Villa Acquisition Surge", snippet: "Low-density residences command a 40% compressed contract cycle across Bonifacio Global City." }
@@ -125,6 +134,103 @@ export const ARTICLES = [
     image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&q=80",
     sourceName: "Manila Events & Convention Center Association Gazette",
     sourceUrl: "https://mecca.ph/bulletin/2026-q2"
+  },
+  {
+    slug: "meridian-park-tower-ortigas",
+    title: "Meridian Park Tower Ortigas Breaks Cover",
+    category: "Commercial",
+    event: "Development",
+    corridor: "Ortigas Center East Bank",
+    status: "ANNOUNCED",
+    lifecycle: "planned",
+    intelType: "PIPELINE WATCH",
+    date: "September 2026",
+    city: "Ortigas Center",
+    region: "Metro Manila",
+    lat: 14.5865,
+    lng: 121.0637,
+    excerpt: "A 42-storey grade-A office filing lands on the city registry; no showroom, no price list, no completion quarter confirmed.",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80",
+    sourceName: "Pasig City Planning Registry Filing",
+    sourceUrl: "https://pasigcity.gov.ph/planning-filings"
+  },
+  {
+    slug: "bridgetowne-cascade-residences",
+    title: "Cascade Residences Tops Out at Bridgetowne",
+    category: "Residential",
+    event: "Development",
+    corridor: "Bridgetowne Estate Fringe",
+    status: "STRUCTURE RISING",
+    lifecycle: "construction",
+    intelType: "PIPELINE WATCH",
+    date: "September 2026",
+    city: "Bridgetowne, Quezon City",
+    region: "Metro Manila",
+    lat: 14.6023,
+    lng: 121.056,
+    excerpt: "Core structure complete, facade installation underway; turnover quarter not yet declared by the developer.",
+    image: "https://images.unsplash.com/photo-1541888946425-d03b7e5e0e5a?w=1200&q=80",
+    sourceName: "Site Progress Bulletin, Quezon City Engineering District",
+    sourceUrl: "https://quezoncity.gov.ph/engineering-bulletin"
+  },
+  {
+    slug: "solana-bay-hotel-bgc",
+    title: "Solana Bay Hotel Opens Its Doors in BGC",
+    category: "Hospitality",
+    event: "Development",
+    corridor: "Bonifacio South Waterfront",
+    status: "TURNOVER",
+    lifecycle: "construction",
+    openingDate: PIPELINE_OPENING_TODAY_ISO,
+    intelType: "PIPELINE WATCH",
+    date: "September 2026",
+    city: "BGC, Taguig",
+    region: "Metro Manila",
+    lat: 14.5411,
+    lng: 121.055,
+    excerpt: "Harbour-front keys open to first guests today; rates desk publishes at turnover, not before.",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80",
+    sourceName: "Taguig Tourism & Culture Office Opening Register",
+    sourceUrl: "https://taguig.gov.ph/tourism-register"
+  },
+  {
+    slug: "alabang-exchange-tower",
+    title: "Alabang Exchange Tower Misses Its Opening Quarter",
+    category: "Commercial",
+    event: "Development",
+    corridor: "Filinvest Avenue Frontage",
+    status: "STRUCTURE COMPLETE",
+    lifecycle: "construction",
+    openingDate: "2026-08-15",
+    intelType: "PIPELINE WATCH",
+    date: "September 2026",
+    city: "Alabang",
+    region: "Metro Manila",
+    lat: 14.4239,
+    lng: 121.0335,
+    excerpt: "Structure finished over a month ago with no turnover notice filed; the record flags itself until the registry moves.",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80",
+    sourceName: "Muntinlupa Engineering District Progress Log",
+    sourceUrl: "https://muntinlupacity.gov.ph/engineering-log"
+  },
+  {
+    slug: "tagaytay-ridge-retreat",
+    title: "Ridge Retreat Named for Tagaytay Highlands",
+    category: "Residential",
+    event: "Development",
+    corridor: "Highlands Ridge Line",
+    status: "ANNOUNCED",
+    lifecycle: "planned",
+    intelType: "PIPELINE WATCH",
+    date: "",
+    city: "Tagaytay",
+    region: "Calabarzon",
+    lat: 14.1018,
+    lng: 120.9338,
+    excerpt: "A name and a ridge line, nothing else on record — the thin shell, listed honestly.",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
+    sourceName: "",
+    sourceUrl: ""
   }
 ];
 

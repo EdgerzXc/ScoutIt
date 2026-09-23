@@ -39,12 +39,12 @@
    be reached by CSS — but the cure was worse: it broke layout on every
    viewport to avoid a colour inconsistency on some components.
 
-   ── THE POSITION THIS THEME TAKES ──────────────────────────────
-   AGENTS.md says ScoutIt is ALWAYS dark. So light mode is NOT a second
-   brand — it is an ACCESSIBILITY AFFORDANCE for bright sunlight, low
-   vision, and user preference. It must be a faithful translation of the
-   dark hierarchy, not a re-design. Same structure, same gold role,
-   inverted luminance.
+    ── THE POSITION THIS THEME TAKES ──────────────────────────────
+    AGENTS.md says ScoutIt is ALWAYS dark by default. Light mode is the WHITE
+    LENS (locked 2026-09-23, WHITE_LENS_SPEC): an opt-in professional surface
+    for users who want pure use with zero experience — same structure, softer
+    whites, gray buttons, no black, no gold. Dark stays the brand; the lens
+    stays the tool.
 
    ── THE GOLD PROBLEM, AND HOW IT IS SOLVED ─────────────────────
    Spatial Gold #E8AE3C on white is **1.99:1** — unreadable. Gold cannot
@@ -57,51 +57,56 @@
 body.light-mode {
   color-scheme: light;
 
-  /* ── Surfaces. Neutral, never cream: the dark theme is chroma-0, so
-     its counterpart is too. Warm-tinting here would invent a brand
-     temperature the product does not have. Pure #fff is avoided per
-     DESIGN.md. */
-  --bg:              #f4f4f5;
-  --surface:         #fafafa;
-  --surface2:        #f0f0f2;
-  --surface3:        #e7e7ea;
-  --surface-variant: #ececef;
+  /* ── WHITE LENS surfaces (locked 2026-09-23, WHITE_LENS_SPEC). Lesson
+     learned 2026-09-23: cards in page-tone gray melted into one flat
+     washout. The Apple grouped pattern needs REAL separation — gray canvas,
+     near-white cards, crisp hairlines, deeper shadows. Canvas + wells stay
+     in the 4-tone family; cards go near-white so boxes read as boxes. */
+  --bg:              #D5D5D5;
+  --surface:         #F2F2F4;
+  --surface2:        #E7E7EA;
+  --surface3:        #B3B3B3;
+  --surface-variant: #E7E7EA;
 
-  /* ── Ink. Contrast measured against --surface (#fafafa). */
-  --text-primary:   #111113;   /* 17.6:1  AAA */
-  --text-secondary: #45454d;   /*  8.9:1  AAA */
-  --text-muted:     #5f5f6a;   /*  6.1:1  AA  — deliberately NOT a light
-                                  grey. Muted text at 3:1 is the single
-                                  most common contrast failure. */
+  /* ── Ink on the soft canvas. */
+  --text-primary:   #111113;
+  --text-secondary: #45454d;
+  --text-muted:     #4a4a54;   /* darker than before: the canvas is darker
+                                   than near-white, so muted must step down
+                                   to hold AA. Muted grey at 3:1 is the most
+                                   common contrast failure — never lighter. */
 
-  --border:       rgba(17, 17, 19, 0.12);
-  --border-mid:   rgba(17, 17, 19, 0.20);
-  --border-solid: #d5d5db;
+  --border:       rgba(17, 17, 19, 0.18);
+  --border-mid:   rgba(17, 17, 19, 0.30);
+  --border-solid: #B3B3B3;
 
-  --brand:         #f4f4f5;
-  --brand-overlay: rgba(244, 244, 245, 0.92);
+  --brand:         #D5D5D5;
+  --brand-overlay: rgba(213, 213, 213, 0.92);
 
-  /* ── Gold, re-roled for light. */
-  --accent:            #8B5E10;   /* 5.7:1 — text-safe bronze-gold */
-  --accent-rgb:        139, 94, 16;
-  --accent-ch:          139 94 16;
-  --accent-bright-ch:   154 98 0;
-  --bg-ch:              244 244 245;
-  --bg-rgb:             244, 244, 245;
-  --surface-ch:         250 250 250;
-  --surface-rgb:        250, 250, 250;
-  --surface2-ch:        240 240 242;
-  --surface2-rgb:       240, 240, 242;
-  --surface3-ch:        231 231 234;
-  --surface3-rgb:       231, 231, 234;
+  /* ── NO GOLD on the lens (locked). Every gold role is re-homed to ink:
+     links/eyebrows → charcoal, loud/CTA → near-black, fills → gray.
+     The -rgb/-ch channels feed 32 hand-written glow call sites, so pointing
+     them at ink neutralizes every gold-tinted shadow in one move. */
+  --accent:            #3a3a41;
+  --accent-rgb:        58, 58, 65;
+  --accent-ch:          58 58 65;
+  --accent-bright-ch:   17 17 19;
+  --bg-ch:              213 213 213;
+  --bg-rgb:             213, 213, 213;
+  --surface-ch:         242 242 244;
+  --surface-rgb:        242, 242, 244;
+  --surface2-ch:        231 231 234;
+  --surface2-rgb:       231, 231, 234;
+  --surface3-ch:        179 179 179;
+  --surface3-rgb:       179, 179, 179;
   --text-primary-ch:    17 17 19;
   --text-primary-rgb:   17, 17, 19;
   --text-secondary-ch:  69 69 77;
   --text-secondary-rgb: 69, 69, 77;
-  --accent-bright:     #9A6200;   /* 5.1:1 — text-safe, the loud one   */
-  --accent-bright-rgb: 154, 98, 0;
-  --accent-fill:       #E8AE3C;   /* true gold, FILLS ONLY + dark text */
-  --on-accent:         #111113;   /* ink that rides ON a gold fill      */
+  --accent-bright:     #111113;
+  --accent-bright-rgb: 17, 17, 19;
+  --accent-fill:       #B3B3B3;   /* GRAY buttons on the lens, ink text */
+  --on-accent:         #111113;
 
   /* ── Light counterparts of the Material-3 Tailwind keys. See :root.
      `on-surface` is INK, so it flips to near-black (17.6:1 on --surface).
@@ -122,12 +127,12 @@ body.light-mode {
   --tier-bronze:   #8a5320;   /* 6.0:1 */
 
   --m3-on-surface-ch:            17  17  19;
-  --m3-surface-variant-ch:      214 214 219;
-  --m3-surface-container-ch:    240 240 242;
-  --m3-surface-container-low-ch: 246 246 247;
-  --accent-muted:      #E0C583;   /* light-gold hairlines and dividers */
-  --accent-dim:        rgba(154, 98, 0, 0.10);
-  --accent-border:     rgba(154, 98, 0, 0.34);
+  --m3-surface-variant-ch:      179 179 179;
+  --m3-surface-container-ch:    242 242 244;
+  --m3-surface-container-low-ch: 231 231 234;
+  --accent-muted:      #B3B3B3;   /* lens: gray hairlines, zero gold */
+  --accent-dim:        rgba(17, 17, 19, 0.08);
+  --accent-border:     rgba(17, 17, 19, 0.30);
 
   /* ── Semantic colours. The dark set is tuned to glow on near-black;
      the same hues on white are far too bright to read, so each drops
@@ -136,33 +141,30 @@ body.light-mode {
   --sapphire-dim: rgba(29, 78, 216, 0.12);
   --amethyst:     #6d28d9;
   --amethyst-dim: rgba(109, 40, 217, 0.12);
-  --emerald:      #047857;
-  --emerald-dim:  rgba(4, 120, 87, 0.12);
-  --green:        #047857;
-  --green-dim:    rgba(4, 120, 87, 0.12);
-  --yellow:       #a16207;
-  --yellow-dim:   rgba(161, 98, 7, 0.12);
+  --emerald:      #036849;
+  --emerald-dim:  rgba(3, 104, 73, 0.12);
+  --green:        #036849;
+  --green-dim:    rgba(3, 104, 73, 0.12);
+  --yellow:       #7a4a06;
+  --yellow-dim:   rgba(122, 74, 6, 0.12);
   --red:          #b91c1c;
   --red-dim:      rgba(185, 28, 28, 0.12);
 
-  /* ── Depth. Heavy black shadows read as dirt on a light surface, so
-     these are lighter and tighter. A GLOW does not exist on light —
-     there is nothing for light to bloom against — so the two glow
-     tokens become a gold ring, which carries the same "this is active"
-     meaning without pretending to emit light. */
-  --shadow-sm:         0 1px 2px rgba(17, 17, 19, 0.06), 0 1px 3px rgba(17, 17, 19, 0.08);
-  --shadow-md:         0 4px 12px rgba(17, 17, 19, 0.10);
-  --shadow-lg:         0 12px 32px rgba(17, 17, 19, 0.14);
-  --shadow-glow:       0 0 0 1.5px rgba(154, 98, 0, 0.55);
-  --shadow-glow-soft:  0 2px 12px rgba(154, 98, 0, 0.16);
+  /* ── Depth on the lens: flat Apple corporate. No glow exists here at
+     all — the gold ring is gone with the gold. Active/focus reads as a
+     neutral ink ring + soft neutral shadow. */
+  --shadow-sm:         0 1px 2px rgba(17, 17, 19, 0.08), 0 1px 3px rgba(17, 17, 19, 0.10);
+  --shadow-md:         0 4px 14px rgba(17, 17, 19, 0.16);
+  --shadow-lg:         0 14px 36px rgba(17, 17, 19, 0.22);
+  --shadow-glow:       0 0 0 1.5px rgba(17, 17, 19, 0.30);
+  --shadow-glow-soft:  0 2px 12px rgba(17, 17, 19, 0.12);
 
   background: var(--bg);
   color: var(--text-primary);
 }
 
-/* Primary CTA keeps TRUE gold as a fill in light mode — a bronze button
-   would lose the one loud element the whole system is built around.
-   Gold #E8AE3C carrying near-black text is 7.8:1. */
+/* Primary CTA on the lens is GRAY, not gold (locked): --accent-fill is
+   #B3B3B3 carrying near-black #111113 text (~8:1). Dark theme keeps gold. */
 body.light-mode .btn-primary,
 body.light-mode .btn-gold {
   background: var(--accent-fill);
@@ -213,22 +215,14 @@ body.light-mode .section-hook {
 }
 */
 
-/* The horizon was a gold glow blooming out of black. On near-white it becomes
-   a soft warm wash — the same gesture, lit from the other side. */
-body.light-mode .event-horizon {
-  background: radial-gradient(
-    circle at 50% 52%,
-    rgba(232, 174, 60, 0.28) 0%,
-    rgba(232, 174, 60, 0.12) 34%,
-    rgba(244, 244, 245, 0) 68%
-  );
-  opacity: 1;
-  filter: none;   /* never a filter on this subtree — see the removal note */
-}
-
-/* The starfield reads as dirt on white, and "stars in daylight" is incoherent
-   besides. The grain goes too: it exists to sit over near-black. */
-body.light-mode .space-bg-container > *:not(.event-horizon),
+/* WHITE LENS — clean Apple corporate (owner-approved 2026-09-23).
+   No blackhole, no stars, no gold wash. Stripped so experience can be
+   slowly re-integrated later. BlackHoleCanvas already no-ops in light mode;
+   this hides the last CSS fallback + containers for a flat clean hero. */
+body.light-mode .event-horizon,
+body.light-mode .event-horizon-swirl,
+body.light-mode .event-horizon-canvas,
+body.light-mode .space-bg-container,
 body.light-mode .grain,
 body.light-mode .atmosphere-grain {
   display: none !important;
@@ -396,16 +390,24 @@ body.light-mode .scoutit-wordmark .word-it {
    the other direction: that one was an island with dark ink and no dark ground,
    this one is an island with dark ground and no dark ink. Either half alone is
    broken. A surface that hardcodes a dark background MUST be in this list. */
-body.light-mode .cinematic-container,
-body.light-mode .descent-root,
-body.light-mode .contact-page,
-body.light-mode .global-footer,
-/* Layer 02 surfaces are dark islands too: the Stratosphere layer sits over a
-   WebGL night sky, and the Discover / radar / nearby-signals instruments are
-   readouts over that same material. Without these they inherited the light
-   ground and painted near-white ink on near-white — the same failure the
-   footer had. */
-body.light-mode .stratosphere-layer,
+/* ➕ WHITE LENS 2026-09-23 (locked, WHITE_LENS_SPEC): the four surfaces above
+   (.cinematic-container, .descent-root, .contact-page, .global-footer) are NO
+   LONGER dark islands — the lens is all-white top to bottom, so they follow
+   the light tokens like every other surface. Their old island failures cannot
+   recur: footer/contact/hero grounds are re-homed to light in the WHITE LENS
+   component block below (footer uses var(--surface2), contact via --bg-root,
+   hero via .section-hook), and their ink is token-driven, so it flips with
+   the theme instead of stranding. If a hardcoded light-on-dark element is
+   ever found on the lens, override THAT element — never re-darken the page. */
+/* Remaining dark islands: the Discover instrument + map card ONLY. They are
+   readouts over dark map tiles (imagery, like a photo — even Apple white
+   pages embed dark imagery). Without these they inherited the light ground
+   and painted near-white ink on near-white — the same failure the footer
+   once had.
+   ➕ WHITE LENS 2026-09-23: `.stratosphere-layer` left this list. Its page
+   chrome is token-driven (flips clean) and its terminal chrome is re-homed
+   in the STRATOSPHERE block below. Only the radar/map canvas grounds stay
+   dark — imagery, not theme. */
 body.light-mode .dsc,
 body.light-mode .spatial-intel-map-card {
   --text-primary:       #ffffff;
@@ -441,7 +443,1504 @@ body.light-mode .spatial-intel-map-card {
      `Platform` / `Services` / `Company` at 1.03:1. An island needs both halves
      or it is not an island. Not a var() — these tokens are the LIGHT theme's
      at this point in the cascade. */
-  background-color: #0d0d0d;
+   background-color: #0d0d0d;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — component re-homes (locked 2026-09-23, WHITE_LENS_SPEC)
+   Every rule here is scoped to body.light-mode, so dark is byte-identical.
+   Pattern: dark grounds that survived the token flip get an explicit light
+   ground; hardcoded golds get ink/gray. Never re-darken a page to fix one
+   element — override the element.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Hero ground. (The 2026-08-17 removal of this rule was correct THEN: island
+   ink was white, so a light ground meant white-on-white. Islands are gone on
+   the lens and ink is dark, so a light ground is correct NOW.) */
+body.light-mode .section-hook {
+  background: var(--bg);
+}
+
+/* Contact ground: contact.css paints var(--bg-root, #0d0d0d). Re-home the var. */
+body.light-mode .contact-page {
+  --bg-root: var(--bg);
+  background: var(--bg);
+}
+
+/* Header chrome: styled-jsx paints a dark gradient + gold hairline. */
+body.light-mode .global-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+body.light-mode .header-gold-thread {
+  display: none !important;
+}
+
+/* Footer hairlines hardcoded faint-white: re-home to ink hairlines. Copy,
+   brand, links and hovers already follow the text and accent tokens. */
+body.light-mode .social-link {
+  border-color: var(--border-mid);
+}
+body.light-mode .footer-bottom {
+  border-top-color: var(--border);
+}
+
+/* Descent: art layers off, content re-inked. The frames keep their layout
+   and scroll-snap — only the night-sky imagery and gold type go. */
+body.light-mode .descent-root {
+  background: var(--bg);
+  color: var(--text-primary);
+  --gold: #55555e;
+  --gold-bright: #B3B3B3;
+}
+body.light-mode .descent-root .layer-bg,
+body.light-mode .descent-root .sky,
+body.light-mode .descent-root .skyline,
+body.light-mode .descent-root .ground,
+body.light-mode .descent-root .stars,
+body.light-mode .descent-root .bstars,
+body.light-mode .descent-root .bnebula,
+body.light-mode .descent-root .cloud,
+body.light-mode .descent-root .mote,
+body.light-mode .descent-root .citystars,
+body.light-mode .descent-root .sun,
+body.light-mode .descent-root .moon,
+body.light-mode .descent-root .strata,
+body.light-mode .descent-root .vein,
+body.light-mode .descent-root .magma,
+body.light-mode .descent-root .bubble,
+body.light-mode .descent-root .coreglow,
+body.light-mode .descent-root .ering,
+body.light-mode .descent-root .ring,
+body.light-mode .descent-root .pool,
+body.light-mode .descent-root .shoot,
+body.light-mode .descent-root .dz-ufo {
+  display: none !important;
+}
+body.light-mode .descent-root .dl-eyebrow { color: var(--text-secondary); }
+body.light-mode .descent-root .dl-title { color: var(--text-primary); }
+body.light-mode .descent-root .dl-sub { color: var(--text-secondary); }
+body.light-mode .descent-root .dl-cta {
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .descent-root .dl-cta:hover {
+    background: rgba(17, 17, 19, 0.06);
+    border-color: var(--border-mid);
+  }
+}
+body.light-mode .descent-root .dl-cta.solid {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+body.light-mode .descent-root .dz-wordmark .w-scout { color: var(--text-primary); }
+body.light-mode .descent-root .dz-wordmark .w-it { color: var(--text-secondary); }
+body.light-mode .descent-root .dz-badge,
+body.light-mode .descent-root .dz-tag1 { color: var(--text-secondary); }
+body.light-mode .descent-root .dz-tag2,
+body.light-mode .descent-root .hero-cue { color: var(--text-muted); }
+body.light-mode .descent-root .dz-divider { background: var(--border-mid); }
+body.light-mode .descent-root .role-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .descent-root .role-card .role-name { color: var(--text-muted); }
+body.light-mode .descent-root .role-card .role-head { color: var(--text-primary); }
+body.light-mode .descent-root .role-card .role-body { color: var(--text-secondary); }
+body.light-mode .descent-root .pioneer {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .descent-root .pioneer .pi-av {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+body.light-mode .descent-root .pioneer .pi-name { color: var(--text-primary); }
+body.light-mode .descent-root .pioneer .pi-tag { color: var(--text-muted); }
+body.light-mode .descent-root .membrane { color: var(--text-muted); }
+body.light-mode .descent-root .membrane::before,
+body.light-mode .descent-root .membrane::after { background: var(--border); }
+body.light-mode .descent-root .inner-core {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .descent-root .inner-core .ic-head { color: var(--text-primary); }
+body.light-mode .descent-root .inner-core .ic-sub { color: var(--text-secondary); }
+body.light-mode .descent-root .layer-board .board-split {
+  background: rgba(219, 219, 219, 0.8) !important;
+}
+body.light-mode .descent-root [style*="backdrop"] {
+  background-color: rgba(219, 219, 219, 0.9) !important;
+}
+
+/* Gradient headline: same shifting-gold gesture, ink-gray execution. */
+body.light-mode .text-gradient-gold {
+  background: linear-gradient(135deg, #3a3a41 0%, #111113 55%, #55555e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* CTA pulse: gold fire becomes a calm neutral lift. */
+body.light-mode .cta-pulse {
+  animation: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* Hero mesh wash: gold bloom removed, quiet tonal light kept. */
+body.light-mode .mesh-bg-hero {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(17, 17, 19, 0.04), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(17, 17, 19, 0.03), transparent 50%);
+}
+
+/* Gold-button pattern re-home. Dozens of controls use "gold fill + dark
+   text" (built for gold). On the lens that reads charcoal-fill + black-text
+   = unreadable, and hovers go near-black. So every filled gold control —
+   including the locked Showcase's pills (overridden here, file untouched) —
+   becomes gray fill + ink text with a calm shadow. */
+body.light-mode .orbit-primary-btn,
+body.light-mode .orbit-portal-cta-btn,
+body.light-mode .orbit-save-btn.is-saved,
+body.light-mode .orbit-runner-save.is-saved,
+body.light-mode .orbit-filter-pill.is-active,
+body.light-mode .sc-award-pill.is-active,
+body.light-mode .sc-cat-pill.is-active,
+body.light-mode .sc-save-board-btn.is-saved,
+body.light-mode .sc-switcher-pill.is-active {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  border-color: var(--accent-fill);
+  box-shadow: var(--shadow-sm);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .orbit-apex-card:hover .orbit-primary-btn,
+  body.light-mode .orbit-portal-cta-btn:hover {
+    background: var(--accent-fill);
+    transform: translateY(-1px);
+  }
+}
+body.light-mode .orbit-filter-pill.is-active .orbit-filter-count {
+  color: var(--on-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .orbit-save-btn:hover,
+  body.light-mode .orbit-runner-save:hover {
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+    background: rgba(17, 17, 19, 0.06);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — BATCH 2: homepage sections + layer wordmark + /descent
+   (locked 2026-09-23). Same doctrine: lens-only, dark byte-identical.
+   ═══════════════════════════════════════════════════════════════ */
+/* Layer wordmark twin (layer-descent.css copy has hardcoded white + gold
+   beam glows): ink, no shadow. HomeClient's own copy already handles its. */
+body.light-mode .scoutit-wordmark .word-scout,
+body.light-mode .scoutit-wordmark.lit .word-scout {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+body.light-mode .scoutit-wordmark .word-s,
+body.light-mode .scoutit-wordmark .word-it,
+body.light-mode .scoutit-wordmark.lit .word-s,
+body.light-mode .scoutit-wordmark.lit .word-it {
+  color: var(--accent);
+  text-shadow: none;
+}
+/* Homepage news rows sit on the page ground: ink title, neutral hover. */
+body.light-mode .discover-news-item-link {
+  border-bottom-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .discover-news-item-link:hover {
+    background: rgba(17, 17, 19, 0.04);
+    border-color: var(--border-mid) !important;
+  }
+}
+body.light-mode .news-item-title {
+  color: var(--text-primary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .discover-news-item-link:hover .news-item-title {
+    color: var(--text-primary);
+  }
+}
+/* Services cards: dark glass → light surface; title → ink. Live accents
+   re-home to the lens green; coming-soon gold wash goes neutral. */
+body.light-mode .service-card {
+  background: var(--surface);
+  border-color: var(--border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.light-mode .service-title {
+  color: var(--text-primary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .live-card:hover {
+    border-color: var(--green);
+    background: rgba(3, 104, 73, 0.05);
+  }
+  body.light-mode .live-card:hover .service-cta {
+    color: var(--green);
+  }
+  body.light-mode .coming-soon-card:hover {
+    border-color: var(--border-mid);
+    background: rgba(17, 17, 19, 0.03);
+  }
+  body.light-mode .coming-soon-card:hover .service-cta {
+    color: var(--text-primary);
+  }
+}
+/* Brokers + About grounds → canvas (inners verified: token inks, inherit,
+   or photo grounds — nothing strands). Metric boxes + ghost avatar go
+   neutral with the lens. */
+body.light-mode .section-brokers,
+body.light-mode .section-about {
+  background: var(--bg);
+}
+body.light-mode .broker-metric-item {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .broker-ghost-avatar {
+  background: rgba(17, 17, 19, 0.05);
+  border-color: var(--border-mid);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .broker-ghost-card:hover {
+    background: rgba(17, 17, 19, 0.03);
+    border-color: var(--border-mid);
+  }
+}
+/* Wishlist skeleton: dark ghost → light ghost. */
+body.light-mode .ledger-ghost {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .ledger-ghost-header {
+  background: rgba(17, 17, 19, 0.04);
+}
+body.light-mode .ledger-ghost-row::after {
+  background: rgba(17, 17, 19, 0.05);
+  border-color: var(--border-mid);
+}
+/* /descent fixed brand bar (inline styles, no classes to hook). */
+body.light-mode .descent-root > div a[href="/"] {
+  color: var(--text-primary) !important;
+}
+body.light-mode .descent-root > div a[href="/"] span {
+  color: var(--text-secondary) !important;
+}
+/* /descent inline light-ink safety net. The route's copy uses hardcoded
+   near-white inline inks (no classes); with art hidden every ground is
+   light, so titles re-home to primary ink and small labels to secondary.
+   Titles first (hierarchy preserved), labels second. */
+body.light-mode .descent-root [style*="#f5f1ea"],
+body.light-mode .descent-root [style*="#F5F1EA"],
+body.light-mode .descent-root [style*="#f0ede8"],
+body.light-mode .descent-root [style*="#F0EDE8"],
+body.light-mode .descent-root [style*="#e8e2d8"] {
+  color: var(--text-primary) !important;
+}
+body.light-mode .descent-root [style*="#d6d2c8"],
+body.light-mode .descent-root [style*="#c8c8c8"] {
+  color: var(--text-secondary) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — LAYER BACKGROUNDS OFF (locked 2026-09-23)
+   Experience canvases are decoration; the lens is pure use. Each layer
+   wraps its WebGL canvas in a non-interactive shell: hide the shell, keep
+   the content. Stratosphere is EXCLUDED — its night sky is the instrument's
+   ground (dark island), hiding it would strand white ink on white.
+   ═══════════════════════════════════════════════════════════════ */
+/* Fixed fullscreen canvas shells with no interactive content (metropolis
+   Tailwind wrapper; crust / mantle / core / about aria-hidden shells). */
+body.light-mode main > div.fixed.inset-0:has(canvas),
+body.light-mode main > div[aria-hidden="true"]:has(canvas) {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — METROPOLIS foreground (page file locked 2026-09-10;
+   every rule below lives here, that file is untouched).
+   Defects fixed: dark page ground, dark header/split panels carrying ink
+   text (black-on-black), invisible CTA (near-black on near-black), gold
+   borders/washes/rings, white hairlines.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode main[class*="bg-[#0d0d0d]"] {
+  background: var(--bg);
+}
+body.light-mode main[class*="bg-[#0d0d0d]"].text-white {
+  color: var(--text-primary);
+}
+body.light-mode .selection\:bg-gold-accent::selection {
+  background: rgba(17, 17, 19, 0.22);
+  color: var(--text-primary);
+}
+body.light-mode .metropolis-surface .layer-global-header {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.light-mode .metropolis-surface .layer-global-header::after {
+  background: linear-gradient(90deg, transparent, var(--border-mid), transparent);
+}
+body.light-mode .metropolis-surface .layer-kicker {
+  border-color: var(--border-mid);
+  background: rgba(17, 17, 19, 0.05);
+  color: var(--text-secondary);
+}
+body.light-mode .metropolis-surface .layer-title {
+  text-shadow: none;
+}
+body.light-mode .metropolis-surface .layer-primary-cta {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .metropolis-surface .layer-primary-cta:hover {
+    background: var(--accent-fill);
+    border-color: var(--accent-fill);
+    color: var(--on-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+body.light-mode .metropolis-surface .layer-mission-block {
+  background: rgba(17, 17, 19, 0.04);
+  border-color: var(--border);
+}
+body.light-mode .metropolis-surface .layer-mission-label {
+  color: var(--text-muted);
+}
+body.light-mode .metropolis-surface .descent-split {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.light-mode .metropolis-surface .descent-sidebar {
+  background: transparent;
+  border-right-color: var(--border);
+}
+body.light-mode .metropolis-surface .descent-cat.on {
+  border-color: var(--border-mid);
+  background: rgba(17, 17, 19, 0.06);
+  color: var(--text-primary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .metropolis-surface .descent-cat:hover {
+    border-color: var(--border-mid);
+    background: rgba(17, 17, 19, 0.06);
+    color: var(--text-primary);
+  }
+}
+body.light-mode .metropolis-surface .descent-cat.on {
+  box-shadow: inset 3px 0 0 var(--text-primary);
+}
+@media (max-width: 800px) {
+  body.light-mode .metropolis-surface .descent-cat.on {
+    box-shadow: none;
+  }
+  body.light-mode .metropolis-surface .descent-sidebar {
+    border-bottom-color: var(--border);
+  }
+}
+body.light-mode .metro-content-head {
+  border-bottom-color: var(--border);
+}
+body.light-mode .metro-search-shell {
+  border-color: var(--border-mid);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+body.light-mode .metro-search-shell:focus-within {
+  border-color: var(--border-mid);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(17, 17, 19, 0.10);
+}
+body.light-mode .metro-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .metro-card:hover {
+    border-color: var(--border-mid);
+    box-shadow: var(--shadow-md);
+  }
+}
+body.light-mode .metro-photo {
+  background-color: rgba(17, 17, 19, 0.05);
+}
+body.light-mode .metro-tag-row {
+  border-bottom-color: var(--border);
+}
+body.light-mode .metro-tag-label {
+  color: var(--text-muted);
+}
+body.light-mode .metro-empty {
+  border-color: var(--border-mid);
+  background: var(--surface);
+}
+body.light-mode .metro-empty-icon {
+  border-color: var(--border-mid);
+  background: rgba(17, 17, 19, 0.05);
+  color: var(--text-secondary);
+}
+body.light-mode .metro-empty-kicker {
+  color: var(--text-muted);
+}
+body.light-mode .metro-empty-action {
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .metro-empty-action {
+  border-color: var(--border-mid);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .metro-empty-action:hover {
+    border-color: var(--border-mid);
+    background: rgba(17, 17, 19, 0.06);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — BATCH 3: property FAQs + homepage flow/mini cards
+   (locked 2026-09-23). FAQs carried hardcoded medal inks + answer text;
+   flow/mini cards kept dark grounds while their headings follow tokens
+   (black-on-black). Tier classes (faq-tier-gold/silver/bronze) were added
+   to the FAQ component in the same change — dark renders byte-identical.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .faq-answer__text {
+  color: var(--text-primary);
+}
+body.light-mode .faq-ask__label {
+  color: var(--text-secondary);
+}
+body.light-mode .faq-input:focus,
+body.light-mode .faq-composer__input:focus {
+  border-color: var(--border-mid);
+}
+body.light-mode .faq-btn--gold {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .faq-btn--ghost:hover {
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+body.light-mode .faq-badge--confirmed {
+  color: var(--green);
+  border-color: var(--green);
+}
+body.light-mode .faq-error {
+  color: var(--red);
+}
+body.light-mode .faq-signin {
+  color: var(--text-secondary);
+  border-color: var(--border-mid);
+}
+body.light-mode .faq-thread__empty {
+  border-color: var(--border-mid);
+}
+/* Tier inks beat their inline styles (stylesheet !important outranks
+   non-important inline declarations). Bars lose their glow on the lens. */
+body.light-mode .faq-tier-gold .faq-badge,
+body.light-mode .faq-legend__item.faq-tier-gold {
+  color: #7a5a10 !important;
+  border-color: rgba(122, 90, 16, 0.4) !important;
+  background: rgba(122, 90, 16, 0.07) !important;
+}
+body.light-mode .faq-tier-silver .faq-badge,
+body.light-mode .faq-legend__item.faq-tier-silver {
+  color: #5f6367 !important;
+  border-color: rgba(95, 99, 103, 0.4) !important;
+  background: rgba(95, 99, 103, 0.07) !important;
+}
+body.light-mode .faq-tier-bronze .faq-badge,
+body.light-mode .faq-legend__item.faq-tier-bronze {
+  color: #8a4f26 !important;
+  border-color: rgba(138, 79, 38, 0.4) !important;
+  background: rgba(138, 79, 38, 0.07) !important;
+}
+body.light-mode .faq-answer.faq-tier-gold,
+body.light-mode .faq-answer.faq-tier-silver,
+body.light-mode .faq-answer.faq-tier-bronze {
+  box-shadow: none !important;
+}
+/* Homepage flow + mini cards: dark grounds → surfaces (headings are
+   token ink). Photo wells stay black — pictures, not theme. */
+body.light-mode .flow-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .flow-card:hover {
+    border-color: var(--border-mid);
+  }
+}
+body.light-mode .mini-preview-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .mini-preview-card:hover {
+    border-color: var(--border-mid);
+    box-shadow: var(--shadow-md);
+  }
+}
+body.light-mode .mini-tag {
+  color: var(--text-secondary);
+  background: rgba(17, 17, 19, 0.04);
+  border-color: var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — STRATOSPHERE terminal + instruments (locked 2026-09-23).
+   Page chrome follows tokens on its own. Below: control bar, search,
+   buttons, dossier pane/cards, filter drawer, connect modal, district
+   strip. Radar + map canvas grounds stay dark (imagery). Dark untouched.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .st-terminal {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+body.light-mode .st-control-bar {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+}
+body.light-mode .st-search-wrap {
+  background: var(--surface2);
+  border-color: var(--border-mid);
+}
+body.light-mode .st-search-wrap:focus-within {
+  border-color: var(--border-mid);
+  box-shadow: 0 0 0 3px rgba(17, 17, 19, 0.10);
+}
+body.light-mode .st-search-input {
+  color: var(--text-primary);
+}
+body.light-mode .st-search-input::placeholder {
+  color: var(--text-muted);
+}
+body.light-mode .st-search-clear {
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .st-search-clear:hover {
+    color: var(--text-primary);
+  }
+}
+body.light-mode .st-filter-btn {
+  background: transparent;
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .st-filter-btn:hover {
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+    background: rgba(17, 17, 19, 0.05);
+  }
+}
+body.light-mode .st-filter-btn.active {
+  background: rgba(17, 17, 19, 0.08);
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .st-filter-badge {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+body.light-mode .st-mode-cluster {
+  background: rgba(17, 17, 19, 0.04);
+  border-color: var(--border-mid);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .st-mode-btn:hover {
+    color: var(--text-primary);
+  }
+}
+body.light-mode .st-mode-btn.active {
+  background: rgba(17, 17, 19, 0.09);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+body.light-mode .st-radar-pane {
+  border-right-color: var(--border);
+}
+body.light-mode .st-dossier-pane {
+  background: var(--surface);
+}
+body.light-mode .st-dossier-header {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+}
+body.light-mode .st-district-indicator {
+  color: var(--text-secondary);
+  background: rgba(17, 17, 19, 0.06);
+}
+body.light-mode .st-dossier-scroll {
+  scrollbar-color: var(--border-mid) transparent;
+}
+body.light-mode .st-dossier-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+}
+body.light-mode .st-empty-icon {
+  color: var(--text-muted);
+}
+body.light-mode .st-empty-title {
+  color: var(--text-primary);
+}
+body.light-mode .st-empty-reset-btn {
+  background: transparent;
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .st-empty-reset-btn:hover {
+    background: rgba(17, 17, 19, 0.05);
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+/* Dossier cards: dark glass → surfaces. */
+body.light-mode .sdc-card {
+  background: var(--surface);
+  border-color: var(--border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.light-mode .sdc-card.hovered,
+body.light-mode .sdc-card.active {
+  border-color: var(--border-mid);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-card:hover {
+    border-color: var(--border-mid);
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+  }
+}
+body.light-mode .sdc-divider {
+  color: var(--border-mid);
+}
+body.light-mode .sdc-btn-secondary {
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-btn-secondary:hover {
+    background: rgba(17, 17, 19, 0.05);
+    border-color: var(--border-mid);
+  }
+}
+body.light-mode .sdc-btn-ghost {
+  border-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-btn-ghost:hover {
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-expand-toggle:hover {
+    color: var(--text-primary);
+  }
+}
+body.light-mode .sdc-expanded-drawer {
+  border-top-color: var(--border);
+}
+/* Filter drawer: dark panel → surface. Overlay scrim stays dark. */
+body.light-mode .sfd-panel {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+body.light-mode .sfd-header {
+  background: rgba(17, 17, 19, 0.03);
+  border-bottom-color: var(--border);
+}
+body.light-mode .sfd-title {
+  color: var(--text-primary);
+}
+body.light-mode .sfd-close-btn {
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sfd-close-btn:hover {
+    color: var(--text-primary);
+  }
+}
+body.light-mode .sfd-chip {
+  background: transparent;
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sfd-chip:hover {
+    background: rgba(17, 17, 19, 0.04);
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+body.light-mode .sfd-chip.active {
+  background: rgba(17, 17, 19, 0.08);
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .sfd-count-badge {
+  background: rgba(17, 17, 19, 0.08);
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+body.light-mode .sfd-footer {
+  background: rgba(17, 17, 19, 0.03);
+  border-top-color: var(--border);
+}
+body.light-mode .sfd-reset-btn {
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sfd-reset-btn:hover:not(:disabled) {
+    color: var(--red);
+  }
+}
+body.light-mode .sfd-apply-btn {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sfd-apply-btn:hover {
+    background: var(--accent-fill);
+    box-shadow: var(--shadow-sm);
+  }
+}
+/* Connect modal: dark panel → surface. Overlay scrim stays dark. */
+body.light-mode .ccm-panel {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+body.light-mode .ccm-header {
+  background: rgba(17, 17, 19, 0.03);
+  border-bottom-color: var(--border);
+}
+body.light-mode .ccm-title,
+body.light-mode .ccm-target-title,
+body.light-mode .ccm-success-title {
+  color: var(--text-primary);
+}
+body.light-mode .ccm-close-btn {
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .ccm-close-btn:hover {
+    color: var(--text-primary);
+  }
+}
+body.light-mode .ccm-signal-summary {
+  background: rgba(17, 17, 19, 0.03);
+  border-color: var(--border);
+}
+body.light-mode .ccm-char-count {
+  color: var(--text-muted);
+}
+body.light-mode .ccm-textarea {
+  background: var(--surface2);
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .ccm-textarea:focus {
+  border-color: var(--border-mid);
+}
+body.light-mode .ccm-error-banner {
+  background: var(--red-dim);
+  border-color: var(--red);
+  color: var(--red);
+}
+body.light-mode .ccm-disclosure-bar {
+  background: rgba(17, 17, 19, 0.04);
+  border-color: var(--border);
+}
+body.light-mode .ccm-cancel-btn {
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .ccm-cancel-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-mid);
+  }
+}
+body.light-mode .ccm-primary-btn {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .ccm-primary-btn:hover:not(:disabled) {
+    background: var(--accent-fill);
+    box-shadow: var(--shadow-sm);
+  }
+}
+body.light-mode .ccm-success-icon {
+  color: var(--green);
+}
+/* District strip: dark rail → surface rail. Live dot goes semantic green. */
+body.light-mode .dis-strip {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.light-mode .dis-header {
+  border-right-color: var(--border);
+}
+body.light-mode .dis-live-indicator {
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(3, 104, 73, 0.5);
+}
+body.light-mode .dis-pill {
+  background: transparent;
+  border-color: var(--border-mid);
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .dis-pill:hover {
+    background: rgba(17, 17, 19, 0.04);
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+body.light-mode .dis-pill.active {
+  background: rgba(17, 17, 19, 0.08);
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — BATCH 4: box separation + dossier card innards
+   Two box bugs: cards painted the same tone as their grounds (zero lift),
+   and dossier innards with hardcoded white/sky inks. Dark untouched.
+   ═══════════════════════════════════════════════════════════════ */
+/* Dossier pane steps down so cards lift off it. */
+body.light-mode .st-dossier-pane {
+  background: var(--surface2);
+}
+/* Metro split goes clear — cards lift off the page, border holds the group. */
+body.light-mode .metropolis-surface .descent-split {
+  background: transparent;
+  box-shadow: none;
+}
+/* Dossier innards: white/sky inks → readable; gold washes → neutral. */
+body.light-mode .sdc-status-dot.fresh {
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(3, 104, 73, 0.5);
+}
+body.light-mode .sdc-spec-chip {
+  color: var(--text-secondary);
+  background: rgba(17, 17, 19, 0.04);
+  border-color: var(--border);
+}
+body.light-mode .sdc-budget-chip {
+  background: rgba(17, 17, 19, 0.06);
+  border-color: var(--border-mid);
+}
+body.light-mode .sdc-spec-tag {
+  color: var(--text-muted);
+  background: rgba(17, 17, 19, 0.04);
+}
+body.light-mode .sdc-footer {
+  border-top-color: var(--border);
+}
+body.light-mode .sdc-action-metric {
+  background: rgba(17, 17, 19, 0.04);
+  border-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-action-metric:hover {
+    background: rgba(17, 17, 19, 0.07);
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+body.light-mode .sdc-action-metric.sdc-relevant-active {
+  background: rgba(17, 17, 19, 0.09);
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .sdc-spaces-metric {
+  color: #075985;
+  border-color: rgba(7, 89, 133, 0.35);
+}
+body.light-mode .sdc-spaces-metric.open {
+  background: rgba(7, 89, 133, 0.10);
+  border-color: #075985;
+  color: #075985;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-spaces-metric:hover {
+    background: rgba(7, 89, 133, 0.10);
+    border-color: #075985;
+    color: #075985;
+  }
+  body.light-mode .sdc-icon-btn:hover {
+    border-color: var(--border-mid);
+    color: var(--text-primary);
+  }
+}
+body.light-mode .sdc-icon-btn {
+  border-color: var(--border);
+}
+body.light-mode .sdc-icon-btn.saved {
+  background: rgba(17, 17, 19, 0.08);
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .sdc-btn-primary {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  border-color: var(--accent-fill);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sdc-btn-primary:hover {
+    background: var(--accent-fill);
+    box-shadow: var(--shadow-sm);
+  }
+  body.light-mode .sdc-btn-secondary:hover {
+    background: rgba(17, 17, 19, 0.05);
+    border-color: var(--border-mid);
+  }
+}
+body.light-mode .sdc-btn-secondary {
+  background: rgba(17, 17, 19, 0.03);
+  border-color: var(--border);
+}
+body.light-mode .sdc-connect-cost {
+  background: rgba(17, 17, 19, 0.07);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — BATCH 5A: public routes sweep (locked 2026-09-23).
+   Contact modals, promo, intel doors, wishlist, enterprise, transit,
+   discover, directory, brokers, dossier, gates, map HUD, badges, cookie.
+   Dark byte-identical throughout.
+   ═══════════════════════════════════════════════════════════════ */
+/* Any charcoal-fill + black-text combo is definitionally broken on the
+   lens (Tailwind gold utilities resolve to charcoal here). One rule heals
+   every gold CTA at once — dashboard, modals, banners. Readable combos
+   (charcoal + light text) never match this selector, so they survive. */
+body.light-mode .bg-gold-accent.text-black {
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+/* Contact modals (GlassPanel flips light; hardcoded inks strand). Hooks:
+   contact-lens-modal on the three GlassPanels. */
+body.light-mode .contact-lens-modal .text-white {
+  color: var(--text-primary);
+}
+body.light-mode .contact-lens-modal .text-\[\#f0ede8\] {
+  color: var(--text-primary);
+}
+body.light-mode .contact-lens-modal .text-\[\#f0ede8\]\/50 {
+  color: var(--text-muted);
+}
+body.light-mode .contact-lens-modal .text-\[\#f0ede8\]\/60,
+body.light-mode .contact-lens-modal .text-\[\#f0ede8\]\/80 {
+  color: var(--text-secondary);
+}
+body.light-mode .contact-lens-modal .text-\[\#a0a0a0\],
+body.light-mode .contact-lens-modal .text-\[\#888\] {
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .contact-lens-modal .hover\:text-white:hover {
+    color: var(--text-primary);
+  }
+}
+body.light-mode .contact-lens-modal .bg-white\/\[0\.02\] {
+  background-color: rgba(17, 17, 19, 0.03);
+}
+body.light-mode .contact-lens-modal .border-gold-accent\/20 {
+  border-color: var(--border);
+}
+/* Promote modal: dark header wash + close X. */
+body.light-mode .promo-lens-modal .bg-\[\#0e0e0e\]\/40 {
+  background-color: rgba(17, 17, 19, 0.04);
+}
+body.light-mode .promo-lens-modal .border-white\/5 {
+  border-color: var(--border);
+}
+body.light-mode .promo-lens-modal .text-\[\#f0ede8\]\/50 {
+  color: var(--text-muted);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .promo-lens-modal .hover\:text-white:hover {
+    color: var(--text-primary);
+  }
+}
+/* Inline gold-fill CTAs (intel doors): gray + ink, beats inline styles. */
+body.light-mode .lens-gold-btn {
+  background: var(--accent-fill) !important;
+  color: var(--on-accent) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+/* Market article tag: gold honesty label → lens bronze. */
+body.light-mode .market-article__tag {
+  color: #7a5a10 !important;
+  border-color: rgba(122, 90, 16, 0.4) !important;
+}
+/* Intel side CTA hover (base is charcoal-outline, fine). */
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .side-panel-cta:hover {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+  }
+}
+/* Enterprise + transit titles. */
+body.light-mode .enterprise-title,
+body.light-mode .transit-page-title {
+  color: var(--text-primary);
+}
+/* Discover directory dividers + kicker. */
+body.light-mode .secondaryKicker {
+  color: var(--text-muted);
+}
+body.light-mode .discoverSecondary,
+body.light-mode .intelHeader {
+  border-color: var(--border);
+}
+/* Property directory hairlines. */
+body.light-mode .property-preview-card,
+body.light-mode .filter-card {
+  border-color: var(--border);
+}
+body.light-mode .property-card-footer,
+body.light-mode .intel-widget-header {
+  border-color: var(--border);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .compare-clear:hover {
+    border-color: var(--border-mid);
+  }
+}
+/* Property detail chapters. */
+body.light-mode .market-numbers__lock-cta {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+body.light-mode .market-numbers__lock .market-numbers__lock-title {
+  color: var(--text-primary);
+}
+body.light-mode .sidebar-block {
+  border-bottom-color: var(--border);
+}
+body.light-mode .wt-walk__score {
+  color: var(--text-primary);
+}
+body.light-mode .wt-walk__label,
+body.light-mode .wt-chip,
+body.light-mode .wt-layer__label {
+  color: var(--text-secondary);
+}
+body.light-mode .wt-sub {
+  color: var(--text-secondary);
+}
+body.light-mode .wt-walk__flag {
+  color: var(--yellow);
+}
+body.light-mode .cp-eyebrow {
+  color: var(--text-secondary);
+}
+body.light-mode .cp-disclaimer,
+body.light-mode .cp-agree__text {
+  color: var(--text-secondary);
+}
+body.light-mode .cp-btn--ghost {
+  color: var(--text-secondary);
+  border-color: var(--border-mid);
+}
+body.light-mode .cp-btn--gold {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+/* Brokers pick + retain + bronze label. */
+body.light-mode .scoutit-pick-badge {
+  background: rgba(17, 17, 19, 0.06);
+  border-color: var(--border-mid);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .action-retain-btn:hover {
+    background: var(--accent-fill);
+  }
+}
+body.light-mode .bronze-card .tier-badge-label {
+  color: #8a4f26;
+}
+body.light-mode .profile-name,
+body.light-mode .detail-curations-section h3 {
+  color: var(--text-primary);
+}
+body.light-mode .detail-section h3 {
+  border-color: var(--border);
+}
+/* Investigation dossier: light-ink vars + dark chips re-homed. */
+body.light-mode .dossier {
+  --dossier-ink: #111113;
+  --dossier-ink-soft: #45454d;
+  --dossier-hairline: rgba(17, 17, 19, 0.14);
+}
+body.light-mode .dossier-registry-item,
+body.light-mode .dossier-shift-side,
+body.light-mode .dossier-evidence-toggle {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .dossier-cta {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .dossier-cta:hover {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+  }
+}
+body.light-mode .ab-table td {
+  border-color: var(--border);
+}
+/* Gates (EarlyAccess): title, input, submit, restricted strips. */
+body.light-mode .gate-title {
+  color: var(--text-primary);
+}
+body.light-mode .gate-input {
+  background: var(--surface2);
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+body.light-mode .gate-submit-btn {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+body.light-mode .restricted-banner,
+body.light-mode .detail-gate-strip {
+  background: var(--surface);
+}
+body.light-mode .detail-gate-cta {
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+/* Transit instrument labels + checkbox; status pills over the map stay. */
+body.light-mode .transit-map-toggle-label {
+  color: var(--text-secondary);
+}
+body.light-mode .transit-map-toggle input[type="checkbox"]:checked {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+}
+body.light-mode .transit-map-status-error {
+  color: var(--red);
+}
+/* Map HUD island: panel keeps dark tokens (map stays dark both themes). */
+body.light-mode .scc-panel {
+  --text-primary: #ffffff;
+  --text-primary-ch: 255 255 255;
+  --text-secondary: #d8d4cc;
+  --accent: #E8AE3C;
+  --accent-rgb: 232, 174, 60;
+  --accent-ch: 232 174 60;
+  --accent-bright: #F7C64E;
+  --border: rgba(255, 255, 255, 0.12);
+  background-color: rgba(14, 14, 14, 0.92);
+  color: var(--text-primary);
+}
+/* Chips + tilt live inside the island above, so gold still works there. */
+/* Notification toggle on. */
+body.light-mode .np-toggle[aria-checked="true"] {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+/* Profile contact modal hairline. */
+body.light-mode .contact-modal {
+  border-color: var(--border-mid);
+}
+/* Mobile inquire pill + toast go light. */
+body.light-mode .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-icon {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  box-shadow: var(--shadow-sm);
+}
+body.light-mode .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-icon svg {
+  stroke: var(--on-accent);
+}
+body.light-mode .bottom-nav.property-actions .bottom-nav-item.primary .bottom-nav-label {
+  color: var(--text-primary);
+}
+body.light-mode .bottom-nav-toast {
+  background: var(--surface);
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+/* Trust popover well + hairlines. */
+body.light-mode .trust-lens .bg-black\/30 {
+  background: rgba(17, 17, 19, 0.06);
+}
+body.light-mode .trust-lens .border-white\/10 {
+  border-color: var(--border);
+}
+/* Skip link focus state. */
+body.light-mode .focus\:bg-\[\#0d0d0d\]:focus {
+  background-color: var(--surface);
+}
+body.light-mode .focus\:text-\[var\(--accent\2c var\(--accent\)\)\]:focus {
+  color: var(--text-primary);
+}
+/* Badges: locked icon, owned pill, locked silhouette chip, claim button,
+   historical dark cards. Toast stays a dark pill (readable). */
+body.light-mode .badges-lens .border-white\/5 {
+  border-color: var(--border);
+}
+body.light-mode .badges-lens .text-white\/90 {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  border-color: transparent;
+  box-shadow: none;
+}
+body.light-mode .badges-lens .bg-black\/50 {
+  background: var(--surface3);
+}
+body.light-mode .badges-lens .text-white:not(.fixed) {
+  color: var(--text-primary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .badges-lens .hover\:text-white:hover {
+    color: var(--text-primary);
+  }
+  body.light-mode .badges-lens .hover\:bg-white\/20:hover {
+    background: rgba(17, 17, 19, 0.06);
+  }
+}
+body.light-mode .badges-lens .bg-\[\#0a0a0a\] {
+  background: var(--surface);
+}
+body.light-mode .badges-lens .bg-\[\#0a0a0a\] h3 {
+  color: var(--text-primary) !important;
+}
+/* Shared-board empty state (inline hardcoded ink needs !important). */
+body.light-mode .empty-heading {
+  color: var(--text-primary) !important;
+}
+/* MeshHero scrim: darkens a backdrop that never exists (typographic hero,
+   no image) — on the lens it only manufactures the dead gray slab. */
+body.light-mode .mesh-bg-hero > div.bg-black\/40 {
+  display: none;
+}
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — BATCH 6: calendar + event chips (locked 2026-09-23).
+   Calendar grounds flip to surfaces (token text heals itself); pastel
+   event inks go dark variants. Dark untouched throughout.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .cal-lens {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+body.light-mode .cal-lens-bar {
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+body.light-mode .cal-lens .bg-\[\#1a1a1a\] {
+  background-color: var(--surface2);
+}
+body.light-mode .cal-lens .bg-black\/40 {
+  background-color: rgba(17, 17, 19, 0.04);
+}
+body.light-mode .cal-lens .border-white\/5 {
+  border-color: var(--border);
+}
+body.light-mode .cal-lens .text-sky-300,
+body.light-mode .cal-lens .text-sky-200 {
+  color: var(--sapphire);
+}
+body.light-mode .cal-lens .text-purple-300 {
+  color: var(--amethyst);
+}
+body.light-mode .cal-lens .border-white\/10 {
+  border-color: var(--border-mid);
+}
+body.light-mode .cal-lens .text-white\/70 {
+  color: var(--text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .cal-lens .hover\:bg-white\/5:hover {
+    background-color: rgba(17, 17, 19, 0.04);
+  }
+}
+body.light-mode .ev-chip.text-sky-300,
+body.light-mode .ev-chip.text-sky-200 {
+  color: var(--sapphire);
+}
+body.light-mode .ev-chip.text-emerald-300 {
+  color: var(--emerald);
+}
+body.light-mode .ev-chip.text-red-300 {
+  color: var(--red);
+}
+body.light-mode .ev-chip.text-purple-300 {
+  color: var(--amethyst);
+}
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — KEEP-DARK instruments (locked 2026-09-23). Some subtrees
+   are hardcoded dark-with-light-ink with no theme hooks (profile pages,
+   floating toolbox). Rather than rewriting them, the lens re-declares the
+   dark tokens scoped to the subtree — same doctrine as the map islands.
+   Add className="keep-dark" to the subtree root. Dark theme untouched.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .keep-dark,
+body.light-mode .toolbox-float {
+  --text-primary: #ffffff;
+  --text-primary-ch: 255 255 255;
+  --text-primary-rgb: 255, 255, 255;
+  --text-secondary: #a8a29a;
+  --text-secondary-ch: 168 162 154;
+  --text-muted: rgba(255, 255, 255, 0.62);
+  --accent: #E8AE3C;
+  --accent-rgb: 232, 174, 60;
+  --accent-ch: 232 174 60;
+  --accent-bright: #F7C64E;
+  --accent-bright-ch: 247 198 78;
+  --accent-muted: #6E531A;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-mid: rgba(255, 255, 255, 0.15);
+  --surface: #121212;
+  --surface2: #1a1a1a;
+  --surface3: #222222;
+  --bg: #0d0d0d;
+  --bg-ch: 13 13 13;
+  --m3-on-surface-ch: 229 226 225;
+  --on-accent: #111113;
+  color-scheme: dark;
+  color: var(--text-primary);
+}
+/* Gates (EarlyAccess): title, input, submit, restricted strips. */
+body.light-mode .gate-title {
+  color: var(--text-primary);
+}
+body.light-mode .gate-input {
+  background: var(--surface2);
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+body.light-mode .gate-submit-btn {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+body.light-mode .restricted-banner,
+body.light-mode .detail-gate-strip {
+  background: var(--surface);
+}
+body.light-mode .detail-gate-cta {
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+/* Cookie banner: eyebrow + accept go lens; dark card stays (instrument). */
+body.light-mode .cookie-lens > p:first-of-type {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .cookie-lens > p:nth-of-type(2) {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .cookie-lens > div > button:last-child {
+  background: var(--accent-fill) !important;
+  color: var(--on-accent) !important;
+}
+
+/* NOTE: admin console lens rules live inside src/app/admin/page.js (scoped
+   styles need in-file :global rules — see WHITE_LENS_SPEC). */
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — HERO words (locked 2026-09-23). The animated title letters
+   carry gold + glow shadows built for black; on the lens they go solid ink
+   with zero shadow (the entrance animations keep playing). UFO stays green.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .letter {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+body.light-mode .letter-s {
+  text-shadow: none;
+}
+body.light-mode .title-tagline-1 {
+  color: var(--text-secondary);
+}
+body.light-mode .title-tagline-2 {
+  color: var(--text-muted);
+}
+body.light-mode .title-divider {
+  background: var(--border-mid);
+}
+body.light-mode .hero-tagline,
+body.light-mode .hero-subheadline {
+  text-shadow: none;
+}
+body.light-mode .hero-founding-link {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .hero-founding-link:hover {
+    color: var(--text-primary);
+    text-shadow: none;
+  }
+  body.light-mode .hero-cta-btn:hover {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-sm);
+  }
+}
+body.light-mode .hero-cta-btn {
+  border-color: var(--border-mid);
+  color: var(--text-primary);
+}
+body.light-mode .ufo-beam {
+  background: linear-gradient(to bottom, rgba(17, 17, 19, 0.35), transparent);
+}
+body.light-mode .reticle-ring,
+body.light-mode .orbit-ring {
+  border-color: rgba(17, 17, 19, 0.35);
+}
+
+/* Shared prominent links (all layers): the gold-outline button keeps its
+   box, and its hover state goes gray fill with ink text. */
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .prominent-action-link:hover {
+    background: var(--accent-fill);
+    border-color: var(--accent-fill);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -470,8 +1969,28 @@ body.light-mode .spatial-intel-map-card {
   --border-mid: rgba(255, 255, 255, 0.15);
   --border-solid: #2d2d2d;
 
-  /* Typography Colors */
-  --text-primary: #ffffff;
+  /* ── SOFT-WHITE DEFAULT SCENE (owner-approved 2026-09-23) ──
+     Replaces pure #FFFFFF default with 4 softer tones so pros integrate
+     via tokens, never raw hex. Roles:
+       paper-03 #DBDBDB = primary text on dark (default)
+       paper-01 #D5D5D5 = secondary text / soft surfaces
+       paper-02 #B3B3B3 = muted text / disabled / hairlines
+       ink-deep #111111 = deep fill on light accents
+     Pure #fff retained only inside locked cinematic islands + starfields. */
+  --paper-01: #D5D5D5;
+  --paper-01-ch: 213 213 213;
+  --paper-01-rgb: 213, 213, 213;
+  --paper-02: #B3B3B3;
+  --paper-02-ch: 179 179 179;
+  --paper-02-rgb: 179, 179, 179;
+  --paper-03: #DBDBDB;
+  --paper-03-ch: 219 219 219;
+  --paper-03-rgb: 219, 219, 219;
+  --ink-deep: #111111;
+  --ink-deep-ch: 17 17 17;
+  --ink-deep-rgb: 17, 17, 17;
+  /* Typography Colors — default scene uses soft whites, not pure white */
+  --text-primary: var(--paper-03);
   /* ⚠️ WAS #a099b0 until 2026-08-06 (§62). That is a LAVENDER, not a grey:
      its channels are R160 G153 B176 — blue is the HIGHEST. On near-black it
      passes for neutral, but anywhere lighter, and at larger sizes, it reads
@@ -482,8 +2001,8 @@ body.light-mode .spatial-intel-map-card {
      near-black + 5% gold. Nothing in the system asks for blue.
      Replaced with a warm neutral that sits with the gold instead of fighting
      it. Verified by scripts/verify-contrast.mjs. */
-  --text-secondary: #a8a29a;
-  --text-muted: rgba(255, 255, 255, 0.62);
+  --text-secondary: var(--paper-01);
+  --text-muted: rgba(var(--paper-02-rgb), 0.78);
 
   /* Brand Identity */
   --brand: #0d0d0d;
@@ -513,8 +2032,8 @@ body.light-mode .spatial-intel-map-card {
   --surface2-rgb:       26, 26, 26;
   --surface3-ch:        34 34 34;
   --surface3-rgb:       34, 34, 34;
-  --text-primary-ch:    255 255 255;
-  --text-primary-rgb:   255, 255, 255;
+  --text-primary-ch:    219 219 219;
+  --text-primary-rgb:   219, 219, 219;
   --text-secondary-ch:  168 162 154;
   --text-secondary-rgb: 168, 162, 154;
   --accent-bright: #F7C64E;
@@ -562,7 +2081,7 @@ body.light-mode .spatial-intel-map-card {
   --tier-silver:   #dcdcdc;
   --tier-bronze:   #cd7f32;
 
-  --m3-on-surface-ch:          229 226 225;  /* was #e5e2e1 */
+  --m3-on-surface-ch:          219 219 219;  /* soft-white default: was #e5e2e1, now paper-03 */
   --m3-surface-variant-ch:      53  53  53;  /* was #353535 */
   --m3-surface-container-ch:    32  32  31;  /* was #20201f */
   --m3-surface-container-low-ch: 28 27 27;   /* was #1c1b1b */
@@ -2439,6 +3958,16 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
 }
 
 
+.header-gold-thread {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    HEADER BRAND LOCKUP
 
@@ -2497,13 +4026,13 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   display: flex;
   align-items: center;
   gap: 20px;
-  flex: 1;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
 .header-center {
   position: relative;
-  flex: 2;
+  flex: 1 1 0%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2517,7 +4046,7 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
+  flex: 0 0 auto;
   justify-content: flex-end;
   min-width: 0;
 }

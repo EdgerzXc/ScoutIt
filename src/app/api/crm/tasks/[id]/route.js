@@ -107,15 +107,21 @@ export async function PATCH(request, { params }) {
     }
 
     // Completion is worth a timeline entry; every other edit is not.
+    // A-146: isolated like the POST path — a timeline failure must not fail
+    // an already-committed completion.
     const justCompleted = updated.status === "done" && access.task.status !== "done";
     if (justCompleted && (updated.deal_id || updated.property_id)) {
-      await logActivity(supabaseAdmin, {
-        dealId: updated.deal_id,
-        propertyId: updated.property_id,
-        activityType: "task_completed",
-        actorId: userId,
-        metadata: { taskId: updated.id, title: updated.title },
-      });
+      try {
+        await logActivity(supabaseAdmin, {
+          dealId: updated.deal_id,
+          propertyId: updated.property_id,
+          activityType: "task_completed",
+          actorId: userId,
+          metadata: { taskId: updated.id, title: updated.title },
+        });
+      } catch (activityError) {
+        console.warn("[CRM TASKS API] Completion entry not recorded for task", updated.id, activityError?.message);
+      }
     }
 
     return NextResponse.json({ success: true, task: serializeTask(updated) });

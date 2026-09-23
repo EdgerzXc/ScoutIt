@@ -39,11 +39,18 @@ export async function POST(request) {
       }
     }
 
-    await supabaseAdmin
+    // A-146: the delete result was unchecked — success:true with the row
+    // still present leaves the calendar connected while the UI says removed.
+    const { error: deleteError } = await supabaseAdmin
       .from("calendar_connections")
       .delete()
       .eq("owner_user_id", userId)
       .eq("provider", "google");
+
+    if (deleteError) {
+      console.error("[OAUTH google/disconnect] delete failed:", deleteError.message);
+      return NextResponse.json({ error: "Could not disconnect" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

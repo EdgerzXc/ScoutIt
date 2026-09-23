@@ -148,7 +148,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#0a0908]/85 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
       <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col">
-        <GlassPanel className="flex flex-col rounded-xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.6)] h-full max-h-[85vh]">
+        <GlassPanel className="flex flex-col rounded-xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.6)] h-full max-h-[85vh] promo-lens-modal">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-white/5 bg-[#0e0e0e]/40">
             <div className="flex items-center gap-2 text-gold-accent">

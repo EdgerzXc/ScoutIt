@@ -1,0 +1,96 @@
+/* ═══════════════════════════════════════════════════════════════
+   SCOUTIT — SPATIAL SIGNAL RADAR CSS
+   ═══════════════════════════════════════════════════════════════ */
+
+.ssr-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  background: #0d0d0d;
+  overflow: hidden;
+}
+
+.ssr-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Custom dark styling for MapLibre controls */
+.ssr-container .maplibregl-ctrl-group {
+  background: rgba(18, 18, 18, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 4px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+}
+
+.ssr-container .maplibregl-ctrl-group button {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.ssr-container .maplibregl-ctrl-group button:last-child {
+  border-bottom: none !important;
+}
+
+.ssr-container .maplibregl-ctrl-icon {
+  filter: invert(0.85) hue-rotate(180deg);
+}
+
+/* ── RADAR HUD WATERMARK OVERLAY ── */
+.ssr-hud-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ssr-hud-top-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ssr-hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 8px rgba(247, 198, 78, 0.9);
+}
+
+.ssr-hud-text {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ssr-hud-top-right {
+  position: absolute;
+  top: 16px;
+  right: 54px; /* avoid overlapping top-right map controls */
+}
+
+.ssr-hud-bottom-left {
+  display: flex;
+  align-items: center;
+}
+
+.ssr-hud-tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  background: rgba(13, 13, 13, 0.85);
+  border: 1px solid rgba(232, 174, 60, 0.25);
+  padding: 3px 8px;
+  border-radius: 3px;
+  backdrop-filter: blur(8px);
+}

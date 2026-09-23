@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { hasBadge } from "@/lib/BadgeEngine";
@@ -94,7 +95,7 @@ export default function BadgeRegistryPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-bg">
+    <main className="min-h-screen flex flex-col bg-bg badges-lens">
       <Header />
       
       {/* Toast Notification */}
@@ -204,6 +205,7 @@ export default function BadgeRegistryPage() {
                   ) : (
                     <span className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/5 bg-white/5 text-text-secondary">
                       Staff-granted honor — no purchase path
+                      {" "}<Link className="underline hover:text-on-surface" href="/contact">Ask about honors →</Link>
                     </span>
                   )
                 )}

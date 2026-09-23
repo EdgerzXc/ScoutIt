@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import MapCreditControl from "@/components/maps/MapCreditControl";
 import pezaZonesData from "@/data/peza_zones_philippines.json";
 import infraProjectsData from "@/data/ph_infrastructure_projects.json";
 import { computeSpatialIntel, computeContinuityScore } from "@/lib/spatialIntel";
@@ -94,6 +95,8 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
     let map;
     try {
       map = new maplibregl.Map({
+        // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+        attributionControl: false,
         container: mapContainerRef.current,
         style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
         center: [targetLng, targetLat],
@@ -126,6 +129,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
         new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }),
         "top-right"
       );
+      map.addControl(new MapCreditControl(), "bottom-right");
     } catch (err) {}
 
     map.on("error", (e) => {

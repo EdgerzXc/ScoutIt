@@ -11,6 +11,10 @@ test.describe('Dependency runtime contracts', () => {
     const { slug } = await getCommercialListing(request);
     await gotoAndSettle(page, `/property/${slug}`);
     await openYourMove(page);
+    const helpPanel = page.getByRole('complementary', { name: 'Help & Display' });
+    if (await helpPanel.isVisible().catch(() => false)) {
+      await helpPanel.getByRole('button', { name: 'Close Help & Display' }).click();
+    }
 
     const exportButton = page.getByRole('button', { name: /download tear-sheet/i }).first();
     await expect(exportButton).toBeVisible({ timeout: 20000 });

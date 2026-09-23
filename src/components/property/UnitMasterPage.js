@@ -7,8 +7,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
 import dynamic from "next/dynamic";
-import ShareModal from "@/components/property/ShareModal";
-import { buildShareText } from "@/lib/shareBriefing";
+import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import InViewport from "@/components/ui/InViewport";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
@@ -76,7 +75,6 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
   const [inquiryPrefill, setInquiryPrefill] = useState("");
   const [unlockedVault, setUnlockedVault] = useState(false);
-  const [shareTextOpen, setShareTextOpen] = useState(null);
   
   // Photo states
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -277,7 +275,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     setActiveTab(tabId);
     if (typeof window !== "undefined" && window.innerWidth <= 768) {
       setTimeout(() => {
-        document.querySelector('.zone-story')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelector('.zone-story')?.scrollIntoView({ behavior: motionSafeScrollBehavior(), block: 'start' });
       }, 50);
     }
   };
@@ -705,12 +703,6 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         </div>{/* /zone-story */}
 
       </div>{/* /page */}
-
-      <ShareModal
-        isOpen={!!shareTextOpen}
-        onClose={() => setShareTextOpen(null)}
-        shareText={shareTextOpen || ""}
-      />
 
       <UnitInquiryModal
         isOpen={isInquiryOpen}

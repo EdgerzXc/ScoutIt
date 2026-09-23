@@ -50,6 +50,7 @@ function toChatBoxDeal(d) {
     // NULL on pre-2026-08-05 rows; ChatBox's badge is guarded by
     // Number.isFinite so it stays hidden rather than rendering a guess.
     connects_spent: d.connects_spent,
+    open_gate_inbound: d.open_gate_inbound === true,
     archived_at: d.archivedAt,
     pending_clock_reset_at: d.pendingClockResetAt,
     unreadCount: d.unreadCount,
@@ -354,7 +355,7 @@ function InboxInner() {
             <WorkspaceCommandBar active="inbox" className="mt-4" />
 
             {/* Three-State Inbox Tab Bar (Section 38) */}
-            <div className="grid grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
               {[
                 { id: "waiting", label: "WAITING", count: waitingDeals.length },
                 { id: "active", label: "ACTIVE", count: activeDeals.length },
@@ -369,7 +370,7 @@ function InboxInner() {
                     // min-h-11 -> a real 44px touch target. These were 26px
                     // tall, well under the WCAG / iOS minimum, which on a
                     // phone means mis-taps between three adjacent tabs.
-                    className={`min-h-11 rounded-md border px-1 py-1.5 font-mono text-[12px] tracking-wider transition-all duration-300 ease-out ${
+                    className={`min-h-11 min-w-0 whitespace-nowrap overflow-hidden text-ellipsis rounded-md border px-1 py-1.5 font-mono text-[12px] tracking-wider transition-all duration-300 ease-out ${
                       isActive
                         ? "bg-gold-accent/20 text-gold-bright border border-gold-accent/50 font-bold"
                         : "text-text-secondary hover:text-on-surface hover:bg-surface-variant/50 border border-transparent"
@@ -457,7 +458,7 @@ function InboxInner() {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-text-primary mb-1">{deal.other_party}</p>
+                  <p className="text-xs text-text-primary mb-1 truncate">{deal.other_party}</p>
                   <p className="text-xs text-text-secondary truncate">{deal.last_message}</p>
                 </motion.div>
               ))

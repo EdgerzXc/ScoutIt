@@ -65,18 +65,19 @@ test('showcase keeps explicit parent and home navigation', async ({ page }) => {
   await expect(orbitLink).toBeVisible();
   await expect(orbitLink).toHaveAttribute('href', '/layer/orbit');
 
-  const homeLink = page.getByRole('link', { name: /ScoutIT.*home/i });
+  const homeLink = page.getByRole('link', { name: 'ScoutIt', exact: true });
   await expect(homeLink).toBeVisible();
   await expect(homeLink).toHaveAttribute('href', '/');
 });
 
 
 test('metropolis category surface stays operable', async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.removeItem('scoutit_help_seen_v1'));
   await gotoAndSettle(page, '/layer/metropolis');
 
   const helpPanel = page.getByRole('complementary', { name: 'Help & Display' });
   await expect(helpPanel).toBeVisible();
-  await page.getByRole('heading', { name: 'Explore by Category' }).click();
+  await helpPanel.getByRole('button', { name: 'Close Help & Display' }).click();
   await expect(helpPanel).toBeHidden();
 
   const commercialCategory = page.getByRole('button', { name: 'Commercial' });

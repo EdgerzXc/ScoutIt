@@ -17,6 +17,7 @@ import LeadExportButton from './crm/LeadExportButton';
 
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import MapCreditControl from '@/components/maps/MapCreditControl';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ownerTenureLabel } from "@/lib/dashboardListings";
@@ -207,6 +208,8 @@ export default function BrokerMode() {
       try {
         setMapError(null);
         const map = new maplibregl.Map({
+          // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+          attributionControl: false,
           container: mapContainerRef.current,
           style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
           center: DEFAULT_MAP_CENTER || [121.0215, 14.5547],
@@ -219,6 +222,7 @@ export default function BrokerMode() {
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
+        map.addControl(new MapCreditControl(), 'bottom-right');
         mapInstance.current = map;
 
         map.on('load', () => {
@@ -448,7 +452,7 @@ export default function BrokerMode() {
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-surface-variant pb-6 mb-8 gap-4">
           <div>
             <button 
-              className="text-text-secondary hover:text-gold-accent text-sm font-working-title flex items-center gap-2 mb-4 transition"
+              className="text-text-secondary hover:text-gold-accent text-sm font-working-title inline-flex items-center gap-2 mb-4 min-h-11 transition"
               onClick={() => setActiveDealId(null)}
             >
               ← Back to Opportunity Files
@@ -456,7 +460,7 @@ export default function BrokerMode() {
             <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">Opportunity File</span>
             <h1 className="font-display-md text-3xl md:text-5xl text-on-surface break-words">Deal: {property?.title || 'Unknown Property'}</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className={`px-3 py-1 rounded text-xs font-bold font-working-title tracking-wider uppercase border
               ${deal.status === 'accepted' ? 'bg-success/10 text-success border-success/30' : 
                 deal.status === 'declined' ? 'bg-error/10 text-error border-error/30' : 
@@ -467,7 +471,7 @@ export default function BrokerMode() {
             </div>
             {deal.status === 'pending' && (
               <button 
-                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 rounded transition text-sm"
+                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm"
                 onClick={() => {
                   updatePitchStatus(deal.id, 'declined'); // Brokers can withdraw
                   setActiveDealId(null);
@@ -479,7 +483,7 @@ export default function BrokerMode() {
             {deal.status === 'invited' && (
               <div className="flex gap-2">
                 <button 
-                  className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 rounded transition text-sm"
+                  className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm"
                   onClick={() => {
                     updatePitchStatus(deal.id, 'declined');
                     setActiveDealId(null);
@@ -488,7 +492,7 @@ export default function BrokerMode() {
                   Decline
                 </button>
                 <button 
-                  className="bg-gold-accent text-background hover:opacity-90 font-working-title font-bold px-4 py-2 rounded transition text-sm"
+                  className="bg-gold-accent text-background hover:opacity-90 font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm"
                   onClick={() => {
                     updatePitchStatus(deal.id, 'accepted');
                   }}
@@ -701,11 +705,11 @@ export default function BrokerMode() {
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => { setShowIdCard(true); dismissIdCardBanner(); }}
-              className="text-xs font-bold text-background bg-gold-accent px-4 py-2 rounded hover:opacity-90 transition-opacity"
+              className="min-h-11 text-xs font-bold text-background bg-gold-accent px-4 py-2 rounded hover:opacity-90 transition-opacity"
             >
               Generate ID
             </button>
-            <button onClick={dismissIdCardBanner} aria-label="Close" className="text-text-muted hover:text-on-surface p-2">✕</button>
+            <button onClick={dismissIdCardBanner} aria-label="Close" className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-on-surface">✕</button>
           </div>
         </div>
       )}
@@ -717,7 +721,7 @@ export default function BrokerMode() {
             <button 
               onClick={() => setShowIdCard(false)}
               aria-label="Close"
-              className="absolute top-4 right-4 text-text-muted hover:text-on-surface text-xl z-20"
+              className="absolute top-4 right-4 min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-on-surface text-xl z-20"
             >
               ✕
             </button>
@@ -785,8 +789,8 @@ export default function BrokerMode() {
                   </div>
                 </div>
 
-                <div className="border-t border-surface-variant pt-4 flex justify-between items-end">
-                  <div className="flex items-end gap-6">
+                <div className="border-t border-surface-variant pt-4 flex flex-wrap justify-between items-end gap-4">
+                  <div className="flex flex-wrap items-end gap-6 min-w-0">
                     <div>
                       <span className="block text-[12px] text-text-muted font-mono uppercase tracking-widest mb-1">License Valid Until</span>
                       <input
@@ -851,19 +855,19 @@ export default function BrokerMode() {
             {pitchError && (
               <div className="mt-3 text-error text-sm bg-error/10 border border-error/30 rounded px-3 py-2">{pitchError}</div>
             )}
-            <div className="flex items-center justify-between mt-6">
-              <div className="text-gold-accent font-data-tabular text-sm flex items-center gap-2">
-                <span>◈</span> Cost: 1 Connect · You have {connects}
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
+              <div className="text-gold-accent font-data-tabular text-sm flex items-center gap-2 min-w-0 break-words">
+                <span className="shrink-0">◈</span> Cost: 1 Connect · You have {connects}
               </div>
               <div className="flex gap-3">
                 <button 
-                  className="px-4 py-2 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition"
+                  className="min-h-11 px-4 py-2 border border-surface-variant text-text-secondary rounded hover:text-on-surface hover:bg-surface-container transition"
                   onClick={() => setPitchingListing(null)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="bg-gold-accent text-background font-working-title px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="min-h-11 bg-gold-accent text-background font-working-title px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleSendPitch}
                   disabled={isSendingPitch}
                 >
@@ -891,9 +895,9 @@ export default function BrokerMode() {
       {/* Mobile quick actions — brokers get no dashboard top-nav on mobile, so
           surface the core destinations (schedule/availability, inbox, pipeline). */}
       <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4 hide-scrollbar">
-        <Link href="/dashboard/calendar" className="shrink-0 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">🗓️ Availability</Link>
-        <Link href="/dashboard/inbox" className="shrink-0 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">✉️ Inbox</Link>
-        <Link href="/dashboard/crm" className="shrink-0 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">📊 Pipeline</Link>
+        <Link href="/dashboard/calendar" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">🗓️ Availability</Link>
+        <Link href="/dashboard/inbox" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">✉️ Inbox</Link>
+        <Link href="/dashboard/crm" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">📊 Pipeline</Link>
       </div>
 
       {/* Action Bar */}
@@ -945,8 +949,8 @@ export default function BrokerMode() {
           )}
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
-          <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
-            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2 max-w-[calc(100%-6rem)]">
+            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] break-words">
               <div className="text-[12px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
               </div>
@@ -996,7 +1000,7 @@ export default function BrokerMode() {
               <div className="col-span-full"><RowListSkeleton count={3} label="Loading your deal files" /></div>
             )}
             {!isLoading && activePitches.length === 0 && (
-              <div className="col-span-full py-16 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300">
+              <div className="col-span-full py-8 sm:py-16 px-4 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300 break-words">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/5 rounded-full blur-[60px]" />
                 <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">📂</span>
                 <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No active deal files</p>
@@ -1007,7 +1011,7 @@ export default function BrokerMode() {
                     setShowMap(true);
                     setTimeout(() => document.getElementById('broker-map-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
                   }}
-                  className="relative z-10 font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-5 py-2.5 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold"
+                  className="relative z-10 min-h-11 inline-flex items-center justify-center font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-5 py-2.5 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold"
                 >
                   Explore Opportunities on Map →
                 </button>
@@ -1058,14 +1062,14 @@ export default function BrokerMode() {
               <div className="col-span-full"><RowListSkeleton count={2} label="Loading accepted mandates" /></div>
             )}
             {!isLoading && accepted.length === 0 && (
-              <div className="col-span-full py-12 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300">
+              <div className="col-span-full py-8 sm:py-12 px-4 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300 break-words">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-success/5 rounded-full blur-[60px]" />
                 <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">🛡️</span>
                 <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Accepted Advisory Mandates</p>
                 <p className="text-sm text-text-secondary relative z-10 max-w-sm mb-4 leading-relaxed">When property owners accept your representation handshake, your authorized advisory files will appear here.</p>
                 <Link
                   href="/property"
-                  className="relative z-10 font-label-caps text-[12px] tracking-widest uppercase text-gold-accent border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 px-5 py-2.5 rounded transition active:scale-95"
+                  className="relative z-10 min-h-11 inline-flex items-center justify-center font-label-caps text-[12px] tracking-widest uppercase text-gold-accent border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 px-5 py-2.5 rounded transition active:scale-95"
                 >
                   Browse Available Spaces →
                 </Link>

@@ -9,6 +9,7 @@ import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
 import dynamic from "next/dynamic";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
+import ScoutItMark from "@/components/brand/ScoutItMark";
 const BlackHoleCanvas = dynamic(() => import("@/components/descent/BlackHoleCanvas"), { ssr: false });
 const GoldenHorizonCanvas = dynamic(() => import("@/components/descent/GoldenHorizonCanvas"), { ssr: false });
 
@@ -704,6 +705,9 @@ export default function HomeClient() {
           LAUNCHPAD (ELEVATOR MENU)
           ========================================= */}
       <section data-scoutit-guide="scoutit-home-launchpad" className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
+        <div className="flex justify-center mb-8" style={{ fontSize: "32px", letterSpacing: "0.12em", color: "var(--accent)" }} aria-hidden="true">
+          <ScoutItWordmark leading={<ScoutItMark />} />
+        </div>
         <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
           Browse Space Catalog
         </h2>

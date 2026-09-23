@@ -254,14 +254,20 @@ export async function POST(req) {
       }
 
       if (faq.asked_by_user_id && faq.asked_by_user_id !== userId) {
-        await notifyUser(supabaseAdmin, {
-          userId: faq.asked_by_user_id,
-          title: "Your question was answered",
-          desc: `A ${role} answered: "${faq.question_text.slice(0, 80)}"`,
-          icon: tier === "gold" ? "🥇" : tier === "silver" ? "🥈" : "🥉",
-          propertySlug: faq.property_id,
-          notificationType: "faq_answered",
-        });
+        // A-146: isolated — the answer is saved; a bell failure must neither
+        // 500 it (the retry would duplicate the answer) nor vanish silently.
+        try {
+          await notifyUser(supabaseAdmin, {
+            userId: faq.asked_by_user_id,
+            title: "Your question was answered",
+            desc: `A ${role} answered: "${faq.question_text.slice(0, 80)}"`,
+            icon: tier === "gold" ? "🥇" : tier === "silver" ? "🥈" : "🥉",
+            propertySlug: faq.property_id,
+            notificationType: "faq_answered",
+          });
+        } catch (notifyError) {
+          console.warn("[api/faqs] answer bell not delivered for faq", faq.id, notifyError?.message);
+        }
       }
 
       return NextResponse.json(
@@ -326,16 +332,20 @@ export async function POST(req) {
     if (error) throw error;
 
     // Ping the already-verified owner so the question lands in their Mission Control queue.
-
+    // A-146: isolated like the answer bell above.
     if (property?.owner_id && property.owner_id !== userId) {
-      await notifyUser(supabaseAdmin, {
-        userId: property.owner_id,
-        title: "New question on your listing",
-        desc: `"${question.slice(0, 80)}" — ${property.title}`,
-        icon: "❓",
-        propertyId: property.id,
-        notificationType: "faq_question",
-      });
+      try {
+        await notifyUser(supabaseAdmin, {
+          userId: property.owner_id,
+          title: "New question on your listing",
+          desc: `"${question.slice(0, 80)}" — ${property.title}`,
+          icon: "❓",
+          propertyId: property.id,
+          notificationType: "faq_question",
+        });
+      } catch (notifyError) {
+        console.warn("[api/faqs] question bell not delivered for property", property.id, notifyError?.message);
+      }
     }
 
     return NextResponse.json(

@@ -42,6 +42,11 @@ function buildScheduleItems({ appointments, events, tasks }) {
       title: a.propertyTitle || "Property viewing",
       subtitle: a.contactName ? `With ${a.contactName}` : null,
       status: a.status,
+      // A-149: contact-exchange affordance rides the appointment. dealId +
+      // the server-resolved exchange state travel on the item; numbers never
+      // do — those stay in the thread after a completed handshake.
+      dealId: a.dealId || null,
+      contactExchange: a.contactExchange || null,
       raw: a,
     });
   }
@@ -102,7 +107,7 @@ function groupByBucket(items) {
  * inline availability, and one day-by-day schedule merging viewings, calendar
  * events, and tasks that have a due time.
  */
-export default function AppointmentsSheet({ appointments = [], onStatusUpdate, userId, addToast }) {
+export default function AppointmentsSheet({ appointments = [], onStatusUpdate, onRefresh, userId, addToast }) {
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [updatingId, setUpdatingId] = useState(null);
@@ -246,6 +251,9 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, u
                   updatingId={updatingId}
                   onViewingUpdate={handleViewingUpdate}
                   onEditEvent={(ev) => setEditorSeed(ev)}
+                  userId={userId}
+                  onExchangeUpdate={onRefresh}
+                  notify={addToast}
                 />
               ))}
             </div>
@@ -264,8 +272,59 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, u
   );
 }
 
+// A-149: contact exchange at the viewing. Same two-sided handshake as the
+// thread widget, same route, same mutual-consent semantics — surfaced where
+// the meeting lives. The server-resolved exchange state decides; this never
+// invents an offer, and exchanged renders as a note, never as numbers.
+function ContactExchange({ dealId, exchange, userId, onChanged, notify }) {
+  const [busy, setBusy] = useState(false);
+  if (!dealId || !exchange || exchange.state === "unavailable") return null;
+  if (exchange.state === "exchanged") {
+    return (
+      <span className="text-[12px] font-mono uppercase tracking-widest text-success">
+        Contacts exchanged ✓
+      </span>
+    );
+  }
+  if (exchange.state === "offered" && exchange.offeredByMe) {
+    return (
+      <span className="text-[12px] font-mono uppercase tracking-widest text-text-muted">
+        Handshake offered — awaiting them
+      </span>
+    );
+  }
+  const label = exchange.state === "offered" ? "Accept contact reveal" : "Exchange contact";
+  const sign = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await crmFetch("/api/deals/handshake", {
+        method: "POST",
+        mockUserId: userId,
+        body: { dealId, action: "sign" },
+      });
+      notify?.("Handshake updated.");
+      onChanged?.();
+    } catch (e) {
+      notify?.(sanitizeError(e, "Couldn't update the handshake."));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={sign}
+      disabled={busy}
+      className="px-2.5 py-1.5 rounded border border-gold-accent/30 text-gold-accent hover:bg-gold-accent/10 text-xs font-working-title flex items-center gap-1 shrink-0 disabled:opacity-50"
+    >
+      {busy ? "Sending…" : label}
+    </button>
+  );
+}
+
 // A single schedule row — viewing / event / task, each with its own affordances.
-function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent }) {
+function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent, userId, onExchangeUpdate, notify }) {
   const now = new Date();
   // Show the real range when the item has an end. Viewings carry one now, so
   // a 90-minute booking no longer reads as a bare start time.
@@ -308,6 +367,17 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent }) {
           <span className="flex items-center gap-1"><Clock size={12} className="text-text-muted" />{timeLabel}</span>
           {item.subtitle && <span className="truncate text-text-muted">{item.subtitle}</span>}
         </div>
+        {item.kind === "viewing" && (item.dealId || item.contactExchange) ? (
+          <div className="mt-1.5">
+            <ContactExchange
+              dealId={item.dealId}
+              exchange={item.contactExchange}
+              userId={userId}
+              onChanged={onExchangeUpdate}
+              notify={notify}
+            />
+          </div>
+        ) : null}
       </div>
 
       {canRespond ? (

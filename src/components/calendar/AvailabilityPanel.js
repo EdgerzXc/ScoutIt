@@ -152,7 +152,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
   const overrideDates = Object.keys(overrides).sort();
 
   return (
-    <section className="bg-[#121212] border border-surface-variant rounded-lg p-4 sm:p-6">
+    <section className="bg-[#121212] border border-surface-variant rounded-lg p-4 sm:p-6 cal-lens">
       <h2 className="font-working-title text-xl text-on-surface mb-2">Weekly Availability</h2>
       <p className="text-sm text-text-secondary mb-6">
         Set the standard hours you are available for live property viewings. Buyers can only
@@ -347,7 +347,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
                 type="button"
                 onClick={addOverride}
                 disabled={!newOverrideDate}
-                className="shrink-0 bg-surface-variant hover:bg-surface-variant/80 text-on-surface px-4 py-2 rounded text-sm font-working-title transition-colors disabled:opacity-40 flex items-center gap-1"
+                className="shrink-0 min-h-11 bg-surface-variant hover:bg-surface-variant/80 text-on-surface px-4 py-2 rounded text-sm font-working-title transition-colors disabled:opacity-40 flex items-center gap-1"
               >
                 <Plus size={14} /> Block
               </button>
@@ -374,7 +374,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
                       type="button"
                       onClick={() => removeOverride(dateKey)}
                       aria-label={`Unblock ${dateKey}`}
-                      className="text-text-muted hover:text-error transition shrink-0 p-1"
+                      className="text-text-muted hover:text-error transition shrink-0 min-h-11 min-w-11 inline-flex items-center justify-center -m-1"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -388,7 +388,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-surface-variant hover:bg-surface-variant/80 text-on-surface px-6 py-2 rounded text-sm font-working-title transition-colors disabled:opacity-50"
+              className="min-h-11 w-full sm:w-auto bg-surface-variant hover:bg-surface-variant/80 text-on-surface px-6 py-2 rounded text-sm font-working-title transition-colors disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save Settings"}
             </button>

@@ -38,9 +38,12 @@ describe("A-137 workspace unlock gates", () => {
   });
 
   it("refuses broker without a valid-format PRC license number", () => {
+    // A-146: the client helper mirrors the server rule (7–8 digits). A
+    // 5-digit claim used to pass here and 400 at the server.
     expect(canAddRole("broker", {}).ok).toBe(false);
     expect(canAddRole("broker", { prcLicense: "PRC-1234" }).ok).toBe(false);
-    expect(canAddRole("broker", { prcLicense: "PRC-REB-12345" })).toEqual({ ok: true });
+    expect(canAddRole("broker", { prcLicense: "PRC-REB-12345" }).ok).toBe(false);
+    expect(canAddRole("broker", { prcLicense: "PRC-REB-1234567" })).toEqual({ ok: true });
   });
 
   it("says which field is missing, so the refusal names the task", () => {

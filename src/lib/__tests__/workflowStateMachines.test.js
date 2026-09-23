@@ -12,6 +12,12 @@ describe("workflow state-machine contracts", () => {
     expect(canTransitionWorkflow("inquiry", "accepted", "closed")).toBe(true);
     expect(canTransitionWorkflow("inquiry", "closed", "accepted")).toBe(false);
     expect(canTransitionWorkflow("inquiry", "accepted", "withdrawn")).toBe(false);
+    // Invites answer from the inbox like every other request (A-144 logic
+    // check): the broker accepts/declines; withdraw stays sender-pending.
+    expect(canTransitionWorkflow("inquiry", "invited", "accepted")).toBe(true);
+    expect(canTransitionWorkflow("inquiry", "invited", "declined")).toBe(true);
+    expect(canTransitionWorkflow("inquiry", "invited", "withdrawn")).toBe(false);
+    expect(canTransitionWorkflow("inquiry", "invited", "closed")).toBe(false);
   });
 
   it("prevents viewing states from skipping required milestones", () => {

@@ -58,7 +58,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur border-b border-surface-variant">
           <div>
             <div className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent">Unit Master Page</div>
-            <h2 className="font-display-md text-lg text-on-surface">{unit.name || "Untitled Unit"}</h2>
+            <h2 className="font-display-md text-lg text-on-surface break-words [overflow-wrap:anywhere] min-w-0">{unit.name || "Untitled Unit"}</h2>
           </div>
           <div className="flex items-center gap-3">
             {propertyId && unit.id && (
@@ -66,12 +66,12 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
                 href={unitDetailPath(propertyId, unit.id)}
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[12px] font-label-caps uppercase tracking-widest transition"
+                className="min-h-11 inline-flex items-center px-3 py-1.5 rounded border border-surface-variant text-text-secondary hover:text-gold-accent hover:border-gold-accent text-[12px] font-label-caps uppercase tracking-widest transition"
               >
                 Preview
               </a>
             )}
-            <button onClick={onClose} className="p-2 rounded hover:bg-surface-alt text-text-muted hover:text-on-surface transition" aria-label="Close">
+            <button onClick={onClose} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded hover:bg-surface-alt text-text-muted hover:text-on-surface transition" aria-label="Close">
               <X size={18} />
             </button>
           </div>
@@ -182,11 +182,12 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
                     <button
                       onClick={() => updateScenario(s.id, "recommended", !s.recommended)}
                       title="Mark recommended"
-                      className={`p-2 rounded border transition ${s.recommended ? "border-gold-accent text-gold-accent bg-gold-accent/10" : "border-surface-variant text-text-muted hover:text-gold-accent"}`}
+                      aria-label="Mark recommended"
+                      className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded border transition ${s.recommended ? "border-gold-accent text-gold-accent bg-gold-accent/10" : "border-surface-variant text-text-muted hover:text-gold-accent"}`}
                     >
                       <Star size={15} fill={s.recommended ? "currentColor" : "none"} />
                     </button>
-                    <button onClick={() => removeScenario(s.id)} title="Remove" className="p-2 rounded border border-surface-variant text-text-muted hover:text-error hover:border-error transition">
+                    <button onClick={() => removeScenario(s.id)} title="Remove" aria-label="Remove scenario" className="min-h-11 min-w-11 inline-flex items-center justify-center rounded border border-surface-variant text-text-muted hover:text-error hover:border-error transition">
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -201,7 +202,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
               );
             })}
 
-            <button onClick={addScenario} className="flex items-center justify-center gap-2 w-full py-2.5 rounded border border-dashed border-surface-variant text-text-secondary hover:border-gold-accent hover:text-gold-accent transition text-sm">
+            <button onClick={addScenario} className="flex items-center justify-center gap-2 w-full min-h-11 py-2.5 rounded border border-dashed border-surface-variant text-text-secondary hover:border-gold-accent hover:text-gold-accent transition text-sm">
               <Plus size={15} /> Add a subdivision option
             </button>
           </section>

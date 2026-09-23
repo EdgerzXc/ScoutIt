@@ -6,6 +6,8 @@ import { reportError } from "@/lib/reportError";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
+import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
+import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { guideForPath } from "@/lib/pageGuides";
 // A-093: `@/lib/journeyGuides` pulls the ~1MB internal system graph
 // (`masterFlowGraphData`) into this layout-mounted chunk. It is imported
@@ -121,10 +123,9 @@ export default function FloatingToolbox({ showTrigger = true }) {
     // Migrate old key
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
     const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
-    // Light Mode remains implemented for later remediation, but its full-route
-    // contrast audit failed the pilot gate. Normalize old selections to Dark.
-    const savedMode = requestedMode === "light" ? "dark" : requestedMode;
-    if (requestedMode === "light") localStorage.setItem("scoutit_display_mode", "dark");
+    // White-lens preview (owner-approved 2026-09-23). Light is opt-in preview,
+    // not pilot-approved default. Keep saved selection as-is.
+    const savedMode = requestedMode;
     const savedPos = (() => {
       try { return JSON.parse(localStorage.getItem("scoutit_toolbox_pos")); }
       catch { return null; }
@@ -197,6 +198,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
     const next = !lite;
     setLite(next);
     setLiteMode(next);
+    // A-146: mode-switch measurement (Simple vs Pro experiment needs it).
+    trackEvent(GA_EVENTS.DISPLAY_MODE_SWITCHED, { axis: "performance", mode: next ? "lite-on" : "lite-off" });
   };
 
   // A-083. Simple is a reading level, not a performance switch — it is an
@@ -208,6 +211,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
     const next = !simple;
     setSimple(next);
     setSimpleMode(next);
+    // A-146: mode-switch measurement (Simple vs Pro experiment needs it).
+    trackEvent(GA_EVENTS.DISPLAY_MODE_SWITCHED, { axis: "density", mode: next ? "simple-on" : "simple-off" });
   };
 
   const submitReport = async () => {
@@ -294,7 +299,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const viewW = typeof window !== 'undefined' ? window.innerWidth : 1000;
   const viewH = typeof window !== 'undefined' ? window.innerHeight : 800;
   const defaultPanelX = Math.max(16, Math.min(viewW - 250, pos.x > viewW - 290 ? viewW - 250 : pos.x));
-  const defaultPanelY = Math.max(60, Math.min(viewH - 450, pos.y > viewH - 300 ? viewH - 450 : pos.y));
+  const defaultPanelY = viewW <= 768 ? 16 : Math.max(60, Math.min(viewH - 450, pos.y > viewH - 300 ? viewH - 450 : pos.y));
   const activePanelX = panelPos ? panelPos.x : defaultPanelX;
   const activePanelY = panelPos ? panelPos.y : defaultPanelY;
 
@@ -376,7 +381,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   function openJourneyStep() {
     if (!currentStep?.route) return;
     if (pathname !== currentStep.route) router.push(currentStep.route);
-    else document.querySelector(`[data-scoutit-guide="${currentStep.target}"]`)?.scrollIntoView({ behavior: lite ? "auto" : "smooth", block: "center" });
+    else document.querySelector(`[data-scoutit-guide="${currentStep.target}"]`)?.scrollIntoView({ behavior: motionSafeScrollBehavior(), block: "center" });
   }
 
   useEffect(() => {
@@ -386,7 +391,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
       if (!target) return;
       if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
       target.focus({ preventScroll: true });
-      target.scrollIntoView({ behavior: lite ? "auto" : "smooth", block: "center" });
+      target.scrollIntoView({ behavior: motionSafeScrollBehavior(), block: "center" });
     }, 120);
     return () => window.clearTimeout(timer);
   }, [currentStep, lite, pathname, wizardKind, wizardOpen]);
@@ -414,7 +419,9 @@ export default function FloatingToolbox({ showTrigger = true }) {
     const dx = e.clientX - panelAnchor.current.clientX;
     const dy = e.clientY - panelAnchor.current.clientY;
     const nx = Math.max(10, Math.min(viewW - 240, panelAnchor.current.posX + dx));
-    const ny = Math.max(10, Math.min(viewH - 450, panelAnchor.current.posY + dy));
+    const panelHeight = panelRef.current?.offsetHeight || 450;
+    const bottomClearance = viewW <= 768 ? 88 : 10;
+    const ny = Math.max(10, Math.min(viewH - panelHeight - bottomClearance, panelAnchor.current.posY + dy));
     setPanelPos({ x: nx, y: ny });
     if (panelRef.current) {
       panelRef.current.style.left = nx + "px";
@@ -493,7 +500,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
             border: "1px solid var(--border-solid, rgba(232, 174, 60,0.25))",
             borderRadius: 10,
             boxShadow: "var(--shadow-lg, 0 12px 48px rgba(0,0,0,0.75))",
-            overflow: "hidden",
+            maxHeight: Math.max(160, viewH - activePanelY - (viewW <= 768 ? 88 : 10)),
+            overflowY: "auto",
           }}
         >
           {/* Draggable Header */}
@@ -550,6 +558,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
           <div style={{ padding: "9px 9px 7px", display: "flex", flexDirection: "column", gap: 5 }}>
             {[
               { key: "dark",          label: "Dark Mode",     desc: "Cosmic default",        dot: "#1e1e1e", dotBorder: "rgba(255,255,255,0.18)" },
+              { key: "light",         label: "Light / White Lens", desc: "Clean corporate preview", dot: "#f4f4f5", dotBorder: "rgba(17,17,19,0.25)" },
               { key: "high-contrast", label: "High Contrast", desc: "Maximum readability",   dot: "#E8AE3C", dotBorder: "rgba(232, 174, 60,0.4)" },
             ].map(({ key, label, desc, dot, dotBorder }) => (
               <button

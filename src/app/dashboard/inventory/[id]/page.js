@@ -198,22 +198,22 @@ function InventoryInner({ params }) {
           <div>
             <Link 
               href="/dashboard"
-              className="text-text-secondary hover:text-gold-accent text-sm font-working-title flex items-center gap-2 mb-4 transition"
+              className="text-text-secondary hover:text-gold-accent text-sm font-working-title inline-flex items-center gap-2 mb-4 min-h-11 transition"
             >
               ← Back to Dashboard
             </Link>
             <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">
               Inventory Manager
             </span>
-            <h1 className="font-display-md text-3xl md:text-5xl text-on-surface">
+            <h1 className="font-display-md text-3xl md:text-5xl text-on-surface break-words [overflow-wrap:anywhere] min-w-0">
               {listing.title || 'Untitled Property'}
             </h1>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-stretch md:items-end gap-2">
             <button
               onClick={manualSave}
               disabled={saveState === 'saving'}
-              className={`min-w-[150px] text-sm font-working-title font-bold px-6 py-2 rounded-full border transition duration-300 flex items-center justify-center gap-2 ${
+              className={`w-full md:w-auto md:min-w-[150px] min-h-11 text-sm font-working-title font-bold px-6 py-2 rounded-full border transition duration-300 flex items-center justify-center gap-2 ${
                 saveState === 'saving'
                   ? 'bg-surface-variant text-text-muted border-surface-variant cursor-wait'
                   : saveState === 'saved'

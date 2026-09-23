@@ -1,23 +1,38 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 const E="11111111-1111-4111-8111-111111111111", A="22222222-2222-4222-8222-222222222222";
-const mocks=vi.hoisted(()=>({resolveUserId:vi.fn(),requireAdmin:vi.fn(),rpc:vi.fn(),appealsLimit:vi.fn()}));
+const mocks=vi.hoisted(()=>({resolveUserId:vi.fn(),requireAdmin:vi.fn(),rpc:vi.fn(),appealsLimit:vi.fn(),turnstileGuard:vi.fn()}));
 vi.mock("@/lib/serverAuth",()=>({resolveUserId:mocks.resolveUserId}));
 vi.mock("@/lib/adminGuard",()=>({requireAdmin:mocks.requireAdmin}));
+vi.mock("@/lib/turnstile",()=>({turnstileGuard:(...a)=>mocks.turnstileGuard(...a)}));
 vi.mock("@/lib/supabaseAdmin",()=>({supabaseAdmin:{rpc:mocks.rpc,from:(table)=>{if(table!=="faq_block_appeals")throw new Error(`Unexpected ${table}`);return{select:()=>({in:()=>({order:()=>({limit:mocks.appealsLimit})})})};}}}));
 import { GET, PATCH, POST } from "@/app/api/faqs/appeal/route";
 const req=(method,body)=>new Request("https://scoutit.space/api/faqs/appeal",{method,headers:{"Content-Type":"application/json"},...(body?{body:JSON.stringify(body)}:{})});
 
 describe("FAQ appeal evidence and review API",()=>{
  const original=process.env.FAQ_APPEAL_ACTIVE;
- beforeEach(()=>{vi.clearAllMocks();process.env.FAQ_APPEAL_ACTIVE="true";mocks.resolveUserId.mockResolvedValue("owner-1");mocks.requireAdmin.mockResolvedValue({userId:"staff-1",error:null});mocks.rpc.mockResolvedValue({data:[{appeal_id:A,appeal_status:"pending"}],error:null});mocks.appealsLimit.mockResolvedValue({data:[],error:null});});
+  beforeEach(()=>{vi.clearAllMocks();process.env.FAQ_APPEAL_ACTIVE="true";mocks.resolveUserId.mockResolvedValue("owner-1");mocks.requireAdmin.mockResolvedValue({userId:"staff-1",error:null});mocks.rpc.mockResolvedValue({data:[{appeal_id:A,appeal_status:"pending"}],error:null});mocks.appealsLimit.mockResolvedValue({data:[],error:null});mocks.turnstileGuard.mockResolvedValue(null);});
  afterEach(()=>{if(original===undefined)delete process.env.FAQ_APPEAL_ACTIVE;else process.env.FAQ_APPEAL_ACTIVE=original;});
  it("gates every handler before schema access",async()=>{delete process.env.FAQ_APPEAL_ACTIVE;for(const call of [POST(req("POST",{evidenceId:E,explanation:"Legitimate cadastral reference"})),GET(req("GET")),PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review"}))])expect((await call).status).toBe(503);expect(mocks.rpc).not.toHaveBeenCalled();expect(mocks.appealsLimit).not.toHaveBeenCalled();});
- it("rejects anonymous, malformed, and contact-bearing submissions",async()=>{mocks.resolveUserId.mockResolvedValue(null);expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate cadastral reference"}))).status).toBe(401);mocks.resolveUserId.mockResolvedValue("owner-1");expect((await POST(req("POST",{evidenceId:"tampered",explanation:"Legitimate cadastral reference"}))).status).toBe(400);expect((await POST(req("POST",{evidenceId:E,explanation:"Call 0917 123 4567 about this"}))).status).toBe(422);});
- it.each(["cross-user","cross-property","nonexistent","replayed","expired"])("rejects %s evidence without leaking which check failed",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{message:"EVIDENCE_INVALID"}});const res=await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference"}));expect(res.status).toBe(409);expect((await res.json()).message).toContain("invalid, expired, or already used");});
- it("submits only evidence plus sanitized explanation through atomic RPC",async()=>{const res=await POST(req("POST",{evidenceId:E,explanation:"<b>Legitimate title registry reference</b>"}));expect(res.status).toBe(201);expect(mocks.rpc).toHaveBeenCalledWith("submit_faq_block_appeal",{p_evidence_id:E,p_user_id:"owner-1",p_explanation:"Legitimate title registry reference"});});
- it("maps atomic pending-limit enforcement",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{message:"APPEAL_LIMIT"}});expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference"}))).status).toBe(429);});
- it("requires admin for queue and transitions",async()=>{mocks.requireAdmin.mockResolvedValue({userId:null,error:"Forbidden",status:403});expect((await GET(req("GET"))).status).toBe(403);expect((await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review"}))).status).toBe(403);});
+  it("rejects anonymous, malformed, and contact-bearing submissions",async()=>{mocks.resolveUserId.mockResolvedValue(null);expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate cadastral reference"}))).status).toBe(401);mocks.resolveUserId.mockResolvedValue("owner-1");expect((await POST(req("POST",{evidenceId:"tampered",explanation:"Legitimate cadastral reference"}))).status).toBe(400);expect((await POST(req("POST",{evidenceId:E,explanation:"Call 0917 123 4567 about this",turnstileToken:"tok"}))).status).toBe(422);});
+  it.each(["cross-user","cross-property","nonexistent","replayed","expired"])("rejects %s evidence without leaking which check failed",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{message:"EVIDENCE_INVALID"}});const res=await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference",turnstileToken:"tok"}));expect(res.status).toBe(409);expect((await res.json()).message).toContain("invalid, expired, or already used");});
+  it("submits only evidence plus sanitized explanation through atomic RPC",async()=>{const res=await POST(req("POST",{evidenceId:E,explanation:"<b>Legitimate title registry reference</b>",turnstileToken:"tok"}));expect(res.status).toBe(201);expect(mocks.rpc).toHaveBeenCalledWith("submit_faq_block_appeal",{p_evidence_id:E,p_user_id:"owner-1",p_explanation:"Legitimate title registry reference"});});
+  it("maps atomic pending-limit enforcement",async()=>{mocks.rpc.mockResolvedValue({data:null,error:{message:"APPEAL_LIMIT"}});expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference",turnstileToken:"tok"}))).status).toBe(429);});
+  it("requires a bot-check token and rejects a failed one",async()=>{
+    expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference"}))).status).toBe(400);
+    mocks.turnstileGuard.mockResolvedValue(Response.json({ok:false},{status:403}));
+    expect((await POST(req("POST",{evidenceId:E,explanation:"Legitimate title registry reference",turnstileToken:"spent"}))).status).toBe(403);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+   it("meters one submitter's loop before the RPC ever sees it",async()=>{
+    mocks.rpc.mockClear();
+    const body={evidenceId:E,explanation:"Legitimate title registry reference",turnstileToken:"tok"};
+    const statuses=[];
+    for(let i=0;i<25;i+=1){statuses.push((await POST(req("POST",body))).status);}
+    expect(statuses).toContain(429);
+    expect(mocks.rpc.mock.calls.length).toBeLessThan(25);
+  });
+  it("requires admin for queue and transitions",async()=>{mocks.requireAdmin.mockResolvedValue({userId:null,error:"Forbidden",status:403});expect((await GET(req("GET"))).status).toBe(403);expect((await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review"}))).status).toBe(403);});
  it("performs optimistic-concurrency review transitions",async()=>{mocks.rpc.mockResolvedValueOnce({data:[{appeal_status:"under_review",reviewed_at:null}],error:null});const res=await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"start_review",reviewerNotes:"Checking title reference"}));expect(res.status).toBe(200);expect(mocks.rpc).toHaveBeenCalledWith("review_faq_block_appeal",{p_appeal_id:A,p_reviewer_id:"staff-1",p_expected_status:"pending",p_action:"start_review",p_reviewer_notes:"Checking title reference"});mocks.rpc.mockResolvedValueOnce({data:null,error:{message:"APPEAL_CONFLICT"}});expect((await PATCH(req("PATCH",{appealId:A,expectedStatus:"pending",action:"reject"}))).status).toBe(409);});
 });
 

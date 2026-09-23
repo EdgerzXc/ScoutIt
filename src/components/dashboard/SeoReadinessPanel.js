@@ -93,7 +93,9 @@ export default function SeoReadinessPanel({ propertyId }) {
           background: none;
           border: none;
           padding: 8px 0 8px 12px;
-          min-height: 36px;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
           font-family: ${MONO};
           font-size: 12px;
           letter-spacing: 0.12em;

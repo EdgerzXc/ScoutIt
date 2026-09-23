@@ -141,7 +141,7 @@ export async function GET(request) {
       headers: cacheable
         ? {
             // Identical for every caller, so it is safe to share. 60s of
-            // freshness with a 5 minute stale window: a visitor gets the
+            // freshness with a 60s stale window: a visitor gets the
             // cached copy immediately and a new one is fetched behind them,
             // so a published listing appears within a minute without anyone
             // ever waiting on Airtable.

@@ -66,7 +66,7 @@ function AdminFlowPageInner() {
               <span className="text-gold-accent">S</span>cout<span className="text-gold-accent">IT</span>
             </span>
             {isStaff && (
-              <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gold-accent">
+              <span className="hidden sm:inline text-xs font-mono uppercase px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gold-accent whitespace-nowrap">
                 Master System Flow Map (Internal)
               </span>
             )}
@@ -76,31 +76,31 @@ function AdminFlowPageInner() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin"
-            className="text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
+            className="hidden sm:inline text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
           >
             Overview
           </Link>
           <Link
             href="/layer/orbit"
-            className="text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
+            className="hidden sm:inline text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
           >
             Orbit
           </Link>
           <Link
             href="/showcase"
-            className="text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
+            className="hidden sm:inline text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
           >
             Showcase
           </Link>
           <Link
             href="/property"
-            className="text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
+            className="hidden sm:inline text-xs font-mono uppercase text-text-secondary hover:text-white transition-colors"
           >
             Directory
           </Link>
           <Link
             href="/dashboard"
-            className="text-xs font-mono uppercase px-2.5 py-1 rounded bg-gold-accent/20 border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/30 transition-colors font-bold"
+            className="shrink-0 whitespace-nowrap text-xs font-mono uppercase px-2.5 py-1 rounded bg-gold-accent/20 border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/30 transition-colors font-bold"
           >
             Dashboard
           </Link>

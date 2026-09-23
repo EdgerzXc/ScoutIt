@@ -38,7 +38,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
             Monitor construction milestones and daily on-the-ground updates from your team.
           </p>
         </div>
-        <GlassPanel className="p-12 flex flex-col items-center justify-center text-center gap-3">
+        <GlassPanel className="p-8 md:p-12 flex flex-col items-center justify-center text-center gap-3 break-words">
           <span className="text-3xl">🏗️</span>
           <h3 className="text-white font-medium">No projects yet</h3>
           <p className="text-sm text-text-secondary max-w-sm">
@@ -64,7 +64,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
           <select
             value={activeEstate || ""}
             onChange={(e) => setActiveEstate(e.target.value)}
-            className="w-full bg-surface-alt border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-gold-accent transition truncate"
+            className="w-full min-h-11 bg-surface-alt border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-gold-accent transition truncate"
           >
             {estates.map(est => (
               <option key={est.id} value={est.id}>{est.title}</option>

@@ -665,6 +665,58 @@ export default function WishlistPage() {
             padding: 60px 12px 28px;
           }
         }
+
+        /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): scoped styles
+           need in-file :global rules. Dark untouched. */
+        :global(body.light-mode) .merge-btn {
+          background: var(--accent-fill);
+          color: var(--on-accent);
+        }
+        :global(body.light-mode) .merge-message {
+          color: var(--text-secondary);
+          border-color: var(--accent-muted);
+        }
+        :global(body.light-mode) .empty-heading,
+        :global(body.light-mode) .card-title {
+          color: var(--text-primary);
+        }
+        :global(body.light-mode) .empty-subtitle,
+        :global(body.light-mode) .card-meta,
+        :global(body.light-mode) .loading-state,
+        :global(body.light-mode) .board-footer {
+          color: var(--text-secondary);
+        }
+        :global(body.light-mode) .board-footer {
+          border-color: var(--border-solid);
+        }
+        :global(body.light-mode) .advisor-badge,
+        :global(body.light-mode) .reaction-badge {
+          color: var(--accent);
+          border-color: var(--accent-muted);
+          background: var(--accent-dim);
+        }
+        :global(body.light-mode) .remove-btn {
+          color: var(--text-secondary);
+          border-color: var(--border-solid);
+        }
+        @media (hover: hover) and (pointer: fine) {
+          :global(body.light-mode) .card-title:hover {
+            color: var(--accent);
+          }
+          :global(body.light-mode) .remove-btn:hover {
+            color: var(--text-primary);
+          }
+        }
+        :global(body.light-mode) .empty-cta {
+          color: var(--accent);
+          border-color: var(--accent-muted);
+        }
+        @media (hover: hover) and (pointer: fine) {
+          :global(body.light-mode) .empty-cta:hover {
+            background: var(--accent-fill);
+            color: #111113;
+          }
+        }
       `}</style>
     </div>
   );

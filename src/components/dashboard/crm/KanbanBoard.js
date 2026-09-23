@@ -72,8 +72,8 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
 
   return (
     <div className="flex h-full flex-col font-body">
-      <div className="mb-6 flex justify-between items-center">
-        <div className="relative w-72">
+      <div className="mb-6 flex flex-wrap justify-between items-center gap-3">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
           <input 
             type="search"
@@ -93,7 +93,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
           return (
             <div 
               key={col.id} 
-              className="flex-shrink-0 w-80 bg-surface/50 border border-surface-variant rounded-lg p-3 flex flex-col snap-start"
+              className="flex-shrink-0 w-80 max-w-[85vw] bg-surface/50 border border-surface-variant rounded-lg p-3 flex flex-col snap-start"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.id)}
             >
@@ -120,10 +120,10 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                       bg-surface/80 backdrop-blur-sm
                     `}
                   >
-                    <div className="mb-1 truncate font-body text-base font-semibold text-on-surface">{deal.propertyTitle}</div>
+                    <div className="mb-1 truncate font-body text-base font-semibold text-on-surface break-words">{deal.propertyTitle}</div>
                     <div className="mb-3 flex items-center justify-between gap-3 font-body text-sm text-text-secondary">
-                      <span>{deal.otherParty}</span>
-                      <span className="shrink-0 font-label-caps text-label-caps uppercase text-gold-accent/80">{deal.myRole}</span>
+                      <span className="min-w-0 truncate">{deal.otherParty}</span>
+                      <span className="shrink-0 whitespace-nowrap font-label-caps text-label-caps uppercase text-gold-accent/80">{deal.myRole}</span>
                     </div>
                     {deal.lastMessage && (
                       <div className="mt-2 truncate border-t border-surface-variant/40 pt-2 font-body text-sm italic text-text-muted">

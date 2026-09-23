@@ -86,7 +86,7 @@ export default function PublicProfilePage() {
 
   if (loading) {
     return (
-      <div role="main" style={loadingScreen}>
+        <div role="main" style={loadingScreen} className="keep-dark">
         <h1 className="sr-only">ScoutIt Profile</h1>
         <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
           Loading…
@@ -97,7 +97,7 @@ export default function PublicProfilePage() {
 
   if (notFound) {
     return (
-      <div style={notFoundScreen}>
+        <div style={notFoundScreen} className="keep-dark">
         <header style={navBar}>
           <Link href="/" style={backLink}>← ScoutIt</Link>
         </header>
@@ -127,7 +127,7 @@ export default function PublicProfilePage() {
   const hasAnyPanel = showBroker || showPhotographer || showResearcher;
 
   return (
-    <div style={pageWrap}>
+    <div style={pageWrap} className="keep-dark">
       {/* Nav */}
       <header style={navBar}>
         <Link href="/" style={backLink}>← ScoutIt</Link>

@@ -87,7 +87,7 @@ export default function OwnProfilePage() {
 
   if (loading) {
     return (
-      <div style={loadingScreen}>
+      <div style={loadingScreen} className="keep-dark">
         <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
           Loading Profile…
         </span>
@@ -97,7 +97,7 @@ export default function OwnProfilePage() {
 
   if (loadError) {
     return (
-      <div style={loadingScreen}>
+      <div style={loadingScreen} className="keep-dark">
         <p role="alert" style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-secondary)", maxWidth: 420, textAlign: "center", padding: 24 }}>
           {loadError}
         </p>
@@ -114,7 +114,7 @@ export default function OwnProfilePage() {
   const isResearcher = roles.includes("provider") && provType === "researcher";
 
   return (
-    <div style={pageWrap}>
+    <div style={pageWrap} className="keep-dark">
       <AtmosphereBackground variant="default" />
       <header style={navBar}>
         <Link href="/dashboard" style={backLink}>

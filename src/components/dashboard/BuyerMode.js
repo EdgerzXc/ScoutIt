@@ -14,6 +14,7 @@ const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonM
 
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import MapCreditControl from '@/components/maps/MapCreditControl';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import SimpleDetail from "@/components/ui/SimpleDetail";
@@ -65,6 +66,8 @@ export default function BuyerMode() {
       try {
         setMapError(null);
         const map = new maplibregl.Map({
+          // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+          attributionControl: false,
           container: mapContainerRef.current,
           style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
           center: DEFAULT_MAP_CENTER, // Makati
@@ -80,6 +83,7 @@ export default function BuyerMode() {
         });
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
+        map.addControl(new MapCreditControl(), 'bottom-right');
         mapInstance.current = map;
 
         // Ensure the map resizes correctly if the container layout changes
@@ -321,7 +325,7 @@ export default function BuyerMode() {
   const ListingCard = ({ item }) => {
     const isSelected = selectedForCompare.includes(item.id);
     return (
-      <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] md:min-w-[280px]">
+      <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] max-w-[85vw] md:min-w-[280px]">
         <div className={`card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center transition cursor-pointer h-full group relative ${isSelected ? 'border-gold-accent bg-gold-accent/5' : 'hover:border-gold-accent'}`}>
           <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
             {item.img || '🏠'}
@@ -335,7 +339,7 @@ export default function BuyerMode() {
             <button
               type="button"
               title={isSelected ? "Remove from comparison" : "Select for comparison"}
-              className={`p-1 rounded text-xs transition ${isSelected ? 'bg-gold-accent text-black font-bold' : 'bg-surface/80 text-text-secondary hover:text-gold-accent'}`}
+              className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded text-xs transition ${isSelected ? 'bg-gold-accent text-black font-bold' : 'bg-surface/80 text-text-secondary hover:text-gold-accent'}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -349,7 +353,7 @@ export default function BuyerMode() {
                 user cannot tell a saved item from an unsaved one — the label
                 and the state have to move together. */}
             <button 
-              className="text-xl drop-shadow-md hover:scale-110 transition-transform p-0.5"
+              className="min-h-11 min-w-11 inline-flex items-center justify-center text-xl drop-shadow-md hover:scale-110 transition-transform"
               aria-pressed={savedIds.includes(item.id)}
               aria-label={
                 savedIds.includes(item.id)
@@ -373,7 +377,7 @@ export default function BuyerMode() {
   };
 
   const VerticalListingCard = ({ item }) => (
-    <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 w-[280px] snap-start relative">
+    <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 w-[280px] max-w-[80vw] snap-start relative">
       <div className="card-atmosphere hov-card rounded-lg p-0 flex flex-col hover:border-text-secondary transition cursor-pointer overflow-hidden group h-full">
         <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200">
           {item.img || '🏠'}
@@ -386,7 +390,7 @@ export default function BuyerMode() {
         {/* A-084. See the note on the compact card's toggle above: the pair
             must stay identical or one of them silently loses its state. */}
         <button 
-          className="absolute top-4 right-4 text-2xl drop-shadow-md hover:scale-110 transition-transform bg-background/20 rounded-full p-1"
+          className="absolute top-4 right-4 min-h-11 min-w-11 inline-flex items-center justify-center text-2xl drop-shadow-md hover:scale-110 transition-transform bg-background/20 rounded-full"
           aria-pressed={savedIds.includes(item.id)}
           aria-label={
             savedIds.includes(item.id)
@@ -472,8 +476,8 @@ export default function BuyerMode() {
           )}
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
-          <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
-            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2 max-w-[calc(100%-6rem)]">
+            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] break-words">
               <div className="text-[12px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
               </div>
@@ -511,8 +515,8 @@ export default function BuyerMode() {
 
           {/* Intelligence Archive (Saved Items) */}
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-surface-variant pb-2">
-              <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-variant pb-2">
+              <h2 className="font-headline-editorial text-2xl text-on-surface flex min-w-0 items-center gap-3">
                 Your Board
                 {savedFiltered.length > 0 && (
                   <span className="font-mono text-xs text-text-muted">
@@ -520,7 +524,7 @@ export default function BuyerMode() {
                   </span>
                 )}
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {savedFiltered.length >= 2 && (
                   <button
                     type="button"
@@ -534,7 +538,7 @@ export default function BuyerMode() {
               </div>
             </div>
             <p className="text-xs text-text-secondary mb-2">Tracked assets and saved market briefs. Select items to compare specifications side-by-side.</p>
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 scroll-px-4">
               {savedFiltered.map(item => (
                 <div key={item.id} className="snap-start">
                   <ListingCard item={item} />
@@ -563,9 +567,9 @@ export default function BuyerMode() {
 
           {/* Feed Rail (New in Area) */}
           <div className="flex flex-col gap-4 mt-8">
-            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between border-b border-surface-variant pb-2">
+            <h2 className="font-headline-editorial text-2xl text-on-surface flex flex-wrap items-center justify-between gap-2 border-b border-surface-variant pb-2">
               New in Metro Manila
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <button
                   className={`font-label-caps tracking-widest uppercase text-[12px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
                   onClick={toggleAreaWatch}
@@ -581,7 +585,7 @@ export default function BuyerMode() {
                 </button>
               </div>
             </h2>
-            <div className="flex gap-4 overflow-x-auto pb-6 snap-x hide-scrollbar">
+            <div className="flex gap-4 overflow-x-auto pb-6 snap-x hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 scroll-px-4">
               {newFeedListings.map(item => (
                 <VerticalListingCard key={item.id} item={item} />
               ))}
@@ -591,7 +595,7 @@ export default function BuyerMode() {
                 </div>
               )}
               {!isLoading && newFeedListings.length === 0 ? (
-                <div className="w-full flex flex-col items-center justify-center p-12 bg-surface/50 border border-surface-variant/50 border-dashed rounded-xl">
+                <div className="w-full flex flex-col items-center justify-center p-8 md:p-12 bg-surface/50 border border-surface-variant/50 border-dashed rounded-xl break-words">
                   <div className="w-16 h-16 rounded-full border border-gold-accent/30 bg-surface flex items-center justify-center text-gold-accent mb-4">
                     <Search strokeWidth={1.5} size="1.5em" />
                   </div>
@@ -631,12 +635,12 @@ export default function BuyerMode() {
               Market Intelligence
               <Link href="/intel" className="text-xs font-working-title text-gold-accent hover:underline py-2.5 px-1 -my-1">View Archives</Link>
             </h2>
-            <div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar">
+            <div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 scroll-px-4">
               
               {/* Intel Brief 1 — links must point at REAL briefings (the old
                   makati-yields / nuvali-expansion / pasig-zoning slugs never
                   existed and 404'd from the dashboard) */}
-              <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel" className="block shrink-0 w-[320px] max-w-[85vw] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
@@ -650,7 +654,7 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 2 */}
-              <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel" className="block shrink-0 w-[320px] max-w-[85vw] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
@@ -664,7 +668,7 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 3 */}
-              <Link href="/intel" className="block shrink-0 w-[320px] md:w-[400px] snap-start">
+              <Link href="/intel" className="block shrink-0 w-[320px] max-w-[85vw] md:w-[400px] snap-start">
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>
@@ -694,7 +698,7 @@ export default function BuyerMode() {
           pill at this content width overruns a 390px viewport, and because it
           is centred it clips both ends at once rather than one. */}
       {selectedForCompare.length >= 2 && (
-        <div className="fixed z-50 bottom-4 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-[calc(100vw-2rem)] bg-surface/95 backdrop-blur-xl border border-gold-accent/40 rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex items-center justify-between sm:justify-start gap-3 sm:gap-4 motion-safe:animate-[compareBarIn_200ms_cubic-bezier(0.23,1,0.32,1)]">
+        <div className="fixed z-50 bottom-[calc(90px+env(safe-area-inset-bottom))] sm:bottom-6 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-[calc(100vw-2rem)] bg-surface/95 backdrop-blur-xl border border-gold-accent/40 rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex items-center justify-between sm:justify-start gap-3 sm:gap-4 motion-safe:animate-[compareBarIn_200ms_cubic-bezier(0.23,1,0.32,1)]">
           <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-bold truncate">
             <span className="sm:hidden">{selectedForCompare.length} Selected</span>
             <span className="hidden sm:inline">{selectedForCompare.length} Spaces Selected</span>

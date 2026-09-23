@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { feature } from "topojson-client";
 
 import { addSolarSystem } from "./solarSystem";
+import { isLiteMode } from "@/lib/liteMode";
 
 import "./scout-earth.css";
 
@@ -254,10 +255,11 @@ export default function ScoutEarth({
       solarSystemRef.current = system;
 
       /* The sky and the rings stay; only their drift stops. Reduced motion
-         means less movement, not a stripped-out scene. */
+         means less movement, not a stripped-out scene. A-146: Lite joins
+         the gate — a weak device pays for every frame either way. */
       const noDrift =
         typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isLiteMode());
 
       /* globe.gl owns its own render loop and exposes no per-frame hook, so
          the orbital drift runs on its own rAF. It only mutates a rotation
@@ -280,7 +282,7 @@ export default function ScoutEarth({
     if (descendTo != null) {
       const still =
         typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isLiteMode());
       if (still) {
         globe.pointOfView({ ...INITIAL_POV, altitude: descendTo }, 0);
       } else {
@@ -289,10 +291,11 @@ export default function ScoutEarth({
     }
 
     // Orbital drift is decorative motion. Someone who asked for less of it
-    // still gets the planet, just without the constant rotation.
+    // still gets the planet, just without the constant rotation. A-146: Lite
+    // joins the gate like the drift and descent gates above.
     const stillPreferred =
       typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isLiteMode());
 
     controls.autoRotate = autoRotate && !stillPreferred;
     controls.autoRotateSpeed = 0.22;

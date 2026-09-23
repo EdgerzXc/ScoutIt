@@ -1,5 +1,6 @@
 // A-096: distinct tab title (root template appends "· ScoutIt").
-export const metadata = { title: "Settings" };
+// A-146: private workspace — noindex with the title, never title-only.
+export const metadata = { title: "Settings", robots: { index: false, follow: true } };
 
 export default function SettingsRouteLayout({ children }) {
   return <>{children}</>;

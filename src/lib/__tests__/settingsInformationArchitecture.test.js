@@ -33,10 +33,13 @@ describe("menu and Settings information architecture", () => {
   });
 
   it("defines stable, directly reachable Settings sections", () => {
+    // A-152 adds "notifications" between privacy and plan — the email
+    // footer promises a control at /settings#notifications.
     expect(SETTINGS_SECTIONS.map((section) => section.id)).toEqual([
       "account",
       "public-profile",
       "privacy",
+      "notifications",
       "plan",
       "security",
       "delete-account",

@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
+import TurnstileGate from "@/components/ui/TurnstileGate";
+import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 
 // ─────────────────────────────────────────────────────────────────────────
 // OWNER FAQ PRE-FLIGHT CHECKLIST PANEL
@@ -31,6 +33,10 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
   const [appeal, setAppeal] = useState(null);
   const [appealExplanation, setAppealExplanation] = useState("");
   const [appealBusy, setAppealBusy] = useState(false);
+  // A-146: the appeal submit is an abuse-prone authed write — same bot-check
+  // contract as contact/waitlist. Single-use token: reset after any failure.
+  const [captchaToken, setCaptchaToken] = useState("");
+  const turnstileRef = useRef(null);
 
   const authHeaders = async () => {
     const { data: { session } } = await getSession();
@@ -103,21 +109,25 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
   };
 
   const submitAppeal = async () => {
-    if (!appeal?.evidenceId || appealBusy || appealExplanation.trim().length < 10) return;
+    if (!appeal?.evidenceId || appealBusy || appealExplanation.trim().length < 10 || !captchaToken) return;
     setAppealBusy(true);
     try {
       const res = await fetch("/api/faqs/appeal", {
         method: "POST",
         headers: await authHeaders(),
-        body: JSON.stringify({ evidenceId: appeal.evidenceId, explanation: appealExplanation.trim() }),
+        body: JSON.stringify({ evidenceId: appeal.evidenceId, explanation: appealExplanation.trim(), turnstileToken: captchaToken }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.success) {
+        turnstileRef.current?.reset();
         setAppeal((current) => ({ ...current, status: "error", message: json.message || "Appeal could not be submitted." }));
         return;
       }
+      setCaptchaToken("");
+      trackEvent(GA_EVENTS.APPEAL_SUBMITTED, { evidence_id: appeal.evidenceId });
       setAppeal((current) => ({ ...current, status: "pending", message: "Appeal submitted for review." }));
     } catch {
+      turnstileRef.current?.reset();
       setAppeal((current) => ({ ...current, status: "error", message: "Network error. Try again." }));
     } finally {
       setAppealBusy(false);
@@ -166,6 +176,8 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
         .pf-meter { margin-bottom: 20px; }
         .pf-meter__row {
           display: flex;
+          flex-wrap: wrap;
+          gap: 4px 12px;
           justify-content: space-between;
           align-items: baseline;
           font-family: ${MONO};
@@ -370,7 +382,9 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
               <textarea id="faq-appeal-explanation" className="pf-q__input" value={appealExplanation}
                 onChange={(event) => setAppealExplanation(event.target.value)} maxLength={500} disabled={appealBusy}
                 placeholder="Explain why the answer is legitimate without repeating contact details." />
-              <button className="pf-btn" onClick={submitAppeal} disabled={appealBusy || appealExplanation.trim().length < 10}>
+              <TurnstileGate ref={turnstileRef} onToken={setCaptchaToken}
+                onError={(message) => setAppeal((current) => ({ ...current, message }))} />
+              <button className="pf-btn" onClick={submitAppeal} disabled={appealBusy || appealExplanation.trim().length < 10 || !captchaToken}>
                 {appealBusy ? "Submitting..." : "Request review"}
               </button>
               {appeal.message && <div>{appeal.message}</div>}

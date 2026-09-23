@@ -4,6 +4,9 @@ import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
 import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/deals/userDeals";
+import { isManualCreatableStatus } from "@/lib/deals/dealStatus";
+import { isBlocked } from "@/lib/connectBlocks";
+import { checkReceiverGate } from "@/lib/connectGates";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +31,7 @@ export async function GET(request) {
     // Party membership is an authorization decision and lives in
     // lib/deals/userDeals.js so the dashboard attention rail asks the same
     // question of the same code rather than re-deriving the answer.
-    const { rows: deals, error: dealsError } = await loadUserDealRows(supabaseAdmin, userId);
+    const { rows: deals, error: dealsError, routedRecipients = [] } = await loadUserDealRows(supabaseAdmin, userId);
     if (dealsError === "routing_unavailable") {
       return NextResponse.json({ error: "Failed to load routed conversations" }, { status: 503 });
     }
@@ -38,10 +41,24 @@ export async function GET(request) {
 
     // Best-effort display names for the "other party" -- these id columns
     // aren't real FKs so this is a manual lookup, not an embedded join.
+    // The buyer deal stores no broker_id when a roster receives it. Use the
+    // immutable routing snapshot to name a directed broker, never the owner.
+    const routedBrokerByDeal = new Map();
+    const routedOperatorByDeal = new Map();
+    for (const recipient of routedRecipients) {
+      if (recipient.recipient_type === "operator" && !routedOperatorByDeal.has(recipient.deal_id)) {
+        routedOperatorByDeal.set(recipient.deal_id, recipient.recipient_id);
+      }
+      if (recipient.recipient_type === "broker" && !routedBrokerByDeal.has(recipient.deal_id)) {
+        routedBrokerByDeal.set(recipient.deal_id, recipient.recipient_id);
+      }
+    }
     const otherPartyIds = new Set();
     for (const d of deals) {
       if (d.buyer_id && d.buyer_id !== userId) otherPartyIds.add(d.buyer_id);
       if (d.broker_id && d.broker_id !== userId) otherPartyIds.add(d.broker_id);
+      if (routedOperatorByDeal.has(d.id) && routedOperatorByDeal.get(d.id) !== userId) otherPartyIds.add(routedOperatorByDeal.get(d.id));
+      if (routedBrokerByDeal.has(d.id) && routedBrokerByDeal.get(d.id) !== userId) otherPartyIds.add(routedBrokerByDeal.get(d.id));
       if (d.properties?.owner_id && d.properties.owner_id !== userId) otherPartyIds.add(d.properties.owner_id);
     }
 
@@ -66,9 +83,9 @@ export async function GET(request) {
 
     const result = deals
       .map((d) => {
-        const myRole = deriveMyRole(d, userId);
-        const otherId = myRole === "buyer" ? (d.broker_id || d.properties?.owner_id) : myRole === "broker" ? d.properties?.owner_id : (d.broker_id || d.buyer_id);
-        const otherRoleLabel = myRole === "buyer" ? (d.broker_id ? "Broker" : "Owner") : myRole === "broker" ? "Owner" : (d.broker_id ? "Broker" : "Buyer");
+        const myRole = routedOperatorByDeal.get(d.id) === userId ? "operator" : deriveMyRole(d, userId);
+        const otherId = myRole === "buyer" ? (d.broker_id || routedOperatorByDeal.get(d.id) || routedBrokerByDeal.get(d.id) || d.properties?.owner_id) : myRole === "broker" ? (d.buyer_id || d.properties?.owner_id) : (d.broker_id || d.buyer_id);
+        const otherRoleLabel = myRole === "buyer" ? (routedOperatorByDeal.has(d.id) ? "Operator" : (d.broker_id || routedBrokerByDeal.has(d.id)) ? "Broker" : "Owner") : myRole === "broker" ? (d.buyer_id ? "Buyer" : "Owner") : (d.broker_id ? "Broker" : "Buyer");
         return {
           id: d.id,
           status: d.status,
@@ -84,9 +101,15 @@ export async function GET(request) {
           // check on status and no check on the person's own privacy setting —
           // so the Inbox list showed the very name the panel beside it promised
           // to withhold.
+          // A-148: a sender's explicit per-request anonymity ("Anonymous",
+          // the owner's word) conceals the sender from the recipient while
+          // unanswered — never the recipient from the sender. Only
+          // buyer-initiated rows can carry the flag (the inquiry modals), so
+          // it applies exactly when the viewer is not the buyer.
           otherParty: counterpartyDisplayName({
             dealStatus: d.status,
             counterpartyIsPublic: otherId ? publicById[otherId] === true : false,
+            senderAnonymous: myRole !== "buyer" && d.sender_anonymous === true,
             name: otherId ? namesById[otherId] : "",
             roleLabel: otherRoleLabel,
           }),
@@ -102,6 +125,7 @@ export async function GET(request) {
           // through as-is so the UI can tell "cost nothing" apart from "we
           // never wrote it down" — it renders the badge only for real numbers.
           connects_spent: d.connects_spent ?? null,
+          open_gate_inbound: d.open_gate_inbound === true,
           // §40.15 lifecycle. archived_at NULL = not archived; the reset
           // timestamp is the single origin both the 7-day and 30-day
           // deadlines are measured from, so the client never computes one.
@@ -155,21 +179,104 @@ export async function POST(request) {
     }
 
     const isOwner = property.owner_id === userId;
+    // A-144 §10.10: a manual send starts a request — it cannot manufacture an
+    // accepted/connected/closed relationship from a client string. Rejected
+    // BEFORE any spend so a forged outcome never costs a Connect.
+    const requestedStatus = status || "pending";
+    if (!isManualCreatableStatus(requestedStatus)) {
+      return NextResponse.json(
+        { error: "Manual deals start as pending or invited. No Connect was spent." },
+        { status: 400 },
+      );
+    }
+    // A-144 §10.10: resolve a real recipient before spending. The field
+    // carries a user UUID (see NewDealModal); anything else fails here with
+    // 0 spent instead of stranding a debit on a failed insert.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(otherPartyEmail)) {
+      return NextResponse.json(
+        { error: "Unknown recipient. Use the person's user UUID. No Connect was spent." },
+        { status: 400 },
+      );
+    }
+    const { data: recipientProfile, error: recipientError } = await supabaseAdmin
+      .from("user_profiles")
+      .select("id")
+      .eq("id", otherPartyEmail)
+      .maybeSingle();
+    if (recipientError || !recipientProfile) {
+      return NextResponse.json(
+        { error: "Recipient account not found. No Connect was spent." },
+        { status: 404 },
+      );
+    }
+    if (otherPartyEmail === userId) {
+      return NextResponse.json(
+        { error: "You cannot open a deal with yourself. No Connect was spent." },
+        { status: 400 },
+      );
+    }
+    // A-144 shared send gates: blocked / paused / capped recipients fail
+    // before any spend.
+    if (await isBlocked(supabaseAdmin, userId, otherPartyEmail)) {
+      return NextResponse.json(
+        { error: "This request can't be sent. No Connect was spent." },
+        { status: 403 },
+      );
+    }
+    const manualGate = await checkReceiverGate(supabaseAdmin, otherPartyEmail, property.id);
+    if (!manualGate.ok) {
+      return NextResponse.json(
+        { error: manualGate.message || "This account isn't accepting new Connects right now. No Connect was spent." },
+        { status: 403 },
+      );
+    }
+    // A-144: manual deal creation is a paid Connect action, not a free write.
+    // Spend FIRST so a failed payment never leaves a phantom conversation.
+    // Legacy per-user wallet stays authoritative (owner decision, A-144).
+    const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
+      p_user_id: userId,
+      p_amount: 1,
+      p_reason: 'Manual deal created from dashboard',
+      p_ref_type: 'manual_deal',
+      p_ref_id: property.id,
+    });
+    if (spendError) {
+      const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
+      return NextResponse.json(
+        { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
+        { status: insufficient ? 403 : 500 }
+      );
+    }
     const { data: inserted, error } = await supabaseAdmin
       .from("deals")
       .insert({
-        status: status || "connected",
+        status: requestedStatus,
         pitch_message: initialMessage || "",
         buyer_id: otherPartyEmail,
         broker_id: isOwner ? null : userId,
         property_id: property.id,
+        connects_spent: 1,
       })
       .select("*, properties(id, title, slug, owner_id)")
       .single();
 
     if (error) {
+      // A-144 §10.10: a failed insert must not strand the debit — refund it
+      // as a platform error (same pattern as the A-148 anonymity rollback).
       console.error("[DEALS API] POST error:", error);
-      return NextResponse.json({ error: "Failed to create deal" }, { status: 500 });
+      await supabaseAdmin.rpc('refund_connects_system_error', {
+        p_user_id: userId,
+        p_amount: 1,
+        p_reason: 'Manual deal insert failed after spend',
+        p_staff_id: 'system',
+        p_ref_id: property.id,
+      });
+      return NextResponse.json({ error: "Failed to create deal. No Connect was spent." }, { status: 500 });
+    }
+    const manualBalance = spendData?.[0]?.total_balance ?? null;
+    if (manualBalance !== null) {
+      await supabaseAdmin.from('user_profiles').update({ connects_balance: manualBalance }).eq('id', userId);
     }
 
     await logActivity(supabaseAdmin, {

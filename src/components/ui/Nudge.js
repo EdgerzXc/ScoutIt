@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Camera } from "lucide-react";
 
 // Hardcoded logic rules per Section 8
@@ -32,36 +32,31 @@ const NUDGE_CONTENT = {
 };
 
 export default function Nudge({ mode }) {
-  const [isVisible, setIsVisible] = useState(false);
-  
-  useEffect(() => {
-    // 1. Check if this specific nudge was dismissed recently (max 1 per week rule)
-    const dismissedAt = localStorage.getItem(`nudge_dismissed_${mode}`);
-    if (dismissedAt) {
-      const daysSinceDismissal = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
-      if (daysSinceDismissal < 7) {
-        return; // Don't show, dismissed within the last 7 days
-      }
-    }
-
-    // 2. Hard rule: NO nudges during a user's first 7 days
-    let isAccountMature = false;
+  // Decided synchronously at mount (not 1.5s after paint): a banner that
+  // slides in late shoves every workspace card down mid-scroll on a phone.
+  // The enter animation still plays on mount, so the pop survives without
+  // the layout jump.
+  const [isVisible, setIsVisible] = useState(() => {
     try {
+      if (localStorage.getItem(`nudge_dismissed_${mode}`)) {
+        const daysSinceDismissal =
+          (Date.now() - parseInt(localStorage.getItem(`nudge_dismissed_${mode}`), 10)) /
+          (1000 * 60 * 60 * 24);
+        if (daysSinceDismissal < 7) return false;
+      }
       const user = JSON.parse(localStorage.getItem("scoutit_user") || "null");
       if (user?.created_at) {
-        const daysSinceSignup = (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24);
-        isAccountMature = daysSinceSignup >= 7;
+        const daysSinceSignup =
+          (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceSignup < 7) return false;
+      } else {
+        return false;
       }
-    } catch (e) { /* no user, no nudge */ }
-
-
-    // 3. Mock logic triggers (Assume all thresholds are met for the sake of UI demo)
-    if (isAccountMature && NUDGE_CONTENT[mode]) {
-      // Small delay to let the dashboard render first, making the slide-down animation pop
-      const timer = setTimeout(() => setIsVisible(true), 1500);
-      return () => clearTimeout(timer);
+    } catch {
+      return false;
     }
-  }, [mode]);
+    return Boolean(NUDGE_CONTENT[mode]);
+  });
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -89,13 +84,14 @@ export default function Nudge({ mode }) {
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-          <button className="flex-1 md:flex-none bg-gold-accent text-background font-working-title text-sm font-bold py-2 px-6 rounded hover:opacity-90 transition-all whitespace-nowrap">
+          <button className="flex-1 md:flex-none min-h-11 inline-flex items-center justify-center bg-gold-accent text-background font-working-title text-sm font-bold py-2 px-6 rounded hover:opacity-90 transition-all whitespace-nowrap">
             {content.action}
           </button>
           <button 
-            className="w-10 h-10 flex items-center justify-center rounded border border-surface-variant text-text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" 
+            className="min-h-11 min-w-11 flex items-center justify-center rounded border border-surface-variant text-text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" 
             onClick={handleDismiss} 
             title="Dismiss for 7 days"
+            aria-label="Dismiss"
           >
             ×
           </button>

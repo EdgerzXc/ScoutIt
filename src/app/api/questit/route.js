@@ -150,12 +150,14 @@ If a user asks to save a property, use the save_to_wishlist tool.`;
 
         else if (name === "save_to_wishlist") {
           const { property_id } = input;
-          // Mock saving to wishlist
-
+          // A-146: this tool previously returned a false success to the
+          // Vault" with zero DB write anywhere — the AI then told the user a
+          // save happened. No write path exists from this chat (the Board is
+          // device-local), so the honest result names the real action.
           toolResults.push({
             type: "tool_result",
             tool_use_id: id,
-            content: `Successfully saved ${property_id} to the user's Vault.`
+            content: `I can't save ${property_id} to the Board from this chat — open the listing and tap Save; the Board keeps it privately on this device.`
           });
         }
       }

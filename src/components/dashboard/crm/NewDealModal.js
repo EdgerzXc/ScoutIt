@@ -12,7 +12,10 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
   const [formData, setFormData] = useState({
     propertyId: "",
     otherPartyEmail: "",
-    status: "connected",
+    // A-144 §10.10: a manual send starts a request — the server accepts only
+    // pending/invited, so the modal offers only those (a forged accepted or
+    // won outcome from this form used to spend a Connect and stick).
+    status: "pending",
     initialMessage: ""
   });
 
@@ -54,13 +57,13 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-surface border border-surface-variant rounded-xl shadow-2xl"
         >
           <div className="flex justify-between items-center p-6 border-b border-surface-variant bg-surface/50">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-2">
               Create New Deal
             </h2>
-            <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-on-surface transition">
+            <button onClick={onClose} aria-label="Close" className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-on-surface transition">
               <X size={20} />
             </button>
           </div>
@@ -103,11 +106,8 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 value={formData.status}
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
               >
-                <option value="connected">Connected (New Inquiry)</option>
                 <option value="pending">Pending (Reviewing/Pitched)</option>
-                <option value="accepted">Accepted</option>
-                <option value="closed">Closed Won</option>
-                <option value="declined">Declined</option>
+                <option value="invited">Invited (Owner invites broker)</option>
               </select>
             </div>
             

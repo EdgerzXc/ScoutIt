@@ -75,6 +75,10 @@ module.exports = {
         "surface-dim": "#131313",
         "on-secondary-container": "#bab8b7",
         "text-primary": "rgb(var(--text-primary-ch) / <alpha-value>)",
+        "paper-01": "rgb(var(--paper-01-ch) / <alpha-value>)",
+        "paper-02": "rgb(var(--paper-02-ch) / <alpha-value>)",
+        "paper-03": "rgb(var(--paper-03-ch) / <alpha-value>)",
+        "ink-deep": "rgb(var(--ink-deep-ch) / <alpha-value>)",
         "primary-container": "#E8AE3C",
         "border": "var(--border)"
       },

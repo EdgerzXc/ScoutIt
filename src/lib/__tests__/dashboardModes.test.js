@@ -2,6 +2,8 @@ import {
   inferProviderType,
   normalizeDashboardMode,
   normalizeDashboardModes,
+  pickPrimaryRole,
+  PRIMARY_ROLE_ORDER,
 } from "../dashboardModes";
 
 describe("dashboard mode normalization", () => {
@@ -19,6 +21,12 @@ describe("dashboard mode normalization", () => {
     },
   );
 
+  // A-146: event-planner held a wallet row and a directory but no workspace.
+  it("maps event-planner to the generic provider lens", () => {
+    expect(normalizeDashboardMode("event-planner")).toBe("provider");
+    expect(pickPrimaryRole(["event-planner"], "buyer")).toBe("provider");
+  });
+
   it("deduplicates mixed legacy and UI role names", () => {
     expect(normalizeDashboardModes(["seeker", "buyer", "owner"], "seeker"))
       .toEqual(["buyer", "owner"]);
@@ -34,5 +42,16 @@ describe("dashboard mode normalization", () => {
   it("rejects missing and unrecognized modes instead of rendering Unknown Mode", () => {
     expect(normalizeDashboardMode("superuser")).toBe("");
     expect(normalizeDashboardModes([], "superuser")).toEqual([]);
+  });
+
+  // A-146: primary fallback was tags[0] — insertion order. It is now the
+  // canonical precedence, independent of which lens was added first.
+  it("picks the deterministic primary, not the first-held tag", () => {
+    expect(PRIMARY_ROLE_ORDER).toEqual(["buyer", "owner", "broker", "provider"]);
+    expect(pickPrimaryRole(["owner", "buyer"], "owner")).toBe("owner");
+    expect(pickPrimaryRole(["owner", "buyer"], "provider")).toBe("buyer");
+    expect(pickPrimaryRole(["provider", "broker"], "buyer")).toBe("broker");
+    expect(pickPrimaryRole(["mc_enterprise"], "buyer")).toBe("mc_enterprise");
+    expect(pickPrimaryRole([], "buyer")).toBe("");
   });
 });

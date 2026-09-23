@@ -194,6 +194,43 @@ describe("shareBriefing — extractFacts field aliasing", () => {
   });
 });
 
+describe("shareBriefing — hashtags", () => {
+  it("adds area, city, and category discovery tags without inventing data", () => {
+    const text = buildShareText(FULL_COMMERCIAL, "https://www.scoutit.space/property/cyber-sigma-tower-3");
+    expect(text).toContain("#ScoutIt");
+    expect(text).toContain("#Commercial");
+    expect(text).toContain("#OfficeSpace");
+    expect(text).toContain("#McKinleyWest");
+    expect(text).toContain("#Taguig");
+    expect(text).toContain("#RealEstatePH");
+  });
+
+  it("dedupes tags and never emits a bare #", () => {
+    const text = buildShareText(
+      { title: "Same Place", spaceCategory: "Commercial", location: "BGC, BGC" },
+      "https://x.test/p"
+    );
+    const tags = text.split(/\s+/).filter((w) => w.startsWith("#"));
+    expect(new Set(tags.map((t) => t.toLowerCase())).size).toBe(tags.length);
+    expect(tags).not.toContain("#");
+    expect(text).not.toMatch(MONEY);
+  });
+
+  it("caps the tag line and survives missing location", () => {
+    const text = buildShareText({ title: "No Place", spaceCategory: "Venues" }, "https://x.test/p");
+    const tagLine = text.split("\n").filter((l) => l.includes("#")).join(" ");
+    expect(tagLine.split(/\s+/).filter((w) => w.startsWith("#")).length).toBeLessThanOrEqual(6);
+    expect(text).toContain("#EventVenue");
+  });
+
+  it("gives the Facebook/Instagram editorial hook its hashtags", () => {
+    const pack = buildPromoPack(FULL_COMMERCIAL, "https://www.scoutit.space/property/cyber-sigma-tower-3");
+    expect(pack.editorialHook).toContain("#ScoutIt");
+    expect(pack.editorialHook).toContain("#RealEstatePH");
+    expect(pack.editorialHook).toContain("https://www.scoutit.space/property/cyber-sigma-tower-3");
+  });
+});
+
 describe("shareBriefing - X length budget", () => {
   // A UTM-tagged property URL is ~105 characters, but X rewrites every link
   // through t.co, so it always costs 23. Counting raw `.length` would shorten

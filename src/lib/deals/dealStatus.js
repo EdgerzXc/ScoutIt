@@ -21,6 +21,27 @@ export const ACTIVE_DEAL_STATUSES = Object.freeze(["active", "accepted", "connec
 export const CLOSED_DEAL_STATUSES = Object.freeze(["closed", "declined", "expired", "reported", "withdrawn"]);
 
 /**
+ * A-144 §10.10 — manual dashboard creation is a paid Connect action that must
+ * start a request, never manufacture a relationship. Only waiting states may
+ * be created this way; accepted/connected/active/closed states from a client
+ * value are forged outcomes and fail before any spend.
+ */
+export const MANUAL_DEAL_CREATABLE_STATUSES = Object.freeze(["pending", "invited"]);
+
+export function isManualCreatableStatus(status) {
+  return MANUAL_DEAL_CREATABLE_STATUSES.includes(status);
+}
+
+/**
+ * A-144 §10.10 — chat is an accepted-relationship act. Waiting rows
+ * (pending/invited) and finished rows (closed/declined/withdrawn/...) cannot
+ * post; the open conversation states can, for 0 Connects.
+ */
+export function canPostInDealStatus(status) {
+  return ACTIVE_DEAL_STATUSES.includes(status);
+}
+
+/**
  * A deleted request must not appear anywhere. It is filtered out before
  * bucketing rather than given a bucket: "deleted" has to mean gone to the
  * person who was told it was deleted, or the word is a lie (§40.15).

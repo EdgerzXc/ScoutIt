@@ -110,7 +110,7 @@ export default function ConciergeAI() {
           <button 
             onClick={() => setIsOpen(false)}
             aria-label="Close"
-            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-error transition rounded-full hover:bg-surface-variant"
+            className="min-h-11 min-w-11 flex items-center justify-center text-text-secondary hover:text-error transition rounded-full hover:bg-surface-variant"
           >
             <X size="1.2em" />
           </button>
@@ -123,7 +123,7 @@ export default function ConciergeAI() {
               <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">
                 {msg.role === 'user' ? 'You' : 'Scout AI'}
               </span>
-              <div className={`p-4 rounded-2xl text-sm leading-relaxed font-body ${
+              <div className={`p-4 rounded-2xl text-sm leading-relaxed font-body break-words [overflow-wrap:anywhere] min-w-0 ${
                 msg.role === 'user' 
                   ? 'bg-surface-variant text-on-surface rounded-br-sm' 
                   : 'bg-surface border border-gold-accent/20 text-text-secondary rounded-bl-sm shadow-[0_4px_15px_rgba(232,174,60,0.05)]'
@@ -174,14 +174,14 @@ export default function ConciergeAI() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Command the AI..."
-              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-12 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted font-working-title"
+              className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-14 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted font-working-title"
               disabled={isTyping}
             />
             <button
               type="submit"
               aria-label="Send message"
               disabled={!input.trim() || isTyping}
-              className="absolute right-2 w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background disabled:opacity-50 disabled:bg-surface-variant disabled:text-text-muted transition hover:bg-gold-accent-bright"
+              className="absolute right-1.5 min-h-11 min-w-11 rounded-full bg-gold-accent flex items-center justify-center text-background disabled:opacity-50 disabled:bg-surface-variant disabled:text-text-muted transition hover:bg-gold-accent-bright"
             >
               <Send size="1em" className={input.trim() && !isTyping ? "translate-x-[1px] translate-y-[-1px]" : ""} />
             </button>

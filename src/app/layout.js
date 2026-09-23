@@ -7,6 +7,8 @@ import BottomNav from "@/components/layout/BottomNav";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import DynamicOverlays from "@/components/layout/DynamicOverlays";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import CookieConsent from "@/components/analytics/CookieConsent";
+import SkipLink from "@/components/ui/SkipLink";
 import JsonLd from "@/components/seo/JsonLd";
 import DeviceTracker from "@/components/layout/DeviceTracker";
 
@@ -114,8 +116,21 @@ export default function RootLayout({ children }) {
               "(function(){try{if(localStorage.getItem('scoutit_simple_mode')==='1')document.documentElement.classList.add('simple-mode');}catch(e){}})();",
           }}
         />
+
+        {/* A-146: Interactive Mode's no-flash class. The layout comment always
+            claimed three pre-paint scripts; only two existed, so reloading
+            with Interactive on flashed the Balance hero first. Off unless the
+            visitor unlocked it — no heuristic, no inference. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if(localStorage.getItem('scoutit_interactive_mode')==='1')document.documentElement.classList.add('interactive-mode');}catch(e){}})();",
+          }}
+        />
       </head>
       <body>
+        {/* A-153 — first in tab order, visible on focus only. */}
+        <SkipLink />
         <GoogleAnalytics />
         <JsonLd />
         <DeviceTracker />
@@ -126,6 +141,8 @@ export default function RootLayout({ children }) {
         </ErrorBoundary>
         <BottomNav />
         <DynamicOverlays />
+        {/* A-151 — silent unless NEXT_PUBLIC_GA_ID is set. */}
+        <CookieConsent />
         <SpeedInsights />
       </body>
     </html>

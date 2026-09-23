@@ -250,7 +250,7 @@ export default function OwnerMode() {
   if (showWizard === 'select_mode') {
     return (
       <div className="max-w-[840px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
-        <button onClick={() => setShowWizard(false)} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title active:scale-95 transition inline-block">← Back to Workspace</button>
+        <button onClick={() => setShowWizard(false)} className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent mb-8 font-working-title active:scale-95 transition">← Back to Workspace</button>
         <h1 className="font-display-md text-3xl md:text-4xl text-text-primary mb-2">How would you like to add this property?</h1>
         <p className="text-text-secondary mb-8 text-base">Select your starting point. You can refine and add details at any stage before publishing.</p>
         
@@ -353,7 +353,7 @@ export default function OwnerMode() {
   if (showWizard === 'concierge') {
     return (
       <div className="max-w-[600px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
-        <button onClick={() => setShowWizard('select_mode')} className="text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
+        <button onClick={() => setShowWizard('select_mode')} className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
         <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Property Materials</h1>
         <p className="text-text-secondary mb-6 leading-relaxed">
           Upload your brochure, floor plan packet, or pitch deck. ScoutIt parses specifications and creates an editable draft.
@@ -369,17 +369,17 @@ export default function OwnerMode() {
           <span className="font-mono text-[12px] text-text-muted ml-auto">Max 25MB</span>
         </div>
         
-        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden">
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden break-words">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-white/5 rounded-full blur-[60px]" />
           <span className="text-4xl mb-4 relative z-10 opacity-80 filter drop-shadow-md">📄</span>
           {selectedFile ? (
             <div className="mb-6 w-full relative z-10">
               <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                <div className="flex flex-col text-left truncate mr-2">
+                <div className="flex flex-col text-left truncate mr-2 min-w-0">
                   <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
                   <span className="text-[12px] font-mono text-text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
                 </div>
-                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition-colors duration-200">Remove</button>
+                <button onClick={() => setSelectedFile(null)} className="min-h-11 inline-flex items-center shrink-0 text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition-colors duration-200">Remove</button>
               </div>
             </div>
           ) : (
@@ -395,7 +395,7 @@ export default function OwnerMode() {
                   setSelectedFile(file);
                 }
               }} />
-              <label htmlFor="pdf-upload" className="cursor-pointer border border-white/10 text-on-surface font-working-title text-sm px-6 py-2.5 rounded-full hover:bg-white/5 hover:border-white/20 transition-all duration-300 ease-out active:scale-[0.98] inline-block shadow-sm">
+              <label htmlFor="pdf-upload" className="cursor-pointer border border-white/10 text-on-surface font-working-title text-sm px-6 py-2.5 min-h-11 inline-flex items-center justify-center rounded-full hover:bg-white/5 hover:border-white/20 transition-all duration-300 ease-out active:scale-[0.98] shadow-sm">
                 Choose Document (PDF)
               </label>
             </div>
@@ -762,7 +762,7 @@ export default function OwnerMode() {
   if (!hasListing) {
     if (isLoading) {
       return (
-        <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
+        <div className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-0 animate-[fadeIn_0.4s_ease]">
           <div className="mb-sm">
             <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
             <p className="text-text-secondary font-body-md text-sm md:text-base">Connecting to your workspace...</p>
@@ -772,12 +772,12 @@ export default function OwnerMode() {
       );
     }
     return (
-      <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-4 md:px-0 animate-[fadeIn_0.4s_ease]">
+      <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-0 animate-[fadeIn_0.4s_ease]">
         <div className="mb-sm">
           <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is ready.</p>
         </div>
-        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-4 md:mx-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
           <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Add your first property</h3>
           <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Upload a brochure, flyer, or pitch deck to build a complete property dossier in under 10 minutes.</p>
@@ -931,57 +931,57 @@ export default function OwnerMode() {
         <div>
           {myListings.length > 1 && (
             <button 
-              className="text-text-secondary hover:text-gold-accent text-sm font-label-caps uppercase tracking-widest flex items-center gap-2 mb-4 transition"
+              className="text-text-secondary hover:text-gold-accent text-sm font-label-caps uppercase tracking-widest inline-flex items-center gap-2 mb-4 min-h-11 transition"
               onClick={() => setViewingDossierId(null)}
             >
               ← Back to Active Files
             </button>
           )}
           <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
-          <h1 className="font-display-md text-3xl md:text-5xl text-on-surface">{activeListing.title || 'Untitled Property'}</h1>
+          <h1 className="font-display-md text-3xl md:text-5xl text-on-surface break-words [overflow-wrap:anywhere] min-w-0">{activeListing.title || 'Untitled Property'}</h1>
         </div>
         <div className="flex flex-wrap gap-3">
            <button 
-             className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition text-sm flex-1 md:flex-none text-center justify-center"
-             onClick={() => {
-               if(window.confirm("Withdraw this property dossier from the market? Brokers will no longer see it.")) {
-                 closeListing(activeListing.id);
-               }
-             }}
-           >
-             Withdraw
-           </button>
-           <button 
-             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
-             disabled={activeListing.pipelineStatus === 'ai_drafting'}
-             onClick={() => setShowWizard('edit')}
-           >
-             Edit Workspace
-           </button>
-           <Link 
-             href={`/dashboard/inventory/${activeListing.id}`}
-             className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center"
-           >
-             Manage Inventory
-           </Link>
+              className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm flex-1 md:flex-none text-center items-center justify-center"
+              onClick={() => {
+                if(window.confirm("Withdraw this property dossier from the market? Brokers will no longer see it.")) {
+                  closeListing(activeListing.id);
+                }
+              }}
+            >
+              Withdraw
+            </button>
+            <button 
+              className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center"
+              disabled={activeListing.pipelineStatus === 'ai_drafting'}
+              onClick={() => setShowWizard('edit')}
+            >
+              Edit Workspace
+            </button>
+            <Link 
+              href={`/dashboard/inventory/${activeListing.id}`}
+              className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center"
+            >
+              Manage Inventory
+            </Link>
            <button
              className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition text-sm flex-1 md:flex-none text-center justify-center"
              onClick={() => setShowWizard('select_mode')}
            >
              + New Property
            </button>
-           <button 
-             className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
-             disabled={activeListing.pipelineStatus === 'ai_drafting'}
-             onClick={() => setShowWizard('deep_intel_edit')}
-           >
-             Add Deep Intel
-           </button>
-           {activeListing.pipelineStatus !== 'ai_drafting' && (
-             <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center justify-center">
-               View Public File
-             </Link>
-           )}
+            <button 
+              className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
+              disabled={activeListing.pipelineStatus === 'ai_drafting'}
+              onClick={() => setShowWizard('deep_intel_edit')}
+            >
+              Add Deep Intel
+            </button>
+            {activeListing.pipelineStatus !== 'ai_drafting' && (
+              <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center items-center justify-center">
+                View Public File
+              </Link>
+            )}
         </div>
       </div>
 
@@ -1219,7 +1219,7 @@ export default function OwnerMode() {
           </div>
 
           {incomingPitches.length === 0 ? (
-             <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-12 text-center flex flex-col items-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden">
+             <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden break-words">
                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/10 rounded-full blur-[60px]" />
                <span className="text-4xl mb-6 relative z-10 opacity-70 filter drop-shadow-md">📡</span>
                <p className="font-working-title text-xl text-on-surface mb-3 relative z-10 tracking-tight">No inquiries yet</p>
@@ -1227,9 +1227,9 @@ export default function OwnerMode() {
                  Brokers are reviewing your dossier. Listings with extensive media galleries receive inquiries 4× faster.
                </p>
                {!activeListing?.hasMedia && (
-                 <button className="relative z-10 mt-8 border border-white/10 text-on-surface font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-6 py-2.5 rounded-full hover:bg-white/5 hover:border-white/20" onClick={() => setShowWizard('edit')}>
-                   Add Media Gallery
-                 </button>
+                  <button className="relative z-10 mt-8 border border-white/10 text-on-surface font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-6 py-2.5 min-h-11 inline-flex items-center justify-center rounded-full hover:bg-white/5 hover:border-white/20" onClick={() => setShowWizard('edit')}>
+                    Add Media Gallery
+                  </button>
                )}
              </div>
           ) : (
@@ -1239,14 +1239,14 @@ export default function OwnerMode() {
                   {/* Status Indicator Line */}
                   <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${pitch.status === 'accepted' ? 'bg-success' : pitch.status === 'declined' ? 'bg-error' : 'bg-gold-accent'}`}></div>
                   
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-bold text-lg text-on-surface">
+                  <div className="flex justify-between items-start gap-3 mb-4">
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="w-12 h-12 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-bold text-lg text-on-surface shrink-0">
                         {pitch.brokerName.charAt(0)}
                       </div>
-                      <div>
-                        <h4 className="font-working-title text-lg text-on-surface flex items-center gap-2">
-                          {pitch.brokerName}
+                      <div className="min-w-0">
+                        <h4 className="font-working-title text-lg text-on-surface flex flex-wrap items-center gap-2 break-words [overflow-wrap:anywhere]">
+                          <span className="break-words [overflow-wrap:anywhere]">{pitch.brokerName}</span>
                           {/* An owner's incoming deals are either a broker's
                               pitch or a buyer's direct inquiry — "PRC
                               VERIFIED" (a broker-only credential) was
@@ -1260,8 +1260,8 @@ export default function OwnerMode() {
                         <span className="text-xs text-text-secondary">{pitch.otherPartyRole === 'Broker' ? pitch.brokerFirm : 'Direct inquiry'}</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase block">{pitch.timeRemaining}</span>
+                    <div className="text-right shrink-0">
+                      <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase block whitespace-nowrap">{pitch.timeRemaining}</span>
                       {pitch.status === 'pending' && <span className="text-[12px] text-gold-accent">AWAITING RESPONSE</span>}
                     </div>
                   </div>

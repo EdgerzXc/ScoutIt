@@ -132,6 +132,7 @@ export default function GeoPricingGauge({ location, category, price }) {
 
         .insight-metrics {
           display: flex;
+          flex-wrap: wrap;
           gap: 16px;
           margin-bottom: 12px;
         }
@@ -139,6 +140,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         .metric-box {
           display: flex;
           flex-direction: column;
+          min-width: 0;
         }
 
         .metric-label {
@@ -152,6 +154,7 @@ export default function GeoPricingGauge({ location, category, price }) {
           font-size: 1.1rem;
           font-weight: 600;
           color: var(--text-primary);
+          overflow-wrap: anywhere;
         }
 
         .verdict-banner {

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import MapCreditControl from "@/components/maps/MapCreditControl";
 import {
   point as turfPoint,
   lineString,
@@ -116,6 +117,8 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
     const { geometry: { coordinates: centerCoords } } = turfCenter(combined);
 
     const map = new maplibregl.Map({
+      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+      attributionControl: false,
       container: mapContainerRef.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
       center: centerCoords,
@@ -125,6 +128,7 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
+    map.addControl(new MapCreditControl(), "bottom-right");
 
     map.on("load", () => {
       try {

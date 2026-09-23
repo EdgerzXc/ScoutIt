@@ -402,7 +402,7 @@ export default function MissionControlMode() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-1.5 shrink-0 px-3 py-2 rounded-full text-[12px] font-mono uppercase tracking-wider min-h-[40px] transition ${
+              className={`flex items-center gap-1.5 shrink-0 whitespace-nowrap px-3 py-2 rounded-full text-[12px] font-mono uppercase tracking-wider min-h-[40px] transition ${
                 activeTab === id
                   ? "bg-gold-accent/10 text-gold-accent border border-gold-accent/30"
                   : "text-text-secondary border border-white/10 hover:text-white"
@@ -481,9 +481,13 @@ export default function MissionControlMode() {
               ].map((kpi) => (
                 <GlassPanel 
                   key={kpi.label} 
-                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 ease-out relative group overflow-hidden bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${kpi.onClick ? 'cursor-pointer border-white/[0.04] hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] active:scale-[0.98]' : 'border-white/[0.04]'}`} 
+                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 ease-out relative group overflow-hidden bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${kpi.onClick ? 'cursor-pointer border-white/[0.04] hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70' : 'border-white/[0.04]'}`} 
                   glowColor={kpi.glow}
                   onClick={kpi.onClick}
+                  role={kpi.onClick ? "button" : undefined}
+                  tabIndex={kpi.onClick ? 0 : undefined}
+                  aria-label={kpi.onClick ? `Open ${kpi.label}` : undefined}
+                  onKeyDown={kpi.onClick ? ((e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); kpi.onClick(); } }) : undefined}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                   <div className="flex items-center justify-between relative z-10 mb-4">
@@ -666,22 +670,24 @@ export default function MissionControlMode() {
             </div>
 
             {/* Bulk Actions */}
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-3">
-                <input 
-                  type="checkbox" 
-                  checked={selectedIds.size === scoped.length && scoped.length > 0}
-                  onChange={handleSelectAll}
-                  className="w-4 h-4 rounded border-white/20 bg-black/50 text-gold-accent focus:ring-gold-accent focus:ring-offset-black"
-                />
-                <span className="text-sm text-text-secondary">
-                  {selectedIds.size} selected
-                </span>
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex min-h-11 items-center gap-3 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.size === scoped.length && scoped.length > 0}
+                    onChange={handleSelectAll}
+                    className="w-5 h-5 rounded border-white/20 bg-black/50 text-gold-accent focus:ring-gold-accent focus:ring-offset-black"
+                  />
+                  <span className="text-sm text-text-secondary">
+                    {selectedIds.size} selected
+                  </span>
+                </label>
                 {selectedIds.size > 0 && (
                   <button 
                     onClick={handleMassDelete}
                     disabled={isDeleting}
-                    className="ml-4 text-xs text-red-400 hover:text-red-300 bg-red-400/10 px-3 py-1.5 rounded transition disabled:opacity-50"
+                    className="min-h-11 text-xs text-red-400 hover:text-red-300 bg-red-400/10 px-3 py-1.5 rounded transition disabled:opacity-50"
                   >
                     {isDeleting ? "Deleting..." : "Delete Selected"}
                   </button>
@@ -817,7 +823,7 @@ export default function MissionControlMode() {
                   </span>
                 </div>
                 {(pitches || []).length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 text-center">
                     <div className="w-16 h-16 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center mb-6">
                       <Users className="text-gold-accent" size={28} />
                     </div>
@@ -897,8 +903,8 @@ export default function MissionControlMode() {
                 { label: "Occupied", val: inventoryStats.occupied },
                 { label: "Maintenance", val: inventoryStats.maintenance }
               ].map(stat => (
-                <GlassPanel key={stat.label} className="p-6 rounded-2xl border-white/5">
-                  <div className="text-3xl text-white font-display-md">{stat.val}</div>
+                <GlassPanel key={stat.label} className="min-w-0 p-4 md:p-6 rounded-2xl border-white/5">
+                  <div className="text-3xl text-white font-display-md break-words">{stat.val}</div>
                   <div className="text-[12px] uppercase tracking-widest text-text-secondary mt-1">{stat.label}</div>
                 </GlassPanel>
               ))}
@@ -911,7 +917,7 @@ export default function MissionControlMode() {
                   <select 
                     value={activeEstateId || ""}
                     onChange={(e) => setActiveEstateId(e.target.value)}
-                    className="bg-black border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-gold-accent"
+                    className="bg-black border border-white/10 rounded px-2 py-2 min-h-11 text-xs text-white focus:outline-none focus:border-gold-accent min-w-0"
                   >
                     {scoped.map(prop => (
                       <option key={prop.id} value={prop.id}>{prop.title}</option>
@@ -998,7 +1004,7 @@ export default function MissionControlMode() {
                     </h3>
                     <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
                   </div>
-                  <select className="bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition">
+                  <select aria-label="Chart metric" className="min-h-11 bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition">
                     <option>Yield (%)</option>
                     <option>Price / sqm</option>
                   </select>
@@ -1119,7 +1125,7 @@ export default function MissionControlMode() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-              <GlassPanel className="col-span-1 lg:col-span-2 rounded-2xl border-blue-500/20 p-8 flex flex-col relative overflow-hidden group">
+              <GlassPanel className="col-span-1 lg:col-span-2 rounded-2xl border-blue-500/20 p-6 md:p-8 flex flex-col relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/20 transition duration-200" />
                 <div className="relative z-10 flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center animate-pulse">
@@ -1212,7 +1218,7 @@ export default function MissionControlMode() {
 
               <div className="col-span-1 md:col-span-2 flex flex-col gap-6">
                 {adminActiveTab === 'Organization Profile' && (
-                  <GlassPanel className="rounded-2xl border-white/5 p-8 animate-in fade-in">
+                  <GlassPanel className="rounded-2xl border-white/5 p-6 md:p-8 animate-in fade-in">
                     <h3 className="text-lg text-white font-medium mb-6 border-b border-white/10 pb-4">Organization Profile</h3>
                     
                     <div className="space-y-6 max-w-lg">
@@ -1236,7 +1242,7 @@ export default function MissionControlMode() {
                         />
                       </div>
 
-                      <div className="pt-4 border-t border-white/10 flex justify-end items-center gap-3">
+                      <div className="pt-4 border-t border-white/10 flex flex-wrap justify-end items-center gap-3">
                         <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">Org saving opens in Phase 2</span>
                         <button
                           disabled
@@ -1282,7 +1288,7 @@ export default function MissionControlMode() {
                 )}
 
                 {adminActiveTab !== 'Organization Profile' && adminActiveTab !== 'Security & Access' && (
-                  <GlassPanel className="rounded-2xl border-white/5 p-8 flex flex-col items-center justify-center text-center animate-in fade-in min-h-[300px]">
+                  <GlassPanel className="rounded-2xl border-white/5 p-6 md:p-8 flex flex-col items-center justify-center text-center animate-in fade-in min-h-[300px]">
                     <Settings size={32} className="text-white/70 mb-4" />
                     <h3 className="text-lg text-white font-medium mb-2">{adminActiveTab}</h3>
                     <p className="text-sm text-text-secondary max-w-sm">This settings module is currently locked in the Developer Preview Sandbox.</p>

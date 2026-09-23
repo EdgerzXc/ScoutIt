@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════════════════════
+   MAP CREDIT — the licence line MapCreditControl draws
+   Replaces MapLibre's AttributionControl, whose innerHTML path is the
+   CVE-2026-85061 sink. See MapCreditControl.js for the full reasoning.
+   ═══════════════════════════════════════════════════════════════ */
+
+.map-credit {
+  /* Mono, spaced and small: the system voice the DNA reserves for metrics and
+     labels, so a legal obligation reads as instrumentation rather than as
+     stray body copy sitting on the map. */
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.055em;
+
+  /* NOT uppercased. "OPENSTREETMAP" mangles a project's name in the one place
+     on the page that exists to credit it correctly, and proper case is easier
+     to read at this size. The mono face carries the voice on its own. */
+  line-height: 1;
+  color: var(--text-muted);
+
+  /* A contained pill rather than naked text: the dark basemap is photographic
+     in places (water, parks, lit arterials) and unbacked 10px text disappears
+     over the bright patches. */
+  padding: 5px 9px;
+  margin: 0 8px 8px 0;
+  border: 1px solid rgba(var(--accent-rgb), 0.16);
+  border-radius: 7px;
+  background: rgba(13, 13, 13, 0.72);
+  /* Unprefixed ONLY. This repo's pipeline keeps just the -webkit- copy when both
+     are present and current Chrome rejects it, so pairing them yields NO blur
+     and no warning — the live defect in .glass-panel and .service-card. */
+  backdrop-filter: blur(7px);
+
+  /* Never competes with the map. The credit earns its contrast on hover. */
+  opacity: 0.72;
+  transition: opacity 180ms ease, border-color 180ms ease;
+  pointer-events: auto;
+  user-select: none;
+  max-width: calc(100vw - 32px);
+}
+
+/* Keyboard reveal stays OUTSIDE the hover guard. Wrapping focus-within with
+   hover would delete the keyboard affordance on every touch device, which is a
+   worse defect than the one the guard fixes (A-074). */
+.map-credit:focus-within {
+  opacity: 1;
+  border-color: rgba(var(--accent-rgb), 0.34);
+}
+
+.map-credit__link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  /* A hairline that warms to gold, rather than a default underline — the credit
+     has to look designed at the same standard as everything else on the map. */
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.28);
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+/* Press feedback, deliberately unguarded: a tap is the ONLY interaction a touch
+   user gets here, so this is the one state that must not sit behind
+   `hover: hover`. Distinct from the hover colour so a press reads as a press. */
+.map-credit__link:active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Keyboard parity with the hover state. These links are the only focusable
+   thing in the control, so losing the ring would strand keyboard users on it. */
+.map-credit__link:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+  border-radius: 2px;
+  color: var(--accent-bright);
+}
+
+/* Hover only where hovering is real. On touch, hover fires on tap and STICKS
+   after the finger lifts, leaving the credit lit as though it were selected. */
+@media (hover: hover) and (pointer: fine) {
+  .map-credit:hover {
+    opacity: 1;
+    border-color: rgba(var(--accent-rgb), 0.34);
+  }
+
+  .map-credit__link:hover {
+    color: var(--accent-bright);
+    border-bottom-color: var(--accent-bright);
+  }
+}
+
+/* The basemap is dark-matter in BOTH site themes, so this control cannot follow
+   the page. In light mode the theme's ink and accent go dark and would paint
+   near-black text on a near-black map. Same island problem, and the same fix
+   the .spatial-intel-map-card block in globals.css already uses: re-declare the
+   dark tokens locally. */
+body.light-mode .map-credit {
+  --text-muted: rgba(255, 255, 255, 0.62);
+  --text-secondary: #a8a29a;
+  --accent-rgb: 232, 174, 60;
+  --accent-bright: #F7C64E;
+}
+
+@media (max-width: 640px) {
+  .map-credit {
+    /* Phone map furniture is already tight; the credit stays legible at the
+       10px floor and gives back the padding instead. */
+    padding: 4px 7px;
+    margin: 0 6px 6px 0;
+    letter-spacing: 0.03em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-credit,
+  .map-credit__link {
+    transition: none;
+  }
+}

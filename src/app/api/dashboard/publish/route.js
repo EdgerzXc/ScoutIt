@@ -131,6 +131,10 @@ export async function POST(request) {
           type: currentSubmission.type,
           space_category: currentSubmission.space_category,
           details: currentSubmission.details || {},
+          // photoFields() falls back to data.media_link when no array is
+          // present. Without this forward the fallback is unreachable and a
+          // legacy single-photo row publishes imageless.
+          ...(currentSubmission.media_link ? { media_link: currentSubmission.media_link } : {}),
           ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {})
         };
         

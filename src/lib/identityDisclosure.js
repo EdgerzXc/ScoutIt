@@ -134,18 +134,52 @@ export function canSeeCounterpartyName({
  * different facts, but neither is a name, and inventing a distinction would
  * disclose which one it is.
  */
+/**
+ * What a recipient reads while a request is still unanswered and the sender
+ * chose anonymity for it. The owner's exact word — not the role, not a
+ * placeholder. The role still travels separately (`otherPartyRole`) so
+ * templates keep their shape; the name slot itself says this.
+ */
+export const ANONYMOUS_CONNECT_LABEL = "Anonymous";
+
 export function counterpartyDisplayName({
   dealStatus = "",
   counterpartyIsPublic = false,
+  senderAnonymous = false,
   name = "",
   roleLabel = "Member",
 } = {}) {
   const label = roleLabel || "Member";
+  // A-148 (owner spec S2): an explicitly anonymous send reads "Anonymous" to
+  // the recipient while unanswered — even when the sender is otherwise a
+  // public person. Acceptance still reveals: the revealing-status branch runs
+  // first, so a completed handshake's name is never swallowed by this.
+  if (!IDENTITY_REVEALING_STATUSES.includes(dealStatus) && senderAnonymous === true) {
+    return ANONYMOUS_CONNECT_LABEL;
+  }
   if (!canSeeCounterpartyName({ dealStatus, counterpartyIsPublic })) {
     return label;
   }
   const clean = typeof name === "string" ? name.trim() : "";
   return clean || label;
+}
+
+/**
+ * What a public surface may print for the listing's uploader/lister.
+ *
+ * A-147 (owner spec S1): an anonymous owner's Your Move states "anonymous";
+ * a public owner's shows the person. One rule, one place, beside the
+ * counterparty rule above — callers never branch on `is_profile_public`
+ * themselves. A missing/blank name falls back to "Anonymous" rather than a
+ * role noun: "Building Owner" describes a job, and a job is not the
+ * anonymous-vs-named distinction the surface promises.
+ */
+export const ANONYMOUS_UPLOADER_LABEL = "Anonymous";
+
+export function ownerDisclosureLabel({ isPublic = false, name = "" } = {}) {
+  if (isPublic !== true) return ANONYMOUS_UPLOADER_LABEL;
+  const clean = typeof name === "string" ? name.trim() : "";
+  return clean || ANONYMOUS_UPLOADER_LABEL;
 }
 
 /**

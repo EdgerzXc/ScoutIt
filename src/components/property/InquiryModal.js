@@ -10,6 +10,8 @@ import { ImpeccableButton } from "../ui/ImpeccableButton";
 import { trackFrictionPoint } from "@/lib/deviceTracker";
 import { INTRO_MAX } from "@/lib/connectIntro";
 import ConnectsReceipt from "../connects/ConnectsReceipt";
+import PrivacyNotice from "../ui/PrivacyNotice";
+import { useModalDialog } from "../ui/useModalDialog";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 
 const backdropVariants = {
@@ -52,6 +54,33 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
   // answers — there is deliberately no default shape, so the receipt cannot
   // render invented figures if the call fails.
   const [receipt, setReceipt] = useState(null);
+  // A-148 (owner spec S2): per-request anonymity. Defaults ON — the first
+  // Connect is anonymous by default — then follows the sender's own profile:
+  // a public profile unchecks it, a private one keeps it. Unknown (privacy
+  // unreadable) stays checked: failing closed toward concealment.
+  const [sendAnonymously, setSendAnonymously] = useState(true);
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: { session } } = await getSession();
+        const token = session?.access_token;
+        if (!token) return;
+        const res = await fetch("/api/user/privacy-settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!cancelled && res.ok && data?.settings && typeof data.settings.isProfilePublic === "boolean") {
+          setSendAnonymously(data.settings.isProfilePublic !== true);
+        }
+      } catch {
+        // Unknown stays anonymous. A privacy read that fails is not consent
+        // to publish a name (Rule 14).
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen]);
 
   // Sync default message when modal opens with new pre-filled finding
   useEffect(() => {
@@ -60,12 +89,24 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
     }
   }, [isOpen, defaultMessage, message]);
 
+  // A-146: the tap funnel measured start-vs-sent drop. Fires on open only —
+  // the send itself already emits INQUIRY_SENT on receipt.
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent(GA_EVENTS.INQUIRY_STARTED, { property_slug: propertySlug });
+    }
+  }, [isOpen, propertySlug]);
+
   const handleCloseModal = () => {
     if (status === "composing") {
       trackFrictionPoint("abandoned_inquiry_modal", { propertyTitle, propertySlug });
     }
     onClose();
   };
+
+  // A-153 — Tab stays inside the dialog, Escape closes like the X button.
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen, onClose: handleCloseModal });
 
   // Synchronous in-flight latch for a paid action. Deliberately a ref and
   // not state -- see the guard inside handleSubmit.
@@ -98,28 +139,20 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
 
       const { data: { session } } = await getSession();
       const token = session?.access_token;
-      let mockOwnerId = null;
-      
-      if (!token) {
-        // Fallback for E2E tests
-        try {
-          const stored = window.localStorage.getItem('scoutit_user');
-          if (stored) {
-            mockOwnerId = JSON.parse(stored).id;
-          }
-        } catch (e) {}
 
-        if (!mockOwnerId) {
-          setStatus("error");
-          setErrorMsg("Please log in to contact the property recipient.");
-          return;
-        }
+      if (!token) {
+        // Identity comes from the verified session only (resolveUserId
+        // server-side reads the Bearer token, never a body id). Sending a
+        // body-sent id would only pretend an anonymous visitor is someone.
+        setStatus("error");
+        setErrorMsg("Please log in to contact the property recipient.");
+        return;
       }
 
       const res = await fetch("/api/deals/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ propertySlug, message: trimmed, mockOwnerId }),
+        body: JSON.stringify({ propertySlug, message: trimmed, anonymous: sendAnonymously === true }),
       });
       const data = await res.json();
 
@@ -161,7 +194,8 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
           exit="hidden"
           transition={backdropTransition}
         >
-          <motion.div 
+          <motion.div
+            ref={dialogRef}
             className="my-auto w-full max-w-[500px]"
             role="dialog"
             aria-modal="true"
@@ -172,13 +206,13 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
             exit="exit"
             transition={modalTransition}
           >
-            <GlassPanel className="relative max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
+            <GlassPanel className="relative max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] contact-lens-modal">
               <button 
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
                 onClick={handleCloseModal}
                 aria-label="Close"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
 
               <AnimatePresence mode="wait">
@@ -264,6 +298,19 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Hi, I am interested in viewing this property. Are there any available schedules this week?"
                       />
+                      <label className="flex items-start gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={sendAnonymously === true}
+                          onChange={(e) => setSendAnonymously(e.target.checked)}
+                          className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                          aria-label="Send this request anonymously"
+                        />
+                        <span className="text-[13px] text-[#f0ede8]/80 leading-relaxed">
+                          Send anonymously — they will see <strong className="text-white font-medium">Anonymous</strong> until
+                          they accept, instead of your name.
+                        </span>
+                      </label>
                       <div className="flex justify-between items-center -mt-2">
                         <p className="text-[12px] text-text-muted">
                           They see this before deciding whether to reply.
@@ -289,6 +336,8 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                       >
                         Spend 1 Connect →
                       </ImpeccableButton>
+                      {/* A-150: explicit Privacy Policy link (RA 10173 §11). */}
+                      <PrivacyNotice />
                     </form>
                   </motion.div>
                 )}

@@ -159,14 +159,20 @@ export async function POST(request) {
         (key) => touchedKeys.includes(key) && oldDetails[key] !== newDetails[key]
       );
       if (changedKey) {
-        await notifyAttachedBrokers(serviceClient, {
-          propertyId: submissionId,
-          title: "Listing updated",
-          desc: `"${currentSubmission.title}" was updated — check the latest details.`,
-          icon: "📋",
-          notificationType: "property_changed",
-          excludeUserId: userId,
-        });
+        // A-146: isolated — the listing update stands; a bell failure must
+        // neither 500 it (the retry would re-fire the alert) nor vanish.
+        try {
+          await notifyAttachedBrokers(serviceClient, {
+            propertyId: submissionId,
+            title: "Listing updated",
+            desc: `"${currentSubmission.title}" was updated — check the latest details.`,
+            icon: "📋",
+            notificationType: "property_changed",
+            excludeUserId: userId,
+          });
+        } catch (notifyError) {
+          console.warn("[DASHBOARD UPDATE] Broker alert not delivered for", submissionId, notifyError?.message);
+        }
       }
     }
 

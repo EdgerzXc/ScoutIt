@@ -75,7 +75,7 @@ export default function OffMarketPage() {
                   {property.contactAvailable ? (
                     <button type="button" className="min-h-11 rounded border border-gold-accent/60 px-3 py-2 font-label-caps text-[12px] tracking-widest text-gold-accent" onClick={() => { setSelected(property); setSendState("idle"); }}>REQUEST CONTACT · 1 CONNECT</button>
                   ) : (
-                    <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary">CONTACT DISABLED</span>
+                    <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary" title="Contact appears here when the owner enables Quietly open to offers for this listing">CONTACT DISABLED</span>
                   )}
                 </div>
               </article>

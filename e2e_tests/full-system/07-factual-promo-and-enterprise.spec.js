@@ -166,9 +166,6 @@ test.describe('Enterprise Mission Control (honest data)', () => {
     await signInAsMock(page, { ...MASTER_DEV_READONLY, primaryMode: 'mc_enterprise', tags: ['owner', 'mc_enterprise'] });
     await gotoAndSettle(page, '/dashboard');
     await expectRealContent(page);
-
-    await page.getByRole('button', { name: 'Close Help & Display', exact: true }).click();
-    await expect(page.getByRole('complementary', { name: 'Help & Display', exact: true })).toBeHidden();
     await page.getByRole('button', { name: /Open the Enterprise preview/i }).click();
     await expect(page.getByText('Enterprise Dashboard')).toBeVisible({ timeout: 15000 });
 

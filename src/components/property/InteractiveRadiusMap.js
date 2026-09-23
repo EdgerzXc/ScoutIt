@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import MapCreditControl from '@/components/maps/MapCreditControl';
 
 // Math function to draw a geographical circle without Turf.js
 const createGeoJSONCircle = (center, radiusInKm, points = 64) => {
@@ -35,6 +36,8 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
     if (!mapContainerRef.current || mapInstance.current) return;
 
     const map = new maplibregl.Map({
+      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+      attributionControl: false,
       container: mapContainerRef.current,
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: center,
@@ -42,6 +45,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
       pitch: 45,
       scrollZoom: false
     });
+    map.addControl(new MapCreditControl(), 'bottom-right');
 
     map.on('load', () => {
       map.addSource('radius-circle', {

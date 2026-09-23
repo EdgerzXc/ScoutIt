@@ -24,6 +24,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
 import { turnstileGuard } from "@/lib/turnstile";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 const waitlistSchema = z.object({
   // `.trim()` runs BEFORE `.email()`. Without it a pasted or autocompleted
@@ -37,7 +39,22 @@ const waitlistSchema = z.object({
   turnstileToken: z.string().min(1, "Captcha token is required")
 });
 
+// A-146: ceiling for the anonymous funnel (see POST head).
+const checkWaitlistRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 20_000 });
+
 export async function POST(req) {
+
+  // A-146: the whole pre-launch funnel behind one anonymous POST. Meter per
+  // IP before parsing (same pattern as /api/inquiries — 10/min). Nine
+  // legitimate retries a minute is not a human; an unbounded loop is not one
+  // either.
+  const rate = checkWaitlistRate(clientIp(req));
+  if (!rate.allowed) {
+    return Response.json(
+      { ok: false, error: "Too many signups. Please wait and try again." },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
+    );
+  }
 
   let body;
   try {

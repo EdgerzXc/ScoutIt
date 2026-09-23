@@ -2,9 +2,11 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   IDENTITY_REVEALING_STATUSES,
+  ANONYMOUS_UPLOADER_LABEL,
   isIdentityPublic,
   canSeeCounterpartyName,
   counterpartyDisplayName,
+  ownerDisclosureLabel,
   viewerIsRequestSender,
 } from "@/lib/identityDisclosure";
 
@@ -223,5 +225,34 @@ describe("identity disclosure — the rule is applied, not just defined", () => 
 
   it("the revealing set is frozen so it cannot be widened at runtime", () => {
     expect(Object.isFrozen(IDENTITY_REVEALING_STATUSES)).toBe(true);
+  });
+});
+
+describe("identity disclosure — Your Move uploader label (A-147)", () => {
+  it("states Anonymous unless the owner published themselves", () => {
+    expect(ANONYMOUS_UPLOADER_LABEL).toBe("Anonymous");
+    expect(ownerDisclosureLabel({ isPublic: false, name: "Leroy" })).toBe("Anonymous");
+    expect(ownerDisclosureLabel({})).toBe("Anonymous");
+    expect(ownerDisclosureLabel({ isPublic: true, name: "Leroy" })).toBe("Leroy");
+  });
+
+  it("never prints a blank or a role noun in place of the distinction", () => {
+    // A public owner with nothing on file is Anonymous, not "" and not
+    // "Building Owner" — a job title is not the anonymous-vs-named promise.
+    expect(ownerDisclosureLabel({ isPublic: true, name: "   " })).toBe("Anonymous");
+    expect(ownerDisclosureLabel({ isPublic: true })).toBe("Anonymous");
+  });
+
+  it("both property flows render the server-resolved label, never a local guess", () => {
+    for (const flow of [
+      "src/components/property/CommercialFlow.js",
+      "src/components/property/ResidentialFlow.js",
+    ]) {
+      const source = stripComments(read(flow));
+      expect(source, `${flow} shows the uploader label`).toContain("Listed by {rosterUploader}");
+      expect(source, `${flow} gates on the server value`).toContain('typeof data?.uploader === "string"');
+    }
+    const roster = stripComments(read("src/app/property/[id]/brokers/BrokersClient.js"));
+    expect(roster).toContain("Listed by {uploader}");
   });
 });

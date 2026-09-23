@@ -43,7 +43,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
       <div className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
         <div className="flex justify-between items-end border-b border-surface-variant pb-4">
           <div>
-            <button className="text-text-secondary hover:text-intel-cyan text-sm mb-2" onClick={() => setActiveQuestId(null)}>← Back to Audit List</button>
+            <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-intel-cyan text-sm mb-2" onClick={() => setActiveQuestId(null)}>← Back to Audit List</button>
             <h2 className="font-display-md text-3xl text-on-surface">Data Audit: {quest.title}</h2>
           </div>
           <button
@@ -168,7 +168,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
           ))}
 
           {quests.length === 0 && (
-            <div className="p-12 text-center border border-dashed border-surface-variant rounded-lg">
+            <div className="p-8 md:p-12 text-center border border-dashed border-surface-variant rounded-lg">
               <span className="text-3xl mb-2 block opacity-50">📋</span>
               <p className="text-text-secondary text-sm">No active research audits available.</p>
             </div>

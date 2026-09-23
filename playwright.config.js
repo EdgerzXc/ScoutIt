@@ -27,6 +27,18 @@ export default defineConfig({
   reporter: 'line',
   use: {
     baseURL,
+    // Ordinary journeys start after analytics was declined and Help was seen.
+    // Dedicated first-visit tests clear the Help key before navigation.
+    storageState: {
+      cookies: [],
+      origins: [{
+        origin: new URL(baseURL).origin,
+        localStorage: [
+          { name: 'scoutit_cookie_consent', value: 'denied' },
+          { name: 'scoutit_help_seen_v1', value: 'true' },
+        ],
+      }],
+    },
     trace: 'on-first-retry',
   },
   webServer: externalTarget ? undefined : {

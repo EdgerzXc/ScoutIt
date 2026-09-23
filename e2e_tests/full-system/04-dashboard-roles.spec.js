@@ -104,9 +104,7 @@ test.describe('Owner with zero listings (safe mock)', () => {
       await expectRealContent(page);
       const bodyText = await page.locator('body').innerText();
       expect(bodyText, `${path} crashed`).not.toMatch(/Application error/i);
-      // Let in-flight data fetches finish before navigating away, otherwise
-      // the abort surfaces as a "Failed to fetch" console error we'd flag.
-      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+      // Rendered content is the readiness signal; ambient polling need not become idle.
     }
     expect(errors, errors.join('\n')).toEqual([]);
   });
@@ -126,7 +124,7 @@ test.describe('Settings information architecture', () => {
       await page.goto('/settings', { waitUntil: 'domcontentloaded' });
       const sectionNav = page.getByRole('navigation', { name: 'Settings sections' });
       await expect(sectionNav).toBeVisible();
-      await expect(sectionNav.getByRole('link')).toHaveCount(6);
+      await expect(sectionNav.getByRole('link')).toHaveCount(7);
 
       await sectionNav.getByRole('link', { name: 'Privacy' }).click();
       await expect(page).toHaveURL(/\/settings#privacy$/);
@@ -151,7 +149,13 @@ test.describe('Settings information architecture', () => {
   test('the Eye opens the Help & Display hub at 360px', async ({ page }) => {
     const errors = trackErrors(page);
     await gotoAndSettle(page, '/discover');
-    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    const declineCookies = page.getByRole('dialog', { name: 'Cookie consent' }).getByRole('button', { name: 'DECLINE' });
+    if (await declineCookies.isVisible().catch(() => false)) await declineCookies.click();
+    const menu = page.getByRole('button', { name: 'Menu', exact: true });
+    await expect.poll(async () => {
+      if (await menu.getAttribute('aria-expanded') !== 'true') await menu.click();
+      return menu.getAttribute('aria-expanded');
+    }).toBe('true');
     await expect(page.getByText('Explore', { exact: true })).toBeVisible();
     await expect(page.getByText('Workspace', { exact: true })).toBeVisible();
     await expect(page.getByText('Help', { exact: true })).toBeVisible();
@@ -169,7 +173,7 @@ test.describe('Settings information architecture', () => {
 
     const panel = page.getByRole('complementary', { name: 'Help & Display' });
     await expect(panel).toBeVisible();
-    await page.getByRole('heading', { name: 'Explore by Category' }).click();
+    await page.mouse.click(4, Math.floor(page.viewportSize().height / 2));
     await expect(panel).toBeHidden();
 
     const commercial = page.getByRole('button', { name: 'Commercial' });
@@ -180,8 +184,13 @@ test.describe('Settings information architecture', () => {
   test('Escape closes Help & Display and restores a sensible trigger', async ({ page }) => {
     await page.addInitScript(() => window.localStorage.setItem('scoutit_help_seen_v1', 'true'));
     await gotoAndSettle(page, '/discover');
+    const declineCookies = page.getByRole('dialog', { name: 'Cookie consent' }).getByRole('button', { name: 'DECLINE' });
+    if (await declineCookies.isVisible().catch(() => false)) await declineCookies.click();
     const menu = page.getByRole('button', { name: 'Menu', exact: true });
-    await menu.click();
+    await expect.poll(async () => {
+      if (await menu.getAttribute('aria-expanded') !== 'true') await menu.click();
+      return menu.getAttribute('aria-expanded');
+    }).toBe('true');
     await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
     await expect(page.getByRole('complementary', { name: 'Help & Display' })).toBeVisible();
 
@@ -191,11 +200,15 @@ test.describe('Settings information architecture', () => {
   });
 
   test('page help is non-blocking, keyboard dismissible, and restores Eye focus', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('scoutit_help_seen_v1', 'true'));
     await gotoAndSettle(page, '/discover');
     const eye = page.getByRole('button', { name: 'Menu', exact: true });
     const help = page.getByRole('button', { name: 'Help for this page' });
     if (!(await help.isVisible().catch(() => false))) {
-      await eye.click();
+      await expect.poll(async () => {
+        if (await eye.getAttribute('aria-expanded') !== 'true') await eye.click();
+        return eye.getAttribute('aria-expanded');
+      }).toBe('true');
       await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
     }
     await help.click();
@@ -212,9 +225,14 @@ test.describe('Settings information architecture', () => {
   test('a server-selected owner journey resumes after reload', async ({ page }) => {
     await page.route('**/api/profile/me/role', (route) => route.fulfill({ status: 200, json: { role: 'owner' } }));
     await gotoAndSettle(page, '/discover');
+    const declineCookies = page.getByRole('dialog', { name: 'Cookie consent' }).getByRole('button', { name: 'DECLINE' });
+    if (await declineCookies.isVisible().catch(() => false)) await declineCookies.click();
     const menu = page.getByRole('button', { name: 'Menu', exact: true });
     const openHelp = async () => {
-      await menu.click();
+      await expect.poll(async () => {
+        if (await menu.getAttribute('aria-expanded') !== 'true') await menu.click();
+        return menu.getAttribute('aria-expanded');
+      }).toBe('true');
       await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
     };
     await openHelp();
@@ -263,6 +281,7 @@ test.describe('Calendar viewing lifecycle (fully mocked)', () => {
     await openAgenda(page);
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Jordan Buyer')).toBeVisible();
+    await expect(page.getByText('Loading…', { exact: true })).toBeHidden();
 
     await page.getByRole('button', { name: 'Confirm' }).click();
     await expect.poll(() => patchedStatus, { timeout: 10000 }).toBe('confirmed');
@@ -373,6 +392,7 @@ test.describe('master-dev (isolated local preview)', () => {
     const calendarCard = rail.getByRole('link', { name: /Calendar/ });
     await expect(calendarCard).not.toContainText(/^0$/);
 
+    await expect(rail.getByText('2 overdue tasks', { exact: true })).toBeVisible();
     const type = await page.evaluate(() => {
       const region = document.querySelector('section[aria-label="What needs you"]');
       const headline = [...region.querySelectorAll('span')]
@@ -478,6 +498,7 @@ test.describe('master-dev (isolated local preview)', () => {
     await gotoAndSettle(page, '/dashboard/crm');
     await expectRealContent(page);
     await expect(page.getByRole('heading', { name: 'Deal Intelligence' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('No priced listings in your active pipeline yet', { exact: true })).toBeVisible();
     const type = await page.evaluate(() => {
       const styleFor = (selector) => getComputedStyle(document.querySelector(selector));
       const heading = styleFor('h1');

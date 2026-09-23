@@ -62,11 +62,12 @@ function timeAgo(iso) {
 
 // ── Sub-component: one tier-badged answer ────────────────────────────────
 function AnswerCard({ answer }) {
-  const tier = TIERS[answer.tier] || TIERS.bronze;
+  const tierKey = TIERS[answer.tier] ? answer.tier : "bronze";
+  const tier = TIERS[tierKey];
 
   return (
     <div
-      className="faq-answer"
+      className={`faq-answer faq-tier-${tierKey}`}
       style={{ background: tier.bg, borderLeft: `2px solid ${tier.color}`, boxShadow: tier.glow }}
     >
       <div className="faq-answer__head">
@@ -498,7 +499,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         {Object.entries(TIERS).map(([key, t]) => (
           <div
             key={key}
-            className="faq-legend__item"
+            className={`faq-legend__item faq-tier-${key}`}
             style={{ color: t.color, background: t.bg, border: `0.5px solid ${t.border}` }}
           >
             {t.medal} {t.label}

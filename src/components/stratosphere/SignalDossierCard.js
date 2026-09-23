@@ -1,0 +1,350 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  MapPin,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Share2,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  Bookmark,
+} from "lucide-react";
+import SignalGlyph from "./glyphs/SignalGlyph";
+import { SIGNAL_TYPES, SIGNAL_TYPE_LABELS, SIGNAL_COLORS } from "@/lib/communitySignalsAdapter";
+import "./signal-dossier-card.css";
+
+export default function SignalDossierCard({
+  signal,
+  isActive = false,
+  isHovered = false,
+  onSelect = () => {},
+  onHover = () => {},
+  onConnect = () => {},
+}) {
+  const router = useRouter();
+  const [expanded, setExpanded] = useState(false);
+  const [relevant, setRelevant] = useState(false);
+  const [relevantCount, setRelevantCount] = useState(signal.relevantCount || 0);
+  const [saved, setSaved] = useState(false);
+  const [showMetropolisMatches, setShowMetropolisMatches] = useState(false);
+
+  const typeColor = SIGNAL_COLORS[signal.signalType] || "var(--accent)";
+  const typeLabel = SIGNAL_TYPE_LABELS[signal.signalType] || signal.signalType;
+
+  const handleRelevantClick = (e) => {
+    e.stopPropagation();
+    if (!relevant) {
+      setRelevant(true);
+      setRelevantCount((c) => c + 1);
+      // Background anonymous reaction under A-142
+      try {
+        fetch("/api/reactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            property_id: signal.matchingSpaces?.[0]?.slug || signal.id,
+            reaction_type: "Interested",
+            city: signal.city || signal.district || "",
+            category: signal.category || "",
+          }),
+        }).catch(() => {});
+      } catch {}
+    } else {
+      setRelevant(false);
+      setRelevantCount((c) => Math.max(0, c - 1));
+    }
+  };
+
+  const handleSaveClick = (e) => {
+    e.stopPropagation();
+    const nextSaved = !saved;
+    setSaved(nextSaved);
+    if (nextSaved) {
+      try {
+        fetch("/api/reactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            property_id: signal.matchingSpaces?.[0]?.slug || signal.id,
+            reaction_type: "Save",
+            city: signal.city || signal.district || "",
+            category: signal.category || "",
+          }),
+        }).catch(() => {});
+      } catch {}
+    }
+  };
+
+  const handlePrimaryAction = (e) => {
+    e.stopPropagation();
+    if (signal.actionType === "PROPOSE_SPACE" || signal.actionType === "VIEW_MATCHES") {
+      if (signal.matchingSpaces && signal.matchingSpaces.length > 0) {
+        setShowMetropolisMatches(!showMetropolisMatches);
+        setExpanded(true);
+      } else {
+        onConnect(signal);
+      }
+    } else if (signal.actionType === "EXPLORE_DATA") {
+      router.push("/intel");
+    } else {
+      onConnect(signal);
+    }
+  };
+
+  const renderActionButton = () => {
+    switch (signal.actionType) {
+      case "PROPOSE_SPACE":
+        return (
+          <button type="button" className="sdc-btn sdc-btn-primary" onClick={handlePrimaryAction}>
+            <span>PROPOSE SPACE</span>
+            <ArrowRight size={13} aria-hidden="true" />
+          </button>
+        );
+      case "VIEW_SPACE":
+        return (
+          <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>
+            <span>VIEW SPACE</span>
+            <ArrowRight size={13} aria-hidden="true" />
+          </button>
+        );
+      case "EXPLORE_DATA":
+        return (
+          <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>
+            <span>EXPLORE INTEL</span>
+            <ArrowRight size={13} aria-hidden="true" />
+          </button>
+        );
+      case "VIEW_DETAILS":
+        return (
+          <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setExpanded(!expanded)}>
+            <span>VIEW DETAILS</span>
+          </button>
+        );
+      case "CONNECT":
+      default:
+        return (
+          <button type="button" className="sdc-btn sdc-btn-primary" onClick={handlePrimaryAction}>
+            <span>CONNECT</span>
+            <span className="sdc-connect-cost">1 CONNECT</span>
+          </button>
+        );
+    }
+  };
+
+  return (
+    <article
+      className={`sdc-card ${isActive ? "active" : ""} ${isHovered ? "hovered" : ""}`}
+      onClick={() => onSelect(signal)}
+      onMouseEnter={() => onHover(signal.id)}
+      onMouseLeave={() => onHover(null)}
+      aria-label={`${typeLabel}: ${signal.title}`}
+    >
+      {/* ── CARD HEADER (1-3s Scannable Kicker) ── */}
+      <div className="sdc-header">
+        <div className="sdc-kicker-row">
+          <span className="sdc-district-tag">
+            <MapPin size={11} aria-hidden="true" />
+            <span>{signal.district.toUpperCase()}</span>
+          </span>
+          <span className="sdc-divider" aria-hidden="true">/</span>
+          <span className="sdc-type-pill" style={{ "--pill-color": typeColor }}>
+            {typeLabel.toUpperCase()}
+          </span>
+        </div>
+
+        <div className="sdc-freshness-chip" title="Signal Freshness">
+          <span className={`sdc-status-dot ${signal.freshness}`} aria-hidden="true" />
+          <span>{signal.freshness.toUpperCase()}</span>
+        </div>
+      </div>
+
+      {/* ── CARD BODY (Layout with Micro Spatial Glyph) ── */}
+      <div className="sdc-main-split">
+        <div className="sdc-content-col">
+          <h3 className="sdc-title">{signal.title}</h3>
+
+          {/* Quick Specifications Strip */}
+          <div className="sdc-specs-strip">
+            {signal.areaSqm ? (
+              <span className="sdc-spec-chip">
+                <Building2 size={11} aria-hidden="true" />
+                <span>
+                  {typeof signal.areaSqm === "object"
+                    ? `${signal.areaSqm.min}–${signal.areaSqm.max} sqm`
+                    : `${signal.areaSqm} sqm`}
+                </span>
+              </span>
+            ) : null}
+
+            {signal.timing ? (
+              <span className="sdc-spec-chip">
+                <Calendar size={11} aria-hidden="true" />
+                <span>{signal.timing}</span>
+              </span>
+            ) : null}
+
+            {signal.budget ? (
+              <span className="sdc-spec-chip sdc-budget-chip">
+                <span>{signal.budget}</span>
+              </span>
+            ) : null}
+          </div>
+
+          {/* Key tags */}
+          {signal.specs && signal.specs.length > 0 && (
+            <div className="sdc-tag-list" aria-label="Key specifications">
+              {signal.specs.slice(0, 3).map((spec, i) => (
+                <span key={i} className="sdc-spec-tag">
+                  {spec}
+                </span>
+              ))}
+              {signal.specs.length > 3 && (
+                <span className="sdc-spec-more">+{signal.specs.length - 3}</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Micro Spatial Glyph (Architectural Volume or Trend Diagram) */}
+        <div className="sdc-glyph-col">
+          <SignalGlyph type={signal.glyphType} data={signal.glyphData} label={signal.title} />
+        </div>
+      </div>
+
+      {/* ── CARD METRICS & ACTIONS ── */}
+      <div className="sdc-footer">
+        <div className="sdc-metric-group">
+          {/* Relevant to Me (Demand Aggregation) */}
+          <button
+            type="button"
+            className={`sdc-action-metric ${relevant ? "sdc-relevant-active" : ""}`}
+            onClick={handleRelevantClick}
+            title="Indicate that this market signal also matters to your organization"
+            aria-pressed={relevant}
+          >
+            <Zap size={12} aria-hidden="true" />
+            <span className="sdc-num">{relevantCount}</span>
+            <span className="sdc-metric-text">RELEVANT</span>
+          </button>
+
+          {/* Matching Metropolis Spaces */}
+          {signal.matchingSpaces && signal.matchingSpaces.length > 0 && (
+            <button
+              type="button"
+              className={`sdc-action-metric sdc-spaces-metric ${showMetropolisMatches ? "open" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMetropolisMatches(!showMetropolisMatches);
+                setExpanded(true);
+              }}
+              title="Verified spaces in Metropolis matching this signal"
+            >
+              <Building2 size={12} aria-hidden="true" />
+              <span className="sdc-num">{signal.matchingSpaces.length}</span>
+              <span className="sdc-metric-text">MATCHING SPACES</span>
+            </button>
+          )}
+
+          {/* Bookmark / Save */}
+          <button
+            type="button"
+            className={`sdc-icon-btn ${saved ? "saved" : ""}`}
+            onClick={handleSaveClick}
+            title={saved ? "Saved" : "Save signal"}
+            aria-label={saved ? "Saved" : "Save signal"}
+            aria-pressed={saved}
+          >
+            <Bookmark size={13} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="sdc-cta-group">
+          {renderActionButton()}
+          <button
+            type="button"
+            className="sdc-expand-toggle"
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
+            aria-expanded={expanded}
+            aria-label={expanded ? "Collapse dossier details" : "Expand dossier details"}
+          >
+            {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+          </button>
+        </div>
+      </div>
+
+      {/* ── EXPANDED DOSSIER DETAILS ── */}
+      {expanded && (
+        <div className="sdc-expanded-drawer">
+          <p className="sdc-summary-text">{signal.summary}</p>
+
+          {/* Structured Requirements Matrix */}
+          {signal.requirements && Object.keys(signal.requirements).length > 0 && (
+            <div className="sdc-req-table">
+              <h4 className="sdc-section-heading">STRUCTURED SPECIFICATION</h4>
+              <dl className="sdc-dl">
+                {Object.entries(signal.requirements).map(([key, val]) => (
+                  <div key={key} className="sdc-dl-row">
+                    <dt className="sdc-dt">{key.replace(/([A-Z])/g, " $1").toUpperCase()}</dt>
+                    <dd className="sdc-dd">{String(val)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {/* Metropolis Space Matches Bridge */}
+          {showMetropolisMatches && signal.matchingSpaces && signal.matchingSpaces.length > 0 && (
+            <div className="sdc-matches-drawer">
+              <h4 className="sdc-section-heading">
+                METROPOLIS VERIFIED INVENTORY ({signal.matchingSpaces.length})
+              </h4>
+              <ul className="sdc-matches-list">
+                {signal.matchingSpaces.map((space, i) => (
+                  <li key={i} className="sdc-match-item">
+                    <div className="sdc-match-info">
+                      <span className="sdc-match-title">{space.title}</span>
+                      <span className="sdc-match-dist">{space.distance} from centroid</span>
+                    </div>
+                    <Link
+                      href={`/property/${space.slug}`}
+                      className="sdc-match-link"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>VIEW SPACE</span>
+                      <ArrowRight size={11} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Author Trust and Sample Disclosure */}
+          <div className="sdc-author-bar">
+            <div className="sdc-author-info">
+              <ShieldCheck size={13} className="sdc-shield-icon" aria-hidden="true" />
+              <span className="sdc-scout-id">{signal.author.scoutId}</span>
+              <span className="sdc-trust-badge">{signal.author.trustTier}</span>
+              {signal.author.name && <span className="sdc-author-name">({signal.author.name})</span>}
+            </div>
+            {signal.isSample && (
+              <span className="sdc-sample-tag" title="Demonstration community signal for launch testing">
+                SAMPLE SIGNAL
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}

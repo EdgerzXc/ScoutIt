@@ -138,7 +138,7 @@ export default function BulkImporterMode({ onClose }) {
       <div className="p-4 border-b border-surface-variant bg-surface flex justify-between items-center shrink-0">
         <button 
           onClick={onClose} 
-          className="text-text-secondary hover:text-gold-accent text-xs font-label-caps tracking-widest uppercase transition"
+          className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent text-xs font-label-caps tracking-widest uppercase transition"
         >
           ← Exit Importer
         </button>

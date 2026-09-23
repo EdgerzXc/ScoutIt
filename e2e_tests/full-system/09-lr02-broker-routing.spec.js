@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { gotoAndSettle, expectRealContent, trackErrors } from './helpers';
 
 test.describe('LR-02 property-scoped broker roster', () => {
-  test('shows only the current property roster and routes selected contact to it', async ({ page }) => {
+  test('shows the current roster and requires sign-in before a paid contact', async ({ page }) => {
     const errors = trackErrors(page);
     const slug = 'lr02-property';
     await page.route(`**/api/property/${slug}/brokers`, async (route) => {
@@ -17,10 +17,10 @@ test.describe('LR-02 property-scoped broker roster', () => {
         },
       });
     });
-    await page.route('**/api/inquiries', async (route) => {
-      const body = route.request().postDataJSON();
-      expect(body.preferredBrokerId).toBe('broker-active');
-      await route.fulfill({ status: 200, contentType: 'application/json', json: { success: true, routedToRoster: true, recipientCount: 1 } });
+    const submitted = [];
+    await page.route('**/api/deals/initiate', async (route) => {
+      submitted.push(route.request().postDataJSON());
+      await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
     });
 
     await gotoAndSettle(page, `/property/${slug}/brokers`);
@@ -31,11 +31,11 @@ test.describe('LR-02 property-scoped broker roster', () => {
     await expect(page.getByRole('heading', { name: 'Active Broker' })).toHaveCount(1);
     await expect(page.getByText(/Building record/i)).toBeVisible();
     await page.getByRole('button', { name: /Contact Broker/i }).first().click();
-    await page.getByPlaceholder('Your Full Name').fill('Buyer One');
-    await page.getByPlaceholder(/Contact Number/i).fill('+63 917 000 0000');
-    await page.getByPlaceholder(/Tell the recipient/i).fill('Please share the current viewing terms.');
-    await page.getByRole('button', { name: /Send inquiry/i }).click();
-    await expect(page.getByRole('status')).toContainText(/routed/i);
+    await expect(page.getByRole('heading', { name: 'Contact broker · 1 Connect' })).toBeVisible();
+    await page.getByRole('textbox', { name: 'Introduction message' }).fill('Please share the current viewing terms.');
+    await page.getByRole('button', { name: /Spend 1 Connect/i }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Sign in' })).toContainText('Sign in');
+    expect(submitted).toEqual([]);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
@@ -52,7 +52,7 @@ test.describe('LR-02 property-scoped broker roster', () => {
     await gotoAndSettle(page, `/property/${slug}/brokers`);
     await expectRealContent(page);
     await expect(page.getByText(/No active broker representation/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /Contact uploader \/ lister/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Contact lister · 1 Connect/i })).toBeVisible();
     await expect(page.getByText(/Top Rated Brokers/i)).toHaveCount(0);
     expect(errors, errors.join('\n')).toEqual([]);
   });

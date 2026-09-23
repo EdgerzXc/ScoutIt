@@ -161,14 +161,20 @@ export async function POST(request) {
     }
 
     // A task pinned to a deal or property is part of that record's story.
+    // A-146: isolated — a timeline failure must not 500 a created task (the
+    // retry would duplicate it), but it must be findable in the logs.
     if (inserted.deal_id || inserted.property_id) {
-      await logActivity(supabaseAdmin, {
-        dealId: inserted.deal_id,
-        propertyId: inserted.property_id,
-        activityType: "task_created",
-        actorId: userId,
-        metadata: { taskId: inserted.id, title: inserted.title },
-      });
+      try {
+        await logActivity(supabaseAdmin, {
+          dealId: inserted.deal_id,
+          propertyId: inserted.property_id,
+          activityType: "task_created",
+          actorId: userId,
+          metadata: { taskId: inserted.id, title: inserted.title },
+        });
+      } catch (activityError) {
+        console.warn("[CRM TASKS API] Timeline entry not recorded for task", inserted.id, activityError?.message);
+      }
     }
 
     return NextResponse.json({ success: true, task: serializeTask(inserted) });

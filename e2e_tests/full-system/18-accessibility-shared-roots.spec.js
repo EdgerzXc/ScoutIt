@@ -45,7 +45,11 @@ test.describe("shared accessibility roots", () => {
     await page.goto("/property/one-ecom-center", { waitUntil: "domcontentloaded" });
     const locationTab = page.getByRole("tab", { name: "Location" }).first();
     await expect(locationTab).toBeVisible({ timeout: 20000 });
-    await locationTab.click();
+    await expect.poll(async () => {
+      if (await locationTab.getAttribute("aria-selected") !== "true") await locationTab.click();
+      return locationTab.getAttribute("aria-selected");
+    }, { timeout: 15000 }).toBe("true");
+    await page.locator("#panel-location .map-frame").scrollIntoViewIfNeeded();
     // A-121: the `.leaflet-marker-icon` alternative was dropped when the last
     // Leaflet surface was ported. Leaving it would let this assertion pass on
     // DOM that can no longer exist, which is an assertion that protects nothing.

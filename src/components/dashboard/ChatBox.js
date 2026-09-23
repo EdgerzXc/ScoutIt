@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { viewerIsRequestSender } from "@/lib/identityDisclosure";
+import { ANONYMOUS_CONNECT_LABEL, viewerIsRequestSender } from "@/lib/identityDisclosure";
 import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
@@ -9,6 +9,7 @@ import { uploadAttachment } from "../../lib/storage";
 import { getSession, getUser } from "../../lib/authClient";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { openGateContactRevealed } from "@/lib/openGate";
 import { maskContactDetails } from "@/lib/contactLeakFilter";
 import { EXPORT_DISCLAIMER_LINES } from "@/lib/conversationExport";
 import {
@@ -201,7 +202,7 @@ const renderTextWithLinks = (
           href={safeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gold-accent underline hover:text-gold-bright break-all"
+          className="text-gold-accent underline hover:text-gold-bright break-words [overflow-wrap:anywhere]"
         >
           {part}
         </a>
@@ -350,16 +351,22 @@ export default function ChatBox({
   // the two-sided handshake (/api/deals/handshake, ACQ-03). `handshakeState`
   // is set to 'linked' only by a successful server response -- never
   // optimistically, or the shield would lift on a request that failed.
-  const contactRevealed = deal.handshakeState === "linked" || deal.contactRevealed === true;
+  const contactRevealed = deal.handshakeState === "linked" || deal.contactRevealed === true || openGateContactRevealed(deal);
 
   const closed = isClosed(deal.status);
   const hasOpenViewing = activeViewing && ["pending", "confirmed"].includes(activeViewing.status);
-  const isWaiting = deal.status === "pending";
+  // A-144 §10.10: pending AND invited are both waiting — neither side types
+  // before acceptance. (Invited used to render the full composer while the
+  // server now refuses the post, so without this the broker got a composer
+  // that always fails.) The invite sender is the owner, not the buyer.
+  const isWaiting = deal.status === "pending" || deal.status === "invited";
   // The buyer is always the party who spent the Connect to open the thread,
   // so buyer === sender and everyone else === recipient of the request.
   // One rule, imported rather than restated — the API applies the same one to
   // decide whether it may send a name at all (see lib/identityDisclosure.js).
-  const isRequestSender = viewerIsRequestSender(deal.myRole);
+  const isRequestSender = deal.status === "invited"
+    ? deal.myRole === "owner"
+    : viewerIsRequestSender(deal.myRole);
 
   const mapMessage = useCallback((m, currentUserId) => {
     const attachment = decodeAttachment(m.body);
@@ -888,11 +895,15 @@ export default function ChatBox({
           </h3>
 
           {/* Identity is withheld from the recipient until they accept. The
-              sender already knows who they contacted, so they keep the name. */}
-          <p className="text-xs text-text-secondary font-mono uppercase tracking-wider">
+              sender already knows who they contacted, so they keep the name.
+              A-148: an explicitly anonymous send reads "Anonymous" — the
+              owner's word — rather than the role. */}
+          <p className="text-xs text-text-secondary font-mono uppercase tracking-wider break-words [overflow-wrap:anywhere]">
             {isRequestSender
               ? deal.other_party
-              : `From a verified ${deal.otherPartyRole || "Seeker"} · name revealed on accept`}
+              : deal.other_party === ANONYMOUS_CONNECT_LABEL
+                ? "Anonymous · name revealed on accept"
+                : `From a verified ${deal.otherPartyRole || "Seeker"} · name revealed on accept`}
           </p>
 
           {deal.pitch_message && (
@@ -950,7 +961,7 @@ export default function ChatBox({
                 setPendingBusy(false);
               }}
               disabled={pendingBusy || !onUnarchive}
-              className="mt-3 w-full py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[12px] uppercase tracking-widest hover:bg-gold-accent/10 transition disabled:opacity-50"
+              className="mt-3 w-full min-h-11 py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[12px] uppercase tracking-widest hover:bg-gold-accent/10 transition disabled:opacity-50"
             >
               {pendingBusy ? "Working…" : "Reopen — restarts the 30-day clock"}
             </button>
@@ -1061,7 +1072,7 @@ export default function ChatBox({
         <div className="bg-success/10 border-b border-success/30 px-4 py-3 flex items-center gap-3">
           <span className="text-xl shrink-0">🛡️</span>
           <p className="text-xs text-success">
-            <strong>Contacts exchanged.</strong> Phone and email are now visible to both of you.
+            <strong>{openGateContactRevealed(deal) ? "Open Gate accepted." : "Contacts exchanged."}</strong> {openGateContactRevealed(deal) ? "Contact details you share in this conversation are visible to both of you." : "Phone and email are now visible to both of you."}
             This conversation stays open.
           </p>
         </div>
@@ -1069,8 +1080,8 @@ export default function ChatBox({
 
       {/* Handshake Confirmation Modal */}
       {showConfirmHandshake && (
-        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-surface-alt border border-gold-accent/50 p-6 rounded-lg max-w-sm text-center shadow-[0_0_30px_rgba(var(--accent-rgb),0.15)]">
+        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-alt border border-gold-accent/50 p-6 rounded-lg max-w-sm w-full text-center shadow-[0_0_30px_rgba(var(--accent-rgb),0.15)]">
             <div className="text-4xl mb-4">⚠️</div>
             <h3 className="text-xl font-headline-editorial text-gold-accent mb-2">Exchange Contact Info?</h3>
             <p className="text-sm text-text-secondary mb-6">
@@ -1081,7 +1092,7 @@ export default function ChatBox({
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => setShowConfirmHandshake(false)}
-                className="px-4 py-2.5 border border-surface-variant text-text-secondary rounded hover:text-white"
+                className="min-h-11 px-4 py-2.5 border border-surface-variant text-text-secondary rounded hover:text-white"
               >
                 Cancel
               </button>
@@ -1089,7 +1100,7 @@ export default function ChatBox({
                 onClick={signHandshake}
                 disabled={handshakeBusy}
                 data-scoutit-guide="deal-handshake-two-sided-signature"
-                className="px-4 py-2.5 bg-gold-accent text-black font-bold rounded hover:bg-gold-bright disabled:opacity-50"
+                className="min-h-11 px-4 py-2.5 bg-gold-accent text-black font-bold rounded hover:bg-gold-bright disabled:opacity-50"
               >
                 {handshakeBusy ? "Sending…" : "Offer Handshake"}
               </button>
@@ -1444,7 +1455,7 @@ export default function ChatBox({
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-gradient-to-b from-background to-surface">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-gradient-to-b from-background to-surface">
         {loading && (
           <p className="text-center text-xs text-text-secondary font-mono uppercase tracking-widest">Loading conversation…</p>
         )}
@@ -1463,7 +1474,7 @@ export default function ChatBox({
               transition={messageTransition}
             >
               <div
-                className={`max-w-[85%] p-3.5 rounded-xl text-sm shadow-sm ${
+                className={`max-w-[85%] min-w-0 break-words [overflow-wrap:anywhere] p-3.5 rounded-xl text-sm shadow-sm ${
                   isMe
                     ? 'bg-gold-accent/90 text-background rounded-tr-sm'
                     : 'bg-surface-variant/80 backdrop-blur-md text-on-surface rounded-tl-sm border border-white/5'
@@ -1554,7 +1565,7 @@ export default function ChatBox({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={closed || isUploading}
-            className="p-2.5 rounded-full text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10 transition disabled:opacity-50 flex items-center justify-center"
+            className="min-h-11 min-w-11 p-3 rounded-full text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10 transition disabled:opacity-50 flex items-center justify-center"
             title="Attach file (Max 10MB Doc/Img, 50MB Video)"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>

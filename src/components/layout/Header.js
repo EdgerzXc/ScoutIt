@@ -52,7 +52,8 @@ export default function Header({ ambientContext = null }) {
 
     const panel = menuPanelRef.current;
     const focusables = () =>
-      Array.from(panel?.querySelectorAll("a[href], button:not([disabled])") || []);
+      Array.from(panel?.querySelectorAll("a[href], button:not([disabled])") || [])
+        .filter((element) => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden");
 
     // The panel transitions from visibility:hidden, and focus() on a still
     // hidden element is a silent no-op. Wait for the browser to apply the open

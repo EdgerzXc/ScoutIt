@@ -16,18 +16,18 @@ describe("Turnstile production boundaries", () => {
     expect(config).not.toContain("https://*.cloudflare.com");
   });
 
-  it("requires every public service-role write form to use the shared gate", () => {
+  it("protects public writes with Turnstile and keeps roster requests authenticated", () => {
     const waitlist = read("src/components/waitlist/WaitlistModal.js");
-    const inquiry = read("src/app/property/[id]/brokers/BrokersClient.js");
-
-    for (const source of [waitlist, inquiry]) {
-      expect(source).toContain('import TurnstileGate from "@/components/ui/TurnstileGate"');
-      expect(source).toContain("turnstileRef.current?.reset()");
-      expect(source).toContain("!turnstileToken");
-    }
-    expect(inquiry).toContain("turnstileToken,");
+    const roster = read("src/app/property/[id]/brokers/BrokersClient.js");
+    const contact = read("src/app/property/[id]/brokers/BrokerConnectForm.js");
+    expect(waitlist).toContain('import TurnstileGate from "@/components/ui/TurnstileGate"');
+    expect(waitlist).toContain("turnstileRef.current?.reset()");
+    expect(waitlist).toContain("!turnstileToken");
+    expect(roster).not.toContain('fetch("/api/inquiries"');
+    expect(contact).toContain("session?.access_token");
+    expect(contact).toContain('Authorization: `Bearer ${session.access_token}`');
+    expect(contact).toContain('fetch("/api/deals/initiate"');
   });
-
   it("makes both public write endpoints fail closed before persistence", () => {
     for (const file of ["src/app/api/waitlist/route.js", "src/app/api/inquiries/route.js"]) {
       const route = read(file);

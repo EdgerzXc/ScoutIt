@@ -58,6 +58,16 @@ export default function OSINTControlCenter() {
   const [parsedPreview, setParsedPreview] = useState(null);
   const [jsonError, setJsonError] = useState(null);
 
+  // A-156: pipeline supply fields. Blank = not pipeline (ordinary intel is
+  // untouched). Staff entries here override the same keys from pasted AI
+  // JSON — the person beats the model on lifecycle claims.
+  const [publishLifecycle, setPublishLifecycle] = useState("");
+  const [publishOpeningDate, setPublishOpeningDate] = useState("");
+  const resetPipelineFields = () => {
+    setPublishLifecycle("");
+    setPublishOpeningDate("");
+  };
+
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
 
@@ -204,7 +214,11 @@ export default function OSINTControlCenter() {
     try {
       const selectedSource = sources.find((s) => selectedSourceIds.includes(s.id));
       const data = await publishOsintBriefing({
-        briefingData: parsedPreview,
+        briefingData: {
+          ...parsedPreview,
+          lifecycle: publishLifecycle || parsedPreview.lifecycle || "",
+          openingDate: publishOpeningDate || parsedPreview.openingDate || "",
+        },
         sourceId: selectedSource ? selectedSource.id : null,
       });
       if (data.ok) {
@@ -214,12 +228,15 @@ export default function OSINTControlCenter() {
         // whatever actually occurred.
         setStatusMessage({
           type: data.airtable?.status === "published" ? "success" : "error",
-          text: data.message,
+          text: data.lifecycleDropped
+            ? `${data.message} (Pipeline fields not saved — the lifecycle migration is not applied yet.)`
+            : data.message,
         });
         setShowPublishModal(false);
         setRawAiJson("");
         setParsedPreview(null);
         setSelectedSourceIds([]);
+        resetPipelineFields();
         loadData();
       } else {
         setStatusMessage({ type: "error", text: data.message || "Failed to publish" });
@@ -620,7 +637,7 @@ export default function OSINTControlCenter() {
                 <Upload className="w-5 h-5 text-[#F7C64E]" />
                 Paste &amp; Publish AI Briefing JSON
               </h3>
-              <button onClick={() => setShowPublishModal(false)} className="text-white/70 hover:text-white">
+              <button onClick={() => { setShowPublishModal(false); resetPipelineFields(); }} className="text-white/70 hover:text-white">
                 ✕
               </button>
             </div>
@@ -664,10 +681,42 @@ export default function OSINTControlCenter() {
               </div>
             )}
 
+            {/* A-156: pipeline supply fields. Blank = ordinary intel; the
+                publish carries them only when set here or in the JSON. */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-black/50 border border-white/10">
+              <label className="text-xs font-mono text-white/60 block">
+                SUPPLY LIFECYCLE (OPTIONAL)
+                <select
+                  value={publishLifecycle}
+                  onChange={(e) => setPublishLifecycle(e.target.value)}
+                  className="mt-2 w-full rounded-xl bg-black/70 border border-white/10 text-white text-xs p-2.5 outline-none focus:border-[#F7C64E]"
+                >
+                  <option value="">Not pipeline — ordinary intel</option>
+                  <option value="planned">Planned</option>
+                  <option value="construction">Under construction</option>
+                </select>
+              </label>
+              <label className="text-xs font-mono text-white/60 block">
+                OPENING DATE (OPTIONAL)
+                <input
+                  type="date"
+                  value={publishOpeningDate}
+                  onChange={(e) => setPublishOpeningDate(e.target.value)}
+                  className="mt-2 w-full rounded-xl bg-black/70 border border-white/10 text-white text-xs p-2.5 outline-none focus:border-[#F7C64E]"
+                />
+              </label>
+              {(publishLifecycle || publishOpeningDate || parsedPreview?.lifecycle) && (
+                <p className="sm:col-span-2 text-[12px] font-mono text-[#F7C64E]">
+                  PIPELINE: {publishLifecycle || parsedPreview?.lifecycle || "—"}
+                  {` · opens ${publishOpeningDate || parsedPreview?.openingDate || "date TBC"}`}
+                </p>
+              )}
+            </div>
+
             <div className="pt-3 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setShowPublishModal(false)}
+                onClick={() => { setShowPublishModal(false); resetPipelineFields(); }}
                 className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white text-xs font-mono uppercase"
               >
                 Cancel

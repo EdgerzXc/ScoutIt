@@ -86,6 +86,23 @@ async function maybeEmailFallback(serviceClient, { userId, title, desc, notifica
   if (!isEmailConfigured()) return;            // no provider yet — the current state
   if (!EMAIL_WORTHY.has(notificationType)) return;
 
+  // A-152 — the /settings#notifications toggle. An explicit FALSE opts out;
+  // anything else (true, null row, unreadable row, pre-migration table
+  // without the column) keeps today's behavior. A failed preference read
+  // must not silence a time-sensitive fallback, and a missing column means
+  // no stored preference exists to honor — so this gate only ever fires on
+  // a preference the user actually set.
+  try {
+    const { data: prefs, error: prefsError } = await serviceClient
+      .from("privacy_settings")
+      .select("email_alerts")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!prefsError && prefs && prefs.email_alerts === false) return;
+  } catch {
+    // Preference store unreachable — fall through to current behavior.
+  }
+
   // `email` is not a column on user_profiles (§19.1) — the address lives in
   // auth.users, reachable only with the service role. Fetching it here rather
   // than storing a copy avoids a second address that can drift out of date.

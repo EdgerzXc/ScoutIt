@@ -257,7 +257,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
             className="w-full bg-transparent text-sm text-text-primary focus:outline-none placeholder-text-muted/60"
           />
           {search && (
-            <button onClick={() => setSearch("")} aria-label="Clear Search" className="text-text-muted hover:text-gold-accent" title="Clear">
+            <button onClick={() => setSearch("")} aria-label="Clear Search" className="min-h-11 min-w-11 inline-flex items-center justify-center -m-2 text-text-muted hover:text-gold-accent" title="Clear">
               <X size={14} />
             </button>
           )}
@@ -287,7 +287,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
             />
             <button
               onClick={bulkAdd}
-              className="bg-gold-accent text-background font-working-title font-bold px-3 py-1.5 rounded text-sm hover:bg-gold-accent-hover transition whitespace-nowrap"
+              className="min-h-11 bg-gold-accent text-background font-working-title font-bold px-3 py-1.5 rounded text-sm hover:bg-gold-accent-hover transition whitespace-nowrap"
             >
               Add
             </button>
@@ -438,7 +438,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant border border-gold-accent/20 text-[12px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                       {feature}
                                       {!structuralReadOnly && (
-                                        <button onClick={() => removeFeature(unit.id, feature)} aria-label={`Remove ${feature}`} className="text-text-muted hover:text-error transition">
+                                        <button onClick={() => removeFeature(unit.id, feature)} aria-label={`Remove ${feature}`} className="min-h-11 min-w-11 inline-flex items-center justify-center -m-3 text-text-muted hover:text-error transition">
                                           <X size={10} />
                                         </button>
                                       )}
@@ -483,14 +483,14 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                               onDragOver={(e) => !lockedForOwner && e.preventDefault()}
                               onDrop={(e) => !lockedForOwner && handleDirectDrop(e, unit.id)}
                             >
-                              <button
-                                onClick={() => !lockedForOwner && setActivePhotoUnit(unit.id)}
-                                disabled={lockedForOwner}
-                                className={`relative h-10 w-10 flex items-center justify-center rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition mx-auto disabled:opacity-40 disabled:cursor-not-allowed`}
-                                title={lockedForOwner ? "Managed by the operator" : isPro ? "Upload photos" : "Free tier: 1 photo per unit"}
-                              >
-                                <Upload size={18} />
-                              </button>
+                                <button
+                                    onClick={() => !lockedForOwner && setActivePhotoUnit(unit.id)}
+                                    disabled={lockedForOwner}
+                                    className={`relative min-h-11 px-4 flex items-center justify-center gap-2 rounded border ${photoCount > 0 ? "bg-gold-accent/20 border-gold-accent text-gold-accent" : "bg-surface-alt border-surface-variant text-text-muted hover:border-gold-accent hover:text-gold-accent"} transition mx-auto disabled:opacity-40 disabled:cursor-not-allowed`}
+                                    title={lockedForOwner ? "Managed by the operator" : isPro ? "Upload photos" : "Free tier: 1 photo per unit"}
+                                >
+                                    <Upload size={16} /> <span className="text-sm font-working-title">Manage Photos</span>
+                                </button>
                               <div className="text-[12px] text-text-secondary mt-1 flex items-center justify-center gap-1">
                                 {!isPro && atPhotoLimit && <Lock size={9} className="text-text-muted" />}
                                 {photoCount}/{maxPhotos}
@@ -626,7 +626,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             <div className="flex items-center gap-1 shrink-0">
                                 <button
                                   onClick={() => setDetailsUnitId(unit.id)}
-                                  className="p-2 rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition"
+                                  className="min-h-11 min-w-11 inline-flex items-center justify-center rounded border border-surface-variant text-text-secondary hover:bg-gold-accent/10 hover:text-gold-accent hover:border-gold-accent transition"
                                   title="Edit Unit Master Page"
                                 >
                                   <SlidersHorizontal size={15} />
@@ -636,21 +636,21 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     <button
                                       aria-label="Duplicate this unit"
                                       onClick={() => duplicateUnit(unit.id)}
-                                      className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
+                                      className="min-h-11 min-w-11 inline-flex items-center justify-center rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
                                     >
                                       <Copy size={15} />
                                     </button>
                                     <button
                                       aria-label="Subdivide this unit"
                                       onClick={() => setSubdivideUnitId(unit.id)}
-                                      className="p-2 rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
+                                      className="min-h-11 min-w-11 inline-flex items-center justify-center rounded hover:bg-gold-accent/10 text-text-muted hover:text-gold-accent transition"
                                     >
                                       <Split size={15} />
                                     </button>
                                     <button
                                       aria-label="Remove this unit"
                                       onClick={() => removeUnit(unit.id)}
-                                      className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition"
+                                      className="min-h-11 min-w-11 inline-flex items-center justify-center rounded hover:bg-error/10 text-text-muted hover:text-error transition"
                                     >
                                       <Trash2 size={15} />
                                     </button>
@@ -705,10 +705,10 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt border border-gold-accent/20 text-[12px] text-text-primary rounded uppercase tracking-wide font-working-title">
                                     {feature}
                                     {!structuralReadOnly && (
-                                      <button
+                                        <button
                                         aria-label={`Remove the feature ${feature}`}
                                         onClick={() => removeFeature(unit.id, feature)}
-                                        className="text-text-muted hover:text-error transition"
+                                        className="min-h-11 min-w-11 inline-flex items-center justify-center -m-3 text-text-muted hover:text-error transition"
                                       >
                                         <X size={10} />
                                       </button>
@@ -806,7 +806,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
       {units.length > 0 && !isOperatorMode && (
         <button
           onClick={() => addUnit()}
-          className="self-start border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 flex items-center gap-2 rounded text-sm font-working-title transition"
+          className="self-start min-h-11 inline-flex items-center border border-gold-accent text-gold-accent hover:bg-gold-accent/10 px-4 py-2 gap-2 rounded text-sm font-working-title transition"
         >
           <Plus size={16} /> Add Unit
         </button>
@@ -825,7 +825,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
               <button
                 onClick={() => setActivePhotoUnit(null)}
                 aria-label="Close"
-                className="p-2 text-text-secondary hover:text-on-surface bg-surface-variant hover:bg-surface rounded transition"
+                className="min-h-11 min-w-11 inline-flex items-center justify-center text-text-secondary hover:text-on-surface bg-surface-variant hover:bg-surface rounded transition"
               >
                 <X size={20} />
               </button>
@@ -868,7 +868,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                   <div className="mt-6 flex justify-end">
                     <button
                       onClick={() => setActivePhotoUnit(null)}
-                      className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded uppercase tracking-wider text-sm hover:bg-surface-tint transition"
+                      className="min-h-11 bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded uppercase tracking-wider text-sm hover:bg-surface-tint transition"
                     >
                       Done
                     </button>
@@ -928,16 +928,16 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                 className="w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition"
               />
             </div>
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-wrap justify-end gap-3">
               <button
                 onClick={() => setSubdivideUnitId(null)}
-                className="px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
+                className="min-h-11 px-4 py-2 text-sm text-text-muted hover:text-text-primary transition"
               >
                 Cancel
               </button>
               <button
                 onClick={executeSubdivide}
-                className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:bg-gold-accent-hover transition"
+                className="min-h-11 bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm hover:bg-gold-accent-hover transition"
               >
                 Subdivide
               </button>

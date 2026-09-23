@@ -127,7 +127,7 @@ export default function TrustBadge({
             width: coords.width,
             transformOrigin: `${coords.originX}% bottom`,
           }}
-          className="fixed block p-3 bg-surface/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl z-50 text-left pointer-events-none motion-safe:animate-[badgePopIn_150ms_cubic-bezier(0.23,1,0.32,1)]"
+          className="fixed block p-3 bg-surface/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl z-50 text-left pointer-events-none motion-safe:animate-[badgePopIn_150ms_cubic-bezier(0.23,1,0.32,1)] trust-lens"
         >
           <span className="flex items-center justify-between gap-2 mb-1.5 pb-1 border-b border-white/[0.08]">
             <span className="flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-widest text-gold-accent font-bold">

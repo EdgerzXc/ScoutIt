@@ -54,12 +54,15 @@ We do not sell, rent, or trade your personal data to third parties for commercia
   {
     num: "06",
     title: "Third-party service providers and cross-border data transfers",
-    body: `To maintain edge infrastructure, mapping, database storage, and listing document extraction, ScoutIt shares minimal required personal data with trusted third-party service providers:
+    body: `To maintain edge infrastructure, mapping, database storage, error monitoring, bot protection, and listing document extraction, ScoutIt shares minimal required personal data with trusted third-party service providers:
 
-1. Vercel Inc. — Application Hosting & Edge Routing (United States / Global Edge) — Enterprise DPA, TLS 1.3 Encryption.
-2. Supabase Inc. — Encrypted Cloud Database Infrastructure (AWS AP-Southeast Singapore) — AES-256 Encryption at Rest, PostgreSQL Row Level Security (RLS).
-3. Mapbox Inc. — Geospatial Mapping & Geocoding APIs (United States / Global) — Anonymized Coordinate Telemetry.
-4. Google LLC — Gemini Flash PDF Extraction AI Worker (United States / Global) — Transient API Data Processing Agreement.
+1. Vercel Inc. — Application Hosting & Edge Routing (United States / Global Edge) — Enterprise DPA, TLS 1.3 Encryption. Serves pages and API routes; runs Speed Insights performance telemetry (cookieless).
+2. Supabase Inc. — Encrypted Cloud Database Infrastructure (AWS AP-Southeast Singapore) — AES-256 Encryption at Rest, PostgreSQL Row Level Security (RLS). Issues the session tokens described in Section 14.
+3. Mapbox Inc. — Geospatial Mapping & Geocoding APIs (United States / Global) — Anonymized Coordinate Telemetry. Address lookups run through ScoutIt's server proxy so the browser never carries the access token.
+4. Google LLC — Gemini Flash PDF Extraction AI Worker (United States / Global) — Transient API Data Processing Agreement. Also Google Analytics (GA4) measurement, only when enabled and only after cookie consent (see Section 14).
+5. Sentry (Functional Software, Inc.) — Error Telemetry (United States / Global) — Crash reports and performance traces from the web application. Source maps are not shipped to browsers; Sentry resolves stack traces from its own uploaded copies.
+6. Cloudflare, Inc. — Turnstile Bot Protection (United States / Global) — The human-verification challenge on public forms (contact, inquiry, waitlist, appeals). Receives only what is needed to tell people from bots.
+7. CARTO (CartoDB, Inc.) — Basemap Tiles (United States / Global Edge) — The dark-matter map tiles behind property maps and the spatial canvas. Receives tile requests and approximate viewports, not account data.
 
 Under Section 21 of the DPA (Accountability for Transfer) and NPC Circular 2023-06 (Security of Personal Data), ScoutIt enforces legal contracts with offshore processors ensuring data protection standards comparable to RA 10173.`,
   },
@@ -107,7 +110,26 @@ To exercise any right, contact our Data Protection Officer as provided in Sectio
     body: `ScoutIt does not represent that an NPC registration, Data Processing System registration, or Sworn Declaration and Undertaking has been completed. The owner and Philippine counsel must close the applicable filing and documentation gates before any such statement is published.`,
   },
   {
-    num: "13",
+    num: "14",
+    title: "Cookie schedule and device identifiers",
+    body: `What ScoutIt stores in your browser, and why. Nothing here is advertising: ScoutIt serves no ads and sells no data.
+
+ESSENTIAL — the product does not work without these:
+— Supabase session tokens (session cookies): prove you are signed in. They expire with the session; clearing them signs you out.
+— scout_did device identifier (localStorage, mirrored to a cookie): a random device id used to keep anonymous telemetry attributable to a device rather than a person. The cookie mirror carries path=/, a lifetime of one year (max-age=31536000), and SameSite=Lax. No name, email, or account id is stored in it.
+
+FUNCTIONAL — remembers choices you made:
+— scoutit_lite_mode, scoutit_simple_mode, scoutit_interactive_mode (localStorage): your display-mode preferences.
+— The Ledger (localStorage): your private wishlist and saved spaces, on your device by default per Section 03.
+
+ANALYTICS — only with your consent:
+— Google Analytics (GA4: _ga, _gid and related): measures visits. Loaded only when the site is configured with a measurement id, and storage starts DENIED under Google Consent Mode v2 until you choose Accept in the cookie banner. Declining leaves measurement off; the product works identically either way.
+— Vercel Speed Insights: performance telemetry without cookies.
+
+Managing them: the cookie banner (shown only when Analytics is enabled) records Accept or Decline on this device. Clearing site data removes every entry above and restores the defaults; signing out clears the session tokens.`,
+  },
+  {
+    num: "15",
     title: "Privacy policy updates",
     body: `ScoutIt reserves the right to modify this Privacy Policy to reflect system updates, regulatory changes, or NPC circular amendments. Material updates will be announced via in-app banners or registered email notifications. The "Effective Date" at the top indicates the latest revision date.`,
   },

@@ -4,6 +4,13 @@ export const WORKFLOW_STATE_MACHINES = Object.freeze({
     source: "src/app/api/deals/[id]/route.js",
     transitions: Object.freeze({
       pending: Object.freeze(["accepted", "declined", "withdrawn", "reported"]),
+      // A-144 logic check 2026-09-19: an owner's invitation is answered from
+      // the same inbox as every other request, and the machine had no invited
+      // row — so PATCH accepted/declined on an invite 409'd while the
+      // dashboard path allowed it. Who answers is still gated per-request
+      // (mayAnswerBrokerRequest: invited = broker only); withdraw stays
+      // sender-only-pending, an invite is rescinded via representation revoke.
+      invited: Object.freeze(["accepted", "declined"]),
       connected: Object.freeze(["accepted", "declined", "reported"]),
       accepted: Object.freeze(["closed", "reported"]),
     }),

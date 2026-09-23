@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import "./investigation-dossier.css";
 
 /*
@@ -69,7 +70,7 @@ export default function InvestigationDossier({ dossier }) {
   const inv = dossier.investigation;
   const jumpTo = (id) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el) el.scrollIntoView({ behavior: motionSafeScrollBehavior(), block: "start" });
   };
 
   return (

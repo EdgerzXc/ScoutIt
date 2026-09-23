@@ -9,11 +9,13 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { Camera, Search, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
+import NotificationPreferencesPanel from "@/components/profile/NotificationPreferencesPanel";
 import DeleteAccountPanel from "@/components/profile/DeleteAccountPanel";
 import PlanPanel from "@/components/profile/PlanPanel";
 import { getCurrentTier } from "@/lib/entitlements";
 import { SETTINGS_SECTIONS } from "@/lib/settingsNavigation";
 import { canAddRole } from "@/lib/workspaceUnlock";
+import { normalizeDashboardModes, pickPrimaryRole } from "@/lib/dashboardModes";
 
 const SELF_SERVICE_TAGS = [
   { id: 'buyer', label: 'Looking to Buy/Rent', icon: <Search strokeWidth={1.5} size="1em" /> },
@@ -91,7 +93,8 @@ export default function SettingsPage() {
 
       const user = userResult.data?.user;
       if (!user) {
-        router.replace("/onboarding");
+        // A-146: keep the deep link across the auth bounce.
+        router.replace("/onboarding?next=%2Fsettings");
         return;
       }
       const { data: profile } = await supabase
@@ -102,10 +105,12 @@ export default function SettingsPage() {
       if (!profile) return;
 
       setName(profile.display_name || "");
-      const nextTags = Array.isArray(profile.active_roles) ? profile.active_roles : [];
+      // A-146: normalize on load — a legacy "seeker" tag otherwise matches no
+      // workspace card and the primary falls back by insertion order.
+      const nextTags = normalizeDashboardModes(profile.active_roles, profile.primary_mode || profile.role);
       setTags(nextTags);
       setInitialTags(nextTags);
-      setPrimaryMode(profile.primary_mode || profile.role || nextTags[0] || "");
+      setPrimaryMode(pickPrimaryRole(nextTags, profile.primary_mode || profile.role));
       setPublicProfile((current) => ({
         ...current,
         headline: profile.headline || "",
@@ -149,11 +154,43 @@ export default function SettingsPage() {
     }
     const { data: { user }, error: userError } = await getUser();
     if (userError || !user) {
-      router.replace("/onboarding");
+      // A-146: keep the deep link across the auth bounce.
+      router.replace("/onboarding?next=%2Fsettings");
       return;
     }
+
+    // A-146: the lens must never be held without its credential. State the
+    // PRC claim FIRST through POST /api/broker/credential (which forces
+    // prc_verified = false server-side); only a recorded claim earns the
+    // lens in the profile save below. Previously the save ran first, so a
+    // failed claim left the broker lens held with nothing behind it.
+    if (tags.includes("broker") && !initialTags.includes("broker")) {
+      if (!brokerClaim.trim()) {
+        setSecurityMessage({ type: "error", text: "Enter your PRC licence number to add the broker workspace. This records your claim; public verification stays a separate staff review." });
+        return;
+      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch("/api/broker/credential", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ prcLicense: brokerClaim.trim() }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setSecurityMessage({ type: "error", text: data.error || "The PRC claim could not be recorded. The broker workspace was not added." });
+          return;
+        }
+      } catch {
+        setSecurityMessage({ type: "error", text: "The PRC claim could not be recorded. Check your connection — the broker workspace was not added." });
+        return;
+      }
+    }
     
-    const nextPrimaryMode = tags.includes(primaryMode) ? primaryMode : tags[0];
+    const nextPrimaryMode = pickPrimaryRole(tags, primaryMode);
     const { error } = await supabase
       .from("user_profiles")
       .update({
@@ -175,31 +212,8 @@ export default function SettingsPage() {
       return;
     }
 
-    // A-137: the profile save above grants the lens; this states the PRC
-    // claim through the only writer allowed to touch it
-    // (POST /api/broker/credential), which also forces prc_verified = false
-    // server-side. Without this, a self-added broker badge would mean nothing.
-    if (tags.includes("broker") && !initialTags.includes("broker") && brokerClaim.trim() !== "") {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch("/api/broker/credential", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-          },
-          body: JSON.stringify({ prcLicense: brokerClaim.trim() }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          setSecurityMessage({ type: "error", text: data.error || "Workspace saved, but the PRC claim could not be recorded. Re-enter it below and save again." });
-          return;
-        }
-      } catch {
-        setSecurityMessage({ type: "error", text: "Workspace saved, but the PRC claim could not be recorded. Check your connection and save again." });
-        return;
-      }
-    }
+    // A-146: the PRC claim is stated BEFORE the profile save above, so a
+    // failed claim never leaves the broker lens held with nothing behind it.
     
     // Supabase is the only persistent profile store.
     router.push("/dashboard");
@@ -539,6 +553,18 @@ export default function SettingsPage() {
             tier={shieldTier}
             activeRoles={tags}
           />
+        </section>
+
+        {/* ── Notifications (A-152) ── the control the transactional email
+            footer promises. One real toggle (email fallback); the inbox is
+            disclosed as always-on and marketing lives in Privacy. */}
+        <section id="notifications" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Notifications</span>
+            <h2>Email & inbox alerts</h2>
+            <p>What ScoutIt may send you, and where every message lives.</p>
+          </div>
+          <NotificationPreferencesPanel />
         </section>
 
         {/* ── Plan & Connects (A-135) ── read from the account, never from

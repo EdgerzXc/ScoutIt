@@ -135,10 +135,10 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photoUrl} alt={`Property view ${index + 1}`} className="object-cover w-full h-full" />
-                <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                <div className="absolute inset-0 bg-background/80 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                   <span className="text-white text-[12px] font-mono bg-black/50 px-2 py-1 rounded backdrop-blur border border-white/20">CLICK TO REPLACE</span>
                   <button 
-                    className="text-white text-[12px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
+                    className="min-h-11 text-white text-[12px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
                     onClick={(e) => {
                       e.stopPropagation();
                       const newPhotos = [...currentPhotos];
@@ -152,7 +152,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
                 </div>
                 {currentPhotos.length > 5 && (
                   <button 
-                    className="absolute top-2 right-2 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center shadow hover:scale-110 transition-transform z-10 text-xs"
+                    className="absolute top-2 right-2 bg-error text-white rounded-full min-h-11 min-w-11 flex items-center justify-center shadow hover:scale-110 transition-transform z-10 text-xs"
                     onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
                     aria-label="Remove photo"
                     title="Remove Photo Slot"

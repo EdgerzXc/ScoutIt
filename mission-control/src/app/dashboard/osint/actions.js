@@ -8,6 +8,39 @@ import { pushBriefingToAirtable, publishedMarkers } from "@/lib/intelPublish";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
+// A-156: vendored vocabulary — Mission Control cannot import the main app,
+// so these mirror src/lib/pipelineLifecycle.js normalizeLifecycleInput and
+// normalizeOpeningDate exactly. mission-control/test/intel-pipeline.test.mjs
+// pins the behavior table; cross-app-boundary pins the bridge mapping.
+function normalizeLifecycleInput(value) {
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, " ");
+  if (v === "" || v === "none") return "";
+  if (v === "planned") return "planned";
+  if (v === "construction" || v === "under construction") return "construction";
+  return "";
+}
+
+function normalizeOpeningDate(value) {
+  if (typeof value !== "string") return "";
+  const m = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (!m) return "";
+  const [y, mo, d] = m[1].split("-").map(Number);
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return "";
+  const t = new Date(y, mo - 1, d);
+  if (
+    Number.isNaN(t.getTime()) ||
+    t.getFullYear() !== y ||
+    t.getMonth() !== mo - 1 ||
+    t.getDate() !== d
+  ) {
+    return "";
+  }
+  return m[1];
+}
+
 /**
  * The OSINT Control Center, as Mission Control's own capability.
  *
@@ -159,30 +192,56 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
 
   const admin = createAdminClient();
 
-  const { data: inserted, error: insertErr } = await admin
+  // A-156: pipeline supply fields. Normalized here so the AI JSON, the form
+  // fields, and every future caller funnel through one vocabulary — an
+  // unrecognized stage never reaches storage as a value the product then
+  // displays as fact.
+  const lifecycle = normalizeLifecycleInput(briefingData.lifecycle);
+  const openingDate = normalizeOpeningDate(briefingData.openingDate);
+
+  const baseRow = {
+    source_id: sourceId || null,
+    slug: briefingData.slug,
+    title: briefingData.title,
+    category: briefingData.category || "MARKET INTEL",
+    excerpt: briefingData.excerpt || "",
+    lead: briefingData.lead || "",
+    our_take: briefingData.our_take || "",
+    cover_image_url:
+      briefingData.cover_image_url ||
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",
+    body_json: briefingData.body_json || [],
+    city: briefingData.city || "BGC, Taguig",
+    region: briefingData.region || "Metro Manila",
+    lat: briefingData.lat ?? 14.5547,
+    lng: briefingData.lng ?? 121.0244,
+    source_name: briefingData.sourceName || briefingData.source_name || "OSINT Gazette",
+    source_url: briefingData.sourceUrl || briefingData.source_url || "",
+    published_to_airtable: false,
+  };
+  const pipelineRow =
+    lifecycle || openingDate ? { lifecycle, opening_date: openingDate } : null;
+
+  let inserted = null;
+  let insertErr = null;
+  let lifecycleDropped = false;
+  ({ data: inserted, error: insertErr } = await admin
     .from("intel_briefings")
-    .insert({
-      source_id: sourceId || null,
-      slug: briefingData.slug,
-      title: briefingData.title,
-      category: briefingData.category || "MARKET INTEL",
-      excerpt: briefingData.excerpt || "",
-      lead: briefingData.lead || "",
-      our_take: briefingData.our_take || "",
-      cover_image_url:
-        briefingData.cover_image_url ||
-        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",
-      body_json: briefingData.body_json || [],
-      city: briefingData.city || "BGC, Taguig",
-      region: briefingData.region || "Metro Manila",
-      lat: briefingData.lat ?? 14.5547,
-      lng: briefingData.lng ?? 121.0244,
-      source_name: briefingData.sourceName || briefingData.source_name || "OSINT Gazette",
-      source_url: briefingData.sourceUrl || briefingData.source_url || "",
-      published_to_airtable: false,
-    })
+    .insert(pipelineRow ? { ...baseRow, ...pipelineRow } : baseRow)
     .select("*")
-    .single();
+    .single());
+
+  // The lifecycle migration may not be applied yet. A missing column must
+  // degrade to an ordinary intel draft — never fail the whole publish.
+  // The staff notice names the gap instead of silently dropping data.
+  if (insertErr && pipelineRow && /column .* does not exist|schema cache|PGRST204/i.test(insertErr.message || "")) {
+    lifecycleDropped = true;
+    ({ data: inserted, error: insertErr } = await admin
+      .from("intel_briefings")
+      .insert(baseRow)
+      .select("*")
+      .single());
+  }
 
   if (insertErr || !inserted) {
     return { ok: false, message: `The draft could not be saved: ${insertErr?.message}` };
@@ -256,5 +315,10 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
         ? `Draft saved to Supabase, but the Airtable sync failed (${airtableError}). The article is not in the CMS yet.`
         : "Draft saved to Supabase. Airtable is not configured, so it was not synced.";
 
-  return { ok: true, message, airtable: { status: airtableStatus, recordId: airtableRecordId } };
+  return {
+    ok: true,
+    message,
+    lifecycleDropped,
+    airtable: { status: airtableStatus, recordId: airtableRecordId },
+  };
 }

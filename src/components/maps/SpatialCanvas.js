@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import MapCreditControl from "@/components/maps/MapCreditControl";
 import { computeSpatialIntel, computeContinuityScore } from "@/lib/spatialIntel";
 import { useReach } from "@/components/maps/useReach";
 import "@/components/maps/spatial-canvas.css";
@@ -216,6 +217,8 @@ export default function SpatialCanvas({
     let map;
     try {
       map = new maplibregl.Map({
+        // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+        attributionControl: false,
         container: mapContainerRef.current,
         style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
         center: [targetLng, targetLat],
@@ -259,6 +262,7 @@ export default function SpatialCanvas({
       // the compass says which way you are facing and puts it back, these say
       // how steeply you are looking down.
       map.addControl(new TiltControl(), "top-right");
+      map.addControl(new MapCreditControl(), "bottom-right");
     } catch (err) {}
 
     // ── THIS HANDLER USED TO SWALLOW EVERYTHING ──────────────────────────

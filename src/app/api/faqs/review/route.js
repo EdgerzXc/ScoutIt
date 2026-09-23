@@ -231,15 +231,20 @@ export async function PATCH(req) {
     // Tell the author their answer was confirmed. Deliberately silent on
     // "hide" — a notification saying an owner hid your answer invites a
     // fight, and the owner already has the override path if they disagree.
+    // A-146: isolated — the confirm stands even if the bell fails.
     if (action === "confirm" && answer.author_id && answer.author_id !== userId) {
-      await notifyUser(supabaseAdmin, {
-        userId: answer.author_id,
-        title: "Your answer was confirmed",
-        desc: `The owner of "${property.title}" confirmed your answer to: "${faq.question_text.slice(0, 70)}"`,
-        icon: "✓",
-        propertyId: property.id,
-        notificationType: "faq_verified",
-      });
+      try {
+        await notifyUser(supabaseAdmin, {
+          userId: answer.author_id,
+          title: "Your answer was confirmed",
+          desc: `The owner of "${property.title}" confirmed your answer to: "${faq.question_text.slice(0, 70)}"`,
+          icon: "✓",
+          propertyId: property.id,
+          notificationType: "faq_verified",
+        });
+      } catch (notifyError) {
+        console.warn("[api/faqs/review] confirm bell not delivered for answer", answerId, notifyError?.message);
+      }
     }
 
     return NextResponse.json({ success: true, answerId, action }, { status: 200 });

@@ -40,10 +40,20 @@ export async function POST(request) {
     // 2. Insert into Airtable
     const airtableRecord = await insertProperty(apiKey, baseId, submission);
 
-    // 3. Update Supabase status to 'approved'
+    // 3. Update Supabase status to 'approved'. Airtable's Slug is a FORMULA
+    // field and the single source of slug truth (same rule the owner publish
+    // path follows on both its paths): persist the computed Slug back, and
+    // adopt it as canonical_slug only when none is owner-locked yet.
+    const airtableSlug = airtableRecord?.fields?.Slug || null;
+    const slugUpdate = airtableSlug
+      ? {
+          slug: airtableSlug,
+          ...(submission.canonical_slug ? {} : { canonical_slug: airtableSlug }),
+        }
+      : {};
     const { error: updateError } = await supabaseAdmin
       .from('properties')
-      .update({ pipeline_status: 'approved' })
+      .update({ pipeline_status: 'approved', ...slugUpdate })
       .eq('id', submissionId);
 
     if (updateError) {

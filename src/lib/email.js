@@ -68,6 +68,13 @@ export async function sendEmail({ to, subject, html, text }) {
         // with spam filters, and ScoutIt is sending from a new domain with no
         // sending reputation.
         text: text || stripAllTags(html),
+        // A-152 — one-click unsubscribe (RFC 8058). Every mail resolves to
+        // the working control at /settings#notifications, so the footer
+        // promise and the header agree on where "off" lives.
+        headers: {
+          "List-Unsubscribe": `<${SITE_URL}/settings#notifications>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
       }),
     });
 
@@ -109,7 +116,7 @@ export function renderEmail({ heading, body, ctaLabel, ctaPath, footnote }) {
     <hr style="border:none;border-top:1px solid #eee;margin:26px 0 14px">
     <p style="margin:0;font-size:11px;line-height:1.5;color:#999">
       You're receiving this because you have a ScoutIt account.
-      <a href="${SITE_URL}/settings" style="color:#8a7433">Manage notifications</a>.
+      <a href="${SITE_URL}/settings#notifications" style="color:#8a7433">Manage notifications</a>.
     </p>
   </div></body></html>`;
 }

@@ -64,6 +64,19 @@ export async function PATCH(request, { params }) {
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    // A free Open Gate request belongs to its routed recipient. Property
+    // ownership alone does not authorize answering a delegated operator or
+    // broker's inbound request, and the buyer cannot accept their own send.
+    if (["accepted", "declined", "connected"].includes(status)) {
+      const { data: gateDeal, error: gateError } = await supabaseAdmin.from("deals")
+        .select("open_gate_inbound").eq("id", dealId).single();
+      const missingGateColumn = gateError?.code === "42703" || /does not exist|undefined_column/i.test(gateError?.message || "");
+      if (gateError && !missingGateColumn) return NextResponse.json({ error: "Request authority unavailable" }, { status: 503 });
+      if (gateDeal?.open_gate_inbound === true && (deal.buyer_id === userId || !isRoutedRecipient)) {
+        return NextResponse.json({ error: "Only the routed recipient may answer this Open Gate request." }, { status: 403 });
+      }
+    }
+
     // Only the SENDER may withdraw, and only while the request is still
     // pending. Without this, a recipient could call PATCH {status:'withdrawn'}
     // and make it look as though the seeker walked away from their own
@@ -139,15 +152,22 @@ export async function PATCH(request, { params }) {
       }
     }
 
+    // A-144 §16 audit: map status moves to analytics events so spend and
+    // outcome are never conflated. Acceptance preserves the accepted thread
+    // even if the originating signal/property later closes (invariant #8 —
+    // enforced by never deleting accepted rows; see sweep which touches only
+    // `pending`).
+    const analytics_event =
+      status === "accepted" ? "connect_accepted" : status === "declined" ? "connect_declined" : status === "reported" ? "connect_blocked" : null;
     await logActivity(supabaseAdmin, {
       dealId,
       propertyId: deal.property_id,
       activityType: "status_change",
       actorId: userId,
-      metadata: { from: deal.status, to: status },
+      metadata: { from: deal.status, to: status, ...(analytics_event ? { analytics_event } : {}) },
     });
 
-    return NextResponse.json({ success: true, status: updateData.status });
+    return NextResponse.json({ success: true, status: updateData.status, ...(analytics_event ? { analytics_event } : {}) });
   } catch (err) {
     console.error("[DEALS API] Error:", err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

@@ -5,6 +5,9 @@ import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
+import { isBlocked } from "@/lib/connectBlocks";
+import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
+import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
 
 // Broker-initiated pitch (Market Intelligence Feed -> "Open Deal File").
 // `deals` has an explicit RLS policy blocking ALL direct client inserts
@@ -21,7 +24,8 @@ import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 
 export async function POST(request) {
   try {
-    const { listingId, message  } = await request.json();
+    const { listingId, message, source_type, source_id, reason_tag, sender_identity_mode } = await request.json();
+    const connectSource = normalizeConnectSource({ source_type, source_id, reason_tag, sender_identity_mode });
 
     const brokerId = await resolveUserId(request);
     if (!brokerId) {
@@ -62,16 +66,33 @@ export async function POST(request) {
     if (representationLookupError) return NextResponse.json({ error: "Representation service unavailable" }, { status: 503 });
     if (existingRepresentation?.status === "active") return NextResponse.json({ error: "You already represent this property" }, { status: 409 });
     if (existingRepresentation?.status === "locked" || existingRepresentation?.status === "suspended") return NextResponse.json({ error: "You are not currently eligible for a new representation request" }, { status: 409 });
+    // A-144 double-tap guard FIRST (before any write): reuse a recent pending
+    // pitch instead of spending again. findRecentPendingDeal now matches the
+    // broker_id sender column (§10.10), so broker retries actually dedupe.
+    const recentDealId = await findRecentPendingDeal(supabaseAdmin, brokerId, listingId);
+    if (recentDealId) {
+      return NextResponse.json({ success: true, dealId: recentDealId, connects_spent: 0, deduped: true, source_context: connectSource });
+    }
+
+    let createdRepresentationId = null;
     if (!existingRepresentation) {
-      const { error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
+      const { data: createdRepresentation, error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
         property_id: listingId,
         broker_id: brokerId,
         status: "pending",
         source: "broker_pitch",
-      });
+      }).select("id").maybeSingle();
       if (representationError) return NextResponse.json({ error: "Failed to create representation request" }, { status: 503 });
+      createdRepresentationId = createdRepresentation?.id || null;
     }
-    // 1. Insert the pitch deal first — rolled back below if the Connect spend fails.
+    // A-144 §10.10: a failed send must leave no actionable phantom — clean up
+    // the representation row this send created, not just the deal row.
+    const rollbackPitchSideEffects = async (dealId) => {
+      if (dealId) await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      if (createdRepresentationId) await supabaseAdmin.from('property_broker_representations').delete().eq('id', createdRepresentationId);
+    };
+
+    // 1. Insert the pitch deal first — rolled back below if a gate or the Connect spend fails.
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
       property_id: listingId,
       broker_id: brokerId,
@@ -81,7 +102,22 @@ export async function POST(request) {
 
     if (dealError || !dealData) {
       console.error("[PITCH API] Failed to insert deal:", dealError);
+      await rollbackPitchSideEffects(null);
       return NextResponse.json({ error: "Failed to create pitch" }, { status: 500 });
+    }
+
+    // A-144 invariant #6 + §8: blocked / paused / capped recipients fail before any spend.
+    const ownerIdForGate = property?.owner_id || null;
+    if (ownerIdForGate && await isBlocked(supabaseAdmin, brokerId, ownerIdForGate)) {
+      await rollbackPitchSideEffects(dealData[0].id);
+      return NextResponse.json({ error: "This request can't be sent. No Connect was spent." }, { status: 403 });
+    }
+    if (ownerIdForGate) {
+      const gate = await checkReceiverGate(supabaseAdmin, ownerIdForGate, listingId, dealData[0].id);
+      if (!gate.ok) {
+        await rollbackPitchSideEffects(dealData[0].id);
+        return NextResponse.json({ error: gate.message || "This account isn't accepting new Connects right now. No Connect was spent." }, { status: 403 });
+      }
     }
 
     // 2. Atomic Connect spend — same spend_connects RPC every other paid
@@ -105,7 +141,7 @@ export async function POST(request) {
 
     if (spendError) {
       console.error("[PITCH API] Connect spend failed:", spendError);
-      await supabaseAdmin.from('deals').delete().eq('id', dealData[0].id);
+      await rollbackPitchSideEffects(dealData[0].id);
       const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
       return NextResponse.json(
         { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
@@ -143,10 +179,10 @@ export async function POST(request) {
       propertyId: listingId,
       activityType: 'deal_created',
       actorId: brokerId,
-      metadata: { source: 'broker_pitch' },
+      metadata: { source: 'broker_pitch', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
     });
 
-    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, propertyTitle: propertyRow?.title });
+    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, propertyTitle: propertyRow?.title, source_context: connectSource });
 
   } catch (err) {
     console.error("[PITCH API] Error during pitch process:", err);

@@ -13,6 +13,34 @@ const DEAL_FIELDS =
   "closed_at, expires_at, connects_spent, archived_at, pending_clock_reset_at, " +
   "properties(id, title, slug, owner_id, price)";
 
+// A-148: per-request anonymity flag (migration-gated, O-004). Until the
+// column exists any select naming it fails 42703, so read with it first and
+// fall back to the base list — rows then carry sender_anonymous undefined,
+// which the render rule treats as false. A missing column never breaks the
+// inbox (same warn-once fallback shape as connectGates.js).
+const DEAL_FIELDS_ANON = `${DEAL_FIELDS}, sender_anonymous`;
+const DEAL_FIELDS_GATE = `${DEAL_FIELDS_ANON}, open_gate_inbound`;
+
+let anonColumnWarned = false;
+
+function isMissingColumn(error) {
+  return error?.code === "42703" || /does not exist|undefined_column/i.test(error?.message || "");
+}
+
+async function selectDeals(client, buildQuery) {
+  const withGate = await buildQuery(DEAL_FIELDS_GATE);
+  if (!withGate.error) return withGate;
+  if (!isMissingColumn(withGate.error)) return withGate;
+  const withAnon = await buildQuery(DEAL_FIELDS_ANON);
+  if (!withAnon.error) return withAnon;
+  if (!isMissingColumn(withAnon.error)) return withAnon;
+  if (!anonColumnWarned) {
+    console.warn("[userDeals] anonymity column unavailable, falling back:", withAnon.error.code || withAnon.error.message);
+    anonColumnWarned = true;
+  }
+  return buildQuery(DEAL_FIELDS);
+}
+
 /**
  * Every deal row the user is a party to, deduped.
  *
@@ -37,11 +65,11 @@ export async function loadUserDealRows(client, userId) {
   const routedDealIds = [...new Set((routedRecipients || []).map((row) => row.deal_id).filter(Boolean))];
 
   const [asBuyer, asBroker, asOwner, asRouted] = await Promise.all([
-    client.from("deals").select(DEAL_FIELDS).eq("buyer_id", userId),
-    client.from("deals").select(DEAL_FIELDS).eq("broker_id", userId),
-    client.from("deals").select(DEAL_FIELDS).eq("properties.owner_id", userId).not("properties", "is", null),
+    selectDeals(client, (fields) => client.from("deals").select(fields).eq("buyer_id", userId)),
+    selectDeals(client, (fields) => client.from("deals").select(fields).eq("broker_id", userId)),
+    selectDeals(client, (fields) => client.from("deals").select(fields).eq("properties.owner_id", userId).not("properties", "is", null)),
     routedDealIds.length
-      ? client.from("deals").select(DEAL_FIELDS).in("id", routedDealIds)
+      ? selectDeals(client, (fields) => client.from("deals").select(fields).in("id", routedDealIds))
       : Promise.resolve({ data: [], error: null }),
   ]);
 
@@ -66,7 +94,15 @@ export async function loadUserDealRows(client, userId) {
     }
   }
 
-  return { rows: [...byId.values()], error: null };
+  let allRoutedRecipients = routedRecipients || [];
+  if (byId.size > 0) {
+    const snapshotResult = await client.from("deal_routing_recipients")
+      .select("deal_id, recipient_id, recipient_type")
+      .in("deal_id", [...byId.keys()]);
+    if (snapshotResult.error) return { rows: null, error: "routing_unavailable" };
+    allRoutedRecipients = snapshotResult.data || [];
+  }
+  return { rows: [...byId.values()], error: null, routedRecipients: allRoutedRecipients };
 }
 
 /**

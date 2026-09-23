@@ -76,7 +76,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
               <button 
                 onClick={onClose}
                 aria-label="Close"
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-alt text-text-secondary transition"
+                className="min-h-11 min-w-11 flex items-center justify-center rounded-full hover:bg-surface-alt text-text-secondary transition"
               >
                 <X size={20} />
               </button>
@@ -97,8 +97,8 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                   <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center shrink-0">
                     <Building2 className="text-gold-accent" size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-working-title text-lg text-on-surface mb-1">{deal.propertyTitle}</h3>
+                  <div className="min-w-0">
+                    <h3 className="font-working-title text-lg text-on-surface mb-1 break-words [overflow-wrap:anywhere]">{deal.propertyTitle}</h3>
                     <p className="text-sm text-text-secondary flex items-center gap-1">
                       <MapPin size={14} /> View listing details
                     </p>
@@ -112,8 +112,8 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                   <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0 border border-surface-variant">
                     <UserCircle2 className="text-text-muted" size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-working-title text-base text-on-surface">
+                  <div className="min-w-0">
+                    <h3 className="font-working-title text-base text-on-surface break-words [overflow-wrap:anywhere]">
                       {deal.status === "accepted" || deal.status === "closed" ? deal.otherParty : "🔒 Hidden"}
                     </h3>
                     <p className="text-xs text-text-secondary uppercase tracking-wider font-label-caps mt-1">

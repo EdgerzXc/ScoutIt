@@ -23,9 +23,14 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
   if (operatorIds.length > 0) {
     const { data: profiles } = await serviceClient
       .from("user_profiles")
-      .select("id, display_name")
+      .select("id, display_name, is_profile_public")
       .in("id", operatorIds);
-    for (const p of profiles || []) displayNames[p.id] = p.display_name;
+    // Units_JSON is PUBLIC. A private profile's name must never reach it —
+    // the same gate the property brokers route enforces
+    // (is_profile_public === true, affirmative, never a negative check).
+    for (const p of profiles || []) {
+      if (p.is_profile_public === true) displayNames[p.id] = p.display_name;
+    }
   }
 
   const airtableUnits = units.map((u) => ({
@@ -56,8 +61,13 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
     space_category: property.space_category,
     details: property.details,
   }, airtableUnits);
+  // Same owner-lock rule as dashboard publish and staff approve: Airtable's
+  // computed Slug is truth; canonical is adopted only when none is locked.
   if (created?.fields?.Slug) {
-    await serviceClient.from("properties").update({ slug: created.fields.Slug }).eq("id", property.id);
+    await serviceClient.from("properties").update({
+      slug: created.fields.Slug,
+      ...(property.canonical_slug ? {} : { canonical_slug: created.fields.Slug }),
+    }).eq("id", property.id);
   }
   return created;
 }

@@ -42,13 +42,13 @@ export default function ProviderMode({ type }) {
   if (!isActiveService) {
     return (
       <div className="w-full max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up-fade py-12">
-        <div className="md:col-span-3 card-atmosphere p-12 md:p-24 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
+        <div className="md:col-span-3 card-atmosphere p-6 sm:p-12 md:p-24 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group break-words">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-500 -translate-y-1/2 translate-x-1/3" />
           <div className="w-20 h-20 bg-surface/50 border border-white/[0.04] rounded-full flex items-center justify-center mb-8 relative">
              <div className="absolute inset-0 bg-gold-accent blur-xl opacity-20 rounded-full group-hover:opacity-40 transition-opacity duration-300" />
              <span className="text-3xl relative z-10">🔒</span>
           </div>
-          <h1 className="font-display-md text-4xl md:text-5xl text-on-surface mb-6 relative z-10">The Roster is Curation-Only.</h1>
+          <h1 className="font-display-md text-4xl md:text-5xl text-on-surface mb-6 relative z-10 break-words">The Roster is Curation-Only.</h1>
           <p className="text-text-secondary font-body-md max-w-xl mb-10 leading-relaxed relative z-10">
             The <strong>{providerLabel}</strong> ecosystem is currently in Phase 2 development. We are allowing top-tier professionals to create their accounts and establish their verified identities now, ahead of the official marketplace launch.
           </p>
@@ -113,9 +113,9 @@ export default function ProviderMode({ type }) {
           <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Provider Workspace</span>
           <h1 className="font-display-md text-3xl md:text-5xl text-on-surface mb-2">{providerLabel} Command Center</h1>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
           <button
-            className="bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
+            className="w-full sm:w-auto bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
             disabled={loading}
             onClick={async () => { setLoading(true); await fetchQuests(); }}
           >

@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
+import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
+import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -125,6 +127,7 @@ export default function BottomNav() {
   const [themeSheetOpen, setThemeSheetOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState("dark");
   const [lite, setLite] = useState(false);
+  const [simple, setSimple] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [shareToast, setShareToast] = useState("");
@@ -136,9 +139,12 @@ export default function BottomNav() {
 
   useEffect(() => {
     const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
-    const savedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
-    setCurrentMode(savedMode);
+    const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
+    // White-lens preview (owner-approved 2026-09-23): keep the saved
+    // selection as-is on read, same as FloatingToolbox. Light is opt-in.
+    setCurrentMode(requestedMode);
     setLite(getStoredLiteMode());
+    setSimple(getStoredSimpleMode());
     setMounted(true);
   }, []);
 
@@ -171,6 +177,8 @@ export default function BottomNav() {
         const item = { property_id: propSlug, property_title: title, category: "", city: "", reaction_type: "Save", is_broker: false, timestamp: Date.now() };
         if (idx > -1) arr[idx] = item; else arr.push(item);
         setIsSaved(true);
+        // A-146: same tap funnel as ReactionButtons — local save confirmed.
+        trackEvent(GA_EVENTS.REACTION_TAPPED, { property_id: propSlug });
         fetch("/api/reactions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ property_id: propSlug, reaction_type: "Save" }) }).catch(() => {});
       }
       localStorage.setItem("scoutit_reactions", JSON.stringify(arr));
@@ -249,6 +257,18 @@ export default function BottomNav() {
     const next = !lite;
     setLite(next);
     setLiteMode(next);
+    // A-146: mode-switch measurement (Simple vs Pro experiment needs it).
+    trackEvent(GA_EVENTS.DISPLAY_MODE_SWITCHED, { axis: "performance", mode: next ? "lite-on" : "lite-off" });
+  };
+
+  // A-146: the sheet promised Guide / Dark / High Contrast / Lite / Simple
+  // (Header's accessible name) but offered no Simple toggle. Same reading
+  // level as the desktop panel — fewer words, nothing removed.
+  const toggleSimple = () => {
+    const next = !simple;
+    setSimple(next);
+    setSimpleMode(next);
+    trackEvent(GA_EVENTS.DISPLAY_MODE_SWITCHED, { axis: "density", mode: next ? "simple-on" : "simple-off" });
   };
 
   const changeMode = (m) => {
@@ -375,7 +395,7 @@ export default function BottomNav() {
             <div className="theme-sheet-options">
               {[
                 { key: "dark", label: "Dark Mode", desc: "Cosmic default", dotClass: "bg-surface border-on-surface/20" },
-                { key: "light", label: "Light Mode", desc: "Bright, open reading", dotClass: "bg-on-surface border-background/20" },
+                { key: "light", label: "Light / White Lens", desc: "Clean corporate preview", dotClass: "bg-surface-bright border-on-surface/20" },
                 { key: "high-contrast", label: "High Contrast", desc: "Maximum readability", dotClass: "bg-gold-accent border-gold-accent/40" },
               ].map(({ key, label, desc, dotClass }) => (
                 <button
@@ -405,6 +425,21 @@ export default function BottomNav() {
               </div>
               <span className={`shrink-0 w-10 h-[22px] rounded-full border relative transition-colors ${lite ? "bg-gold-accent border-gold-accent" : "bg-on-surface/10 border-on-surface/20"}`} aria-hidden="true">
                 <span className={`absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-background transition-transform duration-200 ease-out ${lite ? "translate-x-[18px]" : ""}`} />
+              </span>
+            </button>
+
+            {/* Simple Mode — fewer words, nothing removed (A-083) */}
+            <button
+              className={`w-full flex items-center gap-3 text-left mt-2 p-3 rounded-lg border cursor-pointer transition-colors ${simple ? "bg-gold-accent/10 border-gold-accent/30" : "bg-on-surface/[0.025] border-on-surface/10"}`}
+              onClick={toggleSimple}
+              aria-pressed={simple}
+            >
+              <div className="flex-1">
+                <div className="theme-label">Simple Mode {simple ? "· On" : "· Off"}</div>
+                <div className="theme-desc">Fewer words. Nothing is removed.</div>
+              </div>
+              <span className={`shrink-0 w-10 h-[22px] rounded-full border relative transition-colors ${simple ? "bg-gold-accent border-gold-accent" : "bg-on-surface/10 border-on-surface/20"}`} aria-hidden="true">
+                <span className={`absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-background transition-transform duration-200 ease-out ${simple ? "translate-x-[18px]" : ""}`} />
               </span>
             </button>
           </div>

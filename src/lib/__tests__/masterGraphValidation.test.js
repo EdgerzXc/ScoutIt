@@ -234,8 +234,12 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     const audit = auditGraphAgainstCodebase(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, publicRAGChunks);
     expect(audit.ghostNodes).toEqual([]);
     expect(audit.staleEvidenceItems).toEqual([]);
-    expect(audit.stateMachineTransitions.implemented).toBe(14);
-    expect(audit.stateMachineTransitions.registryMapped).toBe(14);
+    // A-144 logic check 2026-09-19: runtime is 16 (+2 invited→accepted/
+    // declined the inbox needs; was 14). Visual stays 14 — the graph drawing
+    // has no invited edges yet, and drawing them is the owner-gated A-139
+    // regeneration, not a silent pin refresh.
+    expect(audit.stateMachineTransitions.implemented).toBe(16);
+    expect(audit.stateMachineTransitions.registryMapped).toBe(16);
     expect(audit.stateMachineTransitions.visualEdgeMappings).toBe(14);
     expect(audit.stateMachineTransitions.plannedNotImplemented).toHaveLength(9);
     expect(audit.stateMachineTransitions.staleVisualTransitions).toEqual([]);

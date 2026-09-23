@@ -32,7 +32,7 @@ export default function CalendarToolbar({
           type="button"
           onClick={onPrev}
           aria-label="Previous"
-          className="w-8 h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
+          className="w-11 h-11 md:w-8 md:h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
             hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           ‹
@@ -41,7 +41,7 @@ export default function CalendarToolbar({
           type="button"
           onClick={onNext}
           aria-label="Next"
-          className="w-8 h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
+          className="w-11 h-11 md:w-8 md:h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
             hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           ›
@@ -50,7 +50,7 @@ export default function CalendarToolbar({
           type="button"
           onClick={onToday}
           className="text-[12px] uppercase tracking-wider font-mono text-text-secondary border border-surface-variant
-            px-3 h-8 rounded hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
+            px-3 h-11 md:h-8 rounded hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           Today
         </button>
@@ -67,7 +67,7 @@ export default function CalendarToolbar({
               key={v.id}
               type="button"
               onClick={() => onViewChange(v.id)}
-              className={`px-3 py-1.5 text-[12px] uppercase tracking-wider font-mono transition-all duration-160 ease-out active:scale-[0.97]
+              className={`px-3 py-1.5 min-h-11 md:min-h-0 text-[12px] uppercase tracking-wider font-mono transition-all duration-160 ease-out active:scale-[0.97]
                 ${view === v.id ? "bg-gold-accent text-background font-semibold" : "text-text-secondary hover:bg-surface-variant/40 hover:text-on-surface"}`}
             >
               {v.label}
@@ -77,7 +77,7 @@ export default function CalendarToolbar({
         <button
           type="button"
           onClick={onNewEvent}
-          className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-3 sm:px-4 h-8 rounded
+          className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-3 sm:px-4 h-11 md:h-8 rounded
             font-working-title font-semibold whitespace-nowrap shadow-[0_0_12px_rgba(232,174,60,0.25)] transition-all duration-160 ease-out"
         >
           + New

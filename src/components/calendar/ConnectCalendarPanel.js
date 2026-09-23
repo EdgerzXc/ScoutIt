@@ -109,7 +109,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
   };
 
   return (
-    <section className="bg-[#121212] border border-gold-accent/20 rounded-lg p-4 sm:p-5">
+    <section className="bg-[#121212] border border-gold-accent/20 rounded-lg p-4 sm:p-5 cal-lens">
       <div className="mb-4">
         <h2 className="font-working-title text-lg text-on-surface">Calendar Sync</h2>
         <p className="text-xs text-text-muted mt-1">
@@ -140,7 +140,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
                 type="button"
                 onClick={handleSync}
                 disabled={busy}
-                className="text-[12px] text-background bg-gold-accent hover:bg-gold-bright px-3 py-1.5 rounded uppercase tracking-wider font-mono disabled:opacity-50"
+                className="min-h-11 text-[12px] text-background bg-gold-accent hover:bg-gold-bright px-3 py-1.5 rounded uppercase tracking-wider font-mono disabled:opacity-50"
               >
                 {busy ? "Syncing…" : "Sync now"}
               </button>
@@ -148,7 +148,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
                 type="button"
                 onClick={handleDisconnect}
                 disabled={busy}
-                className="text-[12px] text-error border border-error/30 px-3 py-1.5 rounded hover:bg-error/10 uppercase tracking-wider font-mono disabled:opacity-50"
+                className="min-h-11 text-[12px] text-error border border-error/30 px-3 py-1.5 rounded hover:bg-error/10 uppercase tracking-wider font-mono disabled:opacity-50"
               >
                 Disconnect
               </button>
@@ -158,7 +158,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
               type="button"
               onClick={handleConnect}
               disabled={busy}
-              className="text-xs text-background bg-gold-accent hover:bg-gold-bright px-4 py-2 rounded font-working-title disabled:opacity-50 shrink-0"
+              className="min-h-11 text-xs text-background bg-gold-accent hover:bg-gold-bright px-4 py-2 rounded font-working-title disabled:opacity-50 shrink-0"
             >
               {busy ? "Connecting…" : "Connect"}
             </button>

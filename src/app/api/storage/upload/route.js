@@ -102,10 +102,16 @@ export async function POST(request) {
       size_bytes: file.size,
       scan_status: 'pending_scan',
     });
+    // A-146: the upload itself succeeded — a 500 here would lie the other
+    // way and earn a duplicate re-upload. But the "3–5 days" promise below
+    // assumes a queue row exists, so a failed registration must change the
+    // message, not hide behind the success.
+    let queuePending = false;
     if (scanRegError) {
       // Non-fatal: the file is uploaded and queued for Luma; scanning catches
       // up when the row is registered on a retry / by ops.
       console.warn('[Storage Upload] file_scans registration failed:', scanRegError.message);
+      queuePending = true;
     }
 
     // Notify admin via a record in Supabase (admin checks this queue in Mission Control)
@@ -121,14 +127,19 @@ export async function POST(request) {
       });
 
     if (notifyError) {
-      // Non-fatal — video is uploaded, just the queue record failed
+      // Non-fatal to the upload — the file is safe. Flag it so the message
+      // below stays true (see above).
       console.warn('[Storage Upload] Queue insert failed:', notifyError.message);
+      queuePending = true;
     }
 
     return NextResponse.json({
       success: true,
       path,
-      message: "Video uploaded. ScoutIt team will process your Spatial Tour within 3–5 business days."
+      processingQueued: !queuePending,
+      message: queuePending
+        ? "Video uploaded. Our processing registration is pending — the file is safe and the team will still pick it up; no need to re-upload."
+        : "Video uploaded. ScoutIt team will process your Spatial Tour within 3–5 business days."
     });
 
   } catch (err) {

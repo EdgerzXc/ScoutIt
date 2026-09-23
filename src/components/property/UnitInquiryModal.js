@@ -1,21 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSession } from "../../lib/authClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check } from "lucide-react";
 import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
+import PrivacyNotice from "../ui/PrivacyNotice";
+import { useModalDialog } from "../ui/useModalDialog";
 
 // Unit Master Page "Your Move" (SCOUTIT_MASTER_BUILD_SPEC.md §9.3). A single
 // target — the unit's operator if delegated, otherwise the building owner —
 // so there's no roster step, unlike the property-level InquiryModal. Built as
 // its own component (real auth via getSession(), real error handling) rather
-// than literally reusing InquiryModal, which is currently a UI mock (fake
-// broker roster, a token key nothing else in the app writes to, and it
-// swallows all fetch errors) — extending a non-functional mock would ship a
-// unit contact flow that looks like it works but doesn't.
+// than literally reusing InquiryModal, whose broker-roster step this flow
+// doesn't need — extending it would carry a roster with one possible target.
 
 const backdropVariants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
@@ -47,12 +47,52 @@ const formVariants = {
 export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, propertySlug, unitId, unitName, operatorDisplayName, prefillMessage = "" }) {
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
+  const [gate, setGate] = useState({ loading: true, free: false });
 
   const targetLabel = operatorDisplayName ? operatorDisplayName : "the building owner";
+  useEffect(() => {
+    if (!isOpen) return;
+    let live = true;
+    fetch(`/api/property/${encodeURIComponent(propertySlug)}/open-gate?unitId=${encodeURIComponent(unitId)}`, { cache: "no-store" })
+      .then(async response => response.ok ? response.json() : { freeContact: false })
+      .then(data => { if (live) setGate({ loading: false, free: data.freeContact === true }); })
+      .catch(() => { if (live) setGate({ loading: false, free: false }); });
+    return () => { live = false; setGate({ loading: true, free: false }); };
+  }, [isOpen, propertySlug, unitId]);
+
+  // A-148 (owner spec S2): per-request anonymity, same contract as
+  // InquiryModal. Defaults ON, follows the sender's profile, unknown stays
+  // checked — failing closed toward concealment (Rule 14).
+  const [sendAnonymously, setSendAnonymously] = useState(true);
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: { session } } = await getSession();
+        const token = session?.access_token;
+        if (!token) return;
+        const res = await fetch("/api/user/privacy-settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!cancelled && res.ok && data?.settings && typeof data.settings.isProfilePublic === "boolean") {
+          setSendAnonymously(data.settings.isProfilePublic !== true);
+        }
+      } catch {
+        // Unknown stays anonymous.
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen]);
 
   // Synchronous in-flight latch for a paid action. Deliberately a ref and
   // not state -- see the guard inside handleSubmit.
   const submitInFlightRef = useRef(false);
+
+  // A-153 — Tab stays inside the dialog, Escape closes like the X button.
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen, onClose });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,6 +101,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
     // dispatched before the next render would both read "composing" and both
     // spend. A ref updates synchronously, so the second call sees the first.
     if (submitInFlightRef.current) return;
+    if (gate.loading) return;
     submitInFlightRef.current = true;
 
     setStatus("submitting");
@@ -81,7 +122,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
       const res = await fetch("/api/deals/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ propertySlug, unitId, message }),
+        body: JSON.stringify({ propertySlug, unitId, message, anonymous: sendAnonymously === true, expectOpenGate: gate.free }),
       });
       const data = await res.json();
 
@@ -116,21 +157,24 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
           exit="hidden"
           transition={backdropTransition}
         >
-          <motion.div 
+          <motion.div
+            ref={dialogRef}
             className="w-full max-w-[500px]"
+            role="dialog"
+            aria-modal="true"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
             transition={modalTransition}
           >
-            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
-              <button 
+            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] contact-lens-modal">
+              <button
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
-                onClick={onClose} 
+                onClick={onClose}
                 aria-label="Close"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
 
               <AnimatePresence mode="wait">
@@ -152,9 +196,9 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                         <Check size={32} />
                       </motion.div>
                     </div>
-                    <h3 className="font-serif text-2xl text-white font-normal">Connection Established</h3>
+                    <h3 className="font-serif text-2xl text-white font-normal">Request Sent</h3>
                     <p className="text-sm text-[#f0ede8]/60 leading-relaxed max-w-sm">
-                      Your temporary chatbox with {targetLabel} about <strong className="text-white font-medium">{unitName}</strong> is now open. You
+                      Your request to {targetLabel} about <strong className="text-white font-medium">{unitName}</strong> is waiting for their answer. You
                       can view it in your <strong className="text-white font-medium">Leads Inbox</strong>.
                     </p>
                   </motion.div>
@@ -168,7 +212,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                   >
                     <div className="mb-6">
                       <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
-                        1 Connect Required
+                        {gate.loading ? "Checking contact cost…" : gate.free ? "Open Gate · Free Request" : "1 Connect Required"}
                       </span>
                       <h2 className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Contact {targetLabel}</h2>
                       <p className="text-sm text-[#f0ede8]/60 leading-relaxed">
@@ -208,6 +252,24 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                         placeholder={`Hi, I'm interested in ${unitName}. Is it currently available?`}
                       />
 
+                      {gate.free ? (
+                        <p className="text-[13px] text-text-secondary">Your profile privacy setting controls whether your name appears while this free request waits.</p>
+                      ) : (
+                      <label className="flex items-start gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={sendAnonymously === true}
+                          onChange={(e) => setSendAnonymously(e.target.checked)}
+                          className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                          aria-label="Send this request anonymously"
+                        />
+                        <span className="text-[13px] text-[#f0ede8]/80 leading-relaxed">
+                          Send anonymously — they will see <strong className="text-white font-medium">Anonymous</strong> until
+                          they accept, instead of your name.
+                        </span>
+                      </label>
+                      )}
+
                       {status === "error" && (
                         <p className="text-xs text-error">{errorMsg}</p>
                       )}
@@ -216,9 +278,12 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                         type="submit"
                         className="mt-2"
                         isLoading={status === "submitting"}
+                        disabled={gate.loading}
                       >
-                        Spend 1 Connect →
+                        {gate.loading ? "Checking…" : gate.free ? "Send free request →" : "Spend 1 Connect →"}
                       </ImpeccableButton>
+                      {/* A-150: explicit Privacy Policy link (RA 10173 §11). */}
+                      <PrivacyNotice />
                     </form>
                   </motion.div>
                 )}

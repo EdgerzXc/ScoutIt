@@ -2,6 +2,23 @@ import { NextResponse } from "next/server";
 import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { encryptUserId } from "@/lib/wishlistCrypto";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+// A-146: token mint + revoke are authed but effectively free to loop. One
+// shared 10/min/IP ceiling for both verbs — minting is rare, revoking rarer.
+const checkShareRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 20_000 });
+
+function shareLimited(request, action) {
+  const rate = checkShareRate(clientIp(request));
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: `Too many share-link ${action}. Please wait and try again.` },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
+    );
+  }
+  return null;
+}
 
 async function requireShareOwner(request) {
   const userId = await resolveUserId(request);
@@ -16,6 +33,8 @@ async function requireShareOwner(request) {
 
 export async function POST(request) {
   try {
+    const limited = shareLimited(request, "requests");
+    if (limited) return limited;
     const auth = await requireShareOwner(request);
     if (auth.response) return auth.response;
 
@@ -43,6 +62,8 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
+    const limited = shareLimited(request, "changes");
+    if (limited) return limited;
     const auth = await requireShareOwner(request);
     if (auth.response) return auth.response;
 

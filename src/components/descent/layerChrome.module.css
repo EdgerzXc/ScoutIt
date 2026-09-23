@@ -86,6 +86,42 @@
   outline-offset: 3px;
 }
 
+/* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): filled-gold hover/focus
+   states go gray fill + ink text. Dark theme untouched — every rule below
+   is scoped to the lens. */
+:global(body.light-mode) .pill:focus-visible {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+}
+:global(body.light-mode) .pill:focus-visible .arrow {
+  color: var(--on-accent);
+}
+:global(body.light-mode) .primaryCta:focus-visible {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+}
+@media (hover: hover) and (pointer: fine) {
+  :global(body.light-mode) .pill:hover {
+    border-color: var(--accent-fill);
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-sm);
+  }
+  :global(body.light-mode) .pill:hover .arrow {
+    color: var(--on-accent);
+  }
+  :global(body.light-mode) .primaryCta:hover {
+    border-color: var(--accent-fill);
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
 .arrow {
   color: var(--accent-bright);
   font-size: 13px;

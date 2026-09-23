@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { resolveUserId, assertAdultEligibility } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { logActivity } from "@/lib/crmActivity";
 
 /**
  * POST /api/deals/handshake
@@ -66,10 +67,23 @@ export async function POST(request) {
       }
 
       const result = Array.isArray(data) ? data[0] : data;
+      // A-144 §14 audit: the handshake is the contact-reveal act (acceptance
+      // revealed the name; this reveals contact). Store only what is
+      // operationally necessary — who, which deal, when — never the contact
+      // payload itself.
+      try {
+        await logActivity(supabaseAdmin, {
+          dealId,
+          activityType: "status_change",
+          actorId: userId,
+          metadata: { analytics_event: "identity_revealed", reveal_type: "handshake_contact", at: new Date().toISOString() },
+        });
+      } catch { /* audit-best-effort: never fail the handshake on logging */ }
       return NextResponse.json({
         success: result?.success ?? true,
         status: result?.handshake_status || "pending",
         ratingUpdated: result?.rating_updated ?? false,
+        analytics_event: "identity_revealed",
         message: result?.rating_updated
           ? "Handshake completed! Scout Rating incremented."
           : "Handshake signature recorded. Awaiting second party.",

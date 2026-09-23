@@ -14,6 +14,14 @@
 //    text goes to the clipboard, the user is told in plain words to paste it,
 //    and only then does the platform open.
 //
+//    1b. FACEBOOK WITH AN APP ID. When NEXT_PUBLIC_FACEBOOK_APP_ID is set, the
+//    Facebook button instead opens the Share dialog with the full caption
+//    (hashtags included) prefilled via `quote` plus a first-class `hashtag` —
+//    the closest Facebook allows to one-tap sharing. The user still reviews
+//    and taps Post; silent auto-posting to timelines does not exist
+//    (publish_actions died in 2019). The caption is ALSO copied as backup
+//    because the dialog sometimes drops `quote`.
+//
 // 2. NO VIBER, NO MESSENGER. For a Philippine platform that is backwards —
 //    those are where listings actually get forwarded here. X is marginal.
 //
@@ -37,7 +45,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Share2, Copy, Check, Globe, MessageSquare, MessageCircle,
-  Send, Mail, Link2, X,
+  Send, Mail, Link2, X, Phone, Navigation,
 } from "lucide-react";
 import { buildShareText, buildPromoPack } from "@/lib/shareBriefing";
 import {
@@ -51,6 +59,8 @@ const CHANNELS = [
   { key: "viber",     name: "Viber",     icon: <MessageCircle size={18} />, prefill: true  },
   { key: "messenger", name: "Messenger", icon: <Send size={18} />,          prefill: false },
   { key: "facebook",  name: "Facebook",  icon: <Globe size={18} />,         prefill: false },
+  { key: "whatsapp",  name: "WhatsApp",  icon: <Phone size={18} />,         prefill: true  },
+  { key: "telegram",  name: "Telegram",  icon: <Navigation size={18} />,    prefill: true  },
   { key: "linkedin",  name: "LinkedIn",  icon: <Globe size={18} />,         prefill: false },
   { key: "x",         name: "X",         icon: <MessageSquare size={18} />, prefill: true  },
   { key: "email",     name: "Email",     icon: <Mail size={18} />,          prefill: true  },
@@ -84,6 +94,30 @@ async function copyText(text) {
   }
 }
 
+// Facebook App ID for the Feed dialog (quote prefill). Plain web share
+// needs no ID and stays the default; only set this when the owner has
+// registered a Facebook app and added its domain to the app settings.
+const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "";
+
+// The Share dialog is the closest Facebook allows to one-tap posting: the
+// caption (with hashtags) arrives via `quote` plus a first-class `hashtag`,
+// and the user reviews + taps Post. Silent auto-posting to timelines is
+// dead (publish_actions, 2019), so any flow promising "posts for you" is
+// lying — this one doesn't. Community reports say the dialog sometimes
+// drops `quote`; the handleChannel flow below always keeps a clipboard
+// backup, so a dropped quote degrades to paste, never to an empty post.
+export function facebookShareHref(url, quote) {
+  const params = new URLSearchParams({
+    app_id: FACEBOOK_APP_ID,
+    href: url,
+    quote,
+    hashtag: "#ScoutIt",
+    display: "popup",
+    redirect_uri: url,
+  });
+  return `https://www.facebook.com/dialog/share?${params.toString()}`;
+}
+
 export function channelHref(key, url, text) {
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(text);
@@ -99,7 +133,17 @@ export function channelHref(key, url, text) {
       // desktop. Obtaining an App ID is an owner task; see the handoff doc.
       return `fb-messenger://share?link=${u}`;
     case "facebook":
+      // With an App ID the caption (hashtags included) arrives prefilled in
+      // Facebook's own composer. Without one, sharer.php carries the link
+      // only and the copy-then-open flow below covers the text.
+      if (FACEBOOK_APP_ID && text) return facebookShareHref(url, text);
       return `https://www.facebook.com/sharer/sharer.php?u=${u}`;
+    case "whatsapp":
+      // wa.me carries the full text on desktop and mobile. No registration.
+      return `https://wa.me/?text=${t}`;
+    case "telegram":
+      // t.me share carries text + a link preview. No registration.
+      return `https://t.me/share/url?url=${u}&text=${t}`;
     case "linkedin":
       return `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
     case "x":
@@ -215,22 +259,40 @@ export default function ShareModal({
       return;
     }
 
-    // Copy-then-open. The platform cannot carry our text, so the clipboard
-    // does — and the user is told, rather than left wondering where the copy
-    // went. Opening happens regardless of clipboard success; a blocked
-    // clipboard should not also block the share.
-    if (!channel.prefill) {
+    // Whether the platform carries our text itself. Facebook does only via
+    // the Share dialog (needs the App ID above); otherwise it is copy-then-
+    // open like LinkedIn and Messenger.
+    const prefill =
+      channel.key === "facebook" ? Boolean(FACEBOOK_APP_ID) : channel.prefill;
+
+    // Facebook always lands on the clipboard too: the dialog sometimes drops
+    // `quote`, and a silent empty composer is worse than an invisible backup
+    // copy nobody pastes. Everywhere else the clipboard only runs when the
+    // platform cannot carry the text — and the user is told, rather than left
+    // wondering where the copy went. Opening happens regardless of clipboard
+    // success; a blocked clipboard should not also block the share.
+    if (!prefill || channel.key === "facebook") {
       const ok = await copyText(text);
       setNotice(
         ok
-          ? `Briefing copied — paste it into the ${channel.name} post.`
+          ? (channel.key === "facebook" && FACEBOOK_APP_ID
+              ? "Caption prefilled — review the hashtags, then hit Post. Backup copy kept."
+              : `Briefing copied — paste it into the ${channel.name} post.`)
           : `${channel.name} can't carry the text. Copy it below, then paste.`
       );
       setTimeout(() => setNotice(""), 6000);
     }
 
-    window.open(channelHref(channel.key, url, text), "_blank", "noopener,noreferrer");
-    fireShared(channel.key);
+    // A blocked popup opens nothing — claiming the share left the app then
+    // would be intent counted as outcome (analytics.js contract: completed
+    // fires only when the share actually leaves).
+    const win = window.open(channelHref(channel.key, url, text), "_blank", "noopener,noreferrer");
+    if (win) {
+      fireShared(channel.key);
+    } else {
+      setNotice(`A popup blocker stopped ${channel.name} from opening — allow popups, then try again.`);
+      setTimeout(() => setNotice(""), 6000);
+    }
   };
 
   const handleCopyRaw = async () => {

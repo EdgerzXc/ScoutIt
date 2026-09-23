@@ -43,6 +43,7 @@ export default async function DashboardLayout({ children }) {
     { group: "Administration", name: "System Activity", href: "/dashboard/system", icon: <Cpu className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "System Operations", href: "/dashboard/operations", icon: <Wrench className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "Feature Flags", href: "/dashboard/features", icon: <Flag className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
+    { group: "Administration", name: "Open Gate", href: "/dashboard/open-gate", icon: <Flag className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "Staff IAM", href: "/dashboard/staff", icon: <KeyRound className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
   ].filter((item) => staff.tier >= item.minTier)
     .map(({ group, name, href, icon }) => ({ group, name, href, icon }));

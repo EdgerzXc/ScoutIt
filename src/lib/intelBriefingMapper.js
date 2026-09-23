@@ -89,6 +89,10 @@ export function mapBriefingToIntel(row) {
     ourTake: row.our_take || "",
     sourceName: row.source_name || "",
     sourceUrl: row.source_url || "",
+    // Pipeline supply (A-156). Blank = not pipeline; the Descent merge
+    // only crosses rows that resolve to a lifecycle.
+    lifecycle: row.lifecycle || "",
+    openingDate: row.opening_date || "",
     body: Array.isArray(row.body_json) ? row.body_json : [],
     bodyJson: Array.isArray(row.body_json) ? JSON.stringify(row.body_json) : row.body_json,
     source: "supabase_osint",

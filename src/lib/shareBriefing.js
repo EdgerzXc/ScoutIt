@@ -114,12 +114,58 @@ export function briefingShape(facts) {
   return factSpecs(facts).length >= 1 ? "briefing" : "compact";
 }
 
+// One neutral discovery tag per category family. These aid search, never
+// assert a transaction — no sale/rent/price language (money rule).
+const CATEGORY_TAGS = [
+  [/commercial|office|retail/, "#OfficeSpace"],
+  [/restaurant|culinary|dining|food/, "#DiningSpace"],
+  [/venue|event/, "#EventVenue"],
+  [/hospitality|hotel|resort/, "#HotelPH"],
+  [/\bstr\b|vacation|short.term|staycation|stay/, "#StaycationPH"],
+  [/residential|condo|house|apartment|lot/, "#CondoLiving"],
+];
+
+function cleanTag(s) {
+  return String(s || "")
+    .replace(/\s*city\s*$/i, "")
+    .replace(/[^a-zA-Z0-9]/g, "");
+}
+
 function hashTags(f) {
-  const locTag = f.location
-    ? "#" + String(f.location).split(",")[0].replace(/[^a-zA-Z0-9]/g, "")
-    : "";
-  const catTag = "#" + String(f.category).replace(/[^a-zA-Z0-9]/g, "");
-  return `#ScoutIt ${catTag} ${locTag} #RealEstatePH`.replace(/\s+/g, " ").trim();
+  const tags = ["#ScoutIt"];
+  const catRaw = String(f.category || "").trim();
+  if (catRaw) tags.push("#" + catRaw.replace(/[^a-zA-Z0-9]/g, ""));
+  const catLower = catRaw.toLowerCase();
+  for (const [re, tag] of CATEGORY_TAGS) {
+    if (re.test(catLower)) {
+      tags.push(tag);
+      break;
+    }
+  }
+  // Area tag from the first location segment, city tag from the last —
+  // "McKinley West, Taguig City" becomes #McKinleyWest #Taguig.
+  const parts = String(f.location || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts[0]) tags.push("#" + cleanTag(parts[0]));
+  if (parts.length > 1) {
+    const city = cleanTag(parts[parts.length - 1]);
+    if (city) tags.push("#" + city);
+  }
+  tags.push("#RealEstatePH");
+  // Dedupe case-insensitively, drop empties, cap at six.
+  const seen = new Set();
+  const out = [];
+  for (const t of tags) {
+    if (!t || t === "#") continue;
+    const k = t.toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(t);
+    if (out.length >= 6) break;
+  }
+  return out.join(" ");
 }
 
 // ── X / Twitter length budget ──────────────────────────────────────────
@@ -226,6 +272,8 @@ export function buildPromoPack(property, link) {
       `, ready for anyone scouting their next move.`,
     ``,
     `Read the full briefing: ${safeLink}`,
+    ``,
+    hashTags(f),
   ].join("\n");
 
   return { fastPitch, executiveSummary, editorialHook };

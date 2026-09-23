@@ -17,5 +17,16 @@ describe("GA4 privacy allowlists",()=>{
  ])("drops unknown, structured, URL, and contact-bearing values: %o",(params)=>{expect(sanitizeAnalyticsParams(GA_EVENTS.SHARE_COMPLETED,params)).toEqual({});});
  it("drops unknown events and never dispatches them",()=>{vi.stubEnv("NEXT_PUBLIC_GA_ID","G-X");const gtag=vi.fn();globalThis.window={gtag};expect(trackEvent("custom_event",{channel:"copy"})).toBe(false);expect(gtag).not.toHaveBeenCalled();});
  it("stays disabled without GA config",()=>{const gtag=vi.fn();globalThis.window={gtag};expect(trackEvent(GA_EVENTS.BOARD_SAVE,{property_id:"p1"})).toBe(false);expect(gtag).not.toHaveBeenCalled();});
- it("dispatches sanitized params and never throws",()=>{vi.stubEnv("NEXT_PUBLIC_GA_ID","G-X");const gtag=vi.fn();globalThis.window={gtag};expect(trackEvent(GA_EVENTS.CONNECT_SPENT,{spend_reason:"pitch",amount:1,buyer_email:"x@y.com"})).toBe(true);expect(gtag).toHaveBeenCalledWith("event","connect_spent",{spend_reason:"pitch",amount:1});globalThis.window={gtag:()=>{throw new Error("boom")}};expect(trackEvent(GA_EVENTS.BOARD_SAVE)).toBe(false);});
+  it("dispatches sanitized params and never throws",()=>{vi.stubEnv("NEXT_PUBLIC_GA_ID","G-X");const gtag=vi.fn();globalThis.window={gtag};expect(trackEvent(GA_EVENTS.CONNECT_SPENT,{spend_reason:"pitch",amount:1,buyer_email:"x@y.com"})).toBe(true);expect(gtag).toHaveBeenCalledWith("event","connect_spent",{spend_reason:"pitch",amount:1});globalThis.window={gtag:()=>{throw new Error("boom")}};expect(trackEvent(GA_EVENTS.BOARD_SAVE)).toBe(false);});
+
+  // A-146 (H batch): the newly wired funnel events keep the same contract —
+  // allowlisted keys only, identifiers validated, contact/URL shapes dropped.
+  it("sanitizes the H-batch funnel events",()=>{
+    expect(sanitizeAnalyticsParams(GA_EVENTS.REACTION_TAPPED,{property_id:"bgc-tower-1",extra:"drop"})).toEqual({property_id:"bgc-tower-1"});
+    expect(sanitizeAnalyticsParams(GA_EVENTS.REACTION_TAPPED,{property_id:"https://evil.example"})).toEqual({});
+    expect(sanitizeAnalyticsParams(GA_EVENTS.APPEAL_SUBMITTED,{evidence_id:"11111111-1111-4111-8111-111111111111"})).toEqual({evidence_id:"11111111-1111-4111-8111-111111111111"});
+    expect(sanitizeAnalyticsParams(GA_EVENTS.INQUIRY_STARTED,{property_slug:"one-ecom-center"})).toEqual({property_slug:"one-ecom-center"});
+    expect(sanitizeAnalyticsParams(GA_EVENTS.ONBOARDING_STEP,{step:3})).toEqual({step:3});
+    expect(sanitizeAnalyticsParams(GA_EVENTS.DISPLAY_MODE_SWITCHED,{axis:"density",mode:"simple-on",evil:"x"})).toEqual({axis:"density",mode:"simple-on"});
+  });
 });

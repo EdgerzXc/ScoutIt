@@ -26,7 +26,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md bg-[#121212] border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl"
+        className="w-full sm:max-w-md bg-[#121212] border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl cal-lens"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
@@ -34,7 +34,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
           <button
             type="button"
             onClick={onClose}
-            className="text-text-muted hover:text-on-surface text-xl leading-none"
+            className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-on-surface text-xl leading-none"
             aria-label="Close"
           >
             ×
@@ -42,7 +42,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          <h2 className="font-working-title text-lg text-on-surface">{viewing.title}</h2>
+          <h2 className="font-working-title text-lg text-on-surface break-words [overflow-wrap:anywhere]">{viewing.title}</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex gap-2">
               <dt className="text-text-muted w-20 shrink-0">When</dt>
@@ -53,7 +53,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
             {viewing.contactName && (
               <div className="flex gap-2">
                 <dt className="text-text-muted w-20 shrink-0">With</dt>
-                <dd className="text-text-secondary">{viewing.contactName}</dd>
+                <dd className="text-text-secondary break-words [overflow-wrap:anywhere] min-w-0">{viewing.contactName}</dd>
               </div>
             )}
             <div className="flex gap-2">
@@ -70,7 +70,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
                 type="button"
                 onClick={() => onRespond(viewing.id, "cancelled")}
                 disabled={respondingId === viewing.id}
-                className="flex-1 text-xs text-error border border-error/30 py-2 rounded hover:bg-error/10 active:scale-[0.97]
+                className="flex-1 min-h-11 text-xs text-error border border-error/30 py-2 rounded hover:bg-error/10 active:scale-[0.97]
                   uppercase tracking-wider font-mono disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Decline
@@ -79,7 +79,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
                 type="button"
                 onClick={() => onRespond(viewing.id, "confirmed")}
                 disabled={respondingId === viewing.id}
-                className="flex-1 text-xs text-background bg-gold-accent py-2 rounded hover:bg-gold-bright active:scale-[0.97]
+                className="flex-1 min-h-11 text-xs text-background bg-gold-accent py-2 rounded hover:bg-gold-bright active:scale-[0.97]
                   uppercase tracking-wider font-mono font-semibold shadow-[0_0_12px_rgba(232,174,60,0.25)] disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Accept

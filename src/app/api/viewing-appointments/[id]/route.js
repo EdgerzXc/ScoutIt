@@ -149,19 +149,25 @@ async function handleReschedule({ id, appt, payload, userId }) {
     }
   }
 
-  await logActivity(supabaseAdmin, {
-    dealId: appt.deal_id,
-    propertyId: appt.deals?.property_id || appt.property_id || null,
-    activityType: "viewing_rescheduled",
-    actorId: userId,
-    metadata: {
-      appointmentId: id,
-      scheduledAt: updated.scheduled_at,
-      endsAt: slot.endsAt,
-      durationMinutes: updated.duration_minutes,
-      previousScheduledAt: appt.scheduled_at,
-    },
-  });
+  // A-146: isolated — the reschedule stands; timeline and follow-up gaps
+  // must be findable, not fatal.
+  try {
+    await logActivity(supabaseAdmin, {
+      dealId: appt.deal_id,
+      propertyId: appt.deals?.property_id || appt.property_id || null,
+      activityType: "viewing_rescheduled",
+      actorId: userId,
+      metadata: {
+        appointmentId: id,
+        scheduledAt: updated.scheduled_at,
+        endsAt: slot.endsAt,
+        durationMinutes: updated.duration_minutes,
+        previousScheduledAt: appt.scheduled_at,
+      },
+    });
+  } catch (activityError) {
+    console.warn("[APPOINTMENTS API] Timeline entry not recorded for", id, activityError?.message);
+  }
 
   return NextResponse.json({ success: true, appointment: updated });
 }
@@ -240,15 +246,20 @@ async function handleStatusChange({ id, appt, payload, userId }) {
   });
 
   // The one auto-created task type: when the host marks a viewing completed,
-  // drop a "Follow up" task on their list due in 24 hours.
+  // drop a "Follow up" task on their list due in 24 hours. A-146: isolated
+  // like the timeline write above.
   if (status === "completed") {
     const propertyTitle = appt.deals?.properties?.title;
-    await createTask(supabaseAdmin, {
-      ownerUserId: appt.host_id,
-      title: propertyTitle ? `Follow up after viewing — ${propertyTitle}` : "Follow up after viewing",
-      dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      dealId: appt.deal_id,
-    });
+    try {
+      await createTask(supabaseAdmin, {
+        ownerUserId: appt.host_id,
+        title: propertyTitle ? `Follow up after viewing — ${propertyTitle}` : "Follow up after viewing",
+        dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        dealId: appt.deal_id,
+      });
+    } catch (taskError) {
+      console.warn("[APPOINTMENTS API] Follow-up task not created for", id, taskError?.message);
+    }
   }
 
   return NextResponse.json({ success: true, status });

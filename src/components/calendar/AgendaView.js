@@ -62,7 +62,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
     <div className="overflow-y-auto h-full px-1 sm:px-2 py-2 space-y-6">
       {groups.map(({ date, items }) => (
         <section key={date.toISOString()}>
-          <div className="flex items-baseline gap-2 mb-2 sticky top-0 bg-[#121212] py-1 z-10">
+          <div className="flex items-baseline gap-2 mb-2 sticky top-0 bg-[#121212] py-1 z-10 cal-lens-bar">
             <h3 className="font-working-title text-on-surface">{formatDayHeading(date)}</h3>
             {isToday(date) && (
               <span className="text-[12px] uppercase tracking-wider font-mono text-gold-accent">Today</span>
@@ -90,7 +90,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
                         {ev.title}
                       </span>
                     </div>
-                    <div className="text-xs text-text-secondary mt-0.5">
+                    <div className="text-xs text-text-secondary mt-0.5 truncate">
                       {formatShortRange(ev.startsAt, ev.endsAt, ev.allDay)}
                       {ev.location ? ` • ${ev.location}` : ""}
                       {ev.kind === "viewing" && ev.contactName ? ` • ${ev.contactName}` : ""}

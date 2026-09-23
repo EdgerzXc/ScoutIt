@@ -63,13 +63,20 @@ test.describe("the map actually works", () => {
       }
     });
     page.on("requestfailed", (r) => {
-      if (r.url().includes(TILE_HOST)) failures.push(`FAILED ${r.url().slice(0, 90)}`);
+      if (r.url().includes(TILE_HOST)) failures.push(`FAILED ${r.failure()?.errorText || "unknown"} ${r.url().slice(0, 90)}`);
     });
     page.on("console", (m) => {
       if (m.type() === "error") consoleErrors.push(m.text().slice(0, 120));
     });
 
     await page.goto(MAP_ROUTE, { waitUntil: "domcontentloaded" });
+    const location = page.getByRole("tab", { name: "Location", exact: true });
+    await expect.poll(async () => {
+      if (await location.getAttribute("aria-selected") !== "true") await location.click();
+      return location.getAttribute("aria-selected");
+    }, { timeout: 15000 }).toBe("true");
+    // The viewport boundary deliberately defers WebGL until the map is seen.
+    await page.locator("#panel-location .map-frame").scrollIntoViewIfNeeded();
 
     // The map is lazy — no canvas exists for roughly the first six seconds
     // (MAP_SYSTEM.md §6). Selected by MapLibre's OWN class: an earlier version
@@ -128,6 +135,67 @@ test.describe("the map actually works", () => {
       failures,
       `Basemap tiles failed to load:\n${failures.slice(0, 5).join("\n")}`,
     ).toEqual([]);
+  });
+
+  test("the licence credit renders and MapLibre's own attribution control is gone", async ({ page }) => {
+    /**
+     * A-143. The runtime half of the proof.
+     *
+     * `mapAttributionSink.test.js` reads the source and shows that every map
+     * passes `attributionControl: false` and mounts MapCreditControl instead.
+     * Source analysis cannot show what the BROWSER ended up with, and the two
+     * claims that matter here are both runtime facts:
+     *
+     *   1. MapLibre's AttributionControl is not instantiated, so the
+     *      `innerHTML = DOM.sanitize(...)` line that CVE-2026-85061 bypasses
+     *      never executes. `.maplibregl-ctrl-attrib` is that control's own
+     *      container class — if it is absent, the sink is absent.
+     *   2. The OpenStreetMap credit is still on screen. Removing the control
+     *      without replacing the credit would swap a security problem for a
+     *      licence breach, which is a worse trade, not a fix.
+     */
+    await page.goto(MAP_ROUTE, { waitUntil: "domcontentloaded" });
+    const location = page.getByRole("tab", { name: "Location", exact: true });
+    await expect.poll(async () => {
+      if (await location.getAttribute("aria-selected") !== "true") await location.click();
+      return location.getAttribute("aria-selected");
+    }, { timeout: 15000 }).toBe("true");
+    // The viewport boundary deliberately defers WebGL until the map is seen.
+    await page.locator("#panel-location .map-frame").scrollIntoViewIfNeeded();
+
+    const appeared = await page
+      .waitForSelector("canvas.maplibregl-canvas", { timeout: 60_000 })
+      .then(() => true)
+      .catch(() => false);
+    expect(appeared, `No MapLibre canvas on ${MAP_ROUTE}; cannot judge its furniture.`).toBe(true);
+
+    const credit = page.locator(".map-credit").first();
+    await expect(
+      credit,
+      "Our own credit did not render. Turning MapLibre's control off without this visible is an ODbL breach.",
+    ).toBeVisible({ timeout: 30_000 });
+
+    const text = ((await credit.textContent()) || "").replace(/\s+/g, " ").trim();
+    expect(text, `credit read: ${text}`).toContain("OpenStreetMap");
+    expect(text, `credit read: ${text}`).toContain("CARTO");
+    expect(text, `credit read: ${text}`).toContain("contributors");
+
+    // Asserted AFTER the canvas exists and our credit is up, so it cannot pass
+    // just because the map had not mounted yet.
+    expect(
+      await page.locator(".maplibregl-ctrl-attrib").count(),
+      "MapLibre's AttributionControl is mounted, so the vulnerable DOM.sanitize path is live again. Some map is missing `attributionControl: false`.",
+    ).toBe(0);
+
+    // The credit has to be legible over a dark basemap, not merely present.
+    const ink = await credit.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { color: s.color, opacity: s.opacity, display: s.display, fontSize: s.fontSize };
+    });
+    expect(ink.display).not.toBe("none");
+    expect(Number(ink.opacity)).toBeGreaterThan(0.5);
+    // The 10px floor this codebase holds for map furniture.
+    expect(parseFloat(ink.fontSize)).toBeGreaterThanOrEqual(10);
   });
 
   test("the detector is not vacuous — a page with no map fails it", async ({ page }) => {

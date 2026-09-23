@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Bookmark, Sparkles, Target, Heart } from "lucide-react";
 import { reactionFeedback } from "@/components/ui/reactionFeedback";
 import { reportError } from "@/lib/reportError";
+import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 
 const REACTION_SHAPES = {
   "Save": {
@@ -133,6 +134,10 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
               message: `Reaction ping failed with ${res.status}`,
               context: { reaction_type: nextReaction },
             });
+          } else {
+            // A-146: the tap funnel was unwired. Fires only on receipt —
+            // outcome, not intent.
+            trackEvent(GA_EVENTS.REACTION_TAPPED, { property_id: propertyId });
           }
         })
         .catch((error) => {

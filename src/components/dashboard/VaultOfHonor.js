@@ -16,7 +16,7 @@ export default function VaultOfHonor() {
     <div className="w-full mb-12 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex items-end justify-between mb-6">
         <div>
-          <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-3">
+          <h2 className="font-headline-editorial text-2xl text-on-surface flex flex-wrap items-center gap-3">
             Milestones & Achievements
             <span className="font-label-caps tracking-widest text-[12px] text-gold-accent px-2 py-1 bg-gold-accent/10 border border-gold-accent/30 rounded">
               {unlockedBadges.length} / {BADGE_REGISTRY.length} UNLOCKED

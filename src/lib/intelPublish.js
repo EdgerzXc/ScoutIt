@@ -70,6 +70,35 @@ export function buildIntelFields(briefing, relatedPropertyIds = []) {
 
   if (briefing.category) fields.IntelType = briefing.category;
 
+  // Pipeline supply (A-156). Blank = not pipeline; the keys stay out of the
+  // payload so ordinary intel publishes exactly as before. Lifecycle is
+  // re-normalized here (never trust a stored string the product displays),
+  // and the date accepts bare dates or ISO datetime prefixes. This block is
+  // byte-identical in Mission Control's vendored copy — the parity test
+  // pins it.
+  const pipelineLifecycle = (() => {
+    const v = String(briefing.lifecycle ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/[_\s]+/g, " ");
+    if (v === "planned") return "Planned";
+    if (v === "construction" || v === "under construction") return "Under Construction";
+    return "";
+  })();
+  const pipelineOpening = (() => {
+    const raw = briefing.opening_date || briefing.openingDate || "";
+    if (typeof raw !== "string") return "";
+    const m = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (!m) return "";
+    const [y, mo, d] = m[1].split("-").map(Number);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return "";
+    const t = new Date(y, mo - 1, d);
+    if (Number.isNaN(t.getTime()) || t.getFullYear() !== y || t.getMonth() !== mo - 1 || t.getDate() !== d) return "";
+    return m[1];
+  })();
+  if (pipelineLifecycle) fields.Lifecycle_Status = pipelineLifecycle;
+  if (pipelineOpening) fields.Opening_Date = pipelineOpening;
+
   // Provenance. An OSINT briefing without its source is an assertion with no
   // receipt, and this product does not render those.
   if (briefing.source_name || briefing.source_url) {

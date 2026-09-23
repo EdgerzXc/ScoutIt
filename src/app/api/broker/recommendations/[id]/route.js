@@ -82,7 +82,10 @@ export async function PATCH(request, { params }) {
         event_type: action.event,
         event_payload: { note: String(body?.note || "").slice(0, 500) },
       })
-      .then(null, () => null);
+      // A-146: best-effort, never silent.
+      .then(null, (auditError) => {
+        console.warn("[recommendation moderation] audit not recorded for", updated.id, auditError);
+      });
 
     return json({ id: updated.id, state: updated.moderation_state });
   } catch (error) {
@@ -137,7 +140,10 @@ export async function DELETE(request, { params }) {
         event_type: "recommendation_withdrawn",
         event_payload: { reason: String(body?.reason || "").slice(0, 500) },
       })
-      .then(null, () => null);
+      // A-146: best-effort, never silent.
+      .then(null, (auditError) => {
+        console.warn("[recommendation withdrawal] audit not recorded for", withdrawn.id, auditError);
+      });
 
     return json({
       id: withdrawn.id,

@@ -64,7 +64,7 @@ export async function GET(request) {
 }
 
 // ── PATCH /api/admin/property ───────────────────────────────────
-// Body: { id, details?, title?, location?, seo_title?, seo_description? }
+// Body: { id, details?, title?, location?, seo_title?, seo_description?, seo_json_ld? }
 // Saves one section at a time. `details` is MERGED, not replaced, so saving the
 // Commercial section cannot wipe the Residential one.
 export async function PATCH(request) {
@@ -115,9 +115,17 @@ export async function PATCH(request) {
     }
 
     // MERGE, don't replace — a section save must not clear other sections.
+    // A-146: properties has NO seo_* columns (verified: no migration carries
+    // them), so seo keys must never reach the Supabase write — they 500 it.
+    // SEO is public display metadata, so it travels Airtable-only, alongside
+    // the saved row, in the mirror below.
     const patch = { details: { ...(current.details || {}), ...safeDetails } };
-    for (const key of ["title", "location", "seo_title", "seo_description"]) {
+    for (const key of ["title", "location"]) {
       if (body[key] !== undefined) patch[key] = body[key];
+    }
+    const seoForward = {};
+    for (const key of ["seo_title", "seo_description", "seo_json_ld"]) {
+      if (body[key] !== undefined) seoForward[key] = body[key];
     }
 
     const { data: saved, error: saveError } = await supabaseAdmin
@@ -140,7 +148,10 @@ export async function PATCH(request) {
       const baseId = process.env.AIRTABLE_BASE_ID;
       if (apiKey && baseId && canonicalSlug) {
         try {
-          const atResult = await updateProperty(apiKey, baseId, canonicalSlug, saved);
+          // seoForward rides alongside the saved row: updateProperty reads
+          // data.seo_title/seo_description/seo_json_ld straight into the
+          // Airtable SEO columns.
+          const atResult = await updateProperty(apiKey, baseId, canonicalSlug, { ...saved, ...seoForward });
           
           const updatedSlug = atResult?.fields?.Slug;
           if (updatedSlug && updatedSlug !== canonicalSlug) {

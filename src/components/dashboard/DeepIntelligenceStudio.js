@@ -336,13 +336,13 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
         <button 
           onClick={() => setMobileTab('editor')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Editor
         </button>
         <button 
           onClick={() => setMobileTab('preview')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Live Preview
         </button>
@@ -353,13 +353,13 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
 
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
-        <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
+        <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
           ← {isEditing ? "Cancel" : "Exit"}
         </button>
         
         <div className="flex items-center gap-4">
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
+            <button onClick={clearDraft} className="min-h-11 inline-flex items-center text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
               Delete draft
             </button>
           )}
@@ -533,21 +533,21 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
           ))}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-12 pt-6 border-t border-surface-variant">
+          <div className="flex flex-wrap justify-between gap-3 mt-12 pt-6 border-t border-surface-variant">
             {step > 1 ? (
               <button 
                 onClick={() => setStep(step - 1)}
-                className="px-6 py-2 rounded border border-surface-variant text-text-secondary text-sm font-label-caps tracking-widest uppercase hover:text-on-surface hover:border-text-secondary transition"
+                className="min-h-11 px-6 py-2 rounded border border-surface-variant text-text-secondary text-sm font-label-caps tracking-widest uppercase hover:text-on-surface hover:border-text-secondary transition"
               >
                 ← Previous step
               </button>
             ) : <div></div>}
 
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <button 
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
-                className="px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
+                className="min-h-11 px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
               >
                 Save Draft
               </button>
@@ -556,7 +556,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={() => setStep(step + 1)}
                   disabled={step === 1 && !formData.category} // Must select category to proceed
-                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+                  className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.2)]"
                 >
                   Next Step →
                 </button>
@@ -564,7 +564,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={handlePublish}
                   disabled={!isPublishable}
-                  className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)]"
+                  className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)]"
                 >
                   Publish listing
                 </button>

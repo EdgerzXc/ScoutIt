@@ -67,6 +67,11 @@ export const EDITOR_DETAIL_ALIASES = {
   RST_Power_Capacity: "power", RST_Delivery_Access: "delivery", RST_Liquor_License: "liquor",
   RST_FB_Zoning_Permit: "zoning", RST_Ceiling_Height: "ceiling", RST_Turnover_Condition: "turnover",
   RST_Parking: "parking", RST_Rent_Per_Month: "rstRent", RST_Dues_CUSA: "rstDues",
+  // A-146: the editor writes RST_Frontage / RST_Rent / RST_Indoor_Outdoor
+  // (propertyEditorSchema), but only the _M / _Per_Month / VEN variants were
+  // known — so those three owner facts never reached the mapper. Added as
+  // siblings, not replacements: existing camelCase writers keep precedence.
+  RST_Frontage: "frontage", RST_Rent: "rstRent", RST_Indoor_Outdoor: "indoorOutdoor",
   // Venues
   VEN_Capacity_Seated: "seated", VEN_Capacity_Standing: "standing", VEN_Floor_Area_Sqm: "floorArea",
   VEN_Min_Booking_Hours: "minHours", VEN_Indoor_Outdoor: "indoorOutdoor", VEN_Air_Conditioning: "aircon",

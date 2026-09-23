@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { openGateContactRevealed } from "@/lib/openGate";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -70,11 +71,13 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Downloads are unavailable" }, { status: 503 });
     }
 
-    const { data: deal, error: dealError } = await supabaseAdmin
-      .from("deals")
-      .select("id, status, created_at, closed_at, buyer_id, broker_id, properties(title, owner_id)")
-      .eq("id", dealId)
-      .single();
+    const dealFields = "id, status, created_at, closed_at, buyer_id, broker_id, properties(title, owner_id)";
+    let dealResult = await supabaseAdmin.from("deals")
+      .select(`${dealFields}, open_gate_inbound`).eq("id", dealId).single();
+    if (dealResult.error?.code === "42703") {
+      dealResult = await supabaseAdmin.from("deals").select(dealFields).eq("id", dealId).single();
+    }
+    const { data: deal, error: dealError } = dealResult;
 
     if (dealError || !deal) {
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
@@ -111,7 +114,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Could not read this conversation" }, { status: 503 });
     }
 
-    const contactRevealed = handshakeIsComplete(handshake);
+    const contactRevealed = handshakeIsComplete(handshake) || openGateContactRevealed(deal);
 
     // Display names for whoever is actually on this thread. These id columns
     // are plain text, not foreign keys, so this is a manual lookup.

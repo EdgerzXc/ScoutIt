@@ -4,7 +4,15 @@ import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { z } from "zod";
 import { turnstileGuard } from "@/lib/turnstile";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+// A-144 (§13 Enterprise Free Inquiry, §15 abuse): the public form is the most
+// abusable free-contact path. Meter per IP before any other work; the IP is
+// metering-only and never stored (same promise as /api/reactions).
+const checkInquiryRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 20_000 });
 import { getPropertyLeadRecipients, formatRoutingMetadata } from "@/lib/serverBrokerRouting";
+import { resolveEnterpriseForm } from "@/lib/enterpriseForms";
 import { routingFailureStatus } from "@/lib/brokerRepresentation";
 import { normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
@@ -28,15 +36,30 @@ const schema = z.object({
   // verification below. There is no configuration-dependent bypass.
   turnstileToken: z.string().min(1, "Captcha token is required"),
   preferredBrokerId: z.string().max(200).optional(),
+  // A-144 §13: Enterprise-configured entry points identify themselves. Absent
+  // means the legacy public property form (still 0-Connect, still logged-out,
+  // now explicitly labeled so it can be scoped to Enterprise without a
+  // breaking change when the forms table lands under O-004).
+  enterprise_form_id: z.string().max(120).optional(),
 });
 
 export async function POST(req) {
   try {
+    const rate = checkInquiryRate(clientIp(req));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { success: false, message: "Too many inquiries. Please wait and try again.", analytics_event: "enterprise_inquiry_throttled" },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
+      );
+    }
     const parsed = schema.safeParse(await req.json());
     if (!parsed.success) {
       return NextResponse.json({ success: false, message: "Invalid inquiry format" }, { status: 400 });
     }
-    const { propertyId, propertySlug, name, email, phone, message, turnstileToken, preferredBrokerId } = parsed.data;
+    const { propertyId, propertySlug, name, email, phone, message, turnstileToken, preferredBrokerId, enterprise_form_id } = parsed.data;
+    // A-144: label the zero-cost path at the boundary (invariant #9). Only an
+    // explicitly Enterprise-configured form may call itself Free Inquiry.
+    const isEnterpriseFreeInquiry = typeof enterprise_form_id === "string" && enterprise_form_id.trim() !== "";
 
     // ── Bot check ──────────────────────────────────────────────────────
     // This is a PUBLIC, unauthenticated endpoint that writes to
@@ -57,6 +80,18 @@ export async function POST(req) {
     }
     if (!supabaseAdmin) {
       return NextResponse.json({ success: false, message: "Server error: missing service role configuration" }, { status: 500 });
+    }
+
+    // A-144 §10.10: "Free Inquiry" is an enabled, server-validated Enterprise
+    // form — never a nonempty string the caller typed. Forged, disabled or
+    // unknown forms deliver nothing (0 debit either way: this path is free).
+    // Pre-migration the tables do not exist and the check defers gracefully.
+    const enterpriseCheck = await resolveEnterpriseForm(supabaseAdmin, enterprise_form_id);
+    if (!enterpriseCheck.ok) {
+      const reason = enterpriseCheck.reason === "disabled_form"
+        ? "That inquiry form is no longer accepting responses."
+        : "That inquiry form isn't recognized.";
+      return NextResponse.json({ success: false, message: reason }, { status: 403 });
     }
 
     let query = supabaseAdmin.from("properties").select("id, title, slug, owner_id, lifecycle_state, pipeline_status");
@@ -95,7 +130,9 @@ export async function POST(req) {
       propertyId: property.id,
       activityType: "inquiry",
       metadata: {
-        source: "public_form",
+        source: isEnterpriseFreeInquiry ? "enterprise_free_inquiry" : "public_form",
+        enterprise_form_id: enterprise_form_id || null,
+        entry_label: isEnterpriseFreeInquiry ? "Free Inquiry" : "Public inquiry (sign in + Connect to continue)",
         name: name || null,
         email: email || null,
         phone: phone || null,
@@ -120,7 +157,7 @@ export async function POST(req) {
       });
     }
 
-    return NextResponse.json({ success: true, message: "Inquiry received", routedToRoster: routing.routedToRoster, recipientCount: routing.recipients.length }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Inquiry received", routedToRoster: routing.routedToRoster, recipientCount: routing.recipients.length, free_inquiry: isEnterpriseFreeInquiry, analytics_event: isEnterpriseFreeInquiry ? "enterprise_inquiry_submitted" : "inquiry_sent" }, { status: 200 });
   } catch (error) {
     console.error("Error submitting inquiry:", error);
     return NextResponse.json({ success: false, message: "Failed to process inquiry" }, { status: 500 });

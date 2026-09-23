@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import TurnstileGate from "@/components/ui/TurnstileGate";
+import PrivacyNotice from "@/components/ui/PrivacyNotice";
 import { CONTACT_RETENTION_NOTICE } from "@/lib/contactRetention";
 
 // The contact form.
@@ -161,6 +162,9 @@ export default function ContactClient() {
       <button type="submit" className="contact-submit" disabled={sending || !token}>
         {sending ? "Sending…" : "Send message"}
       </button>
+
+      {/* A-150: explicit Privacy Policy link beside the submit (RA 10173 §11). */}
+      <PrivacyNotice />
 
       {!token && status !== "error" && (
         <p className="contact-hint contact-hint--center">

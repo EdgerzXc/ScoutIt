@@ -1,0 +1,390 @@
+/* ═══════════════════════════════════════════════════════════════
+   SCOUTIT — STRATOSPHERE TERMINAL CSS
+   ═══════════════════════════════════════════════════════════════ */
+
+.st-terminal {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 52px);
+  min-height: 600px;
+  background: #0d0d0d;
+  color: #ffffff;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── TOP CONTROL BAR ── */
+.st-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(18, 18, 18, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 16px;
+  z-index: 20;
+}
+
+.st-search-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 580px;
+}
+
+.st-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transition: border-color 0.15s ease;
+}
+
+.st-search-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(232, 174, 60, 0.15);
+}
+
+.st-search-icon {
+  margin-left: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* 16px minimum: iOS Safari zooms the viewport on focus for anything smaller */
+.st-search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  padding: 8px 10px;
+  font-size: 16px;
+  outline: none;
+}
+
+.st-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.st-search-clear {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 6px 10px;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .st-search-clear:hover {
+    color: #ffffff;
+  }
+}
+
+.st-search-clear:active {
+  transform: scale(0.95);
+}
+
+.st-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .st-filter-btn:hover {
+    border-color: rgba(232, 174, 60, 0.4);
+    color: #ffffff;
+    background: rgba(232, 174, 60, 0.08);
+  }
+}
+
+.st-filter-btn:active {
+  transform: scale(0.98);
+}
+
+.st-filter-btn.active {
+  background: rgba(232, 174, 60, 0.15);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.st-filter-badge {
+  background: var(--accent);
+  color: #0d0d0d;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+}
+
+/* ── MODE SWITCHER ── */
+.st-mode-cluster {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.st-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .st-mode-btn:hover {
+    color: #ffffff;
+  }
+}
+
+.st-mode-btn:active {
+  transform: scale(0.98);
+}
+
+.st-mode-btn.active {
+  background: rgba(232, 174, 60, 0.18);
+  color: var(--accent-bright);
+  box-shadow: 0 0 10px rgba(232, 174, 60, 0.15);
+}
+
+/* ── MAIN WORKSPACE ── */
+.st-workspace {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── 1. SPLIT LAYOUT (SPATIAL MODE) ── */
+.st-split-layout {
+  display: grid;
+  grid-template-columns: 64% 36%;
+  height: 100%;
+}
+
+.st-radar-pane {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.st-dossier-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(15, 15, 15, 0.95);
+  overflow: hidden;
+}
+
+/* ── 2. FEED LAYOUT (SIGNALS MODE) ── */
+.st-feed-layout {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.st-feed-layout .st-dossier-pane {
+  width: 100%;
+  max-width: 860px;
+  background: transparent;
+  padding: 0 16px;
+}
+
+/* ── DOSSIER HEADER & SCROLL ── */
+.st-dossier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(18, 18, 18, 0.9);
+  flex-shrink: 0;
+}
+
+.st-telemetry-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+.st-live-icon {
+  color: var(--accent-bright);
+}
+
+.st-district-indicator {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  background: rgba(232, 174, 60, 0.1);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.st-dossier-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 174, 60, 0.2) transparent;
+}
+
+.st-dossier-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.st-dossier-scroll::-webkit-scrollbar-thumb {
+  background: rgba(232, 174, 60, 0.2);
+  border-radius: 4px;
+}
+
+/* Empty state */
+.st-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  gap: 10px;
+}
+
+.st-empty-icon {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.st-empty-title {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.st-empty-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.st-empty-reset-btn {
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .st-empty-reset-btn:hover {
+    background: rgba(232, 174, 60, 0.12);
+    border-color: var(--accent);
+    color: var(--accent-bright);
+  }
+}
+
+.st-empty-reset-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── RESPONSIVE ADAPTATIONS (MOBILE / TABLET) ── */
+@media (max-width: 1024px) {
+  .st-split-layout {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .st-radar-pane {
+    height: 52dvh;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .st-dossier-pane {
+    height: 48dvh;
+  }
+}
+
+@media (max-width: 640px) {
+  .st-control-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .st-search-cluster {
+    max-width: none;
+  }
+
+  .st-mode-cluster {
+    justify-content: center;
+  }
+
+  .st-radar-pane {
+    height: 45dvh;
+  }
+
+  .st-dossier-pane {
+    height: 55dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-search-clear,
+  .st-filter-btn,
+  .st-mode-btn,
+  .st-empty-reset-btn {
+    animation: none;
+    transition: none;
+  }
+}

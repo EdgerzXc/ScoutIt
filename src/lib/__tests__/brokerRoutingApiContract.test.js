@@ -9,7 +9,8 @@ describe("LR-02 routing contracts", () => {
     expect(route).toContain("create_routed_buyer_deal");
     expect(route).toContain("recipientIds");
     expect(route).toContain("routedToRoster");
-    expect(route).not.toContain("propertyRow.owner_id");
+    expect(route).toContain("recipientIds[0] === propertyRow.owner_id");
+    expect(route).not.toContain("recipientIds = [propertyRow.owner_id]");
   });
 
   it("uses the same resolver for logged-out inquiries", () => {

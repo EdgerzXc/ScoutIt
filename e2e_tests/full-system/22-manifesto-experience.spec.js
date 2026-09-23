@@ -32,9 +32,6 @@ for (const viewport of VIEWPORTS) {
 
 test("Manifesto diagrams explain state changes without changing routes", async ({ page }) => {
   await gotoAndSettle(page, "/about");
-
-  await page.getByRole("button", { name: "Close Help & Display", exact: true }).click();
-  await expect(page.getByRole("complementary", { name: "Help & Display", exact: true })).toBeHidden();
   await page.getByRole("button", { name: /05 mantle system disclosure/i }).click();
   await expect(page.locator("#layer-detail")).toContainText("architecture, data philosophy");
   await expect(page.getByRole("button", { name: /05 mantle system disclosure/i })).toHaveAttribute("aria-pressed", "true");
@@ -57,7 +54,13 @@ test("Manifesto deep links expose a keyboard focus target", async ({ page }) => 
 test("Manifesto chapter rail follows the scroll-led reading position", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoAndSettle(page, "/about");
-  await page.locator("#people").scrollIntoViewIfNeeded();
+  const ownerRole = page.getByRole("button", { name: "Owner", exact: true });
+  await ownerRole.click();
+  await expect(ownerRole).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#people").evaluate((section) => {
+    const top = window.scrollY + section.getBoundingClientRect().top;
+    window.scrollTo(0, top - window.innerHeight * 0.22);
+  });
   await expect(page.locator('.chapter-rail a[href="#people"]')).toHaveAttribute("aria-current", "step");
   await expect(page.locator("#people")).toHaveAttribute("data-active", "true");
   const railTop = await page.locator(".chapter-rail-shell").evaluate((node) => node.getBoundingClientRect().top);

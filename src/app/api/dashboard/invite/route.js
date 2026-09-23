@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { isBlocked } from "@/lib/connectBlocks";
+import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
+import { checkReceiverGate, IDEMPOTENCY_WINDOW_MINUTES } from "@/lib/connectGates";
+import { logActivity } from "@/lib/crmActivity";
 
 export async function POST(request) {
   try {
@@ -26,7 +30,8 @@ export async function POST(request) {
     const userId = user.id;
 
     // Remove userId from the body destructuring, trust the token
-    const { listingId, brokerName } = await request.json();
+    const { listingId, brokerName, source_type, source_id, reason_tag, sender_identity_mode } = await request.json();
+    const connectSource = normalizeConnectSource({ source_type, source_id, reason_tag, sender_identity_mode });
 
     if (!listingId || !brokerName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -65,6 +70,45 @@ export async function POST(request) {
       return NextResponse.json({ error: `Multiple brokers named "${brokerName}" found — ask them for their PRC number to disambiguate.` }, { status: 409 });
     }
     const resolvedBrokerId = brokerMatches[0].id;
+    // A-144 invariant #6 FIRST (before any write): a broker who blocked the
+    // owner fails with 0 spend and no representation phantom.
+    if (await isBlocked(supabaseAdmin, userId, resolvedBrokerId)) {
+      return NextResponse.json(
+        { error: "This request can't be sent. No Connect was spent." },
+        { status: 403 },
+      );
+    }
+
+    // A-144 §10.10 invite dedup: a recent identical invite is reused, never
+    // re-spent. Invite rows carry the recipient in broker_id (no buyer_id),
+    // so the generic buyer/broker dedup cannot see them — this query can.
+    try {
+      const inviteWindowStart = new Date(Date.now() - IDEMPOTENCY_WINDOW_MINUTES * 60 * 1000).toISOString();
+      const { data: recentInvites } = await supabaseAdmin
+        .from("deals")
+        .select("id, created_at")
+        .eq("property_id", listingId)
+        .eq("broker_id", resolvedBrokerId)
+        .eq("status", "invited")
+        .gte("created_at", inviteWindowStart)
+        .order("created_at", { ascending: true })
+        .limit(1);
+      if (Array.isArray(recentInvites) && recentInvites.length > 0) {
+        return NextResponse.json({ success: true, dealId: recentInvites[0].id, connects_spent: 0, deduped: true, source_context: connectSource });
+      }
+    } catch {
+      // Dedup is best-effort — a lookup failure never blocks a first send.
+    }
+
+    // A-144 §8 receiver gate for the invited broker.
+    const brokerGate = await checkReceiverGate(supabaseAdmin, resolvedBrokerId, listingId);
+    if (!brokerGate.ok) {
+      return NextResponse.json(
+        { error: brokerGate.message || "This broker isn't accepting new Connects right now. No Connect was spent." },
+        { status: 403 },
+      );
+    }
+
     const { data: existingRepresentation, error: representationLookupError } = await supabaseAdmin
       .from('property_broker_representations')
       .select("id, status")
@@ -74,15 +118,22 @@ export async function POST(request) {
     if (representationLookupError) return NextResponse.json({ error: "Representation service unavailable" }, { status: 503 });
     if (existingRepresentation?.status === "active") return NextResponse.json({ error: "This broker already represents the property" }, { status: 409 });
     if (existingRepresentation?.status === "locked" || existingRepresentation?.status === "suspended") return NextResponse.json({ error: "This broker is not currently eligible for a new representation request" }, { status: 409 });
+    let createdRepresentationId = null;
     if (!existingRepresentation) {
-      const { error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
+      const { data: createdRepresentation, error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
         property_id: listingId,
         broker_id: resolvedBrokerId,
         status: "pending",
         source: "owner_invite",
-      });
+      }).select("id").maybeSingle();
       if (representationError) return NextResponse.json({ error: "Failed to create representation request" }, { status: 503 });
+      createdRepresentationId = createdRepresentation?.id || null;
     }
+    // A-144 §10.10: a failed invite leaves no phantom representation.
+    const rollbackInviteSideEffects = async (dealId) => {
+      if (dealId) await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      if (createdRepresentationId) await supabaseAdmin.from('property_broker_representations').delete().eq('id', createdRepresentationId);
+    };
 
     // 1. Insert the handshake deal first — rolled back below if the Connect spend fails
     const { data: dealData, error: dealError } = await supabaseAdmin.from('deals').insert([{
@@ -111,7 +162,7 @@ export async function POST(request) {
 
     if (spendError) {
       console.error("[INVITE API] Connect spend failed:", spendError);
-      await supabaseAdmin.from('deals').delete().eq('id', dealData[0].id);
+      await rollbackInviteSideEffects(dealData[0].id);
       const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
       return NextResponse.json(
         { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
@@ -126,7 +177,16 @@ export async function POST(request) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
     }
 
-    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance });
+    // A-144 audit: source context on the handshake activity row (no schema change).
+    await logActivity(supabaseAdmin, {
+      dealId: dealData[0].id,
+      propertyId: listingId,
+      activityType: 'deal_created',
+      actorId: userId,
+      metadata: { source: 'owner_invite', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
+    });
+
+    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, source_context: connectSource });
 
   } catch (err) {
     console.error("[INVITE API] Error during invite process:", err);

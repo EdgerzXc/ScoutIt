@@ -2,6 +2,25 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { getPropertyLeadRecipients } from "@/lib/serverBrokerRouting";
+import { isIdentityPublic, ownerDisclosureLabel } from "@/lib/identityDisclosure";
+import { isOpenGateAvailable } from "@/lib/openGate";
+
+// A-147: resolve the uploader/lister disclosure for a live, unrepresented
+// property. Public owner → their name; anyone else → "Anonymous". Never a
+// user id, never an email — the label only.
+async function resolveUploaderLabel(ownerId) {
+  if (!ownerId) return null;
+  const { data: owner } = await supabaseAdmin
+    .from("user_profiles")
+    .select("display_name, is_profile_public")
+    .eq("id", ownerId)
+    .maybeSingle();
+  if (!owner) return null;
+  return ownerDisclosureLabel({
+    isPublic: isIdentityPublic(owner),
+    name: owner.display_name || "",
+  });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +76,8 @@ export async function GET(_request, { params }) {
         represented: false,
         contactable: routing.recipients.some((recipient) => Boolean(recipient.recipientId)),
         rosterStatus: "unrepresented",
+        uploader: await resolveUploaderLabel(property.owner_id),
+        ownerFreeContact: await isOpenGateAvailable(supabaseAdmin, property.id, property.owner_id, "owner"),
       });
     }
 
@@ -90,9 +111,12 @@ export async function GET(_request, { params }) {
       })
       .filter(Boolean);
 
+    const brokerGateFlags = await Promise.all(brokers.map((broker) => isOpenGateAvailable(supabaseAdmin, property.id, broker.id)));
+    const brokersWithGate = brokers.map((broker, index) => ({ ...broker, freeContact: brokerGateFlags[index] === true }));
+
     return NextResponse.json({
       property: { id: property.id, title: property.title, slug: property.canonical_slug || property.slug },
-      brokers,
+      brokers: brokersWithGate,
       represented: brokers.length > 0,
       contactable: routing.recipients.some((recipient) => Boolean(recipient.recipientId)),
       rosterStatus: brokers.length > 0 ? "represented" : "unrepresented",

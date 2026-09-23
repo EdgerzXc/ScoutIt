@@ -652,3 +652,205 @@
 .descent-backdrop .scout-earth--backdrop .scout-earth__glow {
   display: none;
 }
+
+/* ── LAYER 02 RADAR ENHANCEMENTS ─────────────────────────────────── */
+.strat-top-banner {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px) 24px;
+}
+
+.strat-kicker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.strat-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(var(--surface-rgb), 0.8);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+}
+
+.strat-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  min-height: 32px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--transition-slow), background var(--transition-slow), box-shadow var(--transition-slow);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strat-toggle-btn:hover {
+    color: var(--text-primary);
+  }
+}
+
+.strat-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+.strat-toggle-btn.active {
+  background: rgba(var(--accent-rgb), 0.2);
+  color: var(--accent-bright);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.2);
+}
+
+.strat-toggle-btn:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 1px;
+}
+
+/* Pipeline lifecycle filter chips. Same mono pill language as the view
+   toggle above; a bad filter value never hides the feed (see
+   pipelineLifecycle.js), so these are pure progressive disclosure. */
+.strat-lifecycle-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 4px;
+}
+
+.strat-lifecycle-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strat-lifecycle-chip:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-muted);
+  }
+}
+
+.strat-lifecycle-chip.active {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(var(--accent-rgb), 0.34);
+  color: var(--accent-bright);
+}
+
+.strat-lifecycle-chip:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 1px;
+}
+
+/* Lifecycle pill beside the status badge. Outlined, never filled, so it
+   reads as supply metadata rather than competing with the status itself.
+   Opening-today is the one state allowed a fill: it expires by midnight. */
+.strat-lifecycle-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 8px;
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.strat-lifecycle-badge.is-today {
+  background: rgba(var(--accent-rgb), 0.16);
+  border-color: var(--accent-bright);
+  color: var(--accent-bright);
+}
+
+.strat-signal-empty {
+  padding: 28px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Pipeline pulse: one mono ticker line above the filter chips. Only
+   rendered when pipeline data exists (see PipelinePulse). */
+.strat-pipeline-pulse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  margin: 14px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.strat-pipeline-pulse-label {
+  color: var(--text-muted);
+}
+
+/* Sample provenance on the pulse strip: counts over mock rows must never
+   read as verified market fact. Dashed and muted — a footnote, not a badge. */
+.strat-pulse-sample {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 8px;
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Timing readout inside the row meta. Same muted register as the meta
+   line — the badge carries the stage, this carries the clock. */
+.strat-signal-timing {
+  color: var(--text-secondary);
+}
+
+/* Overdue watch: the only red on this surface. A past opening date with
+   no completion on record is a record-keeping problem, and it should
+   look like one — not like another gold stage. */
+.strat-lifecycle-badge.is-overdue {
+  border-color: var(--red);
+  color: var(--red);
+  background: transparent;
+}
+
+.strat-radar-wrapper {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto 36px;
+  padding: 0 clamp(16px, 3vw, 48px);
+}
+
+.strat-radar-wrapper .st-terminal {
+  height: 720px;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(var(--bg-rgb), 0.9), inset 0 1px 0 rgba(var(--accent-rgb), 0.1);
+}

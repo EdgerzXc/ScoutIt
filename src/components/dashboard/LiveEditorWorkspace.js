@@ -358,13 +358,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
         <button 
           onClick={() => setMobileTab('editor')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Editor
         </button>
         <button 
           onClick={() => setMobileTab('preview')}
-          className={`flex-1 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
         >
           Live Preview
         </button>
@@ -395,7 +395,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
-        <button className="text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
+        <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
           ← {isEditing ? "Cancel" : "Exit"}
         </button>
         
@@ -403,12 +403,12 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
           <button 
             onClick={() => fileInputRef.current?.click()} 
-            className="text-gold-accent hover:text-gold-accent/80 text-[12px] uppercase font-label-caps tracking-wider transition border border-gold-accent/30 rounded px-2 py-1"
+            className="min-h-11 inline-flex items-center text-gold-accent hover:text-gold-accent/80 text-[12px] uppercase font-label-caps tracking-wider transition border border-gold-accent/30 rounded px-2 py-1"
           >
             Upload PDF (Auto-fill)
           </button>
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
+            <button onClick={clearDraft} className="min-h-11 inline-flex items-center text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
               Clear Draft
             </button>
           )}
@@ -496,7 +496,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handleSeoOptimize}
                     disabled={isOptimizing || !formData.description}
-                    className="text-[12px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition disabled:opacity-50 flex items-center gap-1 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
+                    className="min-h-11 inline-flex items-center gap-1 text-[12px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition disabled:opacity-50 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
                   >
                     {isOptimizing ? "Optimizing..." : "✨ SEO Optimize Description"}
                   </button>
@@ -583,11 +583,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-12 pt-6 border-t border-surface-variant">
+          <div className="flex flex-wrap justify-between items-center gap-3 mt-12 pt-6 border-t border-surface-variant">
             {step > 1 ? (
               <button 
                 onClick={() => setStep(step - 1)}
-                className="text-text-secondary hover:text-on-surface text-sm font-label-caps tracking-widest uppercase transition"
+                className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface text-sm font-label-caps tracking-widest uppercase transition"
               >
                 ← Back
               </button>
@@ -595,11 +595,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div></div>
             )}
 
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-wrap gap-4 items-center">
               <button 
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
-                className="px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
+                className="min-h-11 px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
               >
                 Save Draft
               </button>
@@ -608,7 +608,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 <button 
                   onClick={() => setStep(2)}
                   disabled={!Object.values(mustHaves).every(Boolean)}
-                  className="px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition"
+                  className="min-h-11 px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition"
                 >
                   Next Step →
                 </button>
@@ -628,7 +628,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handlePublish}
                     disabled={!isPublishable || !isVerified}
-                    className="px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none w-full"
+                    className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none w-full"
                   >
                     Publish to Directory
                   </button>

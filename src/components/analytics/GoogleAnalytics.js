@@ -27,9 +27,20 @@ export default function GoogleAnalytics() {
         id="google-analytics"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
+          // A-151 — Consent Mode v2: storage boots DENIED and only the
+          // CookieConsent banner can grant analytics_storage. Without this
+          // default the config below would start measuring before any
+          // choice. Ad surfaces stay denied unconditionally — ScoutIt
+          // serves no ads.
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied',
+            });
             gtag('js', new Date());
             gtag('config', '${gaId}', {
               page_path: window.location.pathname,
