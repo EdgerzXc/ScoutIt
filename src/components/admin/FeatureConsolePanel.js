@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ShieldAlert, Unlock, Bot, Brain, AlertTriangle, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { sanitizeError } from "@/lib/sanitizeError";
+import InfoTip from "@/components/ui/InfoTip";
 
 export default function FeatureConsolePanel() {
   const [flags, setFlags] = useState([]);
@@ -104,6 +105,7 @@ export default function FeatureConsolePanel() {
           <h2 className="text-base font-semibold text-white flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#E8AE3C] animate-pulse" />
             Live Feature & Kill-Switch Console
+            <InfoTip tipId="adminKillSwitches" label="About system switches" />
           </h2>
           <p className="text-xs text-gray-400 mt-1">
             Real-time system controls. Toggles update site behavior across database endpoints immediately.
@@ -174,8 +176,9 @@ export default function FeatureConsolePanel() {
                         <h4 className="text-sm font-bold text-white flex items-center gap-2">
                           {flag.name}
                           {isDanger && (
-                            <span className="px-1.5 py-0.5 text-[12px] font-mono tracking-wider uppercase rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[12px] font-mono tracking-wider uppercase rounded bg-red-500/20 text-red-400 border border-red-500/30">
                               SAFETY CRITICAL
+                              <InfoTip tipId="adminGlobalReadOnly" label="About read-only mode" />
                             </span>
                           )}
                         </h4>

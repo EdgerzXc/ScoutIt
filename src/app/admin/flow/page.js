@@ -6,6 +6,7 @@ import Link from "next/link";
 import { DashboardProvider } from "@/context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { ArrowLeft } from "lucide-react";
+import InfoTip from "@/components/ui/InfoTip";
 
 // The viewer carries the ~1MB graph source. Code-split it so the admin route
 // shell (and its role check) paints without waiting for it; staff see the
@@ -66,8 +67,9 @@ function AdminFlowPageInner() {
               <span className="text-gold-accent">S</span>cout<span className="text-gold-accent">IT</span>
             </span>
             {isStaff && (
-              <span className="hidden sm:inline text-xs font-mono uppercase px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gold-accent whitespace-nowrap">
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gold-accent whitespace-nowrap">
                 Master System Flow Map (Internal)
+                <InfoTip tipId="adminFlowMap" label="About system flow map" />
               </span>
             )}
           </div>
@@ -122,7 +124,7 @@ function AdminFlowPageInner() {
               <p className="text-sm text-text-secondary leading-relaxed">
                 The system flow map is limited to staff workspaces. Page-level
                 staff checks for /admin ship with the session migration
-                (A-073) — until then this preview hides the map without
+                (A-073). Until then, this preview hides the map without
                 granting or denying anything: every endpoint behind it stays
                 independently staff-checked server-side.
               </p>

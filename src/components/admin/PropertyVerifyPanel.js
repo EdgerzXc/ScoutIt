@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { getFreshness } from "@/lib/freshness";
+import InfoTip from "@/components/ui/InfoTip";
 
 // ─────────────────────────────────────────────────────────────────────────
 // STAFF PROPERTY VERIFICATION — ACQ-01 · WORK ORDER W12
@@ -261,9 +262,12 @@ export default function PropertyVerifyPanel() {
         }
       `}</style>
 
-      <p className="pv-intro">
-        Listings never verified, or not verified in the last {STALE_AFTER_DAYS} days.
-        Oldest first; never-verified listings come first of all.
+      <p className="pv-intro" style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <span>
+          Listings never verified, or not verified in the last {STALE_AFTER_DAYS} days.
+          Oldest first; never-verified listings come first of all.
+        </span>
+        <InfoTip tipId="adminReverification" label="About listing freshness" />
       </p>
 
       <div className="pv-warn">
@@ -334,8 +338,7 @@ export default function PropertyVerifyPanel() {
                 {confirmId === row.id ? (
                   <>
                     <div className="pv-confirm">
-                      Confirm that you have checked this listing&apos;s details — price,
-                      availability, specs — and they are accurate as of today.
+                      Confirm that you checked the pricing, availability, and specs for this listing, and that all information is accurate today.
                     </div>
                     <div className="pv-actions">
                       <button
@@ -344,7 +347,7 @@ export default function PropertyVerifyPanel() {
                         onClick={() => verify(row)}
                         disabled={busyId === row.id}
                       >
-                        {busyId === row.id ? "Recording…" : "Yes — I checked it"}
+                        {busyId === row.id ? "Recording…" : "Yes, I checked it"}
                       </button>
                       <button
                         type="button"

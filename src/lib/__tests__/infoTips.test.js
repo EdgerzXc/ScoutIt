@@ -56,6 +56,15 @@ describe("info tips — explanations on demand (A-160)", () => {
       "listingStrength",
       "vaultMilestones",
       "bulkIngest",
+      "adminKillSwitches",
+      "adminPendingApprovals",
+      "adminPrcQueue",
+      "adminPdfDrafts",
+      "adminIntelStudio",
+      "adminRefunds",
+      "adminReverification",
+      "adminGlobalReadOnly",
+      "adminFlowMap",
     ]) {
       expect(getInfoTip(id), id).toBeTruthy();
     }

@@ -12,6 +12,7 @@ import PropertyVerifyPanel from "@/components/admin/PropertyVerifyPanel";
 import { DashboardProvider } from "@/context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { sanitizeError } from "@/lib/sanitizeError";
+import InfoTip from "@/components/ui/InfoTip";
 
 function AdminPageInner() {
   const [activeTab, setActiveTab] = useState("flags");
@@ -186,7 +187,9 @@ function AdminPageInner() {
               thing, the separate staff console in `mission-control/`. See the
               rule in MissionControlMode.js:23-30; the collision cost real time
               once already. */}
-          <h1 className="page-title">Admin Console</h1>
+          <h1 className="page-title">
+            Admin Console <InfoTip tipId="adminKillSwitches" label="About Admin Console" />
+          </h1>
           <p className="page-subtitle">Master feature switches, verification queues, and system parameters.</p>
         </header>
 
@@ -294,7 +297,9 @@ function AdminPageInner() {
           {activeTab === "refunds" && (
             <div className="admin-panel">
               <div className="panel-header">
-                <h2>Connect Refunds</h2>
+                <h2>
+                  Connect Refunds <InfoTip tipId="adminRefunds" label="About connect refunds" />
+                </h2>
               </div>
               <ConnectsRefundPanel />
             </div>
@@ -303,7 +308,9 @@ function AdminPageInner() {
           {activeTab === "verify" && (
             <div className="admin-panel">
               <div className="panel-header">
-                <h2>Listing Re-verification</h2>
+                <h2>
+                  Listing Re-verification <InfoTip tipId="adminReverification" label="About listing freshness" />
+                </h2>
               </div>
               <PropertyVerifyPanel />
             </div>
@@ -312,7 +319,9 @@ function AdminPageInner() {
           {activeTab === "approvals" && (
             <div className="admin-panel">
               <div className="panel-header">
-                <h2>Pending Approvals</h2>
+                <h2>
+                  Pending Approvals <InfoTip tipId="adminPendingApprovals" label="About pending approvals" />
+                </h2>
                 <span className="count-badge">{pendingProperties.length}</span>
               </div>
 
@@ -372,7 +381,9 @@ function AdminPageInner() {
           {activeTab === "pdf" && (
             <div className="admin-panel">
               <div className="panel-header">
-                <h2>PDF Draft Verification</h2>
+                <h2>
+                  PDF Draft Verification <InfoTip tipId="adminPdfDrafts" label="About PDF source check" />
+                </h2>
                 <span className="count-badge">{pdfQueue.length}</span>
               </div>
 
@@ -442,7 +453,9 @@ function AdminPageInner() {
           {activeTab === "prc" && (
             <div className="admin-panel">
               <div className="panel-header">
-                <h2>PRC Verification</h2>
+                <h2>
+                  PRC Verification <InfoTip tipId="adminPrcQueue" label="About PRC verification" />
+                </h2>
                 <span className="count-badge">{prcQueue.filter((p) => !p.prc_verified).length}</span>
               </div>
 
@@ -471,8 +484,8 @@ function AdminPageInner() {
                         </div>
                         <div className="info-meta">
                           {p.prc_verified
-                            ? `Verified ${p.prc_verified_at ? new Date(p.prc_verified_at).toLocaleDateString() : ""} — badge live on public profile`
-                            : "Unverified — check against the PRC public registry before approving"}
+                            ? `Verified ${p.prc_verified_at ? new Date(p.prc_verified_at).toLocaleDateString() : ""}. Badge is live on public profile.`
+                            : "Unverified. Check against the PRC public registry before approving."}
                         </div>
                       </div>
 
@@ -498,12 +511,14 @@ function AdminPageInner() {
           {activeTab === "intel" && (
             <div className="admin-panel">
               <div className="panel-header">
-                <h2>Intel Studio</h2>
+                <h2>
+                  Intel Studio <InfoTip tipId="adminIntelStudio" label="About Intel Studio" />
+                </h2>
               </div>
               <p className="panel-hint">
                 Turn any document into an Intel article. Upload a PDF market report, a CSV data
-                sheet, or plain text — it gets structured into the universal article format,
-                previewed here, and saved to the INTEL_CMS.
+                sheet, or plain text. The system structures it into an article,
+                lets you preview it here, and saves it directly to the database.
               </p>
               <IntelStudioPanel />
             </div>

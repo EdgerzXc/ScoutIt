@@ -100,6 +100,42 @@ export const INFO_TIPS = Object.freeze({
     title: "Bulk upload options",
     body: "Add multiple properties at once using Excel or CSV spreadsheets, or attach virtual tours and floor plans directly.",
   }),
+  adminKillSwitches: Object.freeze({
+    title: "System switches",
+    body: "Instant switches that control platform features. Changes update database endpoints immediately without redeploying code.",
+  }),
+  adminPendingApprovals: Object.freeze({
+    title: "Pending approvals",
+    body: "Submissions from owners or brokers awaiting review. Approving syncs the space to the public directory and notifies the lister.",
+  }),
+  adminPrcQueue: Object.freeze({
+    title: "PRC verification",
+    body: "Brokers and appraisers submit license numbers for review. Confirm these against the PRC registry before granting verified status.",
+  }),
+  adminPdfDrafts: Object.freeze({
+    title: "PDF source check",
+    body: "Listings drafted by our scanner from owner documents. Staff must confirm every field against the original PDF before publishing.",
+  }),
+  adminIntelStudio: Object.freeze({
+    title: "Intel Studio",
+    body: "Upload market reports or research files to convert them into structured ScoutIt articles with key metrics and neighborhood tags.",
+  }),
+  adminRefunds: Object.freeze({
+    title: "Connect refunds",
+    body: "Refunds can only be issued for verified system errors. Every refund logs the staff ID, credited amount, and incident reason.",
+  }),
+  adminReverification: Object.freeze({
+    title: "Listing freshness",
+    body: "Listings unverified for over 30 days appear here. Re-verifying confirms that pricing, terms, and availability are still accurate.",
+  }),
+  adminGlobalReadOnly: Object.freeze({
+    title: "Read-only mode",
+    body: "Freezes all database inserts and edits across the platform. Use during migrations or emergencies to prevent corrupted submissions.",
+  }),
+  adminFlowMap: Object.freeze({
+    title: "System flow map",
+    body: "Interactive architecture diagram showing data pathways, state machines, and API connections across the platform.",
+  }),
 });
 
 export function getInfoTip(id) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { sanitizeError } from "@/lib/sanitizeError";
+import InfoTip from "@/components/ui/InfoTip";
 
 // ─────────────────────────────────────────────────────────────────────────
 // SYSTEM-ERROR CONNECT REFUND PANEL  (NEW_IDEAS.md §38.3 / §40.16)
@@ -113,15 +114,16 @@ export default function ConnectsRefundPanel() {
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-error/30 bg-error/5 p-4">
-        <h3 className="font-working-title text-sm text-error mb-1">
+        <h3 className="font-working-title text-sm text-error mb-1 flex items-center gap-2">
           System-error refunds only
+          <InfoTip tipId="adminRefunds" label="About connect refunds" />
         </h3>
         <p className="text-xs text-text-secondary leading-relaxed">
-          Connects are <strong>not</strong> refunded when a recipient declines, doesn&apos;t
-          reply, or the sender withdraws — those are decisions, and the Connect paid for the
+          Connects are <strong>not</strong> refunded when a recipient declines, does not
+          reply, or the sender withdraws. Those are normal decisions, and the Connect paid for the
           attempt. Use this <strong>only</strong> when ScoutIt was at fault: a request that
           was charged but never created, a double charge, or a deduction with no
-          conversation. Every credit is written to the ledger with your name and reason.
+          conversation. Every credit is written to the ledger with your staff ID and incident reason.
         </p>
       </div>
 
@@ -241,7 +243,7 @@ export default function ConnectsRefundPanel() {
                   reasonOk ? "text-text-muted" : "text-gold-accent"
                 }`}
               >
-                {reason.trim().length}/{MIN_REASON} — this text is written to the ledger permanently.
+                {reason.trim().length}/{MIN_REASON}. This text is written to the ledger permanently.
               </span>
             </label>
 

@@ -61,7 +61,7 @@ export default function IntelStudioPanel() {
         setStatus({
           type: "success",
           text: data.published
-            ? `Published "${data.article.title}" — it is live on the site now.`
+            ? `Published "${data.article.title}". It is live on the site now.`
             : `Saved "${data.article.title}" as a draft. Check Approved_For_Live_Site in Airtable to publish it.`,
           url: data.published ? data.url : null,
         });
