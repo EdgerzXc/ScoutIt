@@ -559,9 +559,22 @@ export default function Header({ ambientContext = null }) {
             height: 44px;
           }
 
+          /* U-037: one owner for the mobile panel. The dropdown stays
+             absolute (the sticky glass header is its correct containing
+             block — a fixed sheet would collapse inside the header's own
+             backdrop-filter, which is exactly the "Create Account sliver"
+             failure). Full width under the header, own scroll, safe-area
+             aware, dvh-measured because vh lies under the iOS toolbar. */
           .header-dropdown {
-            min-width: 160px;
-            padding: 6px;
+            left: 12px;
+            right: 12px;
+            min-width: 0;
+            width: auto;
+            max-height: calc(100dvh - 88px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            border-radius: 16px;
+            padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
           }
 
           .header-dropdown :global(a) {
@@ -629,8 +642,11 @@ export default function Header({ ambientContext = null }) {
 
         @media (max-width: 480px) {
           .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
-          .header-left { gap: 4px; }
-          .header-back-btn { font-size: 12px; padding: 0 6px; min-height: 44px; letter-spacing: 0.06em; border-radius: 14px; }
+          .header-left { gap: 4px; min-width: 0; }
+          /* U-041: the button keeps its 44px floor but may shrink, and the
+             label truncates instead of shoving the rail off its slot. */
+          .header-back-btn { font-size: 12px; padding: 0 6px; min-height: 44px; min-width: 0; letter-spacing: 0.06em; border-radius: 14px; }
+          .header-back-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
           .header-menu-btn { width: 44px; height: 44px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
         }

@@ -97,15 +97,15 @@ function writeCache(value) {
   catch { /* Private browsing can disable storage; in-memory data still works. */ }
 }
 
-function normalizePropertyContext(context) {
+function normalizeAmbientContext(context) {
   const latitude = Number(context?.latitude);
   const longitude = Number(context?.longitude);
   const shortName = compactPlaceName(context?.shortName);
   const contextKey = String(context?.key || "").trim();
-  if (context?.source !== "property" || !Number.isFinite(latitude) || !Number.isFinite(longitude) || !shortName || !contextKey) return null;
+  if (!["property", "dashboard"].includes(context?.source) || !Number.isFinite(latitude) || !Number.isFinite(longitude) || !shortName || !contextKey) return null;
   return {
     contextKey,
-    source: "property",
+    source: context.source,
     latitude,
     longitude,
     shortName,
@@ -114,10 +114,10 @@ function normalizePropertyContext(context) {
 }
 
 export function cacheablePropertyLocation(location) {
-  if (location?.source !== "property" || !location?.contextKey || !location?.shortName) return null;
+  if (!["property", "dashboard"].includes(location?.source) || !location?.contextKey || !location?.shortName) return null;
   return {
     contextKey: location.contextKey,
-    source: "property",
+    source: location.source,
     shortName: location.shortName,
     updatedAt: Date.now(),
   };
@@ -174,6 +174,10 @@ export function buildAmbientItems({ ambient, now, user }) {
     const { aqi, label } = ambient.air;
     items.push(item("air", [token("AIR", "label"), token(label, "detail"), token(`AQI ${aqi}`, "value")], [token("AIR", "label"), token(`AQI ${aqi}`, "value")]));
   }
+  // A selected dashboard city should reveal its actual conditions first.
+  if (location?.source === "dashboard") {
+    items.sort((a, b) => Number(b.id === "weather") - Number(a.id === "weather"));
+  }
   return items;
 }
 
@@ -186,13 +190,14 @@ export function buildAmbientItems({ ambient, now, user }) {
  * when the layer header was first built. It served one component,
  * AmbientInformationRail, which had no callers at all; both were deleted.
  *
- * Takes `(user, context)`. `context` is the shape the property page passes to
- * <Header ambientContext={...}>: { key, source, latitude, longitude, shortName }.
+ * Takes `(user, context)`. Property pages pass a listing location;
+ * the dashboard passes a city the visitor selected. Neither asks for device
+ * geolocation, and coordinates are never stored in the cache.
  */
 export function useAmbientData(user, context = null) {
   const [now, setNow] = useState(null);
   const [ambient, setAmbient] = useState(null);
-  const propertyContext = useMemo(() => normalizePropertyContext(context), [context]);
+  const locationContext = useMemo(() => normalizeAmbientContext(context), [context]);
 
   useEffect(() => {
     const update = () => setNow(new Date());
@@ -212,7 +217,7 @@ export function useAmbientData(user, context = null) {
     let airTimer;
     let cached = readCache();
 
-    if (!propertyContext) {
+    if (!locationContext) {
       // Older builds cached visitor coordinates. Remove that legacy data and do
       // not request geolocation: generic pages only need greeting + local time.
       if (cached.location) writeCache({});
@@ -220,13 +225,13 @@ export function useAmbientData(user, context = null) {
       return undefined;
     }
 
-    // Property coordinates are public listing data, but they are still not
-    // persisted. Keep them only in this effect closure for API requests.
-    if (cached.location?.latitude != null || cached.location?.longitude != null || cached.location?.source !== "property") {
+    // Listing and chosen-city coordinates stay in this effect closure, never
+    // in browser storage. Discard legacy caches that carried coordinates.
+    if (cached.location?.latitude != null || cached.location?.longitude != null || cached.location?.source !== locationContext.source) {
       writeCache({});
       cached = {};
     }
-    const cacheMatchesContext = cached.location?.contextKey === propertyContext.contextKey;
+    const cacheMatchesContext = cached.location?.contextKey === locationContext.contextKey;
     if (cacheMatchesContext) {
       const cachedDisplay = {
         ...cached,
@@ -281,7 +286,7 @@ export function useAmbientData(user, context = null) {
 
     async function start() {
       try {
-        const location = propertyContext;
+        const location = locationContext;
         const latest = readCache();
         const contextChanged = latest.location?.contextKey !== location.contextKey;
         const seeded = contextChanged
@@ -298,9 +303,9 @@ export function useAmbientData(user, context = null) {
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
       const current = readCache();
-      if (current.location?.contextKey === propertyContext.contextKey) {
-        refreshWeather(propertyContext);
-        refreshAir(propertyContext);
+      if (current.location?.contextKey === locationContext.contextKey) {
+        refreshWeather(locationContext);
+        refreshAir(locationContext);
       }
     };
     start();
@@ -311,7 +316,7 @@ export function useAmbientData(user, context = null) {
       if (airTimer) window.clearInterval(airTimer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [propertyContext]);
+  }, [locationContext]);
 
   return useMemo(() => buildAmbientItems({ ambient, now, user }), [ambient, now, user]);
 }

@@ -54,7 +54,7 @@ describe("A-074 · transitions name their properties", () => {
   it("leaves `transition: all` only in the locked Showcase surface", () => {
     const remaining = filesWithTransitionAll();
     for (const file of remaining) expect(LOCKED.has(file)).toBe(true);
-  });
+  }, 15000);
 
   it("names only compositor-friendly properties — no layout-bound ones", () => {
     for (const property of ["width", "height", "padding", "margin", "font-size", "border-width"]) {

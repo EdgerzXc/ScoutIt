@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { Lock } from "lucide-react";
 import { BADGE_REGISTRY } from "@/lib/badges";
+import InfoTip from "@/components/ui/InfoTip";
 
 export default function VaultOfHonor() {
-  // Mock unlocked badges for demonstration
-  // In production, this would come from Supabase user data
-  const [unlockedBadges] = useState(["pioneer", "spatial_analyst"]);
+  // No earned badges yet: an empty vault is honest, a pre-filled one is not.
+  // Wire this to user_badges when the grant pipeline lands; until then the
+  // count reads 0 and every card shows its locked state.
+  const [unlockedBadges] = useState([]);
   // The badge grid runs a permanent spin/glow/blur animation per unlocked card, which
   // was the source of mobile lag — gate it behind a tap instead of mounting on load.
   const [isLoaded, setIsLoaded] = useState(false);
@@ -17,12 +19,12 @@ export default function VaultOfHonor() {
       <div className="flex items-end justify-between mb-6">
         <div>
           <h2 className="font-headline-editorial text-2xl text-on-surface flex flex-wrap items-center gap-3">
-            Milestones & Achievements
+            <span>Milestones & Achievements <InfoTip tipId="vaultMilestones" label="About milestones and achievements" /></span>
             <span className="font-label-caps tracking-widest text-[12px] text-gold-accent px-2 py-1 bg-gold-accent/10 border border-gold-accent/30 rounded">
               {unlockedBadges.length} / {BADGE_REGISTRY.length} UNLOCKED
             </span>
           </h2>
-          <p className="text-sm text-text-secondary mt-1">Your verified legacy on the ScoutIt platform.</p>
+          <p className="text-sm text-text-secondary mt-1">Badges you earn appear here.</p>
         </div>
       </div>
 

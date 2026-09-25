@@ -36,23 +36,24 @@ describe("universal header menu operating layer", () => {
   });
 
   it("uses dvh for the mobile sheet, because vh lies under the iOS toolbar", () => {
+    // U-037: the mobile panel has one owner — Header.js styled-jsx. A second
+    // fixed-position override in globals.css collapsed inside the header's own
+    // backdrop-filter (the "Create Account sliver"), so the override is gone
+    // and this test is re-aimed at the surviving owner (Rule 14: re-aimed,
+    // not deleted).
     const sheet = header.slice(header.indexOf(".header-dropdown {"));
     expect(sheet).not.toMatch(/max-height:\s*\d+vh/);
-    // A-119: these anchors used to include the section rule's box-drawing
-    // characters, which were double-encoded in globals.css — so the test only
-    // matched because BOTH sides were corrupted identically. Repairing the
-    // source invalidated the test, and per Rule 14 the test is part of that
-    // change: re-aimed, not deleted. It now anchors on the words alone, so no
-    // future encoding change can break it again.
-    const startIndex = globals.indexOf("DROPDOWN POSITIONING FIX");
+    expect(sheet).toContain("100dvh");
+    expect(sheet).toContain("env(safe-area-inset-bottom");
+    expect(sheet).toContain("overscroll-behavior: contain");
+    // The globals override must never come back: no fixed positioning of the
+    // dropdown from outside its owner.
+    const startIndex = globals.indexOf("DROPDOWN POSITIONING (U-037)");
     const endIndex = globals.indexOf("SEARCH INPUT OPTIMIZATION");
     expect(startIndex, "the dropdown positioning section still exists").toBeGreaterThan(-1);
     expect(endIndex, "the search input section still exists").toBeGreaterThan(startIndex);
     const globalMobileSheet = globals.slice(startIndex, endIndex);
-    expect(globalMobileSheet).not.toMatch(/max-height:\s*\d+vh/);
-    expect(globalMobileSheet).toContain("env(safe-area-inset-top");
-    expect(globalMobileSheet).toContain("env(safe-area-inset-bottom");
-    expect(globalMobileSheet).toContain("overscroll-behavior: contain");
+    expect(globalMobileSheet).not.toContain("position: fixed");
   });
 
   // styled-jsx does not attach its scoping class to elements rendered from a

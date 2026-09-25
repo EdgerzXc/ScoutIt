@@ -5,6 +5,7 @@ import Link from "next/link";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import { rankBoard, BOARD_CATEGORIES, BOARD_AWARDS } from "@/data/mock/mockShowcase";
 import { isLiteMode } from "@/lib/liteMode";
+import { isLightMode, LIGHT_MODE_EVENT } from "@/lib/lightMode";
 import {
   Trophy,
   Flame,
@@ -978,6 +979,29 @@ export default function ShowcaseStage({ mode = "full" }) {
     const ctx = bg.getContext("2d"), wctx = warp.getContext("2d");
     let raf = 0, frame = 0;
 
+    // White Lens carries no cosmic background (owner order 2026-09-24): the
+    // loop never runs there, and the canvases are hidden by CSS below, so no
+    // starfield bleeds around the cards. Dark mode is untouched.
+    const clearCanvases = () => {
+      const { W, H } = dimRef.current;
+      if (W && H) {
+        ctx.clearRect(0, 0, W, H);
+        wctx.clearRect(0, 0, W, H);
+      }
+    };
+    const start = () => {
+      if (!raf) raf = requestAnimationFrame(draw);
+    };
+    const stop = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      clearCanvases();
+    };
+    const onLightMode = () => {
+      if (isLightMode()) stop();
+      else start();
+    };
+
     const draw = () => {
       raf = requestAnimationFrame(draw);
       frame++;
@@ -1042,11 +1066,13 @@ export default function ShowcaseStage({ mode = "full" }) {
       }
     };
 
-    raf = requestAnimationFrame(draw);
+    if (!isLightMode()) start();
     window.addEventListener("resize", sizeCanvases);
+    window.addEventListener(LIGHT_MODE_EVENT, onLightMode);
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
       window.removeEventListener("resize", sizeCanvases);
+      window.removeEventListener(LIGHT_MODE_EVENT, onLightMode);
     };
   }, [sizeCanvases]);
 
@@ -1614,6 +1640,18 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
         .sc-canvas-warp {
           z-index: 2;
+        }
+
+        /* White Lens has no cosmic background (owner order 2026-09-24): the
+           fixed starfield canvases and the black stage ground step aside for
+           the theme background. Dark mode is untouched. */
+        :global(body.light-mode) .sc-canvas-bg,
+        :global(body.light-mode) .sc-canvas-warp {
+          display: none;
+        }
+        :global(body.light-mode) .sc-stage-container {
+          background: var(--bg);
+          color: var(--text-primary);
         }
 
         /* ── 1. TOP COMMAND BAR ── */

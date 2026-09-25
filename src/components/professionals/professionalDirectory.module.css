@@ -6,13 +6,15 @@
 .hero { position: relative; max-width: 1420px; min-height: 420px; margin: 0 auto; padding: 112px 48px 72px; display: grid; grid-template-columns: minmax(0, 1fr) 350px; align-items: end; gap: 60px; }
 .heroCopy { position: relative; z-index: 1; max-width: 780px; }
 .eyebrow,.sectionLabel,.resultMeta,.sourceFlag,.sampleFlag { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
-.eyebrow { color: var(--accent); }
-.hero h1 { max-width: 850px; margin: 16px 0 20px; font-family: var(--font-display); font-size: clamp(56px, 7.2vw, 112px); font-weight: 400; letter-spacing: -.035em; line-height: .88; }
+.eyebrow { color: var(--accent); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.hero h1 { max-width: 850px; margin: 16px 0 20px; font-family: var(--font-display); font-size: clamp(56px, 7.2vw, 112px); font-weight: 400; letter-spacing: -.035em; line-height: .95; overflow-wrap: break-word; text-wrap: balance; }
 .heroCopy > p { max-width: 660px; color: var(--text-secondary); font-size: 16px; line-height: 1.75; }
-.truthPanel { position: relative; z-index: 2; padding: 24px; border: 1px solid var(--accent-muted); border-radius: 2px; background: linear-gradient(145deg, rgba(28,25,18,.72), rgba(13,13,13,.88)); box-shadow: 0 24px 70px rgba(0,0,0,.35); backdrop-filter: blur(18px); }
+/* A-160: the evidence essay is now one row — the explanation lives behind
+   the "?" mark instead of in front of the directory. */
+.protocolRow { position: relative; z-index: 2; align-self: end; display: flex; align-items: center; gap: 9px; max-width: 540px; padding: 14px 16px; border: 1px solid var(--accent-muted); border-radius: 2px; background: linear-gradient(145deg, rgba(28,25,18,.72), rgba(13,13,13,.88)); color: var(--accent-bright); }
+.protocolRow > svg { flex-shrink: 0; }
+.protocolRow strong { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .sectionLabel { display: block; margin-bottom: 13px; color: var(--text-muted); }
-.truthPanel strong { display: flex; gap: 9px; align-items: center; color: var(--accent-bright); font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.truthPanel p { margin-top: 12px; color: var(--text-secondary); font-size: 13px; line-height: 1.65; }
 .orbit { position: absolute; width: 420px; height: 420px; top: 28px; right: 210px; opacity: .42; pointer-events: none; }
 .orbit::before,.orbit::after,.orbit span { content: ""; position: absolute; inset: 15%; border: 1px solid rgba(232,174,60,.17); border-radius: 50%; transform: rotateX(68deg) rotateZ(22deg); }
 .orbit::after { inset: 29%; transform: rotateX(62deg) rotateZ(-34deg); }
@@ -82,8 +84,10 @@
 .state h2 { margin: 13px 0 8px; font-family: var(--font-display); font-size: 31px; font-weight: 400; }
 .state p { color: var(--text-secondary); font-size: 14px; }
 .state button { min-height: 44px; margin-top: 20px; padding: 10px 16px; color: var(--accent); border: 1px solid var(--accent-muted); background: transparent; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
-@media (max-width: 1100px) { .hero { grid-template-columns: 1fr; gap: 28px; } .truthPanel { max-width: 540px; } .grid { grid-template-columns: 1fr; } .toolbar { position: relative; top: auto; grid-template-columns: 1fr; } .selects { flex-wrap: wrap; } }
-@media (max-width: 680px) { .hero { min-height: auto; padding: 86px 20px 46px; } .hero h1 { font-size: clamp(48px, 16vw, 72px); } .truthPanel { padding: 19px; } .orbit { width: 290px; height: 290px; right: -80px; top: 15px; } .directory { padding: 0 20px 70px; } .toolbar { padding: 10px; } .selects { display: grid; grid-template-columns: 1fr; } .selects > svg { display: none; } .selects select { width: 100%; max-width: none; } .resultMeta { flex-direction: column; line-height: 1.5; } .card { grid-template-columns: 1fr; transform: none !important; } .portrait { min-height: 210px; } .cardBody { padding: 21px; } .cardActions { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .hero { grid-template-columns: 1fr; gap: 28px; } .protocolRow { max-width: 540px; } .grid { grid-template-columns: 1fr; } .toolbar { position: relative; top: auto; grid-template-columns: 1fr; } .selects { flex-wrap: wrap; } }
+/* U-039: the display headline scales with the phone and always breaks
+   between words — never "Photographe rs" again. */
+@media (max-width: 680px) { .hero { min-height: auto; padding: 86px 20px 46px; } .hero h1 { font-size: clamp(40px, 12.5vw, 56px); line-height: 1; } .protocolRow { padding: 12px 14px; } .protocolRow strong { white-space: normal; } .orbit { width: 290px; height: 290px; right: -80px; top: 15px; } .directory { padding: 0 20px 70px; } .toolbar { padding: 10px; } .selects { display: grid; grid-template-columns: 1fr; } .selects > svg { display: none; } .selects select { width: 100%; max-width: none; } .resultMeta { flex-direction: column; line-height: 1.5; } .card { grid-template-columns: 1fr; transform: none !important; } .portrait { min-height: 210px; } .cardBody { padding: 21px; } .cardActions { grid-template-columns: 1fr; } }
 
 @media (prefers-reduced-motion: reduce) { .orbit span:nth-child(2) { animation: none; } .card,.portrait img { transition: none; transform: none !important; } }
 

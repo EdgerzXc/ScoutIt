@@ -99,6 +99,36 @@ describe("ambient information labels", () => {
     expect(items[0].mobileSegments).toHaveLength(1);
   });
 
+  it("shows a selected dashboard city's actual weather first and caches no coordinates", () => {
+    const items = buildAmbientItems({
+      now: new Date("2026-08-11T05:00:00Z"),
+      user: { name: "Ari" },
+      ambient: {
+        location: { source: "dashboard", shortName: "MAKATI" },
+        weather: {
+          temperature: 29,
+          feelsLike: 33,
+          humidity: 70,
+          condition: "CLEAR",
+        },
+      },
+    });
+    expect(items[0].id).toBe("weather");
+    expect(items[0].mobileSegments.map((part) => part.text)).toEqual(["MAKATI", "29°C"]);
+    expect(items.some((entry) => entry.id === "greeting")).toBe(true);
+
+    const cached = cacheablePropertyLocation({
+      contextKey: "dashboard:makati-cbd",
+      source: "dashboard",
+      latitude: 14.5547,
+      longitude: 121.0244,
+      shortName: "MAKATI",
+    });
+    expect(cached).toMatchObject({ source: "dashboard", shortName: "MAKATI" });
+    expect(cached).not.toHaveProperty("latitude");
+    expect(cached).not.toHaveProperty("longitude");
+  });
+
   it("caches property identity without persisting coordinates", () => {
     const cached = cacheablePropertyLocation({
       contextKey: "property:ridgeline-capitol-commons",

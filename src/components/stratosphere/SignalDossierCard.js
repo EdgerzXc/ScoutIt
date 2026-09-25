@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,6 +17,7 @@ import {
   Bookmark,
 } from "lucide-react";
 import SignalGlyph from "./glyphs/SignalGlyph";
+import { getSession } from "@/lib/authClient";
 import { SIGNAL_TYPES, SIGNAL_TYPE_LABELS, SIGNAL_COLORS } from "@/lib/communitySignalsAdapter";
 import "./signal-dossier-card.css";
 
@@ -35,12 +36,75 @@ export default function SignalDossierCard({
   const [relevantCount, setRelevantCount] = useState(signal.relevantCount || 0);
   const [saved, setSaved] = useState(false);
   const [showMetropolisMatches, setShowMetropolisMatches] = useState(false);
+  // C2: optimism rolls back visibly. A failed tap says so on the card for a
+  // few seconds instead of dying silent — the count on screen is a promise.
+  const [actionError, setActionError] = useState(null);
+  const errorTimer = useRef(null);
+  const flashActionError = useCallback((message) => {
+    setActionError(message);
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+    errorTimer.current = setTimeout(() => setActionError(null), 4000);
+  }, []);
+  useEffect(() => () => {
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+  }, []);
 
   const typeColor = SIGNAL_COLORS[signal.signalType] || "var(--accent)";
   const typeLabel = SIGNAL_TYPE_LABELS[signal.signalType] || signal.signalType;
+  // A-145 separation: one card renders two provenances. Name the source so a
+  // reader can tell a human community post from a ScoutIt building update.
+  const isPipelineUpdate = typeof signal.id === "string" && signal.id.startsWith("pipeline-");
+  const sourceKind = isPipelineUpdate ? "SCOUTIT INTEL" : "COMMUNITY";
+
+  // Live member posts vote through the community endpoints (one tap per
+  // account, server-counted). Everything else keeps its prior path: samples
+  // stay local-only, pipeline rows keep the A-142 reactions meter.
+  const communityFetch = async (path, method) => {
+    const { data: { session } } = await getSession().catch(() => ({ data: {} }));
+    const token = session?.access_token;
+    if (!token) {
+      router.push("/onboarding");
+      return null;
+    }
+    const res = await fetch(`/api/community/signals/${encodeURIComponent(signal.id)}${path}`, {
+      method,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) {
+      router.push("/onboarding");
+      return null;
+    }
+    return res.json().catch(() => ({}));
+  };
 
   const handleRelevantClick = (e) => {
     e.stopPropagation();
+    // A-145 honesty: samples aggregate locally only. They never write to
+    // /api/reactions — a fake signal id must not become a stored row.
+    if (signal.isSample) {
+      setRelevant(!relevant);
+      setRelevantCount((c) => (relevant ? Math.max(0, c - 1) : c + 1));
+      return;
+    }
+    if (signal.liveCommunity) {
+      const next = !relevant;
+      setRelevant(next);
+      setRelevantCount((c) => (next ? c + 1 : Math.max(0, c - 1)));
+      communityFetch("/relevant", next ? "POST" : "DELETE").then((json) => {
+        if (!json || json.ok !== true) {
+          setRelevant(!next);
+          setRelevantCount((c) => (next ? Math.max(0, c - 1) : c + 1));
+          if (json) flashActionError("Couldn't record that — try again.");
+        } else if (typeof json.relevantCount === "number") {
+          setRelevantCount(json.relevantCount);
+        }
+      }).catch(() => {
+        setRelevant(!next);
+        setRelevantCount((c) => (next ? Math.max(0, c - 1) : c + 1));
+        flashActionError("Couldn't record that — try again.");
+      });
+      return;
+    }
     if (!relevant) {
       setRelevant(true);
       setRelevantCount((c) => c + 1);
@@ -66,6 +130,24 @@ export default function SignalDossierCard({
   const handleSaveClick = (e) => {
     e.stopPropagation();
     const nextSaved = !saved;
+    // A-145 honesty: sample saves are local-only, never a stored row.
+    if (signal.isSample) {
+      setSaved(nextSaved);
+      return;
+    }
+    if (signal.liveCommunity) {
+      setSaved(nextSaved);
+      communityFetch("/save", nextSaved ? "POST" : "DELETE").then((json) => {
+        if (!json || json.ok !== true) {
+          setSaved(!nextSaved);
+          if (json) flashActionError("Couldn't save that — try again.");
+        }
+      }).catch(() => {
+        setSaved(!nextSaved);
+        flashActionError("Couldn't save that — try again.");
+      });
+      return;
+    }
     setSaved(nextSaved);
     if (nextSaved) {
       try {
@@ -176,6 +258,10 @@ export default function SignalDossierCard({
           <span className="sdc-divider" aria-hidden="true">/</span>
           <span className="sdc-type-pill" style={{ "--pill-color": typeColor }}>
             {typeLabel.toUpperCase()}
+          </span>
+          <span className="sdc-divider" aria-hidden="true">/</span>
+          <span className="sdc-source-pill" title={isPipelineUpdate ? "Sourced building update from ScoutIt intelligence" : "Posted by a community member"}>
+            {sourceKind}
           </span>
         </div>
 
@@ -302,6 +388,9 @@ export default function SignalDossierCard({
           </button>
         </div>
       </div>
+      {actionError ? (
+        <p className="sdc-action-error" role="alert">{actionError}</p>
+      ) : null}
 
       {/* ── EXPANDED DOSSIER DETAILS ── */}
       {expanded && (

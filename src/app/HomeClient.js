@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ui/ReactionButtons";
+import InfoTip from "@/components/ui/InfoTip";
 import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
@@ -670,9 +671,9 @@ export default function HomeClient() {
           {/* Divider */}
           <div className="title-divider"></div>
 
-          {/* Plain-Language Value Proposition */}
+          {/* Trust proof stays inline; the data philosophy sits behind a "?" (A-160) */}
           <p className="title-tagline-intro">
-            Space intelligence for the Philippines. Structured property briefings and spatial signals. Named sources. No manufactured urgency. Clear terms.
+            Space intelligence for the Philippines. Named sources. No manufactured urgency. Clear terms. <InfoTip tipId="dataPhilosophy" label="How ScoutIt handles data" />
           </p>
 
 
@@ -754,7 +755,7 @@ export default function HomeClient() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Mantle: Platform Truth</h3>
-            <p className="text-sm text-text-secondary">How ScoutIt works. Our data philosophy, verification standards, and dual-system architecture.</p>
+            <p className="text-sm text-text-secondary">Data philosophy and verification standards. <InfoTip tipId="platformTruth" label="How ScoutIt works" /></p>
           </Link>
 
           {/* Card 06: The Core */}

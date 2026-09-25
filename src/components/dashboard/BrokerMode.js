@@ -22,6 +22,7 @@ import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ownerTenureLabel } from "@/lib/dashboardListings";
 import { dealThreadHref } from "@/lib/deals/dealThreadLink";
+import InfoTip from "@/components/ui/InfoTip";
 
 export default function BrokerMode() {
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
@@ -576,10 +577,11 @@ export default function BrokerMode() {
                 because it's an action, not a metric. */}
             {property && (
               <div className="card-atmosphere rounded-lg p-6">
-                <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-3 uppercase border-b border-surface-variant pb-2">Field Briefing</h3>
+                <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-3 uppercase border-b border-surface-variant pb-2">
+                  <span>Field Briefing <InfoTip tipId="fieldBriefing" label="About field briefings" /></span>
+                </h3>
                 <p className="text-xs text-text-secondary leading-relaxed mb-4">
-                  A printable walkthrough sheet — specs, transfer-cost floor and objection
-                  scripts. Fields with no published data are left out, never estimated.
+                  Printable one-page sheet with specs, closing costs, and client notes.
                 </p>
                 <button
                   onClick={() => setBriefingListing(property)}
@@ -595,7 +597,9 @@ export default function BrokerMode() {
               const strength = computeListingStrength(property);
               return (
                 <div className="card-atmosphere rounded-lg p-6">
-                  <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Listing Strength</h3>
+                  <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">
+                    <span>Listing Strength <InfoTip tipId="listingStrength" label="About listing strength" /></span>
+                  </h3>
                   <div className="flex items-center gap-4 mb-4">
                     <div className="relative w-14 h-14 shrink-0">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">

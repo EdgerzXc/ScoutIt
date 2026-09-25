@@ -886,7 +886,9 @@
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 .strat-entry-cta:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 4px; }
-.strat-entry-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(var(--accent-rgb), .18); }
+@media (hover: hover) and (pointer: fine) {
+  .strat-entry-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(var(--accent-rgb), .18); }
+}
 .strat-entry-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

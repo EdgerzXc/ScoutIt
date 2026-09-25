@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapCreditControl from '@/components/maps/MapCreditControl';
+import InfoTip from '@/components/ui/InfoTip';
 
 // Math function to draw a geographical circle without Turf.js
 const createGeoJSONCircle = (center, radiusInKm, points = 64) => {
@@ -111,7 +112,9 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
   return (
     <div className="interactive-radius-wrapper">
       <div className="map-header-bar">
-        <span>📍 Interactive Proximity Radar</span>
+        <span style={{ display: "inline-flex", alignItems: "center" }}>
+          📍 Interactive Proximity Radar <InfoTip tipId="proximityRadar" label="About proximity radar" />
+        </span>
         <button onClick={onClose} aria-label="Close" className="close-map-btn">✕</button>
       </div>
 
@@ -135,7 +138,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         />
         
         <div className="control-hint">
-          Click anywhere on the map or drag the pin to set a new epicenter.
+          Click map or drag pin to move search center.
         </div>
         
         <button className="confirm-radar-btn" onClick={() => {

@@ -261,14 +261,21 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
           {/* Title + cross-link to News & Intelligence */}
           <div className="discoverTopBar">
             <div className="discoverTitleBlock">
-              <span className="discoverKicker">Layer 2.1 // Discovery</span>
+              <span className="discoverKicker">Discovery</span>
               <h1 className="discoverTitle">{matchedCategory}</h1>
             </div>
-            <Link href="/intel" className="modeJumpBox">
-              <span className="jumpHere">Discover</span>
-              <span className="jumpArrow">→</span>
-              <span className="jumpThere">News &amp; Intelligence</span>
-            </Link>
+            <div className="modeJumpGroup">
+              <Link href="/intel" className="modeJumpBox">
+                <span className="jumpHere">Discover</span>
+                <span className="jumpArrow">→</span>
+                <span className="jumpThere">News &amp; Intelligence</span>
+              </Link>
+              <Link href="/stratosphere?view=radar" className="modeJumpBox">
+                <span className="jumpHere">Discover</span>
+                <span className="jumpArrow">→</span>
+                <span className="jumpThere">Spatial Radar</span>
+              </Link>
+            </div>
           </div>
 
           {/* ── PRIMARY SEARCH ENGINE ── */}
@@ -292,7 +299,7 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
               ) : filteredIntel.map((news) => (
                 <Link
                   key={news.id}
-                  href={`/intel/${news.slug}`}
+                  href={`/intel/${news.slug}?fromDiscover=1`}
                   className="newsCapsule"
                   draggable={false}
                   onClick={(e) => { if (movedRef.current) { e.preventDefault(); } }}

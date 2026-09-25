@@ -18,6 +18,7 @@ import MapCreditControl from '@/components/maps/MapCreditControl';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import SimpleDetail from "@/components/ui/SimpleDetail";
+import InfoTip from "@/components/ui/InfoTip";
 
 export default function BuyerMode() {
   const [showMap, setShowMap] = useState(false);
@@ -517,7 +518,7 @@ export default function BuyerMode() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-variant pb-2">
               <h2 className="font-headline-editorial text-2xl text-on-surface flex min-w-0 items-center gap-3">
-                Your Board
+                <span>Your Board <InfoTip tipId="privateSaves" label="About private saves" /></span>
                 {savedFiltered.length > 0 && (
                   <span className="font-mono text-xs text-text-muted">
                     ({savedFiltered.length})
@@ -556,7 +557,9 @@ export default function BuyerMode() {
                 <div className="bg-surface/50 border border-dashed border-white/[0.08] rounded-xl p-8 w-full text-center flex flex-col items-center justify-center">
                   <span className="text-3xl mb-3 opacity-60 block">📂</span>
                   <div className="font-working-title text-base text-on-surface mb-1">Your Board is ready</div>
-                  <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">Save properties, floor plans, and intelligence briefs as you research to build your private evaluation board.</p>
+                  <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
+                    Saved spaces and intelligence briefs appear here. <InfoTip tipId="privateSaves" label="About private saves" />
+                  </p>
                   <Link href="/property" className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold">
                     Explore Curated Spaces →
                   </Link>
@@ -568,7 +571,7 @@ export default function BuyerMode() {
           {/* Feed Rail (New in Area) */}
           <div className="flex flex-col gap-4 mt-8">
             <h2 className="font-headline-editorial text-2xl text-on-surface flex flex-wrap items-center justify-between gap-2 border-b border-surface-variant pb-2">
-              New in Metro Manila
+              <span>New in Metro Manila <InfoTip tipId="areaWatch" label="About area watch" /></span>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <button
                   className={`font-label-caps tracking-widest uppercase text-[12px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}

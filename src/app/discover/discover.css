@@ -800,7 +800,12 @@ button.contextCell,
   text-transform: uppercase;
 }
 
-/* The single box that jumps Discover ↔ News & Intelligence */
+/* The jump boxes out of Discover (Intel hub, Stratosphere radar) */
+.modeJumpGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .modeJumpBox {
   display: inline-flex;
   align-items: center;

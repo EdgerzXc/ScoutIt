@@ -7,7 +7,9 @@
 }
 .sw-route-nav { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 42px; }
 .sw-route-nav a { color: var(--text-secondary); text-decoration: none; font: 12px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
-.sw-route-nav a:hover { color: var(--accent-bright); }
+@media (hover: hover) and (pointer: fine) {
+  .sw-route-nav a:hover { color: var(--accent-bright); }
+}
 .sw-kicker { color: var(--accent); font: 12px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
 .sw-intro { max-width: 740px; margin-bottom: 26px; }
 .sw-intro h1 { margin: 14px 0 12px; font-size: clamp(36px, 5vw, 62px); line-height: 1.04; letter-spacing: -.03em; }
@@ -15,7 +17,14 @@
 .sw-view-switch { display: inline-flex; gap: 5px; margin-bottom: 20px; padding: 5px; border: 1px solid var(--border); border-radius: 8px; background: rgba(var(--surface-rgb), .78); }
 .sw-view-switch button { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; padding: 0 15px; border: 0; border-radius: 5px; background: transparent; color: var(--text-secondary); cursor: pointer; font: 12px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
 .sw-view-switch button.is-active { background: rgba(var(--accent-rgb), .12); color: var(--accent-bright); }
-.sw-view-switch button:focus-visible, .sw-stage button:focus-visible, .sw-empty button:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+.sw-view-switch button:focus-visible, .sw-stage button:focus-visible, .sw-empty button:focus-visible, .sw-post-btn:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+/* One gold action per workspace: posting is the thing only a member can do
+   here, so it carries the single primary emphasis. Sharp 2px corners. */
+.sw-view-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+.sw-view-row .sw-view-switch { margin-bottom: 0; }
+.sw-post-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 1px solid transparent; border-radius: 2px; background: var(--accent-bright); color: var(--bg); cursor: pointer; font: 12px var(--font-mono); letter-spacing: .12em; transition: background-color var(--transition-fast), transform var(--transition-fast); }
+.sw-post-btn span { font-size: 16px; line-height: 1; }
+.sw-post-btn:active { transform: scale(0.98); }
 .sw-stage { padding: 18px; border: 1px solid var(--border); border-radius: 9px; background: rgba(var(--surface-rgb), .72); backdrop-filter: blur(12px); }
 .sw-stage-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; margin-bottom: 14px; }
 .sw-stage-heading h2 { margin: 0; font: 12px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
@@ -43,7 +52,9 @@
 .sw-article-foot { margin-top: auto; }
 .sw-sample { color: var(--accent-muted); }
 .sw-article-link { display: inline-flex; align-items: center; gap: 9px; align-self: flex-start; margin-top: 17px; color: var(--accent-bright); font: 12px var(--font-mono); letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
-.sw-article-link:hover { text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .sw-article-link:hover { text-decoration: underline; }
+}
 .sw-article-link:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 3px; }
 .sw-empty { padding: 38px 20px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); text-align: center; }
 .sw-empty button { padding: 10px 15px; border: 1px solid var(--accent-muted); border-radius: 5px; background: transparent; color: var(--accent-bright); cursor: pointer; font: 12px var(--font-mono); text-transform: uppercase; }
@@ -54,6 +65,7 @@
 @media (hover: hover) and (pointer: fine) {
   .sw-article:hover { border-color: var(--accent-muted); transform: translateY(-2px); }
   .sw-stage-options button:hover:not(.is-active) { border-color: var(--accent-muted); }
+  .sw-post-btn:hover { background: var(--accent); }
 }
 @media (max-width: 900px) {
   .sw-stage-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }

@@ -2760,17 +2760,14 @@ html.lite-mode .drifting-container {
   }
 }
 
-/* ── DROPDOWN POSITIONING FIX ── */
+/* ── DROPDOWN POSITIONING (U-037) ──
+   The mobile menu panel lives in Header.js styled-jsx (single owner). A
+   second fixed-position override lived here and collapsed inside the
+   header's own backdrop-filter into a "Create Account" sliver — removed.
+   This anchor block stays so the mobile-sheet contract test keeps its
+   section bounds. */
 @media (max-width: 480px) {
   .header-dropdown {
-    position: fixed !important;
-    top: calc(env(safe-area-inset-top, 0px) + 64px) !important;
-    bottom: env(safe-area-inset-bottom, 0px) !important;
-    right: 0 !important;
-    left: 0 !important;
-    min-width: 100% !important;
-    border-radius: 16px 16px 0 0 !important;
-    max-height: none !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
   }

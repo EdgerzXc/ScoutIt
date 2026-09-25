@@ -1,8 +1,12 @@
 import Link from "next/link";
 
+import InfoTip from "@/components/ui/InfoTip";
 import styles from "@/components/descent/layerChrome.module.css";
 
-export default function LayerHeader({ layerNum, layerName, title, description, missionText, ctaText, ctaHref }) {
+// missionTipId (optional): when the mission paragraph is trimmed to one
+// line, its explanation moves behind a "?" mark instead of leaving the page.
+// Copy lives in the infoTips registry, never here.
+export default function LayerHeader({ layerNum, layerName, title, description, missionText, missionTipId, ctaText, ctaHref }) {
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>
@@ -22,7 +26,15 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
           {missionText && (
             <section className={styles.mission} aria-label="Layer mission">
               <h2 className={styles.missionLabel}>Mission</h2>
-              <p className={styles.missionText}>{missionText}</p>
+              <p className={styles.missionText}>
+                {missionText}
+                {missionTipId && (
+                  <>
+                    {" "}
+                    <InfoTip tipId={missionTipId} label="About this layer's mission" />
+                  </>
+                )}
+              </p>
             </section>
           )}
         </div>

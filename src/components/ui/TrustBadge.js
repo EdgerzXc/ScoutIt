@@ -25,7 +25,7 @@ const VIEWPORT_MARGIN = 12;
  */
 export default function TrustBadge({
   badgeId,
-  verifiedDate = "Recently Verified",
+  verifiedDate = null,
   className = "",
 }) {
   const [showPopover, setShowPopover] = useState(false);
@@ -134,9 +134,11 @@ export default function TrustBadge({
               <span>{badge.icon || "🛡️"}</span>
               <span>{badge.name}</span>
             </span>
-            <span className="font-mono text-[12px] text-muted uppercase tracking-wider shrink-0">
-              {verifiedDate}
-            </span>
+            {verifiedDate ? (
+              <span className="font-mono text-[12px] text-muted uppercase tracking-wider shrink-0">
+                {verifiedDate}
+              </span>
+            ) : null}
           </span>
           <span className="block font-sans text-[12px] text-text-secondary leading-relaxed mb-2">
             {badge.description}

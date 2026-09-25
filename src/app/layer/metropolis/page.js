@@ -41,8 +41,9 @@ export default function MetropolisLayer() {
           layerNum="03" 
           layerName="Metropolis" 
           title="Explore by Category" 
-          description="Pick a category to explore spaces across homes, offices, venues, and hospitality." 
-          missionText="Metropolis is ScoutIt's property directory. Whether you are looking for a residential home, a commercial office, or an event venue, this layer lets you explore spaces building by building with verified spatial data." 
+          description="Homes, offices, venues, hospitality."
+          missionText="The property directory, building by building."
+          missionTipId="metropolisMission"
           ctaText="Browse All Properties →"
           ctaHref="/property?_cb=1"
         />
@@ -81,7 +82,7 @@ export default function MetropolisLayer() {
             <h3 className="metro-content-title">
               {browseLabel} Spaces
             </h3>
-            <p className="metro-content-sub">A preview of what&rsquo;s in this category</p>
+            <p className="metro-content-sub">Category preview</p>
           </div>
 
           {/* Search */}
@@ -137,10 +138,7 @@ export default function MetropolisLayer() {
               ))
             )}
           </div>
-
-          <p className="metro-hint">
-            Explore different spaces by clicking the categories. Tap any space to view its deep briefing page.
-          </p>
+          
           </div>
         </div>
         <LayerTransition 

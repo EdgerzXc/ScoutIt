@@ -96,7 +96,7 @@ export default function JsonLd() {
     // Was "Intelligent Property Briefings & Real Estate Directory Philippines".
     // "Real Estate Directory" is the exact category /about says ScoutIt is not.
     description:
-      "Property and space intelligence for the Philippines — verified briefings on homes, offices, venues and restaurants.",
+      "Property and space intelligence for the Philippines — briefings on homes, offices, venues and restaurants.",
     inLanguage: "en-PH",
     publisher: {
       "@id": `${url}/#organization`,

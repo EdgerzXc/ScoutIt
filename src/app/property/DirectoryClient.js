@@ -10,6 +10,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
+import InfoTip from "@/components/ui/InfoTip";
 import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import dynamic from "next/dynamic";
@@ -524,7 +525,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                   shown only in the property page's "Your Move" section. */}
               <div className="filter-card">
                 <button className="filter-trigger" onClick={() => toggleFilterSection("prices")}>
-                  Price Band
+                  <span>Price Band <InfoTip tipId="priceBands" label="About price bands" /></span>
                   <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
                 </button>
                 {openFilters.prices && (
@@ -592,7 +593,9 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
               {/* Dynamic Sidebar Widget: Neighborhood Intel */}
               <div className="intel-widget">
-                <h2 className="intel-widget-header">Neighborhood Intel</h2>
+                <h2 className="intel-widget-header">
+                  Neighborhood Intel <InfoTip tipId="neighborhoodIntel" label="About neighborhood intel" />
+                </h2>
                 <div className="intel-widget-list">
                   {widgetArticles.length > 0 ? (
                     widgetArticles.map(art => (
@@ -632,30 +635,34 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                 </div>
               )}
 
-              <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
+              <div className="search-wrapper" style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                 <input
                   type="text"
                   className="global-search-input"
                   placeholder="SEARCH DIRECTORY LEDGER BY KEYWORD, CITY, OR DESIGN TAG..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ flexGrow: 1, margin: 0 }}
+                  style={{ flex: "1 1 240px", minWidth: 0, margin: 0 }}
                 />
-                <button 
+                <button
                   onClick={() => setShowMap(!showMap)}
+                  className="directory-radar-btn"
                   style={{
                     background: showMap ? "#E8AE3C" : "#0d0d0d",
                     color: showMap ? "#000" : "#E8AE3C",
                     border: "1px solid #E8AE3C",
                     padding: "0 24px",
-                    height: "44px",
+                    minHeight: "48px",
+                    flexShrink: 0,
+                    maxWidth: "100%",
+                    whiteSpace: "nowrap",
                     fontFamily: "var(--font-mono)",
                     fontSize: "12px",
                     letterSpacing: "0.1em",
                     cursor: "pointer",
                     textTransform: "uppercase",
                     fontWeight: "bold",
-                    transition: "all 0.2s"
+                    transition: "background-color 0.2s, color 0.2s, border-color 0.2s"
                   }}
                 >
                   {showMap ? "✕ CLOSE RADAR" : "🗺️ PROXIMITY RADAR"}
@@ -740,8 +747,8 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                     <div className="directory-empty">
                       <h2>The first spaces are being verified</h2>
                       <p>
-                        ScoutIt only publishes a space once its intelligence has been checked.
-                        List yours and it becomes one of the first verified spaces in the directory.
+                        List yours and it becomes one of the first verified spaces in the directory.{" "}
+                        <InfoTip tipId="verifyingSpaces" label="Why verified first" />
                       </p>
                       <Link href="/dashboard" className="founding-cta">
                         List a space →

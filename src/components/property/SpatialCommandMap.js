@@ -1083,6 +1083,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             right: "16px",
             zIndex: 12,
             width: "300px",
+            maxWidth: "calc(100vw - 32px)",
             background: "rgba(13, 13, 13, 0.95)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",

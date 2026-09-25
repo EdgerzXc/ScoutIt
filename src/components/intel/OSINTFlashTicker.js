@@ -147,7 +147,7 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold-accent"></span>
         </span>
         <span className="font-mono text-[12px] font-bold text-gold-accent uppercase tracking-[0.12em] bg-gold-accent/10 px-2 py-0.5 rounded-xs border border-gold-accent/30">
-          LIVE OSINT FEED
+          OSINT SIGNALS
         </span>
       </div>
 

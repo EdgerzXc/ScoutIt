@@ -25,7 +25,7 @@ export function RestrictedAccessBanner({ rosterLabel = "This Roster", openDate =
           <span className="restricted-label">CLOSED BETA · BY REFERRAL ONLY</span>
           <p className="restricted-desc">
             {rosterLabel} is currently available to referred partners only.
-            Full public access opens {openDate}. Profiles shown are previews of verified members.
+            Full public access opens {openDate}. Profiles shown are member previews. Full verification completes before public access.
           </p>
         </div>
         <div className="restricted-signal">

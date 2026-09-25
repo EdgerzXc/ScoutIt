@@ -220,10 +220,10 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
           {data && (
             <div className="animate-[fadeIn_0.3s_ease]">
               <p className="text-sm text-text-secondary mb-2">
-                Promotional copy built strictly from this listing&apos;s recorded specs — nothing invented, ready to share.
+                Promotional copy built from this listing&apos;s recorded specs. Review before sharing.
               </p>
               <p className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary/70 mb-6">
-                {source === "ai" ? "AI-drafted · grounded in verified listing data" : "Composed from verified listing data"}
+                {source === "ai" ? "AI-drafted · check figures before sharing" : "Composed from listing data"}
               </p>
 
               {/* Relabelled 2026-08-13: this said "X / WhatsApp". Neither is

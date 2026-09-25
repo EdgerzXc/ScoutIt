@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { LISTER_RELATIONSHIPS, OWNER_SOVEREIGNTY_DISCLAIMER } from "@/lib/listerRelationship";
+import InfoTip from "@/components/ui/InfoTip";
 
 // ─────────────────────────────────────────────────────────────────────────
 // CLAIM THIS PROPERTY — §37 · WORK ORDER W8
@@ -201,17 +202,18 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
           </>
         ) : (
           <>
-            <h3 className="cp-title" id="cp-title">Is this your property?</h3>
+            <h3 className="cp-title" id="cp-title">
+              Is this your property? <InfoTip tipId="claimProperty" label="About claiming property" />
+            </h3>
             <p className="cp-body">
-              Whoever listed this has not been verified as the title holder. If the
-              property is yours, you can claim the file and take control of it.
+              This listing is not yet claimed by a verified owner. If you own or manage
+              this property, claim it here to update its details and inquiries.
             </p>
 
             {!state.signedIn ? (
               <>
                 <p className="cp-note">
-                  You&apos;ll need to sign in first — a claim has to be attached to a real
-                  account.
+                  Please sign in first so your claim can be connected to your account.
                 </p>
                 <a className="cp-btn cp-btn--gold" href="/login">
                   Sign in to claim

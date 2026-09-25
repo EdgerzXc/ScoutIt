@@ -76,6 +76,15 @@
   font-weight: 700;
 }
 
+/* A-145 source separation: COMMUNITY (human post) vs SCOUTIT INTEL
+   (sourced building update). Muted mono so the signal-type pill keeps
+   the single gold emphasis per card. */
+.sdc-source-pill {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
 .sdc-freshness-chip {
   display: flex;
   align-items: center;
@@ -181,18 +190,24 @@
 }
 
 /* ── FOOTER & ACTIONS ── */
+/* U-041: the footer wraps instead of pushing past a 360px card. Metrics
+   keep one line each; the CTA drops to its own row when space runs out. */
 .sdc-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .sdc-metric-group {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .sdc-action-metric {
@@ -289,8 +304,17 @@
 
 .sdc-cta-group {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+}
+
+/* C2: a failed tap says so on the card, briefly, in full width. */
+.sdc-action-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #f87171;
 }
 
 .sdc-btn {

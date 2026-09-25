@@ -12,6 +12,7 @@ import {
   filterSignals,
 } from "@/lib/communitySignalsAdapter";
 import { matchesJourneyStage } from "@/lib/layerTwoJourney";
+import InfoTip from "@/components/ui/InfoTip";
 import "./stratosphere-terminal.css";
 
 export default function StratosphereTerminal({
@@ -32,6 +33,10 @@ export default function StratosphereTerminal({
   });
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [connectModalSignal, setConnectModalSignal] = useState(null);
+  // Source lens: COMMUNITY (member posts + samples) vs SCOUTIT INTEL
+  // (sourced building updates bridged from articles). Radar stays one feed;
+  // the lens only narrows what the eye lands on.
+  const [sourceLens, setSourceLens] = useState("all");
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 680px)").matches) setViewMode("SIGNALS");
@@ -64,13 +69,20 @@ export default function StratosphereTerminal({
 
   // Filtered signal dataset
   const filteredSignals = useMemo(() => {
-    return filterSignals(stageSignals, {
+    const base = filterSignals(stageSignals, {
       query: searchQuery,
       signalType: filters.signalType,
       spaceType: filters.spaceType,
       district: activeDistrict,
     });
-  }, [stageSignals, searchQuery, filters, activeDistrict]);
+    if (sourceLens === "community") {
+      return base.filter((s) => !(typeof s.id === "string" && s.id.startsWith("pipeline-")));
+    }
+    if (sourceLens === "intel") {
+      return base.filter((s) => typeof s.id === "string" && s.id.startsWith("pipeline-"));
+    }
+    return base;
+  }, [stageSignals, searchQuery, filters, activeDistrict, sourceLens]);
 
   const activeFilterCount =
     (filters.signalType ? 1 : 0) +
@@ -213,6 +225,20 @@ export default function StratosphereTerminal({
               <span>
                 {filteredSignals.length} {filteredSignals.length === 1 ? "SIGNAL" : "SIGNALS"} MATCHING
               </span>
+            </div>
+            <div className="st-source-lens" role="group" aria-label="Signal source">
+              {[["all", "ALL"], ["community", "COMMUNITY"], ["intel", "SCOUTIT INTEL"]].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={sourceLens === key}
+                  className={`st-source-chip${sourceLens === key ? " is-active" : ""}`}
+                  onClick={() => setSourceLens(key)}
+                >
+                  {label}
+                </button>
+              ))}
+              <InfoTip tipId="signalSources" label="About signal sources" />
             </div>
             {activeDistrict && (
               <span className="st-district-indicator">

@@ -88,7 +88,7 @@ export default function AmbientRail({ user, context = null }) {
     <div
       className={`ambient-rail ${paused ? "is-paused" : ""}`}
       role="group"
-      aria-label={context?.source === "property" ? `Property conditions for ${context.shortName}` : "Local ambient information"}
+      aria-label={context?.source === "property" ? `Property conditions for ${context.shortName}` : context?.source === "dashboard" ? `Forecast for ${context.shortName} and your local time` : "Local ambient information"}
       onMouseEnter={() => { window.clearTimeout(resumeTimer.current); setResumePending(false); setHovered(true); }}
       onMouseLeave={() => { setHovered(false); scheduleResume(); }}
       onFocusCapture={() => { window.clearTimeout(resumeTimer.current); setResumePending(false); setFocused(true); }}

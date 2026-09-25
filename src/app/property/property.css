@@ -603,6 +603,18 @@
     padding: 14px 16px;
   }
 
+  /* U-038: the search+radar row wraps instead of pushing past the viewport.
+     Below 600px both go full width — the label never wraps inside a fixed
+     height again, so RADAR cannot spill out of its box. */
+  .search-wrapper .global-search-input {
+    flex: 1 1 100%;
+  }
+
+  .search-wrapper .directory-radar-btn {
+    flex: 1 1 100%;
+    white-space: nowrap;
+  }
+
   .property-action-btn {
     min-height: 44px;
     display: inline-flex;

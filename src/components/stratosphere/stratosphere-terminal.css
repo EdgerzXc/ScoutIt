@@ -261,6 +261,39 @@
   border-radius: 2px;
 }
 
+/* Source lens: sharp segmented control. The active segment is the only
+   emphasis in the header besides the live count. */
+.st-source-lens {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.st-source-chip {
+  min-height: 32px;
+  padding: 0 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.st-source-chip.is-active {
+  border-color: var(--accent-muted);
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+}
+
+.st-source-chip:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
 .st-dossier-scroll {
   flex: 1;
   overflow-y: auto;
@@ -328,6 +361,11 @@
     background: rgba(232, 174, 60, 0.12);
     border-color: var(--accent);
     color: var(--accent-bright);
+  }
+
+  .st-source-chip:hover:not(.is-active) {
+    border-color: var(--accent-muted);
+    color: var(--text-secondary);
   }
 }
 

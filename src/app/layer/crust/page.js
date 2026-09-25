@@ -88,8 +88,9 @@ export default function CrustLayer() {
           layerNum="04"
           layerName="Crust"
           title="The Service Ecosystem"
-          description="Understand each professional role, the evidence ScoutIt actually holds, and when that specialist belongs in your space decision."
-          missionText="Crust maps the people around a space decision without flattening them into one generic verified roster. Advisor license evidence is shown only when checked; provider profiles, pilot signals, examples, availability, and launch limits remain explicitly labelled."
+          description="The people around a space decision."
+          missionText="Advisors, photographers, researchers, event designers."
+          missionTipId="crustMission"
           ctaText="Review the advisor roster →"
           ctaHref="/brokers"
         />

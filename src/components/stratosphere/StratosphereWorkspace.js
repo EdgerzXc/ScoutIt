@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Compass, FileText, Search } from "lucide-react";
 import StratosphereTerminal from "./StratosphereTerminal";
+import SignalComposer from "./SignalComposer";
 import { COMMUNITY_SIGNALS, pipelineArticlesToSignals } from "@/lib/communitySignalsAdapter";
 import { loadPublicCatalog } from "@/lib/cms/publicCatalog";
 import { JOURNEY_STAGES, matchesJourneyStage, stageForSignal, validJourneyStage } from "@/lib/layerTwoJourney";
 import { mergeStratosphereArticles } from "@/lib/stratosphereArticles";
+import InfoTip from "@/components/ui/InfoTip";
 import "./stratosphere-workspace.css";
 
 export default function StratosphereWorkspace() {
@@ -16,6 +18,8 @@ export default function StratosphereWorkspace() {
   const [stage, setStage] = useState("all");
   const [query, setQuery] = useState("");
   const [returnSignal, setReturnSignal] = useState(null);
+  const [liveSignals, setLiveSignals] = useState([]);
+  const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -29,13 +33,30 @@ export default function StratosphereWorkspace() {
     loadPublicCatalog().then((data) => {
       if (alive) setLiveArticles(data?.intel || []);
     }).catch(() => {});
+    // Live member posts ride above pipeline + sample rows. A failed or
+    // degraded read leaves the samples in place — never an empty radar.
+    fetch("/api/community/signals?limit=60")
+      .then((res) => res.json())
+      .then((json) => {
+        if (alive && json?.ok && Array.isArray(json.signals)) setLiveSignals(json.signals);
+      })
+      .catch(() => {});
     return () => { alive = false; };
+  }, []);
+
+  const refreshLiveSignals = useCallback(() => {
+    fetch("/api/community/signals?limit=60")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.ok && Array.isArray(json.signals)) setLiveSignals(json.signals);
+      })
+      .catch(() => {});
   }, []);
 
   const articles = useMemo(() => mergeStratosphereArticles(liveArticles), [liveArticles]);
   const radarSignals = useMemo(
-    () => [...pipelineArticlesToSignals(articles), ...COMMUNITY_SIGNALS],
-    [articles]
+    () => [...liveSignals, ...pipelineArticlesToSignals(articles), ...COMMUNITY_SIGNALS],
+    [liveSignals, articles]
   );
   const filteredArticles = useMemo(() => {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -73,13 +94,26 @@ export default function StratosphereWorkspace() {
       <header className="sw-intro">
         <span className="sw-kicker">INSIDE LAYER 02 / STRATOSPHERE</span>
         <h1>Explore what is changing.</h1>
-        <p>Browse the articles behind building updates. Open the radar when you want to explore by area.</p>
+        <p>
+          Building updates, market briefings, and spatial signals.{" "}
+          <InfoTip tipId="stratosphereWorkspace" label="About Stratosphere" />
+        </p>
       </header>
 
-      <div className="sw-view-switch" role="group" aria-label="Explore Stratosphere">
-        <button type="button" aria-pressed={view === "articles"} className={view === "articles" ? "is-active" : ""} onClick={() => chooseView("articles")}><FileText size={15} aria-hidden="true" /> All Articles</button>
-        <button type="button" aria-pressed={view === "radar"} className={view === "radar" ? "is-active" : ""} onClick={() => chooseView("radar")}><Compass size={15} aria-hidden="true" /> Spatial Radar</button>
+      <div className="sw-view-row">
+        <div className="sw-view-switch" role="group" aria-label="Explore Stratosphere">
+          <button type="button" aria-pressed={view === "articles"} className={view === "articles" ? "is-active" : ""} onClick={() => chooseView("articles")}><FileText size={15} aria-hidden="true" /> All Articles</button>
+          <button type="button" aria-pressed={view === "radar"} className={view === "radar" ? "is-active" : ""} onClick={() => chooseView("radar")}><Compass size={15} aria-hidden="true" /> Radar &amp; Community</button>
+        </div>
+        <button type="button" className="sw-post-btn" onClick={() => setComposerOpen(true)}>
+          <span aria-hidden="true">+</span> POST A SIGNAL
+        </button>
       </div>
+      <SignalComposer
+        isOpen={composerOpen}
+        onClose={() => setComposerOpen(false)}
+        onPublished={() => { refreshLiveSignals(); chooseView("radar"); }}
+      />
 
       <section className="sw-stage" aria-label="Building stage">
         <div className="sw-stage-heading">

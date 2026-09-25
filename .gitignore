@@ -16,6 +16,7 @@
 # 872K of PNG was sitting untracked. /test-results/ above was already ignored;
 # this directory was simply missed.
 /e2e_tests/screenshots/
+/.playwright-cli/
 /.lighthouseci/
 /audit_report.json
 /lighthouse-report.json
@@ -81,6 +82,7 @@ yarn-error.log*
 /scratch/
 /scratch_*.png
 /scratch_*.js
+/*.tmp.mjs
 # Agent review captures left at the repo root (e.g. .codex-profile-review.png).
 # The file stays on disk for whoever wants it; it just is not repo content.
 /.codex-*.png

@@ -4,6 +4,7 @@ import { Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import InfoTip from "@/components/ui/InfoTip";
 import { directoryFacets, filterAndSortProfessionals, PROFESSIONAL_CATEGORIES } from "@/lib/professionalDirectory";
 import ProfessionalCard from "./ProfessionalCard";
 import styles from "./professionalDirectory.module.css";
@@ -26,14 +27,14 @@ export default function ProfessionalDirectory({ category, initialRecords = [], i
         <section className={styles.hero} aria-labelledby="directory-title">
           <div className={styles.orbit} aria-hidden="true"><span /><span /><span /></div>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>{config.eyebrow}</span>
+            <span className={styles.eyebrow}>{config.eyebrow} <InfoTip tipId="layerNumber" label="About this layer" /></span>
             <h1 id="directory-title">{config.title}</h1>
             <p>{config.description}</p>
           </div>
-          <aside className={styles.truthPanel}>
-            <span className={styles.sectionLabel}>Evidence protocol</span>
-            <strong><ShieldCheck size={17} aria-hidden="true" /> Named signals only</strong>
-            <p>Credentials show their source. Availability is owner-declared. Activity appears only with a named, fresh observation.</p>
+          <aside className={styles.protocolRow} aria-label="Evidence protocol">
+            <ShieldCheck size={16} aria-hidden="true" />
+            <strong>Named signals only</strong>
+            <InfoTip tipId="evidenceProtocol" label="About the evidence protocol" />
           </aside>
         </section>
 
@@ -49,12 +50,13 @@ export default function ProfessionalDirectory({ category, initialRecords = [], i
               <label><span className="sr-only">Specialty</span><select value={specialty} onChange={(event) => setSpecialty(event.target.value)}><option value="">All specialties</option>{facets.specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className="sr-only">Location</span><select value={location} onChange={(event) => setLocation(event.target.value)}><option value="">All locations</option>{facets.locations.map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className="sr-only">Sort</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="name">Name A–Z</option><option value="credential">Credential evidence</option><option value="availability">Declared availability</option></select></label>
+              <InfoTip tipId="credentialSort" label="How sorting works" />
             </div>
           </div>
 
           <div className={styles.resultMeta} aria-live="polite">
             <span>{records.length.toString().padStart(2, "0")} public profile{records.length === 1 ? "" : "s"}</span>
-            <span>Private saves never create a public count</span>
+            <span>Your saves stay private <InfoTip tipId="privateSaves" label="About private saves" /></span>
           </div>
 
           {initialError ? (

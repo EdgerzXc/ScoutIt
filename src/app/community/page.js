@@ -1,20 +1,16 @@
-import Header from "@/components/layout/Header";
-import StratosphereTerminal from "@/components/stratosphere/StratosphereTerminal";
+import { permanentRedirect } from "next/navigation";
 
 export const metadata = {
   title: "Community — Spatial Radar & Market Signals | ScoutIt",
   description:
-    "Spatial intelligence terminal and community demand radar across Metro Manila's commercial and residential landscape.",
-  alternates: { canonical: "/community" },
+    "Community signals live inside the Stratosphere workspace. You are being taken to the spatial radar.",
+  alternates: { canonical: "/stratosphere" },
 };
 
+// A-145 continuity: /community was an orphaned duplicate of the
+// /stratosphere radar view (same terminal, no in-app links to it).
+// Community signals live in one place — the Stratosphere workspace —
+// so this route hands off instead of maintaining a second copy.
 export default function CommunityPage() {
-  return (
-    <div className="min-h-screen bg-[#0d0d0d] text-white flex flex-col font-sans">
-      <Header />
-      <main className="flex-1 w-full flex flex-col">
-        <StratosphereTerminal initialViewMode="SPATIAL" />
-      </main>
-    </div>
-  );
+  permanentRedirect("/stratosphere?view=radar");
 }

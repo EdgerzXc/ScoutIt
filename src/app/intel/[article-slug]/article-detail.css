@@ -330,7 +330,9 @@ body.light-mode .article-hero {
 }
 .article-layer-return a,
 .article-layer-return-end a { color: var(--accent-bright); text-decoration: none; }
-.article-layer-return a:hover,
-.article-layer-return-end a:hover { text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .article-layer-return a:hover,
+  .article-layer-return-end a:hover { text-decoration: underline; }
+}
 .article-layer-return span { color: var(--text-secondary); }
 .article-layer-return-end { margin: 30px 0 0; font-family: var(--font-mono); font-size: 12px; }

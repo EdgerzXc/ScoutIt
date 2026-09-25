@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getSession } from "@/lib/authClient";
+import InfoTip from "@/components/ui/InfoTip";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PER-PROPERTY 3-TIER FAQ  (NEW_IDEAS.md §4)
@@ -491,8 +492,8 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         What people actually asked{propertyTitle ? ` about ${propertyTitle}` : ""}
       </h2>
       <p className="faq-section__sub">
-        Answers are ranked by verified authority, not by popularity. Nothing here is generated —
-        if no one has answered, the space stays blank.
+        Answers ordered by verified source: owner, advisor, resident.{" "}
+        <InfoTip tipId="faqTiers" label="About who answers questions" />
       </p>
 
       <div className="faq-legend" tabIndex={0} aria-label="Answer authority legend">
@@ -523,7 +524,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
           />
           {askError && <div className="faq-error">{askError}</div>}
           <div className="faq-hint">
-            Phone numbers, emails and external links are blocked — keep the deal on ScoutIt.
+            Phone numbers, emails, and external links are blocked to keep communications secure.
           </div>
           <button
             className="faq-btn faq-btn--gold faq-btn--block"

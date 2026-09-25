@@ -90,7 +90,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         </div>
         <div className="disclaimer-content">
           <p className="disclaimer-paragraph">
-            <strong>ScoutIt operates exclusively as a spatial intelligence platform and verified service provider index.</strong> All partner profiles, credentials, and license numbers displayed on this platform undergo baseline verification at the time of onboarding. However, <span className="highlight-warning">this verification does not constitute an endorsement, guarantee of performance, or warranty of any kind.</span>
+            <strong>ScoutIt operates exclusively as a spatial intelligence platform and service provider index.</strong> Partner profiles, credentials, and license numbers shown here are provided by the partner and checked for completeness at onboarding. However, <span className="highlight-warning">this verification does not constitute an endorsement, guarantee of performance, or warranty of any kind.</span>
           </p>
           <p className="disclaimer-paragraph">
             <strong>Users are solely responsible for conducting independent due diligence</strong> prior to entering into any financial transaction, contractual agreement, or professional engagement with any broker, photographer, researcher, or service provider listed on this platform.

@@ -125,8 +125,8 @@ export const TRUST_BADGES = {
     name: "Availability Confirmed",
     icon: "✓",
     badgeType: "trust",
-    description: "Active unit inventory and lease availability re-validated in the past 14 days.",
-    criteria: "Owner or authorized listing broker confirms real-time unit status.",
+    description: "Unit inventory and lease availability as last confirmed by the owner or listing broker.",
+    criteria: "Owner or authorized listing broker confirms current unit status.",
     color: "#34D399"
   },
   FLOOR_PLAN_VERIFIED: {

@@ -8,25 +8,25 @@ const NUDGE_CONTENT = {
   owner: {
     icon: "📈",
     title: "Boost Your Listing",
-    desc: "You have 50+ views but 0 pitches. Upgrade to featured placement to reach top-tier brokers.",
+    desc: "Your listing is live. Featured placement puts it in front of top-tier brokers.",
     action: "Upgrade Now"
   },
   broker: {
     icon: "⚡",
     title: "Get Featured Placement",
-    desc: "Your response rate is top 10%, but your rank is low. Unlock the 'Top Broker' badge.",
+    desc: "Featured placement and the Top Broker badge mark advisors with proven response records.",
     action: "Unlock Badge"
   },
   buyer: {
     icon: "🕵️",
     title: "Unlock Market Intel",
-    desc: "You have 10 saved listings. Unlock the full Intel Dashboard to see historical yields.",
+    desc: "Saved listings live on your board. The full Intel Dashboard adds historical yields.",
     action: "Get Intel"
   },
   provider: {
     icon: <Camera strokeWidth={1.5} size="1em" />,
     title: "Expand Your Portfolio",
-    desc: "You've hit the free portfolio limit. Upgrade to add unlimited media.",
+    desc: "The free portfolio has a media limit. Upgrade to add unlimited media.",
     action: "Upgrade Plan"
   }
 };

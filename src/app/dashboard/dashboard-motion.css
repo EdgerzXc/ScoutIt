@@ -1,0 +1,186 @@
+/* Buyer, owner and broker workspace motion. Decorative, pointer-transparent,
+   and isolated from controls, maps, modals and dashboard data. */
+.dashboard-lens-motion {
+  position: relative;
+  isolation: isolate;
+}
+
+.dashboard-signal-field {
+  position: absolute;
+  z-index: -1;
+  top: -28px;
+  right: 0;
+  width: min(44vw, 440px);
+  height: auto;
+  color: var(--accent);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.dashboard-signal-track,
+.dashboard-signal-trace {
+  stroke: currentColor;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.dashboard-signal-track {
+  opacity: 0.15;
+}
+
+.dashboard-signal-track--second {
+  opacity: 0.09;
+}
+
+.dashboard-signal-trace {
+  opacity: 0.68;
+  stroke-width: 1.5;
+  stroke-dasharray: 16 184;
+  animation: dashboard-signal-travel 15s linear infinite;
+}
+
+.dashboard-signal-trace--second {
+  opacity: 0.4;
+  animation-delay: -7s;
+  animation-duration: 19s;
+}
+
+.dashboard-signal-node {
+  fill: currentColor;
+  opacity: 0.55;
+  animation: dashboard-signal-breathe 5s ease-in-out infinite;
+}
+
+.dashboard-signal-node--second {
+  animation-delay: -2.5s;
+}
+
+@keyframes dashboard-signal-travel {
+  to { stroke-dashoffset: -200; }
+}
+
+@keyframes dashboard-signal-breathe {
+  50% { opacity: 0.18; }
+}
+
+/* A single fine highlight travels along the top edge of a card only while
+   that card is being used. No overlay covers the card's content or actions. */
+.dashboard-lens-motion .card-atmosphere,
+.dashboard-lens-motion .card-atmosphere-gold {
+  position: relative;
+}
+
+.dashboard-lens-motion .card-atmosphere::after,
+.dashboard-lens-motion .card-atmosphere-gold::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.72), transparent);
+  background-size: 220% 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dashboard-lens-motion .card-atmosphere:hover::after,
+  .dashboard-lens-motion .card-atmosphere-gold:hover::after {
+    opacity: 1;
+    animation: dashboard-card-trace 2.8s linear infinite;
+  }
+}
+
+.dashboard-lens-motion .card-atmosphere:focus-within::after,
+.dashboard-lens-motion .card-atmosphere-gold:focus-within::after,
+.dashboard-lens-motion .card-atmosphere:active::after,
+.dashboard-lens-motion .card-atmosphere-gold:active::after {
+  opacity: 1;
+  animation: dashboard-card-trace 2.8s linear infinite;
+}
+
+@keyframes dashboard-card-trace {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+@media (max-width: 640px) {
+  .dashboard-signal-field {
+    width: min(72vw, 300px);
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-signal-trace,
+  .dashboard-signal-node,
+  .dashboard-lens-motion .card-atmosphere::after,
+  .dashboard-lens-motion .card-atmosphere-gold::after {
+    animation: none !important;
+  }
+}
+
+html.lite-mode .dashboard-signal-field {
+  display: none;
+}
+
+html.lite-mode .dashboard-lens-motion .card-atmosphere::after,
+html.lite-mode .dashboard-lens-motion .card-atmosphere-gold::after {
+  display: none;
+}
+
+
+/* The workspace keeps its role controls and uses the same information rail as
+   the public header. The selected forecast city is explicit and changeable. */
+.dashboard-ambient-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
+
+.dashboard-ambient-rail {
+  width: min(392px, 100%);
+  min-width: 0;
+}
+
+.dashboard-ambient-city {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-ambient-city select {
+  max-width: 112px;
+  min-height: 36px;
+  padding: 0 6px;
+  border: 1px solid var(--accent-muted);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dashboard-ambient-city select:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .dashboard-ambient-strip { gap: 6px; }
+  .dashboard-ambient-city span { display: none; }
+  .dashboard-ambient-city select { max-width: 100px; }
+}

@@ -176,6 +176,21 @@
   font-size: 12px;
 }
 
+/* A-145: sample disclosure inside the connect modal. Muted gold outline,
+   never the error red — exploring a sample is not a failure. */
+.ccm-sample-note {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--accent-muted);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  line-height: 1.5;
+}
+
 .ccm-disclosure-bar {
   display: flex;
   align-items: flex-start;
@@ -266,6 +281,40 @@
   align-items: center;
   text-align: center;
   gap: 12px;
+  /* Dispatched confirmation rises in (state indication, modal tier).
+     transform/opacity only; reduced-motion keeps the fade. */
+  animation: ccm-success-rise 240ms var(--ease-out-custom);
+}
+
+@keyframes ccm-success-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ccm-success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.ccm-inbox-link {
+  text-decoration: none;
+}
+
+/* Dispatch in flight: linear sweep on the gold button (constant-motion
+   tier) so the spend moment reads as working, not stuck. */
+.ccm-form .ccm-primary-btn:disabled {
+  background-image: linear-gradient(100deg, transparent 30%, rgba(13, 13, 13, 0.28) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: ccm-dispatch-sweep 1.1s linear infinite;
+}
+
+@keyframes ccm-dispatch-sweep {
+  from { background-position: 200% 0; }
+  to { background-position: -100% 0; }
 }
 
 .ccm-success-icon {
@@ -294,5 +343,13 @@
   .ccm-primary-btn {
     animation: none;
     transition: none;
+  }
+
+  .ccm-success-state {
+    animation: ccmFade 120ms ease;
+  }
+
+  .ccm-form .ccm-primary-btn:disabled {
+    animation: none;
   }
 }

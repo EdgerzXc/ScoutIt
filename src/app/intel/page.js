@@ -183,15 +183,22 @@ export default function IntelPage() {
       <Header />
       <main className="intel-main">
         <MeshHero
-          tag="Layer 2.2 // Editorial Briefings"
+          tag="Editorial Briefings"
           title="Intel"
           subtitle="Tracing architectural shifts, spatial design, and development dispatches."
         >
-          <Link href="/discover" className="mt-6 inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
-            <span className="text-text-muted">Intel</span>
-            <span className="text-gold-accent">→</span>
-            <span className="text-gold-accent">Discover</span>
-          </Link>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Link href="/discover" className="inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
+              <span className="text-text-muted">Intel</span>
+              <span className="text-gold-accent">→</span>
+              <span className="text-gold-accent">Discover</span>
+            </Link>
+            <Link href="/stratosphere" className="inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
+              <span className="text-text-muted">Intel</span>
+              <span className="text-gold-accent">→</span>
+              <span className="text-gold-accent">Stratosphere Workspace</span>
+            </Link>
+          </div>
         </MeshHero>
 
         {/* Live OSINT Flash News Ticker */}

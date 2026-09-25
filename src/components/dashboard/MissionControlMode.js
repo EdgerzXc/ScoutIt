@@ -341,7 +341,7 @@ export default function MissionControlMode() {
                <GlassPanel className="p-6 rounded-2xl border-white/10 hover:border-gold-accent/30 transition duration-300">
                  <Bot size={24} className="text-blue-400 mb-4" />
                  <h3 className="text-white font-medium mb-2">Intelligence Center</h3>
-                 <p className="text-xs text-text-secondary leading-relaxed">Automate drafting, review pitches, and get real-time AI summaries of your entire portfolio.</p>
+                 <p className="text-xs text-text-secondary leading-relaxed">Automate drafting, review pitches, and get AI summaries of your entire portfolio.</p>
                </GlassPanel>
                <GlassPanel className="p-6 rounded-2xl border-gold-accent/20 relative overflow-hidden ring-1 ring-gold-accent/20">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-gold-accent/10 blur-2xl rounded-full" />

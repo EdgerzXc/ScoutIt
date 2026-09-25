@@ -29,6 +29,7 @@ import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import SimpleDetail from "@/components/ui/SimpleDetail";
+import InfoTip from "@/components/ui/InfoTip";
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading } = useDashboard();
@@ -293,8 +294,10 @@ export default function OwnerMode() {
             className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xs uppercase tracking-[0.14em] text-text-muted">More ways to add</span>
-              <span className="text-[12px] text-text-muted font-body">(Bulk CSV, Advanced Matrix, 3D Spatial)</span>
+              <span className="font-mono text-xs uppercase tracking-[0.14em] text-text-muted">
+                More ways to add <InfoTip tipId="bulkIngest" label="About bulk upload options" />
+              </span>
+              <span className="text-[12px] text-text-muted font-body">(Spreadsheets, Custom Specs, 3D Tours)</span>
             </div>
             <span className="text-text-muted text-sm transition-transform duration-200" style={{ transform: showAdvancedIngest ? "rotate(180deg)" : "rotate(0deg)" }}>
               ▼

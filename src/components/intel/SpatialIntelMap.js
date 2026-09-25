@@ -5,6 +5,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import { circlePolygon, footprintPolygon } from "@/lib/geo";
+import InfoTip from "@/components/ui/InfoTip";
 import "./spatial-intel-map.css";
 
 /*
@@ -49,6 +50,7 @@ export default function SpatialIntelMap({
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const radarMarkerRef = useRef(null);
   const selectedCityRef = useRef(selectedCity);
   const onSelectCityRef = useRef(onSelectCity);
   const onRadarChangeRef = useRef(onRadarChange);
@@ -248,6 +250,7 @@ export default function SpatialIntelMap({
       });
 
       const pick = (e) => {
+        if (!isRadar) return;
         const city = e.features && e.features[0] && e.features[0].properties.city;
         if (city) {
           onSelectCityRef.current(
@@ -258,31 +261,37 @@ export default function SpatialIntelMap({
       map.on("click", "zone-areas-fill", pick);
       map.on("click", "zone-points-glow", pick);
 
-      // In radar mode, clicking bare map moves the radar centre there.
+      // In Discover, any map click drops the pin, including inside a gold zone.
       map.on("click", (e) => {
         if (!onRadarChangeRef.current) return;
-        const hits = map.queryRenderedFeatures(e.point, {
-          layers: ["zone-areas-fill", "zone-points-glow"],
-        });
-        if (hits.length) return;
+        if (isRadar) {
+          const hits = map.queryRenderedFeatures(e.point, {
+            layers: ["zone-areas-fill", "zone-points-glow"],
+          });
+          if (hits.length) return;
+        }
         onRadarChangeRef.current({ lat: e.lngLat.lat, lng: e.lngLat.lng });
       });
 
       map.on("mouseenter", "zone-areas-fill", (e) => {
-        map.getCanvas().style.cursor = "pointer";
+        map.getCanvas().style.cursor = isRadar ? "pointer" : "crosshair";
+        if (!isRadar) return;
         const city = e.features && e.features[0] && e.features[0].properties.city;
         if (city) setHoverCity(city);
       });
       map.on("mouseleave", "zone-areas-fill", () => {
-        map.getCanvas().style.cursor = "";
+        map.getCanvas().style.cursor = isRadar ? "" : "crosshair";
         setHoverCity(null);
       });
 
+      if (!isRadar) map.getCanvas().style.cursor = "crosshair";
       setReady(true);
     });
 
     return () => {
       if (mapInstanceRef.current) {
+        radarMarkerRef.current?.remove();
+        radarMarkerRef.current = null;
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
@@ -311,6 +320,32 @@ export default function SpatialIntelMap({
     const src = map.getSource("radius-src");
     if (src) src.setData(radiusRing);
   }, [radiusRing, ready]);
+
+  /* The visible, draggable pin is the radar's source of truth. */
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !ready) return;
+    if (!radarActive) {
+      radarMarkerRef.current?.remove();
+      radarMarkerRef.current = null;
+      return;
+    }
+    if (!radarMarkerRef.current) {
+      const element = document.createElement("div");
+      element.className = "sim-radar-pin";
+      element.setAttribute("aria-label", "Radar center. Drag to move.");
+      const marker = new maplibregl.Marker({ element, draggable: true, anchor: "bottom" })
+        .setLngLat([radarLng, radarLat])
+        .addTo(map);
+      marker.on("dragend", () => {
+        const { lat, lng } = marker.getLngLat();
+        onRadarChangeRef.current?.({ lat, lng });
+      });
+      radarMarkerRef.current = marker;
+    } else {
+      radarMarkerRef.current.setLngLat([radarLng, radarLat]);
+    }
+  }, [radarActive, radarLat, radarLng, ready]);
 
   /* Repaint the selection highlight without rebuilding any source. */
   useEffect(() => {
@@ -370,6 +405,20 @@ export default function SpatialIntelMap({
       <div className="sim-canvas" style={{ minHeight: minH }}>
         <div ref={mapContainerRef} className="sim-gl" style={{ minHeight: minH }} />
 
+        {!isRadar && !radarActive ? (
+          <button
+            type="button"
+            className="sim-drop-pin"
+            disabled={!ready}
+            onClick={() => {
+              const point = mapInstanceRef.current?.getCenter();
+              if (point) onRadarChangeRef.current?.({ lat: point.lat, lng: point.lng });
+            }}
+          >
+            Drop pin at map center
+          </button>
+        ) : null}
+
         {activeLabel ? (
           <div className="sim-overlay">
             <div className="sim-overlay-text">
@@ -389,8 +438,11 @@ export default function SpatialIntelMap({
 
       <p className="sim-hint">
         {radarActive
-          ? "Click the map to move the radar. Drag the radius to widen it."
-          : "Click a gold zone to filter to that area."}
+          ? "Pin active. Adjust radius below."
+          : !isRadar
+            ? "Click to drop a pin."
+            : "Click a gold zone to filter."}{" "}
+        <InfoTip tipId="spatialRadar" label="How the spatial radar works" />
       </p>
     </div>
   );

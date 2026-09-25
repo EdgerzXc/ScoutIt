@@ -16,6 +16,7 @@ export default function CommunityConnectModal({
   const [intro, setIntro] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [dealId, setDealId] = useState(null);
   const [error, setError] = useState(null);
   // A-153 — Tab stays inside the dialog, Escape closes like ✕/CANCEL.
   // Hooks before the early return: isOpen gates the effect, not the call.
@@ -24,17 +25,44 @@ export default function CommunityConnectModal({
 
   if (!isOpen || !signal) return null;
 
+  const isSample = Boolean(signal.isSample);
+  const isLive = Boolean(signal.liveCommunity);
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // A-145 honesty: a sample card demonstrates the flow. It never sends,
+    // spends, or opens a thread — the control below stays disabled and this
+    // guard holds even if it is reached programmatically.
+    if (isSample) {
+      setError("This is a sample signal for exploring. No request was sent and no Connect was spent.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
+    setDealId(null);
 
-    // In sample / demonstration signal mode, simulate dispatch
-    if (signal.isSample) {
-      setTimeout(() => {
+    // Live member post: the request addresses the persisted author —
+    // resolved server-side from the signal id, never from a browser id.
+    if (isLive) {
+      try {
+        const { data: { session } } = await getSession().catch(() => ({ data: {} }));
+        const token = session?.access_token;
+        if (!token) throw new Error("Please sign in to your ScoutIt account to initiate a Connect.");
+        const res = await fetch(`/api/community/signals/${encodeURIComponent(signal.id)}/connect`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ message: intro.trim() }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok !== true) {
+          throw new Error(data.error || "Unable to initiate Connect at this time.");
+        }
+        setDealId(data.dealId || null);
         setSent(true);
+      } catch (err) {
+        setError(err.message || "Failed to initiate connect.");
+      } finally {
         setSubmitting(false);
-      }, 450);
+      }
       return;
     }
 
@@ -102,9 +130,16 @@ export default function CommunityConnectModal({
               Your introduction and matching proposal have been sent to{" "}
               <strong>{signal.author?.name || signal.author?.scoutId}</strong>. Once accepted, a private conversation thread will open in your ScoutIt Dashboard.
             </p>
-            <button type="button" className="ccm-primary-btn" onClick={onClose}>
-              RETURN TO RADAR
-            </button>
+            <div className="ccm-success-actions">
+              {dealId ? (
+                <a className="ccm-primary-btn ccm-inbox-link" href={`/dashboard/inbox?dealId=${encodeURIComponent(dealId)}`}>
+                  VIEW IN INBOX
+                </a>
+              ) : null}
+              <button type="button" className="ccm-cancel-btn" onClick={onClose}>
+                RETURN TO RADAR
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="ccm-form">
@@ -116,6 +151,11 @@ export default function CommunityConnectModal({
                 <span>•</span>
                 <span>{signal.author?.trustTier}</span>
               </div>
+              {isSample ? (
+                <p className="ccm-sample-note" role="note">
+                  SAMPLE SIGNAL — exploring only. Dispatch is disabled: nothing will be sent and no Connect will be spent.
+                </p>
+              ) : null}
             </div>
 
             <div className="ccm-field-group">
@@ -152,9 +192,9 @@ export default function CommunityConnectModal({
               <button type="button" className="ccm-cancel-btn" onClick={onClose} disabled={submitting}>
                 CANCEL
               </button>
-              <button type="submit" className="ccm-primary-btn" disabled={submitting || !intro.trim()}>
+              <button type="submit" className="ccm-primary-btn" disabled={isSample || submitting || !intro.trim()} title={isSample ? "Disabled for sample signals" : undefined}>
                 <Send size={12} aria-hidden="true" />
-                <span>{submitting ? "DISPATCHING..." : "DISPATCH (1 CONNECT)"}</span>
+                <span>{isSample ? "SAMPLE — DISPATCH DISABLED" : submitting ? "DISPATCHING..." : "DISPATCH (1 CONNECT)"}</span>
               </button>
             </div>
             {/* A-150: explicit Privacy Policy link (RA 10173 §11). */}

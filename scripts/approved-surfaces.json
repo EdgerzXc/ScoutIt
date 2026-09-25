@@ -6,14 +6,16 @@
     {
       "name": "Showcase stage and parent navigation",
       "path": "src/components/board/ShowcaseStage.js",
-      "sha256": "b158224e473a8586a8d6598d7e60a4a3f349bcdd3f6d517d838f3932b0abbbd1",
-      "acceptedAt": "2026-09-10",
-      "acceptedChange": "F-006. Owner reviewed the running page and accepted it: 'I am already alright with the showcase... right now its good.' Three accessibility repairs, no visual change: the hand-written wordmark became the shared ScoutItWordmark (accessible name 'ScoutIT — home' -> 'ScoutIt'), a duplicate <main> landmark became a <div>, and a tray <h4> became an <h2>. Styling verified unchanged - the host's :global(.sc-brand-logo .brand-*) rules still win on specificity, no CSS targets <main> by tag, and .sc-tray-name sets its own font-size and margin."
+      "sha256": "a813bf6fc42c37c144ab722c602adc64952897f1a48fc00f1de07dd20b0fc103",
+      "acceptedAt": "2026-09-25",
+      "acceptedChange": "Owner authorized: White Lens cosmic bypass (2026-09-24). Loop stops in light mode, canvases hidden by CSS, dark mode untouched."
     },
     {
       "name": "Metropolis foreground surface",
       "path": "src/app/layer/metropolis/page.js",
-      "sha256": "b0396aaf1936472a7327b375ac633f125af63e5cc21ee654fc5f540d0624f267"
+      "sha256": "fc129968c4668314fa898f2cf9f63cc9158b7b7e94311a556f3b50982d28fd74",
+      "acceptedAt": "2026-09-25",
+      "acceptedChange": "Owner authorized: replaced long teaching paragraph with missionTipId='metropolisMission' per A-160 InfoTip rollout."
     },
     {
       "name": "Metropolis city background composition",

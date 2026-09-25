@@ -52,7 +52,7 @@ export default async function DiscoverPage() {
                 <div className="engineFrame">
                   <div className="discoverTopBar">
                     <div className="discoverTitleBlock">
-                      <span className="discoverKicker">Layer 2.1 // Discovery</span>
+                      <span className="discoverKicker">Discovery</span>
                       <h1 className="discoverTitle">Residential</h1>
                     </div>
                   </div>

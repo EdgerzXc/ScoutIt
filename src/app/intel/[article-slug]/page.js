@@ -88,7 +88,7 @@ export async function generateMetadata({ params }) {
   const article = await getLiveArticle(slug);
   const isSample = article ? Boolean(article.isSample) : false;
   return {
-    title: article ? `${article.title} &middot; Intel Briefing` : "Intel Briefing",
+    title: article ? `${article.title} · Intel Briefing` : "Intel Briefing",
     description: article ? article.lead : "Real estate news and intelligence.",
     // Without this the article inherits `canonical: "/intel"` from
     // src/app/intel/layout.js, which tells Google to index the hub instead.
@@ -114,6 +114,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
     : null;
   const door = typeof sp.door === "string" ? sp.door : null;
   const fromWorkspace = !fromProperty && (sp.fromStratosphere === "1" || sp.fromLayer === "1");
+  const fromDiscover = !fromProperty && !fromWorkspace && sp.fromDiscover === "1";
   const workspaceReturn = new URLSearchParams();
   const workspaceStage = validJourneyStage(sp.stage);
   if (workspaceStage !== "all") workspaceReturn.set("stage", workspaceStage);
@@ -153,6 +154,11 @@ export default async function IntelArticlePage({ params, searchParams }) {
           <nav className="article-layer-return" aria-label="Stratosphere return">
             <Link href={workspaceHref}>← Back to Stratosphere</Link>
             <span>Your article view and filters are kept.</span>
+          </nav>
+        ) : null}
+        {fromDiscover ? (
+          <nav className="article-layer-return" aria-label="Discover return">
+            <Link href="/discover">← Back to Discover</Link>
           </nav>
         ) : null}
         {/* Dynamic Hero Banner */}

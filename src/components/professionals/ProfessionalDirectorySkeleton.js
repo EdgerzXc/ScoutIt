@@ -18,10 +18,9 @@ export default function ProfessionalDirectorySkeleton({ category = "broker" }) {
             <h1 id="directory-title-skeleton">{config.title}</h1>
             <p>{config.description}</p>
           </div>
-          <aside className={styles.truthPanel}>
-            <span className={styles.sectionLabel}>Evidence protocol</span>
-            <strong><ShieldCheck size={17} aria-hidden="true" /> Named signals only</strong>
-            <p>Credentials show their source. Availability is owner-declared. Activity appears only with a named, fresh observation.</p>
+          <aside className={styles.protocolRow} aria-label="Evidence protocol">
+            <ShieldCheck size={16} aria-hidden="true" />
+            <strong>Named signals only</strong>
           </aside>
         </section>
 

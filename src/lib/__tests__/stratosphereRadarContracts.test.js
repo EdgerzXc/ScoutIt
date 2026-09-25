@@ -105,27 +105,71 @@ describe("Stratosphere Spatial Radar — Terminal & Routing Integration", () => 
     expect(src).toContain("CommunityConnectModal");
   });
 
-  it("standalone /stratosphere route exists and mounts Header and StratosphereTerminal", () => {
+  it("standalone /stratosphere route mounts the workspace (articles + radar) with Header", () => {
     expect(existsSync(join(process.cwd(), "src/app/stratosphere/page.js"))).toBe(true);
     const src = read("src/app/stratosphere/page.js");
-    expect(src).toContain("StratosphereTerminal");
+    expect(src).toContain("StratosphereWorkspace");
     expect(src).toContain("Header");
     expect(src).toContain("canonical: \"/stratosphere\"");
   });
 
-  it("standalone /community route exists and mounts Header and StratosphereTerminal", () => {
+  it("/community hands off to the single Stratosphere radar instead of a duplicate terminal", () => {
     expect(existsSync(join(process.cwd(), "src/app/community/page.js"))).toBe(true);
     const src = read("src/app/community/page.js");
-    expect(src).toContain("StratosphereTerminal");
-    expect(src).toContain("Header");
-    expect(src).toContain("canonical: \"/community\"");
+    expect(src).toContain('permanentRedirect("/stratosphere?view=radar")');
+    expect(src).not.toContain("StratosphereTerminal");
   });
 
-  it("/layer/stratosphere mounts StratosphereTerminal and preserves LayerNav and LayerTransition", () => {
+  it("SignalComposer posts through the community API with staged identity", () => {
+    expect(existsSync(join(process.cwd(), "src/components/stratosphere/SignalComposer.js"))).toBe(true);
+    const src = read("src/components/stratosphere/SignalComposer.js");
+    expect(src).toContain('fetch("/api/community/signals"');
+    expect(src).toContain("/api/community/me");
+    expect(src).toContain("POST A SIGNAL");
+    expect(src).toContain("PrivacyNotice");
+  });
+
+  it("live community Connect resolves the author server-side with an inbox handoff", () => {
+    const modal = read("src/components/stratosphere/CommunityConnectModal.js");
+    expect(modal).toContain("/connect");
+    expect(modal).toContain("VIEW IN INBOX");
+    const route = read("src/app/api/community/signals/[id]/connect/route.js");
+    expect(route).toContain("author_account_id");
+    expect(route).toContain("spend_connects");
+    expect(route).not.toContain("recipient_id: signal");
+  });
+
+  it("workspace merges live posts above pipeline and samples with a post entry", () => {
+    const src = read("src/components/stratosphere/StratosphereWorkspace.js");
+    expect(src).toContain("/api/community/signals");
+    expect(src).toContain("POST A SIGNAL");
+    expect(src).toContain("SignalComposer");
+    expect(src).toContain("liveSignals");
+  });
+
+  it("P1 migration holds five service-role-only tables with no browser grants", () => {
+    const sql = read("supabase/migrations/20260924000001_community_signals_p1.sql");
+    for (const table of [
+      "stratosphere_signals",
+      "signal_locations",
+      "signal_requirements",
+      "signal_relevance",
+      "signal_saves",
+    ]) {
+      expect(sql).toContain(`CREATE TABLE IF NOT EXISTS public.${table}`);
+      expect(sql).toContain(`REVOKE ALL ON TABLE public.${table} FROM PUBLIC, anon, authenticated;`);
+    }
+    expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
+    // Rule 8: no privileged function may hide in the migration at all.
+    expect(sql).not.toContain("CREATE FUNCTION");
+  });
+
+  it("/layer/stratosphere is the cinematic entrance (no workspace controls on the layer)", () => {
     const src = read("src/app/layer/stratosphere/page.js");
     expect(src).toContain("LayerNav");
-    expect(src).toContain("StratosphereTerminal");
+    expect(src).not.toContain("StratosphereTerminal");
     expect(src).toContain("LayerTransition");
     expect(src).toContain("DescentBackdrop");
+    expect(src).toContain('href="/stratosphere"');
   });
 });

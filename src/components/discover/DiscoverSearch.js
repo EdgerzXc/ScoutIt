@@ -253,7 +253,7 @@ export default function DiscoverSearch() {
       <div className="dsc-body">
         <div className="dsc-map">
           <SpatialIntelMap
-            articles={results}
+            articles={articles}
             mode="search"
             selectedCity={selectedCity}
             onSelectCity={setSelectedCity}
@@ -268,45 +268,34 @@ export default function DiscoverSearch() {
             height={430}
           />
 
-          <div className="dsc-radar">
-            {radar ? (
-              <>
-                <label className="dsc-radar-label" htmlFor="dsc-radius">
-                  Within
-                  <output className="dsc-radar-value">{radar.radiusKm} km</output>
-                </label>
-                <input
-                  id="dsc-radius"
-                  type="range"
-                  min={RADIUS_MIN}
-                  max={RADIUS_MAX}
-                  step="1"
-                  value={radar.radiusKm}
-                  onChange={(e) =>
-                    setRadar((r) => ({ ...r, radiusKm: Number(e.target.value) }))
-                  }
-                  className="dsc-radar-range"
-                />
-                <button
-                  type="button"
-                  className="dsc-radar-clear"
-                  onClick={() => setRadar(null)}
-                >
-                  Clear
-                </button>
-              </>
-            ) : (
+          {radar ? (
+            <div className="dsc-radar">
+              <label className="dsc-radar-label" htmlFor="dsc-radius">
+                Within
+                <output className="dsc-radar-value">{radar.radiusKm} km</output>
+              </label>
+              <input
+                id="dsc-radius"
+                type="range"
+                min={RADIUS_MIN}
+                max={RADIUS_MAX}
+                step="1"
+                value={radar.radiusKm}
+                onChange={(e) =>
+                  setRadar((r) => ({ ...r, radiusKm: Number(e.target.value) }))
+                }
+                className="dsc-radar-range"
+                aria-label="Radar radius in kilometers"
+              />
               <button
                 type="button"
-                className="dsc-radar-start"
-                onClick={() =>
-                  setRadar({ lat: 14.5547, lng: 121.0244, radiusKm: DEFAULT_RADIUS })
-                }
+                className="dsc-radar-clear"
+                onClick={() => setRadar(null)}
               >
-                Search within a radius
+                Clear pin
               </button>
-            )}
-          </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="dsc-results">

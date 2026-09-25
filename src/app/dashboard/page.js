@@ -20,12 +20,14 @@ import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
 import { loadDeals } from "../../lib/deals/dealsClient";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
+import DashboardAmbientStrip from "../../components/dashboard/DashboardAmbientStrip";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
 import { normalizeDashboardModes, pickPrimaryRole } from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
+import "./dashboard-motion.css";
 
 const TAG_LABELS = {
   buyer: "Buyer Workspace",
@@ -249,7 +251,7 @@ function DashboardInner() {
       <AtmosphereBackground variant={mode === "broker" ? "broker" : "dashboard"} />
 
       {/* Top Nav (Persistent) */}
-      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex flex-wrap items-center justify-between gap-y-2">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
           
@@ -446,6 +448,7 @@ function DashboardInner() {
             </button>
           </div>
         </div>
+        <DashboardAmbientStrip user={user} />
       </header>
 
       {/* Main Content Area (Mode determined) */}
@@ -456,7 +459,26 @@ function DashboardInner() {
             people open the dashboard to answer, and it is the same question
             for every role. */}
         <AttentionRail mockUserId={user.id} className="mb-6" />
-        {renderActiveMode()}
+        {["buyer", "exploring", "owner", "broker"].includes(mode) ? (
+          <div className="dashboard-lens-motion">
+            <svg
+              className="dashboard-signal-field"
+              viewBox="0 0 440 170"
+              preserveAspectRatio="xMaxYMin meet"
+              fill="none"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path className="dashboard-signal-track" d="M0 134 H93 L135 92 H226 L268 50 H440" />
+              <path className="dashboard-signal-trace" pathLength="200" d="M0 134 H93 L135 92 H226 L268 50 H440" />
+              <path className="dashboard-signal-track dashboard-signal-track--second" d="M64 169 H158 L200 127 H310 L352 85 H440" />
+              <path className="dashboard-signal-trace dashboard-signal-trace--second" pathLength="200" d="M64 169 H158 L200 127 H310 L352 85 H440" />
+              <circle className="dashboard-signal-node" cx="268" cy="50" r="3" />
+              <circle className="dashboard-signal-node dashboard-signal-node--second" cx="352" cy="85" r="2" />
+            </svg>
+            {renderActiveMode()}
+          </div>
+        ) : renderActiveMode()}
       </main>
 
       <Toasts />
