@@ -1,4 +1,4 @@
-﻿import Header from "@/components/layout/Header";
+import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { ShieldCheck, Search, SlidersHorizontal } from "lucide-react";
 import { PROFESSIONAL_CATEGORIES } from "@/lib/professionalDirectory";
@@ -53,9 +53,9 @@ export default function ProfessionalDirectorySkeleton({ category = "broker" }) {
                 </div>
                 <div className={styles.cardBody}>
                   <div className={styles.location} style={{ width: "80px", height: "14px", background: "rgba(232, 174, 60, 0.15)", borderRadius: "2px" }} />
-                  <div style={{ width: "65%", height: "28px", background: "rgba(255, 255, 255, 0.08)", marginTop: "8px", borderRadius: "2px" }} />
-                  <div style={{ width: "45%", height: "14px", background: "rgba(255, 255, 255, 0.04)", marginTop: "10px", borderRadius: "2px" }} />
-                  <div style={{ width: "100%", height: "48px", background: "rgba(255, 255, 255, 0.03)", marginTop: "16px", borderRadius: "2px" }} />
+                  <div className={styles.skeletonLine} style={{ width: "65%", height: "28px", marginTop: "8px" }} />
+                  <div className={styles.skeletonLine} style={{ width: "45%", height: "14px", marginTop: "10px" }} />
+                  <div className={styles.skeletonLine} style={{ width: "100%", height: "48px", marginTop: "16px" }} />
                 </div>
               </div>
             ))}

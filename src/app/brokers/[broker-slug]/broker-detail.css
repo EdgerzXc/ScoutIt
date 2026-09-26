@@ -1080,3 +1080,23 @@
     flex: 0 0 268px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — BROKER DETAIL OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .detail-closures-box,
+body.light-mode .scout-rating-box {
+  background: var(--surface) !important;
+  border-color: var(--border-mid) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+body.light-mode .detail-avatar {
+  border-color: var(--border-mid);
+}
+
+body.light-mode .detail-metric-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-sm);
+}

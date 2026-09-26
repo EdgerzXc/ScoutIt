@@ -98,3 +98,263 @@
    block, which removes the movement and keeps the control usable. */
 .profileLink:active,
 .saveButton:active { transform: scale(0.97); transition-duration: 120ms; }
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — VERIFIED ADVISORS & PROFESSIONALS ROSTER
+   ═══════════════════════════════════════════════════════════════ */
+:global(body.light-mode) .page main::before {
+  display: none !important;
+}
+
+:global(body.light-mode) .orbit {
+  display: none !important;
+}
+
+:global(body.light-mode) .eyebrow {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .protocolRow {
+  background: var(--surface) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light-mode) .protocolRow strong {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .protocolRow > svg {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .toolbar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid var(--border-mid) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light-mode) .search {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .search:focus-within {
+  border-color: var(--text-primary) !important;
+  box-shadow: 0 0 0 2px rgba(17, 17, 19, 0.1) !important;
+}
+
+:global(body.light-mode) .search input {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .search input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .selects {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .selects select {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .selects select:focus {
+  border-color: var(--text-primary) !important;
+  outline: none;
+}
+
+:global(body.light-mode) .selects select option {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .resultMeta {
+  border-bottom-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :global(body.light-mode) .card:hover {
+    border-color: var(--border-mid) !important;
+    box-shadow: var(--shadow-md);
+  }
+}
+
+:global(body.light-mode) .portrait {
+  background: var(--surface2) !important;
+}
+
+:global(body.light-mode) .portraitShade {
+  display: none !important;
+}
+
+:global(body.light-mode) .portrait > span:not(.sampleFlag):not(.sourceFlag) {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .sampleFlag,
+:global(body.light-mode) .sourceFlag {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light-mode) .location {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .card h2 {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .headline {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .summary {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .chips span {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .evidence {
+  border-top-color: var(--border) !important;
+}
+
+:global(body.light-mode) .sectionLabel {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .evidenceRow {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .evidenceRow svg {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .evidenceRow strong {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .evidenceRow small {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .absentSignal {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .badges > span {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .badges small {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .availability {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .availability i {
+  background: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .availability[data-available="true"] i {
+  background: #16a34a !important;
+  box-shadow: 0 0 6px rgba(22, 163, 74, 0.4) !important;
+}
+
+:global(body.light-mode) .availability small {
+  color: var(--text-muted) !important;
+}
+
+:global(body.light-mode) .profileLink,
+:global(body.light-mode) .saveButton {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-primary) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :global(body.light-mode) .profileLink:hover,
+  :global(body.light-mode) .saveButton:hover {
+    background: var(--accent-fill) !important;
+    border-color: var(--border-strong) !important;
+    color: #111113 !important;
+  }
+}
+
+:global(body.light-mode) .saveButtonActive {
+  background: var(--accent-fill) !important;
+  border-color: var(--accent-fill) !important;
+  color: #111113 !important;
+}
+
+:global(body.light-mode) .saveMessage {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .saveMessage a {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .state {
+  background: var(--surface) !important;
+  border: 1px dashed var(--border-mid) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light-mode) .state > span {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .state h2 {
+  color: var(--text-primary) !important;
+}
+
+:global(body.light-mode) .state p {
+  color: var(--text-secondary) !important;
+}
+
+:global(body.light-mode) .state button {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-primary) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :global(body.light-mode) .state button:hover {
+    background: var(--accent-fill) !important;
+    color: #111113 !important;
+  }
+}
+
+.skeletonLine {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+:global(body.light-mode) .skeletonLine {
+  background: rgba(17, 17, 19, 0.08) !important;
+}
+

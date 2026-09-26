@@ -559,22 +559,29 @@ export default function Header({ ambientContext = null }) {
             height: 44px;
           }
 
+          .header-nav {
+            position: static;
+          }
+
           /* U-037: one owner for the mobile panel. The dropdown stays
              absolute (the sticky glass header is its correct containing
              block — a fixed sheet would collapse inside the header's own
              backdrop-filter, which is exactly the "Create Account sliver"
-             failure). Full width under the header, own scroll, safe-area
-             aware, dvh-measured because vh lies under the iOS toolbar. */
+             failure). Anchored directly to the right edge with safe margin,
+             own scroll, safe-area aware, dvh-measured because vh lies under
+             the iOS toolbar. */
           .header-dropdown {
-            left: 12px;
+            top: calc(100% + 8px);
             right: 12px;
+            left: auto;
             min-width: 0;
-            width: auto;
+            width: min(calc(100vw - 24px), 280px);
             max-height: calc(100dvh - 88px);
             overflow-y: auto;
             overscroll-behavior: contain;
             border-radius: 16px;
             padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+            transform-origin: top right;
           }
 
           .header-dropdown :global(a) {
@@ -631,13 +638,6 @@ export default function Header({ ambientContext = null }) {
             height: 44px;
           }
           .header-menu-btn svg { width: 13px; height: 13px; }
-
-          .header-dropdown {
-            width: min(calc(100vw - 24px), 260px);
-            max-height: calc(100dvh - 72px);
-          }
-
-
         }
 
         @media (max-width: 480px) {

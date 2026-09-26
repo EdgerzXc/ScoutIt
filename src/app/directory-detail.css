@@ -329,3 +329,22 @@
     transform: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — DIRECTORY DETAIL OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .detail-closures-box {
+  background: var(--surface) !important;
+  border-color: var(--border-mid) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+body.light-mode .detail-avatar {
+  border-color: var(--border-mid);
+}
+
+body.light-mode .detail-metric-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-sm);
+}
