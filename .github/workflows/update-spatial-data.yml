@@ -31,7 +31,7 @@ jobs:
         run: node scripts/sync_transit_data.js
 
       - name: Commit and Push Changes
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "chore(data): auto-update transit stations from OpenStreetMap"
           file_pattern: "src/data/manila_transit_stations.json"
