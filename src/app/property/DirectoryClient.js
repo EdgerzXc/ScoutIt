@@ -152,6 +152,8 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
       .map((p) => toCard(p, p.spaceCategory || null, "Vetted dynamic listing brief."))
   );
   const [rawIntel, setRawIntel] = useState(() => initialIntel);
+  const [fetchError, setFetchError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // 🔴 Start "loaded" whenever the server already handed us cards. Defaulting
   // to `true` unconditionally is what made a crawler see the loading state even
@@ -234,9 +236,12 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
   // Load Airtable CMS data with mock fallback (now supports Supabase Radius)
   useEffect(() => {
+    let cancelled = false;
     async function loadCMSData() {
       try {
         const data = await loadPublicCatalog({ radius, lng: centerLng, lat: centerLat });
+        if (cancelled) return;
+        setFetchError(false);
 
         // 1. Group and format properties
         const airtableProperties = data.properties || [];
@@ -290,19 +295,22 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
         setRawIntel(mergedIntel);
       } catch (err) {
-        // Fallback strictly to local mockDb
-        const baseProperties = [];
-        setRawProperties(baseProperties);
-
-        const baseIntel = [];
-        setRawIntel(baseIntel);
+        if (cancelled) return;
+        console.error("[Directory] Failed to load catalog:", err);
+        setFetchError(true);
+        // Do not wipe properties if initial SSR cards are present
+        setRawProperties(prev => (prev && prev.length > 0 ? prev : []));
+        setRawIntel(prev => (prev && prev.length > 0 ? prev : []));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     loadCMSData();
-  }, [radius, centerLng, centerLat]);
+    return () => {
+      cancelled = true;
+    };
+  }, [radius, centerLng, centerLat, retryCount]);
 
   const toggleFilterSection = (section) => {
     setOpenFilters(prev => ({ ...prev, [section]: !prev[section] }));
@@ -743,7 +751,24 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                      miss. Merging them tells a first-time visitor that ScoutIt
                      has nothing, which is the one thing a directory must never
                      accidentally say. */
-                  rawProperties.length === 0 ? (
+                  fetchError && rawProperties.length === 0 ? (
+                    <div className="directory-empty">
+                      <h2>Registry connection interrupted</h2>
+                      <p>Unable to connect to the space database right now. Please try again shortly.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoading(true);
+                          setFetchError(false);
+                          setRetryCount((c) => c + 1);
+                        }}
+                        className="founding-cta"
+                        style={{ marginTop: "16px", cursor: "pointer", background: "none", border: "1px solid var(--accent-muted)" }}
+                      >
+                        Retry Connection →
+                      </button>
+                    </div>
+                  ) : rawProperties.length === 0 ? (
                     <div className="directory-empty">
                       <h2>The first spaces are being verified</h2>
                       <p>

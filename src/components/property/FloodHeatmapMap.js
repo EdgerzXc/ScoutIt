@@ -6,6 +6,8 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapCreditControl from '@/components/maps/MapCreditControl';
 import { Protocol } from 'pmtiles';
+import { isWebglSupported } from '@/lib/webglCheck';
+import MapFallback2D from '@/components/ui/MapFallback2D';
 
 // Free, open-licensed UP NOAH flood hazard data, self-served as cloud-optimized vector
 // tiles via HTTP range requests - no full-file download needed.
@@ -78,16 +80,28 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
   useEffect(() => {
     if (!mapContainerRef.current || mapInstance.current || lat == null || lng == null) return;
 
+    if (!isWebglSupported()) {
+      setLoadState('webgl_unavailable');
+      return;
+    }
+
     ensurePmtilesProtocol();
 
-    const map = new maplibregl.Map({
-      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
-      attributionControl: false,
-      container: mapContainerRef.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-      center: [lng, lat],
-      zoom: 13,
-    });
+    let map;
+    try {
+      map = new maplibregl.Map({
+        // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+        attributionControl: false,
+        container: mapContainerRef.current,
+        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        center: [lng, lat],
+        zoom: 13,
+      });
+    } catch (err) {
+      console.warn('[FloodHeatmapMap] WebGL context initialization failed:', err);
+      setLoadState('webgl_unavailable');
+      return;
+    }
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     map.addControl(new MapCreditControl(), 'bottom-right');
@@ -138,6 +152,14 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
   }, [periodId]);
 
   if (lat == null || lng == null) return null;
+
+  if (loadState === 'webgl_unavailable') {
+    return (
+      <div className="flood-heatmap-wrapper">
+        <MapFallback2D lat={lat} lng={lng} title={propertyTitle || "Spatial Flood Analysis"} className="flood-heatmap-container" />
+      </div>
+    );
+  }
 
   return (
     <div className="flood-heatmap-wrapper">

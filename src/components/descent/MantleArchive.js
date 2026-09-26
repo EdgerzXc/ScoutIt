@@ -141,6 +141,7 @@ export default function MantleArchive() {
           title="How ScoutIt Thinks"
           description="The operating layer beneath discovery: why the platform exists, where information lives, how it moves, and what a trust claim means."
           missionText="Mantle is ScoutIt’s disclosure layer. The system should remain understandable without asking a visitor to trust invisible machinery or leave this page to complete the explanation."
+          missionTipId="platformTruth"
           ctaText="Read the complete Manifesto →"
           ctaHref="/about"
         />

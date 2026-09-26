@@ -32,7 +32,7 @@ import SimpleDetail from "@/components/ui/SimpleDetail";
 import InfoTip from "@/components/ui/InfoTip";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
@@ -771,6 +771,42 @@ export default function OwnerMode() {
             <p className="text-text-secondary font-body-md text-sm md:text-base">Connecting to your workspace...</p>
           </div>
           <CardGridSkeleton count={2} label="Loading your listings" />
+        </div>
+      );
+    }
+    if (inventoryError) {
+      return (
+        <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-0 animate-[fadeIn_0.4s_ease]">
+          <div className="mb-sm">
+            <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
+            <p className="text-text-secondary font-body-md text-sm md:text-base">Connecting to your secure workspace...</p>
+          </div>
+          <div className="bg-surface/40 backdrop-blur-xl border border-gold-muted/30 rounded-3xl px-6 py-12 flex flex-col gap-5 items-center justify-center text-center mt-8">
+            <p className="font-label-caps text-xs uppercase tracking-widest text-gold-accent">
+              Workspace Sync Alert
+            </p>
+            <h3 className="font-display-md text-xl md:text-2xl text-on-surface tracking-tight">
+              Unable to sync portfolio dossiers
+            </h3>
+            <p className="text-text-secondary max-w-md text-sm leading-relaxed">
+              We encountered a temporary connection issue while loading your active property files. Your property data remains secure in the registry.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-2">
+              <button
+                type="button"
+                onClick={() => refetchInventory?.()}
+                className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] font-bold cursor-pointer"
+              >
+                Retry Loading Portfolio →
+              </button>
+              <Link
+                href="/property"
+                className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3 rounded-full hover:bg-white/5 hover:text-on-surface"
+              >
+                View Public Directory
+              </Link>
+            </div>
+          </div>
         </div>
       );
     }

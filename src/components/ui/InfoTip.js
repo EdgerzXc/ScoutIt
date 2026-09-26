@@ -153,7 +153,7 @@ export default function InfoTip({ tipId, label = "More information", className =
           justify-content: center;
           border: 1px solid var(--border-solid);
           border-radius: 50%;
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           line-height: 1;
           color: inherit;
@@ -198,7 +198,7 @@ export default function InfoTip({ tipId, label = "More information", className =
           margin-bottom: 5px;
           color: var(--accent-bright);
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;

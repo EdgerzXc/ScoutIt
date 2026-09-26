@@ -114,8 +114,16 @@ export async function proxy(request, event) {
     const isWrite = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
     if (flags.global_read_only === true && isWrite && !path.startsWith('/api/auth/')) {
       return NextResponse.json(
-        { error: 'ScoutIt is briefly in read-only mode for maintenance. Nothing is lost — please try again shortly.' },
-        { status: 503 }
+        {
+          error: 'ScoutIt is briefly in read-only mode for maintenance. Nothing is lost — please try again shortly.',
+          code: 'GLOBAL_READ_ONLY',
+        },
+        {
+          status: 503,
+          headers: {
+            'Retry-After': '60',
+          },
+        }
       );
     }
 
@@ -213,3 +221,15 @@ export async function proxy(request, event) {
 export const config = {
   matcher: '/api/:path*',
 };
+
+export async function checkGlobalReadOnly() {
+  const flags = await getFlags();
+  return Boolean(flags.global_read_only);
+}
+
+export function resetFlagCache() {
+  flagCache = { flags: {}, fetchedAt: 0 };
+}
+
+export { proxy as middleware };
+

@@ -34,6 +34,7 @@ Follow these strict rules:
 
 
 export async function POST(request) {
+  let text;
   try {
     // Dashboard-only tool that spends Gemini quota on caller-supplied text.
     // Left unauthenticated it was a free AI proxy billed to ScoutIt.
@@ -42,15 +43,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { text, location, category } = await request.json();
+    const body = await request.json();
+    text = body?.text;
+    const { location, category } = body || {};
 
     if (!text || text.trim() === '') {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      console.warn('[Rewrite] No GEMINI_API_KEY found');
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 });
+      console.warn('[Rewrite] No GEMINI_API_KEY found, returning formatted text');
+      return NextResponse.json({
+        success: true,
+        text: text.trim(),
+        fallback: true,
+        warning: "AI rewrite service is not configured. Formatted original text returned."
+      });
     }
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -69,7 +77,12 @@ ${text}
 
     return NextResponse.json({ success: true, text: response.text.trim() });
   } catch (error) {
-    console.error('[Rewrite] Error:', error);
-    return NextResponse.json({ error: 'Failed to rewrite description' }, { status: 500 });
+    console.error('[Rewrite] AI error, falling back to formatted original text:', error);
+    return NextResponse.json({
+      success: true,
+      text: (text || '').trim(),
+      fallback: true,
+      warning: "AI enhancement temporarily unavailable. Formatted original text returned."
+    });
   }
 }

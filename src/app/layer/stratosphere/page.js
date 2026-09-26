@@ -7,7 +7,7 @@ import InfoTip from "@/components/ui/InfoTip";
 import "./stratosphere-layer.css";
 
 const steps = [
-  { icon: Compass, title: "Follow the stage", text: "See what is planned, building, opening, or finished." },
+  { icon: Compass, title: "Track developments & trends", text: "Follow building milestones or explore market shifts and zoning." },
   { icon: MapPin, title: "Find your area", text: "Explore updates where they matter to you." },
   { icon: FileText, title: "Read the story", text: "Open the full article behind each update." },
 ];

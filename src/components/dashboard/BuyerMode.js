@@ -15,6 +15,8 @@ const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonM
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapCreditControl from '@/components/maps/MapCreditControl';
+import { isWebglSupported } from '@/lib/webglCheck';
+import MapFallback2D from '@/components/ui/MapFallback2D';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import SimpleDetail from "@/components/ui/SimpleDetail";
@@ -37,6 +39,45 @@ export default function BuyerMode() {
 
   // Store markers to clean them up when listings change
   const markersRef = useRef([]);
+
+  // Market Intelligence rail drag-to-scroll interaction
+  const intelRailRef = useRef(null);
+  const isDraggingIntel = useRef(false);
+  const startXIntel = useRef(0);
+  const scrollLeftIntel = useRef(0);
+  const hasMovedIntel = useRef(false);
+
+  const onIntelMouseDown = (e) => {
+    const el = intelRailRef.current;
+    if (!el) return;
+    isDraggingIntel.current = true;
+    hasMovedIntel.current = false;
+    startXIntel.current = e.pageX - el.offsetLeft;
+    scrollLeftIntel.current = el.scrollLeft;
+  };
+
+  const onIntelMouseMove = (e) => {
+    if (!isDraggingIntel.current) return;
+    const el = intelRailRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXIntel.current) * 1.4;
+    if (Math.abs(walk) > 4) {
+      hasMovedIntel.current = true;
+    }
+    el.scrollLeft = scrollLeftIntel.current - walk;
+  };
+
+  const onIntelMouseUp = () => {
+    isDraggingIntel.current = false;
+  };
+
+  const handleIntelCardClick = (e) => {
+    if (hasMovedIntel.current) {
+      e.preventDefault();
+      hasMovedIntel.current = false;
+    }
+  };
 
   // ⚡ Bolt Optimization: Memoize filtered listings to avoid O(N*C) calculations on every keystroke
   const filteredListings = useMemo(() => {
@@ -64,6 +105,10 @@ export default function BuyerMode() {
   // 1. Initialize Mapbox (now MapLibre)
   useEffect(() => {
     if (showMap && mapContainerRef.current) {
+      if (!isWebglSupported()) {
+        setMapError("Hardware 3D WebGL acceleration is unavailable on this device.");
+        return;
+      }
       try {
         setMapError(null);
         const map = new maplibregl.Map({
@@ -469,13 +514,16 @@ export default function BuyerMode() {
       {showMap ? (
         <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)]">
           
-          {mapError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 text-error z-20 p-8 text-center">
-              <span className="font-bold mb-2">Map Error</span>
-              <span className="text-sm">{mapError}</span>
-            </div>
+          {mapError ? (
+            <MapFallback2D
+              lat={DEFAULT_MAP_CENTER?.[1] || 14.5547}
+              lng={DEFAULT_MAP_CENTER?.[0] || 121.0244}
+              title="Property Spatial Radar"
+              style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+            />
+          ) : (
+            <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           )}
-          <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
           <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2 max-w-[calc(100%-6rem)]">
             <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] break-words">
@@ -638,12 +686,23 @@ export default function BuyerMode() {
               Market Intelligence
               <Link href="/intel" className="text-xs font-working-title text-gold-accent hover:underline py-2.5 px-1 -my-1">View Archives</Link>
             </h2>
-            <div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 scroll-px-4">
+            <div
+              ref={intelRailRef}
+              onMouseDown={onIntelMouseDown}
+              onMouseMove={onIntelMouseMove}
+              onMouseUp={onIntelMouseUp}
+              onMouseLeave={onIntelMouseUp}
+              className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-x-visible pb-6 md:pb-0 snap-x md:snap-none hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 scroll-px-4 select-none cursor-grab active:cursor-grabbing md:cursor-default"
+            >
               
               {/* Intel Brief 1 — links must point at REAL briefings (the old
                   makati-yields / nuvali-expansion / pasig-zoning slugs never
                   existed and 404'd from the dashboard) */}
-              <Link href="/intel" className="block shrink-0 w-[320px] max-w-[85vw] md:w-[400px] snap-start">
+              <Link
+                href="/intel"
+                onClick={handleIntelCardClick}
+                className="block shrink-0 w-[300px] max-w-[85vw] md:w-auto md:max-w-none md:shrink snap-start h-full"
+              >
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
@@ -657,7 +716,11 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 2 */}
-              <Link href="/intel" className="block shrink-0 w-[320px] max-w-[85vw] md:w-[400px] snap-start">
+              <Link
+                href="/intel"
+                onClick={handleIntelCardClick}
+                className="block shrink-0 w-[300px] max-w-[85vw] md:w-auto md:max-w-none md:shrink snap-start h-full"
+              >
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
@@ -671,7 +734,11 @@ export default function BuyerMode() {
               </Link>
 
               {/* Intel Brief 3 */}
-              <Link href="/intel" className="block shrink-0 w-[320px] max-w-[85vw] md:w-[400px] snap-start">
+              <Link
+                href="/intel"
+                onClick={handleIntelCardClick}
+                className="block shrink-0 w-[300px] max-w-[85vw] md:w-auto md:max-w-none md:shrink snap-start h-full"
+              >
                 <div className="card-atmosphere-gold hov-glow rounded-lg p-6 flex flex-col justify-between transition cursor-pointer group h-full">
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Commercial Signal</span>

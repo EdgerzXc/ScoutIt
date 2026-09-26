@@ -212,7 +212,8 @@ function CRMPageInner() {
           <Link
             href="/dashboard"
             className="min-h-11 min-w-11 inline-flex items-center justify-center p-2 border border-surface-variant rounded-full text-text-secondary hover:text-on-surface hover:border-gold-accent/50 transition shrink-0"
-            title="Go back to Dashboard"
+            title="Back to Workspace"
+            aria-label="Back to Workspace"
           >
             <ArrowLeft size={20} />
           </Link>

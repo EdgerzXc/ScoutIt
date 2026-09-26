@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
+import { isWebglSupported } from "@/lib/webglCheck";
+import MapFallback2D from "@/components/ui/MapFallback2D";
 import {
   point as turfPoint,
   lineString,
@@ -107,6 +109,11 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
   useEffect(() => {
     if (!mapContainerRef.current || mapInstance.current) return;
 
+    if (!isWebglSupported()) {
+      setLoadState("webgl_unavailable");
+      return;
+    }
+
     // Frame all three lines instead of guessing a center — accurate to
     // whatever the real OSM geometry actually covers.
     const combined = {
@@ -116,16 +123,23 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
     const [minLng, minLat, maxLng, maxLat] = turfBbox(combined);
     const { geometry: { coordinates: centerCoords } } = turfCenter(combined);
 
-    const map = new maplibregl.Map({
-      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
-      attributionControl: false,
-      container: mapContainerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: centerCoords,
-      zoom: 11,
-      pitch: 60,
-      antialias: true,
-    });
+    let map;
+    try {
+      map = new maplibregl.Map({
+        // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+        attributionControl: false,
+        container: mapContainerRef.current,
+        style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        center: centerCoords,
+        zoom: 11,
+        pitch: 60,
+        antialias: true,
+      });
+    } catch (err) {
+      console.warn("[ManilaTransitMap] WebGL initialization failed:", err);
+      setLoadState("webgl_unavailable");
+      return;
+    }
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
     map.addControl(new MapCreditControl(), "bottom-right");
@@ -486,7 +500,16 @@ export default function ManilaTransitMap({ propertyLat, propertyLng, propertyTit
 
   return (
     <div className="transit-map-wrapper">
-      <div ref={mapContainerRef} className="transit-map-container" />
+      {loadState === "webgl_unavailable" ? (
+        <MapFallback2D
+          lat={propertyLat || 14.5547}
+          lng={propertyLng || 121.0244}
+          title={propertyTitle || "Metro Manila Transit Network"}
+          className="transit-map-container"
+        />
+      ) : (
+        <div ref={mapContainerRef} className="transit-map-container" />
+      )}
 
       <div className="transit-map-panel">
         <div className="transit-map-panel-title">Metro Manila Rail Network</div>

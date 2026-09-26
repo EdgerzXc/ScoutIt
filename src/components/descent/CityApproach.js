@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { isWebglSupported } from "@/lib/webglCheck";
 
 import "./city-approach.css";
 
@@ -52,16 +53,30 @@ export default function CityApproach({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return undefined;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: [MANILA.lng, MANILA.lat],
-      zoom: START_ZOOM,
-      pitch: START_PITCH,
-      bearing: -18,
-      interactive: false,
-      attributionControl: false,
-    });
+    if (!isWebglSupported()) {
+      setReady(true);
+      if (onReadyRef.current) onReadyRef.current();
+      return undefined;
+    }
+
+    let map;
+    try {
+      map = new maplibregl.Map({
+        container: containerRef.current,
+        style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        center: [MANILA.lng, MANILA.lat],
+        zoom: START_ZOOM,
+        pitch: START_PITCH,
+        bearing: -18,
+        interactive: false,
+        attributionControl: false,
+      });
+    } catch (err) {
+      console.warn("[CityApproach] WebGL initialization failed:", err);
+      setReady(true);
+      if (onReadyRef.current) onReadyRef.current();
+      return undefined;
+    }
 
     mapRef.current = map;
 

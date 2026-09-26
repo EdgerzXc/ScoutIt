@@ -6,6 +6,8 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapCreditControl from '@/components/maps/MapCreditControl';
 import InfoTip from '@/components/ui/InfoTip';
+import { isWebglSupported } from '@/lib/webglCheck';
+import MapFallback2D from '@/components/ui/MapFallback2D';
 
 // Math function to draw a geographical circle without Turf.js
 const createGeoJSONCircle = (center, radiusInKm, points = 64) => {
@@ -31,22 +33,28 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
   const [radiusMiles, setRadiusMiles] = useState(5); // Default 5 miles
   const [center, setCenter] = useState([initialLng, initialLat]);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   // Initialize MapLibre (no token needed — CARTO dark tiles are free)
   useEffect(() => {
     if (!mapContainerRef.current || mapInstance.current) return;
+    if (!isWebglSupported()) {
+      setWebglSupported(false);
+      return;
+    }
 
-    const map = new maplibregl.Map({
-      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
-      attributionControl: false,
-      container: mapContainerRef.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-      center: center,
-      zoom: 11,
-      pitch: 45,
-      scrollZoom: false
-    });
-    map.addControl(new MapCreditControl(), 'bottom-right');
+    try {
+      const map = new maplibregl.Map({
+        // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+        attributionControl: false,
+        container: mapContainerRef.current,
+        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        center: center,
+        zoom: 11,
+        pitch: 45,
+        scrollZoom: false
+      });
+      map.addControl(new MapCreditControl(), 'bottom-right');
 
     map.on('load', () => {
       map.addSource('radius-circle', {
@@ -96,6 +104,10 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
       map.remove();
       mapInstance.current = null;
     };
+    } catch (err) {
+      console.warn("[InteractiveRadiusMap] WebGL initialization failed:", err);
+      setWebglSupported(false);
+    }
   }, []);
 
   // Update circle visually when radius or center changes
@@ -118,7 +130,16 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         <button onClick={onClose} aria-label="Close" className="close-map-btn">✕</button>
       </div>
 
-      <div ref={mapContainerRef} className="mapbox-container" />
+      {!webglSupported ? (
+        <MapFallback2D
+          title="Radius Scanner: 2D Mode Active"
+          locationName="Search Center Coordinates"
+          coordinates={center}
+          minHeight="min-h-[400px]"
+        />
+      ) : (
+        <div ref={mapContainerRef} className="mapbox-container" />
+      )}
 
       {/* Control Panel Overlay */}
       <div className="map-control-panel">

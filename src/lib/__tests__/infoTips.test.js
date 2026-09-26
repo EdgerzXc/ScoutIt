@@ -83,7 +83,9 @@ describe("info tips — explanations on demand (A-160)", () => {
     expect(crust).not.toContain("without flattening them into one generic verified roster");
     const home = read("src/app/HomeClient.js");
     expect(home).toContain('tipId="dataPhilosophy"');
-    expect(home).toContain('tipId="platformTruth"');
+    expect(home).not.toContain('tipId="platformTruth"');
+    const mantle = read("src/components/descent/MantleArchive.js");
+    expect(mantle).toContain('missionTipId="platformTruth"');
     expect(home).not.toContain("Structured property briefings and spatial signals");
     const directory = read("src/app/property/DirectoryClient.js");
     expect(directory).toContain('tipId="verifyingSpaces"');

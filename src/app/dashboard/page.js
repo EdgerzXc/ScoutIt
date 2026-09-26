@@ -251,8 +251,8 @@ function DashboardInner() {
       <AtmosphereBackground variant={mode === "broker" ? "broker" : "dashboard"} />
 
       {/* Top Nav (Persistent) */}
-      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 md:py-4 flex flex-wrap items-center justify-between gap-y-2">
-        <div className="flex items-center gap-6">
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
           <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
           
           {/* Custom Desktop Workspace Switcher */}
@@ -301,7 +301,12 @@ function DashboardInner() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6">
+        {/* Forecast & Ambient Conditions in Header */}
+        <div className="hidden lg:flex flex-1 items-center justify-center min-w-0 max-w-xl mx-2">
+          <DashboardAmbientStrip user={user} />
+        </div>
+
+        <div className="flex items-center gap-4 md:gap-6 shrink-0">
           <div className="hidden md:block relative">
             <button
               className="flex items-center gap-2 text-gold-accent font-label-caps text-[12px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition duration-160 ease-out"
@@ -448,7 +453,6 @@ function DashboardInner() {
             </button>
           </div>
         </div>
-        <DashboardAmbientStrip user={user} />
       </header>
 
       {/* Main Content Area (Mode determined) */}
@@ -544,6 +548,13 @@ function DashboardInner() {
               )}
             </div>
 
+
+            <div className="border-t border-surface-variant pt-4 pb-3">
+              <div className="mb-2">
+                <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Forecast &amp; Ambient</span>
+              </div>
+              <DashboardAmbientStrip user={user} />
+            </div>
 
             <div className="border-t border-surface-variant pt-4">
               <Link href="/settings" className="flex items-center gap-3 text-text-secondary hover:text-on-surface font-working-title text-sm py-2">

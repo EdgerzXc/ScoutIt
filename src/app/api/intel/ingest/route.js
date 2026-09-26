@@ -3,6 +3,7 @@ import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { extractText, getDocumentProxy } from "unpdf";
 import Papa from "papaparse";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { GoogleGenAI, Type } from "@google/genai";
 import { generateWithFallback } from "@/lib/geminiModel";
@@ -318,7 +319,28 @@ export async function POST(request) {
 
     const saved = await createIntelRecord(article, publish);
     if (saved.error) {
-      return NextResponse.json({ error: saved.error, article }, { status: 502 });
+      try {
+        await supabaseAdmin.from("intel_briefings").upsert({
+          slug: article.slug,
+          title: article.title,
+          category: article.category,
+          source_name: article.sourceName || "OSINT Ingest",
+          body_json: JSON.stringify(article.blocks),
+          excerpt: article.excerpt || null,
+          lead: article.lead || null,
+          recommendation: article.recommendation || null,
+          published_to_airtable: false,
+          created_at: new Date().toISOString(),
+        }, { onConflict: "slug" });
+      } catch (backupErr) {
+        console.error("[Intel Ingest] Failed to save draft backup to Supabase:", backupErr);
+      }
+      return NextResponse.json({
+        error: saved.error,
+        warning: "Airtable save failed, but article draft was safely preserved in Supabase OSINT repository.",
+        article,
+        savedToSupabaseDraft: true
+      }, { status: 502 });
     }
 
     return NextResponse.json({

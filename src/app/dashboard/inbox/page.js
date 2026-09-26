@@ -12,7 +12,8 @@ import { getSession, getUser } from "@/lib/authClient";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { DashboardProvider } from "@/context/DashboardContext";
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 // Real Supabase session first; an explicit localhost E2E fixture may provide
 // read-only mock identity when the browser suite enables its public test flag.
@@ -341,10 +342,22 @@ function InboxInner() {
         {/* Left Sidebar - Deal List */}
         <div className={`relative z-10 w-full min-h-0 border-r border-surface-variant flex-col bg-background/85 backdrop-blur-xl md:w-[38%] xl:w-[34%] ${selectedDeal ? "hidden md:flex" : "flex"}`}>
           <div className="shrink-0 border-b border-surface-variant p-4 sm:p-5">
-            <span className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent">
-              ScoutIt deal rooms
-            </span>
-            <h1 className="font-headline-editorial text-3xl text-on-surface">Inbox</h1>
+            <div className="flex items-center gap-3.5 mb-2">
+              <Link
+                href="/dashboard"
+                className="min-h-11 min-w-11 inline-flex items-center justify-center p-2 border border-surface-variant rounded-full text-text-secondary hover:text-on-surface hover:border-gold-accent/50 transition shrink-0"
+                title="Back to Workspace"
+                aria-label="Back to Workspace"
+              >
+                <ArrowLeft size={20} />
+              </Link>
+              <div>
+                <span className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent block">
+                  ScoutIt deal rooms
+                </span>
+                <h1 className="font-headline-editorial text-3xl text-on-surface leading-tight">Inbox</h1>
+              </div>
+            </div>
             <p className="text-sm text-text-secondary mt-1">
               Conversations, live viewings, and private deal records.
               {activeUnread > 0 && (
@@ -469,12 +482,22 @@ function InboxInner() {
         {/* Right Content - ChatBox */}
         <div className={`relative z-10 w-full min-h-0 flex-col bg-background/70 md:w-[62%] xl:w-[66%] ${selectedDeal ? "flex" : "hidden md:flex"}`}>
           {selectedDeal && (
-            <button
-              onClick={() => setSelectedDealId(null)}
-              className="md:hidden flex items-center gap-2 text-sm font-working-title text-gold-accent px-4 min-h-11 py-3 border-b border-surface-variant shrink-0 w-full text-left"
-            >
-              ← Back to leads
-            </button>
+            <div className="md:hidden flex items-center justify-between border-b border-surface-variant px-4 py-1 bg-surface/40 shrink-0">
+              <button
+                onClick={() => setSelectedDealId(null)}
+                className="flex items-center gap-2 text-sm font-working-title text-gold-accent min-h-11 py-2 text-left"
+              >
+                ← Back to leads
+              </button>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wider text-text-secondary hover:text-gold-accent min-h-11 py-2 px-2"
+                title="Back to Workspace"
+              >
+                <ArrowLeft size={14} className="text-gold-accent" />
+                <span>Workspace</span>
+              </Link>
+            </div>
           )}
           {selectedDeal ? (
             <ChatBox

@@ -1,5 +1,6 @@
-// Case-sensitivity routing diagnostics trigger and async params fix
 import { notFound, permanentRedirect } from "next/navigation";
+import Link from "next/link";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 
 import { fetchProperties } from "@/lib/airtable";
 import { siteUrl } from "@/lib/siteUrl";
@@ -137,21 +138,63 @@ export default async function PropertyRoute({ params }) {
   // so surfacing briefings on a property page costs no extra fetch. Matching
   // happens in lib/propertyArticles.js, not here.
   let articles = [];
+  let cmsUnavailable = false;
 
   try {
     const bundle = await getCmsBundle();
-    const properties = bundle.properties || [];
-    articles = bundle.intel || [];
+    const properties = bundle?.properties || [];
+    articles = bundle?.intel || [];
+    if (bundle?.source && (bundle.source.includes("empty_fallback") || bundle.source.includes("error"))) {
+      if (properties.length === 0) {
+        cmsUnavailable = true;
+      }
+    }
     match = properties.find(
       (p) =>
         (p.slug && p.slug.toLowerCase() === resolvedParams.id.toLowerCase()) ||
         (p.id && p.id === resolvedParams.id)
     );
-  } catch {}
+  } catch {
+    cmsUnavailable = true;
+  }
 
   if (!match) {
     const redirectSlug = await getHistoricalPropertyRedirect(resolvedParams.id);
     if (redirectSlug) permanentRedirect(`/property/${redirectSlug}`);
+
+    if (cmsUnavailable) {
+      return (
+        <main className="relative min-h-screen bg-background text-text-primary flex items-center justify-center px-6">
+          <AtmosphereBackground variant="stratosphere" />
+          <div className="relative z-10 max-w-md text-center p-8 rounded-2xl bg-surface/60 backdrop-blur-xl border border-white/10 shadow-2xl">
+            <p className="font-label-caps text-[12px] uppercase tracking-widest text-gold-accent mb-2">
+              Signal Interrupted
+            </p>
+            <h1 className="font-headline-editorial text-2xl md:text-3xl text-on-surface mb-3">
+              Space Registry Refreshing
+            </h1>
+            <p className="text-text-secondary text-sm leading-relaxed mb-6">
+              Our connection to the public property registry is temporarily updating. Please refresh to load this dossier.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href={`/property/${encodeURIComponent(resolvedParams.id)}`}
+                className="bg-gold-accent hover:bg-gold-bright text-background font-working-title text-sm font-bold px-6 py-3 rounded-full transition-all duration-300"
+              >
+                Reload Dossier
+              </a>
+              <Link
+                href="/property"
+                className="border border-white/15 hover:border-white/30 text-text-secondary hover:text-text-primary font-working-title text-sm px-6 py-3 rounded-full transition-all duration-300"
+              >
+                Browse Directory
+              </Link>
+            </div>
+          </div>
+        </main>
+      );
+    }
+
     notFound();
   }
 

@@ -4,6 +4,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { resolveUserId } from '@/lib/serverAuth';
 
 export async function POST(request) {
+  let headers;
   try {
     // Dashboard-only tool that spends Gemini quota on caller-supplied text.
     // Left unauthenticated it was a free AI proxy billed to ScoutIt.
@@ -12,7 +13,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { headers, sampleData } = await request.json();
+    const body = await request.json();
+    headers = body?.headers;
+    const sampleData = body?.sampleData;
 
     if (!headers || !sampleData || headers.length === 0) {
       return NextResponse.json({ error: "Missing headers or sample data" }, { status: 400 });
@@ -68,7 +71,10 @@ export async function POST(request) {
     return NextResponse.json(mapping);
 
   } catch (err) {
-    console.error("[BLUEPRINT API] Error generating mapping:", err);
+    console.error("[BLUEPRINT API] Error generating mapping, falling back to heuristic:", err);
+    if (Array.isArray(headers) && headers.length > 0) {
+      return NextResponse.json(naiveMapping(headers));
+    }
     return NextResponse.json({ error: "Failed to generate blueprint mapping" }, { status: 500 });
   }
 }

@@ -135,14 +135,11 @@ html.lite-mode .dashboard-lens-motion .card-atmosphere-gold::after {
 /* The workspace keeps its role controls and uses the same information rail as
    the public header. The selected forecast city is explicit and changeable. */
 .dashboard-ambient-strip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  width: 100%;
+  gap: 10px;
   min-width: 0;
-  padding-top: 7px;
-  border-top: 1px solid var(--border);
 }
 
 .dashboard-ambient-rail {
@@ -153,7 +150,7 @@ html.lite-mode .dashboard-lens-motion .card-atmosphere-gold::after {
 .dashboard-ambient-city {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   flex: 0 0 auto;
   color: var(--text-secondary);
   font-family: var(--font-mono);
@@ -164,13 +161,14 @@ html.lite-mode .dashboard-lens-motion .card-atmosphere-gold::after {
 
 .dashboard-ambient-city select {
   max-width: 112px;
-  min-height: 36px;
+  min-height: 32px;
   padding: 0 6px;
   border: 1px solid var(--accent-muted);
   border-radius: 4px;
   background: var(--surface);
   color: var(--accent);
   font: inherit;
+  font-size: 12px;
   cursor: pointer;
 }
 

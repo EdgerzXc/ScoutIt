@@ -6,6 +6,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import { circlePolygon, footprintPolygon } from "@/lib/geo";
 import InfoTip from "@/components/ui/InfoTip";
+import { isWebglSupported } from "@/lib/webglCheck";
+import MapFallback2D from "@/components/ui/MapFallback2D";
 import "./spatial-intel-map.css";
 
 /*
@@ -56,6 +58,7 @@ export default function SpatialIntelMap({
   const onRadarChangeRef = useRef(onRadarChange);
   const [ready, setReady] = useState(false);
   const [hoverCity, setHoverCity] = useState(null);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   const isRadar = mode === "radar";
   const radarActive = Boolean(onRadarChange) && radiusKm != null;
@@ -145,18 +148,30 @@ export default function SpatialIntelMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return undefined;
 
-    const map = new maplibregl.Map({
-      // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
-      attributionControl: false,
-      container: mapContainerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: [DEFAULT_CENTER.lng, DEFAULT_CENTER.lat],
-      zoom: isRadar ? 10 : 10.5,
-      pitch: isRadar ? 40 : 30,
-      bearing: -15,
-      maxPitch: 70,
-      cooperativeGestures: true,
-    });
+    if (!isWebglSupported()) {
+      setWebglSupported(false);
+      return undefined;
+    }
+
+    let map;
+    try {
+      map = new maplibregl.Map({
+        // CVE-2026-85061 sink: MapCreditControl draws the credit instead.
+        attributionControl: false,
+        container: mapContainerRef.current,
+        style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        center: [DEFAULT_CENTER.lng, DEFAULT_CENTER.lat],
+        zoom: isRadar ? 10 : 10.5,
+        pitch: isRadar ? 40 : 30,
+        bearing: -15,
+        maxPitch: 70,
+        cooperativeGestures: true,
+      });
+    } catch (err) {
+      console.warn("[SpatialIntelMap] WebGL initialization failed:", err);
+      setWebglSupported(false);
+      return undefined;
+    }
 
     mapInstanceRef.current = map;
     map.addControl(
@@ -403,7 +418,17 @@ export default function SpatialIntelMap({
       </div>
 
       <div className="sim-canvas" style={{ minHeight: minH }}>
-        <div ref={mapContainerRef} className="sim-gl" style={{ minHeight: minH }} />
+        {!webglSupported ? (
+          <MapFallback2D
+            lat={DEFAULT_CENTER.lat}
+            lng={DEFAULT_CENTER.lng}
+            title={isRadar ? "Spatial Radar" : "Search Map"}
+            className="sim-gl"
+            style={{ minHeight: minH }}
+          />
+        ) : (
+          <div ref={mapContainerRef} className="sim-gl" style={{ minHeight: minH }} />
+        )}
 
         {!isRadar && !radarActive ? (
           <button

@@ -116,6 +116,31 @@ export async function POST(request) {
       // loudly — a swallowed insert here recreates the exact bug this route
       // exists to remove.
       console.error("[Contact] Insert failed", error.message);
+
+      // Fallback: If DB insert fails but email service is configured, attempt direct email dispatch
+      // so genuine visitor contacts and leads are not dropped during temporary database outages.
+      if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
+        try {
+          const fallbackResult = await sendEmail({
+            to: process.env.CONTACT_NOTIFY_TO,
+            subject: `[DB FALLBACK] New contact message — ${subject || "no subject"}`,
+            html: renderEmail({
+              heading: "Contact Form Message (Direct Email Fallback)",
+              body: `<p><strong>Database storage failed; message delivered via email fallback.</strong></p><p>From: ${name} &lt;${email}&gt;</p><p>${message.replace(/\n/g, "<br/>")}</p>`,
+              ctaLabel: "Open the contact queue",
+              ctaPath: "/contact",
+              footnote: "Database insert failed; please verify system health.",
+            }),
+          });
+          if (fallbackResult.sent) {
+            console.warn("[Contact] Insert failed, but email fallback succeeded. Returning 201.");
+            return NextResponse.json({ ok: true, message: "Message received." }, { status: 201 });
+          }
+        } catch (emailErr) {
+          console.error("[Contact] Email fallback also failed:", emailErr?.message);
+        }
+      }
+
       return NextResponse.json(
         { ok: false, message: "We could not save your message. Please try again shortly." },
         { status: 500 },
@@ -153,6 +178,30 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, message: "Message received." }, { status: 201 });
   } catch (err) {
     console.error("[Contact] Unexpected failure", err?.message);
+
+    if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO && parsed?.data) {
+      try {
+        const { name, email, subject, message } = parsed.data;
+        const fallbackResult = await sendEmail({
+          to: process.env.CONTACT_NOTIFY_TO,
+          subject: `[DB FALLBACK] New contact message — ${subject || "no subject"}`,
+          html: renderEmail({
+            heading: "Contact Form Message (Emergency Fallback)",
+            body: `<p><strong>Unexpected system failure occurred; message delivered via email fallback.</strong></p><p>From: ${name} &lt;${email}&gt;</p><p>${message.replace(/\n/g, "<br/>")}</p>`,
+            ctaLabel: "Open the contact queue",
+            ctaPath: "/contact",
+            footnote: "System error occurred; please verify contact queue health.",
+          }),
+        });
+        if (fallbackResult.sent) {
+          console.warn("[Contact] Unexpected error, but emergency email fallback succeeded. Returning 201.");
+          return NextResponse.json({ ok: true, message: "Message received." }, { status: 201 });
+        }
+      } catch (emailErr) {
+        console.error("[Contact] Emergency email fallback also failed:", emailErr?.message);
+      }
+    }
+
     return NextResponse.json(
       { ok: false, message: "We could not save your message. Please try again shortly." },
       { status: 500 },

@@ -18,6 +18,8 @@ import LeadExportButton from './crm/LeadExportButton';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapCreditControl from '@/components/maps/MapCreditControl';
+import { isWebglSupported } from '@/lib/webglCheck';
+import MapFallback2D from '@/components/ui/MapFallback2D';
 import circle from '@turf/circle';
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ownerTenureLabel } from "@/lib/dashboardListings";
@@ -206,6 +208,10 @@ export default function BrokerMode() {
   // 1. Initialize Mapbox
   useEffect(() => {
     if (showMap && mapContainerRef.current) {
+      if (!isWebglSupported()) {
+        setMapError("Hardware 3D WebGL acceleration is unavailable on this device.");
+        return;
+      }
       try {
         setMapError(null);
         const map = new maplibregl.Map({
@@ -945,13 +951,16 @@ export default function BrokerMode() {
       {showMap && (
         <div id="broker-map-section" className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)] mb-8 scroll-mt-24">
           
-          {mapError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 text-error z-20 p-8 text-center">
-              <span className="font-bold mb-2">Map Error</span>
-              <span className="text-sm">{mapError}</span>
-            </div>
+          {mapError ? (
+            <MapFallback2D
+              lat={14.5547}
+              lng={121.0215}
+              title="Broker Deal Radar"
+              style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+            />
+          ) : (
+            <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           )}
-          <div ref={mapContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} />
           
           <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2 max-w-[calc(100%-6rem)]">
             <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] break-words">

@@ -915,6 +915,7 @@ export default function ShowcaseStage({ mode = "full" }) {
   const isTrayDragging = useRef(false);
   const trayStartX = useRef(0);
   const trayScrollLeft = useRef(0);
+  const trayMoved = useRef(false);
   const [isTrayStripDragging, setIsTrayStripDragging] = useState(false);
 
   const [entries, setEntries] = useState([]);
@@ -1081,6 +1082,22 @@ export default function ShowcaseStage({ mode = "full" }) {
     if (transRef.current) return;
     const from = tierRef.current;
     if (from === toTier && toRank === activeRank) return;
+
+    // In White Lens, Lite Mode, or reduced motion, the canvas draw loop is stopped.
+    // Immediately apply tier and rank state without depending on requestAnimationFrame.
+    const isMotionBypassed =
+      isLightMode() ||
+      isLiteMode() ||
+      (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    if (isMotionBypassed || from === toTier) {
+      tierRef.current = toTier;
+      setActiveTier(toTier);
+      setActiveRank(toRank);
+      transRef.current = null;
+      return;
+    }
+
     const dir = TIER_ORDER.indexOf(toTier) > TIER_ORDER.indexOf(from) ? "up" : "down";
     const { W, H } = dimRef.current;
     warpParticles.current = Array.from({ length: 200 }, () => {
@@ -1103,6 +1120,16 @@ export default function ShowcaseStage({ mode = "full" }) {
       fromRgb: TIERS[from]?.rgb || "232, 174, 60",
       flash: TIERS[toTier]?.flash || "rgba(232, 174, 60, 0.85)",
     };
+
+    // Safety timeout: guaranteed recovery even if rAF is paused or frame is dropped
+    setTimeout(() => {
+      if (transRef.current) {
+        tierRef.current = toTier;
+        setActiveTier(toTier);
+        setActiveRank(toRank);
+        transRef.current = null;
+      }
+    }, 700);
   }, [activeRank]);
 
   const selectRank = useCallback(
@@ -1190,16 +1217,21 @@ export default function ShowcaseStage({ mode = "full" }) {
   const onTrayMouseDown = (e) => {
     if (!trayStripRef.current) return;
     isTrayDragging.current = true;
-    setIsTrayStripDragging(true);
+    trayMoved.current = false;
     trayStartX.current = e.pageX - trayStripRef.current.offsetLeft;
     trayScrollLeft.current = trayStripRef.current.scrollLeft;
   };
   const onTrayMouseMove = (e) => {
     if (!isTrayDragging.current || !trayStripRef.current) return;
-    e.preventDefault();
     const x = e.pageX - trayStripRef.current.offsetLeft;
-    const walk = (x - trayStartX.current) * 1.5;
-    trayStripRef.current.scrollLeft = trayScrollLeft.current - walk;
+    const dist = Math.abs(x - trayStartX.current);
+    if (dist > 5) {
+      trayMoved.current = true;
+      if (!isTrayStripDragging) setIsTrayStripDragging(true);
+      e.preventDefault();
+      const walk = (x - trayStartX.current) * 1.5;
+      trayStripRef.current.scrollLeft = trayScrollLeft.current - walk;
+    }
   };
   const onTrayMouseUpOrLeave = () => {
     isTrayDragging.current = false;
@@ -1582,7 +1614,11 @@ export default function ShowcaseStage({ mode = "full" }) {
                 key={item.property_slug || item.rank}
                 type="button"
                 className={`sc-tray-card ${isCurrent ? "is-selected" : ""}`}
-                onClick={() => selectRank(item.rank)}
+                onClick={() => {
+                  if (!trayMoved.current) {
+                    selectRank(item.rank);
+                  }
+                }}
                 style={{ "--item-color": theme.color }}
               >
                 <div

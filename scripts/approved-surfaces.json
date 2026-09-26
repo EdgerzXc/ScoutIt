@@ -6,9 +6,9 @@
     {
       "name": "Showcase stage and parent navigation",
       "path": "src/components/board/ShowcaseStage.js",
-      "sha256": "a813bf6fc42c37c144ab722c602adc64952897f1a48fc00f1de07dd20b0fc103",
-      "acceptedAt": "2026-09-25",
-      "acceptedChange": "Owner authorized: White Lens cosmic bypass (2026-09-24). Loop stops in light mode, canvases hidden by CSS, dark mode untouched."
+      "sha256": "e9bdc05b2b32c286d6ac347f213cccd77739b57891a52dbba906f3432230b757",
+      "acceptedAt": "2026-09-26",
+      "acceptedChange": "Owner authorized: Fix bottom selection click in White Lens & Lite Mode (bypass rAF loop on goToTier), drag threshold (5px), and safety timeout (700ms)."
     },
     {
       "name": "Metropolis foreground surface",

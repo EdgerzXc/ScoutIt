@@ -31,6 +31,8 @@ const DEFAULT_CONTEXT_VALUE = {
   savedIds: [],
   identityResolved: false,
   isLoading: false,
+  inventoryError: false,
+  refetchInventory: () => {},
   addToast: () => {},
   toggleSave: () => {},
   raiseQuest: async () => false,
@@ -80,9 +82,11 @@ export function DashboardProvider({ children }) {
   const [savedIds, setSavedIds] = useState([]);
   const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [inventoryError, setInventoryError] = useState(false);
   // Which identity the provider has already resolved. Auth events that do not
   // change it are ignored, which is what stops the re-verification loop.
   const resolvedUserIdRef = useRef(null);
+  const fetchLiveIntelligenceRef = useRef(null);
   // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
   // promise resolver so publishListing can await the user's answer.
   const [declarationPrompt, setDeclarationPrompt] = useState(null);
@@ -302,6 +306,10 @@ export function DashboardProvider({ children }) {
         if (inventoryRes?.ok) {
           const inventoryData = await inventoryRes.json();
           supabaseListings = mapSupabaseProperties(inventoryData.properties || []);
+          if (!cancelled) setInventoryError(false);
+        } else {
+          console.warn("[DashboardContext] Failed to load inventory from server");
+          if (!cancelled) setInventoryError(true);
         }
 
         let airtableListings = [];
@@ -404,12 +412,18 @@ export function DashboardProvider({ children }) {
       }
     };
 
+    fetchLiveIntelligenceRef.current = fetchLiveIntelligence;
     fetchLiveIntelligence();
     return () => { cancelled = true; };
     // Loading is keyed to the resolved identity; presentation fields do not
     // authorize or refetch private data.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [identityResolved, currentUser?.id]);
+
+  const refetchInventory = useCallback(() => {
+    setInventoryError(false);
+    fetchLiveIntelligenceRef.current?.();
+  }, []);
 
   // ── Toasts ──
   const addToast = (message, icon = "✓") => {
@@ -1274,7 +1288,9 @@ export function DashboardProvider({ children }) {
       clearAllNotifications,
       searchByRadius,
       DEFAULT_MAP_CENTER,
-      authedFetch
+      authedFetch,
+      inventoryError,
+      refetchInventory,
     }}>
       {children}
       {/* Rendered at provider level so every publish path is gated, not just

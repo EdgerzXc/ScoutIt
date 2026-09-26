@@ -265,14 +265,42 @@ export async function POST(request) {
       // A-144 §10.10: a failed insert must not strand the debit — refund it
       // as a platform error (same pattern as the A-148 anonymity rollback).
       console.error("[DEALS API] POST error:", error);
-      await supabaseAdmin.rpc('refund_connects_system_error', {
-        p_user_id: userId,
-        p_amount: 1,
-        p_reason: 'Manual deal insert failed after spend',
-        p_staff_id: 'system',
-        p_ref_id: property.id,
-      });
-      return NextResponse.json({ error: "Failed to create deal. No Connect was spent." }, { status: 500 });
+      let refundSucceeded = false;
+      try {
+        const { error: refundErr } = await supabaseAdmin.rpc('refund_connects_system_error', {
+          p_user_id: userId,
+          p_amount: 1,
+          p_reason: 'Manual deal insert failed after spend',
+          p_staff_id: 'system',
+          p_ref_id: property.id,
+        });
+        if (!refundErr) {
+          refundSucceeded = true;
+        } else {
+          console.error("[DEALS API] Refund RPC returned error:", refundErr);
+        }
+      } catch (refundEx) {
+        console.error("[DEALS API] Refund RPC threw exception:", refundEx);
+      }
+
+      if (refundSucceeded) {
+        return NextResponse.json({ error: "Failed to create deal. Your Connect token has been refunded." }, { status: 500 });
+      }
+
+      // If refund failed, record emergency log so ledger can be reconciled
+      try {
+        await supabaseAdmin.from('security_access_logs').insert({
+          event_type: 'connects_refund_failed',
+          user_id: userId,
+          ip_hash: 'system_reconciliation',
+          user_agent: 'deals_post_rollback',
+        });
+      } catch {}
+
+      return NextResponse.json({
+        error: "Failed to create deal. Connect refund encountered a sync issue and has been flagged for staff review.",
+        ref_id: property.id,
+      }, { status: 500 });
     }
     const manualBalance = spendData?.[0]?.total_balance ?? null;
     if (manualBalance !== null) {

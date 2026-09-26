@@ -11,6 +11,8 @@ import { commandLens } from "@/components/maps/lenses/command";
 import { locationLens } from "@/components/maps/lenses/location";
 import { floodLens } from "@/components/maps/lenses/flood";
 import { transitLens } from "@/components/maps/lenses/transit";
+import { isWebglSupported } from "@/lib/webglCheck";
+import MapFallback2D from "@/components/ui/MapFallback2D";
 
 // Registry of available lenses
 const LENS_LABELS = {
@@ -130,6 +132,7 @@ export default function SpatialCanvas({
   const [showDossierModal, setShowDossierModal] = useState(false);
   const [recentQuakes, setRecentQuakes] = useState([]);
   const [fireCount, setFireCount] = useState(0);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   // Shared Reach isochrone data (spine)
   // `reach` is the isochrone when Mapbox supplies one and a true-distance
@@ -212,6 +215,11 @@ export default function SpatialCanvas({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
+    if (!isWebglSupported()) {
+      setWebglSupported(false);
+      return;
+    }
+
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
     let map;
@@ -243,6 +251,7 @@ export default function SpatialCanvas({
       });
     } catch (err) {
       console.warn("MapLibre GL initialization error:", err);
+      setWebglSupported(false);
       return;
     }
 
@@ -847,8 +856,12 @@ export default function SpatialCanvas({
         />
       )}
 
-      {/* MapLibre WebGL container */}
-      <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
+      {/* MapLibre WebGL container or 2D Fallback */}
+      {!webglSupported ? (
+        <MapFallback2D lat={targetLat} lng={targetLng} title={propertyTitle} style={{ width: "100%", height: "100%" }} />
+      ) : (
+        <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
+      )}
 
       {/* HUD Telemetry Overlay */}
       {showHud && (

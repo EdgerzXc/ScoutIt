@@ -8,6 +8,7 @@ const crm = read("src/app/dashboard/crm/page.js");
 const kanban = read("src/components/dashboard/crm/KanbanBoard.js");
 const calendarPage = read("src/app/dashboard/calendar/page.js");
 const calendarShell = read("src/components/calendar/CalendarShell.js");
+const dashboardLayout = read("src/components/dashboard/DashboardLayout.js");
 const workspaceBar = read("src/components/dashboard/WorkspaceCommandBar.js");
 const chatBox = read("src/components/dashboard/ChatBox.js");
 const bookingModal = read("src/components/dashboard/BookingModal.js");
@@ -28,6 +29,17 @@ describe("A-047 ScoutIt Inbox and CRM workspace curation", () => {
     expect(inbox).toContain('<WorkspaceCommandBar active="inbox"');
     expect(crm).toContain('<WorkspaceCommandBar active="crm"');
     expect(calendarPage).toContain('<WorkspaceCommandBar active="calendar"');
+  });
+
+  it("provides explicit back navigation to the workspace across Inbox, Calendar, CRM, and DashboardLayout", () => {
+    expect(inbox).toContain('href="/dashboard"');
+    expect(inbox).toContain('title="Back to Workspace"');
+    expect(calendarPage).toContain('href="/dashboard"');
+    expect(calendarPage).toContain('title="Back to Workspace"');
+    expect(crm).toContain('href="/dashboard"');
+    expect(crm).toContain('title="Back to Workspace"');
+    expect(dashboardLayout).toContain('href="/dashboard"');
+    expect(dashboardLayout).toContain('title="Back to Workspace"');
   });
 
   it("keeps the curated workspace on ScoutIt tokens and reduced-motion-safe movement", () => {

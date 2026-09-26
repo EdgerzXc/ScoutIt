@@ -6,6 +6,8 @@ import maplibregl from "maplibre-gl";
 // component is itself lazy-loaded by its parents via next/dynamic, so the
 // stylesheet is still code-split with it.
 import "maplibre-gl/dist/maplibre-gl.css";
+import { isWebglSupported } from "@/lib/webglCheck";
+import MapFallback2D from "@/components/ui/MapFallback2D";
 
 // ═══════════════════════════════════════════════════════════════════════
 // A-121 — ONE MAP ENGINE. This surface was the last Leaflet holdout.
@@ -120,9 +122,15 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
   const [mapLoaded, setMapLoaded] = useState(false);
   const [hoveredAmenity, setHoveredAmenity] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
+
+    if (!isWebglSupported()) {
+      setWebglSupported(false);
+      return;
+    }
 
     let cancelled = false;
     let resizeObserver;
@@ -137,20 +145,27 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
       typeof window !== "undefined" &&
       window.matchMedia("(pointer: coarse)").matches;
 
-    const map = new maplibregl.Map({
-      container: mapRef.current,
-      style: rasterBasemapStyle(),
-      center: centre,
-      zoom: 15,
-      attributionControl: false,
-      scrollZoom: false,
-      dragPan: !isMobile,
-      // The old map could not rotate or tilt, because Leaflet cannot. Keeping
-      // it flat is part of "nothing about this map changes".
-      pitchWithRotate: false,
-      dragRotate: false,
-      touchZoomRotate: false,
-    });
+    let map;
+    try {
+      map = new maplibregl.Map({
+        container: mapRef.current,
+        style: rasterBasemapStyle(),
+        center: centre,
+        zoom: 15,
+        attributionControl: false,
+        scrollZoom: false,
+        dragPan: !isMobile,
+        // The old map could not rotate or tilt, because Leaflet cannot. Keeping
+        // it flat is part of "nothing about this map changes".
+        pitchWithRotate: false,
+        dragRotate: false,
+        touchZoomRotate: false,
+      });
+    } catch (err) {
+      console.warn("[InteractiveMap] WebGL initialization failed:", err);
+      setWebglSupported(false);
+      return;
+    }
     mapInstance.current = map;
 
     map.addControl(
@@ -562,7 +577,16 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
   return (
     <div className="map-view-wrapper">
-      <div ref={mapRef} className="spatial-map-node" />
+      {!webglSupported ? (
+        <MapFallback2D
+          lat={lat || 14.5547}
+          lng={lng || 121.0244}
+          title="Interactive Surroundings"
+          className="spatial-map-node"
+        />
+      ) : (
+        <div ref={mapRef} className="spatial-map-node" />
+      )}
 
       {/* Isochrone legend — only when bands are actually drawn */}
       {mapLoaded && isochrone?.features?.length > 0 && contours.length > 0 && (
@@ -679,7 +703,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         </div>
       )}
 
-      {!mapLoaded && (
+      {!mapLoaded && webglSupported && (
         <div className="map-fallback-overlay">
           LAUNCHING GEOGRAPHIC SATELLITE...
         </div>

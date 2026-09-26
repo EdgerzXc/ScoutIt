@@ -755,7 +755,7 @@ export default function HomeClient() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Mantle: Platform Truth</h3>
-            <p className="text-sm text-text-secondary">Data philosophy and verification standards. <InfoTip tipId="platformTruth" label="How ScoutIt works" /></p>
+            <p className="text-sm text-text-secondary">Data philosophy and verification standards.</p>
           </Link>
 
           {/* Card 06: The Core */}

@@ -635,6 +635,223 @@ body.light-mode .orbit-filter-pill.is-active .orbit-filter-count {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — SHOWCASE STAGE & LEADERBOARD (A-159)
+   Pure use, zero cosmic show. Strip dark islands, re-home to soft
+   surfaces + ink, and ensure leaderboard tray is clearly legible.
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .sc-top-command-bar {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm);
+}
+body.light-mode .sc-brand-logo .brand-scout {
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-telemetry-chip {
+  background: rgba(17, 17, 19, 0.05) !important;
+  border-color: var(--border) !important;
+}
+body.light-mode .sc-telemetry-text {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .sc-pulse-dot {
+  background: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+body.light-mode .sc-award-selector {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+}
+body.light-mode .sc-award-pill {
+  color: var(--text-secondary) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-award-pill:hover {
+    color: var(--text-primary) !important;
+    background: rgba(17, 17, 19, 0.05) !important;
+  }
+}
+body.light-mode .sc-award-pill.is-active {
+  background: var(--accent-fill) !important;
+  color: var(--on-accent) !important;
+  border-color: var(--accent-fill) !important;
+}
+body.light-mode .sc-orbit-return-btn {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-orbit-return-btn:hover {
+    background: var(--accent-fill) !important;
+    border-color: var(--accent-fill) !important;
+    color: var(--on-accent) !important;
+  }
+}
+body.light-mode .sc-rail-nav-btn {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-rail-nav-btn:hover:not(:disabled) {
+    background: var(--accent-fill) !important;
+    border-color: var(--accent-fill) !important;
+    color: var(--on-accent) !important;
+  }
+}
+body.light-mode .sc-cat-pill {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+body.light-mode .sc-cat-count {
+  background: rgba(17, 17, 19, 0.06) !important;
+  color: var(--text-muted) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-cat-pill:hover {
+    background: var(--surface2) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-mid) !important;
+  }
+}
+body.light-mode .sc-cat-pill.is-active {
+  background: var(--accent-fill) !important;
+  color: var(--on-accent) !important;
+  border-color: var(--accent-fill) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+body.light-mode .sc-cat-pill.is-active .sc-cat-count {
+  background: rgba(17, 17, 19, 0.12) !important;
+  color: var(--on-accent) !important;
+}
+body.light-mode .sc-hud-card,
+body.light-mode .sc-viewport-glass {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+body.light-mode .sc-tier-banner {
+  background: var(--surface2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-prop-name {
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-prop-loc {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .sc-velocity-panel {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+}
+body.light-mode .sc-velocity-label,
+body.light-mode .sc-velocity-source {
+  color: var(--text-muted) !important;
+}
+body.light-mode .sc-velocity-stat strong {
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-velocity-stat small {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .sc-merit-card {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+}
+body.light-mode .sc-merit-kicker {
+  color: var(--text-muted) !important;
+}
+body.light-mode .sc-merit-headline {
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-merit-sub {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .sc-primary-vault-btn {
+  background: var(--accent-fill) !important;
+  color: var(--on-accent) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-primary-vault-btn:hover {
+    background: #999999 !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+body.light-mode .sc-save-board-btn {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-save-board-btn.is-saved {
+  background: var(--accent-fill) !important;
+  color: var(--on-accent) !important;
+  border-color: var(--accent-fill) !important;
+}
+body.light-mode .sc-bottom-tray {
+  background: var(--surface) !important;
+  border-top: 1px solid var(--border) !important;
+  box-shadow: 0 -4px 20px rgba(17, 17, 19, 0.05) !important;
+}
+body.light-mode .sc-tray-telemetry {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .sc-arrow-btn {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-arrow-btn:hover:not(:disabled) {
+    background: var(--accent-fill) !important;
+    border-color: var(--accent-fill) !important;
+    color: var(--on-accent) !important;
+  }
+}
+body.light-mode .sc-tray-card {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .sc-tray-card:hover {
+    background: var(--surface) !important;
+    border-color: var(--border-mid) !important;
+    transform: translateY(-1px);
+  }
+}
+body.light-mode .sc-tray-card.is-selected {
+  background: var(--surface) !important;
+  border-color: var(--text-primary) !important;
+  box-shadow: 0 0 0 2px var(--text-primary) !important;
+}
+body.light-mode .sc-tray-thumb {
+  background: var(--surface3) !important;
+}
+body.light-mode .sc-tray-rank {
+  background: var(--surface2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-tray-name {
+  color: var(--text-primary) !important;
+}
+body.light-mode .sc-tray-inq {
+  color: var(--text-secondary) !important;
+}
+
+/* White Lens - Home launchpad clean up */
+body.light-mode [data-scoutit-guide="scoutit-home-launchpad"] h2 {
+  text-shadow: none !important;
+}
+body.light-mode [data-scoutit-guide="scoutit-home-launchpad"] div[class*="radial-gradient"] {
+  display: none !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    WHITE LENS — BATCH 2: homepage sections + layer wordmark + /descent
    (locked 2026-09-23). Same doctrine: lens-only, dark byte-identical.
@@ -764,7 +981,9 @@ body.light-mode .descent-root [style*="#c8c8c8"] {
 /* Fixed fullscreen canvas shells with no interactive content (metropolis
    Tailwind wrapper; crust / mantle / core / about aria-hidden shells). */
 body.light-mode main > div.fixed.inset-0:has(canvas),
-body.light-mode main > div[aria-hidden="true"]:has(canvas) {
+body.light-mode main > div[aria-hidden="true"]:has(canvas),
+body.light-mode div[class*="earthBackdrop"],
+body.light-mode .earthBackdrop {
   display: none !important;
 }
 

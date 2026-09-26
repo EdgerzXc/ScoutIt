@@ -8,6 +8,8 @@ import pezaZonesData from "@/data/peza_zones_philippines.json";
 import infraProjectsData from "@/data/ph_infrastructure_projects.json";
 import { computeSpatialIntel, computeContinuityScore } from "@/lib/spatialIntel";
 import { useReach } from "@/components/maps/useReach";
+import { isWebglSupported } from "@/lib/webglCheck";
+import MapFallback2D from "@/components/ui/MapFallback2D";
 
 // Major Philippine Enterprise Office Density Clusters GeoJSON
 const OFFICE_CLUSTERS_GEOJSON = {
@@ -47,6 +49,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
   const [aiFilterStatus, setAiFilterStatus] = useState(null);
   const [recentQuakes, setRecentQuakes] = useState([]);
   const [fireCount, setFireCount] = useState(0);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   // Fetch real reachability isochrone via shared useReach hook
   const { isochrone, contours, loading: reachLoading, error: reachError } = useReach(targetLat, targetLng);
@@ -92,6 +95,11 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
+    if (!isWebglSupported()) {
+      setWebglSupported(false);
+      return;
+    }
+
     let map;
     try {
       map = new maplibregl.Map({
@@ -111,6 +119,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       });
     } catch (err) {
       console.warn("MapLibre GL initialization error:", err);
+      setWebglSupported(false);
       return;
     }
 
@@ -872,8 +881,12 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
 
   return (
     <div style={{ position: "relative", width: "100%", height: "clamp(380px, 60vh, 680px)", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(232, 174, 60, 0.3)" }}>
-      {/* Map Container with Visual Filter Support */}
-      <div ref={mapContainerRef} style={{ width: "100%", height: "100%", transition: "filter 0.3s ease", ...getContainerStyle() }} />
+      {/* Map Container with Visual Filter Support or 2D Fallback */}
+      {!webglSupported ? (
+        <MapFallback2D lat={targetLat} lng={targetLng} title={propertyTitle} style={{ width: "100%", height: "100%" }} />
+      ) : (
+        <div ref={mapContainerRef} style={{ width: "100%", height: "100%", transition: "filter 0.3s ease", ...getContainerStyle() }} />
+      )}
 
       {/* CRT Retro Scanline Overlay */}
       {visualMode === "CRT" && (
