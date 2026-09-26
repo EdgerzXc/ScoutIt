@@ -146,7 +146,7 @@ export default function StratosphereWorkspace() {
   };
 
   return (
-    <main className="sw-page">
+    <main className={`sw-page${view === "radar" ? " sw-page--radar" : ""}`}>
       <header className="sw-intro">
         <span className="sw-kicker">INSIDE LAYER 02 / STRATOSPHERE</span>
         <h1>Explore what is changing.</h1>

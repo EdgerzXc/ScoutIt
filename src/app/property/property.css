@@ -250,6 +250,40 @@
   box-shadow: var(--shadow-glow-soft, 0 0 24px rgba(232, 174, 60, 0.18));
 }
 
+.directory-radar-btn {
+  background: var(--surface2, #0d0d0d);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 0 24px;
+  min-height: 48px;
+  flex-shrink: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-radius: var(--radius-sm, 3px);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .directory-radar-btn:hover {
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--accent-bright);
+    border-color: var(--accent-bright);
+  }
+}
+
+.directory-radar-btn.is-active {
+  background: var(--accent-bright);
+  color: var(--on-accent);
+  border-color: var(--accent-bright);
+}
+
+
 /* Properties Grid */
 .directory-grid {
   display: grid;

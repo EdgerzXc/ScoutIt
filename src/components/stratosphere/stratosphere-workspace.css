@@ -571,6 +571,47 @@
   border-radius: 10px;
 }
 
+/* Full-frame Radar Cockpit (fills edge-to-edge left, right, and bottom) */
+.sw-page--radar {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: clamp(72px, 6vw, 96px) 0 0 !important;
+}
+
+.sw-page--radar .sw-intro,
+.sw-page--radar .sw-view-row,
+.sw-page--radar .sw-track-deck,
+.sw-page--radar .sw-radar-note {
+  max-width: 1780px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(20px, 3.5vw, 64px);
+  padding-right: clamp(20px, 3.5vw, 64px);
+}
+
+.sw-page--radar .sw-radar {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.sw-page--radar .sw-radar .st-terminal {
+  width: 100%;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  height: calc(100dvh - 56px) !important;
+  min-height: 800px;
+}
+
+/* Hide trailing footer in full-frame radar cockpit */
+.sw-page--radar ~ footer,
+div:has(.sw-page--radar) > footer {
+  display: none !important;
+}
+
+
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS (TABLET & MOBILE)
    ═══════════════════════════════════════════════════════════════ */

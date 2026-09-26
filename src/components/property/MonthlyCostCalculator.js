@@ -11,10 +11,6 @@ import { useMemo, useState } from "react";
 
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
-const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "12px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
-const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "var(--font-display)", fontSize: "14px", width: "100%" };
-const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid #262626", gap: "16px" };
-const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "12px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
 
 // First number in a messy price-ish string ("₱1,200 / sqm / mo" → 1200).
 function parseNum(raw) {
@@ -90,44 +86,44 @@ export default function MonthlyCostCalculator({ d }) {
   };
 
   return (
-    <div data-testid="monthly-cost-sandbox" style={{ marginTop: "24px", padding: "22px 24px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+    <div data-testid="monthly-cost-sandbox" className="monthly-cost-sandbox">
+      <div className="mcs-header">
+        <span className="mcs-title">
           Monthly Cost Sandbox
         </span>
         {d?.is_sample && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", padding: "2px 6px", borderRadius: "2px", background: "rgba(255,255,255,0.04)", border: "0.5px solid #333" }}>
+          <span className="mcs-demo-badge">
             Demo Data
           </span>
         )}
       </div>
-      <p style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "#a0a0a0", lineHeight: 1.6, margin: "0 0 18px", maxWidth: "480px" }}>
+      <p className="mcs-desc">
         What would a month here actually cost you? Listing-verified charges are filled in below — add your own bills to complete the picture.
       </p>
 
       {/* From the listing — owner/manager-provided figures only */}
       {fromListing.length > 0 ? (
         <div style={{ marginBottom: "20px" }}>
-          <div style={{ ...outputLabel, color: "#6E531A", marginBottom: "4px" }}>From this listing</div>
+          <div className="mcs-section-label">From this listing</div>
           {fromListing.map((row) => (
-            <div key={row.key} style={outputRow}>
-              <span style={outputLabel}>{row.label}</span>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "#f0ede8" }}>{peso(row.value)}</span>
+            <div key={row.key} className="mcs-output-row">
+              <span className="mcs-output-label">{row.label}</span>
+              <span className="mcs-output-value">{peso(row.value)}</span>
             </div>
           ))}
         </div>
       ) : (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#5a5a5a", letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 18px" }}>
+        <p className="mcs-empty-note">
           No recurring charges on record for this listing — ask the representative.
         </p>
       )}
 
       {/* The user's own numbers — always empty until they type them */}
-      <div style={{ ...outputLabel, color: "#6E531A", marginBottom: "10px" }}>Your own estimates</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "14px", marginBottom: "20px" }}>
+      <div className="mcs-section-label">Your own estimates</div>
+      <div className="mcs-grid">
         {OWN_COST_FIELDS.map((f) => (
-          <label key={f.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <span style={fieldLabel}>{f.label} ₱/mo</span>
+          <label key={f.key} className="mcs-field-wrap">
+            <span className="mcs-field-label">{f.label} ₱/mo</span>
             <input
               type="number"
               min={0}
@@ -135,20 +131,20 @@ export default function MonthlyCostCalculator({ d }) {
               data-testid={`mcs-input-${f.key}`}
               value={own[f.key]}
               onChange={(e) => setField(f.key, e.target.value)}
-              style={fieldInput}
+              className="mcs-input"
             />
           </label>
         ))}
       </div>
 
-      <div style={{ ...outputRow, borderBottom: "none", borderTop: "1px solid #262626", paddingTop: "14px" }}>
-        <span style={outputLabel}>Est. total per month</span>
-        <span data-testid="mcs-total" style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: hasAnything ? "#E8AE3C" : "#5a5a5a" }}>
+      <div className="mcs-total-row">
+        <span className="mcs-total-label">Est. total per month</span>
+        <span data-testid="mcs-total" className={`mcs-total-value${!hasAnything ? " is-empty" : ""}`}>
           {hasAnything ? peso(total) : "—"}
         </span>
       </div>
 
-      <p style={{ fontFamily: "system-ui,-apple-system,sans-serif", fontSize: "12px", color: "#5a5a5a", lineHeight: 1.6, marginTop: "14px" }}>
+      <p className="mcs-disclaimer">
         Listing charges are provided by the owner or property manager and shown as-is. Utility and lifestyle figures are your own inputs — ScoutIt does not estimate, verify, or advise on personal costs.
       </p>
     </div>

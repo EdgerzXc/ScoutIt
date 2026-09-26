@@ -653,25 +653,9 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                   style={{ flex: "1 1 240px", minWidth: 0, margin: 0 }}
                 />
                 <button
+                  type="button"
                   onClick={() => setShowMap(!showMap)}
-                  className="directory-radar-btn"
-                  style={{
-                    background: showMap ? "#E8AE3C" : "#0d0d0d",
-                    color: showMap ? "#000" : "#E8AE3C",
-                    border: "1px solid #E8AE3C",
-                    padding: "0 24px",
-                    minHeight: "48px",
-                    flexShrink: 0,
-                    maxWidth: "100%",
-                    whiteSpace: "nowrap",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "12px",
-                    letterSpacing: "0.1em",
-                    cursor: "pointer",
-                    textTransform: "uppercase",
-                    fontWeight: "bold",
-                    transition: "background-color 0.2s, color 0.2s, border-color 0.2s"
-                  }}
+                  className={`directory-radar-btn${showMap ? " is-active" : ""}`}
                 >
                   {showMap ? "✕ CLOSE RADAR" : "🗺️ PROXIMITY RADAR"}
                 </button>

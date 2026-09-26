@@ -983,8 +983,266 @@ body.light-mode .descent-root [style*="#c8c8c8"] {
 body.light-mode main > div.fixed.inset-0:has(canvas),
 body.light-mode main > div[aria-hidden="true"]:has(canvas),
 body.light-mode div[class*="earthBackdrop"],
-body.light-mode .earthBackdrop {
+body.light-mode .earthBackdrop,
+body.light-mode .descent-backdrop,
+body.light-mode .descent-stage {
   display: none !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — STRATOSPHERE ENTRY & RADAR OVERHAUL
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .strat-main--entry .strat-headline {
+  text-shadow: none !important;
+  color: var(--text-primary) !important;
+}
+body.light-mode .strat-main--entry .strat-headline-accent {
+  color: var(--text-primary) !important;
+}
+body.light-mode .strat-entry-cta {
+  background: var(--accent-fill) !important;
+  color: #111113 !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .strat-entry-cta:hover {
+    background: #999999 !important;
+    color: #111113 !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+body.light-mode .strat-entry-step {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+body.light-mode .strat-entry-step h2 {
+  color: var(--text-primary) !important;
+}
+body.light-mode .strat-entry-step p {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .strat-kicker {
+  background: rgba(17, 17, 19, 0.05) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+body.light-mode .strat-live-dot {
+  background: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+body.light-mode .strat-underline {
+  background: var(--border-mid) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — DIRECTORY LEDGER & PROXIMITY RADAR OVERHAUL
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .directory-radar-btn {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-mid) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .directory-radar-btn:hover {
+    background: var(--surface2) !important;
+    border-color: var(--text-primary) !important;
+    color: var(--text-primary) !important;
+  }
+}
+body.light-mode .directory-radar-btn.is-active {
+  background: var(--accent-fill) !important;
+  color: #111113 !important;
+  border-color: var(--accent-fill) !important;
+}
+body.light-mode .property-preview-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .property-preview-card:hover {
+    border-color: var(--border-mid) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+body.light-mode .property-action-btn {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .property-preview-card:hover .property-action-btn {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+}
+body.light-mode .property-city-badge {
+  background: rgba(242, 242, 244, 0.94) !important;
+  border-color: var(--border-mid) !important;
+  color: var(--text-primary) !important;
+}
+body.light-mode .property-spec-badge {
+  background: var(--surface2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+body.light-mode .property-card-footer {
+  border-top-color: var(--border) !important;
+}
+body.light-mode .compare-toggle-btn {
+  border-color: var(--border-mid) !important;
+  color: var(--text-secondary) !important;
+  background: var(--surface2) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .compare-toggle-btn:hover {
+    background: var(--surface) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--text-primary) !important;
+  }
+}
+body.light-mode .compare-toggle-btn.active {
+  background: var(--accent-fill) !important;
+  color: #111113 !important;
+  border-color: var(--accent-fill) !important;
+}
+body.light-mode .radius-map-overlay {
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+body.light-mode .map-overlay-header {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border) !important;
+}
+body.light-mode .close-map-btn {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .close-map-btn:hover {
+  color: var(--text-primary) !important;
+}
+body.light-mode .map-control-panel {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+body.light-mode .control-label {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .control-value {
+  color: var(--text-primary) !important;
+}
+body.light-mode .control-hint {
+  color: var(--text-muted) !important;
+  border-top-color: var(--border) !important;
+}
+body.light-mode .confirm-radar-btn {
+  background: var(--accent-fill) !important;
+  color: #111113 !important;
+}
+body.light-mode .confirm-radar-btn:hover {
+  background: #999999 !important;
+}
+body.light-mode .radius-slider {
+  background: var(--border) !important;
+}
+body.light-mode .radius-slider::-webkit-slider-thumb {
+  background: var(--text-primary) !important;
+  border-color: var(--surface) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHITE LENS — CHAPTER INTEL UNLOCK & MONTHLY COST SANDBOX
+   ═══════════════════════════════════════════════════════════════ */
+body.light-mode .market-numbers {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-sm);
+}
+body.light-mode .market-numbers__row {
+  border-bottom: 1px solid var(--border) !important;
+}
+body.light-mode .market-numbers__lock {
+  background: rgba(242, 242, 244, 0.94) !important;
+  backdrop-filter: blur(10px) !important;
+}
+body.light-mode .market-numbers__lock-cta {
+  background: var(--accent-fill) !important;
+  color: #111113 !important;
+  border: 1px solid var(--border) !important;
+}
+body.light-mode .market-numbers__lock .market-numbers__lock-title {
+  color: var(--text-primary) !important;
+}
+body.light-mode .market-numbers__label {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .market-numbers__value {
+  color: var(--text-primary) !important;
+}
+body.light-mode .market-numbers__missing {
+  color: var(--text-muted) !important;
+}
+
+body.light-mode .monthly-cost-sandbox {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm);
+}
+body.light-mode .mcs-title {
+  color: var(--text-primary) !important;
+}
+body.light-mode .mcs-demo-badge {
+  background: rgba(17, 17, 19, 0.05) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+}
+body.light-mode .mcs-desc {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .mcs-section-label {
+  color: var(--text-muted) !important;
+}
+body.light-mode .mcs-output-row {
+  border-bottom: 1px solid var(--border) !important;
+}
+body.light-mode .mcs-output-label {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .mcs-output-value {
+  color: var(--text-primary) !important;
+}
+body.light-mode .mcs-empty-note {
+  color: var(--text-muted) !important;
+}
+body.light-mode .mcs-field-label {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .mcs-input {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border-mid) !important;
+  color: var(--text-primary) !important;
+}
+body.light-mode .mcs-input:focus {
+  border-color: var(--text-primary) !important;
+  box-shadow: 0 0 0 2px rgba(17, 17, 19, 0.15) !important;
+}
+body.light-mode .mcs-total-row {
+  border-top: 1px solid var(--border) !important;
+}
+body.light-mode .mcs-total-label {
+  color: var(--text-secondary) !important;
+}
+body.light-mode .mcs-total-value {
+  color: var(--text-primary) !important;
+}
+body.light-mode .mcs-total-value.is-empty {
+  color: var(--text-muted) !important;
+}
+body.light-mode .mcs-disclaimer {
+  color: var(--text-muted) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
