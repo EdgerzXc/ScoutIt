@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sanitizeError } from '@/lib/sanitizeError';
 import { isEmailConfigured } from '@/lib/email';
-import { fetchWithRetry } from '@/lib/fetchWithRetry';
+import { getAirtableBudgetStatus } from '@/lib/airtableBudget';
 
 // A service that is present but optional must not fail the rollup. Supabase and
 // Airtable already used "unconfigured" for this; "configured" is its counterpart
@@ -39,25 +39,18 @@ export async function GET(request) {
       results.services.supabase = "unconfigured";
     }
 
-    // Check Airtable connection — probe the real CMS table. This previously
-    // hit a nonexistent "Properties" table, so health reported Airtable as
-    // unhealthy (and the endpoint 503'd) even while /api/cms was serving
-    // Airtable data fine.
+    // This public endpoint can be called by anyone or polled by a monitor.
+    // On the Free plan each direct probe consumes a monthly Airtable call, so
+    // report configuration here and leave actual CMS reachability to /api/cms.
     const airtableBaseId = process.env.AIRTABLE_BASE_ID;
     const airtableKey = process.env.AIRTABLE_API_KEY;
-    if (airtableBaseId && airtableKey) {
-      // A-013: the endpoint whose job is to report trouble must not be the
-      // one that hangs. A single short attempt is right here -- health is a
-      // snapshot, and retrying would report a slow upstream as a healthy one.
-      const atRes = await fetchWithRetry(
-        `https://api.airtable.com/v0/${airtableBaseId}/PROPERTIES_CMS?maxRecords=1`,
-        { headers: { Authorization: `Bearer ${airtableKey}` } },
-        { retries: 0, attemptTimeoutMs: 4000, circuit: null }
-      );
-      results.services.airtable = atRes.ok ? "healthy" : "unhealthy";
-    } else {
-      results.services.airtable = "unconfigured";
-    }
+    results.services.airtable = airtableBaseId && airtableKey ? "configured" : "unconfigured";
+
+    // U-042: how much of the month's Airtable Public API allowance the shared
+    // cache has already spent. Reported outside `services` on purpose: it is a
+    // measurement, not a health status. Turning this endpoint red once the cap
+    // is hit would bury the one number that explains why the catalogue is stale.
+    results.airtableBudget = await getAirtableBudgetStatus();
 
     // Email reports PRESENCE, not reachability, and says so by using a
     // different word than the probed services above. Verifying it for real

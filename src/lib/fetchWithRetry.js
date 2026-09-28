@@ -146,6 +146,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  *   circuit?: string|null,
  *   idempotent?: boolean,
  *   backoff?: number[],
+ *   shouldRetryResponse?: (response: Response) => Promise<boolean>|boolean,
+ *   onAttempt?: (attempt: {number: number, method: string}) => void,
  * }} [options]
  * @returns {Promise<Response>}
  */
@@ -157,6 +159,8 @@ export async function fetchWithRetry(url, init = {}, options = {}) {
     circuit = null,
     idempotent = false,
     backoff = DEFAULT_BACKOFF_MS,
+    shouldRetryResponse,
+    onAttempt,
   } = options;
 
   // Fail fast while the circuit is open. This is the whole value of the
@@ -184,6 +188,9 @@ export async function fetchWithRetry(url, init = {}, options = {}) {
 
     let res = null;
     try {
+      // Best-effort telemetry at the network boundary: one callback for every
+      // actual attempt, including retries, but none for an open circuit.
+      try { onAttempt?.({ number: attempt + 1, method }); } catch { /* telemetry must not block a request */ }
       res = await fetch(url, { ...init, signal: controller.signal });
       clearTimeout(timer);
 
@@ -197,6 +204,13 @@ export async function fetchWithRetry(url, init = {}, options = {}) {
       if (!RETRYABLE_STATUS.has(res.status)) {
         // 5xx counts against the breaker; 4xx is our fault, not the upstream's.
         if (res.status >= 500) recordFailure(circuit);
+        return res;
+      }
+
+      // Some providers use 429 for both a short rate limit and a billing
+      // ceiling. Let the adapter classify its own terminal responses so a
+      // monthly quota error is not retried as though it could clear in 100ms.
+      if (shouldRetryResponse && !(await shouldRetryResponse(res))) {
         return res;
       }
 

@@ -5,8 +5,9 @@
 // fanned out into 4 Airtable requests plus Mapbox geocoding. Under real
 // traffic (or a parallel E2E run) that trips Airtable's per-base rate
 // limit, the fetch throws, and the whole public site silently served
-// EMPTY data. A short in-memory cache + serve-stale-on-error makes the
-// "site never goes blank" promise in STRUCTURE.md actually true.
+// EMPTY data. A shared twelve-hour snapshot, short in-memory cache and bounded
+// serve-stale-on-error cover transient failures; prolonged outages return an
+// explicit unavailable state. Successful writes invalidate the shared copy.
 // ═══════════════════════════════════════════════════════════════
 
 import {
@@ -16,6 +17,11 @@ import {
   fetchHomepageConfig,
 } from "@/lib/airtable";
 import { Redis } from '@upstash/redis';
+import {
+  getAirtableBudgetStatus,
+  recordAirtableCall,
+} from "@/lib/airtableBudget";
+
 import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { BoundedCache } from "@/lib/boundedCache";
 import { CITY_HUB } from "@/lib/transit";
@@ -48,6 +54,27 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 }
 
 const FRESH_TTL_MS = 60 * 1000; // serve from memory for 60s
+const MAX_STALE_AGE_MS = 2 * 60 * 1000; // never serve an in-process snapshot for days during a long outage
+export const CMS_SHARED_TTL_S = 12 * 60 * 60;
+const CMS_BUILD_LOCK_KEY = "cms_bundle_build_lock";
+const CMS_GENERATION_KEY = "cms_bundle_generation";
+// The snapshot survives its own TTL under a separate, longer-lived key so a
+// spent monthly budget has something real to serve instead of an empty site.
+const CMS_LAST_GOOD_KEY = "cms_bundle_last_good";
+const CMS_LAST_GOOD_TTL_S = 60 * 60 * 24 * 40;
+// For how long an explicit publish/takedown may still spend budgeted calls.
+const PUBLISHER_REBUILD_WINDOW_MS = 10 * 60 * 1000;
+const WRITE_CURRENT_BUNDLE_SCRIPT = `
+  if (redis.call('GET', KEYS[1]) or '0') ~= ARGV[1] then return 0 end
+  redis.call('SET', KEYS[2], ARGV[2], 'EX', tonumber(ARGV[3]))
+  return 1
+`;
+const RELEASE_OWN_LOCK_SCRIPT = `
+  if redis.call('GET', KEYS[1]) == ARGV[1] then
+    return redis.call('DEL', KEYS[1])
+  end
+  return 0
+`;
 const EMPTY_BUNDLE = {
   properties: [],
   intel: [],
@@ -58,17 +85,79 @@ const EMPTY_BUNDLE = {
 
 let cache = { bundle: null, fetchedAt: 0 };
 let inflight = null; // dedupe concurrent rebuilds into one Airtable fan-out
+let lastMonthlyLimitLogAt = 0;
+// Set by invalidateCmsBundle: for a short window after a publish or takedown,
+// a rebuild bypasses the budget guard. Owner content going live - or being
+// withdrawn - always outranks conserving a capped month of API calls.
+let publisherRebuildUntil = 0;
+let lastBudgetGuardLogAt = 0;
 
 export async function invalidateCmsBundle() {
   // Do not let a rebuild that started before the publish repopulate the cache
   // after invalidation. Wait for it, then clear both cache layers.
   if (inflight) await inflight.catch(() => null);
   cache = { bundle: null, fetchedAt: 0 };
-  if (redis) await redis.del("cms_bundle");
+  if (redis) {
+    // Increment before deletion. A rebuild started on another instance must
+    // not repopulate an older snapshot after an owner withdraws a listing.
+    await redis.incr(CMS_GENERATION_KEY);
+    await redis.del("cms_bundle");
+    // A publish or takedown is an explicit instruction to be fresh now. Let the
+    // rebuild it triggers draw from the monthly budget regardless of the guard.
+    publisherRebuildUntil = Date.now() + PUBLISHER_REBUILD_WINDOW_MS;
+  }
+  // A local memory clear alone cannot refresh the other public instances.
+  // Writers use this result to avoid claiming an immediate public refresh.
+  return { sharedCachePurged: Boolean(redis) };
+}
+
+async function buildSharedBundle() {
+  if (!redis) return buildBundle();
+
+  // A Redis outage must not turn every Vercel instance into an independent
+  // four-table Airtable reader. The public route will report unavailable.
+  const generation = await redis.get(CMS_GENERATION_KEY);
+  const lockToken = crypto.randomUUID();
+  const locked = await redis.set(CMS_BUILD_LOCK_KEY, lockToken, { nx: true, ex: 30 });
+  if (!locked) {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const shared = await redis.get("cms_bundle");
+      if (shared) return { ...normalizeSampleBundle(shared), source: "upstash_redis" };
+    }
+    throw new Error("CMS rebuild is already in progress");
+  }
+
+  try {
+    const bundle = normalizeSampleBundle(await buildBundle());
+    // Compare generation and write as one Redis operation. A separate GET then
+    // SET lets a withdrawal land between them and leaves old data for 12h.
+    const stored = await redis.eval(
+      WRITE_CURRENT_BUNDLE_SCRIPT,
+      [CMS_GENERATION_KEY, "cms_bundle"],
+      [String(generation ?? 0), JSON.stringify(bundle), CMS_SHARED_TTL_S],
+    );
+    if (Number(stored) === 1) {
+      // Keep a long-lived copy the monthly-budget guard can fall back on after
+      // the 12-hour snapshot key itself has expired.
+      try {
+        await redis.set(CMS_LAST_GOOD_KEY, bundle, { ex: CMS_LAST_GOOD_TTL_S });
+      } catch (err) {
+        console.error("[CMS] Could not store last-good snapshot:", err.message);
+      }
+    }
+    if (Number(stored) !== 1) {
+      throw new Error("CMS changed during rebuild; retry on the next request");
+    }
+    return bundle;
+  } finally {
+    // Avoid deleting a successor's lock if this build outlived its lease.
+    await redis.eval(RELEASE_OWN_LOCK_SCRIPT, [CMS_BUILD_LOCK_KEY], [lockToken]);
+  }
 }
 
 async function fetchDevelopmentLiveCms() {
-  if (process.env.NODE_ENV !== "development") return null;
+  if (process.env.NODE_ENV !== "development" || process.env.SCOUTIT_OFFLINE_CMS === "1") return null;
 
   const url = process.env.SCOUTIT_LIVE_CMS_URL || DEFAULT_LIVE_CMS_URL;
   const response = await fetchWithRetry(url, { cache: "no-store" }, {
@@ -168,18 +257,23 @@ async function buildBundle() {
   const baseId = process.env.AIRTABLE_BASE_ID;
 
   if (!apiKey || !baseId) {
-    if (process.env.NODE_ENV === "development") {
-      throw new Error("Local Airtable credentials are missing");
-    }
-    console.warn("[CMS] Env vars missing — serving empty CMS response.");
-    return { ...EMPTY_BUNDLE };
+    throw new Error("Airtable credentials are missing");
   }
 
+  let airtableRequestAttempts = 0;
+  const readOptions = {
+    onAttempt: () => {
+      airtableRequestAttempts += 1;
+      // Count against the shared monthly budget as it happens, so a build that
+      // fails part-way still leaves its spend visible to the next request.
+      void recordAirtableCall();
+    },
+  };
   const [properties, intel, brokers, homepage] = await Promise.all([
-    fetchProperties(apiKey, baseId),
-    fetchIntel(apiKey, baseId),
-    fetchBrokers(apiKey, baseId),
-    fetchHomepageConfig(apiKey, baseId),
+    fetchProperties(apiKey, baseId, readOptions),
+    fetchIntel(apiKey, baseId, readOptions),
+    fetchBrokers(apiKey, baseId, readOptions),
+    fetchHomepageConfig(apiKey, baseId, readOptions),
   ]);
 
   // Fetch published briefings from Supabase OSINT repository.
@@ -226,11 +320,15 @@ async function buildBundle() {
       `${approximate} on an approximate position, ${unplaced} with none`,
     detail: {
       source: "airtable",
+      executionEnvironment: process.env.VERCEL_ENV
+        ? `vercel:${process.env.VERCEL_ENV}`
+        : process.env.SCOUTIT_E2E === "1" ? "local:e2e" : "local",
       properties: positioned.length,
       intel: mergedIntel.length,
       brokers: (brokers || []).length,
       approximatePositions: approximate,
       unplacedProperties: unplaced,
+      airtableRequestAttempts,
     },
   });
 
@@ -262,27 +360,63 @@ export async function getCmsBundle() {
     }
   }
 
+  // A spent monthly budget must not take the site down (U-042). A routine
+  // TTL-expiry refresh serves the last good snapshot rather than spending calls
+  // Airtable will only reject. The rebuild that a publish or takedown triggers
+  // bypasses this, so owner content always reaches the public base.
+  if (redis && Date.now() >= publisherRebuildUntil) {
+    const budget = await getAirtableBudgetStatus();
+    if (budget.exhausted) {
+      try {
+        const lastGood = await redis.get(CMS_LAST_GOOD_KEY);
+        if (lastGood) {
+          const bundle = normalizeSampleBundle(lastGood);
+          cache = { bundle, fetchedAt: Date.now() };
+          if (Date.now() - lastBudgetGuardLogAt >= 15 * 60 * 1000) {
+            lastBudgetGuardLogAt = Date.now();
+            await recordSystemEvent({
+              event: EVENTS.CMS_BUNDLE_BUDGET_GUARDED,
+              severity: "warning",
+              summary:
+                `Airtable monthly call budget reached (${budget.attempts}/${budget.budget}); ` +
+                "serving the last good catalogue snapshot instead of rebuilding",
+              detail: {
+                month: budget.month,
+                attempts: budget.attempts,
+                budget: budget.budget,
+                executionEnvironment: process.env.VERCEL_ENV
+                  ? `vercel:${process.env.VERCEL_ENV}`
+                  : "local",
+              },
+            });
+          }
+          return { ...bundle, source: "stale_monthly_budget" };
+        }
+      } catch (err) {
+        console.error("[CMS] Budget guard could not read the last-good snapshot:", err.message);
+      }
+    }
+  }
+
   if (inflight) return inflight;
 
-  inflight = buildBundle()
+  inflight = buildSharedBundle()
     .then(async (rawBundle) => {
       const bundle = normalizeSampleBundle(rawBundle);
       cache = { bundle, fetchedAt: Date.now() };
       inflight = null;
-      if (redis && bundle.source === 'airtable') {
-        try {
-          await redis.set('cms_bundle', bundle, { ex: 600 }); // Cache for 10 minutes
-        } catch (err) {
-          console.error("[CMS] Redis set failed:", err.message);
-        }
-      }
       return bundle;
     })
     .catch(async (error) => {
       inflight = null;
-      console.error("[CMS] Airtable fetch failed:", error.message);
-      // Stale data beats a blank site: keep serving the last good bundle.
-      if (cache.bundle) {
+      if (error?.code !== "AIRTABLE_MONTHLY_LIMIT" || Date.now() - lastMonthlyLimitLogAt >= 5 * 60 * 1000) {
+        console.error("[CMS] Airtable fetch failed:", error.message);
+        if (error?.code === "AIRTABLE_MONTHLY_LIMIT") lastMonthlyLimitLogAt = Date.now();
+      }
+      // A brief upstream wobble may use the last good in-process bundle.
+      // A monthly outage must not keep withdrawn inventory alive indefinitely
+      // on an instance whose Redis copy has already been invalidated.
+      if (cache.bundle && Date.now() - cache.fetchedAt <= MAX_STALE_AGE_MS) {
         return { ...normalizeSampleBundle(cache.bundle), source: `${cache.bundle.source}_stale` };
       }
 

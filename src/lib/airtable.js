@@ -24,6 +24,32 @@ export function isAirtableRecordNotFoundError(error) {
   return error?.code === "AIRTABLE_RECORD_NOT_FOUND";
 }
 const BASE_URL = "https://api.airtable.com/v0";
+const MONTHLY_LIMIT_COOLDOWN_MS = 5 * 60 * 1000;
+let monthlyLimitRetryAt = 0;
+
+export class AirtableMonthlyLimitError extends Error {
+  constructor() {
+    super("Airtable monthly API limit reached");
+    this.name = "AirtableMonthlyLimitError";
+    this.code = "AIRTABLE_MONTHLY_LIMIT";
+  }
+}
+
+async function isMonthlyLimitResponse(response) {
+  if (response.status !== 429) return false;
+  try {
+    const payload = await response.clone().json();
+    const type = String(payload?.error?.type || payload?.error?.code || "").toUpperCase();
+    return type === "PUBLIC_API_BILLING_LIMIT_EXCEEDED";
+  } catch {
+    return false;
+  }
+}
+
+/** Test seam; never changes Airtable's actual workspace quota. */
+export function resetAirtableMonthlyLimitCooldown() {
+  monthlyLimitRetryAt = 0;
+}
 
 // ── Deep Intelligence values (Airtable `DeepIntel_JSON` column) ─
 // Stored as a JSON object keyed by the DI_* keys in deepIntelSchema.js
@@ -109,15 +135,18 @@ async function fetchTable(tableId, apiKey, baseId, params = "", options = {}) {
 }
 
 async function fetchTablePage(url, apiKey, tableId, options = {}) {
+  // A billing cap cannot clear on a millisecond retry. Bound probes per
+  // instance while still checking again automatically after a short delay.
+  if (Date.now() < monthlyLimitRetryAt) throw new AirtableMonthlyLimitError();
+
   const fetchOptions = {
     headers: { Authorization: `Bearer ${apiKey}` },
   };
   
-  if (process.env.NODE_ENV !== 'production') {
-    fetchOptions.cache = 'no-store';
-  } else {
-    fetchOptions.next = { revalidate: 60 };
-  }
+  // The shared CMS snapshot owns freshness. A publish/takedown invalidation
+  // must read Airtable's current gate, not a separate Next fetch cache that
+  // can keep the withdrawn row for another minute.
+  fetchOptions.cache = 'no-store';
 
   // Retried + circuit-broken (NEW_IDEAS.md §17.1/§17.2). Airtable rate-limits
   // at 5 req/s per base, and ONE breach used to throw here and serve the whole
@@ -142,9 +171,19 @@ async function fetchTablePage(url, apiKey, tableId, options = {}) {
     circuit: "airtable",
     budgetMs: options.budgetMs ?? 5000,
     attemptTimeoutMs: options.attemptTimeoutMs ?? 2500, // §17.2's latency threshold
+    onAttempt: options.onAttempt,
+    shouldRetryResponse: async (response) => {
+      if (!(await isMonthlyLimitResponse(response))) return true;
+      monthlyLimitRetryAt = Date.now() + MONTHLY_LIMIT_COOLDOWN_MS;
+      return false;
+    },
   });
 
   if (!res.ok) {
+    if (await isMonthlyLimitResponse(res)) {
+      monthlyLimitRetryAt = Date.now() + MONTHLY_LIMIT_COOLDOWN_MS;
+      throw new AirtableMonthlyLimitError();
+    }
     throw new Error(`Airtable fetch failed for table "${tableId}": ${res.status} ${res.statusText}`);
   }
 
@@ -155,8 +194,8 @@ async function fetchTablePage(url, apiKey, tableId, options = {}) {
 // ═══════════════════════════════════════════════════════════════
 // BROKERS_CMS → normalized broker objects
 // ═══════════════════════════════════════════════════════════════
-export async function fetchBrokers(apiKey, baseId) {
-  const records = await fetchTable("BROKERS_CMS", apiKey, baseId);
+export async function fetchBrokers(apiKey, baseId, options = {}) {
+  const records = await fetchTable("BROKERS_CMS", apiKey, baseId, "", options);
 
   return records
     .filter((r) => r.fields.Approved_For_Live_Site && r.fields.Name) // only published brokers with a name
@@ -199,8 +238,8 @@ export async function fetchBrokers(apiKey, baseId) {
 // ═══════════════════════════════════════════════════════════════
 // PROPERTIES_CMS → normalized property objects
 // ═══════════════════════════════════════════════════════════════
-export async function fetchProperties(apiKey, baseId) {
-  const records = await fetchTable("PROPERTIES_CMS", apiKey, baseId);
+export async function fetchProperties(apiKey, baseId, options = {}) {
+  const records = await fetchTable("PROPERTIES_CMS", apiKey, baseId, "", options);
 
   return records
     .filter((r) => r.fields.Approved_For_ScoutIt && r.fields.Title && r.fields.Slug) // only approved properties with a title and slug
@@ -456,8 +495,8 @@ export async function fetchPropertyVerificationDates(apiKey, baseId, options = {
 // ═══════════════════════════════════════════════════════════════
 // INTEL_CMS → normalized article objects
 // ═══════════════════════════════════════════════════════════════
-export async function fetchIntel(apiKey, baseId) {
-  const records = await fetchTable("INTEL_CMS", apiKey, baseId);
+export async function fetchIntel(apiKey, baseId, options = {}) {
+  const records = await fetchTable("INTEL_CMS", apiKey, baseId, "", options);
 
   return records
     .filter((r) => r.fields.Approved_For_Live_Site && r.fields.Title && r.fields.Slug)
@@ -521,8 +560,8 @@ export async function fetchIntel(apiKey, baseId) {
 // ═══════════════════════════════════════════════════════════════
 // HOMEPAGE_CMS → active config object
 // ═══════════════════════════════════════════════════════════════
-export async function fetchHomepageConfig(apiKey, baseId) {
-  const records = await fetchTable("HOMEPAGE_CMS", apiKey, baseId);
+export async function fetchHomepageConfig(apiKey, baseId, options = {}) {
+  const records = await fetchTable("HOMEPAGE_CMS", apiKey, baseId, "", options);
   // Return the first active config record
   const active = records.find((r) => r.fields.Is_Active_Config);
   if (!active) return null;

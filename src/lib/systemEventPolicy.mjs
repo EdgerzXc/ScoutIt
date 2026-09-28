@@ -37,6 +37,9 @@ export const EVENTS = Object.freeze({
   CACHE_PURGED: "cache.catalogue.purged",
   CACHE_PURGE_FAILED: "cache.catalogue.purge_failed",
   CMS_BUNDLE_REBUILT: "cms.bundle.rebuilt",
+  // Routine refresh declined itself because the month's Airtable calls ran out.
+  CMS_BUNDLE_BUDGET_GUARDED: "cms.bundle.budget_guarded",
+
 
   // Position — a correction that was saved but had nowhere public to go
   COORDINATES_VERIFIED: "coordinates.verified",
