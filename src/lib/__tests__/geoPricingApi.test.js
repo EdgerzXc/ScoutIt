@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { isUrlOnHost } from "../../../scripts/test-url-hosts.mjs";
 
 // U-009 — `category` was interpolated straight into an Airtable filterByFormula:
 //
@@ -43,7 +44,7 @@ describe("/api/geo-pricing category handling", () => {
 
   beforeEach(() => {
     fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
-      if (String(url).includes("mapbox.com")) {
+      if (isUrlOnHost(url, "api.mapbox.com")) {
         return new Response(
           JSON.stringify({ features: [{ center: [121.05, 14.55] }] }),
           { status: 200 }
@@ -77,7 +78,7 @@ describe("/api/geo-pricing category handling", () => {
   it("does not spend a Mapbox geocode on a request it will reject", async () => {
     await POST(request(validBody({ category: "'; DROP" })));
 
-    expect(urlsHit().some((u) => u.includes("mapbox.com"))).toBe(false);
+    expect(urlsHit().some((u) => isUrlOnHost(u, "api.mapbox.com"))).toBe(false);
   });
 
   it("serves a legitimate category from the approved CMS bundle", async () => {
@@ -86,7 +87,7 @@ describe("/api/geo-pricing category handling", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.compsFound).toBe(1);
-    expect(urlsHit().some((u) => u.includes("airtable.com"))).toBe(false);
+    expect(urlsHit().some((u) => isUrlOnHost(u, "api.airtable.com"))).toBe(false);
   });
 
   it("uses only exact property coordinates, not a geocoded city centroid", async () => {

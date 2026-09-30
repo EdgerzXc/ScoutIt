@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { isUrlOnHost } from "../../../scripts/test-url-hosts.mjs";
 
 // A-012 — src/lib/rateLimit.js was written, tested, and wired into exactly two
 // of 95 API routes. These are the routes that are reachable without an account
@@ -42,7 +43,7 @@ describe("unauthenticated, paid routes are metered", () => {
     process.env.AIRTABLE_API_KEY = "keyTest";
     delete process.env.GEMINI_API_KEY; // exercise the deterministic path
     vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
-      if (String(url).includes("mapbox.com")) {
+      if (isUrlOnHost(url, "api.mapbox.com")) {
         return new Response(JSON.stringify({ features: [{ center: [121, 14.5] }] }), { status: 200 });
       }
       return new Response(JSON.stringify({ records: [] }), { status: 200 });
