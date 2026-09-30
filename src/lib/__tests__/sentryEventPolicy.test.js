@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   isExpectedNodeRequestAbort,
+  isLocalSentryEvent,
+  isLocalSentryUrl,
   shouldEnableSentry,
 } from "@/lib/sentryEventPolicy";
 
@@ -75,5 +77,21 @@ describe("Sentry server event policy", () => {
     expect(shouldEnableSentry({ nodeEnv: "production", e2eFlag: "1" })).toBe(false);
     expect(shouldEnableSentry({ nodeEnv: "production", e2eFlag: undefined })).toBe(true);
     expect(shouldEnableSentry({ nodeEnv: "development", e2eFlag: undefined })).toBe(false);
+  });
+
+  it("suppresses localhost test origins without suppressing live ScoutIt errors", () => {
+    for (const url of [
+      "http://localhost:3817/error-probe-local",
+      "http://127.0.0.1:3000/",
+      "http://[::1]:3000/",
+      "http://dev.localhost:3817/",
+    ]) {
+      expect(isLocalSentryUrl(url), url).toBe(true);
+      expect(isLocalSentryEvent({ request: { url } }), url).toBe(true);
+    }
+    expect(isLocalSentryUrl("https://www.scoutit.space/")).toBe(false);
+    expect(isLocalSentryEvent({ request: { url: "https://www.scoutit.space/" } })).toBe(false);
+    expect(isLocalSentryUrl("https://www.scoutit.space/?next=localhost")).toBe(false);
+    expect(isLocalSentryEvent({})).toBe(false);
   });
 });

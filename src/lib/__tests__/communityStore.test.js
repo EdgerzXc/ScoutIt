@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { geocodeSignalScope } from "../communityStore";
+import { geocodeSignalScope, mapDbSignalToCard } from "../communityStore";
 
 const TOKEN_KEY = "MAPBOX_SERVER_TOKEN";
 let savedToken;
@@ -53,5 +53,40 @@ describe("community geocoding at create (A-145 C1)", () => {
     });
     expect(geo).toBe(null);
     expect(called).toBe(false);
+  });
+
+  it("resolves exact coordinates from a building name via Mapbox fallback when not in DB", async () => {
+    const geo = await geocodeSignalScope(
+      { buildingName: "One E-Com Center", district: "Mall of Asia Complex", city: "Pasay" },
+      fetchOk([120.9822, 14.5342])
+    );
+    expect(geo).toEqual({ lng: 120.9822, lat: 14.5342, precisionLevel: "exact" });
+  });
+});
+
+describe("community author controls", () => {
+  it("derives ownership from the verified account, never the public Scout ID", () => {
+    const row = {
+      id: "signal-1",
+      author_account_id: "owner-account",
+      scout_id_snapshot: "SCOUT-0042",
+      public_identity_mode: "anonymous",
+      signal_type: "LOOKING_FOR",
+      title: "Looking for a workspace",
+      body: "Near BGC",
+      last_confirmed_at: "2026-09-27T00:00:00Z",
+      created_at: "2026-09-27T00:00:00Z",
+    };
+    const now = new Date("2026-09-27T01:00:00Z");
+    const own = mapDbSignalToCard(row, {}, {}, now, "owner-account");
+    const other = mapDbSignalToCard(row, {}, {}, now, "other-account");
+    const guest = mapDbSignalToCard(row, {}, {}, now);
+
+    expect(own.isMine).toBe(true);
+    expect(other.isMine).toBe(false);
+    expect(guest.isMine).toBe(false);
+    expect(own.author.scoutId).toBe("SCOUT-0042");
+    expect(own).not.toHaveProperty("author_account_id");
+    expect(own.author).not.toHaveProperty("accountId");
   });
 });

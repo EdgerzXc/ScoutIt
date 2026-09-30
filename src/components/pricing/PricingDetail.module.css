@@ -1,0 +1,101 @@
+.ambient {
+  display: block;
+}
+
+.pioneer {
+  background: linear-gradient(90deg, var(--surface2), var(--surface3));
+  border: 1px solid var(--accent-border);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.featuredCard {
+  background:
+    radial-gradient(circle at 18% 0%, var(--pricing-detail-tint, var(--accent-dim)), transparent 62%),
+    linear-gradient(135deg, var(--surface2), var(--surface));
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow-soft);
+}
+
+.flagshipCard {
+  border-color: var(--accent-border);
+}
+
+.accentBar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+  box-shadow: var(--shadow-glow-soft);
+}
+
+.badge {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-glow-soft);
+}
+
+.connects {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.connectsFeatured {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+}
+
+.pricePanel {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.card:active {
+  border-color: var(--border-mid);
+}
+
+.featuredCard:active {
+  border-color: var(--accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-mid);
+  }
+
+  .featuredCard:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+:global(body.light-mode) .ambient {
+  display: none;
+}
+
+:global(body.light-mode) .featuredCard {
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light-mode) .accentBar,
+:global(body.light-mode) .badge {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover,
+    .featuredCard:hover {
+      transform: none;
+    }
+  }
+}

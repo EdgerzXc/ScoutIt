@@ -4,18 +4,20 @@ import path from 'node:path';
 import sitemap from '@/app/sitemap';
 import { LOCATION_HUB_SLUGS } from '@/lib/locationHubs';
 
-vi.mock('@/lib/airtable', () => ({
-  fetchProperties: vi.fn().mockResolvedValue([
-    { slug: 'bgc-luxury-suite-1' },
-    { slug: 'makati-penthouse-2' },
-  ]),
+vi.mock('@/lib/cmsCache', () => ({
+  getCmsBundle: vi.fn().mockResolvedValue({
+    source: 'upstash_redis',
+    properties: [
+      { slug: 'bgc-luxury-suite-1', is_sample: false },
+      { slug: 'makati-penthouse-2', is_sample: false },
+    ],
+    intel: [],
+    brokers: [],
+  }),
 }));
 
 describe('sitemap generator', () => {
   it('generates static and property routes with canonical base URL', async () => {
-    process.env.AIRTABLE_API_KEY = 'test-key';
-    process.env.AIRTABLE_BASE_ID = 'test-base';
-
     const routes = await sitemap();
     expect(Array.isArray(routes)).toBe(true);
 
@@ -39,9 +41,6 @@ describe('sitemap generator', () => {
   // original mismatch was only possible because a hardcoded literal list has no
   // way to disagree out loud with the routes that actually exist.
   it('advertises every hub in LOCATION_HUBS, and only those (W7)', async () => {
-    process.env.AIRTABLE_API_KEY = 'test-key';
-    process.env.AIRTABLE_BASE_ID = 'test-base';
-
     const urls = (await sitemap()).map((r) => r.url);
     const hubUrls = urls.filter((u) => u.includes('/hubs/')).sort();
     const expected = LOCATION_HUB_SLUGS

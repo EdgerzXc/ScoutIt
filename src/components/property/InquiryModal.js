@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getSession } from "../../lib/authClient";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
@@ -13,6 +13,7 @@ import ConnectsReceipt from "../connects/ConnectsReceipt";
 import PrivacyNotice from "../ui/PrivacyNotice";
 import { useModalDialog } from "../ui/useModalDialog";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
+import { stillBackdropVariants, stillPanelVariants, instantDialogTransition } from "@/components/ui/reducedDialogMotion";
 
 const backdropVariants = {
   hidden: { opacity: 0, backdropFilter: "blur(0px)" },
@@ -41,6 +42,7 @@ const formVariants = {
 };
 
 export default function InquiryModal({ isOpen, onClose, propertyTitle, propertySlug, defaultMessage = "" }) {
+  const reduceMotion = useReducedMotion();
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
   // NEW_IDEAS.md §38.3 State 1 — this is the pre-acceptance intro, the only
@@ -187,12 +189,13 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 z-[9999] bg-[#0a0908]/85 flex items-center justify-center overflow-y-auto p-5"
-          variants={backdropVariants}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto p-5"
+          style={{ background: "var(--modal-scrim)" }}
+          variants={reduceMotion ? stillBackdropVariants : backdropVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
-          transition={backdropTransition}
+          transition={reduceMotion ? instantDialogTransition : backdropTransition}
         >
           <motion.div
             ref={dialogRef}
@@ -200,13 +203,13 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
             role="dialog"
             aria-modal="true"
             aria-labelledby="inquiry-modal-title"
-            variants={modalVariants}
+            variants={reduceMotion ? stillPanelVariants : modalVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={modalTransition}
+            transition={reduceMotion ? instantDialogTransition : modalTransition}
           >
-            <GlassPanel className="relative max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] contact-lens-modal">
+            <GlassPanel className="relative max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button 
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
                 onClick={handleCloseModal}
@@ -220,7 +223,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                   <motion.div 
                     key="success"
                     className="text-center py-10 flex flex-col items-center gap-4"
-                    variants={successVariants}
+                    variants={reduceMotion ? stillPanelVariants : successVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
@@ -243,7 +246,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                 ) : (
                   <motion.div 
                     key="form"
-                    variants={formVariants}
+                    variants={reduceMotion ? stillPanelVariants : formVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
@@ -306,15 +309,12 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                           className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
                           aria-label="Send this request anonymously"
                         />
-                        <span className="text-[13px] text-[#f0ede8]/80 leading-relaxed">
-                          Send anonymously — they will see <strong className="text-white font-medium">Anonymous</strong> until
+                        <span className="text-[13px] text-text-secondary leading-relaxed">
+                          Send anonymously — they will see <strong className="text-text-primary font-medium">Anonymous</strong> until
                           they accept, instead of your name.
                         </span>
                       </label>
-                      <div className="flex justify-between items-center -mt-2">
-                        <p className="text-[12px] text-text-muted">
-                          They see this before deciding whether to reply.
-                        </p>
+                      <div className="flex justify-end items-center -mt-1">
                         <span
                           className={`text-[12px] font-mono tabular-nums ${
                             message.length > INTRO_MAX - 40 ? "text-gold-accent" : "text-text-muted"

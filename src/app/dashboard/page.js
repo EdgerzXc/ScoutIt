@@ -266,7 +266,7 @@ function DashboardInner() {
             </button>
             
             {showDesktopSwitcher && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out]">
+              <div className="absolute top-full left-0 mt-2 w-64 bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
                 <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt">
                   <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
                 </div>
@@ -503,9 +503,9 @@ function DashboardInner() {
 
       {/* Mobile Profile Menu Slide-out */}
       {showMobileProfileMenu && (
-        <div className="md:hidden fixed inset-0 z-[100001] flex flex-col justify-end animate-[fadeIn_0.3s_ease-out]">
+        <div className="md:hidden fixed inset-0 z-[100001] flex flex-col justify-end motion-safe:animate-[fadeIn_0.3s_ease-out]">
           <button type="button" aria-label="Close Mobile Profile Menu" className="absolute inset-0 w-full h-full block bg-background/60 backdrop-blur-sm" onClick={() => setShowMobileProfileMenu(false)}></button>
-          <div className="bg-surface border-t border-surface-variant rounded-t-2xl w-full p-6 animate-[slideUp_0.3s_ease-out] relative z-10">
+          <div className="bg-surface border-t border-surface-variant rounded-t-2xl w-full p-6 motion-safe:animate-[slideUp_0.3s_ease-out] relative z-10">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-bold text-on-surface">

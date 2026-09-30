@@ -42,6 +42,7 @@ export default function IntelPage() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [articles, setArticles] = useState(getArticles());
   const [propertiesList, setPropertiesList] = useState([]);
+  const [cmsUnavailable, setCmsUnavailable] = useState(false);
   const [sidePanelArticle, setSidePanelArticle] = useState(null);
 
   const handleSelectCity = (city) => {
@@ -62,6 +63,7 @@ export default function IntelPage() {
       try {
         const data = await loadPublicCatalog();
         if (!alive) return;
+        setCmsUnavailable(false);
 
         // 1. Setup properties for asset back-linking
         const airtableProperties = data.properties || [];
@@ -108,7 +110,10 @@ export default function IntelPage() {
         setArticles(baseArticles);
       } catch (err) {
         // Navigating away aborts the fetch — only report while still mounted.
-        if (alive) console.error("Intel page CMS load error:", err);
+        if (alive) {
+          setCmsUnavailable(true);
+          console.error("Intel page CMS load error:", err);
+        }
       }
     }
     loadCMSData();
@@ -200,6 +205,16 @@ export default function IntelPage() {
             </Link>
           </div>
         </MeshHero>
+
+        {cmsUnavailable && (
+          <div
+            role="status"
+            className="mx-auto my-6 max-w-[1400px] rounded-sm px-6 py-4 text-sm"
+            style={{ border: "1px solid var(--accent-muted)", background: "var(--surface2)", color: "var(--text-primary)" }}
+          >
+            Live intelligence is temporarily unavailable. Previously available and sample briefings may still appear below.
+          </div>
+        )}
 
         {/* Live OSINT Flash News Ticker */}
         <OSINTFlashTicker />
@@ -680,6 +695,7 @@ export default function IntelPage() {
           --m3-on-surface-ch:   255 255 255;
           --accent:            #E8AE3C;
           --accent-rgb:        232, 174, 60;
+          --accent-ch:         232 174 60;
           --border:            rgba(255, 255, 255, 0.12);
           --border-mid:        rgba(255, 255, 255, 0.22);
           color: var(--text-primary);

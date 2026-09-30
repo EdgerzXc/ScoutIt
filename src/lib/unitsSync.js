@@ -1,4 +1,15 @@
 import { updateProperty, insertProperty } from "./airtable";
+import { invalidateCmsBundle } from "./cmsCache";
+
+async function purgeAfterUnitsSync() {
+  try {
+    const purge = await invalidateCmsBundle();
+    return purge.sharedCachePurged === false;
+  } catch (cacheError) {
+    console.error("[UNITS SYNC] Catalogue cache purge failed after Airtable write:", cacheError?.message);
+    return true;
+  }
+}
 
 // Re-syncs a property's Airtable Units_JSON from the authoritative
 // property_units rows (not the legacy details.units_inventory blob). No-op
@@ -52,7 +63,7 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
 
   if (property.slug) {
     await updateProperty(apiKey, baseId, property.slug, { details: property.details }, airtableUnits);
-    return null;
+    return { publicCachePending: await purgeAfterUnitsSync() };
   }
   const created = await insertProperty(apiKey, baseId, {
     title: property.title,
@@ -69,5 +80,5 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
       ...(property.canonical_slug ? {} : { canonical_slug: created.fields.Slug }),
     }).eq("id", property.id);
   }
-  return created;
+  return { ...created, publicCachePending: await purgeAfterUnitsSync() };
 }

@@ -40,9 +40,9 @@ const PUBLIC_SCOPE_MAX_AGE_S = 60;
 // Deliberately short. A takedown purges the Redis bundle and the in-process
 // copy immediately (see the dashboard archive/delete routes), but nothing can
 // reach a copy already held by the CDN or a visitor's browser — those can only
-// age out. This value is therefore the hard floor on how long a withdrawn
-// listing can still be served, so it buys freshness rather than throughput:
-// 60s fresh plus 60s stale caps that at about two minutes.
+// age out. This limits the HTTP cache to 60s fresh plus 60s stale. A separate
+// in-process fallback in cmsCache.js is bounded to two minutes from the last
+// successful memory/Redis read when Airtable is down.
 const PUBLIC_SCOPE_STALE_S = 60;
 
 export async function GET(request) {
@@ -72,6 +72,14 @@ export async function GET(request) {
   const centerLat = inRange(parsedLat, 90) ? parsedLat : DEFAULT_CENTER_LAT;
 
   const bundle = await getCmsBundle();
+  if (bundle.source === "empty_fallback_on_error") {
+    // A failed cold read is an outage, not proof that the catalogue is empty.
+    // Never cache this response as an empty public inventory.
+    return NextResponse.json(
+      { error: "The space registry is temporarily unavailable. Please try again shortly." },
+      { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "60" } },
+    );
+  }
   let { properties } = bundle;
   let radiusApplied = false;
 

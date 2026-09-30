@@ -73,6 +73,7 @@ test('showcase keeps explicit parent and home navigation', async ({ page }) => {
 
 test('metropolis category surface stays operable', async ({ page }) => {
   await page.addInitScript(() => window.localStorage.removeItem('scoutit_help_seen_v1'));
+  await page.addInitScript(() => window.localStorage.setItem('scoutit_presentation_choice_seen_v1', '1'));
   await gotoAndSettle(page, '/layer/metropolis');
 
   const helpPanel = page.getByRole('complementary', { name: 'Help & Display' });

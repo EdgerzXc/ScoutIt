@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Building2, UserCircle2, Calendar, FileText, CheckCircle2, MapPin, Clock } from "lucide-react";
 import { crmFetch } from "../../../lib/crmClient";
 import DealTimeline from "./DealTimeline";
 
 export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate, mockUserId }) {
+  const reduceMotion = useReducedMotion();
   const [notes, setNotes] = useState("");
   const [savingState, setSavingState] = useState("idle"); // idle, saving, saved
   const saveTimeout = useRef(null);
@@ -55,18 +56,20 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
       {isOpen && deal && (
         <>
           <motion.div 
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2, ease: "easeOut" }}
             onClick={onClose}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+            className="fixed inset-0 backdrop-blur-sm z-50"
+            style={{ background: "var(--modal-scrim)" }}
           />
           
           <motion.div
-            initial={{ x: "100%" }}
+            initial={reduceMotion ? false : { x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+            exit={reduceMotion ? { x: 0 } : { x: "100%" }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", bounce: 0, duration: 0.4 }}
             className="fixed right-0 top-0 bottom-0 w-full md:w-[480px] bg-surface border-l border-surface-variant z-50 shadow-2xl flex flex-col"
           >
             <div className="flex items-center justify-between p-6 border-b border-surface-variant">

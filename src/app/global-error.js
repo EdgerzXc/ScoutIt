@@ -1,105 +1,58 @@
 "use client";
 
+import { useLayoutEffect } from "react";
 import { MARK_PATH, MARK_VIEWBOX } from "@/components/brand/markPath";
+import styles from "./GlobalRecovery.module.css";
 
-export default function GlobalError({ error, reset }) {
+export default function GlobalError({ reset }) {
+  useLayoutEffect(() => {
+    // React can replace the root layout on the client without executing the
+    // document script below. Restore the saved mode in that path as well.
+    try {
+      let mode = localStorage.getItem("scoutit_display_mode");
+      if (!mode && localStorage.getItem("scoutit_accessibility_mode") === "high-contrast") {
+        mode = "high-contrast";
+      }
+      document.body.classList.toggle("high-contrast", mode === "high-contrast");
+      document.body.classList.toggle("light-mode", mode === "light");
+    } catch {
+      // Storage may be blocked; the document stays on its dark default.
+    }
+  }, []);
+
   return (
-    <html lang="en">
-      <body
-        style={{
-          background: "#0d0d0d",
-          color: "#f0ede8",
-          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          margin: 0,
-          padding: "40px 20px",
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "540px",
-            width: "100%",
-            textAlign: "center",
-            padding: "40px 32px",
-            background: "rgba(18, 18, 18, 0.8)",
-            border: "1px solid rgba(110, 83, 26, 0.3)",
-            borderRadius: "12px",
-            backdropFilter: "blur(12px)",
-            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
+    <html lang="en" suppressHydrationWarning>
+      <body className={styles.body} suppressHydrationWarning>
+        {/* global-error replaces the root layout, so it must restore the
+            stored lens choice before this self-contained document paints. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(function(){try{var m=localStorage.getItem('scoutit_display_mode');if(!m){m=localStorage.getItem('scoutit_accessibility_mode')==='high-contrast'?'high-contrast':null;}if(m==='high-contrast')document.body.classList.add('high-contrast');else if(m==='light')document.body.classList.add('light-mode');}catch(e){}})();",
           }}
-        >
+        />
+        <div className={styles.panel} role="alert">
           <svg
             viewBox={MARK_VIEWBOX}
             width="48"
             height="48"
             role="img"
             aria-label="ScoutIt"
-            style={{ display: "block", marginBottom: "18px", opacity: 0.9 }}
+            className={styles.mark}
           >
-            <path fill="#E8AE3C" fillRule="evenodd" d={MARK_PATH} />
+            <path fill="currentColor" fillRule="evenodd" d={MARK_PATH} />
           </svg>
-          <div
-            style={{
-              fontSize: "12px",
-              fontFamily: "var(--font-mono, monospace)",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "#E8AE3C",
-              marginBottom: "16px",
-            }}
-          >
+          <div className={styles.eyebrow}>
             SYSTEM SHIELD · CRITICAL RECOVERY
           </div>
-          <h1
-            style={{
-              color: "#f0ede8",
-              fontFamily: "var(--font-display)",
-              fontSize: "28px",
-              fontWeight: 400,
-              margin: "0 0 12px 0",
-            }}
-          >
+          <h1 className={styles.title}>
             Something went wrong
           </h1>
-          <p
-            style={{
-              color: "#8a8a8a",
-              lineHeight: 1.6,
-              fontSize: "14px",
-              margin: "0 0 24px 0",
-            }}
-          >
+          <p className={styles.message}>
             A transient system recovery boundary was triggered on ScoutIt. Our telemetry stream has captured the state trace.
           </p>
           <button
             onClick={() => reset()}
-            style={{
-              background: "#F7C64E",
-              color: "#0d0d0d",
-              border: "none",
-              padding: "12px 28px",
-              borderRadius: "6px",
-              fontWeight: 700,
-              fontFamily: "var(--font-mono, monospace)",
-              fontSize: "12px",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease",
-              boxShadow: "0 4px 14px rgba(247, 198, 78, 0.2)",
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = "scale(0.97)";
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
+            className={styles.button}
           >
             RELOAD APPLICATION STATE
           </button>

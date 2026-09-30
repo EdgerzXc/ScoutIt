@@ -1001,8 +1001,58 @@ button.contextCell,
   border-bottom: 1px solid var(--accent-muted);
 }
 
+.cmsOutageNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  padding: 16px 18px;
+  border: 1px solid var(--accent-muted);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text-primary);
+}
+
+.cmsOutageNotice p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.spacesRetry {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid var(--accent-muted);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--accent-bright);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.spacesRetry:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .secondaryJump:hover {
     border-bottom-color: var(--accent);
+  }
+
+  .spacesRetry:hover {
+    border-color: var(--accent-bright);
+    background: var(--surface3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spacesRetry {
+    transition: none;
   }
 }

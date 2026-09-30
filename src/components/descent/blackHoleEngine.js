@@ -1,3 +1,24 @@
+// Keep the render core standalone. The other canvas shares the same capability
+// contract through lib/webglContextCapabilities; this copy prevents a runtime
+// dependency from leaking into the extracted engine.
+const SHADER_CONTEXT_METHODS = [
+  "createShader", "shaderSource", "compileShader", "getShaderParameter",
+  "getShaderInfoLog", "createProgram", "attachShader", "linkProgram",
+  "getProgramParameter", "getProgramInfoLog", "useProgram", "createBuffer",
+  "bindBuffer", "bufferData", "getAttribLocation", "enableVertexAttribArray",
+  "vertexAttribPointer", "getUniformLocation", "uniform1f", "uniform2f",
+  "viewport", "clearColor", "clear", "drawArrays", "deleteProgram",
+  "deleteShader", "deleteBuffer",
+];
+
+function hasShaderContext(gl) {
+  try {
+    return Boolean(gl) && SHADER_CONTEXT_METHODS.every((name) => typeof gl[name] === "function");
+  } catch {
+    return false;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // BLACK HOLE ENGINE — A-088 Phase 0: the extracted render core
 //
@@ -476,10 +497,14 @@ export function createRenderer(canvas, opts = {}) {
 
   if (!canvas || typeof getParams !== "function") return null;
   if (isLiteMode()) return null;
-  const gl =
-    canvas.getContext("webgl", { preserveDrawingBuffer }) ||
-    canvas.getContext("experimental-webgl", { preserveDrawingBuffer });
-  if (!gl) return null; // no WebGL — the CSS horizon glow behind stays as the scene
+  let gl;
+  try {
+    gl = canvas.getContext("webgl", { preserveDrawingBuffer }) ||
+      canvas.getContext("experimental-webgl", { preserveDrawingBuffer });
+  } catch {
+    return null; // WebGL blocked — the CSS horizon glow stays as the scene.
+  }
+  if (!hasShaderContext(gl)) return null; // incomplete context — same CSS fallback
 
   const compileShader = (src, type) => {
     const shader = gl.createShader(type);

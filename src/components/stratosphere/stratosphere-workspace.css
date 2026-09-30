@@ -480,7 +480,28 @@
 }
 
 .sw-sample {
-  color: var(--accent-muted);
+  color: var(--text-muted);
+}
+
+body.light-mode .badge-trend-demand {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+body.light-mode .badge-trend-zoning {
+  background: var(--sapphire-dim);
+  color: var(--sapphire);
+  border-color: var(--sapphire);
+}
+body.light-mode .badge-trend-infrastructure {
+  background: var(--green-dim);
+  color: var(--green);
+  border-color: var(--green);
+}
+body.light-mode .badge-trend-capital {
+  background: var(--surface);
+  color: var(--tier-bronze);
+  border-color: var(--tier-bronze);
 }
 
 .sw-article-link {

@@ -11,6 +11,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/mapboxToken", () => ({
   getServerMapboxToken: () => "pk.test-token",
 }));
+vi.mock("@/lib/cmsCache", () => ({
+  getCmsBundle: vi.fn(async () => ({
+    source: "airtable",
+    properties: [
+      { spaceCategory: "Commercial", latitude: 14.55, longitude: 121.05, cat: { commercial: { rentFrom: 850 } } },
+      { spaceCategory: "Commercial", latitude: 14.55, longitude: 121.05, cat: { commercial: { rentFrom: 1 } }, is_sample: true },
+      { spaceCategory: "Residential", latitude: 14.55, longitude: 121.05, cat: { residential: { price: 100 } } },
+    ],
+  })),
+}));
 
 const { POST } = await import("@/app/api/geo-pricing/route");
 
@@ -32,9 +42,6 @@ describe("/api/geo-pricing category handling", () => {
   let fetchSpy;
 
   beforeEach(() => {
-    process.env.AIRTABLE_BASE_ID = "appTest";
-    process.env.AIRTABLE_API_KEY = "keyTest";
-
     fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
       if (String(url).includes("mapbox.com")) {
         return new Response(
@@ -42,7 +49,7 @@ describe("/api/geo-pricing category handling", () => {
           { status: 200 }
         );
       }
-      return new Response(JSON.stringify({ records: [] }), { status: 200 });
+      throw new Error(`Unexpected network request: ${url}`);
     });
   });
 
@@ -58,13 +65,13 @@ describe("/api/geo-pricing category handling", () => {
     expect(res.status).toBe(400);
   });
 
-  it("never lets a quote in category reach the Airtable formula", async () => {
+  it("rejects an injected category before any network request", async () => {
     const injection = "commercial') , OR(1=1, LOWER('x";
 
     const res = await POST(request(validBody({ category: injection })));
 
     expect(res.status).toBe(400);
-    expect(urlsHit().some((u) => u.includes("airtable.com"))).toBe(false);
+    expect(urlsHit()).toHaveLength(0);
   });
 
   it("does not spend a Mapbox geocode on a request it will reject", async () => {
@@ -73,28 +80,18 @@ describe("/api/geo-pricing category handling", () => {
     expect(urlsHit().some((u) => u.includes("mapbox.com"))).toBe(false);
   });
 
-  it("still serves a legitimate category and keeps the approval filter intact", async () => {
+  it("serves a legitimate category from the approved CMS bundle", async () => {
     const res = await POST(request(validBody({ category: "commercial" })));
 
     expect(res.status).toBe(200);
-    const airtableUrl = urlsHit().find((u) => u.includes("airtable.com"));
-    expect(airtableUrl).toBeDefined();
-    expect(decodeURIComponent(airtableUrl)).toContain("Approved_For_ScoutIt=TRUE()");
+    const body = await res.json();
+    expect(body.compsFound).toBe(1);
+    expect(urlsHit().some((u) => u.includes("airtable.com"))).toBe(false);
   });
 
-  it("URL-encodes the formula so no unescaped separator reaches the query string", () => {
-    // encodeURIComponent deliberately leaves "(" and ")" alone -- they are legal
-    // in a query value. What it DOES encode is exactly what matters here: the
-    // space, the "&", and the "=" that could otherwise start a new parameter.
-    return POST(request(validBody({ category: "commercial" }))).then(() => {
-      const airtableUrl = urlsHit().find((u) => u.includes("airtable.com"));
-      const query = airtableUrl.split("?")[1];
-
-      expect(query).not.toContain(" ");
-      expect(query).toContain("%20");
-      // One "&"-free query value: the formula must not be able to add params.
-      expect(query.split("&")).toHaveLength(1);
-    });
+  it("uses only exact property coordinates, not a geocoded city centroid", async () => {
+    const res = await POST(request(validBody({ category: "residential" })));
+    expect((await res.json()).compsFound).toBe(1);
   });
 
   it("validates the price is a real number before doing any paid work", async () => {

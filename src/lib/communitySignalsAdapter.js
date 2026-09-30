@@ -39,6 +39,19 @@ export const SIGNAL_COLORS = Object.freeze({
   SCOUTIT_INTELLIGENCE: "rgb(247, 198, 78)", // Gold System Intelligence
 });
 
+// MapLibre feature properties need resolved colour values. DOM labels can use
+// theme roles so the same signal remains legible under the White Lens.
+export const SIGNAL_COLOR_TOKENS = Object.freeze({
+  LOOKING_FOR: "var(--accent)",
+  REPRESENTING_CLIENT: "var(--accent-bright)",
+  UPCOMING_SUPPLY: "var(--green)",
+  BUSINESS_EXPANSION: "var(--amethyst)",
+  OPPORTUNITY: "var(--intel-cyan)",
+  MARKET_OBSERVATION: "var(--yellow)",
+  COMMERCIAL_PROMOTION: "var(--yellow)",
+  SCOUTIT_INTELLIGENCE: "var(--accent-bright)",
+});
+
 export const DISTRICT_COORDS = Object.freeze({
   "BGC": { lat: 14.5409, lng: 121.0503, name: "BGC", city: "Taguig" },
   "Makati CBD": { lat: 14.5547, lng: 121.0244, name: "Makati CBD", city: "Makati" },

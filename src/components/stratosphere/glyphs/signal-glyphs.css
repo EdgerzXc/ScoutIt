@@ -9,8 +9,8 @@
   align-items: center;
   justify-content: center;
   padding: 8px;
-  background: rgba(18, 18, 18, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(var(--surface-rgb), 0.6);
+  border: 1px solid var(--border);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -20,8 +20,8 @@
 
 @media (hover: hover) and (pointer: fine) {
   .sg-glyph:hover {
-    border-color: rgba(232, 174, 60, 0.3);
-    background: rgba(26, 26, 26, 0.85);
+    border-color: var(--accent-border);
+    background: rgba(var(--surface2-rgb), 0.85);
   }
 }
 
@@ -37,7 +37,7 @@
 
 /* Ground shadow */
 .sg-ground-shadow {
-  fill: rgba(0, 0, 0, 0.45);
+  fill: var(--surface2);
 }
 
 /* 3D Isometric Faces */
@@ -46,25 +46,25 @@
 }
 
 .sg-face-left {
-  fill: rgba(30, 26, 18, 0.7);
-  stroke: rgba(232, 174, 60, 0.25);
+  fill: rgba(var(--accent-rgb), 0.08);
+  stroke: rgba(var(--accent-rgb), 0.4);
   stroke-width: 0.8;
 }
 
 .sg-face-right {
-  fill: rgba(45, 38, 24, 0.8);
-  stroke: rgba(232, 174, 60, 0.35);
+  fill: rgba(var(--accent-rgb), 0.14);
+  stroke: rgba(var(--accent-rgb), 0.55);
   stroke-width: 0.8;
 }
 
 .sg-face-top {
-  fill: rgba(70, 56, 30, 0.85);
-  stroke: rgba(247, 198, 78, 0.6);
+  fill: rgba(var(--accent-rgb), 0.24);
+  stroke: rgba(var(--accent-bright-rgb), 0.75);
   stroke-width: 1;
 }
 
 .sg-face-corner-accent {
-  fill: rgba(232, 174, 60, 0.25);
+  fill: rgba(var(--accent-rgb), 0.25);
   stroke: var(--accent);
 }
 
@@ -85,12 +85,12 @@
 
 /* Dimension tick */
 .sg-dim-line {
-  stroke: rgba(255, 255, 255, 0.3);
+  stroke: var(--text-muted);
   stroke-width: 0.8;
 }
 
 .sg-dim-tick {
-  stroke: rgba(255, 255, 255, 0.4);
+  stroke: var(--text-muted);
   stroke-width: 0.8;
 }
 
@@ -112,7 +112,7 @@
 }
 
 .sg-tag-accent {
-  background: rgba(232, 174, 60, 0.15);
+  background: var(--accent-dim);
   color: var(--accent-bright);
   padding: 1px 4px;
   border-radius: 2px;
@@ -130,7 +130,7 @@
 
 .sg-spark-dot {
   fill: var(--accent-bright);
-  filter: drop-shadow(0 0 4px rgba(247, 198, 78, 0.6));
+  filter: drop-shadow(0 0 4px rgba(var(--accent-bright-rgb), 0.35));
 }
 
 .sg-trend-badge {
@@ -142,26 +142,26 @@
 }
 
 .sg-trend-up {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid var(--green);
 }
 
 .sg-trend-down {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--red);
+  background: var(--red-dim);
+  border: 1px solid var(--red);
 }
 
 /* Radar Pulse */
 .sg-radar-ring {
   fill: none;
-  stroke: rgba(232, 174, 60, 0.3);
+  stroke: rgba(var(--accent-rgb), 0.4);
   stroke-width: 0.8;
 }
 
 .sg-radar-ring-1 {
-  stroke: rgba(247, 198, 78, 0.7);
+  stroke: rgba(var(--accent-bright-rgb), 0.7);
 }
 
 .sg-radar-ring-2 {
@@ -183,14 +183,14 @@
 
 .sg-meter-track {
   height: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .sg-supply-fill {
   height: 100%;
-  background: #10b981;
+  background: var(--green);
 }
 
 .sg-demand-fill {
@@ -199,7 +199,7 @@
 }
 
 .sg-meter-label {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -211,14 +211,14 @@
 
 /* Target Polygon */
 .sg-target-polygon {
-  fill: rgba(168, 85, 247, 0.12);
-  stroke: #a855f7;
+  fill: var(--amethyst-dim);
+  stroke: var(--amethyst);
   stroke-width: 1;
   stroke-dasharray: 3 2;
 }
 
 .sg-target-pin {
-  fill: #a855f7;
+  fill: var(--amethyst);
 }
 
 @media (prefers-reduced-motion: reduce) {

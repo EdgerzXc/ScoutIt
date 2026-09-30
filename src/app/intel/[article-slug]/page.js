@@ -3,7 +3,7 @@ import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getArticles } from "@/data/mock/mockArticles";
-import { fetchIntel } from "@/lib/airtable";
+import { getCmsBundle } from "@/lib/cmsCache";
 import { siteUrl } from "@/lib/siteUrl";
 import { parseArticleBlocks, blocksFromLegacy } from "@/lib/articleSchema";
 import ArticleBlocks from "@/components/intel/ArticleBlocks";
@@ -18,13 +18,9 @@ import { validJourneyStage } from "@/lib/layerTwoJourney";
 import "./article-detail.css";
 
 async function getLiveArticle(slug) {
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  
-  if (apiKey && baseId) {
-    try {
-      const airtableArticles = await fetchIntel(apiKey, baseId);
-      const matched = airtableArticles.find(a => a.slug === slug);
+  try {
+      const bundle = await getCmsBundle();
+      const matched = (bundle.source === "empty_fallback_on_error" ? [] : bundle.intel || []).find(a => a.slug === slug);
       if (matched) {
         // A-106: no invented category — fetchIntel already falls back to
         // "General", the honest label for uncategorized CMS rows.
@@ -37,9 +33,8 @@ async function getLiveArticle(slug) {
           isSample: false
         };
       }
-    } catch (e) {
-      console.error("Failed to load article from Airtable:", e);
-    }
+  } catch (e) {
+    console.error("Failed to load article from CMS:", e);
   }
   // Fall back to the editorial mock set — the same articles the homepage and
   // intel hub link to, so those links always resolve instead of 404ing.
@@ -47,15 +42,12 @@ async function getLiveArticle(slug) {
 }
 
 async function getLiveRelated(slug) {
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  
   const baseArticles = [...getArticles()];
-  
-  if (apiKey && baseId) {
-    try {
-      const airtableArticles = await fetchIntel(apiKey, baseId);
-      airtableArticles.forEach(item => {
+
+  try {
+      const bundle = await getCmsBundle();
+      const liveArticles = bundle.source === "empty_fallback_on_error" ? [] : bundle.intel || [];
+      liveArticles.forEach(item => {
         if (!baseArticles.some(x => x.slug === item.slug)) {
           // A-106: see above — "General", never an invented vertical.
           let category = item.category || "General";
@@ -73,9 +65,8 @@ async function getLiveRelated(slug) {
           });
         }
       });
-    } catch (e) {
-      console.error("Failed to load related articles from Airtable:", e);
-    }
+  } catch (e) {
+    console.error("Failed to load related articles from CMS:", e);
   }
   
   return baseArticles

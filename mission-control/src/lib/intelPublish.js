@@ -35,6 +35,8 @@
 // removing the field.
 // ═══════════════════════════════════════════════════════════════
 
+import { purgePublicCatalogueCache } from "./publicCatalogueCache";
+
 const BASE_URL = "https://api.airtable.com/v0";
 const INTEL_TABLE = "INTEL_CMS";
 
@@ -199,7 +201,8 @@ export async function pushBriefingToAirtable({
     throw new Error("Airtable intel publish returned no record id");
   }
 
-  return { recordId, created: !existingId };
+  const cache = await purgePublicCatalogueCache();
+  return { recordId, created: !existingId, cache };
 }
 
 /**

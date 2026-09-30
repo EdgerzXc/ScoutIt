@@ -654,7 +654,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
   const photos = useMemo(() => {
     const rawP = (Array.isArray(d?.photos) ? d.photos : [d?.photo || d?.image]).filter(p => typeof p === "string" && p.trim().length > 0);
-    return rawP.length > 0 ? rawP : ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"];
+    return rawP.length > 0 ? rawP : ["/assets/intel-tower-mesh.svg"];
   }, [d]);
 
   const brokerInitials = useMemo(() => {
@@ -2693,7 +2693,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
 
               {rosterLoaded && (
-                <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(232,174,60,0.03)" }}>
+                <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(var(--accent-rgb),0.03)" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
                   {rosterLoaded && !rosterUnavailable && propertyRoster.length === 0 && rosterUploader ? (
@@ -2722,7 +2722,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       padding: "12px 14px",
                       borderRadius: "6px",
                       border: intentStage === "inspired" ? "1px solid var(--accent)" : "1px solid var(--border)",
-                      background: intentStage === "inspired" ? "rgba(232,174,60,0.12)" : "rgba(255,255,255,0.02)",
+                      background: intentStage === "inspired" ? "rgba(var(--accent-rgb),0.12)" : "rgba(255,255,255,0.02)",
                       color: intentStage === "inspired" ? "var(--accent-bright)" : "var(--text-primary)",
                       cursor: "pointer",
                       textAlign: "left",
@@ -2740,7 +2740,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       padding: "12px 14px",
                       borderRadius: "6px",
                       border: intentStage === "fit" ? "1px solid var(--accent)" : "1px solid var(--border)",
-                      background: intentStage === "fit" ? "rgba(232,174,60,0.12)" : "rgba(255,255,255,0.02)",
+                      background: intentStage === "fit" ? "rgba(var(--accent-rgb),0.12)" : "rgba(255,255,255,0.02)",
                       color: intentStage === "fit" ? "var(--accent-bright)" : "var(--text-primary)",
                       cursor: "pointer",
                       textAlign: "left",
@@ -2758,7 +2758,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       padding: "12px 14px",
                       borderRadius: "6px",
                       border: intentStage === "interested" ? "1px solid var(--accent)" : "1px solid var(--border)",
-                      background: intentStage === "interested" ? "rgba(232,174,60,0.12)" : "rgba(255,255,255,0.02)",
+                      background: intentStage === "interested" ? "rgba(var(--accent-rgb),0.12)" : "rgba(255,255,255,0.02)",
                       color: intentStage === "interested" ? "var(--accent-bright)" : "var(--text-primary)",
                       cursor: "pointer",
                       textAlign: "left",
@@ -2785,7 +2785,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
                 {intentStage === "interested" && (
                   <div style={{ marginTop: "12px" }}>
-                    <div style={{ padding: "12px 14px", background: "rgba(232,174,60,0.08)", border: "1px solid var(--accent-muted)", borderRadius: "4px", fontSize: "13px", color: "var(--on-surface)", lineHeight: 1.5, marginBottom: "12px" }}>
+                    <div style={{ padding: "12px 14px", background: "rgba(var(--accent-rgb),0.08)", border: "1px solid var(--accent-muted)", borderRadius: "4px", fontSize: "13px", color: "var(--on-surface)", lineHeight: 1.5, marginBottom: "12px" }}>
                       Ready for introduction. Connect with an authorized, verified broker to arrange a private walkthrough or review commercial lease terms.
                     </div>
                     <button
@@ -2880,7 +2880,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             textTransform: 'uppercase',
             fontWeight: 'bold',
             cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(232, 174, 60,0.3)',
+            boxShadow: '0 8px 24px rgba(var(--accent-rgb),0.3)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px'

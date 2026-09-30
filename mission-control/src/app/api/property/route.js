@@ -141,6 +141,9 @@ export async function PATCH(request) {
     if (current.pipeline_status === "approved") {
       try {
         const result = await publishPropertyToAirtable(saved);
+        if (!result.cache?.purged) {
+          warning = `Saved to Airtable, but the public catalogue cache was not cleared: ${result.cache?.detail || "unknown error"}`;
+        }
         // Ordinary edits must never rewrite the first-publication URL.
         // If Airtable reports anything else, preserve Supabase's canonical value
         // and surface reconciliation instead of silently accepting formula drift.

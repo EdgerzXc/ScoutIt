@@ -142,3 +142,10 @@ yarn-error.log*
 # mission-control/.impeccable/hook.cache.json keeps showing modified until the
 # owner approves `git rm --cached` for it; ignore future cache copies only.
 **/.impeccable/hook.cache.json
+
+# Owner-supplied OWASP ZAP scan exports (~3 MB of vendor HTML + asset copies). Vendor
+# report material is not review content and must not be committed; the durable triage
+# lives in _SCOUTIT_BRAIN/09_SECURITY/ZAP_BASELINE_2026-09-29.md instead. Files stay on
+# disk for re-parsing. Added 2026-09-29 after the directory sat one `git add .` away from
+# being committed.
+/OWASP ZAP/

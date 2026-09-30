@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, Send, Command, Loader2 } from "lucide-react";
+import entrance from "@/components/ui/OverlayEntrance.module.css";
 
 export default function ConciergeAI() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,22 +80,22 @@ export default function ConciergeAI() {
   return (
     <>
       {/* Floating Action Button */}
-      <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-200 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
+      <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-200 motion-reduce:transition-none ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open the ScoutIt concierge"
-          className="relative group w-14 h-14 bg-surface border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)] transition hover:scale-105"
+          className="relative group w-14 h-14 bg-surface border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)] transition motion-safe:hover:scale-105"
         >
           {/* Rotating glow */}
-          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(232,174,60,0.5),transparent)] animate-[spin_4s_linear_infinite] opacity-50"></div>
+          <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(var(--accent-rgb),0.5),transparent)] motion-safe:animate-[spin_4s_linear_infinite] opacity-50"></div>
           <div className="absolute inset-1 rounded-full bg-surface flex items-center justify-center z-10">
-            <Sparkles className="text-gold-accent group-hover:animate-pulse" size="1.5em" strokeWidth={1.5} />
+            <Sparkles className="text-gold-accent motion-safe:group-hover:animate-pulse" size="1.5em" strokeWidth={1.5} />
           </div>
         </button>
       </div>
 
       {/* Chat Modal / Sidebar */}
-      <div className={`fixed inset-y-0 right-0 z-[1000] w-full sm:w-[400px] bg-background/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 z-[1000] w-full sm:w-[400px] bg-background/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-200 motion-reduce:transition-none ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
         {/* Header */}
         <div className="h-16 border-b border-surface-variant px-6 flex items-center justify-between shrink-0 bg-gradient-to-b from-surface-alt to-transparent">
@@ -126,7 +127,7 @@ export default function ConciergeAI() {
               <div className={`p-4 rounded-2xl text-sm leading-relaxed font-body break-words [overflow-wrap:anywhere] min-w-0 ${
                 msg.role === 'user' 
                   ? 'bg-surface-variant text-on-surface rounded-br-sm' 
-                  : 'bg-surface border border-gold-accent/20 text-text-secondary rounded-bl-sm shadow-[0_4px_15px_rgba(232,174,60,0.05)]'
+                  : 'bg-surface border border-gold-accent/20 text-text-secondary rounded-bl-sm shadow-[0_4px_15px_rgba(var(--accent-rgb),0.05)]'
               }`}>
                 {/* Parse basic markdown bold for mock responses */}
                 {msg.content.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-on-surface font-working-title">{part}</strong> : part)}
@@ -136,11 +137,11 @@ export default function ConciergeAI() {
 
           {isTyping && (
             <div className="self-start max-w-[85%] flex flex-col items-start">
-              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 animate-pulse">
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 motion-safe:animate-pulse">
                 Processing Logic
               </span>
               <div className="p-4 rounded-2xl bg-surface border border-gold-accent/20 rounded-bl-sm flex items-center gap-2">
-                <Loader2 size="1.2em" className="text-gold-accent animate-spin" />
+                <Loader2 size="1.2em" className="text-gold-accent motion-safe:animate-spin" />
               </div>
             </div>
           )}
@@ -192,7 +193,8 @@ export default function ConciergeAI() {
       {/* Backdrop for mobile */}
       {isOpen && (
         <button type="button" aria-label="Close Concierge" 
-          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[90] sm:hidden w-full h-full block"
+          className={`fixed inset-0 backdrop-blur-sm z-[90] sm:hidden w-full h-full block ${entrance.backdrop}`}
+          style={{ background: "var(--modal-scrim)" }}
           onClick={() => setIsOpen(false)}
         ></button>
       )}

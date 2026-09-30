@@ -13,11 +13,16 @@ vi.mock("@/lib/mapboxToken", () => ({ getServerMapboxToken: () => "pk.test" }));
 
 const BYPASSING_FILES = [
   "src/app/api/geo-pricing/route.js",
-  "src/app/api/health/route.js",
   "src/app/api/intel/ingest/route.js",
   "src/lib/airtableFreshness.js",
   "src/lib/intelPublish.js",
 ];
+
+it("public health does not make a metered Airtable probe", () => {
+  const source = readFileSync("src/app/api/health/route.js", "utf8");
+  expect(source).not.toContain("api.airtable.com");
+  expect(source).toContain('"configured"');
+});
 
 // src/lib/isochrone.js is deliberately NOT in that list. A-013's first draft
 // included it, but reading the code shows fetchContour already wraps its call in

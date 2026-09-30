@@ -7,10 +7,10 @@
 // populate real scores and add a visual map overlay.
 
 const SEVERITY_BANDS = [
-  { max: 25, label: "Low", color: "#4caf7d" },
-  { max: 50, label: "Moderate", color: "#e8c84a" },
-  { max: 75, label: "High", color: "#e8934a" },
-  { max: Infinity, label: "Severe", color: "#e8644a" },
+  { max: 25, label: "Low", color: "var(--green)" },
+  { max: 50, label: "Moderate", color: "var(--yellow)" },
+  { max: 75, label: "High", color: "var(--flood-high)" },
+  { max: Infinity, label: "Severe", color: "var(--red)" },
 ];
 
 function severityFor(score) {
@@ -27,23 +27,23 @@ export default function FloodRiskBadge({ floodRiskScore, floodZoneStatus }) {
   const severity = hasScore ? severityFor(Number(floodRiskScore)) : null;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px", marginBottom: "16px" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", background: "var(--surface2)", border: "0.5px solid var(--border-solid)", borderRadius: "4px", marginBottom: "16px" }}>
       <span
         style={{
           width: "9px",
           height: "9px",
           borderRadius: "50%",
-          background: severity ? severity.color : "#5a5a5a",
+          background: severity ? severity.color : "var(--text-muted)",
           boxShadow: severity ? `0 0 6px ${severity.color}` : "none",
           flexShrink: 0,
         }}
       />
       <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#c8c8c8", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
           Flood / Hazard Risk{severity ? ` — ${severity.label}` : ""}
         </span>
         {hasStatus && (
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "#f0ede8" }}>{floodZoneStatus}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "var(--text-primary)" }}>{floodZoneStatus}</span>
         )}
       </div>
     </div>

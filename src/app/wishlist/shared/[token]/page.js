@@ -1,7 +1,7 @@
 import { decodeWishlistShareToken, isWishlistShareRevoked } from "@/lib/wishlistCrypto";
 import { classifySavedItem } from "@/lib/wishlistLiveness";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { fetchProperties } from "@/lib/airtable";
+import { getCmsBundle } from "@/lib/cmsCache";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
@@ -71,9 +71,13 @@ export default async function SharedWishlistPage({ params }) {
   }
 
   // Fetch properties to get titles/cities
-  const apiKey = process.env.AIRTABLE_API_KEY;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const allProperties = await fetchProperties(apiKey, baseId);
+  const bundle = await getCmsBundle();
+  // An outage cannot prove that every saved listing has been withdrawn.
+  // Fail closed instead of marking a whole shared board as removed.
+  if (bundle.source === "empty_fallback_on_error") {
+    throw new Error("Shared Board catalogue is temporarily unavailable");
+  }
+  const allProperties = bundle.properties || [];
   // A-102: saved ids are slugs (ReactionButtons stores the slug) while the
   // CMS row id is the Airtable record id — keying by id missed everything and
   // every shared title read "Unknown Property". Key by slug, fall back to id.

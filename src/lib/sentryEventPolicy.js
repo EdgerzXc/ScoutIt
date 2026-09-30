@@ -5,6 +5,22 @@ export function shouldEnableSentry({
   return nodeEnv === "production" && e2eFlag !== "1";
 }
 
+export function isLocalSentryUrl(value) {
+  try {
+    const hostname = new URL(value).hostname.toLowerCase();
+    return hostname === "localhost"
+      || hostname.endsWith(".localhost")
+      || hostname === "127.0.0.1"
+      || hostname === "[::1]";
+  } catch {
+    return false;
+  }
+}
+
+export function isLocalSentryEvent(event) {
+  return isLocalSentryUrl(event?.request?.url);
+}
+
 export function isExpectedNodeRequestAbort(event = {}, hint = {}) {
   const original = hint?.originalException;
   const message = original instanceof Error

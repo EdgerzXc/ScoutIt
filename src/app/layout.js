@@ -117,6 +117,22 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        {/* White Lens / High Contrast no-flash. Lite and Simple above can sit in
+            <head> because their classes live on <html>; the lens classes live on
+            <body>, which does not exist yet while <head> is being parsed, so the
+            earliest moment this can run is the first byte of <body> — still
+            before any content paints. Without it every lens user took a full
+            black frame first (verified in SSR HTML: zero light-mode classes and
+            no theme script reached the paint). The values mirror
+            FloatingToolbox.applyTheme exactly, so the post-hydration apply is a
+            no-op instead of a re-flash. Dark users get nothing added. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var m=localStorage.getItem('scoutit_display_mode');if(!m){m=localStorage.getItem('scoutit_accessibility_mode')==='high-contrast'?'high-contrast':null;}var b=document.body;if(!b)return;if(m==='high-contrast')b.classList.add('high-contrast');else if(m==='light')b.classList.add('light-mode');}catch(e){}})();",
+          }}
+        />
+
         {/* A-153 — first in tab order, visible on focus only. */}
         <SkipLink />
         <GoogleAnalytics />

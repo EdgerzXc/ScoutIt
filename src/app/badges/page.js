@@ -8,6 +8,19 @@ import { hasBadge } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
 import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
 
+// Public badge definitions carry historical display hex values. The page
+// resolves their semantic role locally so the same cohort is legible in both
+// the dark default and the opt-in White Lens.
+const BADGE_TONES = Object.freeze({
+  PIONEER_BROKER: { ink: "var(--sapphire)", dim: "var(--sapphire-dim)" },
+  PIONEER_OWNER: { ink: "var(--green)", dim: "var(--green-dim)" },
+  PIONEER_CREATOR: { ink: "var(--tier-platinum)", dim: "var(--accent-dim)" },
+  FOUNDING_SEEKER: { ink: "var(--accent)", dim: "var(--accent-dim)" },
+  ALPHA_CARTOGRAPHER: { ink: "var(--red)", dim: "var(--red-dim)" },
+});
+
+const toneForBadge = (badge) => BADGE_TONES[badge.id] || BADGE_TONES.FOUNDING_SEEKER;
+
 export default function BadgeRegistryPage() {
   const [userBadges, setUserBadges] = useState([]);
   const [badgeDefs, setBadgeDefs] = useState([]);
@@ -95,13 +108,13 @@ export default function BadgeRegistryPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-bg badges-lens">
+    <main className="min-h-screen flex flex-col bg-[var(--bg)] badges-lens">
       <Header />
       
       {/* Toast Notification */}
       {toast && (
-        <div role="status" aria-live="polite" className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] bg-[#0a0a0a] border border-[#E8AE3C]/50 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
-          <span className="text-[#E8AE3C]">{toast.type === "error" ? "⚠️" : "✅"}</span>
+        <div role="status" aria-live="polite" className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] bg-surface border border-[var(--accent-border)] text-text-primary px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
+          <span className="text-accent">{toast.type === "error" ? "⚠️" : "✅"}</span>
           <span className="text-sm font-working-title">{toast.message}</span>
         </div>
       )}
@@ -131,38 +144,37 @@ export default function BadgeRegistryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {activeBadges.map((badge) => {
               const userHasIt = hasBadge(userBadges, badge.id);
+              const tone = toneForBadge(badge);
               
               return (
               <div 
                 key={badge.id}
-                className={`bg-surface border rounded-xl p-6 relative overflow-hidden group transition-all duration-500 ${userHasIt ? 'border-surface-variant hover:border-white/20' : 'border-white/5'}`}
-                style={{
-                  boxShadow: userHasIt ? `inset 0 0 40px ${badge.color}05, 0 8px 30px rgba(0,0,0,0.4)` : 'inset 0 0 40px rgba(0,0,0,0.8)'
-                }}
+                className={`bg-surface border rounded-xl p-6 relative overflow-hidden group transition-all duration-500 ${userHasIt ? 'border-[var(--accent-border)] hover:border-[var(--accent)]' : 'border-border'}`}
+                style={{ boxShadow: userHasIt ? 'var(--shadow-glow-soft)' : 'var(--shadow-sm)' }}
               >
                 {/* Glow Effect or Shadow */}
                 <div 
-                  className={`absolute top-0 right-0 w-32 h-32 blur-3xl transition-opacity ${userHasIt ? 'opacity-20 group-hover:opacity-40' : 'opacity-5 group-hover:opacity-10 bg-white'}`}
-                  style={{ background: userHasIt ? badge.color : undefined }}
+                  className={`badge-ambient absolute top-0 right-0 w-32 h-32 blur-3xl transition-opacity ${userHasIt ? 'opacity-20 group-hover:opacity-40' : 'opacity-5 group-hover:opacity-10'}`}
+                  style={{ background: userHasIt ? tone.ink : 'var(--text-primary)' }}
                 ></div>
 
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-3 rounded-lg" style={{ 
-                    background: userHasIt ? `${badge.color}15` : 'rgba(255,255,255,0.02)', 
-                    border: userHasIt ? `1px solid ${badge.color}30` : '1px solid rgba(255,255,255,0.05)' 
+                    background: userHasIt ? tone.dim : 'var(--surface2)',
+                    border: `1px solid ${userHasIt ? tone.ink : 'var(--border)'}`
                   }}>
                     {userHasIt ? (
-                      <Shield size={24} color={badge.color} strokeWidth={1.5} />
+                      <Shield size={24} color={tone.ink} strokeWidth={1.5} />
                     ) : (
-                      <Lock size={24} color="rgba(255,255,255,0.2)" strokeWidth={1.5} />
+                      <Lock size={24} color="var(--text-muted)" strokeWidth={1.5} />
                     )}
                   </div>
                   {userHasIt ? (
-                    <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-white/10 text-white/90 bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                    <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-[var(--accent-border)] text-text-primary bg-[var(--accent-dim)]">
                       ★ OWNED
                     </span>
                   ) : (
-                    <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-white/10 text-text-secondary bg-black/50">
+                    <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-border text-text-secondary bg-surface2">
                       LOCKED SILHOUETTE
                     </span>
                   )}
@@ -179,15 +191,15 @@ export default function BadgeRegistryPage() {
                 <div className="mt-auto">
                   <div className="flex justify-between font-mono text-[12px] uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
                     <span>Slots Claimed</span>
-                    <span style={{ color: userHasIt ? badge.color : 'var(--text-secondary)', fontWeight: 'bold' }}>{badge.claimed} / {badge.max_slots}</span>
+                    <span style={{ color: userHasIt ? tone.ink : 'var(--text-secondary)', fontWeight: 'bold' }}>{badge.claimed} / {badge.max_slots}</span>
                   </div>
-                  <div className="w-full h-1.5 bg-black rounded-full overflow-hidden border border-white/5">
+                  <div className="w-full h-1.5 bg-surface2 rounded-full overflow-hidden border border-border">
                     <div 
                       className="h-full rounded-full transition-all duration-1000 ease-out"
                       style={{ 
                         width: `${(badge.claimed / badge.max_slots) * 100}%`,
-                        background: userHasIt ? badge.color : 'rgba(255,255,255,0.2)',
-                        boxShadow: userHasIt ? `0 0 10px ${badge.color}` : 'none'
+                        background: userHasIt ? tone.ink : 'var(--border-solid)',
+                        boxShadow: userHasIt ? 'var(--shadow-glow-soft)' : 'none'
                       }}
                     ></div>
                   </div>
@@ -198,12 +210,12 @@ export default function BadgeRegistryPage() {
                     <button 
                       onClick={() => handleClaimBadge(badge.id)}
                       disabled={claimingId === badge.id}
-                      className="mt-6 w-full block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/20 bg-white/10 hover:bg-white/20 transition-colors text-white hover:text-white"
+                      className="badge-claim-btn mt-6 w-full block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border transition-colors"
                     >
                       {claimingId === badge.id ? 'CLAIMING...' : 'CLAIM FREE BADGE →'}
                     </button>
                   ) : (
-                    <span className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-white/5 bg-white/5 text-text-secondary">
+                    <span className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-border bg-surface2 text-text-secondary">
                       Staff-granted honor — no purchase path
                       {" "}<Link className="underline hover:text-on-surface" href="/contact">Ask about honors →</Link>
                     </span>
@@ -224,11 +236,12 @@ export default function BadgeRegistryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {soldOutBadges.map((badge) => {
               const userHasIt = hasBadge(userBadges, badge.id);
+              const tone = toneForBadge(badge);
               
               return (
               <div 
                 key={badge.id}
-                className={`bg-[#0a0a0a] border border-border rounded-lg p-5 relative transition-all ${userHasIt ? '' : 'grayscale'}`}
+                className="bg-surface border border-border rounded-lg p-5 relative transition-all"
               >
                 {/* Stone texture overlay for graveyard feel */}
                 {!userHasIt && (
@@ -237,27 +250,27 @@ export default function BadgeRegistryPage() {
                 
                 <div className="flex justify-between items-start mb-3">
                   {userHasIt ? (
-                    <ShieldCheck size={20} color={badge.color} strokeWidth={1.5} />
+                    <ShieldCheck size={20} color={tone.ink} strokeWidth={1.5} />
                   ) : (
-                    <ShieldAlert size={20} color="#666" strokeWidth={1.5} />
+                    <ShieldAlert size={20} color="var(--text-muted)" strokeWidth={1.5} />
                   )}
                   {userHasIt ? (
                     <span className="font-mono text-[12px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 px-1.5 rounded">
                       OWNED
                     </span>
                   ) : (
-                    <span className="font-mono text-[12px] uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 px-1.5 rounded">
+                    <span className="font-mono text-[12px] uppercase tracking-widest border px-1.5 rounded" style={{ color: 'var(--text-primary)', background: 'var(--red-dim)', borderColor: 'var(--red)' }}>
                       YOU MISSED THIS
                     </span>
                   )}
                 </div>
                 
-                <h3 className="font-display text-lg mb-1" style={{ color: userHasIt ? '#fff' : '#666' }}>{badge.name}</h3>
-                <p className="text-xs mb-4" style={{ color: userHasIt ? 'var(--text-secondary)' : '#444' }}>
+                <h3 className="font-display text-lg mb-1" style={{ color: userHasIt ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{badge.name}</h3>
+                <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
                   {badge.description}
                 </p>
                 
-                <div className="font-mono text-[12px] uppercase tracking-widest" style={{ color: userHasIt ? badge.color : '#555' }}>
+                <div className="font-mono text-[12px] uppercase tracking-widest" style={{ color: userHasIt ? tone.ink : 'var(--text-muted)' }}>
                   Closed at {badge.max_slots} slots
                 </div>
               </div>

@@ -149,11 +149,11 @@ export default function Footer() {
 
       <style jsx global>{`
         .global-footer {
-          background: var(--surface2, #090909);
-          border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+          background: var(--surface2);
+          border-top: 1px solid var(--border);
           padding: 64px 24px 24px;
           font-family: var(--font-body, sans-serif);
-          color: var(--text-secondary, #a0a0a0);
+          color: var(--text-secondary);
           position: relative;
           z-index: 10;
         }
@@ -182,14 +182,14 @@ export default function Footer() {
           line-height: 1;
         }
 
-        .footer-brand .brand-scout { color: var(--text-primary, #f5f3ee); }
+        .footer-brand .brand-scout { color: var(--text-primary); }
         .footer-brand .brand-s,
-        .footer-brand .brand-it { color: var(--accent, #E8AE3C); }
+        .footer-brand .brand-it { color: var(--accent); }
 
         .footer-tagline {
           font-size: 14px;
           line-height: 1.6;
-          color: var(--text-secondary, #c8c8c8);
+          color: var(--text-secondary);
           max-width: 320px;
         }
 
@@ -207,7 +207,7 @@ export default function Footer() {
           height: 36px;
           border-radius: 50%;
           border: 1px solid rgba(255, 255, 255, 0.1);
-          color: var(--text-secondary, #c8c8c8);
+          color: var(--text-secondary);
           transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
         }
 
@@ -217,9 +217,9 @@ export default function Footer() {
         }
 
         .social-link:hover {
-          color: var(--accent, #E8AE3C);
-          border-color: var(--accent, #E8AE3C);
-          background: rgba(232, 174, 60, 0.08);
+          color: var(--accent);
+          border-color: var(--accent);
+          background: rgba(var(--accent-rgb), 0.08);
           transform: translateY(-2px);
         }
 
@@ -246,14 +246,14 @@ export default function Footer() {
 
         .nav-col a {
           font-size: 13px;
-          color: var(--text-secondary, #c8c8c8);
+          color: var(--text-secondary);
           text-decoration: none;
           transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
           width: fit-content;
         }
 
         .nav-col a:hover {
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           padding-left: 4px;
         }
 
@@ -292,7 +292,7 @@ export default function Footer() {
         }
 
         .footer-meta-links a:hover {
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
         }
 
         .meta-separator {

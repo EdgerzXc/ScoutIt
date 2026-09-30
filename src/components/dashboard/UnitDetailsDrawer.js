@@ -52,7 +52,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
   };
 
   return (
-    <div className="fixed inset-0 z-[1100] bg-background flex flex-col md:grid md:grid-cols-[450px_1fr] overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div className="fixed inset-0 z-[1100] bg-background flex flex-col md:grid md:grid-cols-[450px_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.2s_ease-out]">
       {/* Left side: Editor Form */}
       <div className="relative w-full h-full overflow-y-auto bg-background border-r border-surface-variant flex flex-col">
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur border-b border-surface-variant">

@@ -27,14 +27,14 @@ const POINTS = [
 export default function ConnectsExplainer() {
   return (
     <section className="connects-explainer z-10 relative w-full max-w-5xl mx-auto px-4 mt-24">
-      <div className="rounded-2xl border border-gold-accent/20 bg-surface-alt/40 backdrop-blur-md p-8 md:p-10">
+      <div className="rounded-2xl border border-[var(--accent-border)] bg-surface backdrop-blur-md p-8 md:p-10">
         <div className="flex items-center gap-3 mb-3">
           <span className="text-gold-accent font-mono font-bold text-lg">◈</span>
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold">
             Understanding Connects
           </span>
         </div>
-        <h2 className="text-2xl md:text-3xl font-working-title text-white mb-3">
+        <h2 className="text-2xl md:text-3xl font-working-title text-text-primary mb-3">
           Connects are how you make contact.
         </h2>
         <p className="text-sm text-text-secondary leading-relaxed max-w-2xl mb-8">
@@ -45,12 +45,12 @@ export default function ConnectsExplainer() {
           {POINTS.map(({ icon: Icon, title, body }) => (
             <div
               key={title}
-              className="rounded-xl border border-white/10 bg-white/5 p-6 hover:border-gold-accent/30 transition-colors duration-300"
+              className="rounded-xl border border-border bg-surface2 p-6 hover:border-[var(--accent-border)] transition-colors duration-300"
             >
               <div className="p-2.5 rounded-lg bg-gold-accent/10 w-fit mb-4">
                 <Icon className="w-5 h-5 text-gold-accent" strokeWidth={1.5} />
               </div>
-              <h3 className="text-base font-working-title text-white mb-2">{title}</h3>
+              <h3 className="text-base font-working-title text-text-primary mb-2">{title}</h3>
               <p className="text-xs text-text-secondary leading-relaxed">{body}</p>
             </div>
           ))}

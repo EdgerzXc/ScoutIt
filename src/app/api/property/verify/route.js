@@ -10,6 +10,7 @@ import { findProperty } from "@/lib/propertyLookup";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { stampAirtableFreshness } from "@/lib/airtableFreshness";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 /**
  * POST /api/property/verify
@@ -119,6 +120,7 @@ export async function POST(request) {
     // not successfully verified until both stores carry the same timestamp.
     const publicSlug = prop.canonical_slug || prop.slug;
     const isPublished = prop.pipeline_status === "approved" && Boolean(publicSlug);
+    let publicCachePending = false;
     if (isPublished) {
       const cmsSync = await stampAirtableFreshness({ slug: publicSlug, isoDate: nowIso });
       if (!cmsSync.ok) {
@@ -144,6 +146,13 @@ export async function POST(request) {
           },
           { status: missingConfig ? 503 : 502 },
         );
+      }
+      try {
+        const purge = await invalidateCmsBundle();
+        publicCachePending = purge.sharedCachePurged === false;
+      } catch (cacheError) {
+        console.error("[PROPERTY VERIFY] Catalogue cache purge failed after verification:", cacheError?.message);
+        publicCachePending = true;
       }
     }
 
@@ -177,6 +186,7 @@ export async function POST(request) {
       freshness,
       message: "Property freshness re-verified successfully.",
       publicCmsUpdated: isPublished,
+      publicCachePending,
     });
   } catch (err) {
     console.error("[PROPERTY VERIFY API] POST failed:", err);

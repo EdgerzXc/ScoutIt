@@ -6,6 +6,7 @@ import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
 import Link from "next/link";
 import { Check, Layers } from "lucide-react";
+import styles from "@/components/pricing/PricingDetail.module.css";
 
 const BUNDLES = [
   {
@@ -29,10 +30,6 @@ const BUNDLES = [
       "Anonymous browsing + proxy contact enabled",
       "Featured Broker placement on property pages"
     ],
-    accent: "from-gold-accent to-gold-accent",
-    glowColor: "rgba(232, 174, 60,0.15)",
-    glowHover: "rgba(232, 174, 60,0.25)",
-    borderColor: "border-gold-accent/50",
     highlight: false,
   },
   {
@@ -56,10 +53,6 @@ const BUNDLES = [
       "AI copy optimization on all your listings",
       "Identity Reveal Control + Anonymity Shield"
     ],
-    accent: "from-gold-accent to-gold-accent",
-    glowColor: "rgba(232, 174, 60,0.15)",
-    glowHover: "rgba(232, 174, 60,0.25)",
-    borderColor: "border-gold-accent/50",
     highlight: true,
   },
   {
@@ -83,10 +76,6 @@ const BUNDLES = [
       "Full Job & Portfolio Analytics",
       "Read access to Deep Intel for research"
     ],
-    accent: "from-gold-accent to-gold-accent",
-    glowColor: "rgba(232, 174, 60,0.15)",
-    glowHover: "rgba(232, 174, 60,0.25)",
-    borderColor: "border-gold-accent/50",
     highlight: false,
   },
   {
@@ -110,10 +99,6 @@ const BUNDLES = [
       "Market Intelligence + Full Analytics across all roles",
       "AI copy optimization + Priority Bounty Access"
     ],
-    accent: "from-gold-accent via-gold-accent to-gold-accent",
-    glowColor: "rgba(232, 174, 60,0.12)",
-    glowHover: "rgba(232, 174, 60,0.22)",
-    borderColor: "border-gold-accent/60",
     highlight: false,
     flagship: true,
   },
@@ -126,20 +111,20 @@ export default function BundlesPricingPage() {
       <main className="pricing-main relative overflow-hidden">
 
         {/* Background glows */}
-        <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-gold-accent/8 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-gold-accent/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-[40%] left-[50%] w-[400px] h-[400px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-gold-accent/8 rounded-full blur-[140px] pointer-events-none`} />
+        <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-gold-accent/8 rounded-full blur-[120px] pointer-events-none`} />
+        <div className={`${styles.ambient} absolute top-[40%] left-[50%] w-[400px] h-[400px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none`} />
 
         <header className="pricing-header z-10 relative">
-          <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-white transition-colors mb-8 inline-block">
+          <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors mb-8 inline-block">
             ← Back to Personas
           </Link>
 
-          <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-[#1A1710]/80 to-[#101820]/80 border border-gold-accent/30 inline-block">
+          <div className={`${styles.pioneer} mb-8 p-4 rounded-xl inline-block`}>
             <p className="text-gold-accent font-mono text-xs uppercase tracking-widest font-bold">
               ◈ MULTI-ROLE BUNDLES
             </p>
-            <p className="text-white text-sm mt-1">
+            <p className="text-text-primary text-sm mt-1">
               Hold multiple roles, pay as one. Pioneer rates locked forever.
             </p>
           </div>
@@ -147,7 +132,7 @@ export default function BundlesPricingPage() {
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             LAYER 08 // ECOSYSTEM BUNDLES
           </span>
-          <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
+          <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Every Role. <span className="text-gold-accent">One Plan.</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -161,22 +146,19 @@ export default function BundlesPricingPage() {
           {BUNDLES.map((bundle) => (
             <div
               key={bundle.id}
-              className={`flex flex-col rounded-2xl p-7 relative overflow-hidden transition-all duration-500 cursor-default
-                ${bundle.highlight
-                  ? `bg-gradient-to-br from-[#1A1810] to-[#0A0908] ${bundle.borderColor} border shadow-[0_0_40px_${bundle.glowColor}] hover:shadow-[0_0_60px_${bundle.glowHover}] hover:border-gold-accent transform hover:-translate-y-2`
-                  : `bg-surface-alt/40 backdrop-blur-md ${bundle.borderColor} border hover:bg-surface-alt/60 hover:border-opacity-80 hover:-translate-y-1`
-                } transition-transform`}
+              className={`flex flex-col rounded-2xl p-7 relative overflow-hidden cursor-default backdrop-blur-md ${styles.card} ${bundle.highlight ? styles.featuredCard : ""} ${bundle.flagship ? styles.flagshipCard : ""}`}
+              style={bundle.highlight ? { "--pricing-detail-tint": "var(--accent-dim)" } : undefined}
             >
               {/* Top accent bar */}
-              <div className={`absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r ${bundle.accent} opacity-80`} />
+              <div className={`${styles.accentBar} absolute top-0 left-0 w-full h-[2px] opacity-80`} />
 
               {bundle.flagship && (
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-gold-accent to-gold-bright text-background text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className={`${styles.badge} absolute top-4 right-4 text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full`}>
                   Best Value
                 </div>
               )}
               {bundle.highlight && !bundle.flagship && (
-                <div className="absolute top-4 right-4 bg-gold-accent text-background text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className={`${styles.badge} absolute top-4 right-4 text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full`}>
                   Most Popular
                 </div>
               )}
@@ -184,7 +166,7 @@ export default function BundlesPricingPage() {
               {/* Bundle name + roles */}
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-3xl font-working-title text-white">{bundle.name}</h2>
+                  <h2 className="text-3xl font-working-title text-text-primary">{bundle.name}</h2>
                 </div>
                 <p className="text-xs font-mono text-text-muted uppercase tracking-widest mb-3">{bundle.tagline}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -198,26 +180,26 @@ export default function BundlesPricingPage() {
               </div>
 
               {/* Pricing */}
-              <div className="mb-6 p-4 rounded-xl bg-black/20 border border-white/5">
+              <div className={`${styles.pricePanel} mb-6 p-4 rounded-xl`}>
                 <div className="flex items-end justify-between">
                   <div>
                     <span className="text-xs font-mono text-text-muted line-through block mb-1">
                       {bundle.rawPrice} if separate
                     </span>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-display-md text-white">{bundle.price}</span>
+                      <span className="text-4xl font-display-md text-text-primary">{bundle.price}</span>
                       <span className="text-xs font-mono text-text-muted uppercase tracking-wider">/ mo</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-mono text-text-muted uppercase block">You save</span>
                     <span className="text-lg font-bold text-gold-accent">{bundle.savings}</span>
-                    <span className="text-xs text-gold-accent/70 font-mono block">({bundle.savingsPct} off)</span>
+                    <span className="text-xs text-gold-accent font-mono block">({bundle.savingsPct} off)</span>
                   </div>
                 </div>
 
                 {/* Connects badge */}
-                <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
+                <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
                   <span className="text-gold-accent font-mono font-bold text-sm">◈ {bundle.connects}</span>
                   <span className="text-xs text-text-muted">Connects / month</span>
                   <span className="ml-auto text-xs font-mono text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded">
@@ -230,7 +212,7 @@ export default function BundlesPricingPage() {
               <ul className="flex flex-col gap-3 flex-1 mb-7">
                 {bundle.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <Check className="mt-0.5 flex-shrink-0 text-gold-accent/70" size={13} strokeWidth={3} />
+                    <Check className="mt-0.5 flex-shrink-0 text-gold-accent" size={13} strokeWidth={3} />
                     <span className="text-xs text-on-surface leading-snug">{feature}</span>
                   </li>
                 ))}
@@ -261,7 +243,7 @@ export default function BundlesPricingPage() {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          background: #0A0908;
+          background: var(--bg);
         }
         .pricing-main {
           flex: 1;

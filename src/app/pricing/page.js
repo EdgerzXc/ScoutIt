@@ -77,7 +77,7 @@ export default function PricingHubPage() {
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             LAYER 08 // INTELLIGENCE TIERS
           </span>
-          <h1 className="page-title text-4xl md:text-5xl font-display-md text-white mb-6 drop-shadow-lg max-w-3xl mx-auto">
+          <h1 className="page-title text-4xl md:text-5xl font-display-md text-on-surface mb-6 drop-shadow-lg max-w-3xl mx-auto">
             Choose Your <span className="text-gold-accent">Role</span> in the Ecosystem
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -91,17 +91,17 @@ export default function PricingHubPage() {
           {PERSONAS.map((persona) => {
             const Icon = persona.icon;
             return (
-              <Link key={persona.id} href={persona.href} className="group relative block rounded-2xl p-[1px] overflow-hidden bg-surface-variant hover:bg-gradient-to-br hover:from-surface-variant hover:to-gold-accent/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(232,174,60,0.1)]">
-                <div className="absolute inset-0 bg-surface-alt/80 backdrop-blur-xl group-hover:bg-[#0A0908]/90 transition-colors duration-500 z-0"></div>
+              <Link key={persona.id} href={persona.href} className="group relative block rounded-2xl p-[1px] overflow-hidden bg-surface-variant hover:bg-gradient-to-br hover:from-surface-variant hover:to-gold-accent/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[var(--shadow-glow-soft)]">
+                <div className="absolute inset-0 backdrop-blur-xl z-0" style={{ background: "var(--surface)" }}></div>
                 <div className="relative z-10 p-8 flex items-start gap-6 h-full">
                   <div className={`p-4 rounded-xl ${persona.bgAccent} transition-transform duration-500 group-hover:scale-110 flex-shrink-0`}>
                     <Icon className={`w-8 h-8 ${persona.accent}`} strokeWidth={1.5} />
                   </div>
                   <div className="flex flex-col h-full">
-                    <h2 className="text-2xl font-working-title text-white mb-2 group-hover:text-gold-accent transition-colors duration-300">
+                    <h2 className="text-2xl font-working-title text-on-surface mb-2 group-hover:text-gold-accent transition-colors duration-300">
                       {persona.title}
                     </h2>
-                    <p className="text-sm text-text-secondary leading-relaxed mb-6 group-hover:text-white/80 transition-colors duration-300">
+                    <p className="text-sm text-text-secondary leading-relaxed mb-6 group-hover:text-text-primary transition-colors duration-300">
                       {persona.description}
                     </p>
                     <div className="mt-auto flex items-center gap-2 text-xs font-mono text-text-muted uppercase tracking-wider group-hover:text-gold-accent transition-colors duration-300">
@@ -115,22 +115,22 @@ export default function PricingHubPage() {
           })}
 
           {/* Bundle card — spans full width */}
-          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[0_10px_40px_rgba(232,174,60,0.15)]" style={{background: 'linear-gradient(135deg, rgba(232, 174, 60,0.35), rgba(232, 174, 60,0.12), rgba(122,92,0,0.25))'}}>
-            <div className="absolute inset-0 bg-[#0A0908]/90 backdrop-blur-xl group-hover:bg-[#0A0908]/95 transition-colors duration-500 z-0 rounded-2xl"></div>
+          <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[var(--shadow-glow-soft)]" style={{ background: 'linear-gradient(135deg, var(--accent-border), var(--accent-dim), var(--border))' }}>
+            <div className="absolute inset-0 backdrop-blur-xl z-0 rounded-2xl" style={{ background: "var(--surface)" }}></div>
             <div className="relative z-10 p-8 flex items-center gap-6">
               <div className="p-4 rounded-xl bg-gradient-to-br from-gold-accent/20 to-gold-accent/5 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">
                 <Layers className="w-8 h-8 text-gold-accent" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-working-title text-white group-hover:text-gold-accent transition-colors duration-300">
+                  <h2 className="text-2xl font-working-title text-on-surface group-hover:text-gold-accent transition-colors duration-300">
                     {BUNDLE_CARD.title}
                   </h2>
                   <span className="text-[12px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-gold-accent/20 text-gold-accent border border-gold-accent/30">
                     Save up to 20%
                   </span>
                 </div>
-                <p className="text-sm text-text-secondary leading-relaxed group-hover:text-white/80 transition-colors duration-300 max-w-2xl">
+                <p className="text-sm text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300 max-w-2xl">
                   {BUNDLE_CARD.description}
                 </p>
               </div>

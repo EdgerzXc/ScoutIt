@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Upstash is the only dependency that matters here; the rest of cmsCache is
 // left alone so the module under test is the real one.
 const del = vi.fn(async () => 1);
+const incr = vi.fn(async () => 1);
 const get = vi.fn(async () => null);
 const set = vi.fn(async () => "OK");
 
@@ -10,6 +11,7 @@ vi.mock("@upstash/redis", () => ({
   Redis: class {
     constructor() {
       this.del = del;
+      this.incr = incr;
       this.get = get;
       this.set = set;
     }
@@ -20,6 +22,7 @@ describe("A-054 invalidateCmsBundle", () => {
   beforeEach(() => {
     vi.resetModules();
     del.mockClear();
+    incr.mockClear();
     get.mockClear();
     set.mockClear();
     process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
@@ -32,6 +35,7 @@ describe("A-054 invalidateCmsBundle", () => {
 
     expect(del).toHaveBeenCalledTimes(1);
     expect(del).toHaveBeenCalledWith("cms_bundle");
+    expect(incr).toHaveBeenCalledWith("cms_bundle_generation");
   });
 
   it("is safe to call repeatedly, as a retried takedown would", async () => {
@@ -58,7 +62,7 @@ describe("A-054 invalidateCmsBundle", () => {
     vi.resetModules();
 
     const { invalidateCmsBundle } = await import("../cmsCache");
-    await expect(invalidateCmsBundle()).resolves.toBeUndefined();
+    await expect(invalidateCmsBundle()).resolves.toEqual({ sharedCachePurged: false });
     expect(del).not.toHaveBeenCalled();
   });
 });

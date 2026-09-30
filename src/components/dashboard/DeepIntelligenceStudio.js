@@ -325,7 +325,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
 
   return (
     <div 
-      className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
+      className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
       style={{ gridTemplateColumns: `calc(${leftWidth}% - 5px) 10px calc(${100 - leftWidth}% - 5px)` }}
       onDragOver={handleDragOver}
       onDragEnter={handleDragOver}
@@ -397,7 +397,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
 
           {/* STEP 1: The Space */}
           {step === 1 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+            <section className="flex flex-col gap-6 motion-safe:animate-[fadeIn_0.3s_ease]">
               <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Step 1: The Space</h3>
               <p className="text-sm text-text-secondary">Let&apos;s start with the absolute must-haves and core spatial financials.</p>
               
@@ -501,7 +501,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
           {/* DYNAMIC STEPS 2-6 */}
           {[2, 3, 4, 5, 6].map(s => (
             step === s && (
-              <section key={s} className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+              <section key={s} className="flex flex-col gap-6 motion-safe:animate-[fadeIn_0.3s_ease]">
                 <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">
                   {s === 2 ? "Step 2: Location" : s === 3 ? "Step 3: Life Here" : s === 4 ? "Step 4: Where To?" : s === 5 ? "Step 5: Build Plans" : "Step 6: Units & Universe"}
                 </h3>

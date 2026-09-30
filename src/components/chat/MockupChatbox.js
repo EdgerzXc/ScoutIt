@@ -55,6 +55,22 @@ export default function MockupChatbox() {
         minHeight: "100vh",
         background: "#0d0d0d",
         color: "#f0ede8",
+        // Self-contained dark slab, pinned 2026-09-29. This mock previews the
+        // shipped inbox the way ScoutIt's default dark presentation renders it:
+        // every ground inside it is a literal dark value (#0d0d0d / #121212 /
+        // #1c1c1c) rather than a themed surface. It used to mix those literal
+        // grounds with theme-driven ink (var(--accent-bright),
+        // var(--text-secondary)), so under the White Lens the ink flipped to
+        // near-black while the tab strip stayed #121212 — 1.32:1 on
+        // "1. WAITING (PENDING)" and 1.97:1 on "Chat Unlocked". The two values
+        // pinned here are what those tokens resolve to in the dark theme
+        // (measured on a live page, not copied from a comment: --text-secondary
+        // = var(--paper-01) = #D5D5D5, --accent-bright = #F7C64E), so dark mode
+        // renders exactly as it did before and the lens reads gold on dark
+        // instead of black on dark. Fully theming this mock is a separate owner
+        // call — see the "NOT THE PRODUCT" note above.
+        "--accent-bright": "#F7C64E",
+        "--text-secondary": "#D5D5D5",
         fontFamily: "system-ui, -apple-system, sans-serif",
         padding: "32px 16px",
         boxSizing: "border-box",

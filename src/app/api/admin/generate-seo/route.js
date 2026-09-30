@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchProperties, updateProperty } from "@/lib/airtable";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { requireAdmin } from "@/lib/adminGuard";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -100,8 +101,16 @@ Return ONLY a raw JSON object with exactly these three keys: "title", "descripti
        seo_description: parsedResult.description,
        seo_json_ld: typeof parsedResult.jsonLd === 'object' ? JSON.stringify(parsedResult.jsonLd) : parsedResult.jsonLd
     });
+    let publicCachePending = false;
+    try {
+      const purge = await invalidateCmsBundle();
+      publicCachePending = purge.sharedCachePurged === false;
+    } catch (cacheError) {
+      console.error("[SEO GENERATE API] Catalogue cache purge failed after update:", cacheError?.message);
+      publicCachePending = true;
+    }
 
-    return NextResponse.json({ success: true, seo: parsedResult });
+    return NextResponse.json({ success: true, seo: parsedResult, publicCachePending });
   } catch (err) {
     console.error("[SEO GENERATE API] Error:", err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

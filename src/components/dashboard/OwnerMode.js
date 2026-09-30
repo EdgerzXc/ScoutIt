@@ -875,7 +875,9 @@ export default function OwnerMode() {
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error || 'Failed to archive');
                     setJustArchivedIds(prev => [...prev, ...selectedIds]);
-                    addToast(`Archived ${data.archivedCount} propert${data.archivedCount === 1 ? 'y' : 'ies'}.`, '🗑️');
+                    addToast(data.publicCachePending
+                      ? `${data.withdrawnCount} withdrawal${data.withdrawnCount === 1 ? '' : 's'} saved; public removal unconfirmed. Check the listing pages.`
+                      : `${data.withdrawnCount} propert${data.withdrawnCount === 1 ? 'y' : 'ies'} moved off-market.`, data.publicCachePending ? '⚠️' : '◌');
                     setSelectedIds([]);
                     setSelectMode(false);
                   } catch (err) {
@@ -1413,4 +1415,3 @@ export default function OwnerMode() {
     </div>
   );
 }
-

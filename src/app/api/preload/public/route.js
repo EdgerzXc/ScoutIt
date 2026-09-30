@@ -39,11 +39,19 @@ function response(body, source = "cms") {
   });
 }
 
+function unavailableResponse() {
+  return NextResponse.json(
+    { error: "Public catalogue temporarily unavailable." },
+    { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "60" } },
+  );
+}
+
 export async function GET() {
   try {
     const bundle = await getCmsBundle();
+    if (bundle.source === "empty_fallback_on_error") return unavailableResponse();
     return response(serialize(bundle.properties));
   } catch {
-    return response(JSON.stringify({ version: 1, properties: [] }), "degraded");
+    return unavailableResponse();
   }
 }

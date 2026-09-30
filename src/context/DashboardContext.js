@@ -519,8 +519,6 @@ export function DashboardProvider({ children }) {
         signals: { ...l.signals, completeness: data.completenessScore + "%" }
       };
     }));
-    if (!silent) addToast("Dossier updated", "✏️");
-
     // Server-side dual-database update (Supabase + Airtable if approved)
     try {
       const { data: { session } } = await getSession();
@@ -538,8 +536,12 @@ export function DashboardProvider({ children }) {
         })
       });
 
-      if (!res.ok) {
-        throw new Error("Update failed");
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(result.error || result.warning || "Update failed");
+      if (result.publicCachePending) {
+        addToast("Saved; public refresh unconfirmed. Check the listing page.", "⚠️");
+      } else if (!silent) {
+        addToast("Dossier updated", "✏️");
       }
       return true;
     } catch (err) {
@@ -565,7 +567,9 @@ export function DashboardProvider({ children }) {
       setListings(prev => prev.map((listing) => listing.id === listingId
         ? { ...listing, pipelineStatus: "off_market", lifecycleState: "off_market", quietlyOpenToOffers: false }
         : listing));
-      addToast("Property moved off-market", "◌");
+      addToast(data.publicCachePending
+        ? "Off-market saved; public removal unconfirmed. Check the listing page."
+        : "Property moved off-market", data.publicCachePending ? "⚠️" : "◌");
       return true;
     } catch (err) {
       console.error("Failed to withdraw property", err);
@@ -602,7 +606,9 @@ export function DashboardProvider({ children }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Permanent removal failed");
       setListings(prev => prev.filter((listing) => listing.id !== listingId));
-      addToast("Listing removed from the market; history retained", "◌");
+      addToast(data.publicCachePending
+        ? "Removal saved; public refresh unconfirmed. Check the listing page."
+        : "Listing removed from the market; history retained", data.publicCachePending ? "⚠️" : "◌");
       return true;
     } catch (err) {
       console.error("Failed to permanently remove property", err);
@@ -679,7 +685,9 @@ export function DashboardProvider({ children }) {
       }
       setListings(prev => prev.map(l => l.id === listingId ? { ...l, pipelineStatus: 'approved' } : l));
       setDeclarationPrompt(null);
-      addToast("Property is now LIVE", "🌍");
+      addToast(data.publicCachePending
+        ? "Published; public refresh unconfirmed. Check before sharing."
+        : "Property is now LIVE", data.publicCachePending ? "⚠️" : "🌍");
       trackEvent(GA_EVENTS.PROPERTY_PUBLISHED, { property_id: listingId, with_declaration: Boolean(declaration) });
       return true;
     } catch (err) {
@@ -707,7 +715,11 @@ export function DashboardProvider({ children }) {
     // by owners arrived with no coordinates and then rendered a map of the
     // wrong place. No longer gated on a client-side token either.
     let geo = null;
-    if (listing.location) {
+    if (Number.isFinite(Number(listing.lat)) && Number.isFinite(Number(listing.lng))) {
+      lat = Number(listing.lat);
+      lng = Number(listing.lng);
+      geo = { lat, lng, uncertain: false };
+    } else if (listing.location) {
       try {
         const res = await fetch(`/api/mapbox?op=geocode&q=${encodeURIComponent(listing.location)}`);
         const json = await res.json();
@@ -998,7 +1010,7 @@ export function DashboardProvider({ children }) {
         statusText: 'Sent Just now',
         badgeText: 'Waiting',
         isCurrentUserBroker: true,
-        isCurrentUserOwner: true
+        isCurrentUserOwner: false,
       };
 
       setPitches(prev => [newPitch, ...prev]);

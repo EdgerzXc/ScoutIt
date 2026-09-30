@@ -109,7 +109,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
   };
 
   return (
-    <section className="bg-[#121212] border border-gold-accent/20 rounded-lg p-4 sm:p-5 cal-lens">
+    <section className="bg-surface border border-gold-accent/20 rounded-lg p-4 sm:p-5 cal-lens">
       <div className="mb-4">
         <h2 className="font-working-title text-lg text-on-surface">Calendar Sync</h2>
         <p className="text-xs text-text-muted mt-1">

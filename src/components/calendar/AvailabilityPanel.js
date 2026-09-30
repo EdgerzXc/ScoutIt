@@ -152,7 +152,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
   const overrideDates = Object.keys(overrides).sort();
 
   return (
-    <section className="bg-[#121212] border border-surface-variant rounded-lg p-4 sm:p-6 cal-lens">
+    <section className="bg-surface border border-surface-variant rounded-lg p-4 sm:p-6 cal-lens">
       <h2 className="font-working-title text-xl text-on-surface mb-2">Weekly Availability</h2>
       <p className="text-sm text-text-secondary mb-6">
         Set the standard hours you are available for live property viewings. Buyers can only
@@ -169,7 +169,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
               return (
                 <div
                   key={day}
-                  className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 p-3 border border-surface-variant/50 rounded bg-[#1a1a1a]"
+                  className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 p-3 border border-surface-variant/50 rounded bg-[color:var(--surface2)]"
                 >
                   <label className="flex items-center gap-2 w-full sm:w-32 shrink-0 cursor-pointer">
                     <input
@@ -360,7 +360,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
                 {overrideDates.map((dateKey) => (
                   <li
                     key={dateKey}
-                    className="flex items-center justify-between gap-3 p-2.5 border border-surface-variant/50 rounded bg-[#1a1a1a]"
+                    className="flex items-center justify-between gap-3 p-2.5 border border-surface-variant/50 rounded bg-[color:var(--surface2)]"
                   >
                     <span className="text-sm text-on-surface font-data-tabular">
                       {new Date(`${dateKey}T12:00:00`).toLocaleDateString(undefined, {

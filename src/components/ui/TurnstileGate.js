@@ -98,7 +98,10 @@ const TurnstileGate = forwardRef(function TurnstileGate(
           fontFamily: "'Courier New',monospace",
           fontSize: "12px",
           letterSpacing: "0.08em",
-          color: "#e06c6c",
+          // var(--red), not a literal: this line renders on public pages under
+          // the White Lens too, where a fixed #e06c6c sat at 2.19:1 on the lens
+          // canvas (found by the extended A-153 sweep on /onboarding, 2026-09-29).
+          color: "var(--red)",
           lineHeight: 1.6,
         }}
       >
@@ -139,7 +142,7 @@ const TurnstileGate = forwardRef(function TurnstileGate(
             fontFamily: "'Courier New',monospace",
             fontSize: "12px",
             letterSpacing: "0.06em",
-            color: "#e06c6c",
+            color: "var(--red)",
             marginTop: "6px",
             lineHeight: 1.5,
           }}

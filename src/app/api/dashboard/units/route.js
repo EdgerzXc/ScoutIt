@@ -277,7 +277,8 @@ export async function POST(request) {
 
     let warning = null;
     try {
-      await syncPropertyUnitsToAirtable(serviceClient, property);
+      const sync = await syncPropertyUnitsToAirtable(serviceClient, property);
+      if (sync?.publicCachePending) warning = "Units saved; public refresh unconfirmed. Check the listing page.";
     } catch (airtableErr) {
       console.error("[UNITS API] Airtable sync failed:", airtableErr);
       warning = "Units saved, but Airtable sync failed: " + airtableErr.message;

@@ -3,12 +3,16 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { isLocalSentryUrl } from "./src/lib/sentryEventPolicy";
+
+const isLocalBrowser = typeof window !== "undefined" && isLocalSentryUrl(window.location.href);
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   // Keep local development and its expected hot-reload/socket disconnects out of the live project.
   enabled: process.env.NODE_ENV === "production"
-    && process.env.NEXT_PUBLIC_SCOUTIT_E2E !== "1",
+    && process.env.NEXT_PUBLIC_SCOUTIT_E2E !== "1"
+    && !isLocalBrowser,
 
   // Human-pilot policy: collect errors and a small performance sample, but do
   // not record DOM/session replays. Pilot feedback is observation notes only;

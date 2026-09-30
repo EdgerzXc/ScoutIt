@@ -1,4 +1,4 @@
-// WCAG contrast verification for the light-mode token theme.
+// WCAG contrast verification for the live light/dark token themes.
 // NEW_IDEAS_2.md §61.
 //
 // Exists because the light theme's whole job is legibility, and a contrast
@@ -7,8 +7,19 @@
 //
 //   node scripts/verify-contrast.mjs
 //
-// Exits non-zero if any pair fails its required ratio, so it can be wired
-// into CI later without changes.
+// Exits non-zero if any declared pair fails its required ratio.
+
+import { readFileSync } from "node:fs";
+import { declarations, tokenColor, stripComments } from "./css-token-blocks.mjs";
+
+const css = stripComments(readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8"));
+const recoveryCss = stripComments(readFileSync(new URL("../src/app/GlobalRecovery.module.css", import.meta.url), "utf8"));
+
+const light = declarations("body.light-mode", css);
+const dark = declarations(":root", css);
+const from = (values, names) => Object.fromEntries(
+  Object.entries(names).map(([key, name]) => [key, tokenColor(values, name)])
+);
 
 const hex = (h) => {
   const v = h.replace("#", "").trim();
@@ -30,50 +41,34 @@ const ratio = (a, b) => {
   return (l1 + 0.05) / (l2 + 0.05);
 };
 
-// ── The light theme, as shipped in globals.css `body.light-mode` ────────
+// Read what the app actually ships. Hand-copied values let the check pass
+// after the palette changes, which was the A-153 failure.
+const names = {
+  bg: "bg", surface: "surface", surface2: "surface2", surface3: "surface3",
+  textPrimary: "text-primary", textSecondary: "text-secondary",
+  accent: "accent", accentBright: "accent-bright",
+  accentFill: "accent-fill", onAccent: "on-accent",
+  m3OnSurface: "m3-on-surface-ch",
+  m3SurfaceVariant: "m3-surface-variant-ch",
+};
+// Status inks, read from BOTH theme blocks. A status colour is only as good as
+// its weakest ground, and the grounds actually in use are the page canvas
+// (--bg), the card (--surface) and the deeper well (--surface2).
+const status = {
+  red: "red", green: "green", yellow: "yellow", sapphire: "sapphire",
+  amethyst: "amethyst", floodHigh: "flood-high",
+};
 const L = {
-  bg: "#f4f4f5",
-  surface: "#fafafa",
-  surface3: "#e7e7ea",
-  textPrimary: "#111113",
-  textSecondary: "#45454d",
-  textMuted: "#5f5f6a",
-  accent: "#8B5E10",
-  accentBright: "#9A6200",
-  accentFill: "#E8AE3C",
-  red: "#b91c1c",
-  green: "#047857",
-  yellow: "#a16207",
-  sapphire: "#1d4ed8",
-  amethyst: "#6d28d9",
-  // The Material-3 keys Tailwind exposes, rewired off flat hex 2026-08-07
-  // (§63). `on-surface` is 367 call sites of ink; `surface-variant` is 497
-  // call sites of hairline/panel. If these drift, light mode silently
-  // regresses across the whole app, so they are checked here.
-  intelCyan: "#0b6e7f",
-  intelMagenta: "#a3186b",
-  tierDiamond: "#0e7490",
-  tierPlatinum: "#3f6382",
-  tierSilver: "#57575f",
-  tierBronze: "#8a5320",
-  m3OnSurface: "#111113",
-  m3SurfaceVariant: "#d6d6db",
-  onAccent: "#111113",
+  ...from(light, names),
+  ...from(light, status),
+  ...from(light, {
+    textMuted: "text-muted",
+    intelCyan: "intel-cyan", intelMagenta: "intel-magenta",
+    tierDiamond: "tier-diamond", tierPlatinum: "tier-platinum",
+    tierSilver: "tier-silver", tierBronze: "tier-bronze",
+  }),
 };
-
-// ── The dark theme, for comparison — light mode must not be the weaker one ──
-const D = {
-  bg: "#0d0d0d",
-  surface: "#121212",
-  textPrimary: "#ffffff",
-  textSecondary: "#a8a29a",
-  accent: "#E8AE3C",
-  accentBright: "#F7C64E",
-  accentFill: "#E8AE3C",
-  m3OnSurface: "#e5e2e1",
-  m3SurfaceVariant: "#353535",
-  onAccent: "#111113",
-};
+const D = { ...from(dark, names), ...from(dark, status) };
 
 const AA_BODY = 4.5;   // normal text
 const AA_LARGE = 3.0;  // ≥18px, or bold ≥14px — also the UI-component minimum
@@ -95,9 +90,43 @@ const checks = [
   //    be readable, not merely visible. ─────────────────────────────
   ["LIGHT  red            on surface", L.red, L.surface, AA_BODY],
   ["LIGHT  green          on surface", L.green, L.surface, AA_BODY],
+  //    ...and on the page CANVAS, not only on cards. Gating just the surface
+  //    pair is what let the lens red sit at 4.41:1 under the 12px bot-check
+  //    error line on /onboarding — the computed public sweep
+  //    (36-computed-contrast) found it on ground this script never measured.
+  ["LIGHT  red            on bg", L.red, L.bg, AA_BODY],
+  ["LIGHT  green          on bg", L.green, L.bg, AA_BODY],
   ["LIGHT  yellow         on surface", L.yellow, L.surface, AA_BODY],
   ["LIGHT  sapphire       on surface", L.sapphire, L.surface, AA_BODY],
   ["LIGHT  amethyst       on surface", L.amethyst, L.surface, AA_BODY],
+  //    …same rule for the other three. Each is real text on the canvas in the
+  //    lens: `--yellow` is the walk-score flag and `.detail-val.yellow`,
+  //    `--sapphire` is the PIONEER_BROKER badge ink and calendar labels,
+  //    `--amethyst` is the calendar/event-chip purple label.
+  ["LIGHT  yellow         on bg", L.yellow, L.bg, AA_BODY],
+  ["LIGHT  sapphire       on bg", L.sapphire, L.bg, AA_BODY],
+  ["LIGHT  amethyst       on bg", L.amethyst, L.bg, AA_BODY],
+
+  // ── The flood-risk dot (FloodRiskBadge). A 9px indicator, so the floor is
+  //    the UI-component minimum (AA_LARGE), not body text; the badge paints its
+  //    own card on --surface2, so that is the ground it is measured on. All four
+  //    bands are asserted because any one token could be nudged later.
+  ["LIGHT  flood dot Low      on surface2", L.green, L.surface2, AA_LARGE],
+  ["LIGHT  flood dot Moderate on surface2", L.yellow, L.surface2, AA_LARGE],
+  ["LIGHT  flood dot High     on surface2", L.floodHigh, L.surface2, AA_LARGE],
+  ["LIGHT  flood dot Severe   on surface2", L.red, L.surface2, AA_LARGE],
+  ["DARK   flood dot Low      on surface2", D.green, D.surface2, AA_LARGE],
+  ["DARK   flood dot Moderate on surface2", D.yellow, D.surface2, AA_LARGE],
+  ["DARK   flood dot High     on surface2", D.floodHigh, D.surface2, AA_LARGE],
+  ["DARK   flood dot Severe   on surface2", D.red, D.surface2, AA_LARGE],
+
+  // ── The same badge's label ink: `FloodRiskBadge` writes 12px uppercase
+  //    --text-secondary and 13px --text-primary on that --surface2 card, so the
+  //    body floor applies to the grounds it uses and not only to --surface.
+  ["LIGHT  text-secondary on surface2", L.textSecondary, L.surface2, AA_BODY],
+  ["LIGHT  text-primary   on surface2", L.textPrimary, L.surface2, AA_BODY],
+  ["DARK   text-secondary on surface2", D.textSecondary, D.surface2, AA_BODY],
+  ["DARK   text-primary   on surface2", D.textPrimary, D.surface2, AA_BODY],
 
   // ── The rewired Material-3 Tailwind keys. ─────────────────────────
   ["LIGHT  on-surface     on surface", L.m3OnSurface, L.surface, AA_BODY],
@@ -115,7 +144,7 @@ const checks = [
   ["LIGHT  intel-cyan     on surface", L.intelCyan, L.surface, AA_BODY],
   ["LIGHT  intel-magenta  on surface", L.intelMagenta, L.surface, AA_BODY],
 
-  // ── Dark mode, unchanged — regression guard. ───────────────────────
+  // ── Dark mode — the DEFAULT appearance, so it cannot be a partial mirror. ──
   ["DARK   text-primary   on bg", D.textPrimary, D.bg, AA_BODY],
   ["DARK   text-secondary on surface", D.textSecondary, D.surface, AA_BODY],
   ["DARK   accent (text)  on bg", D.accent, D.bg, AA_BODY],
@@ -123,7 +152,49 @@ const checks = [
   ["DARK   on-surface     on surface", D.m3OnSurface, D.surface, AA_BODY],
   ["DARK   on-surface  on surface-var", D.m3OnSurface, D.m3SurfaceVariant, AA_BODY],
   ["DARK   on-accent  on accent-fill", D.onAccent, D.accentFill, AA_BODY],
+
+  // ── Dark status inks on both grounds. Dark is the default appearance, so a
+  //    status colour that only worked on a card was equally invisible here as
+  //    under the lens — this block had no status rows at all before 2026-09-29.
+  //    `--red` and `--green` are the Turnstile/owner-facing error and success
+  //    lines, which render on the page canvas (`/onboarding`) as often as on a
+  //    card; `--yellow`/`--sapphire` are dashboard and badge text.
+  ["DARK   red            on bg", D.red, D.bg, AA_BODY],
+  ["DARK   red            on surface", D.red, D.surface, AA_BODY],
+  ["DARK   green          on bg", D.green, D.bg, AA_BODY],
+  ["DARK   green          on surface", D.green, D.surface, AA_BODY],
+  ["DARK   yellow         on bg", D.yellow, D.bg, AA_BODY],
+  ["DARK   yellow         on surface", D.yellow, D.surface, AA_BODY],
+  ["DARK   sapphire       on bg", D.sapphire, D.bg, AA_BODY],
+  ["DARK   sapphire       on surface", D.sapphire, D.surface, AA_BODY],
+  ["DARK   amethyst       on bg", D.amethyst, D.bg, AA_BODY],
+
+  // Deliberately NOT gated, so the number is recorded rather than hidden:
+  // dark `--amethyst` (#8b5cf6) as `.sdc-type-pill` TEXT — 12px/700, so WCAG
+  // gives it no large-text exemption — measures 4.42:1 on --surface and 4.11:1
+  // on --surface2, i.e. under the 4.5 body floor. The fix is nudging a visible
+  // default-theme token, which is an owner call (O-030), not a gate edit:
+  // adding the row here would only turn a required CI gate red first.
+  // Measured lead with its confirmation command: ACTIVE A-176.
 ];
+
+// global-error replaces the root layout and does not inherit globals.css.
+// Its compact independent palette needs the same legibility gate.
+for (const [label, selector] of [
+  ["DARK", ".body"],
+  ["LIGHT", ":global(body.light-mode).body"],
+  ["HIGH", ":global(body.high-contrast).body"],
+]) {
+  const values = declarations(selector, recoveryCss);
+  const color = (name) => tokenColor(values, `recovery-${name}`);
+  checks.push(
+    [`${label} recovery text on panel`, color("text"), color("surface"), AA_BODY],
+    [`${label} recovery body on panel`, color("secondary"), color("surface"), AA_BODY],
+    [`${label} recovery label on panel`, color("accent"), color("surface"), AA_BODY],
+    [`${label} recovery CTA ink on fill`, color("on-fill"), color("fill"), AA_BODY],
+    [`${label} recovery CTA hover ink`, color("on-fill"), color("fill-hover"), AA_BODY],
+  );
+}
 
 let failed = 0;
 console.log("\n  pair                                  ratio   need   result");

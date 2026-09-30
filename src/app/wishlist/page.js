@@ -313,8 +313,8 @@ export default function WishlistPage() {
           justify-content: space-between;
           gap: 20px;
           flex-wrap: wrap;
-          background: linear-gradient(165deg, rgba(232, 174, 60, 0.10), rgba(17, 17, 16, 0.6));
-          border: 1px solid rgba(232, 174, 60, 0.35);
+          background: linear-gradient(165deg, rgba(var(--accent-rgb), 0.10), var(--surface));
+          border: 1px solid rgba(var(--accent-rgb), 0.35);
           padding: 20px 24px;
           margin-bottom: 32px;
         }
@@ -330,22 +330,22 @@ export default function WishlistPage() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          color: #E8AE3C;
+          color: var(--accent);
         }
 
         .merge-text {
           margin: 0;
           font-size: 15px;
-          color: #f0ede8;
+          color: var(--text-primary);
         }
 
         .merge-text strong {
-          color: #F7C64E;
+          color: var(--accent-bright);
         }
 
         .merge-btn {
-          background: #F7C64E;
-          color: #0e0e0e;
+          background: var(--accent-bright);
+          color: var(--on-accent);
           border: none;
           padding: 12px 22px;
           font-size: 12px;
@@ -358,7 +358,7 @@ export default function WishlistPage() {
         }
 
         .merge-btn:hover:not(:disabled) {
-          background: #E8AE3C;
+          background: var(--accent);
         }
 
         .merge-btn:active:not(:disabled) {
@@ -373,11 +373,11 @@ export default function WishlistPage() {
         .merge-message {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin-bottom: 24px;
           padding: 12px 16px;
-          border-left: 2px solid #E8AE3C;
-          background: rgba(232, 174, 60, 0.06);
+          border-left: 2px solid var(--accent);
+          background: rgba(var(--accent-rgb), 0.06);
         }
 
         /* Empty state */
@@ -393,13 +393,13 @@ export default function WishlistPage() {
         .empty-heading {
           font-family: var(--font-display);
           font-size: 32px;
-          color: #f0ede8;
+          color: var(--text-primary);
         }
 
         .empty-subtitle {
           font-family: var(--font-mono), monospace;
           font-size: 14px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           margin-top: 8px;
         }
 
@@ -407,8 +407,8 @@ export default function WishlistPage() {
           display: inline-block;
           margin-top: 32px;
           background: transparent;
-          border: 1px solid #E8AE3C;
-          color: #E8AE3C;
+          border: 1px solid var(--accent);
+          color: var(--accent);
           padding: 12px 28px;
           font-size: 13px;
           text-transform: uppercase;
@@ -419,8 +419,8 @@ export default function WishlistPage() {
         }
 
         .empty-cta:hover {
-          background: #E8AE3C;
-          color: #0e0e0e;
+          background: var(--accent);
+          color: var(--on-accent);
         }
 
         .empty-cta:active {
@@ -431,7 +431,7 @@ export default function WishlistPage() {
         .loading-state {
           text-align: center;
           padding: 120px 0;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           font-size: 14px;
         }
 
@@ -503,13 +503,13 @@ export default function WishlistPage() {
           font-family: var(--font-display);
           font-size: 20px;
           font-weight: 400;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 4px;
           transition: color 0.2s ease;
         }
 
         .card-title:hover {
-          color: #E8AE3C;
+          color: var(--accent);
         }
 
         /* A-102: dead-listing marker. Muted, non-interactive, unmistakable —
@@ -530,16 +530,16 @@ export default function WishlistPage() {
         .card-meta {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           display: flex;
           align-items: center;
           gap: 4px;
         }
 
         .advisor-badge {
-          background: rgba(232, 174, 60, 0.1);
-          border: 1px solid rgba(232, 174, 60, 0.3);
-          color: #E8AE3C;
+          background: rgba(var(--accent-rgb), 0.1);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
+          color: var(--accent);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 1px;
@@ -550,7 +550,7 @@ export default function WishlistPage() {
         }
 
         .meta-dot {
-          color: #444;
+          color: var(--text-muted);
         }
 
         .card-actions {
@@ -565,16 +565,16 @@ export default function WishlistPage() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 1px;
-          color: #E8AE3C;
-          border: 1px solid rgba(232, 174, 60, 0.3);
+          color: var(--accent);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
           padding: 4px 10px;
           white-space: nowrap;
         }
 
         .remove-btn {
           background: none;
-          border: 1px solid #262626;
-          color: #c8c8c8;
+          border: 1px solid var(--border-solid);
+          color: var(--text-secondary);
           font-size: 12px;
           cursor: pointer;
           padding: 4px 8px;
@@ -583,8 +583,8 @@ export default function WishlistPage() {
         }
 
         .remove-btn:hover {
-          color: #f0ede8;
-          border-color: #f0ede8;
+          color: var(--text-primary);
+          border-color: var(--text-primary);
         }
 
         .remove-btn:active {
@@ -594,10 +594,10 @@ export default function WishlistPage() {
         .board-footer {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           text-align: center;
           padding-top: 24px;
-          border-top: 1px solid #262626;
+          border-top: 1px solid var(--border-solid);
         }
 
         @media (max-width: 768px) {
@@ -624,7 +624,7 @@ export default function WishlistPage() {
           .card-actions {
             justify-content: space-between;
             width: 100%;
-            border-top: 1px dashed #262626;
+            border-top: 1px dashed var(--border-solid);
             padding-top: 10px;
             margin-top: 4px;
           }
@@ -714,7 +714,7 @@ export default function WishlistPage() {
         @media (hover: hover) and (pointer: fine) {
           :global(body.light-mode) .empty-cta:hover {
             background: var(--accent-fill);
-            color: #111113;
+            color: var(--on-accent);
           }
         }
       `}</style>

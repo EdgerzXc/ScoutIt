@@ -57,6 +57,7 @@ export default function CookieConsent() {
     setCookieConsent(granted ? "granted" : "denied");
     pushConsentUpdate(granted);
     setVisible(false);
+    window.dispatchEvent(new Event("scoutit:cookie-consent-chosen"));
   };
 
   return (

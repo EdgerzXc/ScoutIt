@@ -1689,6 +1689,17 @@ export default function ShowcaseStage({ mode = "full" }) {
           background: var(--bg);
           color: var(--text-primary);
         }
+        :global(body.light-mode) .sc-no-photo,
+        :global(body.light-mode) .sc-prop-cat,
+        :global(body.light-mode) .sc-velocity-val,
+        :global(body.light-mode) .sc-stat-num,
+        :global(body.light-mode) .sc-distinction-title,
+        :global(body.light-mode) .sc-tray-cat {
+          color: var(--text-primary) !important;
+        }
+        :global(body.light-mode) .sc-stat-lbl {
+          color: var(--text-secondary);
+        }
 
         /* ── 1. TOP COMMAND BAR ── */
         .sc-top-command-bar {
@@ -2214,7 +2225,7 @@ export default function ShowcaseStage({ mode = "full" }) {
         }
 
         .sc-viewport-divider {
-          color: rgba(255, 255, 255, 0.35);
+          color: var(--paper-02);
         }
 
         .sc-viewport-month {
@@ -2722,4 +2733,3 @@ export default function ShowcaseStage({ mode = "full" }) {
     </div>
   );
 }
-

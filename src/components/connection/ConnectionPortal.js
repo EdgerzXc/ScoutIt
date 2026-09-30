@@ -117,7 +117,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
 
         <style jsx>{`
           .portal-success {
-            background: rgba(232, 174, 60, 0.04);
+            background: rgba(var(--accent-rgb), 0.04);
             border: 1px solid var(--accent-border);
             border-radius: var(--radius-md);
             padding: 48px;
@@ -137,7 +137,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
           .portal-success h3 {
             font-family: var(--font-display);
             font-size: 24px;
-            color: #fff;
+            color: var(--text-primary);
             margin: 0 0 12px 0;
           }
 
@@ -158,7 +158,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
 
           .btn-primary-gold {
             background: var(--accent-bright);
-            color: #0d0d0d;
+            color: var(--on-accent);
             font-family: var(--font-mono);
             font-size: 12px;
             font-weight: 700;
@@ -327,8 +327,8 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .connection-portal-card {
-          background: var(--surface, #121212);
-          border: 1px solid var(--border-solid, #222);
+          background: var(--surface);
+          border: 1px solid var(--border-solid, var(--border));
           border-radius: var(--radius-md, 8px);
           padding: 48px 56px;
           width: 100%;
@@ -336,7 +336,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
 
         .portal-header {
           margin-bottom: 32px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid var(--border);
           padding-bottom: 20px;
         }
 
@@ -352,14 +352,14 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         .portal-header h2 {
           font-family: var(--font-display);
           font-size: 28px;
-          color: #fff;
+          color: var(--text-primary);
           margin: 0;
         }
 
         .connects-cost-badge {
-          background: rgba(232, 174, 60, 0.12);
-          border: 1px solid var(--accent-muted, #6E531A);
-          color: var(--accent-bright, #F7C64E);
+          background: rgba(var(--accent-rgb), 0.12);
+          border: 1px solid var(--accent-muted);
+          color: var(--accent-bright);
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
@@ -371,7 +371,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
 
         .portal-header p {
           font-size: 15px;
-          color: var(--text-secondary, #a0a0a0);
+          color: var(--text-secondary);
           margin: 0;
           line-height: 1.6;
         }
@@ -380,8 +380,8 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
           display: flex;
           align-items: center;
           gap: 8px;
-          background: rgba(232, 174, 60, 0.06);
-          border: 1px solid rgba(232, 174, 60, 0.15);
+          background: rgba(var(--accent-rgb), 0.06);
+          border: 1px solid rgba(var(--accent-rgb), 0.15);
           padding: 10px 16px;
           border-radius: 4px;
           font-family: var(--font-mono);
@@ -394,14 +394,14 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .wallet-val {
-          color: var(--accent-bright, #F7C64E);
+          color: var(--accent-bright);
           font-weight: 700;
         }
 
         .error-alert {
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #f87171;
+          background: rgba(var(--red-rgb, 239, 68, 68), 0.1);
+          border: 1px solid rgba(var(--red-rgb, 239, 68, 68), 0.3);
+          color: var(--red);
           padding: 12px 16px;
           border-radius: 4px;
           font-size: 13px;
@@ -423,16 +423,16 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         .form-group-item label {
           font-family: var(--font-mono);
           font-size: 12px;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
 
         .form-group-item textarea {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid var(--border-solid, #333);
+          background: var(--surface2);
+          border: 1px solid var(--border-solid, var(--border));
           border-radius: 6px;
-          color: #fff;
+          color: var(--text-primary);
           padding: 14px 16px;
           font-size: 14px;
           line-height: 1.6;
@@ -442,12 +442,12 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .form-group-item textarea:focus {
-          border-color: var(--accent-bright, #F7C64E);
+          border-color: var(--accent-bright);
         }
 
         .portal-submit-btn {
-          background: var(--accent-bright, #F7C64E);
-          color: #0d0d0d;
+          background: var(--accent-bright);
+          color: var(--on-accent);
           border: none;
           font-family: var(--font-mono);
           font-size: 12px;
@@ -462,7 +462,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .portal-submit-btn:hover {
-          background: #f8cf66;
+          background: var(--accent);
         }
 
         .portal-submit-btn:active {
@@ -475,8 +475,8 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .sign-in-gate-box {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px dashed var(--accent-muted, #6E531A);
+          background: var(--surface2);
+          border: 1px dashed var(--accent-muted);
           border-radius: 8px;
           padding: 40px 32px;
           text-align: center;
@@ -493,7 +493,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         .sign-in-gate-box h5 {
           font-family: var(--font-display);
           font-size: 20px;
-          color: #fff;
+          color: var(--text-primary);
           margin: 0 0 10px 0;
         }
 
@@ -506,8 +506,8 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .gate-cta-btn {
-          background: var(--accent-bright, #F7C64E);
-          color: #0d0d0d;
+          background: var(--accent-bright);
+          color: var(--on-accent);
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
@@ -524,8 +524,8 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
         }
 
         .safety-disclaimer-box {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: var(--surface2);
+          border: 1px solid var(--border);
           border-radius: 6px;
           padding: 24px 32px;
         }
@@ -547,13 +547,13 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
 
         .disclaimer-paragraph {
           font-size: 12px;
-          color: #888;
+          color: var(--text-secondary);
           line-height: 1.65;
           margin: 0 0 10px 0;
         }
 
         .highlight-critical {
-          color: #f87171;
+          color: var(--red);
         }
 
         .disclaimer-footer-compliance {
@@ -561,7 +561,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
           font-size: 12px;
           color: var(--text-secondary);
           margin-top: 12px;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-top: 1px solid var(--border);
           padding-top: 10px;
         }
 

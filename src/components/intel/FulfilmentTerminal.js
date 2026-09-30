@@ -31,7 +31,9 @@ export default function FulfilmentTerminal({
     resolved: {
       id: "resolved",
       name: "Resolved",
-      color: "#10b981",
+      color: "var(--green)",
+      tint: "rgba(16, 185, 129, 0.15)",
+      glow: "rgba(16, 185, 129, 0.2)",
       glyph: "●",
       headline: "Impact Confirmed & Understood",
       summary: "The findings apply directly to this building. Return to Your Move with this context attached to your inquiry.",
@@ -40,7 +42,9 @@ export default function FulfilmentTerminal({
     escalated: {
       id: "escalated",
       name: "Escalated",
-      color: "#f59e0b",
+      color: "var(--yellow)",
+      tint: "rgba(245, 158, 11, 0.15)",
+      glow: "rgba(245, 158, 11, 0.2)",
       glyph: "◆",
       headline: "High Urgency & Market Stakes",
       summary: "The investigation revealed critical factors affecting floorplate demand and yield. Connect immediately with an advisor.",
@@ -49,7 +53,9 @@ export default function FulfilmentTerminal({
     ruledout: {
       id: "ruledout",
       name: "Ruled Out",
-      color: "#3b82f6",
+      color: "var(--blue, #3b82f6)",
+      tint: "rgba(59, 130, 246, 0.15)",
+      glow: "rgba(59, 130, 246, 0.2)",
       glyph: "○",
       headline: "Risk Cleared / Does Not Apply",
       summary: "This parcel or tower is exempt or already compliant. Proceed confidently back to Chapter 10 Your Move.",
@@ -66,9 +72,9 @@ export default function FulfilmentTerminal({
       style={{
         marginTop: "32px",
         borderRadius: "10px",
-        border: "1px solid rgba(232, 174, 60, 0.35)",
-        background: "linear-gradient(180deg, #18121d 0%, #100d14 100%)",
-        boxShadow: "0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(232, 174, 60, 0.1)",
+        border: "1px solid var(--accent-muted)",
+        background: "var(--surface)",
+        boxShadow: "var(--shadow-xl)",
         padding: "24px 28px",
         position: "relative",
         overflow: "hidden",
@@ -83,7 +89,7 @@ export default function FulfilmentTerminal({
           width: "200px",
           height: "200px",
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${activeRes.color}22 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${activeRes.glow || "rgba(var(--accent-rgb), 0.15)"} 0%, transparent 70%)`,
           pointerEvents: "none",
           transition: "background 0.3s ease",
         }}
@@ -99,15 +105,15 @@ export default function FulfilmentTerminal({
               fontWeight: 600,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "#E8AE3C",
+              color: "var(--accent)",
             }}
           >
             Fulfilment Terminal · The Curiosity Closes
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(240, 237, 232, 0.6)" }}>
-          <ShieldCheck size={12} style={{ color: "#E8AE3C" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
+          <ShieldCheck size={12} style={{ color: "var(--accent)" }} />
           <span>Investigation Complete</span>
         </div>
       </div>
@@ -118,20 +124,20 @@ export default function FulfilmentTerminal({
           fontFamily: "Georgia, 'Times New Roman', serif",
           fontSize: "clamp(20px, 3vw, 26px)",
           fontWeight: 400,
-          color: "#f7f5f0",
+          color: "var(--text-primary)",
           lineHeight: 1.25,
           margin: "0 0 14px 0",
           letterSpacing: "-0.01em",
         }}
       >
-        Select your conclusion for <span style={{ color: "#F7C64E" }}>{targetTitle}</span>
+        Select your conclusion for <span style={{ color: "var(--accent-bright)" }}>{targetTitle}</span>
       </h3>
 
       <p
         style={{
           fontFamily: "system-ui, -apple-system, sans-serif",
           fontSize: "14px",
-          color: "rgba(240, 237, 232, 0.8)",
+          color: "var(--text-secondary)",
           lineHeight: 1.6,
           margin: "0 0 20px 0",
           maxWidth: "680px",
@@ -157,9 +163,9 @@ export default function FulfilmentTerminal({
               type="button"
               onClick={() => setSelectedResolution(key)}
               style={{
-                background: isSelected ? "rgba(30, 24, 38, 0.9)" : "rgba(20, 18, 22, 0.6)",
-                border: isSelected ? `1.5px solid ${item.color}` : "1px solid rgba(240, 237, 232, 0.08)",
-                boxShadow: isSelected ? `0 0 16px ${item.color}33` : "none",
+                background: isSelected ? "var(--surface-variant, var(--surface2))" : "var(--surface)",
+                border: isSelected ? `1.5px solid ${item.color}` : "1px solid var(--border)",
+                boxShadow: isSelected ? `0 0 16px ${item.glow || "rgba(var(--accent-rgb), 0.2)"}` : "none",
                 borderRadius: "6px",
                 padding: "14px 16px",
                 textAlign: "left",
@@ -190,7 +196,7 @@ export default function FulfilmentTerminal({
                 style={{
                   fontFamily: "Georgia, serif",
                   fontSize: "14px",
-                  color: isSelected ? "#ffffff" : "rgba(240, 237, 232, 0.9)",
+                  color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
                   lineHeight: 1.3,
                 }}
               >
@@ -204,8 +210,8 @@ export default function FulfilmentTerminal({
       {/* Selected Verdict Explanation */}
       <div
         style={{
-          background: "rgba(10, 8, 12, 0.6)",
-          border: `1px solid ${activeRes.color}33`,
+          background: "var(--surface2)",
+          border: `1px solid ${activeRes.tint || "var(--border)"}`,
           borderRadius: "6px",
           padding: "16px 18px",
           marginBottom: "24px",
@@ -230,7 +236,7 @@ export default function FulfilmentTerminal({
           style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
             fontSize: "13.5px",
-            color: "rgba(240, 237, 232, 0.85)",
+            color: "var(--text-secondary)",
             lineHeight: 1.55,
             margin: "0",
           }}
@@ -247,17 +253,17 @@ export default function FulfilmentTerminal({
           alignItems: "center",
           flexWrap: "wrap",
           gap: "14px",
-          borderTop: "1px solid rgba(240, 237, 232, 0.08)",
+          borderTop: "1px solid var(--border)",
           paddingTop: "20px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Building2 size={15} style={{ color: "#E8AE3C" }} />
+          <Building2 size={15} style={{ color: "var(--accent)" }} />
           <span
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "12px",
-              color: "rgba(240, 237, 232, 0.7)",
+              color: "var(--text-muted)",
             }}
           >
             Returning to <strong>{targetTitle}</strong> (Ch. 10 Your Move)
@@ -272,8 +278,8 @@ export default function FulfilmentTerminal({
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              background: "#E8AE3C",
-              color: "#0e0e0e",
+              background: "var(--accent)",
+              color: "var(--on-accent)",
               fontFamily: "var(--font-mono)",
               fontSize: "12px",
               fontWeight: 700,
@@ -281,7 +287,7 @@ export default function FulfilmentTerminal({
               textTransform: "uppercase",
               padding: "12px 22px",
               borderRadius: "4px",
-              boxShadow: "0 4px 18px rgba(232, 174, 60, 0.35)",
+              boxShadow: "var(--shadow-glow-soft)",
               transition: "all 0.15s ease",
             }}
             className="tactile lens-gold-btn"

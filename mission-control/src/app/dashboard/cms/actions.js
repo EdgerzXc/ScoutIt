@@ -64,10 +64,13 @@ export async function approveProperty(formData) {
 
   await recordSystemEvent({
     event: EVENTS.AIRTABLE_PUBLISH_OK,
+    severity: published.cache?.purged ? "info" : "warning",
     subjectTable: "properties",
     subjectId: propertyId,
-    summary: `Published ${published.slug} to the public CMS (${published.mode})`,
-    detail: { slug: published.slug, mode: published.mode, recordId: published.recordId },
+    summary: published.cache?.purged
+      ? `Published ${published.slug} to the public CMS (${published.mode})`
+      : `Published ${published.slug} to Airtable, but the public cache purge needs attention`,
+    detail: { slug: published.slug, mode: published.mode, recordId: published.recordId, cache: published.cache },
   });
 
   // 2. Airtable succeeded — now mark approved in Supabase with the canonical slug.

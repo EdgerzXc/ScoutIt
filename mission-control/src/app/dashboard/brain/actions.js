@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
-import { embed, generateAnswer, chunkText, brainHasAI } from "@/lib/brain";
+import { embed, generateAnswer, chunkText, brainHasAI, reciprocalRankFusion } from "@/lib/brain";
 import { buildCitation, citationLine } from "@/lib/brainCitation";
 
 /**
@@ -106,7 +106,30 @@ export async function askBrain(_prev, formData) {
     let chunks = [];
     let mode = "keyword";
 
-    const queryEmbedding = await embed(question);
+    // Run semantic embedding and keyword query in parallel as fusion partners.
+    const [queryEmbedding, keywordChunks] = await Promise.all([
+      embed(question),
+      admin
+        .from("brain_chunks")
+        .select("id, document_id, content")
+        .textSearch("content_tsv", question, { type: "websearch", config: "english" })
+        .limit(6)
+        .then(async ({ data, error }) => {
+          if (error) {
+            // websearch parse can fail on odd input — fall back to ILIKE.
+            const { data: ilike } = await admin
+              .from("brain_chunks")
+              .select("id, document_id, content")
+              .ilike("content", `%${question.slice(0, 60)}%`)
+              .limit(6);
+            return ilike || [];
+          }
+          return data || [];
+        })
+        .catch(() => []),
+    ]);
+
+    let semanticChunks = [];
     if (queryEmbedding) {
       const { data, error } = await admin.rpc("match_brain_chunks", {
         query_embedding: queryEmbedding,
@@ -114,29 +137,18 @@ export async function askBrain(_prev, formData) {
         similarity_threshold: 0.1,
       });
       if (!error && data) {
-        chunks = data;
-        mode = "semantic";
+        semanticChunks = data;
       }
     }
 
-    // Keyword fallback (no embeddings, or semantic returned nothing).
-    if (chunks.length === 0) {
-      const { data, error } = await admin
-        .from("brain_chunks")
-        .select("id, document_id, content")
-        .textSearch("content_tsv", question, { type: "websearch", config: "english" })
-        .limit(6);
-      if (error) {
-        // websearch parse can fail on odd input — fall back to ILIKE.
-        const { data: ilike } = await admin
-          .from("brain_chunks")
-          .select("id, document_id, content")
-          .ilike("content", `%${question.slice(0, 60)}%`)
-          .limit(6);
-        chunks = ilike || [];
-      } else {
-        chunks = data || [];
-      }
+    if (semanticChunks.length > 0 && keywordChunks.length > 0) {
+      chunks = reciprocalRankFusion({ semantic: semanticChunks, keyword: keywordChunks, limit: 6 });
+      mode = "fusion";
+    } else if (semanticChunks.length > 0) {
+      chunks = semanticChunks;
+      mode = "semantic";
+    } else {
+      chunks = keywordChunks;
       mode = "keyword";
     }
 

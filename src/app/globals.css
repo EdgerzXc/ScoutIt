@@ -71,7 +71,7 @@ body.light-mode {
   /* ── Ink on the soft canvas. */
   --text-primary:   #111113;
   --text-secondary: #45454d;
-  --text-muted:     #4a4a54;   /* darker than before: the canvas is darker
+  --text-muted:     #44444c;   /* readable even on the lens's surface3 gray
                                    than near-white, so muted must step down
                                    to hold AA. Muted grey at 3:1 is the most
                                    common contrast failure — never lighter. */
@@ -82,6 +82,7 @@ body.light-mode {
 
   --brand:         #D5D5D5;
   --brand-overlay: rgba(213, 213, 213, 0.92);
+  --modal-scrim: rgba(17, 17, 19, 0.55);
 
   /* ── NO GOLD on the lens (locked). Every gold role is re-homed to ink:
      links/eyebrows → charcoal, loud/CTA → near-black, fills → gray.
@@ -106,6 +107,7 @@ body.light-mode {
   --accent-bright:     #111113;
   --accent-bright-rgb: 17, 17, 19;
   --accent-fill:       #B3B3B3;   /* GRAY buttons on the lens, ink text */
+  --accent-fill-hover:   #999999;   /* one step down, for CTA hover fills */
   --on-accent:         #111113;
 
   /* ── Light counterparts of the Material-3 Tailwind keys. See :root.
@@ -147,8 +149,9 @@ body.light-mode {
   --green-dim:    rgba(3, 104, 73, 0.12);
   --yellow:       #7a4a06;
   --yellow-dim:   rgba(122, 74, 6, 0.12);
-  --red:          #b91c1c;
-  --red-dim:      rgba(185, 28, 28, 0.12);
+  --flood-high:   #a24f16;
+  --red:          #a51717;   /* was #b91c1c — 4.41:1 on this theme's own canvas (--bg). The 12px bot-check error line on /onboarding measured it under 4.5 in the computed public sweep on 2026-09-29; only the surface pair had ever been gated. */
+  --red-dim:      rgba(165, 23, 23, 0.12);
 
   /* ── Depth on the lens: flat Apple corporate. No glow exists here at
      all — the gold ring is gone with the gold. Active/focus reads as a
@@ -230,7 +233,7 @@ body.light-mode .atmosphere-grain {
 
 /* ── Light Mode Emil Kowalski & UI/UX Pro Max Typography Polish ───────────── */
 body.light-mode {
-  --text-muted: #4a4a54; /* 8.5:1 AAA contrast on #fafafa */
+  --text-muted: #44444c; /* same readable muted ink as the main lens */
 }
 
 body.light-mode .nav-chapter .chapter-label {
@@ -779,7 +782,7 @@ body.light-mode .sc-primary-vault-btn {
 }
 @media (hover: hover) and (pointer: fine) {
   body.light-mode .sc-primary-vault-btn:hover {
-    background: #999999 !important;
+    background: var(--accent-fill-hover) !important;
     box-shadow: var(--shadow-md) !important;
   }
 }
@@ -1002,14 +1005,14 @@ body.light-mode .strat-main--entry .strat-headline-accent {
 }
 body.light-mode .strat-entry-cta {
   background: var(--accent-fill) !important;
-  color: #111113 !important;
+  color: var(--on-accent) !important;
   border: 1px solid var(--border) !important;
   box-shadow: var(--shadow-sm) !important;
 }
 @media (hover: hover) and (pointer: fine) {
   body.light-mode .strat-entry-cta:hover {
-    background: #999999 !important;
-    color: #111113 !important;
+    background: var(--accent-fill-hover) !important;
+    color: var(--on-accent) !important;
     box-shadow: var(--shadow-md) !important;
   }
 }
@@ -1054,7 +1057,7 @@ body.light-mode .directory-radar-btn {
 }
 body.light-mode .directory-radar-btn.is-active {
   background: var(--accent-fill) !important;
-  color: #111113 !important;
+  color: var(--on-accent) !important;
   border-color: var(--accent-fill) !important;
 }
 body.light-mode .property-preview-card {
@@ -1105,7 +1108,7 @@ body.light-mode .compare-toggle-btn {
 }
 body.light-mode .compare-toggle-btn.active {
   background: var(--accent-fill) !important;
-  color: #111113 !important;
+  color: var(--on-accent) !important;
   border-color: var(--accent-fill) !important;
 }
 body.light-mode .radius-map-overlay {
@@ -1120,8 +1123,10 @@ body.light-mode .map-overlay-header {
 body.light-mode .close-map-btn {
   color: var(--text-secondary) !important;
 }
-body.light-mode .close-map-btn:hover {
-  color: var(--text-primary) !important;
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .close-map-btn:hover {
+    color: var(--text-primary) !important;
+  }
 }
 body.light-mode .map-control-panel {
   background: var(--surface) !important;
@@ -1140,10 +1145,12 @@ body.light-mode .control-hint {
 }
 body.light-mode .confirm-radar-btn {
   background: var(--accent-fill) !important;
-  color: #111113 !important;
+  color: var(--on-accent) !important;
 }
-body.light-mode .confirm-radar-btn:hover {
-  background: #999999 !important;
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .confirm-radar-btn:hover {
+    background: var(--accent-fill-hover) !important;
+  }
 }
 body.light-mode .radius-slider {
   background: var(--border) !important;
@@ -1170,7 +1177,7 @@ body.light-mode .market-numbers__lock {
 }
 body.light-mode .market-numbers__lock-cta {
   background: var(--accent-fill) !important;
-  color: #111113 !important;
+  color: var(--on-accent) !important;
   border: 1px solid var(--border) !important;
 }
 body.light-mode .market-numbers__lock .market-numbers__lock-title {
@@ -2194,8 +2201,11 @@ body.light-mode .focus\:bg-\[\#0d0d0d\]:focus {
 body.light-mode .focus\:text-\[var\(--accent\2c var\(--accent\)\)\]:focus {
   color: var(--text-primary);
 }
-/* Badges: locked icon, owned pill, locked silhouette chip, claim button,
-   historical dark cards. Toast stays a dark pill (readable). */
+/* Badge registry: the lens keeps cohort cards on light surfaces and omits
+   decorative glow; inherited legacy selectors below still cover shared chrome. */
+body.light-mode .badges-lens .badge-ambient {
+  display: none;
+}
 body.light-mode .badges-lens .border-white\/5 {
   border-color: var(--border);
 }
@@ -2293,9 +2303,16 @@ body.light-mode .ev-chip.text-purple-300 {
    floating toolbox). Rather than rewriting them, the lens re-declares the
    dark tokens scoped to the subtree — same doctrine as the map islands.
    Add className="keep-dark" to the subtree root. Dark theme untouched.
+
+   .cookie-lens joined 2026-09-27: its card is an inline `#0d0d0d` and the
+   banner says the dark card stays (instrument), but its eyebrow reads
+   `var(--accent)` — charcoal on the lens, ~2.1:1 on black. Re-declaring the
+   dark tokens here is what makes that subtree self-consistent; the
+   per-selector colour patches below are what broke it. See A-172.
    ═══════════════════════════════════════════════════════════════ */
 body.light-mode .keep-dark,
-body.light-mode .toolbox-float {
+body.light-mode .toolbox-float,
+body.light-mode .cookie-lens {
   --text-primary: #ffffff;
   --text-primary-ch: 255 255 255;
   --text-primary-rgb: 255, 255, 255;
@@ -2320,6 +2337,48 @@ body.light-mode .toolbox-float {
   color-scheme: dark;
   color: var(--text-primary);
 }
+/* ── WORKSPACE under the lens (owner decision O-029, 2026-09-27: "apply
+   inside too") ───────────────────────────────────────────────────────────
+   The lens governs the signed-in account, not just the public site. The
+   dashboard shell already follows on its own: tailwind.config maps
+   background / surface / text-secondary / gold-accent onto
+   rgb(var(--…-ch)) and the lens block sets those channels (measured:
+   --bg-ch 213 213 213, and bg-gold-accent resolving to 58,58,65 under the
+   lens). The profile page is the part that could not follow, because it
+   predates the lens: it opted out with .keep-dark AND paints its canvas
+   and ink with inline hex. The opt-out is gone; the handful of hardcoded
+   values are re-homed here with the [style*="#…"] doctrine already used by
+   .descent-root. Everything below is scoped to body.light-mode, so dark
+   mode is byte-for-byte unchanged. */
+body.light-mode .profile-page {
+  background: var(--bg) !important;
+  color: var(--text-primary) !important;
+}
+/* Near-white inline ink (#f0ede8 page wrap, #e5e2e1 panel copy) is unreadable
+   on the lens canvas — both cases listed, same reason as :965-966. */
+body.light-mode .profile-page [style*="#f0ede8"],
+body.light-mode .profile-page [style*="#F0EDE8"],
+body.light-mode .profile-page [style*="#e5e2e1"],
+body.light-mode .profile-page [style*="#E5E2E1"] {
+  color: var(--text-primary) !important;
+}
+/* NO GOLD on the lens (locked): inline gold roles re-home to ink. The lucide
+   forms are `color=` presentation attributes, which any CSS declaration
+   outranks — their stroke="currentColor" then follows the new colour. */
+body.light-mode .profile-page [style*="#E8AE3C"],
+body.light-mode .profile-page [style*="#e8ae3c"],
+body.light-mode .profile-page [color="#E8AE3C"],
+body.light-mode .profile-page [color="#e8ae3c"] {
+  color: var(--accent) !important;
+}
+/* Dark panel gradients (#1a1917 → #111110) and the dark photo tile. */
+body.light-mode .profile-page [style*="#1a1917"],
+body.light-mode .profile-page [style*="#1A1917"],
+body.light-mode .profile-page [style*="#1e1e1e"],
+body.light-mode .profile-page [style*="#1E1E1E"] {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
 /* Gates (EarlyAccess): title, input, submit, restricted strips. */
 body.light-mode .gate-title {
   color: var(--text-primary);
@@ -2341,17 +2400,11 @@ body.light-mode .detail-gate-cta {
   color: var(--text-primary);
   border-color: var(--border-mid);
 }
-/* Cookie banner: eyebrow + accept go lens; dark card stays (instrument). */
-body.light-mode .cookie-lens > p:first-of-type {
-  color: var(--text-secondary) !important;
-}
-body.light-mode .cookie-lens > p:nth-of-type(2) {
-  color: var(--text-secondary) !important;
-}
-body.light-mode .cookie-lens > div > button:last-child {
-  background: var(--accent-fill) !important;
-  color: var(--on-accent) !important;
-}
+/* Cookie banner: the dark card is an instrument (see KEEP-DARK above), so it
+   now inherits dark tokens instead of being patched selector by selector.
+   The two `p` overrides removed here set lens ink (#45454d) on the #0d0d0d
+   card — 2.05:1 measured, and the second one overwrote body copy that was
+   already #c8c8c8 (~13:1). The accept button keeps its own dark-mode fill. */
 
 /* NOTE: admin console lens rules live inside src/app/admin/page.js (scoped
    styles need in-file :global rules — see WHITE_LENS_SPEC). */
@@ -2484,6 +2537,7 @@ body.light-mode .orbit-ring {
   /* Brand Identity */
   --brand: #0d0d0d;
   --brand-overlay: rgba(13, 13, 13, 0.92);
+  --modal-scrim: rgba(0, 0, 0, 0.82);
 
   /* Accent — Expanded Gold System + Secondary Accents */
   --accent: #E8AE3C;
@@ -2516,6 +2570,7 @@ body.light-mode .orbit-ring {
   --accent-bright: #F7C64E;
   --accent-bright-rgb: 247, 198, 78;
   --accent-fill: #E8AE3C;     /* true gold as a FILL — same in both themes */
+  --accent-fill-hover: #F7C64E;
   --on-accent:   #111113;     /* ink that rides ON a gold fill             */
 
   /* ── The Material-3 palette keys that Tailwind still exposes.
@@ -2579,6 +2634,7 @@ body.light-mode .orbit-ring {
   --green-dim: rgba(16, 185, 129, 0.15);
   --yellow: #f59e0b;
   --yellow-dim: rgba(245, 158, 11, 0.15);
+  --flood-high: #e8934a;
   --red: #ef4444;
   --red-dim: rgba(239, 68, 68, 0.15);
 
@@ -2759,6 +2815,18 @@ a {
 
 .bg-surface { background: var(--surface); }
 .bg-surface2 { background: var(--surface2); }
+
+.badge-claim-btn {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .badge-claim-btn:hover {
+    background: var(--accent-fill-hover);
+    border-color: var(--accent-fill-hover);
+  }
+}
 
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-body); }
@@ -3717,7 +3785,10 @@ body.high-contrast :focus-visible {
 @media (max-width: 768px) {
   :root {
     /* Keeps property-specific sticky actions above the universal nav. */
-    --mobile-nav-height: 82px;
+    /* Rendered height = 8 top + 28 icon + 4 gap + 12 label + the bottom
+       inset. On a 34px home-indicator device that is 86px, so a flat 82px
+       let sticky page content sit ~4px under the bar. */
+    --mobile-nav-height: max(82px, calc(64px + env(safe-area-inset-bottom)));
   }
 
   .bottom-nav {
@@ -3746,7 +3817,7 @@ body.high-contrast :focus-visible {
     max-width: 72px;
     text-decoration: none;
     color: var(--text-secondary);
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -3759,9 +3830,16 @@ body.high-contrast :focus-visible {
     color: var(--accent);
   }
 
+  /* The easing lives on the base rule so the release animates too —
+     declaring it only here made the finger-lift snap. */
   .bottom-nav-item:active {
     transform: scale(0.93);
-    transition: transform 0.1s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .bottom-nav-item:not(.active):hover {
+      color: var(--text-primary);
+    }
   }
 
   .bottom-nav-icon {
@@ -3772,7 +3850,7 @@ body.high-contrast :focus-visible {
     height: 28px;
     border-radius: 14px;
     border: 1px solid transparent;
-    transition: background 0.22s ease, border-color 0.22s ease;
+    transition: background 0.22s ease, border-color 0.22s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .bottom-nav-icon svg {
@@ -3784,13 +3862,13 @@ body.high-contrast :focus-visible {
   /* Active state — a soft gold "pill" behind the icon, on-brand glow,
      and a gold accent bar riding the top edge. Reads instantly as "you are here". */
   .bottom-nav-item.active .bottom-nav-icon {
-    background: rgba(232, 174, 60, 0.12);
-    border-color: rgba(232, 174, 60, 0.28);
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.28);
   }
 
   .bottom-nav-item.active .bottom-nav-icon svg {
     stroke: var(--accent);
-    filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.45));
+    filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.45));
   }
 
   .bottom-nav-label {
@@ -3815,7 +3893,42 @@ body.high-contrast :focus-visible {
     height: 3px;
     border-radius: 0 0 3px 3px;
     background: var(--accent);
-    box-shadow: 0 0 8px rgba(232, 174, 60, 0.7);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.7);
+  }
+
+  /* Entrance: the bar rises once, the marker grows from its centre.
+     Compositor-only (transform/opacity), staggered 60ms. `backwards`
+     rather than `both` so no transform lingers on the bar — a permanent
+     transform would make it the containing block for the fixed toast
+     inside it and move that toast. Reduced-motion users get the bar
+     already in place, which is the same information. */
+  @media (prefers-reduced-motion: no-preference) {
+    .bottom-nav {
+      animation: si-nav-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+    .bottom-nav-dot {
+      animation: si-dot-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) 0.06s backwards;
+    }
+  }
+
+  @keyframes si-nav-rise {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes si-dot-in {
+    from {
+      transform: translateX(-50%) scaleX(0.3);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 1;
+    }
   }
 
   /* ── Property action bar: the primary CTA (Inquire) reads as one clear,

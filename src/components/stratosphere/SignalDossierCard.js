@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import SignalGlyph from "./glyphs/SignalGlyph";
 import { getSession } from "@/lib/authClient";
-import { SIGNAL_TYPES, SIGNAL_TYPE_LABELS, SIGNAL_COLORS } from "@/lib/communitySignalsAdapter";
+import { SIGNAL_TYPES, SIGNAL_TYPE_LABELS, SIGNAL_COLOR_TOKENS } from "@/lib/communitySignalsAdapter";
 import "./signal-dossier-card.css";
 
 export default function SignalDossierCard({
@@ -28,6 +28,7 @@ export default function SignalDossierCard({
   onSelect = () => {},
   onHover = () => {},
   onConnect = () => {},
+  onClosed = () => {},
   returnStage = "all",
 }) {
   const router = useRouter();
@@ -36,6 +37,8 @@ export default function SignalDossierCard({
   const [relevantCount, setRelevantCount] = useState(signal.relevantCount || 0);
   const [saved, setSaved] = useState(false);
   const [showMetropolisMatches, setShowMetropolisMatches] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
+  const [closing, setClosing] = useState(false);
   // C2: optimism rolls back visibly. A failed tap says so on the card for a
   // few seconds instead of dying silent — the count on screen is a promise.
   const [actionError, setActionError] = useState(null);
@@ -49,7 +52,7 @@ export default function SignalDossierCard({
     if (errorTimer.current) clearTimeout(errorTimer.current);
   }, []);
 
-  const typeColor = SIGNAL_COLORS[signal.signalType] || "var(--accent)";
+  const typeColor = SIGNAL_COLOR_TOKENS[signal.signalType] || "var(--accent)";
   const typeLabel = SIGNAL_TYPE_LABELS[signal.signalType] || signal.signalType;
   // A-145 separation: one card renders two provenances. Name the source so a
   // reader can tell a human community post from a ScoutIt building update.
@@ -162,6 +165,22 @@ export default function SignalDossierCard({
           }),
         }).catch(() => {});
       } catch {}
+    }
+  };
+
+  const handleCloseSignal = async (event) => {
+    event.stopPropagation();
+    if (closing) return;
+    setClosing(true);
+    try {
+      const result = await communityFetch("/close", "POST");
+      if (!result) return; // The sign-in handoff owns this case.
+      if (result.ok !== true) throw new Error("close failed");
+      onClosed(signal.id);
+    } catch {
+      flashActionError("Could not confirm closure. Refresh the feed before trying again.");
+    } finally {
+      setClosing(false);
     }
   };
 
@@ -453,6 +472,23 @@ export default function SignalDossierCard({
               </span>
             )}
           </div>
+          {signal.liveCommunity && signal.isMine && (
+            <div className="sdc-manage-signal" onClick={(event) => event.stopPropagation()}>
+              {confirmClose ? (
+                <div className="sdc-close-confirm" role="group" aria-label="Confirm signal closure">
+                  <p>Close this signal? It leaves the public feed. Existing conversations remain open.</p>
+                  <div className="sdc-close-actions">
+                    <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(false)} disabled={closing}>KEEP LIVE</button>
+                    <button type="button" className="sdc-btn sdc-close-submit" onClick={handleCloseSignal} disabled={closing}>
+                      {closing ? "CLOSING…" : "CLOSE SIGNAL"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(true)}>CLOSE MY SIGNAL</button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </article>

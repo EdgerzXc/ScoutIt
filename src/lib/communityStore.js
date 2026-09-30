@@ -1,5 +1,11 @@
 import { supabaseAdmin } from "./supabaseAdmin";
-import { freshnessFor, isLiveStatus } from "./communityPosting";
+import {
+  freshnessFor,
+  isLiveStatus,
+  normalizeKeyPart,
+  promoDedupeKey,
+  demandDedupeKey,
+} from "./communityPosting";
 import { getServerMapboxToken } from "./mapboxToken";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { BoundedCache } from "./boundedCache";
@@ -32,7 +38,7 @@ function formatSize(min, max) {
 }
 
 /** Map one DB row (+ location + requirements) to the dossier-card shape. */
-export function mapDbSignalToCard(row, location = {}, requirements = {}, now = new Date()) {
+export function mapDbSignalToCard(row, location = {}, requirements = {}, now = new Date(), viewerId = null) {
   const freshness = freshnessFor(row.last_confirmed_at, now);
   const district = location.district || location.city || "";
   const coords =
@@ -79,11 +85,12 @@ export function mapDbSignalToCard(row, location = {}, requirements = {}, now = n
     createdAt: row.created_at,
     isSample: false,
     liveCommunity: true,
+    isMine: Boolean(viewerId && row.author_account_id === viewerId),
   };
 }
 
 /** Public feed: LIVE rows only, expired filtered, newest first. */
-export async function listLiveSignals({ district = null, signalType = null, limit = 60 } = {}) {
+export async function listLiveSignals({ district = null, signalType = null, limit = 60, viewerId = null } = {}) {
   if (!supabaseAdmin) return { missing: true };
   try {
     let query = supabaseAdmin
@@ -110,7 +117,7 @@ export async function listLiveSignals({ district = null, signalType = null, limi
     const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
     const now = new Date();
     let signals = rows.map((row) =>
-      mapDbSignalToCard(row, locById.get(row.id) || {}, reqById.get(row.id) || {}, now)
+      mapDbSignalToCard(row, locById.get(row.id) || {}, reqById.get(row.id) || {}, now, viewerId)
     );
     // Expired rows leave the feed until refreshed (spec §10). Unpinned rows
     // (no trusted coords) stay readable in the dossier — honest absence.
@@ -154,7 +161,68 @@ const scopeGeocodeCache = new BoundedCache({ maxEntries: 500 });
  * honest absence beats a misplaced pin. Precision is always district-level;
  * only a user-dropped pin may ever claim exact.
  */
-export async function geocodeSignalScope({ district = "", city = "" } = {}, fetchImpl = fetchWithRetry) {
+export async function geocodeSignalScope({ buildingName = "", district = "", city = "" } = {}, fetchImpl = fetchWithRetry) {
+  // 1. Check if a specific building/location was named
+  const bKey = buildingName ? buildingName.trim() : "";
+  if (bKey) {
+    const cacheKey = `b:${bKey.toLowerCase()}:${district.toLowerCase()}:${city.toLowerCase()}`;
+    if (scopeGeocodeCache.has(cacheKey)) return scopeGeocodeCache.get(cacheKey);
+
+    // Check if connected in the registered properties table
+    if (supabaseAdmin) {
+      try {
+        const { data: matched } = await supabaseAdmin
+          .from("properties")
+          .select("coordinates")
+          .ilike("title", bKey)
+          .not("coordinates", "is", null)
+          .limit(1);
+
+        if (matched && matched.length > 0 && matched[0].coordinates) {
+          const m = String(matched[0].coordinates).match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+          if (m) {
+            const lng = Number(m[1]);
+            const lat = Number(m[2]);
+            if (Number.isFinite(lng) && Number.isFinite(lat)) {
+              const res = { lng, lat, precisionLevel: "exact" };
+              scopeGeocodeCache.set(cacheKey, res);
+              return res;
+            }
+          }
+        }
+      } catch {
+        // Table missing or DB failure fails open to Mapbox
+      }
+    }
+
+    // If not connected in properties, use Mapbox for geocoding the building
+    const token = getServerMapboxToken();
+    if (token) {
+      try {
+        const bQuery = [bKey, district, city, "Philippines"].filter(Boolean).join(", ");
+        const url =
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(bQuery)}.json` +
+          `?country=ph&limit=1&access_token=${token}`;
+        const res = await fetchImpl(url, {}, {
+          circuit: "mapbox",
+          budgetMs: 3500,
+          attemptTimeoutMs: 2500,
+          retries: 1,
+        });
+        const data = await res.json();
+        const center = data?.features?.[0]?.center;
+        if (Array.isArray(center) && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
+          const res = { lng: center[0], lat: center[1], precisionLevel: "exact" };
+          scopeGeocodeCache.set(cacheKey, res);
+          return res;
+        }
+      } catch {
+        // Network/timeout fails through to district scope
+      }
+    }
+  }
+
+  // 2. District / City scope fallback
   // No scope, no call: bare "Philippines" would pin a city-level post to a
   // country centroid and invent precision the author never gave.
   if (!district.trim() && !city.trim()) return null;
@@ -182,6 +250,87 @@ export async function geocodeSignalScope({ district = "", city = "" } = {}, fetc
     return result;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Promo duplicate check (owner decision 2026-09-26): same post = same
+ * building. Returns the live duplicate's id, null when clear, or
+ * { missing: true } while the P1 tables are absent.
+ */
+export async function findLivePromoByBuilding(buildingName) {
+  if (!supabaseAdmin) return { missing: true };
+  const key = promoDedupeKey(buildingName);
+  if (!key) return { duplicateId: null };
+  try {
+    const { data: rows, error } = await supabaseAdmin
+      .from("stratosphere_signals")
+      .select("id")
+      .eq("signal_type", "COMMERCIAL_PROMOTION")
+      .in("status", ["live", "limited"]);
+    if (error) {
+      if (isMissingTable(error)) return { missing: true };
+      throw error;
+    }
+    if (!rows || rows.length === 0) return { duplicateId: null };
+    const { data: locations, error: locError } = await supabaseAdmin
+      .from("signal_locations")
+      .select("signal_id, building_name")
+      .in("signal_id", rows.map((r) => r.id));
+    if (locError) {
+      if (isMissingTable(locError)) return { missing: true };
+      throw locError;
+    }
+    const hit = (locations || []).find((l) => promoDedupeKey(l.building_name) === key);
+    return { duplicateId: hit ? hit.signal_id : null };
+  } catch (error) {
+    if (isMissingTable(error)) return { missing: true };
+    throw error;
+  }
+}
+
+/**
+ * Demand duplicate check (owner decision 2026-09-26): same post = same
+ * person + same want. The account id underneath anonymity is the identity,
+ * so anonymous reposts are caught. Returns the live duplicate's id, null
+ * when clear, or { missing: true } while the P1 tables are absent.
+ */
+export async function findLiveDemandByKey({ authorAccountId, signalType, city, district }) {
+  if (!supabaseAdmin) return { missing: true };
+  const key = demandDedupeKey({ authorAccountId, signalType, city, district });
+  try {
+    const { data: rows, error } = await supabaseAdmin
+      .from("stratosphere_signals")
+      .select("id, signal_type")
+      .eq("author_account_id", authorAccountId)
+      .in("status", ["live", "limited"]);
+    if (error) {
+      if (isMissingTable(error)) return { missing: true };
+      throw error;
+    }
+    if (!rows || rows.length === 0) return { duplicateId: null };
+    const { data: locations, error: locError } = await supabaseAdmin
+      .from("signal_locations")
+      .select("signal_id, city, district")
+      .in("signal_id", rows.map((r) => r.id));
+    if (locError) {
+      if (isMissingTable(locError)) return { missing: true };
+      throw locError;
+    }
+    const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
+    const hit = rows.find(
+      (r) =>
+        demandDedupeKey({
+          authorAccountId,
+          signalType: r.signal_type,
+          city: locById.get(r.id)?.city || "",
+          district: locById.get(r.id)?.district || "",
+        }) === key
+    );
+    return { duplicateId: hit ? hit.id : null };
+  } catch (error) {
+    if (isMissingTable(error)) return { missing: true };
+    throw error;
   }
 }
 

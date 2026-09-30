@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { ShieldAlert, Unlock, Bot, Brain, AlertTriangle, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { sanitizeError } from "@/lib/sanitizeError";
 import InfoTip from "@/components/ui/InfoTip";
+import entrance from "@/components/ui/OverlayEntrance.module.css";
 
 export default function FeatureConsolePanel() {
   const [flags, setFlags] = useState([]);
@@ -87,7 +88,7 @@ export default function FeatureConsolePanel() {
       case "global_read_only":
         return <ShieldAlert size={20} className="text-red-400" />;
       case "pre_launch_free_mode":
-        return <Unlock size={20} className="text-[#E8AE3C]" />;
+        return <Unlock size={20} className="text-gold-accent" />;
       case "ai_search":
         return <Bot size={20} className="text-[#4caf7d]" />;
       case "deep_intel":
@@ -100,10 +101,10 @@ export default function FeatureConsolePanel() {
   return (
     <div className="feature-console-panel space-y-6">
       {/* Header info */}
-      <div className="flex items-center justify-between p-4 bg-[#121212] border border-[#E8AE3C]/20 rounded-xl">
+      <div className="flex items-center justify-between p-4 bg-surface border border-gold-accent/20 rounded-xl">
         <div>
           <h2 className="text-base font-semibold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E8AE3C] animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-gold-accent motion-safe:animate-pulse" />
             Live Feature & Kill-Switch Console
             <InfoTip tipId="adminKillSwitches" label="About system switches" />
           </h2>
@@ -137,7 +138,7 @@ export default function FeatureConsolePanel() {
 
       {/* Flag Grid */}
       {loading ? (
-        <div className="p-8 text-center text-xs text-gray-500 bg-[#121212] border border-[#222] rounded-xl">
+        <div className="p-8 text-center text-xs text-gray-500 bg-surface border border-[#222] rounded-xl">
           Scanning system kill-switches...
         </div>
       ) : (
@@ -153,7 +154,7 @@ export default function FeatureConsolePanel() {
                   isDanger && isActive
                     ? "bg-red-950/20 border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
                     : isActive
-                    ? "bg-[#121212] border-[#E8AE3C]/40 shadow-[0_0_15px_rgba(232,174,60,0.08)]"
+                    ? "bg-surface border-gold-accent/40 shadow-[0_0_15px_rgba(var(--accent-rgb),0.08)]"
                     : "bg-[#0d0d0d] border-[#222] opacity-75"
                 }`}
               >
@@ -166,7 +167,7 @@ export default function FeatureConsolePanel() {
                           isDanger && isActive
                             ? "bg-red-500/10 border-red-500/30"
                             : isActive
-                            ? "bg-[#E8AE3C]/10 border-[#E8AE3C]/30"
+                            ? "bg-gold-accent/10 border-gold-accent/30"
                             : "bg-[#1a1a1a] border-[#333]"
                         }`}
                       >
@@ -196,7 +197,7 @@ export default function FeatureConsolePanel() {
                         isActive
                           ? isDanger
                             ? "bg-red-600"
-                            : "bg-[#E8AE3C]"
+                            : "bg-gold-accent"
                           : "bg-gray-800"
                       }`}
                       role="switch"
@@ -226,7 +227,7 @@ export default function FeatureConsolePanel() {
                         isActive
                           ? isDanger
                             ? "text-red-400"
-                            : "text-[#E8AE3C]"
+                            : "text-gold-accent"
                           : "text-gray-500"
                       }`}
                     >
@@ -247,22 +248,22 @@ export default function FeatureConsolePanel() {
 
       {/* Caution Confirmation Modal for Emergency Read-Only Mode */}
       {confirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="max-w-md w-full bg-[#121212] border-2 border-red-500/80 rounded-2xl p-6 shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm motion-safe:animate-fadeIn" style={{ background: "var(--modal-scrim)" }}>
+          <div className={`max-w-md w-full bg-surface border-2 border-red-500/80 rounded-2xl p-6 shadow-lg space-y-4 ${entrance.panel}`}>
             <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/40 flex items-center justify-center mx-auto text-red-500">
               <AlertTriangle size={24} />
             </div>
 
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h3 className="text-lg font-bold text-on-surface tracking-tight">
                 ENABLE EMERGENCY READ-ONLY MODE?
               </h3>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                Enabling <strong className="text-red-400">global_read_only</strong> will freeze all site-wide database writes (publishing properties, deal updates, archiving listings) with HTTP 503 Service Unavailable. Public browsing and authentication remain active.
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Enabling <strong className="text-error">global_read_only</strong> will freeze all site-wide database writes (publishing properties, deal updates, archiving listings) with HTTP 503 Service Unavailable. Public browsing and authentication remain active.
               </p>
             </div>
 
-            <div className="p-3 bg-red-950/30 border border-red-500/30 rounded-lg text-[12px] text-red-300 font-mono text-center">
+            <div className="p-3 bg-error/10 border border-red-500/30 rounded-lg text-[12px] text-error font-mono text-center">
               ⚠️ Use only during database maintenance or emergency outages.
             </div>
 
@@ -272,7 +273,7 @@ export default function FeatureConsolePanel() {
                   setConfirmModalOpen(false);
                   setPendingFlagToggle(null);
                 }}
-                className="flex-1 py-2.5 bg-[#1e1e1e] hover:bg-[#2a2a2a] text-gray-300 font-semibold text-xs rounded-xl border border-[#333] transition-all"
+                className="flex-1 py-2.5 bg-surface-alt hover:bg-surface-variant text-text-secondary font-semibold text-xs rounded-xl border border-surface-variant transition-all"
               >
                 CANCEL
               </button>

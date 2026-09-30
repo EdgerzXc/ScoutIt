@@ -19,7 +19,7 @@ import { childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHiera
 // full head intact. Same framework, same metadata shape — the difference was
 // how long generateMetadata took to return.
 //
-// `getCmsBundle()` is memory-cached for 60s and Redis-cached for 10 min, and
+// `getCmsBundle()` is memory-cached for 60s and Redis-cached for 12 hours, and
 // Next dedupes it across generateMetadata and the page render — so this route
 // went from THREE data loads per request (metadata scan + page load + the
 // client's own /api/cms fetch) to one shared, cached read.

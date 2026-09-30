@@ -40,6 +40,7 @@ describe("human-pilot monitoring privacy", () => {
     const client = source("instrumentation-client.js");
     expect(client).toContain('process.env.NODE_ENV === "production"');
     expect(client).toContain('process.env.NEXT_PUBLIC_SCOUTIT_E2E !== "1"');
+    expect(client).toContain("&& !isLocalBrowser");
 
     for (const file of [
       "sentry.server.config.js",
@@ -54,6 +55,8 @@ describe("human-pilot monitoring privacy", () => {
 
     const server = source("sentry.server.config.js");
     expect(server).toContain("isExpectedNodeRequestAbort");
+    expect(server).toContain("if (isLocalSentryEvent(event)) return null");
     expect(server).toContain("return isExpectedNodeRequestAbort(event, hint) ? null : event");
+    expect(source("sentry.edge.config.js")).toContain("isLocalSentryEvent(event) ? null : event");
   });
 });

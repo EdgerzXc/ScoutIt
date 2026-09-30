@@ -35,15 +35,27 @@ afterEach(() => { vi.restoreAllMocks(); });
 describe('what gets retried', () => {
   it('retries a 500 and succeeds', async () => {
     planFetch([500, 500, 200]);
-    const res = await fetchWithRetry('https://x.test/a', {}, { ...FAST });
+    const onAttempt = vi.fn();
+    const res = await fetchWithRetry('https://x.test/a', {}, { ...FAST, onAttempt });
     expect(res.status).toBe(200);
     expect(calls).toBe(3);
+    expect(onAttempt).toHaveBeenCalledTimes(3);
   });
 
   it('retries a 429 rate limit', async () => {
     planFetch([429, 200]);
     const res = await fetchWithRetry('https://x.test/a', {}, { ...FAST });
     expect(res.status).toBe(200);
+  });
+
+  it('returns a provider-classified terminal 429 without retrying', async () => {
+    planFetch([429, 200]);
+    const res = await fetchWithRetry('https://x.test/a', {}, {
+      ...FAST,
+      shouldRetryResponse: (response) => response.status !== 429,
+    });
+    expect(res.status).toBe(429);
+    expect(calls).toBe(1);
   });
 
   it('retries network errors', async () => {
@@ -105,13 +117,15 @@ describe('circuit breaker', () => {
     }
 
     calls = 0;
+    const onAttempt = vi.fn();
     let err = null;
     try {
-      await fetchWithRetry('https://x.test/a', {}, { circuit: 'airtable' });
+      await fetchWithRetry('https://x.test/a', {}, { circuit: 'airtable', onAttempt });
     } catch (e) { err = e; }
 
     expect(err?.circuitOpen).toBe(true);
     expect(calls).toBe(0);
+    expect(onAttempt).not.toHaveBeenCalled();
   });
 
   it('closes again on success', async () => {

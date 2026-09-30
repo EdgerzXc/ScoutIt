@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { pushBriefingToAirtable, publishedMarkers } from "@/lib/intelPublish";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 // ⚠️ 🔴 UNAUTHENTICATED UNTIL 2026-08-06 (§59, full-system audit).
 //
@@ -145,7 +146,7 @@ export async function POST(req) {
           excerpt: briefingData.excerpt || "",
           lead: briefingData.lead || "",
           our_take: briefingData.our_take || "",
-          cover_image_url: briefingData.cover_image_url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",
+          cover_image_url: briefingData.cover_image_url || "/assets/intel-tower-mesh.svg",
           body_json: briefingData.body_json || [],
           city: briefingData.city || "BGC, Taguig",
           region: briefingData.region || "Metro Manila",
@@ -199,6 +200,7 @@ export async function POST(req) {
               ? briefingData.relatedPropertyIds
               : [],
           });
+          await invalidateCmsBundle();
 
           // Markers are written ONLY here, only with a real record id.
           await supabase

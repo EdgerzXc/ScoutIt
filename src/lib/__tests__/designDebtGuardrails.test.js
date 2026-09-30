@@ -23,7 +23,8 @@ const readSrc = (p) => fs.readFileSync(p, "utf8");
 
 describe("A-098 · no new raw accent hex", () => {
   it("scans a real set of files", () => {
-    expect(filesWithRawAccentHex().length).toBeGreaterThan(40);
+    // A-170 token migration reduced files with raw accent hex from 57 down to 38
+    expect(filesWithRawAccentHex().length).toBeGreaterThan(20);
   });
 
   it("no file outside the frozen baseline introduces one", () => {

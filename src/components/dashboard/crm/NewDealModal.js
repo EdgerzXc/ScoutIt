@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { X, Building2, UserCircle2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { crmFetch } from "../../../lib/crmClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserId }) {
+  const reduceMotion = useReducedMotion();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -46,17 +47,20 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <motion.div 
-          initial={{ opacity: 0 }} 
+          initial={reduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }} 
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.2, ease: "easeOut" }}
+          className="absolute inset-0 backdrop-blur-sm"
+          style={{ background: "var(--modal-scrim)" }}
           onClick={onClose}
         />
         
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          exit={reduceMotion ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}
           className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-surface border border-surface-variant rounded-xl shadow-2xl"
         >
           <div className="flex justify-between items-center p-6 border-b border-surface-variant bg-surface/50">
@@ -139,7 +143,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
               <button 
                 type="submit" 
                 disabled={loading}
-                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(232,174,60,0.35)] hover:-translate-y-0.5 active:scale-[0.97] transition duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
+                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(var(--accent-rgb),0.35)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.97] transition duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {loading ? "Creating..." : "Create Deal"}
               </button>

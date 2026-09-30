@@ -157,6 +157,38 @@
   color: var(--accent, #E8AE3C);
   text-decoration: underline;
 }
+
+/* Legal copy is a reading surface, so the White Lens re-inks the whole page. */
+body.light-mode .legal-page {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+body.light-mode .legal-page .legal-hero,
+body.light-mode .legal-page .legal-section {
+  border-color: var(--border);
+}
+body.light-mode .legal-page .legal-title,
+body.light-mode .legal-page .legal-section-title,
+body.light-mode .legal-page .legal-disclaimer strong {
+  color: var(--text-primary);
+}
+body.light-mode .legal-page .legal-meta,
+body.light-mode .legal-page .legal-intro p,
+body.light-mode .legal-page .legal-section-body p,
+body.light-mode .legal-page .legal-disclaimer p,
+body.light-mode .legal-page .legal-footer-note {
+  color: var(--text-secondary);
+}
+body.light-mode .legal-page .legal-eyebrow,
+body.light-mode .legal-page .legal-disclaimer-label,
+body.light-mode .legal-page .legal-section-num,
+body.light-mode .legal-page .legal-footer-note a {
+  color: var(--accent);
+}
+body.light-mode .legal-page .legal-disclaimer {
+  background: var(--surface);
+  border-color: var(--border-mid);
+}
 @media (hover: hover) and (pointer: fine) {
   .legal-footer-note a:hover {
     text-decoration: underline;

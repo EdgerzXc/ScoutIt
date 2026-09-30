@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { joinWaitlist } from "@/lib/waitlist";
 import TurnstileGate from "@/components/ui/TurnstileGate";
+import styles from "./WaitlistModal.module.css";
 
 // Single global waitlist modal. Mounted once in the root layout; opened from
 // anywhere by dispatching:
@@ -76,16 +77,19 @@ export default function WaitlistModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[100001] flex items-center justify-center p-5 bg-background/70 backdrop-blur-md"
+      className={`${styles.backdrop} fixed inset-0 z-[100001] flex items-center justify-center p-5 bg-background/70 backdrop-blur-md`}
       onClick={(e) => e.target === e.currentTarget && setOpen(false)}
       role="dialog"
       aria-modal="true"
       aria-label="Join the founding waitlist"
     >
-      <div className="relative w-full max-w-[440px] bg-surface border border-gold-accent/30 rounded-2xl px-7 pt-8 pb-7 shadow-[0_24px_80px_rgba(0,0,0,0.7),0_0_60px_rgba(232,174,60,0.06)]">
+      <div className={`${styles.panel} relative w-full max-w-[440px] bg-surface border border-gold-accent/30 rounded-2xl px-7 pt-8 pb-7`}>
         <button className="absolute top-3.5 right-4 bg-transparent border-none text-on-surface/70 text-base cursor-pointer leading-none p-1 hover:text-on-surface/70" onClick={() => setOpen(false)} aria-label="Close">✕</button>
 
         <span className="block font-label-caps text-[12px] tracking-widest uppercase text-gold-accent mb-3.5">◈ Founding Access</span>
+        <svg className={styles.signalLine} viewBox="0 0 320 16" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path d="M0 8H148L160 2L172 8H320" fill="none" stroke="var(--accent)" strokeWidth="1" />
+        </svg>
 
         {done ? (
           <div className="text-center py-1.5">
@@ -97,7 +101,7 @@ export default function WaitlistModal() {
               We&apos;ll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens — with your
               founding rate locked in. No spam. No pressure.
             </p>
-            <button className="w-full bg-gold-accent text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer transition-all hover:-translate-y-px hover:shadow-[0_8px_26px_rgba(232,174,60,0.25)]" onClick={() => setOpen(false)}>Done</button>
+            <button className={`${styles.action} w-full bg-gold-accent text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer`} onClick={() => setOpen(false)}>Done</button>
           </div>
         ) : (
           <>
@@ -127,11 +131,11 @@ export default function WaitlistModal() {
                 onToken={setTurnstileToken}
                 onError={setError}
               />
-              <button type="submit" className="w-full bg-gold-accent-bright text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer transition-all hover:-translate-y-px hover:bg-gold-accent hover:shadow-[0_8px_26px_rgba(232,174,60,0.25)] disabled:opacity-60 disabled:cursor-default" disabled={status === "sending" || !turnstileToken}>
+              <button type="submit" className={`${styles.action} w-full bg-gold-accent-bright text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer hover:bg-gold-accent disabled:opacity-60 disabled:cursor-default`} disabled={status === "sending" || !turnstileToken}>
                 {status === "sending" ? "Joining…" : "Join the Waitlist"}
               </button>
             </form>
-            {status === "error" && <p className="text-[#ff8f6b] text-[12.5px] mt-2.5">{error}</p>}
+            {status === "error" && <p className={`${styles.errorText} text-[12.5px] mt-2.5`}>{error}</p>}
             <p className="text-[12px] text-on-surface/70 mt-3.5 text-center">Intelligence first. We never sell or share your email.</p>
           </>
         )}

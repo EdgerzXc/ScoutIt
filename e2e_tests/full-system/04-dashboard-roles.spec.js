@@ -169,6 +169,7 @@ test.describe('Settings information architecture', () => {
 
   test('first-visit Help & Display closes on an outside touch without swallowing the page', async ({ page }) => {
     await page.addInitScript(() => window.localStorage.removeItem('scoutit_help_seen_v1'));
+    await page.addInitScript(() => window.localStorage.setItem('scoutit_presentation_choice_seen_v1', '1'));
     await gotoAndSettle(page, '/layer/metropolis');
 
     const panel = page.getByRole('complementary', { name: 'Help & Display' });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminGuard";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { insertProperty } from "@/lib/airtable";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export async function POST(request) {
@@ -37,8 +38,23 @@ export async function POST(request) {
       return NextResponse.json({ error: "Submission not found or error fetching" }, { status: 404 });
     }
 
-    // 2. Insert into Airtable
-    const airtableRecord = await insertProperty(apiKey, baseId, submission);
+    // 2. Insert into Airtable (inheriting exact resolved coordinates from Supabase)
+    const point = typeof submission.coordinates === "string"
+      ? submission.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/)
+      : null;
+    const payload = {
+      ...submission,
+      ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {})
+    };
+    const airtableRecord = await insertProperty(apiKey, baseId, payload);
+    let publicCachePending = false;
+    try {
+      const purge = await invalidateCmsBundle();
+      publicCachePending = purge.sharedCachePurged === false;
+    } catch (cacheError) {
+      console.error("[ADMIN APPROVE] Catalogue cache purge failed after insertion:", cacheError?.message);
+      publicCachePending = true;
+    }
 
     // 3. Update Supabase status to 'approved'. Airtable's Slug is a FORMULA
     // field and the single source of slug truth (same rule the owner publish
@@ -62,11 +78,12 @@ export async function POST(request) {
       return NextResponse.json({ 
         success: true, 
         warning: "Inserted to Airtable but failed to update Supabase status",
-        airtableId: airtableRecord.id 
+        airtableId: airtableRecord.id,
+        publicCachePending,
       });
     }
 
-    return NextResponse.json({ success: true, airtableId: airtableRecord.id });
+    return NextResponse.json({ success: true, airtableId: airtableRecord.id, publicCachePending });
 
   } catch (err) {
     console.error("[ADMIN API] Error during approval process:", err);

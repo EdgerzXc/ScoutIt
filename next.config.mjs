@@ -8,7 +8,7 @@ const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://challenges.cloudflare.com https://va.vercel-scripts.com${__impeccableLiveDev};
     style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style;
-    img-src 'self' blob: data: https:;
+    img-src 'self' blob: data: https://*.supabase.co https://*.airtableusercontent.com https://*.mapbox.com https://events.mapbox.com https://*.cartocdn.com https://*.tile.openstreetmap.org https://services.arcgisonline.com https://browser.dataspace.copernicus.eu https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://picsum.photos https://images.unsplash.com;
     font-src 'self' data:;
     worker-src 'self' blob:;
     child-src 'self' blob:;
@@ -23,6 +23,16 @@ const cspHeader = `
 
 const nextConfig = {
   allowedDevOrigins: ['127.0.0.1', '192.168.100.42'],
+  // OWASP ZAP baseline, 2026-09-29 (Low: `Server Leaks Information via
+  // "X-Powered-By"` on every dynamically rendered route — `/discover` and the
+  // API routes answered `X-Powered-By: Next.js`). Prerendered pages never
+  // carried it, which is why only some URLs were flagged.
+  //
+  // The header advertises the framework and its version shape to anyone
+  // probing the site, and nothing in ScoutIt reads it. Vercel strips nothing
+  // on its own, so the opt-out has to live here.
+  poweredByHeader: false,
+
   // A-123: was `true`, which emitted 178 `.js.map` files — **44 MB of a 57 MB
   // build**, against only ~13 MB of actual JavaScript. They were deployed on
   // every release and addressable by anyone who guessed the path.

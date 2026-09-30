@@ -186,14 +186,18 @@ export async function POST(request) {
       return NextResponse.json({ error: "Publication is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
     }
 
-    // The public catalogue is cached; without this the change is invisible
-    // for up to ten minutes. Logged, never propagated — the write already
-    // succeeded and must not be reported as failed over a cache purge.
-    await invalidateCmsBundle().catch((cacheError) => {
+    // Keep the completed publication successful while exposing an unconfirmed
+    // public refresh to the owner.
+    let publicCachePending = false;
+    try {
+      const purge = await invalidateCmsBundle();
+      publicCachePending = purge.sharedCachePurged === false;
+    } catch (cacheError) {
       console.error("[PUBLISH] Catalogue cache purge failed after publication:", cacheError?.message);
-    });
+      publicCachePending = true;
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, publicCachePending });
 
   } catch (err) {
     console.error("[PUBLISH API] Error during publish process:", err);

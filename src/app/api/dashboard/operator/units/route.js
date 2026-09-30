@@ -162,7 +162,8 @@ export async function POST(request) {
 
     let warning = null;
     try {
-      await syncPropertyUnitsToAirtable(supabaseAdmin, property);
+      const sync = await syncPropertyUnitsToAirtable(supabaseAdmin, property);
+      if (sync?.publicCachePending) warning = "Units saved; public refresh unconfirmed. Check the listing page.";
     } catch (airtableErr) {
       console.error("[OPERATOR UNITS API] Airtable sync failed:", airtableErr);
       warning = "Units saved, but Airtable sync failed: " + airtableErr.message;

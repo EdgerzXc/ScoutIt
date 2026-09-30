@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="coastBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#08090c" />
+      <stop offset="50%" stop-color="#0c0e14" />
+      <stop offset="100%" stop-color="#050608" />
+    </linearGradient>
+    <radialGradient id="sunsetAura" cx="60%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#F7C64E" stop-opacity="0.16" />
+      <stop offset="40%" stop-color="#E8AE3C" stop-opacity="0.06" />
+      <stop offset="80%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#coastBg)" />
+  <rect width="1200" height="800" fill="url(#sunsetAura)" />
+
+  <!-- Horizon Line -->
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="#E8AE3C" stroke-width="1" stroke-opacity="0.3" />
+
+  <!-- Architectural Minimalist Pavilion (Cantilever Villa Silhouette) -->
+  <polygon points="320,380 920,380 880,410 360,410" fill="#141418" stroke="#E8AE3C" stroke-width="1.2" stroke-opacity="0.8" />
+  <polygon points="360,410 880,410 860,430 380,430" fill="#0d0d10" stroke="#6E531A" stroke-width="0.8" stroke-opacity="0.5" />
+  
+  <!-- Floor to Ceiling Glass Columns -->
+  <line x1="420" y1="410" x2="420" y2="520" stroke="#E8AE3C" stroke-width="1.2" stroke-opacity="0.6" />
+  <line x1="540" y1="410" x2="540" y2="520" stroke="#E8AE3C" stroke-width="1" stroke-opacity="0.4" />
+  <line x1="660" y1="410" x2="660" y2="520" stroke="#E8AE3C" stroke-width="1" stroke-opacity="0.4" />
+  <line x1="780" y1="410" x2="780" y2="520" stroke="#E8AE3C" stroke-width="1.2" stroke-opacity="0.6" />
+
+  <!-- Cantilever Foundation & Pool Deck -->
+  <polygon points="280,520 960,520 920,550 320,550" fill="#181820" stroke="#F7C64E" stroke-width="1.2" stroke-opacity="0.75" />
+  <polygon points="320,550 920,550 860,680 380,680" fill="#090a0d" stroke="#333338" stroke-width="1" />
+
+  <!-- Water Surface Reflection Grid -->
+  <path d="M 240,580 L 1000,580" stroke="#E8AE3C" stroke-width="0.75" stroke-opacity="0.25" stroke-dasharray="12,12" />
+  <path d="M 180,620 L 1060,620" stroke="#E8AE3C" stroke-width="0.75" stroke-opacity="0.2" stroke-dasharray="16,8" />
+  <path d="M 100,670 L 1140,670" stroke="#E8AE3C" stroke-width="0.75" stroke-opacity="0.15" stroke-dasharray="24,12" />
+
+  <!-- Celestial Glow / Ambient Ring -->
+  <circle cx="720" cy="280" r="80" fill="none" stroke="#F7C64E" stroke-width="1" stroke-opacity="0.3" />
+  <circle cx="720" cy="280" r="140" fill="none" stroke="#6E531A" stroke-width="0.75" stroke-opacity="0.2" stroke-dasharray="4,8" />
+
+  <!-- Telemetry HUD -->
+  <g font-family="monospace" font-size="11" fill="#E8AE3C" fill-opacity="0.65" letter-spacing="2">
+    <text x="70" y="80">SHORT-TERM YIELD ASSET // COASTAL FRONT</text>
+    <text x="70" y="105" fill="#888892">PARCEL IDENTIFIER: SIARGAO GL-08 · OCCUPANCY 91.4%</text>
+    <text x="70" y="730">ENVIRONMENTAL CLEARANCE: COASTAL PRESERVATION ZONED</text>
+  </g>
+</svg>

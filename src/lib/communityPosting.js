@@ -22,6 +22,37 @@ export const POSTABLE_SIGNAL_TYPES = Object.freeze([
 
 export const IDENTITY_MODES = Object.freeze(["anonymous", "public", "organization"]);
 
+// ── Signal kinds (owner decision 2026-09-26) ────────────────────────────
+// One surface, two logics: demand signals are answered by owners/brokers
+// connecting to the seeker; promo signals run the reverse direction. Only
+// this binary split is decided — the other five postable types all follow
+// demand rules until the owner maps them (INBOX 2026-09-26 gap D).
+export function kindForSignalType(signalType) {
+  return signalType === SIGNAL_TYPES.COMMERCIAL_PROMOTION ? "promo" : "demand";
+}
+
+// Normalized comparison keys. Lowercase + strip everything but a-z0-9 so
+// "One E-Com Center" and "one ecom center" match while "BGC" and "Makati"
+// never do. Comparison only — never URL slugs (the 2026-07-11 drift lesson).
+export function normalizeKeyPart(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+// Promo dedupe key: same post = same building (owner decision 2026-09-26).
+export function promoDedupeKey(buildingName) {
+  return normalizeKeyPart(buildingName);
+}
+
+// Demand dedupe key: same post = same person + same want. The account id is
+// the identity underneath anonymity (one deterministic Scout ID per
+// account), so anonymous reposts of the same want are caught.
+export function demandDedupeKey({ authorAccountId, signalType, city, district }) {
+  return [String(authorAccountId || ""), String(signalType || ""), normalizeKeyPart(district), normalizeKeyPart(city)]
+    .join("|");
+}
+
 // Launch active-signal capacity by account class (spec §10). Closed/expired
 // rows stop counting — capacity, never a lifetime quota.
 export const SIGNAL_CAPACITY = Object.freeze({
@@ -132,10 +163,20 @@ export function validateDraft(input = {}) {
 
   const city = cleanStr(input.city, 121);
   const district = cleanStr(input.district, 121);
-  if (!city && !district) {
+  const buildingName = cleanStr(input.buildingName, 161);
+  if (!city && !district && !buildingName) {
     fail(
       "NO_LOCATION",
-      "Anchor the signal somewhere — a city or district is enough. Activity becomes intelligence only when it has a place."
+      "Anchor the signal somewhere — a building, district, or city is enough. Activity becomes intelligence only when it has a place."
+    );
+  }
+  // Owner decision 2026-09-26 (R1): promotions may not run at city scale or
+  // larger. Name the building, or at least the district — "Taguig" alone is
+  // refused with this notice, "BGC" passes.
+  if (kindForSignalType(input.signalType) === "promo" && !district && !buildingName) {
+    fail(
+      "PLACE_TOO_BROAD",
+      "Promotions need a specific stage — name the building, or at least the district. A whole city is too broad: say BGC instead of Taguig, CBD instead of all of Makati."
     );
   }
   if (PRICE_RE.test(combined) && TRANSACTION_RE.test(combined) && (city || district)) {
@@ -152,6 +193,7 @@ export function validateDraft(input = {}) {
 
   const normalized = {
     signalType: POSTABLE_SIGNAL_TYPES.includes(input.signalType) ? input.signalType : null,
+    signalKind: kindForSignalType(input.signalType),
     commercialFlag: input.signalType === SIGNAL_TYPES.COMMERCIAL_PROMOTION,
     title: title.slice(0, TITLE_MAX),
     body: body.slice(0, BODY_MAX),

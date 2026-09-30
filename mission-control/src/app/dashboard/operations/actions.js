@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { purgePublicCatalogueCache } from "@/lib/publicCatalogueCache";
 import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import {
   ONBOARDING_MIGRATION,
@@ -226,9 +227,10 @@ export async function markSampleListings(previousState, formData) {
     const recordIds = before.samples.matched.map((record) => record.id);
     intentId = await logActionStrict({ staff, action: "airtable.sample_records.intent", targetTable: SAMPLE_DATA_OPERATION.table, targetId: SAMPLE_DATA_OPERATION.id, reason: input.reason, metadata: { operation_id: SAMPLE_DATA_OPERATION.id, record_ids: recordIds, expected_count: 7 } });
     const after = await markSevenSampleListings();
+    const cache = await purgePublicCatalogueCache();
     await logActionStrict({ staff, action: "airtable.sample_records.complete", targetTable: SAMPLE_DATA_OPERATION.table, targetId: SAMPLE_DATA_OPERATION.id, reason: input.reason, metadata: { intent_id: intentId, operation_id: SAMPLE_DATA_OPERATION.id, record_ids: recordIds, marked_count: after.samples.marked.length } });
     revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/audit");
-    return { ok: true, message: "All seven fixed sample listings were marked and verified." };
+    return { ok: true, message: `All seven fixed sample listings were marked and verified.${cache.purged ? "" : ` Public cache purge needs attention: ${cache.detail}`}` };
   } catch (error) {
     if (intentId) { try { await logActionStrict({ staff, action: "airtable.sample_records.failed", targetTable: SAMPLE_DATA_OPERATION.table, targetId: SAMPLE_DATA_OPERATION.id, reason: input.reason, metadata: { intent_id: intentId, operation_id: SAMPLE_DATA_OPERATION.id, error: error.message || "Unknown failure" } }); } catch (auditError) { console.error("Sample marking failure audit also failed", auditError); } }
     return { ok: false, message: error.message || "The sample marking operation failed." };
@@ -246,9 +248,10 @@ export async function clearInvalidMediaFields(previousState, formData) {
     if (!before.canClean || before.planHash !== reviewedPlanHash) return { ok: false, message: "Media preflight changed or is blocked. Nothing was cleared." };
     intentId = await logActionStrict({ staff, action: "airtable.property_media_cleanup.intent", targetTable: PROPERTY_MEDIA_OPERATION.table, targetId: PROPERTY_MEDIA_OPERATION.id, reason: input.reason, metadata: { plan_hash: before.planHash, unsafe_entries: before.unsafe.map(({ recordId, slug, field, actualKind }) => ({ recordId, slug, field, actualKind })) } });
     const result = await clearInvalidPropertyMedia(reviewedPlanHash);
+    const cache = await purgePublicCatalogueCache();
     await logActionStrict({ staff, action: "airtable.property_media_cleanup.complete", targetTable: PROPERTY_MEDIA_OPERATION.table, targetId: PROPERTY_MEDIA_OPERATION.id, reason: input.reason, metadata: { intent_id: intentId, plan_hash_before: result.before.planHash, cleared_count: result.before.unsafe.length, retained_count: result.after.retained.length } });
     revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/audit");
-    return { ok: true, message: `Cleared ${result.before.unsafe.length} invalid media field value(s) and verified the catalog.` };
+    return { ok: true, message: `Cleared ${result.before.unsafe.length} invalid media field value(s) and verified the catalog.${cache.purged ? "" : ` Public cache purge needs attention: ${cache.detail}`}` };
   } catch (error) {
     if (intentId) { try { await logActionStrict({ staff, action: "airtable.property_media_cleanup.failed", targetTable: PROPERTY_MEDIA_OPERATION.table, targetId: PROPERTY_MEDIA_OPERATION.id, reason: input.reason, metadata: { intent_id: intentId, error: error.message || "Unknown failure" } }); } catch (auditError) { console.error("Media cleanup failure audit also failed", auditError); } }
     return { ok: false, message: error.message || "The media cleanup operation failed." };
@@ -286,9 +289,10 @@ export async function reconcileLifecycleCandidate(previousState, formData) {
     const result = decision === "restore_live"
       ? await restoreReviewedPublicLifecycle({ airtableRecordId, expectedReviewHash: reviewHash, actorId: staff.id, reason: input.reason })
       : await unpublishReviewedAirtableRecord({ airtableRecordId, expectedReviewHash: reviewHash });
+    const cache = await purgePublicCatalogueCache();
     await logActionStrict({ staff, action: `property.lifecycle_reconciliation.${decision}.complete`, targetTable: "properties", targetId: result.after?.propertyId || result.propertyId || airtableRecordId, reason: input.reason, metadata: { intent_id: intentId, operation_id: LIFECYCLE_RECONCILIATION_OPERATION.id, review_hash: reviewHash, decision, slug: result.after?.slug || result.slug } });
     revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/cms"); revalidatePath("/dashboard/audit");
-    return { ok: true, message: decision === "restore_live" ? "Supabase lifecycle, canonical slug, routing, and Airtable visibility now verify together." : "The drifted Airtable record was unpublished and verified." };
+    return { ok: true, message: `${decision === "restore_live" ? "Supabase lifecycle, canonical slug, routing, and Airtable visibility now verify together." : "The drifted Airtable record was unpublished and verified."}${cache.purged ? "" : ` Public cache purge needs attention: ${cache.detail}`}` };
   } catch (error) {
     if (intentId) { try { await logActionStrict({ staff, action: `property.lifecycle_reconciliation.${decision}.failed`, targetTable: "properties", targetId: airtableRecordId, reason: input.reason, metadata: { intent_id: intentId, operation_id: LIFECYCLE_RECONCILIATION_OPERATION.id, review_hash: reviewHash, decision, error: error.message || "Unknown failure" } }); } catch (auditError) { console.error("Lifecycle reconciliation failure audit also failed", auditError); } }
     return { ok: false, message: error.message || "Lifecycle reconciliation failed." };
@@ -307,9 +311,10 @@ export async function cleanInvalidSampleChildSpaces(previousState, formData) {
     if (!before.canClean || before.planHash !== reviewedPlanHash) return { ok: false, message: "Sample child-space preflight changed or is blocked. Nothing was removed." };
     intentId = await logActionStrict({ staff, action: "airtable.sample_child_spaces.intent", targetTable: SAMPLE_CHILD_SPACE_OPERATION.table, targetId: SAMPLE_CHILD_SPACE_OPERATION.id, reason: input.reason, metadata: { plan_hash: before.planHash, invalid: before.invalid.map(({ recordId, slug, unitId, name, reason }) => ({ recordId, slug, unitId, name, reason })) } });
     const result = await removeInvalidSampleChildSpaces(reviewedPlanHash);
+    const cache = await purgePublicCatalogueCache();
     await logActionStrict({ staff, action: "airtable.sample_child_spaces.complete", targetTable: SAMPLE_CHILD_SPACE_OPERATION.table, targetId: SAMPLE_CHILD_SPACE_OPERATION.id, reason: input.reason, metadata: { intent_id: intentId, plan_hash_before: result.before.planHash, removed_count: result.before.invalid.length } });
     revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/audit");
-    return { ok: true, message: `Removed ${result.before.invalid.length} invalid sample child-space row(s) and verified the seven-property allowlist.` };
+    return { ok: true, message: `Removed ${result.before.invalid.length} invalid sample child-space row(s) and verified the seven-property allowlist.${cache.purged ? "" : ` Public cache purge needs attention: ${cache.detail}`}` };
   } catch (error) {
     if (intentId) { try { await logActionStrict({ staff, action: "airtable.sample_child_spaces.failed", targetTable: SAMPLE_CHILD_SPACE_OPERATION.table, targetId: SAMPLE_CHILD_SPACE_OPERATION.id, reason: input.reason, metadata: { intent_id: intentId, error: error.message || "Unknown failure" } }); } catch (auditError) { console.error("Sample child-space failure audit also failed", auditError); } }
     return { ok: false, message: error.message || "Sample child-space cleanup failed." };

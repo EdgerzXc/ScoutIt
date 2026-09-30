@@ -107,7 +107,9 @@ export default function PropertyVerifyPanel() {
         return;
       }
       setRows((prev) => prev.filter((p) => p.id !== row.id));
-      setNotice({ type: "success", text: `"${row.title}" marked verified as of today.` });
+      setNotice(json.publicCachePending
+        ? { type: "error", text: `"${row.title}" was verified, but its public refresh is unconfirmed. Check the listing page.` }
+        : { type: "success", text: `"${row.title}" marked verified as of today.` });
       setConfirmId(null);
     } catch (e) {
       setNotice({ type: "error", text: sanitizeError(e, "Could not verify that listing.") });
@@ -124,19 +126,19 @@ export default function PropertyVerifyPanel() {
           font-family: var(--font-display);
           font-size: 13.5px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-muted);
           margin: 0 0 18px;
           max-width: 62ch;
         }
         .pv-warn {
-          background: rgba(232, 174, 60, 0.06);
-          border-left: 2px solid #6E531A;
+          background: rgba(var(--accent-rgb), 0.06);
+          border-left: 2px solid var(--accent-muted);
           padding: 12px 14px;
           margin: 0 0 20px;
           font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.7;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           max-width: 62ch;
         }
         .pv-notice {
@@ -148,14 +150,14 @@ export default function PropertyVerifyPanel() {
           border-radius: 3px;
           margin-bottom: 16px;
         }
-        .pv-notice--success { color: #4caf7d; background: rgba(76, 175, 125, 0.08); }
-        .pv-notice--error   { color: #e8644a; background: rgba(232, 100, 74, 0.08); }
+        .pv-notice--success { color: var(--green); background: rgba(76, 175, 125, 0.08); }
+        .pv-notice--error   { color: var(--red); background: rgba(232, 100, 74, 0.08); }
 
         .pv-skel {
           height: 82px;
           border-radius: 4px;
           margin-bottom: 10px;
-          background: linear-gradient(90deg, #141414 0%, #1a1a1a 50%, #141414 100%);
+          background: linear-gradient(90deg, var(--surface) 0%, var(--surface2) 50%, var(--surface) 100%);
           background-size: 200% 100%;
           animation: pvShimmer 1.4s ease-in-out infinite;
         }
@@ -168,8 +170,8 @@ export default function PropertyVerifyPanel() {
            is a data table nobody reads (02_FRONTEND_STANDARD §1). */
         .pv-list { list-style: none; margin: 0; padding: 0; }
         .pv-card {
-          background: #151515;
-          border: 0.5px solid #262626;
+          background: var(--surface2);
+          border: 0.5px solid var(--border);
           border-radius: 4px;
           padding: 15px 14px;
           margin-bottom: 10px;
@@ -178,7 +180,7 @@ export default function PropertyVerifyPanel() {
           font-family: var(--font-display);
           font-size: 15.5px;
           line-height: 1.35;
-          color: #f0ede8;
+          color: var(--text-primary);
           overflow-wrap: anywhere;
           margin-bottom: 5px;
         }
@@ -187,7 +189,7 @@ export default function PropertyVerifyPanel() {
           font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #6a6a6a;
+          color: var(--text-muted);
           margin-bottom: 9px;
         }
         .pv-age {
@@ -197,8 +199,8 @@ export default function PropertyVerifyPanel() {
           text-transform: uppercase;
           margin-bottom: 12px;
         }
-        .pv-age--never { color: #e8644a; }
-        .pv-age--stale { color: #e8c84a; }
+        .pv-age--never { color: var(--red); }
+        .pv-age--stale { color: var(--yellow); }
 
         .pv-actions { display: flex; flex-direction: column; gap: 8px; }
         .pv-btn {
@@ -215,38 +217,38 @@ export default function PropertyVerifyPanel() {
         .pv-btn:active { transform: scale(0.97); }
         .pv-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .pv-btn:disabled:active { transform: none; }
-        .pv-btn:focus-visible { outline: 2px solid #E8AE3C; outline-offset: 2px; }
-        .pv-btn--gold  { background: #F7C64E; border: none; color: #0d0d0d; font-weight: bold; }
-        .pv-btn--ghost { background: transparent; border: 0.5px solid #262626; color: #c8c8c8; }
+        .pv-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .pv-btn--gold  { background: var(--accent-bright); border: none; color: var(--on-accent); font-weight: bold; }
+        .pv-btn--ghost { background: transparent; border: 0.5px solid var(--border); color: var(--text-secondary); }
 
         .pv-confirm {
           font-family: var(--font-display);
           font-size: 12.5px;
           line-height: 1.65;
-          color: #c8c8c8;
-          background: rgba(232, 174, 60, 0.06);
-          border-left: 2px solid #6E531A;
+          color: var(--text-secondary);
+          background: rgba(var(--accent-rgb), 0.06);
+          border-left: 2px solid var(--accent-muted);
           padding: 11px 12px;
           margin-bottom: 10px;
         }
 
         .pv-empty {
-          background: #131313;
-          border: 0.5px solid #262626;
+          background: var(--surface);
+          border: 0.5px solid var(--border);
           border-radius: 4px;
           padding: 22px 18px;
         }
         .pv-empty__t {
           font-family: var(--font-display);
           font-size: 16px;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 8px;
         }
         .pv-empty__b {
           font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-muted);
           margin: 0;
           max-width: 56ch;
         }
@@ -271,7 +273,7 @@ export default function PropertyVerifyPanel() {
       </p>
 
       <div className="pv-warn">
-        Verifying here records that <strong style={{ color: "#f0ede8" }}>a member of
+        Verifying here records that <strong style={{ color: "var(--text-primary)" }}>a member of
         staff checked these details and they are still accurate today</strong>. It is
         not a way to clear the queue. A stale listing is honest; a wrongly-verified one
         carries our name.

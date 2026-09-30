@@ -266,7 +266,7 @@ export default function BrokerMode() {
 
           // Add draggable radar center pin
           const radarMarkerEl = document.createElement('div');
-          radarMarkerEl.className = 'w-6 h-6 rounded-full border-2 border-gold-accent bg-gold-accent/20 cursor-move flex items-center justify-center backdrop-blur-sm shadow-[0_0_15px_rgba(232,174,60,0.5)]';
+          radarMarkerEl.className = 'w-6 h-6 rounded-full border-2 border-gold-accent bg-gold-accent/20 cursor-move flex items-center justify-center backdrop-blur-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.5)]';
           const innerDot = document.createElement('div');
           innerDot.className = 'w-2 h-2 rounded-full bg-gold-accent';
           radarMarkerEl.appendChild(innerDot);
@@ -313,7 +313,7 @@ export default function BrokerMode() {
 
       if (coords) {
         const el = document.createElement('div');
-        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
+        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
         el.innerHTML = listing.hasMedia ? '📸' : '🏢';
 
         const popupContent = document.createElement('div');
@@ -454,7 +454,7 @@ export default function BrokerMode() {
     const notes = dealNotes[deal.id] !== undefined ? dealNotes[deal.id] : (deal.privateNotes || "");
 
     return (
-      <div className="max-w-[1200px] mx-auto py-4 animate-[fadeIn_0.3s_ease]">
+      <div className="max-w-[1200px] mx-auto py-4 motion-safe:animate-[fadeIn_0.3s_ease]">
         {/* Workspace Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-surface-variant pb-6 mb-8 gap-4">
           <div>
@@ -700,11 +700,11 @@ export default function BrokerMode() {
 
   // --- VIEW: LAYER 1 - COMMAND CENTER (Opportunity Grid & Feed) ---
   return (
-    <div data-scoutit-guide="broker-lead-roster-view" className="flex-1 flex flex-col w-full max-w-[1200px] mx-auto animate-[fadeIn_0.4s_ease] relative">
+    <div data-scoutit-guide="broker-lead-roster-view" className="flex-1 flex flex-col w-full max-w-[1200px] mx-auto motion-safe:animate-[fadeIn_0.4s_ease] relative">
       
       {/* Notification Banner */}
       {showNotification && !activeDealId && !showIdCard && (
-        <div className="bg-gold-accent/10 border border-gold-accent/30 rounded-lg p-4 mb-6 flex items-start sm:items-center justify-between gap-4 animate-[slideDown_0.4s_ease]">
+        <div className="bg-gold-accent/10 border border-gold-accent/30 rounded-lg p-4 mb-6 flex items-start sm:items-center justify-between gap-4 motion-safe:animate-[slideDown_0.4s_ease]">
           <div className="flex gap-4 items-start sm:items-center">
             <div className="w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background text-lg shrink-0">✨</div>
             <div>
@@ -727,7 +727,7 @@ export default function BrokerMode() {
       {/* ID Card Generation Overlay */}
       {showIdCard && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/95 backdrop-blur-md px-4 overflow-y-auto pt-20 pb-10">
-          <div className="w-full max-w-2xl bg-background border border-surface-variant rounded-xl shadow-[0_0_50px_rgba(232,174,60,0.1)] flex flex-col relative animate-[scaleUp_0.4s_ease-out]">
+          <div className="w-full max-w-2xl bg-background border border-surface-variant rounded-xl shadow-[0_0_50px_rgba(var(--accent-rgb),0.1)] flex flex-col relative motion-safe:animate-[scaleUp_0.4s_ease-out]">
             <button 
               onClick={() => setShowIdCard(false)}
               aria-label="Close"
@@ -742,14 +742,16 @@ export default function BrokerMode() {
             </div>
 
             {/* The Actual ID Card Design */}
-            <div className="mx-auto w-full max-w-[400px] mb-8 bg-surface rounded-2xl border border-[rgba(232,174,60,0.4)] relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
+            <div className="mx-auto w-full max-w-[400px] mb-8 bg-surface rounded-2xl border border-[rgba(var(--accent-rgb),0.4)] relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
               {/* Glass Glare */}
               <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none"></div>
               
               {/* Header */}
               <div className="bg-gold-accent p-4 flex justify-between items-center relative z-20">
                 <span className="font-display-md text-background text-xl font-bold tracking-tighter">S<span className="font-normal">cout</span>IT</span>
-                <span className="font-mono text-[12px] text-background/80 tracking-widest font-bold">VERIFIED ADVISOR</span>
+                <span className="font-mono text-[12px] text-background/80 tracking-widest font-bold">
+                  {prcVerified ? "VERIFIED ADVISOR" : "ADVISOR IDENTITY"}
+                </span>
               </div>
               
               {/* Body — always the signed-in broker's own data, never a sample
@@ -851,7 +853,7 @@ export default function BrokerMode() {
       {/* Draft Pitch Modal Overlay */}
       {pitchingListing && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-md px-4">
-          <div className="w-full max-w-lg card-atmosphere rounded-lg shadow-2xl p-6 animate-[slideUp_0.4s_ease-out]">
+          <div className="w-full max-w-lg card-atmosphere rounded-lg shadow-2xl p-6 motion-safe:animate-[slideUp_0.4s_ease-out]">
             <h3 className="font-headline-editorial text-2xl text-on-surface mb-2">Draft Pitch</h3>
             <p className="text-sm text-text-secondary mb-6">Pitching <span className="font-bold text-gold-accent">{pitchingListing.title}</span></p>
             
@@ -949,7 +951,7 @@ export default function BrokerMode() {
 
       {/* Embedded Radar Map */}
       {showMap && (
-        <div id="broker-map-section" className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)] mb-8 scroll-mt-24">
+        <div id="broker-map-section" className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(var(--accent-rgb),0.05)] mb-8 scroll-mt-24">
           
           {mapError ? (
             <MapFallback2D
@@ -1247,5 +1249,4 @@ export default function BrokerMode() {
     </div>
   );
 }
-
 

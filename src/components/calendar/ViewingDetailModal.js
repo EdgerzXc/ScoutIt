@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { formatDayHeading, formatShortRange } from "@/lib/calendar/calendarDates";
+import overlayMotion from "@/components/ui/OverlayEntrance.module.css";
 
 /**
  * Read-only detail for a viewing appointment. Viewings aren't free-form
@@ -22,11 +23,11 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4"
+      className={`${overlayMotion.backdrop} fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4`}
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md bg-[#121212] border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl cal-lens"
+        className={`${overlayMotion.panel} w-full sm:max-w-md bg-surface border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl cal-lens`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
@@ -80,7 +81,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
                 onClick={() => onRespond(viewing.id, "confirmed")}
                 disabled={respondingId === viewing.id}
                 className="flex-1 min-h-11 text-xs text-background bg-gold-accent py-2 rounded hover:bg-gold-bright active:scale-[0.97]
-                  uppercase tracking-wider font-mono font-semibold shadow-[0_0_12px_rgba(232,174,60,0.25)] disabled:opacity-50 transition-all duration-160 ease-out"
+                  uppercase tracking-wider font-mono font-semibold shadow-[0_0_12px_rgba(var(--accent-rgb),0.25)] disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Accept
               </button>

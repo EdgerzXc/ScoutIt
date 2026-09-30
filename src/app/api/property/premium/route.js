@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchProperties } from "@/lib/airtable";
+import { getCmsBundle } from "@/lib/cmsCache";
 import { resolveServerTier } from "@/lib/serverAuth";
 import { pickPremiumFields } from "@/lib/premiumFields";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -37,14 +37,12 @@ export async function GET(request) {
     // user_profiles.subscription_tier; anonymous callers fall to 'starry'.
     const { tier, freeMode } = await resolveServerTier(request);
 
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    if (!apiKey || !baseId) {
+    const bundle = await getCmsBundle();
+    if (bundle.source === "empty_fallback_on_error") {
       return NextResponse.json({ error: "Catalog unavailable" }, { status: 503 });
     }
 
-    const properties = await fetchProperties(apiKey, baseId);
-    const property = (properties || []).find((p) => p.slug === slug);
+    const property = (bundle.properties || []).find((p) => p.slug === slug);
 
     if (!property) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });

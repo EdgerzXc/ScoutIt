@@ -22,10 +22,11 @@ async function loadInitialDiscoverData() {
     return {
       properties: (bundle?.properties || []).map((p) => stripPremiumFields(p, "starry")),
       intel: bundle?.intel || [],
+      unavailable: bundle?.source === "empty_fallback_on_error",
     };
   } catch (err) {
     console.error("[/discover] server CMS load failed:", err?.message);
-    return { properties: [], intel: [] };
+    return { properties: [], intel: [], unavailable: true };
   }
 }
 
@@ -68,7 +69,7 @@ export default async function DiscoverPage() {
           </div>
         }
       >
-        <DiscoverClient initialProperties={initialData.properties} initialIntel={initialData.intel} />
+        <DiscoverClient initialProperties={initialData.properties} initialIntel={initialData.intel} initialUnavailable={initialData.unavailable} />
       </Suspense>
 
     </>

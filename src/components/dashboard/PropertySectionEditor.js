@@ -28,8 +28,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { groupFields, VISIBILITY } from "@/lib/propertyFieldRegistry";
 
-const GOLD = "#E8AE3C";
-const GOLD_DIM = "#6E531A";
 const EMPTY_DETAILS = {};
 
 /** Long-form keys that deserve a textarea rather than a single-line input. */
@@ -122,7 +120,7 @@ export default function PropertySectionEditor({
       <p className="empty">
         No editable fields recorded for this listing yet.
         <style jsx>{`
-          .empty { color: #777; font-size: 0.75rem; padding: 1rem 0; }
+          .empty { color: var(--text-muted); font-size: 0.75rem; padding: 1rem 0; }
         `}</style>
       </p>
     );
@@ -206,12 +204,12 @@ export default function PropertySectionEditor({
         /* Mobile first: phone is the base case, one enhancement at 700px. */
         .editor { display: flex; flex-direction: column; gap: 1.25rem; }
         .sec {
-          border: 1px solid #222;
+          border: 1px solid var(--border-solid);
           border-radius: 10px;
           padding: 1rem;
-          background: #101010;
+          background: var(--surface);
         }
-        .sec.staff { border-color: ${GOLD_DIM}; background: #14110a; }
+        .sec.staff { border-color: var(--accent-muted); background: var(--surface2); }
         header {
           display: flex;
           flex-wrap: wrap;
@@ -226,12 +224,12 @@ export default function PropertySectionEditor({
           letter-spacing: 0.14em;
           text-transform: uppercase;
           font-family: ui-monospace, monospace;
-          color: ${GOLD};
+          color: var(--accent);
         }
         button {
           background: transparent;
-          border: 1px solid ${GOLD_DIM};
-          color: ${GOLD};
+          border: 1px solid var(--accent-muted);
+          color: var(--accent);
           font-family: ui-monospace, monospace;
           font-size: 0.75rem;
           letter-spacing: 0.1em;
@@ -244,8 +242,8 @@ export default function PropertySectionEditor({
         }
         button:disabled { opacity: 0.4; cursor: default; }
         .msg { font-size: 0.75rem; margin: 0 0 0.75rem; }
-        .msg.ok { color: #7cc47c; }
-        .msg.err { color: #d98080; }
+        .msg.ok { color: var(--green); }
+        .msg.err { color: var(--red); }
         .grid { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
         .field { display: flex; flex-direction: column; gap: 0.3rem; }
         .lbl {
@@ -255,11 +253,11 @@ export default function PropertySectionEditor({
           font-family: ui-monospace, monospace;
           color: var(--text-secondary);
         }
-        .lbl em { color: ${GOLD_DIM}; font-style: normal; margin-left: 0.3rem; }
+        .lbl em { color: var(--accent-muted); font-style: normal; margin-left: 0.3rem; }
         input, textarea {
           background: var(--bg);
           border: 1px solid var(--border-solid);
-          color: #ededed;
+          color: var(--text-primary);
           border-radius: 6px;
           padding: 0.7rem;
           /* 16px prevents iOS Safari zooming in on focus. */
@@ -267,7 +265,7 @@ export default function PropertySectionEditor({
           width: 100%;
           box-sizing: border-box;
         }
-        input:focus, textarea:focus { outline: none; border-color: ${GOLD}; }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
         textarea { resize: vertical; }
         .mono { font-family: ui-monospace, monospace; font-size: 13px; }
 
@@ -283,7 +281,7 @@ export default function PropertySectionEditor({
           border-color: var(--border);
         }
         :global(body.light-mode) .editor .sec.staff {
-          background: rgba(17, 17, 19, 0.04);
+          background: var(--surface2);
           border-color: var(--border);
         }
         :global(body.light-mode) .editor h3,

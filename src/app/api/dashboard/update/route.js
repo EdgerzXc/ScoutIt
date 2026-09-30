@@ -201,14 +201,20 @@ export async function POST(request) {
       }
     }
 
-    // The public catalogue is cached; without this the change is invisible
-    // for up to ten minutes. Logged, never propagated — the write already
-    // succeeded and must not be reported as failed over a cache purge.
-    await invalidateCmsBundle().catch((cacheError) => {
-      console.error("[UPDATE] Catalogue cache purge failed after an edit:", cacheError?.message);
-    });
+    // Draft edits do not change the public catalogue and must not force a
+    // four-table rebuild on the next visit. Live edits do need a purge.
+    let publicCachePending = false;
+    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE) {
+      try {
+        const purge = await invalidateCmsBundle();
+        publicCachePending = purge.sharedCachePurged === false;
+      } catch (cacheError) {
+        console.error("[UPDATE] Catalogue cache purge failed after an edit:", cacheError?.message);
+        publicCachePending = true;
+      }
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, publicCachePending });
 
   } catch (err) {
     console.error("[UPDATE API] Error during update process:", err);

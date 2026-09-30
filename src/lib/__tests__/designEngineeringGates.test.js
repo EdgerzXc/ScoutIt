@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { cssFiles, guardHoverRules, unguardedHoverFiles } from "../../../scripts/guard-hover-rules.mjs";
 import { filesWithTransitionAll, NAMED_PROPERTIES } from "../../../scripts/name-transition-properties.mjs";
+import { declarations, tokenColor, stripComments } from "../../../scripts/css-token-blocks.mjs";
 
 // A-074 — design engineering, reviewed against Emil Kowalski's checklist.
 //
@@ -106,3 +107,31 @@ describe("A-074 · the palette stays deep black plus gold", () => {
     expect(admin).toContain("var(--red)");
   });
 });
+
+describe("A-170 · a pinned token cannot drift from the theme it imitates", () => {
+  // MockupChatbox paints its own dark grounds (#0d0d0d / #121212 / #1c1c1c), so
+  // it re-declares the theme tokens it consumes instead of re-inking under the
+  // White Lens — the pin pattern _SCOUTIT_BRAIN/05_DESIGN_AND_INTERACTION/
+  // WHITE_LENS_SPEC.md §3 records, and the reason status tabs sat at 1.32:1 in
+  // the lens before that section existed. A pin is a hand copy: a guessed hex
+  // quietly dimmed the dark default once already, and only a human looking at
+  // the dark theme caught it. That check is mechanical now.
+  const dark = declarations(":root", stripComments(fs.readFileSync("src/app/globals.css", "utf8")));
+  const pins = [...fs.readFileSync("src/components/chat/MockupChatbox.js", "utf8").matchAll(/"--([a-z0-9-]+)"\s*:\s*"(#[0-9a-fA-F]{3,8})"/g)]
+    .map(([, name, hex]) => ({ name, hex }));
+
+  it("still finds the pins it claims to check (an empty match is a dead guard)", () => {
+    expect(pins.length).toBeGreaterThanOrEqual(2);
+    expect(pins.map((pin) => pin.name)).toEqual(expect.arrayContaining(["accent-bright", "text-secondary"]));
+  });
+
+  it("pins every colour to the exact :root value it stands in for", () => {
+    for (const { name, hex } of pins) {
+      expect(
+        tokenColor(dark, name).toLowerCase(),
+        `--${name} is pinned as ${hex} in MockupChatbox; globals.css :root says ${tokenColor(dark, name)} — change both or neither`,
+      ).toBe(hex.toLowerCase());
+    }
+  });
+});
+

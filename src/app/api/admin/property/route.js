@@ -25,6 +25,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { updateProperty } from "@/lib/airtable";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { sanitizeObject } from "@/lib/sanitize";
 import { isInternal, fieldMeta } from "@/lib/propertyFieldRegistry";
@@ -147,19 +148,12 @@ export async function PATCH(request) {
       const apiKey = process.env.AIRTABLE_API_KEY;
       const baseId = process.env.AIRTABLE_BASE_ID;
       if (apiKey && baseId && canonicalSlug) {
+        let atResult;
         try {
           // seoForward rides alongside the saved row: updateProperty reads
           // data.seo_title/seo_description/seo_json_ld straight into the
           // Airtable SEO columns.
-          const atResult = await updateProperty(apiKey, baseId, canonicalSlug, { ...saved, ...seoForward });
-          
-          const updatedSlug = atResult?.fields?.Slug;
-          if (updatedSlug && updatedSlug !== canonicalSlug) {
-            return NextResponse.json(
-              { error: "The public CMS returned a different slug; staff reconciliation is required", retryable: false },
-              { status: 409 }
-            );
-          }
+          atResult = await updateProperty(apiKey, baseId, canonicalSlug, { ...saved, ...seoForward });
         } catch (airtableErr) {
           console.error("[ADMIN PROPERTY] Airtable sync failed:", airtableErr);
           const failureResponse = NextResponse.json(
@@ -169,6 +163,22 @@ export async function PATCH(request) {
           warning = "Saved, but the public site sync failed — it will retry on the next save.";
           return failureResponse;
         }
+        let publicCachePending = false;
+        try {
+          const purge = await invalidateCmsBundle();
+          publicCachePending = purge.sharedCachePurged === false;
+        } catch (cacheError) {
+          console.error("[ADMIN PROPERTY] Catalogue cache purge failed after update:", cacheError?.message);
+          publicCachePending = true;
+        }
+        const updatedSlug = atResult?.fields?.Slug;
+        if (updatedSlug && updatedSlug !== canonicalSlug) {
+          return NextResponse.json(
+            { error: "The public CMS returned a different slug; staff reconciliation is required", retryable: false, publicCachePending },
+            { status: 409 }
+          );
+        }
+        if (publicCachePending) warning = "Saved; public refresh unconfirmed. Check the listing page.";
       } else if (!current.slug) {
         warning = "Saved. No public listing is linked yet, so nothing was published.";
       }

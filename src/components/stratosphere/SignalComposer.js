@@ -5,7 +5,7 @@ import { X, ArrowLeft, ArrowRight, CheckCircle2, MapPin, User, Send } from "luci
 import { getSession } from "@/lib/authClient";
 import PrivacyNotice from "@/components/ui/PrivacyNotice";
 import { useModalDialog } from "@/components/ui/useModalDialog";
-import { SIGNAL_TYPE_LABELS } from "@/lib/communitySignalsAdapter";
+import { SIGNAL_TYPE_LABELS, SIGNAL_TYPES } from "@/lib/communitySignalsAdapter";
 import { POSTABLE_SIGNAL_TYPES } from "@/lib/communityPosting";
 import "./signal-composer.css";
 
@@ -33,6 +33,7 @@ const EMPTY = {
   sizeMaxSqm: "",
   timing: "",
   mustHave: "",
+  buildingName: "",
   city: "",
   district: "",
   identityMode: "anonymous",
@@ -106,6 +107,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
         sizeMaxSqm: form.sizeMaxSqm === "" ? null : Number(form.sizeMaxSqm),
         timing: form.timing.trim(),
         mustHave: form.mustHave,
+        buildingName: form.buildingName.trim(),
         city: form.city.trim(),
         district: form.district.trim(),
         identityMode: form.identityMode,
@@ -234,6 +236,10 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                 </div>
                 <label className="scp-field" htmlFor="scp-musts"><span className="scp-label">MUST-HAVES (COMMA-SEPARATED)</span>
                   <input id="scp-musts" className="scp-input" value={form.mustHave} placeholder="8m ceiling, 3-phase power, truck ingress" onChange={(e) => set("mustHave", e.target.value)} /></label>
+                {form.signalType === SIGNAL_TYPES.COMMERCIAL_PROMOTION && (
+                  <label className="scp-field" htmlFor="scp-building"><span className="scp-label">BUILDING (PROMOS ONLY — NAMES THE OFFER)</span>
+                    <input id="scp-building" className="scp-input" value={form.buildingName} placeholder="Name the exact building — only its owner or handling broker may promote it" onChange={(e) => set("buildingName", e.target.value)} /></label>
+                )}
               </div>
             )}
 
@@ -271,7 +277,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                 <dl className="scp-dl">
                   <div className="scp-dl-row"><dt>TYPE</dt><dd>{SIGNAL_TYPE_LABELS[form.signalType]}</dd></div>
                   <div className="scp-dl-row"><dt>HEADLINE</dt><dd>{form.title.trim() || "—"}</dd></div>
-                  <div className="scp-dl-row"><dt>PLACE</dt><dd>{[form.district.trim(), form.city.trim()].filter(Boolean).join(", ") || "—"}</dd></div>
+                  <div className="scp-dl-row"><dt>PLACE</dt><dd>{[form.buildingName.trim(), form.district.trim(), form.city.trim()].filter(Boolean).join(", ") || "—"}</dd></div>
                   <div className="scp-dl-row"><dt>SIGNED</dt><dd>{form.identityMode === "anonymous" ? identityPreview : `${identityPreview} (public)`}</dd></div>
                 </dl>
                 <p className="scp-review-note">Live for 30 days unless refreshed. No comments — members answer with Relevant or a permissioned Connect.</p>

@@ -39,6 +39,9 @@ jobs:
       - name: Owner-approved surface locks
         run: npm run verify:surfaces
 
+      - name: Live token contrast
+        run: npm run verify:contrast
+
       - name: Lint
         run: npm run lint
       - name: Typography regression audit
@@ -67,9 +70,25 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
           NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: "pk.placeholder"
           NEXT_PUBLIC_SITE_URL: "https://scout-it.vercel.app"
+          NEXT_PUBLIC_GA_ID: "G-TEST000000"
           AIRTABLE_API_KEY: "placeholder"
           AIRTABLE_BASE_ID: "appPlaceholder"
         run: npm run build
+
+      - name: Install Chromium for computed contrast
+        run: npx playwright install --with-deps chromium
+
+      - name: Public appearance regressions
+        env:
+          SCOUTIT_E2E_USE_BUILD: "1"
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: "pk.placeholder"
+          NEXT_PUBLIC_SITE_URL: "https://scout-it.vercel.app"
+          NEXT_PUBLIC_GA_ID: "G-TEST000000"
+          AIRTABLE_API_KEY: "placeholder"
+          AIRTABLE_BASE_ID: "appPlaceholder"
+        run: npm run verify:public-appearance
 
   required-ci-result:
     name: Required CI result

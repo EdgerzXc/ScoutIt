@@ -23,9 +23,9 @@
  * `src/lib/brainCitation.js`. The row's `updated_at` is when WE wrote it and is
  * never presented as the document's own date.
  *
- * IDEMPOTENT: a document is keyed by its vault path. Re-running deletes that
- * path's previous row (chunks cascade) and re-inserts, so the Brain converges
- * on the vault instead of accumulating duplicates.
+ * IDEMPOTENT: a document is keyed by its vault path. Re-running compares its
+ * content as well as its date, and replaces the previous row only after the
+ * new row and all of its chunks are ready.
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -46,6 +46,7 @@ const BUDGET = (() => {
 const VAULT = "_SCOUTIT_BRAIN";
 const EMBED_DIMENSIONS = 768;
 const CHUNK_TARGET = 800;
+const CHUNK_OVERLAP = 120;
 const CONCURRENCY = 2;
 const CHUNK_INSERT_BATCH = 10;
 
@@ -130,17 +131,51 @@ export function parseDocument(raw, relPath) {
   return { title, updated, body: body.trim() };
 }
 
+function safeSliceTail(text, maxOverlap) {
+  if (!text || maxOverlap <= 0) return "";
+  const trimmed = text.trim();
+  if (trimmed.length <= maxOverlap) return trimmed;
+  let start = trimmed.length - maxOverlap;
+  const code = trimmed.charCodeAt(start);
+  if (code >= 0xdc00 && code <= 0xdfff && start > 0) {
+    start += 1;
+  }
+  return trimmed.slice(start);
+}
+
+function getTailOverlap(text, maxOverlap) {
+  if (!text || maxOverlap <= 0) return "";
+  const trimmed = text.trim();
+  if (trimmed.length <= maxOverlap) return trimmed;
+  const rawTail = safeSliceTail(trimmed, maxOverlap);
+  const newline = rawTail.indexOf("\n\n");
+  if (newline !== -1 && newline < maxOverlap * 0.6) {
+    return rawTail.slice(newline + 2).trim();
+  }
+  const sentence = rawTail.search(/[.!?]\s+/);
+  if (sentence !== -1 && sentence < maxOverlap * 0.6) {
+    return rawTail.slice(sentence + 2).trim();
+  }
+  const space = rawTail.search(/\s+/);
+  if (space !== -1 && space < maxOverlap * 0.4) {
+    return rawTail.slice(space).trim();
+  }
+  return rawTail.trim();
+}
+
 /** Same algorithm as mission-control/src/lib/brain.js chunkText. */
-export function chunkText(text, target = CHUNK_TARGET) {
+export function chunkText(text, target = CHUNK_TARGET, overlap = CHUNK_OVERLAP) {
   const clean = (text || "").replace(/\r\n/g, "\n").trim();
   if (!clean) return [];
   const paragraphs = clean.split(/\n\s*\n/);
   const chunks = [];
+  const effectiveOverlap = overlap > 0 ? Math.min(overlap, Math.floor(target * 0.25)) : 0;
   let buf = "";
   for (const para of paragraphs) {
-    if ((buf + "\n\n" + para).length > target && buf) {
+    if (buf && (buf + "\n\n" + para).length > target) {
       chunks.push(buf.trim());
-      buf = para;
+      const tail = getTailOverlap(buf, effectiveOverlap);
+      buf = tail ? `${tail}\n\n${para}` : para;
     } else {
       buf = buf ? `${buf}\n\n${para}` : para;
     }
@@ -286,6 +321,62 @@ export function collectDocuments() {
     .filter((d) => d.chunks.length > 0);
 }
 
+export function needsIngestion(doc, existingRows) {
+  if (existingRows.length !== 1) return true;
+  const [row] = existingRows;
+  const source = doc.updated ? `vault:${doc.relPath}@${doc.updated}` : `vault:${doc.relPath}`;
+  return row.source !== source || row.content !== doc.body ||
+    row.title !== doc.title || row.category !== doc.category;
+}
+
+/** Keep the last complete copy available until its replacement is fully written. */
+export async function replaceDocument(doc, previousIds, {
+  embedChunks = embedAll,
+  write = rest,
+} = {}) {
+  const vectors = await embedChunks(doc.chunks);
+  const source = doc.updated ? `vault:${doc.relPath}@${doc.updated}` : `vault:${doc.relPath}`;
+  const [inserted] = await write("brain_documents", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      title: doc.title,
+      category: doc.category,
+      source,
+      content: doc.body,
+      created_by: "ingest-vault.mjs (A-124)",
+    }),
+  });
+
+  try {
+    const rows = doc.chunks.map((content, i) => ({
+      document_id: inserted.id,
+      chunk_index: i,
+      content,
+      embedding: vectors[i],
+    }));
+    for (let i = 0; i < rows.length; i += CHUNK_INSERT_BATCH) {
+      await write("brain_chunks", {
+        method: "POST",
+        body: JSON.stringify(rows.slice(i, i + CHUNK_INSERT_BATCH)),
+      });
+    }
+  } catch (error) {
+    // Chunks cascade. An incomplete new row must never replace the old one.
+    try {
+      await write(`brain_documents?id=eq.${inserted.id}`, { method: "DELETE" });
+    } catch (cleanupError) {
+      throw new AggregateError([error, cleanupError], `Could not clean up incomplete ${source}`);
+    }
+    throw error;
+  }
+
+  for (const id of previousIds) {
+    await write(`brain_documents?id=eq.${id}`, { method: "DELETE" });
+  }
+  return doc.chunks.length;
+}
+
 async function main() {
   if (!existsSync(VAULT)) throw new Error(`Run from the repository root: ${VAULT} not found.`);
   if (!DRY_RUN && (!SUPABASE_URL || !SERVICE_KEY)) {
@@ -313,17 +404,16 @@ async function main() {
   if (!GEMINI_KEY) throw new Error("GEMINI_API_KEY is required for a real ingestion run.");
 
   // Existing vault rows, so a re-run converges instead of duplicating.
-  const existing = await rest("brain_documents?select=id,source&source=like.vault:*");
-  const idByPath = new Map();
-  const sourceByPath = new Map();
+  const existing = await rest("brain_documents?select=id,source,content,title,category&source=like.vault:*");
+  const rowsByPath = new Map();
   for (const row of existing) {
     const body = row.source.slice("vault:".length);
     const at = body.lastIndexOf("@");
     const path = at === -1 ? body : body.slice(0, at);
-    idByPath.set(path, row.id);
-    sourceByPath.set(path, row.source);
+    if (!rowsByPath.has(path)) rowsByPath.set(path, []);
+    rowsByPath.get(path).push(row);
   }
-  console.log(`\nExisting vault documents in the Brain: ${idByPath.size}`);
+  console.log(`\nExisting vault documents in the Brain: ${rowsByPath.size}`);
 
   // RESUME, because the free tier makes this a multi-day job.
   //
@@ -335,14 +425,10 @@ async function main() {
   // re-embedded, and `--budget=N` stops the run before it burns into the next
   // day's allowance.
   //
-  // Skipping is safe precisely BECAUSE the source key carries the file's own
-  // `updated:` date: a document whose date has changed is re-ingested, and one
-  // that has not is left alone.
+  // The source key carries the file's own `updated:` date, but editors can
+  // change a document more than once per day. Compare the stored body too.
   const pending = RESUME
-    ? docs.filter((d) => {
-        const source = d.updated ? `vault:${d.relPath}@${d.updated}` : `vault:${d.relPath}`;
-        return sourceByPath.get(d.relPath) !== source;
-      })
+    ? docs.filter((d) => needsIngestion(d, rowsByPath.get(d.relPath) || []))
     : docs;
 
   if (RESUME && pending.length !== docs.length) {
@@ -361,55 +447,23 @@ async function main() {
       break;
     }
     spent += doc.chunks.length;
-    const previous = idByPath.get(doc.relPath);
-    if (previous) await rest(`brain_documents?id=eq.${previous}`, { method: "DELETE" });
-
-    const source = doc.updated ? `vault:${doc.relPath}@${doc.updated}` : `vault:${doc.relPath}`;
-    const [inserted] = await rest("brain_documents", {
-      method: "POST",
-      headers: { Prefer: "return=representation" },
-      body: JSON.stringify({
-        title: doc.title,
-        category: doc.category,
-        source,
-        content: doc.body,
-        created_by: "ingest-vault.mjs (A-124)",
-      }),
-    });
-
-    const vectors = await embedAll(doc.chunks);
-    const rows = doc.chunks.map((content, i) => ({
-      document_id: inserted.id,
-      chunk_index: i,
-      content,
-      embedding: vectors[i],
-    }));
-    // 25, not 100: a 768-float vector is ~15 KB of JSON, so a 100-row batch
-    // is ~1.5 MB and PostgREST rejects it as "Empty or invalid json" -- a
-    // body-size refusal wearing a parse error's message.
-    for (let i = 0; i < rows.length; i += CHUNK_INSERT_BATCH) {
-      await rest("brain_chunks", {
-        method: "POST",
-        body: JSON.stringify(rows.slice(i, i + CHUNK_INSERT_BATCH)),
-      });
-    }
+    const previousIds = (rowsByPath.get(doc.relPath) || []).map((row) => row.id);
+    const chunkCount = await replaceDocument(doc, previousIds);
 
     done += 1;
-    console.log(`[${String(done).padStart(3)}/${pending.length}] ${doc.relPath} (${rows.length} chunks)`);
+    console.log(`[${String(done).padStart(3)}/${pending.length}] ${doc.relPath} (${chunkCount} chunks)`);
   }
 
   const remaining = pending.length - done;
   if (remaining > 0) {
     console.log(`\nIngestion PAUSED: ${done} of ${pending.length} documents written, ${remaining} remain.`);
     console.log("Re-run this script to continue where it stopped.");
-    console.log("Do NOT rebuild the ivfflat index until the corpus is complete.");
+    console.log("The HNSW index remains available during partial ingestion.");
     return;
   }
 
   console.log("\nIngestion complete.");
-  console.log("NEXT, and it is not optional: rebuild idx_brain_chunks_embedding.");
-  console.log("ivfflat derives its clusters from existing rows, so the index built on an");
-  console.log("empty table is untrained and recall degrades with no error.");
+  console.log("The HNSW index remains available; no ivfflat rebuild is needed.");
 }
 
 if (process.argv[1]?.endsWith("ingest-vault.mjs")) {

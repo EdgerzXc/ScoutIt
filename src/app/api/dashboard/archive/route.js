@@ -12,6 +12,16 @@ const schema = z.object({
   submissionId: z.string().optional(),
 }).refine((value) => value.propertyIds?.length || value.submissionId, { message: "At least one property is required" });
 
+async function purgePublicCatalogue() {
+  try {
+    const purge = await invalidateCmsBundle();
+    return purge.sharedCachePurged === false;
+  } catch (cacheError) {
+    console.error("[ARCHIVE] Catalogue cache purge failed after withdrawal:", cacheError?.message);
+    return true;
+  }
+}
+
 export async function POST(request) {
   try {
     const parsed = schema.safeParse(await request.json());
@@ -53,7 +63,9 @@ export async function POST(request) {
           await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
         } catch (error) {
           console.error("[WITHDRAW API] Airtable unpublish failed:", error);
-          return NextResponse.json({ error: "Airtable unpublish failed; retry the withdrawal", retryable: true }, { status: 502 });
+          // Earlier records in this batch may already be unpublished.
+          const publicCachePending = await purgePublicCatalogue();
+          return NextResponse.json({ error: "Airtable unpublish failed; check the selected listings before retrying", retryable: true, publicCachePending }, { status: 502 });
         }
       }
     } else if (owned.some((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.LIVE)) {
@@ -76,8 +88,13 @@ export async function POST(request) {
       .select("id, canonical_slug, slug, lifecycle_state, pipeline_status, quietly_open_to_offers");
     if (updateError) {
       console.error("[WITHDRAW API] Supabase lifecycle update failed:", updateError);
-      return NextResponse.json({ error: "Public listing was unpublished, but lifecycle state needs reconciliation", retryable: true }, { status: 500 });
+      const publicCachePending = await purgePublicCatalogue();
+      return NextResponse.json({ error: "Public listing was unpublished, but lifecycle state needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
     }
+
+    // Purge before the audit write so an audit failure cannot leave a
+    // withdrawn listing in the twelve-hour public snapshot.
+    const publicCachePending = await purgePublicCatalogue();
 
     const events = owned.map((property) => ({
       property_id: property.id,
@@ -92,23 +109,12 @@ export async function POST(request) {
     if (auditError) console.error("[WITHDRAW API] Audit insert failed:", auditError);
     if (auditError) {
       return NextResponse.json(
-        { error: "Listing is off-market, but lifecycle audit evidence needs reconciliation", retryable: true },
+        { error: "Listing is off-market, but lifecycle audit evidence needs reconciliation", retryable: true, publicCachePending },
         { status: 500 }
       );
     }
 
-    // A withdrawn or removed listing must stop being served publicly now, not
-    // when a TTL expires. /api/cms is backed by a Redis bundle held for ten
-    // minutes and a per-instance memory copy held for sixty seconds; without
-    // this the property stays in the public catalogue for up to ten minutes
-    // after the owner takes it down. Failure is logged, never propagated: the
-    // takedown itself has already succeeded and must not be reported as failed
-    // because a cache purge could not complete.
-    await invalidateCmsBundle().catch((cacheError) => {
-      console.error("[ARCHIVE] Catalogue cache purge failed after withdrawal:", cacheError?.message);
-    });
-
-    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.OFF_MARKET, withdrawnCount: updated?.length || owned.length, withdrawnIds: owned.map((property) => property.id), auditWarning: auditError ? "Lifecycle changed; audit event retry is required" : undefined });
+    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.OFF_MARKET, withdrawnCount: updated?.length || owned.length, withdrawnIds: owned.map((property) => property.id), publicCachePending, auditWarning: auditError ? "Lifecycle changed; audit event retry is required" : undefined });
   } catch (error) {
     console.error("[WITHDRAW API] Error:", error);
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });

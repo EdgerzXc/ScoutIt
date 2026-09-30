@@ -6,9 +6,9 @@
     {
       "name": "Showcase stage and parent navigation",
       "path": "src/components/board/ShowcaseStage.js",
-      "sha256": "e9bdc05b2b32c286d6ac347f213cccd77739b57891a52dbba906f3432230b757",
-      "acceptedAt": "2026-09-26",
-      "acceptedChange": "Owner authorized: Fix bottom selection click in White Lens & Lite Mode (bypass rAF loop on goToTier), drag threshold (5px), and safety timeout (700ms)."
+      "sha256": "0e3e5093df23b83b7231542fdb4669273f1a759fc5feb24f9ac9e1c395b64c0f",
+      "acceptedAt": "2026-09-27",
+      "acceptedChange": "Owner approved desktop and mobile Showcase previews: readable text roles in White Lens and viewport divider contrast in both appearances."
     },
     {
       "name": "Metropolis foreground surface",

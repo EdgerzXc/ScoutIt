@@ -165,10 +165,13 @@ function AdminPageInner() {
         throw new Error(result.error || "Failed to approve property.");
       }
 
-      setMessage({ type: "success", text: "Property approved and synced to Airtable!" });
-      
-      // Remove from list
-      setPendingProperties((prev) => prev.filter((p) => p.id !== submissionId));
+      if (result.warning) {
+        setMessage({ type: "warning", text: `Warning: ${result.warning}. Listing retained in pending queue.` });
+      } else {
+        setMessage({ type: "success", text: "Property approved and synced to Airtable!" });
+        // Remove from list
+        setPendingProperties((prev) => prev.filter((p) => p.id !== submissionId));
+      }
     } catch (err) {
       console.error(err);
       setMessage({ type: "error", text: sanitizeError(err, "Couldn't approve that property.") });
@@ -206,7 +209,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("flags")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "flags"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -218,7 +221,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("approvals")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "approvals"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -230,7 +233,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("prc")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "prc"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -242,7 +245,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("pdf")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "pdf"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -254,7 +257,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("intel")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "intel"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -269,7 +272,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("refunds")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "refunds"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -282,7 +285,7 @@ function AdminPageInner() {
             onClick={() => setActiveTab("verify")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "verify"
-                ? "border-[#E8AE3C] text-[#E8AE3C] bg-[#E8AE3C]/10 font-bold"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
@@ -347,7 +350,7 @@ function AdminPageInner() {
                     <div key={prop.id} className="submission-card">
                       <div className="submission-info">
                         <div className="info-primary">
-                          <Building2 size={16} color="#E8AE3C" />
+                          <Building2 size={16} style={{ color: "var(--accent)" }} />
                           <h3>{prop.title}</h3>
                         </div>
                         <div className="info-secondary">
@@ -409,7 +412,7 @@ function AdminPageInner() {
                     <div key={draft.id} className="submission-card">
                       <div className="submission-info">
                         <div className="info-primary">
-                          <FileText size={16} color="#E8AE3C" />
+                          <FileText size={16} style={{ color: "var(--accent)" }} />
                           <h3>{draft.title}</h3>
                         </div>
                         <div className="info-secondary">
@@ -473,7 +476,7 @@ function AdminPageInner() {
                         <div className="info-primary">
                           {p.prc_verified
                             ? <ShieldCheck size={16} color="#4caf7d" />
-                            : <ShieldOff size={16} color="#E8AE3C" />}
+                            : <ShieldOff size={16} style={{ color: "var(--accent)" }} />}
                           <h3>{p.display_name || p.id}</h3>
                         </div>
                         <div className="info-secondary">
@@ -564,7 +567,7 @@ function AdminPageInner() {
         .page-title {
           font-family: var(--font-display);
           font-size: 38px;
-          color: #fff;
+          color: var(--text-primary);
           margin-bottom: 12px;
         }
 
@@ -596,6 +599,12 @@ function AdminPageInner() {
           color: #4caf7d;
         }
 
+        .admin-alert.warning {
+          background: rgba(var(--accent-rgb), 0.1);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
+          color: var(--accent);
+        }
+
         .admin-alert.error {
           background: var(--red-dim);
           border: 1px solid var(--red);
@@ -603,7 +612,7 @@ function AdminPageInner() {
         }
 
         .admin-panel {
-          background: #121212;
+          background: var(--surface);
           border: 1px solid rgba(255, 255, 255, 0.05);
           border-radius: 8px;
           overflow: hidden;
@@ -621,7 +630,7 @@ function AdminPageInner() {
         .panel-header h2 {
           font-family: var(--font-display);
           font-size: 20px;
-          color: #fff;
+          color: var(--text-primary);
           margin: 0;
         }
 
@@ -732,7 +741,7 @@ function AdminPageInner() {
         .info-primary h3 {
           font-family: var(--font-display);
           font-size: 18px;
-          color: #fff;
+          color: var(--text-primary);
           margin: 0;
           min-width: 0;
           overflow-wrap: anywhere;
@@ -762,7 +771,7 @@ function AdminPageInner() {
 
         .info-tag.coords {
           color: var(--accent);
-          background: rgba(232, 174, 60, 0.08);
+          background: rgba(var(--accent-rgb), 0.08);
         }
 
         .info-meta {
@@ -792,7 +801,7 @@ function AdminPageInner() {
         .btn-approve:hover:not(:disabled) {
           background: var(--accent-bright);
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(232, 174, 60, 0.2);
+          box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
         }
 
         .btn-approve:disabled {

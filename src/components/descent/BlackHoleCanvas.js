@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { isLiteMode, LITE_MODE_EVENT } from "@/lib/liteMode";
 import { isLightMode, LIGHT_MODE_EVENT } from "@/lib/lightMode";
+import { hasShaderContext } from "@/lib/webglContextCapabilities";
 
 // ═══════════════════════════════════════════════════════════════
 // Hero black hole — Balance Mode. Raymarched WebGL framing the homepage
@@ -305,8 +306,13 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
     if (isLiteMode() || lightActive || isLightMode()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const gl = canvas.getContext("webgl", { antialias: false, alpha: false });
-    if (!gl) return; // no WebGL — the CSS horizon glow stays as the scene
+    let gl;
+    try {
+      gl = canvas.getContext("webgl", { antialias: false, alpha: false });
+    } catch {
+      return; // WebGL blocked — keep the CSS horizon glow.
+    }
+    if (!hasShaderContext(gl)) return; // incomplete context — same CSS fallback
 
     const compile = (type, source) => {
       const shader = gl.createShader(type);

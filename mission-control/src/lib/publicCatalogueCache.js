@@ -6,7 +6,7 @@ import "server-only";
  * The public site serves properties from a single Redis key (`cms_bundle`,
  * written by the main app's `src/lib/cmsCache.js`) in front of Airtable. A
  * correction that reaches Airtable but not this key is a correction a visitor
- * does not see until the cache happens to expire — which for a wrong map pin
+ * does not see until the twelve-hour cache happens to expire — which for a wrong map pin
  * means the thing staff were trying to fix stays wrong on screen.
  *
  * This talks to Upstash over its REST API with `fetch` rather than adding
@@ -20,6 +20,7 @@ import "server-only";
  */
 
 const CMS_BUNDLE_KEY = "cms_bundle";
+const CMS_GENERATION_KEY = "cms_bundle_generation";
 
 /**
  * Drop the public catalogue cache.
@@ -27,7 +28,9 @@ const CMS_BUNDLE_KEY = "cms_bundle";
  * Never throws. The caller has already committed a correction to Supabase and
  * Airtable by this point, and an unreachable cache must not present itself as
  * a failed correction — but it must not present itself as a success either, so
- * the outcome is returned for the caller to record and show.
+ * the outcome is returned for the caller to record and show. A generation
+ * increment prevents an in-flight rebuild on another instance from restoring
+ * a snapshot that predates the correction.
  *
  * @returns {Promise<{purged: boolean, detail: string}>}
  */
@@ -40,18 +43,29 @@ export async function purgePublicCatalogueCache() {
       purged: false,
       detail:
         "Upstash credentials are not set on Mission Control, so the public cache was left alone. " +
-        "It refreshes on its own within a minute.",
+        "Staff must resolve this before relying on a public correction.",
     };
   }
 
   try {
-    const res = await fetch(`${url.replace(/\/$/, "")}/del/${CMS_BUNDLE_KEY}`, {
+    const baseUrl = url.replace(/\/$/, "");
+    const generation = await fetch(`${baseUrl}/incr/${CMS_GENERATION_KEY}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    const generationResult = await generation.json().catch(() => null);
+    if (!generation.ok || generationResult?.error) {
+      return { purged: false, detail: `Upstash refused the catalogue generation update (${generation.status}).` };
+    }
+    const res = await fetch(`${baseUrl}/del/${CMS_BUNDLE_KEY}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
 
-    if (!res.ok) {
+    const purgeResult = await res.json().catch(() => null);
+    if (!res.ok || purgeResult?.error) {
       return { purged: false, detail: `Upstash refused the purge (${res.status}).` };
     }
 

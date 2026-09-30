@@ -57,8 +57,8 @@ function SliderGroup({ sliders, params, onSet }) {
       {sliders.map(({ key, label, min, max, step }) => (
         <div key={key}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
-            <span style={{ color: "rgba(255,255,255,0.55)" }}>{label}</span>
-            <span style={{ color: "#E8AE3C" }}>{Number(params[key]).toFixed(2)}</span>
+            <span style={{ color: "var(--text-secondary)" }}>{label}</span>
+            <span style={{ color: "var(--accent)" }}>{Number(params[key]).toFixed(2)}</span>
           </div>
           <input
             type="range"
@@ -67,7 +67,7 @@ function SliderGroup({ sliders, params, onSet }) {
             step={step}
             value={params[key]}
             onChange={(e) => onSet(key, parseFloat(e.target.value))}
-            style={{ width: "100%", accentColor: "#E8AE3C", height: 4, cursor: "pointer" }}
+            style={{ width: "100%", accentColor: "var(--accent)", height: 4, cursor: "pointer" }}
           />
         </div>
       ))}
@@ -77,13 +77,13 @@ function SliderGroup({ sliders, params, onSet }) {
 
 const sectionTitleStyle = {
   fontSize: 12,
-  color: "rgba(255,255,255,0.4)",
+  color: "var(--text-muted)",
   letterSpacing: "0.14em",
   textTransform: "uppercase",
   marginBottom: 6,
 };
 
-const dividerStyle = { height: 1, background: "rgba(255,255,255,0.05)" };
+const dividerStyle = { height: 1, background: "var(--border)" };
 
 export default function InteractivePanel({ params, onChange, onClose }) {
   const [minimized, setMinimized] = useState(false);
@@ -107,13 +107,13 @@ export default function InteractivePanel({ params, onChange, onClose }) {
         maxHeight: "calc(100% - 28px)",
         display: "flex",
         flexDirection: "column",
-        background: "rgba(10,10,10,0.82)",
-        border: "1px solid rgba(232, 174, 60,0.25)",
+        background: "var(--surface)",
+        border: "1px solid var(--accent-muted)",
         borderRadius: 10,
         backdropFilter: "blur(10px)",
-        boxShadow: "0 12px 40px rgba(0,0,0,0.55)",
+        boxShadow: "var(--shadow-xl)",
         fontFamily: "var(--font-mono, monospace)",
-        color: "#e5e2e1",
+        color: "var(--text-primary)",
         overflow: "hidden",
       }}
     >
@@ -127,7 +127,7 @@ export default function InteractivePanel({ params, onChange, onClose }) {
           gap: 10,
           cursor: "pointer",
           flexShrink: 0,
-          borderBottom: minimized ? "none" : "1px solid rgba(255,255,255,0.06)",
+          borderBottom: minimized ? "none" : "1px solid var(--border)",
         }}
         onClick={() => setMinimized((m) => !m)}
         role="button"
@@ -136,18 +136,18 @@ export default function InteractivePanel({ params, onChange, onClose }) {
         aria-label={minimized ? "Expand black hole controls" : "Minimize black hole controls"}
       >
         <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8AE3C" }} />
-          <span style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />
+          <span style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)" }}>
             Golden Horizon
           </span>
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{minimized ? "▸" : "▾"}</span>
+          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{minimized ? "▸" : "▾"}</span>
           {onClose && !minimized && (
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
               aria-label="Exit Interactive Mode"
-              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", cursor: "pointer", fontSize: 12, padding: "0 2px" }}
+              style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 2px" }}
             >
               ✕
             </button>
@@ -176,9 +176,9 @@ export default function InteractivePanel({ params, onChange, onClose }) {
                       textAlign: "left",
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
-                      border: `1px solid ${active ? "rgba(232, 174, 60,0.5)" : "rgba(255,255,255,0.08)"}`,
-                      background: active ? "rgba(232, 174, 60,0.12)" : "rgba(255,255,255,0.02)",
-                      color: active ? "#E8AE3C" : "rgba(255,255,255,0.55)",
+                      border: `1px solid ${active ? "var(--accent-muted)" : "var(--border)"}`,
+                      background: active ? "var(--accent-dim)" : "var(--surface)",
+                      color: active ? "var(--accent-bright)" : "var(--text-secondary)",
                     }}
                   >
                     {preset.name}
@@ -206,9 +206,9 @@ export default function InteractivePanel({ params, onChange, onClose }) {
                       borderRadius: 5,
                       cursor: "pointer",
                       textAlign: "left",
-                      border: `1px solid ${active ? "rgba(232, 174, 60,0.5)" : "rgba(255,255,255,0.08)"}`,
-                      background: active ? "rgba(232, 174, 60,0.12)" : "rgba(255,255,255,0.02)",
-                      color: active ? "#E8AE3C" : "rgba(255,255,255,0.55)",
+                      border: `1px solid ${active ? "var(--accent-muted)" : "var(--border)"}`,
+                      background: active ? "var(--accent-dim)" : "var(--surface)",
+                      color: active ? "var(--accent-bright)" : "var(--text-secondary)",
                     }}
                   >
                     {name}
@@ -234,7 +234,7 @@ export default function InteractivePanel({ params, onChange, onClose }) {
             <SliderGroup sliders={AESTHETIC_SLIDERS} params={params} onSet={setParam} />
           </div>
 
-          <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.4 }}>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--text-muted)", lineHeight: 1.4 }}>
             Drag the black hole to orbit it in 3D. Click for a spacetime shockwave. Hover to bend light around your cursor.
           </p>
 
@@ -247,9 +247,9 @@ export default function InteractivePanel({ params, onChange, onClose }) {
               borderRadius: 6,
               cursor: "pointer",
               textAlign: "center",
-              color: "rgba(255,255,255,0.45)",
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              color: "var(--text-muted)",
+              background: "var(--surface2)",
+              border: "1px solid var(--border)",
             }}
           >
             Reset to default

@@ -12,8 +12,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const requests = [];
 vi.mock("@/lib/fetchWithRetry", () => ({
-  fetchWithRetry: async (url) => {
+  fetchWithRetry: async (url, _init, options) => {
     requests.push(url);
+    options?.onAttempt?.({ number: 1, method: "GET" });
     const parsed = new URL(url);
     const offset = parsed.searchParams.get("offset");
     const page = offset ? Number(offset.replace("page", "")) : 0;
@@ -48,6 +49,16 @@ describe("A-079 · bulk Airtable fetches follow `offset` to the end", () => {
 
     expect(brokers).toHaveLength(237);
     expect(requests).toHaveLength(3);
+  });
+
+  it("counts each paginated request through the caller's attempt hook", async () => {
+    pages = [brokerPage(100, 0, "page1"), brokerPage(5, 100)];
+    const onAttempt = vi.fn();
+
+    await fetchBrokers("key", "base", { onAttempt });
+
+    expect(requests).toHaveLength(2);
+    expect(onAttempt).toHaveBeenCalledTimes(2);
   });
 
   it("stops as soon as Airtable stops returning an offset", async () => {

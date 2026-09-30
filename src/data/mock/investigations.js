@@ -44,7 +44,7 @@ export const INVESTIGATIONS = [
         relationReason: "Covered territory · Existing office inventory",
         impactTag: "↑ Modernization Pressure",
         classification: "UPGRADE REQUIRED",
-        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80",
+        image: "/assets/intel-tower-mesh.svg",
         specs: "42,000 sqm · 32 Floors",
         coords: { x: 50, y: 46 }
       },
@@ -57,7 +57,7 @@ export const INVESTIGATIONS = [
         relationReason: "Adjacent luxury buffer · Low-E glass installed",
         impactTag: "● Pre-Compliant Asset",
         classification: "ALREADY COMPLIANT",
-        image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80",
+        image: "/assets/intel-geometric-capital.svg",
         specs: "650 sqm Penthouse · Floor 54",
         coords: { x: 56, y: 52 }
       },
@@ -70,7 +70,7 @@ export const INVESTIGATIONS = [
         relationReason: "Secondary compliance deadline Q4 2028",
         impactTag: "⚠ CapEx Retrofit Pending",
         classification: "LIKELY RETROFIT REQUIRED",
-        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80",
+        image: "/assets/intel-tower-mesh.svg",
         specs: "14,500 sqm · Mid-Rise Office",
         coords: { x: 46, y: 42 }
       }
@@ -180,7 +180,7 @@ export const INVESTIGATIONS = [
         relationReason: "Direct subterranean concourse portal link",
         impactTag: "↑ +38% Appreciation Surge",
         classification: "PRIME BENEFICIARY",
-        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
+        image: "/assets/intel-spatial-grid.svg",
         specs: "450 sqm · Modernist Villa",
         coords: { x: 62, y: 52 }
       },
@@ -193,7 +193,7 @@ export const INVESTIGATIONS = [
         relationReason: "Acoustic buffer verified · Floating trackbed isolation",
         impactTag: "● High Demand Hold",
         classification: "PRIME BENEFICIARY",
-        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+        image: "/assets/intel-geometric-capital.svg",
         specs: "380 sqm · Signature Suite",
         coords: { x: 66, y: 58 }
       },
@@ -206,7 +206,7 @@ export const INVESTIGATIONS = [
         relationReason: "Off-market acquisition surge · Transit proximity",
         impactTag: "↑ Private Inquiries +45%",
         classification: "HIGH IMPACT",
-        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
+        image: "/assets/intel-spatial-grid.svg",
         specs: "520 sqm · Acoustic Compound",
         coords: { x: 60, y: 50 }
       }
@@ -304,7 +304,7 @@ export const INVESTIGATIONS = [
         relationReason: "Directly facing new atrium campus · Hospitality surge",
         impactTag: "↑ +28% Inquiry Surge",
         classification: "PRIME BENEFICIARY",
-        image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&q=80",
+        image: "/assets/intel-spatial-grid.svg",
         specs: "1,200 sqm · Coastal Pavilion",
         coords: { x: 40, y: 56 }
       },
@@ -317,7 +317,7 @@ export const INVESTIGATIONS = [
         relationReason: "Corporate spillover & executive lodging catchment",
         impactTag: "↑ High Commercial Demand",
         classification: "HIGH IMPACT",
-        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80",
+        image: "/assets/intel-tower-mesh.svg",
         specs: "2,400 sqm · Grade A Floorplate",
         coords: { x: 44, y: 60 }
       }
@@ -410,7 +410,7 @@ export const INVESTIGATIONS = [
         relationReason: "25m coastal easement compliant · 22.4% ARR target",
         impactTag: "↑ 22.4% Annual Yield",
         classification: "PRIME BENEFICIARY",
-        image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80",
+        image: "/assets/intel-str-coastal.svg",
         specs: "320 sqm · Teak Surf Villa",
         coords: { x: 76, y: 70 }
       },
@@ -423,7 +423,7 @@ export const INVESTIGATIONS = [
         relationReason: "Titled beachfront parcel · 100% solar microgrid",
         impactTag: "● High Occupancy Asset",
         classification: "PRIME BENEFICIARY",
-        image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80",
+        image: "/assets/intel-str-coastal.svg",
         specs: "480 sqm · 4 Pavilions",
         coords: { x: 80, y: 74 }
       }

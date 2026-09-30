@@ -71,7 +71,7 @@ export default function EnterprisePage() {
         .enterprise-title {
           font-family: var(--font-display);
           font-size: 48px;
-          color: #fff;
+          color: var(--text-primary);
           margin: 16px 0;
         }
         .enterprise-subtitle {
@@ -94,7 +94,7 @@ export default function EnterprisePage() {
           border-radius: var(--radius-md);
           padding: 28px 24px;
         }
-        .enterprise-card h3 {
+        .enterprise-card h2 {
           font-family: var(--font-display);
           font-size: 17px;
           color: var(--text-primary);
@@ -107,7 +107,7 @@ export default function EnterprisePage() {
         }
         .enterprise-cta {
           padding: 40px;
-          background: linear-gradient(135deg, rgba(232, 174, 60,0.06) 0%, var(--surface) 60%);
+          background: linear-gradient(135deg, var(--accent-dim) 0%, var(--surface) 60%);
           border: 1px solid var(--accent-muted);
           border-radius: var(--radius-md);
         }
@@ -119,8 +119,8 @@ export default function EnterprisePage() {
         .enterprise-cta-btn {
           display: inline-flex;
           align-items: center;
-          background: var(--accent-bright);
-          color: var(--bg, #0e0e0e);
+          background: var(--accent-fill);
+          color: var(--on-accent);
           font-weight: 700;
           padding: 14px 30px;
           border-radius: 4px;
@@ -130,6 +130,7 @@ export default function EnterprisePage() {
         }
         .enterprise-cta-btn:hover {
           transform: translateY(-2px);
+          background: var(--accent-fill-hover);
           box-shadow: var(--shadow-glow);
         }
         .enterprise-cta-btn:active {
@@ -156,7 +157,7 @@ export default function EnterprisePage() {
         }
         .enterprise-cta-secondary:hover {
           border-color: var(--accent);
-          background: rgba(232, 174, 60, 0.06);
+          background: var(--accent-dim);
         }
         @media (max-width: 768px) {
           .enterprise-grid { grid-template-columns: 1fr; }

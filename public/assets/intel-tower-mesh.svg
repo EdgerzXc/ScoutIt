@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="50%" stop-color="#101014" />
+      <stop offset="100%" stop-color="#070708" />
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="65%" cy="35%" r="50%">
+      <stop offset="0%" stop-color="#E8AE3C" stop-opacity="0.18" />
+      <stop offset="60%" stop-color="#6E531A" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="goldLine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F7C64E" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#E8AE3C" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#6E531A" stop-opacity="0.1" />
+    </linearGradient>
+    <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#222226" stroke-width="0.75" stroke-opacity="0.6" />
+    </pattern>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="800" fill="url(#bgGrad)" />
+  <rect width="1200" height="800" fill="url(#goldGlow)" />
+  <rect width="1200" height="800" fill="url(#gridPattern)" />
+
+  <!-- Diagonal Space Intelligence Light Beams -->
+  <path d="M 450 -100 L 950 900 L 800 900 L 300 -100 Z" fill="#E8AE3C" fill-opacity="0.015" />
+  <path d="M 600 -100 L 1100 900 L 980 900 L 480 -100 Z" fill="#F7C64E" fill-opacity="0.02" />
+
+  <!-- Architectural Skyscraper Silhouettes (Obsidian & Gold) -->
+  <!-- Tower 1: Primary Center-Right Trophy Tower -->
+  <polygon points="680,120 840,210 840,750 680,660" fill="#141418" stroke="#E8AE3C" stroke-width="1.2" stroke-opacity="0.7" />
+  <polygon points="520,210 680,120 680,660 520,750" fill="#0d0d10" stroke="#6E531A" stroke-width="1" stroke-opacity="0.5" />
+  
+  <!-- Architectural Facet Ribs -->
+  <line x1="680" y1="120" x2="680" y2="660" stroke="#F7C64E" stroke-width="1.5" stroke-opacity="0.85" />
+  <line x1="560" y1="187" x2="560" y2="727" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.4" />
+  <line x1="600" y1="165" x2="600" y2="705" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.4" />
+  <line x1="640" y1="142" x2="640" y2="682" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.4" />
+
+  <line x1="720" y1="142" x2="720" y2="682" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.3" />
+  <line x1="760" y1="165" x2="760" y2="705" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.3" />
+  <line x1="800" y1="187" x2="800" y2="727" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.3" />
+
+  <!-- Horizontal Floor Slabs -->
+  <path d="M 520,300 L 680,210 L 840,300" fill="none" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.35" />
+  <path d="M 520,390 L 680,300 L 840,390" fill="none" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.35" />
+  <path d="M 520,480 L 680,390 L 840,480" fill="none" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.35" />
+  <path d="M 520,570 L 680,480 L 840,570" fill="none" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.35" />
+  <path d="M 520,660 L 680,570 L 840,660" fill="none" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.35" />
+
+  <!-- Tower 2: Background Secondary Left Tower -->
+  <polygon points="380,240 480,300 480,720 380,660" fill="#0f0f13" stroke="#6E531A" stroke-width="0.8" stroke-opacity="0.4" />
+  <polygon points="280,300 380,240 380,660 280,720" fill="#08080a" stroke="#333339" stroke-width="0.8" stroke-opacity="0.4" />
+  <line x1="380" y1="240" x2="380" y2="660" stroke="#E8AE3C" stroke-width="1" stroke-opacity="0.5" />
+
+  <!-- Tower Spire & Beacon -->
+  <line x1="680" y1="120" x2="680" y2="40" stroke="url(#goldLine)" stroke-width="2" />
+  <circle cx="680" cy="40" r="4" fill="#F7C64E" />
+  <circle cx="680" cy="40" r="12" fill="#F7C64E" fill-opacity="0.25" />
+
+  <!-- Telemetry & Coordinate Overlays -->
+  <g font-family="monospace" font-size="11" fill="#E8AE3C" fill-opacity="0.65" letter-spacing="2">
+    <text x="60" y="80">SCOUTIT INTEL // CORRIDOR ASSET 01</text>
+    <text x="60" y="105" fill="#888892">14°33'12"N  121°03'24"E · ELEVATION 284M</text>
+    <text x="60" y="730">RADAR FREQUENCY: 5.8 GHZ // STATUS: REGISTERED</text>
+  </g>
+
+  <!-- Corner Reticles -->
+  <path d="M 40,60 L 40,40 L 60,40" fill="none" stroke="#E8AE3C" stroke-width="1.5" stroke-opacity="0.7" />
+  <path d="M 1160,60 L 1160,40 L 1140,40" fill="none" stroke="#E8AE3C" stroke-width="1.5" stroke-opacity="0.7" />
+  <path d="M 40,740 L 40,760 L 60,760" fill="none" stroke="#E8AE3C" stroke-width="1.5" stroke-opacity="0.7" />
+  <path d="M 1160,740 L 1160,760 L 1140,760" fill="none" stroke="#E8AE3C" stroke-width="1.5" stroke-opacity="0.7" />
+</svg>

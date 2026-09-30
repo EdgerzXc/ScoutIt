@@ -41,19 +41,15 @@ async function recordRemovalAudit({ property, actorId, fromState, reason, timest
   }, { onConflict: "operation_key", ignoreDuplicates: true });
 }
 
-// A removed listing must stop being served publicly now, not when a TTL
-// expires. /api/cms is backed by a Redis bundle held for ten minutes and a
-// per-instance memory copy held for sixty seconds; without this the property
-// stays in the public catalogue for up to ten minutes after removal.
-//
-// Failure is logged, never propagated. The removal itself has already been
-// written and must not be reported as failed because a cache purge could not
-// complete — that would invite a retry of a destructive operation.
+// Removal is already committed by the time this runs. Return an unconfirmed
+// public refresh to the owner without inviting a retry of a destructive write.
 async function purgePublicCatalogue() {
   try {
-    await invalidateCmsBundle();
+    const purge = await invalidateCmsBundle();
+    return purge.sharedCachePurged === false;
   } catch (cacheError) {
     console.error("[REMOVE API] Catalogue cache purge failed after removal:", cacheError?.message);
+    return true;
   }
 }
 
@@ -97,9 +93,9 @@ export async function POST(request) {
       }
       // Purged here too: an idempotent repair means the row was already
       // removed, but a cached bundle may still be serving it.
-      await purgePublicCatalogue();
+      const publicCachePending = await purgePublicCatalogue();
 
-      return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, idempotent: true });
+      return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, idempotent: true, publicCachePending });
     }
 
     const [deals, appointments, units, disputes] = await Promise.all([
@@ -145,8 +141,13 @@ export async function POST(request) {
       .eq("owner_id", userId)
       .select("id, canonical_slug, slug, lifecycle_state, pipeline_status, permanently_removed_at");
     if (updateError || !updated?.length) {
-      return NextResponse.json({ error: "Public listing was unpublished, but retained removal needs reconciliation", retryable: true }, { status: 500 });
+      const publicCachePending = await purgePublicCatalogue();
+      return NextResponse.json({ error: "Public listing was unpublished, but retained removal needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
     }
+
+    // Clear the public snapshot before the audit write; an audit failure must
+    // not leave a listing visible after Airtable approval was withdrawn.
+    const publicCachePending = await purgePublicCatalogue();
 
     const { error: auditError } = await supabaseAdmin.from("property_lifecycle_events").insert({
       property_id: submissionId,
@@ -159,12 +160,10 @@ export async function POST(request) {
     });
     if (auditError) console.error("[REMOVE API] Audit insert failed:", auditError);
     if (auditError) {
-      return NextResponse.json({ error: "Listing was retained and removed from market access, but audit evidence needs reconciliation", retryable: true }, { status: 500 });
+      return NextResponse.json({ error: "Listing was retained and removed from market access, but audit evidence needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
     }
 
-    await purgePublicCatalogue();
-
-    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, auditWarning: auditError ? "Removal completed; audit event retry is required" : undefined });
+    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, publicCachePending, auditWarning: auditError ? "Removal completed; audit event retry is required" : undefined });
   } catch (error) {
     console.error("[REMOVE API] Error:", error);
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });

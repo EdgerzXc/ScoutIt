@@ -1,0 +1,140 @@
+/* The root layout and globals.css are absent when global-error renders.
+   These small role tokens mirror the dark default and opt-in lens values. */
+.body {
+  --recovery-bg: #0d0d0d;
+  --recovery-surface: #121212;
+  --recovery-text: #dbdbdb;
+  --recovery-secondary: #a8a29a;
+  --recovery-accent: #e8ae3c;
+  --recovery-fill: #e8ae3c;
+  --recovery-fill-hover: #f7c64e;
+  --recovery-on-fill: #0d0d0d;
+  --recovery-border: rgba(247, 198, 78, 0.32);
+  --recovery-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--recovery-bg);
+  color: var(--recovery-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+:global(body.light-mode).body {
+  --recovery-bg: #d5d5d5;
+  --recovery-surface: #f2f2f4;
+  --recovery-text: #111113;
+  --recovery-secondary: #45454d;
+  --recovery-accent: #3a3a41;
+  --recovery-fill: #b3b3b3;
+  --recovery-fill-hover: #999999;
+  --recovery-on-fill: #111113;
+  --recovery-border: rgba(17, 17, 19, 0.3);
+  --recovery-shadow: 0 4px 14px rgba(17, 17, 19, 0.16);
+}
+
+:global(body.high-contrast).body {
+  --recovery-bg: #000000;
+  --recovery-surface: #080808;
+  --recovery-text: #ffffff;
+  --recovery-secondary: #e0e0e0;
+  --recovery-accent: #e8ae3c;
+  --recovery-fill: #e8ae3c;
+  --recovery-fill-hover: #f7c64e;
+  --recovery-on-fill: #000000;
+  --recovery-border: rgba(255, 255, 255, 0.5);
+  --recovery-shadow: none;
+}
+
+.panel {
+  box-sizing: border-box;
+  max-width: 540px;
+  width: 100%;
+  padding: 40px 32px;
+  text-align: center;
+  background: var(--recovery-surface);
+  border: 1px solid var(--recovery-border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--recovery-shadow);
+}
+
+:global(body.light-mode) .panel {
+  backdrop-filter: none;
+}
+
+.mark {
+  display: block;
+  margin: 0 auto 18px;
+  color: var(--recovery-accent);
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--recovery-accent);
+  font-family: ui-monospace, "Courier New", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0 0 12px;
+  color: var(--recovery-text);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.message {
+  margin: 0 0 24px;
+  color: var(--recovery-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.button {
+  min-height: 48px;
+  padding: 12px 28px;
+  border: 1px solid var(--recovery-fill);
+  border-radius: 6px;
+  background: var(--recovery-fill);
+  color: var(--recovery-on-fill);
+  font-family: ui-monospace, "Courier New", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--recovery-accent);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover {
+    background: var(--recovery-fill-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button:active {
+    transform: none;
+  }
+}

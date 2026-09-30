@@ -10,8 +10,8 @@ import Footer from "@/components/layout/Footer";
 const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransitMap"), {
   ssr: false,
   loading: () => (
-    <div style={{ minHeight: 600, background: "#000", border: "0.5px solid #262626", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8c8c8" }}>
+    <div style={{ minHeight: 600, background: "var(--ink-deep)", border: "0.5px solid var(--paper-02)", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--paper-01)" }}>
         Loading transit network…
       </span>
     </div>
@@ -50,7 +50,7 @@ export default function TransitPage() {
         .transit-page-title {
           font-family: var(--font-display);
           font-size: 40px;
-          color: #fff;
+          color: var(--text-primary);
           margin: 16px 0;
         }
         .transit-page-subtitle {

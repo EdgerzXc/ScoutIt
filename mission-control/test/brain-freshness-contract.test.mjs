@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   VAULT_SOURCE_PREFIX,
   STALE_AFTER_DAYS,
@@ -11,7 +12,7 @@ import {
   buildCitation,
   citationLine,
 } from "../src/lib/brainCitation.js";
-import { chunkText } from "../src/lib/brain.js";
+import { chunkText, reciprocalRankFusion } from "../src/lib/brain.js";
 
 const read = (p) => readFileSync(resolve(process.cwd(), p), "utf8");
 // A comment quoting a defect satisfies the guard that forbids it (the A-080
@@ -216,3 +217,68 @@ test("both chunkers carry the unicode flag, not just one", () => {
     assert.ok(!src.includes(unitFlag), path + " still has a unit-counting split");
   }
 });
+
+test("the chunker carries tail-overlap across paragraph boundaries", () => {
+  const p1 = "Alpha paragraph discussing commercial real estate in BGC Taguig. High yield prime location.";
+  const p2 = "Beta paragraph covering Makati residential lease yields and tenant retention factors.";
+  const p3 = "Gamma paragraph detailing Ortigas office space demand and transport infrastructure connectivity.";
+  const fullText = `${p1}\n\n${p2}\n\n${p3}`;
+
+  // Small target to force multiple chunks with overlap
+  const pieces = chunkText(fullText, 100, 30);
+  assert.ok(pieces.length >= 2, "must split into multiple chunks");
+
+  const chunk1 = pieces[0];
+  const chunk2 = pieces[1];
+  assert.ok(chunk1.includes("commercial real estate"));
+  const words1 = chunk1.split(/\s+/);
+  const tailWord = words1[words1.length - 1];
+  assert.ok(chunk2.includes(tailWord), "second chunk must include tail overlap from first chunk");
+});
+
+test("both chunkers implement tail-overlap identically", async () => {
+  const { chunkText: ingestChunkText } = await import(
+    pathToFileURL(resolve(process.cwd(), "scripts/ingest-vault.mjs")).href
+  );
+  const sample = "First section.\n\nSecond section.\n\nThird section.\n\nFourth section.";
+  const res1 = chunkText(sample, 40, 15);
+  const res2 = ingestChunkText(sample, 40, 15);
+  assert.deepEqual(res1, res2, "ingest-vault and brain.js chunkers must match output");
+});
+
+test("reciprocalRankFusion boosts documents appearing in both semantic and keyword results", () => {
+  const semantic = [
+    { id: "doc-1", content: "Prime BGC Tower", similarity: 0.92 },
+    { id: "doc-2", content: "Makati Condo", similarity: 0.85 },
+  ];
+  const keyword = [
+    { id: "doc-3", content: "Ortigas Center" },
+    { id: "doc-2", content: "Makati Condo" },
+  ];
+
+  const fused = reciprocalRankFusion({ semantic, keyword, limit: 6 });
+  assert.equal(fused[0].id, "doc-2", "doc-2 appears in both and must be ranked first");
+  assert.equal(fused[0].similarity, 0.85, "similarity score must be preserved from semantic match");
+  assert.ok(fused[0].fusionScore > fused[1].fusionScore, "top item must have higher fusion score");
+});
+
+test("reciprocalRankFusion handles empty sets gracefully and respects limit", () => {
+  const empty = reciprocalRankFusion({ semantic: [], keyword: [], limit: 5 });
+  assert.deepEqual(empty, []);
+
+  const items = Array.from({ length: 10 }, (_, i) => ({ id: `doc-${i}`, content: `Chunk ${i}` }));
+  const limited = reciprocalRankFusion({ semantic: items, keyword: [], limit: 4 });
+  assert.equal(limited.length, 4);
+});
+
+test("actions.js executes keyword search as a fusion partner in parallel, not fallback-only", () => {
+  const code = stripComments(read(ACTIONS));
+  assert.match(code, /Promise\.all\(\[\s*embed\(question\)/, "must run embed and keyword query in parallel");
+  assert.match(code, /reciprocalRankFusion/, "must fuse semantic and keyword results via RRF");
+  assert.doesNotMatch(
+    code,
+    /if\s*\(\s*chunks\.length\s*===\s*0\s*\)\s*\{\s*const\s*\{\s*data,\s*error\s*\}\s*=\s*await\s*admin\s*\.from\("brain_chunks"\)/,
+    "keyword search must not be fallback-only"
+  );
+});
+

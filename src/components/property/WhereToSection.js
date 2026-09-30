@@ -83,7 +83,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-title {
           font-family: ${MONO};
           font-size: 12px;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           letter-spacing: 0.12em;
           text-transform: uppercase;
         }
@@ -130,9 +130,9 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           transition: border-color 0.15s ease, color 0.15s ease;
         }
         .wt-chip.active {
-          border-color: var(--accent-muted, #6E531A);
-          color: var(--accent, #E8AE3C);
-          background: rgba(232, 174, 60, 0.06);
+          border-color: var(--accent-muted);
+          color: var(--accent);
+          background: rgba(var(--accent-rgb), 0.06);
         }
         .wt-chip:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -203,7 +203,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
         }
         .wt-card:hover {
-          border-color: var(--accent-muted, #6E531A);
+          border-color: var(--accent-muted);
           background: var(--surface2);
           transform: translateY(-1px);
         }
@@ -226,7 +226,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           font-family: ${MONO};
           font-size: 12px;
           letter-spacing: 0.08em;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           white-space: nowrap;
         }
         .wt-card__meta {
@@ -293,7 +293,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           font-family: var(--font-body);
           font-size: 30px;
           line-height: 1;
-          color: #f0ede8;
+          color: var(--text-primary);
           font-weight: 400;
         }
         .wt-walk__of {

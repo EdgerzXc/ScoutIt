@@ -1588,15 +1588,15 @@
 }
 
         .matrix-bg {
-          background-image: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80');
+          background-image: url('/assets/intel-geometric-capital.svg');
         }
 
         .news-bg {
-          background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80');
+          background-image: url('/assets/intel-tower-mesh.svg');
         }
 
         .location-bg {
-          background-image: url('https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80');
+          background-image: url('/assets/intel-spatial-grid.svg');
         }
 
         .preview-card-content {

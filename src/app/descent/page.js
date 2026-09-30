@@ -146,8 +146,8 @@ export default function DescentPage() {
                 three siblings shared one key and React warned on /descent.
                 Titles are the unique field here. */}
             {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel" }].map((a) => (
-              <Link key={a.t} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(232, 174, 60,0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
-                <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 10 }}>{a.k}</div>
+              <Link key={a.t} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
+                <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 10 }}>{a.k}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
               </Link>
             ))}
@@ -176,7 +176,7 @@ export default function DescentPage() {
               <Link key={p.t} href="/property" style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.55)", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: 10, overflow: "hidden", backdropFilter: "blur(4px)" }}>
                 <div style={{ height: 120, background: "linear-gradient(135deg, #1c2340, #2a1d3e)" }} />
                 <div style={{ padding: "14px 16px" }}>
-                  <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#E8AE3C", marginBottom: 6 }}>{p.c}</div>
+                  <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 6 }}>{p.c}</div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea" }}>{p.t}</div>
                   <div style={{ fontSize: 12, color: "#c8c8c8", marginTop: 4 }}>{p.l}</div>
                 </div>
@@ -202,8 +202,8 @@ export default function DescentPage() {
           <p className="dl-sub">The vetted ecosystem — the people who make the data trustworthy. The solid layer the whole world rests on.</p>
           <div className="role-grid" style={{ marginBottom: 30 }}>
             {[{ Icon: Building2, t: "Verified advisors", d: "Licensed professionals to guide the deal.", href: "/brokers" }, { Icon: Camera, t: "Space photography", d: "Make every space look the way it deserves.", href: "/photographers" }, { Icon: Search, t: "Site research", d: "Due diligence before you commit.", href: "/researchers" }, { Icon: CalendarDays, t: "Event design", d: "Turn great spaces into great events.", href: "/event-planners" }].map((s) => (
-              <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(20,14,8,0.6)", border: "0.5px solid rgba(232, 174, 60,0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
-                <s.Icon strokeWidth={1.5} size={26} style={{ color: "#E8AE3C" }} />
+              <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(20,14,8,0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
+                <s.Icon strokeWidth={1.5} size={26} style={{ color: "var(--accent)" }} />
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea", margin: "10px 0 5px" }}>{s.t}</div>
                 <div style={{ fontSize: 13, color: "#d6d2c8", lineHeight: 1.5 }}>{s.d}</div>
               </Link>
@@ -237,8 +237,8 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="core-wrap">
             <div>
-              <div className="dl-eyebrow" style={{ color: "#ffd24a" }}>Layer 06 · the core</div>
-              <h2 className="dl-title" style={{ color: "#fff" }}>It was always about you.</h2>
+              <div className="dl-eyebrow" style={{ color: "var(--accent-bright)" }}>Layer 06 · the core</div>
+              <h2 className="dl-title" style={{ color: "var(--text-primary)" }}>It was always about you.</h2>
               <p className="dl-sub">The molten center. Everything above led here — to the people who got here first, and to your own place inside it.</p>
             </div>
             <div>
@@ -266,7 +266,7 @@ export default function DescentPage() {
               <div className="membrane">Inner core · private</div>
               {signedIn ? (
                 <div className="inner-core">
-                  <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "#E8AE3C" }} /> Welcome back — here&apos;s your world.</div>
+                  <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "var(--accent)" }} /> Welcome back — here&apos;s your world.</div>
                   <div className="ic-sub">Your Board and your profile. The center is yours.</div>
                   <div className="ic-links">
                     <Link href="/dashboard" className="dl-cta solid">Enter your space →</Link>
@@ -276,7 +276,7 @@ export default function DescentPage() {
                 </div>
               ) : (
                 <div className="inner-core locked">
-                  <div className="ic-head"><Lock strokeWidth={1.5} size={20} style={{ color: "#E8AE3C" }} /> Your space is sealed.</div>
+                  <div className="ic-head"><Lock strokeWidth={1.5} size={20} style={{ color: "var(--accent)" }} /> Your space is sealed.</div>
                   <div className="ic-sub">Your Board and profile — the inner core is yours alone, and it opens the moment you join. Becoming a pioneer is the only way to the center.</div>
                   <div className="ic-links"><Link href="/onboarding" className="dl-cta solid">Become a pioneer →</Link></div>
                 </div>

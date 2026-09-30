@@ -340,7 +340,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
   return (
     <div 
-      className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
+      className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
       style={{ gridTemplateColumns: `calc(${leftWidth}% - 5px) 10px calc(${100 - leftWidth}% - 5px)` }}
       onDragOver={handleDragOver}
       onDragEnter={handleDragOver}
@@ -433,7 +433,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
           {/* Step 1: Core Identity */}
           {step === 1 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+            <section className="flex flex-col gap-6 motion-safe:animate-[fadeIn_0.3s_ease]">
               <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Basic Property Information</h3>
               <p className="text-on-surface-muted text-sm max-w-xl">Fill out the bare minimum details to list your property. Don&apos;t worry if you don&apos;t know everything—our Deep Intelligence Vault will securely collect the rest later.</p>
               
@@ -522,7 +522,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
           {/* Step 2: Public Intel */}
           {step === 2 && (
-            <section className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
+            <section className="flex flex-col gap-6 motion-safe:animate-[fadeIn_0.3s_ease]">
               <div className="border-b border-surface-variant pb-4 mb-2 flex justify-between items-end">
                 <div>
                   <h3 className="font-headline-editorial text-3xl text-gold-accent">Public Listing Intel</h3>

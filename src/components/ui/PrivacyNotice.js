@@ -17,7 +17,7 @@ export default function PrivacyNotice() {
         fontSize: 12,
         lineHeight: 1.6,
         textAlign: "center",
-        color: "var(--text-muted, #888)",
+        color: "var(--text-muted)",
       }}
     >
       By submitting, you agree to our{" "}

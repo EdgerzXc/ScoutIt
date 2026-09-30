@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="capBg" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c0d10" />
+      <stop offset="60%" stop-color="#08080a" />
+      <stop offset="100%" stop-color="#040405" />
+    </linearGradient>
+    <radialGradient id="amberAura" cx="40%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#E8AE3C" stop-opacity="0.14" />
+      <stop offset="50%" stop-color="#6E531A" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="goldEdge" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6E531A" stop-opacity="0.3" />
+      <stop offset="50%" stop-color="#F7C64E" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#E8AE3C" stop-opacity="0.4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#capBg)" />
+  <rect width="1200" height="800" fill="url(#amberAura)" />
+
+  <!-- Dynamic Geometric Facets / Golden Ratio Polygons -->
+  <polygon points="150,650 480,180 820,380 520,720" fill="#111116" stroke="#E8AE3C" stroke-width="1.2" stroke-opacity="0.6" />
+  <polygon points="480,180 780,120 1020,320 820,380" fill="#16161c" stroke="#F7C64E" stroke-width="1.5" stroke-opacity="0.85" />
+  <polygon points="820,380 1020,320 1100,560 920,680" fill="#0e0e12" stroke="#6E531A" stroke-width="1" stroke-opacity="0.5" />
+  <polygon points="520,720 820,380 920,680 640,780" fill="#131318" stroke="#E8AE3C" stroke-width="0.8" stroke-opacity="0.4" />
+
+  <!-- Precision Line Matrix -->
+  <line x1="480" y1="180" x2="920" y2="680" stroke="#E8AE3C" stroke-width="0.75" stroke-opacity="0.3" stroke-dasharray="6,6" />
+  <line x1="150" y1="650" x2="1020" y2="320" stroke="#E8AE3C" stroke-width="0.75" stroke-opacity="0.25" stroke-dasharray="4,8" />
+  <line x1="0" y1="400" x2="1200" y2="400" stroke="#222228" stroke-width="0.75" />
+  <line x1="600" y1="0" x2="600" y2="800" stroke="#222228" stroke-width="0.75" />
+
+  <!-- Intersection Hotspots (Glowing Amber Anchors) -->
+  <circle cx="480" cy="180" r="4" fill="#F7C64E" />
+  <circle cx="480" cy="180" r="14" fill="#F7C64E" fill-opacity="0.2" />
+  <circle cx="820" cy="380" r="4" fill="#F7C64E" />
+  <circle cx="820" cy="380" r="14" fill="#F7C64E" fill-opacity="0.2" />
+  <circle cx="780" cy="120" r="3" fill="#E8AE3C" />
+  <circle cx="1020" cy="320" r="3" fill="#E8AE3C" />
+
+  <!-- Circular Target Horizon Reticle -->
+  <circle cx="600" cy="400" r="280" fill="none" stroke="#6E531A" stroke-width="0.75" stroke-opacity="0.35" stroke-dasharray="3,12" />
+  <circle cx="600" cy="400" r="180" fill="none" stroke="#E8AE3C" stroke-width="0.75" stroke-opacity="0.2" />
+
+  <!-- Telemetry HUD Labels -->
+  <g font-family="monospace" font-size="11" fill="#E8AE3C" fill-opacity="0.65" letter-spacing="2">
+    <text x="80" y="90">CAPITAL VECTOR // GEOMETRIC DISPATCH</text>
+    <text x="80" y="115" fill="#848490">YIELD RATIO: 8.42% · LIQUIDITY TIER AAA</text>
+    <text x="80" y="720">MACRO INDEX: MANILA METROPOLIS // PEZA CERTIFIED</text>
+  </g>
+
+  <!-- Gold Hairline Frame -->
+  <rect x="25" y="25" width="1150" height="750" fill="none" stroke="#E8AE3C" stroke-width="0.5" stroke-opacity="0.2" />
+</svg>

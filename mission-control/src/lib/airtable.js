@@ -22,6 +22,7 @@
 
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
 import { escapeAirtableFormulaString } from "./airtableFormula.mjs";
+import { purgePublicCatalogueCache } from "./publicCatalogueCache";
 import { parsePointToLatLng } from "./geoPoint.mjs";
 
 const BASE_URL = "https://api.airtable.com/v0";
@@ -143,10 +144,12 @@ export async function publishPropertyToAirtable(property) {
         throw new Error(`Airtable update failed: ${res.status} ${errText}`);
       }
       const updated = await res.json();
+      const cache = await purgePublicCatalogueCache();
       return {
         slug: updated?.fields?.Slug || property.slug,
         recordId,
         mode: "updated",
+        cache,
       };
     }
   }
@@ -171,7 +174,8 @@ export async function publishPropertyToAirtable(property) {
     // silently persisting a broken public URL.
     throw new Error("Airtable created the record but returned no computed Slug.");
   }
-  return { slug: record.fields.Slug, recordId: record.id, mode: "created" };
+  const cache = await purgePublicCatalogueCache();
+  return { slug: record.fields.Slug, recordId: record.id, mode: "created", cache };
 }
 
 /**

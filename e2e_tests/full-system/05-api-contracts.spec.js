@@ -28,7 +28,7 @@ test.describe('Public read APIs', () => {
     // a dead upstream is a finding, not a test bug. But Supabase and Airtable
     // are both configured locally, so they must at least respond.
     expect(['healthy', 'unhealthy', 'unconfigured']).toContain(body.services.supabase);
-    expect(['healthy', 'unhealthy', 'unconfigured']).toContain(body.services.airtable);
+    expect(['configured', 'unconfigured']).toContain(body.services.airtable);
   });
 });
 

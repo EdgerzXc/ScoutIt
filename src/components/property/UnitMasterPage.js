@@ -693,7 +693,11 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             </div>
 
             <div className="panel-sidebar">
-              <SpecCard label="Listed Rate" value={unit.price || d.price || null} />
+              {unit.price ? (
+                <SpecCard label="Listed Rate" value={unit.price} />
+              ) : d.price ? (
+                <SpecCard label="Building Rate" value={d.price} />
+              ) : null}
               {activeScenario && activeScenario.price_each && (
                 <SpecCard label={`Rate (${activeScenario.label})`} value={activeScenario.price_each} />
               )}

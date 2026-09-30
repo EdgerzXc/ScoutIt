@@ -1,6 +1,10 @@
-import { fetchBrokers, fetchIntel, fetchProperties } from "@/lib/airtable";
+import { getCmsBundle } from "@/lib/cmsCache";
 import { siteUrl } from "@/lib/siteUrl";
 import { LOCATION_HUB_SLUGS } from "@/lib/locationHubs";
+
+// Next caches metadata routes by default. Dynamic inventory must follow a
+// publish/takedown purge instead of freezing at the last deployment build.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap() {
   const baseUrl = siteUrl();
@@ -47,14 +51,26 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
-  // Dynamic property pages from Airtable
+  // All dynamic URLs use the same public catalogue snapshot. A crawler must
+  // not trigger three independent Airtable table reads on every sitemap hit.
+  let bundle = null;
+  try {
+    const candidate = await getCmsBundle();
+    if (candidate.source !== "empty_fallback_on_error") bundle = candidate;
+  } catch (error) {
+    console.error("Sitemap: Failed to load public catalogue", error);
+  }
+  if (!bundle) {
+    // A cold upstream outage is not evidence that every published URL vanished.
+    // Let crawlers retry instead of returning a misleading static-only sitemap.
+    throw new Error("Sitemap: public catalogue temporarily unavailable");
+  }
+
+  // Dynamic property pages from the published catalogue
   let propertyRoutes = [];
   try {
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    if (apiKey && baseId) {
-      const properties = await fetchProperties(apiKey, baseId);
-      propertyRoutes = properties
+    if (bundle) {
+      propertyRoutes = bundle.properties
         // ── A4 · SAMPLES ARE NEVER SUBMITTED (2026-08-08) ──────────────
         // The property page also emits `noindex` for these, but a sitemap
         // entry and a noindex tag are a contradiction Google resolves by
@@ -87,11 +103,8 @@ export default async function sitemap() {
   // draft cannot reach this list.
   let intelRoutes = [];
   try {
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    if (apiKey && baseId) {
-      const articles = await fetchIntel(apiKey, baseId);
-      intelRoutes = articles
+    if (bundle) {
+      intelRoutes = bundle.intel
         .filter((a) => a.slug)
         .map((a) => ({
           url: `${baseUrl}/intel/${a.slug}`,
@@ -116,11 +129,8 @@ export default async function sitemap() {
   // advisor is published - which is the correct behaviour, not a bug.
   let brokerRoutes = [];
   try {
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    if (apiKey && baseId) {
-      const brokers = await fetchBrokers(apiKey, baseId);
-      brokerRoutes = brokers
+    if (bundle) {
+      brokerRoutes = bundle.brokers
         .filter((b) => b.id && b.isExample !== true)
         .map((b) => ({
           url: `${baseUrl}/brokers/${b.id}`,

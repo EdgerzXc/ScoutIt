@@ -76,8 +76,8 @@ export default function ComparisonMatrix({ properties, onClose }) {
             <div className="matrix-cell row-header sticky-col">Micro-Location</div>
             {properties.map((p) => (
               <div key={p.id} className="matrix-cell data-cell">
-                <span style={{ color: "#f0ede8", fontWeight: 500 }}>{p.location || p.city || "Undisclosed"}</span>
-                {p.city && <span style={{ fontSize: "0.75rem", color: "#888", marginTop: "2px" }}>{p.city} Metro Hub</span>}
+                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{p.location || p.city || "Undisclosed"}</span>
+                {p.city && <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>{p.city} Metro Hub</span>}
               </div>
             ))}
 
@@ -89,10 +89,10 @@ export default function ComparisonMatrix({ properties, onClose }) {
               return (
                 <div key={p.id} className="matrix-cell data-cell">
                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <span style={{ fontSize: "0.8rem", color: has3D ? "var(--accent, #E8AE3C)" : "#666" }}>
+                    <span style={{ fontSize: "0.8rem", color: has3D ? "var(--accent)" : "var(--text-muted)" }}>
                       {has3D ? "✓ 3D Spatial Scan" : "○ Spatial Scan Pending"}
                     </span>
-                    <span style={{ fontSize: "0.8rem", color: hasFloorPlan ? "#4caf7d" : "#666" }}>
+                    <span style={{ fontSize: "0.8rem", color: hasFloorPlan ? "var(--green)" : "var(--text-muted)" }}>
                       {hasFloorPlan ? "✓ Verified Floor Plan" : "○ Floor Plan Pending"}
                     </span>
                   </div>
@@ -130,7 +130,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.85);
+          background: var(--modal-scrim, rgba(0, 0, 0, 0.85));
           backdrop-filter: blur(10px);
           z-index: 9999;
           display: flex;
@@ -141,30 +141,30 @@ export default function ComparisonMatrix({ properties, onClose }) {
         }
 
         .matrix-modal {
-          background: #0d0d0d;
-          border: 1px solid rgba(232, 174, 60, 0.3);
+          background: var(--bg);
+          border: 1px solid var(--accent-muted);
           border-radius: 8px;
           width: 100%;
           max-width: 1100px;
           max-height: 90vh;
           display: flex;
           flex-direction: column;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+          box-shadow: var(--shadow-xl, 0 10px 40px rgba(0, 0, 0, 0.8));
           overflow: hidden;
         }
 
         .matrix-header {
           padding: 20px 24px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid var(--border-solid);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: #121212;
+          background: var(--surface);
         }
 
         .matrix-title {
           font-family: var(--font-display, serif);
-          color: #f0ede8;
+          color: var(--text-primary);
           font-size: 1.5rem;
           margin: 0;
         }
@@ -172,14 +172,14 @@ export default function ComparisonMatrix({ properties, onClose }) {
         .matrix-close {
           background: none;
           border: none;
-          color: #888;
+          color: var(--text-muted);
           font-size: 1.2rem;
           cursor: pointer;
           transition: color 0.2s;
         }
 
         .matrix-close:hover {
-          color: #E8AE3C;
+          color: var(--accent-bright);
         }
 
         .matrix-scroll-container {
@@ -191,13 +191,13 @@ export default function ComparisonMatrix({ properties, onClose }) {
         .matrix-grid {
           display: grid;
           gap: 1px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          background: var(--border);
+          border: 1px solid var(--border);
           border-radius: 4px;
         }
 
         .matrix-cell {
-          background: #121212;
+          background: var(--surface);
           padding: 20px;
           display: flex;
           flex-direction: column;
@@ -208,10 +208,10 @@ export default function ComparisonMatrix({ properties, onClose }) {
           font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: #888;
+          color: var(--text-muted);
           justify-content: center;
-          background: #0d0d0d;
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
+          background: var(--bg);
+          border-right: 1px solid var(--border);
         }
 
         .sticky-col {
@@ -225,7 +225,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
           height: 160px;
           background-size: cover;
           background-position: center;
-          background-color: #1a1a1a;
+          background-color: var(--surface2);
           border-radius: 4px;
           margin-bottom: 16px;
           display: flex;
@@ -237,12 +237,12 @@ export default function ComparisonMatrix({ properties, onClose }) {
           font-family: var(--font-mono);
           font-size: 12px;
           text-transform: uppercase;
-          color: #555;
+          color: var(--text-muted);
         }
 
         .matrix-prop-title {
           font-family: var(--font-display, serif);
-          color: #f0ede8;
+          color: var(--text-primary);
           font-size: 1.2rem;
           margin-bottom: 12px;
           line-height: 1.3;
@@ -253,7 +253,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
           font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: #E8AE3C;
+          color: var(--accent);
           text-decoration: none;
           transition: opacity 0.2s;
         }
@@ -265,12 +265,12 @@ export default function ComparisonMatrix({ properties, onClose }) {
         .data-cell {
           font-family: var(--font-body, sans-serif);
           font-size: 0.75rem;
-          color: #ccc;
+          color: var(--text-secondary);
           justify-content: center;
         }
 
         .highlight {
-          color: #f0ede8;
+          color: var(--text-primary);
           font-weight: 600;
           font-size: 1.1rem;
         }
@@ -281,8 +281,8 @@ export default function ComparisonMatrix({ properties, onClose }) {
           font-size: 0.75rem;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          background: rgba(255, 255, 255, 0.05);
-          color: #aaa;
+          background: var(--surface2);
+          color: var(--text-secondary);
           padding: 4px 8px;
           border-radius: 4px;
           margin-right: 8px;
@@ -291,7 +291,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
 
         .italic-hook {
           font-style: italic;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-muted);
           line-height: 1.5;
         }
 

@@ -815,7 +815,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
       {/* Photo Uploader Modal */}
       {activePhotoUnit && (
         <div
-          className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease]"
+          className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 motion-safe:animate-[fadeIn_0.2s_ease]"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => e.preventDefault()}
         >
@@ -903,7 +903,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
       {/* Subdivide Modal */}
       {subdivideUnitId && (
-        <div className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease]">
+        <div className="fixed inset-0 z-[3000] bg-background/90 backdrop-blur-md flex items-center justify-center p-4 motion-safe:animate-[fadeIn_0.2s_ease]">
           <div className="bg-surface border border-gold-accent/30 rounded-lg p-6 max-w-sm w-full shadow-2xl">
             <h3 className="font-display-md text-xl text-gold-accent mb-4">Subdivide Space</h3>
             <div className="mb-4">

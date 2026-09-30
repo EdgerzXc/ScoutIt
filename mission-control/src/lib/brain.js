@@ -207,20 +207,58 @@ async function askModel(model, prompt) {
   }
 }
 
+export const CHUNK_TARGET = 800;
+export const CHUNK_OVERLAP = 120;
+
+function safeSliceTail(text, maxOverlap) {
+  if (!text || maxOverlap <= 0) return "";
+  const trimmed = text.trim();
+  if (trimmed.length <= maxOverlap) return trimmed;
+  let start = trimmed.length - maxOverlap;
+  const code = trimmed.charCodeAt(start);
+  if (code >= 0xdc00 && code <= 0xdfff && start > 0) {
+    start += 1;
+  }
+  return trimmed.slice(start);
+}
+
+function getTailOverlap(text, maxOverlap) {
+  if (!text || maxOverlap <= 0) return "";
+  const trimmed = text.trim();
+  if (trimmed.length <= maxOverlap) return trimmed;
+  const rawTail = safeSliceTail(trimmed, maxOverlap);
+  const newline = rawTail.indexOf("\n\n");
+  if (newline !== -1 && newline < maxOverlap * 0.6) {
+    return rawTail.slice(newline + 2).trim();
+  }
+  const sentence = rawTail.search(/[.!?]\s+/);
+  if (sentence !== -1 && sentence < maxOverlap * 0.6) {
+    return rawTail.slice(sentence + 2).trim();
+  }
+  const space = rawTail.search(/\s+/);
+  if (space !== -1 && space < maxOverlap * 0.4) {
+    return rawTail.slice(space).trim();
+  }
+  return rawTail.trim();
+}
+
 /**
- * Split a document into ~800-char chunks on paragraph/sentence boundaries.
+ * Split a document into ~800-char chunks on paragraph/sentence boundaries
+ * with tail-overlap across chunk transitions to preserve boundary context.
  * Deterministic and dependency-free.
  */
-export function chunkText(text, target = 800) {
+export function chunkText(text, target = CHUNK_TARGET, overlap = CHUNK_OVERLAP) {
   const clean = (text || "").replace(/\r\n/g, "\n").trim();
   if (!clean) return [];
   const paragraphs = clean.split(/\n\s*\n/);
   const chunks = [];
+  const effectiveOverlap = overlap > 0 ? Math.min(overlap, Math.floor(target * 0.25)) : 0;
   let buf = "";
   for (const para of paragraphs) {
-    if ((buf + "\n\n" + para).length > target && buf) {
+    if (buf && (buf + "\n\n" + para).length > target) {
       chunks.push(buf.trim());
-      buf = para;
+      const tail = getTailOverlap(buf, effectiveOverlap);
+      buf = tail ? `${tail}\n\n${para}` : para;
     } else {
       buf = buf ? `${buf}\n\n${para}` : para;
     }
@@ -241,3 +279,52 @@ export function chunkText(text, target = 800) {
       : c.match(new RegExp(`[\\s\\S]{1,${target}}`, "gu")) || [c]
   );
 }
+
+/**
+ * Reciprocal Rank Fusion (RRF) combining semantic and keyword retrieval results.
+ * Standard RRF score: sum(1 / (k + rank_i)) across result sets.
+ * k = 60 is the standard constant in information retrieval.
+ */
+export function reciprocalRankFusion({ semantic = [], keyword = [], k = 60, limit = 6 } = {}) {
+  const map = new Map();
+
+  semantic.forEach((chunk, rank) => {
+    if (!chunk || !chunk.id) return;
+    const rrfScore = 1 / (k + rank + 1);
+    map.set(chunk.id, {
+      chunk: { ...chunk },
+      score: rrfScore,
+      semanticRank: rank + 1,
+      keywordRank: null,
+    });
+  });
+
+  keyword.forEach((chunk, rank) => {
+    if (!chunk || !chunk.id) return;
+    const rrfScore = 1 / (k + rank + 1);
+    if (map.has(chunk.id)) {
+      const existing = map.get(chunk.id);
+      existing.score += rrfScore;
+      existing.keywordRank = rank + 1;
+      if (chunk.similarity !== undefined && existing.chunk.similarity === undefined) {
+        existing.chunk.similarity = chunk.similarity;
+      }
+    } else {
+      map.set(chunk.id, {
+        chunk: { ...chunk },
+        score: rrfScore,
+        semanticRank: null,
+        keywordRank: rank + 1,
+      });
+    }
+  });
+
+  return Array.from(map.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((item) => ({
+      ...item.chunk,
+      fusionScore: Number(item.score.toFixed(6)),
+    }));
+}
+

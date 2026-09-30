@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import { crmFetch } from "../../lib/crmClient";
 import { useModalDialog } from "../ui/useModalDialog";
+import overlayMotion from "../ui/OverlayEntrance.module.css";
 
 // Request a live viewing.
 //
@@ -135,8 +136,8 @@ export default function BookingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-background/85 p-0 backdrop-blur-md sm:items-center sm:p-6" onClick={onClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="viewing-picker-title" onClick={(e) => e.stopPropagation()} className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-t-2xl border border-gold-accent/20 bg-surface/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.58),0_0_42px_rgba(var(--accent-rgb),0.08)] backdrop-blur-xl sm:rounded-xl sm:p-6">
+    <div className={`${overlayMotion.backdrop} fixed inset-0 z-[120] flex items-end justify-center bg-background/85 p-0 backdrop-blur-md sm:items-center sm:p-6`} onClick={onClose}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="viewing-picker-title" onClick={(e) => e.stopPropagation()} className={`${overlayMotion.panel} relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-t-2xl border border-gold-accent/20 bg-surface/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.58),0_0_42px_rgba(var(--accent-rgb),0.08)] backdrop-blur-xl sm:rounded-xl sm:p-6`}>
         <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-transparent font-mono text-text-muted transition-all duration-300 ease-out hover:border-surface-variant hover:bg-surface-variant/50 hover:text-on-surface">
           ✕
         </button>

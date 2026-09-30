@@ -52,6 +52,7 @@ import {
   buildShareUrl, cleanPropertyUrl, resolveShareRef,
 } from "@/lib/shareAttribution";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
+import entrance from "@/components/ui/OverlayEntrance.module.css";
 
 // `prefill: false` means the platform will NOT carry our text, so we must copy
 // it to the clipboard first and say so. This flag is the whole of Task 3.
@@ -305,7 +306,8 @@ export default function ShareModal({
   return (
     <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-3 sm:p-4 pointer-events-none">
       <div
-        className="absolute inset-0 bg-background/70 backdrop-blur-sm pointer-events-auto transition-opacity"
+        className={`absolute inset-0 backdrop-blur-sm pointer-events-auto ${entrance.backdrop}`}
+        style={{ background: "var(--modal-scrim)" }}
         onClick={onClose}
       />
 
@@ -313,7 +315,7 @@ export default function ShareModal({
         role="dialog"
         aria-modal="true"
         aria-label="Share this briefing"
-        className="relative w-full max-w-md max-h-[88vh] flex flex-col overflow-hidden bg-surface border border-gold-accent/20 sm:rounded-xl rounded-t-2xl shadow-2xl pointer-events-auto"
+        className={`relative w-full max-w-md max-h-[88vh] flex flex-col overflow-hidden bg-surface border border-gold-accent/20 sm:rounded-xl rounded-t-2xl shadow-2xl pointer-events-auto ${entrance.panel}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -346,7 +348,7 @@ export default function ShareModal({
                 type="button"
                 onClick={() => handleChannel(c)}
                 aria-label={`Share via ${c.name}`}
-                className="min-w-0 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-lg bg-on-surface/5 border border-on-surface/5 text-on-surface/70 transition-all hover:bg-on-surface/10 hover:text-gold-accent active:scale-[0.97]"
+                className="min-w-0 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-lg bg-on-surface/5 border border-on-surface/5 text-on-surface/70 transition-all hover:bg-on-surface/10 hover:text-gold-accent motion-safe:active:scale-[0.97]"
               >
                 {c.icon}
                 <span className="text-[12px] font-mono uppercase tracking-[0.08em] truncate max-w-full">

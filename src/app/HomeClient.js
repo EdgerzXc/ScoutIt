@@ -861,9 +861,9 @@ export default function HomeClient() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          color: #0a0a0a;
-          background: var(--accent);
-          border: 1px solid var(--accent);
+          color: var(--on-accent);
+          background: var(--accent-fill);
+          border: 1px solid var(--accent-fill);
           padding: 15px 34px;
           border-radius: 4px;
           text-decoration: none;
@@ -871,8 +871,8 @@ export default function HomeClient() {
           animation: glowPulse 3.2s ease-in-out infinite;
         }
         .hero-cta-primary:hover {
-          background: var(--accent-bright);
-          border-color: var(--accent-bright);
+          background: var(--accent-fill-hover);
+          border-color: var(--accent-fill-hover);
           box-shadow: 0 8px 30px rgba(232, 174, 60, 0.25);
           transform: translateY(-2px);
           animation: none;
@@ -1366,7 +1366,7 @@ export default function HomeClient() {
           font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: rgba(232, 174, 60, 0.55);
+          color: var(--accent);
           text-align: center;
           margin: 0 0 34px;
         }
@@ -1643,7 +1643,7 @@ export default function HomeClient() {
         }
         .scroll-chev {
           font-size: 13px;
-          color: #E8AE3C;
+          color: var(--accent);
           opacity: 0;
         }
         .scroll-chev-1 { animation: chevSeq 1.5s ease-in-out infinite; }
@@ -1917,8 +1917,8 @@ export default function HomeClient() {
         .menu-btn:hover {
           color: var(--accent);
           transform: scale(1.03);
-          box-shadow: 0 0 20px rgba(232, 174, 60, 0.1);
-          border-color: rgba(232, 174, 60, 0.25);
+          box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.1);
+          border-color: rgba(var(--accent-rgb), 0.25);
           padding-left: 28px;
         }
 
@@ -1926,7 +1926,7 @@ export default function HomeClient() {
           color: var(--accent);
           background: var(--surface2);
           border-color: var(--accent);
-          box-shadow: 0 0 15px rgba(232, 174, 60, 0.05);
+          box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.05);
           padding-left: 28px;
         }
 
@@ -1955,7 +1955,7 @@ export default function HomeClient() {
         .pane-header h3 {
           font-family: var(--font-display);
           font-size: 28px;
-          color: #fff;
+          color: var(--text-primary);
           margin-bottom: 4px;
         }
 
@@ -1978,7 +1978,7 @@ export default function HomeClient() {
 
         .vector-search-input {
           width: 100%;
-          background: #1a1a1a;
+          background: var(--surface2);
           border: 1px solid #333333;
           padding: 12px 16px;
           color: var(--text-primary);
@@ -1995,7 +1995,7 @@ export default function HomeClient() {
 
         .vector-search-input:focus {
           border-color: var(--accent);
-          box-shadow: 0 0 8px rgba(232, 174, 60, 0.15);
+          box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.15);
         }
 
         .search-suggestions-dropdown {
@@ -2003,7 +2003,7 @@ export default function HomeClient() {
           top: 100%;
           left: 0;
           width: 100%;
-          background: #1a1a1a;
+          background: var(--surface2);
           border: 1px solid var(--border-solid);
           border-top: none;
           z-index: 50;
@@ -2177,8 +2177,8 @@ export default function HomeClient() {
           text-decoration: none;
         }
         .discover-news-item-link:hover {
-          background: rgba(232, 174, 60, 0.03);
-          border-color: rgba(232, 174, 60, 0.15) !important;
+          background: rgba(var(--accent-rgb), 0.03);
+          border-color: rgba(var(--accent-rgb), 0.15) !important;
           transform: translateX(4px);
         }
         .news-item-title {
@@ -2264,15 +2264,15 @@ export default function HomeClient() {
         }
 
         .matrix-bg {
-          background-image: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80');
+          background-image: url('/assets/intel-geometric-capital.svg');
         }
 
         .news-bg {
-          background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80');
+          background-image: url('/assets/intel-tower-mesh.svg');
         }
 
         .location-bg {
-          background-image: url('https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80');
+          background-image: url('/assets/intel-spatial-grid.svg');
         }
 
         .preview-card-content {
@@ -2283,7 +2283,7 @@ export default function HomeClient() {
         .preview-card-content h3 {
           font-family: var(--font-display);
           font-size: 24px;
-          color: #fff;
+          color: var(--text-primary);
           margin-bottom: 8px;
         }
 
@@ -2396,7 +2396,7 @@ export default function HomeClient() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(232, 174, 60, 0.1);
+          background: rgba(var(--accent-rgb), 0.1);
           border: 1px dashed var(--accent-border);
         }
 
@@ -2471,7 +2471,7 @@ export default function HomeClient() {
 
         .service-card:hover {
           transform: translateY(-4px);
-          border-color: rgba(232, 174, 60, 0.3);
+          border-color: rgba(var(--accent-rgb), 0.3);
           box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
         }
 
@@ -2500,20 +2500,20 @@ export default function HomeClient() {
 
         .live-badge {
           background: rgba(16, 185, 129, 0.1);
-          color: #10b981;
+          color: var(--green);
           border: 0.5px solid rgba(16, 185, 129, 0.3);
         }
 
         .soon-badge {
-          background: rgba(232, 174, 60, 0.1);
+          background: rgba(var(--accent-rgb), 0.1);
           color: var(--accent);
-          border: 0.5px solid rgba(232, 174, 60, 0.3);
+          border: 0.5px solid rgba(var(--accent-rgb), 0.3);
         }
 
         .service-title {
           font-family: var(--font-display);
           font-size: 20px;
-          color: #fff;
+          color: var(--text-primary);
           margin-bottom: 12px;
           font-weight: 400;
           letter-spacing: 0.02em;
@@ -2539,18 +2539,18 @@ export default function HomeClient() {
         }
 
         .live-card:hover {
-          border-color: #10b981;
+          border-color: var(--green);
           background: rgba(16, 185, 129, 0.02);
           transform: translateY(-4px);
         }
 
         .live-card:hover .service-cta {
-          color: #10b981;
+          color: var(--green);
         }
 
         .coming-soon-card:hover {
           border-color: var(--accent-border);
-          background: rgba(232, 174, 60, 0.02);
+          background: rgba(var(--accent-rgb), 0.02);
           transform: translateY(-4px);
         }
 
@@ -2610,8 +2610,8 @@ export default function HomeClient() {
           content: "";
           height: 24px;
           width: 80px;
-          background: rgba(232, 174, 60, 0.05);
-          border: 1px solid rgba(232, 174, 60, 0.2);
+          background: rgba(var(--accent-rgb), 0.05);
+          border: 1px solid rgba(var(--accent-rgb), 0.2);
           border-radius: 12px;
           margin-left: auto;
         }

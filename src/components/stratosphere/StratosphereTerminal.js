@@ -20,6 +20,7 @@ export default function StratosphereTerminal({
   initialViewMode = "SPATIAL", // 'SPATIAL' | 'SIGNALS'
   stageFilter = "all",
   onClearStage = () => {},
+  onSignalClosed = () => {},
 }) {
   const [viewMode, setViewMode] = useState(initialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
@@ -270,6 +271,7 @@ export default function StratosphereTerminal({
                   onSelect={handleSelectSignal}
                   onHover={handleHoverSignal}
                   onConnect={handleOpenConnect}
+                  onClosed={onSignalClosed}
                   returnStage={stageFilter}
                 />
               ))

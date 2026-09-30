@@ -133,7 +133,7 @@ export default function BulkImporterMode({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out]">
       {/* HEADER */}
       <div className="p-4 border-b border-surface-variant bg-surface flex justify-between items-center shrink-0">
         <button 

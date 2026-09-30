@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import entrance from "@/components/ui/OverlayEntrance.module.css";
 
 export default function OffMarketPage() {
   const [properties, setProperties] = useState([]);
@@ -66,7 +67,7 @@ export default function OffMarketPage() {
         {state === "ready" && properties.length > 0 && (
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {properties.map((property) => (
-              <article key={property.id} className="rounded border border-surface-variant bg-surface-alt/80 p-5 shadow-[0_0_28px_rgba(232,174,60,0.05)]">
+              <article key={property.id} className="rounded border border-surface-variant bg-surface-alt/80 p-5 shadow-[var(--shadow-glow-soft)]">
                 <p className="font-label-caps text-[12px] tracking-[0.12em] text-text-secondary">OFF-MARKET · {property.spaceCategory || property.type || "PROPERTY"}</p>
                 <h2 className="mt-3 text-2xl text-on-surface">{property.title}</h2>
                 <p className="mt-2 text-sm text-text-secondary">{property.location || "Philippines"}</p>
@@ -84,8 +85,8 @@ export default function OffMarketPage() {
         )}
 
         {selected && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-4 md:items-center" role="dialog" aria-modal="true" aria-labelledby="off-market-contact-title">
-            <form onSubmit={sendContact} className="w-full max-w-lg rounded border border-gold-accent/50 bg-surface p-5 shadow-[0_0_35px_rgba(232,174,60,0.12)]">
+          <div className={`fixed inset-0 z-50 flex items-end justify-center p-4 md:items-center ${entrance.backdrop}`} style={{ background: "var(--modal-scrim)" }} role="dialog" aria-modal="true" aria-labelledby="off-market-contact-title">
+            <form onSubmit={sendContact} className={`w-full max-w-lg rounded border border-gold-accent/50 bg-surface p-5 ${entrance.panel}`} style={{ boxShadow: "var(--shadow-glow-soft)" }}>
               <div className="flex items-start justify-between gap-4">
                 <div><p className="font-label-caps text-[12px] tracking-[0.12em] text-gold-accent">ONE-CONNECT CONTACT</p><h2 id="off-market-contact-title" className="mt-2 text-xl">{selected.title}</h2></div>
                 <button type="button" className="min-h-11 min-w-11 text-2xl text-text-secondary" aria-label="Close contact form" onClick={() => setSelected(null)}>×</button>

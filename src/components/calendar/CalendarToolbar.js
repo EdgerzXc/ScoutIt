@@ -78,7 +78,7 @@ export default function CalendarToolbar({
           type="button"
           onClick={onNewEvent}
           className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-3 sm:px-4 h-11 md:h-8 rounded
-            font-working-title font-semibold whitespace-nowrap shadow-[0_0_12px_rgba(232,174,60,0.25)] transition-all duration-160 ease-out"
+            font-working-title font-semibold whitespace-nowrap shadow-[0_0_12px_rgba(var(--accent-rgb),0.25)] transition-all duration-160 ease-out"
         >
           + New
         </button>

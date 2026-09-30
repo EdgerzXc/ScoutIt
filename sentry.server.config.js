@@ -4,6 +4,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import {
+  isLocalSentryEvent,
   isExpectedNodeRequestAbort,
   shouldEnableSentry,
 } from "./src/lib/sentryEventPolicy";
@@ -17,6 +18,7 @@ Sentry.init({
   tracesSampleRate: 0.1,
   sendDefaultPii: false,
   beforeSend(event, hint) {
+    if (isLocalSentryEvent(event)) return null;
     return isExpectedNodeRequestAbort(event, hint) ? null : event;
   },
 

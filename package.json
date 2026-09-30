@@ -4,16 +4,22 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:offline": "node scripts/next-offline.mjs dev",
     "build": "next build",
+    "build:offline": "node scripts/next-offline.mjs build",
+    "start:offline": "node scripts/next-offline.mjs start",
     "start": "next start",
     "lint": "eslint src mission-control/src",
     "test": "vitest",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:live-cms": "node scripts/test-e2e-live-cms.mjs",
     "test:e2e:list": "playwright test --list",
     "verify": "npm run verify:surfaces && npm run verify:contrast && npm run lint && npm run audit:typography && npm run test:unit && npm run test:e2e:list",
     "verify:surfaces": "node scripts/verify-approved-surfaces.mjs",
     "verify:contrast": "node scripts/verify-contrast.mjs",
+    "verify:computed-contrast": "playwright test e2e_tests/full-system/36-computed-contrast.spec.js --project=chromium --workers=2",
+    "verify:public-appearance": "playwright test e2e_tests/full-system/36-computed-contrast.spec.js e2e_tests/full-system/37-dark-default.spec.js e2e_tests/full-system/38-first-visit-presentation.spec.js --project=chromium --workers=2",
     "audit:typography": "node scripts/audit-typography.mjs"
   },
   "dependencies": {

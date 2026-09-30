@@ -241,7 +241,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               
               <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-[#1a1518] border border-intel-magenta/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(255,117,195,0.1)]">
+                  <div className="w-16 h-16 bg-surface-alt border border-intel-magenta/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(255,117,195,0.1)]">
                     🎨
                     {acceptingCommissions && (
                       <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full" title="Accepting Commissions"></div>

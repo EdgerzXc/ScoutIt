@@ -130,7 +130,9 @@ export default function BrokerDossierEditor() {
         return;
       }
       setRecord(body.record);
-      setMessage("Published. The public dossier cache was refreshed.");
+      setMessage(body.publicCachePending
+        ? "Published, but the public refresh is unconfirmed. Check your dossier before sharing."
+        : "Published. The public dossier cache was refreshed.");
     } finally {
       setPublishing(false);
     }

@@ -210,7 +210,7 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
     our_take: briefingData.our_take || "",
     cover_image_url:
       briefingData.cover_image_url ||
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop",
+      "/assets/intel-tower-mesh.svg",
     body_json: briefingData.body_json || [],
     city: briefingData.city || "BGC, Taguig",
     region: briefingData.region || "Metro Manila",
@@ -251,13 +251,14 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
   let airtableStatus = "unconfigured";
   let airtableRecordId = null;
   let airtableError = null;
+  let cacheStatus = null;
 
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
 
   if (apiKey && baseId) {
     try {
-      const { recordId } = await pushBriefingToAirtable({
+      const { recordId, cache } = await pushBriefingToAirtable({
         apiKey,
         baseId,
         briefing: inserted,
@@ -268,6 +269,7 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
       await admin.from("intel_briefings").update(publishedMarkers(recordId)).eq("id", inserted.id);
       airtableRecordId = recordId;
       airtableStatus = "published";
+      cacheStatus = cache;
     } catch (err) {
       airtableStatus = "failed";
       airtableError = err.message;
@@ -276,14 +278,14 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
 
   await recordSystemEvent({
     event: airtableStatus === "published" ? EVENTS.AIRTABLE_PUBLISH_OK : EVENTS.AIRTABLE_PUBLISH_FAILED,
-    severity: airtableStatus === "published" ? "info" : "error",
+    severity: airtableStatus === "published" ? (cacheStatus?.purged ? "info" : "warning") : "error",
     subjectTable: "intel_briefings",
     subjectId: inserted.id,
     summary:
       airtableStatus === "published"
         ? `Briefing '${inserted.slug}' synced to Airtable INTEL_CMS`
         : `Briefing '${inserted.slug}' saved as a draft but did not reach Airtable (${airtableStatus})`,
-    detail: { slug: inserted.slug, airtableStatus, airtableRecordId, error: airtableError },
+    detail: { slug: inserted.slug, airtableStatus, airtableRecordId, error: airtableError, cache: cacheStatus },
   });
 
   await logAction({
@@ -311,7 +313,7 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
   // "a Supabase row exists" — that is not what a reader of the word assumes.
   const message =
     airtableStatus === "published"
-      ? "Draft saved and synced to Airtable. Tick Approved_For_Live_Site there to put it on the public site."
+      ? `Draft saved and synced to Airtable. Tick Approved_For_Live_Site there to put it on the public site.${cacheStatus?.purged ? "" : ` Public cache purge needs attention: ${cacheStatus?.detail || "unknown error"}`}`
       : airtableStatus === "failed"
         ? `Draft saved to Supabase, but the Airtable sync failed (${airtableError}). The article is not in the CMS yet.`
         : "Draft saved to Supabase. Airtable is not configured, so it was not synced.";

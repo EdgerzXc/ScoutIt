@@ -6,6 +6,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { getFreshness } from "@/lib/freshness";
 import { stampAirtableFreshness } from "@/lib/airtableFreshness";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 // ─────────────────────────────────────────────────────────────────────────
 // RE-VERIFICATION GATE  (NEW_IDEAS.md §21)
@@ -135,6 +136,16 @@ export async function POST(req) {
     }
 
     const failedSync = airtableResults.filter((r) => !r.synced).map((r) => r.slug);
+    let publicCachePending = false;
+    if (airtableResults.some((r) => r.synced)) {
+      try {
+        const purge = await invalidateCmsBundle();
+        publicCachePending = purge.sharedCachePurged === false;
+      } catch (cacheError) {
+        console.error("[VERIFY FRESHNESS] Catalogue cache purge failed after sync:", cacheError?.message);
+        publicCachePending = true;
+      }
+    }
 
     return NextResponse.json(
       {
@@ -144,6 +155,7 @@ export async function POST(req) {
         // Honest about partial success — the owner's confirmation is saved
         // either way, but a failed CMS sync means the PUBLIC badge is stale.
         ...(failedSync.length ? { cmsSyncPending: failedSync } : {}),
+        publicCachePending,
       },
       { status: 200 },
     );

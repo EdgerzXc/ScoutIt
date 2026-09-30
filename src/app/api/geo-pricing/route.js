@@ -4,12 +4,12 @@ import { getServerMapboxToken } from "@/lib/mapboxToken";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/clientIp";
 import { fetchWithRetry } from "@/lib/fetchWithRetry";
+import { getCmsBundle } from "@/lib/cmsCache";
 
 // ── SPEND CEILING (A-012) ────────────────────────────────────────────────────
 // U-009 made this route reject malformed input cheaply. It did not stop a
-// caller sending WELL-FORMED requests in a loop, and each accepted request is
-// one Mapbox geocode plus one Airtable read, both billed, with no account
-// required. 20/minute comfortably covers a person adjusting a price slider.
+// caller sending WELL-FORMED requests in a loop. Mapbox remains metered; the
+// published comparables now come from the shared CMS bundle.
 const GEO_PRICING_LIMIT_PER_MINUTE = 20;
 const checkGeoPricingRate = createRateLimiter({
   limit: GEO_PRICING_LIMIT_PER_MINUTE,
@@ -46,17 +46,17 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 // values, and the field name comes from our constant, not from the wire.
 // ---------------------------------------------------------------------------
 const CATEGORY_PRICE_FIELD = Object.freeze({
-  residential: 'RS_Price',
-  commercial: 'CM_Rent_Per_Sqm',
-  str: 'STR_Nightly_Rate',
-  hospitality: 'Listed_Price',
-  restaurants: 'RST_Rent',
-  venues: 'VEN_Rental_Rate',
+  residential: (p) => p.cat?.residential?.price,
+  commercial: (p) => p.cat?.commercial?.rentFrom ?? p.cat?.commercial?.rentPerSqm,
+  str: (p) => p.cat?.str?.nightlyRate,
+  hospitality: (p) => p.listed_price,
+  restaurants: (p) => p.cat?.restaurant?.rent,
+  venues: (p) => p.cat?.venue?.rentalRate,
 });
 
 /**
  * @param {unknown} category
- * @returns {{ key: string, priceField: string } | null} null when unknown
+ * @returns {{ key: string, priceField: Function } | null} null when unknown
  */
 function resolveCategory(category) {
   if (typeof category !== 'string') return null;
@@ -111,6 +111,14 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid location' }, { status: 400 });
     }
 
+    // A public pricing request must not perform its own Airtable query. The
+    // shared snapshot already contains only approved listings and all fields
+    // needed for comparable selection.
+    const bundle = await getCmsBundle();
+    if (bundle.source === "empty_fallback_on_error") {
+      return NextResponse.json({ error: "Catalog unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } });
+    }
+
     // 1. Geocode the location
     const mapboxToken = getServerMapboxToken();
     const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxToken}&limit=1`;
@@ -129,40 +137,22 @@ export async function POST(request) {
 
     const [lon, lat] = geocodeData.features[0].center;
 
-    // 2. Fetch properties from Airtable
-    // `resolved.key` came out of CATEGORY_PRICE_FIELD, not off the wire, so it
-    // cannot carry a quote. It is still encoded, because "the value is safe" is
-    // a property that decays the moment someone edits this line.
-    const formula = `AND(Approved_For_ScoutIt=TRUE(), LOWER(SpaceCategory)='${resolved.key}')`;
-    const airtableUrl =
-      `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/PROPERTIES_CMS` +
-      `?filterByFormula=${encodeURIComponent(formula)}`;
-    
-    const airtableRes = await fetchWithRetry(
-      airtableUrl,
-      { headers: { Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}` } },
-      { circuit: "airtable-geo-pricing" }
-    );
-
-    if (!airtableRes.ok) {
-      throw new Error('Failed to fetch from Airtable');
-    }
-
-    const airtableData = await airtableRes.json();
-
-    // 3. Filter by radius and calculate average
+    // 2. Filter the approved snapshot by radius and calculate average.
     let totalPriceSum = 0;
     let compsCount = 0;
 
-    airtableData.records.forEach((record) => {
-      const compLat = record.fields.Latitude;
-      const compLon = record.fields.Longitude;
-      const compPrice = record.fields[priceField];
+    (bundle.properties || []).forEach((property) => {
+      if (property.is_sample) return;
+      if (String(property.spaceCategory || "").toLowerCase() !== resolved.key) return;
+      // Do not treat a city-centroid fallback as an address-level comparable.
+      const compLat = property.latitude;
+      const compLon = property.longitude;
+      const compPrice = Number.parseFloat(priceField(property));
 
-      if (compLat && compLon && compPrice) {
+      if (compLat && compLon && Number.isFinite(compPrice) && compPrice > 0) {
         const dist = calculateDistance(lat, lon, compLat, compLon);
         if (dist <= COMP_RADIUS_KM) {
-          totalPriceSum += parseFloat(compPrice);
+          totalPriceSum += compPrice;
           compsCount++;
         }
       }
@@ -180,7 +170,7 @@ export async function POST(request) {
       averagePrice: averagePrice,
       percentageDiff: percentageDiff,
       radiusKm: COMP_RADIUS_KM,
-      priceField: priceField
+      priceField: resolved.key
     });
 
   } catch (error) {

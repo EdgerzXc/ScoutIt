@@ -110,6 +110,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         // Surfaced rather than swallowed — a failed CMS sync means the
         // PUBLIC badge is still stale even though the owner's action saved.
         cmsSyncPending: json.cmsSyncPending || [],
+        publicCachePending: json.publicCachePending === true,
       });
       try { window.localStorage.setItem(dismissKey(), "1"); } catch { /* ignore */ }
     } catch (e) {
@@ -129,7 +130,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           position: fixed;
           inset: 0;
           z-index: 900;
-          background: rgba(8, 8, 8, 0.86);
+          background: var(--modal-scrim);
           backdrop-filter: blur(7px);
           display: flex;
           align-items: flex-end;
@@ -147,6 +148,12 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           border-radius: 10px 10px 0 0;
           padding: 22px 18px 18px;
         }
+        @media (prefers-reduced-motion: no-preference) {
+          .mf-overlay { animation: mfFade 160ms ease-out backwards; }
+          .mf-card { animation: mfRise 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+        }
+        @keyframes mfFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes mfRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .mf-eyebrow {
           font-family: ${MONO};
           font-size: 12px;
@@ -290,17 +297,21 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
               {done.count} listing{done.count === 1 ? "" : "s"} confirmed
             </h2>
             <div className="mf-done">
-              Marked verified as of today. They&apos;ll show a{" "}
-              <span style={{ color: "var(--green)" }}>🥇 Verified Fresh</span> badge and return to top
-              placement in discovery.
+              {done.cmsSyncPending.length || done.publicCachePending
+                ? "Your confirmation was saved. Check the public listing before relying on its freshness badge."
+                : <>Marked verified as of today. They&apos;ll show a{" "}
+                    <span style={{ color: "var(--green)" }}>🥇 Verified Fresh</span> badge and return to top
+                    placement in discovery.</>}
             </div>
             {done.cmsSyncPending.length > 0 && (
               <div className="mf-warn">
                 Saved, but {done.cmsSyncPending.length} listing
                 {done.cmsSyncPending.length === 1 ? "" : "s"} couldn&apos;t sync to the public CMS
-                just now. Your confirmation is recorded — the public badge will catch up on the next
-                sync.
+                just now. Your confirmation is recorded; retry the public sync when Airtable is available.
               </div>
+            )}
+            {done.publicCachePending && (
+              <div className="mf-warn">Public refresh is unconfirmed. Check the listing page before sharing it.</div>
             )}
             <div className="mf-actions">
               <button className="mf-btn mf-btn--gold" onClick={() => setOpen(false)}>Done</button>

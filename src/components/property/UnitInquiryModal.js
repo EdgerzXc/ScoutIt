@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getSession } from "../../lib/authClient";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Check } from "lucide-react";
 import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
 import PrivacyNotice from "../ui/PrivacyNotice";
 import { useModalDialog } from "../ui/useModalDialog";
+import { stillBackdropVariants, stillPanelVariants, instantDialogTransition } from "@/components/ui/reducedDialogMotion";
 
 // Unit Master Page "Your Move" (SCOUTIT_MASTER_BUILD_SPEC.md §9.3). A single
 // target — the unit's operator if delegated, otherwise the building owner —
@@ -45,6 +46,7 @@ const formVariants = {
 };
 
 export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, propertySlug, unitId, unitName, operatorDisplayName, prefillMessage = "" }) {
+  const reduceMotion = useReducedMotion();
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
   const [gate, setGate] = useState({ loading: true, free: false });
@@ -150,25 +152,26 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 z-[9999] bg-[#0a0908]/85 flex items-center justify-center p-5"
-          variants={backdropVariants}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-5"
+          style={{ background: "var(--modal-scrim)" }}
+          variants={reduceMotion ? stillBackdropVariants : backdropVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
-          transition={backdropTransition}
+          transition={reduceMotion ? instantDialogTransition : backdropTransition}
         >
           <motion.div
             ref={dialogRef}
             className="w-full max-w-[500px]"
             role="dialog"
             aria-modal="true"
-            variants={modalVariants}
+            variants={reduceMotion ? stillPanelVariants : modalVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={modalTransition}
+            transition={reduceMotion ? instantDialogTransition : modalTransition}
           >
-            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] contact-lens-modal">
+            <GlassPanel className="relative p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
                 onClick={onClose}
@@ -182,16 +185,16 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                   <motion.div 
                     key="success"
                     className="text-center py-10 flex flex-col items-center gap-4"
-                    variants={successVariants}
+                    variants={reduceMotion ? stillPanelVariants : successVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
                   >
                     <div className="w-16 h-16 rounded-full bg-success/10 border border-success/30 text-success flex items-center justify-center mb-2">
                       <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
+                        initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                        transition={reduceMotion ? instantDialogTransition : { type: "spring", stiffness: 300, delay: 0.2 }}
                       >
                         <Check size={32} />
                       </motion.div>
@@ -205,7 +208,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                 ) : (
                   <motion.div 
                     key="form"
-                    variants={formVariants}
+                    variants={reduceMotion ? stillPanelVariants : formVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
@@ -235,7 +238,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                           🛑 <strong>NEVER pay upfront reservation fees or deposits</strong> prior to in-person physical inspection and title/contract verification. ScoutIt does not manage or hold funds.
                         </p>
                         <p className="mb-1.5">
-                          ⏱️ <strong>7-Day Purge Window:</strong> Temporary chatboxes remain accessible in your archive for <strong>7 days</strong> after the conversation ends (closed, declined, withdrawn or expired), after which all raw messages are <strong>permanently deleted forever</strong> from servers. Threads under Trust &amp; Safety review are kept until the review closes.
+                          ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted — they aren&apos;t returned.
                         </p>
                         <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-[#888]">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
@@ -263,8 +266,8 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                           className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
                           aria-label="Send this request anonymously"
                         />
-                        <span className="text-[13px] text-[#f0ede8]/80 leading-relaxed">
-                          Send anonymously — they will see <strong className="text-white font-medium">Anonymous</strong> until
+                        <span className="text-[13px] text-text-secondary leading-relaxed">
+                          Send anonymously — they will see <strong className="text-text-primary font-medium">Anonymous</strong> until
                           they accept, instead of your name.
                         </span>
                       </label>

@@ -633,6 +633,17 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
   const unitsJson = JSON.stringify(unitsOverride || data.details?.units_inventory || []);
   const categoryFields = reverseMapCategoryFields(data.details, data.space_category || data.category || data.type);
 
+  // Parse coordinates if passed as numeric latitude/longitude OR PostGIS POINT string
+  let lat = Number.isFinite(Number(data.latitude)) ? Number(data.latitude) : null;
+  let lng = Number.isFinite(Number(data.longitude)) ? Number(data.longitude) : null;
+  if ((lat == null || lng == null) && typeof data.coordinates === "string") {
+    const pointMatch = data.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+    if (pointMatch) {
+      lng = Number(pointMatch[1]);
+      lat = Number(pointMatch[2]);
+    }
+  }
+
   const payload = {
     records: [
       {
@@ -655,8 +666,8 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
           // these, publish sent only the location TEXT and the public page had
           // to geocode it a second time — a different lookup that can land
           // somewhere else, so the owner and the visitor saw different maps.
-          ...(Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude))
-            ? { Latitude: Number(data.latitude), Longitude: Number(data.longitude) }
+          ...(lat != null && lng != null
+            ? { Latitude: lat, Longitude: lng }
             : {}),
           ...photoFields(data),
           ...categoryFields

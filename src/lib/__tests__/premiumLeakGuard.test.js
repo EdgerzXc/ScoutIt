@@ -80,7 +80,7 @@ describe("A-053 hardening — the route wiring", () => {
     expect(cmsRoute).toContain('const PUBLIC_SOURCE_RADIUS = "radius"');
     expect(cmsRoute).toContain('const PUBLIC_SOURCE_CATALOG = "catalog"');
     expect(cmsRoute).toContain("source: radiusApplied ? PUBLIC_SOURCE_RADIUS : PUBLIC_SOURCE_CATALOG");
-    expect(cmsRoute).not.toContain("bundle.source");
+    expect(cmsRoute).not.toMatch(/source:\s*bundle\.source/);
     expect(cmsRoute).not.toContain("supabase_radius");
 
     const directory = readFileSync("src/app/property/DirectoryClient.js", "utf8");

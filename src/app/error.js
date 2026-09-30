@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import Link from "next/link";
 import ScoutItMark from "@/components/brand/ScoutItMark";
 import { sanitizeError, errorReference } from "@/lib/sanitizeError";
@@ -11,7 +11,7 @@ import { reportError } from "@/lib/reportError";
 //
 // Without this, one crashed component white-screens the whole route -- which
 // in practice means a broker mid-walkthrough, phone in hand, looking at
-// nothing. This intercepts the crash and renders a dark-gold recovery card
+// nothing. This intercepts the crash and renders a theme-aware recovery card
 // with a working Reload, while logging the real error to Sentry (via the
 // global handler) and through the privacy-limited Sentry report helper.
 //
@@ -20,6 +20,21 @@ import { reportError } from "@/lib/reportError";
 // ─────────────────────────────────────────────────────────────────────────
 
 export default function GlobalError({ error, reset }) {
+  useLayoutEffect(() => {
+    // A failed hydration can replace the root body class before the normal
+    // display controller mounts. Keep the recovery card in the saved mode.
+    try {
+      let mode = localStorage.getItem("scoutit_display_mode");
+      if (!mode && localStorage.getItem("scoutit_accessibility_mode") === "high-contrast") {
+        mode = "high-contrast";
+      }
+      document.body.classList.toggle("high-contrast", mode === "high-contrast");
+      document.body.classList.toggle("light-mode", mode === "light");
+    } catch {
+      // Storage may be blocked; the page stays on its dark default.
+    }
+  }, []);
+
   useEffect(() => {
     // Best-effort — the logger must never throw inside an error boundary.
     reportError({
@@ -57,7 +72,7 @@ export default function GlobalError({ error, reset }) {
       <style jsx global>{`
         .err-root {
           min-height: 100vh;
-          background: #0d0d0d;
+          background: var(--bg);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -66,15 +81,15 @@ export default function GlobalError({ error, reset }) {
         .err-card {
           width: 100%;
           max-width: 420px;
-          background: #161616;
-          border: 0.5px solid #262626;
-          border-top: 1px solid var(--accent, #E8AE3C);
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-top-color: var(--accent-border);
           border-radius: 4px;
           padding: 28px 20px;
-          box-shadow: 0 0 40px rgba(232, 174, 60, 0.06);
+          box-shadow: var(--shadow-glow-soft);
         }
         .err-mark {
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           display: block;
           margin: 0 auto 16px;
           opacity: 0.9;
@@ -84,7 +99,7 @@ export default function GlobalError({ error, reset }) {
           font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           margin-bottom: 14px;
         }
         .err-title {
@@ -92,14 +107,14 @@ export default function GlobalError({ error, reset }) {
           font-size: 24px;
           line-height: 1.25;
           font-weight: 400;
-          color: #f0ede8;
+          color: var(--text-primary);
           margin: 0 0 10px;
         }
         .err-message {
           font-family: var(--font-display);
           font-size: 14px;
           line-height: 1.7;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 24px;
         }
         .err-actions {
@@ -122,29 +137,32 @@ export default function GlobalError({ error, reset }) {
           text-transform: uppercase;
           text-decoration: none;
           cursor: pointer;
-          transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+          transition: background-color var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
         }
         .err-btn--gold {
-          background: var(--accent-bright, #F7C64E);
+          background: var(--accent-fill);
           border: none;
-          color: #0d0d0d;
+          color: var(--on-accent);
         }
-        .err-btn--gold:hover { background: var(--accent, #E8AE3C); }
         .err-btn--ghost {
           background: transparent;
-          border: 0.5px solid #262626;
-          color: #c8c8c8;
+          border: 1px solid var(--border);
+          color: var(--text-primary);
         }
-        .err-btn--ghost:hover {
-          border-color: var(--accent-muted, #6E531A);
-          color: var(--accent, #E8AE3C);
+        .err-btn:active { transform: scale(0.98); }
+        @media (hover: hover) and (pointer: fine) {
+          .err-btn--gold:hover { background: var(--accent-fill-hover); }
+          .err-btn--ghost:hover {
+            border-color: var(--accent-border);
+            color: var(--accent);
+          }
         }
         .err-ref {
           font-family: var(--font-mono, 'Courier New', monospace);
           font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: #4a4a4a;
+          color: var(--text-muted);
           margin-top: 20px;
           text-align: center;
         }
@@ -154,6 +172,10 @@ export default function GlobalError({ error, reset }) {
           .err-title { font-size: 28px; }
           .err-actions { flex-direction: row; }
           .err-btn { width: auto; flex: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .err-btn { transition: none; }
+          .err-btn:active { transform: none; }
         }
       `}</style>
     </div>

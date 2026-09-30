@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
@@ -9,11 +9,23 @@ import { notifyLightModeChanged } from "@/lib/lightMode";
 import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { guideForPath } from "@/lib/pageGuides";
+import { COOKIE_CONSENT_KEY } from "@/lib/cookieConsent";
+import FirstVisitPresentation from "./FirstVisitPresentation";
+import motionStyles from "./FloatingToolboxMotion.module.css";
+
+const PRESENTATION_CHOICE_KEY = "scoutit_presentation_choice_seen_v1";
+const FIRST_VISIT_HELP_KEY = "scoutit_help_seen_v1";
 // A-093: `@/lib/journeyGuides` pulls the ~1MB internal system graph
 // (`masterFlowGraphData`) into this layout-mounted chunk. It is imported
 // dynamically below, gated on the fetched role, so anonymous readers
 // download no internal paths. journeyGuides keeps its sync exports for
 // tests and staff surfaces; only THIS call site goes lazy.
+
+function mobileNavClearance() {
+  if (typeof window === "undefined" || !window.matchMedia("(max-width: 768px)").matches) return 0;
+  const navHeight = document.querySelector(".bottom-nav")?.getBoundingClientRect().height || 0;
+  return Math.max(88, Math.ceil(navHeight) + 8);
+}
 
 export default function FloatingToolbox({ showTrigger = true }) {
   const router = useRouter();
@@ -22,6 +34,9 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const [mode, setMode] = useState("dark");
   const [lite, setLite] = useState(false);
   const [simple, setSimple] = useState(false);
+  const [presentationOpen, setPresentationOpen] = useState(false);
+  const presentationCompletedRef = useRef(false);
+  const consentResolvedRef = useRef(false);
   // The guide is resolved from the surface the reader is actually on. It was
   // one fixed four-card sequence shown identically everywhere, which is why it
   // never landed — see src/lib/pageGuides.js.
@@ -116,7 +131,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   useEffect(() => {
     // On mobile the fixed bottom nav (~74px) owns the bottom of the screen, so
     // default the toolbox above it instead of on top of the nav / page content.
-    const navClear = window.matchMedia("(max-width: 768px)").matches ? 88 : 24;
+    const navClear = window.matchMedia("(max-width: 768px)").matches ? mobileNavClearance() : 24;
     const viewH = window.innerHeight || 800;
     const fallbackY = Math.max(100, viewH - 120 - navClear);
     
@@ -171,16 +186,56 @@ export default function FloatingToolbox({ showTrigger = true }) {
     };
   }, []);
 
-  // Never cover authentication controls with the first-visit help panel.
-  // If onboarding is the visitor's first route, defer the welcome until they
-  // reach a normal page instead of marking it seen without showing it.
+  const showFirstVisitHelp = useCallback(() => {
+    try {
+      if (localStorage.getItem(FIRST_VISIT_HELP_KEY)) return;
+      localStorage.setItem(FIRST_VISIT_HELP_KEY, "1");
+    } catch { /* storage denial must not block the guide */ }
+    setOpen(true);
+  }, []);
+
+  // First visit order: consent (when GA is configured), presentation choice,
+  // then the existing Help panel. Returning visitors keep their choices. The
+  // separate marker means a theme key written by an older default does not
+  // pretend that the chooser was completed.
   useEffect(() => {
     if (!mounted || pathname === "/onboarding") return;
-    if (!localStorage.getItem("scoutit_help_seen_v1")) {
-      localStorage.setItem("scoutit_help_seen_v1", "1");
-      setOpen(true);
-    }
-  }, [mounted, pathname]);
+    const stored = (key) => {
+      try { return localStorage.getItem(key); }
+      catch { return null; }
+    };
+    const showNext = () => {
+      const helpSeen = stored(FIRST_VISIT_HELP_KEY);
+      const choiceSeen = stored(PRESENTATION_CHOICE_KEY) || presentationCompletedRef.current;
+      if (choiceSeen) {
+        if (!helpSeen) showFirstVisitHelp();
+        return;
+      }
+
+      const priorMode = stored("scoutit_display_mode");
+      const priorDetail = stored("scoutit_simple_mode");
+      const priorContrast = stored("scoutit_accessibility_mode") === "high-contrast";
+      if (priorMode === "light" || priorMode === "high-contrast" ||
+          priorDetail !== null || priorContrast) {
+        try { localStorage.setItem(PRESENTATION_CHOICE_KEY, "existing"); } catch {}
+        if (!helpSeen) showFirstVisitHelp();
+        return;
+      }
+
+      const consentPending = Boolean(process.env.NEXT_PUBLIC_GA_ID) &&
+        stored(COOKIE_CONSENT_KEY) === null && !consentResolvedRef.current;
+      if (consentPending) return;
+      setOpen(false);
+      setPresentationOpen(true);
+    };
+    const onConsent = () => {
+      consentResolvedRef.current = true;
+      showNext();
+    };
+    window.addEventListener("scoutit:cookie-consent-chosen", onConsent);
+    showNext();
+    return () => window.removeEventListener("scoutit:cookie-consent-chosen", onConsent);
+  }, [mounted, pathname, showFirstVisitHelp]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -191,7 +246,20 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const changeMode = (m) => {
     setMode(m);
     applyTheme(m);
-    localStorage.setItem("scoutit_display_mode", m);
+    try { localStorage.setItem("scoutit_display_mode", m); } catch {}
+  };
+
+  const finishPresentation = (choice) => {
+    if (choice) {
+      changeMode(choice.appearance);
+      const nextSimple = choice.detail === "simple";
+      setSimple(nextSimple);
+      setSimpleMode(nextSimple);
+    }
+    presentationCompletedRef.current = true;
+    try { localStorage.setItem(PRESENTATION_CHOICE_KEY, "1"); } catch {}
+    setPresentationOpen(false);
+    showFirstVisitHelp();
   };
 
   const toggleLite = () => {
@@ -251,7 +319,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
     const dy = e.clientY - anchor.current.clientY;
     if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved.current = true;
     // Keep the button out from under the mobile bottom nav even while dragging.
-    const navClear = window.matchMedia("(max-width: 768px)").matches ? 88 : 0;
+    const navClear = mobileNavClearance();
     const nx = Math.max(0, Math.min(window.innerWidth - 56, anchor.current.posX + dx));
     const ny = Math.max(0, Math.min(window.innerHeight - 56 - navClear, anchor.current.posY + dy));
     livePos.current = { x: nx, y: ny };
@@ -298,10 +366,11 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
   const viewW = typeof window !== 'undefined' ? window.innerWidth : 1000;
   const viewH = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const navClear = viewW <= 768 ? mobileNavClearance() : 0;
   const defaultPanelX = Math.max(16, Math.min(viewW - 250, pos.x > viewW - 290 ? viewW - 250 : pos.x));
   const defaultPanelY = viewW <= 768 ? 16 : Math.max(60, Math.min(viewH - 450, pos.y > viewH - 300 ? viewH - 450 : pos.y));
-  const activePanelX = panelPos ? panelPos.x : defaultPanelX;
-  const activePanelY = panelPos ? panelPos.y : defaultPanelY;
+  const activePanelX = panelPos ? Math.max(10, Math.min(viewW - 238, panelPos.x)) : defaultPanelX;
+  const activePanelY = panelPos ? Math.max(10, Math.min(viewH - navClear - 160, panelPos.y)) : defaultPanelY;
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -420,7 +489,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
     const dy = e.clientY - panelAnchor.current.clientY;
     const nx = Math.max(10, Math.min(viewW - 240, panelAnchor.current.posX + dx));
     const panelHeight = panelRef.current?.offsetHeight || 450;
-    const bottomClearance = viewW <= 768 ? 88 : 10;
+    const bottomClearance = viewW <= 768 ? mobileNavClearance() : 10;
     const ny = Math.max(10, Math.min(viewH - panelHeight - bottomClearance, panelAnchor.current.posY + dy));
     setPanelPos({ x: nx, y: ny });
     if (panelRef.current) {
@@ -439,6 +508,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
   return (
     <>
+      {presentationOpen && <FirstVisitPresentation onComplete={finishPresentation} />}
       {/* ── Draggable eye trigger ── */}
       {showTrigger && <div
         ref={containerRef}
@@ -490,7 +560,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
       {open && (
         <div
           ref={panelRef}
-          className="toolbox-float"
+          className={`toolbox-float ${motionStyles.displayPanel}`}
           role="complementary"
           aria-label="Help & Display"
           style={{
@@ -500,7 +570,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
             border: "1px solid var(--border-solid, rgba(232, 174, 60,0.25))",
             borderRadius: 10,
             boxShadow: "var(--shadow-lg, 0 12px 48px rgba(0,0,0,0.75))",
-            maxHeight: Math.max(160, viewH - activePanelY - (viewW <= 768 ? 88 : 10)),
+            maxHeight: Math.max(160, viewH - activePanelY - (viewW <= 768 ? navClear : 10)),
             overflowY: "auto",
           }}
         >
@@ -724,8 +794,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
             role="dialog"
             aria-modal="false"
             aria-labelledby="scoutit-guide-title"
-            className="toolbox-float"
-            style={{ position: "fixed", right: 12, bottom: 88, zIndex: 100000, width: "min(420px, calc(100vw - 24px))", maxHeight: "calc(100dvh - 112px)", overflowY: "auto", background: "#111111", border: "1px solid rgba(232, 174, 60,0.3)", borderRadius: 12, boxShadow: "0 18px 60px rgba(0,0,0,0.75)" }}
+            className={`toolbox-float ${motionStyles.guidePanel}`}
+            style={{ position: "fixed", right: 12, bottom: viewW <= 768 ? navClear : 88, zIndex: 100000, width: "min(420px, calc(100vw - 24px))", maxHeight: `calc(100dvh - ${viewW <= 768 ? navClear + 24 : 112}px)`, overflowY: "auto", background: "#111111", border: "1px solid rgba(232, 174, 60,0.3)", borderRadius: 12, boxShadow: "0 18px 60px rgba(0,0,0,0.75)" }}
           >
             {/* Wizard header */}
             <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
@@ -795,8 +865,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
       {/* ── Report Problem overlay ── */}
       {reportOpen && (
-        <div className="fixed inset-0 z-[100000] flex items-end sm:items-center justify-center bg-background/70 backdrop-blur-sm p-4" onClick={() => setReportOpen(false)}>
-          <div className="w-full max-w-md bg-[#111] border border-surface-variant rounded-lg p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className={`${motionStyles.reportBackdrop} fixed inset-0 z-[100000] flex items-end sm:items-center justify-center bg-background/70 backdrop-blur-sm p-4`} onClick={() => setReportOpen(false)}>
+          <div className={`${motionStyles.reportPanel} keep-dark w-full max-w-md border border-surface-variant rounded-lg p-6 shadow-2xl`} style={{ background: "var(--surface)" }} onClick={e => e.stopPropagation()}>
             {reportSent ? (
               <div className="text-center py-6">
                 <div className="text-3xl mb-3">✅</div>

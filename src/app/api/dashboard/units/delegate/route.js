@@ -242,7 +242,8 @@ export async function POST(request) {
 
     let warning = null;
     try {
-      await syncPropertyUnitsToAirtable(supabaseAdmin, property);
+      const sync = await syncPropertyUnitsToAirtable(supabaseAdmin, property);
+      if (sync?.publicCachePending) warning = "Units delegated; public refresh unconfirmed. Check the listing page.";
     } catch (airtableErr) {
       console.error("[DELEGATE API] Airtable sync failed:", airtableErr);
       warning = "Units delegated, but Airtable sync failed: " + airtableErr.message;

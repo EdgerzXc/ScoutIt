@@ -6,6 +6,7 @@ import { getCurrentRole, getCurrentTier } from "@/lib/entitlements";
 import GlassPanel from "../ui/GlassPanel";
 import { buildPromoPack } from "@/lib/shareBriefing";
 import { promoteFailureState } from "@/components/property/promoteFallback";
+import entrance from "@/components/ui/OverlayEntrance.module.css";
 
 function MinorLockSection() {
   return (
@@ -146,16 +147,16 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
   const isUnlocked = data?.executiveSummary != null;
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#0a0908]/85 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
-      <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col">
-        <GlassPanel className="flex flex-col rounded-xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.6)] h-full max-h-[85vh] promo-lens-modal">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 backdrop-blur-sm motion-safe:animate-[fadeIn_0.2s_ease]" style={{ background: "var(--modal-scrim)" }}>
+      <div className={`relative w-full max-w-2xl max-h-[85vh] flex flex-col ${entrance.panel}`}>
+        <GlassPanel className="flex flex-col rounded-xl overflow-hidden h-full max-h-[85vh] promo-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/5 bg-[#0e0e0e]/40">
+          <div className="flex items-center justify-between p-5 border-b border-surface-variant" style={{ background: "rgba(var(--surface2-rgb),0.4)" }}>
             <div className="flex items-center gap-2 text-gold-accent">
               <Sparkles size={18} />
               <h2 className="font-mono text-sm uppercase tracking-[0.12em] font-semibold text-gold-accent">1-Click AI Promote</h2>
             </div>
-            <button aria-label="Close" onClick={onClose} className="p-1 text-[#f0ede8]/50 hover:text-white transition-colors rounded">
+            <button aria-label="Close" onClick={onClose} className="p-1 text-text-secondary hover:text-text-primary transition-colors rounded">
               <X size={20} />
             </button>
           </div>
@@ -165,8 +166,8 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
           
           {loading && !data && (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-12 h-12 rounded-full border-2 border-gold-accent/20 border-t-gold-accent animate-spin mb-4" />
-              <div className="text-[12px] font-label-caps tracking-widest text-gold-accent uppercase animate-pulse">
+              <div className="w-12 h-12 rounded-full border-2 border-gold-accent/20 border-t-gold-accent motion-safe:animate-spin mb-4" />
+              <div className="text-[12px] font-label-caps tracking-widest text-gold-accent uppercase motion-safe:animate-pulse">
                 Assimilating Intelligence...
               </div>
             </div>
@@ -218,7 +219,7 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
           )}
 
           {data && (
-            <div className="animate-[fadeIn_0.3s_ease]">
+            <div className="motion-safe:animate-[fadeIn_0.3s_ease]">
               <p className="text-sm text-text-secondary mb-2">
                 Promotional copy built from this listing&apos;s recorded specs. Review before sharing.
               </p>

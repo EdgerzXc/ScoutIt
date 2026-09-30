@@ -7,7 +7,7 @@ const SRC_ROOT = resolve(process.cwd(), "src");
 function sourceFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
-    if (entry.isDirectory()) return sourceFiles(path);
+    if (entry.isDirectory()) return entry.name === "__tests__" ? [] : sourceFiles(path);
     return /\.(?:js|jsx|mjs)$/.test(entry.name) ? [path] : [];
   });
 }

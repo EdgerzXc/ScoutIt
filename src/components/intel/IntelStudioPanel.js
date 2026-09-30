@@ -186,9 +186,9 @@ export default function IntelStudioPanel() {
           align-items: center;
           gap: 10px;
           padding: 28px 16px;
-          border: 1px dashed rgba(232, 174, 60, 0.4);
+          border: 1px dashed rgba(var(--accent-rgb), 0.4);
           border-radius: var(--radius-lg);
-          background: rgba(232, 174, 60, 0.03);
+          background: rgba(var(--accent-rgb), 0.03);
           color: var(--text-secondary);
           font-family: var(--font-mono), monospace;
           font-size: 12px;
@@ -199,7 +199,7 @@ export default function IntelStudioPanel() {
           min-height: 44px;
           width: 100%;
         }
-        .dropzone:hover { border-color: var(--accent); background: rgba(232, 174, 60, 0.06); }
+        .dropzone:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.06); }
         .dropzone svg { color: var(--accent); }
         .file-chip {
           display: inline-flex;
@@ -238,7 +238,7 @@ export default function IntelStudioPanel() {
           color: var(--text-primary);
           resize: vertical;
         }
-        .paste-area:focus { outline: none; border-color: rgba(232, 174, 60, 0.5); }
+        .paste-area:focus { outline: none; border-color: rgba(var(--accent-rgb), 0.5); }
         .paste-area:disabled { opacity: 0.4; }
         .publish-toggle {
           display: flex;
@@ -275,7 +275,7 @@ export default function IntelStudioPanel() {
           color: #0d0d0d;
           font-weight: 700;
         }
-        .btn-primary:hover:not(:disabled) { background: var(--accent-bright, #F7C64E); }
+        .btn-primary:hover:not(:disabled) { background: var(--accent-bright); }
         .btn-ghost {
           background: transparent;
           border: 1px solid rgba(255, 255, 255, 0.15);
@@ -301,7 +301,7 @@ export default function IntelStudioPanel() {
         }
         .studio-status a { color: var(--accent); text-decoration: underline; }
         .studio-preview {
-          border: 1px solid rgba(232, 174, 60, 0.2);
+          border: 1px solid rgba(var(--accent-rgb), 0.2);
           border-radius: var(--radius-lg);
           background: rgba(255, 255, 255, 0.02);
           padding: clamp(16px, 4vw, 32px);

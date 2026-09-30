@@ -9,6 +9,7 @@ import {
 } from "@/lib/calendar/calendarDates";
 import { EVENT_COLOR_STYLES } from "./EventChip";
 import { sanitizeError } from "@/lib/sanitizeError";
+import overlayMotion from "@/components/ui/OverlayEntrance.module.css";
 
 const COLOR_KEYS = Object.keys(EVENT_COLOR_STYLES);
 
@@ -109,12 +110,11 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4"
+      className={`${overlayMotion.backdrop} fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4`}
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-lg bg-[#121212] border border-surface-variant rounded-t-2xl sm:rounded-lg
-          shadow-2xl max-h-[90dvh] overflow-y-auto cal-lens"
+        className={`${overlayMotion.panel} w-full sm:max-w-lg bg-surface border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl max-h-[90dvh] overflow-y-auto cal-lens`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
@@ -220,7 +220,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
                   onClick={() => set({ color: c })}
                   aria-label={c}
                   className={`w-11 h-11 sm:w-7 sm:h-7 rounded-full border-2 transition-transform ${EVENT_COLOR_STYLES[c]}
-                    ${form.color === c ? "scale-110 ring-2 ring-offset-2 ring-offset-[#121212] ring-gold-accent" : "opacity-70"}`}
+                    ${form.color === c ? "scale-110 ring-2 ring-offset-2 ring-offset-surface ring-gold-accent" : "opacity-70"}`}
                 />
               ))}
             </div>
@@ -254,7 +254,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
                 type="submit"
                 disabled={saving}
                 className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-5 py-2 rounded
-                  font-working-title font-semibold shadow-[0_0_12px_rgba(232,174,60,0.25)] transition-all duration-160 ease-out disabled:opacity-50"
+                  font-working-title font-semibold shadow-[0_0_12px_rgba(var(--accent-rgb),0.25)] transition-all duration-160 ease-out disabled:opacity-50"
               >
                 {saving ? "Saving…" : isEdit ? "Save" : "Create"}
               </button>

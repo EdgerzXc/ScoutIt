@@ -6,6 +6,7 @@ import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
 import Link from "next/link";
 import { Check } from "lucide-react";
+import styles from "@/components/pricing/PricingDetail.module.css";
 
 const TIERS = [
   {
@@ -79,14 +80,14 @@ export default function SeekerPricingPage() {
       <main className="pricing-main relative overflow-hidden">
         
         {/* Cinematic Background Glows */}
-        <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none`}></div>
+        <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none`}></div>
 
         <header className="pricing-header z-10 relative">
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             LAYER 08 // SEEKER INTELLIGENCE
           </span>
-          <h1 className="page-title text-5xl md:text-6xl font-display-md text-white mb-6 drop-shadow-lg">
+          <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Explore with the <span className="text-gold-accent">Spatial Vault</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -100,19 +101,16 @@ export default function SeekerPricingPage() {
           {TIERS.map((tier) => (
             <div 
               key={tier.name} 
-              className={`flex flex-col rounded-2xl p-8 relative overflow-hidden transition-all duration-500 cursor-default ${
-                tier.highlight 
-                  ? 'bg-gradient-to-br from-[#1A1814] to-[#0A0908] border border-gold-accent/50 shadow-[0_0_40px_rgba(232,174,60,0.15)] hover:shadow-[0_0_60px_rgba(232,174,60,0.25)] hover:border-gold-accent transform hover:-translate-y-2' 
-                  : 'bg-surface-alt/40 backdrop-blur-md border border-surface-variant/50 hover:bg-surface-alt/60 hover:border-text-primary/30'
-              }`}
+              className={`flex flex-col rounded-2xl p-8 relative overflow-hidden cursor-default backdrop-blur-md ${styles.card} ${tier.highlight ? styles.featuredCard : ""}`}
+              style={tier.highlight ? { "--pricing-detail-tint": "var(--accent-dim)" } : undefined}
             >
               {tier.highlight && (
                 <>
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gold-accent to-gold-bright shadow-[0_0_15px_rgba(232,174,60,0.8)]"></div>
-                  <div className="absolute top-4 right-4 bg-gold-accent text-background text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_10px_rgba(232,174,60,0.3)]">
+                  <div className={`${styles.accentBar} absolute top-0 left-0 w-full h-1.5`}></div>
+                  <div className={`${styles.badge} absolute top-4 right-4 text-[12px] font-bold uppercase tracking-widest px-3 py-1 rounded-full`}>
                     Most Popular
                   </div>
-                  <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl"></div>
+                  <div className={`${styles.ambient} absolute -bottom-24 -right-24 w-48 h-48 bg-gold-accent/10 rounded-full blur-3xl`}></div>
                 </>
               )}
 
@@ -121,7 +119,7 @@ export default function SeekerPricingPage() {
                   {tier.name}
                 </h2>
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-4xl font-display-md text-white">{tier.price}</span>
+                  <span className="text-4xl font-display-md text-text-primary">{tier.price}</span>
                   <span className="text-sm font-mono text-text-muted uppercase tracking-wider">/ {tier.period}</span>
                 </div>
                 <p className="text-sm text-text-secondary leading-relaxed h-12">
@@ -129,7 +127,7 @@ export default function SeekerPricingPage() {
                 </p>
               </div>
 
-              <div className={`flex items-center gap-2 mb-6 px-3 py-2 rounded-lg ${tier.highlight ? 'bg-gold-accent/10 border border-gold-accent/20' : 'bg-white/5 border border-white/10'}`}>
+              <div className={`flex items-center gap-2 mb-6 px-3 py-2 rounded-lg ${styles.connects} ${tier.highlight ? styles.connectsFeatured : ""}`}>
                 <span className="text-gold-accent font-mono font-bold text-sm">◈</span>
                 <span className={`text-xs font-mono font-semibold ${tier.highlight ? 'text-gold-accent' : 'text-text-secondary'}`}>{tier.connects}</span>
               </div>
@@ -158,7 +156,7 @@ export default function SeekerPricingPage() {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          background: #0A0908;
+          background: var(--bg);
         }
 
         .pricing-main {

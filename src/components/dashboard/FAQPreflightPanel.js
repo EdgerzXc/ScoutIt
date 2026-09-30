@@ -225,7 +225,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
           height: 6px;
           border-radius: 50%;
           margin-top: 7px;
-          background: #2e2e2e;
+          background: var(--border-solid);
         }
         .pf-q__dot--done { background: var(--accent, var(--accent-fill)); }
         .pf-q__text {

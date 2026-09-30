@@ -92,7 +92,7 @@ export function formatDiscoverDatasets(airtableProperties = [], airtableIntel = 
   return { properties: nextProps, intel: nextIntel };
 }
 
-export default function DiscoverClient({ initialProperties = [], initialIntel = [] }) {
+export default function DiscoverClient({ initialProperties = [], initialIntel = [], initialUnavailable = false }) {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
   const initialRegionParam = searchParams.get("region");
@@ -101,6 +101,8 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
   const initialDatasets = useMemo(() => formatDiscoverDatasets(initialProperties, initialIntel), [initialProperties, initialIntel]);
   const [allProperties, setAllProperties] = useState(() => initialDatasets.properties);
   const [allIntel, setAllIntel] = useState(() => initialDatasets.intel);
+  const [cmsUnavailable, setCmsUnavailable] = useState(initialUnavailable);
+  const [retryCount, setRetryCount] = useState(0);
 
   const [properties, setProperties] = useState([]);
   const [intel, setIntel] = useState([]);
@@ -122,13 +124,15 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
         const formatted = formatDiscoverDatasets(data.properties || [], data.intel || []);
         setAllProperties(formatted.properties);
         setAllIntel(formatted.intel);
+        setCmsUnavailable(false);
       } catch (err) {
         console.error("Discover page CMS load error:", err);
+        setCmsUnavailable(true);
       }
     }
 
     fetchCMS();
-  }, []);
+  }, [retryCount]);
 
 
   // Region search filter within the regions navigation bar
@@ -278,6 +282,15 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
             </div>
           </div>
 
+          {cmsUnavailable && (
+            <div className="cmsOutageNotice" role="status">
+              <p>Live catalogue connection is temporarily unavailable. Sample entries may still appear below.</p>
+              <button className="spacesRetry" type="button" onClick={() => setRetryCount((count) => count + 1)}>
+                Retry Connection
+              </button>
+            </div>
+          )}
+
           {/* ── PRIMARY SEARCH ENGINE ── */}
           <div data-scoutit-guide="scoutit-discover-search">
             <DiscoverSearch />
@@ -398,10 +411,14 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
                   color: "var(--text-secondary)"
                 }}
               >
-                <p style={{ margin: "0 0 12px 0", fontSize: "14px" }}>
-                  No spaces recorded {activeRegion ? `in ${activeRegion}` : "for this category"} yet.
-                </p>
-                {activeRegion && (
+                {cmsUnavailable ? (
+                  <p style={{ margin: 0, fontSize: "14px" }}>Live spaces cannot be loaded right now.</p>
+                ) : (
+                  <p style={{ margin: "0 0 12px 0", fontSize: "14px" }}>
+                    No spaces recorded {activeRegion ? `in ${activeRegion}` : "for this category"} yet.
+                  </p>
+                )}
+                {!cmsUnavailable && activeRegion && (
                   <button
                     type="button"
                     onClick={() => setActiveRegion(null)}

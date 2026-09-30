@@ -10,7 +10,16 @@ import {
   capacityCheck,
   POSTABLE_SIGNAL_TYPES,
 } from "@/lib/communityPosting";
-import { listLiveSignals, countActiveSignals, geocodeSignalScope, isMissingTable } from "@/lib/communityStore";
+import {
+  listLiveSignals,
+  countActiveSignals,
+  geocodeSignalScope,
+  isMissingTable,
+  findLivePromoByBuilding,
+  findLiveDemandByKey,
+} from "@/lib/communityStore";
+import { normalizeKeyPart } from "@/lib/communityPosting";
+import { isActiveRosterBroker } from "@/lib/brokerRepresentation";
 
 // ─────────────────────────────────────────────────────────────────────────
 // COMMUNITY SIGNALS FEED + POSTING (A-145 P1)
@@ -30,12 +39,18 @@ export async function GET(request) {
   }
   try {
     const url = new URL(request.url);
+    // A private request-scoped flag lets authors manage their own posts
+    // without publishing account IDs or trusting collision-prone Scout IDs.
+    const viewerId = request.headers.get("Authorization")
+      ? await resolveUserId(request).catch(() => null)
+      : null;
     const result = await listLiveSignals({
       district: url.searchParams.get("district") || null,
       signalType: POSTABLE_SIGNAL_TYPES.includes(url.searchParams.get("signalType"))
         ? url.searchParams.get("signalType")
         : null,
       limit: url.searchParams.get("limit") || 60,
+      viewerId,
     });
     if (result.missing) {
       return NextResponse.json(
@@ -43,7 +58,10 @@ export async function GET(request) {
         { status: 200 }
       );
     }
-    return NextResponse.json({ ok: true, signals: result.signals });
+    return NextResponse.json(
+      { ok: true, signals: result.signals },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (err) {
     if (isMissingTable(err)) {
       return NextResponse.json(
@@ -137,14 +155,127 @@ export async function POST(request) {
       );
     }
 
+    // ── Kind split (owner decisions 2026-09-26) ──────────────────────
+    // Promo naming a building: only its owner or handling broker may post
+    // it (R3). "Handler" currently means an active roster representation —
+    // Gap B default, stated not smuggled. District-only promos and demand
+    // signals skip this gate (nothing to verify against).
+    if (normalized.signalKind === "promo" && normalized.buildingName) {
+      const buildingKey = normalizeKeyPart(normalized.buildingName);
+      const { data: owned, error: ownedErr } = await supabaseAdmin
+        .from("properties")
+        .select("id, title")
+        .eq("owner_id", userId);
+      if (ownedErr) {
+        if (isMissingTable(ownedErr)) {
+          return NextResponse.json(
+            { ok: false, error: "Community posting is opening soon. Nothing was saved." },
+            { status: 503 }
+          );
+        }
+        throw ownedErr;
+      }
+      const ownsBuilding = (owned || []).some(
+        (p) => normalizeKeyPart(p.title) === buildingKey
+      );
+      let handlesBuilding = false;
+      if (!ownsBuilding) {
+        const { data: reps, error: repErr } = await supabaseAdmin
+          .from("property_broker_representations")
+          .select("property_id, status, visible_to_public, inventory_eligible, unavailable_at, expires_at")
+          .eq("broker_id", userId);
+        if (repErr) {
+          if (isMissingTable(repErr)) {
+            return NextResponse.json(
+              { ok: false, error: "Community posting is opening soon. Nothing was saved." },
+              { status: 503 }
+            );
+          }
+          throw repErr;
+        }
+        const activeIds = (reps || []).filter((r) => isActiveRosterBroker(r)).map((r) => r.property_id);
+        if (activeIds.length > 0) {
+          const { data: handled, error: handledErr } = await supabaseAdmin
+            .from("properties")
+            .select("id, title")
+            .in("id", activeIds);
+          if (handledErr) throw handledErr;
+          handlesBuilding = (handled || []).some(
+            (p) => normalizeKeyPart(p.title) === buildingKey
+          );
+        }
+      }
+      if (!ownsBuilding && !handlesBuilding) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: `Only the owner or handling broker of ${normalized.buildingName} can promote it. If this is your property, list it through Create Space first — or post a district promo without naming the building.`,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    // ── Dedupe (owner decision 2026-09-26) ─────────────────────────────
+    // Promos: same post = same building → join it, don't stack it.
+    // Demand: same post = same person + same want (Scout ID sees through
+    // anonymity). District-only promos dedupe by author + place.
+    if (normalized.signalKind === "promo" && normalized.buildingName) {
+      const dup = await findLivePromoByBuilding(normalized.buildingName);
+      if (dup.missing) {
+        return NextResponse.json(
+          { ok: false, error: "Community posting is opening soon. Nothing was saved." },
+          { status: 503 }
+        );
+      }
+      if (dup.duplicateId) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "This building already has a live promo — join it with Relevant instead of stacking a duplicate.",
+            duplicateId: dup.duplicateId,
+          },
+          { status: 409 }
+        );
+      }
+    } else {
+      const dup = await findLiveDemandByKey({
+        authorAccountId: userId,
+        signalType: normalized.signalType,
+        city: normalized.city,
+        district: normalized.district,
+      });
+      if (dup.missing) {
+        return NextResponse.json(
+          { ok: false, error: "Community posting is opening soon. Nothing was saved." },
+          { status: 503 }
+        );
+      }
+      if (dup.duplicateId) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "You already have this want live — refresh or close the existing one instead of posting it twice.",
+            duplicateId: dup.duplicateId,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     const scoutId = scoutIdFor(userId);
-    // Best-effort district pin so the post can join the radar. Never blocks
-    // publishing and never invents precision: unresolvable stays unpinned.
-    const geo = await geocodeSignalScope({ district: normalized.district, city: normalized.city });
+    // Best-effort position pin so the post can join the radar. If a building is
+    // registered in properties, inherits exact coordinates; if not, geocodes via
+    // Mapbox, falling back to district/city scope. Never blocks publishing.
+    const geo = await geocodeSignalScope({
+      buildingName: normalized.buildingName,
+      district: normalized.district,
+      city: normalized.city,
+    });
     if (geo) {
       normalized.lat = geo.lat;
       normalized.lng = geo.lng;
-      normalized.precisionLevel = "district";
+      normalized.precisionLevel = geo.precisionLevel || "district";
     }
     const { data: signal, error: signalError } = await supabaseAdmin
       .from("stratosphere_signals")

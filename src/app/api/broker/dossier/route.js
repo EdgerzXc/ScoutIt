@@ -120,7 +120,16 @@ export async function POST(request) {
       brokerId: auth.userId,
       draft: loaded.record.draft,
     });
-    await invalidateCmsBundle();
+    // Airtable has already accepted the write. A cache outage must not turn
+    // this into a false publish failure that encourages another write.
+    let publicCachePending = false;
+    try {
+      const purge = await invalidateCmsBundle();
+      publicCachePending = purge.sharedCachePurged === false;
+    } catch (cacheError) {
+      console.error("[broker dossier] Catalogue cache purge failed after publication:", cacheError?.message);
+      publicCachePending = true;
+    }
     const marked = await markBrokerDossierPublished({
       brokerId: auth.userId,
       actorId: auth.userId,
@@ -129,9 +138,9 @@ export async function POST(request) {
     });
     if (!marked.ok) {
       console.error("[broker dossier] Airtable updated but publish marker failed", marked.reason);
-      return json({ error: "Public content updated, but confirmation is pending. Retry safely." }, 503);
+      return json({ error: "Public content updated, but confirmation is pending. Retry safely.", publicCachePending }, 503);
     }
-    return json({ record: marked.record, identity: auth.identity, scoutItRecord: auth.record, credential: auth.credential });
+    return json({ record: marked.record, identity: auth.identity, scoutItRecord: auth.record, credential: auth.credential, publicCachePending });
   } catch (error) {
     console.error("[broker dossier] Publish failed:", error?.message || error);
     return json({ error: "Broker dossier publish failed" }, 500);

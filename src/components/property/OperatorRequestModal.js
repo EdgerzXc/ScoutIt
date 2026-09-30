@@ -2,11 +2,12 @@
 
 import { useRef, useState } from "react";
 import { getSession } from "../../lib/authClient";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Check } from "lucide-react";
 import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
+import { stillBackdropVariants, stillPanelVariants, instantDialogTransition } from "@/components/ui/reducedDialogMotion";
 
 // Operator-initiated handshake to a building owner (SCOUTIT_MASTER_BUILD_SPEC.md
 // §9.2/locked decision #7). Deliberately a separate, lighter component from
@@ -41,6 +42,7 @@ const formVariants = {
 };
 
 export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, propertySlug }) {
+  const reduceMotion = useReducedMotion();
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -103,22 +105,23 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 z-[9999] bg-[#0a0908]/85 flex items-center justify-center p-5"
-          variants={backdropVariants}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-5"
+          style={{ background: "var(--modal-scrim)" }}
+          variants={reduceMotion ? stillBackdropVariants : backdropVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
-          transition={backdropTransition}
+          transition={reduceMotion ? instantDialogTransition : backdropTransition}
         >
           <motion.div 
             className="w-full max-w-[500px]"
-            variants={modalVariants}
+            variants={reduceMotion ? stillPanelVariants : modalVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={modalTransition}
+            transition={reduceMotion ? instantDialogTransition : modalTransition}
           >
-            <GlassPanel className="relative p-8 rounded-xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] contact-lens-modal">
+            <GlassPanel className="relative p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button 
                 className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
                 onClick={onClose} 
@@ -132,16 +135,16 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                   <motion.div 
                     key="success"
                     className="text-center py-10 flex flex-col items-center gap-4"
-                    variants={successVariants}
+                    variants={reduceMotion ? stillPanelVariants : successVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
                   >
                     <div className="w-16 h-16 rounded-full bg-success/10 border border-success/30 text-success flex items-center justify-center mb-2">
                       <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
+                        initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                        transition={reduceMotion ? instantDialogTransition : { type: "spring", stiffness: 300, delay: 0.2 }}
                       >
                         <Check size={32} />
                       </motion.div>
@@ -155,7 +158,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                 ) : (
                   <motion.div 
                     key="form"
-                    variants={formVariants}
+                    variants={reduceMotion ? stillPanelVariants : formVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"

@@ -252,7 +252,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
         }
 
         .reaction-tile:focus-visible {
-          outline: 1.5px solid var(--accent-bright, #F7C64E);
+          outline: 1.5px solid var(--accent-bright);
           outline-offset: 4px;
         }
 
@@ -271,8 +271,8 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           inset: 0;
           width: 100%;
           height: 100%;
-          fill: #1c1c1c;
-          stroke: #4a4a4a;
+          fill: var(--surface2);
+          stroke: var(--border-solid);
           stroke-width: 3px;
           /* Named properties only. "all" also tweened stroke-width and the
              drop-shadow filter, which is the expensive half of this rule. */
@@ -284,7 +284,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           z-index: 2;
           font-size: 22px;
           opacity: 0.85;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           user-select: none;
           transition: color 220ms ease, opacity 220ms ease;
         }
@@ -299,22 +299,22 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           }
 
           .reaction-tile:hover .shape-wrapper :global(svg) {
-            stroke: var(--accent-bright, #F7C64E);
+            stroke: var(--accent-bright);
             stroke-width: 3px;
-            filter: drop-shadow(0 0 6px rgba(232, 174, 60, 0.35));
+            filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.35));
           }
         }
 
         /* Active states */
         .reaction-tile.active .shape-wrapper :global(svg) {
-          fill: #E8AE3C;
-          stroke: #E8AE3C;
+          fill: var(--accent-fill);
+          stroke: var(--accent);
           stroke-width: 3px;
-          filter: drop-shadow(0 0 10px rgba(232, 174, 60, 0.4));
+          filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.4));
         }
 
         .reaction-tile.active .icon-overlay {
-          color: #121212;
+          color: var(--on-accent);
           opacity: 1;
         }
 
@@ -324,7 +324,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          color: var(--text-secondary, #c8c8c8);
+          color: var(--text-secondary);
           margin-top: 6px;
           transition: color 0.25s ease;
           text-align: center;
@@ -332,18 +332,18 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
 
         @media (hover: hover) and (pointer: fine) {
           .reaction-tile:hover .tile-label {
-            color: var(--accent-bright, #F7C64E);
+            color: var(--accent-bright);
           }
         }
 
         .reaction-tile.active .tile-label {
-          color: #E8AE3C;
+          color: var(--accent);
         }
 
         /* Confirmation text */
         .confirm-text {
           font-family: var(--font-mono, monospace);
-          color: var(--accent, #E8AE3C);
+          color: var(--accent);
           letter-spacing: 0.1em;
           font-size: 12px;
           text-transform: uppercase;
@@ -352,7 +352,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
           min-height: 1em; /* row is reserved, so nothing below it shifts */
           opacity: 0;
           pointer-events: none;
-          text-shadow: 0 0 8px rgba(232, 174, 60, 0.3);
+          text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.3);
           transform: translateY(4px);
           /* Exit is quicker than entry: the message has already been read by
              the time it leaves, so lingering only delays the next one. */
@@ -371,7 +371,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
            "something is off" while staying inside the warm palette -- a
            system red would be the only cool-shifted pixel on the page. */
         .confirm-text.warn {
-          color: #D08C6A;
+          color: var(--yellow);
           text-shadow: none;
         }
 

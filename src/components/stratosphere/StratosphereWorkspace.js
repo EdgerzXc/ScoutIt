@@ -15,6 +15,7 @@ import {
   validJourneyStage,
 } from "@/lib/layerTwoJourney";
 import { mergeStratosphereArticles } from "@/lib/stratosphereArticles";
+import { getSession } from "@/lib/authClient";
 import InfoTip from "@/components/ui/InfoTip";
 import "./stratosphere-workspace.css";
 
@@ -26,6 +27,16 @@ const ALL_CURATED_STAGES = [
   { key: "demand", label: "Market Demand", hint: "Absorption and residential surges" },
   { key: "zoning", label: "Policy & Zoning", hint: "Mandates and green standards" },
 ];
+
+async function fetchCommunitySignals() {
+  const { data: { session } } = await getSession().catch(() => ({ data: {} }));
+  const token = session?.access_token;
+  const response = await fetch("/api/community/signals?limit=60", {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    cache: "no-store",
+  });
+  return response.json();
+}
 
 export default function StratosphereWorkspace() {
   const [liveArticles, setLiveArticles] = useState([]);
@@ -52,8 +63,7 @@ export default function StratosphereWorkspace() {
       })
       .catch(() => {});
 
-    fetch("/api/community/signals?limit=60")
-      .then((res) => res.json())
+    fetchCommunitySignals()
       .then((json) => {
         if (alive && json?.ok && Array.isArray(json.signals)) setLiveSignals(json.signals);
       })
@@ -64,12 +74,15 @@ export default function StratosphereWorkspace() {
   }, []);
 
   const refreshLiveSignals = useCallback(() => {
-    fetch("/api/community/signals?limit=60")
-      .then((res) => res.json())
+    fetchCommunitySignals()
       .then((json) => {
         if (json?.ok && Array.isArray(json.signals)) setLiveSignals(json.signals);
       })
       .catch(() => {});
+  }, []);
+
+  const handleSignalClosed = useCallback((id) => {
+    setLiveSignals((current) => current.filter((signal) => signal.id !== id));
   }, []);
 
   const articles = useMemo(() => mergeStratosphereArticles(liveArticles), [liveArticles]);
@@ -378,6 +391,7 @@ export default function StratosphereWorkspace() {
             initialSignals={radarSignals}
             stageFilter={stage}
             onClearStage={() => chooseStage("all")}
+            onSignalClosed={handleSignalClosed}
           />
         </section>
       )}

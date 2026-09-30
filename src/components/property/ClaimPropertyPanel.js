@@ -322,7 +322,7 @@ function ClaimStyles() {
       .cp-skeleton {
         height: 148px;
         border-radius: 5px;
-        background: linear-gradient(90deg, #131313 0%, #181818 50%, #131313 100%);
+        background: linear-gradient(90deg, var(--surface) 0%, var(--surface2) 50%, var(--surface) 100%);
         background-size: 200% 100%;
         animation: cpShimmer 1.4s ease-in-out infinite;
       }
@@ -331,16 +331,16 @@ function ClaimStyles() {
         100% { background-position: -200% 0; }
       }
       .cp-card {
-        background: var(--surface2, #131313);
-        border: 0.5px solid var(--border, #262626);
-        border-left: 2px solid var(--accent, #6E531A);
+        background: var(--surface2);
+        border: 0.5px solid var(--border);
+        border-left: 2px solid var(--accent-muted);
         border-radius: 4px;
         padding: 20px 17px;
       }
       .cp-eyebrow {
         font-family: ${MONO};
         font-size: 12px;
-        color: #E8AE3C;
+        color: var(--accent);
         letter-spacing: 0.12em;
         text-transform: uppercase;
         margin-bottom: 9px;
@@ -350,14 +350,14 @@ function ClaimStyles() {
         font-weight: 400;
         font-size: 18px;
         line-height: 1.3;
-        color: var(--text-primary, #f0ede8);
+        color: var(--text-primary);
         margin: 0 0 9px;
       }
       .cp-body {
         font-family: var(--font-display);
         font-size: 13.5px;
         line-height: 1.7;
-        color: var(--text-secondary, #c8c8c8);
+        color: var(--text-secondary);
         margin: 0 0 16px;
         max-width: 56ch;
       }
@@ -372,7 +372,7 @@ function ClaimStyles() {
       .cp-meta {
         font-family: ${MONO};
         font-size: 12px;
-        color: var(--text-muted, #5a5a5a);
+        color: var(--text-muted);
         letter-spacing: 0.1em;
         text-transform: uppercase;
       }
@@ -382,7 +382,7 @@ function ClaimStyles() {
       .cp-legend {
         font-family: ${MONO};
         font-size: 12px;
-        color: var(--text-muted, #8a8a8a);
+        color: var(--text-muted);
         letter-spacing: 0.12em;
         text-transform: uppercase;
         padding: 0;
@@ -395,22 +395,22 @@ function ClaimStyles() {
         min-height: 48px;
         padding: 13px 12px;
         margin-bottom: 8px;
-        background: var(--surface, #171717);
-        border: 0.5px solid var(--border, #262626);
+        background: var(--surface);
+        border: 0.5px solid var(--border);
         border-radius: 4px;
         cursor: pointer;
         transition: border-color 160ms ease-out, background-color 160ms ease-out, transform 120ms ease-out;
       }
       .cp-opt:active { transform: scale(0.98); }
-      .cp-opt:hover { border-color: #3a3a3a; }
-      .cp-opt:focus-within { outline: 2px solid #6E531A; outline-offset: 2px; }
-      .cp-opt--on { background: rgba(232, 174, 60, 0.06); border-color: #6E531A; }
+      .cp-opt:hover { border-color: var(--border-hover, var(--border-solid)); }
+      .cp-opt:focus-within { outline: 2px solid var(--accent-muted); outline-offset: 2px; }
+      .cp-opt--on { background: rgba(var(--accent-rgb), 0.06); border-color: var(--accent-muted); }
       .cp-radio {
         flex: 0 0 auto;
         width: 18px;
         height: 18px;
         margin-top: 2px;
-        accent-color: #E8AE3C;
+        accent-color: var(--accent);
         cursor: pointer;
       }
       .cp-opt__main { min-width: 0; flex: 1; }
@@ -419,7 +419,7 @@ function ClaimStyles() {
         font-family: var(--font-display);
         font-size: 14.5px;
         line-height: 1.35;
-        color: var(--text-primary, #f0ede8);
+        color: var(--text-primary);
         margin-bottom: 4px;
       }
       .cp-opt__detail {
@@ -427,18 +427,18 @@ function ClaimStyles() {
         font-family: var(--font-display);
         font-size: 12.5px;
         line-height: 1.6;
-        color: #8a8a8a;
+        color: var(--text-muted);
       }
 
       .cp-disclaimer {
-        background: rgba(232, 174, 60, 0.05);
-        border-left: 2px solid #6E531A;
+        background: rgba(var(--accent-rgb), 0.05);
+        border-left: 2px solid var(--accent-muted);
         padding: 11px 12px;
         margin: 14px 0 10px;
         font-family: var(--font-display);
         font-size: 12.5px;
         line-height: 1.65;
-        color: #c8c8c8;
+        color: var(--text-secondary);
       }
       .cp-agree {
         display: flex;
@@ -453,20 +453,20 @@ function ClaimStyles() {
         width: 20px;
         height: 20px;
         margin-top: 1px;
-        accent-color: #E8AE3C;
+        accent-color: var(--accent);
         cursor: pointer;
       }
       .cp-agree__text {
         font-family: var(--font-display);
         font-size: 12.5px;
         line-height: 1.6;
-        color: #c8c8c8;
+        color: var(--text-secondary);
       }
 
       .cp-hint {
         font-family: ${MONO};
         font-size: 12px;
-        color: #8a8a8a;
+        color: var(--text-muted);
         letter-spacing: 0.06em;
         line-height: 1.7;
         margin-top: 8px;
@@ -474,7 +474,7 @@ function ClaimStyles() {
       .cp-error {
         font-family: ${MONO};
         font-size: 12px;
-        color: #e8644a;
+        color: var(--red);
         letter-spacing: 0.05em;
         line-height: 1.7;
         margin-top: 10px;
@@ -505,10 +505,10 @@ function ClaimStyles() {
       .cp-btn:active { transform: scale(0.97); }
       .cp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
       .cp-btn:disabled:active { transform: none; }
-      .cp-btn:focus-visible { outline: 2px solid #E8AE3C; outline-offset: 2px; }
+      .cp-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       /* The single gold element in this panel — 95/5 rule. */
-      .cp-btn--gold { background: #F7C64E; border: none; color: #0d0d0d; font-weight: bold; }
-      .cp-btn--ghost { background: transparent; border: 0.5px solid #262626; color: #c8c8c8; }
+      .cp-btn--gold { background: var(--accent-bright); border: none; color: var(--on-accent); font-weight: bold; }
+      .cp-btn--ghost { background: transparent; border: 0.5px solid var(--border); color: var(--text-secondary); }
 
       @media (min-width: 700px) {
         .cp-card { padding: 24px 26px; }
