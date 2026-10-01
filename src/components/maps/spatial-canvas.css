@@ -324,6 +324,25 @@
   color: var(--text-secondary, #c8c8c8);
 }
 
+.spatial-canvas-root .scc-legend--imagery {
+  max-width: min(480px, calc(100% - 24px));
+  bottom: 72px;
+}
+
+.scc-imagery-credit {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* Credits must be readable before hover or keyboard focus, including the
+   required contributor text. Keep this correction local to SpatialCanvas. */
+.spatial-canvas-root .map-credit {
+  background: var(--scc-panel-bg);
+  opacity: 1;
+}
+
 /* The cooperative-gesture overlay ("use ctrl + scroll to zoom") is a white
    sheet by default. */
 .spatial-canvas-root .maplibregl-cooperative-gesture-screen {

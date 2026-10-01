@@ -13,7 +13,7 @@ const cspHeader = `
     worker-src 'self' blob:;
     child-src 'self' blob:;
     frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai https://accounts.google.com https://challenges.cloudflare.com;
-    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://*.cartocdn.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://va.vercel-scripts.com${__impeccableLiveDev};
+    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://*.cartocdn.com https://services.arcgisonline.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://va.vercel-scripts.com${__impeccableLiveDev};
     object-src 'none';
     base-uri 'self';
     form-action 'self';
