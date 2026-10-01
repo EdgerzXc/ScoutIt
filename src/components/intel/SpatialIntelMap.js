@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import { circlePolygon, footprintPolygon } from "@/lib/geo";

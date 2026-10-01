@@ -1,8 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { sendMagicLink } from "@/lib/magicLink.mjs";
+import LoginCaptcha from "@/components/LoginCaptcha";
 import { Shield, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_SUPABASE_GOOGLE_AUTH_ENABLED === "true";
@@ -27,26 +29,42 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle, loading, success, error
   const [errorMessage, setErrorMessage] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef(null);
+  const sendingRef = useRef(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (sendingRef.current) return;
+    if (!captchaToken) {
+      setErrorMessage("Complete the security check before sending a link.");
+      setStatus("error");
+      return;
+    }
+    sendingRef.current = true;
     setStatus("loading");
     setErrorMessage("");
+    const token = captchaToken;
+    setCaptchaToken("");
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      await sendMagicLink({
+        auth: supabase.auth,
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        origin: window.location.origin,
+        captchaToken: token,
+        resetCaptcha: () => {
+          setCaptchaToken("");
+          captchaRef.current?.reset();
         },
       });
-
-      if (error) throw error;
       setStatus("success");
     } catch (err) {
       console.error("Login error:", err);
       setErrorMessage(err.message || "Failed to send magic link.");
       setStatus("error");
+    } finally {
+      sendingRef.current = false;
     }
   };
 
@@ -127,6 +145,8 @@ function LoginForm() {
               />
             </div>
 
+            <LoginCaptcha widgetRef={captchaRef} onToken={setCaptchaToken} />
+
             {status === "error" && (
               <div className="flex items-start gap-2 text-red-400 text-xs bg-red-400/10 p-3 rounded-lg border border-red-400/20">
                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -136,7 +156,7 @@ function LoginForm() {
 
             <button
               type="submit"
-              disabled={status === "loading" || !email}
+              disabled={status === "loading" || !email || !captchaToken}
               className="w-full bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium rounded-xl px-4 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7C64E]"
             >
               {status === "loading" ? (
@@ -156,7 +176,7 @@ function LoginForm() {
                   <div className="flex-1 h-px bg-white/10" />
                 </div>
 
-                <button
+            <button
                   type="button"
                   onClick={handleGoogle}
                   disabled={status === "loading"}

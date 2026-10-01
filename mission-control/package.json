@@ -10,6 +10,7 @@
     "test:security": "node --test test/authorization-boundary.test.mjs test/image-optimizer-boundary.test.mjs test/operator-surface-protections.test.mjs test/database-security-readiness.test.mjs test/canonical-slug-boundary.test.mjs test/airtable-formula.test.mjs test/onboarding-migration-operation.test.mjs test/wishlist-revocation-migration-operation.test.mjs test/pilot-cohort-migration-operation.test.mjs test/pilot-cohort-registry.test.mjs test/sample-data-operation.test.mjs test/sample-child-space-operation.test.mjs test/property-media-operation.test.mjs test/property-lifecycle-reconciliation.test.mjs test/coordinates-verification-action.test.mjs test/retrieval-corpus-migration.test.mjs test/demo-authority-transfer-operation.test.mjs test/party-dispute-reconciliation.test.mjs test/coordinates-airtable-sync.test.mjs test/system-event-log.test.mjs test/cross-app-boundary.test.mjs test/property-claim-review.test.mjs test/deal-oversight.test.mjs test/recommendation-moderation.test.mjs test/verification-effect-honesty.test.mjs test/console-csp.test.mjs test/broker-contribution-crediting.test.mjs test/security-ban-writer-retired.test.mjs test/brain-model-pinning.test.mjs test/brain-freshness-contract.test.mjs test/dispute-evidence.test.mjs test/faq-appeal-review.test.mjs test/brain-answer-fallback.test.mjs test/brain-ingest-replacement.test.mjs"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "1.5.3",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.0",
     "lucide-react": "^1.23.0",
@@ -28,7 +29,7 @@
     "tailwindcss": "^4"
   },
   "overrides": {
-    "brace-expansion": "^1.1.18",
+    "brace-expansion": "^1.1.21",
     "js-yaml": "^4.3.1",
     "nanoid": "^3.3.18",
     "postcss": "^8.5.25",

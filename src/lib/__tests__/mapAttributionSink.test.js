@@ -43,15 +43,14 @@ const sourceFiles = walk(resolve(ROOT, "src")).filter(
 // contributors`. So remote third-party HTML was being pushed through a
 // known-broken sanitizer into innerHTML on every map that showed the control.
 //
-// THERE IS NO VERSION TO UPGRADE TO. 5.24.0 is the end of the 5.x line — no
-// 5.24.1, no 5.25 — and the fix exists only in 6.4.1+, whose major rewrite
-// blanked every map surface here. So the sink is removed instead of patched:
+// A-143 removed this boundary while 6.x rendering was blocked. A-132 now
+// upgrades the engine using the documented Next worker/shared-asset setup.
+// Keep DOM-built credits even with a patched dependency:
 // MapLibre's control is switched off and `MapCreditControl` draws the same
 // credit from DOM nodes, which never touches innerHTML. That makes the
 // vulnerable function uncallable in this app rather than merely unreached.
 //
-// This guard is what lets the Dependabot alert be dismissed honestly. If it
-// fails, the dismissal is no longer true.
+// This guard keeps remote attribution markup out of ScoutIt's credit control.
 describe("A-143 MapLibre's attribution sink stays unreachable", () => {
   // Every map that renders a basemap must switch the built-in control off AND
   // attach our own credit, so turning the sink off never silently drops the

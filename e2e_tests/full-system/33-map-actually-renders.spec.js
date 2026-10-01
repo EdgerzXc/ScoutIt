@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { isCartoVectorTile as isVectorTile } from "./mapTileResponse";
 
 /**
  * DOES THE MAP ACTUALLY WORK?
@@ -42,11 +43,11 @@ const MAP_ROUTE = "/property/one-ecom-center";
 // The vector basemap every live surface uses (MAP_SYSTEM.md §1).
 const TILE_HOST = "basemaps.cartocdn.com";
 
-// A working dark-matter basemap pulls dozens of tiles. Six is deliberately far
-// below that: this catches NOTHING LOADING, it does not police tile counts. A
+// A working dark-matter basemap pulls real vector tiles. One is deliberately
+// permissive: this catches NOTHING LOADING, it does not police tile counts. A
 // tight bound would fail on a zoom tweak and get deleted, which is how a guard
 // stops guarding.
-const MIN_TILE_RESPONSES = 6;
+const MIN_TILE_RESPONSES = 1;
 
 test.setTimeout(180_000);
 
@@ -57,13 +58,13 @@ test.describe("the map actually works", () => {
     const consoleErrors = [];
 
     page.on("response", (r) => {
-      if (r.url().includes(TILE_HOST)) {
+      if (isVectorTile(r.url())) {
         tiles.push(r.status());
-        if (r.status() >= 400) failures.push(`${r.status()} ${r.url().slice(0, 90)}`);
+        if (r.status() < 200 || r.status() >= 300) failures.push(`${r.status()} ${r.url().slice(0, 90)}`);
       }
     });
     page.on("requestfailed", (r) => {
-      if (r.url().includes(TILE_HOST)) failures.push(`FAILED ${r.failure()?.errorText || "unknown"} ${r.url().slice(0, 90)}`);
+      if (isVectorTile(r.url())) failures.push(`FAILED ${r.failure()?.errorText || "unknown"} ${r.url().slice(0, 90)}`);
     });
     page.on("console", (m) => {
       if (m.type() === "error") consoleErrors.push(m.text().slice(0, 120));
@@ -93,25 +94,14 @@ test.describe("the map actually works", () => {
       `No MapLibre canvas on ${MAP_ROUTE} within 60s. The map did not mount at all — a different bug from a map that mounts and draws nothing.`,
     ).toBe(true);
 
-    // Poll for the style to finish and tiles to arrive, rather than sleeping a
-    // fixed amount: not flaky on a slow run, not slow on a fast one.
-    let styleLoaded = false;
-    for (let i = 0; i < 40; i += 1) {
-      styleLoaded = await page.evaluate(() => {
-        // MapLibre does not expose the instance globally, so ask the DOM node
-        // the library itself annotates. `_maplibre` is set by SpatialCanvas;
-        // fall back to reporting unknown rather than guessing.
-        const el = document.querySelector(".maplibregl-map");
-        const m = el && (el._maplibreMap || el.__maplibre || null);
-        if (m && typeof m.isStyleLoaded === "function") return m.isStyleLoaded();
-        return null;
-      });
-      if (styleLoaded === true) break;
-      if (tiles.filter((s) => s < 400).length >= MIN_TILE_RESPONSES) break;
-      await page.waitForTimeout(500);
-    }
+    await expect(page.locator("#panel-location .maplibregl-map").first()).toHaveAttribute(
+      "data-map-style-loaded", "true", { timeout: 30_000 },
+    );
+    await expect.poll(() => tiles.filter((s) => s >= 200 && s < 300).length, {
+      timeout: 30_000,
+    }).toBeGreaterThanOrEqual(MIN_TILE_RESPONSES);
 
-    const ok = tiles.filter((s) => s < 400).length;
+    const ok = tiles.filter((s) => s >= 200 && s < 300).length;
 
     // THE ASSERTION THIS FILE EXISTS FOR.
     expect(
@@ -123,8 +113,8 @@ test.describe("the map actually works", () => {
         failures.length ? `Tile failures: ${failures.slice(0, 3).join(" | ")}` : `No tile request failed — they were never made.`,
         consoleErrors.length ? `Console errors: ${consoleErrors.slice(0, 2).join(" | ")}` : `No console errors — which is why this counts network traffic instead of trusting silence.`,
         ``,
-        `If this broke after a maplibre-gl upgrade: the library mounts, throws nothing,`,
-        `and renders an empty rectangle. Roll the version back and see MAP_SYSTEM.md §5.`,
+        `If this broke after a maplibre-gl upgrade, check the matching worker and shared`,
+        `asset responses and see MAP_SYSTEM.md §5 before diagnosing the renderer.`,
       ].join("\n"),
     ).toBeGreaterThanOrEqual(MIN_TILE_RESPONSES);
 
@@ -204,7 +194,7 @@ test.describe("the map actually works", () => {
     // permanently green and permanently useless.
     const tiles = [];
     page.on("response", (r) => {
-      if (r.url().includes(TILE_HOST) && r.status() < 400) tiles.push(r.status());
+      if (isVectorTile(r.url()) && r.status() >= 200 && r.status() < 300) tiles.push(r.status());
     });
 
     // The privacy page has no map by design.

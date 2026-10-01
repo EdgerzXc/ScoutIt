@@ -12,7 +12,7 @@ import VaultOfHonor from "./VaultOfHonor";
 
 const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonMatrix"), { ssr: false });
 
-import maplibregl from 'maplibre-gl';
+import maplibregl from '@/lib/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapCreditControl from '@/components/maps/MapCreditControl';
 import { isWebglSupported } from '@/lib/webglCheck';

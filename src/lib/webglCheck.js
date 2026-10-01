@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
 
 /**
- * Checks whether WebGL is supported by the current browser/device.
- * Evaluates both standard WebGL and experimental-webgl contexts safely.
+ * Checks for WebGL2, required by MapLibre 6, on the current browser/device.
  * Returns true during SSR to avoid hydration mismatch.
  */
 export function isWebglSupported() {
   if (typeof window === "undefined") return true;
   try {
     const canvas = document.createElement("canvas");
-    const gl =
-      canvas.getContext("webgl") ||
-      canvas.getContext("experimental-webgl");
+    const gl = canvas.getContext("webgl2");
     return Boolean(gl && typeof gl.getParameter === "function");
   } catch {
     return false;

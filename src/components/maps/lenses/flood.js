@@ -1,6 +1,6 @@
 // UP NOAH Flood Hazard Lens for Spatial Canvas
 // Cloud-optimized PMTiles vector tiles via HTTP range requests
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import { Protocol } from "pmtiles";
 
 const FLOOD_PERIODS = [

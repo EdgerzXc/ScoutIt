@@ -72,7 +72,7 @@ describe("A-121 no remote script or stylesheet is injected at runtime", () => {
       readFileSync(resolve(ROOT, "src/components/property/InteractiveMap.js"), "utf8")
     );
     expect(map).not.toContain("unpkg");
-    expect(map).toContain('import maplibregl from "maplibre-gl"');
+    expect(map).toContain('import maplibregl from "@/lib/maplibre"');
     expect(map).toContain('import "maplibre-gl/dist/maplibre-gl.css"');
     expect(map).not.toContain("leaflet");
   });

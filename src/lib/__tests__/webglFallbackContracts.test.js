@@ -10,15 +10,15 @@ describe("WebGL Hardware Support Detection", () => {
     vi.restoreAllMocks();
   });
 
-  it("returns true when WebGL context creation succeeds", () => {
+  it("returns true when WebGL2 context creation succeeds", () => {
     const origCreateElement = document.createElement.bind(document);
     vi.spyOn(document, "createElement").mockImplementation((tag) => {
       if (tag === "canvas") {
         return {
           getContext: (contextType) => {
-            if (contextType === "webgl" || contextType === "experimental-webgl") {
+            if (contextType === "webgl2") {
               return {
-                getParameter: () => "WebGL 1.0",
+                getParameter: () => "WebGL 2.0",
               };
             }
             return null;
@@ -29,6 +29,13 @@ describe("WebGL Hardware Support Detection", () => {
     });
 
     expect(isWebglSupported()).toBe(true);
+  });
+
+  it("rejects WebGL1-only devices so maps use the existing 2D fallback", () => {
+    const getContext = vi.fn((type) => type === "webgl" ? { getParameter: () => "WebGL 1.0" } : null);
+    vi.spyOn(document, "createElement").mockReturnValue({ getContext });
+    expect(isWebglSupported()).toBe(false);
+    expect(getContext).toHaveBeenCalledExactlyOnceWith("webgl2");
   });
 
   it("returns false when WebGL context returns null (disabled or unsupported)", () => {

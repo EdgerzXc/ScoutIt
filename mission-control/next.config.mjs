@@ -24,7 +24,7 @@ const SUPABASE_ORIGIN = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://unpkg.com",
+  "script-src 'self' 'unsafe-inline' https://unpkg.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline' https://unpkg.com",
   // Map tiles (Carto), Supabase-hosted property media, and inline data/blob
   // previews. Images cannot execute, so this is the one directive kept broad.
@@ -34,7 +34,8 @@ const CONTENT_SECURITY_POLICY = [
   // to Supabase for auth and data. Without this the console cannot sign in.
   `connect-src 'self' ${SUPABASE_ORIGIN}`.trim(),
   "frame-ancestors 'none'",
-  "frame-src 'none'",
+  // Supabase auth requires Turnstile; embedding the console itself stays denied.
+  "frame-src https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

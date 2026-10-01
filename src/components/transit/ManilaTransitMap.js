@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import { isWebglSupported } from "@/lib/webglCheck";

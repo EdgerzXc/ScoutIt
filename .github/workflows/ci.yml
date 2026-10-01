@@ -57,6 +57,23 @@ jobs:
         run: npm ci --prefix mission-control
       - name: Mission Control tests
         run: npm --prefix mission-control run test:security
+      - name: Mission Control build check
+        # The console is deployed independently. Its tests alone cannot catch
+        # compilation or prerender failures. Keep this build off live services.
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
+          SUPABASE_SERVICE_ROLE_KEY: "placeholder-service-role-key"
+          NEXT_PUBLIC_APP_URL: "https://mantle.scoutit.space"
+          AIRTABLE_API_KEY: ""
+          AIRTABLE_BASE_ID: ""
+          UPSTASH_REDIS_REST_URL: ""
+          UPSTASH_REDIS_REST_TOKEN: ""
+          GEMINI_API_KEY: ""
+          VIRUSTOTAL_API_KEY: ""
+          SUPABASE_ACCESS_TOKEN: ""
+          CRON_SECRET: ""
+        run: npm --prefix mission-control run build
       - name: Browser suite discovery
         run: npm run test:e2e:list
 
