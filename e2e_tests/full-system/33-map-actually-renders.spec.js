@@ -170,6 +170,31 @@ test.describe("the map actually works", () => {
     expect(text, `credit read: ${text}`).toContain("CARTO");
     expect(text, `credit read: ${text}`).toContain("contributors");
 
+    // A visible attribution container can still sit behind the phone lens bar.
+    // Check the painted hit target, rather than visibility or a forced click.
+    const links = credit.locator("a");
+    await expect(links).toHaveCount(2);
+    for (const link of await links.all()) {
+      const target = await link.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          box.x + box.width / 2, box.y + box.height / 2,
+        );
+        return {
+          label: element.textContent,
+          reachable: hit === element || element.contains(hit),
+          coarse: window.matchMedia("(pointer: coarse)").matches,
+          width: box.width,
+          height: box.height,
+        };
+      });
+      expect(target.reachable, `${target.label} is covered by map furniture`).toBe(true);
+      if (target.coarse) {
+        expect(target.width, `${target.label} touch width`).toBeGreaterThanOrEqual(44);
+        expect(target.height, `${target.label} touch height`).toBeGreaterThanOrEqual(44);
+      }
+    }
+
     // Asserted AFTER the canvas exists and our credit is up, so it cannot pass
     // just because the map had not mounted yet.
     expect(
