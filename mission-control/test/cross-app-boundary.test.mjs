@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { MAIN_SITE_HOSTS, RETIRED_ENV_VARS } from "../src/lib/crossAppPolicy.mjs";
+import { escapeRegExpLiteral } from "../../scripts/test-url-hosts.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const srcDir = path.join(root, "src");
@@ -37,7 +38,7 @@ test("nothing in Mission Control calls the main site's API", () => {
     if (file === POLICY_FILE) continue;
     for (const host of MAIN_SITE_HOSTS) {
       // A plain link for a human to click is fine; a fetch is not.
-      const fetchToHost = new RegExp(`fetch\\(\\s*[\`"'][^\`"']*${host.replace(/\./g, "\\.")}`);
+      const fetchToHost = new RegExp(`fetch\\(\\s*[\`"'][^\`"']*${escapeRegExpLiteral(host)}`);
       if (fetchToHost.test(text)) offenders.push(`${file} → ${host}`);
     }
     if (/fetch\(\s*[`"'][^`"']*\/api\/admin\//.test(text)) {

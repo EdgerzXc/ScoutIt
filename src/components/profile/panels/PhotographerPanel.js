@@ -32,7 +32,7 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
     <section style={panelStyle}>
       <div style={panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Camera size={14} strokeWidth={1.5} color="#E8AE3C" />
+          <Camera size={14} strokeWidth={1.5} style={{ color: "var(--accent)" }} />
           <span style={panelLabel}>Photographer</span>
         </div>
         {isOwnView && (
@@ -43,11 +43,11 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
             aria-label={available ? "Mark as unavailable" : "Mark as available"}
           >
             {available ? (
-              <ToggleRight size={20} strokeWidth={1.5} color="#E8AE3C" />
+              <ToggleRight size={20} strokeWidth={1.5} style={{ color: "var(--accent)" }} />
             ) : (
               <ToggleLeft size={20} strokeWidth={1.5} color="var(--text-secondary)" />
             )}
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: available ? "#E8AE3C" : "var(--text-secondary)", letterSpacing: "0.06em" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: available ? "var(--accent)" : "var(--text-secondary)", letterSpacing: "0.06em" }}>
               {available ? "Available" : "Unavailable"}
             </span>
           </button>
@@ -134,7 +134,7 @@ const panelLabel = {
   fontWeight: 700,
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  color: "#E8AE3C",
+  color: "var(--accent)",
 };
 
 const portfolioGrid = {
@@ -186,7 +186,7 @@ const emptyText = {
 const emptyCta = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#E8AE3C",
+  color: "var(--accent)",
   letterSpacing: "0.06em",
   textDecoration: "underline",
   textUnderlineOffset: 3,
