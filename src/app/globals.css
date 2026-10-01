@@ -2146,20 +2146,48 @@ body.light-mode .transit-map-toggle input[type="checkbox"]:checked {
 body.light-mode .transit-map-status-error {
   color: var(--red);
 }
-/* Map HUD island: panel keeps dark tokens (map stays dark both themes). */
-body.light-mode .scc-panel {
-  --text-primary: #ffffff;
-  --text-primary-ch: 255 255 255;
-  --text-secondary: #d8d4cc;
-  --accent: #E8AE3C;
-  --accent-rgb: 232, 174, 60;
-  --accent-ch: 232 174 60;
-  --accent-bright: #F7C64E;
-  --border: rgba(255, 255, 255, 0.12);
-  background-color: rgba(14, 14, 14, 0.92);
+/* Map imagery stays dark; DOM controls use the same neutral Lens palette.
+   Resolve chip and panel tokens together, including cameras outside the HUD. */
+body.light-mode .spatial-canvas-root {
+  --scc-chip-border: var(--border-solid);
+  --scc-chip-bg-active: var(--accent-fill);
+  --scc-panel-bg: var(--surface);
+  --scc-continuity-bg: var(--surface2);
+  --scc-continuity-enterprise: var(--green);
+  --scc-continuity-prime: var(--yellow);
+  --scc-continuity-standard: var(--text-secondary);
+  --scc-infra-ink: var(--intel-cyan);
+  --scc-peza-ink: var(--green);
+  --scc-seismic-ink: var(--text-secondary);
+  --scc-divider: var(--border);
+  --scc-live-glow: none;
+  --scc-credit-ink: var(--text-secondary);
+  --scc-credit-muted: var(--text-muted);
+  --scc-credit-accent-rgb: var(--accent-rgb);
+  --scc-credit-focus: var(--accent-bright);
+}
+body.light-mode .spatial-canvas-root .scc-panel,
+body.light-mode .spatial-canvas-root .maplibregl-ctrl-group {
+  background-color: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
   color: var(--text-primary);
 }
-/* Chips + tilt live inside the island above, so gold still works there. */
+body.light-mode .spatial-canvas-root .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: none;
+}
+body.light-mode .spatial-canvas-root .map-credit {
+  --text-secondary: var(--scc-credit-ink);
+  --text-muted: var(--scc-credit-muted);
+  --accent-rgb: var(--scc-credit-accent-rgb);
+  --accent-bright: var(--scc-credit-focus);
+}
+@media (hover: hover) and (pointer: fine) {
+  body.light-mode .spatial-canvas-root .maplibregl-ctrl-group button:hover {
+    background: var(--surface2);
+  }
+}
 /* Notification toggle on. */
 body.light-mode .np-toggle[aria-checked="true"] {
   background: var(--accent-fill);

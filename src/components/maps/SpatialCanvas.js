@@ -824,6 +824,9 @@ export default function SpatialCanvas({
   }, [activeLensId, recentQuakes.length, fireCount]);
 
   const continuity = spatialIntel ? computeContinuityScore(spatialIntel) : null;
+  const continuityTone = continuity?.score >= 90 ? "enterprise" : continuity?.score >= 75 ? "prime" : "standard";
+  const continuityInk = continuity ? `var(--scc-continuity-${continuityTone}, ${continuity.badge_color})` : undefined;
+  const satelliteVisible = activeLensId === "command" && activeSubLayer === "satellite";
 
   return (
     <div
@@ -901,7 +904,7 @@ export default function SpatialCanvas({
                   height: "8px",
                   borderRadius: "50%",
                   background: "var(--accent-bright, #F7C64E)",
-                  boxShadow: "0 0 8px var(--accent, #E8AE3C)",
+                  boxShadow: "var(--scc-live-glow, 0 0 8px var(--accent, #E8AE3C))",
                 }}
               />
               <span className="scc-panel__title">{LENS_LABELS[activeLensId] || "Spatial"} lens</span>
@@ -936,11 +939,11 @@ export default function SpatialCanvas({
 
           {/* Telemetry Metrics */}
           {hudExpanded && spatialIntel && (
-            <div style={{ borderTop: "1px dashed rgba(255,255,255,0.12)", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "5px", fontSize: "12px" }}>
+            <div style={{ borderTop: "1px dashed var(--scc-divider, rgba(255,255,255,0.12))", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "5px", fontSize: "12px" }}>
               {continuity && (
-                <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(232, 174, 60, 0.08)", padding: "3px 6px", borderRadius: "3px", border: `1px solid ${continuity.badge_color}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", background: "var(--scc-continuity-bg, rgba(232, 174, 60, 0.08))", padding: "3px 6px", borderRadius: "3px", border: `1px solid ${continuityInk}` }}>
                   <span style={{ color: "var(--accent, #E8AE3C)", fontWeight: "bold" }}>🛡️ Continuity Index:</span>
-                  <span style={{ color: continuity.badge_color, fontWeight: "bold" }}>
+                  <span style={{ color: continuityInk, fontWeight: "bold" }}>
                     {continuity.score}/100 ({continuity.grade})
                   </span>
                 </div>
@@ -948,8 +951,8 @@ export default function SpatialCanvas({
 
               {spatialIntel.infra && (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#777" }}>Infra Megaproject:</span>
-                  <span style={{ color: "#06B6D4" }}>
+                  <span style={{ color: "var(--text-muted)" }}>Infra Megaproject:</span>
+                  <span style={{ color: "var(--scc-infra-ink, #06B6D4)" }}>
                     {spatialIntel.infra.name} ({spatialIntel.infra.distance_km}km)
                   </span>
                 </div>
@@ -957,7 +960,7 @@ export default function SpatialCanvas({
 
               {spatialIntel.transit && (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#777" }}>Nearest Transit:</span>
+                  <span style={{ color: "var(--text-muted)" }}>Nearest Transit:</span>
                   <span style={{ color: "var(--accent-bright, #F7C64E)" }}>
                     {spatialIntel.transit.station_name} ({spatialIntel.transit.walk_minutes}m walk)
                   </span>
@@ -965,16 +968,16 @@ export default function SpatialCanvas({
               )}
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#777" }}>PEZA Status:</span>
-                <span style={{ color: spatialIntel.peza?.is_accredited ? "#10B981" : "#777" }}>
+                <span style={{ color: "var(--text-muted)" }}>PEZA Status:</span>
+                <span style={{ color: spatialIntel.peza?.is_accredited ? "var(--scc-peza-ink, #10B981)" : "var(--text-muted)" }}>
                   {spatialIntel.peza?.is_accredited ? `Certified (${spatialIntel.peza.zone_name})` : "Standard Zone"}
                 </span>
               </div>
 
               {spatialIntel.seismic && (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#777" }}>Fault Proximity:</span>
-                  <span style={{ color: "#bbb" }}>{spatialIntel.seismic.status}</span>
+                  <span style={{ color: "var(--text-muted)" }}>Fault Proximity:</span>
+                  <span style={{ color: "var(--scc-seismic-ink, #bbb)" }}>{spatialIntel.seismic.status}</span>
                 </div>
               )}
             </div>
@@ -985,10 +988,18 @@ export default function SpatialCanvas({
       {/* What the reach actually measures. Without this the ring is an
           unlabelled circle and the reader is left to assume it means minutes —
           which, on the fallback, it does not. */}
-      {reachShapeLabel && (
-        <div className="scc-legend scc-panel">
-          <span className="scc-legend__swatch" aria-hidden="true" />
-          <span className="scc-legend__text">{reachShapeLabel}</span>
+      {(reachShapeLabel || satelliteVisible) && (
+        <div className={`scc-legend scc-panel${satelliteVisible ? " scc-legend--imagery" : ""}`}>
+          {satelliteVisible ? (
+            <span className="scc-imagery-credit">
+              Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community
+            </span>
+          ) : (
+            <>
+              <span className="scc-legend__swatch" aria-hidden="true" />
+              <span className="scc-legend__text">{reachShapeLabel}</span>
+            </>
+          )}
         </div>
       )}
 

@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { isCartoVectorTile as isVectorTile } from "./mapTileResponse";
+import { auditVisibleText } from "../../scripts/audit/computed-contrast.js";
+import { auditMapCreditContrast } from "../../scripts/audit/map-credit-contrast.js";
 
 /**
  * DOES THE MAP ACTUALLY WORK?
@@ -170,6 +172,31 @@ test.describe("the map actually works", () => {
     expect(text, `credit read: ${text}`).toContain("CARTO");
     expect(text, `credit read: ${text}`).toContain("contributors");
 
+    // A visible attribution container can still sit behind the phone lens bar.
+    // Check the painted hit target, rather than visibility or a forced click.
+    const links = credit.locator("a");
+    await expect(links).toHaveCount(2);
+    for (const link of await links.all()) {
+      const target = await link.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          box.x + box.width / 2, box.y + box.height / 2,
+        );
+        return {
+          label: element.textContent,
+          reachable: hit === element || element.contains(hit),
+          coarse: window.matchMedia("(pointer: coarse)").matches,
+          width: box.width,
+          height: box.height,
+        };
+      });
+      expect(target.reachable, `${target.label} is covered by map furniture`).toBe(true);
+      if (target.coarse) {
+        expect(target.width, `${target.label} touch width`).toBeGreaterThanOrEqual(44);
+        expect(target.height, `${target.label} touch height`).toBeGreaterThanOrEqual(44);
+      }
+    }
+
     // Asserted AFTER the canvas exists and our credit is up, so it cannot pass
     // just because the map had not mounted yet.
     expect(
@@ -186,6 +213,43 @@ test.describe("the map actually works", () => {
     expect(Number(ink.opacity)).toBeGreaterThan(0.5);
     // The 10px floor this codebase holds for map furniture.
     expect(parseFloat(ink.fontSize)).toBeGreaterThanOrEqual(10);
+
+    // The basemap remains dark imagery; its DOM controls must stay readable
+    // with either site palette. This is a style check, not an auth/theme journey.
+    const originalLens = await page.evaluate(() => document.body.classList.contains("light-mode"));
+    try {
+      for (const lens of [false, true]) {
+        await page.evaluate((enabled) => document.body.classList.toggle("light-mode", enabled), lens);
+        const audit = await page.evaluate(auditVisibleText, ".spatial-canvas-root");
+        expect(audit.checked, "No property map text was measured").toBeGreaterThan(0);
+        await expect.poll(async () => {
+          const result = await page.evaluate(auditVisibleText, ".spatial-canvas-root");
+          return result.failures;
+        }, { message: `${lens ? "Lens" : "Dark"} property map controls contrast` }).toEqual([]);
+        await expect.poll(async () => {
+          const result = await page.evaluate(auditMapCreditContrast);
+          return { checked: result.checked, settled: result.settled, failures: result.failures };
+        }, { message: `${lens ? "Lens" : "Dark"} normal map credit contrast` }).toEqual({
+          checked: 3, settled: true, failures: [],
+        });
+      }
+    } finally {
+      await page.evaluate((enabled) => document.body.classList.toggle("light-mode", enabled), originalLens);
+    }
+
+    const map = page.locator(".spatial-canvas-root");
+    await map.getByRole("tab", { name: "Command", exact: true }).click();
+    const hudToggle = map.locator(".scm-hud button[aria-expanded]");
+    if (await hudToggle.getAttribute("aria-expanded") !== "true") await hudToggle.click();
+    await map.getByRole("button", { name: "🛰️ SAT", exact: true }).click();
+    const imageryCredit = map.locator(".scc-imagery-credit");
+    await expect(imageryCredit).toHaveText(
+      "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community",
+    );
+    await hudToggle.click();
+    await expect(imageryCredit, "Satellite credit must survive a collapsed HUD").toBeVisible();
+    await map.getByRole("tab", { name: "Tactical", exact: true }).click();
+    await expect(imageryCredit).toHaveCount(0);
   });
 
   test("the detector is not vacuous — a page with no map fails it", async ({ page }) => {

@@ -26,6 +26,16 @@ describe("A-055 transport security headers", () => {
     expect(nextConfig).toContain("Permissions-Policy");
   });
 
+  it("allows the satellite tile source through the fetch policy", () => {
+    // MapLibre fetches raster tiles; an img-src allowance alone cannot load them.
+    const commandLens = readFileSync("src/components/maps/lenses/command.js", "utf8");
+    const tileUrl = commandLens.match(/https:\/\/[^"\s]+\/World_Imagery\/MapServer\/tile\/[^"\s]+/);
+    expect(tileUrl).not.toBeNull();
+    const connect = nextConfig.match(/connect-src\s+([^;]+)/);
+    expect(connect).not.toBeNull();
+    expect(connect[1].split(/\s+/)).toContain(new URL(tileUrl[0]).origin);
+  });
+
   // ── A-123 — browser source maps are not shipped ───────────────────────────
   //
   // `productionBrowserSourceMaps: true` emitted 178 `.js.map` files: **44 MB of
