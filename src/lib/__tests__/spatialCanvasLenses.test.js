@@ -78,7 +78,7 @@ describe("SpatialCanvas Lenses", () => {
     });
 
     it("excludes infrastructure clutter", () => {
-      const f = featureFilter(buildPoiFilter(null, reach));
+      const f = featureFilter(buildPoiFilter(null, reach), "filter");
       const at = (cls) => f.filter({ zoom: 16 }, {
         type: 1,
         properties: { class: cls, name: "X" },
@@ -92,7 +92,7 @@ describe("SpatialCanvas Lenses", () => {
     it("renders nothing when there is no measured reach", () => {
       // The circle is a promise about distance. Without one, showing POIs would
       // break that promise silently.
-      const f = featureFilter(buildPoiFilter(null, null));
+      const f = featureFilter(buildPoiFilter(null, null), "filter");
       const passes = f.filter({ zoom: 16 }, {
         type: 1,
         properties: { class: "restaurant", name: "X" },

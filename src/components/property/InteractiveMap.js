@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 // A-121: static, matching every other MapLibre surface in this codebase. This
 // component is itself lazy-loaded by its parents via next/dynamic, so the
 // stylesheet is still code-split with it.

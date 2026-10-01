@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import { computeSpatialIntel, computeContinuityScore } from "@/lib/spatialIntel";
@@ -256,6 +256,16 @@ export default function SpatialCanvas({
     }
 
     mapInstanceRef.current = map;
+
+    // Read-only readiness signal for the render gate; never expose the map
+    // instance. A mounted canvas alone can still be a completely blank map.
+    const container = map.getContainer();
+    container.dataset.mapStyleLoaded = "false";
+    const recordStyleCompletion = () => {
+      if (map.isStyleLoaded()) container.dataset.mapStyleLoaded = "true";
+    };
+    map.on("load", recordStyleCompletion);
+    map.on("idle", recordStyleCompletion);
 
     try {
       // The compass is the escape hatch that makes free rotation safe to offer:
@@ -696,6 +706,7 @@ export default function SpatialCanvas({
     });
 
     return () => {
+      delete container.dataset.mapStyleLoaded;
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();

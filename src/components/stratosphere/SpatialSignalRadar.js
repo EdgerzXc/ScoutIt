@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
+import { isWebglSupported } from "@/lib/webglCheck";
 import { generateBeaconGeoJSON, DISTRICT_COORDS } from "@/lib/communitySignalsAdapter";
 import "./spatial-signal-radar.css";
 
@@ -27,17 +28,6 @@ export default function SpatialSignalRadar({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(DEFAULT_ZOOM);
   const [webglSupported, setWebglSupported] = useState(true);
-
-  // Check WebGL availability for fallback
-  useEffect(() => {
-    try {
-      const canvas = document.createElement("canvas");
-      const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      if (!gl) setWebglSupported(false);
-    } catch {
-      setWebglSupported(false);
-    }
-  }, []);
 
   const filteredIdsSet = React.useMemo(() => {
     return new Set(filteredSignals.map((s) => s.id));
@@ -64,17 +54,29 @@ export default function SpatialSignalRadar({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: [METRO_MANILA_CENTER.lng, METRO_MANILA_CENTER.lat],
-      zoom: DEFAULT_ZOOM,
-      pitch: DEFAULT_PITCH,
-      bearing: DEFAULT_BEARING,
-      maxPitch: 65,
-      cooperativeGestures: true,
-      attributionControl: false, // Critical CVE-2026-85061 sink mitigation
-    });
+    if (!isWebglSupported()) {
+      setWebglSupported(false);
+      return;
+    }
+
+    let map;
+    try {
+      map = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        center: [METRO_MANILA_CENTER.lng, METRO_MANILA_CENTER.lat],
+        zoom: DEFAULT_ZOOM,
+        pitch: DEFAULT_PITCH,
+        bearing: DEFAULT_BEARING,
+        maxPitch: 65,
+        cooperativeGestures: true,
+        attributionControl: false, // Critical CVE-2026-85061 sink mitigation
+      });
+    } catch (error) {
+      console.warn("[SpatialSignalRadar] WebGL initialization failed:", error);
+      setWebglSupported(false);
+      return;
+    }
 
     mapInstanceRef.current = map;
 

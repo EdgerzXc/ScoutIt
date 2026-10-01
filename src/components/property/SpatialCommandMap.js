@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import pezaZonesData from "@/data/peza_zones_philippines.json";
@@ -563,7 +563,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
       //
       // MapLibre's own `DOM.sanitize()` is not a defence here: CVE-2026-85061
       // (CVSS 10.0) is a bypass in exactly that function, unfixed until 6.4.1
-      // and we are on 5.24.0. But the upgrade is not what makes this safe —
+      // in the former 5.x dependency. DOM construction keeps this safe after upgrades —
       // not building HTML from user text is. Every other popup in this codebase
       // already does it this way; `lenses/location.js` even carries the comment
       // explaining why, for OpenStreetMap names. This one was the exception.

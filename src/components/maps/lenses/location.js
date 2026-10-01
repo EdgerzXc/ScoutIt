@@ -4,7 +4,7 @@
 // the map already downloads — the same trick as the building heights. No extra
 // request, no new service. Measured: one Makati tile carries 4,857 POI features
 // with class / subclass / name / rank.
-import maplibregl from "maplibre-gl";
+import maplibregl from "@/lib/maplibre";
 import { registerMapIcons, iconImageExpression } from "@/components/maps/mapIcons";
 
 // ~900 features per tile in the sample are pure infrastructure clutter — the
