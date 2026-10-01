@@ -80,7 +80,9 @@ test("the console sends HSTS, which the main app already did and this did not", 
 });
 
 test("Turnstile can load while all other frame origins and console embedding remain denied", () => {
-  assert.ok(directive("script-src").split(/\s+/).includes("https://challenges.cloudflare.com"));
+  assert.deepEqual(directive("script-src").split(/\s+/), [
+    "'self'", "'unsafe-inline'", "https://unpkg.com", "https://challenges.cloudflare.com",
+  ]);
   assert.equal(directive("frame-src"), "https://challenges.cloudflare.com");
   assert.equal(directive("frame-ancestors"), "'none'");
   assert.equal(get("X-Frame-Options"), "DENY");
