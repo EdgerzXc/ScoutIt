@@ -712,9 +712,29 @@ export default function HomeClient() {
         <div className="flex justify-center mb-8" style={{ fontSize: "32px", letterSpacing: "0.12em", color: "var(--accent)" }} aria-hidden="true">
           <ScoutItWordmark leading={<ScoutItMark />} />
         </div>
-        <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(var(--accent-rgb), 0.3)' }}>
+        <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-6 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(var(--accent-rgb), 0.3)' }}>
           Browse Space Catalog
         </h2>
+
+        {/* Fast Category Access Rail (A-192) */}
+        <nav aria-label="Quick Category Access" className="flex flex-wrap justify-center gap-2 mb-12 max-w-4xl mx-auto px-2">
+          {[
+            { label: "Residences", type: "Residential" },
+            { label: "Offices", type: "Commercial" },
+            { label: "F&B & Retail", type: "Restaurants" },
+            { label: "Event Venues", type: "Venues" },
+            { label: "STR & Stays", type: "STR" },
+            { label: "Hospitality", type: "Hospitality" },
+          ].map(({ label, type }) => (
+            <Link
+              key={type}
+              href={`/property?type=${encodeURIComponent(type)}`}
+              className="font-mono text-xs tracking-[0.12em] uppercase px-3.5 py-1.5 rounded-sm border border-border bg-surface/70 text-text-secondary hover:text-text-primary hover:border-gold-accent/60 hover:bg-surface transition-all duration-200"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 01: Orbit */}

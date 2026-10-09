@@ -132,6 +132,17 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
 };
 
+// Fast category rail mapping (A-192)
+const FAST_CATEGORIES = [
+  { label: "All Spaces", sector: null },
+  { label: "Residences", sector: "Residential" },
+  { label: "Offices", sector: "Commercial" },
+  { label: "F&B & Retail", sector: "Restaurants" },
+  { label: "Event Venues", sector: "Venues/Events" },
+  { label: "STR & Stays", sector: "STR" },
+  { label: "Hospitality", sector: "Hospitality" },
+];
+
 // `initialProperties` is server-rendered by ./page.js and arrives already
 // premium-stripped. Seeding state with it means the CRAWLER sees real cards in
 // the first HTML response instead of "LOADING THE DIRECTORY..." — the second
@@ -232,6 +243,23 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
     setSelectedBeds([]);
     setSearchQuery("");
     setRadius("any");
+  };
+
+  const handleFastCategoryClick = (sector) => {
+    if (!sector) {
+      setSelectedSectors([]);
+      return;
+    }
+    if (selectedSectors.length === 1 && selectedSectors[0] === sector) {
+      setSelectedSectors([]);
+    } else {
+      setSelectedSectors([sector]);
+    }
+  };
+
+  const isCategoryActive = (sector) => {
+    if (!sector) return selectedSectors.length === 0;
+    return selectedSectors.includes(sector);
   };
 
   // Load Airtable CMS data with mock fallback (now supports Supabase Radius)
@@ -436,6 +464,24 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
           <span className="vector-label">Layer 3.1 // Directory Ledger</span>
           <h1>The Space Directory</h1>
           <p className="page-subtitle">Every home, office, and venue on ScoutIt — searchable in one place.</p>
+
+          {/* Fast Category Filter Rail (A-192) */}
+          <nav aria-label="Quick Category Filter" className="category-filter-rail">
+            {FAST_CATEGORIES.map(({ label, sector }) => {
+              const active = isCategoryActive(sector);
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => handleFastCategoryClick(sector)}
+                  className={`category-pill ${active ? "active" : ""}`}
+                  aria-pressed={active}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </nav>
         </header>
 
         {loading ? (

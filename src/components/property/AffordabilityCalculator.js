@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { calculateMortgage, parsePriceToNumber, MORTGAGE_DEFAULTS } from "@/lib/affordability";
+import SettlementTaxSchedule from "./SettlementTaxSchedule";
 
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
@@ -94,6 +95,9 @@ export default function AffordabilityCalculator({ listedPrice, priceStatus, tenu
       <p style={{ fontFamily: "system-ui,-apple-system,sans-serif", fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "18px" }}>
         Illustrative estimate only — not a loan offer, pre-qualification, or financial advice. Rates and terms shown are editable placeholders for reference; confirm actual terms with a licensed lender. ScoutIt does not arrange, broker, or process financing.
       </p>
+
+      {/* Statutory Philippine Real Estate Transfer Taxes (RESA RA 9646) */}
+      <SettlementTaxSchedule listedPrice={listedPrice} />
     </div>
   );
 }
