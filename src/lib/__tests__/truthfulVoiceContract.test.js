@@ -23,17 +23,18 @@ describe("A-029 Truthful Voice and Display Typography Contract", () => {
     expect(jsonLd).not.toContain("Philippines' first");
     expect(share).not.toContain("Philippines' first");
 
-    // Prohibit "No fake listings" in shell copy
+    // Prohibit "No fake listings" and staccato AI negations in shell copy
     expect(home).not.toContain("No fake listings");
     expect(home).not.toContain("No duplicate listings");
     expect(home).not.toContain("direct owner connections");
     expect(home).not.toContain("verified facts");
+    expect(home).not.toContain("No manufactured urgency");
 
-    // Verify truthful spatial intelligence phrasing
+    // Verify truthful spatial intelligence and spatial commerce phrasing
     expect(layout).toContain("Property and space intelligence platform for the Philippines");
     expect(footer).toContain("Space intelligence for the Philippines");
-    expect(home).toContain("Space intelligence for the Philippines");
-    expect(home).toContain("Named sources. No manufactured urgency. Clear terms.");
+    expect(home).toContain("Space intelligence technology and spatial commerce for the Philippines");
+    expect(home).toContain("Architectural briefings, verified ground data, and named sources.");
     expect(terms).toContain("The terms of service for ScoutIt");
     expect(jsonLd).toContain("ScoutIt is a property and space intelligence platform in the Philippines");
   });

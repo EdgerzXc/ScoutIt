@@ -82,7 +82,7 @@ describe("info tips — explanations on demand (A-160)", () => {
     expect(crust).toContain('missionTipId="crustMission"');
     expect(crust).not.toContain("without flattening them into one generic verified roster");
     const home = read("src/app/HomeClient.js");
-    expect(home).toContain('tipId="dataPhilosophy"');
+    expect(home).not.toContain('tipId="dataPhilosophy"');
     expect(home).not.toContain('tipId="platformTruth"');
     const mantle = read("src/components/descent/MantleArchive.js");
     expect(mantle).toContain('missionTipId="platformTruth"');

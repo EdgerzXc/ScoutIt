@@ -81,6 +81,13 @@ The following AI marketing clichés and lazy luxury buzzwords are strictly prohi
 - Clear, precise statutory references (e.g., RA 9646 Real Estate Service Act, Civil Code Art. 1327).
 - Plain statements of entity status and data retention without fictitious corporate claims.
 
+### E. Homepage Hero & Spatial Commerce (`/`)
+- **Discipline Badge:** `SPACE INTELLIGENCE TECHNOLOGY` (mono uppercase, instrument-panel aesthetic).
+- **Value Proposition:** `Space intelligence technology and spatial commerce for the Philippines. Architectural briefings, verified ground data, and named sources.`
+- **Display Tagline:** `Get lost in spaces that inspire you.` (stripped of the AI tell "actually", warm display typography).
+- **Secondary Chrome:** `SPATIAL COMMERCE · PHILIPPINE PROPERTY`.
+- **No Unnecessary Tooltips:** Hero surfaces stay clean and visually unobstructed; tooltip explanations belong on complex dense forms, not in the luxury brand showcase.
+
 ---
 
 ## 4. Display Typography Stance

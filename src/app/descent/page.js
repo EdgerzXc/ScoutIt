@@ -109,10 +109,10 @@ export default function DescentPage() {
             </svg>
           </div>
           <h1 className="dz-wordmark"><span className="w-scout">Scout</span><span className="w-it">IT</span></h1>
-          <div className="dz-badge">SPACE · INTELLIGENCE · TECHNOLOGY</div>
+          <div className="dz-badge">SPACE INTELLIGENCE TECHNOLOGY</div>
           <div className="dz-divider" />
-          <p className="dz-tag1">Get lost in spaces that actually inspire you.</p>
-          <div className="dz-tag2">SPACE INTELLIGENCE · PHILIPPINE PROPERTY</div>
+          <p className="dz-tag1">Get lost in spaces that inspire you.</p>
+          <div className="dz-tag2">SPATIAL COMMERCE · PHILIPPINE PROPERTY</div>
           <div className="hero-cue">Begin the descent <span className="cue-arrow">↓</span></div>
         </div>
       </section>

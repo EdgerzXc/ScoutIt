@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import ReactionButtons from "@/components/ui/ReactionButtons";
-import InfoTip from "@/components/ui/InfoTip";
 import ProfileButton from "@/components/ui/ProfileButton";
 import BoardPodium from "@/components/board/BoardPodium";
 import CinematicJourney from "@/components/cinematic/CinematicJourney";
@@ -666,20 +665,20 @@ export default function HomeClient() {
           </ScoutItWordmark>
 
           {/* Discipline badge */}
-          <div className="title-badge">SPACE &middot; INTELLIGENCE &middot; TECHNOLOGY</div>
+          <div className="title-badge">SPACE INTELLIGENCE TECHNOLOGY</div>
 
           {/* Divider */}
           <div className="title-divider"></div>
 
-          {/* Trust proof stays inline; the data philosophy sits behind a "?" (A-160) */}
+          {/* Spatial commerce and space intelligence value proposition */}
           <p className="title-tagline-intro">
-            Space intelligence for the Philippines. Named sources. No manufactured urgency. Clear terms. <InfoTip tipId="dataPhilosophy" label="How ScoutIt handles data" />
+            Space intelligence technology and spatial commerce for the Philippines. Architectural briefings, verified ground data, and named sources.
           </p>
 
 
           {/* Taglines */}
-          <p className="title-tagline-1">Get lost in spaces that actually inspire you.</p>
-          <div className="title-tagline-2">SPACE INTELLIGENCE &middot; PHILIPPINE PROPERTY</div>
+          <p className="title-tagline-1">Get lost in spaces that inspire you.</p>
+          <div className="title-tagline-2">SPATIAL COMMERCE &middot; PHILIPPINE PROPERTY</div>
 
           {/* Primary action path — gives first-time visitors clear cascading doors in */}
           <div className="hero-cta-row">
