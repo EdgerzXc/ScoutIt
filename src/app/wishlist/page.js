@@ -271,6 +271,7 @@ export default function WishlistPage() {
       <style jsx>{`
         .page-wrapper {
           min-height: 100vh;
+          min-height: 100dvh;
           background: var(--bg);
           color: var(--text-primary);
           position: relative;

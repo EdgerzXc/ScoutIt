@@ -130,7 +130,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
           left: 0;
           right: 0;
           bottom: 0;
-          background: var(--modal-scrim, rgba(0, 0, 0, 0.85));
+          background: var(--modal-scrim);
           backdrop-filter: blur(10px);
           z-index: 9999;
           display: flex;
@@ -149,7 +149,7 @@ export default function ComparisonMatrix({ properties, onClose }) {
           max-height: 90vh;
           display: flex;
           flex-direction: column;
-          box-shadow: var(--shadow-xl, 0 10px 40px rgba(0, 0, 0, 0.8));
+          box-shadow: var(--shadow-xl, 0 10px 40px rgba(var(--bg-rgb), 0.8));
           overflow: hidden;
         }
 

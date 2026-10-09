@@ -24,10 +24,10 @@
 // coordinate presented as a location is not.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { distanceKm } from "./geo";
+
 /** How far from the hub centre still counts as "in" the hub. */
 export const HUB_RADIUS_KM = 6;
-
-const EARTH_RADIUS_KM = 6371;
 
 /**
  * Great-circle distance in km. Returns null when either point is incomplete.
@@ -45,12 +45,7 @@ export function haversineKm(lat1, lng1, lat2, lng2) {
   const nums = raw.map(Number);
   if (nums.some((n) => !Number.isFinite(n))) return null;
   const [a1, o1, a2, o2] = nums;
-  const dLat = ((a2 - a1) * Math.PI) / 180;
-  const dLng = ((o2 - o1) * Math.PI) / 180;
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((a1 * Math.PI) / 180) * Math.cos((a2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  return distanceKm(a1, o1, a2, o2);
 }
 
 /** Lowercased, punctuation collapsed to single spaces. */

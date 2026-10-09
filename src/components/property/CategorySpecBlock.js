@@ -194,7 +194,7 @@ function MinorLockSection({ labels, slug }) {
                 {value !== null ? (
                   <span className="font-label-caps text-[12px] text-gold-accent tracking-widest text-right">{value}</span>
                 ) : (
-                  <span className="font-label-caps text-[12px] text-[#5a5a5a] tracking-widest text-right">Not recorded</span>
+                  <span className="font-label-caps text-[12px] text-[var(--text-muted)] tracking-widest text-right">Not recorded</span>
                 )}
               </div>
             );
@@ -206,7 +206,7 @@ function MinorLockSection({ labels, slug }) {
             {labels.map((label, i) => (
               <div key={i} className={`flex justify-between items-center py-2.5 ${i < labels.length - 1 ? 'border-b border-surface-variant' : ''}`}>
                 <span className="font-headline-editorial text-[13px] text-text-secondary">{label}</span>
-                <span className="font-label-caps text-[12px] text-[#3a3a3a] tracking-widest">████████</span>
+                <span className="font-label-caps text-[12px] text-[var(--border)] tracking-widest">████████</span>
               </div>
             ))}
           </div>
@@ -275,7 +275,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
               {value !== null ? (
                 <span className="font-headline-editorial text-[14px] text-on-surface text-right">{value}</span>
               ) : (
-                <span className="font-label-caps text-[12px] text-[#5a5a5a] tracking-widest text-right">Not listed yet</span>
+                <span className="font-label-caps text-[12px] text-[var(--text-muted)] tracking-widest text-right">Not listed yet</span>
               )}
             </div>
           );

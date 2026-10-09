@@ -150,7 +150,7 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           position: fixed;
           inset: 0;
           z-index: 1000;
-          background: rgba(8, 8, 8, 0.94);
+          background: rgba(var(--bg-rgb), 0.94);
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
           padding: 12px;

@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ALL_STATIONS } from '@/lib/transit';
-
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c;
-}
+import { distanceKm } from '@/lib/geo';
 
 export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city) {
   const [closestTransit, setClosestTransit] = useState(null);
@@ -29,7 +18,7 @@ export function useTrueClosestTransit(whereTo, propertyLat, propertyLng, city) {
         // 1. Calculate straight line distance to ALL stations in Manila
         const stationsWithDist = ALL_STATIONS.map(s => ({
           ...s,
-          distKm: getDistanceFromLatLonInKm(propertyLat, propertyLng, s.lat, s.lon)
+          distKm: distanceKm(propertyLat, propertyLng, s.lat, s.lon)
         }));
 
         // 2. Sort by straight line distance and take the closest 15

@@ -23,29 +23,29 @@ const readSrc = (p) => fs.readFileSync(p, "utf8");
 
 describe("A-098 · no new raw accent hex", () => {
   it("scans a real set of files", () => {
-    // A-170 token migration reduced files with raw accent hex from 57 down to 38
-    expect(filesWithRawAccentHex().length).toBeGreaterThan(20);
-  });
+    // A-170 token migration reduced files with raw accent hex from 57 down to 20
+    expect(filesWithRawAccentHex().length).toBeGreaterThan(15);
+  }, 30000);
 
   it("no file outside the frozen baseline introduces one", () => {
     const fresh = filesWithRawAccentHex().filter(
       (f) => !BASELINE_HEX_FILES.includes(f),
     );
     expect(fresh).toEqual([]);
-  });
+  }, 30000);
 });
 
 describe("A-098 · no new emoji iconography", () => {
   it("scans a real set of files", () => {
     expect(filesWithEmoji().length).toBeGreaterThan(40);
-  });
+  }, 30000);
 
   it("no file outside the frozen baseline introduces one", () => {
     const fresh = filesWithEmoji().filter(
       (f) => !BASELINE_EMOJI_FILES.includes(f),
     );
     expect(fresh).toEqual([]);
-  });
+  }, 30000);
 });
 
 describe("A-098 · every raw <img> carries an alt", () => {

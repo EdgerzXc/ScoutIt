@@ -116,7 +116,7 @@ export default function KanbanBoard({ deals, viewingAs, onStatusChange, onDealCl
                       ${getStatusColor(deal.status)}
                       ${draggingId === deal.id 
                         ? "opacity-40 scale-[0.98] border-gold-accent shadow-none" 
-                        : "hover:-translate-y-[2px] active:scale-[0.98] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5),0_0_15px_rgba(232,174,60,0.12)] hover:border-gold-accent/40"}
+                        : "hover:-translate-y-[2px] active:scale-[0.98] hover:shadow-[0_8px_24px_rgba(var(--bg-rgb),0.5),0_0_15px_rgba(var(--accent-rgb),0.12)] hover:border-gold-accent/40"}
                       bg-surface/80 backdrop-blur-sm
                     `}
                   >

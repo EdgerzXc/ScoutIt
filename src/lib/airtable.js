@@ -333,7 +333,7 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
         // property with a populated gallery but no dedicated Image column still
         // shows a real photo instead of the gradient placeholder.
         image:                f.Image || (f.Photos ? f.Photos.split(",")[0].trim() : "") || "",
-        gradient:             f.Gradient     || "linear-gradient(135deg, #1f1c18 0%, #100f0d 100%)",
+        gradient:             f.Gradient     || "linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%)",
         latitude:             f.Latitude ? Number(f.Latitude) : null,
         longitude:            f.Longitude ? Number(f.Longitude) : null,
         seo_title:            f.SEO_Title    || "",

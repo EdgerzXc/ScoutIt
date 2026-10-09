@@ -189,9 +189,9 @@ const privacyLink = {
 };
 
 const pageWrap = {
-  minHeight: "100vh",
-  background: "#0e0e0e",
-  color: "#f0ede8",
+  minHeight: "100dvh",
+  background: "var(--bg)",
+  color: "var(--text-primary)",
   paddingBottom: 80,
   position: "relative",
 };
@@ -204,9 +204,9 @@ const navBar = {
   alignItems: "center",
   justifyContent: "space-between",
   padding: "14px 24px",
-  background: "rgba(14,14,14,0.85)",
+  background: "rgba(var(--bg-rgb), 0.85)",
   backdropFilter: "blur(20px)",
-  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  borderBottom: "1px solid var(--border-subtle)",
 };
 
 const backLink = {
@@ -221,7 +221,7 @@ const backLink = {
 const navTitle = {
   fontFamily: "var(--font-mono)",
   fontSize: 12,
-  color: "#E8AE3C",
+  color: "var(--accent)",
   letterSpacing: "0.12em",
   textTransform: "uppercase",
 };
@@ -229,7 +229,7 @@ const navTitle = {
 const publicLink = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#E8AE3C",
+  color: "var(--accent)",
   textDecoration: "none",
   letterSpacing: "0.06em",
 };
@@ -259,8 +259,8 @@ const panelsGrid = {
 };
 
 const loadingScreen = {
-  minHeight: "100vh",
-  background: "#0e0e0e",
+  minHeight: "100dvh",
+  background: "var(--bg)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

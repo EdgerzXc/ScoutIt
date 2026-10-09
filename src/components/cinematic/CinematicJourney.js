@@ -193,7 +193,7 @@ export default function CinematicJourney() {
                 letterSpacing: "0.08em",
                 lineHeight: "1.6",
                 textTransform: "uppercase",
-                textShadow: "0 2px 12px rgba(0,0,0,0.8)"
+                textShadow: "0 2px 12px rgba(var(--bg-rgb),0.8)"
               }}
             >
               <div style={{ fontWeight: "bold", marginBottom: "6px", color: "var(--accent-bright)" }}>

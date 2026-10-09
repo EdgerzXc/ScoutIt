@@ -89,7 +89,7 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
             key={index} 
             className={`block w-full text-left relative aspect-video bg-surface-alt border rounded overflow-hidden group flex flex-col items-center justify-center cursor-pointer transition duration-300 ${
               dragOverIndex === index 
-                ? 'border-gold-accent border-2 bg-gold-accent/5 scale-[1.02] shadow-[0_0_15px_rgba(232,174,60,0.2)] z-10' 
+                ? 'border-gold-accent border-2 bg-gold-accent/5 scale-[1.02] shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)] z-10' 
                 : 'border-surface-variant hover:border-gold-accent/50'
             }`}
             onClick={() => {

@@ -164,7 +164,7 @@ export default function SeoReadinessPanel({ propertyId }) {
           gap: 10px;
           align-items: flex-start;
           padding: 11px 0;
-          border-bottom: 1px solid #1a1a1a;
+          border-bottom: 1px solid var(--border-subtle);
           font-family: var(--font-display);
           font-size: 13px;
           line-height: 1.6;
@@ -176,7 +176,7 @@ export default function SeoReadinessPanel({ propertyId }) {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #6E531A;
+          background: var(--accent-muted);
           margin-top: 7px;
         }
         .sr-clear {

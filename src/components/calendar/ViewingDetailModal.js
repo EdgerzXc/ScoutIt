@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useRef } from "react";
+import useModalDialog from "@/components/ui/useModalDialog";
 import { formatDayHeading, formatShortRange } from "@/lib/calendar/calendarDates";
 import overlayMotion from "@/components/ui/OverlayEntrance.module.css";
 
@@ -10,12 +11,8 @@ import overlayMotion from "@/components/ui/OverlayEntrance.module.css";
  * @param {{ viewing: object|null, onRespond, respondingId, onClose }} props
  */
 export default function ViewingDetailModal({ viewing, onRespond, respondingId, onClose }) {
-  useEffect(() => {
-    if (!viewing) return undefined;
-    const onKey = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [viewing, onClose]);
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: Boolean(viewing), onClose });
 
   if (!viewing) return null;
 
@@ -27,6 +24,10 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="viewing-detail-title"
         className={`${overlayMotion.panel} w-full sm:max-w-md bg-surface border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl cal-lens`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -43,7 +44,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          <h2 className="font-working-title text-lg text-on-surface break-words [overflow-wrap:anywhere]">{viewing.title}</h2>
+          <h2 id="viewing-detail-title" className="font-working-title text-lg text-on-surface break-words [overflow-wrap:anywhere]">{viewing.title}</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex gap-2">
               <dt className="text-text-muted w-20 shrink-0">When</dt>

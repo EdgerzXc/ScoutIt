@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
+import useModalDialog from "@/components/ui/useModalDialog";
 
 // ─────────────────────────────────────────────────────────────────────────
 // MONTHLY RE-VERIFICATION GATE  (NEW_IDEAS.md §21.2)
@@ -31,7 +32,7 @@ import FreshnessBadge from "@/components/ui/FreshnessBadge";
 // Mobile first: full-screen sheet on a phone, centred card on desktop.
 // ─────────────────────────────────────────────────────────────────────────
 
-const MONO = "'Courier New',monospace";
+const MONO = "var(--font-mono)";
 
 function dismissKey() {
   const now = new Date();
@@ -120,10 +121,13 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
     }
   };
 
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: open, onClose: dismiss });
+
   if (!open) return null;
 
   return (
-    <div className="mf-overlay" role="dialog" aria-modal="true" aria-label="Monthly portfolio audit">
+    <div className="mf-overlay" role="dialog" aria-modal="true" aria-label="Monthly portfolio audit" onClick={dismiss}>
       <style jsx global>{`
         /* ── MOBILE FIRST: full-screen sheet ──────────────────────────── */
         .mf-overlay {
@@ -225,7 +229,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         .mf-row__edit:hover { color: var(--accent, var(--accent)); }
 
         .mf-warn {
-          background: rgba(232, 174, 60, 0.06);
+          background: rgba(var(--accent-rgb), 0.06);
           border-left: 2px solid var(--accent-muted, var(--accent-muted));
           padding: 11px 13px;
           margin: 16px 0;
@@ -289,7 +293,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         }
       `}</style>
 
-      <div className="mf-card">
+      <div className="mf-card" ref={dialogRef} onClick={(e) => e.stopPropagation()}>
         {done ? (
           <>
             <div className="mf-eyebrow">Portfolio Audit</div>

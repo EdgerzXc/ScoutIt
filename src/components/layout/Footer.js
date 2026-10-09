@@ -206,7 +206,7 @@ export default function Footer() {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.1);
           color: var(--text-secondary);
           transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
         }
@@ -258,7 +258,7 @@ export default function Footer() {
         }
 
         .footer-bottom {
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-top: 1px solid rgba(var(--text-primary-rgb), 0.05);
           padding-top: 24px;
         }
 

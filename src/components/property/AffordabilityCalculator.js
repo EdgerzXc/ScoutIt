@@ -5,10 +5,10 @@ import { calculateMortgage, parsePriceToNumber, MORTGAGE_DEFAULTS } from "@/lib/
 
 const peso = (v) => `₱${Math.round(v).toLocaleString("en-PH")}`;
 
-const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "12px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
-const fieldInput = { background: "#0e0e0e", border: "0.5px solid #262626", borderRadius: "2px", padding: "8px 10px", color: "#f0ede8", fontFamily: "var(--font-display)", fontSize: "14px", width: "100%" };
-const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: "1px solid #262626", gap: "16px" };
-const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "12px", color: "#c8c8c8", letterSpacing: "0.1em", textTransform: "uppercase" };
+const fieldLabel = { fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" };
+const fieldInput = { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "2px", padding: "8px 10px", color: "var(--text-primary)", fontFamily: "var(--font-display)", fontSize: "14px", width: "100%" };
+const outputRow = { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: "1px solid var(--border)", gap: "16px" };
+const outputLabel = { fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" };
 
 // Only meaningful for a purchase (not a lease/rental) — mortgage math doesn't
 // apply to renting a space.
@@ -32,8 +32,8 @@ export default function AffordabilityCalculator({ listedPrice, priceStatus, tenu
   if (!result) return null;
 
   return (
-    <div style={{ marginTop: "24px", padding: "22px 24px", background: "#161616", border: "0.5px solid #262626", borderRadius: "4px" }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>
+    <div style={{ marginTop: "24px", padding: "22px 24px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px" }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>
         Affordability Estimate
       </div>
 
@@ -79,19 +79,19 @@ export default function AffordabilityCalculator({ listedPrice, priceStatus, tenu
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={outputRow}>
           <span style={outputLabel}>Est. monthly payment</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "#E8AE3C" }}>{peso(result.monthlyPayment)}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--accent)" }}>{peso(result.monthlyPayment)}</span>
         </div>
         <div style={outputRow}>
           <span style={outputLabel}>Down payment</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "#f0ede8" }}>{peso(result.downPayment)}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "var(--text-primary)" }}>{peso(result.downPayment)}</span>
         </div>
         <div style={{ ...outputRow, borderBottom: "none" }}>
           <span style={outputLabel}>Total interest over term</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "#f0ede8" }}>{peso(result.totalInterest)}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "14px", color: "var(--text-primary)" }}>{peso(result.totalInterest)}</span>
         </div>
       </div>
 
-      <p style={{ fontFamily: "system-ui,-apple-system,sans-serif", fontSize: "12px", color: "#5a5a5a", lineHeight: 1.6, marginTop: "18px" }}>
+      <p style={{ fontFamily: "system-ui,-apple-system,sans-serif", fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "18px" }}>
         Illustrative estimate only — not a loan offer, pre-qualification, or financial advice. Rates and terms shown are editable placeholders for reference; confirm actual terms with a licensed lender. ScoutIt does not arrange, broker, or process financing.
       </p>
     </div>

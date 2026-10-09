@@ -42,7 +42,8 @@
 // introduce copy that bypasses it.
 // ═══════════════════════════════════════════════════════════════
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import useModalDialog from "@/components/ui/useModalDialog";
 import {
   Share2, Copy, Check, Globe, MessageSquare, MessageCircle,
   Send, Mail, Link2, X, Phone, Navigation,
@@ -53,6 +54,7 @@ import {
 } from "@/lib/shareAttribution";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import entrance from "@/components/ui/OverlayEntrance.module.css";
+import LuxuryStoryStudio from "./LuxuryStoryStudio";
 
 // `prefill: false` means the platform will NOT carry our text, so we must copy
 // it to the clipboard first and say so. This flag is the whole of Task 3.
@@ -195,11 +197,21 @@ export default function ShareModal({
   propertyUrl,
   property = null,
   userId = null,
+  viaPromoterSlug = null,
 }) {
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen, onClose });
+
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
   const [ref, setRef] = useState("");
   const [showFormats, setShowFormats] = useState(false);
+  const [activeTab, setActiveTab] = useState("channels");
+  const [promoterSlug, setPromoterSlug] = useState(viaPromoterSlug || "");
+
+  useEffect(() => {
+    if (viaPromoterSlug) setPromoterSlug(viaPromoterSlug);
+  }, [viaPromoterSlug]);
 
   // Minted once per open. A failure here yields "" and attribution silently
   // degrades to channel-only — it must never block a share.
@@ -212,13 +224,25 @@ export default function ShareModal({
     return () => { alive = false; };
   }, [isOpen, userId]);
 
-  const baseUrl = useMemo(() => {
+  const rawBaseUrl = useMemo(() => {
     if (propertyUrl) return cleanPropertyUrl(propertyUrl);
     if (typeof window !== "undefined") return cleanPropertyUrl(window.location.href);
     return "";
   }, [propertyUrl]);
 
   const slug = property?.slug || property?.id || "";
+
+  const baseUrl = useMemo(() => {
+    if (!rawBaseUrl) return "";
+    const cleanPromoter = promoterSlug ? promoterSlug.trim().toLowerCase() : "";
+    if (cleanPromoter && !rawBaseUrl.includes("/via/")) {
+      const propMatch = rawBaseUrl.match(/^(https?:\/\/[^\/]+)?(\/property\/[^\/\?\#]+)/i);
+      if (propMatch) {
+        return `${propMatch[0]}/via/${encodeURIComponent(cleanPromoter)}`;
+      }
+    }
+    return rawBaseUrl;
+  }, [rawBaseUrl, promoterSlug]);
 
   // Text for a given channel: rebuilt against that channel's attributed URL so
   // the link inside the copy matches the link the platform receives. Without a
@@ -312,6 +336,7 @@ export default function ShareModal({
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Share this briefing"
@@ -335,102 +360,186 @@ export default function ShareModal({
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 custom-scrollbar">
-          <p className="text-[13px] text-text-secondary mb-4">
-            Share this property&apos;s market intelligence with your network or clients.
-          </p>
-
-          <div className="grid grid-cols-4 gap-2 mb-3">
-            {CHANNELS.map((c) => (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => handleChannel(c)}
-                aria-label={`Share via ${c.name}`}
-                className="min-w-0 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-lg bg-on-surface/5 border border-on-surface/5 text-on-surface/70 transition-all hover:bg-on-surface/10 hover:text-gold-accent motion-safe:active:scale-[0.97]"
-              >
-                {c.icon}
-                <span className="text-[12px] font-mono uppercase tracking-[0.08em] truncate max-w-full">
-                  {c.name}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Plain-language status. This is the visible half of Task 3 — the
-              copy-then-open flow only works if the user is actually told. */}
-          {notice && (
-            <div
-              role="status"
-              aria-live="polite"
-              className="mb-4 px-3 py-2 rounded border border-gold-accent/30 bg-gold-accent/10 text-[12px] text-gold-accent"
+        {/* Tab Selection */}
+        {property && (
+          <div className="flex border-b border-on-surface/10 px-4 sm:px-5 bg-on-surface/[0.02] shrink-0">
+            <button
+              type="button"
+              onClick={() => setActiveTab("channels")}
+              className={`py-2.5 px-3 text-xs font-mono uppercase tracking-[0.12em] border-b-2 transition-colors ${
+                activeTab === "channels"
+                  ? "border-gold-accent text-gold-accent font-bold"
+                  : "border-transparent text-on-surface/70 hover:text-on-surface"
+              }`}
             >
-              {notice}
-            </div>
-          )}
+              Channels & Copy
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("studio")}
+              className={`py-2.5 px-3 text-xs font-mono uppercase tracking-[0.12em] border-b-2 transition-colors flex items-center gap-1.5 ${
+                activeTab === "studio"
+                  ? "border-gold-accent text-gold-accent font-bold"
+                  : "border-transparent text-on-surface/70 hover:text-on-surface"
+              }`}
+            >
+              <span>9:16 Story Studio & QR</span>
+              <span className="px-1.5 py-0.5 rounded text-xs bg-gold-accent/20 text-gold-accent font-bold">
+                NEW
+              </span>
+            </button>
+          </div>
+        )}
 
-          <div className="relative mt-5">
-            <div className="absolute -top-2.5 left-3 px-2 bg-surface text-[12px] uppercase tracking-[0.14em] text-gold-accent font-mono">
-              Raw Briefing Text
-            </div>
-            <textarea
-              readOnly
-              aria-label="Raw briefing text"
-              className="w-full h-28 bg-background border border-on-surface/10 rounded-lg p-4 pt-5 text-[13px] text-on-surface/80 font-mono resize-none focus:outline-none focus:border-gold-accent/50 transition-colors custom-scrollbar"
-              value={textFor("copy")}
+        {activeTab === "studio" && property ? (
+          <div className="overflow-y-auto flex-1 custom-scrollbar">
+            <LuxuryStoryStudio
+              property={property}
+              shareUrl={buildShareUrl(baseUrl, { channel: "copy", ref })}
+              onClose={onClose}
             />
           </div>
+        ) : (
+          <>
+            {/* Body */}
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 custom-scrollbar">
+              <p className="text-[13px] text-text-secondary mb-4">
+                Share this property&apos;s market intelligence with your network or clients.
+              </p>
 
-          {/* Ready-to-post formats — previously stranded behind AI Promote. */}
-          {promo && (
-            <div className="mt-5 border-t border-on-surface/5 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowFormats((v) => !v)}
-                aria-expanded={showFormats}
-                className="w-full flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.14em] text-on-surface/60 hover:text-gold-accent transition-colors"
-              >
-                <span>Ready-to-post formats</span>
-                <span aria-hidden="true">{showFormats ? "−" : "+"}</span>
-              </button>
+              {/* A-186: VIA Partner Priority Control */}
+              {property && (
+                <div className="mb-4 p-3 rounded-lg bg-surface border border-gold-accent/20 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${promoterSlug.trim() ? "bg-gold-accent animate-pulse" : "bg-on-surface/30"}`} />
+                      <span className="text-xs font-mono uppercase tracking-wider text-gold-accent font-bold">
+                        {promoterSlug.trim() ? "VIA Attribution Active" : "VIA Partner Priority (Position Zero)"}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-on-surface/60">30-Day Lock</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add broker slug for lead priority (e.g. john-doe)"
+                      value={promoterSlug}
+                      onChange={(e) => setPromoterSlug(e.target.value)}
+                      aria-label="VIA Promoter Slug"
+                      className="flex-1 bg-background border border-on-surface/15 rounded px-2.5 py-1.5 text-xs font-mono text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
+                    />
+                    {promoterSlug && (
+                      <button
+                        type="button"
+                        onClick={() => setPromoterSlug("")}
+                        className="text-xs font-mono text-on-surface/60 hover:text-gold-accent px-1.5 py-1 rounded bg-on-surface/5"
+                        title="Clear promoter attribution"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                  {promoterSlug.trim() && (
+                    <p className="text-xs text-text-secondary leading-tight">
+                      Visitors who open this link route directly to your contact card as Position Zero primary contact.
+                    </p>
+                  )}
+                </div>
+              )}
 
-              {showFormats && (
-                <div className="mt-4">
-                  <CopyRow label="Short Pitch (Viber / X)" text={promo.fastPitch} />
-                  <CopyRow label="Executive Summary (LinkedIn / Email)" text={promo.executiveSummary} />
-                  <CopyRow label="Editorial Hook (Facebook / Instagram)" text={promo.editorialHook} />
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {CHANNELS.map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => handleChannel(c)}
+                    aria-label={`Share via ${c.name}`}
+                    className="min-w-0 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-lg bg-on-surface/5 border border-on-surface/5 text-on-surface/70 transition-all hover:bg-on-surface/10 hover:text-gold-accent motion-safe:active:scale-[0.97]"
+                  >
+                    {c.icon}
+                    <span className="text-[12px] font-mono uppercase tracking-[0.08em] truncate max-w-full">
+                      {c.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Plain-language status. This is the visible half of Task 3 — the
+                  copy-then-open flow only works if the user is actually told. */}
+              {notice && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="mb-4 px-3 py-2 rounded border border-gold-accent/30 bg-gold-accent/10 text-[12px] text-gold-accent"
+                >
+                  {notice}
+                </div>
+              )}
+
+              <div className="relative mt-5">
+                <div className="absolute -top-2.5 left-3 px-2 bg-surface text-[12px] uppercase tracking-[0.14em] text-gold-accent font-mono">
+                  Raw Briefing Text
+                </div>
+                <textarea
+                  readOnly
+                  aria-label="Raw briefing text"
+                  className="w-full h-28 bg-background border border-on-surface/10 rounded-lg p-4 pt-5 text-[13px] text-on-surface/80 font-mono resize-none focus:outline-none focus:border-gold-accent/50 transition-colors custom-scrollbar"
+                  value={textFor("copy")}
+                />
+              </div>
+
+              {/* Ready-to-post formats — previously stranded behind AI Promote. */}
+              {promo && (
+                <div className="mt-5 border-t border-on-surface/5 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowFormats((v) => !v)}
+                    aria-expanded={showFormats}
+                    className="w-full flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.14em] text-on-surface/60 hover:text-gold-accent transition-colors"
+                  >
+                    <span>Ready-to-post formats</span>
+                    <span aria-hidden="true">{showFormats ? "−" : "+"}</span>
+                  </button>
+
+                  {showFormats && (
+                    <div className="mt-4">
+                      <CopyRow label="Short Pitch (Viber / X)" text={promo.fastPitch} />
+                      <CopyRow label="Executive Summary (LinkedIn / Email)" text={promo.executiveSummary} />
+                      <CopyRow label="Editorial Hook (Facebook / Instagram)" text={promo.editorialHook} />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Footer */}
-        <div className="p-4 sm:p-5 pt-3 shrink-0 border-t border-on-surface/5">
-          <button
-            onClick={handleCopyRaw}
-            aria-label="Copy the raw briefing text"
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium text-sm transition-all duration-300 ${
-              copied
-                ? "bg-success/10 text-success border border-success/20"
-                : "bg-gold-accent text-background hover:bg-gold-bright"
-            }`}
-          >
-            {copied ? (
-              <>
-                <Check size={16} strokeWidth={3} />
-                <span>Copied to Clipboard</span>
-              </>
-            ) : (
-              <>
-                <Copy size={16} />
-                <span>Copy Raw Text</span>
-              </>
-            )}
-          </button>
-        </div>
+            {/* Footer */}
+            <div className="p-4 sm:p-5 pt-3 shrink-0 border-t border-on-surface/5">
+              <button
+                onClick={handleCopyRaw}
+                aria-label="Copy the raw briefing text"
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  copied
+                    ? "bg-success/10 text-success border border-success/20"
+                    : "bg-gold-accent text-background hover:bg-gold-bright"
+                }`}
+              >
+                {copied ? (
+                  <>
+                    <Check size={16} strokeWidth={3} />
+                    <span>Copied to Clipboard</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={16} />
+                    <span>Copy Raw Text</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
+

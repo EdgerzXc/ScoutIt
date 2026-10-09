@@ -5,6 +5,7 @@ import {
   canRetrieveChunk,
   keywordSearch,
 } from "@/lib/retrieval/corpusContract";
+import { distanceKm as calcDistanceKm } from "@/lib/geo";
 
 const PUBLIC_RELEASE_STATES = new Set(["PUBLIC_LIVE", "LIMITED_LIVE"]);
 const INTERNAL_ROLES = new Set(["staff", "admin", "agent", "ops_manager", "super_admin"]);
@@ -59,12 +60,7 @@ function distanceKm(origin, source) {
   const lat2 = validNumber(source?.lat);
   const lon2 = validNumber(source?.lng);
   if ([lat1, lon1, lat2, lon2].some((value) => value === null)) return null;
-  const radians = (degrees) => degrees * Math.PI / 180;
-  const dLat = radians(lat2 - lat1);
-  const dLon = radians(lon2 - lon1);
-  const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(dLon / 2) ** 2;
-  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return calcDistanceKm(lat1, lon1, lat2, lon2);
 }
 
 function isPublicSourceSafe(source, chunk) {

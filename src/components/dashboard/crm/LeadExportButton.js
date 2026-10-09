@@ -144,11 +144,11 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
         .lx-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .lx-btn:hover:not(:disabled) { border-color: var(--accent-muted); color: var(--accent); }
         .lx-btn--primary {
-          background: rgba(232, 174, 60, 0.08);
-          border-color: rgba(232, 174, 60, 0.32);
+          background: rgba(var(--accent-rgb), 0.08);
+          border-color: rgba(var(--accent-rgb), 0.32);
           color: var(--accent);
         }
-        .lx-btn--ok { border-color: rgba(127,191,127,0.4); color: var(--green); }
+        .lx-btn--ok { border-color: color-mix(in srgb, var(--green) 40%, transparent); color: var(--green); }
         .lx-hint {
           font-family: ${MONO};
           font-size: 12px;

@@ -36,7 +36,7 @@ export default function ViewingWorkspaceCard({
 
   return (
     <section className="border-b border-gold-accent/15 bg-surface/70 px-4 py-3 backdrop-blur-xl" aria-label="Current viewing">
-      <div className="mx-auto flex max-w-5xl flex-col gap-3 rounded-lg border border-gold-accent/20 bg-background/55 p-3 shadow-[0_12px_32px_rgba(0,0,0,0.28)] sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-5xl flex-col gap-3 rounded-lg border border-gold-accent/20 bg-background/55 p-3 shadow-[0_12px_32px_rgba(var(--bg-rgb),0.28)] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gold-accent/25 bg-gold-accent/10 text-gold-accent">
             <CalendarClock size={18} strokeWidth={1.7} aria-hidden="true" />

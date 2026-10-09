@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { computeListingStrength } from '../listingStrength.js';
+import {
+  computeListingStrength,
+  MIN_PUBLISH_STRENGTH,
+  isListingPublishable,
+  getListingStrengthAdvice,
+} from '../listingStrength.js';
 
 const COMPLETE = {
   title: 'One BGC Tower',
@@ -60,5 +64,29 @@ describe('computeListingStrength — baseline behaviour', () => {
     expect(result.missing).toContain('Title');
     expect(result.missing).toContain('Photos or media gallery');
     expect(result.score).toBeLessThan(100);
+  });
+});
+
+describe('isListingPublishable and getListingStrengthAdvice (70% minimum threshold)', () => {
+  it('enforces 70% threshold as MIN_PUBLISH_STRENGTH', () => {
+    expect(MIN_PUBLISH_STRENGTH).toBe(70);
+  });
+
+  it('declares a complete listing publishable', () => {
+    expect(isListingPublishable(COMPLETE)).toBe(true);
+  });
+
+  it('declares a null or empty listing unpublishable', () => {
+    expect(isListingPublishable(null)).toBe(false);
+    expect(isListingPublishable({})).toBe(false);
+  });
+
+  it('provides structured actionable advice for missing fields', () => {
+    const partial = { ...COMPLETE, title: '', hasMedia: false, mediaLink: null };
+    const advice = getListingStrengthAdvice(partial);
+    expect(advice.targetScore).toBe(70);
+    expect(advice.missing).toContain('Title');
+    expect(advice.suggestions.length).toBeGreaterThan(0);
+    expect(advice.suggestions.some((s) => s.includes('title'))).toBe(true);
   });
 });

@@ -458,7 +458,7 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
                           className="visualBg"
                           style={{
                             background: property.image
-                              ? `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${property.image}')`
+                              ? `linear-gradient(to top, rgba(var(--bg-rgb), 0.9), transparent), url('${property.image}')`
                               : "linear-gradient(135deg, rgba(var(--accent-rgb), 0.10), var(--bg))",
                             backgroundSize: "cover",
                             backgroundPosition: "center",

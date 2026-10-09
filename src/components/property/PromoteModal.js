@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import useModalDialog from "@/components/ui/useModalDialog";
 import { X, Copy, Check, Lock, Sparkles } from "lucide-react";
 import { getCurrentRole, getCurrentTier } from "@/lib/entitlements";
 import GlassPanel from "../ui/GlassPanel";
@@ -55,7 +56,7 @@ function CopyBox({ label, text }) {
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <div className="bg-background/80 border border-on-surface/10 rounded p-4 text-sm text-on-surface leading-relaxed whitespace-pre-wrap font-serif focus-within:border-gold-accent focus-within:shadow-[0_0_0_1px_rgba(232,174,60,0.2)] transition-all">
+      <div className="bg-background/80 border border-on-surface/10 rounded p-4 text-sm text-on-surface leading-relaxed whitespace-pre-wrap font-serif focus-within:border-gold-accent focus-within:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2)] transition-all">
         {text}
       </div>
     </div>
@@ -70,6 +71,8 @@ function CopyBox({ label, text }) {
 // `pre_launch_free_mode` flag is on). Do not re-add a client-side gate here —
 // the paywall used to live in the UI only, which is exactly the hole §45 closed.
 export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen, onClose });
   const [role, setRole] = useState('seeker');
   const [tier, setTier] = useState('starry');
   
@@ -147,14 +150,14 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
   const isUnlocked = data?.executiveSummary != null;
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 backdrop-blur-sm motion-safe:animate-[fadeIn_0.2s_ease]" style={{ background: "var(--modal-scrim)" }}>
-      <div className={`relative w-full max-w-2xl max-h-[85vh] flex flex-col ${entrance.panel}`}>
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 backdrop-blur-sm motion-safe:animate-[fadeIn_0.2s_ease]" style={{ background: "var(--modal-scrim)" }} onClick={onClose}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="promote-modal-title" className={`relative w-full max-w-2xl max-h-[85vh] flex flex-col ${entrance.panel}`} onClick={(e) => e.stopPropagation()}>
         <GlassPanel className="flex flex-col rounded-xl overflow-hidden h-full max-h-[85vh] promo-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-surface-variant" style={{ background: "rgba(var(--surface2-rgb),0.4)" }}>
             <div className="flex items-center gap-2 text-gold-accent">
               <Sparkles size={18} />
-              <h2 className="font-mono text-sm uppercase tracking-[0.12em] font-semibold text-gold-accent">1-Click AI Promote</h2>
+              <h2 id="promote-modal-title" className="font-mono text-sm uppercase tracking-[0.12em] font-semibold text-gold-accent">1-Click AI Promote</h2>
             </div>
             <button aria-label="Close" onClick={onClose} className="p-1 text-text-secondary hover:text-text-primary transition-colors rounded">
               <X size={20} />

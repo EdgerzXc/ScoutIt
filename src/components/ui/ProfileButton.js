@@ -124,12 +124,12 @@ export default function ProfileButton({ floating = false }) {
           justify-content: center;
           cursor: pointer;
           transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 4px 16px rgba(var(--bg-rgb), 0.5);
         }
 
         .profile-eye-btn:hover {
           border-color: var(--accent-bright);
-          background: rgba(232, 174, 60, 0.16);
+          background: rgba(var(--accent-rgb), 0.16);
           transform: scale(1.05);
         }
 
@@ -171,7 +171,7 @@ export default function ProfileButton({ floating = false }) {
 
         .profile-btn:hover {
           border-color: var(--accent-bright);
-          background: rgba(232, 174, 60, 0.16);
+          background: rgba(var(--accent-rgb), 0.16);
           box-shadow: var(--shadow-glow-soft);
           transform: translateY(-1px);
         }

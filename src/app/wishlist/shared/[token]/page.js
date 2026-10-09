@@ -62,7 +62,7 @@ export default async function SharedWishlistPage({ params }) {
             <h1 className="page-title">Shared Board</h1>
           </header>
           <div className="empty-state" style={{ padding: "120px 0", textAlign: "center" }}>
-            <div className="empty-heading" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "#f0ede8" }}>This board is empty.</div>
+            <div className="empty-heading" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--text-primary)" }}>This board is empty.</div>
           </div>
         </main>
         <Footer />

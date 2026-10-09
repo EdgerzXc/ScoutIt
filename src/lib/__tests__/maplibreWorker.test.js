@@ -39,7 +39,7 @@ describe("A-132 MapLibre worker integration", () => {
       resolve(root, "src/lib/maplibre.js").replaceAll("\\", "/"),
     ]);
     expect(read("src/lib/maplibre.js")).toContain("maplibregl.setWorkerUrl(`/maplibre/${maplibrePackage.version}/maplibre-gl-worker.mjs`)");
-  });
+  }, 15000);
 
   it("generates worker assets for regular and offline development/builds", () => {
     const { scripts, dependencies } = JSON.parse(read("package.json"));

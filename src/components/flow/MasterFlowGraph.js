@@ -9,7 +9,8 @@ import {
   ExternalLink, ChevronRight, ChevronLeft, X, Zap,
   AlertCircle, RotateCcw, CheckCircle2,
   Download, BookOpen, Layers, ShieldCheck, Compass, Sparkles,
-  MapPin, Database, Sparkle, Link2, Shield, Lock, Activity, FileCode, Check
+  MapPin, Database, Sparkle, Link2, Shield, Lock, Activity, FileCode, Check,
+  Radio, Flame, ShieldAlert, FileText, Terminal
 } from "lucide-react";
 import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from "@/data/masterFlowGraphData";
 import {
@@ -22,6 +23,20 @@ import {
   WORKFLOW_DEFINITIONS,
   LINEAR_GUIDE_DEFINITIONS
 } from "@/lib/flow/subgraphExtractor";
+import {
+  INCIDENT_SCENARIOS,
+  calculateBlastRadius,
+  getNodeHealthStatus,
+  getIncidentDossier
+} from "@/lib/flow/incidentSimulator";
+import NodeLogicDiagram from "./NodeLogicDiagram";
+import IncidentSignalBanner from "./IncidentSignalBanner";
+import {
+  initIncidentSignalHub,
+  parseUrlIncidentParams,
+  recordSignal,
+  createSignal
+} from "@/lib/flow/incidentSignalHub";
 
 // Enhanced card dimensions for maximum text readability and breathing room
 const NODE_W = 320;
@@ -69,11 +84,14 @@ const EC_TRACE     = "#F59E0B";
 // ── Memoized Node Card (Readable, High-Contrast Typography & Left Accent Border) ─
 const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
   node, pos, isSelected, isDimmed, isTraceActive, isFocusedBranch,
+  healthStatus,
   onDragStart, onClick, onMouseEnter, onMouseLeave, onToggleFocus
 }) {
   const tc = TYPE_CONFIG[node.nodeType || node.type] || TYPE_CONFIG.PAGE;
   const sc = STATUS_CONFIG[node.implementationStatus] || STATUS_CONFIG.UNKNOWN;
   const isArch = node.category === "architecture";
+  const isFaulted = healthStatus === "FAULTED";
+  const isBlast   = healthStatus === "BLAST_RADIUS";
 
   return (
     <div
@@ -83,7 +101,11 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
       onMouseEnter={() => onMouseEnter(node.id)}
       onMouseLeave={() => onMouseLeave(null)}
       className={`node-card absolute z-10 rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition-all duration-150 select-none border-l-[5px] ${
-        isSelected
+        isFaulted
+          ? "ring-2 ring-red-500 shadow-[0_0_40px_rgba(239,68,68,0.75)] z-30 bg-[#250d14] border-t border-r border-b border-red-500 animate-pulse"
+          : isBlast
+          ? "ring-1 ring-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.4)] z-20 bg-[#1c160c] border-t border-r border-b border-amber-500/70"
+          : isSelected
           ? "ring-2 ring-[#E8AE3C] shadow-[0_0_35px_rgba(232,174,60,0.5)] z-20 bg-[#16162e] border-t border-r border-b border-[#E8AE3C]"
           : isTraceActive
           ? "ring-2 ring-amber-400 shadow-[0_0_24px_rgba(245,158,11,0.45)] bg-[#15152a] border-t border-r border-b border-amber-400/80"
@@ -94,13 +116,17 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
           : "bg-[#111124] border-t border-r border-b border-white/20 hover:border-white/60 shadow-xl hover:shadow-black/80 hover:-translate-y-0.5"
       }`}
       style={{
-        borderLeftColor: tc.color,
+        borderLeftColor: isFaulted ? "#EF4444" : isBlast ? "#F59E0B" : tc.color,
         transform: `translate3d(${pos.x}px,${pos.y}px,0)`,
         width: NODE_W,
         height: NODE_H,
         contain: "strict",
         willChange: "opacity, transform",
-        boxShadow: isSelected
+        boxShadow: isFaulted
+          ? "0 0 40px rgba(239,68,68,0.7), inset 0 1px 0 rgba(255,255,255,0.2)"
+          : isBlast
+          ? "0 0 25px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.15)"
+          : isSelected
           ? "0 0 35px rgba(232,174,60,0.45), inset 0 1px 0 rgba(255,255,255,0.2)"
           : "0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)"
       }}
@@ -135,14 +161,34 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
           <span>{tc.label}</span>
         </span>
         <div className="flex items-center gap-1">
-          <span
-            className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 font-semibold"
-            style={{ color: sc.color, borderColor: sc.border, background: sc.bg }}
-            title={`Implementation Status: ${sc.label}`}
-          >
-            <span>{sc.icon}</span>
-            <span>{sc.label}</span>
-          </span>
+          {isFaulted && (
+            <span
+              className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded border border-red-500/90 bg-red-500/30 text-red-200 font-bold flex items-center gap-1 shadow-sm animate-pulse"
+              title="Operational Signal Fault Detected"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              <span>FAULT</span>
+            </span>
+          )}
+          {isBlast && (
+            <span
+              className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded border border-amber-500/80 bg-amber-500/25 text-amber-200 font-bold flex items-center gap-1 shadow-sm"
+              title="Downstream Journey Severed / In Blast Radius"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span>BLAST</span>
+            </span>
+          )}
+          {!isFaulted && !isBlast && (
+            <span
+              className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 font-semibold"
+              style={{ color: sc.color, borderColor: sc.border, background: sc.bg }}
+              title={`Implementation Status: ${sc.label}`}
+            >
+              <span>{sc.icon}</span>
+              <span>{sc.label}</span>
+            </span>
+          )}
           <span className="text-[12px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-white/80 font-semibold">
             {node.domain || (isArch ? "Arch" : "Flow")}
           </span>
@@ -190,7 +236,8 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
 // ── Canvas Edge Drawing Hook ──────────────────────────────────────────────────
 function useCanvasEdges({
   canvasEdgeRef, visibleEdges, nodeMap, positionsRef,
-  hoveredNodeId, selectedNodeId, focusedNodeSet, tracePathSet
+  hoveredNodeId, selectedNodeId, focusedNodeSet, tracePathSet,
+  severedEdgeSet, isHealthMode
 }) {
   const rafRef = useRef(null);
 
@@ -224,11 +271,12 @@ function useCanvasEdges({
     const normal = [], highlight = [];
     for (let i = 0; i < visibleEdges.length; i++) {
       const e = visibleEdges[i];
-      const isTrace = tSet && tSet.has(`${e.source}→${e.target}`);
-      const isFocus = fSet && fSet.has(e.source) && fSet.has(e.target);
-      const isSel   = (sId === e.source || sId === e.target);
-      const isHov   = (hId === e.source || hId === e.target);
-      if (isTrace || isFocus || isSel || isHov) highlight.push(e);
+      const isTrace   = tSet && tSet.has(`${e.source}→${e.target}`);
+      const isFocus   = fSet && fSet.has(e.source) && fSet.has(e.target);
+      const isSel     = (sId === e.source || sId === e.target);
+      const isHov     = (hId === e.source || hId === e.target);
+      const isSevered = isHealthMode && severedEdgeSet && severedEdgeSet.has(`${e.source}→${e.target}`);
+      if (isTrace || isFocus || isSel || isHov || isSevered) highlight.push(e);
       else normal.push(e);
     }
 
@@ -243,13 +291,15 @@ function useCanvasEdges({
       const ty = tp.y + NODE_H / 2;
       const dx = Math.abs(tx - sx) * 0.5;
 
-      const isTrace = tSet && tSet.has(`${e.source}→${e.target}`);
-      const isFocus = fSet && fSet.has(e.source) && fSet.has(e.target);
-      const isSel   = (sId === e.source || sId === e.target);
-      const isHov   = (hId === e.source || hId === e.target);
+      const isTrace   = tSet && tSet.has(`${e.source}→${e.target}`);
+      const isFocus   = fSet && fSet.has(e.source) && fSet.has(e.target);
+      const isSel     = (sId === e.source || sId === e.target);
+      const isHov     = (hId === e.source || hId === e.target);
+      const isSevered = isHealthMode && severedEdgeSet && severedEdgeSet.has(`${e.source}→${e.target}`);
 
       let stroke = EC_DEFAULT, lw = 1.4, dash = false;
-      if (isTrace)      { stroke = EC_TRACE;     lw = 3.4; }
+      if (isSevered)    { stroke = "#EF4444";    lw = 2.4; dash = true; }
+      else if (isTrace) { stroke = EC_TRACE;     lw = 3.4; }
       else if (isFocus) { stroke = EC_FOCUS;     lw = 2.8; }
       else if (isSel)   { stroke = EC_SELECTED;  lw = 2.4; }
       else if (isHov)   { stroke = EC_HOVER;     lw = 2.2; }
@@ -275,10 +325,10 @@ function useCanvasEdges({
       ctx.bezierCurveTo(sx + dx, sy, tx - dx, ty, tx, ty);
       ctx.stroke();
 
-      if (isHl || isTrace || isFocus) {
-        ctx.fillStyle = stroke;
+      if (isHl || isTrace || isFocus || isSevered) {
+        ctx.fillStyle = isSevered ? "#EF4444" : stroke;
         ctx.beginPath();
-        ctx.arc(tx - 4, ty, isTrace ? 5.5 : 4.5, 0, Math.PI * 2);
+        ctx.arc(tx - 4, ty, (isTrace || isSevered) ? 5.5 : 4.5, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
@@ -286,7 +336,7 @@ function useCanvasEdges({
 
     for (let i = 0; i < normal.length;    i++) drawEdge(normal[i], false);
     for (let i = 0; i < highlight.length; i++) drawEdge(highlight[i], true);
-  }, [canvasEdgeRef, visibleEdges, nodeMap, positionsRef, hoveredNodeId, selectedNodeId, focusedNodeSet, tracePathSet]);
+  }, [canvasEdgeRef, visibleEdges, nodeMap, positionsRef, hoveredNodeId, selectedNodeId, focusedNodeSet, tracePathSet, severedEdgeSet, isHealthMode]);
 
   useEffect(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -325,11 +375,16 @@ export default function MasterFlowGraph({ onNavigate }) {
   const rafDrag     = useRef(null);
 
   // ── Slicing & Multi-Mode State ──────────────────────────────────────────────
-  const [graphMode, setGraphMode] = useState("master"); // "master" | "role" | "workflow" | "guide"
+  const [graphMode, setGraphMode] = useState("master"); // "master" | "role" | "workflow" | "guide" | "health"
   const [activeRole, setActiveRole] = useState("seeker");
   const [activeWorkflow, setActiveWorkflow] = useState("deal_room_lifecycle");
   const [activeGuideId, setActiveGuideId] = useState("buyer_guide");
   const [currentGuideStepIdx, setCurrentGuideStepIdx] = useState(0);
+
+  // System Health & Incident Signals State
+  const [activeScenarioId, setActiveScenarioId] = useState("CMS_BRIDGE_OUTAGE");
+  const [customFaultedNodeIds, setCustomFaultedNodeIds] = useState([]);
+  const [healthFilter, setHealthFilter] = useState("all"); // "all" | "affected" | "faulted" | "exceptions" | "recovery"
 
   // Filter State
   const [selectedNodeId,  setSelectedNodeId]  = useState("hero");
@@ -353,6 +408,25 @@ export default function MasterFlowGraph({ onNavigate }) {
     return m;
   }, []);
   const selectedNode = nodeMap.get(selectedNodeId) || MASTER_FLOW_NODES[0];
+
+  // Incident Scenarios & Topological Blast Radius Computation
+  const currentScenario = useMemo(() => {
+    return INCIDENT_SCENARIOS[activeScenarioId] || INCIDENT_SCENARIOS.CMS_BRIDGE_OUTAGE;
+  }, [activeScenarioId]);
+
+  const activeFaultedNodeIds = useMemo(() => {
+    if (activeScenarioId === "CUSTOM") return customFaultedNodeIds;
+    return currentScenario.faultedNodeIds || [];
+  }, [activeScenarioId, currentScenario, customFaultedNodeIds]);
+
+  const blastRadius = useMemo(() => {
+    return calculateBlastRadius(activeFaultedNodeIds, nodeMap);
+  }, [activeFaultedNodeIds, nodeMap]);
+
+  const selectedDossier = useMemo(() => {
+    if (!selectedNode) return null;
+    return getIncidentDossier(selectedNode, nodeMap, blastRadius);
+  }, [selectedNode, nodeMap, blastRadius]);
 
   // Memoize dropdown options
   const nodeOptions = useMemo(() =>
@@ -585,6 +659,37 @@ export default function MasterFlowGraph({ onNavigate }) {
     applyDOM(); setDisplayScale(s); updateCull(); setSelectedNodeId(nodeId);
   }, [applyDOM, updateCull]);
 
+  // A-187: On-call incident deep-link intake & signal hub initialization
+  useEffect(() => {
+    initIncidentSignalHub();
+    if (typeof window === "undefined") return;
+    try {
+      const parsed = parseUrlIncidentParams(window.location.search);
+      if (parsed.hasParams) {
+        if (parsed.isIncidentMode) {
+          setGraphMode("health");
+        }
+        if (parsed.scenarioId && INCIDENT_SCENARIOS[parsed.scenarioId]) {
+          setActiveScenarioId(parsed.scenarioId);
+        }
+        if (parsed.nodeId && nodeMap.has(parsed.nodeId)) {
+          setSelectedNodeId(parsed.nodeId);
+          setIsInspectorOpen(true);
+          if (parsed.isIncidentMode) {
+            setCustomFaultedNodeIds(prev => prev.includes(parsed.nodeId) ? prev : [...prev, parsed.nodeId]);
+            setActiveScenarioId("CUSTOM");
+          }
+          const timer = setTimeout(() => {
+            centerOnNode(parsed.nodeId);
+          }, 150);
+          return () => clearTimeout(timer);
+        }
+      }
+    } catch {
+      // Safe no-op on invalid query strings
+    }
+  }, [nodeMap, centerOnNode]);
+
   const handleNodeDragStart = useCallback((e, nodeId) => {
     e.stopPropagation(); setSelectedNodeId(nodeId); dragNodeRef.current = nodeId;
     const p = positionsRef.current[nodeId]; if (!p) return;
@@ -605,13 +710,19 @@ export default function MasterFlowGraph({ onNavigate }) {
       if (selectedRole   !== "all" && !node.roles.includes(selectedRole)) return false;
       if (selectedType   !== "all" && (node.nodeType || node.type) !== selectedType) return false;
     }
+    if (graphMode === "health") {
+      if (healthFilter === "affected" && !blastRadius.blastRadiusSet.has(node.id)) return false;
+      if (healthFilter === "faulted" && !blastRadius.faultedNodeIds.includes(node.id)) return false;
+      if (healthFilter === "exceptions" && node.nodeType !== "EXCEPTION" && node.type !== "EXCEPTION") return false;
+      if (healthFilter === "recovery" && node.nodeType !== "RECOVERY" && node.type !== "RECOVERY") return false;
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       if (![node.name, node.canonicalId, node.route, node.description, node.purpose, node.id]
         .some(f => (f || "").toLowerCase().includes(q))) return false;
     }
     return true;
-  }, [graphMode, categoryFilter, statusFilter, domainFilter, selectedRole, selectedType, searchQuery]);
+  }, [graphMode, categoryFilter, statusFilter, domainFilter, selectedRole, selectedType, healthFilter, blastRadius, searchQuery]);
 
   const visibleNodes     = useMemo(() => activeSlice.nodes.filter(isNodeMatch), [activeSlice.nodes, isNodeMatch]);
   const visibleNodeIdSet = useMemo(() => new Set(visibleNodes.map(n => n.id)), [visibleNodes]);
@@ -632,7 +743,9 @@ export default function MasterFlowGraph({ onNavigate }) {
   // Canvas edge drawing
   useCanvasEdges({
     canvasEdgeRef, visibleEdges, nodeMap, positionsRef,
-    hoveredNodeId, selectedNodeId, focusedNodeSet, tracePathSet
+    hoveredNodeId, selectedNodeId, focusedNodeSet, tracePathSet,
+    severedEdgeSet: blastRadius.severedEdgeSet,
+    isHealthMode: graphMode === "health"
   });
 
   // Linear Guide Walkthrough step handler
@@ -748,6 +861,17 @@ export default function MasterFlowGraph({ onNavigate }) {
               <BookOpen size={14} />
               <span>User Guides</span>
             </button>
+            <button
+              onClick={() => { setGraphMode("health"); resetView(); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-bold text-xs ${
+                graphMode === "health"
+                  ? "bg-red-500 text-white shadow-md shadow-red-950"
+                  : "text-white/80 hover:text-white"
+              }`}
+            >
+              <Activity size={14} />
+              <span>Incident Signals ({blastRadius.totalAffectedCount > 0 ? `🚨 ${blastRadius.totalAffectedCount}` : "Nominal"})</span>
+            </button>
           </div>
 
           {/* Role selector in Role Mode */}
@@ -800,6 +924,75 @@ export default function MasterFlowGraph({ onNavigate }) {
                 <option key={k} value={k}>{LINEAR_GUIDE_DEFINITIONS[k].title}</option>
               ))}
             </select>
+          )}
+
+          {/* Incident Scenario & Filter controls in Health Mode */}
+          {graphMode === "health" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={activeScenarioId}
+                onChange={e => {
+                  setActiveScenarioId(e.target.value);
+                  const scen = INCIDENT_SCENARIOS[e.target.value];
+                  if (scen && scen.faultedNodeIds.length > 0) {
+                    centerOnNode(scen.faultedNodeIds[0]);
+                  }
+                }}
+                className="bg-black/90 border border-red-500/70 rounded-lg px-3 py-1.5 text-xs text-red-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-red-500 max-w-[280px] truncate"
+              >
+                {Object.values(INCIDENT_SCENARIOS).map(scen => (
+                  <option key={scen.id} value={scen.id}>
+                    {scen.id === "NOMINAL" ? "✅" : "🚨"} {scen.name}
+                  </option>
+                ))}
+              </select>
+
+              {activeScenarioId === "CUSTOM" && (
+                <button
+                  onClick={() => {
+                    setCustomFaultedNodeIds(prev =>
+                      prev.includes(selectedNodeId)
+                        ? prev.filter(id => id !== selectedNodeId)
+                        : [...prev, selectedNodeId]
+                    );
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition border ${
+                    customFaultedNodeIds.includes(selectedNodeId)
+                      ? "bg-red-500 text-white border-red-400"
+                      : "bg-white/10 text-white/90 border-white/20 hover:bg-white/20"
+                  }`}
+                >
+                  {customFaultedNodeIds.includes(selectedNodeId) ? "Clear Injected Fault" : "+ Fault Selected"}
+                </button>
+              )}
+
+              <select
+                value={healthFilter}
+                onChange={e => setHealthFilter(e.target.value)}
+                className="bg-black/80 border border-white/25 rounded-lg px-2.5 py-1 text-xs text-white font-mono font-semibold focus:outline-none focus:border-red-400"
+              >
+                <option value="all">View: All Nodes</option>
+                <option value="affected">🚨 Faulted & Blast Radius</option>
+                <option value="faulted">🔥 Faulted Only</option>
+                <option value="exceptions">⚠️ Exceptions Only</option>
+                <option value="recovery">🔄 Recovery Only</option>
+              </select>
+
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-black/60 border border-white/15 text-xs font-mono">
+                <span className="text-red-400 font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                  {blastRadius.faultedNodeIds.length} Faulted
+                </span>
+                <span className="text-white/60">·</span>
+                <span className="text-amber-300 font-bold">
+                  {blastRadius.impactedNodeIds.length} Severed
+                </span>
+                <span className="text-white/60">·</span>
+                <span className="text-sky-300 font-bold">
+                  {blastRadius.severedRoles.length} Roles
+                </span>
+              </div>
+            </div>
           )}
 
           {/* Quick Search */}
@@ -963,6 +1156,28 @@ export default function MasterFlowGraph({ onNavigate }) {
         </div>
       )}
 
+      {/* Real-Time Operational Incident Signal Banner */}
+      <IncidentSignalBanner
+        nodeMap={nodeMap}
+        activeFaultedNodeIds={activeFaultedNodeIds}
+        onFocusNode={(nodeId) => {
+          centerOnNode(nodeId);
+          setSelectedNodeId(nodeId);
+          setIsInspectorOpen(true);
+        }}
+        onTriggerScenario={(scenId) => {
+          if (graphMode !== "health") setGraphMode("health");
+          setActiveScenarioId(scenId);
+        }}
+        onInjectCustomFault={(nodeId) => {
+          if (graphMode !== "health") setGraphMode("health");
+          setActiveScenarioId("CUSTOM");
+          setCustomFaultedNodeIds(prev =>
+            prev.includes(nodeId) ? prev : [...prev, nodeId]
+          );
+        }}
+      />
+
       {/* ── CANVAS ── */}
       <div className="flex-1 w-full h-full relative cursor-grab active:cursor-grabbing overflow-hidden">
         {/* Subtle grid background */}
@@ -983,6 +1198,9 @@ export default function MasterFlowGraph({ onNavigate }) {
           {/* Viewport-culled memoized node cards */}
           {culledNodes.map(node => {
             const p = positions[node.id] || { x: 0, y: 0 };
+            const hStatus = graphMode === "health"
+              ? getNodeHealthStatus(node.id, new Set(blastRadius.faultedNodeIds), blastRadius.blastRadiusSet)
+              : null;
             return (
               <MemoizedNodeCard
                 key={node.id}
@@ -992,6 +1210,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                 isDimmed={!!focusedNodeSet && !focusedNodeSet.has(node.id) && selectedNodeId !== node.id}
                 isTraceActive={!!(tracePathSet && activeTracePath?.includes(node.id))}
                 isFocusedBranch={focusBranchId === node.id}
+                healthStatus={hStatus}
                 onDragStart={handleNodeDragStart}
                 onClick={handleNodeClick}
                 onMouseEnter={setHoveredNodeId}
@@ -1121,6 +1340,131 @@ export default function MasterFlowGraph({ onNavigate }) {
                 )}
               </div>
             </div>
+
+            {/* Interactive Logic Blueprint & Humanized Diagram */}
+            <NodeLogicDiagram
+              node={selectedNode}
+              nodeMap={nodeMap}
+              onNavigateToNode={(nodeId) => {
+                centerOnNode(nodeId);
+                setSelectedNodeId(nodeId);
+              }}
+              onSimulateFault={(nodeId) => {
+                if (graphMode !== "health") setGraphMode("health");
+                setActiveScenarioId("CUSTOM");
+                setCustomFaultedNodeIds(prev =>
+                  prev.includes(nodeId)
+                    ? prev.filter(id => id !== nodeId)
+                    : [...prev, nodeId]
+                );
+              }}
+              isFaulted={selectedDossier?.healthStatus === "FAULTED"}
+              isBlastRadius={selectedDossier?.healthStatus === "BLAST_RADIUS"}
+            />
+
+            {/* Operational Incident Dossier & Alert Telemetry */}
+            {selectedDossier && (graphMode === "health" || selectedDossier.healthStatus !== "NOMINAL" || selectedNode.type === "EXCEPTION") && (
+              <div className={`space-y-2.5 p-3.5 rounded-2xl border transition-all ${
+                selectedDossier.healthStatus === "FAULTED"
+                  ? "bg-red-500/20 border-red-500/70 shadow-[0_0_25px_rgba(239,68,68,0.3)]"
+                  : selectedDossier.healthStatus === "BLAST_RADIUS"
+                  ? "bg-amber-500/20 border-amber-500/70 shadow-[0_0_25px_rgba(245,158,11,0.25)]"
+                  : "bg-emerald-500/15 border-emerald-500/40"
+              }`}>
+                <div className="flex items-center justify-between pb-2 border-b border-white/15">
+                  <span className={`text-[12px] font-mono font-bold uppercase flex items-center gap-1.5 ${
+                    selectedDossier.healthStatus === "FAULTED" ? "text-red-300" : selectedDossier.healthStatus === "BLAST_RADIUS" ? "text-amber-300" : "text-emerald-300"
+                  }`}>
+                    {selectedDossier.healthStatus === "FAULTED" && <Flame size={14} className="text-red-400 animate-pulse" />}
+                    {selectedDossier.healthStatus === "BLAST_RADIUS" && <Radio size={14} className="text-amber-400" />}
+                    {selectedDossier.healthStatus === "NOMINAL" && <ShieldCheck size={14} className="text-emerald-400" />}
+                    <span>
+                      {selectedDossier.healthStatus === "FAULTED"
+                        ? "🚨 Primary Fault Origin"
+                        : selectedDossier.healthStatus === "BLAST_RADIUS"
+                        ? "⚠️ Severed / In Blast Radius"
+                        : "✅ Operational Nominal"}
+                    </span>
+                  </span>
+                  <span className="text-[12px] font-mono uppercase px-2 py-0.5 rounded bg-black/40 border border-white/15 text-white/80 font-bold">
+                    {selectedDossier.healthStatus === "BLAST_RADIUS" ? `Depth +${selectedDossier.depthInIncident}` : selectedDossier.domain}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[12px] font-mono">
+                  <div className="bg-black/40 p-2 rounded-xl border border-white/10">
+                    <span className="text-white/60 block text-[12px]">Downstream Impact:</span>
+                    <strong className="text-white text-[13px]">{selectedDossier.downstreamImpactCount} nodes</strong>
+                  </div>
+                  <div className="bg-black/40 p-2 rounded-xl border border-white/10">
+                    <span className="text-white/60 block text-[12px]">Direct Outgoing:</span>
+                    <strong className="text-white text-[13px]">{selectedDossier.directChildrenCount} paths</strong>
+                  </div>
+                </div>
+
+                {/* Primary Triage Source Files */}
+                {selectedDossier.triageFiles.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[12px] font-mono text-white/70 uppercase font-bold flex items-center gap-1">
+                      <FileCode size={13} className="text-[#E8AE3C]" />
+                      <span>Triage Files ({selectedDossier.triageFiles.length})</span>
+                    </span>
+                    <div className="space-y-1">
+                      {selectedDossier.triageFiles.map((f, i) => (
+                        <div key={i} className="text-[12px] font-mono text-amber-200/90 truncate bg-black/50 px-2 py-1 rounded-lg border border-white/10" title={f}>
+                          {f}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Connected Recovery Playbooks */}
+                {selectedDossier.connectedRecoveryNodes.length > 0 && (
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[12px] font-mono text-cyan-300 uppercase font-bold flex items-center gap-1">
+                      <RotateCcw size={13} className="text-cyan-400" />
+                      <span>Recovery Actions</span>
+                    </span>
+                    <div className="space-y-1">
+                      {selectedDossier.connectedRecoveryNodes.map(rec => (
+                        <button
+                          key={rec.id}
+                          onClick={() => centerOnNode(rec.id)}
+                          className="w-full text-left p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:border-cyan-400 hover:bg-cyan-900/40 transition flex items-center justify-between text-[12px] font-mono text-cyan-200"
+                        >
+                          <span className="truncate">{rec.name}</span>
+                          <ChevronRight size={13} className="text-cyan-400 shrink-0 ml-1" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Simulation Action Button */}
+                <div className="pt-1">
+                  <button
+                    onClick={() => {
+                      if (graphMode !== "health") setGraphMode("health");
+                      setActiveScenarioId("CUSTOM");
+                      setCustomFaultedNodeIds(prev =>
+                        prev.includes(selectedNode.id)
+                          ? prev.filter(id => id !== selectedNode.id)
+                          : [...prev, selectedNode.id]
+                      );
+                    }}
+                    className={`w-full py-1.5 px-3 rounded-xl text-xs font-mono font-bold transition border flex items-center justify-center gap-1.5 ${
+                      activeFaultedNodeIds.includes(selectedNode.id)
+                        ? "bg-red-500/30 text-red-200 border-red-500 hover:bg-red-500/40"
+                        : "bg-white/10 text-white/90 border-white/20 hover:bg-white/20"
+                    }`}
+                  >
+                    <Activity size={13} />
+                    <span>{activeFaultedNodeIds.includes(selectedNode.id) ? "Clear Injected Fault" : "Simulate Outage on This Node"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Codebase & Grounding Evidence Section */}
             {selectedNode.evidence && selectedNode.evidence.length > 0 && (

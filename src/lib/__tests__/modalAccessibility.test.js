@@ -17,6 +17,16 @@ const MODALS = [
   "src/components/ui/EarlyAccessGate.js",
   "src/components/dashboard/BookingModal.js",
   "src/components/stratosphere/CommunityConnectModal.js",
+  "src/components/dashboard/ListerDeclarationModal.js",
+  "src/components/dashboard/MonthlyFreshnessModal.js",
+  "src/components/property/OperatorRequestModal.js",
+  "src/components/property/PromoteModal.js",
+  "src/components/property/ShareModal.js",
+  "src/components/dashboard/crm/NewDealModal.js",
+  "src/components/waitlist/WaitlistModal.js",
+  "src/components/calendar/EventEditorModal.js",
+  "src/components/calendar/ViewingDetailModal.js",
+  "src/components/profile/ProfileContactModal.js",
 ];
 
 describe("A-153 — modal keyboard contract", () => {

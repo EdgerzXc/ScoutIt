@@ -38,7 +38,7 @@ export default async function DiscoverPage() {
       <Header />
       <Suspense
         fallback={
-          <div className="discoverPage" aria-busy="true" style={{ minHeight: "100vh" }}>
+          <div className="discoverPage" aria-busy="true" style={{ minHeight: "100dvh" }}>
             <AtmosphereBackground />
             <div className="discoverContainer">
               <aside className="categoryRail" aria-hidden="true">

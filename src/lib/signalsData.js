@@ -37,7 +37,7 @@ export const SPATIAL_SIGNALS = [
       resolved: {
         id: "resolved",
         name: "Resolved",
-        color: "#10b981",
+        color: "var(--green)",
         glyph: "●",
         headline: "Compliance Upgrade Required",
         summary: "The building sits directly in the Ayala corridor. A chiller & thermal envelope upgrade is required before Q4 2027 to avoid progressive municipal tax surcharges.",
@@ -46,7 +46,7 @@ export const SPATIAL_SIGNALS = [
       escalated: {
         id: "escalated",
         name: "Escalated",
-        color: "#f59e0b",
+        color: "var(--amber, var(--yellow))",
         glyph: "◆",
         headline: "High Urgency: 22% Tenant Flight Spread",
         summary: "Multinational tenants in this corridor are actively enforcing lease covenants requiring certified green stock. Inquire immediately regarding retrofit schedule.",
@@ -55,7 +55,7 @@ export const SPATIAL_SIGNALS = [
       ruledout: {
         id: "ruledout",
         name: "Ruled Out",
-        color: "#3b82f6",
+        color: "var(--intel-blue, var(--sapphire))",
         glyph: "○",
         headline: "Pre-Certified / Zero Penalty Risk",
         summary: "The asset is either pre-certified LEED Gold/Platinum or outside the commercial high-rise threshold. Zero tax penalty or compliance friction detected.",
@@ -212,7 +212,7 @@ export const SPATIAL_SIGNALS = [
       resolved: {
         id: "resolved",
         name: "Resolved",
-        color: "#10b981",
+        color: "var(--green)",
         glyph: "●",
         headline: "Direct Transit Appreciation Verified",
         summary: "Subterranean tunneling verified within 200m. Rapid airport reach transforms rental yields by Q1 2028.",
@@ -221,7 +221,7 @@ export const SPATIAL_SIGNALS = [
       escalated: {
         id: "escalated",
         name: "Escalated",
-        color: "#f59e0b",
+        color: "var(--amber, var(--yellow))",
         glyph: "◆",
         headline: "High Urgency: Perimeter Land Banking",
         summary: "Off-market acquisition pressure is surging. Inventory along this boundary is contracting rapidly.",
@@ -230,7 +230,7 @@ export const SPATIAL_SIGNALS = [
       ruledout: {
         id: "ruledout",
         name: "Ruled Out",
-        color: "#3b82f6",
+        color: "var(--intel-blue, var(--sapphire))",
         glyph: "○",
         headline: "Acoustic Buffer Verified / Zero Vibration",
         summary: "Floating slab isolation and deep rock strata eliminate vibration risk entirely for this parcel.",
@@ -362,7 +362,7 @@ export const SPATIAL_SIGNALS = [
       resolved: {
         id: "resolved",
         name: "Resolved",
-        color: "#10b981",
+        color: "var(--green)",
         glyph: "●",
         headline: "High Street Walkability Verified",
         summary: "Direct 3-minute walking connection along landscaped pedestrian parkways. Quiet courtyard buffer confirmed.",
@@ -371,7 +371,7 @@ export const SPATIAL_SIGNALS = [
       escalated: {
         id: "escalated",
         name: "Escalated",
-        color: "#f59e0b",
+        color: "var(--amber, var(--yellow))",
         glyph: "◆",
         headline: "Prime Corridor Scarcity",
         summary: "Pedestrian-linked floorplates in this block have 0.4% vacancy rate. Immediate offer submission advised.",
@@ -380,7 +380,7 @@ export const SPATIAL_SIGNALS = [
       ruledout: {
         id: "ruledout",
         name: "Ruled Out",
-        color: "#3b82f6",
+        color: "var(--intel-blue, var(--sapphire))",
         glyph: "○",
         headline: "No Commercial Noise Spillover",
         summary: "Acoustic modeling verifies retail dining noise does not reach upper residential tiers.",

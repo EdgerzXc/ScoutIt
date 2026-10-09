@@ -26,7 +26,7 @@ export default function AttachedFindingCard({
   const isEscalated = findingKey === "escalated";
   const isRuledOut = findingKey === "ruledout";
 
-  const color = resolution.color || "#10b981";
+  const color = resolution.color || "var(--green)";
 
   const dossierHref = `/layer/stratosphere?fromProperty=${encodeURIComponent(propertySlug || "")}&signal=${encodeURIComponent(signal.slug)}`;
 
@@ -36,14 +36,14 @@ export default function AttachedFindingCard({
         margin: "0 0 32px 0",
         borderRadius: "8px",
         padding: "1px",
-        background: `linear-gradient(135deg, ${color}66 0%, rgba(232, 174, 60, 0.3) 50%, rgba(255, 255, 255, 0.08) 100%)`,
-        boxShadow: `0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px ${color}1a`,
+        background: `linear-gradient(135deg, color-mix(in srgb, ${color} 40%, transparent) 0%, rgba(var(--accent-rgb), 0.3) 50%, var(--border-subtle) 100%)`,
+        boxShadow: `0 8px 30px rgba(var(--bg-rgb), 0.4), 0 0 20px color-mix(in srgb, ${color} 10%, transparent)`,
         animation: "riseIn 0.4s cubic-bezier(0.2, 0.7, 0.3, 1)",
       }}
     >
       <div
         style={{
-          background: "linear-gradient(180deg, #19141f 0%, #120f17 100%)",
+          background: "var(--surface-alt)",
           borderRadius: "7px",
           padding: "22px 24px",
           position: "relative",
@@ -81,9 +81,9 @@ export default function AttachedFindingCard({
                 textTransform: "uppercase",
                 padding: "3px 8px",
                 borderRadius: "3px",
-                background: `${color}22`,
+                background: `color-mix(in srgb, ${color} 15%, transparent)`,
                 color: color,
-                border: `1px solid ${color}44`,
+                border: `1px solid color-mix(in srgb, ${color} 27%, transparent)`,
               }}
             >
               {resolution.glyph} {resolution.name.toUpperCase()}
@@ -97,7 +97,7 @@ export default function AttachedFindingCard({
                   border: "none",
                   fontFamily: "var(--font-mono)",
                   fontSize: "12px",
-                  color: "rgba(240, 237, 232, 0.4)",
+                  color: "var(--text-muted)",
                   cursor: "pointer",
                   padding: "2px 4px",
                 }}
@@ -114,12 +114,12 @@ export default function AttachedFindingCard({
             fontFamily: "Georgia, serif",
             fontSize: "clamp(18px, 2.4vw, 22px)",
             fontWeight: 400,
-            color: "#f7f5f0",
+            color: "var(--text-primary)",
             lineHeight: 1.3,
             margin: "0 0 8px 0",
           }}
         >
-          {signal.title}: <span style={{ color: "#F7C64E" }}>{resolution.headline}</span>
+          {signal.title}: <span style={{ color: "var(--accent-bright)" }}>{resolution.headline}</span>
         </h3>
 
         {/* Summary */}
@@ -127,7 +127,7 @@ export default function AttachedFindingCard({
           style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
             fontSize: "14px",
-            color: "rgba(240, 237, 232, 0.85)",
+            color: "var(--text-secondary)",
             lineHeight: 1.6,
             margin: "0 0 16px 0",
             maxWidth: "680px",
@@ -144,17 +144,17 @@ export default function AttachedFindingCard({
             alignItems: "center",
             flexWrap: "wrap",
             gap: "12px",
-            borderTop: "1px solid rgba(240, 237, 232, 0.08)",
+            borderTop: "1px solid var(--border)",
             paddingTop: "14px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <Sparkles size={13} style={{ color: "#E8AE3C" }} />
+            <Sparkles size={13} style={{ color: "var(--accent)" }} />
             <span
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "12px",
-                color: "#E8AE3C",
+                color: "var(--accent)",
               }}
             >
               Inquiry is pre-armed with topic: &ldquo;{resolution.inquiryTopic}&rdquo;
@@ -170,7 +170,7 @@ export default function AttachedFindingCard({
               gap: "4px",
               fontFamily: "var(--font-mono)",
               fontSize: "12px",
-              color: "rgba(240, 237, 232, 0.7)",
+              color: "var(--text-secondary)",
               transition: "color 0.15s ease",
             }}
             className="hover:text-gold"

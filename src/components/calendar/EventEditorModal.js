@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import useModalDialog from "@/components/ui/useModalDialog";
 import {
   toDateInputValue,
   toTimeInputValue,
@@ -53,13 +54,8 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
     }
   }, [seed]);
 
-  // Close on Escape.
-  useEffect(() => {
-    if (!seed) return undefined;
-    const onKey = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [seed, onClose]);
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: Boolean(seed), onClose });
 
   if (!seed) return null;
 
@@ -114,11 +110,15 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-editor-title"
         className={`${overlayMotion.panel} w-full sm:max-w-lg bg-surface border border-surface-variant rounded-t-2xl sm:rounded-lg shadow-2xl max-h-[90dvh] overflow-y-auto cal-lens`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
-          <h2 className="font-working-title text-lg text-on-surface">
+          <h2 id="event-editor-title" className="font-working-title text-lg text-on-surface">
             {isEdit ? "Edit event" : "New event"}
           </h2>
           <button

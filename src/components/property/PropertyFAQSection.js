@@ -30,18 +30,18 @@ const TIERS = {
   silver: {
     medal: "🥈",
     label: "Advisor Spec",
-    color: "var(--tier-silver, #c8ccd2)",
-    border: "rgba(200, 204, 210, 0.30)",
-    bg: "rgba(200, 204, 210, 0.05)",
-    glow: "0 0 14px rgba(200, 204, 210, 0.08)",
+    color: "var(--tier-silver)",
+    border: "color-mix(in srgb, var(--tier-silver) 30%, transparent)",
+    bg: "color-mix(in srgb, var(--tier-silver) 5%, transparent)",
+    glow: "0 0 14px color-mix(in srgb, var(--tier-silver) 8%, transparent)",
     blurb: "Measured specs, floor logistics, availability.",
   },
   bronze: {
     medal: "🥉",
     label: "Resident Verified",
-    color: "var(--tier-bronze, #c98a5b)",
-    border: "rgba(201, 138, 91, 0.30)",
-    bg: "rgba(201, 138, 91, 0.05)",
+    color: "var(--tier-bronze)",
+    border: "color-mix(in srgb, var(--tier-bronze) 30%, transparent)",
+    bg: "color-mix(in srgb, var(--tier-bronze) 5%, transparent)",
     glow: "none",
     blurb: "Lived reality — cell signal, elevator wait, noise stack.",
   },
@@ -425,7 +425,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         }
         .faq-badge--confirmed {
           color: var(--green);
-          border: 0.5px solid rgba(76, 175, 125, 0.3);
+          border: 0.5px solid color-mix(in srgb, var(--green) 30%, transparent);
         }
         .faq-answer__text {
           font-family: var(--font-display);

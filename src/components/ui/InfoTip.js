@@ -183,12 +183,12 @@ export default function InfoTip({ tipId, label = "More information", className =
           display: block;
           z-index: 2500;
           padding: 13px 15px;
-          background: rgba(18, 18, 18, 0.96);
+          background: rgba(var(--surface-rgb), 0.96);
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
           border: 1px solid var(--accent-muted);
           border-radius: 4px;
-          box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 1px rgba(var(--accent-rgb), 0.3);
+          box-shadow: 0 14px 34px rgba(var(--bg-rgb), 0.65), 0 0 1px rgba(var(--accent-rgb), 0.3);
           text-align: left;
           pointer-events: none;
           animation: infotip-in 160ms var(--ease-out-custom);

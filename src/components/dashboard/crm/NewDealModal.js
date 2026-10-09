@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import useModalDialog from "@/components/ui/useModalDialog";
 import { X, Building2, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { crmFetch } from "../../../lib/crmClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserId }) {
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen, onClose });
+
   const reduceMotion = useReducedMotion();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,10 +65,14 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={reduceMotion ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="new-deal-modal-title"
           className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-surface border border-surface-variant rounded-xl shadow-2xl"
         >
           <div className="flex justify-between items-center p-6 border-b border-surface-variant bg-surface/50">
-            <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-2">
+            <h2 id="new-deal-modal-title" className="font-headline-editorial text-2xl text-on-surface flex items-center gap-2">
               Create New Deal
             </h2>
             <button onClick={onClose} aria-label="Close" className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-on-surface transition">

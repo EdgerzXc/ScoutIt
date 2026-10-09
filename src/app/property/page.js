@@ -117,12 +117,12 @@ export default async function PropertyRootPage() {
               </aside>
               <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
                 <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
-                  <div style={{ flexGrow: 1, height: "48px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-solid)" }} />
+                  <div style={{ flexGrow: 1, height: "48px", background: "rgba(var(--text-primary-rgb), 0.03)", border: "1px solid var(--border-solid)" }} />
                   <div style={{ width: "180px", height: "44px", background: "var(--bg)", border: "1px solid var(--accent)" }} />
                 </div>
                 <div className="directory-grid">
                   {[1, 2, 3, 4, 5, 6].map((n) => (
-                    <div key={n} style={{ height: "380px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md, 6px)", opacity: 0.6 }} />
+                    <div key={n} style={{ height: "380px", background: "rgba(var(--text-primary-rgb), 0.03)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md, 6px)", opacity: 0.6 }} />
                   ))}
                 </div>
               </section>

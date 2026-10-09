@@ -44,7 +44,7 @@ import { shouldRender } from "@/lib/simpleMode";
 // numbers worth wanting.
 // ═══════════════════════════════════════════════════════════════
 
-const ACCENT = "#E8AE3C";
+const ACCENT = "var(--accent)";
 
 /** The gated rows. Order is deliberate: yield first, provenance last. */
 export const MARKET_FIELDS = [
@@ -72,7 +72,7 @@ function ArticleRow({ article }) {
           style={{
             color: article.isAboutThisProperty ? ACCENT : "var(--text-muted)",
             borderColor: article.isAboutThisProperty
-              ? "rgba(232, 174, 60, 0.35)"
+              ? "rgba(var(--accent-rgb), 0.35)"
               : "var(--border)",
           }}
         >
@@ -169,7 +169,7 @@ function MarketNumbers({ deepIntel, unlocked }) {
               className="market-numbers__row"
               style={{
                 borderBottom:
-                  i < MARKET_FIELDS.length - 1 ? "1px solid #262626" : "none",
+                  i < MARKET_FIELDS.length - 1 ? "1px solid var(--border)" : "none",
               }}
             >
               <span className="market-numbers__label">{label}</span>
@@ -195,7 +195,7 @@ function MarketNumbers({ deepIntel, unlocked }) {
             className="market-numbers__row"
             style={{
               borderBottom:
-                i < MARKET_FIELDS.length - 1 ? "1px solid #262626" : "none",
+                i < MARKET_FIELDS.length - 1 ? "1px solid var(--border)" : "none",
             }}
           >
             <span className="market-numbers__label">{label}</span>

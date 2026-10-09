@@ -89,7 +89,7 @@ export default function ConnectsReceipt({ receipt, propertyTitle, recipientLabel
       {/* No deadline is quoted, because there isn't one (§40.15). Requests
           stay open until answered or withdrawn. Never reintroduce a countdown
           here without a real mechanism behind it. */}
-      <p className="text-xs text-[#f0ede8]/60 leading-relaxed max-w-xs mt-5">
+      <p className="text-xs text-text-secondary leading-relaxed max-w-xs mt-5">
         Your request stays open until they reply — there&apos;s no deadline. You
         can withdraw it from your inbox at any time. Connects are spent on
         sending and aren&apos;t returned.
@@ -110,7 +110,7 @@ function ReceiptRow({ label, value, mono = false }) {
   if (!value) return null; // Honest Blank Rule — no "—" placeholders on a receipt.
   return (
     <div className="flex justify-between items-baseline gap-4">
-      <span className="font-mono text-[12px] uppercase tracking-widest text-[#f0ede8]/40 shrink-0">
+      <span className="font-mono text-[12px] uppercase tracking-widest text-text-muted shrink-0">
         {label}
       </span>
       <span className={`text-sm text-white text-right ${mono ? "font-data-tabular" : ""}`}>

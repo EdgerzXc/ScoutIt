@@ -25,6 +25,11 @@ export function distanceKm(lat1, lng1, lat2, lng2) {
   return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** Great-circle distance between two points, in integer metres. */
+export function distanceMeters(lat1, lng1, lat2, lng2) {
+  return Math.round(distanceKm(lat1, lng1, lat2, lng2) * 1000);
+}
+
 /** Kilometres to degrees of longitude at a given latitude. */
 export function kmToLngDeg(km, lat) {
   return km / (111.32 * Math.cos((lat * Math.PI) / 180) || 1);

@@ -90,7 +90,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-count {
           font-family: ${MONO};
           font-size: 12px;
-          color: #6a6a6a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
           white-space: nowrap;
         }
@@ -98,7 +98,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           font-family: var(--font-body);
           font-size: 12.5px;
           line-height: 1.6;
-          color: #8a8a8a;
+          color: var(--text-secondary);
           margin: 0 0 16px;
         }
 
@@ -118,9 +118,9 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           min-height: 36px;
           padding: 0 13px;
           background: transparent;
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border);
           border-radius: 3px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           font-family: ${MONO};
           font-size: 12px;
           letter-spacing: 0.12em;
@@ -142,20 +142,20 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           align-items: center;
           gap: 8px;
           padding-bottom: 8px;
-          border-bottom: 1px solid #1e1e1e;
+          border-bottom: 1px solid var(--border);
           margin-bottom: 4px;
         }
         .wt-layer__label {
           font-family: ${MONO};
           font-size: 12px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           letter-spacing: 0.12em;
           text-transform: uppercase;
         }
         .wt-layer__n {
           font-family: ${MONO};
           font-size: 12px;
-          color: #4a4a4a;
+          color: var(--text-muted);
           margin-left: auto;
         }
 
@@ -165,7 +165,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           align-items: center;
           gap: 12px;
           padding: 11px 0;
-          border-bottom: 1px solid #161616;
+          border-bottom: 1px solid var(--border);
         }
         .wt-row:last-child { border-bottom: none; }
         .wt-row__main { min-width: 0; }
@@ -284,8 +284,8 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           align-items: baseline;
           gap: 12px;
           padding: 14px 0 15px;
-          border-top: 1px solid #1e1e1e;
-          border-bottom: 1px solid #1e1e1e;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
           margin-bottom: 18px;
           flex-wrap: wrap;
         }
@@ -299,7 +299,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-walk__of {
           font-family: ${MONO};
           font-size: 12px;
-          color: #4a4a4a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
           margin-left: -7px;
         }
@@ -307,7 +307,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-walk__label {
           font-family: ${MONO};
           font-size: 12px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           line-height: 1.5;
@@ -316,7 +316,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
           font-family: var(--font-body);
           font-size: 12px;
           line-height: 1.6;
-          color: #6a6a6a;
+          color: var(--text-muted);
           margin-top: 4px;
         }
         /* Low confidence is stated, not styled away. A score computed from
@@ -325,7 +325,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-walk__flag {
           font-family: ${MONO};
           font-size: 12px;
-          color: #e8c84a;
+          color: var(--accent-bright);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-top: 5px;
@@ -334,7 +334,7 @@ export default function WhereToSection({ lat, lng, radiusM = 900, onIsochrone, o
         .wt-source {
           font-family: ${MONO};
           font-size: 12px;
-          color: #4a4a4a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
           margin-top: 14px;
           line-height: 1.7;

@@ -54,7 +54,7 @@ export default function ProviderMode({ type }) {
           </p>
           <div className="flex gap-4 relative z-10">
             <button
-              className="bg-gold-accent text-black font-working-title font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(232,174,60,0.3)] hover:shadow-[0_0_30px_rgba(247,198,78,0.5)] hover:-translate-y-1 transition-all duration-300 ease-out active:scale-95"
+              className="bg-gold-accent text-black font-working-title font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--accent-bright-rgb),0.5)] hover:-translate-y-1 transition-all duration-300 ease-out active:scale-95"
               onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: type?.toLowerCase(), source: "provider-roster" } }))}
             >
               Secure Your Position
@@ -127,7 +127,7 @@ export default function ProviderMode({ type }) {
       {/* Render the specific HUD injected into the master layout */}
       <div className="w-full">
         {USE_MOCK_DATA && quests === MOCK_QUESTS && (
-          <div className="text-sm text-[#e8c84a] bg-[rgba(232,200,74,0.1)] p-3 rounded-md mb-4 border border-[rgba(232,200,74,0.2)]">
+          <div className="text-sm text-gold-accent bg-gold-accent/10 p-3 rounded-md mb-4 border border-gold-accent/20">
             Showing sample bounties — live feed unavailable.
           </div>
         )}

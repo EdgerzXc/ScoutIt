@@ -51,3 +51,33 @@ export function computeListingStrength(listing) {
     passed,
   };
 }
+
+export const MIN_PUBLISH_STRENGTH = 70;
+
+/**
+ * Checks whether a listing passes the 70% completeness minimum required for launch publication.
+ * @param {object} listing UI listing model
+ * @returns {boolean}
+ */
+export function isListingPublishable(listing) {
+  const { score } = computeListingStrength(listing);
+  return score >= MIN_PUBLISH_STRENGTH;
+}
+
+/**
+ * Generates actionable real-time advice for owners to improve visibility and pass the 70% threshold.
+ * @param {object} listing UI listing model
+ * @returns {{ isPublishable: boolean, score: number, missing: string[], suggestions: string[], targetScore: number }}
+ */
+export function getListingStrengthAdvice(listing) {
+  const result = computeListingStrength(listing);
+  const isPublishable = result.score >= MIN_PUBLISH_STRENGTH;
+  const suggestions = result.missing.map((field) => `Add ${field.toLowerCase()} to boost search visibility and listing strength.`);
+  return {
+    isPublishable,
+    score: result.score,
+    missing: result.missing,
+    suggestions,
+    targetScore: MIN_PUBLISH_STRENGTH,
+  };
+}

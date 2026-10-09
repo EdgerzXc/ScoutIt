@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function ShowcasePage() {
   return (
-    <main className="min-h-screen w-full bg-black text-[#f5f3ee] overflow-x-hidden">
+    <main className="min-h-screen w-full bg-[var(--bg)] text-[var(--text-primary)] overflow-x-hidden">
       <ShowcaseStage mode="full" />
     </main>
   );

@@ -107,7 +107,7 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
   const activeItem = feedItems[currentIndex] || feedItems[0];
 
   return (
-    <div className="osint-flash-ticker-bar border border-gold-accent/40 rounded-xs px-4 py-2.5 max-w-[1400px] mx-auto my-4 flex items-center justify-between gap-4 backdrop-blur-md shadow-[0_0_20px_rgba(232,174,60,0.15)] overflow-hidden select-none">
+    <div className="osint-flash-ticker-bar keep-dark border border-gold-accent/40 rounded-xs px-4 py-2.5 max-w-[1400px] mx-auto my-4 flex items-center justify-between gap-4 backdrop-blur-md shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)] overflow-hidden select-none">
       {/* An OSINT terminal ticker is a dark-by-design surface: it is meant to
           read as an instrument panel, and a white ticker bar is not that.
           'bg-black/80' was doing the job in dark mode by accident — the page
@@ -115,15 +115,15 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
           its labels followed the theme to near-black ink (measured 1.11:1).
           So it becomes a proper island: an explicit dark ground plus dark ink
           tokens, in both themes, from one place. Also drops Tailwind's
-          'bg-black' — pure #000 is banned by DESIGN.md 6. */}
+          'bg-black' — pure black is banned by DESIGN.md 6. */}
       <style jsx>{`
         .osint-flash-ticker-bar {
-          background: rgba(14, 14, 14, 0.86);
+          background: rgba(var(--bg-rgb), 0.86);
         }
         :global(body.light-mode) .osint-flash-ticker-bar {
-          --text-primary:   #ffffff;
-          --text-secondary: #d8d4cc;
-          --text-muted:     rgba(255, 255, 255, 0.6);
+          --text-primary:   var(--paper-00, var(--foreground));
+          --text-secondary: var(--paper-02, var(--text-secondary));
+          --text-muted:     rgb(var(--text-primary-ch) / 0.6);
           /* Every ink token needs its '-ch' twin: the Tailwind classes
              (text-text-secondary, text-on-surface, …) resolve through
              'rgb(var(--x-ch) / <alpha>)', NOT through the hex token. Setting
@@ -132,9 +132,9 @@ export default function OSINTFlashTicker({ customFeed = null, onSelectArticle = 
           --text-primary-ch:    255 255 255;
           --text-secondary-ch:  216 212 204;
           --m3-on-surface-ch:   255 255 255;
-          --accent:         #E8AE3C;
+          --accent:         var(--accent-bright);
           --accent-ch:      232 174 60;
-          --surface-variant: rgba(255, 255, 255, 0.18);
+          --surface-variant: rgb(var(--m3-surface-variant-ch) / 0.18);
           --m3-surface-variant-ch: 255 255 255;
           color: var(--text-primary);
         }

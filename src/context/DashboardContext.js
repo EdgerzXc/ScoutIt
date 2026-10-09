@@ -15,6 +15,8 @@ import { trackEvent, GA_EVENTS } from "../lib/analytics";
 import { stripAllTags } from '../lib/sanitize';
 import { assessGeocode } from "../lib/geocodeConfidence";
 import { completenessScoreOf, mapCatalogueListing } from "@/lib/dashboardListings";
+import { sanitizeError } from "../lib/sanitizeError";
+import { distanceKm } from "@/lib/geo";
 
 const DashboardContext = createContext();
 
@@ -72,6 +74,43 @@ function withAuthTimeout(promise, ms = AUTH_RESOLVE_TIMEOUT_MS) {
   ]);
 }
 
+// Helper to map DB row to UI model
+const mapSupabaseProperties = (propertiesData) => {
+  return propertiesData.map(p => ({
+    id: p.id,
+    // Published listings sync to Airtable keyed by slug, and the public
+    // /property/[id] page ONLY ever resolves against the Airtable feed —
+    // it never queries Supabase at all. Every link built from `.id` (the
+    // Supabase UUID) instead of `.slug` was a link to a page that loads
+    // forever, including the owner's own "View Public File" button.
+    slug: p.slug || null,
+    type: p.type,
+    title: p.title,
+    desc: p.description || '',
+    loc: p.location,
+    location: p.location,
+    hasMedia: !!p.media_link,
+    mediaLink: p.media_link || null,
+    price: p.price ?? null,
+    tag: 'LIVE',
+    tagClass: 'bg-gold-accent/20 text-gold-accent',
+    time: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Just now',
+    ownerId: p.owner_id || null,
+    spaceCategory: p.space_category || p.type,
+    details: p.details || {},
+    pipelineStatus: p.pipeline_status || 'pending',
+    lifecycleState: p.lifecycle_state || null,
+    canonicalSlug: p.canonical_slug || p.slug || null,
+    quietlyOpenToOffers: p.quietly_open_to_offers === true,
+    completenessScore: completenessScoreOf(p),
+    verified: !!p.verified,
+    coordinates: p.coordinates || null,
+    signals: {
+      accountAge: null,
+    }
+  }));
+};
+
 export function DashboardProvider({ children }) {
   const [listings, setListings] = useState([]);
   const [pitches, setPitches] = useState([]);
@@ -90,6 +129,93 @@ export function DashboardProvider({ children }) {
   // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
   // promise resolver so publishListing can await the user's answer.
   const [declarationPrompt, setDeclarationPrompt] = useState(null);
+
+  // ── Notifications (persisted — Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) ──
+  // Stable reference (no reactive closures — reads session/localStorage fresh
+  // on each call) so consumers can safely list it in their own hook deps.
+  const authedFetch = useCallback(async (url, options = {}) => {
+    const { data: { session } } = await getSession();
+    const token = session?.access_token;
+    const mockUser = !token && typeof window !== "undefined"
+      ? readDevelopmentMockUser(localStorage, {
+          nodeEnv: process.env.NODE_ENV,
+          hostname: window.location.hostname,
+        })
+      : null;
+    const mockUserId = mockUser?.id || "";
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        "Authorization": token ? `Bearer ${token}` : "",
+        ...(mockUserId ? { "x-mock-user-id": mockUserId } : {})
+      },
+    });
+  }, []);
+
+  const fetchNotifications = async (userId) => {
+    if (!userId) return;
+    try {
+      const res = await authedFetch(`/api/notifications`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setNotifications((data.notifications || []).map(n => ({
+        id: n.id,
+        title: n.title,
+        desc: n.desc,
+        icon: n.icon,
+        read: n.read,
+        propertyId: n.propertyId,
+        notificationType: n.notificationType,
+      })));
+    } catch (e) {
+      console.error("Failed to fetch notifications", e);
+    }
+  };
+
+  const handleUserLogin = async (authUser) => {
+    // Fetch fresh profile data
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single();
+
+    if (!isOnboardingComplete(profile)) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("scoutit_user");
+        setCurrentUser(null);
+        setIsLoading(false);
+        if (window.location.pathname !== "/onboarding") {
+          const returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          window.location.replace(`/onboarding?next=${encodeURIComponent(returnPath)}`);
+        }
+        return false;
+      }
+      return false;
+    }
+
+    const mergedUser = {
+      ...authUser,
+      ...profile,
+      id: authUser.id,
+    };
+    setCurrentUser(mergedUser);
+
+    const role = (profile?.role || "seeker").toLowerCase();
+    const tier = (profile?.subscription_tier || "starry").toLowerCase();
+    initWalletIfEmpty(role, tier);
+    setConnects(getBalance(role, tier));
+
+    // Local Board -> account merge is now an explicit, idempotent action the
+    // user triggers from /wishlist ("Bring your N saved spaces into your
+    // account"), backed by /api/wishlist/merge. The old silent auto-insert on
+    // every login was removed: it ran a naive insert with no de-dup guard
+    // (saved_intel has no unique(user_id, property_id) constraint), so it could
+    // accumulate duplicate rows.
+    fetchNotifications(authUser.id);
+    return true;
+  };
 
   // A dashboard identity is either validated by Supabase Auth or an explicit
   // localhost-only development mock. Browser profile cache is never authority.
@@ -166,93 +292,6 @@ export function DashboardProvider({ children }) {
     return () => subscription?.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleUserLogin = async (authUser) => {
-    // Fetch fresh profile data
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', authUser.id)
-      .single();
-
-    if (!isOnboardingComplete(profile)) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("scoutit_user");
-        setCurrentUser(null);
-        setIsLoading(false);
-        if (window.location.pathname !== "/onboarding") {
-          const returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-          window.location.replace(`/onboarding?next=${encodeURIComponent(returnPath)}`);
-        }
-        return false;
-      }
-      return false;
-    }
-
-    const mergedUser = {
-      ...authUser,
-      ...profile,
-      id: authUser.id,
-    };
-    setCurrentUser(mergedUser);
-
-    const role = (profile?.role || "seeker").toLowerCase();
-    const tier = (profile?.subscription_tier || "starry").toLowerCase();
-    initWalletIfEmpty(role, tier);
-    setConnects(getBalance(role, tier));
-
-    // Local Board -> account merge is now an explicit, idempotent action the
-    // user triggers from /wishlist ("Bring your N saved spaces into your
-    // account"), backed by /api/wishlist/merge. The old silent auto-insert on
-    // every login was removed: it ran a naive insert with no de-dup guard
-    // (saved_intel has no unique(user_id, property_id) constraint), so it could
-    // accumulate duplicate rows.
-    fetchNotifications(authUser.id);
-    return true;
-  };
-
-  // ── Notifications (persisted — Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) ──
-  // Stable reference (no reactive closures — reads session/localStorage fresh
-  // on each call) so consumers can safely list it in their own hook deps.
-  const authedFetch = useCallback(async (url, options = {}) => {
-    const { data: { session } } = await getSession();
-    const token = session?.access_token;
-    const mockUser = !token && typeof window !== "undefined"
-      ? readDevelopmentMockUser(localStorage, {
-          nodeEnv: process.env.NODE_ENV,
-          hostname: window.location.hostname,
-        })
-      : null;
-    const mockUserId = mockUser?.id || "";
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...(options.headers || {}),
-        "Authorization": token ? `Bearer ${token}` : "",
-        ...(mockUserId ? { "x-mock-user-id": mockUserId } : {})
-      },
-    });
-  }, []);
-
-  const fetchNotifications = async (userId) => {
-    if (!userId) return;
-    try {
-      const res = await authedFetch(`/api/notifications`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setNotifications((data.notifications || []).map(n => ({
-        id: n.id,
-        title: n.title,
-        desc: n.desc,
-        icon: n.icon,
-        read: n.read,
-        propertyId: n.propertyId,
-        notificationType: n.notificationType,
-      })));
-    } catch (e) {
-      console.error("Failed to fetch notifications", e);
-    }
-  };
 
   // Fetch from Supabase
   useEffect(() => {
@@ -521,15 +560,9 @@ export function DashboardProvider({ children }) {
     }));
     // Server-side dual-database update (Supabase + Airtable if approved)
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-
-      const res = await fetch("/api/dashboard/update", {
+      const res = await authedFetch("/api/dashboard/update", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": token ? `Bearer ${token}` : ""
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           submissionId: listingId,
           data
@@ -555,11 +588,9 @@ export function DashboardProvider({ children }) {
   // name as an internal compatibility alias for Mission Control callers.
   const closeListing = async (listingId) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || '';
-      const res = await fetch("/api/dashboard/archive", {
+      const res = await authedFetch("/api/dashboard/archive", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submissionId: listingId }),
       });
       const data = await res.json().catch(() => ({}));
@@ -573,7 +604,7 @@ export function DashboardProvider({ children }) {
       return true;
     } catch (err) {
       console.error("Failed to withdraw property", err);
-      addToast(err.message || "Error withdrawing property", "❌");
+      addToast(sanitizeError(err, "Error withdrawing property"), "❌");
       return false;
     }
   };
@@ -612,7 +643,7 @@ export function DashboardProvider({ children }) {
       return true;
     } catch (err) {
       console.error("Failed to permanently remove property", err);
-      addToast(err.message || "Removal could not be completed", "❌");
+      addToast(sanitizeError(err, "Removal could not be completed"), "❌");
       return false;
     }
   };
@@ -646,9 +677,6 @@ export function DashboardProvider({ children }) {
     // that hasn't happened.
     addToast(declaration ? "Syncing to live network..." : "Preparing publication...", "⏳");
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || '';
-
       const body = { submissionId: listingId, userId: currentUser.id };
       if (declaration) {
         body.listerRelationship = declaration.relationship;
@@ -657,12 +685,9 @@ export function DashboardProvider({ children }) {
         body.ownerSovereigntyAgreed = declaration.agreed === true;
       }
 
-      const res = await fetch("/api/dashboard/publish", {
+      const res = await authedFetch("/api/dashboard/publish", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
       const data = await res.json().catch(() => ({}));
@@ -692,12 +717,13 @@ export function DashboardProvider({ children }) {
       return true;
     } catch (err) {
       console.error(err);
-      addToast(err.message || "Failed to publish", "❌");
+      const safeErrorMsg = sanitizeError(err, "Failed to publish");
+      addToast(safeErrorMsg, "❌");
       // If the declaration modal is open behind this, it must come out of its
       // busy state and say what went wrong. A modal stuck on "Publishing…"
       // after a failed request is the error state nobody builds.
       setDeclarationPrompt(prev =>
-        prev ? { ...prev, busy: false, error: err.message || "Failed to publish" } : prev
+        prev ? { ...prev, busy: false, error: safeErrorMsg } : prev
       );
       return false;
     }
@@ -851,15 +877,9 @@ export function DashboardProvider({ children }) {
     
     // Attempt insertion
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-
-      const res = await fetch('/api/dashboard/bulk-insert', {
+      const res = await authedFetch('/api/dashboard/bulk-insert', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          "Authorization": token ? `Bearer ${token}` : ""
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ properties: propertiesArray })
       });
       const data = await res.json();
@@ -973,14 +993,9 @@ export function DashboardProvider({ children }) {
     // (BrokerMode's handleSendPitch) never awaited this function so it always
     // treated the pitch as successful, and no deal was ever actually created.
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-      const res = await fetch('/api/deals/pitch', {
+      const res = await authedFetch('/api/deals/pitch', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ listingId, message }),
       });
       const data = await res.json();
@@ -1036,15 +1051,9 @@ export function DashboardProvider({ children }) {
 
     // Call the edge function for server-side Connect deduction and ledger record
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-
-      const res = await fetch("/api/dashboard/invite", {
+      const res = await authedFetch("/api/dashboard/invite", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": token ? `Bearer ${token}` : ""
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listingId, brokerName, userId: currentUser?.id, role })
       });
       
@@ -1077,7 +1086,7 @@ export function DashboardProvider({ children }) {
       return true;
     } catch (err) {
       console.error(err);
-      addToast(err.message, "❌");
+      addToast(sanitizeError(err, "Failed to send handshake"), "❌");
       return false;
     }
   };
@@ -1085,15 +1094,9 @@ export function DashboardProvider({ children }) {
   const updatePitchStatus = async (pitchId, newStatus) => {
     // Supabase update via Edge Function
     try {
-      const { data: { session } } = await getSession();
-      const token = session?.access_token;
-
-      const res = await fetch("/api/dashboard/deals/update", {
+      const res = await authedFetch("/api/dashboard/deals/update", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": token ? `Bearer ${token}` : ""
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dealId: pitchId, newStatus, userId: currentUser?.id })
       });
       const data = await res.json();
@@ -1116,7 +1119,7 @@ export function DashboardProvider({ children }) {
       return true;
     } catch (err) {
       console.error(err);
-      addToast(err.message, "❌");
+      addToast(sanitizeError(err, "Failed to update deal status"), "❌");
       return false;
     }
   };
@@ -1201,7 +1204,6 @@ export function DashboardProvider({ children }) {
         setListings(allData);
       } else {
         const radius = parseFloat(radiusKm);
-        const toRad = (value) => (value * Math.PI) / 180;
         const filtered = allData.filter(p => {
           if (!p.coordinates) return false;
           
@@ -1211,16 +1213,7 @@ export function DashboardProvider({ children }) {
           const pLng = parseFloat(match[1]);
           const pLat = parseFloat(match[2]);
 
-          const R = 6371; // Earth's radius in km
-          const dLat = toRad(pLat - centerLat);
-          const dLon = toRad(pLng - centerLng);
-          const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(toRad(centerLat)) * Math.cos(toRad(pLat)) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          const distance = R * c;
-          
+          const distance = distanceKm(centerLat, centerLng, pLat, pLng);
           return distance <= radius;
         });
         setListings(filtered);
@@ -1232,45 +1225,6 @@ export function DashboardProvider({ children }) {
     }
   };
 
-  // Helper to map DB row to UI model
-  const mapSupabaseProperties = (propertiesData) => {
-    return propertiesData.map(p => ({
-      id: p.id,
-      // Published listings sync to Airtable keyed by slug, and the public
-      // /property/[id] page ONLY ever resolves against the Airtable feed —
-      // it never queries Supabase at all. Every link built from `.id` (the
-      // Supabase UUID) instead of `.slug` was a link to a page that loads
-      // forever, including the owner's own "View Public File" button.
-      slug: p.slug || null,
-      type: p.type,
-      title: p.title,
-      desc: p.description || '',
-      loc: p.location,
-      location: p.location,
-      hasMedia: !!p.media_link,
-      mediaLink: p.media_link || null,
-      price: p.price ?? null,
-      tag: 'LIVE',
-      tagClass: 'bg-gold-accent/20 text-gold-accent',
-      time: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Just now',
-      ownerId: p.owner_id || null,
-      spaceCategory: p.space_category || p.type,
-      details: p.details || {},
-      pipelineStatus: p.pipeline_status || 'pending',
-      lifecycleState: p.lifecycle_state || null,
-      canonicalSlug: p.canonical_slug || p.slug || null,
-      quietlyOpenToOffers: p.quietly_open_to_offers === true,
-      completenessScore: completenessScoreOf(p),
-      verified: !!p.verified,
-      coordinates: p.coordinates || null,
-      signals: {
-        // A-081: `ownerAge`/`ownerAgeClass` had no consumer and were pre-styled
-        // green; the completeness string here was a number nobody measured.
-        // Owner tenure is not recorded anywhere yet, so it is reported absent.
-        accountAge: null,
-      }
-    }));
-  };
 
   return (
     <DashboardContext.Provider value={{

@@ -74,11 +74,11 @@ export default function CookieConsent() {
         zIndex: 9500,
         maxWidth: 520,
         margin: "0 auto",
-        background: "#0d0d0d",
-        border: "1px solid var(--accent-muted, #6E531A)",
+        background: "var(--surface)",
+        border: "1px solid var(--border-solid, var(--accent-muted))",
         borderRadius: 8,
         padding: "16px 18px",
-        boxShadow: "0 18px 50px rgba(0,0,0,0.6)",
+        boxShadow: "0 18px 50px rgba(var(--bg-rgb),0.6)",
       }}
     >
       <p
@@ -88,12 +88,12 @@ export default function CookieConsent() {
           fontSize: 12,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
-          color: "var(--accent, var(--accent))",
+          color: "var(--accent)",
         }}
       >
         Cookies
       </p>
-      <p style={{ margin: "0 0 12px", fontSize: 13, lineHeight: 1.6, color: "#c8c8c8" }}>
+      <p style={{ margin: "0 0 12px", fontSize: 13, lineHeight: 1.6, color: "var(--text-secondary)" }}>
         ScoutIt keeps a device identifier on this browser and, when enabled,
         measures visits with Google Analytics. Details in our{" "}
         <a
@@ -113,8 +113,8 @@ export default function CookieConsent() {
           style={{
             flex: 1,
             background: "transparent",
-            border: "1px solid #3a3a3a",
-            color: "#c8c8c8",
+            border: "1px solid var(--border)",
+            color: "var(--text-secondary)",
             borderRadius: 6,
             padding: "10px 12px",
             fontSize: 12,
@@ -131,9 +131,9 @@ export default function CookieConsent() {
           onClick={() => choose(true)}
           style={{
             flex: 1,
-            background: "var(--accent, var(--accent))",
+            background: "var(--accent-fill, var(--accent))",
             border: "none",
-            color: "#0d0d0d",
+            color: "var(--on-accent)",
             borderRadius: 6,
             padding: "10px 12px",
             fontSize: 12,

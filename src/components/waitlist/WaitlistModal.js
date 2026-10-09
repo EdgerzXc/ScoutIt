@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import useModalDialog from "@/components/ui/useModalDialog";
 import { joinWaitlist } from "@/lib/waitlist";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import styles from "./WaitlistModal.module.css";
@@ -27,6 +28,7 @@ export default function WaitlistModal() {
   const [error, setError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const turnstileRef = useRef(null);
+  const dialogRef = useRef(null);
 
   const reset = useCallback(() => {
     setEmail("");
@@ -50,11 +52,7 @@ export default function WaitlistModal() {
     return () => window.removeEventListener(OPEN_EVENT, onOpen);
   }, [reset]);
 
-  useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
-    if (open) window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  useModalDialog(dialogRef, { active: open, onClose: () => setOpen(false) });
 
   if (!open) return null;
 
@@ -79,11 +77,14 @@ export default function WaitlistModal() {
     <div
       className={`${styles.backdrop} fixed inset-0 z-[100001] flex items-center justify-center p-5 bg-background/70 backdrop-blur-md`}
       onClick={(e) => e.target === e.currentTarget && setOpen(false)}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Join the founding waitlist"
     >
-      <div className={`${styles.panel} relative w-full max-w-[440px] bg-surface border border-gold-accent/30 rounded-2xl px-7 pt-8 pb-7`}>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Join the founding waitlist"
+        className={`${styles.panel} relative w-full max-w-[440px] bg-surface border border-gold-accent/30 rounded-2xl px-7 pt-8 pb-7`}
+      >
         <button className="absolute top-3.5 right-4 bg-transparent border-none text-on-surface/70 text-base cursor-pointer leading-none p-1 hover:text-on-surface/70" onClick={() => setOpen(false)} aria-label="Close">✕</button>
 
         <span className="block font-label-caps text-[12px] tracking-widest uppercase text-gold-accent mb-3.5">◈ Founding Access</span>

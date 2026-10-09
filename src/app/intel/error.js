@@ -20,8 +20,8 @@ export default function IntelError({ error, reset }) {
   const reference = errorReference(error);
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-6 py-16 bg-[#0d0d0d]">
-      <div className="max-w-md w-full text-center p-8 rounded-2xl bg-[#141414] border border-white/10 shadow-2xl" role="alert">
+    <div className="min-h-[70vh] flex items-center justify-center px-6 py-16 bg-[var(--bg)]">
+      <div className="max-w-md w-full text-center p-8 rounded-2xl bg-[var(--surface)] border border-white/10 shadow-2xl" role="alert">
         <div className="flex justify-center mb-4">
           <ScoutItMark size={40} />
         </div>
@@ -38,7 +38,7 @@ export default function IntelError({ error, reset }) {
           <button
             type="button"
             onClick={() => reset()}
-            className="bg-[var(--accent)] hover:bg-[var(--accent-bright)] text-[#0d0d0d] font-bold text-sm px-6 py-3 rounded-full transition-colors cursor-pointer"
+            className="bg-[var(--accent)] hover:bg-[var(--accent-bright)] text-[var(--on-accent)] font-bold text-sm px-6 py-3 rounded-full transition-colors cursor-pointer"
           >
             Retry Loading
           </button>

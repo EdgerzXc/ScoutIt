@@ -279,6 +279,50 @@ export function buildPromoPack(property, link) {
   return { fastPitch, executiveSummary, editorialHook };
 }
 
+/**
+ * Generates rich messaging dispatches optimized for WhatsApp and Viber.
+ * Strictly adheres to RESA RA 9646: zero monetary values/prices.
+ *
+ * @param {object} property
+ * @param {string} url
+ * @param {{ platform?: 'whatsapp'|'viber' }} options
+ * @returns {string}
+ */
+export function buildMessagingDispatch(property, url, { platform = 'whatsapp' } = {}) {
+  const f = extractFacts(property);
+  const specs = factSpecs(f);
+  const safeLink = url || "";
+  const loc = f.location ? f.location : "Philippines";
+
+  if (platform === "whatsapp") {
+    return [
+      `*SCOUTIT SPACE BRIEFING*`,
+      `*${f.title}*`,
+      `_${f.category} in ${loc}_`,
+      ``,
+      `*Verified Signals:*`,
+      ...specs.map((s) => `• ${s.charAt(0).toUpperCase() + s.slice(1)}`),
+      ``,
+      `*Private Dossier & Viewing RSVP:*`,
+      `${safeLink}`,
+      ``,
+      `_ScoutIt Space Intelligence Platform_`,
+    ].join("\n");
+  }
+
+  return [
+    `SCOUTIT SPACE BRIEFING: ${f.title}`,
+    `Location: ${loc}`,
+    `Category: ${f.category}`,
+    ``,
+    `Key Specifications:`,
+    ...specs.map((s) => `• ${s.charAt(0).toUpperCase() + s.slice(1)}`),
+    ``,
+    `View verified dossier & book private viewing:`,
+    `${safeLink}`,
+  ].join("\n");
+}
+
 // Progressively shorter shapes, tried in order until one fits the limit.
 // Each one still states only facts the listing carries.
 function buildTightText(property, url, shapes) {

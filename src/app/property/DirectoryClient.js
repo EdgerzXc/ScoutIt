@@ -16,7 +16,7 @@ import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import dynamic from "next/dynamic";
 const InteractiveRadiusMap = dynamic(() => import("@/components/property/InteractiveRadiusMap"), { 
   ssr: false, 
-  loading: () => <div style={{ height: 400, background: "#121212", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING RADAR...</span></div>
+  loading: () => <div style={{ height: 400, background: "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING RADAR...</span></div>
 });
 
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
@@ -625,7 +625,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
             <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
               {/* Contextual Intelligence Insight Strip */}
               {widgetArticles.length > 0 && (
-                <div className="mb-4 p-3 rounded-xl bg-surface/80 border border-gold-accent/20 backdrop-blur-md flex items-center justify-between gap-3 text-xs shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                <div className="mb-4 p-3 rounded-xl bg-surface/80 border border-gold-accent/20 backdrop-blur-md flex items-center justify-between gap-3 text-xs shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     <span className="font-mono text-[12px] tracking-widest uppercase text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/30 shrink-0 font-bold">
                       District Intel

@@ -25,11 +25,11 @@ export default function ActiveDetourHud({
         top: "0",
         zIndex: 40,
         width: "100%",
-        background: "rgba(18, 14, 24, 0.88)",
+        background: "rgba(var(--bg-rgb), 0.88)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(232, 174, 60, 0.25)",
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+        borderBottom: "1px solid rgba(var(--accent-rgb), 0.25)",
+        boxShadow: "0 4px 20px rgba(var(--bg-rgb), 0.4)",
         animation: "riseIn 0.3s ease",
       }}
     >
@@ -55,9 +55,9 @@ export default function ActiveDetourHud({
               width: "28px",
               height: "28px",
               borderRadius: "4px",
-              background: "rgba(232, 174, 60, 0.15)",
-              border: "1px solid rgba(232, 174, 60, 0.3)",
-              color: "#F7C64E",
+              background: "rgba(var(--accent-rgb), 0.15)",
+              border: "1px solid rgba(var(--accent-rgb), 0.3)",
+              color: "var(--accent-bright)",
               flexShrink: 0,
             }}
           >
@@ -75,19 +75,19 @@ export default function ActiveDetourHud({
                 fontWeight: 600,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "#E8AE3C",
+                color: "var(--accent)",
               }}
             >
               <span>Layer 02 Detour Active</span>
               <span style={{ opacity: 0.4 }}>·</span>
-              <span style={{ color: "rgba(240, 237, 232, 0.7)" }}>Resolution Mode</span>
+              <span style={{ color: "rgba(var(--text-primary-rgb), 0.7)" }}>Resolution Mode</span>
             </div>
 
             <div
               style={{
                 fontFamily: "var(--font-body)",
                 fontSize: "13.5px",
-                color: "#f7f5f0",
+                color: "var(--text-primary)",
                 display: "flex",
                 alignItems: "center",
                 gap: "6px",
@@ -96,10 +96,10 @@ export default function ActiveDetourHud({
                 textOverflow: "ellipsis",
               }}
             >
-              <Building2 size={13} style={{ color: "#F7C64E", flexShrink: 0 }} />
+              <Building2 size={13} style={{ color: "var(--accent-bright)", flexShrink: 0 }} />
               <span style={{ fontWeight: 500 }}>{displayTitle}</span>
               {relationReason && (
-                <span style={{ color: "rgba(240, 237, 232, 0.5)", fontSize: "12px" }}>
+                <span style={{ color: "rgba(var(--text-primary-rgb), 0.5)", fontSize: "12px" }}>
                   ({relationReason})
                 </span>
               )}
@@ -115,9 +115,9 @@ export default function ActiveDetourHud({
             display: "inline-flex",
             alignItems: "center",
             gap: "6px",
-            background: "rgba(240, 237, 232, 0.08)",
-            border: "1px solid rgba(240, 237, 232, 0.15)",
-            color: "#f7f5f0",
+            background: "rgba(var(--text-primary-rgb), 0.08)",
+            border: "1px solid rgba(var(--text-primary-rgb), 0.15)",
+            color: "var(--text-primary)",
             fontFamily: "var(--font-mono)",
             fontSize: "12px",
             fontWeight: 600,
@@ -125,12 +125,12 @@ export default function ActiveDetourHud({
             textTransform: "uppercase",
             padding: "6px 12px",
             borderRadius: "4px",
-            transition: "all 0.15s ease",
+            transition: "color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease",
             flexShrink: 0,
           }}
           className="tactile"
         >
-          <RotateCcw size={12} style={{ color: "#E8AE3C" }} />
+          <RotateCcw size={12} style={{ color: "var(--accent)" }} />
           <span>Return to Listing</span>
         </Link>
       </div>

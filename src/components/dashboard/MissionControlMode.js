@@ -104,7 +104,7 @@ function SectionEditorRow({ listing, colSpan, onClose }) {
   }, [listing.id]);
 
   return (
-    <tr className="bg-[rgba(255,255,255,0.02)]">
+    <tr className="bg-[rgba(var(--text-primary-rgb),0.02)]">
       <td colSpan={colSpan} className="px-4 py-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent">
@@ -439,7 +439,7 @@ export default function MissionControlMode() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-6 auto-rows-[minmax(160px,auto)]">
               
               {/* Hero Metric: Company Health (2x2) */}
-              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/[0.04] hover:border-gold-accent/30 transition-all duration-300 ease-out shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_40px_rgba(232,174,60,0.15)] bg-surface/40 backdrop-blur-xl">
+              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/[0.04] hover:border-gold-accent/30 transition-all duration-300 ease-out shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_40px_rgba(var(--accent-rgb),0.15)] bg-surface/40 backdrop-blur-xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-200 -translate-y-1/2 translate-x-1/3" />
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
                 
@@ -466,7 +466,7 @@ export default function MissionControlMode() {
                     </div>
                   )}
                   <div className="mt-6 flex items-center gap-4 text-xs text-text-secondary">
-                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> {kpis.approved} live {kpis.approved === 1 ? "listing" : "listings"}</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_color-mix(in_srgb,var(--green)_50%,transparent)]"></span> {kpis.approved} live {kpis.approved === 1 ? "listing" : "listings"}</span>
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-gold-accent shadow-[0_0_8px_rgba(var(--accent-rgb),0.5)]"></span> {weakListings.length} need{weakListings.length === 1 ? "s" : ""} attention</span>
                   </div>
                 </div>
@@ -474,14 +474,14 @@ export default function MissionControlMode() {
 
               {/* Standard KPI Cards (1x1) */}
               {[
-                { label: "Active Portfolio", value: kpis.total, glow: "rgba(59,130,246,0.1)", onClick: () => setActiveTab("portfolio"), icon: Building2 },
-                { label: "Broker Pitches", value: kpis.newLeads.toString(), glow: "rgba(16,185,129,0.1)", onClick: () => setActiveTab("crm"), icon: Users },
+                { label: "Active Portfolio", value: kpis.total, glow: "color-mix(in srgb, var(--sapphire) 10%, transparent)", onClick: () => setActiveTab("portfolio"), icon: Building2 },
+                { label: "Broker Pitches", value: kpis.newLeads.toString(), glow: "color-mix(in srgb, var(--green) 10%, transparent)", onClick: () => setActiveTab("crm"), icon: Users },
                 { label: "In Pipeline", value: kpis.pending, glow: "rgba(var(--accent-bright-rgb),0.1)", onClick: () => setActiveTab("projects"), icon: ClipboardList },
-                { label: "Team Seats", value: "—", glow: "rgba(255,255,255,0.05)", onClick: () => setActiveTab("team"), actionText: "Set up", icon: UsersRound },
+                { label: "Team Seats", value: "—", glow: "rgba(var(--text-primary-rgb),0.05)", onClick: () => setActiveTab("team"), actionText: "Set up", icon: UsersRound },
               ].map((kpi) => (
                 <GlassPanel 
                   key={kpi.label} 
-                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 ease-out relative group overflow-hidden bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${kpi.onClick ? 'cursor-pointer border-white/[0.04] hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70' : 'border-white/[0.04]'}`} 
+                  className={`md:col-span-1 md:row-span-1 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 ease-out relative group overflow-hidden bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] ${kpi.onClick ? 'cursor-pointer border-white/[0.04] hover:border-white/20 shadow-lg hover:shadow-[0_8px_30px_rgba(var(--text-primary-rgb),0.05)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70' : 'border-white/[0.04]'}`} 
                   glowColor={kpi.glow}
                   onClick={kpi.onClick}
                   role={kpi.onClick ? "button" : undefined}
@@ -508,7 +508,7 @@ export default function MissionControlMode() {
               ))}
 
               {/* Wide Card: Recent Activity (2x1) */}
-              <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/10 transition-all duration-300 ease-out flex flex-col justify-center bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <GlassPanel className="md:col-span-2 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/10 transition-all duration-300 ease-out flex flex-col justify-center bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center">
                     <Activity className="text-gold-accent" size={14} />
@@ -524,7 +524,7 @@ export default function MissionControlMode() {
               </GlassPanel>
 
               {/* Schedule (1x2) */}
-              <GlassPanel className="md:col-span-1 md:row-span-2 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <GlassPanel className="md:col-span-1 md:row-span-2 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]">
                 <div className="flex items-center gap-2 mb-6">
                   <CalendarDays className="text-gold-accent opacity-80" size={18} />
                   <h4 className="text-white font-medium text-sm">Today&apos;s Schedule</h4>
@@ -546,7 +546,7 @@ export default function MissionControlMode() {
               {/* System Alerts (1x1) */}
               <GlassPanel 
                 onClick={() => setActiveTab("projects")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-red-500/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(239,68,68,0.15)]"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-red-500/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_color-mix(in_srgb,var(--red)_15%,transparent)]"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition duration-200 -translate-y-1/2 translate-x-1/2" />
                 <div className="flex items-center justify-between mb-4 relative z-10">
@@ -576,7 +576,7 @@ export default function MissionControlMode() {
               {/* Inventory Overview (1x1) */}
               <GlassPanel 
                 onClick={() => setActiveTab("inventory")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <Warehouse className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
@@ -595,7 +595,7 @@ export default function MissionControlMode() {
               {/* Active Projects (1x1) */}
               <GlassPanel
                 onClick={() => setActiveTab("projects")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <HardHat className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
@@ -611,7 +611,7 @@ export default function MissionControlMode() {
               {/* Occupancy (1x1) — live unit data */}
               <GlassPanel
                 onClick={() => setActiveTab("inventory")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <Activity className="text-text-secondary group-hover:text-emerald-400 transition duration-300" size={18} />
@@ -634,7 +634,7 @@ export default function MissionControlMode() {
               {/* Connections (1x1) — live deal chatboxes */}
               <GlassPanel
                 onClick={() => setActiveTab("crm")}
-                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <Users className="text-text-secondary group-hover:text-blue-400 transition duration-300" size={18} />
@@ -696,7 +696,7 @@ export default function MissionControlMode() {
             </div>
 
       {/* Property table */}
-      <GlassPanel className="rounded-2xl overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/[0.04] mt-4 bg-surface/40 backdrop-blur-xl">
+      <GlassPanel className="rounded-2xl overflow-hidden shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] border border-white/[0.04] mt-4 bg-surface/40 backdrop-blur-xl">
         <div className="px-5 py-4 border-b border-white/[0.04] bg-white/[0.02] flex justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent">
@@ -737,7 +737,7 @@ export default function MissionControlMode() {
                   const isSelected = selectedIds.has(l.id);
                   const isEditing = editingId === l.id;
                   return [
-                    <tr key={l.id} className={`border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.02)] transition ${isSelected ? "bg-[rgba(var(--accent-bright-rgb),0.05)]" : ""}`}>
+                    <tr key={l.id} className={`border-b border-[rgba(var(--text-primary-rgb),0.05)] hover:bg-[rgba(var(--text-primary-rgb),0.02)] transition ${isSelected ? "bg-[rgba(var(--accent-bright-rgb),0.05)]" : ""}`}>
                       <td className="px-4 py-2.5">
                         <input
                           type="checkbox"
@@ -949,7 +949,7 @@ export default function MissionControlMode() {
         ) : activeTab === "finance" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[12px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">Enterprise Console • Finance</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_color-mix(in_srgb,var(--green)_50%,transparent)]">Enterprise Console • Finance</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Financial Hub</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Your Connects balance and money movement — live once billing is switched on.
@@ -959,7 +959,7 @@ export default function MissionControlMode() {
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
                 <h4 className="text-white font-medium text-sm mb-6 relative z-10">Connects Balance</h4>
-                <div className="text-5xl text-emerald-400 font-display-md tracking-tighter mt-auto mb-2 relative z-10 drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">{connects ?? 0}</div>
+                <div className="text-5xl text-emerald-400 font-display-md tracking-tighter mt-auto mb-2 relative z-10 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--green)_30%,transparent)]">{connects ?? 0}</div>
                 <div className="text-text-secondary text-xs font-mono font-medium relative z-10">Available for operations</div>
               </GlassPanel>
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col relative overflow-hidden">
@@ -985,7 +985,7 @@ export default function MissionControlMode() {
         ) : activeTab === "analytics" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6 overflow-y-auto pb-6 custom-scrollbar">
             <div>
-              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • Analytics</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_color-mix(in_srgb,var(--sapphire)_50%,transparent)]">Enterprise Console • Analytics</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Market Intelligence</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 How the market moves around your assets. Charts below are sample previews until live data connects.
@@ -1014,17 +1014,17 @@ export default function MissionControlMode() {
                 <div className="relative z-10 flex-1 w-full h-full border-b border-l border-white/10 mt-2 pb-6 pl-2">
                    <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
                      {/* Grid lines */}
-                     <line x1="0" y1="10" x2="100" y2="10" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                     <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                     <line x1="0" y1="30" x2="100" y2="30" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+                     <line x1="0" y1="10" x2="100" y2="10" stroke="rgba(var(--text-primary-rgb),0.05)" strokeWidth="0.5" />
+                     <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(var(--text-primary-rgb),0.05)" strokeWidth="0.5" />
+                     <line x1="0" y1="30" x2="100" y2="30" stroke="rgba(var(--text-primary-rgb),0.05)" strokeWidth="0.5" />
                      
                      {/* BGC Line */}
-                     <polyline points="0,35 20,30 40,22 60,15 80,12 100,8" fill="none" stroke="#e8ae3c" strokeWidth="1.5" className="drop-shadow-[0_0_5px_rgba(232,174,60,0.5)]" />
-                     <circle cx="100" cy="8" r="1.5" fill="#e8ae3c" />
+                     <polyline points="0,35 20,30 40,22 60,15 80,12 100,8" fill="none" stroke="var(--accent)" strokeWidth="1.5" className="drop-shadow-[0_0_5px_rgba(var(--accent-rgb),0.5)]" />
+                     <circle cx="100" cy="8" r="1.5" fill="var(--accent)" />
                      
                      {/* Makati Line */}
-                     <polyline points="0,32 20,28 40,26 60,20 80,18 100,16" fill="none" stroke="#3b82f6" strokeWidth="1.5" className="drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
-                     <circle cx="100" cy="16" r="1.5" fill="#3b82f6" />
+                     <polyline points="0,32 20,28 40,26 60,20 80,18 100,16" fill="none" stroke="var(--sapphire)" strokeWidth="1.5" className="drop-shadow-[0_0_5px_color-mix(in_srgb,var(--sapphire)_50%,transparent)]" />
+                     <circle cx="100" cy="16" r="1.5" fill="var(--sapphire)" />
                    </svg>
                    <div className="absolute -bottom-1 left-2 right-0 flex justify-between text-[12px] text-text-secondary font-mono">
                      <span>2022</span>
@@ -1117,7 +1117,7 @@ export default function MissionControlMode() {
         ) : activeTab === "ai" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">Enterprise Console • AI</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_color-mix(in_srgb,var(--sapphire)_50%,transparent)]">Enterprise Console • AI</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 Where AI works for your portfolio — drafting dossiers now, portfolio Q&amp;A next.
@@ -1268,7 +1268,7 @@ export default function MissionControlMode() {
                         className="flex items-center gap-2 cursor-pointer w-fit text-left"
                       >
                         <div className={`w-8 h-4 rounded-full relative transition duration-300 ${is2FAEnforced ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
-                          <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'left-0 bg-white/40'}`} />
+                          <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_color-mix(in_srgb,var(--green)_50%,transparent)]' : 'left-0 bg-white/40'}`} />
                         </div>
                         <span className={`text-xs ${is2FAEnforced ? 'text-emerald-400' : 'text-text-secondary'}`}>
                           {is2FAEnforced ? 'Enforced' : 'Optional'}

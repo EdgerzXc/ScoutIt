@@ -52,7 +52,7 @@ export default function ProfessionalDirectorySkeleton({ category = "broker" }) {
                   <span style={{ opacity: 0.3 }}>◈</span>
                 </div>
                 <div className={styles.cardBody}>
-                  <div className={styles.location} style={{ width: "80px", height: "14px", background: "rgba(232, 174, 60, 0.15)", borderRadius: "2px" }} />
+                  <div className={styles.location} style={{ width: "80px", height: "14px", background: "rgba(var(--accent-rgb), 0.15)", borderRadius: "2px" }} />
                   <div className={styles.skeletonLine} style={{ width: "65%", height: "28px", marginTop: "8px" }} />
                   <div className={styles.skeletonLine} style={{ width: "45%", height: "14px", marginTop: "10px" }} />
                   <div className={styles.skeletonLine} style={{ width: "100%", height: "48px", marginTop: "16px" }} />

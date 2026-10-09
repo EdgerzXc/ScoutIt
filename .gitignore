@@ -47,6 +47,8 @@ yarn-error.log*
 # stay ignored; verify with: git check-ignore -v .env.local
 !.env.example
 .vercel/
+/supabase/.temp/
+/supabase/.branches/
 
 # Reference assets and local tool state
 /reference/

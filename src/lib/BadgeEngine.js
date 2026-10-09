@@ -13,7 +13,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 20,
     claimed: 14, // Mocked for now; in production, this is queried from Supabase
     status: "ACTIVE", // ACTIVE | SOLD_OUT | EXPIRED
-    color: "#60A5FA", // Sapphire Blue
+    color: "var(--intel-blue, var(--sapphire))", // Sapphire Blue
     perks: {
       discount: true,
       priority_support: true
@@ -26,7 +26,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 20,
     claimed: 8,
     status: "ACTIVE",
-    color: "#34D399", // Emerald Green
+    color: "var(--green)", // Emerald Green
     perks: {
       discount: true,
       priority_support: true
@@ -39,7 +39,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 20,
     claimed: 19,
     status: "ACTIVE",
-    color: "#0d0d0d", // Obsidian Black
+    color: "var(--bg)", // Obsidian Black
     perks: {
       discount: true,
       priority_support: true
@@ -52,7 +52,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 100,
     claimed: 100,
     status: "SOLD_OUT",
-    color: "#E8AE3C", // ScoutIt Gold
+    color: "var(--accent)", // ScoutIt Gold
     perks: {
       free_access: true
     }
@@ -64,7 +64,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 5,
     claimed: 5,
     status: "SOLD_OUT",
-    color: "#F87171", // Ruby Red
+    color: "var(--red)", // Ruby Red
     perks: {
       admin_access: true
     }
@@ -118,7 +118,7 @@ export const TRUST_BADGES = {
     badgeType: "trust",
     description: "Property authority, corporate registration, and ownership verified directly with land title records.",
     criteria: "Owner government ID, notarized deed/authority, and corporate registration submitted.",
-    color: "#E8AE3C"
+    color: "var(--accent)"
   },
   AVAILABILITY_CONFIRMED: {
     id: "AVAILABILITY_CONFIRMED",
@@ -127,7 +127,7 @@ export const TRUST_BADGES = {
     badgeType: "trust",
     description: "Unit inventory and lease availability as last confirmed by the owner or listing broker.",
     criteria: "Owner or authorized listing broker confirms current unit status.",
-    color: "#34D399"
+    color: "var(--green)"
   },
   FLOOR_PLAN_VERIFIED: {
     id: "FLOOR_PLAN_VERIFIED",
@@ -136,7 +136,7 @@ export const TRUST_BADGES = {
     badgeType: "trust",
     description: "Architectural dimensions and unit measurements verified against CAD blueprints.",
     criteria: "Architectural CAD drawings, measurement scan, or as-built plan verified.",
-    color: "#60A5FA"
+    color: "var(--intel-blue, var(--sapphire))"
   },
   IDENTITY_VERIFIED: {
     id: "IDENTITY_VERIFIED",
@@ -145,7 +145,7 @@ export const TRUST_BADGES = {
     badgeType: "trust",
     description: "Professional PRC broker license or company officer credentials verified.",
     criteria: "PRC real estate broker license or government corporate filings validated.",
-    color: "#A78BFA"
+    color: "var(--intel-purple, var(--amethyst))"
   },
   AUTHORIZED_REPRESENTATION: {
     id: "AUTHORIZED_REPRESENTATION",
@@ -154,7 +154,7 @@ export const TRUST_BADGES = {
     badgeType: "trust",
     description: "Direct written representation agreement signed between owner and broker.",
     criteria: "Mutual digital handshake or exclusive/non-exclusive authority letter on file.",
-    color: "#F472B6"
+    color: "var(--intel-pink, var(--red))"
   }
 };
 

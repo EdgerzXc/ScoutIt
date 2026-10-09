@@ -2,20 +2,10 @@ import manilaStations from "../data/manila_transit_stations.json";
 import pezaZonesData from "../data/peza_zones_philippines.json";
 import phivolcsFaults from "../data/phivolcs_active_faults.json";
 import infraProjectsData from "../data/ph_infrastructure_projects.json";
+import { distanceMeters } from "./geo";
 
-// ─── Haversine distance in meters ────────────────────────────────────────────
-function haversineMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-}
+// ─── Haversine distance in meters (canonical implementation in ./geo) ───────
+const haversineMeters = distanceMeters;
 
 // ─── Point-to-segment perpendicular distance (meters) ────────────────────────
 // Projects point P onto segment A→B and returns shortest distance (clamped to endpoints).
@@ -188,7 +178,7 @@ export function checkInfraProximity(lat, lon) {
 
 // ─── Business Continuity & Spatial Risk Index (0-100) ────────────────────────
 export function computeContinuityScore(spatialIntel) {
-  if (!spatialIntel) return { score: 75, grade: "Tier 2 Prime Commercial", badge_color: "#F7C64E" };
+  if (!spatialIntel) return { score: 75, grade: "Tier 2 Prime Commercial", badge_color: "var(--accent-bright)" };
 
   let score = 50;
 
@@ -210,7 +200,7 @@ export function computeContinuityScore(spatialIntel) {
   return {
     score: finalScore,
     grade: finalScore >= 90 ? "Tier 1 Enterprise Grade" : finalScore >= 75 ? "Tier 2 Prime Commercial" : "Standard Commercial Zone",
-    badge_color: finalScore >= 90 ? "#10B981" : finalScore >= 75 ? "#F7C64E" : "#888888",
+    badge_color: finalScore >= 90 ? "var(--green)" : finalScore >= 75 ? "var(--accent-bright)" : "var(--text-muted)",
   };
 }
 

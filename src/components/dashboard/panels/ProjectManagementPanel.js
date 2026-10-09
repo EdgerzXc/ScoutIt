@@ -92,14 +92,14 @@ export default function ProjectManagementPanel({ properties = [] }) {
             {/* Progress Bar Background */}
             <div className="absolute top-8 left-0 w-full h-1 bg-white/10 rounded-full"></div>
             {/* Active Progress Bar */}
-            <div className="absolute top-8 left-0 w-[55%] h-1 bg-gold-accent rounded-full shadow-[0_0_10px_rgba(232,174,60,0.5)]"></div>
+            <div className="absolute top-8 left-0 w-[55%] h-1 bg-gold-accent rounded-full shadow-[0_0_10px_rgba(var(--accent-rgb),0.5)]"></div>
 
             <div className="relative flex justify-between">
               {SAMPLE_MILESTONES.map((milestone, idx) => (
               <div key={milestone.id} className="flex flex-col items-center gap-3 w-24 relative -ml-12 first:ml-0 last:-mr-12">
                 <div className={`w-4 h-4 rounded-full z-10 border-2 ${
-                  milestone.status === 'completed' ? 'bg-gold-accent border-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.8)]' : 
-                  milestone.status === 'in-progress' ? 'bg-black border-gold-accent shadow-[0_0_8px_rgba(232,174,60,0.8)]' :
+                  milestone.status === 'completed' ? 'bg-gold-accent border-gold-accent shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)]' : 
+                  milestone.status === 'in-progress' ? 'bg-black border-gold-accent shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)]' :
                   'bg-black border-white/20'
                 }`}></div>
                 <div className="text-center">

@@ -103,6 +103,32 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     }
   }, [isResizing]);
 
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (e.changedTouches && e.changedTouches.length === 1) {
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+      // Predominant horizontal swipe with 50px release threshold
+      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5 && Math.abs(deltaX) > 50) {
+        if (deltaX < -50 && mobileTab === "editor") {
+          setMobileTab("preview");
+        } else if (deltaX > 50 && mobileTab === "preview") {
+          setMobileTab("editor");
+        }
+      }
+    }
+  }, [mobileTab]);
+
   useEffect(() => {
     if (isResizing) {
       window.addEventListener("mousemove", resize);
@@ -346,6 +372,8 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       onDragEnter={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <input 
         type="file" 
@@ -354,20 +382,43 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         onChange={handleFileUpload} 
         aria-label="Upload PDF"
       />
-      {/* Mobile Tab Bar */}
-      <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
-        <button 
-          onClick={() => setMobileTab('editor')}
-          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+      {/* Mobile Responsive Mode Toggle (Floating Capsule Pill) */}
+      <div className="md:hidden sticky top-0 z-50 px-4 py-2 bg-surface/95 backdrop-blur-md border-b border-surface-variant flex items-center justify-between gap-3">
+        <div className="relative flex items-center bg-surface-alt border border-surface-variant rounded-full p-1 flex-1 max-w-xs mx-auto shadow-md">
+          {/* Sliding indicator pill */}
+          <div 
+            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none bg-gold-accent/20 border border-gold-accent/50 ${
+              mobileTab === 'preview' ? 'translate-x-[calc(100%+8px)]' : 'translate-x-0'
+            }`}
+          />
+          <button 
+            type="button"
+            onClick={() => setMobileTab('editor')}
+            className={`relative z-10 flex-1 min-h-9 py-1 text-xs font-label-caps tracking-wider uppercase text-center transition ${
+              mobileTab === 'editor' ? 'text-gold-accent font-bold' : 'text-text-secondary hover:text-on-surface'
+            }`}
+          >
+            📝 Spec Sheet
+          </button>
+          <button 
+            type="button"
+            onClick={() => setMobileTab('preview')}
+            className={`relative z-10 flex-1 min-h-9 py-1 text-xs font-label-caps tracking-wider uppercase text-center transition ${
+              mobileTab === 'preview' ? 'text-gold-accent font-bold' : 'text-text-secondary hover:text-on-surface'
+            }`}
+          >
+            👁️ Live Dossier
+          </button>
+        </div>
+        
+        {/* Dynamic Completeness Badge with tactile micro-interaction */}
+        <div 
+          className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-surface-variant bg-surface-alt"
+          title={`${completionPercentage}% completeness`}
         >
-          Editor
-        </button>
-        <button 
-          onClick={() => setMobileTab('preview')}
-          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
-        >
-          Live Preview
-        </button>
+          <div className={`w-2 h-2 rounded-full ${completionPercentage >= 70 ? 'bg-success animate-pulse' : 'bg-gold-accent'}`} />
+          <span className="text-xs font-mono text-on-surface font-semibold">{completionPercentage}%</span>
+        </div>
       </div>
 
       {/* Editor Pane (Left on Desktop) */}
@@ -443,7 +494,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   {CATEGORIES.map(c => (
                     <button
                       key={c.id}
-                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
+                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
                     >
                       <span className="text-2xl">{c.icon}</span> {c.label}
@@ -628,7 +679,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   <button 
                     onClick={handlePublish}
                     disabled={!isPublishable || !isVerified}
-                    className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)] disabled:shadow-none w-full"
+                    className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] disabled:shadow-none w-full"
                   >
                     Publish to Directory
                   </button>
@@ -654,11 +705,19 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       </div>
       
       {/* Preview Pane (Right on Desktop) */}
-      <div className={`${mobileTab === 'preview' ? 'block' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
-        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md pointer-events-none">
-          LIVE PREVIEW / DRAFT MODE
+      <div className={`${mobileTab === 'preview' ? 'block motion-safe:animate-[fadeIn_0.25s_cubic-bezier(0.16,1,0.3,1)]' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
+        <div className="sticky top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md flex items-center justify-between px-3">
+          <button
+            type="button"
+            onClick={() => setMobileTab('editor')}
+            className="md:hidden text-xs font-mono uppercase underline hover:opacity-80 py-1"
+          >
+            ← Back to Editor
+          </button>
+          <span className="flex-1 text-center font-bold">LIVE PREVIEW / DRAFT DOSSIER</span>
+          <span className="md:hidden text-xs font-mono opacity-80">{completionPercentage}%</span>
         </div>
-        <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">
+        <div className="mt-4 md:mt-10 opacity-95 md:scale-[0.98] origin-top transition pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
             <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           ) : (

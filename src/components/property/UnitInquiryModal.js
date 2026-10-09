@@ -173,7 +173,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
           >
             <GlassPanel className="relative p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button
-                className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
+                className="absolute top-5 right-5 text-text-secondary hover:text-text-primary transition-colors"
                 onClick={onClose}
                 aria-label="Close"
               >
@@ -200,7 +200,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                       </motion.div>
                     </div>
                     <h3 className="font-serif text-2xl text-white font-normal">Request Sent</h3>
-                    <p className="text-sm text-[#f0ede8]/60 leading-relaxed max-w-sm">
+                    <p className="text-sm text-text-secondary leading-relaxed max-w-sm">
                       Your request to {targetLabel} about <strong className="text-white font-medium">{unitName}</strong> is waiting for their answer. You
                       can view it in your <strong className="text-white font-medium">Leads Inbox</strong>.
                     </p>
@@ -217,8 +217,8 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                       <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
                         {gate.loading ? "Checking contact cost…" : gate.free ? "Open Gate · Free Request" : "1 Connect Required"}
                       </span>
-                      <h2 className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Contact {targetLabel}</h2>
-                      <p className="text-sm text-[#f0ede8]/60 leading-relaxed">
+                      <h2 className="font-serif text-[28px] text-text-primary font-normal mb-1.5">Contact {targetLabel}</h2>
+                      <p className="text-sm text-text-secondary leading-relaxed">
                         Start a secure, temporary chat about <strong className="text-white font-medium">{unitName}</strong> at <strong className="text-white font-medium">{propertyTitle}</strong>.
                       </p>
                       <p className="text-xs text-text-secondary mt-3">
@@ -227,7 +227,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                       </p>
 
                       {/* Transaction Integrity & Security Protocol Warning */}
-                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[12px] leading-relaxed text-[#a0a0a0]">
+                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[12px] leading-relaxed text-text-muted">
                         <div className="flex items-center gap-1.5 text-gold-accent font-mono font-semibold uppercase tracking-wider mb-1.5 text-[12px]">
                           <span>⚠️ TRANSACTION INTEGRITY & SECURITY PROTOCOL</span>
                         </div>
@@ -240,7 +240,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                         <p className="mb-1.5">
                           ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted — they aren&apos;t returned.
                         </p>
-                        <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-[#888]">
+                        <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-text-muted">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
                         </div>
                       </div>

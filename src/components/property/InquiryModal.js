@@ -211,7 +211,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
           >
             <GlassPanel className="relative max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button 
-                className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
+                className="absolute top-5 right-5 text-text-secondary hover:text-text-primary transition-colors"
                 onClick={handleCloseModal}
                 aria-label="Close"
               >
@@ -237,9 +237,9 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                       receipt={receipt}
                       propertyTitle={propertyTitle}
                       /* No recipientLabel: this modal genuinely does not know
-                         who the lead routed to — /api/deals/initiate resolves
-                         that server-side against the broker roster. The
-                         receipt omits the row rather than guessing "Owner". */
+                          who the lead routed to — /api/deals/initiate resolves
+                          that server-side against the broker roster. The
+                          receipt omits the row rather than guessing "Owner". */
                       onDismiss={onClose}
                     />
                   </motion.div>
@@ -255,8 +255,8 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                       <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
                         1 Connect Required
                       </span>
-                      <h2 id="inquiry-modal-title" className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Contact the Property Recipient</h2>
-                      <p className="text-sm text-[#f0ede8]/60 leading-relaxed">
+                      <h2 id="inquiry-modal-title" className="font-serif text-[28px] text-text-primary font-normal mb-1.5">Contact the Property Recipient</h2>
+                      <p className="text-sm text-text-secondary leading-relaxed">
                         Start a secure, temporary chat with the current recipient for <strong className="text-white font-medium">{propertyTitle}</strong>.
                       </p>
                       <p className="text-xs text-text-secondary mt-3">
@@ -265,7 +265,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                       </p>
 
                       {/* Transaction Integrity & Security Protocol Warning */}
-                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[12px] leading-relaxed text-[#a0a0a0]">
+                      <div className="my-4 p-3.5 bg-white/[0.02] border border-gold-accent/20 rounded-md text-[12px] leading-relaxed text-text-muted">
                         <div className="flex items-center gap-1.5 text-gold-accent font-mono font-semibold uppercase tracking-wider mb-1.5 text-[12px]">
                           <span>⚠️ TRANSACTION INTEGRITY & SECURITY PROTOCOL</span>
                         </div>
@@ -285,7 +285,7 @@ export default function InquiryModal({ isOpen, onClose, propertyTitle, propertyS
                         <p className="mb-1.5">
                           ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted — they aren&apos;t returned.
                         </p>
-                        <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-[#888]">
+                        <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-text-muted">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
                         </div>
                       </div>

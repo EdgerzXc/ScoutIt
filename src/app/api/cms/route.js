@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { resolveServerTier } from "@/lib/serverAuth";
 import { findPremiumLeak, stripPremiumFields } from "@/lib/premiumFields";
+import { distanceKm } from "@/lib/geo";
 
 export const dynamic = 'force-dynamic';
 
@@ -87,19 +88,9 @@ export async function GET(request) {
   if (validRadius) {
     const radiusKm = radiusKmRaw;
 
-    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-      var R = 6371;
-      var dLat = (lat2 - lat1) * Math.PI / 180;
-      var dLon = (lon2 - lon1) * Math.PI / 180;
-      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
     properties = properties.filter(p => {
       if (!p.lat || !p.lng) return false;
-      const dist = getDistanceFromLatLonInKm(centerLat, centerLng, p.lat, p.lng);
+      const dist = distanceKm(centerLat, centerLng, p.lat, p.lng);
       return dist <= radiusKm;
     });
 

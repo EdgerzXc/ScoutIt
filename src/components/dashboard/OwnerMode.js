@@ -260,7 +260,7 @@ export default function OwnerMode() {
           {/* Choice A: PDF / Brochure Ingestion */}
           <button 
             type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-gold-accent/30 rounded-xl p-8 hover:border-gold-accent hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+            className="bg-surface/40 backdrop-blur-xl border border-gold-accent/30 rounded-xl p-8 hover:border-gold-accent hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(var(--bg-rgb),0.4)]"
             onClick={() => setShowWizard('concierge')}
           >
              <div className="flex items-center gap-3 mb-4">
@@ -274,7 +274,7 @@ export default function OwnerMode() {
           {/* Choice B: Step-by-Step Guided Setup */}
           <button 
             type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-white/[0.08] rounded-xl p-8 hover:border-gold-accent/50 hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.08] rounded-xl p-8 hover:border-gold-accent/50 hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(var(--bg-rgb),0.4)]"
             onClick={() => setShowWizard('live_editor')}
           >
              <div className="flex items-center gap-3 mb-4">
@@ -372,12 +372,12 @@ export default function OwnerMode() {
           <span className="font-mono text-[12px] text-text-muted ml-auto">Max 25MB</span>
         </div>
         
-        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden break-words">
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden break-words">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-white/5 rounded-full blur-[60px]" />
           <span className="text-4xl mb-4 relative z-10 opacity-80 filter drop-shadow-md">📄</span>
           {selectedFile ? (
             <div className="mb-6 w-full relative z-10">
-              <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+              <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]">
                 <div className="flex flex-col text-left truncate mr-2 min-w-0">
                   <span className="text-on-surface font-working-title text-sm truncate">{selectedFile.name}</span>
                   <span className="text-[12px] font-mono text-text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
@@ -612,7 +612,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSaveUrl}
               disabled={!isUrlValid}
-              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
+              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition duration-300 text-base tracking-wide shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)]"
             >
               Link to My Listing
             </button>
@@ -628,7 +628,7 @@ export default function OwnerMode() {
             <button
               type="button"
               onClick={() => setVaultBuildOption("self")}
-              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden text-left block w-full"
+              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.08)] relative overflow-hidden text-left block w-full"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition" />
               <div className="flex items-start gap-5">
@@ -648,7 +648,7 @@ export default function OwnerMode() {
             <button
               type="button"
               onClick={() => setVaultBuildOption("team")}
-              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(232,174,60,0.08)] relative overflow-hidden text-left block w-full"
+              className="bg-gradient-to-br from-surface-alt to-background border border-surface-variant hover:border-gold-accent/60 rounded-xl p-7 cursor-pointer group transition duration-300 hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.08)] relative overflow-hidden text-left block w-full"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-surface-variant group-hover:bg-gold-accent/50 transition" />
               <div className="flex items-start gap-5">
@@ -685,7 +685,7 @@ export default function OwnerMode() {
               </div>
             ) : (
               <div className="w-full flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(232,174,60,0.15)]">
+                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)]">
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
@@ -702,7 +702,7 @@ export default function OwnerMode() {
             <button
               onClick={handleSubmitVideo}
               disabled={!selectedFile}
-              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition duration-300 text-base shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
+              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition duration-300 text-base shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)]"
             >
               Submit for Processing
             </button>
@@ -751,7 +751,7 @@ export default function OwnerMode() {
 
             <button
               onClick={handleJoinQueue}
-              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 transition duration-300 text-base shadow-[0_0_20px_rgba(232,174,60,0.2)] hover:shadow-[0_0_30px_rgba(232,174,60,0.4)]"
+              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 transition duration-300 text-base shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)]"
             >
               Join the Queue
             </button>
@@ -795,7 +795,7 @@ export default function OwnerMode() {
               <button
                 type="button"
                 onClick={() => refetchInventory?.()}
-                className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] font-bold cursor-pointer"
+                className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold cursor-pointer"
               >
                 Retry Loading Portfolio →
               </button>
@@ -816,12 +816,12 @@ export default function OwnerMode() {
           <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is ready.</p>
         </div>
-        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+        <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-0 shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
           <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Add your first property</h3>
           <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Upload a brochure, flyer, or pitch deck to build a complete property dossier in under 10 minutes.</p>
           <div className="flex flex-col sm:flex-row gap-3 relative z-10 mt-2">
-            <button data-scoutit-guide="owner-claim-submit-btn" className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(232,174,60,0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
+            <button data-scoutit-guide="owner-claim-submit-btn" className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
               Add Property →
             </button>
             <Link href="/property" className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-white/5 hover:text-on-surface">
@@ -1012,7 +1012,7 @@ export default function OwnerMode() {
              + New Property
            </button>
             <button 
-              className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center shadow-[0_0_10px_rgba(232,174,60,0.1)]"
+              className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center shadow-[0_0_10px_rgba(var(--accent-rgb),0.1)]"
               disabled={activeListing.pipelineStatus === 'ai_drafting'}
               onClick={() => setShowWizard('deep_intel_edit')}
             >
@@ -1260,7 +1260,7 @@ export default function OwnerMode() {
           </div>
 
           {incomingPitches.length === 0 ? (
-             <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden break-words">
+             <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] relative overflow-hidden break-words">
                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/10 rounded-full blur-[60px]" />
                <span className="text-4xl mb-6 relative z-10 opacity-70 filter drop-shadow-md">📡</span>
                <p className="font-working-title text-xl text-on-surface mb-3 relative z-10 tracking-tight">No inquiries yet</p>

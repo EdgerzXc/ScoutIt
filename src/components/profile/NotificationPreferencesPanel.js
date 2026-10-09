@@ -111,12 +111,12 @@ export default function NotificationPreferencesPanel() {
           justify-content: space-between;
           gap: 16px;
           padding: 14px 0;
-          border-top: 1px solid var(--border-subtle, #222);
+          border-top: 1px solid var(--border-subtle, var(--border));
         }
         .np-row:first-of-type { border-top: none; padding-top: 0; }
         .np-title { font-size: 14px; color: var(--text-primary); margin: 0 0 4px; }
         .np-body { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin: 0; max-width: 60ch; }
-        .np-link { color: var(--accent, var(--accent)); }
+        .np-link { color: var(--accent); }
         .np-toggle {
           flex-shrink: 0;
           min-width: 64px;
@@ -130,15 +130,15 @@ export default function NotificationPreferencesPanel() {
           cursor: pointer;
         }
         .np-toggle[aria-checked="true"] {
-          background: var(--accent, var(--accent));
-          border-color: var(--accent, var(--accent));
-          color: #0d0d0d;
+          background: var(--accent);
+          border-color: var(--accent);
+          color: var(--on-accent);
           font-weight: 700;
         }
         .np-toggle:disabled { opacity: 0.45; cursor: not-allowed; }
-        .np-note { font-size: 12px; color: var(--text-muted, #888); margin: 12px 0 0; }
-        .np-error { font-size: 13px; color: var(--error, #e8644a); margin: 12px 0 0; }
-        .np-saved { font-size: 12px; color: var(--green, #4caf7d); margin: 12px 0 0; }
+        .np-note { font-size: 12px; color: var(--text-muted); margin: 12px 0 0; }
+        .np-error { font-size: 13px; color: var(--red); margin: 12px 0 0; }
+        .np-saved { font-size: 12px; color: var(--green); margin: 12px 0 0; }
       `}</style>
 
       {loading && <p className="np-body">Loading your notification settings…</p>}

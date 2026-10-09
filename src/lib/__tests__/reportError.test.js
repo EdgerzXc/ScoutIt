@@ -52,4 +52,41 @@ describe("reportError", () => {
     await expect(reportError({ kind: "crash", message: "Render failed" })).resolves.toBe(false);
     expect(sentry.captureException).toHaveBeenCalledOnce();
   });
+
+  it("tags flow node metadata when an explicit nodeId is provided", async () => {
+    await expect(reportError({ kind: "crash", message: "Deal room socket disconnected", nodeId: "deal_room" })).resolves.toBe(true);
+
+    expect(scope.setTag).toHaveBeenCalledWith("scoutit.flow_node_id", "deal_room");
+    expect(scope.setTag).toHaveBeenCalledWith("scoutit.flow_domain", "deal");
+    expect(scope.setContext).toHaveBeenCalledWith(
+      "scoutit_flow",
+      expect.objectContaining({
+        node_id: "deal_room",
+        domain: "deal",
+      })
+    );
+  });
+
+  it("dispatches scoutit:flow-error window event with topological metadata", async () => {
+    let capturedEvent = null;
+    const listener = (e) => {
+      capturedEvent = e.detail;
+    };
+    window.addEventListener("scoutit:flow-error", listener);
+
+    try {
+      await reportError({
+        kind: "crash",
+        message: "Publishing bridge timeout",
+        nodeId: "api_publish_listing",
+      });
+
+      expect(capturedEvent).not.toBeNull();
+      expect(capturedEvent.nodeId).toBe("api_publish_listing");
+      expect(capturedEvent.message).toBe("Publishing bridge timeout");
+      expect(capturedEvent.severity).toBe("CRITICAL");
+    } finally {
+      window.removeEventListener("scoutit:flow-error", listener);
+    }
+  });
 });

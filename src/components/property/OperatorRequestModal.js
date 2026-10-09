@@ -8,6 +8,7 @@ import GlassPanel from "../ui/GlassPanel";
 import { ImpeccableTextArea } from "../ui/ImpeccableInput";
 import { ImpeccableButton } from "../ui/ImpeccableButton";
 import { stillBackdropVariants, stillPanelVariants, instantDialogTransition } from "@/components/ui/reducedDialogMotion";
+import useModalDialog from "@/components/ui/useModalDialog";
 
 // Operator-initiated handshake to a building owner (SCOUTIT_MASTER_BUILD_SPEC.md
 // §9.2/locked decision #7). Deliberately a separate, lighter component from
@@ -49,6 +50,8 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
   // Synchronous in-flight latch for a paid action. Deliberately a ref and
   // not state -- see the guard inside handleSubmit.
   const submitInFlightRef = useRef(false);
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen, onClose });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -112,8 +115,14 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
           animate="visible"
           exit="hidden"
           transition={reduceMotion ? instantDialogTransition : backdropTransition}
+          onClick={onClose}
         >
           <motion.div 
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Operator request"
+            onClick={(e) => e.stopPropagation()}
             className="w-full max-w-[500px]"
             variants={reduceMotion ? stillPanelVariants : modalVariants}
             initial="hidden"
@@ -123,7 +132,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
           >
             <GlassPanel className="relative p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button 
-                className="absolute top-5 right-5 text-[#f0ede8]/50 hover:text-white transition-colors"
+                className="absolute top-5 right-5 text-text-secondary hover:text-text-primary transition-colors"
                 onClick={onClose} 
                 aria-label="Close"
               >
@@ -150,7 +159,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                       </motion.div>
                     </div>
                     <h3 className="font-serif text-2xl text-white font-normal">Request Sent</h3>
-                    <p className="text-sm text-[#f0ede8]/60 leading-relaxed max-w-sm">
+                    <p className="text-sm text-text-secondary leading-relaxed max-w-sm">
                       The owner of <strong className="text-white font-medium">{propertyTitle}</strong> can now review your request and choose which
                       units to hand over for you to operate.
                     </p>
@@ -167,8 +176,8 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                       <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
                         1 Connect Required
                       </span>
-                      <h2 className="font-serif text-[28px] text-[#f0ede8] font-normal mb-1.5">Request to Operate This Building</h2>
-                      <p className="text-sm text-[#f0ede8]/60 leading-relaxed">
+                      <h2 className="font-serif text-[28px] text-text-primary font-normal mb-1.5">Request to Operate This Building</h2>
+                      <p className="text-sm text-text-secondary leading-relaxed">
                         Ask the owner of <strong className="text-white font-medium">{propertyTitle}</strong> about operating specific units here.
                         They will review your request and pick which units, if any, to delegate to you.
                       </p>

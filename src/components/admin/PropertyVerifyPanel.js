@@ -150,8 +150,8 @@ export default function PropertyVerifyPanel() {
           border-radius: 3px;
           margin-bottom: 16px;
         }
-        .pv-notice--success { color: var(--green); background: rgba(76, 175, 125, 0.08); }
-        .pv-notice--error   { color: var(--red); background: rgba(232, 100, 74, 0.08); }
+        .pv-notice--success { color: var(--green); background: color-mix(in srgb, var(--green) 8%, transparent); }
+        .pv-notice--error   { color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent); }
 
         .pv-skel {
           height: 82px;

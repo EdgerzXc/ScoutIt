@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "31d9df1cc8306ebe205787f928f0a233e201fc54",
+  "dataRevision": "b3ab118c6b274197f029f275a72a6b527a159e71",
   "lastVerifiedAt": "2026-09-11",
-  "generatedAt": "2026-09-11T12:05:56.600Z",
+  "generatedAt": "2026-10-07T14:20:00.655Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "31d9df1cc8306ebe205787f928f0a233e201fc54"
+    "commitSha": "b3ab118c6b274197f029f275a72a6b527a159e71"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "31d9df1cc8306ebe205787f928f0a233e201fc54"
+    "commitSha": "b3ab118c6b274197f029f275a72a6b527a159e71"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "31d9df1cc8306ebe205787f928f0a233e201fc54"
+    "commitSha": "b3ab118c6b274197f029f275a72a6b527a159e71"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -51,6 +51,22 @@
         "stateMachineId": "inquiry.lifecycle",
         "from": "PENDING",
         "to": "REPORTED",
+        "source": "src/app/api/deals/[id]/route.js",
+        "status": "IMPLEMENTED"
+      },
+      {
+        "lifecycle": "INQUIRY",
+        "stateMachineId": "inquiry.lifecycle",
+        "from": "INVITED",
+        "to": "ACCEPTED",
+        "source": "src/app/api/deals/[id]/route.js",
+        "status": "IMPLEMENTED"
+      },
+      {
+        "lifecycle": "INQUIRY",
+        "stateMachineId": "inquiry.lifecycle",
+        "from": "INVITED",
+        "to": "DECLINED",
         "source": "src/app/api/deals/[id]/route.js",
         "status": "IMPLEMENTED"
       },

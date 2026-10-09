@@ -85,8 +85,8 @@ export default function DescentPage() {
     <main className="descent-root" ref={rootRef}>
       {/* minimal brand bar */}
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px clamp(20px, 6vw, 90px)", pointerEvents: "none" }}>
-        <Link href="/" style={{ fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.12em", fontSize: 13, color: "#f0ede8", textDecoration: "none", pointerEvents: "auto" }}>
-          SCOUT<span style={{ color: "#E8AE3C" }}>IT</span>
+        <Link href="/" style={{ fontFamily: "var(--font-mono, monospace)", letterSpacing: "0.12em", fontSize: 13, color: "var(--text-primary)", textDecoration: "none", pointerEvents: "auto" }}>
+          SCOUT<span style={{ color: "var(--accent)" }}>IT</span>
         </Link>
         <div style={{ pointerEvents: "auto" }}><ProfileButton /></div>
       </div>
@@ -100,11 +100,11 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="dz-ufo">
             <svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="60" cy="44" rx="55" ry="13" fill="#1a1a1a" stroke="#E8AE3C" strokeWidth="2" />
-              <ellipse cx="60" cy="48" rx="40" ry="8" fill="#222222" />
+              <ellipse cx="60" cy="44" rx="55" ry="13" fill="var(--surface)" stroke="var(--accent)" strokeWidth="2" />
+              <ellipse cx="60" cy="48" rx="40" ry="8" fill="var(--surface2)" />
               <circle className="ufo-belly" cx="36" cy="49" r="2.2" /><circle className="ufo-belly" cx="52" cy="51" r="2.2" />
               <circle className="ufo-belly" cx="68" cy="51" r="2.2" /><circle className="ufo-belly" cx="84" cy="49" r="2.2" />
-              <path d="M37 38 Q60 4 83 38 Z" fill="#1e2a1e" stroke="#E8AE3C" strokeWidth="1" />
+              <path d="M37 38 Q60 4 83 38 Z" fill="var(--surface3)" stroke="var(--accent)" strokeWidth="1" />
               <circle className="porthole porthole-1" cx="49" cy="28" r="4" /><circle className="porthole porthole-2" cx="60" cy="24" r="4" /><circle className="porthole porthole-3" cx="71" cy="28" r="4" />
             </svg>
           </div>
@@ -146,9 +146,9 @@ export default function DescentPage() {
                 three siblings shared one key and React warned on /descent.
                 Titles are the unique field here. */}
             {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel" }].map((a) => (
-              <Link key={a.t} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
+              <Link key={a.t} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(var(--bg-rgb),0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 10 }}>{a.k}</div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#f5f1ea" }}>{a.t}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "var(--text-primary)" }}>{a.t}</div>
               </Link>
             ))}
           </div>
@@ -173,12 +173,12 @@ export default function DescentPage() {
           <p className="dl-sub">Down into the streets. Real, desirable spaces — browse the market itself, building by building.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
             {[{ t: "The Proscenium", l: "Rockwell Center, Makati", c: "Condo" }, { t: "Ayala Alabang Core", l: "Muntinlupa City", c: "House" }, { t: "High Street South Block", l: "BGC, Taguig", c: "Commercial" }].map((p) => (
-              <Link key={p.t} href="/property" style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(10,12,24,0.55)", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: 10, overflow: "hidden", backdropFilter: "blur(4px)" }}>
-                <div style={{ height: 120, background: "linear-gradient(135deg, #1c2340, #2a1d3e)" }} />
+              <Link key={p.t} href="/property" style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(var(--bg-rgb),0.55)", border: "0.5px solid var(--border-subtle)", borderRadius: 10, overflow: "hidden", backdropFilter: "blur(4px)" }}>
+                <div style={{ height: 120, background: "linear-gradient(135deg, var(--surface2), var(--surface))" }} />
                 <div style={{ padding: "14px 16px" }}>
                   <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 6 }}>{p.c}</div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea" }}>{p.t}</div>
-                  <div style={{ fontSize: 12, color: "#c8c8c8", marginTop: 4 }}>{p.l}</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-primary)" }}>{p.t}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 4 }}>{p.l}</div>
                 </div>
               </Link>
             ))}
@@ -202,10 +202,10 @@ export default function DescentPage() {
           <p className="dl-sub">The vetted ecosystem — the people who make the data trustworthy. The solid layer the whole world rests on.</p>
           <div className="role-grid" style={{ marginBottom: 30 }}>
             {[{ Icon: Building2, t: "Verified advisors", d: "Licensed professionals to guide the deal.", href: "/brokers" }, { Icon: Camera, t: "Space photography", d: "Make every space look the way it deserves.", href: "/photographers" }, { Icon: Search, t: "Site research", d: "Due diligence before you commit.", href: "/researchers" }, { Icon: CalendarDays, t: "Event design", d: "Turn great spaces into great events.", href: "/event-planners" }].map((s) => (
-              <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(20,14,8,0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
+              <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(var(--bg-rgb),0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <s.Icon strokeWidth={1.5} size={26} style={{ color: "var(--accent)" }} />
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#f5f1ea", margin: "10px 0 5px" }}>{s.t}</div>
-                <div style={{ fontSize: 13, color: "#d6d2c8", lineHeight: 1.5 }}>{s.d}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-primary)", margin: "10px 0 5px" }}>{s.t}</div>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{s.d}</div>
               </Link>
             ))}
           </div>
@@ -253,7 +253,7 @@ export default function DescentPage() {
                 ))}
               </div>
               <div className="pioneer-strip" style={{ marginTop: 18 }}>
-                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c8c8c8" }}>The pioneers</span>
+                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-secondary)" }}>The pioneers</span>
                 {PIONEERS.map((p) => (
                   <div className="pioneer" key={p.name}>
                     <span className="pi-av">{p.initials}</span>

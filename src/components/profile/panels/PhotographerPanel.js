@@ -58,9 +58,9 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
               fontFamily: "var(--font-body)",
               fontSize: 12,
               letterSpacing: "0.08em",
-              color: available ? "#4caf7d" : "var(--text-secondary)",
+              color: available ? "var(--green)" : "var(--text-secondary)",
               textTransform: "uppercase",
-              border: `1px solid ${available ? "rgba(76,175,125,0.3)" : "rgba(255,255,255,0.08)"}`,
+              border: `1px solid ${available ? "var(--green-dim)" : "var(--border-subtle)"}`,
               padding: "2px 8px",
               borderRadius: 20,
             }}
@@ -95,7 +95,7 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
                   />
                 ) : (
                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Camera size={16} strokeWidth={1.5} color="rgba(255,255,255,0.15)" />
+                    <Camera size={16} strokeWidth={1.5} color="rgba(var(--text-primary-rgb),0.15)" />
                   </div>
                 )}
                 <div style={portfolioCellLabel}>{p.title}</div>
@@ -115,8 +115,8 @@ export default function PhotographerPanel({ projects = [], userId, isAvailable, 
 }
 
 const panelStyle = {
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(165deg, var(--surface2), var(--surface))",
+  border: "1px solid rgba(var(--text-primary-rgb),0.08)",
   borderRadius: 6,
   padding: 24,
 };
@@ -146,8 +146,8 @@ const portfolioGrid = {
 const portfolioCell = {
   position: "relative",
   aspectRatio: "1 / 1",
-  background: "#1e1e1e",
-  border: "1px solid rgba(255,255,255,0.05)",
+  background: "var(--surface3)",
+  border: "1px solid rgba(var(--text-primary-rgb), 0.05)",
   borderRadius: 3,
   overflow: "hidden",
 };
@@ -158,10 +158,10 @@ const portfolioCellLabel = {
   left: 0,
   right: 0,
   padding: "4px 6px",
-  background: "rgba(0,0,0,0.7)",
+  background: "rgba(var(--bg-rgb), 0.7)",
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "rgba(255,255,255,0.7)",
+  color: "rgba(var(--text-primary-rgb), 0.7)",
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",

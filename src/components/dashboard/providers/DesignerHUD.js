@@ -223,7 +223,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               <button
                 disabled
                 title="Profile saving opens in Phase 2 — previews only today."
-                className="w-full mt-4 bg-intel-magenta text-background font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed shadow-[0_0_15px_rgba(255,117,195,0.3)]"
+                className="w-full mt-4 bg-intel-magenta text-background font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed shadow-[0_0_15px_rgba(var(--intel-magenta-rgb),0.3)]"
               >
                 Save Studio Profile · Phase 2
               </button>
@@ -241,7 +241,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               
               <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-surface-alt border border-intel-magenta/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(255,117,195,0.1)]">
+                  <div className="w-16 h-16 bg-surface-alt border border-intel-magenta/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(var(--intel-magenta-rgb),0.1)]">
                     🎨
                     {acceptingCommissions && (
                       <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full" title="Accepting Commissions"></div>

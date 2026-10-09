@@ -50,7 +50,7 @@ export default function VaultOfHonor() {
               key={badge.id}
               className={`relative group rounded-xl border p-6 flex flex-col items-center text-center transition duration-200 overflow-hidden min-h-[200px] justify-center ${
                 isUnlocked 
-                  ? 'bg-gradient-to-b from-surface-alt to-background border-gold-accent/40 hover:border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.05)] hover:shadow-[0_0_25px_rgba(232,174,60,0.15)]' 
+                  ? 'bg-gradient-to-b from-surface-alt to-background border-gold-accent/40 hover:border-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.05)] hover:shadow-[0_0_25px_rgba(var(--accent-rgb),0.15)]' 
                   : 'bg-background border-surface-variant hover:border-surface-variant/80'
               }`}
             >
@@ -71,7 +71,7 @@ export default function VaultOfHonor() {
                     size="1.5em" 
                     className={`transition duration-200 ${
                       isUnlocked 
-                        ? 'text-gold-accent drop-shadow-[0_0_8px_rgba(232,174,60,0.6)]' 
+                        ? 'text-gold-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.6)]' 
                         : 'text-surface-alt' // Very dark icon to create silhouette effect
                     }`} 
                   />
@@ -106,7 +106,7 @@ export default function VaultOfHonor() {
 
               {/* Subtle Scanline Effect on Locked */}
               {!isUnlocked && (
-                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-10 pointer-events-none mix-blend-overlay"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(var(--bg-rgb),0.5)_50%)] bg-[length:100%_4px] opacity-10 pointer-events-none mix-blend-overlay"></div>
               )}
             </div>
           );

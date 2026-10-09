@@ -2,24 +2,60 @@
 
 import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Building2, Search } from "lucide-react";
 import BackgroundMetropolis from "@/components/descent/BackgroundMetropolis";
 import LayerHeader from "@/components/descent/LayerHeader";
 import LayerTransition from "@/components/descent/LayerTransition";
+import {
+  METROPOLIS_CATEGORIES,
+  buildCategoryPreviews,
+  getCategoryCounts,
+  filterCategoryPreviews,
+} from "@/lib/categoryPreviews";
 
-const CATEGORY_PREVIEWS = {};
-const CATEGORIES = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues"];
+const INITIAL_PREVIEWS = {
+  Residential: [],
+  Commercial: [],
+  STR: [],
+  Hospitality: [],
+  Restaurants: [],
+  Venues: [],
+};
 
 export default function MetropolisLayer() {
   const [category, setCategory] = useState("Residential");
   const [search, setSearch] = useState("");
+  const [previews, setPreviews] = useState(INITIAL_PREVIEWS);
+  const [loading, setLoading] = useState(true);
 
-  const properties = (CATEGORY_PREVIEWS[category] || []).filter(p =>
-    !search ||
-    p.title.toLowerCase().includes(search.toLowerCase()) ||
-    p.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
-  );
+  useEffect(() => {
+    let active = true;
+    fetch("/api/cms")
+      .then((res) => {
+        if (!res.ok) throw new Error("CMS catalog offline");
+        return res.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        if (Array.isArray(data?.properties)) {
+          setPreviews(buildCategoryPreviews(data.properties));
+        }
+      })
+      .catch(() => {
+        // Preserves honest empty fallback state on offline or failure
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const properties = filterCategoryPreviews(previews, category, search);
+  const { counts } = getCategoryCounts(previews);
 
   const browseLabel = category === "Venues" ? "Venues/Events" : category;
 
@@ -54,17 +90,21 @@ export default function MetropolisLayer() {
           <div>
 
             <nav className="descent-nav" aria-label="Layer categories">
-              {CATEGORIES.map(c => (
-                <button
-                  key={c}
-                  className={`descent-cat${category === c ? " on" : ""}`}
-                  type="button"
-                  aria-pressed={category === c}
-                  onClick={() => { setCategory(c); setSearch(""); }}
-                >
-                  {c === "Venues" ? "Venues/Events" : c}
-                </button>
-              ))}
+              {METROPOLIS_CATEGORIES.map(c => {
+                const count = counts[c] || 0;
+                return (
+                  <button
+                    key={c}
+                    className={`descent-cat${category === c ? " on" : ""}`}
+                    type="button"
+                    aria-pressed={category === c}
+                    onClick={() => { setCategory(c); setSearch(""); }}
+                  >
+                    <span>{c === "Venues" ? "Venues/Events" : c}</span>
+                    {count > 0 && <span className="descent-cat-count ml-1.5 opacity-60 font-normal">({count})</span>}
+                  </button>
+                );
+              })}
             </nav>
 
           </div>
@@ -79,9 +119,9 @@ export default function MetropolisLayer() {
         {/* ── RIGHT CONTENT ── */}
         <div className="descent-content">
           <div className="metro-content-head">
-            <h3 className="metro-content-title">
+            <h2 className="metro-content-title">
               {browseLabel} Spaces
-            </h3>
+            </h2>
             <p className="metro-content-sub">Category preview</p>
           </div>
 
@@ -104,7 +144,7 @@ export default function MetropolisLayer() {
               <div className="metro-empty" role="status">
                 <span className="metro-empty-icon"><Building2 size={22} aria-hidden="true" /></span>
                 <span className="metro-empty-kicker">Directory signal</span>
-                <h4>{search ? "No matching spaces" : `No ${browseLabel.toLowerCase()} previews yet`}</h4>
+                <h3>{search ? "No matching spaces" : `No ${browseLabel.toLowerCase()} previews yet`}</h3>
                 <p>
                   {search
                     ? "Try another name, city, or style—or open the complete directory."
@@ -116,10 +156,10 @@ export default function MetropolisLayer() {
               </div>
             ) : (
               properties.map(p => (
-                <Link href={`/property/${p.id}`} key={p.id} className="metro-card">
+                <Link href={`/property/${p.slug || p.id}`} key={p.id} className="metro-card">
                   <div
                     className="metro-photo"
-                    style={{ backgroundImage: `url(${p.image})` }}
+                    style={{ backgroundImage: `url(${p.image || "/images/property-fallback.webp"})` }}
                   />
                   <div className="metro-body">
                     <div className="metro-name">{p.title}</div>

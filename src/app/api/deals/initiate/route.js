@@ -12,6 +12,8 @@ import { anyBlocked, anyBlockedStrict } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
 import { freeInboundRecipient, isOpenGateAvailable } from "@/lib/openGate";
+import { getViaCookieName, parseViaCookie, isAttributionExpired, ROUTING_REASONS } from "@/lib/viaRouting";
+import { recordRoutingDecision } from "@/lib/serverViaRouting";
 
 
 
@@ -161,10 +163,29 @@ export async function POST(request) {
 
     const operatorOpenGate = role === "buyer" && unitId && unitOperatorId
       && await isOpenGateAvailable(supabaseAdmin, resolvedListingId, unitOperatorId, "operator", unitId);
+    let effectivePreferredBrokerId = preferredBrokerId || null;
+    let isViaAttributedBroker = false;
+
+    // A-186 Tier 3 VIA Attribution: If caller did not explicitly supply a preferred broker,
+    // check for an active 30-day VIA attribution cookie to preserve promoter lead priority.
+    if (!effectivePreferredBrokerId && request.cookies?.get) {
+      const viaCookieValue =
+        request.cookies.get(getViaCookieName(resolvedListingId))?.value ||
+        (propertyRow?.slug ? request.cookies.get(getViaCookieName(propertyRow.slug))?.value : null) ||
+        (propertySlug ? request.cookies.get(getViaCookieName(propertySlug))?.value : null);
+      if (viaCookieValue) {
+        const parsedVia = parseViaCookie(viaCookieValue);
+        if (parsedVia && !isAttributionExpired(parsedVia) && parsedVia.promoterId) {
+          effectivePreferredBrokerId = parsedVia.promoterId;
+          isViaAttributedBroker = true;
+        }
+      }
+    }
+
     const legacyRouteArgs = {
       p_property_id: resolvedListingId, p_buyer_id: userId,
       p_message: introMessage || defaultMessage, p_expires_at: expiresAt.toISOString(),
-      p_unit_id: unitId || null, p_preferred_broker_id: preferredBrokerId || null,
+      p_unit_id: unitId || null, p_preferred_broker_id: effectivePreferredBrokerId,
     };
     const directedOperator = role === "buyer" && Boolean(unitId && unitOperatorId);
     let routedResult = directedOperator
@@ -180,6 +201,18 @@ export async function POST(request) {
       && (routedResult.error.code === "PGRST202" || routedResult.error.code === "42883"
         || /function.*does not exist/i.test(routedResult.error.message || ""));
     if (missingOperatorRpc) routedResult = await supabaseAdmin.rpc("create_routed_buyer_deal", legacyRouteArgs);
+
+    // A-186 Invariant 4 (Resilient Fallback): If the VIA-attributed promoter is no longer
+    // contactable on this property, gracefully degrade to normal organic ranking rather
+    // than failing the visitor's inquiry.
+    if (
+      isViaAttributedBroker &&
+      routedResult.error?.message?.includes("BROKER_NOT_CONTACTABLE")
+    ) {
+      legacyRouteArgs.p_preferred_broker_id = null;
+      routedResult = await supabaseAdmin.rpc("create_routed_buyer_deal", legacyRouteArgs);
+    }
+
     const { data: routedDeal, error: routingError } = routedResult;
     if (routingError || !routedDeal?.[0]?.deal_id) {
       console.error("[INITIATE API] Routed deal creation failed:", routingError);
@@ -189,6 +222,17 @@ export async function POST(request) {
     const dealId = routedDeal[0].deal_id;
     const recipientIds = routedDeal[0].recipient_ids || [];
     const routedToRoster = routedDeal[0].routed_to_roster === true;
+
+    // A-186 Invariant 5: Auditable Decision Logging
+    if (isViaAttributedBroker && recipientIds.length > 0) {
+      recordRoutingDecision(supabaseAdmin, {
+        propertyId: resolvedListingId,
+        visitorId: userId,
+        selectedRecipientId: recipientIds[0],
+        selectedRecipientType: routedToRoster ? "broker" : "owner",
+        routingReason: ROUTING_REASONS.VIA_ATTRIBUTION,
+      }).catch((err) => console.warn("[deals/initiate] VIA decision log warning:", err?.message));
+    }
     // Human-testing samples may notify only explicitly designated test accounts.
     // Validate the server-resolved recipient snapshot before spending a Connect.
     // A missing allowlist fails closed and removes the just-created pending deal.

@@ -227,8 +227,26 @@ export default function IntelPage() {
           <InViewport
             style={{ minHeight: 500 }}
             fallback={
-              <div className="h-[500px] bg-surface-alt animate-pulse rounded-sm border border-surface-variant flex items-center justify-center font-mono text-xs text-text-muted">
-                LOADING SPATIAL RADAR...
+              <div
+                className="h-[500px] bg-surface-alt/60 backdrop-blur-md rounded-sm border border-surface-variant flex flex-col items-center justify-center relative overflow-hidden"
+                role="status"
+                aria-label="Loading Spatial Radar"
+              >
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20" aria-hidden="true">
+                  <svg className="w-80 h-80" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+                    <circle cx="50" cy="50" r="45" stroke="var(--border-subtle)" strokeWidth="0.5" strokeDasharray="2 2" />
+                    <circle cx="50" cy="50" r="30" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                    <circle cx="50" cy="50" r="15" stroke="var(--accent-muted)" strokeWidth="0.5" />
+                    <line x1="50" y1="5" x2="50" y2="95" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                    <line x1="5" y1="50" x2="95" y2="50" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                  </svg>
+                </div>
+                <div className="relative z-10 flex flex-col items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-gold-accent motion-safe:animate-ping" aria-hidden="true" />
+                  <span className="font-mono text-xs tracking-widest uppercase text-text-muted">
+                    INITIALIZING SPATIAL RADAR // TELEMETRY LOCK
+                  </span>
+                </div>
               </div>
             }
           >
@@ -357,7 +375,7 @@ export default function IntelPage() {
                 </div>
               </div>
 
-              <Link href={`/intel/${featuredArticle.slug}`} className={`featured-card-new block text-decoration-none h-full ${featuredArticle.image ? "" : "featured-card-new--noimage"}`}>
+              <Link href={`/intel/${featuredArticle.slug}`} className={`featured-card-new keep-dark block text-decoration-none h-full ${featuredArticle.image ? "" : "featured-card-new--noimage"}`}>
                 <div className="featured-image-wrapper">
                   {featuredArticle.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -433,7 +451,7 @@ export default function IntelPage() {
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`filter-btn font-mono text-xs tracking-[0.1em] uppercase px-4 py-2 border rounded-sm transition-colors active:scale-[0.98] ${filter === cat ? "bg-gold-accent text-background border-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.3)]" : "bg-transparent text-text-secondary border-surface-variant hover:border-gold-accent hover:text-gold-accent"}`}
+                className={`filter-btn font-mono text-xs tracking-[0.1em] uppercase px-4 py-2 border rounded-sm transition-colors active:scale-[0.98] ${filter === cat ? "bg-gold-accent text-background border-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]" : "bg-transparent text-text-secondary border-surface-variant hover:border-gold-accent hover:text-gold-accent"}`}
               >
                 {cat}
               </button>
@@ -556,6 +574,7 @@ export default function IntelPage() {
           background: var(--bg);
           color: var(--text-primary);
           min-height: 100vh;
+          min-height: 100dvh;
         }
 
         .intel-main {
@@ -678,26 +697,9 @@ export default function IntelPage() {
         body.light-mode .featured-card-new {
           /* The scrim is a SIBLING overlay, not an ancestor background, so a
              light card ground shows through wherever the photo has not loaded
-             — and white text lands on it. The island needs its own dark
-             ground, same lesson as .global-footer. */
-          background: #0d0d0d;
-          --text-primary:      #ffffff;
-          --text-primary-rgb:  255, 255, 255;
-          --text-secondary:    #d8d4cc;
-          --text-muted:        rgba(255, 255, 255, 0.62);
-          /* Every ink token needs its '-ch' twin: the Tailwind classes
-             (text-text-secondary, text-on-surface, …) resolve through
-             'rgb(var(--x-ch) / <alpha>)', NOT through the hex token. Setting
-             only the hex leaves every Tailwind-coloured child on the LIGHT
-             value — measured 2.05:1 on the ticker's city badge. */
-          --text-primary-ch:    255 255 255;
-          --text-secondary-ch:  216 212 204;
-          --m3-on-surface-ch:   255 255 255;
-          --accent:            #E8AE3C;
-          --accent-rgb:        232, 174, 60;
-          --accent-ch:         232 174 60;
-          --border:            rgba(255, 255, 255, 0.12);
-          --border-mid:        rgba(255, 255, 255, 0.22);
+             — and white text lands on it. .keep-dark provides the dark tokens,
+             while background ensures the card body itself uses var(--bg). */
+          background: var(--bg);
           color: var(--text-primary);
         }
 
@@ -730,7 +732,7 @@ export default function IntelPage() {
         .featured-overlay-new {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(9, 9, 9, 0.98) 0%, rgba(9, 9, 9, 0.6) 50%, rgba(9, 9, 9, 0.1) 80%, transparent 100%);
+          background: linear-gradient(to top, rgba(var(--bg-rgb), 0.98) 0%, rgba(var(--bg-rgb), 0.6) 50%, rgba(var(--bg-rgb), 0.1) 80%, transparent 100%);
           z-index: 2;
         }
 
@@ -913,21 +915,21 @@ export default function IntelPage() {
           align-items: center;
           min-height: 68px;
           padding: 12px 16px;
-          border: 1px solid rgba(232, 174, 60, 0.3);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
           border-radius: 4px;
-          background: rgba(13, 13, 13, 0.94);
+          background: rgba(var(--bg-rgb), 0.94);
         }
         .intel-radar-dock .intel-radar-label,
         .intel-radar-dock .intel-radar-idle {
-          color: #c8c8c8;
+          color: var(--text-secondary);
         }
         .intel-radar-dock .intel-radar-value,
         .intel-radar-dock .intel-radar-result {
-          color: #E8AE3C;
+          color: var(--accent);
         }
         .intel-radar-dock .intel-radar-search-link {
-          color: #c8c8c8;
-          border-color: rgba(232, 174, 60, 0.35);
+          color: var(--text-secondary);
+          border-color: rgba(var(--accent-rgb), 0.35);
         }
 
         .intel-radar-idle {
@@ -999,7 +1001,7 @@ export default function IntelPage() {
         }
 
         .intel-radar-clear:hover {
-          background: rgba(232, 174, 60, 0.1);
+          background: rgba(var(--accent-rgb), 0.1);
         }
 
         .intel-radar-start:active,
@@ -1324,7 +1326,7 @@ export default function IntelPage() {
         .side-panel-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,0.6);
+          background: rgba(var(--bg-rgb), 0.6);
           backdrop-filter: blur(4px);
           z-index: 1000;
         }

@@ -187,7 +187,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
+      <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
         <h1 className="sr-only">Child-space Intelligence</h1>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
           Loading Child-space Intelligence…
@@ -198,7 +198,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
   if (!property || !unit) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg)", gap: "16px" }}>
+      <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg)", gap: "16px" }}>
         <h1 style={{ fontFamily: "var(--font-body)", fontSize: "20px", color: "var(--text-primary)" }}>This {hierarchy.childLabel.toLowerCase()} could not be found.</h1>
         {property?.slug && (
           <Link href={`/property/${property.slug}`} style={{ color: "var(--accent)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
@@ -386,7 +386,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         {/* Mobile Hero Intel */}
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label" style={{ color: ACCENT }}>ScoutIt &middot; {CHILD_SPACE_LEVEL_LABEL} &middot; {hierarchy.dossierLabel}</p>
-          <h1 className="mobile-hero-title">{unitDisplayName}</h1>
+          <div role="heading" aria-level="1" className="mobile-hero-title">{unitDisplayName}</div>
           <p className="mobile-hero-location">
             {property.title} <ProvenanceBadge record={property} /> &middot; {property.location || property.city}
           </p>
@@ -394,7 +394,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         </div>
 
         {/* ════ ZONE 2 – NAV (drag-to-scroll) ════ */}
-        <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`} style={{ background: "rgba(14, 14, 14, 0.7)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "0.5px solid rgba(255,255,255,0.08)", borderBottom: "0.5px solid rgba(255,255,255,0.08)", zIndex: 40 }}>
+        <div className={`zone-nav ${canScrollLeft ? "can-scroll-left" : ""} ${canScrollRight ? "can-scroll-right" : ""}`}>
           <div className="nav-inner" role="tablist" ref={scrollRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none", cursor: "grab" }} onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd} onPointerMove={onDragMove}>
             {[
               { id: "space", label: "The Space" },
@@ -675,7 +675,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: "bold",
                   padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  boxShadow: "0 0 10px rgba(232,174,60,0.15)"
+                  boxShadow: "0 0 10px rgba(var(--accent-rgb),0.15)"
                 }}
                 className="hover:bg-gold-accent hover:text-background transition-colors"
               >

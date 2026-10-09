@@ -537,9 +537,9 @@ export default function HomeClient() {
                 width: star.size,
                 height: star.size,
                 borderRadius: '50%',
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--text-primary)',
                 opacity: star.opacity,
-                boxShadow: star.opacity > 0.18 ? '0 0 8px rgba(255,255,255,0.6)' : 'none',
+                boxShadow: star.opacity > 0.18 ? '0 0 8px rgba(var(--text-primary-rgb),0.6)' : 'none',
                 animation: 'twinkleSpace 6s ease-in-out infinite alternate',
                 animationDelay: `${idx * 0.4}s`
               }}
@@ -585,8 +585,8 @@ export default function HomeClient() {
                       width: '100%',
                       height: '100%',
                       borderRadius: rock.borderRadius,
-                      background: 'rgba(232, 174, 60, 0.55)', // Gold-tinted to match theme
-                      boxShadow: '0 0 6px rgba(232, 174, 60, 0.25)',
+                      background: 'rgba(var(--accent-rgb), 0.55)', // Gold-tinted to match theme
+                      boxShadow: '0 0 6px rgba(var(--accent-rgb), 0.25)',
                       filter: 'blur(0.5px)'
                     }}
                   />
@@ -637,20 +637,20 @@ export default function HomeClient() {
               <svg className="title-ufo-svg" viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <filter id="ufoRimGlow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#E8AE3C" floodOpacity="0.55" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="var(--accent)" floodOpacity="0.55" style={{ floodColor: "var(--accent)" }} />
                   </filter>
                 </defs>
-                {/* saucer body ΓÇö wide disc */}
-                <ellipse cx="60" cy="44" rx="55" ry="13" fill="#1a1a1a" stroke="#E8AE3C" strokeWidth="2" filter="url(#ufoRimGlow)" />
-                {/* belly ΓÇö slightly lighter underside */}
-                <ellipse cx="60" cy="48" rx="40" ry="8" fill="#222222" />
-                {/* belly lights ΓÇö 4 evenly spaced gold dots */}
+                {/* saucer body — wide disc */}
+                <ellipse cx="60" cy="44" rx="55" ry="13" fill="var(--surface)" stroke="var(--accent)" strokeWidth="2" filter="url(#ufoRimGlow)" />
+                {/* belly — slightly lighter underside */}
+                <ellipse cx="60" cy="48" rx="40" ry="8" fill="var(--surface2)" />
+                {/* belly lights — 4 evenly spaced gold dots */}
                 <circle className="ufo-belly" cx="36" cy="49" r="2.2" />
                 <circle className="ufo-belly" cx="52" cy="51" r="2.2" />
                 <circle className="ufo-belly" cx="68" cy="51" r="2.2" />
                 <circle className="ufo-belly" cx="84" cy="49" r="2.2" />
-                {/* dome / cockpit ΓÇö prominent, green-tinted */}
-                <path d="M37 38 Q60 4 83 38 Z" fill="#1e2a1e" stroke="#E8AE3C" strokeWidth="1" />
+                {/* dome / cockpit — prominent, green-tinted */}
+                <path d="M37 38 Q60 4 83 38 Z" fill="var(--surface3)" stroke="var(--accent)" strokeWidth="1" />
                 {/* porthole windows ΓÇö sequential 1-2-3 blink */}
                 <circle className="porthole porthole-1" cx="49" cy="28" r="4" />
                 <circle className="porthole porthole-2" cx="60" cy="24" r="4" />
@@ -713,14 +713,14 @@ export default function HomeClient() {
         <div className="flex justify-center mb-8" style={{ fontSize: "32px", letterSpacing: "0.12em", color: "var(--accent)" }} aria-hidden="true">
           <ScoutItWordmark leading={<ScoutItMark />} />
         </div>
-        <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(232, 174, 60,0.3)' }}>
+        <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-12 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(var(--accent-rgb), 0.3)' }}>
           Browse Space Catalog
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 01: Orbit */}
           <Link href="/layer/orbit" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(var(--accent-rgb),0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 01 // ORBIT</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">Orbit: Top Demand</h3>
             <p className="text-sm text-text-secondary">Properties ranked by real buyer and seeker inquiry demand across the market.</p>
@@ -728,7 +728,7 @@ export default function HomeClient() {
 
           {/* Card 02: Stratosphere */}
           <Link href="/layer/stratosphere" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--accent-rgb),0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 02 // STRATOSPHERE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">Stratosphere: Market Intel</h3>
             <p className="text-sm text-text-secondary">Independent neighborhood reports, pricing trends, and zoning analysis.</p>
@@ -736,7 +736,7 @@ export default function HomeClient() {
 
           {/* Card 03: Metropolis */}
           <Link href="/layer/metropolis" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 lg:col-span-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(232,174,60,0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(var(--accent-rgb),0.15),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 03 // METROPOLIS</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">Metropolis: Directory</h3>
             <p className="text-sm text-text-secondary">Search commercial, residential, and event spaces across the Philippines.</p>
@@ -744,7 +744,7 @@ export default function HomeClient() {
 
           {/* Card 04: The Crust */}
           <Link href="/layer/crust" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--accent-rgb),0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 04 // THE CRUST</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Crust: Professional Roster</h3>
             <p className="text-sm text-text-secondary">Licensed brokers, spatial photographers, site researchers, and event planners.</p>
@@ -752,7 +752,7 @@ export default function HomeClient() {
 
           {/* Card 05: The Mantle */}
           <Link href="/layer/mantle" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,174,60,0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--accent-rgb),0.12),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 05 // THE MANTLE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Mantle: Platform Truth</h3>
             <p className="text-sm text-text-secondary">Data philosophy and verification standards.</p>
@@ -760,7 +760,7 @@ export default function HomeClient() {
 
           {/* Card 06: The Core */}
           <Link href="/layer/core" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,174,60,0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--accent-rgb),0.1),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="font-mono text-[12px] text-gold-accent tracking-widest mb-4">LAYER 06 // THE CORE</div>
             <h3 className="font-display text-2xl text-on-surface mb-2">The Core: Private Command</h3>
             <p className="text-sm text-text-secondary">Your personal board, saved comparisons, property portfolio, and deal inbox.</p>
@@ -817,7 +817,7 @@ export default function HomeClient() {
         .prominent-action-link:hover {
           background: var(--accent-bright);
           border-color: var(--accent-bright);
-          color: #000;
+          color: var(--on-accent);
           box-shadow: var(--shadow-glow);
           transform: translateY(-2px);
         }
@@ -873,7 +873,7 @@ export default function HomeClient() {
         .hero-cta-primary:hover {
           background: var(--accent-fill-hover);
           border-color: var(--accent-fill-hover);
-          box-shadow: 0 8px 30px rgba(232, 174, 60, 0.25);
+          box-shadow: 0 8px 30px rgba(var(--accent-rgb), 0.25);
           transform: translateY(-2px);
           animation: none;
         }
@@ -922,23 +922,22 @@ export default function HomeClient() {
         }
         .hero-founding-link:hover {
           opacity: 1;
-          text-shadow: 0 0 14px rgba(232, 174, 60, 0.5);
+          text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5);
         }
         .hero-founding-link:focus-visible {
           outline: 1.5px solid var(--accent-bright);
           outline-offset: 4px;
         }
 
-        /* ΓòÉΓòÉΓòÉ SECTION 1: SPACE HERO ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
+        /* ─── SECTION 1: SPACE HERO ────────────────────────────────── */
         .section-hook {
           display: flex;
           align-items: center;
           justify-content: center;
           /* Deliberately dark in BOTH themes: this is the starfield hero and
              "outer space" is the concept. globals.css re-declares dark ink
-             tokens for it in light mode (the inverted-island rule).
-             Was #000000; DESIGN.md bans pure black, so this is void-black. */
-          background: #0d0d0d;
+             tokens for it in light mode (the inverted-island rule). */
+          background: var(--bg);
           overflow: hidden;
           position: relative;
         }
@@ -960,14 +959,14 @@ export default function HomeClient() {
           border-radius: 50%;
           background: radial-gradient(
             circle,
-            #000000 0%,
-            #000000 35%,
-            rgba(232, 174, 60, 0.04) 45%,
-            rgba(232, 174, 60, 0.12) 55%,
+            var(--bg) 0%,
+            var(--bg) 35%,
+            rgba(var(--accent-rgb), 0.04) 45%,
+            rgba(var(--accent-rgb), 0.12) 55%,
             transparent 75%
           );
-          border: 1px solid rgba(232, 174, 60, 0.18);
-          box-shadow: 0 0 120px rgba(232, 174, 60, 0.14), inset 0 0 40px rgba(232, 174, 60, 0.08);
+          border: 1px solid rgba(var(--accent-rgb), 0.18);
+          box-shadow: 0 0 120px rgba(var(--accent-rgb), 0.14), inset 0 0 40px rgba(var(--accent-rgb), 0.08);
           pointer-events: none;
           z-index: 1;
           animation: slowOrbit 60s linear infinite;
@@ -984,11 +983,11 @@ export default function HomeClient() {
           border-radius: 50%;
           background: conic-gradient(
             from 0deg,
-            rgba(232, 174, 60, 0.12) 0%,
+            rgba(var(--accent-rgb), 0.12) 0%,
             transparent 25%,
-            rgba(232, 174, 60, 0.18) 50%,
+            rgba(var(--accent-rgb), 0.18) 50%,
             transparent 75%,
-            rgba(232, 174, 60, 0.12) 100%
+            rgba(var(--accent-rgb), 0.12) 100%
           );
           filter: blur(35px);
           animation: slowSwirl 45s linear infinite;
@@ -1006,8 +1005,8 @@ export default function HomeClient() {
           border-radius: 50% 50% 0 0;
           background: radial-gradient(
             ellipse at top,
-            rgba(232, 174, 60, 0.22) 0%,
-            rgba(232, 174, 60, 0.06) 40%,
+            rgba(var(--accent-rgb), 0.22) 0%,
+            rgba(var(--accent-rgb), 0.06) 40%,
             transparent 70%
           );
           filter: blur(40px);
@@ -1026,11 +1025,11 @@ export default function HomeClient() {
           border-radius: 50%;
           background: conic-gradient(
             from 180deg,
-            rgba(232, 174, 60, 0.09) 0%,
+            rgba(var(--accent-rgb), 0.09) 0%,
             transparent 30%,
-            rgba(232, 174, 60, 0.15) 50%,
+            rgba(var(--accent-rgb), 0.15) 50%,
             transparent 80%,
-            rgba(232, 174, 60, 0.09) 100%
+            rgba(var(--accent-rgb), 0.09) 100%
           );
           filter: blur(50px);
           animation: slowSwirl 90s linear infinite reverse;
@@ -1070,13 +1069,13 @@ export default function HomeClient() {
           }
         }
 
-        /* ΓöÇΓöÇ Comet Elements ΓöÇΓöÇ */
+        /* ── Comet Elements ── */
         .comet-head {
           width: 100%;
           height: 100%;
-          background: #ffffff;
+          background: var(--text-primary);
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(232, 174, 60, 0.4);
+          box-shadow: 0 0 10px rgba(var(--text-primary-rgb), 0.9), 0 0 20px rgba(var(--accent-rgb), 0.4);
           position: relative;
         }
         .comet-tail {
@@ -1086,34 +1085,34 @@ export default function HomeClient() {
           transform: translateY(-50%);
           width: 90px; /* Longer, highly noticeable tail */
           height: 3px; /* Thicker head connection */
-          background: linear-gradient(to left, #ffffff 0%, rgba(232, 174, 60, 0.6) 30%, rgba(232, 174, 60, 0.15) 75%, transparent 100%);
+          background: linear-gradient(to left, var(--text-primary) 0%, rgba(var(--accent-rgb), 0.6) 30%, rgba(var(--accent-rgb), 0.15) 75%, transparent 100%);
           clip-path: polygon(0 50%, 100% 0, 100% 100%); /* Elegant taper wedge shape */
           pointer-events: none;
         }
 
-        /* ΓöÇΓöÇ Drifting Neutron Star ΓöÇΓöÇ */
+        /* ── Drifting Neutron Star ── */
         .neutron-star-drifting {
           width: 100%;
           height: 100%;
-          background: #e0f2fe;
+          background: color-mix(in srgb, var(--intel-cyan) 25%, white);
           border-radius: 50%;
           box-shadow: 
-            0 0 12px rgba(224, 242, 254, 0.9), 
-            0 0 24px rgba(232, 174, 60, 0.6);
+            0 0 12px color-mix(in srgb, var(--intel-cyan) 80%, white), 
+            0 0 24px rgba(var(--accent-rgb), 0.6);
           animation: pulseNeutronDrifting 2.5s ease-in-out infinite alternate;
         }
         @keyframes pulseNeutronDrifting {
           0% {
             transform: scale(0.85);
             box-shadow: 
-              0 0 8px rgba(224, 242, 254, 0.7), 
-              0 0 16px rgba(232, 174, 60, 0.4);
+              0 0 8px color-mix(in srgb, var(--intel-cyan) 70%, white), 
+              0 0 16px rgba(var(--accent-rgb), 0.4);
           }
           100% {
             transform: scale(1.15);
             box-shadow: 
-              0 0 16px rgba(224, 242, 254, 0.95), 
-              0 0 32px rgba(232, 174, 60, 0.75);
+              0 0 16px color-mix(in srgb, var(--intel-cyan) 90%, white), 
+              0 0 32px rgba(var(--accent-rgb), 0.75);
           }
         }
 
@@ -1156,7 +1155,7 @@ export default function HomeClient() {
           inset: 0;
           z-index: 2;
           pointer-events: none;
-          background: radial-gradient(ellipse 44% 30% at 50% 62%, rgba(10, 9, 8, 0.34) 0%, rgba(10, 9, 8, 0.14) 55%, transparent 78%);
+          background: radial-gradient(ellipse 44% 30% at 50% 62%, rgba(var(--bg-rgb), 0.34) 0%, rgba(var(--bg-rgb), 0.14) 55%, transparent 78%);
         }
         :global(body.light-mode) .hero-content-scrim {
           display: none;
@@ -1182,19 +1181,19 @@ export default function HomeClient() {
           /* slow fade-back to resting state (2s) when the lit class is removed */
           transition: color 2s ease, text-shadow 2s ease;
         }
-        .scoutit-wordmark .word-scout { color: var(--text-primary, #ffffff); }
-        .scoutit-wordmark .word-s     { color: var(--accent, #E8AE3C); }
-        .scoutit-wordmark .word-it    { color: var(--accent, #E8AE3C); margin-right: -4px; }
+        .scoutit-wordmark .word-scout { color: var(--text-primary); }
+        .scoutit-wordmark .word-s     { color: var(--accent); }
+        .scoutit-wordmark .word-it    { color: var(--accent); margin-right: -4px; }
         /* beam-hit illumination snaps on fast, then fades back slowly via base transition */
         .scoutit-wordmark.lit .word-scout {
-          color: var(--text-primary, #ffffff);
-          text-shadow: 0 0 60px rgba(232, 174, 60, 0.8), 0 0 120px rgba(232, 174, 60, 0.3);
+          color: var(--text-primary);
+          text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.8), 0 0 120px rgba(var(--accent-rgb), 0.3);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
         .scoutit-wordmark.lit .word-s,
         .scoutit-wordmark.lit .word-it {
-          color: var(--accent, #E8AE3C);
-          text-shadow: 0 0 60px rgba(232, 174, 60, 0.9), 0 0 120px rgba(232, 174, 60, 0.4);
+          color: var(--accent);
+          text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.9), 0 0 120px rgba(var(--accent-rgb), 0.4);
           transition: color 0.15s ease, text-shadow 0.15s ease;
         }
         :global(body.light-mode) .scoutit-wordmark .word-scout,
@@ -1218,7 +1217,7 @@ export default function HomeClient() {
           width: 220px;
           height: 220px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(232, 174, 60, 0.6) 0%, rgba(232, 174, 60, 0) 60%);
+          background: radial-gradient(circle, rgba(var(--accent-rgb), 0.6) 0%, rgba(var(--accent-rgb), 0) 60%);
           transform: translate(-50%, -50%) scale(0.3);
           pointer-events: none;
           opacity: 0;
@@ -1226,7 +1225,7 @@ export default function HomeClient() {
           animation: titleImpact 0.3s ease-out forwards;
         }
 
-        /* ΓöÇΓöÇ UFO (clickable easter egg) hovering above the wordmark ΓöÇΓöÇ */
+        /* ── UFO (clickable easter egg) hovering above the wordmark ── */
         .title-ufo-zone {
           display: flex;
           flex-direction: column;
@@ -1250,7 +1249,7 @@ export default function HomeClient() {
           -webkit-user-select: none;
         }
         .title-ufo.powering { animation: none; }   /* stop floating during power-up */
-        /* Soft gold underglow ΓÇö UFO emits faint warmth downward */
+        /* Soft gold underglow — UFO emits faint warmth downward */
         .title-ufo-underglow {
           position: absolute;
           top: 60%;
@@ -1258,7 +1257,7 @@ export default function HomeClient() {
           transform: translateX(-50%);
           width: 180px;
           height: 90px;
-          background: radial-gradient(ellipse at top, rgba(232, 174, 60, 0.12), rgba(232, 174, 60, 0) 70%);
+          background: radial-gradient(ellipse at top, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-rgb), 0) 70%);
           pointer-events: none;
           z-index: -1;
         }
@@ -1271,7 +1270,7 @@ export default function HomeClient() {
           height: 60px;
           margin: -30px 0 0 -30px;
           border-radius: 50%;
-          border: 1px solid rgba(232, 174, 60, 0.5);
+          border: 1px solid rgba(var(--accent-rgb), 0.5);
           pointer-events: none;
           opacity: 0;
           z-index: -1;
@@ -1283,16 +1282,16 @@ export default function HomeClient() {
           display: block;
           animation: titleSaucerTilt 9s ease-in-out infinite;
         }
-        .title-ufo-svg .porthole { fill: #00ff88; }
+        .title-ufo-svg .porthole { fill: var(--green); }
         /* sequential 1-2-3 blink (delays stagger the same keyframe) */
         .title-ufo-svg .porthole-1 { animation: portSeq 1.4s linear infinite; animation-delay: 0s; }
         .title-ufo-svg .porthole-2 { animation: portSeq 1.4s linear infinite; animation-delay: 0.2s; }
         .title-ufo-svg .porthole-3 { animation: portSeq 1.4s linear infinite; animation-delay: 0.4s; }
         /* power-up: all three flash together, rapidly, 3x over ~0.5s */
         .title-ufo.powering .porthole { animation: portPower 0.166s ease-in-out 3; }
-        .title-ufo-svg .ufo-belly { fill: rgba(232, 174, 60, 0.6); }
+        .title-ufo-svg .ufo-belly { fill: rgba(var(--accent-rgb), 0.6); }
 
-        /* ΓöÇΓöÇ Tractor beam: gold cone, fades to transparent, extend ΓåÆ hold ΓåÆ fade ΓöÇΓöÇ */
+        /* ── Tractor beam: gold cone, fades to transparent, extend → hold → fade ── */
         .title-beam {
           display: block;
           width: 3px;
@@ -1300,14 +1299,14 @@ export default function HomeClient() {
           margin-top: 0;
           background: linear-gradient(
             to bottom,
-            rgba(255, 235, 160, 1) 0%,
-            rgba(232, 174, 60, 0.85) 30%,
-            rgba(232, 174, 60, 0.3) 70%,
-            rgba(232, 174, 60, 0) 100%
+            rgba(var(--accent-bright-rgb), 1) 0%,
+            rgba(var(--accent-rgb), 0.85) 30%,
+            rgba(var(--accent-rgb), 0.3) 70%,
+            rgba(var(--accent-rgb), 0) 100%
           );
           box-shadow:
-            0 0 8px rgba(232, 174, 60, 0.6),
-            0 0 20px rgba(232, 174, 60, 0.25);
+            0 0 8px rgba(var(--accent-rgb), 0.6),
+            0 0 20px rgba(var(--accent-rgb), 0.25);
           border-radius: 0 0 4px 4px;
           transform-origin: top center;
           opacity: 0;
@@ -1319,35 +1318,35 @@ export default function HomeClient() {
             width: 4px;
             height: 100px;
             box-shadow:
-              0 0 12px rgba(232, 174, 60, 0.7),
-              0 0 30px rgba(232, 174, 60, 0.3);
+              0 0 12px rgba(var(--accent-rgb), 0.7),
+              0 0 30px rgba(var(--accent-rgb), 0.3);
           }
         }
 
-        /* ΓöÇΓöÇ Discipline badge ΓöÇΓöÇ */
+        /* ── Discipline badge ── */
         .title-badge {
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-mono), 'Courier New', monospace;
           font-size: 13px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: var(--text-muted, #777777);
+          color: var(--text-muted);
           margin-bottom: 22px;
         }
 
-        /* ΓöÇΓöÇ Divider ΓöÇΓöÇ */
+        /* ── Divider ── */
         .title-divider {
           width: 32px;
           height: 1px;
-          background: rgba(232, 174, 60, 0.35);
+          background: rgba(var(--accent-rgb), 0.35);
           margin: 0 auto 22px;
         }
 
-        /* ΓöÇΓöÇ Taglines ΓöÇΓöÇ */
+        /* ── Taglines ── */
         .title-tagline-intro {
           font-family: var(--font-body, system-ui, sans-serif);
           font-size: 14px;
           line-height: 1.6;
-          color: var(--text-secondary, #888888);
+          color: var(--text-secondary);
           max-width: 520px;
           margin: 0 auto 24px;
           text-align: center;
@@ -1357,7 +1356,7 @@ export default function HomeClient() {
           font-family: var(--font-display);
           font-style: italic;
           font-size: 20px;
-          color: #aaaaaa;
+          color: var(--text-secondary);
           text-align: center;
           margin: 0 0 10px;
         }
@@ -1425,7 +1424,7 @@ export default function HomeClient() {
         /* ΓöÇΓöÇ S: Comet Trail ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .letter-s {
           animation: cometDraw 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-          text-shadow: 0 0 12px rgba(232, 174, 60, 0.5);
+          text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.5);
         }
 
         /* ΓöÇΓöÇ C: Eclipse Reveal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
@@ -1443,7 +1442,7 @@ export default function HomeClient() {
           position: absolute;
           top: 50%; left: 50%;
           width: 120%; height: 35%;
-          border: 1px solid rgba(232, 174, 60,0.5);
+          border: 1px solid rgba(var(--accent-rgb), 0.5);
           border-radius: 50%;
           transform: translate(-50%, -50%) rotateX(65deg);
           animation: orbitSweep 1.4s ease-out 1.0s forwards;
@@ -1488,7 +1487,7 @@ export default function HomeClient() {
           width: 0.06em;
           min-width: 3px;
           height: 1.1em;
-          background: linear-gradient(to bottom, rgba(34,197,94,0.35), transparent);
+          background: linear-gradient(to bottom, color-mix(in srgb, var(--green) 35%, transparent), transparent);
           animation: beamGlow 2.2s ease-in-out 3.5s infinite;
           opacity: 0;
           animation-fill-mode: forwards;
@@ -1510,9 +1509,9 @@ export default function HomeClient() {
         .ufo-disc {
           width: 0.5em;
           height: 0.11em;
-          background: linear-gradient(180deg, #6eff8a 0%, #1faa3a 100%);
+          background: linear-gradient(180deg, color-mix(in srgb, var(--green) 80%, white) 0%, var(--green) 100%);
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(0,220,80,0.7), 0 0 22px rgba(0,220,80,0.3);
+          box-shadow: 0 0 10px color-mix(in srgb, var(--green) 70%, transparent), 0 0 22px color-mix(in srgb, var(--green) 30%, transparent);
           position: relative;
           display: flex;
           align-items: center;
@@ -1526,7 +1525,7 @@ export default function HomeClient() {
           inset: -2px;
           border-radius: 50%;
           background: transparent;
-          box-shadow: 0 0 14px rgba(0,220,80,0.5);
+          box-shadow: 0 0 14px color-mix(in srgb, var(--green) 50%, transparent);
           animation: discGlow 2.5s ease-in-out 3.5s infinite;
         }
 
@@ -1534,8 +1533,8 @@ export default function HomeClient() {
         .ufo-dome {
           width: 0.22em;
           height: 0.12em;
-          background: linear-gradient(180deg, rgba(80,255,120,0.2) 0%, rgba(0,200,60,0.08) 100%);
-          border: 1px solid rgba(80,255,120,0.5);
+          background: linear-gradient(180deg, color-mix(in srgb, var(--green) 20%, transparent) 0%, color-mix(in srgb, var(--green) 8%, transparent) 100%);
+          border: 1px solid color-mix(in srgb, var(--green) 50%, transparent);
           border-bottom: none;
           border-radius: 50% 50% 0 0;
         }
@@ -1547,8 +1546,8 @@ export default function HomeClient() {
           min-width: 3px;
           min-height: 3px;
           border-radius: 50%;
-          background: #a8ffb8;
-          box-shadow: 0 0 5px #50ff80;
+          background: color-mix(in srgb, var(--green) 35%, white);
+          box-shadow: 0 0 5px var(--green);
         }
 
 
@@ -1570,7 +1569,7 @@ export default function HomeClient() {
           min-width: 4px;
           flex: 1;
           min-height: 0.55em;
-          background: linear-gradient(to bottom, rgba(232, 174, 60,0.7) 0%, rgba(232, 174, 60,0.15) 100%);
+          background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.7) 0%, rgba(var(--accent-rgb), 0.15) 100%);
           clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
           animation: beamPulse 2s ease-in-out 3.4s infinite;
           opacity: 0;
@@ -1587,7 +1586,7 @@ export default function HomeClient() {
           position: absolute;
           top: 50%; left: 50%;
           border-radius: 50%;
-          border: 1px solid rgba(232, 174, 60,0.5);
+          border: 1px solid rgba(var(--accent-rgb), 0.5);
           transform: translate(-50%, -50%) scale(2);
           opacity: 0;
           pointer-events: none;
@@ -1627,11 +1626,11 @@ export default function HomeClient() {
         }
 
         .scroll-text {
-          font-family: 'Courier New', monospace;
+          font-family: var(--font-mono), 'Courier New', monospace;
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          color: #888888;
+          color: var(--text-secondary);
         }
 
         /* Pulsing downward chevrons (top fades in first, then bottom) */
@@ -1672,7 +1671,7 @@ export default function HomeClient() {
           max-width: 18em;
           margin-left: auto;
           margin-right: auto;
-          text-shadow: 0 2px 30px rgba(0,0,0,0.8);
+          text-shadow: 0 2px 30px rgba(var(--bg-rgb), 0.8);
           animation: fadeUp 1.2s ease 2.8s forwards;
           opacity: 0;
         }
@@ -1685,7 +1684,7 @@ export default function HomeClient() {
           margin-top: 0;
           margin-bottom: 48px;
           letter-spacing: 0.04em;
-          text-shadow: 0 1px 15px rgba(0,0,0,0.8);
+          text-shadow: 0 1px 15px rgba(var(--bg-rgb), 0.8);
           animation: fadeUp 1.2s ease 3.2s forwards;
           opacity: 0;
         }
@@ -1710,18 +1709,18 @@ export default function HomeClient() {
 
         .hero-cta-btn:hover {
           background: var(--accent);
-          color: #0e0e0e;
-          box-shadow: 0 0 35px rgba(232, 174, 60, 0.45);
+          color: var(--on-accent);
+          box-shadow: 0 0 35px rgba(var(--accent-rgb), 0.45);
           transform: translateY(-2px);
         }
 
-        /* KEYFRAMES ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
+        /* KEYFRAMES ────────────────────────────────────────────────────────── */
 
         /* Primary CTA — breathing gold glow (dim -> bright -> dim), signals
            "this is the one clickable thing" without a second accent color */
         @keyframes glowPulse {
-          0%, 100% { box-shadow: 0 0 6px rgba(232, 174, 60, 0.15); }
-          50%      { box-shadow: 0 0 26px rgba(232, 174, 60, 0.55); }
+          0%, 100% { box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.15); }
+          50%      { box-shadow: 0 0 26px rgba(var(--accent-rgb), 0.55); }
         }
 
         /* S ΓÇö comet: draws left-to-right with trailing glow */
@@ -1786,8 +1785,8 @@ export default function HomeClient() {
 
         /* UFO disc glow pulse */
         @keyframes discGlow {
-          0%, 100% { box-shadow: 0 0 12px rgba(232, 174, 60,0.4); }
-          50%       { box-shadow: 0 0 22px rgba(232, 174, 60,0.9), 0 0 40px rgba(232, 174, 60,0.2); }
+          0%, 100% { box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4); }
+          50%       { box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.9), 0 0 40px rgba(var(--accent-rgb), 0.2); }
         }
 
         /* UFO lights blink */
@@ -1938,7 +1937,7 @@ export default function HomeClient() {
 
         .matrix-preview-pane {
           flex: 1;
-          background: #121212;
+          background: var(--surface);
           padding: 120px 48px;
           display: flex;
           flex-direction: column;
@@ -1979,7 +1978,7 @@ export default function HomeClient() {
         .vector-search-input {
           width: 100%;
           background: var(--surface2);
-          border: 1px solid #333333;
+          border: 1px solid var(--border-solid);
           padding: 12px 16px;
           color: var(--text-primary);
           font-family: var(--font-body);
@@ -1990,7 +1989,7 @@ export default function HomeClient() {
         }
 
         .vector-search-input::placeholder {
-          color: #666666;
+          color: var(--text-muted);
         }
 
         .vector-search-input:focus {
@@ -2021,7 +2020,7 @@ export default function HomeClient() {
         }
 
         .dropdown-item:hover {
-          background: #222222;
+          background: var(--surface3);
           color: var(--accent);
         }
 
@@ -2040,8 +2039,8 @@ export default function HomeClient() {
         }
 
         .flow-card {
-          background: #111111;
-          border: 1px solid #222222;
+          background: var(--surface);
+          border: 1px solid var(--border);
           padding: 24px 20px;
           border-radius: 4px;
           display: flex;
@@ -2064,8 +2063,8 @@ export default function HomeClient() {
         }
 
         .mini-preview-card {
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: linear-gradient(165deg, var(--surface2), var(--surface));
+          border: 1px solid rgba(var(--text-primary-rgb), 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
           transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -2074,13 +2073,13 @@ export default function HomeClient() {
         .mini-preview-card:hover {
           transform: translateY(-4px);
           border-color: var(--accent);
-          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+          box-shadow: 0 14px 32px rgba(var(--bg-rgb), 0.45), var(--shadow-glow-soft);
         }
 
         .mini-card-visual {
           height: 180px;
           overflow: hidden;
-          background: #000;
+          background: var(--bg);
         }
 
         .mini-card-image {
@@ -2143,8 +2142,8 @@ export default function HomeClient() {
         .mini-tag {
           font-size: 12px;
           color: var(--text-secondary);
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          background: rgba(var(--text-primary-rgb), 0.03);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.05);
           padding: 4px 8px;
           border-radius: 2px;
           font-family: var(--font-mono);
@@ -2169,7 +2168,7 @@ export default function HomeClient() {
 
         .discover-news-item-link {
           display: block;
-          border-bottom: 1px solid #1e1e1e;
+          border-bottom: 1px solid var(--border-subtle);
           padding: 12px;
           margin: 0 -12px;
           border-radius: 4px;
@@ -2184,7 +2183,7 @@ export default function HomeClient() {
         .news-item-title {
           font-size: 13px;
           font-weight: 500;
-          color: #f0ede8;
+          color: var(--text-primary);
           transition: color var(--transition-fast);
           margin: 0;
         }
@@ -2289,12 +2288,12 @@ export default function HomeClient() {
 
         .preview-card-content p {
           font-size: 13px;
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--text-secondary);
         }
 
         /* SECTION 4: BROKERS LAYER */
         .section-brokers {
-          background: #0a0a0a;
+          background: var(--bg);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -2335,8 +2334,8 @@ export default function HomeClient() {
         }
 
         .broker-preview-card {
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: linear-gradient(165deg, var(--surface2), var(--surface));
+          border: 1px solid rgba(var(--text-primary-rgb), 0.08);
           border-radius: 8px;
           padding: 32px 24px;
           display: flex;
@@ -2350,7 +2349,7 @@ export default function HomeClient() {
         .broker-preview-card:hover {
           border-color: var(--accent);
           transform: translateY(-4px);
-          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+          box-shadow: 0 14px 32px rgba(var(--bg-rgb), 0.45), var(--shadow-glow-soft);
         }
 
         .broker-metrics-block {
@@ -2363,8 +2362,8 @@ export default function HomeClient() {
 
         .broker-metric-item {
           flex: 1;
-          background: #0e0e0e;
-          border: 1px solid #262626;
+          background: var(--surface);
+          border: 1px solid var(--border-solid);
           padding: 16px 8px;
           display: flex;
           flex-direction: column;
@@ -2375,7 +2374,7 @@ export default function HomeClient() {
         }
 
         .broker-ghost-card {
-          background: rgba(255, 255, 255, 0.02);
+          background: rgba(var(--text-primary-rgb), 0.02);
           border: 1px solid var(--border-solid);
           border-radius: var(--radius-md);
           padding: 32px;
@@ -2388,7 +2387,7 @@ export default function HomeClient() {
 
         .broker-ghost-card:hover {
           filter: blur(0px);
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(var(--text-primary-rgb), 0.05);
           border-color: var(--accent-border);
         }
 
@@ -2423,7 +2422,7 @@ export default function HomeClient() {
 
         /* SECTION: SERVICES LAYER */
         .section-services {
-          background: #070707;
+          background: var(--bg);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -2459,8 +2458,8 @@ export default function HomeClient() {
         }
 
         .service-card {
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: linear-gradient(165deg, var(--surface2), var(--surface));
+          border: 1px solid rgba(var(--text-primary-rgb), 0.08);
           border-radius: 8px;
           text-decoration: none;
           display: block;
@@ -2472,7 +2471,7 @@ export default function HomeClient() {
         .service-card:hover {
           transform: translateY(-4px);
           border-color: rgba(var(--accent-rgb), 0.3);
-          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow-soft);
+          box-shadow: 0 14px 32px rgba(var(--bg-rgb), 0.45), var(--shadow-glow-soft);
         }
 
         .service-card-inner {
@@ -2499,9 +2498,9 @@ export default function HomeClient() {
         }
 
         .live-badge {
-          background: rgba(16, 185, 129, 0.1);
+          background: color-mix(in srgb, var(--green) 10%, transparent);
           color: var(--green);
-          border: 0.5px solid rgba(16, 185, 129, 0.3);
+          border: 0.5px solid color-mix(in srgb, var(--green) 30%, transparent);
         }
 
         .soon-badge {
@@ -2540,7 +2539,7 @@ export default function HomeClient() {
 
         .live-card:hover {
           border-color: var(--green);
-          background: rgba(16, 185, 129, 0.02);
+          background: color-mix(in srgb, var(--green) 2%, transparent);
           transform: translateY(-4px);
         }
 
@@ -2576,15 +2575,15 @@ export default function HomeClient() {
         }
 
         .ledger-ghost {
-          background: linear-gradient(165deg, #1a1917, #111110);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: linear-gradient(165deg, var(--surface2), var(--surface));
+          border: 1px solid rgba(var(--text-primary-rgb), 0.08);
           border-radius: var(--radius-md);
           overflow: hidden;
         }
 
         .ledger-ghost-header {
           height: 48px;
-          background: rgba(0,0,0,0.2);
+          background: rgba(var(--bg-rgb), 0.2);
           border-bottom: 1px solid var(--border-solid);
         }
 
@@ -2618,7 +2617,7 @@ export default function HomeClient() {
 
         /* SECTION 6: ABOUT US LAYER */
         .section-about {
-          background: #080808;
+          background: var(--bg);
           display: flex;
           flex-direction: column;
           justify-content: center;

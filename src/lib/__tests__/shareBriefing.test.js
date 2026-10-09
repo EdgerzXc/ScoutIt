@@ -7,6 +7,7 @@ import {
   xLength,
   X_LIMIT,
   buildPromoPack,
+  buildMessagingDispatch,
 } from "../shareBriefing";
 
 // ═══════════════════════════════════════════════════════════════
@@ -263,5 +264,26 @@ describe("shareBriefing - X length budget", () => {
     const short = { title: "A", spaceCategory: "Office" };
     const url = "https://x.test/p";
     expect(buildShareText(short, url, { limit: "x" })).toBe(buildShareText(short, url));
+  });
+});
+
+describe("shareBriefing — Philippine messaging dispatches (WhatsApp / Viber)", () => {
+  const url = "https://www.scoutit.space/property/cyber-sigma-tower-3";
+
+  it("builds a WhatsApp dispatch conforming to RESA RA 9646 without prices", () => {
+    const dispatch = buildMessagingDispatch(FULL_COMMERCIAL, url, { platform: "whatsapp" });
+    expect(dispatch).toContain("*SCOUTIT SPACE BRIEFING*");
+    expect(dispatch).toContain("*Cyber Sigma Tower 3*");
+    expect(dispatch).toContain("1500 sqm");
+    expect(dispatch).toContain(url);
+    expect(dispatch).not.toMatch(MONEY);
+  });
+
+  it("builds a Viber dispatch without prices", () => {
+    const dispatch = buildMessagingDispatch(FULL_COMMERCIAL, url, { platform: "viber" });
+    expect(dispatch).toContain("SCOUTIT SPACE BRIEFING: Cyber Sigma Tower 3");
+    expect(dispatch).toContain("1500 sqm");
+    expect(dispatch).toContain(url);
+    expect(dispatch).not.toMatch(MONEY);
   });
 });

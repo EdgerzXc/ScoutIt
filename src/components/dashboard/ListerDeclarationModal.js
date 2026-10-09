@@ -6,6 +6,7 @@ import {
   OWNER_SOVEREIGNTY_DISCLAIMER,
   DISCLAIMER_VERSION,
 } from "@/lib/listerRelationship";
+import useModalDialog from "@/components/ui/useModalDialog";
 
 // ─────────────────────────────────────────────────────────────────────────
 // LISTER RELATIONSHIP DECLARATION — the publish gate
@@ -39,7 +40,7 @@ import {
 // Mobile first: full-screen sheet at 390px, centred card from 700px.
 // ─────────────────────────────────────────────────────────────────────────
 
-const MONO = "'Courier New',monospace";
+const MONO = "var(--font-mono)";
 
 export default function ListerDeclarationModal({
   open,
@@ -67,14 +68,7 @@ export default function ListerDeclarationModal({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKey = (e) => {
-      if (e.key === "Escape" && !busy) onCancel?.();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, busy, onCancel]);
+  useModalDialog(cardRef, { active: open, onClose: busy ? undefined : onCancel });
 
   if (!open) return null;
 
@@ -97,7 +91,7 @@ export default function ListerDeclarationModal({
           position: fixed;
           inset: 0;
           z-index: 950;
-          background: rgba(8, 8, 8, 0.88);
+          background: rgba(var(--bg-rgb), 0.88);
           backdrop-filter: blur(7px);
           display: flex;
           align-items: flex-end;
@@ -130,7 +124,7 @@ export default function ListerDeclarationModal({
         .ld-eyebrow {
           font-family: ${MONO};
           font-size: 12px;
-          color: var(--accent, var(--accent));
+          color: var(--accent);
           letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 8px;
@@ -189,7 +183,7 @@ export default function ListerDeclarationModal({
         .ld-opt:hover { border-color: var(--border-solid); }
         .ld-opt:focus-within { outline: 2px solid var(--accent-muted); outline-offset: 2px; }
         .ld-opt--on {
-          background: rgba(232, 174, 60, 0.06);
+          background: rgba(var(--accent-rgb), 0.06);
           border-color: var(--accent-muted, var(--accent-muted));
         }
         .ld-radio {
@@ -216,7 +210,7 @@ export default function ListerDeclarationModal({
         }
 
         .ld-disclaimer {
-          background: rgba(232, 174, 60, 0.06);
+          background: rgba(var(--accent-rgb), 0.06);
           border-left: 2px solid var(--accent-muted, var(--accent-muted));
           padding: 12px 13px;
           margin: 16px 0 12px;
@@ -236,7 +230,7 @@ export default function ListerDeclarationModal({
         .ld-version {
           font-family: ${MONO};
           font-size: 12px;
-          color: #5a5a5a;
+          color: var(--text-muted);
           letter-spacing: 0.1em;
           margin-top: 9px;
         }

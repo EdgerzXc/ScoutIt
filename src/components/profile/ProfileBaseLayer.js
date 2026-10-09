@@ -8,9 +8,9 @@ import { MapPin, Calendar, Edit2, MessageSquare } from "lucide-react";
 
 const TIER_CONFIG = {
   universe: { label: "Universe", color: "var(--accent)", border: "var(--accent-muted)" },
-  cluster:  { label: "Cluster",  color: "#C0C0C0", border: "rgba(192,192,192,0.4)" },
-  solar:    { label: "Solar",    color: "#CD7F32", border: "rgba(205,127,50,0.4)" },
-  starry:   { label: "Starry",   color: "var(--text-secondary)", border: "rgba(136,136,136,0.3)" },
+  cluster:  { label: "Cluster",  color: "var(--tier-silver)", border: "var(--tier-silver)" },
+  solar:    { label: "Solar",    color: "var(--tier-bronze)", border: "var(--tier-bronze)" },
+  starry:   { label: "Starry",   color: "var(--text-secondary)", border: "var(--border-subtle)" },
 };
 
 const ROLE_LABELS = {
@@ -220,7 +220,7 @@ const baseSection = {
   alignItems: "flex-start",
   gap: 24,
   paddingBottom: 32,
-  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  borderBottom: "1px solid var(--border-subtle)",
 };
 
 const avatarWrap = {
@@ -229,7 +229,7 @@ const avatarWrap = {
   height: 96,
   borderRadius: "50%",
   background: "var(--surface)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--border-subtle)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

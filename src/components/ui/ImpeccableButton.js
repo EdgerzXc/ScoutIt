@@ -34,7 +34,7 @@ const BASE_CLASSES = [
 
 const VARIANTS = {
   primary:
-    "bg-gold-accent text-[var(--bg,#0e0e0e)] hover:bg-[var(--accent-bright,#e6a600)] shadow-[var(--shadow-glow-soft)]",
+    "bg-gold-accent text-[var(--on-accent)] hover:bg-[var(--accent-bright)] shadow-[var(--shadow-glow-soft)]",
   secondary:
     "bg-[var(--surface2)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent-border)]",
   danger: "bg-error/10 text-error border border-error/20 hover:bg-error/20",

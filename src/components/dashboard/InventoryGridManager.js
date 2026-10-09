@@ -320,7 +320,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
         groups.map(([floorKey, floorUnits]) => {
           const collapsed = collapsedFloors.has(floorKey);
           return (
-            <div key={floorKey} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl overflow-hidden mb-4 transition-all duration-300">
+            <div key={floorKey} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl overflow-hidden mb-4 transition-all duration-300">
               {/* Floor header */}
               <div className="flex items-center justify-between bg-white/[0.02] border-b border-white/[0.04] px-5 py-3.5">
                 <button
@@ -598,7 +598,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                     const structuralReadOnly = isOperatorMode || lockedForOwner;
 
                     return (
-                      <div key={unit.id} className={`flex flex-col gap-4 rounded-2xl border border-white/[0.04] p-5 transition-all duration-300 group shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${lockedForOwner ? "bg-gold-accent/5 backdrop-blur-xl" : "bg-surface/40 hover:bg-surface/60 backdrop-blur-xl hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"}`}>
+                      <div key={unit.id} className={`flex flex-col gap-4 rounded-2xl border border-white/[0.04] p-5 transition-all duration-300 group shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] ${lockedForOwner ? "bg-gold-accent/5 backdrop-blur-xl" : "bg-surface/40 hover:bg-surface/60 backdrop-blur-xl hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"}`}>
                         {/* Name & Actions Header */}
                         <div className="flex justify-between items-start gap-2">
                           <div className="flex-1">

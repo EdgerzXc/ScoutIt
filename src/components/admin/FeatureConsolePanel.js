@@ -90,7 +90,7 @@ export default function FeatureConsolePanel() {
       case "pre_launch_free_mode":
         return <Unlock size={20} className="text-gold-accent" />;
       case "ai_search":
-        return <Bot size={20} className="text-[#4caf7d]" />;
+        return <Bot size={20} style={{ color: "var(--green)" }} />;
       case "deep_intel":
         return <Brain size={20} className="text-purple-400" />;
       default:
@@ -115,7 +115,7 @@ export default function FeatureConsolePanel() {
         <button
           onClick={fetchFlags}
           disabled={loading}
-          className="px-3 py-1.5 bg-[#1e1e1e] hover:bg-[#282828] text-xs text-gray-300 rounded border border-[#333] transition-all flex items-center gap-1.5"
+          className="px-3 py-1.5 bg-surface-alt hover:bg-surface text-xs text-text-secondary rounded border border-surface-variant transition flex items-center gap-1.5"
         >
           <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
           Refresh Status
@@ -138,7 +138,7 @@ export default function FeatureConsolePanel() {
 
       {/* Flag Grid */}
       {loading ? (
-        <div className="p-8 text-center text-xs text-gray-500 bg-surface border border-[#222] rounded-xl">
+        <div className="p-8 text-center text-xs text-text-muted bg-surface border border-surface-variant rounded-xl">
           Scanning system kill-switches...
         </div>
       ) : (
@@ -152,10 +152,10 @@ export default function FeatureConsolePanel() {
                 key={flag.id}
                 className={`p-5 rounded-xl border transition-all relative overflow-hidden flex flex-col justify-between ${
                   isDanger && isActive
-                    ? "bg-red-950/20 border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
+                    ? "bg-red-950/20 border-red-500/60 shadow-[0_0_20px_var(--red-dim)]"
                     : isActive
                     ? "bg-surface border-gold-accent/40 shadow-[0_0_15px_rgba(var(--accent-rgb),0.08)]"
-                    : "bg-[#0d0d0d] border-[#222] opacity-75"
+                    : "bg-background border-surface-variant opacity-75"
                 }`}
               >
                 {/* Top Row: Icon + Title + Switch */}
@@ -168,7 +168,7 @@ export default function FeatureConsolePanel() {
                             ? "bg-red-500/10 border-red-500/30"
                             : isActive
                             ? "bg-gold-accent/10 border-gold-accent/30"
-                            : "bg-[#1a1a1a] border-[#333]"
+                            : "bg-surface-alt border-surface-variant"
                         }`}
                       >
                         {getFlagIcon(flag.id)}
@@ -219,7 +219,7 @@ export default function FeatureConsolePanel() {
                 </div>
 
                 {/* Bottom Row: Status Badge */}
-                <div className="pt-3 border-t border-[#1e1e1e] flex items-center justify-between text-[12px]">
+                <div className="pt-3 border-t border-surface-variant flex items-center justify-between text-[12px]">
                   <span className="text-gray-500 font-mono">
                     State:{" "}
                     <strong

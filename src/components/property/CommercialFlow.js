@@ -194,7 +194,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-alt/90 rounded-b-sm backdrop-blur-md">
             <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase drop-shadow-md">SOLAR TIER UNLOCKS THIS</span>
-            <a href="/pricing/seeker" className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(232,174,60,0.4)] active:scale-[0.98]">
+            <a href="/pricing/seeker" className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.4)] active:scale-[0.98]">
               Unlock Full Intelligence →
             </a>
           </div>
@@ -713,7 +713,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   if (dataLoading || !propertyData) {
     return (
       <div style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         background: "var(--bg)",
         display: "flex",
         alignItems: "center",
@@ -1246,16 +1246,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
           <div className="photo-decor">
             <svg viewBox="0 0 1000 320" preserveAspectRatio="xMidYMid slice">
-              <rect x="680" y="30" width="200" height="150" fill="none" stroke="rgba(232, 174, 60,0.1)" strokeWidth="1"/>
-              <line x1="780" y1="30" x2="780" y2="180" stroke="rgba(232, 174, 60,0.07)" strokeWidth="0.5"/>
-              <line x1="680" y1="105" x2="880" y2="105" stroke="rgba(232, 174, 60,0.07)" strokeWidth="0.5"/>
-              <rect x="100" y="240" width="320" height="58" rx="3" fill="rgba(25,20,12,0.75)"/>
-              <rect x="118" y="222" width="285" height="32" rx="3" fill="rgba(30,24,14,0.65)"/>
-              <rect x="100" y="222" width="26"  height="76" rx="2" fill="rgba(28,22,13,0.7)"/>
-              <rect x="392" y="222" width="26"  height="76" rx="2" fill="rgba(28,22,13,0.7)"/>
-              <rect x="470" y="264" width="145" height="28" rx="2" fill="rgba(35,27,15,0.55)"/>
-              <rect x="875" y="120" width="3"   height="140" fill="rgba(40,32,18,0.45)"/>
-              <ellipse cx="876" cy="120" rx="19" ry="7" fill="rgba(40,32,18,0.35)"/>
+              <rect x="680" y="30" width="200" height="150" fill="none" stroke="rgba(var(--accent-rgb),0.1)" strokeWidth="1"/>
+              <line x1="780" y1="30" x2="780" y2="180" stroke="rgba(var(--accent-rgb),0.07)" strokeWidth="0.5"/>
+              <line x1="680" y1="105" x2="880" y2="105" stroke="rgba(var(--accent-rgb),0.07)" strokeWidth="0.5"/>
+              <rect x="100" y="240" width="320" height="58" rx="3" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.75))"/>
+              <rect x="118" y="222" width="285" height="32" rx="3" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.65))"/>
+              <rect x="100" y="222" width="26"  height="76" rx="2" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.7))"/>
+              <rect x="392" y="222" width="26"  height="76" rx="2" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.7))"/>
+              <rect x="470" y="264" width="145" height="28" rx="2" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.55))"/>
+              <rect x="875" y="120" width="3"   height="140" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.45))"/>
+              <ellipse cx="876" cy="120" rx="19" ry="7" fill="color-mix(in srgb, var(--accent) 5%, rgba(var(--bg-rgb),0.35))"/>
             </svg>
           </div>
 
@@ -1283,7 +1283,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button 
                 onClick={(e) => { e.stopPropagation(); handleDownloadPdf(); }}
-                className="font-mono text-xs tracking-wider text-black bg-gold-accent hover:opacity-90 px-3.5 py-1.5 rounded-full transition-all uppercase font-semibold inline-flex items-center gap-1.5 shadow-[0_0_12px_rgba(232,174,60,0.3)] cursor-pointer"
+                className="font-mono text-xs tracking-wider text-black bg-gold-accent hover:opacity-90 px-3.5 py-1.5 rounded-full transition-all uppercase font-semibold inline-flex items-center gap-1.5 shadow-[0_0_12px_rgba(var(--accent-rgb),0.3)] cursor-pointer"
               >
                 <span style={{ fontSize: '12px' }}>🖨️</span> Download Tear-Sheet
               </button>
@@ -1359,10 +1359,10 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
         <div className="mobile-hero-intel">
           <p className="mobile-hero-label">ScoutIt &middot; {PROPERTY_LEVEL_LABEL} &middot; {briefLabel}</p>
         <div className="mobile-hero-header">
-          <h1 className="mobile-hero-title">
+          <div role="heading" aria-level="1" className="mobile-hero-title">
             {d.title}
             <ProvenanceBadge record={d} />
-          </h1>
+          </div>
           <p className="mobile-hero-location">{d.location || d.city || "Philippines"}</p>
         </div>
           <p className="mobile-hero-hook">{d.hook}</p>
@@ -2655,7 +2655,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       <GlassPanel className="p-6 rounded-md">
                         <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.1}}>{d.listed_price}</div>
                         {/* Verified-by badge — the confirmation the buyer can trust */}
-                        <div style={{display:"inline-flex", alignItems:"center", gap:"7px", marginTop:"14px", padding:"6px 12px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
+                        <div style={{display:"inline-flex", alignItems:"center", gap:"7px", marginTop:"14px", padding:"6px 12px", border:"0.5px solid color-mix(in srgb, var(--green) 40%, transparent)", borderRadius:"4px", background:"color-mix(in srgb, var(--green) 6%, transparent)"}}>
                           <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 7.5L6 11l5.5-7"/></svg>
                           <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--green)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Verified by {verifiedBy}</span>
                         </div>
@@ -2722,7 +2722,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       padding: "12px 14px",
                       borderRadius: "6px",
                       border: intentStage === "inspired" ? "1px solid var(--accent)" : "1px solid var(--border)",
-                      background: intentStage === "inspired" ? "rgba(var(--accent-rgb),0.12)" : "rgba(255,255,255,0.02)",
+                      background: intentStage === "inspired" ? "rgba(var(--accent-rgb),0.12)" : "rgba(var(--text-primary-rgb),0.02)",
                       color: intentStage === "inspired" ? "var(--accent-bright)" : "var(--text-primary)",
                       cursor: "pointer",
                       textAlign: "left",
@@ -2740,7 +2740,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       padding: "12px 14px",
                       borderRadius: "6px",
                       border: intentStage === "fit" ? "1px solid var(--accent)" : "1px solid var(--border)",
-                      background: intentStage === "fit" ? "rgba(var(--accent-rgb),0.12)" : "rgba(255,255,255,0.02)",
+                      background: intentStage === "fit" ? "rgba(var(--accent-rgb),0.12)" : "rgba(var(--text-primary-rgb),0.02)",
                       color: intentStage === "fit" ? "var(--accent-bright)" : "var(--text-primary)",
                       cursor: "pointer",
                       textAlign: "left",
@@ -2758,7 +2758,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                       padding: "12px 14px",
                       borderRadius: "6px",
                       border: intentStage === "interested" ? "1px solid var(--accent)" : "1px solid var(--border)",
-                      background: intentStage === "interested" ? "rgba(var(--accent-rgb),0.12)" : "rgba(255,255,255,0.02)",
+                      background: intentStage === "interested" ? "rgba(var(--accent-rgb),0.12)" : "rgba(var(--text-primary-rgb),0.02)",
                       color: intentStage === "interested" ? "var(--accent-bright)" : "var(--text-primary)",
                       cursor: "pointer",
                       textAlign: "left",
@@ -2772,13 +2772,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
                 {/* Intent Stage Feedback & Actions */}
                 {intentStage === "inspired" && (
-                  <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  <div style={{ padding: "12px 14px", background: "rgba(var(--text-primary-rgb),0.03)", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
                     Space recorded to your inspiration signals. Use the reaction buttons above to bookmark architectural details.
                   </div>
                 )}
 
                 {intentStage === "fit" && (
-                  <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  <div style={{ padding: "12px 14px", background: "rgba(var(--text-primary-rgb),0.03)", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
                     Space added to your evaluation shortlist. You can compare specs against other properties in your Dashboard Board.
                   </div>
                 )}
@@ -2823,7 +2823,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 )}
                 <button
                   onClick={() => setIsPromoteOpen(true)}
-                  className="flex-1 bg-transparent border border-gold-accent/60 text-gold-accent font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-gold-accent hover:text-background transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(232,174,60,0.15)]"
+                  className="flex-1 bg-transparent border border-gold-accent/60 text-gold-accent font-mono text-xs tracking-[0.12em] uppercase font-bold py-3 px-4 rounded hover:bg-gold-accent hover:text-background transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(var(--accent-rgb),0.15)]"
                 >
                   AI Promote ✦
                 </button>
@@ -2840,7 +2840,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               )}
 
               {/* RA 9646 compliance badge */}
-              <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid rgba(76,175,125,0.4)", borderRadius:"4px", background:"rgba(76,175,125,0.06)"}}>
+              <div style={{display:"inline-flex", alignItems:"center", gap:"8px", marginTop:"20px", padding:"8px 14px", border:"0.5px solid color-mix(in srgb, var(--green) 40%, transparent)", borderRadius:"4px", background:"color-mix(in srgb, var(--green) 6%, transparent)"}}>
                 <span style={{width:"7px", height:"7px", borderRadius:"50%", background:"var(--green)", flexShrink:0}}/>
                 <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--green)", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
               </div>

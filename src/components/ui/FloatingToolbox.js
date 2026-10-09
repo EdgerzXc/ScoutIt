@@ -527,15 +527,15 @@ export default function FloatingToolbox({ showTrigger = true }) {
           style={{
             width: 48, height: 48, borderRadius: "50%",
             background: eyeActive
-              ? (mode === "high-contrast" ? "#E8AE3C" : "rgba(232, 174, 60,0.14)")
-              : "rgba(10,10,10,0.85)",
-            border: `1.5px solid ${eyeActive ? "rgba(232, 174, 60,0.55)" : "rgba(232, 174, 60,0.22)"}`,
-            color: mode === "high-contrast" ? "#000" : "#E8AE3C",
+              ? (mode === "high-contrast" ? "var(--accent)" : "rgba(var(--accent-rgb), 0.14)")
+              : "rgba(var(--bg-rgb), 0.85)",
+            border: `1.5px solid ${eyeActive ? "rgba(var(--accent-rgb), 0.55)" : "rgba(var(--accent-rgb), 0.22)"}`,
+            color: mode === "high-contrast" ? "var(--on-accent)" : "var(--accent)",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "grab", position: "relative",
             boxShadow: eyeActive
-              ? "0 0 18px rgba(232, 174, 60,0.3), 0 4px 16px rgba(0,0,0,0.5)"
-              : "0 4px 16px rgba(0,0,0,0.55)",
+              ? "0 0 18px rgba(var(--accent-rgb), 0.3), 0 4px 16px rgba(var(--bg-rgb), 0.5)"
+              : "0 4px 16px rgba(var(--bg-rgb), 0.55)",
             transition: "background 0.25s, box-shadow 0.25s, border-color 0.25s",
           }}
         >
@@ -550,7 +550,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
             <span style={{
               position: "absolute", top: 0, right: 0,
               width: 10, height: 10, borderRadius: "50%",
-              background: "#E8AE3C", border: "1.5px solid #0e0e0e",
+              background: "var(--accent)", border: "1.5px solid var(--bg)",
             }} />
           )}
         </div>
@@ -566,10 +566,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
           style={{
             position: "fixed", left: activePanelX, top: activePanelY,
             zIndex: 99998, width: 228,
-            background: "var(--surface, #111111)",
-            border: "1px solid var(--border-solid, rgba(232, 174, 60,0.25))",
+            background: "var(--surface)",
+            border: "1px solid var(--border-solid, rgba(var(--accent-rgb), 0.25))",
             borderRadius: 10,
-            boxShadow: "var(--shadow-lg, 0 12px 48px rgba(0,0,0,0.75))",
+            boxShadow: "var(--shadow-lg, 0 12px 48px rgba(var(--bg-rgb), 0.75))",
             maxHeight: Math.max(160, viewH - activePanelY - (viewW <= 768 ? navClear : 10)),
             overflowY: "auto",
           }}
@@ -581,15 +581,15 @@ export default function FloatingToolbox({ showTrigger = true }) {
             onPointerUp={onPanelPointerUp}
             style={{
               padding: "11px 14px 10px",
-              borderBottom: "1px solid var(--border-solid, rgba(255,255,255,0.08))",
+              borderBottom: "1px solid var(--border)",
               display: "flex", alignItems: "center", justifyContent: "space-between",
               cursor: "grab", userSelect: "none", touchAction: "none",
-              background: "rgba(255,255,255,0.03)"
+              background: "rgba(var(--text-primary-rgb), 0.03)"
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ cursor: "grab", opacity: 0.5, fontSize: 12, color: "var(--accent)" }}>⠿</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent, #E8AE3C)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}>
                 Help & Display
               </span>
 
@@ -604,9 +604,9 @@ export default function FloatingToolbox({ showTrigger = true }) {
               onPointerUp={(e) => e.stopPropagation()}
               aria-label="Close Help & Display"
               style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid var(--border-mid, rgba(255,255,255,0.15))",
-                color: "var(--text-primary, #fff)",
+                background: "rgba(var(--text-primary-rgb), 0.08)",
+                border: "1px solid var(--border-mid)",
+                color: "var(--text-primary)",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: "bold",
@@ -627,31 +627,31 @@ export default function FloatingToolbox({ showTrigger = true }) {
           {/* Mode options */}
           <div style={{ padding: "9px 9px 7px", display: "flex", flexDirection: "column", gap: 5 }}>
             {[
-              { key: "dark",          label: "Dark Mode",     desc: "Cosmic default",        dot: "#1e1e1e", dotBorder: "rgba(255,255,255,0.18)" },
-              { key: "light",         label: "Light / White Lens", desc: "Clean corporate preview", dot: "#f4f4f5", dotBorder: "rgba(17,17,19,0.25)" },
-              { key: "high-contrast", label: "High Contrast", desc: "Maximum readability",   dot: "#E8AE3C", dotBorder: "rgba(232, 174, 60,0.4)" },
+              { key: "dark",          label: "Dark Mode",     desc: "Cosmic default",        dot: "var(--surface2)", dotBorder: "rgba(var(--text-primary-rgb), 0.18)" },
+              { key: "light",         label: "Light / White Lens", desc: "Clean corporate preview", dot: "var(--paper-01)", dotBorder: "rgba(var(--text-primary-rgb),0.25)" },
+              { key: "high-contrast", label: "High Contrast", desc: "Maximum readability",   dot: "var(--accent)", dotBorder: "rgba(var(--accent-rgb), 0.4)" },
             ].map(({ key, label, desc, dot, dotBorder }) => (
               <button
                 key={key}
                 onClick={() => changeMode(key)}
                 style={{
                   width: "100%",
-                  background: mode === key ? "rgba(232, 174, 60,0.09)" : "rgba(255,255,255,0.025)",
-                  border: `1px solid ${mode === key ? "rgba(232, 174, 60,0.3)" : "rgba(255,255,255,0.06)"}`,
+                  background: mode === key ? "rgba(var(--accent-rgb), 0.09)" : "rgba(var(--text-primary-rgb), 0.025)",
+                  border: `1px solid ${mode === key ? "rgba(var(--accent-rgb), 0.3)" : "rgba(var(--text-primary-rgb), 0.06)"}`,
                   borderRadius: 5, padding: "8px 10px",
                   cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
                 }}
               >
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: dot, border: `1.5px solid ${dotBorder}`, flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: mode === key ? "#E8AE3C" : "#e5e2e1", fontWeight: mode === key ? 600 : 400, lineHeight: 1.3 }}>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: mode === key ? "var(--accent)" : "var(--text-primary)", fontWeight: mode === key ? 600 : 400, lineHeight: 1.3 }}>
                     {label}
                   </div>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.3, marginTop: 1 }}>
                     {desc}
                   </div>
                 </div>
-                {mode === key && <span style={{ color: "#E8AE3C", fontSize: 12, marginLeft: "auto" }}>✓</span>}
+                {mode === key && <span style={{ color: "var(--accent)", fontSize: 12, marginLeft: "auto" }}>✓</span>}
               </button>
             ))}
           </div>
@@ -663,14 +663,14 @@ export default function FloatingToolbox({ showTrigger = true }) {
               aria-pressed={lite}
               style={{
                 width: "100%",
-                background: lite ? "rgba(232, 174, 60,0.09)" : "rgba(255,255,255,0.025)",
-                border: `1px solid ${lite ? "rgba(232, 174, 60,0.3)" : "rgba(255,255,255,0.06)"}`,
+                background: lite ? "rgba(var(--accent-rgb), 0.09)" : "rgba(var(--text-primary-rgb), 0.025)",
+                border: `1px solid ${lite ? "rgba(var(--accent-rgb), 0.3)" : "rgba(var(--text-primary-rgb), 0.06)"}`,
                 borderRadius: 5, padding: "8px 10px",
                 cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
               }}
             >
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "#E8AE3C" : "#e5e2e1", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: lite ? "var(--accent)" : "var(--text-primary)", fontWeight: lite ? 600 : 400, lineHeight: 1.3 }}>
                   Lite Mode {lite ? "· On" : "· Off"}
                 </div>
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.3, marginTop: 1 }}>
@@ -679,13 +679,13 @@ export default function FloatingToolbox({ showTrigger = true }) {
               </div>
               <span style={{
                 flexShrink: 0, width: 34, height: 19, borderRadius: 999,
-                background: lite ? "#F7C64E" : "rgba(255,255,255,0.14)",
-                border: `1px solid ${lite ? "#F7C64E" : "rgba(255,255,255,0.18)"}`,
+                background: lite ? "var(--accent-bright)" : "rgba(var(--text-primary-rgb), 0.14)",
+                border: `1px solid ${lite ? "var(--accent-bright)" : "rgba(var(--text-primary-rgb), 0.18)"}`,
                 position: "relative", transition: "background 0.2s",
               }}>
                 <span style={{
                   position: "absolute", top: 1.5, left: 1.5, width: 14, height: 14, borderRadius: "50%",
-                  background: "#0e0e0e", transition: "transform 0.2s",
+                  background: "var(--bg)", transition: "transform 0.2s",
                   transform: lite ? "translateX(15px)" : "translateX(0)",
                 }} />
               </span>
@@ -699,14 +699,14 @@ export default function FloatingToolbox({ showTrigger = true }) {
               aria-pressed={simple}
               style={{
                 width: "100%",
-                background: simple ? "rgba(232, 174, 60,0.09)" : "rgba(255,255,255,0.025)",
-                border: `1px solid ${simple ? "rgba(232, 174, 60,0.3)" : "rgba(255,255,255,0.06)"}`,
+                background: simple ? "rgba(var(--accent-rgb), 0.09)" : "rgba(var(--text-primary-rgb), 0.025)",
+                border: `1px solid ${simple ? "rgba(var(--accent-rgb), 0.3)" : "rgba(var(--text-primary-rgb), 0.06)"}`,
                 borderRadius: 5, padding: "8px 10px",
                 cursor: "pointer", display: "flex", alignItems: "center", gap: 9, textAlign: "left",
               }}
             >
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: simple ? "#E8AE3C" : "#e5e2e1", fontWeight: simple ? 600 : 400, lineHeight: 1.3 }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: simple ? "var(--accent)" : "var(--text-primary)", fontWeight: simple ? 600 : 400, lineHeight: 1.3 }}>
                   Simple Mode {simple ? "· On" : "· Off"}
                 </div>
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.3, marginTop: 1 }}>
@@ -715,13 +715,13 @@ export default function FloatingToolbox({ showTrigger = true }) {
               </div>
               <span style={{
                 flexShrink: 0, width: 34, height: 19, borderRadius: 999,
-                background: simple ? "#F7C64E" : "rgba(255,255,255,0.14)",
-                border: `1px solid ${simple ? "#F7C64E" : "rgba(255,255,255,0.18)"}`,
+                background: simple ? "var(--accent-bright)" : "rgba(var(--text-primary-rgb), 0.14)",
+                border: `1px solid ${simple ? "var(--accent-bright)" : "rgba(var(--text-primary-rgb), 0.18)"}`,
                 position: "relative", transition: "background 0.2s",
               }}>
                 <span style={{
                   position: "absolute", top: 1.5, left: 1.5, width: 14, height: 14, borderRadius: "50%",
-                  background: "#0e0e0e", transition: "transform 0.2s",
+                  background: "var(--bg)", transition: "transform 0.2s",
                   transform: simple ? "translateX(15px)" : "translateX(0)",
                 }} />
               </span>
@@ -729,7 +729,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
           </div>
 
           {/* Divider */}
-          <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "0 9px" }} />
+          <div style={{ height: 1, background: "rgba(var(--text-primary-rgb), 0.04)", margin: "0 9px" }} />
 
           {/* Page help and server-verified journey */}
           <div style={{ padding: "8px 9px 4px" }}>
@@ -737,10 +737,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
               onClick={(event) => openWizard("page", event.currentTarget)}
               style={{
                 width: "100%",
-                background: "rgba(232, 174, 60,0.05)",
-                border: "1px solid rgba(232, 174, 60,0.18)",
+                background: "rgba(var(--accent-rgb), 0.05)",
+                border: "1px solid rgba(var(--accent-rgb), 0.18)",
                 borderRadius: 5, padding: "9px 12px",
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "#E8AE3C",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "var(--accent)",
               }}
             >
               <span style={{ fontSize: 13 }}>◈</span>
@@ -751,14 +751,14 @@ export default function FloatingToolbox({ showTrigger = true }) {
             {verifiedJourney ? (
               <button
                 onClick={(event) => journeyProgress ? openWizard("journey", event.currentTarget) : restartJourney(event.currentTarget)}
-                style={{ width: "100%", marginTop: 5, background: "rgba(232, 174, 60,0.1)", border: "1px solid rgba(232, 174, 60,0.28)", borderRadius: 5, padding: "9px 12px", cursor: "pointer", color: "#E8AE3C", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}
+                style={{ width: "100%", marginTop: 5, background: "rgba(var(--accent-rgb), 0.1)", border: "1px solid rgba(var(--accent-rgb), 0.28)", borderRadius: 5, padding: "9px 12px", cursor: "pointer", color: "var(--accent)", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}
               >
                 {journeyProgress ? "Resume guided journey" : "Start guided journey"}
               </button>
             ) : (
               <button
                 onClick={() => router.push("/login")}
-                style={{ width: "100%", marginTop: 5, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 5, padding: "9px 12px", cursor: "pointer", color: "rgba(255,255,255,0.62)", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "left" }}
+                style={{ width: "100%", marginTop: 5, background: "rgba(var(--text-primary-rgb), 0.025)", border: "1px solid var(--border)", borderRadius: 5, padding: "9px 12px", cursor: "pointer", color: "var(--text-secondary)", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "left" }}
               >
                 Sign in for a role guide
               </button>
@@ -771,10 +771,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
               onClick={() => { setReportOpen(true); setOpen(false); }}
               style={{
                 width: "100%",
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "rgba(var(--text-primary-rgb), 0.02)",
+                border: "1px solid var(--border)",
                 borderRadius: 5, padding: "9px 12px",
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.6)",
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)",
               }}
             >
               <span style={{ fontSize: 13 }}>⚑</span>
@@ -795,19 +795,19 @@ export default function FloatingToolbox({ showTrigger = true }) {
             aria-modal="false"
             aria-labelledby="scoutit-guide-title"
             className={`toolbox-float ${motionStyles.guidePanel}`}
-            style={{ position: "fixed", right: 12, bottom: viewW <= 768 ? navClear : 88, zIndex: 100000, width: "min(420px, calc(100vw - 24px))", maxHeight: `calc(100dvh - ${viewW <= 768 ? navClear + 24 : 112}px)`, overflowY: "auto", background: "#111111", border: "1px solid rgba(232, 174, 60,0.3)", borderRadius: 12, boxShadow: "0 18px 60px rgba(0,0,0,0.75)" }}
+            style={{ position: "fixed", right: 12, bottom: viewW <= 768 ? navClear : 88, zIndex: 100000, width: "min(420px, calc(100vw - 24px))", maxHeight: `calc(100dvh - ${viewW <= 768 ? navClear + 24 : 112}px)`, overflowY: "auto", background: "var(--surface)", border: "1px solid rgba(var(--accent-rgb), 0.3)", borderRadius: 12, boxShadow: "0 18px 60px rgba(var(--bg-rgb),0.75)" }}
           >
             {/* Wizard header */}
-            <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
               <div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#E8AE3C", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
                   {`${wizardKind === "journey" ? `${verifiedJourney.role} journey` : activeGuide.label} // ${wizardStep + 1} of ${wizardSteps.length}`}
                 </span>
-                <h2 id="scoutit-guide-title" style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "#f0ede8", fontWeight: 400, lineHeight: 1.2 }}>
+                <h2 id="scoutit-guide-title" style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--text-primary)", fontWeight: 400, lineHeight: 1.2 }}>
                   {currentStep.title}
                 </h2>
               </div>
-              <button onClick={closeWizard} aria-label="Dismiss guide" style={{ background: "none", border: "none", color: "rgba(255,255,255,0.55)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 8, flexShrink: 0 }}>✕</button>
+              <button onClick={closeWizard} aria-label="Dismiss guide" style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 8, flexShrink: 0 }}>✕</button>
             </div>
 
             {/* Wizard body */}
@@ -815,9 +815,9 @@ export default function FloatingToolbox({ showTrigger = true }) {
               <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.8, margin: 0 }}>
                 {currentStep.body}
               </p>
-              {currentStep.tip && <p style={{ margin: "12px 0 0", color: "rgba(255,255,255,0.58)", fontSize: 12, lineHeight: 1.6 }}>Tip: {currentStep.tip}</p>}
+              {currentStep.tip && <p style={{ margin: "12px 0 0", color: "var(--text-secondary)", fontSize: 12, lineHeight: 1.6 }}>Tip: {currentStep.tip}</p>}
               {wizardKind === "journey" && (
-                <button onClick={openJourneyStep} style={{ marginTop: 16, width: "100%", padding: 11, background: "rgba(232,174,60,0.1)", color: "#E8AE3C", border: "1px solid rgba(232,174,60,0.3)", borderRadius: 6, cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                <button onClick={openJourneyStep} style={{ marginTop: 16, width: "100%", padding: 11, background: "rgba(var(--accent-rgb), 0.1)", color: "var(--accent)", border: "1px solid rgba(var(--accent-rgb), 0.3)", borderRadius: 6, cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>
                   {pathname === currentStep.route ? "Show me on this page" : "Open this step"}
                 </button>
               )}
@@ -832,7 +832,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
                   onClick={() => changeWizardStep(i)}
                   style={{
                     width: i === wizardStep ? 22 : 6, height: 6, borderRadius: 3,
-                    background: i === wizardStep ? "#E8AE3C" : "rgba(255,255,255,0.12)",
+                    background: i === wizardStep ? "var(--accent)" : "rgba(var(--text-primary-rgb), 0.12)",
                     cursor: "pointer", transition: lite ? "none" : "width 0.25s, background 0.2s", border: 0, padding: 0,
                   }}
                 />
@@ -840,24 +840,24 @@ export default function FloatingToolbox({ showTrigger = true }) {
             </div>
 
             {/* Wizard nav */}
-            <div style={{ padding: "12px 24px 20px", display: "flex", gap: 10, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+            <div style={{ padding: "12px 24px 20px", display: "flex", gap: 10, borderTop: "1px solid var(--border)" }}>
               {wizardStep > 0 && (
                 <button
                   onClick={() => changeWizardStep(wizardStep - 1)}
-                  style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 6, color: "#c8c8c8", fontFamily: "var(--font-body)", fontSize: 13, cursor: "pointer" }}
+                  style={{ flex: 1, padding: "11px 0", background: "rgba(var(--text-primary-rgb), 0.05)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: 13, cursor: "pointer" }}
                 >← Back</button>
               )}
               <button
                 onClick={() => wizardStep < wizardSteps.length - 1 ? changeWizardStep(wizardStep + 1) : (wizardKind === "journey" ? finishJourney() : closeWizard())}
-                style={{ flex: 1, padding: "11px 0", background: "#E8AE3C", border: "none", borderRadius: 6, color: "#000", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                style={{ flex: 1, padding: "11px 0", background: "var(--accent)", border: "none", borderRadius: 6, color: "var(--on-accent)", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
               >
                 {wizardStep < wizardSteps.length - 1 ? "Next →" : (wizardKind === "journey" ? "Finish ✓" : "Got it ✓")}
               </button>
             </div>
             {wizardKind === "journey" && (
               <div style={{ padding: "0 24px 18px", display: "flex", justifyContent: "space-between" }}>
-                <button onClick={() => changeWizardStep(Math.min(wizardStep + 1, wizardSteps.length - 1))} style={{ background: "none", border: 0, color: "rgba(255,255,255,0.58)", fontSize: 12, cursor: "pointer" }}>Skip step</button>
-                <button onClick={(event) => restartJourney(event.currentTarget)} style={{ background: "none", border: 0, color: "rgba(232,174,60,0.8)", fontSize: 12, cursor: "pointer" }}>Restart journey</button>
+                <button onClick={() => changeWizardStep(Math.min(wizardStep + 1, wizardSteps.length - 1))} style={{ background: "none", border: 0, color: "var(--text-secondary)", fontSize: 12, cursor: "pointer" }}>Skip step</button>
+                <button onClick={(event) => restartJourney(event.currentTarget)} style={{ background: "none", border: 0, color: "rgba(var(--accent-rgb), 0.8)", fontSize: 12, cursor: "pointer" }}>Restart journey</button>
               </div>
             )}
           </div>
@@ -874,10 +874,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
               </div>
             ) : (
               <>
-                <h3 className="font-headline-editorial text-xl text-[#f0ede8] mb-1">Report a problem</h3>
-                <p className="text-xs text-[rgba(255,255,255,0.6)] mb-4">Tell us what went wrong or felt off. This goes straight to the team without session recording.</p>
+                <h3 className="font-headline-editorial text-xl text-on-surface mb-1">Report a problem</h3>
+                <p className="text-xs text-text-secondary mb-4">Tell us what went wrong or felt off. This goes straight to the team without session recording.</p>
                 <textarea
-                  className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded px-4 py-3 text-[#f0ede8] text-sm min-h-[120px] focus:outline-none focus:border-gold-accent transition-colors"
+                  className="w-full bg-[rgba(var(--text-primary-rgb),0.03)] border border-surface-variant rounded px-4 py-3 text-on-surface text-sm min-h-[120px] focus:outline-none focus:border-gold-accent transition-colors"
                   placeholder="What happened?"
                   value={reportText}
                   onChange={e => { setReportText(e.target.value); setReportFailed(false); }}
@@ -886,8 +886,8 @@ export default function FloatingToolbox({ showTrigger = true }) {
                 />
                 {reportFailed && <p role="alert" className="mt-3 text-xs text-error">The report was not delivered. Please keep your text and try again after reconnecting.</p>}
                 <div className="flex gap-3 mt-4">
-                  <button type="button" className="flex-1 border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] hover:text-white font-label-caps uppercase tracking-widest text-sm py-3 rounded transition-colors" onClick={() => setReportOpen(false)}>Cancel</button>
-                  <button type="button" className="flex-1 bg-gold-accent text-black font-label-caps uppercase tracking-widest font-bold text-sm py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50" disabled={!reportText.trim() || reportSending} onClick={submitReport}>{reportSending ? "Sending…" : "Send report"}</button>
+                  <button type="button" className="flex-1 border border-surface-variant text-text-secondary hover:text-text-primary font-label-caps uppercase tracking-widest text-sm py-3 rounded transition-colors" onClick={() => setReportOpen(false)}>Cancel</button>
+                  <button type="button" className="flex-1 bg-gold-accent text-ink-on-accent font-label-caps uppercase tracking-widest font-bold text-sm py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50" disabled={!reportText.trim() || reportSending} onClick={submitReport}>{reportSending ? "Sending…" : "Send report"}</button>
                 </div>
               </>
             )}

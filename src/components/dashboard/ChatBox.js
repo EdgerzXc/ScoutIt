@@ -40,7 +40,7 @@ const renderTextWithLinks = (
   if (text.startsWith("[SYSTEM] I have requested a live viewing for:")) {
     const timeStr = text.replace("[SYSTEM] I have requested a live viewing for:", "").trim();
     return (
-      <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+      <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(var(--bg-rgb),0.32)] backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/40 flex items-center justify-center text-gold-accent shrink-0 text-lg">
             📅
@@ -91,7 +91,7 @@ const renderTextWithLinks = (
   if (text.startsWith("[SYSTEM] Reschedule requested for:")) {
     const details = text.replace("[SYSTEM] Reschedule requested for:", "").trim();
     return (
-      <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+      <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(var(--bg-rgb),0.32)] backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/35 flex items-center justify-center text-gold-accent shrink-0 text-lg">
             🔄

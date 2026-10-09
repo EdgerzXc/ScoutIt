@@ -202,3 +202,59 @@ test("the page can be narrowed to problems", () => {
 test("the page is Ops Manager and above, like the audit log", () => {
   assert.match(systemPage, /staff\.tier < TIERS\.OPS_MANAGER/);
 });
+
+// ── A-185 Phase 3: Topological Incident Signal Dispatcher ────────────────────
+
+import { extractIncidentSignal, KNOWN_EVENT_FLOW_FALLBACKS } from "../src/lib/incidentSignals.mjs";
+
+test("extractIncidentSignal extracts explicit flow node provenance from detail", () => {
+  const signal = extractIncidentSignal({
+    event: "client.error",
+    severity: "error",
+    detail: {
+      flow_node_id: "deal_room",
+      flow_domain: "deals",
+      flow_role: "broker",
+      blast_radius: "HIGH / SEVERED CONVERSATION",
+      recovery_playbook: "Check Supabase realtime connection and deal status.",
+      evidence_path: "src/app/api/deals/initiate/route.js",
+    },
+  });
+
+  assert.ok(signal, "must extract signal when flow_node_id is present");
+  assert.equal(signal.nodeId, "deal_room");
+  assert.equal(signal.domain, "deals");
+  assert.equal(signal.role, "broker");
+  assert.equal(signal.blastRadius, "HIGH / SEVERED CONVERSATION");
+  assert.equal(signal.recoveryPlaybook, "Check Supabase realtime connection and deal status.");
+  assert.equal(signal.evidencePath, "src/app/api/deals/initiate/route.js");
+  assert.match(signal.triageUrl, /admin\/flow\?node=deal_room&mode=incident/);
+});
+
+test("extractIncidentSignal resolves fallback provenance for critical known events", () => {
+  const cmsSignal = extractIncidentSignal({
+    event: "cms.bundle.budget_guarded",
+    severity: "warning",
+    detail: { month: "2026-10", attempts: 900, budget: 900 },
+  });
+  assert.ok(cmsSignal);
+  assert.equal(cmsSignal.nodeId, "cms_airtable");
+  assert.match(cmsSignal.triageUrl, /admin\/flow\?node=cms_airtable&mode=incident/);
+
+  const cronSignal = extractIncidentSignal({
+    event: "cron.failed",
+    severity: "error",
+    detail: { job: "check-stale-listings" },
+  });
+  assert.ok(cronSignal);
+  assert.equal(cronSignal.nodeId, "cron_scheduler");
+  assert.match(cronSignal.triageUrl, /admin\/flow\?node=cron_scheduler&mode=incident/);
+});
+
+test("system activity page renders topological incident cards with 1-click on-call triage links", () => {
+  assert.match(systemPage, /extractIncidentSignal/);
+  assert.match(systemPage, /Topological Incident Provenance/);
+  assert.match(systemPage, /Open in Flow Graph/);
+  assert.match(systemPage, /filter=incidents/);
+});
+

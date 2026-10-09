@@ -76,7 +76,7 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
 }
 
 const panelStyle = {
-  background: "linear-gradient(165deg, rgba(20,20,18,0.85), rgba(12,12,10,0.95))",
+  background: "linear-gradient(165deg, rgba(var(--surface-rgb), 0.85), rgba(var(--bg-rgb), 0.95))",
   border: "1px solid var(--border-solid)",
   borderRadius: 8,
   padding: 24,
@@ -128,7 +128,7 @@ const statsRow = {
 
 const statCard = {
   flex: 1,
-  background: "linear-gradient(165deg, rgba(26,25,23,0.6), rgba(17,17,16,0.8))",
+  background: "linear-gradient(165deg, rgba(var(--surface2-rgb), 0.6), rgba(var(--surface-rgb), 0.8))",
   border: "1px solid var(--border-solid)",
   borderRadius: 6,
   padding: "12px 10px",

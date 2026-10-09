@@ -24,8 +24,8 @@ import { sanitizeError } from "@/lib/sanitizeError";
 const MONO = "'Courier New',monospace";
 
 const TIER = {
-  silver: { medal: "🥈", label: "Advisor Spec",      color: "#c8ccd2" },
-  bronze: { medal: "🥉", label: "Resident Verified", color: "#c98a5b" },
+  silver: { medal: "🥈", label: "Advisor Spec",      color: "var(--tier-silver)" },
+  bronze: { medal: "🥉", label: "Resident Verified", color: "var(--tier-bronze)" },
 };
 
 function timeAgo(iso) {
@@ -175,9 +175,9 @@ export default function FAQReviewQueue({ onPendingCount }) {
           cursor: pointer;
         }
         .fq-tab.active {
-          border-color: rgba(232, 174, 60, 0.4);
+          border-color: rgba(var(--accent-rgb), 0.4);
           color: var(--accent);
-          background: rgba(232, 174, 60, 0.08);
+          background: rgba(var(--accent-rgb), 0.08);
         }
 
         .fq-card {
@@ -205,7 +205,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
         .fq-ans {
           padding: 12px;
           border-radius: 0 3px 3px 0;
-          background: rgba(255,255,255,0.02);
+          background: rgba(var(--text-primary-rgb),0.02);
           margin-bottom: 12px;
         }
         .fq-ans__badges {
@@ -223,9 +223,9 @@ export default function FAQReviewQueue({ onPendingCount }) {
           border-radius: 2px;
           white-space: nowrap;
         }
-        .fq-badge--ok     { color: var(--green); border: 0.5px solid rgba(127,191,127,0.3); }
-        .fq-badge--hidden { color: var(--red); border: 0.5px solid rgba(224,108,108,0.3); }
-        .fq-badge--prc    { color: var(--accent); border: 0.5px solid rgba(232,174,60,0.3); }
+        .fq-badge--ok     { color: var(--green); border: 0.5px solid color-mix(in srgb, var(--green) 30%, transparent); }
+        .fq-badge--hidden { color: var(--red); border: 0.5px solid color-mix(in srgb, var(--red) 30%, transparent); }
+        .fq-badge--prc    { color: var(--accent); border: 0.5px solid rgba(var(--accent-rgb),0.3); }
         .fq-ans__text {
           font-family: var(--font-display);
           font-size: 13.5px;
@@ -257,7 +257,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
         .fq-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .fq-btn--confirm { background: var(--accent-fill); border: none; color: var(--on-accent); font-weight: bold; }
         .fq-btn--ghost   { background: transparent; border: 0.5px solid var(--border-solid); color: var(--text-secondary); }
-        .fq-btn--danger  { background: transparent; border: 0.5px solid rgba(224,108,108,0.35); color: var(--red); }
+        .fq-btn--danger  { background: transparent; border: 0.5px solid color-mix(in srgb, var(--red) 35%, transparent); color: var(--red); }
 
         .fq-override { margin-top: 10px; }
         .fq-override__input {

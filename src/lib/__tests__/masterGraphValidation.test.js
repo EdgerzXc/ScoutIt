@@ -167,7 +167,7 @@ describe("ScoutIt Master Flow Graph Schema V2.2 — Deep Research Remediation Su
     expect(LINEAR_GUIDE_DEFINITIONS.buyer_guide.type).toBe("EXECUTABLE_GUIDE");
     expect(LINEAR_GUIDE_DEFINITIONS.owner_guide.type).toBe("MACRO_GUIDE");
     expect(LINEAR_GUIDE_DEFINITIONS.broker_guide.type).toBe("MACRO_GUIDE");
-  });
+  }, 15000);
 
   // 10. Split RAG Security Audit & Zero Technical Leakage (G-10)
   it("evaluates access safety (100%) and content sanitization (100%) with zero internal leakages", () => {

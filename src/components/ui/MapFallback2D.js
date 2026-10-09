@@ -28,7 +28,7 @@ export default function MapFallback2D({
 
   return (
     <div
-      className={`relative w-full ${minHeight} bg-[#0d0d0d] border border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 text-center overflow-hidden ${className}`}
+      className={`relative w-full ${minHeight} bg-[var(--bg)] border border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 text-center overflow-hidden ${className}`}
       style={style}
       role="region"
       aria-label={title}
@@ -38,7 +38,7 @@ export default function MapFallback2D({
         className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
           backgroundImage:
-            "radial-gradient(var(--accent) 1px, transparent 1px), radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)",
+            "radial-gradient(var(--accent) 1px, transparent 1px), radial-gradient(rgba(var(--text-primary-rgb), 0.4) 1px, transparent 1px)",
           backgroundSize: "24px 24px",
           backgroundPosition: "0 0, 12px 12px",
         }}

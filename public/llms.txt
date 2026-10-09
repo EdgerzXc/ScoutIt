@@ -1,0 +1,32 @@
+# ScoutIt Space Intelligence Platform
+> ScoutIt is a premium spatial intelligence and verified real estate directory in the Philippines, organizing commercial, residential, hospitality, and specialized properties across geospatial descent layers.
+
+## Core Architecture & Invariants
+- **Dual-CMS System**: Airtable serves public, read-only content via `/api/cms`. Supabase manages private user profiles, authenticated workspaces, and draft submissions.
+- **Geocoding & Spatial Coordinates**: Geographic positions are geocoded using Mapbox and projected into MapLibre GL 3D viewports.
+- **Price Transparency & Integrity**: In compliance with the Real Estate Service Act (RESA RA 9646), asking prices and financial negotiations are strictly confined to Chapter 10 "Your Move" on verified listings. Prices are never exposed in social open graph tags or preview snippets.
+- **Authenticity Guarantees**: Zero fabricated social proof, zero fake urgency countdowns, and zero unverified user reviews. Scout Ratings and badges are earned through verifiable two-sided transactions.
+
+## Geospatial Layers
+- **Layer 01 Orbit** (`/`): Atmospheric entry and macro national spatial registry.
+- **Layer 02 Stratosphere** (`/stratosphere`): Regional macroeconomic intelligence and investigative dossiers.
+- **Layer 03 Metropolis** (`/layer/metropolis`): Metro Manila urban district density (BGC, Makati, Ortigas).
+- **Layer 04 Crust** (`/layer/crust`): Street-level architectural and parcel footprints.
+- **Layer 05 Mantle** (`/layer/mantle`): Institutional zoning, subsurface utility topology, and infrastructure corridors.
+
+## Key Public Routes
+- Directory: https://www.scoutit.space/property
+- Discover & Radius Search: https://www.scoutit.space/discover
+- Location Hubs:
+  - BGC, Taguig: https://www.scoutit.space/hubs/bonifacio-global-city
+  - Makati CBD: https://www.scoutit.space/hubs/makati-cbd
+  - Cebu IT Park: https://www.scoutit.space/hubs/cebu-it-park
+- Market Intel & Briefings: https://www.scoutit.space/intel
+- Certified Professional Advisors: https://www.scoutit.space/brokers
+- Features & Spatial Capabilities: https://www.scoutit.space/showcase
+- Platform Pricing & Tier Entitlements: https://www.scoutit.space/pricing
+
+## Public API & Feeds
+- Public Inventory Feed: `GET /api/cms`
+- Sitemap Index: `https://www.scoutit.space/sitemap.xml`
+- Robots Directive: `https://www.scoutit.space/robots.txt`

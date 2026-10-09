@@ -40,9 +40,9 @@ export default function IntelDoorCard({
         borderRadius: "8px",
         padding: "1px",
         background: isSevere
-          ? "linear-gradient(135deg, rgba(var(--accent-rgb, 232, 174, 60), 0.45) 0%, rgba(232, 100, 74, 0.3) 50%, rgba(255, 255, 255, 0.05) 100%)"
-          : "linear-gradient(135deg, rgba(var(--accent-rgb, 232, 174, 60), 0.35) 0%, rgba(59, 130, 246, 0.25) 50%, rgba(255, 255, 255, 0.05) 100%)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4), 0 0 18px rgba(var(--accent-rgb, 232, 174, 60), 0.08)",
+          ? "linear-gradient(135deg, rgba(var(--accent-rgb), 0.45) 0%, color-mix(in srgb, var(--flood-high, var(--red)) 30%, transparent) 50%, color-mix(in srgb, var(--text-primary) 5%, transparent) 100%)"
+          : "linear-gradient(135deg, rgba(var(--accent-rgb), 0.35) 0%, color-mix(in srgb, var(--intel-blue, var(--sapphire)) 25%, transparent) 50%, color-mix(in srgb, var(--text-primary) 5%, transparent) 100%)",
+        boxShadow: "0 8px 32px rgba(var(--bg-rgb), 0.4), 0 0 18px rgba(var(--accent-rgb), 0.08)",
       }}
     >
       <div
@@ -64,7 +64,7 @@ export default function IntelDoorCard({
             width: "160px",
             height: "160px",
             borderRadius: "50%",
-            background: isSevere ? "radial-gradient(circle, rgba(var(--accent-rgb, 232, 174, 60), 0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%)",
+            background: isSevere ? "radial-gradient(circle, rgba(var(--accent-rgb), 0.15) 0%, transparent 70%)" : "radial-gradient(circle, color-mix(in srgb, var(--intel-blue, var(--sapphire)) 15%, transparent) 0%, transparent 70%)",
             pointerEvents: "none",
           }}
         />
@@ -100,9 +100,9 @@ export default function IntelDoorCard({
                 textTransform: "uppercase",
                 padding: "3px 8px",
                 borderRadius: "3px",
-                background: isSevere ? "rgba(232, 100, 74, 0.15)" : "rgba(16, 185, 129, 0.15)",
+                background: isSevere ? "color-mix(in srgb, var(--flood-high, var(--red)) 15%, transparent)" : "color-mix(in srgb, var(--green) 15%, transparent)",
                 color: isSevere ? "var(--red)" : "var(--green)",
-                border: isSevere ? "1px solid rgba(232, 100, 74, 0.3)" : "1px solid rgba(16, 185, 129, 0.3)",
+                border: isSevere ? "1px solid color-mix(in srgb, var(--flood-high, var(--red)) 30%, transparent)" : "1px solid color-mix(in srgb, var(--green) 30%, transparent)",
               }}
             >
               {signal.statusBadge || "ACTIVE RECORD"}
@@ -158,8 +158,8 @@ export default function IntelDoorCard({
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              background: "rgba(var(--accent-rgb, 232, 174, 60), 0.08)",
-              border: "1px solid rgba(var(--accent-rgb, 232, 174, 60), 0.25)",
+              background: "rgba(var(--accent-rgb), 0.08)",
+              border: "1px solid rgba(var(--accent-rgb), 0.25)",
               borderRadius: "4px",
               padding: "6px 12px",
               marginBottom: "18px",
@@ -206,7 +206,7 @@ export default function IntelDoorCard({
               textTransform: "uppercase",
               padding: "10px 18px",
               borderRadius: "4px",
-              boxShadow: "0 2px 10px rgba(var(--accent-rgb, 232, 174, 60), 0.25)",
+              boxShadow: "0 2px 10px rgba(var(--accent-rgb), 0.25)",
               transition: "transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease",
             }}
             className="tactile lens-gold-btn"

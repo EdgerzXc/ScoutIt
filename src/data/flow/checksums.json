@@ -1,18 +1,18 @@
 {
   "bundleVersion": "2.2.0",
-  "dataRevision": "31d9df1cc8306ebe205787f928f0a233e201fc54",
-  "generatedAt": "2026-09-11T12:05:56.600Z",
+  "dataRevision": "b3ab118c6b274197f029f275a72a6b527a159e71",
+  "generatedAt": "2026-10-07T14:20:00.655Z",
   "checksums": {
     "schema.json": "84107b9ac4501e93c3fad3b0537d9c8eeeedf4d73572f160112e3debf92261cf",
-    "masterFlowGraph.json": "897f598fdff4c84aeb4bf9dcf477237519a80d962ef1e7ea9626ae2df2ed5757",
-    "masterFlowLayout.json": "fbd3e7d3cd7f00f0c6572638df8fcf7070e8f3562c7af4ccce6a5e6bea5af62c",
+    "masterFlowGraph.json": "2c919ebfd5a4ae9f790c521dbc27aef2605e5072a264b86dbde71cbbf862d491",
+    "masterFlowLayout.json": "9d74fd17a24d4cb9a470790401fa71ca5e57b1eede8dff84bb3672cabf0b5803",
     "atomicRAGChunks.json": "ce3b3d875e50cd066a7e5eee3a387c6324fd50d4ad8478bd0ee35a2537b65d6b",
     "publicRAGChunks.json": "552d572237a100b33a92d23d74a3f0bfac3f764a6e7eaeaab1927de4a61f2f6b",
     "workflows.json": "ca5036e35d04bc02c32901029c949cd939d035f3a81282ad94bb8587ad9e89dc",
     "linearGuides.json": "56670739182d171029cfc02b55aabab86cb7bdadfe50126bcf55c5c05cbfc408",
     "coverageReport.json": "1b985cd61997fef5a9974a9972843d58e5d939b9f04a0b9f4e77059b3f382e83",
-    "auditReport.json": "1244b1d45bb539ec2e5c12a3497369a15fa9dd93acc7d0eebed6a88371d1729c",
+    "auditReport.json": "6008ecff3d00f9470b00f46897b56310ffdfc20a259ac7be8f35a9d852786606",
     "index.js": "e5c6a3b8e0fdf3d55b29b4465cef26225bf1f497c24fa7133eeaafe49d577429",
-    "README.md": "02bb01fbbd52aba2641f229fb1c910e31f896156ac9a7c50cb5b01cc71d7be6d"
+    "README.md": "55f8b6e8b6e25d89c4a3070677268fecd4d5a7e25da2db876d08004fd42b8e46"
   }
 }

@@ -9,6 +9,7 @@ import { Bookmark, Search } from "lucide-react";
 import PostMoveEcosystem from "./PostMoveEcosystem";
 import RecommendationInvitation from "./RecommendationInvitation";
 import VaultOfHonor from "./VaultOfHonor";
+import ResidentPassportCard from "./ResidentPassportCard";
 
 const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonMatrix"), { ssr: false });
 
@@ -167,7 +168,7 @@ export default function BuyerMode() {
 
           // Add draggable radar center pin
           const radarMarkerEl = document.createElement('div');
-          radarMarkerEl.className = 'w-6 h-6 rounded-full border-2 border-gold-accent bg-gold-accent/20 cursor-move flex items-center justify-center backdrop-blur-sm shadow-[0_0_15px_rgba(232,174,60,0.5)]';
+          radarMarkerEl.className = 'w-6 h-6 rounded-full border-2 border-gold-accent bg-gold-accent/20 cursor-move flex items-center justify-center backdrop-blur-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.5)]';
           const innerDot = document.createElement('div');
           innerDot.className = 'w-2 h-2 rounded-full bg-gold-accent';
           radarMarkerEl.appendChild(innerDot);
@@ -218,7 +219,7 @@ export default function BuyerMode() {
       if (coords) {
         // Marker element
         const el = document.createElement('div');
-        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(232,174,60,0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
+        el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
         el.innerHTML = listing.hasMedia ? '📸' : '🏢';
 
         // Secure Popup DOM Construction to prevent XSS
@@ -471,7 +472,7 @@ export default function BuyerMode() {
             <input
               type="text"
               ref={searchRef}
-              className="w-full bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] placeholder:text-text-muted"
+              className="w-full bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full pl-11 pr-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] placeholder:text-text-muted"
               placeholder="Search locations, asset types, or intel..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -481,7 +482,7 @@ export default function BuyerMode() {
           {/* Proximity / Radius Filter */}
           <select
             aria-label="Search radius"
-            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full px-5 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 cursor-pointer w-full md:w-auto shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-full px-5 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface/80 transition-all duration-300 cursor-pointer w-full md:w-auto shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]"
             value={radius}
             onChange={handleRadiusChange}
           >
@@ -512,7 +513,7 @@ export default function BuyerMode() {
       </div>
 
       {showMap ? (
-        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(232,174,60,0.05)]">
+        <div className="w-full h-[600px] bg-surface border border-surface-variant rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(var(--accent-rgb),0.05)]">
           
           {mapError ? (
             <MapFallback2D
@@ -526,7 +527,7 @@ export default function BuyerMode() {
           )}
           
           <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2 max-w-[calc(100%-6rem)]">
-            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] break-words">
+            <div className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] p-5 rounded-2xl shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)] break-words">
               <div className="text-[12px] font-label-caps tracking-widest text-gold-accent mb-1 uppercase">
                 Spatial Intelligence
               </div>
@@ -535,7 +536,7 @@ export default function BuyerMode() {
             </div>
             
             <select
-              className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] text-on-surface text-sm rounded-xl px-4 py-3 w-full focus:outline-none focus:border-gold-accent/50 transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+              className="bg-background/40 backdrop-blur-2xl border border-white/[0.04] text-on-surface text-sm rounded-xl px-4 py-3 w-full focus:outline-none focus:border-gold-accent/50 transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"
               value={radius}
               onChange={handleRadiusChange}
             >
@@ -608,7 +609,7 @@ export default function BuyerMode() {
                   <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
                     Saved spaces and intelligence briefs appear here. <InfoTip tipId="privateSaves" label="About private saves" />
                   </p>
-                  <Link href="/property" className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(232,174,60,0.2)] font-bold">
+                  <Link href="/property" className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(var(--accent-bright-rgb),0.2)] font-bold">
                     Explore Curated Spaces →
                   </Link>
                 </div>
@@ -622,7 +623,7 @@ export default function BuyerMode() {
               <span>New in Metro Manila <InfoTip tipId="areaWatch" label="About area watch" /></span>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <button
-                  className={`font-label-caps tracking-widest uppercase text-[12px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(232,174,60,0.3)] hover:opacity-90 hover:scale-105'}`}
+                  className={`font-label-caps tracking-widest uppercase text-[12px] px-4 py-2 rounded transition flex items-center gap-1.5 ${areaWatch ? 'text-gold-accent bg-gold-accent/10 border border-gold-accent/40' : 'text-background bg-gold-accent shadow-[0_0_10px_rgba(var(--accent-bright-rgb),0.3)] hover:opacity-90 hover:scale-105'}`}
                   onClick={toggleAreaWatch}
                   aria-pressed={areaWatch}
                 >
@@ -760,6 +761,9 @@ export default function BuyerMode() {
         </>
       )}
 
+      {/* Resident Passport & Tenancy Trust Credential (A-182) */}
+      <ResidentPassportCard />
+
       {/* Vault of Honor — badges/achievements sit below the core content (search + saved + intel) */}
       <VaultOfHonor />
 
@@ -768,7 +772,7 @@ export default function BuyerMode() {
           pill at this content width overruns a 390px viewport, and because it
           is centred it clips both ends at once rather than one. */}
       {selectedForCompare.length >= 2 && (
-        <div className="fixed z-50 bottom-[calc(90px+env(safe-area-inset-bottom))] sm:bottom-6 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-[calc(100vw-2rem)] bg-surface/95 backdrop-blur-xl border border-gold-accent/40 rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex items-center justify-between sm:justify-start gap-3 sm:gap-4 motion-safe:animate-[compareBarIn_200ms_cubic-bezier(0.23,1,0.32,1)]">
+        <div className="fixed z-50 bottom-[calc(90px+env(safe-area-inset-bottom))] sm:bottom-6 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-[calc(100vw-2rem)] bg-surface/95 backdrop-blur-xl border border-gold-accent/40 rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 shadow-[0_8px_32px_rgba(var(--bg-rgb),0.8)] flex items-center justify-between sm:justify-start gap-3 sm:gap-4 motion-safe:animate-[compareBarIn_200ms_cubic-bezier(0.23,1,0.32,1)]">
           <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-bold truncate">
             <span className="sm:hidden">{selectedForCompare.length} Selected</span>
             <span className="hidden sm:inline">{selectedForCompare.length} Spaces Selected</span>
@@ -776,7 +780,7 @@ export default function BuyerMode() {
           <button
             type="button"
             onClick={() => setIsComparisonOpen(true)}
-            className="shrink-0 px-4 min-h-11 sm:min-h-0 sm:py-1.5 rounded-full bg-gold-accent text-black font-mono text-xs uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-95 shadow-[0_0_15px_rgba(232,174,60,0.4)]"
+            className="shrink-0 px-4 min-h-11 sm:min-h-0 sm:py-1.5 rounded-full bg-gold-accent text-black font-mono text-xs uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-95 shadow-[0_0_15px_rgba(var(--accent-bright-rgb),0.4)]"
           >
             <span className="sm:hidden">Compare</span>
             <span className="hidden sm:inline">Launch Comparison Matrix ➔</span>

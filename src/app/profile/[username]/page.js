@@ -184,9 +184,9 @@ export default function PublicProfilePage() {
 }
 
 const pageWrap = {
-  minHeight: "100vh",
-  background: "#0e0e0e",
-  color: "#f0ede8",
+  minHeight: "100dvh",
+  background: "var(--bg)",
+  color: "var(--text-primary)",
   paddingBottom: 80,
 };
 
@@ -197,9 +197,9 @@ const navBar = {
   display: "flex",
   alignItems: "center",
   padding: "14px 24px",
-  background: "rgba(14,14,14,0.85)",
+  background: "rgba(var(--bg-rgb), 0.85)",
   backdropFilter: "blur(20px)",
-  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  borderBottom: "1px solid var(--border-subtle)",
 };
 
 const backLink = {
@@ -231,17 +231,17 @@ const emptyPanels = {
 };
 
 const loadingScreen = {
-  minHeight: "100vh",
-  background: "#0e0e0e",
+  minHeight: "100dvh",
+  background: "var(--bg)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 };
 
 const notFoundScreen = {
-  minHeight: "100vh",
-  background: "#0e0e0e",
-  color: "#f0ede8",
+  minHeight: "100dvh",
+  background: "var(--bg)",
+  color: "var(--text-primary)",
 };
 
 const notFoundContent = {
@@ -258,7 +258,7 @@ const notFoundContent = {
 const notFoundTitle = {
   fontFamily: "var(--font-display)",
   fontSize: 36,
-  color: "#f0ede8",
+  color: "var(--text-primary)",
 };
 
 const notFoundDesc = {
@@ -271,8 +271,8 @@ const notFoundDesc = {
 const notFoundCta = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
-  color: "#E8AE3C",
-  border: "1px solid rgba(232, 174, 60,0.3)",
+  color: "var(--accent)",
+  border: "1px solid rgba(var(--accent-rgb), 0.3)",
   borderRadius: 20,
   padding: "8px 20px",
   textDecoration: "none",

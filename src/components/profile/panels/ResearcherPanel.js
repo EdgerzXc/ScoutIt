@@ -60,8 +60,8 @@ export default function ResearcherPanel({ data, isAnonymous = false, isPublic = 
 }
 
 const panelStyle = {
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(165deg, var(--surface2), var(--surface))",
+  border: "1px solid var(--border-subtle)",
   borderRadius: 6,
   padding: 24,
 };
@@ -86,7 +86,7 @@ const anonBadge = {
   fontFamily: "var(--font-body)",
   fontSize: 12,
   color: "var(--text-secondary)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  border: "1px solid var(--border-mid)",
   padding: "2px 8px",
   borderRadius: 20,
   letterSpacing: "0.04em",
@@ -99,8 +99,8 @@ const statsRow = {
 };
 
 const statCard = {
-  background: "linear-gradient(165deg, #1a1917, #111110)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(165deg, var(--surface2), var(--surface))",
+  border: "1px solid var(--border-subtle)",
   borderRadius: 4,
   padding: "14px 10px",
   display: "flex",
@@ -112,7 +112,7 @@ const statCard = {
 const statValue = {
   fontFamily: "var(--font-display)",
   fontSize: 28,
-  color: "#e5e2e1",
+  color: "var(--text-primary)",
   lineHeight: 1.2,
 };
 

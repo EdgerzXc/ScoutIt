@@ -148,8 +148,8 @@ export default function AmbientRail({ user, context = null }) {
           align-items: center;
           border-radius: 999px;
           border: 1px solid rgba(var(--accent-rgb), .16);
-          background: linear-gradient(180deg, rgba(255,255,255,.04), transparent 52%), rgba(6,6,6,.45);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(var(--accent-rgb), .04), 0 8px 32px rgba(0,0,0,.22);
+          background: linear-gradient(180deg, rgba(var(--text-primary-rgb),.04), transparent 52%), rgba(var(--bg-rgb),.45);
+          box-shadow: inset 0 1px 0 rgba(var(--text-primary-rgb),.05), inset 0 -1px 0 rgba(var(--accent-rgb), .04), 0 8px 32px rgba(var(--bg-rgb),.22);
           user-select: none;
           isolation: isolate;
         }
@@ -247,12 +247,12 @@ export default function AmbientRail({ user, context = null }) {
            #9a6200 on this ground measures 4.9:1. */
         :global(body.light-mode) .ambient-rail {
           background:
-            linear-gradient(180deg, rgba(0,0,0,.03), transparent 52%),
-            rgba(252, 252, 253, .72);
+            linear-gradient(180deg, rgba(var(--bg-rgb), .03), transparent 52%),
+            rgba(var(--surface-rgb), .72);
           box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.6),
+            inset 0 1px 0 rgba(var(--text-primary-rgb), .6),
             inset 0 -1px 0 rgba(var(--accent-rgb), .06),
-            0 6px 22px rgba(0,0,0,.08);
+            0 6px 22px rgba(var(--bg-rgb), .08);
         }
         .ambient-nav {
           width: 24px;

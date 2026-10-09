@@ -94,9 +94,9 @@ export default function GeoPricingGauge({ location, category, price }) {
 
       <style jsx>{`
         .geo-pricing-gauge {
-          background: rgba(18, 18, 18, 0.6);
+          background: rgba(var(--surface-rgb), 0.6);
           backdrop-filter: blur(12px);
-          border: 1px solid rgba(232, 174, 60, 0.2);
+          border: 1px solid rgba(var(--accent-rgb), 0.2);
           border-radius: 8px;
           padding: 16px;
           margin-top: 12px;
@@ -126,7 +126,7 @@ export default function GeoPricingGauge({ location, category, price }) {
 
         .loading-pulse {
           font-size: 0.75rem;
-          color: #aaa;
+          color: var(--text-secondary);
           animation: pulse 1.5s infinite ease-in-out;
         }
 
@@ -146,7 +146,7 @@ export default function GeoPricingGauge({ location, category, price }) {
         .metric-label {
           font-size: 0.75rem;
           text-transform: uppercase;
-          color: #888;
+          color: var(--text-muted);
           margin-bottom: 4px;
         }
 
@@ -168,21 +168,21 @@ export default function GeoPricingGauge({ location, category, price }) {
         }
 
         .verdict-green {
-          background: rgba(46, 204, 113, 0.1);
-          color: #2ecc71;
-          border-left: 3px solid #2ecc71;
+          background: color-mix(in srgb, var(--green) 10%, transparent);
+          color: var(--green);
+          border-left: 3px solid var(--green);
         }
 
         .verdict-yellow {
-          background: rgba(247, 198, 78, 0.1);
-          color: var(--accent-bright, var(--accent-bright));
-          border-left: 3px solid var(--accent, var(--accent));
+          background: rgba(var(--accent-rgb), 0.1);
+          color: var(--accent-bright);
+          border-left: 3px solid var(--accent);
         }
 
         .verdict-red {
-          background: rgba(231, 76, 60, 0.1);
-          color: #e74c3c;
-          border-left: 3px solid #e74c3c;
+          background: color-mix(in srgb, var(--red) 10%, transparent);
+          color: var(--red);
+          border-left: 3px solid var(--red);
         }
 
         @keyframes pulse {

@@ -522,7 +522,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                         <div className="text-xs text-white/70 uppercase tracking-widest">Delegated Tasks</div>
                         <button 
                           onClick={() => setIsAssigningTask(!isAssigningTask)}
-                          className={`min-h-11 text-[12px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(232,174,60,0.1)]'}`}
+                          className={`min-h-11 text-[12px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(var(--accent-rgb),0.1)]'}`}
                         >
                           {isAssigningTask ? <X size={12} /> : <Plus size={12} />} 
                           {isAssigningTask ? 'Cancel' : 'Assign Task'}

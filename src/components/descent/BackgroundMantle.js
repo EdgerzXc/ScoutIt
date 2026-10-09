@@ -319,7 +319,7 @@ export default function BackgroundMantle({ paused = false }) {
         style={{
           pointerEvents: "none",
           background:
-            "radial-gradient(ellipse 72% 62% at 50% 44%, rgba(10,5,2,0.80) 0%, rgba(10,5,2,0.48) 38%, rgba(10,5,2,0.06) 72%, rgba(10,5,2,0) 100%)",
+            "radial-gradient(ellipse 72% 62% at 50% 44%, rgba(var(--bg-rgb),0.80) 0%, rgba(var(--bg-rgb),0.48) 38%, rgba(var(--bg-rgb),0.06) 72%, rgba(var(--bg-rgb),0) 100%)",
         }}
       />
     </div>

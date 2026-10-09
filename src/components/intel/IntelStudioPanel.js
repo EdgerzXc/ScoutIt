@@ -225,12 +225,12 @@ export default function IntelStudioPanel() {
           content: "";
           flex: 1;
           height: 1px;
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(var(--text-primary-rgb), 0.08);
         }
         .paste-area {
           width: 100%;
-          background: rgba(0, 0, 0, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(var(--bg-rgb), 0.4);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.1);
           border-radius: var(--radius-lg);
           padding: 14px 16px;
           font-size: 16px;
@@ -272,13 +272,13 @@ export default function IntelStudioPanel() {
         .btn-primary {
           background: var(--accent);
           border: 1px solid var(--accent);
-          color: #0d0d0d;
+          color: var(--on-accent);
           font-weight: 700;
         }
         .btn-primary:hover:not(:disabled) { background: var(--accent-bright); }
         .btn-ghost {
           background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(var(--text-primary-rgb), 0.15);
           color: var(--text-secondary);
         }
         .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
@@ -290,20 +290,20 @@ export default function IntelStudioPanel() {
           line-height: 1.5;
         }
         .studio-status.success {
-          background: rgba(76, 175, 125, 0.1);
-          border: 1px solid rgba(76, 175, 125, 0.3);
-          color: #4caf7d;
+          background: var(--green-dim);
+          border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
+          color: var(--green);
         }
         .studio-status.error {
-          background: rgba(255, 82, 82, 0.08);
-          border: 1px solid rgba(255, 82, 82, 0.3);
-          color: #ff8a8a;
+          background: var(--red-dim);
+          border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+          color: var(--red);
         }
         .studio-status a { color: var(--accent); text-decoration: underline; }
         .studio-preview {
           border: 1px solid rgba(var(--accent-rgb), 0.2);
           border-radius: var(--radius-lg);
-          background: rgba(255, 255, 255, 0.02);
+          background: rgba(var(--text-primary-rgb), 0.02);
           padding: clamp(16px, 4vw, 32px);
         }
         .preview-head { margin-bottom: 20px; }

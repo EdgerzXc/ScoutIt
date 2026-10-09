@@ -1,11 +1,16 @@
 "use client";
 
+import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useModalDialog from "@/components/ui/useModalDialog";
 import ConnectionPortal from "../connection/ConnectionPortal";
 import ServiceConnectionPortal from "../connection/ServiceConnectionPortal";
 import "./ProfileContactModal.css"; // We'll put styles here for cleanliness, similar to InquiryModal.css
 
 export default function ProfileContactModal({ isOpen, onClose, profile }) {
+  const dialogRef = useRef(null);
+  useModalDialog(dialogRef, { active: isOpen && Boolean(profile), onClose });
+
   if (!profile) return null;
   
   const roles = profile.active_roles || [];
@@ -27,13 +32,19 @@ export default function ProfileContactModal({ isOpen, onClose, profile }) {
           animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
           exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
           transition={{ duration: 0.4 }}
+          onClick={onClose}
         >
           <motion.div 
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Contact ${profile.display_name || "Profile"}`}
             className="contact-modal"
             initial={{ y: 30, scale: 0.95, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 20, scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            onClick={(e) => e.stopPropagation()}
           >
             <button className="contact-close" onClick={onClose} aria-label="Close">
               ✕

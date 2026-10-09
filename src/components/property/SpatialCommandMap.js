@@ -880,7 +880,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
   };
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "clamp(380px, 60vh, 680px)", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(232, 174, 60, 0.3)" }}>
+    <div style={{ position: "relative", width: "100%", height: "clamp(380px, 60vh, 680px)", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(var(--accent-rgb), 0.3)" }}>
       {/* Map Container with Visual Filter Support or 2D Fallback */}
       {!webglSupported ? (
         <MapFallback2D lat={targetLat} lng={targetLng} title={propertyTitle} style={{ width: "100%", height: "100%" }} />
@@ -896,9 +896,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             inset: 0,
             pointerEvents: "none",
             zIndex: 5,
-            background: "linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))",
+            background: "linear-gradient(transparent 50%, rgba(var(--bg-rgb), 0.25) 50%), linear-gradient(90deg, color-mix(in srgb, var(--red) 6%, transparent), color-mix(in srgb, var(--green) 2%, transparent), color-mix(in srgb, var(--intel-blue, var(--sapphire)) 6%, transparent))",
             backgroundSize: "100% 3px, 6px 100%",
-            boxShadow: "inset 0 0 100px rgba(0,255,100,0.2)",
+            boxShadow: "inset 0 0 100px color-mix(in srgb, var(--green) 20%, transparent)",
           }}
         />
       )}
@@ -912,16 +912,16 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
           left: "12px",
           right: "12px",
           zIndex: 10,
-          background: "rgba(13, 13, 13, 0.92)",
+          background: "rgba(var(--bg-rgb), 0.92)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
-          border: "1px solid rgba(232, 174, 60, 0.4)",
+          border: "1px solid rgba(var(--accent-rgb), 0.4)",
           borderRadius: "8px",
           padding: "10px 12px",
           color: visualMode === "CRT" ? "var(--green)" : "var(--text-primary)",
           fontFamily: "var(--font-mono, monospace)",
           fontSize: "12px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.75)",
+          boxShadow: "0 8px 32px rgba(var(--bg-rgb), 0.75)",
           width: "calc(100% - 24px)",
           maxWidth: "420px",
           transition: "all 0.3s ease",
@@ -988,7 +988,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               style={{
                 width: "100%",
                 background: "var(--surface)",
-                border: "1px solid rgba(232, 174, 60, 0.3)",
+                border: "1px solid rgba(var(--accent-rgb), 0.3)",
                 borderRadius: "4px",
                 padding: "6px 10px",
                 color: "var(--text-primary)",
@@ -998,7 +998,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 transition: "border-color 0.2s ease, box-shadow 0.2s ease",
               }}
               onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 8px color-mix(in srgb, var(--accent) 30%, transparent)'; }}
-              onBlur={(e) => { e.target.style.borderColor = 'rgba(232, 174, 60, 0.3)'; e.target.style.boxShadow = 'none'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'rgba(var(--accent-rgb), 0.3)'; e.target.style.boxShadow = 'none'; }}
             />
             {aiFilterStatus && <div style={{ fontSize: "12px", color: "var(--green)", marginTop: "3px" }}>✓ {aiFilterStatus}</div>}
           </form>
@@ -1025,7 +1025,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 padding: "4px 8px",
                 borderRadius: "4px",
                 border: activeLayer === btn.id ? "1px solid var(--accent)" : "1px solid var(--border-mid)",
-                background: activeLayer === btn.id ? "rgba(232, 174, 60, 0.25)" : "var(--surface2)",
+                background: activeLayer === btn.id ? "rgba(var(--accent-rgb), 0.25)" : "var(--surface2)",
                 color: activeLayer === btn.id ? "var(--accent-bright)" : "var(--text-secondary)",
                 fontSize: "12px",
                 cursor: "pointer",
@@ -1040,9 +1040,9 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
 
         {/* Pre-Computed Telemetry Metrics + Business Continuity Index */}
         {hudExpanded && spatialIntel && (
-          <div style={{ borderTop: "1px dashed rgba(255,255,255,0.15)", paddingTop: "10px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div style={{ borderTop: "1px dashed var(--border-subtle)", paddingTop: "10px", display: "flex", flexDirection: "column", gap: "6px" }}>
             {continuity && (
-              <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(232, 174, 60, 0.1)", padding: "4px 8px", borderRadius: "4px", border: `1px solid ${continuity.badge_color}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(var(--accent-rgb), 0.1)", padding: "4px 8px", borderRadius: "4px", border: `1px solid ${continuity.badge_color}` }}>
                 <span style={{ color: "var(--accent)", fontWeight: "bold" }}>🛡️ Continuity Index:</span>
                 <span style={{ color: continuity.badge_color, fontWeight: "bold" }}>{continuity.score}/100 ({continuity.grade})</span>
               </div>
@@ -1097,7 +1097,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             zIndex: 12,
             width: "300px",
             maxWidth: "calc(100vw - 32px)",
-            background: "rgba(13, 13, 13, 0.95)",
+            background: "rgba(var(--bg-rgb), 0.95)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
             border: "1px solid var(--accent)",
@@ -1105,7 +1105,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             padding: "14px",
             color: "var(--text-primary)",
             fontFamily: "var(--font-mono, monospace)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.8)",
+            boxShadow: "0 12px 40px rgba(var(--bg-rgb), 0.8)",
             animation: "scmFadeIn 0.25s ease-out",
           }}
         >
@@ -1152,7 +1152,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
             position: "absolute",
             inset: 0,
             zIndex: 20,
-            background: "rgba(0,0,0,0.75)",
+            background: "rgba(var(--bg-rgb), 0.75)",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
             display: "flex",
@@ -1172,7 +1172,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
               padding: "20px",
               color: "var(--text-primary)",
               fontFamily: "var(--font-mono, monospace)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.9)",
+              boxShadow: "0 16px 48px rgba(var(--bg-rgb), 0.9)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
@@ -1230,7 +1230,7 @@ export default function SpatialCommandMap({ lat = 14.5547, lng = 121.0244, prope
                 display: "block",
                 marginTop: "14px",
                 padding: "8px",
-                background: "rgba(6, 182, 212, 0.15)",
+                background: "color-mix(in srgb, var(--intel-cyan) 15%, transparent)",
                 border: "1px solid var(--intel-cyan)",
                 color: "var(--intel-cyan)",
                 borderRadius: "4px",

@@ -246,8 +246,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         new maplibregl.Popup(POPUP_OPTIONS).setDOMContent(
           popupBody(
             propertyTitle || "ScoutIt Property",
-            "#E8AE3C",
-            popupSub("#c8c8c8", "Target Location")
+            "var(--accent)",
+            popupSub("var(--text-secondary)", "Target Location")
           )
         )
       )
@@ -291,8 +291,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             new maplibregl.Popup(POPUP_OPTIONS).setDOMContent(
               popupBody(
                 item.name,
-                "#ffffff",
-                popupSub("#E8AE3C", `${catLabel} · ${distLabel}`)
+                "var(--text-primary)",
+                popupSub("var(--accent)", `${catLabel} · ${distLabel}`)
               )
             )
           )
@@ -323,8 +323,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             new maplibregl.Popup(POPUP_OPTIONS).setDOMContent(
               popupBody(
                 item.name,
-                "#f0ede8",
-                popupSub("#c8c8c8", `${item.category} · ${item.distance}`)
+                "var(--text-primary)",
+                popupSub("var(--text-secondary)", `${item.category} · ${item.distance}`)
               )
             )
           )
@@ -411,7 +411,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           .setLngLat([destLng, destLat])
           .setPopup(
             new maplibregl.Popup(POPUP_OPTIONS).setDOMContent(
-              popupBody(destName, "#E8AE3C", popupSub("#c8c8c8", "Transit hub · route start"))
+              popupBody(destName, "var(--accent)", popupSub("var(--text-secondary)", "Transit hub · route start"))
             )
           )
           .addTo(map);
@@ -598,7 +598,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
             zIndex: 500,
             background: "rgba(13,13,13,0.82)",
             backdropFilter: "blur(6px)",
-            border: "0.5px solid #262626",
+            border: "0.5px solid var(--border)",
             borderRadius: "3px",
             padding: "8px 10px",
             display: "flex",
@@ -622,7 +622,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "12px",
-                  color: "#c8c8c8",
+                  color: "var(--text-secondary)",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   whiteSpace: "nowrap",
@@ -715,10 +715,10 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 100%;
           height: 100%;
           min-height: 360px;
-          border: 0.5px solid #262626;
+          border: 0.5px solid var(--border);
           border-radius: 8px;
           overflow: hidden;
-          background: #0d0d0d;
+          background: var(--bg);
         }
 
         .spatial-map-node {
@@ -749,10 +749,10 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .white-dot-marker-core {
           width: 9px;
           height: 9px;
-          background: #ffffff;
-          border: 1.5px solid #0d0d0d;
+          background: var(--text-primary);
+          border: 1.5px solid var(--bg);
           border-radius: 50%;
-          box-shadow: 0 0 8px #ffffff, 0 0 16px rgba(232, 174, 60, 0.4);
+          box-shadow: 0 0 8px var(--text-primary), 0 0 16px rgba(var(--accent-rgb), 0.4);
           cursor: pointer;
           transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
         }
@@ -760,24 +760,24 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         @media (hover: hover) and (pointer: fine) {
           .custom-map-marker.white-dot:hover .white-dot-marker-core {
             transform: scale(1.7);
-            background: #F7C64E;
-            box-shadow: 0 0 12px #F7C64E, 0 0 24px rgba(247, 198, 78, 0.8);
+            background: var(--accent-bright);
+            box-shadow: 0 0 12px var(--accent-bright), 0 0 24px rgba(var(--accent-bright-rgb), 0.8);
           }
         }
 
         .map-radar-ring {
           fill: none;
-          stroke: rgba(232, 174, 60, 0.12);
+          stroke: rgba(var(--accent-rgb), 0.12);
           stroke-width: 0.5;
         }
 
         .map-radar-ring.outer {
-          stroke: rgba(232, 174, 60, 0.22);
+          stroke: rgba(var(--accent-rgb), 0.22);
           stroke-width: 0.6;
         }
 
         .map-radar-sweep {
-          stroke: rgba(232, 174, 60, 0.25);
+          stroke: rgba(var(--accent-rgb), 0.25);
           stroke-width: 0.6;
         }
 
@@ -791,14 +791,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
 
         .map-radar-lock-line {
-          stroke: #E8AE3C;
+          stroke: var(--accent);
           stroke-width: 0.75;
           stroke-dasharray: 2 2;
         }
 
         .map-radar-lock-ring {
           fill: none;
-          stroke: #E8AE3C;
+          stroke: var(--accent);
           stroke-width: 0.5;
           animation: mapLockPulse 1.2s ease-out infinite;
           transform-origin: center;
@@ -816,7 +816,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           left: 16px;
           width: 200px;
           background: rgba(14, 14, 14, 0.88);
-          border: 0.5px solid #2d2a24;
+          border: 0.5px solid var(--border);
           border-radius: 4px;
           padding: 8px 12px;
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
@@ -845,7 +845,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .hud-card-cat {
           font-family: var(--font-mono);
           font-size: 12px;
-          color: #E8AE3C;
+          color: var(--accent);
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
@@ -853,14 +853,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .hud-card-dist {
           font-family: var(--font-mono);
           font-size: 12px;
-          color: #f0ede8;
+          color: var(--text-primary);
           font-weight: 600;
         }
 
         .hud-card-name {
           font-family: system-ui, -apple-system, sans-serif;
           font-size: 12px;
-          color: #f0ede8;
+          color: var(--text-primary);
           font-weight: 500;
           white-space: nowrap;
           overflow: hidden;
@@ -870,9 +870,9 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .hud-card-coords {
           font-family: var(--font-mono);
           font-size: 12px;
-          color: #777;
+          color: var(--text-muted);
           margin-top: 2px;
-          border-top: 0.5px solid #222;
+          border-top: 0.5px solid var(--border);
           padding-top: 2px;
         }
 
@@ -882,11 +882,11 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #0d0d0d;
+          background: var(--bg);
           font-family: var(--font-mono);
           font-size: 12px;
           letter-spacing: 0.12em;
-          color: #6a6a6a;
+          color: var(--text-muted);
           z-index: 2;
         }
 
@@ -900,7 +900,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           align-items: center;
           gap: 7px;
           background: rgba(14, 14, 14, 0.9);
-          border: 0.5px solid rgba(232, 174, 60, 0.4);
+          border: 0.5px solid rgba(var(--accent-rgb), 0.4);
           border-radius: 4px;
           padding: 7px 12px;
           backdrop-filter: blur(12px);
@@ -910,14 +910,14 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 7px;
           height: 7px;
           border-radius: 50%;
-          background: #E8AE3C;
-          box-shadow: 0 0 6px #E8AE3C;
+          background: var(--accent);
+          box-shadow: 0 0 6px var(--accent);
           flex-shrink: 0;
         }
         .map-route-label .route-time {
           font-family: var(--font-mono);
           font-size: 12px;
-          color: #E8AE3C;
+          color: var(--accent);
           font-weight: 600;
           letter-spacing: 0.04em;
           white-space: nowrap;
@@ -925,7 +925,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .map-route-label .route-dest {
           font-family: system-ui, -apple-system, sans-serif;
           font-size: 12px;
-          color: #f0ede8;
+          color: var(--text-primary);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -933,7 +933,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         .map-route-label .route-km {
           font-family: var(--font-mono);
           font-size: 12px;
-          color: #c8c8c8;
+          color: var(--text-secondary);
           white-space: nowrap;
         }
 
@@ -957,7 +957,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          border: 1px solid #E8AE3C;
+          border: 1px solid var(--accent);
           animation: mapMarkerPulse 2s ease-out infinite;
         }
 
@@ -965,8 +965,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: #E8AE3C;
-          box-shadow: 0 0 10px #E8AE3C;
+          background: var(--accent);
+          box-shadow: 0 0 10px var(--accent);
         }
 
         @keyframes mapMarkerPulse {
@@ -984,8 +984,8 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #c8c8c8;
-          border: 1px solid #1a1a1a;
+          background: var(--text-secondary);
+          border: 1px solid var(--border);
           box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
           transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
         }
@@ -995,16 +995,16 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
           width: 14px;
           height: 14px;
           border-radius: 50%;
-          background: #0e0e0e;
-          border: 2px solid #E8AE3C;
-          box-shadow: 0 0 8px rgba(232, 174, 60, 0.7);
+          background: var(--bg);
+          border: 2px solid var(--accent);
+          box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.7);
         }
 
         @media (hover: hover) and (pointer: fine) {
           .custom-map-marker.amenity:hover .amenity-dot {
-            background: #E8AE3C;
+            background: var(--accent);
             transform: scale(1.5);
-            box-shadow: 0 0 8px #E8AE3C;
+            box-shadow: 0 0 8px var(--accent);
           }
         }
 
@@ -1016,9 +1016,9 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
            (No backticks in here: this block is a template literal, and one
            would close it.) */
         .custom-map-popup .maplibregl-popup-content {
-          background: #121212 !important;
-          color: #f0ede8 !important;
-          border: 0.5px solid #2d2a24 !important;
+          background: var(--surface) !important;
+          color: var(--text-primary) !important;
+          border: 0.5px solid var(--border) !important;
           border-radius: 4px !important;
           font-family: system-ui, -apple-system, sans-serif !important;
           font-size: 12px !important;
@@ -1027,25 +1027,25 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
         }
 
         .custom-map-popup .maplibregl-popup-tip {
-          border-top-color: #121212 !important;
-          border-bottom-color: #121212 !important;
-          border-left-color: #121212 !important;
-          border-right-color: #121212 !important;
+          border-top-color: var(--surface) !important;
+          border-bottom-color: var(--surface) !important;
+          border-left-color: var(--surface) !important;
+          border-right-color: var(--surface) !important;
         }
 
         /* Zoom control. MapLibre renders buttons where Leaflet rendered
            anchors; the palette, the hairline border and the flat shadow are
            carried across so the control looks unchanged. */
         .map-view-wrapper .maplibregl-ctrl-group {
-          background: #121212 !important;
-          border: 0.5px solid #262626 !important;
+          background: var(--surface) !important;
+          border: 0.5px solid var(--border) !important;
           border-radius: 3px !important;
           box-shadow: none !important;
         }
 
         .map-view-wrapper .maplibregl-ctrl-group button {
-          background-color: #121212 !important;
-          border-bottom: 0.5px solid #262626 !important;
+          background-color: var(--surface) !important;
+          border-bottom: 0.5px solid var(--border) !important;
           width: 30px;
           height: 30px;
           transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
@@ -1063,7 +1063,7 @@ export default function InteractiveMap({ lat, lng, propertyTitle, vicinityData =
 
         @media (hover: hover) and (pointer: fine) {
           .map-view-wrapper .maplibregl-ctrl-group button:hover {
-            background-color: #1a1a1a !important;
+            background-color: var(--surface-hover) !important;
           }
           .map-view-wrapper .maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon {
             filter: invert(74%) sepia(47%) saturate(716%) hue-rotate(348deg) brightness(96%) contrast(92%);

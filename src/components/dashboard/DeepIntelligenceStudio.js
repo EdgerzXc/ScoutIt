@@ -407,7 +407,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                   {CATEGORIES.map(c => (
                     <button
                       key={c.id}
-                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(232,174,60,0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
+                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
                     >
                       <span className="text-2xl">{c.icon}</span> {c.label}
@@ -556,7 +556,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={() => setStep(step + 1)}
                   disabled={step === 1 && !formData.category} // Must select category to proceed
-                  className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+                  className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]"
                 >
                   Next Step →
                 </button>
@@ -564,7 +564,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <button 
                   onClick={handlePublish}
                   disabled={!isPublishable}
-                  className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(232,174,60,0.3)]"
+                  className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
                 >
                   Publish listing
                 </button>

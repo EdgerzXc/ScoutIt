@@ -204,13 +204,13 @@ function AdminPageInner() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#222] mb-8 overflow-x-auto gap-2">
+        <div className="flex border-b border-[var(--surface3)] mb-8 overflow-x-auto gap-2">
           <button
             onClick={() => setActiveTab("flags")}
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "flags"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <Sliders size={15} />
@@ -222,7 +222,7 @@ function AdminPageInner() {
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "approvals"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <Building2 size={15} />
@@ -234,7 +234,7 @@ function AdminPageInner() {
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "prc"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <ShieldCheck size={15} />
@@ -246,7 +246,7 @@ function AdminPageInner() {
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "pdf"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <FileText size={15} />
@@ -258,7 +258,7 @@ function AdminPageInner() {
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "intel"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <FileText size={15} />
@@ -273,7 +273,7 @@ function AdminPageInner() {
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "refunds"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <Wallet size={15} />
@@ -286,7 +286,7 @@ function AdminPageInner() {
             className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "verify"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
-                : "border-transparent text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
             }`}
           >
             <ShieldCheck size={15} />
@@ -475,7 +475,7 @@ function AdminPageInner() {
                       <div className="submission-info">
                         <div className="info-primary">
                           {p.prc_verified
-                            ? <ShieldCheck size={16} color="#4caf7d" />
+                            ? <ShieldCheck size={16} style={{ color: "var(--emerald)" }} />
                             : <ShieldOff size={16} style={{ color: "var(--accent)" }} />}
                           <h3>{p.display_name || p.id}</h3>
                         </div>
@@ -497,7 +497,7 @@ function AdminPageInner() {
                           className="btn-approve"
                           disabled={prcProcessingId === p.id}
                           onClick={() => handlePrcToggle(p.id, !p.prc_verified)}
-                          style={p.prc_verified ? { background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "var(--text-secondary)" } : undefined}
+                          style={p.prc_verified ? { background: "transparent", border: "1px solid var(--border-mid)", color: "var(--text-secondary)" } : undefined}
                         >
                           {prcProcessingId === p.id
                             ? "SAVING..."
@@ -533,9 +533,10 @@ function AdminPageInner() {
       <style jsx>{`
         .admin-layout {
           min-height: 100vh;
+          min-height: 100dvh;
           display: flex;
           flex-direction: column;
-          background: #090909;
+          background: var(--bg);
         }
 
         .admin-main {
@@ -594,9 +595,9 @@ function AdminPageInner() {
         }
 
         .admin-alert.success {
-          background: rgba(76, 175, 125, 0.1);
-          border: 1px solid rgba(76, 175, 125, 0.3);
-          color: #4caf7d;
+          background: var(--green-dim);
+          border: 1px solid var(--emerald);
+          color: var(--emerald);
         }
 
         .admin-alert.warning {
@@ -613,7 +614,7 @@ function AdminPageInner() {
 
         .admin-panel {
           background: var(--surface);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border: 1px solid var(--border-subtle);
           border-radius: 8px;
           overflow: hidden;
         }
@@ -623,8 +624,8 @@ function AdminPageInner() {
           align-items: center;
           justify-content: space-between;
           padding: 24px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          background: rgba(255, 255, 255, 0.02);
+          border-bottom: 1px solid var(--border-subtle);
+          background: rgba(var(--text-primary-rgb), 0.02);
         }
 
         .panel-header h2 {
@@ -647,7 +648,7 @@ function AdminPageInner() {
 
         .count-badge {
           background: var(--accent);
-          color: #000;
+          color: var(--on-accent);
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           font-weight: 700;
@@ -710,12 +711,12 @@ function AdminPageInner() {
           justify-content: space-between;
           align-items: center;
           padding: 24px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+          border-bottom: 1px solid var(--border-subtle);
           transition: background 0.3s ease;
         }
 
         .submission-card:hover {
-          background: rgba(255, 255, 255, 0.01);
+          background: rgba(var(--text-primary-rgb), 0.01);
         }
 
         .submission-card:last-child {
@@ -759,7 +760,7 @@ function AdminPageInner() {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           color: var(--text-secondary);
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(var(--text-primary-rgb), 0.05);
           padding: 4px 8px;
           border-radius: 2px;
           text-transform: uppercase;
@@ -785,7 +786,7 @@ function AdminPageInner() {
 
         .btn-approve {
           background: var(--accent);
-          color: #000;
+          color: var(--on-accent);
           border: none;
           font-family: var(--font-mono), monospace;
           font-size: 12px;
@@ -864,22 +865,22 @@ function AdminPageInner() {
         }
         :global(body.light-mode) .panel-header {
           border-bottom-color: var(--border);
-          background: rgba(17, 17, 19, 0.03);
+          background: rgba(var(--text-primary-rgb), 0.03);
         }
         :global(body.light-mode) .submission-card {
           border-bottom-color: var(--border);
         }
         @media (hover: hover) and (pointer: fine) {
           :global(body.light-mode) .submission-card:hover {
-            background: rgba(17, 17, 19, 0.03);
+            background: rgba(var(--text-primary-rgb), 0.03);
           }
         }
         :global(body.light-mode) .info-tag {
-          background: rgba(17, 17, 19, 0.05);
+          background: rgba(var(--text-primary-rgb), 0.05);
         }
         :global(body.light-mode) .info-tag.coords {
           color: var(--text-secondary);
-          background: rgba(17, 17, 19, 0.05);
+          background: rgba(var(--text-primary-rgb), 0.05);
         }
         :global(body.light-mode) .count-badge,
         :global(body.light-mode) .btn-approve {

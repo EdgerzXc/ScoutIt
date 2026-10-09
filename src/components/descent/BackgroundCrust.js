@@ -400,7 +400,7 @@ export default function BackgroundCrust() {
   }, []);
 
   return (
-    <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0, background: "#020202" }}>
+    <div className="absolute inset-0 w-full h-full" style={{ zIndex: 0, background: "var(--bg)" }}>
       <div ref={mountRef} className="absolute inset-0 w-full h-full" />
       {/* subtle vignette scrim */}
       <div
@@ -408,7 +408,7 @@ export default function BackgroundCrust() {
         style={{
           pointerEvents: "none",
           background:
-            "radial-gradient(ellipse 70% 60% at 50% 44%, rgba(2,2,2,0.6) 0%, rgba(2,2,2,0.3) 40%, rgba(2,2,2,0) 70%)",
+            "radial-gradient(ellipse 70% 60% at 50% 44%, rgba(var(--bg-rgb),0.6) 0%, rgba(var(--bg-rgb),0.3) 40%, rgba(var(--bg-rgb),0) 70%)",
         }}
       />
     </div>

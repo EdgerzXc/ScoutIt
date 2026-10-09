@@ -171,7 +171,7 @@ export default function BulkImporterMode({ onClose }) {
         </div>
 
         {/* MIDDLE: Data Grid */}
-        <div className="flex-1 bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl flex flex-col overflow-hidden relative">
+        <div className="flex-1 bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl flex flex-col overflow-hidden relative">
           <div className="p-5 border-b border-white/[0.04] bg-white/[0.02] flex justify-between items-center shrink-0">
             <h3 className="font-working-title text-gold-accent text-sm">Data Grid Preview</h3>
             <span className="text-xs text-text-secondary">{csvData.length} rows loaded</span>
@@ -214,7 +214,7 @@ export default function BulkImporterMode({ onClose }) {
                 {/* Mobile List View (lg:hidden) */}
                 <div className="lg:hidden flex-1 overflow-auto flex flex-col gap-4 p-4 custom-scrollbar">
                   {csvData.map((row, idx) => (
-                    <div key={row._id} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-2xl p-5 flex flex-col gap-3 relative transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                    <div key={row._id} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl p-5 flex flex-col gap-3 relative transition-all duration-300 hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]">
                       <div className="absolute top-5 right-5 bg-gold-accent/10 text-gold-accent text-[12px] font-label-caps px-2 py-0.5 rounded uppercase tracking-widest">
                         Row {idx + 1}
                       </div>
@@ -279,7 +279,7 @@ export default function BulkImporterMode({ onClose }) {
             onClick={handleSubmit}
             disabled={csvData.length === 0 || isProcessing}
             aria-busy={isProcessing}
-            className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+            className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]"
           >
             {isProcessing ? "Processing..." : "Process & Import Portfolio"}
           </button>

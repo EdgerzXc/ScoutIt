@@ -15,6 +15,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import HoverCard from "@/components/ui/HoverCard";
 import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 import { validJourneyStage } from "@/lib/layerTwoJourney";
+import { escapeJsonLd } from "@/lib/jsonLdScript";
 import "./article-detail.css";
 
 async function getLiveArticle(slug) {
@@ -127,8 +128,38 @@ export default async function IntelArticlePage({ params, searchParams }) {
   // without a dossier simply render without the section.
   const dossier = getInvestigation(slug);
 
+  const articleSchema = (!article.isSample && article.title) ? {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.lead || article.excerpt || "",
+    url: siteUrl(`/intel/${slug}`),
+    ...(article.image ? { image: [article.image] } : {}),
+    ...(article.date ? { datePublished: article.date } : {}),
+    author: {
+      "@type": "Organization",
+      name: "ScoutIt Space Intelligence",
+      url: siteUrl(),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "ScoutIt",
+      url: siteUrl(),
+      logo: {
+        "@type": "ImageObject",
+        url: siteUrl("/icon.svg"),
+      },
+    },
+  } : null;
+
   return (
     <div className="page-wrapper">
+      {articleSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: escapeJsonLd(JSON.stringify(articleSchema)) }}
+        />
+      )}
       <Header />
       
       {fromProperty ? (

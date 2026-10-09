@@ -237,18 +237,44 @@ body.light-mode {
 }
 
 body.light-mode .nav-chapter .chapter-label {
-  color: #3b3b42 !important;
+  color: var(--text-secondary);
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 body.light-mode .nav-chapter .chapter-icon {
-  opacity: 0.75 !important;
+  color: var(--text-secondary);
+  opacity: 0.65;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   body.light-mode .nav-chapter:hover:not(.active) .chapter-label {
-    color: var(--accent) !important;
+    color: var(--text-primary);
   }
+  body.light-mode .nav-chapter:hover:not(.active) .chapter-icon {
+    color: var(--text-primary);
+    opacity: 0.9;
+  }
+}
+
+body.light-mode .nav-chapter:active {
+  background: rgba(17, 17, 19, 0.06);
+}
+
+body.light-mode .nav-chapter.active .chapter-label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+body.light-mode .nav-chapter.active .chapter-icon {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
+}
+
+body.light-mode .nav-chapter.active::after {
+  background: var(--accent-bright) !important;
+  height: 2.5px !important;
 }
 
 body.light-mode .unit-z3-row {

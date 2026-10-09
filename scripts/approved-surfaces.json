@@ -13,9 +13,9 @@
     {
       "name": "Metropolis foreground surface",
       "path": "src/app/layer/metropolis/page.js",
-      "sha256": "fc129968c4668314fa898f2cf9f63cc9158b7b7e94311a556f3b50982d28fd74",
-      "acceptedAt": "2026-09-25",
-      "acceptedChange": "Owner authorized: replaced long teaching paragraph with missionTipId='metropolisMission' per A-160 InfoTip rollout."
+      "sha256": "87e7435eb7a22189e99007f600682474a99a664d4ddecca1096a384b1dc08d5c",
+      "acceptedAt": "2026-10-07",
+      "acceptedChange": "Owner authorized: Phase 2 dynamic CMS category previews & density counts wiring via categoryPreviews adapter, updated heading order (h1 -> h2 -> h3)."
     },
     {
       "name": "Metropolis city background composition",

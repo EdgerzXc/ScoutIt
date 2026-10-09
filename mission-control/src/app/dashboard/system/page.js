@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { Activity, AlertTriangle, CircleAlert, Cpu } from "lucide-react";
+import { Activity, AlertTriangle, CircleAlert, Cpu, ExternalLink, ShieldAlert, Zap } from "lucide-react";
+import { extractIncidentSignal } from "@/lib/incidentSignals.mjs";
 
 // A-063 — System Activity.
+// A-185 Phase 3 — Master Mission Control Topological Incident Signal Dispatcher.
 //
 // Deliberately NOT a tab on the Audit Log. That page is a human accountability
 // trail: every row is a named person who pressed a button, and each one can be
@@ -48,6 +50,7 @@ export default async function SystemActivityPage({ searchParams }) {
 
   const params = await searchParams;
   const onlyProblems = params?.filter === "problems";
+  const onlyIncidents = params?.filter === "incidents";
 
   const admin = createAdminClient();
   let query = admin
@@ -56,9 +59,9 @@ export default async function SystemActivityPage({ searchParams }) {
     .order("occurred_at", { ascending: false })
     .limit(200);
 
-  if (onlyProblems) query = query.in("severity", ["warning", "error"]);
+  if (onlyProblems || onlyIncidents) query = query.in("severity", ["warning", "error"]);
 
-  const { data: events, error } = await query;
+  const { data: rawEvents, error } = await query;
 
   // Counted separately from the (filtered, capped) list so the header is a fact
   // about the log rather than about this page of it.
@@ -66,6 +69,14 @@ export default async function SystemActivityPage({ searchParams }) {
     .from("system_events")
     .select("id", { count: "exact", head: true })
     .in("severity", ["warning", "error"]);
+
+  const allEvents = rawEvents ?? [];
+  const incidentSignalsList = allEvents.map((e) => ({ event: e, signal: extractIncidentSignal(e) }));
+  const totalIncidentsInBatch = incidentSignalsList.filter((item) => Boolean(item.signal)).length;
+
+  const displayItems = onlyIncidents
+    ? incidentSignalsList.filter((item) => Boolean(item.signal))
+    : incidentSignalsList;
 
   return (
     <div className="space-y-6">
@@ -81,13 +92,13 @@ export default async function SystemActivityPage({ searchParams }) {
             so a job that quietly stopped shows up as a gap rather than as silence.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <a
             href="/dashboard/system"
             className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
-              onlyProblems
-                ? "border-white/10 text-white/70 hover:text-white"
-                : "border-[rgba(232,174,60,0.3)] bg-[rgba(232,174,60,0.10)] text-[#F7C64E]"
+              !onlyProblems && !onlyIncidents
+                ? "border-[rgba(232,174,60,0.3)] bg-[rgba(232,174,60,0.10)] text-[#F7C64E]"
+                : "border-white/10 text-white/70 hover:text-white"
             }`}
           >
             Everything
@@ -102,6 +113,17 @@ export default async function SystemActivityPage({ searchParams }) {
           >
             Only problems{typeof problemCount === "number" ? ` (${problemCount})` : ""}
           </a>
+          <a
+            href="/dashboard/system?filter=incidents"
+            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors flex items-center gap-1.5 ${
+              onlyIncidents
+                ? "border-red-500/40 bg-red-950/40 text-red-300 font-semibold"
+                : "border-white/10 text-white/70 hover:text-white"
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+            <span>Incident signals{totalIncidentsInBatch > 0 ? ` (${totalIncidentsInBatch})` : ""}</span>
+          </a>
         </div>
       </div>
 
@@ -112,16 +134,18 @@ export default async function SystemActivityPage({ searchParams }) {
       )}
 
       <div className="bg-[#121212] border border-white/5 rounded-xl overflow-hidden">
-        {(events ?? []).length === 0 ? (
+        {displayItems.length === 0 ? (
           <div className="text-sm text-white/70 p-8 text-center flex flex-col items-center gap-2">
             <Activity className="w-5 h-5 text-white/70" />
-            {onlyProblems
+            {onlyIncidents
+              ? "No topological incident signals detected in current window."
+              : onlyProblems
               ? "Nothing has gone wrong that the system noticed."
               : "Nothing recorded yet. Crons, catalogue rebuilds and public-site syncs write here as they run."}
           </div>
         ) : (
           <ul className="divide-y divide-white/5">
-            {events.map((e) => {
+            {displayItems.map(({ event: e, signal }) => {
               const style = SEVERITY_STYLE[e.severity] || SEVERITY_STYLE.info;
               const { Icon } = style;
               return (
@@ -145,6 +169,72 @@ export default async function SystemActivityPage({ searchParams }) {
                           {timeAgo(e.occurred_at)}
                         </span>
                       </div>
+
+                      {/* A-185 Phase 3: Interactive Topological Incident Signal Card */}
+                      {signal && (
+                        <div className="mt-3 rounded-lg border border-red-500/30 bg-red-950/20 p-3.5 space-y-2.5 backdrop-blur-sm">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-red-500/20 pb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                              </span>
+                              <span className="font-mono text-xs font-bold tracking-wider uppercase text-red-400 flex items-center gap-1.5">
+                                <ShieldAlert className="w-3.5 h-3.5" />
+                                Topological Incident Provenance
+                              </span>
+                            </div>
+                            <a
+                              href={signal.triageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#E8AE3C]/10 border border-[#E8AE3C]/40 text-[#F7C64E] hover:bg-[#E8AE3C]/20 text-xs font-mono tracking-wider uppercase font-semibold transition-colors"
+                            >
+                              <span>Open in Flow Graph</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                            <div className="bg-black/40 border border-white/5 rounded p-2">
+                              <div className="text-white/60 uppercase tracking-widest text-[12px]">Node ID</div>
+                              <div className="text-[#F7C64E] font-bold truncate mt-0.5">{signal.nodeId}</div>
+                            </div>
+                            <div className="bg-black/40 border border-white/5 rounded p-2">
+                              <div className="text-white/60 uppercase tracking-widest text-[12px]">Domain</div>
+                              <div className="text-white/90 truncate mt-0.5 capitalize">{signal.domain}</div>
+                            </div>
+                            <div className="bg-black/40 border border-white/5 rounded p-2">
+                              <div className="text-white/60 uppercase tracking-widest text-[12px]">Affected Role</div>
+                              <div className="text-white/90 truncate mt-0.5 uppercase">{signal.role}</div>
+                            </div>
+                            <div className="bg-black/40 border border-white/5 rounded p-2">
+                              <div className="text-white/60 uppercase tracking-widest text-[12px]">Blast Radius</div>
+                              <div className="text-red-400 font-bold truncate mt-0.5">{signal.blastRadius}</div>
+                            </div>
+                          </div>
+
+                          {signal.recoveryPlaybook && (
+                            <div className="bg-black/50 border border-amber-500/20 rounded p-2.5 flex items-start gap-2 text-[12px]">
+                              <Zap className="w-3.5 h-3.5 text-[#F7C64E] shrink-0 mt-0.5" />
+                              <div className="text-white/80">
+                                <strong className="text-[#F7C64E] font-mono uppercase tracking-wider text-[12px] block">
+                                  Declared Recovery Playbook
+                                </strong>
+                                {signal.recoveryPlaybook}
+                              </div>
+                            </div>
+                          )}
+
+                          {signal.evidencePath && (
+                            <div className="text-[12px] font-mono text-white/60 flex items-center gap-1.5 truncate">
+                              <span>Triage Path:</span>
+                              <span className="text-white/70">{signal.evidencePath}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {e.detail && Object.keys(e.detail).length > 0 && (
                         <details className="mt-2">
                           <summary className="text-[12px] text-white/60 hover:text-white/80 cursor-pointer select-none">

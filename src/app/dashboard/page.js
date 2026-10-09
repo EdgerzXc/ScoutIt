@@ -492,7 +492,7 @@ function DashboardInner() {
           for modes that define one — see PRIMARY_ACTIONS above. */}
       {primaryAction && (
       <button
-        className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(232,174,60,0.4)] hover:opacity-90 transition border-2 border-surface-alt"
+        className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(var(--accent-rgb),0.4)] hover:opacity-90 transition border-2 border-surface-alt"
         onClick={firePrimaryAction}
         aria-label={primaryAction.label}
       >

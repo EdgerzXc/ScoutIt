@@ -193,7 +193,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
 
         .portal-header {
           margin-bottom: 40px;
-          border-bottom: 1px solid rgba(255,255,255,0.03);
+          border-bottom: 1px solid var(--border-subtle);
           padding-bottom: 24px;
         }
 
@@ -251,7 +251,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
 
         .form-group-item input,
         .form-group-item textarea {
-          background: rgba(0,0,0,0.3);
+          background: color-mix(in srgb, var(--bg) 30%, transparent);
           border: 1px solid var(--border-solid);
           border-radius: 6px;
           padding: 18px 24px;
@@ -291,14 +291,14 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
 
         /* Safety Warning Disclaimer Styles */
         .safety-disclaimer-box {
-          background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, rgba(14, 14, 14, 0.7) 100%);
-          border: 1px solid rgba(245, 158, 11, 0.3);
+          background: linear-gradient(135deg, color-mix(in srgb, var(--yellow) 6%, transparent) 0%, color-mix(in srgb, var(--surface) 70%, transparent) 100%);
+          border: 1px solid color-mix(in srgb, var(--yellow) 30%, transparent);
           border-radius: 8px;
           padding: 60px 64px;
           display: flex;
           flex-direction: column;
           gap: 32px;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+          box-shadow: 0 12px 40px rgba(var(--bg-rgb), 0.6);
           transition: border-color 0.3s ease, box-shadow 0.3s ease;
           width: 100%;
         }
@@ -310,29 +310,29 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         }
 
         .safety-disclaimer-box:hover {
-          border-color: rgba(245, 158, 11, 0.45);
-          box-shadow: 0 12px 40px rgba(245, 158, 11, 0.08);
+          border-color: color-mix(in srgb, var(--yellow) 45%, transparent);
+          box-shadow: 0 12px 40px color-mix(in srgb, var(--yellow) 8%, transparent);
         }
 
         .disclaimer-header {
           display: flex;
           align-items: center;
           gap: 18px;
-          border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+          border-bottom: 1px solid color-mix(in srgb, var(--yellow) 20%, transparent);
           padding-bottom: 20px;
         }
 
         .disclaimer-icon {
           font-size: 34px;
           line-height: 1;
-          filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
+          filter: drop-shadow(0 0 8px color-mix(in srgb, var(--yellow) 70%, transparent));
         }
 
         .disclaimer-header h2 {
           font-family: var(--font-mono), monospace;
           font-size: 20px;
           font-weight: 700;
-          color: #f59e0b; /* Amber */
+          color: var(--yellow);
           letter-spacing: 0.12em;
           margin: 0;
         }
@@ -357,12 +357,12 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         }
 
         .highlight-warning {
-          color: #fcd34d; /* Light amber/yellow */
+          color: var(--accent-bright);
           font-weight: 500;
         }
 
         .highlight-critical {
-          color: #f87171; /* Soft red/coral for high criticality statements */
+          color: var(--red);
           font-weight: 500;
         }
 
@@ -371,7 +371,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           font-size: 14px;
           line-height: 1.7;
           color: var(--text-secondary);
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-top: 1px solid var(--border);
           padding-top: 20px;
           margin-top: 16px;
         }      `}</style>
