@@ -39,7 +39,7 @@
     }
   },
   "PROPERTY_LISTING": {
-    "totalNodes": 16,
+    "totalNodes": 17,
     "happyPathCoverage": {
       "numerator": 4,
       "denominator": 4,
@@ -117,7 +117,7 @@
     }
   },
   "VIEWING_TRANSACTION": {
-    "totalNodes": 24,
+    "totalNodes": 26,
     "happyPathCoverage": {
       "numerator": 4,
       "denominator": 4,
@@ -132,8 +132,8 @@
     },
     "recoveryCoverage": {
       "numerator": 2,
-      "denominator": 3,
-      "percentage": "67%",
+      "denominator": 4,
+      "percentage": "50%",
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
@@ -156,7 +156,7 @@
     }
   },
   "OFFER_NEGOTIATION": {
-    "totalNodes": 24,
+    "totalNodes": 26,
     "happyPathCoverage": {
       "numerator": 4,
       "denominator": 4,
@@ -171,8 +171,8 @@
     },
     "recoveryCoverage": {
       "numerator": 2,
-      "denominator": 3,
-      "percentage": "67%",
+      "denominator": 4,
+      "percentage": "50%",
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
@@ -195,7 +195,7 @@
     }
   },
   "HANDSHAKE_CLOSURE": {
-    "totalNodes": 24,
+    "totalNodes": 26,
     "happyPathCoverage": {
       "numerator": 4,
       "denominator": 4,
@@ -210,8 +210,8 @@
     },
     "recoveryCoverage": {
       "numerator": 2,
-      "denominator": 3,
-      "percentage": "67%",
+      "denominator": 4,
+      "percentage": "50%",
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {
@@ -234,7 +234,7 @@
     }
   },
   "OWNERSHIP_CLAIM": {
-    "totalNodes": 20,
+    "totalNodes": 22,
     "happyPathCoverage": {
       "numerator": 2,
       "denominator": 4,
@@ -273,7 +273,7 @@
     }
   },
   "BROKER_REPRESENTATION": {
-    "totalNodes": 9,
+    "totalNodes": 13,
     "happyPathCoverage": {
       "numerator": 3,
       "denominator": 4,

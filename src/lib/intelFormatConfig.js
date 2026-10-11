@@ -22,6 +22,8 @@ export const BASE_INTEL_FORMATS = [
     doorChapterId: "hiddenintel",
     job: "An ordinance dropped. Does it hit my building?",
     why: "Numbered chapters with a progress rail, ending in the affected-space ledger.",
+    moveset: "Chapter Rail ⟷ Spatial Ledger",
+    tip: "Use the chapter rail to jump between ordinance sections. Affected properties are cataloged at the bottom.",
     returnsTo: "yourmove",
     config: {
       rail: true,
@@ -39,6 +41,8 @@ export const BASE_INTEL_FORMATS = [
     doorChapterId: "whereto",
     job: "Explain this district to me — I only know the unit.",
     why: "The map pins itself and pans as the copy scrolls past.",
+    moveset: "Scroll Camera ⟷ Dynamic Map Pan",
+    tip: "Scroll down to steer the camera across neighborhood boundaries and reveal micro-district demographics.",
     returnsTo: "yourmove",
     config: {
       rail: false,
@@ -55,6 +59,8 @@ export const BASE_INTEL_FORMATS = [
     doorChapterId: "yourmove",
     job: "What happens to my yield if rates move 100bps?",
     why: "The value is the what-if, not prose. Inputs the reader moves; outputs recompute.",
+    moveset: "Interactive Yield ⟷ Live Sliders",
+    tip: "Adjust cap rate, yield, and financing sliders in real time to test investment outcomes.",
     returnsTo: "yourmove",
     config: {
       inputs: "declared in blocks[]",
@@ -70,6 +76,8 @@ export const BASE_INTEL_FORMATS = [
     doorChapterId: "universe",
     job: "Is the station actually being built, or is it still a rendering?",
     why: "Fixed timeline, newest update on top, each entry dated and sourced.",
+    moveset: "Timeline Ledger ⟷ Milestone Audits",
+    tip: "Reverse-chronological timeline of ground progress, satellite verification, and building permits.",
     returnsTo: "yourmove",
     config: {
       rail: true,
@@ -86,6 +94,8 @@ export const BASE_INTEL_FORMATS = [
     doorChapterId: null,
     job: "Short opinionated takes. Volume and serendipity.",
     why: "The one category where endless scroll is honest. Not part of the decision loop.",
+    moveset: "Continuous Intel Feed ⟷ Field Notes",
+    tip: "Rapid tactical observations streamed across Philippine commercial and residential hubs.",
     returnsTo: null,
     config: {
       affectedSpaces: false,
@@ -101,6 +111,8 @@ export const BASE_INTEL_FORMATS = [
     doorChapterId: "space",
     job: "Dated, factual, two-minute read.",
     why: "The universal fallback. Every other format degrades to this one.",
+    moveset: "Distilled Briefing ⟷ Verified Sources",
+    tip: "Focused two-minute read with direct statutory citations and regulatory links.",
     returnsTo: "yourmove",
     config: {
       affectedSpaces: true,

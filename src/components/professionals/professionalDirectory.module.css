@@ -11,9 +11,14 @@
 .heroCopy > p { max-width: 660px; color: var(--text-secondary); font-size: 16px; line-height: 1.75; }
 /* A-160: the evidence essay is now one row — the explanation lives behind
    the "?" mark instead of in front of the directory. */
-.protocolRow { position: relative; z-index: 2; align-self: end; display: flex; align-items: center; gap: 9px; max-width: 540px; padding: 14px 16px; border: 1px solid var(--accent-muted); border-radius: 2px; background: linear-gradient(145deg, rgba(28,25,18,.72), rgba(13,13,13,.88)); color: var(--accent-bright); }
+.protocolRow { position: relative; z-index: 2; align-self: end; display: flex; align-items: center; gap: 9px; max-width: 580px; padding: 14px 16px; border: 1px solid var(--accent-muted); border-radius: 2px; background: linear-gradient(145deg, rgba(28,25,18,.72), rgba(13,13,13,.88)); color: var(--accent-bright); }
 .protocolRow > svg { flex-shrink: 0; }
 .protocolRow strong { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.portalLink { margin-left: auto; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-bright); text-decoration: none; padding: 4px 10px; border: 1px solid var(--accent); background: rgba(232,174,60,.08); transition: background .2s ease, color .2s ease, transform .12s ease; white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) {
+  .portalLink:hover { background: var(--accent); color: var(--on-accent); }
+}
+.portalLink:active { transform: scale(0.97); }
 .sectionLabel { display: block; margin-bottom: 13px; color: var(--text-muted); }
 .orbit { position: absolute; width: 420px; height: 420px; top: 28px; right: 210px; opacity: .42; pointer-events: none; }
 .orbit::before,.orbit::after,.orbit span { content: ""; position: absolute; inset: 15%; border: 1px solid rgba(232,174,60,.17); border-radius: 50%; transform: rotateX(68deg) rotateZ(22deg); }

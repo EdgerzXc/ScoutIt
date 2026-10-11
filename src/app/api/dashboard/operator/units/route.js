@@ -27,6 +27,9 @@ function toClientUnit(row) {
     price: row.price || "",
     operatorId: row.operator_id || null,
     availabilityStatus: row.availability_status || null,
+    unitCategory: row.unit_category || null,
+    listingPurpose: row.listing_purpose || null,
+    details: row.details || {},
   };
 }
 
@@ -76,6 +79,10 @@ const unitSchema = z.object({
   photos: z.array(z.string().max(2000)).optional().default([]),
   image: z.string().max(2000).optional().default(""),
   availabilityStatus: z.enum(["available", "occupied", "coming_soon"]).optional(),
+  unitCategory: z.enum(["residential_lease", "residential_sale", "str", "commercial_flex"]).nullable().optional(),
+  listingPurpose: z.enum(["lease", "sale", "short_stay", "flex"]).nullable().optional(),
+  price: z.union([z.string(), z.number()]).optional(),
+  details: z.record(z.any()).optional().default({}),
 });
 
 const bodySchema = z.object({
@@ -137,6 +144,10 @@ export async function POST(request) {
           updated_at: new Date().toISOString(),
         };
         if (u.availabilityStatus) patch.availability_status = u.availabilityStatus;
+        if (u.unitCategory !== undefined) patch.unit_category = u.unitCategory;
+        if (u.listingPurpose !== undefined) patch.listing_purpose = u.listingPurpose;
+        if (u.price !== undefined) patch.price = u.price != null ? String(u.price) : "";
+        if (u.details !== undefined) patch.details = u.details;
         return supabaseAdmin.from("property_units").update(patch).eq("id", u.id);
       });
 

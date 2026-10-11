@@ -90,6 +90,53 @@
   outline-offset: 2px;
 }
 
+/* Granularity Switcher & Unit Tray (A-154) */
+.granularity-pill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm, 3px);
+  border: 1px solid var(--border-solid);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .granularity-pill:hover {
+    color: var(--text-primary);
+    border-color: rgba(var(--accent-rgb), 0.5);
+    background: var(--surface2);
+  }
+}
+
+.granularity-pill.active {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.3);
+}
+
+.unit-tray-chip {
+  transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .unit-tray-chip:hover {
+    border-color: var(--accent) !important;
+    color: var(--text-primary) !important;
+    background: var(--surface2) !important;
+  }
+}
+
 .directory-container {
   display: grid;
   grid-template-columns: 280px 1fr;

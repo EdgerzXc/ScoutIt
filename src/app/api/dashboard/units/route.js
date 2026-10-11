@@ -22,6 +22,8 @@ const unitSchema = z.object({
   image: z.string().max(2000).optional().default(""),
   price: z.union([z.string(), z.number()]).optional(),
   availabilityStatus: z.enum(["available", "occupied", "coming_soon"]).nullable().optional(),
+  unitCategory: z.enum(["residential_lease", "residential_sale", "str", "commercial_flex"]).nullable().optional(),
+  listingPurpose: z.enum(["lease", "sale", "short_stay", "flex"]).nullable().optional(),
   // Unit Master Page rich fields (co-working detail) + the subdivision
   // scenarios that power the "This space flexes" toggle. Free-form jsonb —
   // shape validated at the editor, stored as display data.
@@ -76,6 +78,8 @@ function toClientUnit(row) {
     operatorId: row.operator_id || null,
     operatorDisplayName: row.operator_display_name || null,
     availabilityStatus: row.availability_status || row.details?.availabilityStatus || null,
+    unitCategory: row.unit_category || null,
+    listingPurpose: row.listing_purpose || null,
     details: row.details || {},
     subdivisionScenarios: row.subdivision_scenarios || [],
   };
@@ -198,22 +202,25 @@ export async function POST(request) {
     const errors = [];
 
     for (const [index, u] of toUpdate.entries()) {
+      const patch = {
+        name: u.name || "",
+        size_sqm: u.size === "" || u.size === undefined ? null : Number(u.size) || null,
+        floor: u.floor != null ? String(u.floor) : "",
+        features: u.features || [],
+        photos: u.photos || [],
+        image: u.image || (u.photos || []).find(Boolean) || "",
+        price: u.price != null ? String(u.price) : "",
+        availability_status: u.availabilityStatus || "available",
+        details: u.details || {},
+        subdivision_scenarios: u.subdivisionScenarios || [],
+        sort_order: index,
+        updated_at: new Date().toISOString(),
+      };
+      if (u.unitCategory !== undefined) patch.unit_category = u.unitCategory;
+      if (u.listingPurpose !== undefined) patch.listing_purpose = u.listingPurpose;
       const { error } = await serviceClient
         .from("property_units")
-        .update({
-          name: u.name || "",
-          size_sqm: u.size === "" || u.size === undefined ? null : Number(u.size) || null,
-          floor: u.floor != null ? String(u.floor) : "",
-          features: u.features || [],
-          photos: u.photos || [],
-          image: u.image || (u.photos || []).find(Boolean) || "",
-          price: u.price != null ? String(u.price) : "",
-          availability_status: u.availabilityStatus || "available",
-          details: u.details || {},
-          subdivision_scenarios: u.subdivisionScenarios || [],
-          sort_order: index,
-          updated_at: new Date().toISOString(),
-        })
+        .update(patch)
         .eq("id", u.id)
         .eq("property_id", propertyId);
       if (error) errors.push(error);
@@ -231,6 +238,8 @@ export async function POST(request) {
         image: u.image || (u.photos || []).find(Boolean) || "",
         price: u.price != null ? String(u.price) : "",
         availability_status: u.availabilityStatus || "available",
+        unit_category: u.unitCategory || null,
+        listing_purpose: u.listingPurpose || null,
         details: u.details || {},
         subdivision_scenarios: u.subdivisionScenarios || [],
         sort_order: toUpdate.length + i,

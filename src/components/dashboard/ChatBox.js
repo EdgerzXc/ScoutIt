@@ -305,6 +305,9 @@ export default function ChatBox({
   const [closeNote, setCloseNote] = useState("");
 
   const [showConfirmReport, setShowConfirmReport] = useState(false);
+  const [blockAlsoInReport, setBlockAlsoInReport] = useState(true);
+  const [showConfirmBlock, setShowConfirmBlock] = useState(false);
+  const [blockBusy, setBlockBusy] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingMode, setBookingMode] = useState("create");
   const [activeViewing, setActiveViewing] = useState(null);
@@ -694,6 +697,13 @@ export default function ChatBox({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Couldn't submit this report.");
       }
+      if (blockAlsoInReport && deal.otherPartyId) {
+        await fetch("/api/user/blocks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...authHeaders(token) },
+          body: JSON.stringify({ blockedId: deal.otherPartyId }),
+        }).catch(() => {});
+      }
       await loadDispute();
       onCloseDeal(deal.id, "reported");
       setShowConfirmReport(false);
@@ -701,6 +711,36 @@ export default function ChatBox({
       setUploadError(sanitizeError(err, "Couldn't submit this report."));
       setTimeout(() => setUploadError(null), 5000);
       setShowConfirmReport(false);
+    }
+  };
+
+  const handleBlockCounterparty = async () => {
+    if (!deal.otherPartyId) {
+      setUploadError("Could not determine counterparty account to block.");
+      setTimeout(() => setUploadError(null), 5000);
+      return;
+    }
+    setBlockBusy(true);
+    try {
+      const { token } = await resolveAuth();
+      const res = await fetch("/api/user/blocks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({ blockedId: deal.otherPartyId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to block account.");
+      }
+      setShowConfirmBlock(false);
+      if (!closed) {
+        onCloseDeal(deal.id, "closed");
+      }
+    } catch (err) {
+      setUploadError(sanitizeError(err, "Failed to block counterparty."));
+      setTimeout(() => setUploadError(null), 5000);
+    } finally {
+      setBlockBusy(false);
     }
   };
 
@@ -1238,9 +1278,18 @@ export default function ChatBox({
               <span>🛡️ Staff Support</span>
             </button>
             <button
+              onClick={() => setShowConfirmBlock(true)}
+              className="text-error/70 hover:text-error px-2 py-2 rounded text-xs transition min-h-[44px]"
+              title="Block Counterparty"
+              aria-label="Block Counterparty"
+            >
+              🚫
+            </button>
+            <button
               onClick={() => setShowConfirmReport(true)}
-              className="text-error/70 hover:text-error px-2 py-2 rounded text-xs transition"
+              className="text-error/70 hover:text-error px-2 py-2 rounded text-xs transition min-h-[44px]"
               title="Report / Unmatch"
+              aria-label="Report / Unmatch"
             >
               🚩
             </button>
@@ -1788,18 +1837,59 @@ export default function ChatBox({
               </button>{" "}
               — it keeps this conversation instead of ending it.
             </p>
+            <label className="flex items-center gap-2 mb-4 cursor-pointer text-xs text-text-secondary select-none">
+              <input
+                type="checkbox"
+                checked={blockAlsoInReport}
+                onChange={(e) => setBlockAlsoInReport(e.target.checked)}
+                className="rounded border-surface-variant bg-surface text-gold-accent focus:ring-0"
+              />
+              <span>Also block this account from sending future requests</span>
+            </label>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowConfirmReport(false)}
-                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition"
+                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition min-h-[44px]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReportConversation}
-                className="px-4 py-2 rounded bg-error text-white text-sm font-working-title hover:bg-error/80 transition"
+                className="px-4 py-2 rounded bg-error text-white text-sm font-working-title hover:bg-error/80 transition min-h-[44px]"
               >
                 Report User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block Modal */}
+      {showConfirmBlock && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-[fadeIn_0.2s_ease]">
+          <div className="bg-surface border border-error/50 rounded-lg p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="font-working-title text-lg text-error mb-2 flex items-center gap-2">
+              <span>🚫</span> Block Account
+            </h3>
+            <p className="text-sm text-text-secondary mb-4 leading-relaxed">
+              Blocking this account prevents them from sending future Connect requests, inquiries, or pitches to you. Your listings and profile will be hidden from them.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                disabled={blockBusy}
+                onClick={() => setShowConfirmBlock(false)}
+                className="px-4 py-2 rounded border border-surface-variant text-sm text-text-secondary hover:text-on-surface transition min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={blockBusy}
+                onClick={handleBlockCounterparty}
+                className="px-4 py-2 rounded bg-error text-white text-sm font-working-title hover:bg-error/80 transition min-h-[44px] flex items-center gap-2"
+              >
+                {blockBusy ? "Blocking…" : "Block Account"}
               </button>
             </div>
           </div>

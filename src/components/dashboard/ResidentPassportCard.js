@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, Award, FileCheck, Copy, Check, Lock, ChevronDown, ChevronUp } from "lucide-react";
+import { ShieldCheck, Award, FileCheck, Copy, Check, Lock, ChevronDown, ChevronUp, Flag, AlertCircle, X } from "lucide-react";
 import { generateResidentPassport, PASSPORT_SCOPES } from "@/lib/scoring/residentPassport";
 
 /**
@@ -28,6 +28,10 @@ export default function ResidentPassportCard({
   const [showVectors, setShowVectors] = useState(false);
   const [copiedConsent, setCopiedConsent] = useState(false);
   const [remotePassport, setRemotePassport] = useState(null);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [disputeReviewId, setDisputeReviewId] = useState("");
+  const [disputeReason, setDisputeReason] = useState("");
+  const [disputeStatus, setDisputeStatus] = useState(null);
 
   // If explicit props are provided, use in-memory generation; otherwise fetch from live API
   const hasExplicitProps = Boolean(
@@ -85,8 +89,36 @@ export default function ResidentPassportCard({
     }
   };
 
+  const handleDisputeSubmit = async (e) => {
+    e.preventDefault();
+    if (!disputeReviewId.trim()) return;
+    setDisputeStatus({ loading: true, msg: "Quarantining review & filing with Trust & Safety...", ok: false });
+    try {
+      const res = await fetch(`/api/reviews/${encodeURIComponent(disputeReviewId.trim())}/dispute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: disputeReason.trim() || "Party flagged review for Trust & Safety arbitration" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Dispute filing failed");
+      setDisputeStatus({
+        loading: false,
+        msg: "Review placed on DISPUTED_HOLD. Quarantined from your score and forwarded to Mission Control.",
+        ok: true,
+      });
+      setTimeout(() => {
+        setShowDisputeModal(false);
+        setDisputeStatus(null);
+        setDisputeReviewId("");
+        setDisputeReason("");
+      }, 3500);
+    } catch (err) {
+      setDisputeStatus({ loading: false, msg: err.message, ok: false });
+    }
+  };
+
   return (
-    <div className="w-full bg-surface border border-surface-variant rounded-lg p-5 flex flex-col gap-4 shadow-xl">
+    <div className="w-full bg-surface border border-surface-variant rounded-lg p-5 flex flex-col gap-4 shadow-xl relative">
       {/* Top Header */}
       <div className="flex items-center justify-between border-b border-surface-variant pb-3">
         <div className="flex items-center gap-2.5">
@@ -185,24 +217,116 @@ export default function ResidentPassportCard({
           <span>RA 10173 Protected · Not searchable on open web</span>
         </div>
 
-        <button
-          type="button"
-          onClick={handleCopyConsentedToken}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-alt border border-surface-variant hover:border-gold-accent text-on-surface hover:text-gold-accent transition"
-        >
-          {copiedConsent ? (
-            <>
-              <Check size={12} className="text-success" />
-              <span>Consent Token Copied</span>
-            </>
-          ) : (
-            <>
-              <Copy size={12} />
-              <span>Copy Consented Passport Token</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDisputeModal(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-surface-alt border border-surface-variant hover:border-red-400/40 text-text-secondary hover:text-red-400 transition"
+            title="Flag an inaccurate or unfair review for Trust & Safety arbitration"
+          >
+            <Flag size={11} />
+            <span>Dispute Review</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyConsentedToken}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-alt border border-surface-variant hover:border-gold-accent text-on-surface hover:text-gold-accent transition"
+          >
+            {copiedConsent ? (
+              <>
+                <Check size={12} className="text-success" />
+                <span>Consent Token Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy size={12} />
+                <span>Copy Consented Token</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Trust & Safety Review Dispute Modal */}
+      {showDisputeModal && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm rounded-lg z-20 p-5 flex flex-col justify-center animate-in fade-in">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+            <div className="flex items-center gap-2">
+              <Flag size={14} className="text-red-400" />
+              <span className="font-mono text-xs uppercase tracking-wider text-on-surface font-bold">
+                Trust & Safety Arbitration Request
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setShowDisputeModal(false); setDisputeStatus(null); }}
+              className="text-text-muted hover:text-text-primary"
+              aria-label="Close arbitration modal"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <form onSubmit={handleDisputeSubmit} className="flex flex-col gap-3 text-xs font-mono">
+            <p className="text-text-secondary font-sans leading-relaxed text-xs m-0">
+              Disputing a review immediately quarantines it under <strong className="text-gold-accent">DISPUTED_HOLD</strong>, removing it from your behavioral score while Mission Control reviews the case.
+            </p>
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor="dispute-review-id" className="text-text-muted text-[12px] uppercase">
+                Review ID to Quarantine:
+              </label>
+              <input
+                id="dispute-review-id"
+                type="text"
+                value={disputeReviewId}
+                onChange={(e) => setDisputeReviewId(e.target.value)}
+                placeholder="e.g. rev-xxxx or UUID"
+                required
+                className="bg-black/60 border border-surface-variant px-3 py-2 rounded text-on-surface outline-none focus:border-gold-accent"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor="dispute-reason" className="text-text-muted text-[12px] uppercase">
+                Reason / Ground for Arbitration:
+              </label>
+              <textarea
+                id="dispute-reason"
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+                placeholder="Explain the factual inaccuracy or lease dispute..."
+                rows={2}
+                className="bg-black/60 border border-surface-variant px-3 py-2 rounded text-on-surface outline-none focus:border-gold-accent font-sans text-xs"
+              />
+            </div>
+
+            {disputeStatus && (
+              <div className={`p-2.5 rounded text-xs ${disputeStatus.ok ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/30" : "bg-red-950/60 text-red-300 border border-red-500/30"}`}>
+                {disputeStatus.msg}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => { setShowDisputeModal(false); setDisputeStatus(null); }}
+                className="px-3 py-1.5 rounded bg-surface-alt border border-surface-variant text-text-secondary hover:text-text-primary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={disputeStatus?.loading}
+                className="px-3.5 py-1.5 rounded bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 font-bold transition disabled:opacity-50"
+              >
+                {disputeStatus?.loading ? "Quarantining…" : "Quarantine & File Dispute"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

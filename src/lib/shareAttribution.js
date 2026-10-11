@@ -184,3 +184,26 @@ export function cleanPropertyUrl(href) {
     return String(href || "");
   }
 }
+
+/**
+ * A-193: the base URL a share is built on.
+ *
+ * - Any `/via/<slug>` already in the page URL is stripped first. A visitor on someone
+ *   else's priority link must not re-broadcast that person's Position Zero.
+ * - A VIA segment is added only when `verifiedPromoterSlug` is supplied, and that
+ *   value must come from the server eligibility check, never from user input.
+ * - Everyone else gets the clean public canonical property URL.
+ *
+ * @param {string} rawUrl a property URL (absolute or path)
+ * @param {string|null} [verifiedPromoterSlug]
+ */
+export function computeViaBaseUrl(rawUrl, verifiedPromoterSlug = null) {
+  const clean = cleanPropertyUrl(rawUrl);
+  if (!clean) return "";
+  const match = clean.match(/^(https?:\/\/[^/]+)?(\/property\/[^/?#]+)/i);
+  if (!match) return clean;
+  const canonical = match[0];
+  const slug = verifiedPromoterSlug ? String(verifiedPromoterSlug).trim().toLowerCase() : "";
+  if (!slug || !/^[a-z0-9][a-z0-9-]{0,60}$/.test(slug)) return canonical;
+  return `${canonical}/via/${encodeURIComponent(slug)}`;
+}

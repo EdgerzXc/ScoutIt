@@ -31,7 +31,7 @@ export async function GET(request) {
 
     const { data: profile, error } = await supabaseAdmin
       .from("user_profiles")
-      .select("is_profile_public, telemetry_opt_out, marketing_opt_out, adult_eligibility_status")
+      .select("is_profile_public, telemetry_opt_out, marketing_opt_out, adult_eligibility_status, accepting_connects, max_pending_connects")
       .eq("id", userId)
       .maybeSingle();
 
@@ -87,6 +87,9 @@ export async function GET(request) {
         // Reporting an attestation the user never made is how a legal-capacity
         // claim gets fabricated by a fallback value.
         adultEligibilityStatus: profile?.adult_eligibility_status || "unknown",
+        // A-144: receiver controls (accepting_connects and max_pending_connects)
+        acceptingConnects: profile?.accepting_connects ?? true,
+        maxPendingConnects: profile?.max_pending_connects ?? null,
       },
     });
   } catch (err) {
@@ -125,6 +128,25 @@ export async function POST(request) {
 
     if (typeof body.marketingOptOut === "boolean") {
       updates.marketing_opt_out = body.marketingOptOut;
+    }
+
+    if (typeof body.acceptingConnects === "boolean") {
+      updates.accepting_connects = body.acceptingConnects;
+    }
+
+    if (body.maxPendingConnects !== undefined) {
+      if (body.maxPendingConnects === null || body.maxPendingConnects === "") {
+        updates.max_pending_connects = null;
+      } else {
+        const cap = Number(body.maxPendingConnects);
+        if (!Number.isInteger(cap) || cap < 0) {
+          return NextResponse.json(
+            { error: "maxPendingConnects must be a non-negative integer or null." },
+            { status: 400 }
+          );
+        }
+        updates.max_pending_connects = cap;
+      }
     }
 
     // Anonymity shield fields live in `privacy_settings`, not `user_profiles`.
@@ -237,7 +259,7 @@ export async function POST(request) {
     // renders what it is told, so it must be told what is actually stored.
     const { data: profileAfter } = await supabaseAdmin
       .from("user_profiles")
-      .select("is_profile_public, telemetry_opt_out, marketing_opt_out")
+      .select("is_profile_public, telemetry_opt_out, marketing_opt_out, accepting_connects, max_pending_connects")
       .eq("id", userId)
       .maybeSingle();
     const { shield: shieldAfter, emailAlertsStored: storedAfter } =
@@ -255,6 +277,8 @@ export async function POST(request) {
         isProfilePublic: profileAfter?.is_profile_public === true,
         telemetryOptOut: profileAfter?.telemetry_opt_out ?? false,
         marketingOptOut: profileAfter?.marketing_opt_out ?? false,
+        acceptingConnects: profileAfter?.accepting_connects ?? true,
+        maxPendingConnects: profileAfter?.max_pending_connects ?? null,
         anonymousBrowsing: shieldAfter?.anonymous_browsing ?? false,
         anonymousByline: shieldAfter?.anonymous_byline ?? false,
         publicRoles: normalizePublicRoles(shieldAfter?.public_roles) ?? [],

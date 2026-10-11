@@ -402,6 +402,23 @@ export async function flagReviewDispute(supabaseAdmin, { reviewId, userId, reaso
   // Recalculate target user's metrics with review excluded
   await refreshUserMetrics(supabaseAdmin, review.target_user_id);
 
+  // Mirror to Master Mission Control disputes hub for staff arbitration
+  try {
+    await supabaseAdmin.from("disputes").insert({
+      kind: "other",
+      title: `Behavioral Review Dispute (${reviewId.slice(0, 8)})`,
+      description: `Party flagged behavioral review under Trust & Safety quarantine: ${reason}`,
+      complainant: userId,
+      respondent: review.reviewer_id === userId ? review.target_user_id : review.reviewer_id,
+      priority: "high",
+      status: "open",
+      source: "party",
+      opened_by: userId,
+    });
+  } catch (mirrorErr) {
+    console.warn("[flagReviewDispute] Could not create mirror row in disputes:", mirrorErr?.message);
+  }
+
   return {
     success: true,
     message: "Review placed under DISPUTED_HOLD. Quarantined from behavioral standing.",

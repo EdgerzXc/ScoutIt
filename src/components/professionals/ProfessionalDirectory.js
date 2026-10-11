@@ -2,6 +2,7 @@
 
 import { Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import InfoTip from "@/components/ui/InfoTip";
@@ -35,6 +36,11 @@ export default function ProfessionalDirectory({ category, initialRecords = [], i
             <ShieldCheck size={16} aria-hidden="true" />
             <strong>Named signals only</strong>
             <InfoTip tipId="evidenceProtocol" label="About the evidence protocol" />
+            {category === "broker" && (
+              <Link href="/brokers/portal" className={styles.portalLink} title="Edit your private broker dossier and coverage areas">
+                Edit Dossier →
+              </Link>
+            )}
           </aside>
         </section>
 

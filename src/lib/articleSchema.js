@@ -71,6 +71,70 @@ const imageBlock = z.object({
 
 const dividerBlock = z.object({ type: z.literal("divider") });
 
+// ── Interactive Building & Spatial Intelligence Widget Schemas (A-195) ──
+export const buildingSpecsBlock = z.object({
+  type: z.literal("building_specs"),
+  title: z.string().optional(),
+  developer: z.string().optional(),
+  architect: z.string().optional(),
+  completionYear: z.union([z.string(), z.number()]).optional(),
+  heightMeters: z.union([z.string(), z.number()]).optional(),
+  floorCount: z.union([z.string(), z.number()]).optional(),
+  elevators: z.string().optional(),
+  powerRedundancy: z.string().optional(),
+  leedStatus: z.string().optional(),
+  district: z.string().optional(),
+  gfa: z.string().optional(),
+});
+
+export const unitMixItemSchema = z.object({
+  type: z.string(),
+  areaSqm: z.union([z.string(), z.number()]),
+  priceRange: z.string().optional(),
+  efficiency: z.string().optional(),
+  highlights: z.array(z.string()).optional(),
+});
+
+export const unitMixBlock = z.object({
+  type: z.literal("unit_mix"),
+  title: z.string().optional(),
+  totalUnits: z.union([z.string(), z.number()]).optional(),
+  units: z.array(unitMixItemSchema).min(1),
+});
+
+export const transitHubItemSchema = z.object({
+  name: z.string(),
+  distanceMeters: z.union([z.string(), z.number()]),
+  walkMinutes: z.union([z.string(), z.number()]),
+  transitType: z.string(),
+  status: z.string().optional(),
+});
+
+export const transitCorridorBlock = z.object({
+  type: z.literal("transit_corridor"),
+  title: z.string().optional(),
+  corridorName: z.string().optional(),
+  walkScore: z.union([z.string(), z.number()]).optional(),
+  transitHubs: z.array(transitHubItemSchema).min(1),
+});
+
+export const comparisonItemSchema = z.object({
+  name: z.string(),
+  developer: z.string().optional(),
+  ratePerSqm: z.string(),
+  efficiency: z.string().optional(),
+  yearBuilt: z.union([z.string(), z.number()]).optional(),
+  power: z.string().optional(),
+  badge: z.string().optional(),
+});
+
+export const comparisonMatrixBlock = z.object({
+  type: z.literal("comparison_matrix"),
+  title: z.string().optional(),
+  benchmarkCategory: z.string().optional(),
+  items: z.array(comparisonItemSchema).min(2),
+});
+
 export const articleBlockSchema = z.discriminatedUnion("type", [
   headingBlock,
   paragraphBlock,
@@ -81,6 +145,10 @@ export const articleBlockSchema = z.discriminatedUnion("type", [
   calloutBlock,
   imageBlock,
   dividerBlock,
+  buildingSpecsBlock,
+  unitMixBlock,
+  transitCorridorBlock,
+  comparisonMatrixBlock,
 ]);
 
 export const articleBlocksSchema = z.array(articleBlockSchema).min(1);

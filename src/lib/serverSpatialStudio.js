@@ -1,0 +1,254 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// ScoutIt Spatial Studio — Server-Side Queue & Revision Handlers
+//
+// Dual-CMS Golden Rule:
+//   Airtable = Public read-only property directory.
+//   Supabase = Private user data, generation queues, and revision requests.
+// ═══════════════════════════════════════════════════════════════════════════
+
+import {
+  SPATIAL_STYLE_PRESETS,
+  resolveSpatialEntitlement,
+  SPATIAL_SLA_HOURS,
+  DEFAULT_MATERIAL_CONFIG,
+} from "./spatialStudio";
+
+function getMonthStartTimestamp() {
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+/**
+ * Submits a new 3D spatial generation request to the concierge queue.
+ */
+export async function submitSpatialGenerationRequest({
+  supabaseClient,
+  user,
+  propertyId,
+  stylePreset,
+  fileUrl = null,
+  notes = "",
+  currentTier = "starry",
+  currentConnects = 0,
+}) {
+  if (!user?.id) {
+    return { success: false, error: "Authentication required", code: "unauthenticated" };
+  }
+
+  if (!propertyId) {
+    return { success: false, error: "Property ID is required", code: "missing_property" };
+  }
+
+  if (!stylePreset || !SPATIAL_STYLE_PRESETS[stylePreset]) {
+    return {
+      success: false,
+      error: `Invalid style preset '${stylePreset}'. Must be one of: ${Object.keys(SPATIAL_STYLE_PRESETS).join(", ")}`,
+      code: "invalid_style_preset",
+    };
+  }
+
+  // Count requests made by this user in the current calendar month
+  let monthlyGenerationsUsed = 0;
+  if (supabaseClient) {
+    try {
+      const monthStart = getMonthStartTimestamp();
+      const { count, error } = await supabaseClient
+        .from("property_spatial_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("requester_id", user.id)
+        .gte("created_at", monthStart);
+
+      if (!error && typeof count === "number") {
+        monthlyGenerationsUsed = count;
+      }
+    } catch {
+      // Degrade gracefully if table unmigrated
+    }
+  }
+
+  // Resolve entitlement: tier allowance vs 3 Connects overflow
+  const entitlement = resolveSpatialEntitlement({
+    tier: currentTier,
+    monthlyGenerationsUsed,
+    currentConnects,
+  });
+
+  if (!entitlement.canProceed) {
+    return {
+      success: false,
+      error: entitlement.reason,
+      code: "insufficient_entitlement",
+      requiresConnects: entitlement.connectCostRequired,
+      remainingAllowance: entitlement.remainingAllowance,
+    };
+  }
+
+  const connectsSpent = entitlement.connectCostRequired;
+  const targetSlaHours = SPATIAL_SLA_HOURS.standard;
+
+  let requestId = `spatial-${Date.now()}`;
+
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("property_spatial_requests")
+        .insert({
+          property_id: String(propertyId),
+          requester_id: user.id,
+          status: "REQUESTED",
+          style_preset: stylePreset,
+          file_url: fileUrl,
+          notes: notes?.slice(0, 2000) || null,
+          is_express: false,
+          target_sla_hours: targetSlaHours,
+          connects_spent: connectsSpent,
+          material_config: DEFAULT_MATERIAL_CONFIG,
+        })
+        .select("id")
+        .single();
+
+      if (!error && data?.id) {
+        requestId = data.id;
+      }
+
+      // Best effort update on properties row
+      await supabaseClient
+        .from("properties")
+        .update({
+          spatial_generation_status: "REQUESTED",
+          spatial_style_preset: stylePreset,
+        })
+        .eq("id", propertyId);
+    } catch {
+      // Degrade gracefully if Supabase offline/unmigrated
+    }
+  }
+
+  return {
+    success: true,
+    requestId,
+    status: "REQUESTED",
+    stylePreset,
+    isExpress: false,
+    connectsSpent,
+    targetSlaHours,
+    coveredByTier: entitlement.coveredByTier,
+    remainingAllowance: entitlement.remainingAllowance,
+  };
+}
+
+/**
+ * Submits an express revision request (4–12h SLA) for an existing 3D twin.
+ */
+export async function submitSpatialRevisionRequest({
+  supabaseClient,
+  user,
+  propertyId,
+  revisionNotes,
+  targetElements = [],
+}) {
+  if (!user?.id) {
+    return { success: false, error: "Authentication required", code: "unauthenticated" };
+  }
+
+  if (!propertyId) {
+    return { success: false, error: "Property ID is required", code: "missing_property" };
+  }
+
+  if (!revisionNotes || typeof revisionNotes !== "string" || revisionNotes.trim().length < 5) {
+    return {
+      success: false,
+      error: "Detailed revision instructions (minimum 5 characters) are required",
+      code: "invalid_revision_notes",
+    };
+  }
+
+  const targetSlaHours = SPATIAL_SLA_HOURS.express;
+  let requestId = `rev-${Date.now()}`;
+
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("property_spatial_requests")
+        .insert({
+          property_id: String(propertyId),
+          requester_id: user.id,
+          status: "REVISION_REQUESTED",
+          style_preset: "minimalist_organic", // fallback preset
+          notes: revisionNotes.trim().slice(0, 2000),
+          is_express: true,
+          target_sla_hours: targetSlaHours,
+          connects_spent: 0, // Revisions included under express SLA
+          material_config: { targetElements },
+        })
+        .select("id")
+        .single();
+
+      if (!error && data?.id) {
+        requestId = data.id;
+      }
+
+      // Best effort update on properties row
+      await supabaseClient
+        .from("properties")
+        .update({
+          spatial_generation_status: "REVISION_REQUESTED",
+        })
+        .eq("id", propertyId);
+    } catch {
+      // Degrade gracefully
+    }
+  }
+
+  return {
+    success: true,
+    requestId,
+    status: "REVISION_REQUESTED",
+    isExpress: true,
+    targetSlaHours,
+    slaLabel: "4–12 Hours (Express Priority)",
+  };
+}
+
+/**
+ * Gets spatial generation status and material configuration for a property.
+ */
+export async function getSpatialPropertyStatus({
+  supabaseClient,
+  propertyId,
+}) {
+  if (!propertyId) {
+    return { status: "NONE", stylePreset: null, materialConfig: DEFAULT_MATERIAL_CONFIG };
+  }
+
+  if (!supabaseClient) {
+    return { status: "NONE", stylePreset: null, materialConfig: DEFAULT_MATERIAL_CONFIG };
+  }
+
+  try {
+    const { data: latestRequest } = await supabaseClient
+      .from("property_spatial_requests")
+      .select("*")
+      .eq("property_id", String(propertyId))
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (latestRequest) {
+      return {
+        status: latestRequest.status,
+        stylePreset: latestRequest.style_preset,
+        materialConfig: latestRequest.material_config || DEFAULT_MATERIAL_CONFIG,
+        isExpress: Boolean(latestRequest.is_express),
+        targetSlaHours: latestRequest.target_sla_hours || 48,
+        createdAt: latestRequest.created_at,
+      };
+    }
+  } catch {
+    // Degrade gracefully
+  }
+
+  return { status: "NONE", stylePreset: null, materialConfig: DEFAULT_MATERIAL_CONFIG };
+}

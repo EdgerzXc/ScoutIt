@@ -16,6 +16,7 @@ import HoverCard from "@/components/ui/HoverCard";
 import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
 import { validJourneyStage } from "@/lib/layerTwoJourney";
 import { escapeJsonLd } from "@/lib/jsonLdScript";
+import { getIntelFormatConfig } from "@/lib/intelFormatConfig";
 import "./article-detail.css";
 
 async function getLiveArticle(slug) {
@@ -127,6 +128,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
   // belongs here: the reader has already chosen this story. Articles
   // without a dossier simply render without the section.
   const dossier = getInvestigation(slug);
+  const formatConfig = getIntelFormatConfig(article.intelType || article.category || article.type);
 
   const articleSchema = (!article.isSample && article.title) ? {
     "@context": "https://schema.org",
@@ -204,6 +206,31 @@ export default async function IntelArticlePage({ params, searchParams }) {
         {/* Article Body */}
         <section className="article-body-container">
           <div className="article-content-wrapper">
+            {formatConfig && (
+              <GlassPanel className="p-3.5 mb-6 border border-gold-accent/25 bg-black/50 backdrop-blur-md rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-[14px] text-gold-accent">⚡</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[12px] text-gold-accent tracking-[0.14em] uppercase font-semibold">
+                        FORMAT MOVESET: {formatConfig.moveset}
+                      </span>
+                      <span className="font-mono text-[12px] text-text-tertiary border border-surface-variant/80 px-1.5 py-0.5 rounded uppercase">
+                        {formatConfig.id}
+                      </span>
+                    </div>
+                    <p className="font-sans text-xs text-text-secondary m-0 mt-0.5">
+                      {formatConfig.tip}
+                    </p>
+                  </div>
+                </div>
+                {formatConfig.job ? (
+                  <span className="font-mono text-[12px] text-text-tertiary border border-surface-variant/60 px-2 py-1 rounded bg-black/40 shrink-0 self-start sm:self-auto">
+                    {formatConfig.job}
+                  </span>
+                ) : null}
+              </GlassPanel>
+            )}
             {article.isSample ? (
               <GlassPanel className="p-4 mb-8 border-l-2 border-l-gold-accent bg-gold-accent/5">
                 <SampleIntelDisclosure />

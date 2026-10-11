@@ -1,4 +1,8 @@
 import "./article-blocks.css";
+import BuildingSpecsCard from "./widgets/BuildingSpecsCard";
+import UnitMixExplorer from "./widgets/UnitMixExplorer";
+import SpatialTransitHighlight from "./widgets/SpatialTransitHighlight";
+import SpatialComparisonMatrix from "./widgets/SpatialComparisonMatrix";
 // Renders the universal article block array (see src/lib/articleSchema.js).
 // Every Intel article — legacy 3-paragraph ones and uploaded PDF/CSV ones —
 // flows through this single reader, tuned for mobile readability first:
@@ -78,6 +82,14 @@ export default function ArticleBlocks({ blocks }) {
             );
           case "divider":
             return <hr key={idx} className="ab-divider" />;
+          case "building_specs":
+            return <BuildingSpecsCard key={idx} {...block} />;
+          case "unit_mix":
+            return <UnitMixExplorer key={idx} {...block} />;
+          case "transit_corridor":
+            return <SpatialTransitHighlight key={idx} {...block} />;
+          case "comparison_matrix":
+            return <SpatialComparisonMatrix key={idx} {...block} />;
           default:
             return null;
         }

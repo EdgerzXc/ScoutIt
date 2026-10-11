@@ -26,6 +26,7 @@ export default async function DashboardLayout({ children }) {
     { group: "Content & People", name: "Position Queue", href: "/dashboard/coordinates", icon: <Crosshair className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Disputes", href: "/dashboard/disputes", icon: <Scale className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Recommendations", href: "/dashboard/recommendations", icon: <MessageSquareQuote className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Content & People", name: "Community Signals", href: "/dashboard/community", icon: <Radio className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "FAQ Appeals", href: "/dashboard/faq-appeals", icon: <MessageSquareWarning className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Contributions", href: "/dashboard/contributions", icon: <Stamp className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Ownership Claims", href: "/dashboard/claims", icon: <Gavel className={iconClass} />, minTier: TIERS.OPS_MANAGER },

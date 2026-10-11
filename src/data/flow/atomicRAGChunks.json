@@ -27569,6 +27569,1778 @@
     "lastVerifiedAt": "2026-09-11"
   },
   {
+    "chunk_id": "fact_broker.via_share",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.via_share",
+    "canonicalId": "broker.via_share",
+    "title": "VIA Priority Share Link & Concierge View",
+    "domain": "broker",
+    "layer": "metropolis",
+    "route": "/property/[id]/via/[contactSlug]",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker",
+      "owner",
+      "operator"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Dedicated dynamic landing view for verified promoter attribution links that routes visitor leads to Position Zero without modifying search ranking.",
+    "description": "Promoter-specific landing view establishing Position Zero concierge lead routing under A-186 and A-193. Sets 30-day attribution cookie and enforces canonical tag pointing to primary property slug.",
+    "available_actions": [
+      "Inspect Property Specifications",
+      "Trigger Position Zero Concierge Inquiry",
+      "Share Verified Promoter Link"
+    ],
+    "entry_conditions": [
+      "Valid property slug and promoter contact slug"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/viaRouting.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_via_priority_routing",
+        "text": "VIA priority link sets Position Zero concierge lead routing without altering global ranking.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "ROUTE",
+            "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "machineVerifiedBy": "Vitest viaRouting.test.js",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_broker.via_share",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "broker.via_share",
+    "canonicalId": "broker.via_share",
+    "title": "Recovery Protocol: VIA Priority Share Link & Concierge View",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Promoter representation revoked or expired"
+    ],
+    "recovery_mechanisms": [
+      "Gracefully falls back to algorithmic organic contacts without breaking user inquiry"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/viaRouting.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_broker.via_share",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "broker.via_share",
+    "canonicalId": "broker.via_share",
+    "title": "Implementation Evidence: VIA Priority Share Link & Concierge View",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/property/[id]/via/[contactSlug]/page.js",
+      "src/lib/viaRouting.js"
+    ],
+    "components": [
+      "PositionZeroContactCard.js",
+      "ResidentialFlow.js"
+    ],
+    "apis": [
+      "/api/property/[id]/via",
+      "/api/property/[id]/via/telemetry"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "TEST",
+        "path": "src/lib/__tests__/viaRouting.test.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_via_priority_routing",
+        "text": "VIA priority link sets Position Zero concierge lead routing without altering global ranking.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "ROUTE",
+            "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "machineVerifiedBy": "Vitest viaRouting.test.js",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_broker.api_via_routing",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.api_via_routing",
+    "canonicalId": "broker.api_via_routing",
+    "title": "API: VIA Contact Lead Attribution Resolver",
+    "domain": "broker",
+    "layer": "metropolis",
+    "route": "/api/property/[id]/via",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Resolves promoter attribution eligibility, sets 30-day HTTP-only tracking cookie, and logs immutable routing decision.",
+    "description": "Backend attribution endpoint validating promoter active representation and writing session attribution in Supabase.",
+    "available_actions": [
+      "Resolve Promoter Eligibility",
+      "Issue Attribution Cookie",
+      "Log Immutable Routing Decision"
+    ],
+    "entry_conditions": [
+      "Request includes property ID and optional promoter slug"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/property/[id]/via/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_broker.api_via_routing",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "broker.api_via_routing",
+    "canonicalId": "broker.api_via_routing",
+    "title": "Recovery Protocol: API: VIA Contact Lead Attribution Resolver",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "exceptions": [
+      "Invalid property ID or expired representation"
+    ],
+    "recovery_mechanisms": [
+      "Falls back to organic algorithmic ranking"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/property/[id]/via/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_broker.api_via_routing",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "broker.api_via_routing",
+    "canonicalId": "broker.api_via_routing",
+    "title": "Implementation Evidence: API: VIA Contact Lead Attribution Resolver",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/property/[id]/via/route.js",
+      "src/lib/serverViaRouting.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/property/[id]/via"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/property/[id]/via/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_broker.api_via_telemetry",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.api_via_telemetry",
+    "canonicalId": "broker.api_via_telemetry",
+    "title": "API: VIA Qualified Engagement Telemetry",
+    "domain": "broker",
+    "layer": "metropolis",
+    "route": "/api/property/[id]/via/telemetry",
+    "roles": [
+      "visitor",
+      "seeker"
+    ],
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Filters bot/crawler clicks and marks qualified visits (15s dwell time, 30% scroll depth) to compute genuine broker demand metrics.",
+    "description": "Telemetry ingestion API verifying human visitor interaction thresholds to prevent bot click fraud and referral stuffing.",
+    "available_actions": [
+      "Evaluate Anti-Abuse Rules",
+      "Check Dwell Time Threshold",
+      "Mark Attribution Qualified"
+    ],
+    "entry_conditions": [
+      "Beacon payload contains dwell time and scroll metrics"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/property/[id]/via/telemetry/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_broker.api_via_telemetry",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "broker.api_via_telemetry",
+    "canonicalId": "broker.api_via_telemetry",
+    "title": "Implementation Evidence: API: VIA Qualified Engagement Telemetry",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/property/[id]/via/telemetry/route.js",
+      "src/lib/viaTelemetry.js"
+    ],
+    "components": [
+      "ViaTelemetryTracker"
+    ],
+    "apis": [
+      "/api/property/[id]/via/telemetry"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/property/[id]/via/telemetry/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_deal.api_deal_review",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.api_deal_review",
+    "canonicalId": "deal.api_deal_review",
+    "title": "API: 14-Day Double-Blind Deal Review Engine",
+    "domain": "deal",
+    "layer": "metropolis",
+    "route": "/api/deals/[id]/review",
+    "roles": [
+      "seeker",
+      "owner",
+      "broker"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER",
+      "OWNER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Manages simultaneous mutual review submissions with anti-retaliation lockdown; reviews unlock concurrently or after 14 days.",
+    "description": "Double-blind review submission endpoint preventing retaliatory feedback in completed deals. Both parties' ratings remain concealed until mutual submission.",
+    "available_actions": [
+      "Submit Deal Review",
+      "Verify Double-Blind Window",
+      "Unlock Mutual Review Disclosure"
+    ],
+    "entry_conditions": [
+      "Caller is an authenticated participant of a completed deal"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/review/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_deal.api_deal_review",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "deal.api_deal_review",
+    "canonicalId": "deal.api_deal_review",
+    "title": "Recovery Protocol: API: 14-Day Double-Blind Deal Review Engine",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER",
+      "OWNER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "exceptions": [
+      "Review window expired (>14 days) or unauthorized participant"
+    ],
+    "recovery_mechanisms": [
+      "Locks review submission and maintains existing score"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/review/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_deal.api_deal_review",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.api_deal_review",
+    "canonicalId": "deal.api_deal_review",
+    "title": "Implementation Evidence: API: 14-Day Double-Blind Deal Review Engine",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/deals/[id]/review/route.js",
+      "src/lib/scoring/doubleBlindReview.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]/review"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/review/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_deal.api_deal_dispute",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "deal.api_deal_dispute",
+    "canonicalId": "deal.api_deal_dispute",
+    "title": "API: Deal Review Dispute & Escrow Hold",
+    "domain": "deal",
+    "layer": "metropolis",
+    "route": "/api/deals/[id]/dispute",
+    "roles": [
+      "seeker",
+      "owner",
+      "broker"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER",
+      "OWNER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Places contentious reviews into DISPUTED_HOLD, freezing public metrics until Trust & Safety staff arbitration.",
+    "description": "Dispute submission route allowing transaction parties to challenge bad-faith ratings with documented transaction evidence.",
+    "available_actions": [
+      "File Review Dispute",
+      "Freeze Behavioral Metric Updates",
+      "Escalate to Staff Review Queue"
+    ],
+    "entry_conditions": [
+      "Dispute filed within 7 days of review disclosure"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/dispute/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_deal.api_deal_dispute",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "deal.api_deal_dispute",
+    "canonicalId": "deal.api_deal_dispute",
+    "title": "Implementation Evidence: API: Deal Review Dispute & Escrow Hold",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/deals/[id]/dispute/route.js",
+      "src/lib/scoring/doubleBlindReview.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/deals/[id]/dispute"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/deals/[id]/dispute/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_seeker.resident_passport",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "seeker.resident_passport",
+    "canonicalId": "seeker.resident_passport",
+    "title": "System: Private Resident Passport Trust Engine",
+    "domain": "seeker",
+    "layer": "metropolis",
+    "route": "/api/user/resident-passport",
+    "roles": [
+      "seeker"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Generates zero-knowledge 4-vector behavioral trust certifications for verified seekers under Philippine RA 10173.",
+    "description": "Computes 100-pt weighted behavioral score across payment punctuality, space care, communication, and lease covenants.",
+    "available_actions": [
+      "Compute 4-Vector Behavioral Score",
+      "Generate Private Resident Passport",
+      "Export Selective Disclosure Token"
+    ],
+    "entry_conditions": [
+      "Authenticated seeker session with transaction history"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/user/resident-passport/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_seeker.resident_passport",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "seeker.resident_passport",
+    "canonicalId": "seeker.resident_passport",
+    "title": "Recovery Protocol: System: Private Resident Passport Trust Engine",
+    "domain": "seeker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "exceptions": [
+      "Zero transaction history"
+    ],
+    "recovery_mechanisms": [
+      "Applies Honest Blank Rule displaying unrated cold-start tier"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/user/resident-passport/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_seeker.resident_passport",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "seeker.resident_passport",
+    "canonicalId": "seeker.resident_passport",
+    "title": "Implementation Evidence: System: Private Resident Passport Trust Engine",
+    "domain": "seeker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/user/resident-passport/route.js",
+      "src/lib/scoring/residentPassport.js"
+    ],
+    "components": [
+      "ResidentPassportCard.js"
+    ],
+    "apis": [
+      "/api/user/resident-passport"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/user/resident-passport/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_property.unit_detail",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "property.unit_detail",
+    "canonicalId": "property.unit_detail",
+    "title": "Sub-Unit Space Profile & Floorplan View",
+    "domain": "property",
+    "layer": "metropolis",
+    "route": "/property/[id]/unit/[unitId]",
+    "roles": [
+      "visitor",
+      "seeker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Renders detailed architectural specifications and leasing parameters for an individual child unit inside a building.",
+    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, and specific lease rate under A-154.",
+    "available_actions": [
+      "Inspect Unit Floorplan",
+      "Calculate Unit Affordability",
+      "Inquire on Specific Unit"
+    ],
+    "entry_conditions": [
+      "Valid property ID and unit ID"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/property/[id]/unit/[unitId]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_property.unit_detail",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "property.unit_detail",
+    "canonicalId": "property.unit_detail",
+    "title": "Recovery Protocol: Sub-Unit Space Profile & Floorplan View",
+    "domain": "property",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Unit unpublished or occupied"
+    ],
+    "recovery_mechanisms": [
+      "Renders building overview with alternative available units"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/property/[id]/unit/[unitId]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_property.unit_detail",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "property.unit_detail",
+    "canonicalId": "property.unit_detail",
+    "title": "Implementation Evidence: Sub-Unit Space Profile & Floorplan View",
+    "domain": "property",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/property/[id]/unit/[unitId]/page.js",
+      "src/components/unit/UnitMasterPage.js"
+    ],
+    "components": [
+      "UnitMasterPage.js"
+    ],
+    "apis": [
+      "/api/cms"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/property/[id]/unit/[unitId]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_owner.inventory_units",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "owner.inventory_units",
+    "canonicalId": "owner.inventory_units",
+    "title": "Dashboard: Multi-Unit Hierarchy Manager",
+    "domain": "owner",
+    "layer": "metropolis",
+    "route": "/dashboard/inventory/[id]",
+    "roles": [
+      "owner",
+      "operator"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "OWNER",
+      "OPERATOR"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Owner cockpit to configure child unit floorplates, pricing schedules, and operational delegation to co-operators.",
+    "description": "Inventory manager enabling owners of multi-tenant buildings to create unit allocations, adjust availability, and invite operators.",
+    "available_actions": [
+      "Add Child Unit",
+      "Update Unit Lease Terms",
+      "Delegate to STR Operator"
+    ],
+    "entry_conditions": [
+      "Caller owns the parent property listing"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/inventory/[id]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_owner.inventory_units",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "owner.inventory_units",
+    "canonicalId": "owner.inventory_units",
+    "title": "Recovery Protocol: Dashboard: Multi-Unit Hierarchy Manager",
+    "domain": "owner",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "AUTHENTICATED",
+      "OWNER",
+      "OPERATOR"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "exceptions": [
+      "Ownership mismatch or invalid unit schema"
+    ],
+    "recovery_mechanisms": [
+      "Prompts owner to verify listing ownership in Dashboard"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/inventory/[id]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_owner.inventory_units",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "owner.inventory_units",
+    "canonicalId": "owner.inventory_units",
+    "title": "Implementation Evidence: Dashboard: Multi-Unit Hierarchy Manager",
+    "domain": "owner",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/dashboard/inventory/[id]/page.js"
+    ],
+    "components": [
+      "InventoryGridManager.js"
+    ],
+    "apis": [
+      "/api/dashboard/units",
+      "/api/dashboard/units/delegate"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/inventory/[id]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_operator.unit_management",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "operator.unit_management",
+    "canonicalId": "operator.unit_management",
+    "title": "API: STR Operator Unit Delegation Engine",
+    "domain": "operator",
+    "layer": "metropolis",
+    "route": "/api/dashboard/operator/units",
+    "roles": [
+      "owner",
+      "operator"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "OWNER",
+      "OPERATOR"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Enforces scoped unit operational authority for short-term rental (STR) co-operators under A-154.",
+    "description": "Backend delegation router validating operator rights to manage calendar availability, pricing, and guest inquiries for assigned units.",
+    "available_actions": [
+      "Validate Operator Scoped Rights",
+      "Sync Unit Calendar",
+      "Update STR Nightly Rates"
+    ],
+    "entry_conditions": [
+      "Active operator assignment in property_units.operator_id"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/operator/units/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_operator.unit_management",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "operator.unit_management",
+    "canonicalId": "operator.unit_management",
+    "title": "Implementation Evidence: API: STR Operator Unit Delegation Engine",
+    "domain": "operator",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/dashboard/operator/units/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/dashboard/operator/units"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/operator/units/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_layer.community_signals",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "layer.community_signals",
+    "canonicalId": "layer.community_signals",
+    "title": "Community Space Signals & Bounties Feed",
+    "domain": "layer",
+    "layer": "stratosphere",
+    "route": "/community",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Directory of user-submitted space demand signals and commercial tenant search bounties.",
+    "description": "Public feed where prospective tenants broadcast explicit space needs (location, square footage, budget) and accredited brokers connect.",
+    "available_actions": [
+      "Broadcast Space Signal",
+      "Browse Demand Bounties",
+      "Connect to Client Signal"
+    ],
+    "entry_conditions": [
+      "Publicly viewable; broadcasting requires authenticated account"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/community/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_layer.community_signals",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "layer.community_signals",
+    "canonicalId": "layer.community_signals",
+    "title": "Recovery Protocol: Community Space Signals & Bounties Feed",
+    "domain": "layer",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Signal closed by author or duplicate post"
+    ],
+    "recovery_mechanisms": [
+      "Marks signal as closed and prevents further connections"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/community/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_layer.community_signals",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "layer.community_signals",
+    "canonicalId": "layer.community_signals",
+    "title": "Implementation Evidence: Community Space Signals & Bounties Feed",
+    "domain": "layer",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/community/page.js",
+      "src/lib/signalsData.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/community/signals"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/community/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_layer.api_community_signals",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "layer.api_community_signals",
+    "canonicalId": "layer.api_community_signals",
+    "title": "API: Space Demand Signal Broadcasting & Connection",
+    "domain": "layer",
+    "layer": "stratosphere",
+    "route": "/api/community/signals",
+    "roles": [
+      "seeker",
+      "broker"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Persists seeker space bounties and manages broker connection handshakes to claim client leads.",
+    "description": "Backend router validating broker connects balance and establishing private deal room upon connecting with signal creator.",
+    "available_actions": [
+      "Create Signal Post",
+      "Connect to Signal Lead",
+      "Close Signal"
+    ],
+    "entry_conditions": [
+      "Caller has active authenticated session and required connects stake"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/community/signals/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_layer.api_community_signals",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "layer.api_community_signals",
+    "canonicalId": "layer.api_community_signals",
+    "title": "Recovery Protocol: API: Space Demand Signal Broadcasting & Connection",
+    "domain": "layer",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "AUTHENTICATED",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "exceptions": [
+      "Insufficient connects balance or closed signal"
+    ],
+    "recovery_mechanisms": [
+      "Prompts broker to top up connects wallet"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/community/signals/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_layer.api_community_signals",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "layer.api_community_signals",
+    "canonicalId": "layer.api_community_signals",
+    "title": "Implementation Evidence: API: Space Demand Signal Broadcasting & Connection",
+    "domain": "layer",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/community/signals/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/community/signals"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/community/signals/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_owner.open_gate",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "owner.open_gate",
+    "canonicalId": "owner.open_gate",
+    "title": "Dashboard: Open Gate Listing Authority Portal",
+    "domain": "owner",
+    "layer": "metropolis",
+    "route": "/dashboard/open-gate",
+    "roles": [
+      "owner"
+    ],
+    "visibility": [
+      "AUTHENTICATED",
+      "OWNER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Enables owner direct legal attestation to publish manual and CSV listings immediately without staff review.",
+    "description": "Authority portal enforcing Philippine real estate legal compliance statements before triggering the Airtable sync bridge under A-130.",
+    "available_actions": [
+      "Complete Owner Legal Attestation",
+      "Verify Listing Data Ownership",
+      "Trigger Immediate Publication"
+    ],
+    "entry_conditions": [
+      "Caller is authenticated owner of a draft listing"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/open-gate/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_owner.open_gate",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "owner.open_gate",
+    "canonicalId": "owner.open_gate",
+    "title": "Recovery Protocol: Dashboard: Open Gate Listing Authority Portal",
+    "domain": "owner",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "AUTHENTICATED",
+      "OWNER"
+    ],
+    "securityClassification": "CONFIDENTIAL",
+    "exceptions": [
+      "Owner attestation checkbox unchecked"
+    ],
+    "recovery_mechanisms": [
+      "Blocks publication until statutory compliance attested"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/open-gate/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_owner.open_gate",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "owner.open_gate",
+    "canonicalId": "owner.open_gate",
+    "title": "Implementation Evidence: Dashboard: Open Gate Listing Authority Portal",
+    "domain": "owner",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/dashboard/open-gate/page.js",
+      "src/app/api/dashboard/open-gate/route.js"
+    ],
+    "components": [],
+    "apis": [
+      "/api/dashboard/open-gate",
+      "/api/dashboard/publish"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/dashboard/open-gate/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_broker.dynamic_profile",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.dynamic_profile",
+    "canonicalId": "broker.dynamic_profile",
+    "title": "Accredited Professional Portfolio & RESA Dossier",
+    "domain": "broker",
+    "layer": "metropolis",
+    "route": "/brokers/[broker-slug]",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Public profile displaying verified PRC RESAD license credentials, listing representations, and direct contact options.",
+    "description": "Dynamic professional showcase rendering accredited broker transactions, specializations, verified trust badges, and direct inquiry CTA.",
+    "available_actions": [
+      "Inspect PRC License Status",
+      "Browse Broker Listing Portfolio",
+      "Initiate Direct Contact Request"
+    ],
+    "entry_conditions": [
+      "Valid broker slug with active profile"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/brokers/[broker-slug]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_broker.dynamic_profile",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "broker.dynamic_profile",
+    "canonicalId": "broker.dynamic_profile",
+    "title": "Recovery Protocol: Accredited Professional Portfolio & RESA Dossier",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "PRC license expired or broker inactive"
+    ],
+    "recovery_mechanisms": [
+      "Displays license expiration notice and hides contact CTA"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/brokers/[broker-slug]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "impl_broker.dynamic_profile",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "broker.dynamic_profile",
+    "canonicalId": "broker.dynamic_profile",
+    "title": "Implementation Evidence: Accredited Professional Portfolio & RESA Dossier",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/brokers/[broker-slug]/page.js"
+    ],
+    "components": [
+      "BrokerPanel.js"
+    ],
+    "apis": [
+      "/api/cms",
+      "/api/broker/dossier"
+    ],
+    "database": "Airtable",
+    "evidence": [
+      {
+        "kind": "ROUTE",
+        "path": "src/app/brokers/[broker-slug]/page.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
     "chunk_id": "edge_e_hero_to_sys_edge_ip_masking_1",
     "chunk_type": "EDGE_TRANSITION",
     "chunkType": "EDGE_TRANSITION",
@@ -39152,6 +40924,683 @@
         "commitSha": "aa0343239f0de57a353792337fc55b596b50f74c"
       }
     ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_to_via_promoter_share",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep",
+    "target": "via_promoter_share",
+    "transition_type": "NAVIGATE",
+    "label": "PEP -> VIA Priority Share Link",
+    "predicate": {
+      "field": "promoter.relationship",
+      "operator": "in",
+      "value": [
+        "owner",
+        "broker",
+        "operator"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_via_promoter_share_to_api_via_routing",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "via_promoter_share",
+    "target": "api_via_routing",
+    "transition_type": "SYSTEM",
+    "label": "VIA Page -> API: VIA Attribution",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_via_promoter_share_to_api_via_telemetry",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "via_promoter_share",
+    "target": "api_via_telemetry",
+    "transition_type": "SYSTEM",
+    "label": "VIA Page -> API: Telemetry Tracker",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_via_promoter_share_to_inquiry_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "via_promoter_share",
+    "target": "inquiry_modal",
+    "transition_type": "ACTION",
+    "label": "VIA Page -> Inquiry Modal",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_api_via_routing_to_deal_room",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "api_via_routing",
+    "target": "deal_room",
+    "transition_type": "SUCCESS",
+    "label": "VIA Attribution -> Deal Room",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_deal_room_to_api_deal_review",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "deal_room",
+    "target": "api_deal_review",
+    "transition_type": "ACTION",
+    "label": "Deal Room -> Double-Blind Review Engine",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_api_deal_review_to_api_deal_dispute",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "api_deal_review",
+    "target": "api_deal_dispute",
+    "transition_type": "FAILURE",
+    "label": "Review Engine -> Review Dispute Hold",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_api_deal_review_to_sys_resident_passport",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "api_deal_review",
+    "target": "sys_resident_passport",
+    "transition_type": "SUCCESS",
+    "label": "Review Engine -> Resident Passport",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_sys_resident_passport_to_dashboard_buyer",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "sys_resident_passport",
+    "target": "dashboard_buyer",
+    "transition_type": "NAVIGATE",
+    "label": "Resident Passport -> Buyer Dashboard",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch7_units_to_unit_detail_page",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch7_units",
+    "target": "unit_detail_page",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 07 Units -> Unit Detail Page",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_unit_detail_page_to_inquiry_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "unit_detail_page",
+    "target": "inquiry_modal",
+    "transition_type": "ACTION",
+    "label": "Unit Page -> Inquiry Modal",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_dashboard_owner_to_dashboard_inventory_unit",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "dashboard_owner",
+    "target": "dashboard_inventory_unit",
+    "transition_type": "NAVIGATE",
+    "label": "Owner Dashboard -> Unit Inventory Manager",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_dashboard_inventory_unit_to_api_operator_units",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "dashboard_inventory_unit",
+    "target": "api_operator_units",
+    "transition_type": "SUBMIT",
+    "label": "Inventory Manager -> API: Operator Delegation",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_stratosphere_to_community_signals_feed",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "stratosphere",
+    "target": "community_signals_feed",
+    "transition_type": "NAVIGATE",
+    "label": "Stratosphere -> Community Signals Feed",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_community_signals_feed_to_api_community_signals",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "community_signals_feed",
+    "target": "api_community_signals",
+    "transition_type": "ACTION",
+    "label": "Signals Feed -> API: Signal Connection",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_api_community_signals_to_deal_room",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "api_community_signals",
+    "target": "deal_room",
+    "transition_type": "SUCCESS",
+    "label": "Signal Connection -> Deal Room",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_dashboard_owner_to_dashboard_open_gate",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "dashboard_owner",
+    "target": "dashboard_open_gate",
+    "transition_type": "NAVIGATE",
+    "label": "Owner Dashboard -> Open Gate Portal",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_dashboard_open_gate_to_api_publish_listing",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "dashboard_open_gate",
+    "target": "api_publish_listing",
+    "transition_type": "SUBMIT",
+    "label": "Open Gate -> Publish Listing Bridge",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_brokers_roster_to_broker_profile_dynamic",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "brokers_roster",
+    "target": "broker_profile_dynamic",
+    "transition_type": "NAVIGATE",
+    "label": "Brokers Directory -> Dynamic Broker Profile",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_broker_profile_dynamic_to_inquiry_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "broker_profile_dynamic",
+    "target": "inquiry_modal",
+    "transition_type": "ACTION",
+    "label": "Broker Profile -> Direct Inquiry",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_offer_modal_to_deal_room",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "offer_modal",
+    "target": "deal_room",
+    "transition_type": "SUCCESS",
+    "label": "Offer Modal -> Deal Room",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch1_space_to_pep_ch2_location",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch1_space",
+    "target": "pep_ch2_location",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 01 -> Chapter 02 Location",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch1_space_to_pep",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch1_space",
+    "target": "pep",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 01 -> Chapter Index",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch3_life_to_pep_ch4_where_to",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch3_life",
+    "target": "pep_ch4_where_to",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 03 -> Chapter 04 Where To",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch3_life_to_pep",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch3_life",
+    "target": "pep",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 03 -> Chapter Index",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch4_where_to_to_pep_ch5_build_plans",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch4_where_to",
+    "target": "pep_ch5_build_plans",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 04 -> Chapter 05 Build Plans",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch4_where_to_to_pep",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch4_where_to",
+    "target": "pep",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 04 -> Chapter Index",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch5_build_plans_to_pep_ch6_fine_print",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch5_build_plans",
+    "target": "pep_ch6_fine_print",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 05 -> Chapter 06 Fine Print",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_pep_ch5_build_plans_to_pep",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "pep_ch5_build_plans",
+    "target": "pep",
+    "transition_type": "NAVIGATE",
+    "label": "Chapter 05 -> Chapter Index",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
     "last_verified_at": "2026-08-19",

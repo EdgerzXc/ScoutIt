@@ -4,9 +4,10 @@
 // SERVER shell (./page.js) so the crawler receives resolved markup. Putting one
 // back in this file would recreate the client-only boundary that made /property
 // serve "LOADING DIRECTORY LEDGER..." to Google. See page.js header.
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Building2, DoorOpen } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
@@ -24,6 +25,7 @@ import ComparisonMatrix from "@/components/property/ComparisonMatrix";
 import { motion, AnimatePresence } from "framer-motion";
 import "./property.css";
 import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
+import { matchesPropertyCategory, getAdaptivePriceBands, unitCategoryLabel } from "@/lib/unitCategory";
 
 
 // Carry the category-spec + price fields through the card mappers (the source
@@ -41,6 +43,8 @@ function cardExtras(p) {
     accommodations:    p.accommodations || "",
     kitchen_grade:     p.kitchen_grade || "",
     setup_grade:       p.setup_grade || "",
+    units_inventory:   p.units_inventory || [],
+    active_offerings:  p.active_offerings || p.Active_Offerings || [],
   };
 }
 
@@ -149,6 +153,7 @@ const FAST_CATEGORIES = [
 // half of the 2026-08-08 fix. The useEffect below still runs and overwrites
 // this with a live fetch, so radius/filter changes behave exactly as before.
 function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type");
 
@@ -165,6 +170,9 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
   const [rawIntel, setRawIntel] = useState(() => initialIntel);
   const [fetchError, setFetchError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Granularity View Mode: "buildings" (Estates & Towers) vs "units" (Suites & Stays)
+  const [granularity, setGranularity] = useState("buildings");
 
   // 🔴 Start "loaded" whenever the server already handed us cards. Defaulting
   // to `true` unconditionally is what made a crawler see the loading state even
@@ -189,9 +197,10 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
   const [centerLng, setCenterLng] = useState(121.0215);
   const [centerLat, setCenterLat] = useState(14.5547);
 
-  // Price Band State — qualitative tiers only (Entry/Mid/Premium/Trophy).
+  // Price Band State — qualitative tiers only (adaptive to selected sectors).
   // No monetary amounts are ever displayed; thresholds live in code for filtering.
   const [selectedPriceBands, setSelectedPriceBands] = useState([]);
+  const activePriceBands = useMemo(() => getAdaptivePriceBands(selectedSectors), [selectedSectors]);
 
   // Collapsible panels state
   const [openFilters, setOpenFilters] = useState({
@@ -372,14 +381,9 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
   // Filter properties dynamically
   const filteredProperties = rawProperties.filter(p => {
-    // Sector filter
+    // Sector filter (multi-category aware: parent category, active offerings, or child units)
     if (selectedSectors.length > 0) {
-      const mappedSectors = selectedSectors.map(s => {
-        if (s === "Venues/Events") return "Venues";
-        return s;
-      });
-      let cat = p.spaceCategory;
-      if (!mappedSectors.includes(cat)) {
+      if (!matchesPropertyCategory(p, selectedSectors)) {
         return false;
       }
     }
@@ -396,7 +400,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
       const pPrice = parsePrice(p.listed_price);
       if (pPrice === null) return false; // no price on record → excluded when banding
       const inBand = selectedPriceBands.some(label => {
-        const band = PRICE_BANDS.find(b => b.label === label);
+        const band = activePriceBands.find(b => b.label === label);
         return band && pPrice >= band.min && pPrice < band.max;
       });
       if (!inBand) return false;
@@ -427,6 +431,31 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
     }
     return true;
   });
+
+  // Flattened Units collection for Unit-level Discovery (A-154)
+  const flattenedUnits = useMemo(() => {
+    const list = [];
+    filteredProperties.forEach((p) => {
+      const units = p.units_inventory || [];
+      units.forEach((u) => {
+        if (selectedSectors.length > 0) {
+          const matches = selectedSectors.some((sec) => {
+            const normSec = sec === "Venues/Events" ? "venues" : sec.toLowerCase();
+            const uCat = (u.unit_category || u.unitCategory || "").toLowerCase();
+            const pCat = (p.spaceCategory || "").toLowerCase();
+            return uCat === normSec || pCat === normSec;
+          });
+          if (!matches) return;
+        }
+        list.push({
+          parent: p,
+          unit: u,
+          id: `${p.id}-${u.id || u.unit_number || Math.random()}`,
+        });
+      });
+    });
+    return list;
+  }, [filteredProperties, selectedSectors]);
 
   // Compile Dynamic "Neighborhood Intel" Sidebar Widget
   const getWidgetArticles = () => {
@@ -584,7 +613,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                 </button>
                 {openFilters.prices && (
                   <div className="filter-options">
-                    {PRICE_BANDS.map(band => (
+                    {activePriceBands.map(band => (
                       <label key={band.label} className="filter-checkbox-label">
                         <input
                           type="checkbox"
@@ -689,6 +718,31 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                 </div>
               )}
 
+              {/* Granularity Switcher: Buildings vs Units (A-154) */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setGranularity("buildings")}
+                    className={`granularity-pill ${granularity === "buildings" ? "active" : ""}`}
+                  >
+                    <Building2 size={13} />
+                    <span>Buildings & Estates</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGranularity("units")}
+                    className={`granularity-pill ${granularity === "units" ? "active" : ""}`}
+                  >
+                    <DoorOpen size={13} />
+                    <span>Individual Suites & Stays</span>
+                  </button>
+                </div>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {granularity === "buildings" ? `${filteredProperties.length} Properties` : `${flattenedUnits.length} Available Units`}
+                </span>
+              </div>
+
               <div className="search-wrapper" style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                 <input
                   type="text"
@@ -721,7 +775,74 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
               )}
 
               <motion.div className="directory-grid" variants={gridVariants} initial="hidden" animate="visible">
-                {filteredProperties.length > 0 ? (
+                {granularity === "units" ? (
+                  flattenedUnits.length > 0 ? (
+                    flattenedUnits.map(({ parent: p, unit: u, id }) => {
+                      const unitPhoto = (Array.isArray(u.photos) && u.photos.length > 0 ? u.photos[0] : (u.image || u.photo)) || p.image;
+                      const unitTitle = u.name || `${p.title} - Unit ${u.unit_number || ""}`;
+                      const uCat = u.unit_category || u.unitCategory || p.spaceCategory;
+                      const uPurpose = u.listing_purpose || u.listingPurpose;
+                      return (
+                        <motion.div key={id} variants={cardVariants}>
+                          <Link href={`/property/${p.slug}/unit/${u.id}`} className="property-preview-card">
+                            <div className="property-card-visual">
+                              <span className="property-city-badge">{p.city}</span>
+                              {unitPhoto ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img src={unitPhoto} alt={unitTitle} className="property-card-img" loading="lazy" />
+                              ) : (
+                                <ImagePlaceholder className="property-card-img" label={unitTitle} />
+                              )}
+                            </div>
+
+                            <div className="property-card-body">
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
+                                <h2>{unitTitle}</h2>
+                                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                  {p.title}
+                                </span>
+                              </div>
+                              <p className="hook">{u.description || p.hook}</p>
+
+                              <div className="property-spec-badges">
+                                <span className="property-spec-badge">{unitCategoryLabel(uCat)}</span>
+                                {uPurpose && <span className="property-spec-badge">{uPurpose.toUpperCase()}</span>}
+                                {u.size ? <span className="property-spec-badge">{u.size} sqm</span> : null}
+                                {u.bedrooms ? <span className="property-spec-badge">{u.bedrooms} BR</span> : null}
+                                {u.details?.wifi_speed_mbps ? (
+                                  <span className="property-spec-badge">{u.details.wifi_speed_mbps} Mbps WiFi</span>
+                                ) : null}
+                                {u.details?.min_stay_nights ? (
+                                  <span className="property-spec-badge">Min {u.details.min_stay_nights} Nights</span>
+                                ) : null}
+                              </div>
+
+                              <div className="property-card-footer">
+                                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
+                                  {p.location}
+                                </span>
+                                <span className="property-action-btn">Inspect Suite →</span>
+                              </div>
+                            </div>
+                          </Link>
+                        </motion.div>
+                      );
+                    })
+                  ) : (
+                    <div className="directory-empty">
+                      <h2>No suites match these filters</h2>
+                      <p>No individual suites or stays match current search criteria. Try switching back to Buildings view or clearing filters.</p>
+                      <button
+                        type="button"
+                        onClick={() => setGranularity("buildings")}
+                        className="founding-cta"
+                        style={{ marginTop: "16px", cursor: "pointer", background: "none", border: "1px solid var(--accent-muted)" }}
+                      >
+                        View Buildings & Estates ({filteredProperties.length} available) →
+                      </button>
+                    </div>
+                  )
+                ) : filteredProperties.length > 0 ? (
                   filteredProperties.map(p => {
                     const specBadges = getCardSpecBadges(p);
                     return (
@@ -751,6 +872,72 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                             <span key={i} className="property-spec-badge">{b}</span>
                           ))}
                         </div>
+
+                        {p.units_inventory && p.units_inventory.length > 0 && (
+                          <div
+                            className="property-units-tray"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            style={{
+                              margin: "0 0 16px 0",
+                              padding: "10px 12px",
+                              background: "rgba(255, 255, 255, 0.02)",
+                              border: "1px solid rgba(255, 255, 255, 0.06)",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                              <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>
+                                Active Units ({p.units_inventory.length})
+                              </span>
+                              <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
+                                Direct Access
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                              {p.units_inventory.slice(0, 3).map((u, uIdx) => (
+                                <button
+                                  key={u.id || uIdx}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    router.push(`/property/${p.slug}/unit/${u.id}`);
+                                  }}
+                                  style={{
+                                    fontFamily: "var(--font-mono)",
+                                    fontSize: "12px",
+                                    padding: "4px 8px",
+                                    background: "var(--surface)",
+                                    border: "1px solid var(--border-solid)",
+                                    borderRadius: "3px",
+                                    color: "var(--text-secondary)",
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "5px",
+                                  }}
+                                  className="unit-tray-chip"
+                                >
+                                  <DoorOpen size={12} style={{ color: "var(--accent)" }} />
+                                  <span>{u.name || `Unit ${u.unit_number || uIdx + 1}`}</span>
+                                  {u.unit_category && (
+                                    <span style={{ color: "var(--accent-muted)", fontSize: "12px" }}>
+                                      · {unitCategoryLabel(u.unit_category)}
+                                    </span>
+                                  )}
+                                </button>
+                              ))}
+                              {p.units_inventory.length > 3 && (
+                                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", alignSelf: "center", padding: "0 4px" }}>
+                                  +{p.units_inventory.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="property-card-footer">
                           <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

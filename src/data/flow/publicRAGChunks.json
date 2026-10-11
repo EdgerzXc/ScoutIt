@@ -5897,6 +5897,395 @@
     "lastVerifiedAt": "2026-09-11"
   },
   {
+    "chunk_id": "fact_broker.via_share",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.via_share",
+    "canonicalId": "broker.via_share",
+    "title": "VIA Priority Share Link & Concierge View",
+    "domain": "broker",
+    "layer": "metropolis",
+    "route": "/property/[id]/via/[contactSlug]",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker",
+      "owner",
+      "operator"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Dedicated dynamic landing view for verified promoter attribution links that routes visitor leads to Position Zero without modifying search ranking.",
+    "description": "Promoter-specific landing view establishing Position Zero concierge lead routing under A-186 and A-193. Sets 30-day attribution cookie and enforces canonical tag pointing to primary property slug.",
+    "available_actions": [
+      "Inspect Property Specifications",
+      "Trigger Position Zero Concierge Inquiry",
+      "Share Verified Promoter Link"
+    ],
+    "entry_conditions": [
+      "Valid property slug and promoter contact slug"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_via_priority_routing",
+        "text": "VIA priority link sets Position Zero concierge lead routing without altering global ranking.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "PRODUCT_BEHAVIOR",
+            "provenance": "SCOUTIT_PRODUCT_GRAPH",
+            "confidence": 1
+          }
+        ],
+        "confidence": 1,
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "legalReviewStatus": "RESEARCHED"
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_broker.via_share",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "broker.via_share",
+    "canonicalId": "broker.via_share",
+    "title": "Recovery Protocol: VIA Priority Share Link & Concierge View",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Promoter representation revoked or expired"
+    ],
+    "recovery_mechanisms": [
+      "Gracefully falls back to algorithmic organic contacts without breaking user inquiry"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_property.unit_detail",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "property.unit_detail",
+    "canonicalId": "property.unit_detail",
+    "title": "Sub-Unit Space Profile & Floorplan View",
+    "domain": "property",
+    "layer": "metropolis",
+    "route": "/property/[id]/unit/[unitId]",
+    "roles": [
+      "visitor",
+      "seeker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Renders detailed architectural specifications and leasing parameters for an individual child unit inside a building.",
+    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, and specific lease rate under A-154.",
+    "available_actions": [
+      "Inspect Unit Floorplan",
+      "Calculate Unit Affordability",
+      "Inquire on Specific Unit"
+    ],
+    "entry_conditions": [
+      "Valid property ID and unit ID"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_property.unit_detail",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "property.unit_detail",
+    "canonicalId": "property.unit_detail",
+    "title": "Recovery Protocol: Sub-Unit Space Profile & Floorplan View",
+    "domain": "property",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Unit unpublished or occupied"
+    ],
+    "recovery_mechanisms": [
+      "Renders building overview with alternative available units"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_layer.community_signals",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "layer.community_signals",
+    "canonicalId": "layer.community_signals",
+    "title": "Community Space Signals & Bounties Feed",
+    "domain": "layer",
+    "layer": "stratosphere",
+    "route": "/community",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Directory of user-submitted space demand signals and commercial tenant search bounties.",
+    "description": "Public feed where prospective tenants broadcast explicit space needs (location, square footage, budget) and accredited brokers connect.",
+    "available_actions": [
+      "Broadcast Space Signal",
+      "Browse Demand Bounties",
+      "Connect to Client Signal"
+    ],
+    "entry_conditions": [
+      "Publicly viewable; broadcasting requires authenticated account"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_layer.community_signals",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "layer.community_signals",
+    "canonicalId": "layer.community_signals",
+    "title": "Recovery Protocol: Community Space Signals & Bounties Feed",
+    "domain": "layer",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Signal closed by author or duplicate post"
+    ],
+    "recovery_mechanisms": [
+      "Marks signal as closed and prevents further connections"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_broker.dynamic_profile",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "broker.dynamic_profile",
+    "canonicalId": "broker.dynamic_profile",
+    "title": "Accredited Professional Portfolio & RESA Dossier",
+    "domain": "broker",
+    "layer": "metropolis",
+    "route": "/brokers/[broker-slug]",
+    "roles": [
+      "visitor",
+      "seeker",
+      "broker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Public profile displaying verified PRC RESAD license credentials, listing representations, and direct contact options.",
+    "description": "Dynamic professional showcase rendering accredited broker transactions, specializations, verified trust badges, and direct inquiry CTA.",
+    "available_actions": [
+      "Inspect PRC License Status",
+      "Browse Broker Listing Portfolio",
+      "Initiate Direct Contact Request"
+    ],
+    "entry_conditions": [
+      "Valid broker slug with active profile"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "rec_broker.dynamic_profile",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "broker.dynamic_profile",
+    "canonicalId": "broker.dynamic_profile",
+    "title": "Recovery Protocol: Accredited Professional Portfolio & RESA Dossier",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER",
+      "BROKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "PRC license expired or broker inactive"
+    ],
+    "recovery_mechanisms": [
+      "Displays license expiration notice and hides contact CTA"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-11",
+    "lastVerifiedAt": "2026-10-11"
+  },
+  {
     "chunk_id": "edge_e_hero_to_orbit_7",
     "chunk_type": "EDGE_TRANSITION",
     "chunkType": "EDGE_TRANSITION",

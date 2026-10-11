@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Plus, Trash2, Star } from "lucide-react";
 import { UNIT_TYPES, estimateCapacity } from "../../lib/unitMasterPage";
 import { unitDetailPath } from "../../lib/propertyRoutes";
+import { UNIT_CATEGORIES, LISTING_PURPOSES, UNIT_CATEGORY_LABELS } from "../../lib/unitCategory";
 import UnitMasterPage from "../property/UnitMasterPage";
 
 // Drill-in editor for one unit's Unit Master Page — the rich co-working fields
@@ -111,7 +112,69 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
                 <option value="coming_soon">Coming Soon</option>
               </select>
             </Field>
+            <Field label="Unit Commercial Category" hint="Specializes child-space discovery (e.g. Airbnb / STR in a residential condo tower).">
+              <select
+                className={inputCls}
+                value={unit.unitCategory || unit.unit_category || ""}
+                onChange={(e) => onField("unitCategory", e.target.value || null)}
+              >
+                <option value="">Standard (inherits parent building)</option>
+                {UNIT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {UNIT_CATEGORY_LABELS[cat] || cat}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Listing Purpose">
+              <select
+                className={inputCls}
+                value={unit.listingPurpose || unit.listing_purpose || ""}
+                onChange={(e) => onField("listingPurpose", e.target.value || null)}
+              >
+                <option value="">Unspecified</option>
+                {LISTING_PURPOSES.map((purp) => (
+                  <option key={purp} value={purp}>
+                    {purp === "short_stay" ? "Short Stay / Nightly" : purp.charAt(0).toUpperCase() + purp.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </Field>
           </section>
+
+          {/* Short-Term Rental & Host Controls (A-154 Pillar 2) */}
+          {(unit.unitCategory || unit.unit_category) === "str" && (
+            <section className="flex flex-col gap-4 pt-2 border-t border-surface-variant">
+              <div className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent">Short-Term Rental & Stay Controls</div>
+              <Field label="Nightly rate">
+                <input className={inputCls} value={d.nightly_rate || ""} onChange={(e) => onDetail("nightly_rate", e.target.value)} placeholder="e.g. ₱3,500 / night" />
+              </Field>
+              <Field label="Weekend surge / rate">
+                <input className={inputCls} value={d.weekend_rate || ""} onChange={(e) => onDetail("weekend_rate", e.target.value)} placeholder="e.g. ₱4,200 / night" />
+              </Field>
+              <Field label="Cleaning fee">
+                <input className={inputCls} value={d.cleaning_fee || ""} onChange={(e) => onDetail("cleaning_fee", e.target.value)} placeholder="e.g. ₱850" />
+              </Field>
+              <Field label="Minimum stay (nights)">
+                <input type="number" min="1" className={inputCls} value={d.min_stay || ""} onChange={(e) => onDetail("min_stay", e.target.value)} placeholder="e.g. 2" />
+              </Field>
+              <Field label="Check-in & check-out times">
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={inputCls} value={d.check_in_time || ""} onChange={(e) => onDetail("check_in_time", e.target.value)} placeholder="Check-in (2:00 PM)" />
+                  <input className={inputCls} value={d.check_out_time || ""} onChange={(e) => onDetail("check_out_time", e.target.value)} placeholder="Check-out (11:00 AM)" />
+                </div>
+              </Field>
+              <Field label="Self check-in method">
+                <input className={inputCls} value={d.self_check_in_method || ""} onChange={(e) => onDetail("self_check_in_method", e.target.value)} placeholder="Smart Lock / Keypad / Concierge Drop" />
+              </Field>
+              <Field label="WiFi speed (Mbps)">
+                <input type="number" min="0" className={inputCls} value={d.wifi_speed || ""} onChange={(e) => onDetail("wifi_speed", e.target.value)} placeholder="e.g. 300" />
+              </Field>
+              <Field label="Direct booking link (optional)">
+                <input className={inputCls} value={d.booking_link || ""} onChange={(e) => onDetail("booking_link", e.target.value)} placeholder="https://..." />
+              </Field>
+            </section>
+          )}
 
 
 

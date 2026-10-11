@@ -36,25 +36,31 @@ describe("flowNodeResolver", () => {
   });
 
   it("resolves newly added features and domain subroutes via fallback matchers", () => {
+    // Exact parameterized canonical routes (A-194 promotion)
     const viaPage = resolveFlowNode("/property/the-ridgeline/via/broker-mike");
     expect(viaPage).not.toBeNull();
-    expect(viaPage.nodeId).toBe("direct_slug");
+    expect(viaPage.nodeId).toBe("via_promoter_share");
 
     const viaApi = resolveFlowNode("/api/property/rec123/via");
     expect(viaApi).not.toBeNull();
-    expect(viaApi.nodeId).toBe("direct_slug");
+    expect(viaApi.nodeId).toBe("api_via_routing");
 
     const reviewApi = resolveFlowNode("/api/deals/deal-abc-123/review");
     expect(reviewApi).not.toBeNull();
-    expect(reviewApi.nodeId).toBe("deal_room");
+    expect(reviewApi.nodeId).toBe("api_deal_review");
 
     const passportApi = resolveFlowNode("/api/user/resident-passport");
     expect(passportApi).not.toBeNull();
-    expect(passportApi.nodeId).toBe("auth_onboarding_flow");
+    expect(passportApi.nodeId).toBe("sys_resident_passport");
 
+    // Domain fallback matchers
     const adminFlow = resolveFlowNode("/admin/flow");
     expect(adminFlow).not.toBeNull();
     expect(adminFlow.nodeId).toBe("mission_control");
+
+    const viaMetrics = resolveFlowNode("/api/broker/via-metrics");
+    expect(viaMetrics).not.toBeNull();
+    expect(viaMetrics.nodeId).toBe("brokers_roster");
 
     const metropolis = resolveFlowNode("/layer/metropolis");
     expect(metropolis).not.toBeNull();

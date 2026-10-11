@@ -63,6 +63,11 @@ const OwnerListingCard = memo(({
               <ProvenanceBadge record={listing} />
             </h3>
             <p className="text-xs text-text-secondary break-words [overflow-wrap:anywhere]">{listing.location || 'Location missing'}</p>
+            {listing.spatial_generation_status && listing.spatial_generation_status !== 'NONE' && (
+              <span className="font-mono text-[12px] uppercase tracking-wider text-[var(--accent)] font-semibold inline-block mt-1">
+                3D: {listing.spatial_generation_status === 'LIVE' ? 'Live Twin' : listing.spatial_generation_status === 'REVISION_REQUESTED' ? 'Express Revision (4-12h)' : 'In Production'}
+              </span>
+            )}
           </div>
           {!selectMode && (
             // A-146: null means unknown (dashboardListings completenessScoreOf),

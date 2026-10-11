@@ -8,6 +8,8 @@ import {
   isStrCategory,
   unitCategoryLabel,
   usesNightlyPricing,
+  getAdaptivePriceBands,
+  matchesPropertyCategory,
 } from "@/lib/unitCategory.js";
 
 // A-154 foundation — the child-space vocabulary contract plus the one wire
@@ -76,3 +78,47 @@ describe("A-154 — p_unit_id passthrough is pinned before Pillar 3", () => {
     expect(src).toContain("p_unit_id: unitId || null");
   });
 });
+
+describe("A-154 Pillar 5 — Adaptive price bands & multi-category discovery", () => {
+  it("switches price bands based on sector selection", () => {
+    const defaultBands = getAdaptivePriceBands([]);
+    expect(defaultBands.map((b) => b.label)).toEqual(["Entry", "Mid", "Premium", "Trophy"]);
+
+    const strBands = getAdaptivePriceBands(["STR"]);
+    expect(strBands.map((b) => b.label)).toContain("Under ₱3,000 / night");
+    expect(strBands[0].max).toBe(3000);
+
+    const leaseBands = getAdaptivePriceBands(["Residential"]);
+    expect(leaseBands.map((b) => b.label)).toContain("Under ₱50k / mo");
+    expect(leaseBands[0].max).toBe(50000);
+  });
+
+  it("multi-category matcher resolves parent category, active offerings, or child unit category", () => {
+    // 1. Direct parent SpaceCategory match
+    const condo = { spaceCategory: "Residential", units_inventory: [] };
+    expect(matchesPropertyCategory(condo, ["Residential"])).toBe(true);
+    expect(matchesPropertyCategory(condo, ["Commercial"])).toBe(false);
+
+    // 2. Child unit inventory match (Residential high-rise holding STR child unit)
+    const hybridCondo = {
+      spaceCategory: "Residential",
+      units_inventory: [
+        { id: "u-1", name: "Suite 101", unit_category: "residential_lease" },
+        { id: "u-2", name: "Penthouse STR", unit_category: "str" },
+      ],
+    };
+    expect(matchesPropertyCategory(hybridCondo, ["STR"])).toBe(true);
+    expect(matchesPropertyCategory(hybridCondo, ["Residential"])).toBe(true);
+    expect(matchesPropertyCategory(hybridCondo, ["Commercial"])).toBe(false);
+
+    // 3. Active_Offerings multi-select match
+    const multiOffering = {
+      spaceCategory: "Commercial",
+      active_offerings: ["Commercial", "Venues"],
+      units_inventory: [],
+    };
+    expect(matchesPropertyCategory(multiOffering, ["Venues/Events"])).toBe(true);
+    expect(matchesPropertyCategory(multiOffering, ["STR"])).toBe(false);
+  });
+});
+

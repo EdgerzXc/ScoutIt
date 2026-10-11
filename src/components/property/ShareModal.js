@@ -50,11 +50,22 @@ import {
 } from "lucide-react";
 import { buildShareText, buildPromoPack } from "@/lib/shareBriefing";
 import {
-  buildShareUrl, cleanPropertyUrl, resolveShareRef,
+  buildShareUrl, cleanPropertyUrl, computeViaBaseUrl, resolveShareRef,
 } from "@/lib/shareAttribution";
+import { getSession } from "@/lib/authClient";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import entrance from "@/components/ui/OverlayEntrance.module.css";
 import LuxuryStoryStudio from "./LuxuryStoryStudio";
+
+// A-193: the default is always the clean public canonical link.
+const PUBLIC_VIA = Object.freeze({ eligible: false, promoterType: null, promoterSlug: null });
+
+// What a verified link means for each relationship that can earn one.
+const VIA_ROLE_COPY = Object.freeze({
+  owner: "You own this property. Visitors who open this link reach you first, as the property owner.",
+  broker: "You are an accepted broker on this property. Visitors who open this link reach your contact card first.",
+  operator: "You operate space in this property. Visitors who open this link reach you first for that space.",
+});
 
 // `prefill: false` means the platform will NOT carry our text, so we must copy
 // it to the clipboard first and say so. This flag is the whole of Task 3.
@@ -197,7 +208,6 @@ export default function ShareModal({
   propertyUrl,
   property = null,
   userId = null,
-  viaPromoterSlug = null,
 }) {
   const dialogRef = useRef(null);
   useModalDialog(dialogRef, { active: isOpen, onClose });
@@ -207,11 +217,9 @@ export default function ShareModal({
   const [ref, setRef] = useState("");
   const [showFormats, setShowFormats] = useState(false);
   const [activeTab, setActiveTab] = useState("channels");
-  const [promoterSlug, setPromoterSlug] = useState(viaPromoterSlug || "");
-
-  useEffect(() => {
-    if (viaPromoterSlug) setPromoterSlug(viaPromoterSlug);
-  }, [viaPromoterSlug]);
+  // A-193: what this caller may promote on THIS property. Defaults to the public
+  // canonical link; only the server eligibility check can upgrade it.
+  const [via, setVia] = useState(PUBLIC_VIA);
 
   // Minted once per open. A failure here yields "" and attribution silently
   // degrades to channel-only — it must never block a share.
@@ -224,25 +232,46 @@ export default function ShareModal({
     return () => { alive = false; };
   }, [isOpen, userId]);
 
+  const slug = property?.slug || property?.id || "";
+
+  // A-193: ask the server what this caller is authorised to promote. Anonymous,
+  // unrelated, or failed lookups all land on the public canonical link — sharing
+  // must never show an error gate.
+  useEffect(() => {
+    if (!isOpen || !slug) return undefined;
+    let alive = true;
+    (async () => {
+      try {
+        const { data: { session } } = await getSession();
+        const token = session?.access_token;
+        if (!token) { if (alive) setVia(PUBLIC_VIA); return; }
+        const res = await fetch(`/api/property/${encodeURIComponent(slug)}/via/eligibility`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        const body = res.ok ? await res.json() : null;
+        if (alive) {
+          setVia(body?.eligible && body?.promoterSlug
+            ? { eligible: true, promoterType: body.promoterType, promoterSlug: body.promoterSlug }
+            : PUBLIC_VIA);
+        }
+      } catch {
+        if (alive) setVia(PUBLIC_VIA);
+      }
+    })();
+    return () => { alive = false; };
+  }, [isOpen, slug]);
+
   const rawBaseUrl = useMemo(() => {
     if (propertyUrl) return cleanPropertyUrl(propertyUrl);
     if (typeof window !== "undefined") return cleanPropertyUrl(window.location.href);
     return "";
   }, [propertyUrl]);
 
-  const slug = property?.slug || property?.id || "";
-
-  const baseUrl = useMemo(() => {
-    if (!rawBaseUrl) return "";
-    const cleanPromoter = promoterSlug ? promoterSlug.trim().toLowerCase() : "";
-    if (cleanPromoter && !rawBaseUrl.includes("/via/")) {
-      const propMatch = rawBaseUrl.match(/^(https?:\/\/[^\/]+)?(\/property\/[^\/\?\#]+)/i);
-      if (propMatch) {
-        return `${propMatch[0]}/via/${encodeURIComponent(cleanPromoter)}`;
-      }
-    }
-    return rawBaseUrl;
-  }, [rawBaseUrl, promoterSlug]);
+  const baseUrl = useMemo(
+    () => computeViaBaseUrl(rawBaseUrl, via.eligible ? via.promoterSlug : null),
+    [rawBaseUrl, via]
+  );
 
   // Text for a given channel: rebuilt against that channel's attributed URL so
   // the link inside the copy matches the link the platform receives. Without a
@@ -407,45 +436,30 @@ export default function ShareModal({
                 Share this property&apos;s market intelligence with your network or clients.
               </p>
 
-              {/* A-186: VIA Partner Priority Control */}
-              {property && (
-                <div className="mb-4 p-3 rounded-lg bg-surface border border-gold-accent/20 flex flex-col gap-2">
+              {/* A-193: VIA priority link is auto-detected from the caller's relationship to
+                  THIS property (owner / accepted broker / co-operator). There is deliberately
+                  no input: nobody can type their way into Position Zero. Everyone else shares
+                  the clean public canonical link with no friction and no error state. */}
+              {property && via.eligible && (
+                <div
+                  className="mb-4 p-3 rounded-lg bg-surface border border-gold-accent/30 flex flex-col gap-1.5"
+                  data-testid="via-verified-panel"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${promoterSlug.trim() ? "bg-gold-accent animate-pulse" : "bg-on-surface/30"}`} />
+                      <span className="w-2 h-2 rounded-full bg-gold-accent animate-pulse" />
                       <span className="text-xs font-mono uppercase tracking-wider text-gold-accent font-bold">
-                        {promoterSlug.trim() ? "VIA Attribution Active" : "VIA Partner Priority (Position Zero)"}
+                        [●] Verified VIA Priority Link
                       </span>
                     </div>
                     <span className="text-xs font-mono text-on-surface/60">30-Day Lock</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Add broker slug for lead priority (e.g. john-doe)"
-                      value={promoterSlug}
-                      onChange={(e) => setPromoterSlug(e.target.value)}
-                      aria-label="VIA Promoter Slug"
-                      className="flex-1 bg-background border border-on-surface/15 rounded px-2.5 py-1.5 text-xs font-mono text-on-surface focus:outline-none focus:border-gold-accent transition-colors"
-                    />
-                    {promoterSlug && (
-                      <button
-                        type="button"
-                        onClick={() => setPromoterSlug("")}
-                        className="text-xs font-mono text-on-surface/60 hover:text-gold-accent px-1.5 py-1 rounded bg-on-surface/5"
-                        title="Clear promoter attribution"
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                  {promoterSlug.trim() && (
-                    <p className="text-xs text-text-secondary leading-tight">
-                      Visitors who open this link route directly to your contact card as Position Zero primary contact.
-                    </p>
-                  )}
+                  <p className="text-xs text-text-secondary leading-tight m-0">
+                    {VIA_ROLE_COPY[via.promoterType] || VIA_ROLE_COPY.broker}
+                  </p>
                 </div>
               )}
+
 
               <div className="grid grid-cols-4 gap-2 mb-3">
                 {CHANNELS.map((c) => (

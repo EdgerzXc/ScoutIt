@@ -159,6 +159,12 @@ export default async function BrokerDetailPage({ params }) {
       <main className="broker-detail-main">
         <BrokerDossierIdentity identity={identity} record={scoutItRecord} credential={credential} />
 
+        <div className="broker-profile-actions-bar">
+          <Link href="/brokers/portal" className="broker-portal-edit-btn" title="Edit your private broker dossier and coverage areas">
+            Advisor Portal · Edit My Dossier →
+          </Link>
+        </div>
+
         {/* Current representations are generated from the Supabase
             representation authority. Brokers cannot add or reorder them. */}
         <section className="detail-curations-section">

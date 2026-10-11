@@ -280,6 +280,7 @@
       "/api/property/verify",
       "/api/property/[id]/brokers",
       "/api/property/[id]/open-gate",
+      "/api/property/[id]/via/eligibility",
       "/api/property/[id]/via",
       "/api/property/[id]/via/telemetry",
       "/api/questit",
@@ -287,6 +288,9 @@
       "/api/reviews/[id]/dispute",
       "/api/seo/readiness",
       "/api/showcase",
+      "/api/spatial/request",
+      "/api/spatial/revision",
+      "/api/spatial/status",
       "/api/storage/upload",
       "/api/telemetry/device",
       "/api/user/delete-account",
@@ -359,7 +363,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 184,
+    "totalCodebaseRoutesDiscovered": 188,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],
@@ -453,21 +457,21 @@
     "staleReleasedGraphOnlyRoutes": [
       "/lib/aiListingEngine.js"
     ],
-    "verifiedCodeEvidenceCount": 97,
+    "verifiedCodeEvidenceCount": 110,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
     "schemaValidityScore": {
-      "numerator": 131,
-      "denominator": 131,
+      "numerator": 144,
+      "denominator": 144,
       "percentage": "100%",
       "formula": "schema-valid nodes / total nodes",
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 97,
-      "denominator": 131,
-      "percentage": "74%",
+      "numerator": 110,
+      "denominator": 144,
+      "percentage": "76%",
       "formula": "verified nodes with existing grounded code evidence / total nodes",
       "failingItems": [
         "sys_velocity_radar",
@@ -528,8 +532,8 @@
       "failingItems": []
     },
     "ragSafetyScore": {
-      "numerator": 188,
-      "denominator": 188,
+      "numerator": 196,
+      "denominator": 196,
       "percentage": "100%",
       "formula": "public chunks passing access and content sanitization checks / total public chunks",
       "failingItems": []
@@ -543,20 +547,20 @@
     },
     "recoveryCoverageScore": {
       "numerator": 14,
-      "denominator": 19,
-      "percentage": "74%",
+      "denominator": 22,
+      "percentage": "64%",
       "formula": "mapped failures with recovery or terminal resolution / total mapped failures",
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 97,
-      "denominator": 97,
+      "numerator": 110,
+      "denominator": 110,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
-      "percentage": "93.5%",
+      "percentage": "94.0%",
       "formula": "weighted sum: (evidence * 0.25) + (canonical-route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
@@ -566,5 +570,5 @@
       "failingItems": []
     }
   },
-  "auditScore": "93.5% TRUST GROUNDED"
+  "auditScore": "94.0% TRUST GROUNDED"
 }

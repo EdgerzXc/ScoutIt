@@ -104,6 +104,80 @@ export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
     }
   };
 
+  const [blocks, setBlocks] = useState([]);
+  const [loadingBlocks, setLoadingBlocks] = useState(false);
+  const [blockInput, setBlockInput] = useState("");
+  const [blockActionBusy, setBlockActionBusy] = useState(false);
+
+  const loadBlocks = useCallback(async () => {
+    try {
+      setLoadingBlocks(true);
+      const { data: { session } } = await getSession();
+      if (!session?.access_token) return;
+      const res = await fetch("/api/user/blocks", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && Array.isArray(data.blocks)) {
+        setBlocks(data.blocks);
+      }
+    } catch {
+      // Non-fatal
+    } finally {
+      setLoadingBlocks(false);
+    }
+  }, []);
+
+  useEffect(() => { loadBlocks(); }, [loadBlocks]);
+
+  const handleUnblock = async (blockedId) => {
+    if (!blockedId || blockActionBusy) return;
+    setBlockActionBusy(true);
+    try {
+      const { data: { session } } = await getSession();
+      const res = await fetch(`/api/user/blocks?blockedId=${encodeURIComponent(blockedId)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session?.access_token || ""}` },
+      });
+      if (res.ok) {
+        setBlocks((prev) => prev.filter((b) => b.blocked_id !== blockedId));
+      }
+    } catch {
+      // Non-fatal
+    } finally {
+      setBlockActionBusy(false);
+    }
+  };
+
+  const handleBlockManual = async (e) => {
+    e?.preventDefault();
+    const idToBlock = blockInput.trim();
+    if (!idToBlock || blockActionBusy) return;
+    setBlockActionBusy(true);
+    try {
+      const { data: { session } } = await getSession();
+      const res = await fetch("/api/user/blocks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({ blockedId: idToBlock }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.success) {
+        setBlockInput("");
+        await loadBlocks();
+      } else {
+        setError(json.error || "Failed to block account.");
+      }
+    } catch {
+      setError("Failed to block account.");
+    } finally {
+      setBlockActionBusy(false);
+    }
+  };
+
   const shieldApplies = canUseAnonymityShield(role);
   // A-135: which of this person's roles may appear on their public profile.
   // Moved here from /profile so privacy has one home and one writer.
@@ -129,6 +203,12 @@ export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
       key: "isProfilePublic",
       title: "Public profile",
       body: "Whether your profile page can be found by other people on ScoutIt.",
+    },
+    {
+      key: "acceptingConnects",
+      title: "Accept incoming Connect requests",
+      body: "When turned off, new incoming inquiries and pitches are paused. Senders receive an honest notice with zero Connects debited.",
+      defaultValue: true,
     },
     {
       key: "telemetryOptOut",
@@ -261,10 +341,157 @@ export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
+        .ps-select-wrap {
+          flex: 0 0 auto;
+          margin-top: 2px;
+        }
+        .ps-select {
+          min-height: 44px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          background: var(--bg);
+          border: 1px solid var(--border-solid);
+          color: var(--text-primary);
+          font-family: var(--font-display);
+          font-size: 13px;
+          cursor: pointer;
+        }
+        .ps-select:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+        .ps-blocks-section {
+          margin-top: 28px;
+          padding-top: 22px;
+          border-top: 1px solid var(--border-solid);
+        }
+        .ps-blocks-h {
+          font-family: var(--font-display);
+          font-size: 16px;
+          font-weight: 500;
+          color: var(--text-primary);
+          margin: 0 0 6px;
+        }
+        .ps-blocks-intro {
+          font-family: var(--font-display);
+          font-size: 12.5px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          margin: 0 0 16px;
+          max-width: 54ch;
+        }
+        .ps-block-form {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-bottom: 16px;
+        }
+        .ps-block-input {
+          flex: 1;
+          min-width: 220px;
+          min-height: 44px;
+          padding: 8px 14px;
+          border-radius: 8px;
+          background: var(--bg);
+          border: 1px solid var(--border-solid);
+          color: var(--text-primary);
+          font-family: ${MONO};
+          font-size: 13px;
+        }
+        .ps-block-input:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+        .ps-block-submit {
+          min-height: 44px;
+          padding: 8px 16px;
+          border-radius: 8px;
+          background: rgba(var(--accent-rgb), 0.12);
+          border: 1px solid var(--accent-muted);
+          color: var(--accent-bright);
+          font-family: ${MONO};
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background-color 150ms ease-out;
+        }
+        .ps-block-submit:hover:not(:disabled) {
+          background: rgba(var(--accent-rgb), 0.22);
+        }
+        .ps-block-submit:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+        .ps-blocks-empty {
+          font-family: var(--font-display);
+          font-size: 13px;
+          color: var(--text-muted);
+          padding: 12px 0;
+        }
+        .ps-blocks-loading {
+          font-family: ${MONO};
+          font-size: 12px;
+          color: var(--text-muted);
+          padding: 12px 0;
+        }
+        .ps-blocks-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .ps-block-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 14px;
+          border-radius: 8px;
+          background: var(--surface2, rgba(255, 255, 255, 0.03));
+          border: 1px solid var(--border-solid);
+        }
+        .ps-block-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          min-width: 0;
+        }
+        .ps-block-name {
+          font-family: var(--font-display);
+          font-size: 13.5px;
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+        .ps-block-id {
+          font-family: ${MONO};
+          font-size: 12px;
+          color: var(--text-muted);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ps-unblock-btn {
+          min-height: 44px;
+          padding: 6px 14px;
+          border-radius: 6px;
+          background: transparent;
+          border: 1px solid var(--border-solid);
+          color: var(--text-secondary);
+          font-family: ${MONO};
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: border-color 150ms ease-out, color 150ms ease-out;
+        }
+        .ps-unblock-btn:hover:not(:disabled) {
+          border-color: var(--accent-muted);
+          color: var(--accent-bright);
+        }
         @media (min-width: 700px) { .ps-root { padding: 24px 26px; } }
         @media (prefers-reduced-motion: reduce) {
           .ps-skel { animation: none; }
-          .ps-toggle, .ps-toggle::after { transition: none; }
+          .ps-toggle, .ps-toggle::after, .ps-unblock-btn { transition: none; }
         }
       `}</style>
 
@@ -354,6 +581,86 @@ export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
               })}
             </>
           )}
+          <div className="ps-row">
+            <div className="ps-row__main">
+              <div className="ps-row__t">Maximum pending incoming requests</div>
+              <div className="ps-row__b">
+                Set a safety cap on active pending Connect requests awaiting your response. Once reached, new requests pause until you accept or decline.
+              </div>
+              {saved === "maxPendingConnects" && <div className="ps-row__saved">Saved</div>}
+            </div>
+            <div className="ps-select-wrap">
+              <select
+                className="ps-select"
+                value={settings.maxPendingConnects === null ? "unlimited" : String(settings.maxPendingConnects)}
+                disabled={savingKey === "maxPendingConnects"}
+                aria-label="Maximum pending incoming requests"
+                onChange={(e) => {
+                  const val = e.target.value === "unlimited" ? null : parseInt(e.target.value, 10);
+                  update("maxPendingConnects", val);
+                }}
+              >
+                <option value="unlimited">Unlimited</option>
+                <option value="3">3 pending</option>
+                <option value="5">5 pending</option>
+                <option value="10">10 pending</option>
+                <option value="20">20 pending</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="ps-blocks-section">
+            <h4 className="ps-blocks-h">Blocked Counterparties</h4>
+            <p className="ps-blocks-intro">
+              Blocked accounts cannot initiate deals, pitches, or messages with you. Your profile and listings remain invisible to them.
+            </p>
+
+            <form className="ps-block-form" onSubmit={handleBlockManual}>
+              <input
+                type="text"
+                className="ps-block-input"
+                placeholder="Enter Account ID to block..."
+                value={blockInput}
+                onChange={(e) => setBlockInput(e.target.value)}
+                disabled={blockActionBusy}
+                aria-label="Account ID to block"
+              />
+              <button
+                type="submit"
+                className="ps-block-submit"
+                disabled={!blockInput.trim() || blockActionBusy}
+              >
+                Block Account
+              </button>
+            </form>
+
+            {loadingBlocks && <div className="ps-blocks-loading">Loading blocked accounts...</div>}
+
+            {!loadingBlocks && blocks.length === 0 && (
+              <div className="ps-blocks-empty">No accounts blocked.</div>
+            )}
+
+            {!loadingBlocks && blocks.length > 0 && (
+              <div className="ps-blocks-list">
+                {blocks.map((b) => (
+                  <div className="ps-block-item" key={b.blocked_id}>
+                    <div className="ps-block-info">
+                      <span className="ps-block-name">{b.display_name || "Unknown Account"}</span>
+                      <span className="ps-block-id">{b.blocked_id}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="ps-unblock-btn"
+                      disabled={blockActionBusy}
+                      onClick={() => handleUnblock(b.blocked_id)}
+                    >
+                      Unblock
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           {error && <p className="ps-err" role="alert">{error}</p>}
         </>
       )}

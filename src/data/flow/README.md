@@ -1,7 +1,7 @@
 # ScoutIt Flow Knowledge Backbone & Export Bundle
 
 Authoritative export and knowledge bundle representing the complete behavioral and architectural graph of **ScoutIt** (Schema V2.2.0).
-Commit Bound: `b3ab118c6b274197f029f275a72a6b527a159e71`
+Commit Bound: `4795283c1c2e57aa50d9511f2a8e715833350e1b`
 
 ---
 
@@ -19,10 +19,10 @@ Commit Bound: `b3ab118c6b274197f029f275a72a6b527a159e71`
 ## 📦 Bundle Manifest
 
 - **`schema.json`**: Strict JSON Schema Draft-07 defining Schema V2.2.0.
-- **`masterFlowGraph.json`**: Pure behavioral graph containing 131 nodes and 252 semantic edges.
+- **`masterFlowGraph.json`**: Pure behavioral graph containing 144 nodes and 281 semantic edges.
 - **`masterFlowLayout.json`**: Decoupled visual canvas coordinates for UI rendering.
-- **`atomicRAGChunks.json`**: Complete internal retrieval corpus (639 chunks) for Admin & Staff.
-- **`publicRAGChunks.json`**: Strictly sanitized public retrieval corpus (188 chunks) with zero technical leakages.
+- **`atomicRAGChunks.json`**: Complete internal retrieval corpus (704 chunks) for Admin & Staff.
+- **`publicRAGChunks.json`**: Strictly sanitized public retrieval corpus (196 chunks) with zero technical leakages.
 - **`workflows.json`**: 5 end-to-end user and system workflows with ordered milestone validation.
 - **`linearGuides.json`**: 3 interactive guides (1 Executable Buyer Guide + 2 Macro Guides).
 - **`coverageReport.json`**: Mathematical domain coverage metrics across 9 key lifecycles.
@@ -34,5 +34,5 @@ Commit Bound: `b3ab118c6b274197f029f275a72a6b527a159e71`
 
 ## 🔍 Validation Status
 - **JSON Schema:** Validated with Ajv Strict Mode.
-- **Commit Binding:** `b3ab118c6b274197f029f275a72a6b527a159e71`
+- **Commit Binding:** `4795283c1c2e57aa50d9511f2a8e715833350e1b`
 - **Public Isolation:** Zero internal endpoint or database table leakage.

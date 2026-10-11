@@ -113,6 +113,7 @@ export async function GET(request) {
             name: otherId ? namesById[otherId] : "",
             roleLabel: otherRoleLabel,
           }),
+          otherPartyId: otherId || null,
           otherPartyRole: otherRoleLabel, // "Broker" | "Buyer" | "Owner" — which template a UI card should use
           lastMessage: lastMessageByDeal[d.id] || d.pitch_message || "",
           pitch_message: d.pitch_message,

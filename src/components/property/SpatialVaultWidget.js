@@ -4,6 +4,9 @@ import { useState } from "react";
 import { usePremiumFields } from "@/lib/usePremiumFields";
 import { imageMediaUrl, safeFloorPlans, spatialEmbedUrl } from "@/lib/propertyMedia";
 import { isSamplePropertySlug } from "@/lib/sampleInventory";
+import MaterialSwapperToolbar from "@/components/property/MaterialSwapperToolbar";
+import SpatialStudioRevisionModal from "@/components/property/SpatialStudioRevisionModal";
+import { DEFAULT_MATERIAL_CONFIG } from "@/lib/spatialStudio";
 
 export default function SpatialVaultWidget({
   slug,
@@ -15,6 +18,8 @@ export default function SpatialVaultWidget({
 }) {
   const { fields, loading } = usePremiumFields(slug);
   const [failedImages, setFailedImages] = useState(new Set());
+  const [materialConfig, setMaterialConfig] = useState(DEFAULT_MATERIAL_CONFIG);
+  const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const isSample = isSamplePropertySlug(slug);
 
   const realLuma =
@@ -70,11 +75,27 @@ export default function SpatialVaultWidget({
       )}
 
       {realLuma && (
-        <EmbedCard title="3D Spatial Map" url={realLuma} iframeTitle="Verified 3D spatial map" />
+        <EmbedCard
+          title="3D Spatial Map"
+          url={realLuma}
+          iframeTitle="Verified 3D spatial map"
+          materialConfig={materialConfig}
+          onMaterialChange={setMaterialConfig}
+          onRequestRevision={() => setRevisionModalOpen(true)}
+          canRequestRevision={true}
+        />
       )}
 
       {realMatterport && (
-        <EmbedCard title="360° Room Tour" url={realMatterport} iframeTitle="Verified Matterport room tour" />
+        <EmbedCard
+          title="360° Room Tour"
+          url={realMatterport}
+          iframeTitle="Verified Matterport room tour"
+          materialConfig={materialConfig}
+          onMaterialChange={setMaterialConfig}
+          onRequestRevision={() => setRevisionModalOpen(true)}
+          canRequestRevision={true}
+        />
       )}
 
       {realHeatmap && !failedImages.has(realHeatmap) && (
@@ -127,15 +148,29 @@ export default function SpatialVaultWidget({
           </div>
         </section>
       )}
+
+      <SpatialStudioRevisionModal
+        isOpen={revisionModalOpen}
+        onClose={() => setRevisionModalOpen(false)}
+        property={{ slug }}
+      />
     </div>
   );
 }
 
-function EmbedCard({ title, url, iframeTitle }) {
+function EmbedCard({
+  title,
+  url,
+  iframeTitle,
+  materialConfig,
+  onMaterialChange,
+  onRequestRevision,
+  canRequestRevision,
+}) {
   return (
     <section className="vault-item">
       <h2 className="mb-3 font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">{title}</h2>
-      <div className="h-[400px] overflow-hidden rounded border border-surface-variant bg-surface">
+      <div className="h-[460px] overflow-hidden rounded border border-surface-variant bg-surface relative group">
         <iframe
           src={url}
           className="h-full w-full border-none"
@@ -143,6 +178,12 @@ function EmbedCard({ title, url, iframeTitle }) {
           loading="lazy"
           allow="fullscreen; xr-spatial-tracking"
           referrerPolicy="strict-origin-when-cross-origin"
+        />
+        <MaterialSwapperToolbar
+          activeConfig={materialConfig}
+          onChange={onMaterialChange}
+          onRequestRevision={onRequestRevision}
+          canRequestRevision={canRequestRevision}
         />
       </div>
     </section>

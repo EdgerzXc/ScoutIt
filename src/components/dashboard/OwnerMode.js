@@ -30,12 +30,17 @@ import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import SimpleDetail from "@/components/ui/SimpleDetail";
 import InfoTip from "@/components/ui/InfoTip";
+import SpatialStudioRequestModal from "./SpatialStudioRequestModal";
+import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedStylePreset, setSelectedStylePreset] = useState("minimalist_organic");
+  const [spatialModalOpen, setSpatialModalOpen] = useState(false);
+  const [spatialTargetProperty, setSpatialTargetProperty] = useState(null);
   const [isAssimilating, setIsAssimilating] = useState(false);
   const [vaultTab, setVaultTab] = useState("url"); // "url" | "build"
   const [vaultBuildOption, setVaultBuildOption] = useState(null); // null | "self" | "team"
@@ -538,7 +543,21 @@ export default function OwnerMode() {
 
         if (!res.ok) throw new Error(result.error || 'Upload failed');
 
-        addToast("Video uploaded — your Spatial Tour will be ready in 3–5 days.", "✅");
+        await fetch('/api/spatial/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            propertyId: activeListing?.id,
+            stylePreset: selectedStylePreset,
+            fileUrl: result.publicUrl || selectedFile.name,
+            walletConnects: connects,
+          })
+        }).catch(() => {});
+
+        addToast("Video uploaded — your Spatial Twin will be ready in 24–48 hours.", "✅");
       } catch (err) {
         console.error('[Vault upload]', err);
         addToast(`Upload failed: ${sanitizeError(err)}`, "❌");
@@ -672,7 +691,44 @@ export default function OwnerMode() {
           <div className="bg-background border border-gold-accent/20 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
             <div className="bg-surface-alt/50 border border-gold-accent/20 rounded-lg p-5 w-full">
               <strong className="text-gold-accent font-label-caps uppercase tracking-widest text-sm block mb-1">JUST HIT RECORD</strong>
-              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera. Upload the raw .mp4 or .mov — we&apos;ll stitch it into an immersive 3D tour and notify you when it&apos;s live, typically within 48 hours.</p>
+              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera or submit your CAD blueprint. Upload the raw footage — we&apos;ll stitch it into an immersive 3D twin and notify you when it&apos;s live, typically within 24–48 hours.</p>
+            </div>
+
+            {/* Pre-Flight Style & Palette Selector (A-196 Pillar 1) */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold block">
+                1. Select Aesthetic Moodboard Preset
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                {Object.values(SPATIAL_STYLE_PRESETS).map((preset) => {
+                  const isSelected = selectedStylePreset === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => setSelectedStylePreset(preset.id)}
+                      className={`text-left p-3.5 rounded-xl border transition flex flex-col gap-2 ${
+                        isSelected
+                          ? "bg-surface-alt border-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"
+                          : "bg-surface-variant/30 border-surface-variant hover:border-gold-accent/40"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-working-title text-sm text-on-surface font-bold">
+                          {preset.name}
+                        </span>
+                        {isSelected && <span className="text-gold-accent text-xs">✓</span>}
+                      </div>
+                      <span className="text-[12px] text-text-secondary leading-tight">
+                        {preset.subtitle}
+                      </span>
+                      <span className="text-[12px] font-mono text-gold-bright mt-auto">
+                        {preset.materials.slice(0, 2).join(" · ")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {selectedFile ? (
@@ -967,6 +1023,17 @@ export default function OwnerMode() {
         }}
       />
 
+      <SpatialStudioRequestModal
+        isOpen={spatialModalOpen}
+        onClose={() => setSpatialModalOpen(false)}
+        property={spatialTargetProperty || activeListing}
+        currentTier={getCurrentTier()}
+        currentConnects={connects}
+        onSuccess={() => {
+          addToast("3D Spatial Twin queued for production (24–48h SLA).", "success");
+        }}
+      />
+
       {/* Dossier Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-surface-variant pb-6 mb-8 gap-4">
         <div>
@@ -1017,6 +1084,16 @@ export default function OwnerMode() {
               onClick={() => setShowWizard('deep_intel_edit')}
             >
               Add Deep Intel
+            </button>
+            <button 
+              className="bg-gold-accent text-background hover:bg-gold-bright active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)]"
+              disabled={activeListing.pipelineStatus === 'ai_drafting'}
+              onClick={() => {
+                setSpatialTargetProperty(activeListing);
+                setSpatialModalOpen(true);
+              }}
+            >
+              ✦ 3D Spatial Studio
             </button>
             {activeListing.pipelineStatus !== 'ai_drafting' && (
               <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center items-center justify-center">

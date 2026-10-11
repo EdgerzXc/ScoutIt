@@ -11,6 +11,7 @@ import ScoutInsightPanel from './panels/ScoutInsightPanel';
 import MeshHero from '../ui/MeshHero';
 import TaskRail from "./crm/TaskRail";
 import DealTimeline from "./crm/DealTimeline";
+import ViaTelemetryHUD from "./crm/ViaTelemetryHUD";
 import { computeListingStrength } from "../../lib/listingStrength";
 import BrokerFieldBriefing from "./BrokerFieldBriefing";
 import LeadExportButton from './crm/LeadExportButton';
@@ -926,6 +927,13 @@ export default function BrokerMode() {
           </div>
           {/* Permanent entry point — the dismissible "new feature" banner must
               not be the only way to reach the ID card */}
+          <Link
+            href="/brokers/portal"
+            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50 flex items-center gap-1.5"
+            title="Edit your private broker dossier and coverage areas"
+          >
+            💼 Edit Dossier
+          </Link>
           <button
             className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50"
             onClick={() => setShowIdCard(true)}
@@ -946,6 +954,8 @@ export default function BrokerMode() {
           </button>
         </div>
       </MeshHero>
+
+      <ViaTelemetryHUD />
 
       <ScoutInsightPanel pitches={pitches} listings={listings} taskSummary={taskSummary} />
 

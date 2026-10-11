@@ -207,4 +207,43 @@ describe('/api/user/privacy-settings API endpoint', () => {
     mockDb({ shield: null });
     expect((await (await GET(getReq())).json()).settings.publicRoles).toEqual([]);
   });
+
+  // A-144: receiver gates (acceptingConnects and maxPendingConnects)
+  it('returns default receiver gate settings in GET', async () => {
+    mockDb({ profile: { is_profile_public: true, accepting_connects: true, max_pending_connects: null } });
+    const json = await (await GET(getReq())).json();
+    expect(json.settings.acceptingConnects).toBe(true);
+    expect(json.settings.maxPendingConnects).toBeNull();
+  });
+
+  it('updates acceptingConnects and maxPendingConnects via POST', async () => {
+    const writes = mockDb({
+      profile: { is_profile_public: true, accepting_connects: false, max_pending_connects: 5 },
+    });
+    const res = await POST(post({ acceptingConnects: false, maxPendingConnects: 5 }));
+    expect(res.status).toBe(200);
+
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.settings.acceptingConnects).toBe(false);
+    expect(json.settings.maxPendingConnects).toBe(5);
+    expect(writes.profile[0]).toMatchObject({ accepting_connects: false, max_pending_connects: 5 });
+  });
+
+  it('allows clearing maxPendingConnects back to null via POST', async () => {
+    const writes = mockDb({
+      profile: { is_profile_public: true, max_pending_connects: null },
+    });
+    const res = await POST(post({ maxPendingConnects: null }));
+    expect(res.status).toBe(200);
+    expect(writes.profile[0]).toMatchObject({ max_pending_connects: null });
+  });
+
+  it('refuses negative or invalid maxPendingConnects with 400', async () => {
+    mockDb();
+    expect((await POST(post({ maxPendingConnects: -1 }))).status).toBe(400);
+    expect((await POST(post({ maxPendingConnects: 3.5 }))).status).toBe(400);
+    expect((await POST(post({ maxPendingConnects: 'invalid' }))).status).toBe(400);
+  });
 });
+

@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "generatedAt": "2026-10-07T14:20:00.655Z",
+  "generatedAt": "2026-10-11T12:46:12.996Z",
   "positions": {
     "hero": {
       "x": 80,
@@ -525,6 +525,58 @@
     "page_settings": {
       "x": 3450,
       "y": 2950
+    },
+    "via_promoter_share": {
+      "x": 1800,
+      "y": 1450
+    },
+    "api_via_routing": {
+      "x": 1800,
+      "y": 1600
+    },
+    "api_via_telemetry": {
+      "x": 1950,
+      "y": 1600
+    },
+    "api_deal_review": {
+      "x": 2300,
+      "y": 2750
+    },
+    "api_deal_dispute": {
+      "x": 2450,
+      "y": 2850
+    },
+    "sys_resident_passport": {
+      "x": 2300,
+      "y": 2900
+    },
+    "unit_detail_page": {
+      "x": 1650,
+      "y": 1950
+    },
+    "dashboard_inventory_unit": {
+      "x": 2750,
+      "y": 1950
+    },
+    "api_operator_units": {
+      "x": 2900,
+      "y": 2050
+    },
+    "community_signals_feed": {
+      "x": 650,
+      "y": 800
+    },
+    "api_community_signals": {
+      "x": 800,
+      "y": 900
+    },
+    "dashboard_open_gate": {
+      "x": 2750,
+      "y": 1650
+    },
+    "broker_profile_dynamic": {
+      "x": 1050,
+      "y": 2200
     }
   }
 }

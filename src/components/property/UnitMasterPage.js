@@ -16,8 +16,10 @@ import { CHILD_SPACE_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } 
 // Dynamically import heavy modals & widgets
 const FloodRiskBadge = dynamic(() => import("@/components/property/FloodRiskBadge"), { ssr: false });
 const UnitInquiryModal = dynamic(() => import("@/components/property/UnitInquiryModal"), { ssr: false });
+const PromoteModal = dynamic(() => import("@/components/property/PromoteModal"), { ssr: false });
 const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
-const PromoteModal = dynamic(() => import("./PromoteModal"), { ssr: false });
+import SemanticChip from "@/components/ui/SemanticChip";
+import { unitCategoryLabel, isStrCategory } from "@/lib/unitCategory";
 import {
   unitCapacity,
   scenarioCapacity,
@@ -484,6 +486,20 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             </div>
 
             <div className="panel-sidebar">
+              {unitCategoryLabel(unit.unit_category || unit.unitCategory || d.unit_category) && (
+                <SpecCard label="Unit Category" value={unitCategoryLabel(unit.unit_category || unit.unitCategory || d.unit_category)} />
+              )}
+              {isStrCategory(unit.unit_category || unit.unitCategory || d.unit_category) && (
+                <>
+                  {(d.nightly_rate || unit.price) && <SpecCard label="Nightly Rate" value={d.nightly_rate || unit.price} />}
+                  {d.weekend_rate && <SpecCard label="Weekend Rate" value={d.weekend_rate} />}
+                  {d.min_stay && <SpecCard label="Min Stay" value={`${d.min_stay} nights`} />}
+                  {d.check_in_time && <SpecCard label="Check-In" value={d.check_in_time} />}
+                  {d.check_out_time && <SpecCard label="Check-Out" value={d.check_out_time} />}
+                  {d.wifi_speed && <SpecCard label="WiFi" value={`${d.wifi_speed} Mbps`} />}
+                  {d.self_check_in_method && <SpecCard label="Access Method" value={d.self_check_in_method} />}
+                </>
+              )}
               <SpecCard label="Unit Size" value={unit.size ? `${unit.size} sqm` : null} />
               <SpecCard label="Floor" value={unit.floor ? `Level ${unit.floor}` : null} />
               <SpecCard label="Capacity" value={cap ? `${cap.estimated ? "~" : ""}${cap.value} seats${cap.estimated ? " (est.)" : ""}` : null} />
@@ -590,19 +606,28 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
                 <FloodRiskBadge floodRiskScore={property.flood_risk_score} floodZoneStatus={property.flood_zone_status} />
                 {property.details?.spatial_intel?.peza?.is_accredited && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--green)", background: "color-mix(in srgb, var(--green) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--green) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    🏢 PEZA Certified ({property.details.spatial_intel.peza.zone_name})
-                  </span>
+                  <SemanticChip
+                    label={`PEZA Certified · ${property.details.spatial_intel.peza.zone_name}`}
+                    detail="Designated Philippine Economic Zone Authority Special Economic Zone. Registered IT parks and ecozones offer statutory fiscal incentives including Income Tax Holidays (ITH) and 5% Gross Income Tax."
+                    statute="PEZA Law · RA 7916 Special Economic Zone Act"
+                    tone="emerald"
+                  />
                 )}
                 {property.details?.spatial_intel?.transit && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent-bright)", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    🚆 {property.details.spatial_intel.transit.walk_minutes}m walk ({property.details.spatial_intel.transit.station_name})
-                  </span>
+                  <SemanticChip
+                    label={`Transit · ${property.details.spatial_intel.transit.walk_minutes}m Walk to ${property.details.spatial_intel.transit.station_name}`}
+                    detail={`Pedestrian-accessible rapid transit corridor. Direct walking envelope to ${property.details.spatial_intel.transit.station_name} transit node.`}
+                    statute="DOTr Rail Transit Connectivity Envelope"
+                    tone="sapphire"
+                  />
                 )}
                 {property.details?.spatial_intel?.seismic && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", padding: "6px 12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    📐 Fault Buffer: {property.details.spatial_intel.seismic.status}
-                  </span>
+                  <SemanticChip
+                    label={`Fault Buffer · ${property.details.spatial_intel.seismic.status}`}
+                    detail="Seismic fault line distance verification grounded in the PHIVOLCS Valley Fault System (VFS) active atlas."
+                    statute="PHIVOLCS Active Faults Database"
+                    tone="amber"
+                  />
                 )}
               </div>
 

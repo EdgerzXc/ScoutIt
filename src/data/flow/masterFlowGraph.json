@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "b3ab118c6b274197f029f275a72a6b527a159e71",
+  "dataRevision": "4795283c1c2e57aa50d9511f2a8e715833350e1b",
   "lastVerifiedAt": "2026-09-11",
-  "generatedAt": "2026-10-07T14:20:00.655Z",
+  "generatedAt": "2026-10-11T12:46:12.996Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "b3ab118c6b274197f029f275a72a6b527a159e71"
+    "commitSha": "4795283c1c2e57aa50d9511f2a8e715833350e1b"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "b3ab118c6b274197f029f275a72a6b527a159e71"
+    "commitSha": "4795283c1c2e57aa50d9511f2a8e715833350e1b"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "b3ab118c6b274197f029f275a72a6b527a159e71"
+    "commitSha": "4795283c1c2e57aa50d9511f2a8e715833350e1b"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -227,15 +227,15 @@
     ]
   },
   "stats": {
-    "totalNodes": 131,
-    "totalEdges": 252,
-    "verifiedNodes": 97,
+    "totalNodes": 144,
+    "totalEdges": 281,
+    "verifiedNodes": 110,
     "partialNodes": 9,
     "plannedNodes": 25,
     "proposedNodes": 0
   },
   "productStats": {
-    "approved": 111,
+    "approved": 124,
     "planned": 5,
     "proposed": 15,
     "deprecated": 0
@@ -244,14 +244,14 @@
     "notStarted": 25,
     "partial": 9,
     "implemented": 0,
-    "verified": 97,
+    "verified": 110,
     "contradicted": 0
   },
   "evidenceStats": {
     "unverified": 17,
     "documented": 8,
     "codeGrounded": 81,
-    "testGrounded": 25,
+    "testGrounded": 38,
     "runtimeGrounded": 0
   },
   "releaseStats": {
@@ -259,7 +259,7 @@
     "deployedDisabled": 0,
     "privatePilot": 4,
     "limitedLive": 22,
-    "publicLive": 79,
+    "publicLive": 92,
     "rolledBack": 0
   },
   "nodes": [
@@ -2047,7 +2047,8 @@
       "children": [
         "intel_articles",
         "hubs",
-        "pep"
+        "pep",
+        "community_signals_feed"
       ],
       "actorRoles": [
         "visitor",
@@ -3958,7 +3959,8 @@
       ],
       "children": [
         "pep",
-        "dashboard_broker"
+        "dashboard_broker",
+        "broker_profile_dynamic"
       ],
       "actorRoles": [
         "visitor",
@@ -4917,7 +4919,11 @@
         "scenario_pii_erasure",
         "compare_specs_matrix",
         "sys_freshness_staleness_engine",
-        "rec_confirm_freshness_click"
+        "rec_confirm_freshness_click",
+        "pep_ch1_space",
+        "pep_ch3_life",
+        "pep_ch4_where_to",
+        "pep_ch5_build_plans"
       ],
       "children": [
         "pep_ch1_space",
@@ -4932,7 +4938,8 @@
         "pep_ch10_your_move",
         "scenario_churned_owner_escrow",
         "compare_specs_matrix",
-        "broker_field_briefing"
+        "broker_field_briefing",
+        "via_promoter_share"
       ],
       "actorRoles": [
         "visitor",
@@ -5100,7 +5107,10 @@
       "parents": [
         "pep"
       ],
-      "children": [],
+      "children": [
+        "pep_ch2_location",
+        "pep"
+      ],
       "actorRoles": [
         "visitor",
         "seeker",
@@ -5254,7 +5264,8 @@
       "lastVerifiedAt": "2026-08-19",
       "parents": [
         "pep",
-        "sys_noah_hazard_radar"
+        "sys_noah_hazard_radar",
+        "pep_ch1_space"
       ],
       "children": [
         "sys_noah_hazard_radar"
@@ -5410,7 +5421,10 @@
       "parents": [
         "pep"
       ],
-      "children": [],
+      "children": [
+        "pep_ch4_where_to",
+        "pep"
+      ],
       "actorRoles": [
         "visitor",
         "seeker",
@@ -5561,9 +5575,13 @@
       "version": "2.1.0",
       "lastVerifiedAt": "2026-08-19",
       "parents": [
+        "pep",
+        "pep_ch3_life"
+      ],
+      "children": [
+        "pep_ch5_build_plans",
         "pep"
       ],
-      "children": [],
       "actorRoles": [
         "visitor",
         "seeker",
@@ -5713,9 +5731,13 @@
       "version": "2.1.0",
       "lastVerifiedAt": "2026-08-19",
       "parents": [
+        "pep",
+        "pep_ch4_where_to"
+      ],
+      "children": [
+        "pep_ch6_fine_print",
         "pep"
       ],
-      "children": [],
       "actorRoles": [
         "visitor",
         "seeker",
@@ -5866,7 +5888,8 @@
       "lastVerifiedAt": "2026-08-19",
       "parents": [
         "pep",
-        "dec_tier_gate"
+        "dec_tier_gate",
+        "pep_ch5_build_plans"
       ],
       "children": [
         "gate_deep_intel_tier",
@@ -6326,7 +6349,8 @@
         "pep"
       ],
       "children": [
-        "scenario_broker_lead_collision"
+        "scenario_broker_lead_collision",
+        "unit_detail_page"
       ],
       "actorRoles": [
         "visitor",
@@ -7309,7 +7333,10 @@
         "rec_topup_connects",
         "compare_specs_matrix",
         "gate_auth",
-        "login"
+        "login",
+        "via_promoter_share",
+        "unit_detail_page",
+        "broker_profile_dynamic"
       ],
       "children": [
         "sys_connect_wallet",
@@ -7661,6 +7688,7 @@
       ],
       "children": [
         "gate_offer",
+        "deal_room",
         "deal_room"
       ],
       "actorRoles": [
@@ -11221,7 +11249,8 @@
         "ai_listing_engine",
         "rec_owner_manual_override",
         "rec_manual_approval_queue",
-        "sys_ephemeral_secret_engine"
+        "sys_ephemeral_secret_engine",
+        "dashboard_open_gate"
       ],
       "children": [
         "pep"
@@ -11974,7 +12003,8 @@
       "parents": [
         "login",
         "auth_onboarding_flow",
-        "wishlist"
+        "wishlist",
+        "sys_resident_passport"
       ],
       "children": [
         "comp_return_brief_buyer",
@@ -12304,7 +12334,9 @@
         "scenario_offmarket_pitch",
         "sys_monthly_scout_wrap",
         "sys_freshness_staleness_engine",
-        "action_owner_remove_broker"
+        "action_owner_remove_broker",
+        "dashboard_inventory_unit",
+        "dashboard_open_gate"
       ],
       "actorRoles": [
         "owner"
@@ -13207,6 +13239,9 @@
         "scenario_broker_lead_collision",
         "broker_field_briefing",
         "comp_return_brief_owner",
+        "offer_modal",
+        "api_via_routing",
+        "api_community_signals",
         "offer_modal"
       ],
       "children": [
@@ -13214,7 +13249,8 @@
         "sys_transaction_handshake",
         "terminal_deal_closed",
         "sys_zero_log_ai_crm",
-        "offer_modal"
+        "offer_modal",
+        "api_deal_review"
       ],
       "actorRoles": [
         "seeker",
@@ -21437,6 +21473,1500 @@
       "productStatus": "APPROVED",
       "evidenceStatus": "TEST_GROUNDED",
       "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "via_promoter_share",
+      "canonicalId": "broker.via_share",
+      "name": "VIA Priority Share Link & Concierge View",
+      "label": "VIA Priority Share Link & Concierge View",
+      "type": "PAGE",
+      "nodeType": "PAGE",
+      "domain": "broker",
+      "category": "architecture",
+      "route": "/property/[id]/via/[contactSlug]",
+      "layer": "metropolis",
+      "roles": [
+        "visitor",
+        "seeker",
+        "broker",
+        "owner",
+        "operator"
+      ],
+      "actorRoles": [
+        "visitor",
+        "seeker",
+        "broker",
+        "owner",
+        "operator"
+      ],
+      "visibility": [
+        "PUBLIC"
+      ],
+      "uiAudience": [
+        "PUBLIC",
+        "SEEKER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "PUBLIC"
+      ],
+      "securityClassification": "PUBLIC",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Dedicated dynamic landing view for verified promoter attribution links that routes visitor leads to Position Zero without modifying search ranking.",
+      "description": "Promoter-specific landing view establishing Position Zero concierge lead routing under A-186 and A-193. Sets 30-day attribution cookie and enforces canonical tag pointing to primary property slug.",
+      "actions": [
+        "Inspect Property Specifications",
+        "Trigger Position Zero Concierge Inquiry",
+        "Share Verified Promoter Link"
+      ],
+      "conditions": [
+        "Valid property slug and promoter contact slug"
+      ],
+      "systems": [
+        "src/app/property/[id]/via/[contactSlug]/page.js",
+        "src/lib/viaRouting.js"
+      ],
+      "components": [
+        "PositionZeroContactCard.js",
+        "ResidentialFlow.js"
+      ],
+      "apis": [
+        "/api/property/[id]/via",
+        "/api/property/[id]/via/telemetry"
+      ],
+      "dataRefs": [
+        "via_share_links",
+        "via_attributions"
+      ],
+      "database": "Supabase",
+      "auth": "public",
+      "exceptions": [
+        "Promoter representation revoked or expired"
+      ],
+      "recovery": [
+        "Gracefully falls back to algorithmic organic contacts without breaking user inquiry"
+      ],
+      "evidence": [
+        {
+          "kind": "ROUTE",
+          "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        },
+        {
+          "kind": "TEST",
+          "path": "src/lib/__tests__/viaRouting.test.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [
+        {
+          "id": "claim_via_priority_routing",
+          "text": "VIA priority link sets Position Zero concierge lead routing without altering global ranking.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "ROUTE",
+              "path": "src/app/property/[id]/via/[contactSlug]/page.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 1,
+          "machineVerifiedBy": "Vitest viaRouting.test.js",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Broker Experience & Lead Routing",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-186/A-193: Ingest verified VIA contact attribution and priority routing"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-186 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/VIA_CONTACT_ATTRIBUTION_AND_ROUTING.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "pep"
+      ],
+      "children": [
+        "api_via_routing",
+        "api_via_telemetry",
+        "inquiry_modal"
+      ]
+    },
+    {
+      "id": "api_via_routing",
+      "canonicalId": "broker.api_via_routing",
+      "name": "API: VIA Contact Lead Attribution Resolver",
+      "label": "API: VIA Contact Lead Attribution Resolver",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "broker",
+      "category": "architecture",
+      "route": "/api/property/[id]/via",
+      "layer": "metropolis",
+      "roles": [
+        "visitor",
+        "seeker",
+        "broker"
+      ],
+      "actorRoles": [
+        "visitor",
+        "seeker",
+        "broker"
+      ],
+      "visibility": [
+        "PUBLIC"
+      ],
+      "uiAudience": [
+        "PUBLIC",
+        "SEEKER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "ROLE_RESTRICTED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Resolves promoter attribution eligibility, sets 30-day HTTP-only tracking cookie, and logs immutable routing decision.",
+      "description": "Backend attribution endpoint validating promoter active representation and writing session attribution in Supabase.",
+      "actions": [
+        "Resolve Promoter Eligibility",
+        "Issue Attribution Cookie",
+        "Log Immutable Routing Decision"
+      ],
+      "conditions": [
+        "Request includes property ID and optional promoter slug"
+      ],
+      "systems": [
+        "src/app/api/property/[id]/via/route.js",
+        "src/lib/serverViaRouting.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/property/[id]/via"
+      ],
+      "dataRefs": [
+        "via_share_links",
+        "via_routing_decisions"
+      ],
+      "database": "Supabase",
+      "auth": "public",
+      "exceptions": [
+        "Invalid property ID or expired representation"
+      ],
+      "recovery": [
+        "Falls back to organic algorithmic ranking"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/property/[id]/via/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Broker Experience & Lead Routing",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-186: Ingest verified VIA routing resolver API"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-186 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/VIA_CONTACT_ATTRIBUTION_AND_ROUTING.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "via_promoter_share"
+      ],
+      "children": [
+        "deal_room"
+      ]
+    },
+    {
+      "id": "api_via_telemetry",
+      "canonicalId": "broker.api_via_telemetry",
+      "name": "API: VIA Qualified Engagement Telemetry",
+      "label": "API: VIA Qualified Engagement Telemetry",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "broker",
+      "category": "architecture",
+      "route": "/api/property/[id]/via/telemetry",
+      "layer": "metropolis",
+      "roles": [
+        "visitor",
+        "seeker"
+      ],
+      "actorRoles": [
+        "visitor",
+        "seeker"
+      ],
+      "visibility": [
+        "PUBLIC"
+      ],
+      "uiAudience": [
+        "PUBLIC"
+      ],
+      "knowledgeScope": [
+        "ROLE_RESTRICTED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Filters bot/crawler clicks and marks qualified visits (15s dwell time, 30% scroll depth) to compute genuine broker demand metrics.",
+      "description": "Telemetry ingestion API verifying human visitor interaction thresholds to prevent bot click fraud and referral stuffing.",
+      "actions": [
+        "Evaluate Anti-Abuse Rules",
+        "Check Dwell Time Threshold",
+        "Mark Attribution Qualified"
+      ],
+      "conditions": [
+        "Beacon payload contains dwell time and scroll metrics"
+      ],
+      "systems": [
+        "src/app/api/property/[id]/via/telemetry/route.js",
+        "src/lib/viaTelemetry.js"
+      ],
+      "components": [
+        "ViaTelemetryTracker"
+      ],
+      "apis": [
+        "/api/property/[id]/via/telemetry"
+      ],
+      "dataRefs": [
+        "via_attributions"
+      ],
+      "database": "Supabase",
+      "auth": "public",
+      "exceptions": [
+        "Bot user-agent or velocity spam detected"
+      ],
+      "recovery": [
+        "Silently ignores bot telemetry without affecting user experience"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/property/[id]/via/telemetry/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Broker Experience & Lead Routing",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-186: Ingest verified VIA telemetry API"
+      },
+      "guideability": "NONE",
+      "isTerminal": true,
+      "terminal": true,
+      "machineVerifiedBy": "A-186 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/VIA_CONTACT_ATTRIBUTION_AND_ROUTING.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "via_promoter_share"
+      ],
+      "children": []
+    },
+    {
+      "id": "api_deal_review",
+      "canonicalId": "deal.api_deal_review",
+      "name": "API: 14-Day Double-Blind Deal Review Engine",
+      "label": "API: 14-Day Double-Blind Deal Review Engine",
+      "type": "ACTION",
+      "nodeType": "ACTION",
+      "domain": "deal",
+      "category": "architecture",
+      "route": "/api/deals/[id]/review",
+      "layer": "metropolis",
+      "roles": [
+        "seeker",
+        "owner",
+        "broker"
+      ],
+      "actorRoles": [
+        "seeker",
+        "owner",
+        "broker"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "SEEKER",
+        "OWNER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "AUTHENTICATED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Manages simultaneous mutual review submissions with anti-retaliation lockdown; reviews unlock concurrently or after 14 days.",
+      "description": "Double-blind review submission endpoint preventing retaliatory feedback in completed deals. Both parties' ratings remain concealed until mutual submission.",
+      "actions": [
+        "Submit Deal Review",
+        "Verify Double-Blind Window",
+        "Unlock Mutual Review Disclosure"
+      ],
+      "conditions": [
+        "Caller is an authenticated participant of a completed deal"
+      ],
+      "systems": [
+        "src/app/api/deals/[id]/review/route.js",
+        "src/lib/scoring/doubleBlindReview.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/deals/[id]/review"
+      ],
+      "dataRefs": [
+        "user_behavioral_reviews",
+        "deals"
+      ],
+      "database": "Supabase",
+      "auth": "authenticated",
+      "exceptions": [
+        "Review window expired (>14 days) or unauthorized participant"
+      ],
+      "recovery": [
+        "Locks review submission and maintains existing score"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/deals/[id]/review/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": true,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Deal Room & Behavioral Scoring",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-182: Ingest double-blind deal review endpoint"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-182 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "deal_room"
+      ],
+      "children": [
+        "api_deal_dispute",
+        "sys_resident_passport"
+      ]
+    },
+    {
+      "id": "api_deal_dispute",
+      "canonicalId": "deal.api_deal_dispute",
+      "name": "API: Deal Review Dispute & Escrow Hold",
+      "label": "API: Deal Review Dispute & Escrow Hold",
+      "type": "ACTION",
+      "nodeType": "ACTION",
+      "domain": "deal",
+      "category": "architecture",
+      "route": "/api/deals/[id]/dispute",
+      "layer": "metropolis",
+      "roles": [
+        "seeker",
+        "owner",
+        "broker"
+      ],
+      "actorRoles": [
+        "seeker",
+        "owner",
+        "broker"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "SEEKER",
+        "OWNER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "AUTHENTICATED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Places contentious reviews into DISPUTED_HOLD, freezing public metrics until Trust & Safety staff arbitration.",
+      "description": "Dispute submission route allowing transaction parties to challenge bad-faith ratings with documented transaction evidence.",
+      "actions": [
+        "File Review Dispute",
+        "Freeze Behavioral Metric Updates",
+        "Escalate to Staff Review Queue"
+      ],
+      "conditions": [
+        "Dispute filed within 7 days of review disclosure"
+      ],
+      "systems": [
+        "src/app/api/deals/[id]/dispute/route.js",
+        "src/lib/scoring/doubleBlindReview.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/deals/[id]/dispute"
+      ],
+      "dataRefs": [
+        "user_behavioral_reviews"
+      ],
+      "database": "Supabase",
+      "auth": "authenticated",
+      "exceptions": [
+        "Frivolous dispute or expired window"
+      ],
+      "recovery": [
+        "Dismisses dispute and applies review to composite score"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/deals/[id]/dispute/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": true,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Deal Room & Behavioral Scoring",
+        "reviewer": null,
+        "riskLevel": "HIGH",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-182: Ingest deal dispute hold route"
+      },
+      "guideability": "NONE",
+      "isTerminal": true,
+      "terminal": true,
+      "machineVerifiedBy": "A-182 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "api_deal_review"
+      ],
+      "children": []
+    },
+    {
+      "id": "sys_resident_passport",
+      "canonicalId": "seeker.resident_passport",
+      "name": "System: Private Resident Passport Trust Engine",
+      "label": "System: Private Resident Passport Trust Engine",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "seeker",
+      "category": "architecture",
+      "route": "/api/user/resident-passport",
+      "layer": "metropolis",
+      "roles": [
+        "seeker"
+      ],
+      "actorRoles": [
+        "seeker"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "SEEKER"
+      ],
+      "knowledgeScope": [
+        "ROLE_RESTRICTED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Generates zero-knowledge 4-vector behavioral trust certifications for verified seekers under Philippine RA 10173.",
+      "description": "Computes 100-pt weighted behavioral score across payment punctuality, space care, communication, and lease covenants.",
+      "actions": [
+        "Compute 4-Vector Behavioral Score",
+        "Generate Private Resident Passport",
+        "Export Selective Disclosure Token"
+      ],
+      "conditions": [
+        "Authenticated seeker session with transaction history"
+      ],
+      "systems": [
+        "src/app/api/user/resident-passport/route.js",
+        "src/lib/scoring/residentPassport.js"
+      ],
+      "components": [
+        "ResidentPassportCard.js"
+      ],
+      "apis": [
+        "/api/user/resident-passport"
+      ],
+      "dataRefs": [
+        "user_behavioral_metrics"
+      ],
+      "database": "Supabase",
+      "auth": "authenticated",
+      "exceptions": [
+        "Zero transaction history"
+      ],
+      "recovery": [
+        "Applies Honest Blank Rule displaying unrated cold-start tier"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/user/resident-passport/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Seeker Identity & Trust Architecture",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-182: Ingest Resident Passport trust engine"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-182 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "api_deal_review"
+      ],
+      "children": [
+        "dashboard_buyer"
+      ]
+    },
+    {
+      "id": "unit_detail_page",
+      "canonicalId": "property.unit_detail",
+      "name": "Sub-Unit Space Profile & Floorplan View",
+      "label": "Sub-Unit Space Profile & Floorplan View",
+      "type": "PAGE",
+      "nodeType": "PAGE",
+      "domain": "property",
+      "category": "architecture",
+      "route": "/property/[id]/unit/[unitId]",
+      "layer": "metropolis",
+      "roles": [
+        "visitor",
+        "seeker"
+      ],
+      "actorRoles": [
+        "visitor",
+        "seeker"
+      ],
+      "visibility": [
+        "PUBLIC"
+      ],
+      "uiAudience": [
+        "PUBLIC",
+        "SEEKER"
+      ],
+      "knowledgeScope": [
+        "PUBLIC"
+      ],
+      "securityClassification": "PUBLIC",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Renders detailed architectural specifications and leasing parameters for an individual child unit inside a building.",
+      "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, and specific lease rate under A-154.",
+      "actions": [
+        "Inspect Unit Floorplan",
+        "Calculate Unit Affordability",
+        "Inquire on Specific Unit"
+      ],
+      "conditions": [
+        "Valid property ID and unit ID"
+      ],
+      "systems": [
+        "src/app/property/[id]/unit/[unitId]/page.js",
+        "src/components/unit/UnitMasterPage.js"
+      ],
+      "components": [
+        "UnitMasterPage.js"
+      ],
+      "apis": [
+        "/api/cms"
+      ],
+      "dataRefs": [
+        "property_units"
+      ],
+      "database": "Supabase",
+      "auth": "public",
+      "exceptions": [
+        "Unit unpublished or occupied"
+      ],
+      "recovery": [
+        "Renders building overview with alternative available units"
+      ],
+      "evidence": [
+        {
+          "kind": "ROUTE",
+          "path": "src/app/property/[id]/unit/[unitId]/page.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Property Pipeline Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-154: Ingest child unit profile page"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-154 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "pep_ch7_units"
+      ],
+      "children": [
+        "inquiry_modal"
+      ]
+    },
+    {
+      "id": "dashboard_inventory_unit",
+      "canonicalId": "owner.inventory_units",
+      "name": "Dashboard: Multi-Unit Hierarchy Manager",
+      "label": "Dashboard: Multi-Unit Hierarchy Manager",
+      "type": "PAGE",
+      "nodeType": "PAGE",
+      "domain": "owner",
+      "category": "architecture",
+      "route": "/dashboard/inventory/[id]",
+      "layer": "metropolis",
+      "roles": [
+        "owner",
+        "operator"
+      ],
+      "actorRoles": [
+        "owner",
+        "operator"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "OWNER",
+        "OPERATOR"
+      ],
+      "knowledgeScope": [
+        "ROLE_RESTRICTED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Owner cockpit to configure child unit floorplates, pricing schedules, and operational delegation to co-operators.",
+      "description": "Inventory manager enabling owners of multi-tenant buildings to create unit allocations, adjust availability, and invite operators.",
+      "actions": [
+        "Add Child Unit",
+        "Update Unit Lease Terms",
+        "Delegate to STR Operator"
+      ],
+      "conditions": [
+        "Caller owns the parent property listing"
+      ],
+      "systems": [
+        "src/app/dashboard/inventory/[id]/page.js"
+      ],
+      "components": [
+        "InventoryGridManager.js"
+      ],
+      "apis": [
+        "/api/dashboard/units",
+        "/api/dashboard/units/delegate"
+      ],
+      "dataRefs": [
+        "property_units"
+      ],
+      "database": "Supabase",
+      "auth": "owner",
+      "exceptions": [
+        "Ownership mismatch or invalid unit schema"
+      ],
+      "recovery": [
+        "Prompts owner to verify listing ownership in Dashboard"
+      ],
+      "evidence": [
+        {
+          "kind": "ROUTE",
+          "path": "src/app/dashboard/inventory/[id]/page.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": true,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Owner Experience & Inventory",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-154: Ingest unit inventory management dashboard"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-154 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "dashboard_owner"
+      ],
+      "children": [
+        "api_operator_units"
+      ]
+    },
+    {
+      "id": "api_operator_units",
+      "canonicalId": "operator.unit_management",
+      "name": "API: STR Operator Unit Delegation Engine",
+      "label": "API: STR Operator Unit Delegation Engine",
+      "type": "ACTION",
+      "nodeType": "ACTION",
+      "domain": "operator",
+      "category": "architecture",
+      "route": "/api/dashboard/operator/units",
+      "layer": "metropolis",
+      "roles": [
+        "owner",
+        "operator"
+      ],
+      "actorRoles": [
+        "owner",
+        "operator"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "OWNER",
+        "OPERATOR"
+      ],
+      "knowledgeScope": [
+        "ROLE_RESTRICTED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Enforces scoped unit operational authority for short-term rental (STR) co-operators under A-154.",
+      "description": "Backend delegation router validating operator rights to manage calendar availability, pricing, and guest inquiries for assigned units.",
+      "actions": [
+        "Validate Operator Scoped Rights",
+        "Sync Unit Calendar",
+        "Update STR Nightly Rates"
+      ],
+      "conditions": [
+        "Active operator assignment in property_units.operator_id"
+      ],
+      "systems": [
+        "src/app/api/dashboard/operator/units/route.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/dashboard/operator/units"
+      ],
+      "dataRefs": [
+        "property_units"
+      ],
+      "database": "Supabase",
+      "auth": "operator",
+      "exceptions": [
+        "Operator assignment revoked by owner"
+      ],
+      "recovery": [
+        "Revokes operator access and alerts owner in Dashboard"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/dashboard/operator/units/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": true,
+      "governance": {
+        "domainOwner": "Operator Ecosystem & Workspaces",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-154: Ingest operator unit delegation API"
+      },
+      "guideability": "NONE",
+      "isTerminal": true,
+      "terminal": true,
+      "machineVerifiedBy": "A-154 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "dashboard_inventory_unit"
+      ],
+      "children": []
+    },
+    {
+      "id": "community_signals_feed",
+      "canonicalId": "layer.community_signals",
+      "name": "Community Space Signals & Bounties Feed",
+      "label": "Community Space Signals & Bounties Feed",
+      "type": "PAGE",
+      "nodeType": "PAGE",
+      "domain": "layer",
+      "category": "architecture",
+      "route": "/community",
+      "layer": "stratosphere",
+      "roles": [
+        "visitor",
+        "seeker",
+        "broker"
+      ],
+      "actorRoles": [
+        "visitor",
+        "seeker",
+        "broker"
+      ],
+      "visibility": [
+        "PUBLIC"
+      ],
+      "uiAudience": [
+        "PUBLIC",
+        "SEEKER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "PUBLIC"
+      ],
+      "securityClassification": "PUBLIC",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Directory of user-submitted space demand signals and commercial tenant search bounties.",
+      "description": "Public feed where prospective tenants broadcast explicit space needs (location, square footage, budget) and accredited brokers connect.",
+      "actions": [
+        "Broadcast Space Signal",
+        "Browse Demand Bounties",
+        "Connect to Client Signal"
+      ],
+      "conditions": [
+        "Publicly viewable; broadcasting requires authenticated account"
+      ],
+      "systems": [
+        "src/app/community/page.js",
+        "src/lib/signalsData.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/community/signals"
+      ],
+      "dataRefs": [
+        "community_signals"
+      ],
+      "database": "Supabase",
+      "auth": "public",
+      "exceptions": [
+        "Signal closed by author or duplicate post"
+      ],
+      "recovery": [
+        "Marks signal as closed and prevents further connections"
+      ],
+      "evidence": [
+        {
+          "kind": "ROUTE",
+          "path": "src/app/community/page.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Stratosphere & Community Engagement",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-145: Ingest Stratosphere community signals page"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-145 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "stratosphere"
+      ],
+      "children": [
+        "api_community_signals"
+      ]
+    },
+    {
+      "id": "api_community_signals",
+      "canonicalId": "layer.api_community_signals",
+      "name": "API: Space Demand Signal Broadcasting & Connection",
+      "label": "API: Space Demand Signal Broadcasting & Connection",
+      "type": "ACTION",
+      "nodeType": "ACTION",
+      "domain": "layer",
+      "category": "architecture",
+      "route": "/api/community/signals",
+      "layer": "stratosphere",
+      "roles": [
+        "seeker",
+        "broker"
+      ],
+      "actorRoles": [
+        "seeker",
+        "broker"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "SEEKER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "AUTHENTICATED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Persists seeker space bounties and manages broker connection handshakes to claim client leads.",
+      "description": "Backend router validating broker connects balance and establishing private deal room upon connecting with signal creator.",
+      "actions": [
+        "Create Signal Post",
+        "Connect to Signal Lead",
+        "Close Signal"
+      ],
+      "conditions": [
+        "Caller has active authenticated session and required connects stake"
+      ],
+      "systems": [
+        "src/app/api/community/signals/route.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/community/signals"
+      ],
+      "dataRefs": [
+        "community_signals",
+        "deals"
+      ],
+      "database": "Supabase",
+      "auth": "authenticated",
+      "exceptions": [
+        "Insufficient connects balance or closed signal"
+      ],
+      "recovery": [
+        "Prompts broker to top up connects wallet"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/community/signals/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Stratosphere & Community Engagement",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-145: Ingest community signals API"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-145 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "community_signals_feed"
+      ],
+      "children": [
+        "deal_room"
+      ]
+    },
+    {
+      "id": "dashboard_open_gate",
+      "canonicalId": "owner.open_gate",
+      "name": "Dashboard: Open Gate Listing Authority Portal",
+      "label": "Dashboard: Open Gate Listing Authority Portal",
+      "type": "PAGE",
+      "nodeType": "PAGE",
+      "domain": "owner",
+      "category": "architecture",
+      "route": "/dashboard/open-gate",
+      "layer": "metropolis",
+      "roles": [
+        "owner"
+      ],
+      "actorRoles": [
+        "owner"
+      ],
+      "visibility": [
+        "AUTHENTICATED"
+      ],
+      "uiAudience": [
+        "AUTHENTICATED",
+        "OWNER"
+      ],
+      "knowledgeScope": [
+        "ROLE_RESTRICTED"
+      ],
+      "securityClassification": "CONFIDENTIAL",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Enables owner direct legal attestation to publish manual and CSV listings immediately without staff review.",
+      "description": "Authority portal enforcing Philippine real estate legal compliance statements before triggering the Airtable sync bridge under A-130.",
+      "actions": [
+        "Complete Owner Legal Attestation",
+        "Verify Listing Data Ownership",
+        "Trigger Immediate Publication"
+      ],
+      "conditions": [
+        "Caller is authenticated owner of a draft listing"
+      ],
+      "systems": [
+        "src/app/dashboard/open-gate/page.js",
+        "src/app/api/dashboard/open-gate/route.js"
+      ],
+      "components": [],
+      "apis": [
+        "/api/dashboard/open-gate",
+        "/api/dashboard/publish"
+      ],
+      "dataRefs": [
+        "properties"
+      ],
+      "database": "Supabase",
+      "auth": "owner",
+      "exceptions": [
+        "Owner attestation checkbox unchecked"
+      ],
+      "recovery": [
+        "Blocks publication until statutory compliance attested"
+      ],
+      "evidence": [
+        {
+          "kind": "ROUTE",
+          "path": "src/app/dashboard/open-gate/page.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": true,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Owner Operations & Compliance",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-130: Ingest Open Gate owner publication authority"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "A-130 Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "dashboard_owner"
+      ],
+      "children": [
+        "api_publish_listing"
+      ]
+    },
+    {
+      "id": "broker_profile_dynamic",
+      "canonicalId": "broker.dynamic_profile",
+      "name": "Accredited Professional Portfolio & RESA Dossier",
+      "label": "Accredited Professional Portfolio & RESA Dossier",
+      "type": "PAGE",
+      "nodeType": "PAGE",
+      "domain": "broker",
+      "category": "architecture",
+      "route": "/brokers/[broker-slug]",
+      "layer": "metropolis",
+      "roles": [
+        "visitor",
+        "seeker",
+        "broker"
+      ],
+      "actorRoles": [
+        "visitor",
+        "seeker",
+        "broker"
+      ],
+      "visibility": [
+        "PUBLIC"
+      ],
+      "uiAudience": [
+        "PUBLIC",
+        "SEEKER",
+        "BROKER"
+      ],
+      "knowledgeScope": [
+        "PUBLIC"
+      ],
+      "securityClassification": "PUBLIC",
+      "productStatus": "APPROVED",
+      "implementationStatus": "VERIFIED",
+      "evidenceStatus": "TEST_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE",
+      "purpose": "Public profile displaying verified PRC RESAD license credentials, listing representations, and direct contact options.",
+      "description": "Dynamic professional showcase rendering accredited broker transactions, specializations, verified trust badges, and direct inquiry CTA.",
+      "actions": [
+        "Inspect PRC License Status",
+        "Browse Broker Listing Portfolio",
+        "Initiate Direct Contact Request"
+      ],
+      "conditions": [
+        "Valid broker slug with active profile"
+      ],
+      "systems": [
+        "src/app/brokers/[broker-slug]/page.js"
+      ],
+      "components": [
+        "BrokerPanel.js"
+      ],
+      "apis": [
+        "/api/cms",
+        "/api/broker/dossier"
+      ],
+      "dataRefs": [
+        "Service_Providers",
+        "user_profiles"
+      ],
+      "database": "Airtable",
+      "auth": "public",
+      "exceptions": [
+        "PRC license expired or broker inactive"
+      ],
+      "recovery": [
+        "Displays license expiration notice and hides contact CTA"
+      ],
+      "evidence": [
+        {
+          "kind": "ROUTE",
+          "path": "src/app/brokers/[broker-slug]/page.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        }
+      ],
+      "claims": [],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Broker Ecosystem & Compliance",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "A-023: Ingest dynamic broker profile view"
+      },
+      "guideability": "NONE",
+      "isTerminal": false,
+      "terminal": false,
+      "machineVerifiedBy": "Vitest Suite",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "brainRefs": [
+        "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      ],
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-10-11",
+      "parents": [
+        "brokers_roster"
+      ],
+      "children": [
+        "inquiry_modal"
+      ]
     }
   ],
   "edges": [
@@ -35937,6 +37467,364 @@
         "Representation ended; the broker's conversations about the property closed"
       ],
       "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_pep_to_via_promoter_share",
+      "source": "pep",
+      "target": "via_promoter_share",
+      "type": "NAVIGATE",
+      "label": "PEP -> VIA Priority Share Link",
+      "trigger": "Promoter Generates & Visits Unique Attribution Link",
+      "conditions": [
+        "Listing published and promoter has verified relationship"
+      ],
+      "quality": "DOMAIN_DECISION",
+      "predicate": {
+        "field": "promoter.relationship",
+        "operator": "in",
+        "value": [
+          "owner",
+          "broker",
+          "operator"
+        ],
+        "quality": "DOMAIN_DECISION"
+      }
+    },
+    {
+      "id": "e_via_promoter_share_to_api_via_routing",
+      "source": "via_promoter_share",
+      "target": "api_via_routing",
+      "type": "SYSTEM",
+      "label": "VIA Page -> API: VIA Attribution",
+      "trigger": "Page Bootstrap Resolves Promoter & Issues Cookie",
+      "conditions": [
+        "Promoter slug active in database"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_via_promoter_share_to_api_via_telemetry",
+      "source": "via_promoter_share",
+      "target": "api_via_telemetry",
+      "type": "SYSTEM",
+      "label": "VIA Page -> API: Telemetry Tracker",
+      "trigger": "Visitor Dwells >=15s and Scrolls >=30%",
+      "conditions": [
+        "Non-bot user agent"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_via_promoter_share_to_inquiry_modal",
+      "source": "via_promoter_share",
+      "target": "inquiry_modal",
+      "type": "ACTION",
+      "label": "VIA Page -> Inquiry Modal",
+      "trigger": "Visitor Clicks Position Zero Concierge Inquiry",
+      "conditions": [
+        "Visitor intends to inquire with attributed promoter"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_api_via_routing_to_deal_room",
+      "source": "api_via_routing",
+      "target": "deal_room",
+      "type": "SUCCESS",
+      "label": "VIA Attribution -> Deal Room",
+      "trigger": "Deal Initiated with Attributed Promoter Priority",
+      "conditions": [
+        "Attribution cookie valid and lead captured"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_deal_room_to_api_deal_review",
+      "source": "deal_room",
+      "target": "api_deal_review",
+      "type": "ACTION",
+      "label": "Deal Room -> Double-Blind Review Engine",
+      "trigger": "Transaction Completed Entering 14-Day Review Window",
+      "conditions": [
+        "Deal status is CLOSED"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_api_deal_review_to_api_deal_dispute",
+      "source": "api_deal_review",
+      "target": "api_deal_dispute",
+      "type": "FAILURE",
+      "label": "Review Engine -> Review Dispute Hold",
+      "trigger": "Party Files Review Dispute within 7-Day Window",
+      "conditions": [
+        "Dispute filed with transaction proof"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_api_deal_review_to_sys_resident_passport",
+      "source": "api_deal_review",
+      "target": "sys_resident_passport",
+      "type": "SUCCESS",
+      "label": "Review Engine -> Resident Passport",
+      "trigger": "Reviews Unlocked Concurrently or 14-Day Window Cleared",
+      "conditions": [
+        "Review verified and applied to composite score"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_sys_resident_passport_to_dashboard_buyer",
+      "source": "sys_resident_passport",
+      "target": "dashboard_buyer",
+      "type": "NAVIGATE",
+      "label": "Resident Passport -> Buyer Dashboard",
+      "trigger": "Updated Trust Certification Displayed in Passport HUD",
+      "conditions": [
+        "Authenticated seeker session"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_pep_ch7_units_to_unit_detail_page",
+      "source": "pep_ch7_units",
+      "target": "unit_detail_page",
+      "type": "NAVIGATE",
+      "label": "Chapter 07 Units -> Unit Detail Page",
+      "trigger": "Seeker Selects Specific Child Unit",
+      "conditions": [
+        "Child unit published"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_unit_detail_page_to_inquiry_modal",
+      "source": "unit_detail_page",
+      "target": "inquiry_modal",
+      "type": "ACTION",
+      "label": "Unit Page -> Inquiry Modal",
+      "trigger": "Seeker Inquires on Specific Unit",
+      "conditions": [
+        "Unit available for lease"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_dashboard_owner_to_dashboard_inventory_unit",
+      "source": "dashboard_owner",
+      "target": "dashboard_inventory_unit",
+      "type": "NAVIGATE",
+      "label": "Owner Dashboard -> Unit Inventory Manager",
+      "trigger": "Owner Manages Building Subdivisions",
+      "conditions": [
+        "Owner owns property"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_dashboard_inventory_unit_to_api_operator_units",
+      "source": "dashboard_inventory_unit",
+      "target": "api_operator_units",
+      "type": "SUBMIT",
+      "label": "Inventory Manager -> API: Operator Delegation",
+      "trigger": "Owner Assigns Operations to STR Co-Operator",
+      "conditions": [
+        "Operator user ID confirmed"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_stratosphere_to_community_signals_feed",
+      "source": "stratosphere",
+      "target": "community_signals_feed",
+      "type": "NAVIGATE",
+      "label": "Stratosphere -> Community Signals Feed",
+      "trigger": "Visitor Explores Space Bounties in Stratosphere",
+      "conditions": [
+        "Public access"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_community_signals_feed_to_api_community_signals",
+      "source": "community_signals_feed",
+      "target": "api_community_signals",
+      "type": "ACTION",
+      "label": "Signals Feed -> API: Signal Connection",
+      "trigger": "Seeker Broadcasts Need or Broker Claims Bounty",
+      "conditions": [
+        "Authenticated session"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_api_community_signals_to_deal_room",
+      "source": "api_community_signals",
+      "target": "deal_room",
+      "type": "SUCCESS",
+      "label": "Signal Connection -> Deal Room",
+      "trigger": "Broker Connects with Signal Creator",
+      "conditions": [
+        "Connects stake deducted"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_dashboard_owner_to_dashboard_open_gate",
+      "source": "dashboard_owner",
+      "target": "dashboard_open_gate",
+      "type": "NAVIGATE",
+      "label": "Owner Dashboard -> Open Gate Portal",
+      "trigger": "Owner Opens Open Gate Publication Cockpit",
+      "conditions": [
+        "Listing in draft state"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_dashboard_open_gate_to_api_publish_listing",
+      "source": "dashboard_open_gate",
+      "target": "api_publish_listing",
+      "type": "SUBMIT",
+      "label": "Open Gate -> Publish Listing Bridge",
+      "trigger": "Owner Completes Statutory Attestation",
+      "conditions": [
+        "Attestation completed"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_brokers_roster_to_broker_profile_dynamic",
+      "source": "brokers_roster",
+      "target": "broker_profile_dynamic",
+      "type": "NAVIGATE",
+      "label": "Brokers Directory -> Dynamic Broker Profile",
+      "trigger": "Visitor Selects Accredited Broker",
+      "conditions": [
+        "Broker profile active"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_broker_profile_dynamic_to_inquiry_modal",
+      "source": "broker_profile_dynamic",
+      "target": "inquiry_modal",
+      "type": "ACTION",
+      "label": "Broker Profile -> Direct Inquiry",
+      "trigger": "Visitor Contacts Broker from Portfolio",
+      "conditions": [
+        "Inquiry form submitted"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_offer_modal_to_deal_room",
+      "source": "offer_modal",
+      "target": "deal_room",
+      "type": "SUCCESS",
+      "label": "Offer Modal -> Deal Room",
+      "trigger": "Commercial LOI Offer Submitted",
+      "conditions": [
+        "Terms accepted and submitted"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_pep_ch1_space_to_pep_ch2_location",
+      "source": "pep_ch1_space",
+      "target": "pep_ch2_location",
+      "type": "NAVIGATE",
+      "label": "Chapter 01 -> Chapter 02 Location",
+      "trigger": "Sequential Chapter Progression",
+      "conditions": [
+        "User advances walkthrough"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch1_space_to_pep",
+      "source": "pep_ch1_space",
+      "target": "pep",
+      "type": "NAVIGATE",
+      "label": "Chapter 01 -> Chapter Index",
+      "trigger": "Return to Space Index",
+      "conditions": [
+        "User closes chapter view"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch3_life_to_pep_ch4_where_to",
+      "source": "pep_ch3_life",
+      "target": "pep_ch4_where_to",
+      "type": "NAVIGATE",
+      "label": "Chapter 03 -> Chapter 04 Where To",
+      "trigger": "Sequential Chapter Progression",
+      "conditions": [
+        "User advances walkthrough"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch3_life_to_pep",
+      "source": "pep_ch3_life",
+      "target": "pep",
+      "type": "NAVIGATE",
+      "label": "Chapter 03 -> Chapter Index",
+      "trigger": "Return to Space Index",
+      "conditions": [
+        "User closes chapter view"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch4_where_to_to_pep_ch5_build_plans",
+      "source": "pep_ch4_where_to",
+      "target": "pep_ch5_build_plans",
+      "type": "NAVIGATE",
+      "label": "Chapter 04 -> Chapter 05 Build Plans",
+      "trigger": "Sequential Chapter Progression",
+      "conditions": [
+        "User advances walkthrough"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch4_where_to_to_pep",
+      "source": "pep_ch4_where_to",
+      "target": "pep",
+      "type": "NAVIGATE",
+      "label": "Chapter 04 -> Chapter Index",
+      "trigger": "Return to Space Index",
+      "conditions": [
+        "User closes chapter view"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch5_build_plans_to_pep_ch6_fine_print",
+      "source": "pep_ch5_build_plans",
+      "target": "pep_ch6_fine_print",
+      "type": "NAVIGATE",
+      "label": "Chapter 05 -> Chapter 06 Fine Print",
+      "trigger": "Sequential Chapter Progression",
+      "conditions": [
+        "User advances walkthrough"
+      ],
+      "quality": "GENERIC_NAVIGATION"
+    },
+    {
+      "id": "e_pep_ch5_build_plans_to_pep",
+      "source": "pep_ch5_build_plans",
+      "target": "pep",
+      "type": "NAVIGATE",
+      "label": "Chapter 05 -> Chapter Index",
+      "trigger": "Return to Space Index",
+      "conditions": [
+        "User closes chapter view"
+      ],
+      "quality": "GENERIC_NAVIGATION"
     }
   ]
 }

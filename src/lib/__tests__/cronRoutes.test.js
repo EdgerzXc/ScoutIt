@@ -90,6 +90,9 @@ describe("configured Vercel cron routes", () => {
       // Disarmed 2026-08-06: it fabricated PSE disclosures attributed to real
       // listed companies. It must stay unscheduled until it reads real sources.
       "osint-scraper",
+      // On-demand & staff-triggered autonomous intel generator bot (POST) (A-195).
+      // Triggered on-demand via staff session or worker to manage LLM quota.
+      "intel-agent",
     ]);
 
     const cronDir = resolve(process.cwd(), "src/app/api/cron");

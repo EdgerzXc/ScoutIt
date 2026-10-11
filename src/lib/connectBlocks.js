@@ -70,3 +70,76 @@ export async function anyBlockedStrict(admin, senderId, recipientIds = []) {
     return { ok: false, blocked: false };
   }
 }
+
+/**
+ * Add a block entry for blockerId -> blockedId.
+ * Idempotent: upsert on (blocker_id, blocked_id).
+ */
+export async function addBlock(supabaseAdmin, blockerId, blockedId) {
+  if (!supabaseAdmin || !blockerId || !blockedId) return { ok: false, error: "Missing required parameters" };
+  if (blockerId === blockedId) return { ok: false, error: "Cannot block yourself" };
+  try {
+    const { error } = await supabaseAdmin
+      .from("connect_blocks")
+      .upsert({ blocker_id: blockerId, blocked_id: blockedId }, { onConflict: "blocker_id,blocked_id" });
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err?.message || "Failed to block user" };
+  }
+}
+
+/**
+ * Remove a block entry for blockerId -> blockedId.
+ */
+export async function removeBlock(supabaseAdmin, blockerId, blockedId) {
+  if (!supabaseAdmin || !blockerId || !blockedId) return { ok: false, error: "Missing required parameters" };
+  try {
+    const { error } = await supabaseAdmin
+      .from("connect_blocks")
+      .delete()
+      .eq("blocker_id", blockerId)
+      .eq("blocked_id", blockedId);
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err?.message || "Failed to unblock user" };
+  }
+}
+
+/**
+ * List all users blocked by blockerId, enriched with profile metadata.
+ */
+export async function listBlocks(supabaseAdmin, blockerId) {
+  if (!supabaseAdmin || !blockerId) return [];
+  try {
+    const { data: blocks, error } = await supabaseAdmin
+      .from("connect_blocks")
+      .select("blocked_id, created_at")
+      .eq("blocker_id", blockerId)
+      .order("created_at", { ascending: false });
+    if (error || !Array.isArray(blocks)) return [];
+    if (blocks.length === 0) return [];
+
+    const blockedIds = blocks.map((b) => b.blocked_id);
+    const { data: profiles } = await supabaseAdmin
+      .from("user_profiles")
+      .select("id, display_name, headline")
+      .in("id", blockedIds);
+
+    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+    return blocks.map((b) => ({
+      blocked_id: b.blocked_id,
+      created_at: b.created_at,
+      display_name: profileMap.get(b.blocked_id)?.display_name || "Anonymous Member",
+      headline: profileMap.get(b.blocked_id)?.headline || null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
