@@ -391,7 +391,7 @@ async function main() {
   console.log(`Chunks                    : ${totalChunks}`);
   console.log(`Missing an updated: date  : ${undated.length}`);
   if (HAS_EMBEDDING_KEY) {
-    console.log(`Embedding                 : ${EMBED_MODEL}`);
+    console.log("Embedding                 : ACTIVE (gemini-embedding-001)");
   } else {
     console.log("Embedding                 : NONE (keyword-only)");
   }
