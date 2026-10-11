@@ -40,7 +40,7 @@
     "jspdf": "^4.2.1",
     "lucide-react": "^1.18.0",
     "maplibre-gl": "6.11.2",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "papaparse": "^5.5.4",
     "pmtiles": "^4.4.1",
     "react": "19.2.4",
@@ -59,13 +59,16 @@
     "@vitest/ui": "^4.1.11",
     "autoprefixer": "^10.5.0",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "16.3.8",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",
     "vitest": "^4.1.11"
   },
   "overrides": {
-    "postcss": "^8.5.15"
+    "postcss": "^8.5.15",
+    "sharp": "^0.35.5",
+    "source-map-js": "^1.2.2",
+    "postcss-selector-parser": "^7.1.6"
   }
 }

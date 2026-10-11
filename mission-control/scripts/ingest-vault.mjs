@@ -390,7 +390,11 @@ async function main() {
   console.log(`Vault documents to ingest : ${docs.length}`);
   console.log(`Chunks                    : ${totalChunks}`);
   console.log(`Missing an updated: date  : ${undated.length}`);
-  console.log(`Embedding                 : ${HAS_EMBEDDING_KEY ? EMBED_MODEL : "NONE (keyword-only)"}`);
+  if (HAS_EMBEDDING_KEY) {
+    console.log(`Embedding                 : ${EMBED_MODEL}`);
+  } else {
+    console.log("Embedding                 : NONE (keyword-only)");
+  }
   if (undated.length) {
     console.log("\nUndated - these cite as date unknown, never as fresh:");
     for (const d of undated.slice(0, 20)) console.log(`  ${d.relPath}`);

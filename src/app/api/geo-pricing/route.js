@@ -43,14 +43,37 @@ const CATEGORY_PRICE_FIELD = Object.freeze({
 });
 
 /**
+ * Resolves comparable price statically without dynamic method invocation (CodeQL alert 42).
+ */
+function getComparablePrice(categoryKey, p) {
+  if (!p || typeof p !== 'object') return null;
+  switch (categoryKey) {
+    case 'residential':
+      return p.cat?.residential?.price;
+    case 'commercial':
+      return p.cat?.commercial?.rentFrom ?? p.cat?.commercial?.rentPerSqm;
+    case 'str':
+      return p.cat?.str?.nightlyRate;
+    case 'hospitality':
+      return p.listed_price;
+    case 'restaurants':
+      return p.cat?.restaurant?.rent;
+    case 'venues':
+      return p.cat?.venue?.rentalRate;
+    default:
+      return null;
+  }
+}
+
+/**
  * @param {unknown} category
- * @returns {{ key: string, priceField: Function } | null} null when unknown
+ * @returns {{ key: string } | null} null when unknown
  */
 function resolveCategory(category) {
   if (typeof category !== 'string') return null;
   const key = category.trim().toLowerCase();
   if (!Object.prototype.hasOwnProperty.call(CATEGORY_PRICE_FIELD, key)) return null;
-  return { key, priceField: CATEGORY_PRICE_FIELD[key] };
+  return { key };
 }
 
 const COMP_RADIUS_KM = 1.5;
@@ -88,7 +111,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    const { priceField } = resolved;
 
     const targetPrice = parseFloat(price);
     if (!Number.isFinite(targetPrice) || targetPrice <= 0) {
@@ -135,7 +157,7 @@ export async function POST(request) {
       // Do not treat a city-centroid fallback as an address-level comparable.
       const compLat = property.latitude;
       const compLon = property.longitude;
-      const compPrice = Number.parseFloat(priceField(property));
+      const compPrice = Number.parseFloat(getComparablePrice(resolved.key, property));
 
       if (compLat && compLon && Number.isFinite(compPrice) && compPrice > 0) {
         const dist = distanceKm(lat, lon, compLat, compLon);
