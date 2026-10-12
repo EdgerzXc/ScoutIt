@@ -39,7 +39,7 @@
     }
   },
   "PROPERTY_LISTING": {
-    "totalNodes": 17,
+    "totalNodes": 18,
     "happyPathCoverage": {
       "numerator": 4,
       "denominator": 4,
@@ -53,9 +53,9 @@
       "formula": "mapped expected failures / total expected failures"
     },
     "recoveryCoverage": {
-      "numerator": 0,
+      "numerator": 1,
       "denominator": 1,
-      "percentage": "0%",
+      "percentage": "100%",
       "formula": "mapped failures with valid recovery or terminal resolution / mapped failures"
     },
     "guideCoverage": {

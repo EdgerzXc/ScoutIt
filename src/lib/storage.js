@@ -1,21 +1,31 @@
 import { supabase } from "./supabaseClient";
 
-// 10MB for documents/images, 50MB for videos
+// 10MB for documents/images/audio, 50MB for videos
 const MAX_SIZES = {
   'image/jpeg': 10 * 1024 * 1024,
   'image/png': 10 * 1024 * 1024,
+  'image/webp': 10 * 1024 * 1024,
   'application/pdf': 10 * 1024 * 1024,
   'video/mp4': 50 * 1024 * 1024,
+  'audio/webm': 10 * 1024 * 1024,
+  'audio/mp4': 10 * 1024 * 1024,
+  'audio/ogg': 10 * 1024 * 1024,
+  'audio/mpeg': 10 * 1024 * 1024,
+  'audio/wav': 10 * 1024 * 1024,
+  'audio/x-m4a': 10 * 1024 * 1024,
+  'audio/aac': 10 * 1024 * 1024,
 };
 
-export const uploadAttachment = async (dealId, file) => {
+export const uploadAttachment = async (dealId, file, extraMeta = {}) => {
   // 1. Client-side MIME Type Validation (Defense in Depth)
-  if (!MAX_SIZES[file.type]) {
-    throw new Error("Invalid file type. Only JPG, PNG, PDF, and MP4 are allowed.");
+  // Clean MIME type to remove codec parameters, e.g. "audio/webm;codecs=opus" -> "audio/webm"
+  const baseType = (file.type || '').split(';')[0].trim().toLowerCase();
+  if (!MAX_SIZES[baseType]) {
+    throw new Error("Invalid file type. Only JPG, PNG, WEBP, PDF, MP4, and Audio files are allowed.");
   }
 
   // 2. Client-side Size Validation
-  const maxSize = MAX_SIZES[file.type];
+  const maxSize = MAX_SIZES[baseType];
   if (file.size > maxSize) {
     throw new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB for this file type.`);
   }
@@ -52,17 +62,20 @@ export const uploadAttachment = async (dealId, file) => {
     path: filePath,
     url: urlData.signedUrl,
     name: file.name,
-    type: file.type,
-    size: file.size
+    type: baseType || file.type,
+    size: file.size,
+    isVoiceNote: Boolean(extraMeta.isVoiceNote || baseType.startsWith('audio/')),
+    duration: extraMeta.duration || null,
   };
 };
 
 export const uploadPropertyPhoto = async (file) => {
   // Client-side Validation
-  if (!MAX_SIZES[file.type]) {
-    throw new Error("Invalid file type. Only JPG, PNG, PDF, and MP4 are allowed.");
+  const baseType = (file.type || '').split(';')[0].trim().toLowerCase();
+  if (!MAX_SIZES[baseType]) {
+    throw new Error("Invalid file type. Only JPG, PNG, WEBP, PDF, MP4, and Audio files are allowed.");
   }
-  const maxSize = MAX_SIZES[file.type];
+  const maxSize = MAX_SIZES[baseType];
   if (file.size > maxSize) {
     throw new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB for this file type.`);
   }

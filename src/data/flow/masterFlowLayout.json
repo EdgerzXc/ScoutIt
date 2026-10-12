@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "generatedAt": "2026-10-11T12:46:12.996Z",
+  "generatedAt": "2026-10-12T05:38:46.359Z",
   "positions": {
     "hero": {
       "x": 80,
@@ -577,6 +577,10 @@
     "broker_profile_dynamic": {
       "x": 1050,
       "y": 2200
+    },
+    "direct_call_modal": {
+      "x": 1850,
+      "y": 2050
     }
   }
 }

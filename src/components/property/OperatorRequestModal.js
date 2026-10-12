@@ -42,7 +42,7 @@ const formVariants = {
   exit: { opacity: 0 }
 };
 
-export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, propertySlug }) {
+export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, propertySlug, unitId = null, unitName = null }) {
   const reduceMotion = useReducedMotion();
   const [status, setStatus] = useState("composing"); // composing, submitting, success, error
   const [errorMsg, setErrorMsg] = useState("");
@@ -73,14 +73,19 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
       const token = session?.access_token;
       if (!token) {
         setStatus("error");
-        setErrorMsg("Please log in to request to operate this building.");
+        setErrorMsg("Please log in to request to operate " + (unitName ? `this unit.` : `this building.`));
         return;
       }
 
       const res = await fetch("/api/deals/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ propertySlug, message, role: "operator" }),
+        body: JSON.stringify({
+          propertySlug,
+          message,
+          role: "operator",
+          unitId: unitId || undefined,
+        }),
       });
       const data = await res.json();
 
@@ -160,8 +165,16 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                     </div>
                     <h3 className="font-serif text-2xl text-white font-normal">Request Sent</h3>
                     <p className="text-sm text-text-secondary leading-relaxed max-w-sm">
-                      The owner of <strong className="text-white font-medium">{propertyTitle}</strong> can now review your request and choose which
-                      units to hand over for you to operate.
+                      {unitName ? (
+                        <>
+                          The management of <strong className="text-white font-medium">{propertyTitle}</strong> can now review your application to operate <strong className="text-white font-medium">{unitName}</strong>.
+                        </>
+                      ) : (
+                        <>
+                          The owner of <strong className="text-white font-medium">{propertyTitle}</strong> can now review your request and choose which
+                          units to hand over for you to operate.
+                        </>
+                      )}
                     </p>
                   </motion.div>
                 ) : (
@@ -176,10 +189,22 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                       <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-2">
                         1 Connect Required
                       </span>
-                      <h2 className="font-serif text-[28px] text-text-primary font-normal mb-1.5">Request to Operate This Building</h2>
+                      <h2 className="font-serif text-[28px] text-text-primary font-normal mb-1.5">
+                        {unitName ? `Operate ${unitName}` : "Request to Operate This Building"}
+                      </h2>
                       <p className="text-sm text-text-secondary leading-relaxed">
-                        Ask the owner of <strong className="text-white font-medium">{propertyTitle}</strong> about operating specific units here.
-                        They will review your request and pick which units, if any, to delegate to you.
+                        {unitName ? (
+                          <>
+                            Apply to the owner or management of <strong className="text-white font-medium">{propertyTitle}</strong> to operate{" "}
+                            <strong className="text-white font-medium">{unitName}</strong> (commercial, restaurant, retail, or flex space).
+                            They will review your credentials and delegate this space to your operations team.
+                          </>
+                        ) : (
+                          <>
+                            Ask the owner of <strong className="text-white font-medium">{propertyTitle}</strong> about operating specific units here.
+                            They will review your request and pick which units, if any, to delegate to you.
+                          </>
+                        )}
                       </p>
                     </div>
 
@@ -188,7 +213,11 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
                         label="First Message"
                         name="message"
                         required
-                        placeholder="Hi, we operate co-working spaces in this area and would like to discuss managing units in this building."
+                        placeholder={
+                          unitName
+                            ? `Hi, we operate businesses in this category and would like to manage/operate ${unitName} in ${propertyTitle}. Here are our operational details...`
+                            : "Hi, we operate commercial/retail/food spaces and would like to discuss managing units in this building."
+                        }
                       />
 
                       {status === "error" && (

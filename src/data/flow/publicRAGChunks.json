@@ -6034,11 +6034,14 @@
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
     "purpose": "Renders detailed architectural specifications and leasing parameters for an individual child unit inside a building.",
-    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, and specific lease rate under A-154.",
+    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, commercial operator hotline, and specific lease rate under A-154 and A-198.",
     "available_actions": [
       "Inspect Unit Floorplan",
       "Calculate Unit Affordability",
-      "Inquire on Specific Unit"
+      "Inquire on Specific Unit",
+      "Call Delegated Commercial Operator Hotline",
+      "Fallback to Missed Call Callback Inquiry after 18s",
+      "Apply to Operate Commercial Unit Space"
     ],
     "entry_conditions": [
       "Valid property ID and unit ID"
@@ -6058,8 +6061,8 @@
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "rec_property.unit_detail",
@@ -6096,8 +6099,8 @@
     ],
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "fact_layer.community_signals",
@@ -6284,6 +6287,98 @@
     "graphVersion": "2.2.0",
     "last_verified_at": "2026-10-11",
     "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_property.unit.direct_call",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "property.unit.direct_call",
+    "canonicalId": "property.unit.direct_call",
+    "title": "Direct Operator Hotline & Ringing Interface",
+    "domain": "property",
+    "layer": "metropolis",
+    "route": "/property/[id]/unit/[unitId]",
+    "roles": [
+      "visitor",
+      "seeker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Provides immediate direct hotline dialing to delegated commercial unit operators with Web Audio ringing feedback and 18-second unanswered fallback under A-198.",
+    "description": "Web Audio synthesized ringing interface for reaching space operators directly. Automatically falls back to missed call callback inquiry routing after 18 seconds of unacknowledged ringing.",
+    "available_actions": [
+      "Initiate Web Audio Ringing Tone",
+      "Mute or Unmute Call Audio",
+      "Terminate Hotline Call",
+      "Transition to Unanswered Missed Call State",
+      "Redirect to Callback Inquiry Form"
+    ],
+    "entry_conditions": [
+      "Delegated commercial operator has public hotline configured"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
+  },
+  {
+    "chunk_id": "rec_property.unit.direct_call",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "property.unit.direct_call",
+    "canonicalId": "property.unit.direct_call",
+    "title": "Recovery Protocol: Direct Operator Hotline & Ringing Interface",
+    "domain": "property",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Operator hotline busy or unanswered after 18 seconds"
+    ],
+    "recovery_mechanisms": [
+      "Displays unanswered fallback card offering immediate callback note dispatch via InquiryModal"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "PRODUCT_BEHAVIOR",
+        "provenance": "SCOUTIT_PRODUCT_GRAPH",
+        "confidence": 1
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "edge_e_hero_to_orbit_7",

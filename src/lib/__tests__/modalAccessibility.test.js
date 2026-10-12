@@ -27,6 +27,7 @@ const MODALS = [
   "src/components/calendar/EventEditorModal.js",
   "src/components/calendar/ViewingDetailModal.js",
   "src/components/profile/ProfileContactModal.js",
+  "src/components/property/DirectCallModal.js",
 ];
 
 describe("A-153 — modal keyboard contract", () => {

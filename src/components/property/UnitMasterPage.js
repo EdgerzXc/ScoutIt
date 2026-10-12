@@ -16,8 +16,11 @@ import { CHILD_SPACE_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } 
 // Dynamically import heavy modals & widgets
 const FloodRiskBadge = dynamic(() => import("@/components/property/FloodRiskBadge"), { ssr: false });
 const UnitInquiryModal = dynamic(() => import("@/components/property/UnitInquiryModal"), { ssr: false });
+const DirectCallModal = dynamic(() => import("@/components/property/DirectCallModal"), { ssr: false });
+const OperatorRequestModal = dynamic(() => import("@/components/property/OperatorRequestModal"), { ssr: false });
 const PromoteModal = dynamic(() => import("@/components/property/PromoteModal"), { ssr: false });
 const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
+import { Phone } from "lucide-react";
 import SemanticChip from "@/components/ui/SemanticChip";
 import { unitCategoryLabel, isStrCategory } from "@/lib/unitCategory";
 import {
@@ -74,6 +77,8 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   const [property, setProperty] = useState(seeded);
   const [loading, setLoading] = useState(!seeded);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
   const [isPromoteOpen, setIsPromoteOpen] = useState(false);
   const [inquiryPrefill, setInquiryPrefill] = useState("");
   const [unlockedVault, setUnlockedVault] = useState(false);
@@ -691,6 +696,64 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                 Contact {operatorName ? "This Operator" : "The Owner"} →
               </button>
 
+              {operatorName ? (
+                <button
+                  type="button"
+                  onClick={() => setIsCallModalOpen(true)}
+                  style={{
+                    marginTop: "10px",
+                    maxWidth: "400px",
+                    width: "100%",
+                    background: "rgba(var(--accent-rgb), 0.08)",
+                    border: "0.5px solid var(--accent)",
+                    color: "var(--accent-bright)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    fontWeight: "bold",
+                    padding: "12px 16px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    boxShadow: "0 0 10px rgba(var(--accent-rgb),0.12)"
+                  }}
+                  className="hover:bg-gold-accent hover:text-background transition-colors"
+                >
+                  <Phone size={14} /> Call Operator Hotline
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsOperatorRequestOpen(true)}
+                  style={{
+                    marginTop: "10px",
+                    maxWidth: "400px",
+                    width: "100%",
+                    background: "transparent",
+                    border: "0.5px solid var(--border)",
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "12px 16px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px"
+                  }}
+                  className="hover:border-gold-accent hover:text-gold-accent transition-colors"
+                >
+                  <span>🏢</span> Apply to Operate This Space →
+                </button>
+              )}
+
               <button
                 onClick={() => setIsPromoteOpen(true)}
                 style={{
@@ -734,6 +797,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
       </div>{/* /page */}
 
       <UnitInquiryModal
+        key={inquiryPrefill || "default"}
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
         propertyTitle={property.title}
@@ -742,6 +806,27 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         unitName={unitDisplayName}
         operatorDisplayName={operatorName}
         prefillMessage={inquiryPrefill}
+      />
+
+      <DirectCallModal
+        isOpen={isCallModalOpen}
+        onClose={() => setIsCallModalOpen(false)}
+        operatorDisplayName={operatorName}
+        unitName={unitDisplayName}
+        propertyTitle={property.title}
+        onLeaveMessage={() => {
+          setIsCallModalOpen(false);
+          openInquiry(`[Missed Call] I attempted to reach your branch hotline for ${unitDisplayName} at ${property.title}. Please contact me back regarding this space.`);
+        }}
+      />
+
+      <OperatorRequestModal
+        isOpen={isOperatorRequestOpen}
+        onClose={() => setIsOperatorRequestOpen(false)}
+        propertyTitle={property.title}
+        propertySlug={property.slug}
+        unitId={unit.id}
+        unitName={unitDisplayName}
       />
 
       <PromoteModal

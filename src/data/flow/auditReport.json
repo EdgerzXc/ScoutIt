@@ -117,7 +117,8 @@
     "rec_sso_idp_reauth",
     "sys_ephemeral_secret_engine",
     "exc_ephemeral_token_expired",
-    "rec_silent_token_refresh"
+    "rec_silent_token_refresh",
+    "direct_call_modal"
   ],
   "staleEvidenceItems": [],
   "stateMachineTransitions": {
@@ -221,6 +222,7 @@
       "/api/crm/tasks",
       "/api/crm/tasks/[id]",
       "/api/cron/check-stale-listings",
+      "/api/cron/intel-agent",
       "/api/cron/osint-scraper",
       "/api/cron/purge-chat-messages",
       "/api/cron/purge-contact-messages",
@@ -293,6 +295,7 @@
       "/api/spatial/status",
       "/api/storage/upload",
       "/api/telemetry/device",
+      "/api/user/blocks",
       "/api/user/delete-account",
       "/api/user/plan",
       "/api/user/privacy-settings",
@@ -363,7 +366,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 188,
+    "totalCodebaseRoutesDiscovered": 190,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],
@@ -384,6 +387,7 @@
       "src/components/dashboard/OwnerMode.js",
       "src/components/dashboard/PropertySectionEditor.js",
       "src/components/dashboard/ProviderMode.js",
+      "src/components/dashboard/VoiceNotePlayer.js",
       "src/components/dashboard/crm/AppointmentsSheet.js",
       "src/components/descent/BlackHoleCanvas.js",
       "src/components/layout/Header.js",
@@ -392,9 +396,11 @@
       "src/components/property/ClaimPropertyPanel.js",
       "src/components/property/CommercialFlow.js",
       "src/components/property/ComparisonMatrix.js",
+      "src/components/property/DirectCallModal.js",
       "src/components/property/FloodHeatmapMap.js",
       "src/components/property/InquiryModal.js",
       "src/components/property/InteractiveMap.js",
+      "src/components/property/OperatorRequestModal.js",
       "src/components/property/PropertyFAQSection.js",
       "src/components/property/ResidentialFlow.js",
       "src/components/property/SpatialCommandMap.js",
@@ -457,21 +463,21 @@
     "staleReleasedGraphOnlyRoutes": [
       "/lib/aiListingEngine.js"
     ],
-    "verifiedCodeEvidenceCount": 110,
+    "verifiedCodeEvidenceCount": 111,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
     "schemaValidityScore": {
-      "numerator": 144,
-      "denominator": 144,
+      "numerator": 145,
+      "denominator": 145,
       "percentage": "100%",
       "formula": "schema-valid nodes / total nodes",
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 110,
-      "denominator": 144,
-      "percentage": "76%",
+      "numerator": 111,
+      "denominator": 145,
+      "percentage": "77%",
       "formula": "verified nodes with existing grounded code evidence / total nodes",
       "failingItems": [
         "sys_velocity_radar",
@@ -532,8 +538,8 @@
       "failingItems": []
     },
     "ragSafetyScore": {
-      "numerator": 196,
-      "denominator": 196,
+      "numerator": 198,
+      "denominator": 198,
       "percentage": "100%",
       "formula": "public chunks passing access and content sanitization checks / total public chunks",
       "failingItems": []
@@ -546,21 +552,21 @@
       "failingItems": []
     },
     "recoveryCoverageScore": {
-      "numerator": 14,
+      "numerator": 15,
       "denominator": 22,
-      "percentage": "64%",
+      "percentage": "68%",
       "formula": "mapped failures with recovery or terminal resolution / total mapped failures",
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 110,
-      "denominator": 110,
+      "numerator": 111,
+      "denominator": 111,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
-      "percentage": "94.0%",
+      "percentage": "94.3%",
       "formula": "weighted sum: (evidence * 0.25) + (canonical-route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
@@ -570,5 +576,5 @@
       "failingItems": []
     }
   },
-  "auditScore": "94.0% TRUST GROUNDED"
+  "auditScore": "94.3% TRUST GROUNDED"
 }

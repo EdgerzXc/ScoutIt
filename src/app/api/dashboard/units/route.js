@@ -22,7 +22,10 @@ const unitSchema = z.object({
   image: z.string().max(2000).optional().default(""),
   price: z.union([z.string(), z.number()]).optional(),
   availabilityStatus: z.enum(["available", "occupied", "coming_soon"]).nullable().optional(),
-  unitCategory: z.enum(["residential_lease", "residential_sale", "str", "commercial_flex"]).nullable().optional(),
+  unitCategory: z.enum([
+    "residential_lease", "residential_sale", "str", "commercial_flex",
+    "fastfood", "restaurant", "cafe", "retail", "kiosk", "services", "entertainment"
+  ]).nullable().optional(),
   listingPurpose: z.enum(["lease", "sale", "short_stay", "flex"]).nullable().optional(),
   // Unit Master Page rich fields (co-working detail) + the subdivision
   // scenarios that power the "This space flexes" toggle. Free-form jsonb —

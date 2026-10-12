@@ -7145,7 +7145,8 @@ export const MASTER_FLOW_NODES = [
       "login",
       "via_promoter_share",
       "unit_detail_page",
-      "broker_profile_dynamic"
+      "broker_profile_dynamic",
+      "direct_call_modal"
     ],
     "children": [
       "sys_connect_wallet",
@@ -13032,10 +13033,13 @@ export const MASTER_FLOW_NODES = [
       "deal"
     ],
     "implementationStatus": "VERIFIED",
-    "purpose": "Private inquiry workspace for chat, viewing coordination, and current deal status.",
-    "description": "Authenticated parties communicate and coordinate appointments here. Structured offer negotiation remains planned.",
+    "purpose": "Private inquiry workspace for chat, voice memos, viewing coordination, and current deal status.",
+    "description": "Authenticated parties communicate, record 60-second Opus voice memos, upload attachments, and coordinate appointments here. Zero-bloat JSON envelope pointer architecture preserves PostgreSQL health.",
     "actions": [
       "Exchange in-app chat messages",
+      "Record and dispatch 60-second Opus voice memos",
+      "Play voice notes with scrubbable speed-controlled player",
+      "Upload and review deal room attachments (PDFs, images, videos, audio)",
       "Coordinate viewing appointments",
       "Review current inquiry status",
       "Complete the existing two-sided handshake when eligible"
@@ -13045,10 +13049,13 @@ export const MASTER_FLOW_NODES = [
     ],
     "systems": [
       "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/VoiceNotePlayer.js",
+      "src/lib/storage.js",
       "src/components/dashboard/crm/AppointmentsSheet.js"
     ],
     "components": [
       "ChatBox.js",
+      "VoiceNotePlayer.js",
       "AppointmentsSheet.js"
     ],
     "apis": [
@@ -13059,7 +13066,7 @@ export const MASTER_FLOW_NODES = [
       "/api/deals/handshake"
     ],
     "dataRefs": [
-      "Supabase deals, messages, viewing_schedules"
+      "Supabase deals, messages, viewing_schedules, chat_attachments storage bucket"
     ],
     "database": "Supabase deals, messages, viewing_schedules",
     "auth": "seeker",
@@ -13076,14 +13083,22 @@ export const MASTER_FLOW_NODES = [
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/VoiceNotePlayer.js",
+        "symbol": "VoiceNotePlayer",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "COMPONENT",
@@ -13097,6 +13112,7 @@ export const MASTER_FLOW_NODES = [
     "brainRefs": [
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_EXPERIENCES.md",
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/DEAL_ROOM_VOICE_MEMOS_AND_ZERO_BLOAT_STORAGE.md",
       "_SCOUTIT_BRAIN/00_LOGIC_HIERARCHY.md"
     ],
     "terminal": false,
@@ -22209,24 +22225,33 @@ export const MASTER_FLOW_NODES = [
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
     "purpose": "Renders detailed architectural specifications and leasing parameters for an individual child unit inside a building.",
-    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, and specific lease rate under A-154.",
+    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, commercial operator hotline, and specific lease rate under A-154 and A-198.",
     "actions": [
       "Inspect Unit Floorplan",
       "Calculate Unit Affordability",
-      "Inquire on Specific Unit"
+      "Inquire on Specific Unit",
+      "Call Delegated Commercial Operator Hotline",
+      "Fallback to Missed Call Callback Inquiry after 18s",
+      "Apply to Operate Commercial Unit Space"
     ],
     "conditions": [
       "Valid property ID and unit ID"
     ],
     "systems": [
       "src/app/property/[id]/unit/[unitId]/page.js",
-      "src/components/unit/UnitMasterPage.js"
+      "src/components/unit/UnitMasterPage.js",
+      "src/components/property/DirectCallModal.js",
+      "src/components/property/OperatorRequestModal.js",
+      "src/app/api/dashboard/units/delegate/route.js"
     ],
     "components": [
-      "UnitMasterPage.js"
+      "UnitMasterPage.js",
+      "DirectCallModal.js",
+      "OperatorRequestModal.js"
     ],
     "apis": [
-      "/api/cms"
+      "/api/cms",
+      "/api/dashboard/units/delegate"
     ],
     "dataRefs": [
       "property_units"
@@ -22246,6 +22271,22 @@ export const MASTER_FLOW_NODES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/OperatorRequestModal.js",
+        "symbol": "OperatorRequestModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "claims": [],
@@ -22263,29 +22304,31 @@ export const MASTER_FLOW_NODES = [
       "validFrom": null,
       "reviewAfter": null,
       "deprecatedBy": null,
-      "changeReason": "A-154: Ingest child unit profile page"
+      "changeReason": "A-154/A-198: Child unit profile with commercial operator delegation & hotlines"
     },
     "guideability": "NONE",
     "isTerminal": false,
     "terminal": false,
-    "machineVerifiedBy": "A-154 Vitest Suite",
+    "machineVerifiedBy": "Vitest Suite",
     "humanReviewedBy": null,
     "machineVerificationStatus": "VERIFIED",
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "brainRefs": [
-      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md"
     ],
     "version": "2.2.0",
-    "lastVerifiedAt": "2026-10-11",
+    "lastVerifiedAt": "2026-10-12",
     "x": 1650,
     "y": 1950,
     "parents": [
       "pep_ch7_units"
     ],
     "children": [
-      "inquiry_modal"
+      "inquiry_modal",
+      "direct_call_modal"
     ]
   },
   {
@@ -22406,8 +22449,8 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "api_operator_units",
     "canonicalId": "operator.unit_management",
-    "name": "API: STR Operator Unit Delegation Engine",
-    "label": "API: STR Operator Unit Delegation Engine",
+    "name": "API: Commercial & Tenant Unit Operator Delegation Engine",
+    "label": "API: Commercial & Tenant Unit Operator Delegation Engine",
     "type": "ACTION",
     "nodeType": "ACTION",
     "domain": "operator",
@@ -22438,25 +22481,31 @@ export const MASTER_FLOW_NODES = [
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Enforces scoped unit operational authority for short-term rental (STR) co-operators under A-154.",
-    "description": "Backend delegation router validating operator rights to manage calendar availability, pricing, and guest inquiries for assigned units.",
+    "purpose": "Enforces commercial tenant delegation and operational authority for units inside malls, towers, and multi-unit complexes under A-154 and A-198.",
+    "description": "Backend delegation router validating operator rights to manage tenant branding, commercial category, hotlines, calendar availability, and inquiries for assigned units.",
     "actions": [
       "Validate Operator Scoped Rights",
+      "Approve or Reject Unit Operator Delegation Requests",
+      "Retrieve Inbound Unit Operator Applications",
+      "Support Commercial Tenant Categories (F&B, Retail, Kiosk)",
       "Sync Unit Calendar",
       "Update STR Nightly Rates"
     ],
     "conditions": [
-      "Active operator assignment in property_units.operator_id"
+      "Active operator assignment in property_units.operator_id or pending delegation request in unit_operator_requests"
     ],
     "systems": [
-      "src/app/api/dashboard/operator/units/route.js"
+      "src/app/api/dashboard/operator/units/route.js",
+      "src/app/api/dashboard/units/delegate/route.js"
     ],
     "components": [],
     "apis": [
-      "/api/dashboard/operator/units"
+      "/api/dashboard/operator/units",
+      "/api/dashboard/units/delegate"
     ],
     "dataRefs": [
-      "property_units"
+      "property_units",
+      "unit_operator_requests"
     ],
     "database": "Supabase",
     "auth": "operator",
@@ -22473,6 +22522,13 @@ export const MASTER_FLOW_NODES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/units/delegate/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "claims": [],
@@ -22490,22 +22546,23 @@ export const MASTER_FLOW_NODES = [
       "validFrom": null,
       "reviewAfter": null,
       "deprecatedBy": null,
-      "changeReason": "A-154: Ingest operator unit delegation API"
+      "changeReason": "A-154/A-198: Commercial tenant & operator delegation API engine"
     },
     "guideability": "NONE",
     "isTerminal": true,
     "terminal": true,
-    "machineVerifiedBy": "A-154 Vitest Suite",
+    "machineVerifiedBy": "Vitest Suite",
     "humanReviewedBy": null,
     "machineVerificationStatus": "VERIFIED",
     "approvedAt": null,
     "productReviewStatus": "RESEARCHED",
     "securityReviewStatus": "RESEARCHED",
     "brainRefs": [
-      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md",
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md"
     ],
     "version": "2.2.0",
-    "lastVerifiedAt": "2026-10-11",
+    "lastVerifiedAt": "2026-10-12",
     "x": 2900,
     "y": 2050,
     "parents": [
@@ -22965,6 +23022,132 @@ export const MASTER_FLOW_NODES = [
     "y": 2200,
     "parents": [
       "brokers_roster"
+    ],
+    "children": [
+      "inquiry_modal"
+    ]
+  },
+  {
+    "id": "direct_call_modal",
+    "canonicalId": "property.unit.direct_call",
+    "name": "Direct Operator Hotline & Ringing Interface",
+    "label": "Direct Operator Hotline & Ringing Interface",
+    "type": "ACTION",
+    "nodeType": "ACTION",
+    "domain": "property",
+    "category": "architecture",
+    "route": "/property/[id]/unit/[unitId]",
+    "layer": "metropolis",
+    "roles": [
+      "visitor",
+      "seeker"
+    ],
+    "actorRoles": [
+      "visitor",
+      "seeker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "uiAudience": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "knowledgeScope": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Provides immediate direct hotline dialing to delegated commercial unit operators with Web Audio ringing feedback and 18-second unanswered fallback under A-198.",
+    "description": "Web Audio synthesized ringing interface for reaching space operators directly. Automatically falls back to missed call callback inquiry routing after 18 seconds of unacknowledged ringing.",
+    "actions": [
+      "Initiate Web Audio Ringing Tone",
+      "Mute or Unmute Call Audio",
+      "Terminate Hotline Call",
+      "Transition to Unanswered Missed Call State",
+      "Redirect to Callback Inquiry Form"
+    ],
+    "conditions": [
+      "Delegated commercial operator has public hotline configured"
+    ],
+    "systems": [
+      "src/components/property/DirectCallModal.js",
+      "src/components/property/InquiryModal.js"
+    ],
+    "components": [
+      "DirectCallModal.js",
+      "InquiryModal.js"
+    ],
+    "apis": [
+      "/api/deals/initiate"
+    ],
+    "dataRefs": [
+      "property_units"
+    ],
+    "database": "Supabase",
+    "auth": "public",
+    "exceptions": [
+      "Operator hotline busy or unanswered after 18 seconds"
+    ],
+    "recovery": [
+      "Displays unanswered fallback card offering immediate callback note dispatch via InquiryModal"
+    ],
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      }
+    ],
+    "claims": [],
+    "legalReviewStatus": "RESEARCHED",
+    "requiredCapabilities": [],
+    "resourceRelationship": [],
+    "ownershipRequirement": false,
+    "dealParticipationRequired": false,
+    "representationRequired": false,
+    "governance": {
+      "domainOwner": "Property Pipeline Engineering",
+      "reviewer": null,
+      "riskLevel": "STANDARD",
+      "approvedAt": null,
+      "validFrom": null,
+      "reviewAfter": null,
+      "deprecatedBy": null,
+      "changeReason": "A-198: Direct hotline modal with Web Audio ringing and 18s fallback"
+    },
+    "guideability": "NONE",
+    "isTerminal": false,
+    "terminal": false,
+    "machineVerifiedBy": "Vitest Suite",
+    "humanReviewedBy": null,
+    "machineVerificationStatus": "VERIFIED",
+    "approvedAt": null,
+    "productReviewStatus": "RESEARCHED",
+    "securityReviewStatus": "RESEARCHED",
+    "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md"
+    ],
+    "version": "2.2.0",
+    "lastVerifiedAt": "2026-10-12",
+    "x": 1850,
+    "y": 2050,
+    "parents": [
+      "unit_detail_page"
     ],
     "children": [
       "inquiry_modal"
@@ -37828,5 +38011,29 @@ export const MASTER_FLOW_EDGES = [
       "User closes chapter view"
     ],
     "quality": "GENERIC_NAVIGATION"
+  },
+  {
+    "id": "e_unit_detail_page_to_direct_call_modal",
+    "source": "unit_detail_page",
+    "target": "direct_call_modal",
+    "type": "ACTION",
+    "label": "Unit Detail Page -> Direct Operator Hotline Modal",
+    "trigger": "Seeker Clicks Call Operator Hotline",
+    "conditions": [
+      "Unit has delegated operator with active hotline"
+    ],
+    "quality": "DOMAIN_DECISION"
+  },
+  {
+    "id": "e_direct_call_modal_to_inquiry_modal",
+    "source": "direct_call_modal",
+    "target": "inquiry_modal",
+    "type": "RECOVERY",
+    "label": "Direct Call Modal -> Inquiry Modal Fallback",
+    "trigger": "Call Unanswered After 18 Seconds or User Selects Leave Note",
+    "conditions": [
+      "Call unanswered timeout or direct note request"
+    ],
+    "quality": "DOMAIN_DECISION"
   }
 ];

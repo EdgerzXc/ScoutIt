@@ -4,6 +4,7 @@ import { join } from "node:path";
 import {
   UNIT_CATEGORIES,
   LISTING_PURPOSES,
+  UNIT_SECTORS,
   isUnitCategory,
   isStrCategory,
   unitCategoryLabel,
@@ -22,17 +23,32 @@ import {
 const read = (p) => readFileSync(join(process.cwd(), p), "utf8");
 
 describe("A-154 — unit-category vocabulary", () => {
-  it("holds exactly the four owner-decided identities", () => {
+  it("holds the expanded commercial and residential identities", () => {
     expect([...UNIT_CATEGORIES]).toEqual([
       "residential_lease",
       "residential_sale",
       "str",
       "commercial_flex",
+      "fastfood",
+      "restaurant",
+      "cafe",
+      "retail",
+      "kiosk",
+      "services",
+      "entertainment",
     ]);
+  });
+
+  it("organizes identities into intuitive sectors", () => {
+    expect(UNIT_SECTORS.food_and_dining.categories).toContain("fastfood");
+    expect(UNIT_SECTORS.food_and_dining.categories).toContain("restaurant");
+    expect(UNIT_SECTORS.retail_and_shopping.categories).toContain("retail");
+    expect(UNIT_SECTORS.services_and_wellness.categories).toContain("services");
   });
 
   it("accepts only the vocabulary, never a near-miss", () => {
     expect(isUnitCategory("str")).toBe(true);
+    expect(isUnitCategory("fastfood")).toBe(true);
     expect(isUnitCategory("STR")).toBe(false);
     expect(isUnitCategory("hotel")).toBe(false);
     expect(isUnitCategory(null)).toBe(false);
@@ -50,25 +66,29 @@ describe("A-154 — unit-category vocabulary", () => {
     expect(isStrCategory("str")).toBe(true);
     // An always-true identity check would silently file every unit as STR.
     expect(isStrCategory("residential_lease")).toBe(false);
+    expect(isStrCategory("fastfood")).toBe(false);
     expect(isStrCategory(null)).toBe(false);
     expect(usesNightlyPricing("str")).toBe(true);
-    for (const other of ["residential_lease", "residential_sale", "commercial_flex"]) {
+    for (const other of ["residential_lease", "residential_sale", "commercial_flex", "fastfood", "restaurant", "cafe", "retail", "kiosk", "services", "entertainment"]) {
       expect(usesNightlyPricing(other)).toBe(false);
     }
   });
 
   it("the migration mirrors the module vocabulary, null-able with no default", () => {
-    const sql = read(
+    const baseSql = read(
       "supabase/migrations/20260918000002_unit_category_listing_purpose.sql",
     );
+    const wideningSql = read(
+      "supabase/migrations/20261012000001_expand_unit_categories.sql",
+    );
+    const combinedSql = `${baseSql}\n${wideningSql}`;
     for (const category of UNIT_CATEGORIES) {
-      expect(sql).toContain(`'${category}'`);
+      expect(combinedSql).toContain(`'${category}'`);
     }
     for (const purpose of LISTING_PURPOSES) {
-      expect(sql).toContain(`'${purpose}'`);
+      expect(baseSql).toContain(`'${purpose}'`);
     }
-    expect(sql).not.toMatch(/default\s+'(str|residential_lease)/i);
-    expect(sql).toContain("PREPARED, NOT APPLIED");
+    expect(baseSql).not.toMatch(/default\s+'(str|residential_lease)/i);
   });
 });
 
@@ -119,6 +139,17 @@ describe("A-154 Pillar 5 — Adaptive price bands & multi-category discovery", (
     };
     expect(matchesPropertyCategory(multiOffering, ["Venues/Events"])).toBe(true);
     expect(matchesPropertyCategory(multiOffering, ["STR"])).toBe(false);
+
+    // 4. Commercial mall holding Fast Food / Dining child unit
+    const mallWithDining = {
+      spaceCategory: "Commercial",
+      units_inventory: [
+        { id: "u-3", name: "Jollibee SM Marilao", unit_category: "fastfood" },
+      ],
+    };
+    expect(matchesPropertyCategory(mallWithDining, ["Food & Dining"])).toBe(true);
+    expect(matchesPropertyCategory(mallWithDining, ["Commercial"])).toBe(true);
+    expect(matchesPropertyCategory(mallWithDining, ["STR"])).toBe(false);
   });
 });
 

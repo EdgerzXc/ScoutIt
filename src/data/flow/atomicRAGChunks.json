@@ -17022,10 +17022,13 @@
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "CODE_GROUNDED",
     "releaseStatus": "LIMITED_LIVE",
-    "purpose": "Private inquiry workspace for chat, viewing coordination, and current deal status.",
-    "description": "Authenticated parties communicate and coordinate appointments here. Structured offer negotiation remains planned.",
+    "purpose": "Private inquiry workspace for chat, voice memos, viewing coordination, and current deal status.",
+    "description": "Authenticated parties communicate, record 60-second Opus voice memos, upload attachments, and coordinate appointments here. Zero-bloat JSON envelope pointer architecture preserves PostgreSQL health.",
     "available_actions": [
       "Exchange in-app chat messages",
+      "Record and dispatch 60-second Opus voice memos",
+      "Play voice notes with scrubbable speed-controlled player",
+      "Upload and review deal room attachments (PDFs, images, videos, audio)",
       "Coordinate viewing appointments",
       "Review current inquiry status",
       "Complete the existing two-sided handshake when eligible"
@@ -17042,14 +17045,22 @@
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/VoiceNotePlayer.js",
+        "symbol": "VoiceNotePlayer",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "COMPONENT",
@@ -17130,14 +17141,22 @@
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/VoiceNotePlayer.js",
+        "symbol": "VoiceNotePlayer",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "COMPONENT",
@@ -17184,14 +17203,22 @@
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/VoiceNotePlayer.js",
+        "symbol": "VoiceNotePlayer",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "COMPONENT",
@@ -17227,10 +17254,13 @@
     "securityClassification": "INTERNAL",
     "systems": [
       "src/components/dashboard/ChatBox.js",
+      "src/components/dashboard/VoiceNotePlayer.js",
+      "src/lib/storage.js",
       "src/components/dashboard/crm/AppointmentsSheet.js"
     ],
     "components": [
       "ChatBox.js",
+      "VoiceNotePlayer.js",
       "AppointmentsSheet.js"
     ],
     "apis": [
@@ -17248,14 +17278,22 @@
         "symbol": "ChatBox",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/dashboard/VoiceNotePlayer.js",
+        "symbol": "VoiceNotePlayer",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "API",
         "path": "src/app/api/deals/[id]/messages/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "c856cf8b17bbe3c5519437ba7ac000240d018cf2"
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       },
       {
         "kind": "COMPONENT",
@@ -28424,11 +28462,14 @@
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
     "purpose": "Renders detailed architectural specifications and leasing parameters for an individual child unit inside a building.",
-    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, and specific lease rate under A-154.",
+    "description": "Granular space briefing displaying unit floor area, fit-out status, floor level, commercial operator hotline, and specific lease rate under A-154 and A-198.",
     "available_actions": [
       "Inspect Unit Floorplan",
       "Calculate Unit Affordability",
-      "Inquire on Specific Unit"
+      "Inquire on Specific Unit",
+      "Call Delegated Commercial Operator Hotline",
+      "Fallback to Missed Call Callback Inquiry after 18s",
+      "Apply to Operate Commercial Unit Space"
     ],
     "entry_conditions": [
       "Valid property ID and unit ID"
@@ -28442,6 +28483,22 @@
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/OperatorRequestModal.js",
+        "symbol": "OperatorRequestModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "claims": [],
@@ -28450,8 +28507,8 @@
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "rec_property.unit_detail",
@@ -28486,12 +28543,28 @@
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/OperatorRequestModal.js",
+        "symbol": "OperatorRequestModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "impl_property.unit_detail",
@@ -28513,13 +28586,19 @@
     "securityClassification": "INTERNAL",
     "systems": [
       "src/app/property/[id]/unit/[unitId]/page.js",
-      "src/components/unit/UnitMasterPage.js"
+      "src/components/unit/UnitMasterPage.js",
+      "src/components/property/DirectCallModal.js",
+      "src/components/property/OperatorRequestModal.js",
+      "src/app/api/dashboard/units/delegate/route.js"
     ],
     "components": [
-      "UnitMasterPage.js"
+      "UnitMasterPage.js",
+      "DirectCallModal.js",
+      "OperatorRequestModal.js"
     ],
     "apis": [
-      "/api/cms"
+      "/api/cms",
+      "/api/dashboard/units/delegate"
     ],
     "database": "Supabase",
     "evidence": [
@@ -28529,6 +28608,22 @@
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/OperatorRequestModal.js",
+        "symbol": "OperatorRequestModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "claims": [],
@@ -28536,8 +28631,8 @@
     "sourceType": "CODEBASE_EVIDENCE",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "fact_owner.inventory_units",
@@ -28687,7 +28782,7 @@
     "chunkType": "NODE_FACT",
     "canonical_id": "operator.unit_management",
     "canonicalId": "operator.unit_management",
-    "title": "API: STR Operator Unit Delegation Engine",
+    "title": "API: Commercial & Tenant Unit Operator Delegation Engine",
     "domain": "operator",
     "layer": "metropolis",
     "route": "/api/dashboard/operator/units",
@@ -28706,15 +28801,18 @@
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Enforces scoped unit operational authority for short-term rental (STR) co-operators under A-154.",
-    "description": "Backend delegation router validating operator rights to manage calendar availability, pricing, and guest inquiries for assigned units.",
+    "purpose": "Enforces commercial tenant delegation and operational authority for units inside malls, towers, and multi-unit complexes under A-154 and A-198.",
+    "description": "Backend delegation router validating operator rights to manage tenant branding, commercial category, hotlines, calendar availability, and inquiries for assigned units.",
     "available_actions": [
       "Validate Operator Scoped Rights",
+      "Approve or Reject Unit Operator Delegation Requests",
+      "Retrieve Inbound Unit Operator Applications",
+      "Support Commercial Tenant Categories (F&B, Retail, Kiosk)",
       "Sync Unit Calendar",
       "Update STR Nightly Rates"
     ],
     "entry_conditions": [
-      "Active operator assignment in property_units.operator_id"
+      "Active operator assignment in property_units.operator_id or pending delegation request in unit_operator_requests"
     ],
     "source_type": "MASTER_FLOW_GRAPH",
     "sourceType": "MASTER_FLOW_GRAPH",
@@ -28725,6 +28823,13 @@
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/units/delegate/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "claims": [],
@@ -28733,8 +28838,8 @@
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "impl_operator.unit_management",
@@ -28742,7 +28847,7 @@
     "chunkType": "IMPLEMENTATION_REFERENCE",
     "canonical_id": "operator.unit_management",
     "canonicalId": "operator.unit_management",
-    "title": "Implementation Evidence: API: STR Operator Unit Delegation Engine",
+    "title": "Implementation Evidence: API: Commercial & Tenant Unit Operator Delegation Engine",
     "domain": "operator",
     "status": "VERIFIED",
     "productStatus": "APPROVED",
@@ -28755,11 +28860,13 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "src/app/api/dashboard/operator/units/route.js"
+      "src/app/api/dashboard/operator/units/route.js",
+      "src/app/api/dashboard/units/delegate/route.js"
     ],
     "components": [],
     "apis": [
-      "/api/dashboard/operator/units"
+      "/api/dashboard/operator/units",
+      "/api/dashboard/units/delegate"
     ],
     "database": "Supabase",
     "evidence": [
@@ -28769,6 +28876,13 @@
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/dashboard/units/delegate/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
       }
     ],
     "claims": [],
@@ -28776,8 +28890,8 @@
     "sourceType": "CODEBASE_EVIDENCE",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "fact_layer.community_signals",
@@ -29339,6 +29453,173 @@
     "graphVersion": "2.2.0",
     "last_verified_at": "2026-10-11",
     "lastVerifiedAt": "2026-10-11"
+  },
+  {
+    "chunk_id": "fact_property.unit.direct_call",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "property.unit.direct_call",
+    "canonicalId": "property.unit.direct_call",
+    "title": "Direct Operator Hotline & Ringing Interface",
+    "domain": "property",
+    "layer": "metropolis",
+    "route": "/property/[id]/unit/[unitId]",
+    "roles": [
+      "visitor",
+      "seeker"
+    ],
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Provides immediate direct hotline dialing to delegated commercial unit operators with Web Audio ringing feedback and 18-second unanswered fallback under A-198.",
+    "description": "Web Audio synthesized ringing interface for reaching space operators directly. Automatically falls back to missed call callback inquiry routing after 18 seconds of unacknowledged ringing.",
+    "available_actions": [
+      "Initiate Web Audio Ringing Tone",
+      "Mute or Unmute Call Audio",
+      "Terminate Hotline Call",
+      "Transition to Unanswered Missed Call State",
+      "Redirect to Callback Inquiry Form"
+    ],
+    "entry_conditions": [
+      "Delegated commercial operator has public hotline configured"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
+  },
+  {
+    "chunk_id": "rec_property.unit.direct_call",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "property.unit.direct_call",
+    "canonicalId": "property.unit.direct_call",
+    "title": "Recovery Protocol: Direct Operator Hotline & Ringing Interface",
+    "domain": "property",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "PUBLIC",
+      "SEEKER"
+    ],
+    "securityClassification": "PUBLIC",
+    "exceptions": [
+      "Operator hotline busy or unanswered after 18 seconds"
+    ],
+    "recovery_mechanisms": [
+      "Displays unanswered fallback card offering immediate callback note dispatch via InquiryModal"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
+  },
+  {
+    "chunk_id": "impl_property.unit.direct_call",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "property.unit.direct_call",
+    "canonicalId": "property.unit.direct_call",
+    "title": "Implementation Evidence: Direct Operator Hotline & Ringing Interface",
+    "domain": "property",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "TEST_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/components/property/DirectCallModal.js",
+      "src/components/property/InquiryModal.js"
+    ],
+    "components": [
+      "DirectCallModal.js",
+      "InquiryModal.js"
+    ],
+    "apis": [
+      "/api/deals/initiate"
+    ],
+    "database": "Supabase",
+    "evidence": [
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/property/DirectCallModal.js",
+        "symbol": "DirectCallModal",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      },
+      {
+        "kind": "SCOUTIT_BRAIN",
+        "path": "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/COMMERCIAL_UNIT_OPERATORS_AND_TENANT_ECOSYSTEM.md",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-10-12",
+    "lastVerifiedAt": "2026-10-12"
   },
   {
     "chunk_id": "edge_e_hero_to_sys_edge_ip_masking_1",
@@ -41591,6 +41872,52 @@
     "target": "pep",
     "transition_type": "NAVIGATE",
     "label": "Chapter 05 -> Chapter Index",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_unit_detail_page_to_direct_call_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "unit_detail_page",
+    "target": "direct_call_modal",
+    "transition_type": "ACTION",
+    "label": "Unit Detail Page -> Direct Operator Hotline Modal",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_direct_call_modal_to_inquiry_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "direct_call_modal",
+    "target": "inquiry_modal",
+    "transition_type": "RECOVERY",
+    "label": "Direct Call Modal -> Inquiry Modal Fallback",
     "preconditions": [],
     "postconditions": [],
     "status": "UNVERIFIED",

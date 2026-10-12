@@ -69,18 +69,34 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
+    // 1. Fetch any explicit operator_request activities logged for this property
+    const { data: opActivities } = await supabaseAdmin
+      .from("crm_activities")
+      .select("deal_id")
+      .eq("property_id", propertyId)
+      .eq("activity_type", "operator_request");
+    const opDealIds = new Set((opActivities || []).map((a) => a.deal_id).filter(Boolean));
+
+    // 2. Fetch pending or connected deals for this property
     const { data: deals, error: dealsErr } = await supabaseAdmin
       .from("deals")
-      .select("id, buyer_id, pitch_message, created_at")
+      .select("id, buyer_id, pitch_message, created_at, unit_id")
       .eq("property_id", propertyId)
-      .is("unit_id", null)
       .in("status", ["pending", "connected"])
       .order("created_at", { ascending: false });
     if (dealsErr) {
       return NextResponse.json({ error: "Failed to load requests" }, { status: 500 });
     }
 
-    const operatorIds = [...new Set((deals || []).map((d) => d.buyer_id))];
+    // A deal qualifies as a delegation request if:
+    // - It has no unit_id assigned yet (general building delegation ask), OR
+    // - It was explicitly initiated as an operator_request in CRM activities, OR
+    // - Its pitch_message refers to operating/managing space
+    const delegationDeals = (deals || []).filter((d) =>
+      d.unit_id === null || opDealIds.has(d.id) || (d.pitch_message && /operator|operate|operating/i.test(d.pitch_message))
+    );
+
+    const operatorIds = [...new Set(delegationDeals.map((d) => d.buyer_id))];
     let names = {};
     if (operatorIds.length > 0) {
       const { data: profiles } = await supabaseAdmin
@@ -90,13 +106,25 @@ export async function GET(request) {
       for (const p of profiles || []) names[p.id] = p.display_name;
     }
 
+    const requestedUnitIds = [...new Set(delegationDeals.map((d) => d.unit_id).filter(Boolean))];
+    let unitNames = {};
+    if (requestedUnitIds.length > 0) {
+      const { data: units } = await supabaseAdmin
+        .from("property_units")
+        .select("id, name")
+        .in("id", requestedUnitIds);
+      for (const u of units || []) unitNames[u.id] = u.name;
+    }
+
     return NextResponse.json({
-      requests: (deals || []).map((d) => ({
+      requests: delegationDeals.map((d) => ({
         dealId: d.id,
         operatorId: d.buyer_id,
         operatorDisplayName: names[d.buyer_id] || "An operator",
         message: d.pitch_message,
         createdAt: d.created_at,
+        requestedUnitId: d.unit_id || null,
+        requestedUnitName: d.unit_id ? (unitNames[d.unit_id] || "Specific Unit") : null,
       })),
     });
   } catch (err) {
@@ -140,7 +168,7 @@ export async function POST(request) {
     if (dealErr || !deal) {
       return NextResponse.json({ error: "Delegation request not found" }, { status: 404 });
     }
-    if (deal.unit_id) {
+    if (deal.status !== "pending" && deal.status !== "connected") {
       return NextResponse.json({ error: "This request has already been resolved" }, { status: 409 });
     }
 
@@ -179,7 +207,8 @@ export async function POST(request) {
       return NextResponse.json({ success: true, status: "declined" });
     }
 
-    if (unitIds.length === 0) {
+    const effectiveUnitIds = unitIds.length > 0 ? unitIds : (deal.unit_id ? [deal.unit_id] : []);
+    if (effectiveUnitIds.length === 0) {
       return NextResponse.json({ error: "Select at least one unit to delegate" }, { status: 400 });
     }
 
@@ -187,19 +216,19 @@ export async function POST(request) {
     const { data: units, error: unitsErr } = await supabaseAdmin
       .from("property_units")
       .select("id, property_id, operator_id")
-      .in("id", unitIds);
+      .in("id", effectiveUnitIds);
     if (unitsErr) {
       return NextResponse.json({ error: "Failed to load selected units" }, { status: 500 });
     }
     const foundIds = new Set(units.map((u) => u.id));
-    const missing = unitIds.filter((id) => !foundIds.has(id));
+    const missing = effectiveUnitIds.filter((id) => !foundIds.has(id));
     if (missing.length > 0) {
       return NextResponse.json({ error: "One or more selected units were not found" }, { status: 400 });
     }
     if (units.some((u) => u.property_id !== property.id)) {
       return NextResponse.json({ error: "Selected units must belong to the same property as the request" }, { status: 400 });
     }
-    if (units.some((u) => u.operator_id)) {
+    if (units.some((u) => u.operator_id && u.operator_id !== deal.buyer_id)) {
       return NextResponse.json({ error: "One or more selected units are already delegated" }, { status: 409 });
     }
 
@@ -207,7 +236,7 @@ export async function POST(request) {
     const { error: stampErr } = await supabaseAdmin
       .from("property_units")
       .update({ operator_id: deal.buyer_id, updated_at: new Date().toISOString() })
-      .in("id", unitIds);
+      .in("id", effectiveUnitIds);
     if (stampErr) {
       console.error("[DELEGATE API] Failed to stamp operator_id:", stampErr);
       return NextResponse.json({ error: "Failed to delegate units" }, { status: 500 });
@@ -215,7 +244,7 @@ export async function POST(request) {
 
     // First unit resolves the original deal row; extras clone sibling rows
     // (one deal = one unit, per locked decision #6 — no additional Connect charge).
-    const [firstUnitId, ...restUnitIds] = unitIds;
+    const [firstUnitId, ...restUnitIds] = effectiveUnitIds;
     const { error: updateDealErr } = await supabaseAdmin
       .from("deals")
       .update({ unit_id: firstUnitId, status: "accepted" })
@@ -253,7 +282,7 @@ export async function POST(request) {
       await notifyAttachedBrokers(supabaseAdmin, {
         propertyId: property.id,
         title: "Units delegated to an operator",
-        desc: `${unitIds.length} unit(s) in "${property.title}" are now operated by a co-working operator.`,
+        desc: `${effectiveUnitIds.length} unit(s) in "${property.title}" are now operated by a commercial operator.`,
         icon: "🏢",
         notificationType: "property_changed",
         excludeUserId: userId,
@@ -265,10 +294,10 @@ export async function POST(request) {
       propertyId: property.id,
       activityType: "delegation_accepted",
       actorId: userId,
-      metadata: { operatorId: deal.buyer_id, unitCount: unitIds.length },
+      metadata: { operatorId: deal.buyer_id, unitCount: effectiveUnitIds.length },
     });
 
-    return NextResponse.json({ success: true, status: "accepted", delegatedUnitIds: unitIds, ...(warning ? { warning } : {}) });
+    return NextResponse.json({ success: true, status: "accepted", delegatedUnitIds: effectiveUnitIds, ...(warning ? { warning } : {}) });
   } catch (err) {
     console.error("[DELEGATE API] Error:", err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

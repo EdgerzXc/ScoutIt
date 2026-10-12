@@ -79,7 +79,10 @@ const unitSchema = z.object({
   photos: z.array(z.string().max(2000)).optional().default([]),
   image: z.string().max(2000).optional().default(""),
   availabilityStatus: z.enum(["available", "occupied", "coming_soon"]).optional(),
-  unitCategory: z.enum(["residential_lease", "residential_sale", "str", "commercial_flex"]).nullable().optional(),
+  unitCategory: z.enum([
+    "residential_lease", "residential_sale", "str", "commercial_flex",
+    "fastfood", "restaurant", "cafe", "retail", "kiosk", "services", "entertainment"
+  ]).nullable().optional(),
   listingPurpose: z.enum(["lease", "sale", "short_stay", "flex"]).nullable().optional(),
   price: z.union([z.string(), z.number()]).optional(),
   details: z.record(z.any()).optional().default({}),

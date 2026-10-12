@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
 import ViewingWorkspaceCard from "./ViewingWorkspaceCard";
+import VoiceNotePlayer from "./VoiceNotePlayer";
 import { uploadAttachment } from "../../lib/storage";
 import { getSession, getUser } from "../../lib/authClient";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
@@ -347,6 +348,15 @@ export default function ChatBox({
   const [handshakeBusy, setHandshakeBusy] = useState(false);
   const [pendingBusy, setPendingBusy] = useState(false);
 
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const recordingDurationRef = useRef(0);
+  const stopVoiceRecordingRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordingTimerRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -449,7 +459,7 @@ export default function ChatBox({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isUploading]);
 
-  const sendMessageBody = async (body) => {
+  const sendMessageBody = useCallback(async (body) => {
     const { token, mockOwnerId, userId } = await resolveAuth();
     if (!userId) throw new Error("Please log in to send a message.");
     const res = await fetch(`/api/deals/${deal.id}/messages`, {
@@ -460,7 +470,7 @@ export default function ChatBox({
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Couldn't send your message.");
     setMessages((prev) => [...prev, mapMessage(data.message, userId)]);
-  };
+  }, [deal.id, deal.myRole, mapMessage]);
 
   const handleSend = async (e) => {
     if (e) e.preventDefault();
@@ -520,6 +530,178 @@ export default function ChatBox({
     setIsDragging(false);
     if (!isClosed(deal.status) && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  // Cleanup audio tracks and interval on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  const cancelVoiceRecording = useCallback(() => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.ondataavailable = null;
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+      } catch {}
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    audioChunksRef.current = [];
+    setIsRecording(false);
+    setRecordingDuration(0);
+    recordingDurationRef.current = 0;
+  }, []);
+
+  const stopVoiceRecording = useCallback((shouldSend = true) => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    const recorder = mediaRecorderRef.current;
+    const finalDuration = recordingDurationRef.current;
+
+    if (!recorder || recorder.state === "inactive") {
+      cancelVoiceRecording();
+      return;
+    }
+
+    recorder.onstop = async () => {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+
+      if (!shouldSend) {
+        audioChunksRef.current = [];
+        setIsRecording(false);
+        setRecordingDuration(0);
+        recordingDurationRef.current = 0;
+        return;
+      }
+
+      const chunks = audioChunksRef.current;
+      if (!chunks || chunks.length === 0) {
+        setIsRecording(false);
+        setRecordingDuration(0);
+        recordingDurationRef.current = 0;
+        return;
+      }
+
+      const mimeType = recorder.mimeType || "audio/webm";
+      const audioBlob = new Blob(chunks, { type: mimeType });
+      const ext = mimeType.includes("mp4") ? "mp4" : mimeType.includes("ogg") ? "ogg" : "webm";
+      const fileName = `voice-memo-${Date.now()}.${ext}`;
+      const audioFile = new File([audioBlob], fileName, { type: mimeType });
+
+      setIsRecording(false);
+      setRecordingDuration(0);
+      recordingDurationRef.current = 0;
+      setIsUploading(true);
+
+      try {
+        const attachment = await uploadAttachment(deal.id, audioFile, {
+          isVoiceNote: true,
+          duration: Math.max(1, finalDuration),
+        });
+        await sendMessageBody(encodeAttachment(attachment));
+      } catch (err) {
+        setUploadError(sanitizeError(err, "Failed to upload voice memo."));
+        setTimeout(() => setUploadError(null), 5000);
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    try {
+      recorder.stop();
+    } catch {
+      cancelVoiceRecording();
+    }
+  }, [cancelVoiceRecording, deal.id, sendMessageBody]);
+
+  useEffect(() => {
+    stopVoiceRecordingRef.current = stopVoiceRecording;
+  }, [stopVoiceRecording]);
+
+  const startVoiceRecording = async () => {
+    if (closed || isSubmitting || isUploading || isRecording) return;
+    setUploadError(null);
+
+    if (typeof window === "undefined" || !navigator?.mediaDevices?.getUserMedia) {
+      setUploadError("Voice recording is not supported in this browser environment.");
+      setTimeout(() => setUploadError(null), 5000);
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      audioChunksRef.current = [];
+
+      const mimeTypes = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+        "audio/mp4",
+        "audio/aac",
+      ];
+      let selectedMimeType = "";
+      for (const mime of mimeTypes) {
+        if (typeof MediaRecorder !== "undefined" && typeof MediaRecorder.isTypeSupported === "function" && MediaRecorder.isTypeSupported(mime)) {
+          selectedMimeType = mime;
+          break;
+        }
+      }
+
+      const recorderOptions = selectedMimeType
+        ? { mimeType: selectedMimeType, audioBitsPerSecond: 24000 }
+        : { audioBitsPerSecond: 24000 };
+
+      const recorder = new MediaRecorder(stream, recorderOptions);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.start(250);
+      setIsRecording(true);
+      setRecordingDuration(0);
+      recordingDurationRef.current = 0;
+
+      const startTime = Date.now();
+      recordingTimerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        if (elapsed >= 60) {
+          recordingDurationRef.current = 60;
+          setRecordingDuration(60);
+          stopVoiceRecordingRef.current?.(true);
+        } else {
+          recordingDurationRef.current = elapsed;
+          setRecordingDuration(elapsed);
+        }
+      }, 500);
+    } catch (err) {
+      console.warn("Microphone access error:", err);
+      setUploadError("Could not access microphone. Please check browser permissions.");
+      setTimeout(() => setUploadError(null), 5000);
+      setIsRecording(false);
     }
   };
 
@@ -882,7 +1064,18 @@ export default function ChatBox({
   const daysLeft = msLeft === null ? null : Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
 
   const renderAttachment = (att) => {
-    if (att.type.startsWith('image/')) {
+    if (att.isVoiceNote || (att.type && att.type.startsWith('audio/'))) {
+      return (
+        <VoiceNotePlayer
+          src={att.url}
+          name={att.name || "Voice Memo"}
+          duration={att.duration}
+          size={att.size}
+          className="mt-2"
+        />
+      );
+    }
+    if (att.type && att.type.startsWith('image/')) {
       return (
         <a href={att.url} target="_blank" rel="noopener noreferrer" className="block mt-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -890,7 +1083,7 @@ export default function ChatBox({
         </a>
       );
     }
-    if (att.type.startsWith('video/')) {
+    if (att.type && att.type.startsWith('video/')) {
       return (
         <video src={att.url} controls className="max-w-[250px] max-h-[250px] rounded mt-2 border border-white/10" />
       );
@@ -1560,7 +1753,7 @@ export default function ChatBox({
         {isUploading && (
           <div className="flex flex-col items-end animate-[fadeIn_0.3s_ease]">
             <div className="max-w-[75%] p-3.5 rounded-xl text-sm bg-surface-variant/50 text-text-secondary rounded-tr-sm border border-white/5 flex items-center gap-2">
-              <span className="animate-pulse">Uploading file...</span>
+              <span className="animate-pulse">Uploading attachment or audio memo...</span>
             </div>
           </div>
         )}
@@ -1577,7 +1770,7 @@ export default function ChatBox({
             ref={fileInputRef}
             onChange={onFileChange}
             className="hidden"
-            accept="image/jpeg,image/png,application/pdf,video/mp4"
+            accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4,audio/*"
           />
 
           <button
@@ -1603,7 +1796,7 @@ export default function ChatBox({
                 console.error("Counter offer generation failed", err);
               }
             }}
-            disabled={closed || isSubmitting}
+            disabled={closed || isSubmitting || isRecording}
             className="px-3 py-1.5 rounded-full bg-gold-accent/10 border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/20 text-xs font-mono transition disabled:opacity-50 flex items-center gap-1 shrink-0"
             title="Draft RESA-compliant AI Counter-Offer"
           >
@@ -1613,29 +1806,109 @@ export default function ChatBox({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={closed || isUploading}
+            disabled={closed || isUploading || isRecording}
             className="min-h-11 min-w-11 p-3 rounded-full text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10 transition disabled:opacity-50 flex items-center justify-center"
-            title="Attach file (Max 10MB Doc/Img, 50MB Video)"
+            title="Attach file (Max 10MB Doc/Img/Audio, 50MB Video)"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
           </button>
 
-          <input
-            type="text"
-            className="order-first w-full sm:order-none sm:w-auto flex-1 min-w-0 bg-surface border border-surface-variant rounded-full px-5 py-2.5 text-base sm:text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 disabled:opacity-50 transition"
-            placeholder={closed ? "This chat is closed." : "Type your message or drag a file here..."}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={closed || isSubmitting}
-          />
-
           <button
-            type="submit"
-            disabled={closed || isSubmitting || !input.trim()}
-            className="ml-auto bg-gold-accent text-background px-6 py-2.5 rounded-full font-mono text-[12px] uppercase tracking-wider disabled:opacity-50 hover:bg-gold-bright transition-all duration-300 ease-out shadow-[0_4px_10px_rgba(var(--accent-rgb),0.1)]"
+            type="button"
+            onClick={isRecording ? () => stopVoiceRecording(true) : startVoiceRecording}
+            disabled={closed || isUploading || isSubmitting}
+            className={`min-h-11 min-w-11 p-3 rounded-full transition disabled:opacity-50 flex items-center justify-center ${
+              isRecording
+                ? "text-error bg-error/15 border border-error/40 animate-pulse"
+                : "text-text-secondary hover:text-gold-accent hover:bg-gold-accent/10"
+            }`}
+            title={isRecording ? "Stop & send voice memo (Max 60s)" : "Record Voice Memo (Max 60s)"}
+            aria-label={isRecording ? "Stop voice recording" : "Record voice memo"}
           >
-            {isSubmitting ? "..." : "Send"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={isRecording ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
           </button>
+
+          {isRecording ? (
+            <div className="order-first w-full sm:order-none sm:w-auto flex-1 min-w-0 flex items-center justify-between gap-2 sm:gap-3 bg-surface border border-gold-accent/40 rounded-full px-4 py-2 shadow-[0_0_15px_rgba(var(--accent-rgb),0.12)]">
+              {/* Left: Pulsing Red Recording Indicator + Time Elapsed */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
+                </span>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-error font-bold">
+                  REC
+                </span>
+                <span className="text-[11px] font-mono text-on-surface">
+                  {Math.floor(recordingDuration / 60).toString().padStart(2, "0")}:
+                  {(recordingDuration % 60).toString().padStart(2, "0")} / 01:00
+                </span>
+              </div>
+
+              {/* Center: Live Sound Waves */}
+              <div className="hidden sm:flex items-center gap-1 h-3.5">
+                {[35, 70, 95, 55, 85, 45, 80, 50, 65].map((h, i) => (
+                  <span
+                    key={i}
+                    className="w-0.5 bg-gold-accent rounded-full animate-pulse"
+                    style={{
+                      height: `${h}%`,
+                      animationDelay: `${i * 0.08}s`,
+                      animationDuration: "0.7s",
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Right: Discard / Send Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={cancelVoiceRecording}
+                  className="px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider text-text-muted hover:text-error transition-colors"
+                  title="Discard recording"
+                >
+                  Discard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => stopVoiceRecording(true)}
+                  className="flex items-center gap-1 bg-gold-accent text-background px-3.5 py-1 rounded-full font-mono text-[11px] font-bold uppercase tracking-wider hover:bg-gold-bright transition shadow-[0_2px_8px_rgba(var(--accent-rgb),0.2)]"
+                  title="Finish and send voice memo"
+                >
+                  <span>Send</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <input
+                type="text"
+                className="order-first w-full sm:order-none sm:w-auto flex-1 min-w-0 bg-surface border border-surface-variant rounded-full px-5 py-2.5 text-base sm:text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 disabled:opacity-50 transition"
+                placeholder={closed ? "This chat is closed." : "Type your message or drag a file here..."}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={closed || isSubmitting}
+              />
+
+              <button
+                type="submit"
+                disabled={closed || isSubmitting || !input.trim()}
+                className="ml-auto bg-gold-accent text-background px-6 py-2.5 rounded-full font-mono text-[12px] uppercase tracking-wider disabled:opacity-50 hover:bg-gold-bright transition-all duration-300 ease-out shadow-[0_4px_10px_rgba(var(--accent-rgb),0.1)]"
+              >
+                {isSubmitting ? "..." : "Send"}
+              </button>
+            </>
+          )}
         </form>
       </div>
 

@@ -80,9 +80,27 @@ export default function OperatorMode() {
         </span>
         <h1 className="font-display-md text-3xl md:text-4xl text-on-surface">Operated Spaces</h1>
         <p className="text-sm text-text-secondary mt-2 max-w-2xl">
-          Units delegated to you across every building you operate. You can rename units, manage their
-          photos, and set availability here — everything else about the building stays with its owner.
+          Units delegated to you across every building you operate (commercial, restaurant, retail, flex spaces).
+          You can rename units, manage photos, and set availability here — everything else about the building stays with its owner.
         </p>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-surface/50 border border-white/[0.06] backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent text-lg">
+            🏢
+          </div>
+          <div>
+            <div className="text-sm font-medium text-on-surface">Branch Operations Center</div>
+            <div className="text-xs text-text-muted">Inbound client inquiries, branch hotline callbacks, and missed call catch-ups route directly to your Operations Inbox.</div>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/inbox"
+          className="px-4 py-2 rounded-lg bg-white/[0.04] hover:bg-gold-accent hover:text-black border border-white/[0.08] hover:border-gold-accent text-xs font-mono tracking-wider uppercase text-text-primary transition-all flex items-center gap-2"
+        >
+          <span>Open Operations Inbox →</span>
+        </Link>
       </div>
 
       {buildings.length === 0 ? (
@@ -93,9 +111,8 @@ export default function OperatorMode() {
             No units have been delegated to you yet.
           </p>
           <p className="text-xs text-text-secondary max-w-md relative z-10">
-            Find a building you would like to operate, open its property page, and use{" "}
-            <span className="text-gold-accent">Request to Operate This Building</span> to reach out to
-            the owner.
+            Find a commercial building or unit you would like to operate, open its property or unit master page, and use{" "}
+            <span className="text-gold-accent">Apply to Operate This Space</span> to reach out to the owner or property management.
           </p>
         </div>
       ) : (

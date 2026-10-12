@@ -14,6 +14,13 @@ export const UNIT_CATEGORIES = Object.freeze([
   "residential_sale",
   "str",
   "commercial_flex",
+  "fastfood",
+  "restaurant",
+  "cafe",
+  "retail",
+  "kiosk",
+  "services",
+  "entertainment",
 ]);
 
 export const LISTING_PURPOSES = Object.freeze([
@@ -28,6 +35,36 @@ export const UNIT_CATEGORY_LABELS = Object.freeze({
   residential_sale: "Residential sale",
   str: "Short-term rental",
   commercial_flex: "Commercial flex",
+  fastfood: "Fast Food / Quick Service",
+  restaurant: "Restaurant / Dining",
+  cafe: "Café / Beverage",
+  retail: "Retail Store",
+  kiosk: "Kiosk / Pop-up",
+  services: "Services / Clinic",
+  entertainment: "Entertainment / Leisure",
+});
+
+export const UNIT_SECTORS = Object.freeze({
+  food_and_dining: Object.freeze({
+    label: "Food & Dining",
+    categories: Object.freeze(["fastfood", "restaurant", "cafe"]),
+  }),
+  retail_and_shopping: Object.freeze({
+    label: "Retail & Shopping",
+    categories: Object.freeze(["retail", "kiosk"]),
+  }),
+  services_and_wellness: Object.freeze({
+    label: "Services & Wellness",
+    categories: Object.freeze(["services", "commercial_flex"]),
+  }),
+  entertainment_and_leisure: Object.freeze({
+    label: "Entertainment & Leisure",
+    categories: Object.freeze(["entertainment"]),
+  }),
+  residential: Object.freeze({
+    label: "Residential & Living",
+    categories: Object.freeze(["residential_lease", "residential_sale", "str"]),
+  }),
 });
 
 export function isUnitCategory(value) {
@@ -108,7 +145,9 @@ export function matchesPropertyCategory(property, selectedSectors = []) {
       const uCat = (u.unit_category || u.unitCategory || "").toLowerCase();
       if (sec === "STR" && (uCat === "str" || uCat === "short_term_rental")) return true;
       if (sec === "Residential" && (uCat.includes("residential") || uCat === "lease" || uCat === "sale")) return true;
-      if (sec === "Commercial" && (uCat.includes("commercial") || uCat === "office" || uCat === "commercial_flex")) return true;
+      if (sec === "Commercial" && (uCat.includes("commercial") || uCat === "office" || uCat === "commercial_flex" || uCat === "retail" || uCat === "kiosk" || uCat === "fastfood" || uCat === "restaurant" || uCat === "cafe" || uCat === "services" || uCat === "entertainment")) return true;
+      if ((sec === "Food & Dining" || sec === "Dining" || sec === "F&B") && (uCat === "fastfood" || uCat === "restaurant" || uCat === "cafe")) return true;
+      if ((sec === "Retail & Shopping" || sec === "Retail" || sec === "Shopping") && (uCat === "retail" || uCat === "kiosk")) return true;
       return false;
     });
   });
