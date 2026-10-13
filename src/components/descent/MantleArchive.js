@@ -8,7 +8,7 @@ import LayerHeader from "@/components/descent/LayerHeader";
 import LayerTransition from "@/components/descent/LayerTransition";
 import { getPublicLayerFlowSource } from "@/data/manifestoStorySourceContract";
 
-const CATEGORY_ORDER = ["story", "architecture", "philosophy", "trust"];
+const CATEGORY_ORDER = ["story", "architecture", "philosophy", "trust", "tour"];
 const MANTLE_FLOW_SOURCE = getPublicLayerFlowSource("mantle");
 
 const DISCLOSURES = {
@@ -99,6 +99,28 @@ const DISCLOSURES = {
       nodes: ["Named source", "Defined check", "Qualified label"],
     },
     links: [["Meet public professionals", "/layer/crust"], ["Read the legal boundaries", "/terms"]],
+  },
+  tour: {
+    number: "05",
+    label: "Platform Tour",
+    eyebrow: "Live system operation",
+    title: "Features are the promotion.",
+    intro: "Test our platform capabilities directly: 3D spatial GIS radar, dual-CMS publishing, broker VIA attribution rails, Open Gate inbound delivery, and the People & Dealings CRM engine.",
+    paragraphs: [
+      "The Platform Tour demonstrates how ScoutIt works across five core systems: 3D spatial GIS, dual-CMS publishing, broker VIA attribution, Open Gate inbound delivery, and the People & Dealings CRM.",
+      "You can step through each capability, switch between role-specific operating lenses (Seeker, Broker, Owner, Operator), and review our release version transmissions.",
+    ],
+    proof: [
+      ["Execution", "Client-side interactive walkthrough"],
+      ["Video delivery", "Adaptive zero-bloat external streaming"],
+      ["Operating lenses", "Seeker · Broker · Owner · Operator"],
+      ["Version ledger", "v1.0 Genesis through v1.3 CRM"],
+    ],
+    diagram: {
+      label: "Platform tour operational path",
+      nodes: ["Sovereign features", "Role lenses", "Live execution"],
+    },
+    links: [["Launch Full Platform Tour & Guide", "/platform-tour"], ["Inspect live spaces", "/property"]],
   },
 };
 

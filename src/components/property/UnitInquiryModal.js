@@ -19,8 +19,8 @@ import { stillBackdropVariants, stillPanelVariants, instantDialogTransition } fr
 // doesn't need — extending it would carry a roster with one possible target.
 
 const backdropVariants = {
-  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
-  visible: { opacity: 1, backdropFilter: "blur(8px)" }
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 }
 };
 
 const modalVariants = {
@@ -30,7 +30,7 @@ const modalVariants = {
 };
 
 const modalTransition = { type: "spring", stiffness: 380, damping: 28 };
-const backdropTransition = { duration: 0.2 };
+const backdropTransition = { duration: 0.2, ease: "easeOut" };
 
 
 const successVariants = {
@@ -152,7 +152,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-5"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-5 backdrop-blur-sm"
           style={{ background: "var(--modal-scrim)" }}
           variants={reduceMotion ? stillBackdropVariants : backdropVariants}
           initial="hidden"

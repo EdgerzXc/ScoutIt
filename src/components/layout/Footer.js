@@ -109,6 +109,7 @@ export default function Footer() {
           <div className="nav-col">
             <h2>Company</h2>
             <Link href="/about">About Us</Link>
+            <Link href="/platform-tour">Platform Tour & Guide</Link>
             <Link href="/enterprise">Enterprise</Link>
             <Link href="/dashboard">Dashboard</Link>
             <a href="mailto:hello@scoutit.space">Contact</a>

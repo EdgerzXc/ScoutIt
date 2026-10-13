@@ -497,7 +497,7 @@ export default function ShareModal({
                 <textarea
                   readOnly
                   aria-label="Raw briefing text"
-                  className="w-full h-28 bg-background border border-on-surface/10 rounded-lg p-4 pt-5 text-[13px] text-on-surface/80 font-mono resize-none focus:outline-none focus:border-gold-accent/50 transition-colors custom-scrollbar"
+                  className="w-full h-28 bg-background border border-on-surface/10 rounded-lg p-4 pt-5 text-base sm:text-[13px] text-on-surface/80 font-mono resize-none focus:outline-none focus:border-gold-accent/50 transition-colors custom-scrollbar"
                   value={textFor("copy")}
                 />
               </div>
@@ -531,7 +531,7 @@ export default function ShareModal({
               <button
                 onClick={handleCopyRaw}
                 aria-label="Copy the raw briefing text"
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium text-sm transition-all duration-300 ${
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium text-sm transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.98] touch-manipulation ${
                   copied
                     ? "bg-success/10 text-success border border-success/20"
                     : "bg-gold-accent text-background hover:bg-gold-bright"

@@ -246,9 +246,11 @@ function DashboardInner() {
 
   return (
     <div className="relative min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
-      {/* Broker gets the "Tactical Velocity" ambient layer (signal pulses +
-          light streaks); every other role keeps the base dashboard glow. */}
-      <AtmosphereBackground variant={mode === "broker" ? "broker" : "dashboard"} />
+      {/* Role-specific ambient atmosphere layer (Layer 5 Ambient Role Atmosphere
+          per DASHBOARD_ATMOSPHERE_FRAMEWORK.md): spatial contours for Buyer,
+          structural blueprint for Owner, tactical velocity streaks for Broker,
+          telemetry grid for Operator/Provider. */}
+      <AtmosphereBackground variant={mode || "dashboard"} />
 
       {/* Top Nav (Persistent) */}
       <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex items-center justify-between gap-4">
@@ -492,7 +494,8 @@ function DashboardInner() {
           for modes that define one — see PRIMARY_ACTIONS above. */}
       {primaryAction && (
       <button
-        className="md:hidden fixed bottom-24 right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(var(--accent-rgb),0.4)] hover:opacity-90 transition border-2 border-surface-alt"
+        className="md:hidden fixed right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(var(--accent-rgb),0.4)] hover:opacity-90 transition-[transform,opacity] duration-150 ease-out active:scale-[0.94] touch-manipulation border-2 border-surface-alt"
+        style={{ bottom: "calc(var(--mobile-nav-height, 82px) + 16px)" }}
         onClick={firePrimaryAction}
         aria-label={primaryAction.label}
       >
@@ -505,7 +508,7 @@ function DashboardInner() {
       {showMobileProfileMenu && (
         <div className="md:hidden fixed inset-0 z-[100001] flex flex-col justify-end motion-safe:animate-[fadeIn_0.3s_ease-out]">
           <button type="button" aria-label="Close Mobile Profile Menu" className="absolute inset-0 w-full h-full block bg-background/60 backdrop-blur-sm" onClick={() => setShowMobileProfileMenu(false)}></button>
-          <div className="bg-surface border-t border-surface-variant rounded-t-2xl w-full p-6 motion-safe:animate-[slideUp_0.3s_ease-out] relative z-10">
+          <div className="bg-surface border-t border-surface-variant rounded-t-2xl w-full p-6 pb-[max(24px,calc(16px+env(safe-area-inset-bottom)))] motion-safe:animate-[slideUp_0.3s_ease-out] relative z-10">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-bold text-on-surface">
@@ -516,7 +519,7 @@ function DashboardInner() {
                   <Link href="/profile" className="text-xs text-gold-accent hover:underline">View Your Profile</Link>
                 </div>
               </div>
-              <button className="text-text-secondary" aria-label="Close" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
+              <button className="text-text-secondary w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-surface-variant active:scale-95 touch-manipulation transition-[transform,background-color] duration-150" aria-label="Close" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
             </div>
             
             {user.tags.length > 1 && (
@@ -528,7 +531,7 @@ function DashboardInner() {
               {user.tags.length > 1 && user.tags.map(tagId => (
                 <button
                   key={tagId}
-                  className={`flex items-center justify-between p-4 rounded-lg font-working-title text-sm border transition ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
+                  className={`flex items-center justify-between p-4 rounded-lg font-working-title text-sm border transition-[transform,border-color,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
                   onClick={() => handleSwitchMode(tagId)}
                 >
                   <span className="uppercase tracking-wider">{TAG_LABELS[tagId]}</span>

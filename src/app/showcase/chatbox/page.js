@@ -11,9 +11,9 @@ export const metadata = {
 
 export default function MockupChatboxPage() {
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-[#f0ede8] flex flex-col">
+    <div className="min-h-screen bg-background text-text-primary flex flex-col">
       {/* Top Ease-of-Use Navigation Bar */}
-      <header className="sticky top-0 z-30 w-full px-6 py-3.5 bg-[#121212]/90 border-b border-white/5 backdrop-blur-md flex items-center justify-between">
+      <header className="sticky top-0 z-30 w-full px-6 py-3.5 bg-surface/90 border-b border-border-subtle backdrop-blur-md flex items-center justify-between">
         <Link
           href="/showcase"
           className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"

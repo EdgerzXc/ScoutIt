@@ -42,7 +42,7 @@ export async function PATCH(request, { params }) {
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
-      .select("property_id, buyer_id, broker_id, properties(owner_id)")
+      .select("property_id, buyer_id, broker_id, private_notes, properties(owner_id)")
       .eq("id", dealId)
       .single();
 
@@ -58,9 +58,22 @@ export async function PATCH(request, { params }) {
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    let notesMap = {};
+    if (deal.private_notes) {
+      try {
+        const parsed = JSON.parse(deal.private_notes);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          notesMap = parsed;
+        }
+      } catch {
+        // legacy plain text string
+      }
+    }
+    notesMap[userId] = note;
+
     const { error: updateError } = await supabaseAdmin
       .from("deals")
-      .update({ private_notes: note })
+      .update({ private_notes: JSON.stringify(notesMap) })
       .eq("id", dealId);
 
     if (updateError) {

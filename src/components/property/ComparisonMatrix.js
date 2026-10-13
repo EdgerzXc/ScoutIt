@@ -15,12 +15,12 @@ export default function ComparisonMatrix({ properties, onClose }) {
   return (
     <MotionConfig reducedMotion={isLiteMode() ? "always" : "user"}>
     <motion.div 
-      className="matrix-overlay" 
+      className="matrix-overlay backdrop-blur-sm" 
       onClick={onClose}
-      initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-      animate={{ opacity: 1, backdropFilter: "blur(10px)" }}
-      exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
     >
       <motion.div 
         className="matrix-modal" 

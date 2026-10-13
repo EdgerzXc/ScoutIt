@@ -447,7 +447,7 @@ export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
           gap: 12px;
           padding: 12px 14px;
           border-radius: 8px;
-          background: var(--surface2, rgba(255, 255, 255, 0.03));
+          background: var(--surface2);
           border: 1px solid var(--border-solid);
         }
         .ps-block-info {

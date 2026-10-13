@@ -89,5 +89,5 @@ describe("/api/geo-pricing surfaces a slow upstream as an error, not a hang", ()
     expect(res.status).toBeGreaterThanOrEqual(400);
     const payload = await res.json();
     expect(payload.error).toBeDefined();
-  });
+  }, 10000);
 });

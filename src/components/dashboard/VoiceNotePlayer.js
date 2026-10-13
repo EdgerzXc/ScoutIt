@@ -127,14 +127,18 @@ export default function VoiceNotePlayer({
       {/* Header: Memo Badge & Size */}
       <div className="flex items-center justify-between pb-2 mb-2 border-b border-surface-variant/60">
         <div className="flex items-center gap-1.5">
-          <span className="text-gold-accent text-xs">🎙️</span>
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-gold-bright">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gold-accent">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+          </svg>
+          <span className="font-mono text-[12px] font-semibold uppercase tracking-wider text-gold-bright">
             Voice Memo
           </span>
         </div>
         <div className="flex items-center gap-2">
           {formattedSize && (
-            <span className="font-mono text-[10px] text-text-muted">
+            <span className="font-mono text-[12px] text-text-muted">
               {formattedSize}
             </span>
           )}
@@ -208,7 +212,7 @@ export default function VoiceNotePlayer({
             </div>
 
             {/* Time Stamp & Rate Control */}
-            <div className="flex items-center justify-between text-[11px] font-mono text-text-secondary">
+            <div className="flex items-center justify-between text-[12px] font-mono text-text-secondary">
               <span>
                 {formatAudioTime(currentTime)} / {formatAudioTime(effectiveDuration)}
               </span>
@@ -216,7 +220,7 @@ export default function VoiceNotePlayer({
               <button
                 type="button"
                 onClick={cyclePlaybackRate}
-                className="rounded border border-surface-variant bg-surface-variant/40 px-1.5 py-0.5 text-[10px] font-bold text-gold-accent hover:border-gold-accent/40 hover:text-gold-bright transition-colors"
+                className="rounded border border-surface-variant bg-surface-variant/40 px-1.5 py-0.5 text-[12px] font-bold text-gold-accent hover:border-gold-accent/40 hover:text-gold-bright transition-colors"
                 title="Playback Speed"
               >
                 {playbackRate}x

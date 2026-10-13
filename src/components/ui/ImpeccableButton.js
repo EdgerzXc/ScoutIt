@@ -29,6 +29,7 @@ const BASE_CLASSES = [
   // things that should move; nothing else here should animate at all.
   "transition-[transform,background-color,border-color,opacity] duration-200 ease-out",
   "active:scale-[0.97]",
+  "touch-manipulation",
   "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
 ].join(" ");
 

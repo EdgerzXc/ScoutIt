@@ -3,7 +3,7 @@ import {
   Shield, LayoutDashboard, Users, Database, Flag, Video, LogOut, Bell,
   ScrollText, KeyRound, Award, BarChart3, Radar, Inbox, BadgeCheck,
   Scale, BrainCircuit, Radio, Wrench, Crosshair, Mail, Cpu, Gavel, Briefcase,
-   MessageSquareQuote, MessageSquareWarning, Stamp } from "lucide-react";
+   MessageSquareQuote, MessageSquareWarning, Stamp, Compass } from "lucide-react";
 import { getCurrentStaff, TIER_LABELS, TIERS } from "@/lib/rbac";
 import SidebarNav from "@/components/dashboard/SidebarNav";
 import SensitiveWorkspaceGuard from "@/components/security/SensitiveWorkspaceGuard";
@@ -22,6 +22,7 @@ export default async function DashboardLayout({ children }) {
 
     { group: "Content & People", name: "CMS / Content", href: "/dashboard/cms", icon: <Database className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "User CRM", href: "/dashboard/crm", icon: <Users className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Content & People", name: "Property Outreach CRM", href: "/dashboard/outreach", icon: <Compass className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Verification", href: "/dashboard/verification", icon: <BadgeCheck className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Position Queue", href: "/dashboard/coordinates", icon: <Crosshair className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Disputes", href: "/dashboard/disputes", icon: <Scale className={iconClass} />, minTier: TIERS.AGENT },

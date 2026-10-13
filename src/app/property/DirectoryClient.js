@@ -883,8 +883,8 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                             style={{
                               margin: "0 0 16px 0",
                               padding: "10px 12px",
-                              background: "rgba(255, 255, 255, 0.02)",
-                              border: "1px solid rgba(255, 255, 255, 0.06)",
+                              background: "var(--surface-alt)",
+                              border: "1px solid var(--border-subtle)",
                               borderRadius: "4px",
                             }}
                           >

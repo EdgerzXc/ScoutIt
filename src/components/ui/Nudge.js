@@ -84,7 +84,7 @@ export default function Nudge({ mode }) {
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-          <button className="flex-1 md:flex-none min-h-11 inline-flex items-center justify-center bg-gold-accent text-background font-working-title text-sm font-bold py-2 px-6 rounded hover:opacity-90 transition-all whitespace-nowrap">
+          <button className="flex-1 md:flex-none min-h-11 inline-flex items-center justify-center bg-gold-accent text-background font-working-title text-sm font-bold py-2 px-6 rounded hover:opacity-90 transition-[transform,opacity,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation whitespace-nowrap">
             {content.action}
           </button>
           <button 

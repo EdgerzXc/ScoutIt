@@ -10,7 +10,7 @@ export const ImpeccableInput = forwardRef(({ label, className = "", ...props }, 
       )}
       <input
         ref={ref}
-        className={`bg-[var(--surface2)] border border-[var(--border)] rounded px-3.5 py-3 text-[var(--text-primary)] font-sans text-sm transition-all duration-200 outline-none focus:border-[var(--accent)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25)] placeholder-[var(--text-muted)] ${className}`}
+        className={`bg-[var(--surface2)] border border-[var(--border)] rounded px-3.5 py-3 text-[var(--text-primary)] font-sans text-base md:text-sm transition-[border-color,box-shadow,background-color] duration-150 ease-out outline-none focus:border-[var(--accent)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25)] placeholder-[var(--text-muted)] touch-manipulation ${className}`}
         {...props}
       />
     </div>
@@ -28,7 +28,7 @@ export const ImpeccableTextArea = forwardRef(({ label, className = "", ...props 
       )}
       <textarea
         ref={ref}
-        className={`bg-[var(--surface2)] border border-[var(--border)] rounded px-3.5 py-3 text-[var(--text-primary)] font-sans text-sm transition-all duration-200 outline-none focus:border-[var(--accent)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25)] placeholder-[var(--text-muted)] resize-y min-h-[100px] ${className}`}
+        className={`bg-[var(--surface2)] border border-[var(--border)] rounded px-3.5 py-3 text-[var(--text-primary)] font-sans text-base md:text-sm transition-[border-color,box-shadow,background-color] duration-150 ease-out outline-none focus:border-[var(--accent)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25)] placeholder-[var(--text-muted)] resize-y min-h-[100px] touch-manipulation ${className}`}
         {...props}
       />
     </div>

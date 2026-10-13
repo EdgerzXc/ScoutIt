@@ -36,6 +36,15 @@ describe("A-055 transport security headers", () => {
     expect(connect[1].split(/\s+/)).toContain(new URL(tileUrl[0]).origin);
   });
 
+  it("allows external video providers in frame-src", () => {
+    const frame = nextConfig.match(/frame-src\s+([^;]+)/);
+    expect(frame).not.toBeNull();
+    const frameSources = frame[1].split(/\s+/);
+    expect(frameSources).toContain("https://www.youtube.com");
+    expect(frameSources).toContain("https://player.vimeo.com");
+    expect(frameSources).toContain("https://drive.google.com");
+  });
+
   // ── A-123 — browser source maps are not shipped ───────────────────────────
   //
   // `productionBrowserSourceMaps: true` emitted 178 `.js.map` files: **44 MB of

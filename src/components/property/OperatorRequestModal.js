@@ -17,8 +17,8 @@ import useModalDialog from "@/components/ui/useModalDialog";
 // handling (no swallowed errors, unlike InquiryModal's current mock).
 
 const backdropVariants = {
-  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
-  visible: { opacity: 1, backdropFilter: "blur(8px)" }
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 }
 };
 
 const modalVariants = {
@@ -28,7 +28,7 @@ const modalVariants = {
 };
 
 const modalTransition = { type: "spring", stiffness: 300, damping: 30 };
-const backdropTransition = { duration: 0.4 };
+const backdropTransition = { duration: 0.2, ease: "easeOut" };
 
 const successVariants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -113,7 +113,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-5"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-5 backdrop-blur-sm"
           style={{ background: "var(--modal-scrim)" }}
           variants={reduceMotion ? stillBackdropVariants : backdropVariants}
           initial="hidden"

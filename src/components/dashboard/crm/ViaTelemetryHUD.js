@@ -41,7 +41,7 @@ export default function ViaTelemetryHUD() {
 
   if (loading) {
     return (
-      <div className="p-5 rounded-2xl bg-[#121212] border border-white/5 mb-8 animate-pulse">
+      <div className="p-5 rounded-2xl bg-surface border border-white/5 mb-8 animate-pulse">
         <div className="h-4 w-48 bg-white/10 rounded mb-4" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -57,7 +57,7 @@ export default function ViaTelemetryHUD() {
   const { summary, conversionRates, shareLinks } = data;
 
   return (
-    <div className="p-6 rounded-2xl bg-[#121212] border border-surface-variant/40 shadow-xl mb-8 relative overflow-hidden">
+    <div className="p-6 rounded-2xl bg-surface border border-surface-variant/40 shadow-xl mb-8 relative overflow-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-white/5">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded bg-gold-accent/10 border border-gold-accent/20 text-gold-accent">

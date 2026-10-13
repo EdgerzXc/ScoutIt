@@ -9,8 +9,8 @@ import { stillBackdropVariants, stillPanelVariants, instantDialogTransition } fr
 import useModalDialog from "@/components/ui/useModalDialog";
 
 const backdropVariants = {
-  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
-  visible: { opacity: 1, backdropFilter: "blur(8px)" }
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 }
 };
 
 const modalVariants = {
@@ -20,7 +20,7 @@ const modalVariants = {
 };
 
 const modalTransition = { type: "spring", stiffness: 320, damping: 28 };
-const backdropTransition = { duration: 0.3 };
+const backdropTransition = { duration: 0.2, ease: "easeOut" };
 
 export default function DirectCallModal({
   isOpen,
@@ -162,7 +162,7 @@ export default function DirectCallModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 backdrop-blur-sm"
           style={{ background: "var(--modal-scrim)" }}
           variants={reduceMotion ? stillBackdropVariants : backdropVariants}
           initial="hidden"
@@ -187,12 +187,12 @@ export default function DirectCallModal({
             <GlassPanel
               className="relative p-6 md:p-8 rounded-2xl contact-lens-modal border border-white/[0.08]"
               style={{
-                boxShadow: "0 24px 48px -12px rgba(0,0,0,0.8), 0 0 20px rgba(var(--accent-rgb),0.12)",
-                background: "linear-gradient(180deg, #161616 0%, #0d0d0d 100%)"
+                boxShadow: "0 24px 48px -12px var(--shadow-xl), 0 0 20px rgba(var(--accent-rgb),0.12)",
+                background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)"
               }}
             >
               <button
-                className="absolute top-5 right-5 text-text-secondary hover:text-text-primary transition-colors p-1 rounded-full hover:bg-white/5"
+                className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-full hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 onClick={handleEndCall}
                 aria-label="Close call modal"
               >
@@ -201,7 +201,7 @@ export default function DirectCallModal({
 
               <div className="flex items-center gap-2 mb-6">
                 <span className="w-2 h-2 rounded-full bg-gold-accent animate-pulse" />
-                <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-gold-accent">
+                <span className="font-mono text-[12px] tracking-[0.12em] uppercase text-gold-accent">
                   Direct Operator Hotline · Web Audio Connect
                 </span>
               </div>
@@ -252,9 +252,9 @@ export default function DirectCallModal({
                   </div>
 
                   {/* Security Badge */}
-                  <div className="flex items-center gap-1.5 text-[11px] text-text-muted mt-2 mb-8">
+                  <div className="flex items-center gap-1.5 text-[12px] text-text-muted mt-2 mb-8">
                     <ShieldCheck size={14} className="text-gold-accent/70" />
-                    <span>Direct P2P audio hotline. No automated AI bots or transaction processing.</span>
+                    <span>Direct line to the property operations desk. Live voice communication without bots.</span>
                   </div>
 
                   {/* Controls */}
@@ -262,7 +262,7 @@ export default function DirectCallModal({
                     <button
                       type="button"
                       onClick={() => setIsMuted(!isMuted)}
-                      className="p-3 rounded-full bg-white/[0.04] border border-white/10 hover:border-gold-accent/40 text-text-secondary hover:text-text-primary transition"
+                      className="min-w-[44px] min-h-[44px] p-3 rounded-full bg-white/[0.04] border border-white/10 hover:border-gold-accent/40 text-text-secondary hover:text-text-primary transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-95 touch-manipulation flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
                       title={isMuted ? "Unmute ringtone" : "Mute ringtone"}
                       aria-label={isMuted ? "Unmute ringtone" : "Mute ringtone"}
                     >
@@ -272,7 +272,7 @@ export default function DirectCallModal({
                     <button
                       type="button"
                       onClick={handleEndCall}
-                      className="flex items-center gap-2 px-6 py-3 rounded-full bg-error/15 border border-error/30 hover:bg-error/25 text-error font-mono text-xs uppercase tracking-wider transition shadow-lg"
+                      className="min-h-[44px] flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-error/15 border border-error/30 hover:bg-error/25 text-error font-mono text-xs uppercase tracking-wider transition-[transform,background-color,border-color] duration-150 ease-out active:scale-95 touch-manipulation shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
                     >
                       <PhoneOff size={16} />
                       <span>End Call</span>
@@ -281,7 +281,7 @@ export default function DirectCallModal({
                     <button
                       type="button"
                       onClick={handleGoToMessage}
-                      className="flex items-center gap-2 px-4 py-3 rounded-full bg-white/[0.04] border border-white/10 hover:border-gold-accent/40 text-text-secondary hover:text-gold-accent font-mono text-xs uppercase tracking-wider transition"
+                      className="min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-white/[0.04] border border-white/10 hover:border-gold-accent/40 text-text-secondary hover:text-gold-accent font-mono text-xs uppercase tracking-wider transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
                       title="Leave message instead"
                     >
                       <MessageSquare size={16} />
@@ -305,14 +305,14 @@ export default function DirectCallModal({
                   </p>
 
                   <p className="text-xs text-text-muted leading-relaxed max-w-sm mb-6">
-                    Don&apos;t worry — your inquiry has been logged. Leave a priority message so the branch operations team can catch up with you directly in their dashboard.
+                    Your inquiry is saved. Leave a message with your preferred call time, and the operations team will follow up directly.
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-3 w-full">
                     <ImpeccableButton
                       type="button"
                       onClick={handleGoToMessage}
-                      className="w-full flex-1"
+                      className="w-full flex-1 min-h-[44px]"
                     >
                       Leave Priority Message →
                     </ImpeccableButton>
@@ -320,7 +320,7 @@ export default function DirectCallModal({
                     <button
                       type="button"
                       onClick={handleEndCall}
-                      className="px-4 py-2.5 rounded-lg border border-white/10 hover:border-white/20 text-text-secondary hover:text-text-primary font-mono text-xs uppercase tracking-wider transition"
+                      className="min-h-[44px] px-4 py-2.5 rounded-lg border border-white/10 hover:border-white/20 text-text-secondary hover:text-text-primary font-mono text-xs uppercase tracking-wider transition-[transform,border-color,color] duration-150 ease-out active:scale-95 touch-manipulation inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                     >
                       Close
                     </button>

@@ -83,7 +83,7 @@ export default function SemanticChip({
         aria-expanded={open}
         aria-controls={open ? popoverId : undefined}
         onClick={() => setOpen((prev) => !prev)}
-        className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border transition-all duration-200 cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+        className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border transition-[transform,border-color,box-shadow,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
         style={{
           background: "var(--surface)",
           borderColor: open ? selectedTone.accent : "var(--border)",
@@ -110,11 +110,11 @@ export default function SemanticChip({
           id={popoverId}
           role="region"
           aria-label={label}
-          className="absolute z-50 left-0 top-full mt-2 w-72 p-3.5 rounded-sm border backdrop-blur-md transition-all shadow-xl"
+          className="absolute z-50 left-0 top-full mt-2 w-72 p-3.5 rounded-sm border backdrop-blur-md transition-[opacity,transform] duration-150 ease-out shadow-xl"
           style={{
             background: "var(--surface)",
             borderColor: selectedTone.border,
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.7), 0 0 15px rgba(var(--accent-rgb), 0.1)",
+            boxShadow: "0 10px 25px -5px var(--shadow-lg), 0 0 15px rgba(var(--accent-rgb), 0.1)",
           }}
         >
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--border)]">

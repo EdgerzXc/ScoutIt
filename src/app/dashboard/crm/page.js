@@ -8,12 +8,14 @@ import KanbanBoard from "../../../components/dashboard/crm/KanbanBoard";
 import AppointmentsSheet from "../../../components/dashboard/crm/AppointmentsSheet";
 import DealFileSlideOver from "../../../components/dashboard/crm/DealFileSlideOver";
 import NewDealModal from "../../../components/dashboard/crm/NewDealModal";
+import ImportLeadsModal from "../../../components/dashboard/crm/ImportLeadsModal";
 import TaskRail from "../../../components/dashboard/crm/TaskRail";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
 import { loadDeals } from "../../../lib/deals/dealsClient";
 import { normalizeDashboardMode } from "../../../lib/dashboardModes";
-import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole } from "lucide-react";
+import { leadsToCsv, exportFilename } from "../../../lib/leadExport";
+import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole, Upload, Download } from "lucide-react";
 import Link from "next/link";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -46,6 +48,7 @@ function CRMPageInner() {
   const [showToast, setShowToast] = useState("");
   const [toastTone, setToastTone] = useState("locked"); // "locked" | "error"
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // The lens menu had no way out but re-clicking its own trigger: clicking the
   // page, or pressing Escape, left it hovering over the pipeline.
@@ -159,6 +162,45 @@ function CRMPageInner() {
     flashToast(`Unlock ${feature} at ${tier} tier.`, "locked");
   };
 
+  const handleImportLeads = (newLeads) => {
+    if (!Array.isArray(newLeads) || newLeads.length === 0) return;
+    const mappedDeals = newLeads.map((item, idx) => ({
+      id: item.id || `imported-${Date.now()}-${idx}`,
+      status: item.status || "connected",
+      propertyTitle: item.propertyTitle || "Direct Inbound Lead",
+      otherParty: item.name || item.email || "Imported Contact",
+      otherPartyEmail: item.email || "",
+      otherPartyPhone: item.phone || "",
+      propertyPrice: item.budget ? Number(item.budget) || null : null,
+      myRole: viewingAs === "broker" ? "broker" : "owner",
+      lastMessage: item.notes || "Imported lead record",
+      createdAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      private_notes: item.notes || "",
+      source: item.source || "csv_import",
+    }));
+
+    setDeals((prev) => [...mappedDeals, ...prev]);
+    flashToast(`Imported ${mappedDeals.length} leads to your pipeline.`);
+  };
+
+  const handleExportPipelineCsv = () => {
+    if (deals.length === 0) {
+      flashToast("No deals in pipeline to export.");
+      return;
+    }
+    const csvContent = leadsToCsv(deals);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = exportFilename("scoutit-pipeline", "csv");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   // Only an unknown identity justifies covering the whole page. Waiting for
   // the pipeline itself no longer hides the header, the workspace nav and the
   // tabs — those are ready immediately, and blanking them made the CRM feel
@@ -258,6 +300,18 @@ function CRMPageInner() {
               </div>
             )}
           </div>
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex min-h-11 items-center gap-2 rounded border border-surface-variant bg-surface-alt px-3.5 py-2 font-label-caps text-label-caps uppercase text-on-surface transition-colors duration-200 ease-out hover:border-gold-accent/50"
+          >
+            <Upload size={14} className="text-gold-accent" /> Import Leads
+          </button>
+          <button
+            onClick={handleExportPipelineCsv}
+            className="flex min-h-11 items-center gap-2 rounded border border-surface-variant bg-surface-alt px-3.5 py-2 font-label-caps text-label-caps uppercase text-on-surface transition-colors duration-200 ease-out hover:border-gold-accent/50"
+          >
+            <Download size={14} className="text-gold-accent" /> Export .csv
+          </button>
           <button
             onClick={() => setIsNewDealModalOpen(true)}
             className="min-h-11 rounded bg-gold-accent px-4 py-2 font-label-caps text-label-caps uppercase text-background shadow-[0_0_18px_rgba(var(--accent-bright-rgb),0.25)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-gold-bright active:scale-[0.97] md:px-6"
@@ -373,6 +427,7 @@ function CRMPageInner() {
             viewingAs={viewingAs}
             onStatusChange={handleStatusChange}
             onDealClick={setSelectedDeal}
+            appointments={appointments}
           />
         )}
         {activeTab === "appointments" && loading && (
@@ -409,6 +464,13 @@ function CRMPageInner() {
         onClose={() => setIsNewDealModalOpen(false)}
         onDealCreated={(newDeal) => setDeals((prev) => [...prev, newDeal])}
         mockUserId={mockUserId}
+      />
+
+      <ImportLeadsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleImportLeads}
+        existingDeals={deals}
       />
 
       {/* Toast Notification */}

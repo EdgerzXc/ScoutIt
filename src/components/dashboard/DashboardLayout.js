@@ -2,10 +2,10 @@ import Link from "next/link";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { ArrowLeft } from "lucide-react";
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children, variant = "dashboard" }) {
   return (
     <div className="relative min-h-screen bg-background text-text-primary flex flex-col pb-[100px] md:pb-24">
-      <AtmosphereBackground variant="dashboard" />
+      <AtmosphereBackground variant={variant} />
 
       {/* Top Nav (Persistent) */}
       <header className="relative z-40 sticky top-0 bg-background/60 backdrop-blur-2xl border-b border-white/[0.04] px-4 py-3 md:px-6 md:py-4 flex items-center justify-between transition-all duration-300">

@@ -68,8 +68,8 @@ export default function IncidentSignalBanner({
       <div
         className={`rounded-2xl border backdrop-blur-xl px-4 py-2.5 shadow-2xl flex items-center justify-between transition-all ${
           isAlarmActive
-            ? "bg-[#20080d]/95 border-red-500/80 shadow-[0_0_35px_rgba(239,68,68,0.4)] text-white"
-            : "bg-[#0c0c16]/90 border-white/20 text-white/90 hover:border-white/30"
+            ? "bg-error/20 border-error/80 shadow-[0_0_35px_rgba(var(--red-rgb,239,68,68),0.4)] text-text-primary"
+            : "bg-surface/90 border-border-solid text-text-primary hover:border-accent-muted"
         }`}
       >
         {/* Left: Status Indicator & Core Message */}
@@ -77,13 +77,13 @@ export default function IncidentSignalBanner({
           <div className="shrink-0 flex items-center">
             {isAlarmActive ? (
               <div className="relative">
-                <span className="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping absolute" />
-                <span className="w-3.5 h-3.5 rounded-full bg-red-500 flex items-center justify-center text-[12px] font-bold text-white relative">
+                <span className="w-3.5 h-3.5 rounded-full bg-error animate-ping absolute" />
+                <span className="w-3.5 h-3.5 rounded-full bg-error flex items-center justify-center text-[12px] font-bold text-white relative">
                   !
                 </span>
               </div>
             ) : (
-              <span className="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <span className="w-3 h-3 rounded-full bg-green shadow-[0_0_8px_rgba(var(--green-rgb,16,185,129),0.8)]" />
             )}
           </div>
 
@@ -147,7 +147,7 @@ export default function IncidentSignalBanner({
 
       {/* Expanded Signal Dispatcher Drawer */}
       {isExpanded && (
-        <div className="mt-2 rounded-2xl bg-[#0c0c16]/95 border border-white/20 backdrop-blur-2xl p-4 shadow-2xl text-white space-y-3.5">
+        <div className="mt-2 rounded-2xl bg-surface/95 border border-border-solid backdrop-blur-2xl p-4 shadow-2xl text-text-primary space-y-3.5">
           <div className="flex items-center justify-between pb-2 border-b border-white/15">
             <div className="flex items-center gap-2">
               <Radio size={15} className="text-[var(--accent)]" />

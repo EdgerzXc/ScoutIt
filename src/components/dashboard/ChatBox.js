@@ -1841,10 +1841,10 @@ export default function ChatBox({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
                 </span>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-error font-bold">
+                <span className="text-[12px] font-mono uppercase tracking-wider text-error font-bold">
                   REC
                 </span>
-                <span className="text-[11px] font-mono text-on-surface">
+                <span className="text-[12px] font-mono text-on-surface">
                   {Math.floor(recordingDuration / 60).toString().padStart(2, "0")}:
                   {(recordingDuration % 60).toString().padStart(2, "0")} / 01:00
                 </span>
@@ -1870,7 +1870,7 @@ export default function ChatBox({
                 <button
                   type="button"
                   onClick={cancelVoiceRecording}
-                  className="px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider text-text-muted hover:text-error transition-colors"
+                  className="px-2.5 py-1 text-[12px] font-mono uppercase tracking-wider text-text-muted hover:text-error transition-colors"
                   title="Discard recording"
                 >
                   Discard
@@ -1878,7 +1878,7 @@ export default function ChatBox({
                 <button
                   type="button"
                   onClick={() => stopVoiceRecording(true)}
-                  className="flex items-center gap-1 bg-gold-accent text-background px-3.5 py-1 rounded-full font-mono text-[11px] font-bold uppercase tracking-wider hover:bg-gold-bright transition shadow-[0_2px_8px_rgba(var(--accent-rgb),0.2)]"
+                  className="flex items-center gap-1 bg-gold-accent text-background px-3.5 py-1 rounded-full font-mono text-[12px] font-bold uppercase tracking-wider hover:bg-gold-bright transition shadow-[0_2px_8px_rgba(var(--accent-rgb),0.2)]"
                   title="Finish and send voice memo"
                 >
                   <span>Send</span>

@@ -86,6 +86,20 @@ export async function GET(request) {
         const myRole = routedOperatorByDeal.get(d.id) === userId ? "operator" : deriveMyRole(d, userId);
         const otherId = myRole === "buyer" ? (d.broker_id || routedOperatorByDeal.get(d.id) || routedBrokerByDeal.get(d.id) || d.properties?.owner_id) : myRole === "broker" ? (d.buyer_id || d.properties?.owner_id) : (d.broker_id || d.buyer_id);
         const otherRoleLabel = myRole === "buyer" ? (routedOperatorByDeal.has(d.id) ? "Operator" : (d.broker_id || routedBrokerByDeal.has(d.id)) ? "Broker" : "Owner") : myRole === "broker" ? (d.buyer_id ? "Buyer" : "Owner") : (d.broker_id ? "Broker" : "Buyer");
+        let userScopedNote = "";
+        if (d.private_notes) {
+          try {
+            const parsedNotes = JSON.parse(d.private_notes);
+            if (parsedNotes && typeof parsedNotes === "object" && !Array.isArray(parsedNotes)) {
+              userScopedNote = parsedNotes[userId] || "";
+            } else {
+              userScopedNote = String(d.private_notes);
+            }
+          } catch {
+            userScopedNote = String(d.private_notes);
+          }
+        }
+
         return {
           id: d.id,
           status: d.status,
@@ -93,6 +107,7 @@ export async function GET(request) {
           propertyTitle: d.properties?.title || "Untitled Property",
           propertySlug: d.properties?.slug || null,
           propertyPrice: d.properties?.price ?? null,
+          unitId: d.unit_id || null,
           myRole,
           // A pending Connect is anonymous: the recipient learns the intent and
           // the tier, not the identity (§38.3). Acceptance is the act that
@@ -132,7 +147,7 @@ export async function GET(request) {
           // deadlines are measured from, so the client never computes one.
           archivedAt: d.archived_at ?? null,
           pendingClockResetAt: d.pending_clock_reset_at ?? null,
-          private_notes: d.private_notes,
+          private_notes: userScopedNote,
         };
       })
       .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));

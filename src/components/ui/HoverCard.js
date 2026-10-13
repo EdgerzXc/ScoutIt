@@ -19,7 +19,7 @@ export default function HoverCard({
   
   return (
     <div
-      className={`hov-card card-atmosphere stagger-enter transition-all relative overflow-hidden group border ${selectedClass} ${ctaClass} ${className}`}
+      className={`hov-card card-atmosphere stagger-enter transition-[transform,box-shadow,border-color] duration-200 ease-out touch-manipulation relative overflow-hidden group border ${selectedClass} ${ctaClass} ${className}`}
       style={{ '--i': index, ...(props.style || {}) }}
       onClick={onClick}
       {...props}

@@ -46,12 +46,12 @@ export default function SettlementTaxSchedule({ listedPrice, location = "" }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
         {/* Seller Statutory Floor */}
-        <div className="p-3.5 rounded-sm border border-[var(--border)] bg-[var(--surface-alt,rgba(255,255,255,0.02))]">
+        <div className="p-3.5 rounded-sm border border-[var(--border)] bg-[var(--surface-alt)]">
           <div className="flex items-center justify-between mb-2.5">
             <span className="font-mono text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
               Seller Customary Liability
             </span>
-            <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-[var(--accent-muted,rgba(232,174,60,0.15))] text-[var(--accent)]">
+            <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-[var(--accent-muted)] text-[var(--accent)]">
               Capital Asset
             </span>
           </div>
@@ -78,12 +78,12 @@ export default function SettlementTaxSchedule({ listedPrice, location = "" }) {
         </div>
 
         {/* Buyer Statutory Floor */}
-        <div className="p-3.5 rounded-sm border border-[var(--border)] bg-[var(--surface-alt,rgba(255,255,255,0.02))]">
+        <div className="p-3.5 rounded-sm border border-[var(--border)] bg-[var(--surface-alt)]">
           <div className="flex items-center justify-between mb-2.5">
             <span className="font-mono text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
               Buyer Transfer & Registration
             </span>
-            <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-[var(--accent-muted,rgba(232,174,60,0.15))] text-[var(--accent)]">
+            <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-[var(--accent-muted)] text-[var(--accent)]">
               Title Transfer
             </span>
           </div>
@@ -121,7 +121,7 @@ export default function SettlementTaxSchedule({ listedPrice, location = "" }) {
         </button>
 
         {expanded && (
-          <div className="mt-2.5 p-3 rounded-sm bg-[var(--bg,#0e0e0e)] border border-[var(--border)] text-xs leading-relaxed text-[var(--text-secondary)] space-y-2">
+          <div className="mt-2.5 p-3 rounded-sm bg-[var(--bg)] border border-[var(--border)] text-xs leading-relaxed text-[var(--text-secondary)] space-y-2">
             <p>{TAX_DISCLAIMER}</p>
             <p className="font-mono text-xs text-[var(--text-muted)] pt-1 border-t border-[var(--border)]">
               {RESA_FOOTER}

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ScoutIt — Space Intelligence Platform</title>
+<meta name="viewport" content="width=1920, height=1080">
+<link rel="stylesheet" href="./runtime/fonts.css">
+<style>
+:root {
+  --ground: #07080B;
+  --ground-card: rgba(14, 16, 22, 0.95);
+  --ink: #F4F2EE;
+  --ink-soft: #A39E93;
+  --ink-muted: #6E685E;
+  --accent: #E8AE3C;
+  --accent-bright: #F7C64E;
+  --accent-muted: #6E531A;
+  --accent-glow: rgba(232, 174, 60, 0.28);
+  --border-gold: 1px solid rgba(232, 174, 60, 0.32);
+  --border-subtle: 1px solid rgba(244, 242, 238, 0.08);
+  --font: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "Inter", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+#main {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+  overflow: hidden; background: var(--ground); color: var(--ink);
+  font-family: var(--font); font-weight: 500;
+}
+.scene { position: absolute; inset: 0; }
+.cam { position: absolute; inset: 0; }
+
+/* Cinematic background ground & lighting */
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(232, 174, 60, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 174, 60, 0.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+  background-position: -1px -1px;
+}
+.radial-aura {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(232, 174, 60, 0.14) 0%, transparent 68%);
+}
+
+/* ==============================================================
+   BEAT 1: HOOK (GEOSPATIAL RETICLE LOCK)
+   ============================================================== */
+#s1-wrap {
+  position: absolute; left: 240px; top: 150px; width: 1440px; height: 780px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#reticle-card {
+  position: relative; width: 1360px; height: 740px;
+  background: var(--ground-card);
+  border: var(--border-gold);
+  border-radius: 36px;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.85), 0 0 60px var(--accent-glow);
+  padding: 56px 68px;
+  overflow: hidden;
+}
+.top-meta-row {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: var(--border-subtle);
+  padding-bottom: 24px; margin-bottom: 36px;
+}
+.coords-tag {
+  font-family: var(--font-mono); font-size: 28px; font-weight: 600;
+  color: var(--accent); letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 14px;
+}
+.coords-tag svg { width: 30px; height: 30px; }
+.cbd-badge {
+  font-size: 22px; font-weight: 600; color: var(--ink-soft);
+  background: rgba(244, 242, 238, 0.05); padding: 8px 24px; border-radius: 999px;
+  border: var(--border-subtle);
+}
+.hero-building-title {
+  font-size: 86px; line-height: 98px; font-weight: 800;
+  color: var(--ink); letter-spacing: -0.035em; margin: 0 0 14px 0;
+}
+.hero-building-sub {
+  font-size: 32px; line-height: 42px; font-weight: 450;
+  color: var(--ink-soft); margin: 0 0 42px 0;
+}
+.specs-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+.spec-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: var(--border-subtle); border-radius: 20px;
+  padding: 24px 30px;
+}
+.spec-num {
+  font-size: 46px; font-weight: 700; color: var(--accent-bright);
+  line-height: 54px; margin-bottom: 6px;
+}
+.spec-label {
+  font-size: 20px; font-weight: 500; color: var(--ink-soft);
+}
+.reticle-corner-bracket {
+  position: absolute; width: 44px; height: 44px;
+  border-color: var(--accent); border-style: solid;
+}
+.rc-tl { top: 22px; left: 22px; border-width: 3px 0 0 3px; }
+.rc-tr { top: 22px; right: 22px; border-width: 3px 3px 0 0; }
+.rc-bl { bottom: 22px; left: 22px; border-width: 0 0 3px 3px; }
+.rc-br { bottom: 22px; right: 22px; border-width: 0 3px 3px 0; }
+
+/* Scanning horizontal laser bar */
+#scan-bar-1 {
+  position: absolute; left: 0; top: 0; width: 100%; height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-bright) 50%, transparent 100%);
+  box-shadow: 0 0 16px var(--accent-bright);
+}
+
+/* Radar scanner */
+#radar-sweep {
+  position: absolute; right: 70px; top: 170px; width: 230px; height: 230px;
+}
+
+/* ==============================================================
+   BEAT 2: TURN (GIS HAZARD ENVELOPE)
+   ============================================================== */
+#gis-panel {
+  position: absolute; left: 230px; top: 150px; width: 1460px; height: 780px;
+  background: var(--ground-card);
+  border: var(--border-gold);
+  border-radius: 36px;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.85), 0 0 60px var(--accent-glow);
+  padding: 50px 64px;
+  overflow: hidden;
+}
+.gis-head {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: var(--border-subtle); padding-bottom: 24px; margin-bottom: 36px;
+}
+.gis-title {
+  font-size: 40px; font-weight: 700; color: var(--ink);
+  display: flex; align-items: center; gap: 16px;
+}
+.gis-badge {
+  font-size: 20px; font-weight: 600; color: var(--accent-bright);
+  background: rgba(232, 174, 60, 0.12); border: var(--border-gold);
+  padding: 8px 24px; border-radius: 999px;
+}
+.gis-cards-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+}
+.gis-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: var(--border-subtle); border-radius: 24px;
+  padding: 36px 32px; display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.gis-card.featured {
+  border-color: rgba(232, 174, 60, 0.4);
+  background: rgba(232, 174, 60, 0.04);
+}
+.gis-card-header {
+  font-size: 20px; font-weight: 600; color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+.gis-card-hero {
+  font-size: 60px; font-weight: 800; color: var(--ink);
+  line-height: 66px; margin-bottom: 12px;
+}
+.gis-card-hero.gold {
+  color: var(--accent-bright);
+}
+.gis-card-status {
+  font-size: 22px; font-weight: 600; color: #4ADE80;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+}
+.gis-card-status.gold-stat {
+  color: var(--accent-bright);
+}
+.gis-card-desc {
+  font-size: 19px; line-height: 28px; color: var(--ink-soft); margin-top: auto;
+}
+.gis-progress-track {
+  width: 100%; height: 6px; background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px; margin-bottom: 20px; overflow: hidden;
+}
+.gis-progress-fill {
+  height: 100%; background: var(--accent-bright); border-radius: 999px; width: 0%;
+}
+.fill-green { background: #4ADE80; }
+
+#scan-bar-2 {
+  position: absolute; left: 0; top: 0; width: 100%; height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-bright) 50%, transparent 100%);
+  box-shadow: 0 0 16px var(--accent-bright);
+}
+
+/* ==============================================================
+   BEAT 3: PROOF (DUAL-CMS PIPELINE & EXPORT)
+   ============================================================== */
+#proof-panel {
+  position: absolute; left: 230px; top: 150px; width: 1460px; height: 780px;
+  background: var(--ground-card);
+  border: var(--border-gold);
+  border-radius: 36px;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.85), 0 0 60px var(--accent-glow);
+  padding: 54px 68px; overflow: hidden;
+}
+.proof-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: var(--border-subtle); padding-bottom: 24px; margin-bottom: 36px;
+}
+.broker-pill {
+  font-family: var(--font-mono); font-size: 22px; font-weight: 600;
+  color: var(--accent-bright); background: rgba(232, 174, 60, 0.1);
+  border: var(--border-gold); padding: 10px 24px; border-radius: 999px;
+  display: flex; align-items: center; gap: 12px;
+}
+.proof-body {
+  display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center;
+}
+.proof-left {
+  display: flex; flex-direction: column;
+}
+.counter-caption {
+  font-size: 24px; font-weight: 500; color: var(--ink-soft); margin-bottom: 8px;
+}
+.counter-headline {
+  font-size: 92px; line-height: 102px; font-weight: 800;
+  color: var(--ink); letter-spacing: -0.04em; margin-bottom: 28px;
+  font-variant-numeric: tabular-nums;
+}
+.counter-headline span.gold-peso {
+  color: var(--accent);
+}
+.inquiry-card {
+  background: rgba(255, 255, 255, 0.025); border: var(--border-subtle);
+  border-radius: 20px; padding: 26px 30px;
+}
+.inquiry-line {
+  font-size: 22px; line-height: 36px; color: var(--ink); margin-bottom: 6px;
+}
+.inquiry-line span { color: var(--accent-bright); font-weight: 600; }
+.proof-right {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.015); border: var(--border-subtle);
+  border-radius: 28px; padding: 48px 40px; text-align: center;
+}
+#export-btn {
+  position: relative; width: 100%; height: 90px;
+  background: var(--accent-bright); color: #08090C;
+  border: none; border-radius: 20px; font-size: 26px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  cursor: pointer; box-shadow: 0 16px 40px rgba(232, 174, 60, 0.35);
+}
+#dossier-pill {
+  margin-top: 28px; font-size: 22px; font-weight: 600; color: #4ADE80;
+  background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3);
+  padding: 12px 28px; border-radius: 999px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* Mouse cursor */
+#cursor {
+  position: absolute; left: 0; top: 0; pointer-events: none; z-index: 99;
+}
+
+/* ==============================================================
+   BEAT 4: CTA (BRAND STING)
+   ============================================================== */
+#s4 { background: #060709; }
+#lockup {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.brand-wordmark {
+  font-size: 160px; line-height: 164px; font-weight: 800;
+  letter-spacing: -0.05em; display: flex; align-items: center;
+  margin-bottom: 24px;
+}
+.word-scout { color: #F4F2EE; }
+.word-it { color: var(--accent); }
+.brand-strapline {
+  font-size: 42px; line-height: 52px; font-weight: 600;
+  color: var(--ink-soft); letter-spacing: 0.03em; margin-bottom: 40px;
+}
+.brand-url-pill {
+  font-family: var(--font-mono); font-size: 32px; font-weight: 600;
+  color: var(--accent-bright); background: rgba(232, 174, 60, 0.1);
+  border: var(--border-gold); padding: 14px 48px; border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+</style>
+</head>
+<body>
+<div id="main" data-composition-id="main" data-start="0" data-duration="15" data-width="1920" data-height="1080">
+  <div class="grid-bg"></div>
+  <div class="radial-aura"></div>
+
+  <!-- ============ BEAT 1: HOOK (GEOSPATIAL RETICLE LOCK) ============ -->
+  <section id="s1" class="scene">
+    <div id="cam1" class="cam">
+      <div id="s1-wrap">
+        <div id="reticle-card" data-ui="captured">
+          <div id="scan-bar-1"></div>
+          <div class="reticle-corner-bracket rc-tl"></div>
+          <div class="reticle-corner-bracket rc-tr"></div>
+          <div class="reticle-corner-bracket rc-bl"></div>
+          <div class="reticle-corner-bracket rc-br"></div>
+
+          <div class="top-meta-row">
+            <div class="coords-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>
+              <span>14.5547° N, 121.0244° E</span>
+            </div>
+            <div class="cbd-badge">Makati CBD // Ayala Avenue</div>
+          </div>
+
+          <h1 class="hero-building-title">The Estate Makati</h1>
+          <p class="hero-building-sub">Institutional Space Intelligence Target</p>
+
+          <div class="specs-grid">
+            <div class="spec-box">
+              <div class="spec-num">54</div>
+              <div class="spec-label">Storey Super-Prime Tower</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-num">188</div>
+              <div class="spec-label">Exclusive Private Residences</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-num">₱340M+</div>
+              <div class="spec-label">Institutional Asset Class</div>
+            </div>
+          </div>
+
+          <svg id="radar-sweep" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(232,174,60,0.2)" stroke-width="2"/>
+            <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(232,174,60,0.3)" stroke-width="1.5"/>
+            <line x1="50" y1="5" x2="50" y2="95" stroke="rgba(232,174,60,0.2)" stroke-width="1"/>
+            <line x1="5" y1="50" x2="95" y2="50" stroke="rgba(232,174,60,0.2)" stroke-width="1"/>
+            <path id="radar-hand" d="M50 50 L85 20" stroke="#E8AE3C" stroke-width="3.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BEAT 2: TURN (GIS HAZARD ENVELOPE) ============ -->
+  <section id="s2" class="scene" style="visibility:hidden">
+    <div id="cam2" class="cam">
+      <div id="gis-panel" data-ui="captured">
+        <div id="scan-bar-2"></div>
+        <div class="gis-head">
+          <div class="gis-title">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#E8AE3C" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            <span>Live Geospatial Risk Envelope</span>
+          </div>
+          <div class="gis-badge">Project NOAH & PHIVOLCS Verified</div>
+        </div>
+
+        <div class="gis-cards-row">
+          <div id="gis-card-1" class="gis-card featured">
+            <div class="gis-card-header">Project NOAH Flood Model</div>
+            <div class="gis-card-hero gold">Zone 0</div>
+            <div class="gis-progress-track"><div id="fill-1" class="gis-progress-fill fill-green"></div></div>
+            <div class="gis-card-status">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Zero Inundation Risk</span>
+            </div>
+            <div class="gis-card-desc">100-Year Return Period Tested: Safe Elevation +28.4m Above Mean Sea Level</div>
+          </div>
+
+          <div id="gis-card-2" class="gis-card">
+            <div class="gis-card-header">West Valley Fault Proximity</div>
+            <div class="gis-card-hero">6.8 km</div>
+            <div class="gis-progress-track"><div id="fill-2" class="gis-progress-fill"></div></div>
+            <div class="gis-card-status">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Stable Bedrock Buffer</span>
+            </div>
+            <div class="gis-card-desc">Guadalupe Formation Basaltic Tuff: Zero Surface Rupture Exposure</div>
+          </div>
+
+          <div id="gis-card-3" class="gis-card">
+            <div class="gis-card-header">Transit Pedestrian Radius</div>
+            <div class="gis-card-hero">800 m</div>
+            <div class="gis-progress-track"><div id="fill-3" class="gis-progress-fill"></div></div>
+            <div class="gis-card-status gold-stat">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>9 Min Walk to MRT Ayala</span>
+            </div>
+            <div class="gis-card-desc">Direct Elevated Walkway Connection to Greenbelt & Commercial Core</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BEAT 3: PROOF (DUAL-CMS PIPELINE & EXPORT) ============ -->
+  <section id="s3" class="scene" style="visibility:hidden">
+    <div id="cam3" class="cam">
+      <div id="proof-panel" data-ui="captured">
+        <div class="proof-header">
+          <div class="broker-pill">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>PRC REBL #0028491 · Authenticated Institutional Partner</span>
+          </div>
+          <div class="cbd-badge">Dual-CMS Pipeline Synchronization</div>
+        </div>
+
+        <div class="proof-body">
+          <div class="proof-left">
+            <div class="counter-caption">Institutional Capital Under Advisory</div>
+            <div class="counter-headline"><span class="gold-peso">₱</span><span id="counter-val">180</span>,000,000</div>
+
+            <div class="inquiry-card">
+              <div class="inquiry-line">Target: <span>The Estate Makati — Penthouse 02</span></div>
+              <div class="inquiry-line">Clearance: <span>Full Spatial & Hazard Verification Passed</span></div>
+              <div class="inquiry-line">Ledger: <span>Live Sync to Institutional Data Room</span></div>
+            </div>
+          </div>
+
+          <div class="proof-right">
+            <button id="export-btn">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Asset Dossier</span>
+            </button>
+            <div id="dossier-pill" style="visibility:hidden">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Dossier Packaged (PDF + Spatial CSV)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <svg id="cursor" width="34" height="48" viewBox="0 0 34 48">
+        <path d="M0 0 L0 40 L10 30 L18 47 L26 43 L19 27 L33 27 Z" fill="#0D0E12" stroke="#E8AE3C" stroke-width="3.5" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ BEAT 4: CTA (BRAND STING) ============ -->
+  <section id="s4" class="scene" style="visibility:hidden">
+    <div id="cam4" class="cam">
+      <div id="lockup" data-ui="captured">
+        <div class="brand-wordmark">
+          <span class="word-scout">SCOUT</span><span class="word-it">IT</span>
+        </div>
+        <div class="brand-strapline">Space Intelligence Platform</div>
+        <div class="brand-url-pill">scoutit.ph</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="./runtime/vendor/gsap.min.js"></script>
+<script src="./runtime/motion.js"></script>
+<script>
+const M = Motion.film({ fps: 30, duration: 15, width: 1920, height: 1080, clock: 'smooth' });
+
+/* ==============================================================
+   BEAT 1: HOOK (0 – 102 frames / 0.0s – 3.4s)
+   Card crashes in mid-motion from 3.2x scale, radar sweeps, laser scans
+   ============================================================== */
+M.snap('#reticle-card', { at: 0, from: { scale: 3.2, y: -50 }, to: { scale: 1.0, y: 0 }, tail: 16, ease: 'snapSettle' });
+M.drift('#cam1', { prop: 'scale', from: 1.0, to: 1.10, start: 0, end: 102 });
+M.kf('#radar-hand', 'rotation', [[0, 0], [102, 1080]], { ease: 'cruise' });
+M.kf('#scan-bar-1', 'y', [[0, 0], [102, 735]], { ease: 'cruise' });
+M.kf('#reticle-card', 'scale', [[0, 1.0], [80, 1.02], [102, 1.12, 'gentleIn']]);
+
+/* ==============================================================
+   BEAT 2: TURN (102 – 240 frames / 3.4s – 8.0s)
+   GIS panel enters mid-motion; cards stagger; meter bars fill; laser scans
+   ============================================================== */
+M.cut(102, { hide: ['#s1'], show: ['#s2'] });
+M.enter('#gis-panel', { at: 102, frames: 14, ease: 'softLand', from: { y: 55, scale: 0.93 }, smear: { axis: 'y', px: 32 } });
+M.enter('#gis-card-1', { at: 114, frames: 10, ease: 'softLand', from: { y: 35, opacity: 0 } });
+M.enter('#gis-card-2', { at: 128, frames: 10, ease: 'softLand', from: { y: 35, opacity: 0 } });
+M.enter('#gis-card-3', { at: 142, frames: 10, ease: 'softLand', from: { y: 35, opacity: 0 } });
+
+// Animated metric fill bars inside cards
+M.kf('#fill-1', 'width', [[118, '0%'], [150, '100%']], { ease: 'softLand' });
+M.kf('#fill-2', 'width', [[132, '0%'], [165, '85%']], { ease: 'softLand' });
+M.kf('#fill-3', 'width', [[146, '0%'], [180, '92%']], { ease: 'softLand' });
+
+M.kf('#scan-bar-2', 'y', [[102, 0], [240, 775]], { ease: 'cruise' });
+M.drift('#cam2', { prop: 'x', from: 0, to: -40, start: 102, end: 240 });
+M.kf('#gis-panel', 'scale', [[102, 1.0], [210, 1.02], [240, 1.10, 'gentleIn']]);
+
+/* ==============================================================
+   BEAT 3: PROOF (240 – 408 frames / 8.0s – 13.6s)
+   Capital counter increments; cursor sweeps in, clicks export; confirmation pops
+   ============================================================== */
+M.cut(240, { hide: ['#s2'], show: ['#s3'] });
+M.enter('#proof-panel', { at: 240, frames: 14, ease: 'softLand', from: { y: 55, scale: 0.93 }, smear: { axis: 'y', px: 32 } });
+M.count('#counter-val', { at: 252, from: 180, to: 340, frames: 38, round: true });
+M.drift('#cam3', { prop: 'scale', from: 1.0, to: 1.05, start: 240, end: 408 });
+
+// Cursor enters oversized (3.2x), sweeps to export button, parks, presses at 338
+M.cursor('#cursor', {
+  keys: [
+    [276, 1860, 990, 3.2, -26],
+    [294, 1580, 800, 2.2, -16],
+    [314, 1430, 640, 1.5, -8],
+    [332, 1370, 565, 1.0, 0]
+  ],
+  ease: 'glide'
+});
+M.press('#cursor', '#export-btn', { at: 340, cursorDepth: 0.82, targetDepth: 0.90, frames: 3, release: true });
+M.enter('#dossier-pill', { at: 348, frames: 10, ease: 'popOver', from: { scale: 0.7, y: 15 } });
+M.kf('#proof-panel', 'scale', [[240, 1.0], [380, 1.02], [408, 1.10, 'gentleIn']]);
+
+/* ==============================================================
+   BEAT 4: CTA (408 – 450 frames / 13.6s – 15.0s)
+   Total duration: 1.4s (9.3% <= 25%). Resolves in ~14 frames with ~0.9s resolved hold (0.6 - 1.4s)
+   ============================================================== */
+M.cut(408, { hide: ['#s3'], show: ['#s4'] });
+M.enter('#lockup', { at: 408, frames: 16, ease: 'snapSettle', from: { scale: 3.2, blur: 10 } });
+
+window.__ready = Motion.loaded().then(() => {
+  if (/selftest/.test(location.search)) Motion.selfTest(M, { samples: 24 });
+});
+</script>
+</body>
+</html>

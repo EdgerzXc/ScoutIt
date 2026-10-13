@@ -56,7 +56,7 @@ export default function NodeLogicDiagram({
   const activeStage = stages.find(s => s.id === selectedStageId) || stages[2] || stages[0];
 
   return (
-    <div className="rounded-2xl border border-white/15 bg-[#10101c]/90 p-3.5 space-y-3.5 backdrop-blur-md shadow-xl text-white">
+    <div className="rounded-2xl border border-border-solid bg-surface/90 p-3.5 space-y-3.5 backdrop-blur-md shadow-xl text-text-primary">
       {/* Header & Mode Switcher */}
       <div className="flex items-center justify-between pb-2 border-b border-white/10">
         <div className="flex items-center gap-1.5">
@@ -136,7 +136,7 @@ export default function NodeLogicDiagram({
                 onClick={() => setSelectedStageId(stage.id)}
                 className={`w-full text-left p-2 rounded-xl border transition flex items-center justify-between text-[12px] ${
                   isSelected
-                    ? "bg-[var(--accent)]/15 border-[var(--accent)] shadow-[0_0_15px_rgba(232,174,60,0.2)]"
+                    ? "bg-[var(--accent)]/15 border-[var(--accent)] shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]"
                     : "bg-black/30 border-white/10 hover:border-white/30 hover:bg-black/50"
                 }`}
               >

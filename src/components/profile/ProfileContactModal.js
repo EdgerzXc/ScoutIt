@@ -27,11 +27,11 @@ export default function ProfileContactModal({ isOpen, onClose, profile }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="contact-overlay"
-          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
-          exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          transition={{ duration: 0.4 }}
+          className="contact-overlay backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           onClick={onClose}
         >
           <motion.div 
