@@ -42,7 +42,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
           <span className="text-3xl">🏗️</span>
           <h3 className="text-white font-medium">No projects yet</h3>
           <p className="text-sm text-text-secondary max-w-sm">
-            Add a property to your portfolio and it becomes a project you can track here — milestones, team updates, and briefings in one feed.
+            Add a property to your portfolio and it becomes a project you can track here: milestones, team updates, and briefings in one feed.
           </p>
         </GlassPanel>
       </div>
@@ -151,7 +151,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
             </div>
             <div className="p-6 space-y-4">
               <p className="text-sm text-text-secondary leading-relaxed">
-                Once your team posts daily updates for <span className="text-white font-medium">{currentEstate?.title || "this project"}</span>, the AI distills them into a morning briefing — progress, risks, and momentum in three lines instead of thirty posts.
+                Once your team posts daily updates for <span className="text-white font-medium">{currentEstate?.title || "this project"}</span>, the AI distills them into a morning briefing: progress, risks, and momentum in three lines instead of thirty posts.
               </p>
               <div className="text-[12px] font-mono uppercase tracking-widest text-text-secondary border border-white/10 bg-white/[0.02] rounded px-2 py-1.5 inline-block">
                 Waiting for first updates

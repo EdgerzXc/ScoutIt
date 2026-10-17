@@ -18,27 +18,27 @@ const BUCKETS = [
     label: "Monthly Allowance",
     icon: "↻",
     description:
-      "Your tier's free monthly Connects. Refreshes on the 1st of each month — spend it before it resets, since it never rolls over.",
+      "Your tier's free monthly Connects. Refreshes on the 1st of each month; spend it before it resets, since it never rolls over.",
   },
   {
     key: "purchased",
     label: "Purchased",
     icon: "◈",
     description:
-      "Connect packs you've bought. Never expire — they stay in your wallet until you spend them.",
+      "Connect packs you've bought. Never expire: they stay in your wallet until you spend them.",
   },
   {
     key: "earned",
     label: "Earned",
     icon: "★",
     description:
-      "Earned by completing bounties. Never expire — yours to keep and spend whenever you like.",
+      "Earned by completing bounties. Never expire: yours to keep and spend whenever you like.",
   },
 ];
 
 // Spend order note shown once, since it's the one non-obvious mechanic.
 const SPEND_ORDER_NOTE =
-  "When you spend a Connect, it's drawn from Monthly first, then Purchased, then Earned — so the ones that expire go before the ones that don't.";
+  "When you spend a Connect, it's drawn from Monthly first, then Purchased, then Earned; so the ones that expire go before the ones that don't.";
 
 export default function ConnectsBreakdown({ open, onClose, mode, providerType, tier }) {
   const ref = useRef(null);

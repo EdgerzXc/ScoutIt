@@ -180,7 +180,7 @@ export default function DeleteAccountPanel() {
             {Object.values(ERASED_DATA_LABELS).map((label) => (
               <li key={label}>{label}</li>
             ))}
-            <li>Your profile is cleared — name, photo, bio, licence details and date of birth are removed, and it is hidden.</li>
+            <li>Your profile is cleared: name, photo, bio, licence details and date of birth are removed, and it is hidden.</li>
             <li>Your sign-in is closed.</li>
           </ul>
         </div>

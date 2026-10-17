@@ -34,7 +34,7 @@ const CATEGORY_TO_LAYOUT_MAP = {
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
+  let seoTitle = `Property Intel · ${resolvedParams.id} | ScoutIt`;
   let seoDescription = "Property Intelligence Vector";
   let imageUrl = siteUrl("/api/og");
   let canonicalUrl = siteUrl(`/property/${resolvedParams.id}`);

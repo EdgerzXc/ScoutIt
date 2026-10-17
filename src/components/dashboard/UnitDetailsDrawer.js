@@ -99,7 +99,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
             >
               <input type="number" min="0" className={inputCls} value={d.capacity_seats ?? ""} onChange={(e) => onDetail("capacity_seats", e.target.value)} placeholder={capEstimate ? `~${capEstimate}` : "e.g. 40"} />
             </Field>
-            <Field label="Differentiator" hint="Why this specific cut — corner suite, freight-lift access, private entrance…">
+            <Field label="Differentiator" hint="Why this specific cut: corner suite, freight-lift access, private entrance…">
               <textarea rows={3} className={inputCls} value={d.differentiator || ""} onChange={(e) => onDetail("differentiator", e.target.value)} placeholder="Corner suite with uninterrupted skyline views and a private pantry." />
             </Field>
             <Field label="Fit-out status">
@@ -217,14 +217,14 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
               <input className={inputCls} value={d.matterport_url || ""} onChange={(e) => onDetail("matterport_url", e.target.value)} placeholder="https://my.matterport.com/show/?m=..." />
             </Field>
             <p className="text-[12px] text-text-muted -mt-1">
-              3D conversion is generated on our side and shown gated behind Cluster+ — no Connect cost. A commissioned pro model is a separate paid ecosystem service.
+              3D conversion is generated on our side and shown gated behind Cluster+, with no Connect cost. A commissioned pro model is a separate paid ecosystem service.
             </p>
           </section>
 
           {/* Subdivision scenarios */}
           <section className="flex flex-col gap-3 pt-2 border-t border-surface-variant">
             <div className="flex items-center justify-between">
-              <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">This space flexes — subdivision options</div>
+              <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">This space flexes: subdivision options</div>
             </div>
             <p className="text-[12px] text-text-muted -mt-1">
               Curate the real ways this space can be carved. Buyers pick from these on the unit page (they don&apos;t invent cuts). Add a &ldquo;Whole floor&rdquo;, &ldquo;Halves&rdquo;, &ldquo;Quarters&rdquo;, etc.
@@ -241,7 +241,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
               return (
                 <div key={s.id} className="bg-surface-alt border border-surface-variant rounded-lg p-3 flex flex-col gap-3">
                   <div className="flex items-center gap-2">
-                    <input className={`${inputCls} flex-1`} value={s.label || ""} onChange={(e) => updateScenario(s.id, "label", e.target.value)} placeholder="Layout name — e.g. Quarters" />
+                    <input className={`${inputCls} flex-1`} value={s.label || ""} onChange={(e) => updateScenario(s.id, "label", e.target.value)} placeholder="Layout name (e.g. Quarters)" />
                     <button
                       onClick={() => updateScenario(s.id, "recommended", !s.recommended)}
                       title="Mark recommended"

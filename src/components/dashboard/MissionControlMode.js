@@ -278,7 +278,7 @@ export default function MissionControlMode() {
   const portfolioSignal = scoped.length === 0
     ? "No properties in your company scope yet. Add or import your first asset from the Portfolio module."
     : [
-        `Your portfolio holds ${kpis.total} ${kpis.total === 1 ? "listing" : "listings"} — ${kpis.approved} live, ${kpis.pending} in the pipeline.`,
+        `Your portfolio holds ${kpis.total} ${kpis.total === 1 ? "listing" : "listings"}: ${kpis.approved} live, ${kpis.pending} in the pipeline.`,
         inventoryStats.total > 0
           ? `${inventoryStats.total} units tracked: ${inventoryStats.occupied} occupied, ${inventoryStats.vacant} vacant${inventoryStats.maintenance ? `, ${inventoryStats.maintenance} in maintenance` : ""}.`
           : null,
@@ -339,7 +339,7 @@ export default function MissionControlMode() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8 text-left">
                <GlassPanel className="p-6 rounded-2xl border-white/10 hover:border-gold-accent/30 transition duration-300">
-                 <Bot size={24} className="text-blue-400 mb-4" />
+                 <Bot size={24} className="text-gold-accent mb-4" />
                  <h3 className="text-white font-medium mb-2">Intelligence Center</h3>
                  <p className="text-xs text-text-secondary leading-relaxed">Automate drafting, review pitches, and get AI summaries of your entire portfolio.</p>
                </GlassPanel>
@@ -419,7 +419,7 @@ export default function MissionControlMode() {
               <AlertTriangle className="text-gold-accent shrink-0 mt-0.5" size={16} />
               <div className="text-xs text-text-secondary leading-relaxed">
                 <span className="text-gold-accent font-mono uppercase tracking-widest text-[12px]">Dev preview</span>{" "}
-                <span className="ml-2">Real Enterprise account isolation isn&apos;t built yet — this filters by &quot;properties you own&quot; as a stand-in for a real company scope. Not safe to expose to real users until the RLS security reset happens.</span>
+                <span className="ml-2">Real Enterprise account isolation isn&apos;t built yet. This filters by &quot;properties you own&quot; as a stand-in for a real company scope. Not safe to expose to real users until the RLS security reset happens.</span>
               </div>
             </div>
 
@@ -431,7 +431,7 @@ export default function MissionControlMode() {
                 Enterprise Dashboard
               </h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                One view of your whole operation — every number below is read live from your portfolio.
+                One view of your whole operation: every number below is read live from your portfolio.
               </p>
             </div>
 
@@ -461,7 +461,7 @@ export default function MissionControlMode() {
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-3">
-                      <span className="font-display-md text-7xl text-white/70 tracking-tighter">—</span>
+                      <span className="font-display-md text-7xl text-white/70 tracking-tighter">-</span>
                       <span className="text-text-secondary font-mono text-sm uppercase tracking-widest">No assets yet</span>
                     </div>
                   )}
@@ -477,7 +477,7 @@ export default function MissionControlMode() {
                 { label: "Active Portfolio", value: kpis.total, glow: "color-mix(in srgb, var(--sapphire) 10%, transparent)", onClick: () => setActiveTab("portfolio"), icon: Building2 },
                 { label: "Broker Pitches", value: kpis.newLeads.toString(), glow: "color-mix(in srgb, var(--green) 10%, transparent)", onClick: () => setActiveTab("crm"), icon: Users },
                 { label: "In Pipeline", value: kpis.pending, glow: "rgba(var(--accent-bright-rgb),0.1)", onClick: () => setActiveTab("projects"), icon: ClipboardList },
-                { label: "Team Seats", value: "—", glow: "rgba(var(--text-primary-rgb),0.05)", onClick: () => setActiveTab("team"), actionText: "Set up", icon: UsersRound },
+                { label: "Team Seats", value: "-", glow: "rgba(var(--text-primary-rgb),0.05)", onClick: () => setActiveTab("team"), actionText: "Set up", icon: UsersRound },
               ].map((kpi) => (
                 <GlassPanel 
                   key={kpi.label} 
@@ -561,7 +561,7 @@ export default function MissionControlMode() {
                     <p className="text-xs text-text-secondary line-clamp-3 leading-relaxed">
                       {alerts.slice(0, 2).map((a, i) => (
                         <span key={i} className="block">
-                          <span className={`${a.tone === "warn" ? "text-gold-accent" : "text-blue-400"} font-medium`}>{a.label}:</span> {a.detail}
+                          <span className={`${a.tone === "warn" ? "text-gold-accent" : "text-gold-accent/80"} font-medium`}>{a.label}:</span> {a.detail}
                         </span>
                       ))}
                     </p>
@@ -618,7 +618,7 @@ export default function MissionControlMode() {
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-2 group-hover:scale-[1.02] origin-left transition-transform duration-300">
-                    {inventoryStats.total > 0 ? `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` : "—"}
+                    {inventoryStats.total > 0 ? `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` : "-"}
                   </div>
                   {inventoryStats.total > 0 && (
                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
@@ -637,7 +637,7 @@ export default function MissionControlMode() {
                 className="md:col-span-1 md:row-span-1 rounded-2xl p-6 relative overflow-hidden group border-white/[0.04] hover:border-white/20 transition-all duration-300 ease-out cursor-pointer active:scale-[0.98] bg-surface/40 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <Users className="text-text-secondary group-hover:text-blue-400 transition duration-300" size={18} />
+                  <Users className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
                   {(pitches || []).filter((p) => p.status === "pending").length > 0 && (
                     <span className="text-gold-accent text-[12px] font-mono font-bold">
                       {(pitches || []).filter((p) => p.status === "pending").length} sealed
@@ -665,7 +665,7 @@ export default function MissionControlMode() {
                 Manage Assets
               </h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                Every property your company controls — edit, publish, or retire them from one table.
+                Every property your company controls: edit, publish, or retire them from one table.
               </p>
             </div>
 
@@ -747,7 +747,7 @@ export default function MissionControlMode() {
                         />
                       </td>
                       <td className="px-4 py-2.5 text-on-surface max-w-[200px] truncate" title={l.title}>{l.title}</td>
-                      <td className="px-4 py-2.5 text-text-secondary max-w-[150px] truncate" title={l.spaceCategory || ""}>{l.spaceCategory || "—"}</td>
+                      <td className="px-4 py-2.5 text-text-secondary max-w-[150px] truncate" title={l.spaceCategory || ""}>{l.spaceCategory || "-"}</td>
                       <td className="px-4 py-2.5">
                         <span
                           className={`inline-flex items-center gap-1.5 text-xs font-medium ${status.textClass}`}
@@ -810,7 +810,7 @@ export default function MissionControlMode() {
               <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(var(--accent-bright-rgb),0.5)]">Enterprise Console • CRM</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Relationship Management</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                The people around your portfolio — broker pitches, leads, and every conversation in play.
+                The people around your portfolio: broker pitches, leads, and every conversation in play.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
@@ -876,7 +876,7 @@ export default function MissionControlMode() {
                     </Link>
                   </div>
                   <p className="text-[12px] text-text-secondary mb-4 leading-relaxed">
-                    Site visits, follow-ups, document deadlines — add anything with a due date and tick it off when done.
+                    Site visits, follow-ups, document deadlines: add anything with a due date and tick it off when done.
                   </p>
                   <TaskRail mockUserId={currentUser?.id} />
                 </GlassPanel>
@@ -893,7 +893,7 @@ export default function MissionControlMode() {
               <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(var(--accent-bright-rgb),0.5)]">Enterprise Console • Inventory</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Asset Inventory</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                Unit-by-unit control of each estate — occupancy, delegation handshakes, and the floor grid.
+                Unit-by-unit control of each estate: occupancy, delegation handshakes, and the floor grid.
               </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -917,7 +917,7 @@ export default function MissionControlMode() {
                   <select 
                     value={activeEstateId || ""}
                     onChange={(e) => setActiveEstateId(e.target.value)}
-                    className="bg-black border border-white/10 rounded px-2 py-2 min-h-11 text-xs text-white focus:outline-none focus:border-gold-accent min-w-0"
+                    className="bg-black border border-white/10 rounded px-2 py-2 min-h-11 text-base md:text-xs text-white focus:outline-none focus:border-gold-accent min-w-0"
                   >
                     {scoped.map(prop => (
                       <option key={prop.id} value={prop.id}>{prop.title}</option>
@@ -952,7 +952,7 @@ export default function MissionControlMode() {
               <span className="font-label-caps text-[12px] tracking-widest text-emerald-400 uppercase drop-shadow-[0_0_10px_color-mix(in_srgb,var(--green)_50%,transparent)]">Enterprise Console • Finance</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Financial Hub</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                Your Connects balance and money movement — live once billing is switched on.
+                Your Connects balance and money movement, live once billing is switched on.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -985,7 +985,7 @@ export default function MissionControlMode() {
         ) : activeTab === "analytics" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6 overflow-y-auto pb-6 custom-scrollbar">
             <div>
-              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_color-mix(in_srgb,var(--sapphire)_50%,transparent)]">Enterprise Console • Analytics</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]">Enterprise Console • Analytics</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Market Intelligence</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
                 How the market moves around your assets. Charts below are sample previews until live data connects.
@@ -995,16 +995,16 @@ export default function MissionControlMode() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Historical Location Graph */}
               <GlassPanel className="col-span-1 lg:col-span-2 rounded-2xl border-white/5 p-6 h-80 flex flex-col relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-black to-transparent opacity-50" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-gold-accent/5 via-black to-transparent opacity-50" />
                 <div className="relative z-10 flex justify-between items-center mb-6">
                   <div>
                     <h3 className="text-white font-medium text-sm flex items-center gap-2">
                       Historical Property Yield
                       <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
                     </h3>
-                    <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative — live data connects at launch</p>
+                    <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mt-1">Makati CBD vs BGC · illustrative (live data connects at launch)</p>
                   </div>
-                  <select aria-label="Chart metric" className="min-h-11 bg-black/50 border border-white/10 text-xs text-white rounded px-2 py-1 outline-none focus:border-blue-400 transition">
+                  <select aria-label="Chart metric" className="min-h-11 bg-black/50 border border-white/10 text-base md:text-xs text-white rounded px-2 py-1 outline-none focus:border-gold-accent transition">
                     <option>Yield (%)</option>
                     <option>Price / sqm</option>
                   </select>
@@ -1035,7 +1035,7 @@ export default function MissionControlMode() {
                    </div>
                    <div className="absolute top-2 right-4 flex flex-col gap-2 bg-black/40 backdrop-blur border border-white/5 p-2 rounded-lg">
                       <div className="flex items-center gap-2 text-[12px] text-white"><span className="w-2 h-2 rounded-full bg-gold-accent" /> BGC (+14%)</div>
-                      <div className="flex items-center gap-2 text-[12px] text-white"><span className="w-2 h-2 rounded-full bg-blue-500" /> Makati (+6%)</div>
+                      <div className="flex items-center gap-2 text-[12px] text-white"><span className="w-2 h-2 rounded-full bg-gold-accent/60" /> Makati (+6%)</div>
                    </div>
                 </div>
               </GlassPanel>
@@ -1046,7 +1046,7 @@ export default function MissionControlMode() {
                   Space Demand Trends
                   <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 rounded px-1.5 py-0.5">Sample preview</span>
                 </h3>
-                <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mb-6">Illustrative — live data connects at launch</p>
+                <p className="text-[12px] text-text-secondary font-mono tracking-widest uppercase mb-6">Illustrative (live data connects at launch)</p>
                 
                 <div className="space-y-4 flex-1">
                   {[
@@ -1117,19 +1117,19 @@ export default function MissionControlMode() {
         ) : activeTab === "ai" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[12px] tracking-widest text-blue-400 uppercase drop-shadow-[0_0_10px_color-mix(in_srgb,var(--sapphire)_50%,transparent)]">Enterprise Console • AI</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]">Enterprise Console • AI</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                Where AI works for your portfolio — drafting dossiers now, portfolio Q&amp;A next.
+                Where AI works for your portfolio: drafting dossiers now, portfolio Q&amp;A next.
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-              <GlassPanel className="col-span-1 lg:col-span-2 rounded-2xl border-blue-500/20 p-6 md:p-8 flex flex-col relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/20 transition duration-200" />
+              <GlassPanel className="col-span-1 lg:col-span-2 rounded-2xl border-gold-accent/20 p-6 md:p-8 flex flex-col relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold-accent/20 transition duration-200" />
                 <div className="relative z-10 flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center animate-pulse">
-                    <Bot className="text-blue-400" size={24} />
+                  <div className="w-12 h-12 rounded-full bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-center animate-pulse">
+                    <Bot className="text-gold-accent" size={24} />
                   </div>
                   <div>
                     <h3 className="text-xl text-white font-medium">ScoutIt Concierge</h3>
@@ -1139,18 +1139,18 @@ export default function MissionControlMode() {
                 <div className="relative z-10 bg-black/40 rounded-xl border border-white/5 p-4 flex-1 flex flex-col">
                   <div className="flex-1 overflow-y-auto mb-4 space-y-4">
                     <div className="flex gap-3">
-                      <Bot className="text-blue-400 shrink-0 mt-1" size={16} />
+                      <Bot className="text-gold-accent shrink-0 mt-1" size={16} />
                       <div className="bg-surface-variant/50 rounded-lg p-3 text-sm text-text-secondary border border-white/5">
                         {scoped.length > 0
                           ? `I can see ${scoped.length} ${scoped.length === 1 ? "listing" : "listings"} in your scope${weakListings.length > 0 ? `, and ${weakListings.length} ${weakListings.length === 1 ? "dossier" : "dossiers"} could use more detail` : ""}. Conversational portfolio analysis unlocks when the Concierge goes live.`
-                          : "Once your portfolio has assets, I'll analyze dossiers, spot gaps, and answer questions about your scope — conversational analysis unlocks when the Concierge goes live."}
+                          : "Once your portfolio has assets, I'll analyze dossiers, spot gaps, and answer questions about your scope. Conversational analysis unlocks when the Concierge goes live."}
                       </div>
                     </div>
                   </div>
                   <div className="relative">
-                    <input type="text" placeholder="Portfolio Q&A unlocks when the Concierge goes live..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 transition" disabled />
+                    <input type="text" placeholder="Portfolio Q&A unlocks when the Concierge goes live..." className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent/50 transition" disabled />
                     <button
-                      aria-label="Open — not available yet"
+                      aria-label="Open (not available yet)"
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-text-secondary hover:text-white"
                       disabled
                     >
@@ -1161,7 +1161,7 @@ export default function MissionControlMode() {
               </GlassPanel>
 
               <div className="col-span-1 flex flex-col gap-6">
-                <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-blue-500/20 transition">
+                <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-gold-accent/20 transition">
                   <h4 className="text-white font-medium text-sm mb-4">Automated Drafting Queue</h4>
                   {scoped.filter((l) => l.pipelineStatus === "ai_drafting").length > 0 ? (
                     <div className="space-y-4">
@@ -1169,10 +1169,10 @@ export default function MissionControlMode() {
                         <div key={l.id}>
                           <div className="flex justify-between text-xs mb-1.5">
                             <span className="text-white truncate pr-2">{l.title}</span>
-                            <span className="text-blue-400 font-mono shrink-0">Drafting</span>
+                            <span className="text-gold-accent font-mono shrink-0">Drafting</span>
                           </div>
                           <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-blue-500 h-full rounded-full w-1/2 animate-pulse" />
+                            <div className="bg-gold-accent h-full rounded-full w-1/2 animate-pulse" />
                           </div>
                           <div className="text-[12px] text-text-secondary mt-1">Queued for the ScoutIt team</div>
                         </div>
@@ -1188,7 +1188,7 @@ export default function MissionControlMode() {
                 <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 flex flex-col justify-between group hover:border-gold-accent/20 transition">
                   <div>
                     <h4 className="text-white font-medium text-sm mb-2">Market Reports</h4>
-                    <p className="text-xs text-text-secondary">AI comp analysis from real closings in your zones — switches on once enough market data accumulates.</p>
+                    <p className="text-xs text-text-secondary">AI comp analysis from real closings in your zones, switching on once enough market data accumulates.</p>
                   </div>
                   <div className="text-text-secondary text-[12px] font-mono uppercase tracking-widest">
                     Coming online
@@ -1228,7 +1228,7 @@ export default function MissionControlMode() {
                           type="text" 
                           value={orgName} 
                           onChange={e => setOrgName(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition" 
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent transition" 
                         />
                       </div>
                       
@@ -1238,7 +1238,7 @@ export default function MissionControlMode() {
                           type="text" 
                           value={orgDomain} 
                           onChange={e => setOrgDomain(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-gold-accent transition" 
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent transition" 
                         />
                       </div>
 
@@ -1246,7 +1246,7 @@ export default function MissionControlMode() {
                         <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">Org saving opens in Phase 2</span>
                         <button
                           disabled
-                          title="Organization saving opens in Phase 2 — edits stay local today."
+                          title="Organization saving opens in Phase 2. Edits stay local today."
                           className="px-6 py-2 bg-gold-accent text-black rounded-lg text-sm font-medium opacity-60 cursor-not-allowed">
                           Save Changes · Phase 2
                         </button>

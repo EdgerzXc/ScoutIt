@@ -432,7 +432,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "space" ? "active" : ""}`} id="panel-space">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-secondary)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>01 — The Space</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-secondary)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>01 · The Space</div>
                 <div style={{height:"1px", background:"var(--border-solid)"}}/>
               </div>
 
@@ -518,7 +518,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
             <div className={`chapter-panel ${activeTab === "diff" ? "active" : ""}`} id="panel-diff">
               <div className="panel-content">
                 <div style={{marginBottom:"32px"}}>
-                  <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>02 — The Differentiator</div>
+                  <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>02 · The Differentiator</div>
                   <div style={{height:"1px", background:"var(--border)"}}/>
                 </div>
                 <p style={{ fontFamily: "var(--font-body)", fontSize: "17px", color: "var(--text-primary)", lineHeight: 1.75, margin: "0 0 16px 0", maxWidth: "680px" }}>
@@ -533,7 +533,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
             <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:ACCENT, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM — THE SPATIAL VAULT</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:ACCENT, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>PREMIUM · THE SPATIAL VAULT</div>
                 <div style={{height:"1px", background:ACCENT}}/>
               </div>
 
@@ -566,7 +566,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "terms" ? "active" : ""}`} id="panel-terms">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>04 — Terms & Fit-Out</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>04 · Terms & Fit-Out</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
@@ -603,7 +603,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "building" ? "active" : ""}`} id="panel-building">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>05 — Spatial Intelligence & Building</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>05 · Spatial Intelligence & Building</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "18px", color: "var(--text-primary)", margin: "0 0 14px 0" }}>{property.title}</p>
@@ -680,7 +680,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
           <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove">
             <div className="panel-content">
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>06 — Your Move</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>06 · Your Move</div>
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
               

@@ -61,15 +61,26 @@ export async function POST(request) {
     // path follows on both its paths): persist the computed Slug back, and
     // adopt it as canonical_slug only when none is owner-locked yet.
     const airtableSlug = airtableRecord?.fields?.Slug || null;
+    const nowIso = new Date().toISOString();
     const slugUpdate = airtableSlug
       ? {
           slug: airtableSlug,
-          ...(submission.canonical_slug ? {} : { canonical_slug: airtableSlug }),
+          ...(submission.canonical_slug
+            ? {}
+            : {
+                canonical_slug: airtableSlug,
+                canonical_slug_locked_at: nowIso,
+              }),
         }
       : {};
     const { error: updateError } = await supabaseAdmin
       .from('properties')
-      .update({ pipeline_status: 'approved', ...slugUpdate })
+      .update({
+        pipeline_status: 'approved',
+        lifecycle_state: 'live',
+        published_at: submission.published_at || nowIso,
+        ...slugUpdate,
+      })
       .eq('id', submissionId);
 
     if (updateError) {

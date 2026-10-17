@@ -8,11 +8,18 @@ export const metadata = {
   alternates: { canonical: "/stratosphere" },
 };
 
-export default function StratospherePage() {
+export default async function StratospherePage({ searchParams }) {
+  const sp = await searchParams;
+  const initialView = sp?.view === "radar" ? "radar" : "articles";
   return (
     <div className="min-h-screen flex flex-col font-sans" style={{ background: "var(--bg)", color: "var(--text-primary)" }}>
       <Header />
-      <StratosphereWorkspace />
+      <StratosphereWorkspace
+        initialView={initialView}
+        initialStage={sp?.stage}
+        initialQuery={sp?.q}
+        initialSignal={sp?.signal}
+      />
       <Footer />
     </div>
   );

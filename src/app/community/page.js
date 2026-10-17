@@ -1,7 +1,7 @@
 import { permanentRedirect } from "next/navigation";
 
 export const metadata = {
-  title: "Community — Spatial Radar & Market Signals | ScoutIt",
+  title: "Community · Spatial Radar & Market Signals | ScoutIt",
   description:
     "Community signals live inside the Stratosphere workspace. You are being taken to the spatial radar.",
   alternates: { canonical: "/stratosphere" },

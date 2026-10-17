@@ -21,18 +21,21 @@ function initLimiters() {
       standardLimiter = new Ratelimit({
         redis: redis,
         limiter: Ratelimit.slidingWindow(30, '10 s'),
+        prefix: '@upstash/ratelimit:standard',
         analytics: true,
       });
 
       strictLimiter = new Ratelimit({
         redis: redis,
         limiter: Ratelimit.slidingWindow(5, '10 s'),
+        prefix: '@upstash/ratelimit:strict',
         analytics: true,
       });
 
       aiLimiter = new Ratelimit({
         redis: redis,
         limiter: Ratelimit.slidingWindow(15, '10 s'),
+        prefix: '@upstash/ratelimit:ai',
         analytics: true,
       });
     }
@@ -98,9 +101,19 @@ function supabaseHeaders() {
   };
 }
 
+function isExemptFromMaintenance(pathname) {
+  return (
+    pathname.startsWith('/api/webhooks/') ||
+    pathname.startsWith('/api/oauth/') ||
+    pathname === '/api/calendar/sync'
+  );
+}
+
 export async function proxy(request, event) {
   // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
-  const ip = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
+  // GAP-13: Parse first IP if x-forwarded-for contains comma-separated chain
+  const rawIp = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
+  const ip = rawIp.split(',')[0].trim();
   const path = request.nextUrl.pathname;
   const sensitive = isSensitivePath(path);
   const questItPath = isQuestItPath(path);
@@ -109,10 +122,10 @@ export async function proxy(request, event) {
   try {
     const flags = await getFlags();
 
-    // KILL SWITCH: freeze every write on the site instantly. Auth stays up
-    // so people can still sign in/out during the freeze.
+    // KILL SWITCH: freeze every write on the site instantly. Auth and inbound
+    // webhooks/callbacks stay up so external integrations and logins are preserved (GAP-14).
     const isWrite = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
-    if (flags.global_read_only === true && isWrite && !path.startsWith('/api/auth/')) {
+    if (flags.global_read_only === true && isWrite && !path.startsWith('/api/auth/') && !isExemptFromMaintenance(path)) {
       return NextResponse.json(
         {
           error: 'ScoutIt is briefly in read-only mode for maintenance. Nothing is lost — please try again shortly.',
@@ -184,7 +197,7 @@ export async function proxy(request, event) {
   }
 
   try {
-    const { success, limit, reset, remaining } = await limiterToUse.limit(`ratelimit_${ip}`);
+    const { success, limit, reset, remaining } = await limiterToUse.limit(`ratelimit_${tier}_${ip}`);
 
     if (!success) {
       return NextResponse.json(

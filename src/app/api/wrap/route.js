@@ -8,7 +8,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { findProperty } from "@/lib/propertyLookup";
 import { sanitizeError } from "@/lib/sanitizeError";
 
-const VALID_TYPES = new Set(["property", "owner_portfolio", "broker"]);
+const VALID_TYPES = new Set(["property", "owner_portfolio", "broker", "user", "seeker"]);
 
 /**
  * GET /api/wrap?entityType=property&entityId=...&periodMonth=2026-07
@@ -25,16 +25,18 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const entityType = searchParams.get("entityType");
+    const rawEntityType = searchParams.get("entityType");
     const entityId = searchParams.get("entityId");
     const periodMonth = searchParams.get("periodMonth") || getCurrentPeriodMonth();
 
-    if (!entityType || !VALID_TYPES.has(entityType)) {
+    if (!rawEntityType || !VALID_TYPES.has(rawEntityType)) {
       return NextResponse.json(
-        { error: "Missing or invalid entityType (must be property, owner_portfolio, or broker)" },
+        { error: "Missing or invalid entityType (must be property, owner_portfolio, broker, or user)" },
         { status: 400 }
       );
     }
+
+    const entityType = rawEntityType === "seeker" ? "user" : rawEntityType;
 
     if (!entityId) {
       return NextResponse.json(
@@ -153,9 +155,14 @@ async function isAuthorisedForWrap(userId, entityType, entityId) {
   const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
   if (roles.includes("admin") || roles.includes("staff")) return true;
 
-  // `owner_id` and `broker_id` are TEXT columns holding the user id, so a
+  // `owner_id`, `broker_id`, and `user_id` are TEXT columns holding the user id, so a
   // string comparison is the right one. Positive checks only (Rule 6).
-  if (entityType === "owner_portfolio" || entityType === "broker") {
+  if (
+    entityType === "owner_portfolio" ||
+    entityType === "broker" ||
+    entityType === "user" ||
+    entityType === "seeker"
+  ) {
     return String(entityId) === String(userId);
   }
 

@@ -44,10 +44,10 @@ If a chat thread is flagged for harassment, fraudulent listing activity, or term
     num: "05",
     title: "Lawful bases for processing under DPA Section 12 & 13",
     body: `Pursuant to Section 12 and Section 13 of the DPA, ScoutIt processes personal data under the following lawful bases:
-— Consent: You have given explicit consent upon account registration or voluntary submission.
-— Contractual Necessity: Processing is required to execute the Terms of Service, manage account access, deliver Connects, and maintain platform features.
-— Legitimate Interests: Processing is required to secure the Platform, detect fraudulent listings, prevent scrapers, and optimize spatial intelligence workflows.
-— Legal Obligation: Processing is required to comply with Philippine statutory mandates, tax rules, or law enforcement orders.
+• Consent: You have given explicit consent upon account registration or voluntary submission.
+• Contractual Necessity: Processing is required to execute the Terms of Service, manage account access, deliver Connects, and maintain platform features.
+• Legitimate Interests: Processing is required to secure the Platform, detect fraudulent listings, prevent scrapers, and optimize spatial intelligence workflows.
+• Legal Obligation: Processing is required to comply with Philippine statutory mandates, tax rules, or law enforcement orders.
 
 We do not sell, rent, or trade your personal data to third parties for commercial marketing.`,
   },
@@ -56,13 +56,13 @@ We do not sell, rent, or trade your personal data to third parties for commercia
     title: "Third-party service providers and cross-border data transfers",
     body: `To maintain edge infrastructure, mapping, database storage, error monitoring, bot protection, and listing document extraction, ScoutIt shares minimal required personal data with trusted third-party service providers:
 
-1. Vercel Inc. — Application Hosting & Edge Routing (United States / Global Edge) — Enterprise DPA, TLS 1.3 Encryption. Serves pages and API routes; runs Speed Insights performance telemetry (cookieless).
-2. Supabase Inc. — Encrypted Cloud Database Infrastructure (AWS AP-Southeast Singapore) — AES-256 Encryption at Rest, PostgreSQL Row Level Security (RLS). Issues the session tokens described in Section 14.
-3. Mapbox Inc. — Geospatial Mapping & Geocoding APIs (United States / Global) — Anonymized Coordinate Telemetry. Address lookups run through ScoutIt's server proxy so the browser never carries the access token.
-4. Google LLC — Gemini Flash PDF Extraction AI Worker (United States / Global) — Transient API Data Processing Agreement. Also Google Analytics (GA4) measurement, only when enabled and only after cookie consent (see Section 14).
-5. Sentry (Functional Software, Inc.) — Error Telemetry (United States / Global) — Crash reports and performance traces from the web application. Source maps are not shipped to browsers; Sentry resolves stack traces from its own uploaded copies.
-6. Cloudflare, Inc. — Turnstile Bot Protection (United States / Global) — The human-verification challenge on public forms (contact, inquiry, waitlist, appeals). Receives only what is needed to tell people from bots.
-7. CARTO (CartoDB, Inc.) — Basemap Tiles (United States / Global Edge) — The dark-matter map tiles behind property maps and the spatial canvas. Receives tile requests and approximate viewports, not account data.
+1. Vercel Inc. · Application Hosting & Edge Routing (United States / Global Edge) · Enterprise DPA, TLS 1.3 Encryption. Serves pages and API routes; runs Speed Insights performance telemetry (cookieless).
+2. Supabase Inc. · Encrypted Cloud Database Infrastructure (AWS AP-Southeast Singapore) · AES-256 Encryption at Rest, PostgreSQL Row Level Security (RLS). Issues the session tokens described in Section 14.
+3. Mapbox Inc. · Geospatial Mapping & Geocoding APIs (United States / Global) · Anonymized Coordinate Telemetry. Address lookups run through ScoutIt's server proxy so the browser never carries the access token.
+4. Google LLC · Gemini Flash PDF Extraction AI Worker (United States / Global) · Transient API Data Processing Agreement. Also Google Analytics (GA4) measurement, only when enabled and only after cookie consent (see Section 14).
+5. Sentry (Functional Software, Inc.) · Error Telemetry (United States / Global) · Crash reports and performance traces from the web application. Source maps are not shipped to browsers; Sentry resolves stack traces from its own uploaded copies.
+6. Cloudflare, Inc. · Turnstile Bot Protection (United States / Global) · The human-verification challenge on public forms (contact, inquiry, waitlist, appeals). Receives only what is needed to tell people from bots.
+7. CARTO (CartoDB, Inc.) · Basemap Tiles (United States / Global Edge) · The dark-matter map tiles behind property maps and the spatial canvas. Receives tile requests and approximate viewports, not account data.
 
 Under Section 21 of the DPA (Accountability for Transfer) and NPC Circular 2023-06 (Security of Personal Data), ScoutIt enforces legal contracts with offshore processors ensuring data protection standards comparable to RA 10173.`,
   },
@@ -114,17 +114,17 @@ To exercise any right, contact our Data Protection Officer as provided in Sectio
     title: "Cookie schedule and device identifiers",
     body: `What ScoutIt stores in your browser, and why. Nothing here is advertising: ScoutIt serves no ads and sells no data.
 
-ESSENTIAL — the product does not work without these:
-— Supabase session tokens (session cookies): prove you are signed in. They expire with the session; clearing them signs you out.
-— scout_did device identifier (localStorage, mirrored to a cookie): a random device id used to keep anonymous telemetry attributable to a device rather than a person. The cookie mirror carries path=/, a lifetime of one year (max-age=31536000), and SameSite=Lax. No name, email, or account id is stored in it.
+ESSENTIAL (the product does not work without these):
+• Supabase session tokens (session cookies): prove you are signed in. They expire with the session; clearing them signs you out.
+• scout_did device identifier (localStorage, mirrored to a cookie): a random device id used to keep anonymous telemetry attributable to a device rather than a person. The cookie mirror carries path=/, a lifetime of one year (max-age=31536000), and SameSite=Lax. No name, email, or account id is stored in it.
 
-FUNCTIONAL — remembers choices you made:
-— scoutit_display_mode, scoutit_lite_mode, scoutit_simple_mode (localStorage): your appearance, performance, and detail choices. scoutit_presentation_choice_seen_v1 and scoutit_help_seen_v1 remember that you completed or dismissed the first-visit prompts. The optional Interactive homepage simulator is temporary and resets on a new page load.
-— The Ledger (localStorage): your private wishlist and saved spaces, on your device by default per Section 03.
+FUNCTIONAL (remembers choices you made):
+• scoutit_display_mode, scoutit_lite_mode, scoutit_simple_mode (localStorage): your appearance, performance, and detail choices. scoutit_presentation_choice_seen_v1 and scoutit_help_seen_v1 remember that you completed or dismissed the first-visit prompts. The optional Interactive homepage simulator is temporary and resets on a new page load.
+• The Ledger (localStorage): your private wishlist and saved spaces, on your device by default per Section 03.
 
-ANALYTICS — only with your consent:
-— Google Analytics (GA4: _ga, _gid and related): measures visits. Loaded only when the site is configured with a measurement id, and storage starts DENIED under Google Consent Mode v2 until you choose Accept in the cookie banner. Declining leaves measurement off; the product works identically either way.
-— Vercel Speed Insights: performance telemetry without cookies.
+ANALYTICS (only with your consent):
+• Google Analytics (GA4: _ga, _gid and related): measures visits. Loaded only when the site is configured with a measurement id, and storage starts DENIED under Google Consent Mode v2 until you choose Accept in the cookie banner. Declining leaves measurement off; the product works identically either way.
+• Vercel Speed Insights: performance telemetry without cookies.
 
 Managing them: the cookie banner (shown only when Analytics is enabled) records Accept or Decline on this device. Clearing site data removes every entry above and restores the defaults; signing out clears the session tokens.`,
   },

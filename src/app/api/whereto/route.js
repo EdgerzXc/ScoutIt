@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { getOverpassIntel, calculateWalkabilityScore } from "@/lib/overpassIntel";
 import { getIsochrones } from "@/lib/isochrone";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 // ─────────────────────────────────────────────────────────────────────────
 // WHERE TO? — lifestyle intel for a coordinate  (NEW_IDEAS.md §3)
@@ -20,6 +22,20 @@ export const revalidate = 86400; // 24h — POIs and street networks move slowly
 const MIN_RADIUS = 300;
 const MAX_RADIUS = 3000;
 
+const checkWhereToRate = createRateLimiter({
+  limit: 30,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
+
+/**
+ * Rounds coordinates to 4 decimal places (~11m precision) so arbitrary sub-meter
+ * jitter cannot bypass the upstream Overpass/Mapbox cache (GAP-65).
+ */
+export function normalizeWhereToCoordinate(value) {
+  return Math.round(Number(value) * 1e4) / 1e4;
+}
+
 export async function GET(req) {
   // Request properties are intentionally read outside the catch block. Next
   // uses this access to classify the handler as dynamic during prerendering;
@@ -28,16 +44,27 @@ export async function GET(req) {
   const params = new URL(req.url).searchParams;
 
   try {
-    const lat = Number(params.get("lat"));
-    const lon = Number(params.get("lon"));
+    const rate = checkWhereToRate(clientIp(req));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { success: false, message: "Too many location intelligence requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    const rawLat = Number(params.get("lat"));
+    const rawLon = Number(params.get("lon"));
+
+    if (!Number.isFinite(rawLat) || !Number.isFinite(rawLon)) {
       return NextResponse.json({ success: false, message: "Valid lat and lon are required" }, { status: 400 });
     }
     // Reject coordinates that can't be real before spending an upstream call.
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    if (rawLat < -90 || rawLat > 90 || rawLon < -180 || rawLon > 180) {
       return NextResponse.json({ success: false, message: "Coordinates out of range" }, { status: 400 });
     }
+
+    const lat = normalizeWhereToCoordinate(rawLat);
+    const lon = normalizeWhereToCoordinate(rawLon);
 
     // BUG (found in live verification 2026-07-29): this read
     //   Number(params.get("radius"))

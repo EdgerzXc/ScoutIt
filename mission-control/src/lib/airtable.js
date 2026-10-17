@@ -125,11 +125,19 @@ export async function publishPropertyToAirtable(property) {
   }
 
   const fields = listingFields(property);
+  const lookupSlug = property.canonical_slug || property.slug;
 
   // 1. Update path — only if we have a slug to find the record by.
-  if (property.slug) {
-    const recordId = await findRecordIdBySlug(apiKey, baseId, property.slug);
+  if (lookupSlug) {
+    const recordId = await findRecordIdBySlug(apiKey, baseId, lookupSlug);
     if (recordId) {
+      // GAP-33: Once canonical_slug is locked, never overwrite Airtable Title if it would
+      // recompute Airtable's formula Slug and break the public URL.
+      const patchFields = { ...fields };
+      if (property.canonical_slug && property.canonical_slug_locked_at) {
+        delete patchFields.Title;
+      }
+
       const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
         method: "PATCH",
         headers: {
@@ -137,7 +145,7 @@ export async function publishPropertyToAirtable(property) {
           "Content-Type": "application/json",
         },
         // typecast lets singleSelect choices auto-create instead of 422ing.
-        body: JSON.stringify({ fields, typecast: true }),
+        body: JSON.stringify({ fields: patchFields, typecast: true }),
       });
       if (!res.ok) {
         const errText = await res.text();
@@ -146,7 +154,7 @@ export async function publishPropertyToAirtable(property) {
       const updated = await res.json();
       const cache = await purgePublicCatalogueCache();
       return {
-        slug: updated?.fields?.Slug || property.slug,
+        slug: property.canonical_slug || updated?.fields?.Slug || lookupSlug,
         recordId,
         mode: "updated",
         cache,
@@ -224,4 +232,81 @@ export async function syncCoordinatesToAirtable({ slug, lat, lng }) {
   }
 
   return { recordId };
+}
+
+/**
+ * Unpublish a property from Airtable (sets Approved_For_ScoutIt = false).
+ * Invalidates the public catalogue Redis cache.
+ * @param {string} slug
+ * @returns {Promise<{recordId: string|null, cache: any}>}
+ */
+export async function unpublishPropertyFromAirtable(slug) {
+  const { apiKey, baseId } = getCreds();
+  if (!slug) return { recordId: null, cache: null };
+
+  const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
+  if (!recordId) {
+    return { recordId: null, cache: null };
+  }
+
+  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields: { Approved_For_ScoutIt: false } }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Airtable unpublish failed: ${res.status} ${errText}`);
+  }
+
+  const cache = await purgePublicCatalogueCache();
+  return { recordId, cache };
+}
+
+/**
+ * Updates arbitrary fields in an already published Airtable property record.
+ * Invalidates the public catalogue Redis cache.
+ * @param {string} slug
+ * @param {object} fields
+ * @returns {Promise<{recordId: string|null, cache: any}>}
+ */
+export async function updatePropertyInAirtable(slug, fields) {
+  const { apiKey, baseId } = getCreds();
+  if (!slug) return { recordId: null, cache: null };
+  if (fields && typeof fields === "object") {
+    if ("Slug" in fields) {
+      throw new Error("Never write Slug in an Airtable payload; Slug is a computed formula field (Dual-CMS Rule #3).");
+    }
+    if ("Title" in fields) {
+      throw new Error(
+        "Cannot mutate Title on a published Airtable record because Airtable's Slug formula would recompute and break the locked canonical URL (GAP-33)."
+      );
+    }
+  }
+
+  const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
+  if (!recordId) {
+    return { recordId: null, cache: null };
+  }
+
+  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields, typecast: true }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Airtable property update failed: ${res.status} ${errText}`);
+  }
+
+  const cache = await purgePublicCatalogueCache();
+  return { recordId, cache };
 }

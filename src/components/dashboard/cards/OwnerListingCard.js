@@ -106,7 +106,7 @@ const OwnerListingCard = memo(({
             </div>
             <div>
               <span className="block font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">Views</span>
-              <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">—</span>
+              <span className="font-data-tabular text-lg text-text-muted" title="View tracking arrives once page instrumentation ships">-</span>
             </div>
             <div className="flex items-end justify-end">
               {!listing.is_sample && (

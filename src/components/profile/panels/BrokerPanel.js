@@ -14,7 +14,7 @@ export default function BrokerPanel({ data, isPublic = false, prcVerified = fals
           {/* RA 9646 badge — renders ONLY when staff verified the credential
               against the PRC registry, never from the mere number. */}
           {prcVerified && (
-            <span style={prcBadge} title={prcLicense ? `PRC License ${prcLicense} — verified by ScoutIt` : "Verified by ScoutIt"}>
+            <span style={prcBadge} title={prcLicense ? `PRC License ${prcLicense} · verified by ScoutIt` : "Verified by ScoutIt"}>
               <ShieldCheck size={11} strokeWidth={2} />
               PRC VERIFIED{prcLicense ? ` · ${prcLicense}` : ""}
             </span>

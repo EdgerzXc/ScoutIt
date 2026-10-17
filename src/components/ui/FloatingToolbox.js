@@ -870,7 +870,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
             {reportSent ? (
               <div className="text-center py-6">
                 <div className="text-3xl mb-3">✅</div>
-                <p className="font-working-title text-on-surface">Thank you — we got it.</p>
+                <p className="font-working-title text-on-surface">Thank you: we got it.</p>
               </div>
             ) : (
               <>

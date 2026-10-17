@@ -204,29 +204,36 @@ export async function POST(request) {
 
     const errors = [];
 
-    for (const [index, u] of toUpdate.entries()) {
-      const patch = {
-        name: u.name || "",
-        size_sqm: u.size === "" || u.size === undefined ? null : Number(u.size) || null,
-        floor: u.floor != null ? String(u.floor) : "",
-        features: u.features || [],
-        photos: u.photos || [],
-        image: u.image || (u.photos || []).find(Boolean) || "",
-        price: u.price != null ? String(u.price) : "",
-        availability_status: u.availabilityStatus || "available",
-        details: u.details || {},
-        subdivision_scenarios: u.subdivisionScenarios || [],
-        sort_order: index,
-        updated_at: new Date().toISOString(),
-      };
-      if (u.unitCategory !== undefined) patch.unit_category = u.unitCategory;
-      if (u.listingPurpose !== undefined) patch.listing_purpose = u.listingPurpose;
-      const { error } = await serviceClient
-        .from("property_units")
-        .update(patch)
-        .eq("id", u.id)
-        .eq("property_id", propertyId);
-      if (error) errors.push(error);
+    // GAP-64: Execute unit updates concurrently via Promise.all to avoid O(N) serial round-trips
+    const nowIso = new Date().toISOString();
+    const updateResults = await Promise.all(
+      toUpdate.map(async (u, index) => {
+        const patch = {
+          name: u.name || "",
+          size_sqm: u.size === "" || u.size === undefined ? null : Number(u.size) || null,
+          floor: u.floor != null ? String(u.floor) : "",
+          features: u.features || [],
+          photos: u.photos || [],
+          image: u.image || (u.photos || []).find(Boolean) || "",
+          price: u.price != null ? String(u.price) : "",
+          availability_status: u.availabilityStatus || "available",
+          details: u.details || {},
+          subdivision_scenarios: u.subdivisionScenarios || [],
+          sort_order: index,
+          updated_at: nowIso,
+        };
+        if (u.unitCategory !== undefined) patch.unit_category = u.unitCategory;
+        if (u.listingPurpose !== undefined) patch.listing_purpose = u.listingPurpose;
+        const { error } = await serviceClient
+          .from("property_units")
+          .update(patch)
+          .eq("id", u.id)
+          .eq("property_id", propertyId);
+        return error || null;
+      })
+    );
+    for (const err of updateResults) {
+      if (err) errors.push(err);
     }
 
     const insertedIdByTempId = {};

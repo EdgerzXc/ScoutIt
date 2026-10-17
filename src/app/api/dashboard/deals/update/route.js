@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logActivity } from "@/lib/crmActivity";
+import { notifyUser } from "@/lib/notifications";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
+import { KNOWN_PIPELINE_STATUSES } from "@/lib/deals/dealStages";
 import { representationStatusUpdate } from "@/lib/brokerRepresentation";
 import {
   isBrokerRepresentationDeal,
@@ -37,10 +40,17 @@ export async function POST(request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    if (typeof newStatus !== "string" || !KNOWN_PIPELINE_STATUSES.has(newStatus)) {
+      return NextResponse.json(
+        { error: "Invalid deal status", code: "INVALID_DEAL_STATUS" },
+        { status: 400 }
+      );
+    }
+
     // 1. Fetch the deal to verify authorization
     const { data: deal, error: fetchError } = await supabaseAdmin
       .from('deals')
-      .select('*, properties(owner_id)')
+      .select('*, properties(owner_id, title)')
       .eq('id', dealId)
       .single();
 
@@ -49,11 +59,29 @@ export async function POST(request) {
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
     }
 
-    const isBroker = deal.broker_id === userId;
+    const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+    const isBroker = deal.broker_id === userId || isRoutedRecipient;
     const isOwner = deal.properties?.owner_id === userId;
+    const isBuyer = deal.buyer_id === userId;
 
-    if (!isBroker && !isOwner) {
+    if (!isBroker && !isOwner && !isBuyer) {
       return NextResponse.json({ error: "Unauthorized: You are not a party to this deal" }, { status: 403 });
+    }
+
+    if (isBuyer && !isBroker && !isOwner) {
+      // Buyers may only withdraw their own pending request or close an active thread
+      if (!["withdrawn", "closed"].includes(newStatus)) {
+        return NextResponse.json(
+          { error: "Buyers may only withdraw a pending request or close a deal" },
+          { status: 403 }
+        );
+      }
+      if (newStatus === "withdrawn" && deal.status !== "pending") {
+        return NextResponse.json(
+          { error: "Only pending requests can be withdrawn" },
+          { status: 409 }
+        );
+      }
     }
 
     if (deal.status === 'invited' && newStatus === 'accepted' && !isBroker) {
@@ -100,6 +128,24 @@ export async function POST(request) {
         console.error("[DEAL UPDATE API] Representation state update failed:", representationError);
         return NextResponse.json({ error: "Deal changed, but representation state needs reconciliation", retryable: true }, { status: 503 });
       }
+    }
+
+    // GAP-86: Notify counterparties of pipeline status update
+    const recipients = [
+      ...new Set(
+        [deal.buyer_id, deal.broker_id, deal.properties?.owner_id].filter(
+          (id) => id && id !== userId
+        )
+      ),
+    ];
+    for (const recipientId of recipients) {
+      await notifyUser(supabaseAdmin, {
+        userId: recipientId,
+        title: `Deal status updated: ${newStatus}`,
+        desc: `A deal on "${deal.properties?.title || "a property"}" moved to ${newStatus}.`,
+        propertyId: deal.property_id || null,
+        notificationType: `deal_${newStatus}`,
+      });
     }
 
     await logActivity(supabaseAdmin, {

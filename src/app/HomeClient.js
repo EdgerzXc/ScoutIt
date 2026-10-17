@@ -12,6 +12,7 @@ import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import ScoutItMark from "@/components/brand/ScoutItMark";
 const BlackHoleCanvas = dynamic(() => import("@/components/descent/BlackHoleCanvas"), { ssr: false });
 const GoldenHorizonCanvas = dynamic(() => import("@/components/descent/GoldenHorizonCanvas"), { ssr: false });
+const DriftingPropertyBubbles = dynamic(() => import("@/components/hero/DriftingPropertyBubbles"), { ssr: false });
 
 const GOLDEN_DEFAULT_PARAMS = {
   horizonRadius: 0.16, diskInner: 0.22, diskOuter: 0.7, lensingStrength: 0.28,
@@ -29,11 +30,6 @@ import {
 import { getArticles } from "@/data/mock/mockArticles";
 import { loadPublicCatalog } from "../lib/cms/publicCatalog";
 
-function getDBCategory(cat) {
-  if (cat === "Venues/Events") return "Venues";
-  return cat;
-}
-
 export default function HomeClient() {
   const router = useRouter();
 
@@ -47,10 +43,35 @@ export default function HomeClient() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("scoutit_user");
-      if (raw) setCurrentUser(JSON.parse(raw));
-    } catch {}
+    let active = true;
+    (async () => {
+      try {
+        const raw = localStorage.getItem("scoutit_user");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && active) {
+            setCurrentUser(parsed);
+            return;
+          }
+        }
+        const { supabase } = await import("@/lib/supabaseClient");
+        if (supabase?.auth?.getSession) {
+          const { data } = await supabase.auth.getSession();
+          const sbUser = data?.session?.user;
+          if (sbUser && active) {
+            const meta = sbUser.user_metadata || {};
+            setCurrentUser({
+              id: sbUser.id,
+              email: sbUser.email,
+              name: meta.full_name || meta.name || sbUser.email,
+              tier: meta.subscription_tier || meta.tier || "starry",
+              active_roles: Array.isArray(meta.active_roles) ? meta.active_roles : ["seeker"],
+            });
+          }
+        }
+      } catch {}
+    })();
+    return () => { active = false; };
   }, []);
   const containerRef = useRef(null);
 
@@ -102,6 +123,15 @@ export default function HomeClient() {
   // Auto-fire on load, then repeat every 6s so the beam stays visible on both mobile & desktop
   useEffect(() => {
     if (isLiteMode()) return; // Lite Mode: no beam loop
+
+    // Reduced motion: one static beam strike, no 6s repeat loop.
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const t = setTimeout(() => { if (!document.hidden) fireBeam(false); }, 2000);
+      return () => {
+        clearTimeout(t);
+        beamTimers.current.forEach(clearTimeout);
+      };
+    }
 
     const startInterval = () => {
       if (beamInterval.current || document.hidden) return;
@@ -385,40 +415,43 @@ export default function HomeClient() {
     if (scrollSaveRaf.current) cancelAnimationFrame(scrollSaveRaf.current);
   }, []);
 
+  // Ambient infall specks (rocks, comets, neutron stars). One
+  // self-perpetuating timer chain with the cap checked inside the functional
+  // updater (no stale closure, no resubscribe churn). Background depth behind
+  // the property bubbles; disabled in Lite Mode / reduced motion / tiny phones.
   useEffect(() => {
     let active = true;
-    
-    // Detect mobile and reduced-motion preferences for performance optimization
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const prefersReducedMotion = typeof window !== 'undefined' && 
+    const prefersReducedMotion = typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
-    // Disable animations in Lite Mode, with reduced motion, or on very small mobile
+
     if (isLiteMode() || prefersReducedMotion || (isMobile && window.innerWidth < 480)) {
       setDriftingRocks([]);
       return;
     }
-    
-    const spawnRock = () => {
-      if (!active || (typeof document !== "undefined" && document.hidden)) return;
-      
-      // Limit max particles on mobile
-      const maxParticles = isMobile ? 3 : 8;
-      if (driftingRocks.length >= maxParticles) return;
 
-      
+    const maxParticles = isMobile ? 2 : 6;
+
+    const spawnRock = () => {
+      if (!active) return;
+      if (typeof document !== "undefined" && document.hidden) {
+        timerId = setTimeout(spawnRock, 4000);
+        return;
+      }
+
       const id = Math.random().toString(36).substr(2, 9);
-      
+
       // Select type: 80% rock, 10% comet, 10% neutron star
       const rand = Math.random();
       let type = 'rock';
       let size = '6px';
       let scale = 1.0;
       let borderRadius = '50%';
-      
+
       const side = Math.floor(Math.random() * 4);
       let startX_pct, startY_pct;
-      
+
       if (side === 0) {
         // Left
         startX_pct = -5;
@@ -471,10 +504,13 @@ export default function HomeClient() {
         duration = Math.floor(10 + Math.random() * 8); // 10s to 18s, medium
       }
 
-      setDriftingRocks(prev => [...prev, { id, type, startX, startY, size, duration, borderRadius, angle, scale }]);
+      setDriftingRocks(prev => {
+        if (prev.length >= maxParticles) return prev;
+        return [...prev, { id, type, startX, startY, size, duration, borderRadius, angle, scale }];
+      });
 
       // Mobile: spawn slower for performance; Desktop: spawn faster for impact
-      const nextDelay = isMobile ? 
+      const nextDelay = isMobile ?
         (6000 + Math.random() * 4000) :  // 6-10s on mobile
         (4000 + Math.random() * 5000);   // 4-9s on desktop
       timerId = setTimeout(spawnRock, nextDelay);
@@ -486,13 +522,7 @@ export default function HomeClient() {
       active = false;
       clearTimeout(timerId);
     };
-  }, [driftingRocks.length]);
-  
-  const propertyTypes = ["Residential", "Commercial", "STR", "Hospitality", "Restaurants", "Venues/Events"];
-
-  const discoverHubs = [];
-
-  // Stars and glitters particle arrays removed for clean cinematic hero redesign
+  }, []);
 
   return (
     <main
@@ -525,25 +555,6 @@ export default function HomeClient() {
           ) : (
             <BlackHoleCanvas />
           )}
-          {[].map((star, idx) => (
-            <div
-              key={`space-star-${idx}`}
-              className="space-star"
-              style={{
-                position: 'absolute',
-                top: star.top,
-                left: star.left,
-                width: star.size,
-                height: star.size,
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-primary)',
-                opacity: star.opacity,
-                boxShadow: star.opacity > 0.18 ? '0 0 8px rgba(var(--text-primary-rgb),0.6)' : 'none',
-                animation: 'twinkleSpace 6s ease-in-out infinite alternate',
-                animationDelay: `${idx * 0.4}s`
-              }}
-            />
-          ))}
           {/* The shader carries the core + disk now; keep only the bottom
               horizon glow for grounding, plus a soft scrim so the wordmark
               stays readable over the bright disk band. */}
@@ -601,9 +612,11 @@ export default function HomeClient() {
               </div>
             </div>
           ))}
-
-          {/* Static pulsing star removed per user request */}
         </div>
+
+        {/* Celestial Property Bubbles: drifting bodies fall into the black hole.
+            This is the one hero bubble experience (rail/amphitheater removed). */}
+        <DriftingPropertyBubbles />
 
         {/* Main hook content */}
         <div className="hook-content">
@@ -708,7 +721,7 @@ export default function HomeClient() {
       {/* =========================================
           LAUNCHPAD (ELEVATOR MENU)
           ========================================= */}
-      <section data-scoutit-guide="scoutit-home-launchpad" className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent' }}>
+      <section data-scoutit-guide="scoutit-home-launchpad" className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent', contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
         <div className="flex justify-center mb-8" style={{ fontSize: "32px", letterSpacing: "0.12em", color: "var(--accent)" }} aria-hidden="true">
           <ScoutItWordmark leading={<ScoutItMark />} />
         </div>
@@ -716,26 +729,6 @@ export default function HomeClient() {
           Browse Space Catalog
         </h2>
 
-        {/* Fast Category Access Rail (A-192) */}
-        <nav aria-label="Quick Category Access" className="flex flex-wrap justify-center gap-2 mb-12 max-w-4xl mx-auto px-2">
-          {[
-            { label: "Residences", type: "Residential" },
-            { label: "Offices", type: "Commercial" },
-            { label: "F&B & Retail", type: "Restaurants" },
-            { label: "Event Venues", type: "Venues" },
-            { label: "STR & Stays", type: "STR" },
-            { label: "Hospitality", type: "Hospitality" },
-          ].map(({ label, type }) => (
-            <Link
-              key={type}
-              href={`/property?type=${encodeURIComponent(type)}`}
-              className="font-mono text-xs tracking-[0.12em] uppercase px-3.5 py-1.5 rounded-sm border border-border bg-surface/70 text-text-secondary hover:text-text-primary hover:border-gold-accent/60 hover:bg-surface transition-all duration-200"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 01: Orbit */}
           <Link href="/layer/orbit" className="text-left group relative bg-surface/80 backdrop-blur-md border border-border rounded-xl p-8 overflow-hidden hover:border-gold-accent/50 transition-all duration-500 hover:-translate-y-1 block">
@@ -1067,7 +1060,7 @@ export default function HomeClient() {
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* ΓöÇΓöÇ Faint drifting rock fragments / meteors (Occasional) ΓöÇΓöÇΓöÇΓöÇ */
+        /* Faint drifting rock fragments / meteors (Occasional) */
         @keyframes driftToCenter {
           0% {
             transform: scale(1);
@@ -1115,27 +1108,25 @@ export default function HomeClient() {
           height: 100%;
           background: color-mix(in srgb, var(--intel-cyan) 25%, white);
           border-radius: 50%;
-          box-shadow: 
-            0 0 12px color-mix(in srgb, var(--intel-cyan) 80%, white), 
+          box-shadow:
+            0 0 12px color-mix(in srgb, var(--intel-cyan) 80%, white),
             0 0 24px rgba(var(--accent-rgb), 0.6);
           animation: pulseNeutronDrifting 2.5s ease-in-out infinite alternate;
         }
         @keyframes pulseNeutronDrifting {
           0% {
             transform: scale(0.85);
-            box-shadow: 
-              0 0 8px color-mix(in srgb, var(--intel-cyan) 70%, white), 
+            box-shadow:
+              0 0 8px color-mix(in srgb, var(--intel-cyan) 70%, white),
               0 0 16px rgba(var(--accent-rgb), 0.4);
           }
           100% {
             transform: scale(1.15);
-            box-shadow: 
-              0 0 16px color-mix(in srgb, var(--intel-cyan) 90%, white), 
+            box-shadow:
+              0 0 16px color-mix(in srgb, var(--intel-cyan) 90%, white),
               0 0 32px rgba(var(--accent-rgb), 0.75);
           }
         }
-
-        /* Static pulsing star styling removed per user request */
 
         /* ΓöÇΓöÇ Main wordmark container ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .hook-content {
@@ -3463,7 +3454,7 @@ export default function HomeClient() {
             margin-top: 40px;
           }
 
-          /* Hide secondary elements on tiny screens */
+          /* Hide ambient specks on tiny screens (bubbles carry the hero there) */
           .drifting-container {
             display: none !important;
           }

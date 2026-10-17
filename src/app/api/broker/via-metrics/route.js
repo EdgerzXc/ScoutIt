@@ -55,7 +55,7 @@ export async function GET(request) {
     // 4. Fetch deals linked to this broker
     const { data: deals } = await supabaseAdmin
       .from("deals")
-      .select("id, property_id, status, stage, created_at")
+      .select("id, property_id, status, created_at")
       .eq("broker_id", userId);
 
     // 5. Aggregate overall metrics
@@ -98,7 +98,7 @@ export async function GET(request) {
 
     for (const d of deals || []) {
       const entry = propMap.get(d.property_id);
-      if (entry && (d.stage === "closed" || d.status === "completed")) {
+      if (entry && (d.stage === "closed" || d.status === "closed" || d.status === "completed")) {
         entry.deals++;
       }
     }

@@ -193,7 +193,7 @@ export default function BookingModal({
                     {new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
                       weekday: "long", month: "long", day: "numeric",
                     })}
-                    {` — ${slotsByDay.get(day).length} time${slotsByDay.get(day).length === 1 ? "" : "s"}`}
+                    {` · ${slotsByDay.get(day).length} time${slotsByDay.get(day).length === 1 ? "" : "s"}`}
                   </option>
                 ))}
               </select>

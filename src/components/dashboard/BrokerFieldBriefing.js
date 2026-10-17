@@ -50,7 +50,7 @@ const OBJECTION_SCRIPTS = [
   {
     objection: "“The dues are higher than the last unit we saw.”",
     response:
-      "Break down what the dues actually cover here versus there — security, common-area power, water, amenities. Dues are only comparable when the inclusions are.",
+      "Break down what the dues actually cover here versus there: security, common-area power, water, amenities. Dues are only comparable when the inclusions are.",
   },
   {
     objection: "“What are the total costs on top of the price?”",
@@ -361,7 +361,7 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
 
         {taxes ? (
           <section className="bfb-section">
-            <h3 className="bfb-section__t">Transfer Costs — Indicative Floor</h3>
+            <h3 className="bfb-section__t">Transfer Costs · Indicative Floor</h3>
             <table className="bfb-tax">
               <thead>
                 <tr>
@@ -400,7 +400,7 @@ export default function BrokerFieldBriefing({ listing, brokerName, onClose }) {
           <section className="bfb-section">
             <h3 className="bfb-section__t">Transfer Costs</h3>
             <div className="bfb-tax__note">
-              N/A — no published sale value on this listing. Transfer taxes are not
+              N/A: no published sale value on this listing. Transfer taxes are not
               computed for lease rates or price-on-request records.
             </div>
           </section>

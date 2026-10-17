@@ -27,7 +27,7 @@ export default function ArticleBlocks({ blocks }) {
             return (
               <blockquote key={idx} className="ab-quote">
                 <p>{block.text}</p>
-                {block.cite && <cite>— {block.cite}</cite>}
+                {block.cite && <cite>· {block.cite}</cite>}
               </blockquote>
             );
           case "list":

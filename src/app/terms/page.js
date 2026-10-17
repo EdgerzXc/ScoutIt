@@ -5,14 +5,14 @@ export const metadata = {
   alternates: { canonical: "/terms" },
   title: "Terms of Service",
   description:
-    "The terms of service for ScoutIt — property and space intelligence across the Philippines. Intelligence first. Transactions never.",
+    "The terms of service for ScoutIt: property and space intelligence across the Philippines. Intelligence first. Transactions never.",
 };
 
 
 const SECTIONS = [
   {
     num: "01",
-    title: "What ScoutIt is — and what it isn't",
+    title: "What ScoutIt is (and what it is not)",
     body: `ScoutIt is an independently operated spatial commerce and intelligence platform ("ScoutIt," "we," "us," or "our") for physical space: homes, commercial offices, short-term rentals, hospitality, restaurants, and event venues. We turn space into clear briefings and connect space owners and professionals to seekers.
 
 INTELLIGENCE FIRST. TRANSACTIONS NEVER. ScoutIt is deliberately and strictly NOT a real estate broker, real estate salesperson, real estate appraiser, real estate consultant, or real estate dealer under Republic Act No. 9646 (the Real Estate Service Act of the Philippines, or RESA). ScoutIt does not sell, purchase, lease, negotiate, represent any party in, manage escrow for, or receive commissions or transaction fees on any property transaction. All discussions, viewings, negotiations, lease agreements, purchase contracts, and financial settlements occur entirely off-platform between the respective parties and their independently retained, licensed professionals.`,
@@ -29,19 +29,19 @@ You agree to provide true, accurate, current, and complete information and maint
   {
     num: "03",
     title: "The Ledger stays yours",
-    body: `Your Ledger — the spaces you save and tag (Potential Fit, Interested, Inspired Me, Save) — is stored exclusively within your local web browser storage on your device by default. ScoutIt cannot view, access, or extract your Ledger while it remains un-synced on your device.
+    body: `Your Ledger (the spaces you save and tag: Potential Fit, Interested, Inspired Me, Save) is stored exclusively within your local web browser storage on your device by default. ScoutIt cannot view, access, or extract your Ledger while it remains un-synced on your device.
 
 If you choose to log in and sync your Ledger across devices, you explicitly instruct ScoutIt to maintain a secure cloud backup mirror of your Ledger. You retain full control to clear local storage or disconnect server synchronization at any time.`,
   },
   {
     num: "04",
     title: "Connects token economy & authorization mechanics",
-    body: `Connects are ScoutIt's proprietary, internal digital utility tokens utilized on the Platform strictly as an authorization layer, access control mechanism, and anti-spam protocol. Under Section 3(g) of the RESA Law (RA 9646), Connects are not real estate brokerage fees, referral fees, commissions, success fees, escrow deposits, or legal tender. Paying a Connect buys encrypted digital message transmission bandwidth and platform access — not a real estate transaction or representation.
+    body: `Connects are ScoutIt's proprietary, internal digital utility tokens utilized on the Platform strictly as an authorization layer, access control mechanism, and anti-spam protocol. Under Section 3(g) of the RESA Law (RA 9646), Connects are not real estate brokerage fees, referral fees, commissions, success fees, escrow deposits, or legal tender. Paying a Connect buys encrypted digital message transmission bandwidth and platform access, not a real estate transaction or representation.
 
 Each Connect wallet holds three structural allocations:
-— Monthly Allowance: Granted based on subscription tier. Resets on the 1st of each calendar month, non-cumulative, with zero rollover. Consumed first.
-— Purchased Allocation: Reserved for future activation through an owner-selected payment provider. Purchases are disabled during the invited pilot.
-— Reward Balance: Earned by completing platform data verification bounties. Permanent, non-expiring, and account-wide. Consumed third.
+• Monthly Allowance: Granted based on subscription tier. Resets on the 1st of each calendar month, non-cumulative, with zero rollover. Consumed first.
+• Purchased Allocation: Reserved for future activation through an owner-selected payment provider. Purchases are disabled during the invited pilot.
+• Reward Balance: Earned by completing platform data verification bounties. Permanent, non-expiring, and account-wide. Consumed third.
 
 A Connect is consumed immediately upon the successful dispatch and delivery of an interaction (sending an inquiry, submitting a pitch, or requesting contact). In compliance with Republic Act No. 7394 (Consumer Act of the Philippines), the platform service is fully rendered upon transmission; consequently, spent Connects are non-refundable even if the recipient declines, fails to respond, or allows the interaction to time out. Discretionary token corrections may be issued by administration only for verified technical system errors.`,
   },
@@ -55,7 +55,7 @@ Scout Rating points and transaction verification counts are awarded exclusively 
   {
     num: "06",
     title: "Subscriptions, tiers, and billing operations",
-    body: `ScoutIt offers subscription tiers per role: Starry (Free), Solar, Cluster, and Universe. Subscriptions grant enhanced data intelligence, elevated visibility, expanded active listing allowances, and monthly Connect allocations. Subscriptions monetize platform software access and intelligence depth — never the listing of property or browsing of public facts.
+    body: `ScoutIt offers subscription tiers per role: Starry (Free), Solar, Cluster, and Universe. Subscriptions grant enhanced data intelligence, elevated visibility, expanded active listing allowances, and monthly Connect allocations. Subscriptions monetize platform software access and intelligence depth, never the listing of property or browsing of public facts.
 
 Prior to reaching the platform benchmark of 200 approved live properties, premium information and features are unlocked for registered users via a Master Mission Control locker. Paid billing operations remain inactive during this period; however, Connect actions continue to consume free monthly allocations to test anti-spam protocols. Normal subscription paywalls and commercial billing activate upon notice once the operational threshold is reached.
 
@@ -66,7 +66,7 @@ Once billing is active, paid subscriptions automatically renew for successive bi
     title: "Listings, accuracy, and price rules",
     body: `Property owners and listers are the primary source of truth for all listing submissions. Listings authored directly by owners publish following owner attestation and automated policy checks. Listings generated via ScoutIt's document extraction tools (parsing owner-supplied PDF brochures or flyers) require procedural verification against the original source document prior to public release.
 
-PROCEDURAL EXTRACTION VERIFICATION DISCLAIMER: "Verification" on ScoutIt refers strictly to procedural verification — confirming that automated document extraction accurately matches owner-provided PDF source files, or verifying that a lister completed basic identity attestation. ScoutIt procedural verification does NOT constitute a real property title search, legal title audit, physical property appraisal, structural inspection, or guarantee of owner legal capacity under Republic Act No. 7394 (Consumer Act) and Article 1338 of the Civil Code of the Philippines.
+PROCEDURAL EXTRACTION VERIFICATION DISCLAIMER: "Verification" on ScoutIt refers strictly to procedural verification: confirming that automated document extraction accurately matches owner-provided PDF source files, or verifying that a lister completed basic identity attestation. ScoutIt procedural verification does NOT constitute a real property title search, legal title audit, physical property appraisal, structural inspection, or guarantee of owner legal capacity under Republic Act No. 7394 (Consumer Act) and Article 1338 of the Civil Code of the Philippines.
 
 ScoutIt strictly prohibits data invention. Missing data points remain blank (indicating "unknown"). Asking prices displayed on the Platform reflect owner-confirmed inputs (mapped strictly to CM_Rent_Per_Sqm). Where pricing is uncertain, listings must state "Price on Request" or remain blank. ScoutIt never appraises, algorithmically estimates, scrapes secondary prices, or negotiates asking prices under Section 3(f) of RA 9646.`,
   },
@@ -82,14 +82,14 @@ Bounties tied to specific private properties require Cluster-tier or higher owne
     title: "Temporary communication and ephemeral chat retention",
     body: `Handshake Chat provides a private, temporary communication space for connected parties. Closing a chat thread converts it to read-only status for seven (7) days as an operational retention benchmark. Upon expiration of the 7-day window, message body text is permanently purged from active database storage, while non-message transaction metadata (timestamps, participant IDs, status flags) is retained for audit trails.
 
-Every chat interface displays the following mandatory operational disclosure: "Notice: This conversation is temporary. When the chat ends — closed, declined, withdrawn or expired — it becomes read-only, and its message contents are deleted after 7 days, except threads under Trust & Safety review, which are kept until the review closes. ScoutIt is not a party to any agreement made here."
+Every chat interface displays the following mandatory operational disclosure: "Notice: This conversation is temporary. When the chat ends (closed, declined, withdrawn or expired), it becomes read-only, and its message contents are deleted after 7 days, except threads under Trust & Safety review, which are kept until the review closes. ScoutIt is not a party to any agreement made here."
 
 Disputed or reported chat threads are placed under restricted administrative holds for Trust & Safety review until resolved. Exchanging personal contact details within the chat is done entirely at your own risk; ScoutIt cannot un-share information once transmitted.`,
   },
   {
     num: "10",
     title: "The Spatial Vault and intellectual property ownership",
-    body: `Spatial Vault assets — including Luma AI 3D spatial scans, 360-degree virtual tours, acoustic heatmaps, and aerial visualisations — produced directly by ScoutIt or its commissioned agents are the exclusive intellectual property of ScoutIt under the Intellectual Property Code of the Philippines (Republic Act No. 8293).
+    body: `Spatial Vault assets (including Luma AI 3D spatial scans, 360-degree virtual tours, acoustic heatmaps, and aerial visualisations) produced directly by ScoutIt or its commissioned agents are the exclusive intellectual property of ScoutIt under the Intellectual Property Code of the Philippines (Republic Act No. 8293).
 
 Subscribed property owners receive a limited, revocable, non-exclusive, non-transferable display license to exhibit ScoutIt-produced media on their live Platform listing during their active subscription. If the owner cancels or downgrades their subscription, their display license terminates and owner privileges pause. However, ScoutIt retains sole copyright and ownership of its produced spatial media under work-for-hire provisions of RA 8293 and may continue displaying it on the Platform to entitled users. Owners may not extract, download, export, or republish ScoutIt-produced media on third-party platforms.
 

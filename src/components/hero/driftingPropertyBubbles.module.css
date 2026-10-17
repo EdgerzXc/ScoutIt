@@ -1,0 +1,573 @@
+/* ═══════════════════════════════════════════════════════════════
+   DRIFTING CELESTIAL PROPERTY BUBBLES — CSS MODULE
+   ScoutIt Space Intelligence Platform · Orbital Infall Mechanics
+   95% Obsidian Black / 5% Amber Gold System
+   Natural Cosmic Physics · Zero UI Clutter · Direct Interaction
+   ═══════════════════════════════════════════════════════════════ */
+
+.container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2; /* Deep space background layer behind hero words (hook-content z-index: 10) */
+  overflow: hidden;
+}
+
+/* ── DRIFTER WRAPPER (ANIMATED ALONG ORBITAL INFALL VECTOR) ── */
+.drifterWrapper {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  width: clamp(150px, 11vw, 190px);
+  height: clamp(150px, 11vw, 190px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+  will-change: transform, opacity, left, top;
+}
+
+/* Hover pauses the trajectory smoothly in mid-flight and raises layer (desktop pointer only) */
+@media (hover: hover) and (pointer: fine) {
+  .drifterWrapper:hover {
+    animation-play-state: paused !important;
+    z-index: 50 !important;
+  }
+}
+
+/* ── 4 FLANKING ORBITAL INFALL VECTORS (CLEAR OF CENTRAL WORDS) ── */
+.vectorNE {
+  left: 88vw;
+  top: 10vh;
+  transform: translate(-50%, -50%) scale(1);
+  animation: orbitInfallNE 25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.vectorNW {
+  left: 10vw;
+  top: 10vh;
+  transform: translate(-50%, -50%) scale(1);
+  animation: orbitInfallNW 26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.vectorSE {
+  left: 88vw;
+  top: 86vh;
+  transform: translate(-50%, -50%) scale(1);
+  animation: orbitInfallSE 25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.vectorSW {
+  left: 10vw;
+  top: 86vh;
+  transform: translate(-50%, -50%) scale(1);
+  animation: orbitInfallSW 26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── DRIFT ALONG FLANKING CORRIDORS (CLEAR OF CENTRAL WORDS), THEN A CAPTURE
+   BURN INTO THE SINGULARITY AT 50vw/40vh. Segments from 80% on accelerate
+   (gravity owns the trajectory); bubbles pass BEHIND the wordmark (z-2 vs
+   content z-10) so the capture reads as falling INTO the hole. ── */
+@keyframes orbitInfallNE {
+  0% {
+    left: 90vw;
+    top: 10vh;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate(-50%, -50%) scale(1.28);
+  }
+  12% {
+    opacity: 0.95;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  35% {
+    left: 86vw;
+    top: 26vh;
+    opacity: 0.90;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.80);
+  }
+  60% {
+    left: 83vw;
+    top: 46vh;
+    opacity: 0.82;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.60);
+  }
+  80% {
+    left: 79vw;
+    top: 62vh;
+    opacity: 0.68;
+    filter: blur(1px);
+    transform: translate(-50%, -50%) scale(0.40);
+    /* Capture burn: from here the hole owns the trajectory — accelerate in. */
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  92% {
+    left: 63vw;
+    top: 52vh;
+    opacity: 0.38;
+    filter: blur(4px);
+    transform: translate(-50%, -50%) scale(0.16);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  100% {
+    /* True singularity: 50vw / 40vh — the shader parks the hole ~10% above
+       canvas center (uv.y -= 0.20), not at screen center. */
+    left: 50.5vw;
+    top: 40vh;
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.02);
+  }
+}
+
+@keyframes orbitInfallNW {
+  0% {
+    left: 10vw;
+    top: 10vh;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate(-50%, -50%) scale(1.28);
+  }
+  12% {
+    opacity: 0.95;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  35% {
+    left: 14vw;
+    top: 26vh;
+    opacity: 0.90;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.80);
+  }
+  60% {
+    left: 17vw;
+    top: 46vh;
+    opacity: 0.82;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.60);
+  }
+  80% {
+    left: 21vw;
+    top: 62vh;
+    opacity: 0.68;
+    filter: blur(1px);
+    transform: translate(-50%, -50%) scale(0.40);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  92% {
+    left: 37vw;
+    top: 52vh;
+    opacity: 0.38;
+    filter: blur(4px);
+    transform: translate(-50%, -50%) scale(0.16);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  100% {
+    left: 49.5vw;
+    top: 40vh;
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.02);
+  }
+}
+
+@keyframes orbitInfallSE {
+  0% {
+    left: 90vw;
+    top: 86vh;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate(-50%, -50%) scale(1.28);
+  }
+  12% {
+    opacity: 0.95;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  35% {
+    left: 86vw;
+    top: 70vh;
+    opacity: 0.90;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.80);
+  }
+  60% {
+    left: 83vw;
+    top: 50vh;
+    opacity: 0.82;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.60);
+  }
+  80% {
+    left: 79vw;
+    top: 30vh;
+    opacity: 0.68;
+    filter: blur(1px);
+    transform: translate(-50%, -50%) scale(0.40);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  92% {
+    left: 64vw;
+    top: 36vh;
+    opacity: 0.38;
+    filter: blur(4px);
+    transform: translate(-50%, -50%) scale(0.16);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  100% {
+    left: 50.5vw;
+    top: 40vh;
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.02);
+  }
+}
+
+@keyframes orbitInfallSW {
+  0% {
+    left: 10vw;
+    top: 86vh;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate(-50%, -50%) scale(1.28);
+  }
+  12% {
+    opacity: 0.95;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  35% {
+    left: 14vw;
+    top: 70vh;
+    opacity: 0.90;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.80);
+  }
+  60% {
+    left: 17vw;
+    top: 50vh;
+    opacity: 0.82;
+    filter: blur(0px);
+    transform: translate(-50%, -50%) scale(0.60);
+  }
+  80% {
+    left: 21vw;
+    top: 30vh;
+    opacity: 0.68;
+    filter: blur(1px);
+    transform: translate(-50%, -50%) scale(0.40);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  92% {
+    left: 36vw;
+    top: 36vh;
+    opacity: 0.38;
+    filter: blur(4px);
+    transform: translate(-50%, -50%) scale(0.16);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+  100% {
+    left: 49.5vw;
+    top: 40vh;
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.02);
+  }
+}
+
+/* Clicked bubble: freeze the drift in place (animation-play-state, NOT a new
+   animation — swapping animations snaps left/top back to the vector base
+   values and teleports the bubble to its spawn corner). The flight into the
+   hole itself is driven per-click by the Web Animations API in handleWarp,
+   which measures the live rect and flies the inner globe to the true
+   singularity at 50vw/40vh. This class only lifts layer + kills input. */
+.consuming {
+  animation-play-state: paused !important;
+  pointer-events: none !important;
+  z-index: 70 !important;
+}
+
+/* ── CELESTIAL BUBBLE BASE (SNOW GLOBE) ── */
+.bubbleBase {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 35% 30%, rgba(32, 26, 16, 0.94) 0%, rgba(13, 13, 13, 0.97) 65%, rgba(4, 4, 4, 0.99) 100%);
+  border: 1.5px solid rgba(var(--accent-rgb, 232, 174, 60), 0.42);
+  box-shadow:
+    0 0 36px rgba(var(--accent-rgb, 232, 174, 60), 0.28),
+    inset 0 0 26px rgba(var(--accent-bright-rgb, 247, 198, 78), 0.24),
+    inset -6px -8px 20px rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.28s ease, border-color 0.25s ease, box-shadow 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .drifterWrapper:hover .bubbleBase {
+    transform: scale(1.12);
+    border-color: var(--accent-bright);
+    box-shadow:
+      0 0 52px rgba(var(--accent-rgb, 232, 174, 60), 0.55),
+      inset 0 0 34px rgba(var(--accent-bright-rgb, 247, 198, 78), 0.42),
+      0 0 24px rgba(var(--accent-bright-rgb, 247, 198, 78), 0.35);
+  }
+}
+
+.drifterWrapper:active .bubbleBase {
+  transform: scale(0.97);
+  border-color: var(--accent-bright);
+}
+
+/* ── FRESNEL OPTICS (Glass Reflections) ── */
+.glassGleamTop {
+  position: absolute;
+  top: 5%;
+  left: 14%;
+  width: 48%;
+  height: 26%;
+  border-radius: 50%;
+  /* Toned down (was 0.44 white): gleam sat over the diorama and washed it out. */
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.26) 0%, rgba(247, 198, 78, 0.12) 45%, transparent 75%);
+  transform: rotate(-22deg);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.glassRimGlow {
+  position: absolute;
+  inset: 1px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--accent-bright-rgb, 247, 198, 78), 0.48);
+  box-shadow: inset 0 0 16px rgba(var(--accent-rgb, 232, 174, 60), 0.35);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.glassBottomBounce {
+  position: absolute;
+  bottom: 8%;
+  right: 18%;
+  width: 34%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(var(--accent-bright-rgb, 247, 198, 78), 0.3) 0%, transparent 70%);
+  transform: rotate(18deg);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Outer corona halo */
+.sphereCorona {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--accent-rgb, 232, 174, 60), 0.22) 40%, transparent 72%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── ARCHITECTURAL DIORAMA VIEWPORT ──
+   inset 0: the render bleeds to the glass rim (edge-to-edge). The 50%
+   radius clip keeps it a globe; per-model zoom comes from
+   --diorama-scale so tall towers aren't beheaded while flat villas fill. */
+.dioramaViewport {
+  position: absolute;
+  inset: 0%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.blender3dImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  /* Silhouette pop: stronger lift so the model reads at
+     150–190px drift size instead of dissolving into the sphere base. */
+  filter: drop-shadow(0 0 28px rgba(var(--accent-rgb, 232, 174, 60), 0.45));
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: scale(var(--diorama-scale, 1.28));
+  transform-origin: center center;
+  transition: transform 0.35s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .drifterWrapper:hover .blender3dImage {
+    transform: scale(calc(var(--diorama-scale, 1.28) * 1.08));
+  }
+}
+
+/* Podium glow behind the render — lit stage under the model. */
+.dioramaViewport {
+  background: radial-gradient(
+    ellipse at 50% 78%,
+    rgba(var(--accent-rgb, 232, 174, 60), 0.16) 0%,
+    transparent 62%
+  );
+}
+
+/* ── PERSISTENT MINI LABEL (always visible; hover pill upgrades it) ──
+   Sits INSIDE the globe bottom (was floating outside below it): stays glued
+   to the bubble, rides the podium glow, and never detaches mid-flight.
+   12px semibold + deep chip bg for legibility at drift sizes. */
+.miniLabel {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  border-radius: 9999px;
+  background: rgba(8, 8, 8, 0.92);
+  border: 1px solid rgba(var(--accent-rgb, 232, 174, 60), 0.6);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.8), 0 0 12px rgba(var(--accent-rgb, 232, 174, 60), 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+  max-width: 94%;
+}
+
+.miniLabel span {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  text-shadow: 0 0 10px rgba(var(--accent-rgb, 232, 174, 60), 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── COSMIC DUST MOTES ── */
+.particleLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.cosmicParticle {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--accent-bright);
+  box-shadow: 0 0 6px var(--accent);
+  pointer-events: none;
+}
+
+/* ── HOVER TELEMETRY CALLOUT PILL ── */
+.telemetryPill {
+  position: absolute;
+  bottom: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(13, 13, 13, 0.94);
+  border: 1px solid rgba(var(--accent-rgb, 232, 174, 60), 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 14px rgba(var(--accent-rgb, 232, 174, 60), 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.telemetryZone {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+}
+
+.telemetryAction {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── ACCRETION BURST FLARE (AT SINGULARITY CENTER ON CONSUME) ──
+   Blooms on arrival and decays across flight + dwell (1.05s) so the entry
+   payoff is seen before the route change unmounts it. */
+.accretionBurst {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(var(--accent-bright-rgb, 247, 198, 78), 0.95) 0%, rgba(var(--accent-rgb, 232, 174, 60), 0.5) 45%, transparent 75%);
+  box-shadow: 0 0 90px rgba(var(--accent-bright-rgb, 247, 198, 78), 0.85);
+  pointer-events: none;
+  z-index: 40;
+  animation: burstBloom 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes burstBloom {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+}
+
+/* ── PREFERS-REDUCED-MOTION PER A-074 GATE ── */
+@media (prefers-reduced-motion: reduce) {
+  .drifterWrapper {
+    animation: none !important;
+  }
+  .bubbleBase {
+    transition: none !important;
+  }
+}
+
+/* ── MOBILE GPU PERF (≤768px) ──
+   backdrop-blur × N bubbles + infinite corona pulse is the top mobile
+   compositor cost. Flat translucent glass keeps the obsidian/gold read
+   without per-pixel blur; static corona keeps the halo. */
+@media (max-width: 768px) {
+  .bubbleBase {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .sphereCorona {
+    animation: none !important;
+  }
+}

@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { syncPropertyUnitsToAirtable } from "@/lib/unitsSync";
-import { notifyAttachedBrokers } from "@/lib/notifications";
+import { notifyAttachedBrokers, notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -71,7 +71,7 @@ export async function GET(request) {
 
     // 1. Fetch any explicit operator_request activities logged for this property
     const { data: opActivities } = await supabaseAdmin
-      .from("crm_activities")
+      .from("crm_activity_log")
       .select("deal_id")
       .eq("property_id", propertyId)
       .eq("activity_type", "operator_request");
@@ -204,6 +204,17 @@ export async function POST(request) {
       } catch (activityError) {
         console.warn("[units/delegate] decline activity not recorded:", activityError?.message);
       }
+
+      // GAP-21: Notify operator of delegation decline
+      await notifyUser(supabaseAdmin, {
+        userId: deal.buyer_id,
+        title: "Delegation request declined",
+        desc: `The owner has declined the unit delegation request for "${property.title}".`,
+        icon: "🚫",
+        propertyId: property.id,
+        notificationType: "delegation_declined",
+      });
+
       return NextResponse.json({ success: true, status: "declined" });
     }
 
@@ -295,6 +306,16 @@ export async function POST(request) {
       activityType: "delegation_accepted",
       actorId: userId,
       metadata: { operatorId: deal.buyer_id, unitCount: effectiveUnitIds.length },
+    });
+
+    // GAP-21: Notify operator of delegated units
+    await notifyUser(supabaseAdmin, {
+      userId: deal.buyer_id,
+      title: "Delegation request accepted",
+      desc: `The owner has delegated ${effectiveUnitIds.length} space ${effectiveUnitIds.length === 1 ? "unit" : "units"} in "${property.title}" to you.`,
+      icon: "🏢",
+      propertyId: property.id,
+      notificationType: "delegation_accepted",
     });
 
     return NextResponse.json({ success: true, status: "accepted", delegatedUnitIds: effectiveUnitIds, ...(warning ? { warning } : {}) });

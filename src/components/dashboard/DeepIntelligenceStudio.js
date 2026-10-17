@@ -43,6 +43,47 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   const [isResizing, setIsResizing] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview'
 
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const isGestureLocked = useRef(false);
+
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      const target = e.target;
+      if (
+        target &&
+        target.closest &&
+        target.closest("input, textarea, select, button, [data-swipe-lock], .overflow-x-auto, [role='slider']")
+      ) {
+        isGestureLocked.current = true;
+      } else {
+        isGestureLocked.current = false;
+      }
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (isGestureLocked.current) {
+      isGestureLocked.current = false;
+      return;
+    }
+    if (e.changedTouches && e.changedTouches.length === 1) {
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5 && Math.abs(deltaX) > 50) {
+        if (deltaX < -50 && mobileTab === "editor") {
+          setMobileTab("preview");
+        } else if (deltaX > 50 && mobileTab === "preview") {
+          setMobileTab("editor");
+        }
+      }
+    }
+    isGestureLocked.current = false;
+  }, [mobileTab]);
+
   const startResizing = useCallback((e) => {
     e.preventDefault();
     setIsResizing(true);
@@ -323,26 +364,49 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
     };
   }, [formData]);
 
+  const [debouncedDraftData, setDebouncedDraftData] = useState(draftData);
+
+  useEffect(() => {
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+    // On mobile, if preview tab is not active, skip background debounced updates to eliminate typing lag
+    if (!isDesktop && mobileTab !== "preview") {
+      return;
+    }
+    const handler = setTimeout(() => {
+      setDebouncedDraftData(draftData);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [draftData, mobileTab]);
+
+  // When switching to preview on mobile, immediately sync draft data
+  useEffect(() => {
+    if (mobileTab === "preview") {
+      setDebouncedDraftData(draftData);
+    }
+  }, [mobileTab, draftData]);
+
   return (
     <div 
-      className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
+      className={`fixed inset-0 h-[100dvh] z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
       style={{ gridTemplateColumns: `calc(${leftWidth}% - 5px) 10px calc(${100 - leftWidth}% - 5px)` }}
       onDragOver={handleDragOver}
       onDragEnter={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Mobile Tab Bar */}
-      <div className="md:hidden flex bg-surface border-b border-surface-variant z-50">
+      <div className="md:hidden flex bg-surface/95 backdrop-blur-md border-b border-surface-variant z-50 px-2 py-1.5 touch-manipulation">
         <button 
           onClick={() => setMobileTab('editor')}
-          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'editor' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-widest uppercase active:scale-95 transition touch-manipulation ${mobileTab === 'editor' ? 'text-gold-accent font-bold border-b-2 border-gold-accent' : 'text-text-secondary hover:text-on-surface'}`}
         >
           Editor
         </button>
         <button 
           onClick={() => setMobileTab('preview')}
-          className={`flex-1 min-h-11 py-3 text-xs font-label-caps tracking-widest uppercase transition ${mobileTab === 'preview' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-text-secondary'}`}
+          className={`flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-widest uppercase active:scale-95 transition touch-manipulation ${mobileTab === 'preview' ? 'text-gold-accent font-bold border-b-2 border-gold-accent' : 'text-text-secondary hover:text-on-surface'}`}
         >
           Live Preview
         </button>
@@ -585,15 +649,26 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       </div>
       
       {/* Preview Pane (Right on Desktop) */}
-      <div className={`${mobileTab === 'preview' ? 'block' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
-        <div className="absolute top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md pointer-events-none">
-          LIVE PREVIEW / DRAFT MODE
+      <div 
+        className={`${mobileTab === 'preview' ? 'block motion-safe:animate-[fadeIn_0.25s_cubic-bezier(0.16,1,0.3,1)]' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}
+        style={{ touchAction: "pan-y" }}
+      >
+        <div className="sticky top-0 left-0 w-full z-50 bg-gold-accent text-background py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md flex items-center justify-between px-3">
+          <button
+            type="button"
+            onClick={() => setMobileTab('editor')}
+            className="md:hidden min-h-[44px] px-2 text-xs font-mono uppercase underline hover:opacity-80 flex items-center active:scale-95 transition touch-manipulation"
+          >
+            ← Back to Editor
+          </button>
+          <span className="flex-1 text-center font-bold">LIVE PREVIEW / DRAFT MODE</span>
+          <span className="md:hidden text-xs font-mono opacity-80">{completionStats.percentage}%</span>
         </div>
-        <div className="mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">
+        <div className="mt-4 md:mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">
           {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
-            <CommercialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
+            <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
           ) : (
-            <ResidentialFlow slug={null} draftData={draftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
+            <ResidentialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
           )}
         </div>
       </div>

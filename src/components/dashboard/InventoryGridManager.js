@@ -401,7 +401,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             {/* Size */}
                             <td className="p-2.5 align-top max-w-[100px] break-words">
                               {structuralReadOnly ? (
-                                <span className="px-2 py-1 text-sm text-text-secondary block">{unit.size || "—"}</span>
+                                <span className="px-2 py-1 text-sm text-text-secondary block">{unit.size || "-"}</span>
                               ) : (
                                 <input
                                   type="text"
@@ -417,7 +417,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             {/* Floor */}
                             <td className="p-2.5 align-top max-w-[120px] break-words">
                               {structuralReadOnly ? (
-                                <span className="px-2 py-1 text-sm text-text-secondary block">{unit.floor || "—"}</span>
+                                <span className="px-2 py-1 text-sm text-text-secondary block">{unit.floor || "-"}</span>
                               ) : (
                                 <input
                                   type="text"
@@ -665,7 +665,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             <div>
                                 <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Size (sqm)</span>
                                 {structuralReadOnly ? (
-                                    <span className="text-sm text-text-secondary block">{unit.size || "—"}</span>
+                                    <span className="text-sm text-text-secondary block">{unit.size || "-"}</span>
                                 ) : (
                                     <input
                                       type="text"
@@ -681,7 +681,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                             <div>
                                 <span className="font-label-caps text-[12px] text-text-secondary uppercase tracking-widest block mb-1">Floor</span>
                                 {structuralReadOnly ? (
-                                    <span className="text-sm text-text-secondary block">{unit.floor || "—"}</span>
+                                    <span className="text-sm text-text-secondary block">{unit.floor || "-"}</span>
                                 ) : (
                                     <input
                                       type="text"

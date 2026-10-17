@@ -11,7 +11,7 @@ export async function generateMetadata({ params }) {
 
   const slug = property.slug || resolvedParams.id;
   return {
-    title: `Authorized Brokers — ${property.title || slug} — ScoutIt`,
+    title: `Authorized Brokers · ${property.title || slug} | ScoutIt`,
     description: "Verified Philippine real estate brokers authorized for this asset.",
     // Declare our own canonical, otherwise src/app/property/layout.js's
     // "/property" canonical is inherited here too.

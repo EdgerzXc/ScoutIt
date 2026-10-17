@@ -36,8 +36,11 @@ vi.mock("@/lib/supabaseAdmin", () => ({
   supabaseAdmin: {
     from: (table) => ({
       select: (fields) => ({
-        eq: (...args) => ({
-          single: async () => {
+        eq: (...args) => {
+          // maybeSingle mirrors single: the initiate route resolves `slug`
+          // first, then the frozen `canonical_slug`, and treats "no row" as
+          // a miss rather than an error — the double must offer both ends.
+          const resolveOne = async () => {
             if (table === "properties" && typeof fields === "string" && fields === "id") {
               return { data: { id: "prop-1" }, error: null };
             }
@@ -51,8 +54,9 @@ vi.mock("@/lib/supabaseAdmin", () => ({
               };
             }
             return { data: null, error: null };
-          },
-        }),
+          };
+          return { single: resolveOne, maybeSingle: resolveOne };
+        },
         in: async () => {
           if (table === "user_profiles") return { data: [...state.profiles], error: null };
           return { data: [], error: null };

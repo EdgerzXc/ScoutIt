@@ -9,6 +9,7 @@ import {
   evaluateDecision,
   moderationPatch,
 } from "@/lib/recommendationModerationPolicy.mjs";
+import { notifyUser } from "@/lib/notifications";
 
 // ═══════════════════════════════════════════════════════════════
 // A-038 — the staff half of the client feedback loop.
@@ -111,6 +112,20 @@ export async function decideRecommendation(formData) {
       previous_state: row.moderation_state,
     },
   });
+
+  // GAP-21: Notify broker of moderation decision
+  if (row.broker_id) {
+    const isApproved = decision === MODERATION_DECISIONS.APPROVE;
+    await notifyUser(admin, {
+      userId: row.broker_id,
+      title: isApproved ? "Recommendation approved" : "Recommendation declined",
+      desc: isApproved
+        ? "A client recommendation was approved and is now visible on your profile."
+        : "A client recommendation was reviewed and declined by moderators.",
+      icon: isApproved ? "⭐" : "ℹ️",
+      notificationType: isApproved ? "recommendation_approved" : "recommendation_rejected",
+    });
+  }
 
   revalidatePath("/dashboard/recommendations");
 }

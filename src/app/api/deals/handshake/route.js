@@ -98,7 +98,7 @@ export async function POST(request) {
       // and confirm the caller is actually a party to it.
       const { data: deal, error: dealError } = await supabaseAdmin
         .from("deals")
-        .select("id, buyer_id, broker_id")
+        .select("id, buyer_id, broker_id, property_id")
         .eq("id", dealId)
         .maybeSingle();
 
@@ -109,9 +109,24 @@ export async function POST(request) {
         );
       }
 
+      let isParty = Boolean(
+        deal && (deal.buyer_id === userId || deal.broker_id === userId)
+      );
+
+      if (deal && !isParty && deal.property_id) {
+        const { data: prop } = await supabaseAdmin
+          .from("properties")
+          .select("owner_id")
+          .eq("id", deal.property_id)
+          .maybeSingle();
+        if (prop && prop.owner_id === userId) {
+          isParty = true;
+        }
+      }
+
       // Same response for "no such deal" and "not your deal" so the endpoint
       // cannot be used to enumerate deal IDs.
-      if (!deal || (deal.buyer_id !== userId && deal.broker_id !== userId)) {
+      if (!deal || !isParty) {
         return NextResponse.json(
           { error: "You are not a party to this deal." },
           { status: 403 }

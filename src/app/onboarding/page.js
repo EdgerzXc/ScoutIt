@@ -406,7 +406,7 @@ export default function OnboardingPage() {
             <button type="button" className="min-h-11 px-4 rounded border border-success/40 text-success text-xs font-bold disabled:opacity-50" disabled={confirmationBusy || !captchaToken} onClick={handleResendConfirmation}>
               {confirmationBusy ? "Sending…" : "Resend confirmation email"}
             </button>
-            {!captchaToken && <p className="text-xs text-text-muted leading-relaxed mt-3">Waiting on the bot check above — the resend unlocks once it passes.</p>}
+            {!captchaToken && <p className="text-xs text-text-muted leading-relaxed mt-3">Waiting on the bot check above. The resend unlocks once it passes.</p>}
             <button type="button" className="min-h-11 px-4 rounded border border-surface-variant text-on-surface text-xs font-bold" onClick={handleDifferentEmail}>
               Use a different email
             </button>
@@ -472,7 +472,7 @@ export default function OnboardingPage() {
           <span className="font-normal text-[12px] text-text-muted">Required. ScoutIt is for adults 18 and over.</span>
         </label>
       </div>
-      <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" onClick={() => setStep(3)} disabled={!formData.name.trim() || !formData.dateOfBirth}>Choose my role →</button>
+      <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" onClick={() => setStep(3)} disabled={!formData.name.trim() || !formData.dateOfBirth}>Choose my role</button>
     </div>
   );
 
@@ -492,7 +492,7 @@ export default function OnboardingPage() {
           );
         })}
       </div>
-      <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" onClick={() => setStep(4)} disabled={!formData.primaryMode}>Continue setup →</button>
+      <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" onClick={() => setStep(4)} disabled={!formData.primaryMode}>Continue setup</button>
     </div>
   );
 
@@ -506,7 +506,7 @@ export default function OnboardingPage() {
         <div className="bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 mb-8">
           {mode === "buyer" && <><h2 className="font-working-title text-xl text-on-surface mb-2">Where are you scouting?</h2><p className="text-text-secondary text-sm mb-6">Optional and private. This helps personalize your discovery feed.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full" maxLength={160} placeholder="e.g. BGC, Makati, Siargao" value={formData.locationFocus} onChange={(event) => setFormData({ ...formData, locationFocus: event.target.value })} /></>}
           {mode === "owner" && <><h2 className="font-working-title text-xl text-on-surface mb-2">Ready to list a property?</h2><p className="text-text-secondary text-sm">You can open the listing builder immediately after your account setup succeeds, or explore the dashboard first.</p></>}
-          {mode === "broker" && <><h2 className="font-working-title text-xl text-on-surface mb-2">Broker license</h2><p className="text-text-secondary text-sm mb-3">Enter your PRC Real Estate Broker license number. This records your claim; public verification remains a separate review.</p><p className="text-text-secondary text-sm mb-6">ScoutIt lists <span className="text-on-surface">licensed real estate brokers</span>. A salesperson accreditation is a different credential and cannot be entered here — if that is what you hold, ask your supervising broker to register.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full uppercase" maxLength={80} placeholder="PRC-REB-XXXXXXX" value={formData.prcLicense} onChange={(event) => setFormData({ ...formData, prcLicense: event.target.value })} />{formData.prcLicense && !isPrcLicenseFormatValid(formData.prcLicense) && <p className="text-error text-sm mt-3">Enter a 7- or 8-digit PRC license number.</p>}</>}
+          {mode === "broker" && <><h2 className="font-working-title text-xl text-on-surface mb-2">Broker license</h2><p className="text-text-secondary text-sm mb-3">Enter your PRC Real Estate Broker license number. This records your claim; public verification remains a separate review.</p><p className="text-text-secondary text-sm mb-6">ScoutIt lists <span className="text-on-surface">licensed real estate brokers</span>. A salesperson accreditation is a different credential and cannot be entered here. If that is what you hold, ask your supervising broker to register.</p><input className="bg-surface border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent w-full uppercase" maxLength={80} placeholder="PRC-REB-XXXXXXX" value={formData.prcLicense} onChange={(event) => setFormData({ ...formData, prcLicense: event.target.value })} />{formData.prcLicense && !isPrcLicenseFormatValid(formData.prcLicense) && <p className="text-error text-sm mt-3">Enter a 7- or 8-digit PRC license number.</p>}</>}
         </div>
         <label className="mb-6 flex min-h-11 cursor-pointer items-start gap-3 rounded border border-surface-variant bg-surface p-4 text-sm text-text-secondary">
           <input
@@ -522,9 +522,9 @@ export default function OnboardingPage() {
           </span>
         </label>
         {mode === "owner" ? (
-          <div className="flex flex-col gap-3"><button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms} onClick={() => completeOnboarding({ openOwnerWizard: true })}>Create my first listing →</button><button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms} onClick={() => completeOnboarding()}>Explore dashboard first</button></div>
+          <div className="flex flex-col gap-3"><button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms} onClick={() => completeOnboarding({ openOwnerWizard: true })}>Create my first listing</button><button className="w-full bg-surface border border-surface-variant text-on-surface font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms} onClick={() => completeOnboarding()}>Explore dashboard first</button></div>
         ) : (
-          <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms || (mode === "broker" && !isPrcLicenseFormatValid(formData.prcLicense))} onClick={() => completeOnboarding()}>{saving ? "Securing profile…" : "Enter my dashboard →"}</button>
+          <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" disabled={saving || !formData.acceptedTerms || (mode === "broker" && !isPrcLicenseFormatValid(formData.prcLicense))} onClick={() => completeOnboarding()}>{saving ? "Securing profile…" : "Enter my dashboard"}</button>
         )}
       </div>
     );

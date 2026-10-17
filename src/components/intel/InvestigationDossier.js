@@ -54,7 +54,7 @@ function ChapterHeading({ num, label, headline }) {
     <>
       <p className="dossier-chapter-eyebrow">
         <span className="dossier-chapter-num">{num}</span>
-        <span aria-hidden="true">—</span>
+        <span aria-hidden="true">-</span>
         {label}
       </p>
       {headline ? <h3 className="dossier-chapter-headline">{headline}</h3> : null}

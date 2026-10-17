@@ -31,6 +31,12 @@ async function requireShareOwner(request) {
   return { userId };
 }
 
+function isCollisionError(error) {
+  const code = String(error?.code || "");
+  const msg = String(error?.message || "");
+  return code === "23505" || /duplicate key|unique constraint/i.test(msg);
+}
+
 export async function POST(request) {
   try {
     const limited = shareLimited(request, "requests");
@@ -44,9 +50,9 @@ export async function POST(request) {
       .eq("user_id", auth.userId)
       .maybeSingle();
 
-    if (error) {
+    if (error && !isCollisionError(error)) {
       console.error("[WISHLIST SHARE] Revocation lookup failed:", error.message);
-      return NextResponse.json({ error: "Share links are unavailable" }, { status: 503 });
+      return NextResponse.json({ error: "Share links are unavailable", code: "DB_UNAVAILABLE" }, { status: 503 });
     }
 
     const revokedAt = data?.revoked_before ? new Date(data.revoked_before).getTime() : 0;
@@ -78,7 +84,7 @@ export async function DELETE(request) {
 
     if (error) {
       console.error("[WISHLIST SHARE] Revocation failed:", error.message);
-      return NextResponse.json({ error: "Could not deactivate shared links" }, { status: 500 });
+      return NextResponse.json({ error: "Could not deactivate shared links", code: "DB_UNAVAILABLE" }, { status: 503 });
     }
 
     return NextResponse.json({ success: true, revokedBefore });

@@ -23,7 +23,8 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { isPreLaunchFreeMode } from "@/lib/featureFlags";
 import { isCanonicalConnectWalletActive } from "@/lib/connectsSchemaGate";
-import { TIERS, TIER_LABELS } from "@/lib/entitlements";
+import { resolveConnectRole } from "@/lib/connectsWallet";
+import { TIERS, TIER_LABELS, monthlyAllowance } from "@/lib/entitlements";
 import { sanitizeError } from "@/lib/sanitizeError";
 
 const PRIVATE = { "Cache-Control": "private, no-store" };
@@ -57,6 +58,49 @@ export async function GET(request) {
         connects = wallet
           ? { balance: Number(wallet.total_balance ?? 0), hasWallet: true }
           : { balance: 0, hasWallet: false };
+      }
+    } else {
+      try {
+        const { searchParams } = new URL(request.url);
+        const requestedRole = resolveConnectRole(searchParams.get("role") || "seeker", "seeker");
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const walletQuery = supabaseAdmin
+          .from("user_connect_wallets")
+          .select("granted_balance, granted_month, role")
+          .eq("user_id", userId);
+        const walletFiltered =
+          typeof walletQuery.eq === "function" ? walletQuery.eq("role", requestedRole) : walletQuery;
+
+        const [{ data: roleWallet, error: roleWalletErr }, { data: acct, error: acctErr }] =
+          await Promise.all([
+            walletFiltered.maybeSingle(),
+            supabaseAdmin
+              .from("user_connect_accounts")
+              .select("purchased_balance, reward_balance")
+              .eq("user_id", userId)
+              .maybeSingle(),
+          ]);
+
+        if (!roleWalletErr && !acctErr && (roleWallet || acct)) {
+          const effectiveTier = tier || "starry";
+          const granted = roleWallet
+            ? roleWallet.granted_month === currentMonth
+              ? Number(roleWallet.granted_balance ?? 0)
+              : monthlyAllowance(requestedRole, effectiveTier)
+            : monthlyAllowance(requestedRole, effectiveTier);
+          const purchased = Number(acct?.purchased_balance ?? 0);
+          const reward = Number(acct?.reward_balance ?? 0);
+          connects = {
+            balance: granted + purchased + reward,
+            hasWallet: Boolean(roleWallet || acct),
+            granted,
+            purchased,
+            reward,
+            role: requestedRole,
+          };
+        }
+      } catch {
+        // Canonical tables unavailable; report balance as null rather than guessing
       }
     }
 

@@ -19,6 +19,8 @@ export default function robots() {
           "/settings",
           "/wishlist",
           "/off-market",
+          "/claim",
+          "/claim/",
         ],
       },
     ],

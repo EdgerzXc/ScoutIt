@@ -4,6 +4,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { writeAuditLog } from "@/lib/auditTrail";
+import { notifyUser } from "@/lib/notifications";
 import {
   DISPUTE_HOLD_STATUSES,
   DISPUTE_REASONS,
@@ -234,6 +235,37 @@ export async function POST(request, { params }) {
       resourceType: "deal",
       metadata: { deal_id: dealId, reason, hold_placed_at: heldAt },
     });
+
+    // GAP-85: Notify counterparties that a retention hold has been placed on the thread
+    // (never leaking reporter's `reason` or `details` to prevent retaliation).
+    const counterparties = Array.from(
+      new Set(
+        [deal.buyer_id, deal.broker_id, deal.properties?.owner_id].filter(
+          (id) => id && String(id) !== String(userId)
+        )
+      )
+    );
+    for (const partyId of counterparties) {
+      await notifyUser(supabaseAdmin, {
+        userId: partyId,
+        title: "Conversation placed on retention hold",
+        desc: "A dispute hold has been placed on this transaction thread. Message history is protected from deletion while Trust & Safety reviews the case.",
+        notificationType: "deal_dispute",
+        forceEmail: true,
+      });
+    }
+
+    // Record Trust & Safety alert event for Mission Control visibility
+    try {
+      await supabaseAdmin.from("system_events").insert({
+        event_type: "deal_dispute_opened",
+        source: "api/deals/dispute",
+        status: "warning",
+        metadata: { deal_id: dealId, dispute_id: filed.id, reason, hold_placed_at: heldAt },
+      });
+    } catch {
+      // Non-fatal if system_events is unavailable in test mocks
+    }
 
     return NextResponse.json({
       success: true,

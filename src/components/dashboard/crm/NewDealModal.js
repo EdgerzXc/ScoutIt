@@ -89,7 +89,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 required
                 type="text" 
                 placeholder="e.g. recXXXXX or uuid"
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
                 value={formData.propertyId}
                 onChange={e => setFormData({ ...formData, propertyId: e.target.value })}
               />
@@ -103,7 +103,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 required
                 type="text" 
                 placeholder="User UUID of Buyer/Broker/Owner"
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
                 value={formData.otherPartyEmail}
                 onChange={e => setFormData({ ...formData, otherPartyEmail: e.target.value })}
               />
@@ -114,7 +114,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
                 Initial Status
               </label>
               <select 
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none"
                 value={formData.status}
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
               >
@@ -130,7 +130,7 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
               <textarea 
                 rows={3}
                 placeholder="Optional starting message..."
-                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition resize-none"
+                className="w-full bg-surface-alt border border-surface-variant rounded px-4 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition resize-none"
                 value={formData.initialMessage}
                 onChange={e => setFormData({ ...formData, initialMessage: e.target.value })}
               />

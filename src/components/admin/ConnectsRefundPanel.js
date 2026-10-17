@@ -92,7 +92,7 @@ export default function ConnectsRefundPanel() {
       const balanceText =
         typeof balance === "number"
           ? `${canonical ? "Account permanent balance" : "Legacy spendable balance"}: ${balance}.`
-          : "Balance could not be read back — the credit and its ledger entry below are unaffected.";
+          : "Balance could not be read back; the credit and its ledger entry below are unaffected.";
 
       setMsg({
         type: "success",

@@ -36,6 +36,36 @@ const checkTelemetryRate = createRateLimiter({
   maxKeys: 20_000,
 });
 
+let distributedTelemetryLimiter = null;
+async function checkDistributedTelemetryRate(ip) {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+  try {
+    if (!distributedTelemetryLimiter) {
+      const [{ Ratelimit }, { Redis }] = await Promise.all([
+        import("@upstash/ratelimit"),
+        import("@upstash/redis"),
+      ]);
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      });
+      distributedTelemetryLimiter = new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(RATE_LIMIT_PER_MINUTE, "60 s"),
+        prefix: "@upstash/ratelimit:telemetry",
+      });
+    }
+    const { success, reset } = await distributedTelemetryLimiter.limit(`telemetry_${ip}`);
+    const retryAfterSeconds = Math.max(1, Math.ceil(((reset || Date.now() + 60_000) - Date.now()) / 1000));
+    return { allowed: Boolean(success), retryAfterSeconds };
+  } catch {
+    // Fall back to in-memory checkTelemetryRate if Redis is unreachable
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+}
+
 const DEVICE_TYPES = ["desktop", "mobile", "tablet"];
 const SEARCH_CATEGORIES = [
   "all",
@@ -266,7 +296,8 @@ async function recordPageview({ maskedIdentity, route, geo, now }) {
 export async function POST(request) {
   try {
     // Meter before parsing so a flood costs as little as possible.
-    const rate = checkTelemetryRate(firstClientIp(request));
+    const clientAddr = firstClientIp(request);
+    const rate = checkTelemetryRate(clientAddr);
     if (!rate.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many telemetry events" },
@@ -275,6 +306,20 @@ export async function POST(request) {
           headers: {
             "Cache-Control": "private, no-store",
             "Retry-After": String(rate.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
+    const distRate = await checkDistributedTelemetryRate(clientAddr);
+    if (!distRate.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Too many telemetry events" },
+        {
+          status: 429,
+          headers: {
+            "Cache-Control": "private, no-store",
+            "Retry-After": String(distRate.retryAfterSeconds),
           },
         },
       );

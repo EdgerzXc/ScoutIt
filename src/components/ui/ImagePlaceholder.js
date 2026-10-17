@@ -12,7 +12,7 @@ export default function ImagePlaceholder({ className = "", label = "ScoutIt", mi
     <div
       className={`scoutit-img-ph ${className}`.trim()}
       role="img"
-      aria-label={`${label} — image coming soon`}
+      aria-label={`${label} · image coming soon`}
     >
       {!minimal && (
         <>

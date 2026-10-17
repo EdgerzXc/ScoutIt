@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { Search, Filter, Layers, ListFilter, Compass, Radio, X } from "lucide-react";
+import { Search, Filter, Layers, ListFilter, Compass, Radio, X, Zap, Building2 } from "lucide-react";
 import SpatialSignalRadar from "./SpatialSignalRadar";
 import SignalDossierCard from "./SignalDossierCard";
 import DistrictIntelligenceStrip from "./DistrictIntelligenceStrip";
@@ -10,6 +10,10 @@ import CommunityConnectModal from "./CommunityConnectModal";
 import {
   COMMUNITY_SIGNALS,
   filterSignals,
+  MARKET_ROLES,
+  MARKET_ROLE_LABELS,
+  MARKET_ROLE_DESCRIPTIONS,
+  getSignalMarketRole,
 } from "@/lib/communitySignalsAdapter";
 import { matchesJourneyStage } from "@/lib/layerTwoJourney";
 import InfoTip from "@/components/ui/InfoTip";
@@ -34,10 +38,8 @@ export default function StratosphereTerminal({
   });
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [connectModalSignal, setConnectModalSignal] = useState(null);
-  // Source lens: COMMUNITY (member posts + samples) vs SCOUTIT INTEL
-  // (sourced building updates bridged from articles). Radar stays one feed;
-  // the lens only narrows what the eye lands on.
-  const [sourceLens, setSourceLens] = useState("all");
+  // Two-Sided Market taxonomy: ALL vs DEMAND (Seekers) vs SUPPLY (Spaces Available) vs INTEL
+  const [marketRole, setMarketRole] = useState("all");
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 680px)").matches) setViewMode("SIGNALS");
@@ -47,6 +49,10 @@ export default function StratosphereTerminal({
     const params = new URLSearchParams(window.location.search);
     const place = params.get("place");
     if (place) setSelectedDistrict(place);
+    const role = params.get("role");
+    if (role && Object.values(MARKET_ROLES).includes(role)) {
+      setMarketRole(role);
+    }
   }, []);
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get("signal");
@@ -68,22 +74,38 @@ export default function StratosphereTerminal({
   // Sync selectedDistrict into filters or vice versa
   const activeDistrict = selectedDistrict || filters.district;
 
-  // Filtered signal dataset
-  const filteredSignals = useMemo(() => {
+  // Telemetry counts across two-sided market taxonomy
+  const roleCounts = useMemo(() => {
     const base = filterSignals(stageSignals, {
       query: searchQuery,
       signalType: filters.signalType,
       spaceType: filters.spaceType,
       district: activeDistrict,
+      marketRole: "all",
     });
-    if (sourceLens === "community") {
-      return base.filter((s) => !(typeof s.id === "string" && s.id.startsWith("pipeline-")));
+    const counts = {
+      [MARKET_ROLES.ALL]: base.length,
+      [MARKET_ROLES.DEMAND]: 0,
+      [MARKET_ROLES.SUPPLY]: 0,
+      [MARKET_ROLES.INTEL]: 0,
+    };
+    for (const s of base) {
+      const r = getSignalMarketRole(s);
+      if (counts[r] !== undefined) counts[r]++;
     }
-    if (sourceLens === "intel") {
-      return base.filter((s) => typeof s.id === "string" && s.id.startsWith("pipeline-"));
-    }
-    return base;
-  }, [stageSignals, searchQuery, filters, activeDistrict, sourceLens]);
+    return counts;
+  }, [stageSignals, searchQuery, filters, activeDistrict]);
+
+  // Filtered signal dataset
+  const filteredSignals = useMemo(() => {
+    return filterSignals(stageSignals, {
+      query: searchQuery,
+      signalType: filters.signalType,
+      spaceType: filters.spaceType,
+      district: activeDistrict,
+      marketRole,
+    });
+  }, [stageSignals, searchQuery, filters, activeDistrict, marketRole]);
 
   const activeFilterCount =
     (filters.signalType ? 1 : 0) +
@@ -99,12 +121,25 @@ export default function StratosphereTerminal({
     window.history.replaceState(null, "", url);
   }, []);
 
+  const handleSelectMarketRole = useCallback((role) => {
+    setMarketRole(role);
+    const url = new URL(window.location.href);
+    if (role && role !== "all") {
+      url.searchParams.set("role", role);
+    } else {
+      url.searchParams.delete("role");
+    }
+    window.history.replaceState(null, "", url);
+  }, []);
+
   const handleResetFilters = useCallback(() => {
     setFilters({ signalType: null, spaceType: null, district: null });
     setSelectedDistrict(null);
     setSearchQuery("");
+    setMarketRole("all");
     const url = new URL(window.location.href);
     url.searchParams.delete("place");
+    url.searchParams.delete("role");
     window.history.replaceState(null, "", url);
   }, []);
 
@@ -219,33 +254,51 @@ export default function StratosphereTerminal({
           className="st-dossier-pane"
           aria-label={viewMode === "SPATIAL" ? "Signal Dossiers for active sector" : "All Community Signal Dossiers"}
         >
-          {/* Telemetry Header */}
+          {/* Telemetry Header & Two-Sided Market Switcher */}
           <div className="st-dossier-header">
-            <div className="st-telemetry-tag">
-              <Radio size={11} className="st-live-icon" aria-hidden="true" />
-              <span>
-                {filteredSignals.length} {filteredSignals.length === 1 ? "SIGNAL" : "SIGNALS"} MATCHING
-              </span>
+            <div className="st-telemetry-row">
+              <div className="st-telemetry-tag">
+                <Radio size={11} className="st-live-icon" aria-hidden="true" />
+                <span>
+                  {filteredSignals.length} {filteredSignals.length === 1 ? "SIGNAL" : "SIGNALS"} MATCHING
+                </span>
+              </div>
+              <div className="st-telemetry-meta">
+                {activeDistrict && (
+                  <span className="st-district-indicator">
+                    DISTRICT // {activeDistrict.toUpperCase()}
+                  </span>
+                )}
+                <InfoTip tipId="signalSources" label="About signal sources" />
+              </div>
             </div>
-            <div className="st-source-lens" role="group" aria-label="Signal source">
-              {[["all", "ALL"], ["community", "COMMUNITY"], ["intel", "SCOUTIT INTEL"]].map(([key, label]) => (
+
+            {/* Two-Sided Market Intent Switcher */}
+            <div className="st-market-tabs" role="tablist" aria-label="Market Intent Taxonomy">
+              {[
+                { key: MARKET_ROLES.ALL, label: "ALL", Icon: null, classMod: "" },
+                { key: MARKET_ROLES.DEMAND, label: "SEEKERS // DEMAND", Icon: Zap, classMod: "tab-demand" },
+                { key: MARKET_ROLES.SUPPLY, label: "SPACES AVAILABLE", Icon: Building2, classMod: "tab-supply" },
+                { key: MARKET_ROLES.INTEL, label: "MARKET INTEL", Icon: Radio, classMod: "tab-intel" },
+              ].map(({ key, label, Icon, classMod }) => (
                 <button
                   key={key}
                   type="button"
-                  aria-pressed={sourceLens === key}
-                  className={`st-source-chip${sourceLens === key ? " is-active" : ""}`}
-                  onClick={() => setSourceLens(key)}
+                  role="tab"
+                  aria-selected={marketRole === key}
+                  className={`st-market-tab ${classMod} ${marketRole === key ? "is-active" : ""}`}
+                  onClick={() => handleSelectMarketRole(key)}
                 >
-                  {label}
+                  {Icon && <Icon size={12} className="st-tab-icon" aria-hidden="true" />}
+                  <span>{label}</span>
+                  <span className="st-market-tab-count">{roleCounts[key] || 0}</span>
                 </button>
               ))}
-              <InfoTip tipId="signalSources" label="About signal sources" />
             </div>
-            {activeDistrict && (
-              <span className="st-district-indicator">
-                DISTRICT // {activeDistrict.toUpperCase()}
-              </span>
-            )}
+
+            <p className="st-market-role-desc">
+              {MARKET_ROLE_DESCRIPTIONS[marketRole] || MARKET_ROLE_DESCRIPTIONS[MARKET_ROLES.ALL]}
+            </p>
           </div>
 
           {/* Dossier Cards List */}
@@ -253,12 +306,23 @@ export default function StratosphereTerminal({
             {filteredSignals.length === 0 ? (
               <div className="st-empty-state">
                 <Compass size={28} className="st-empty-icon" aria-hidden="true" />
-                <h4 className="st-empty-title">No updates for this selection</h4>
+                <h4 className="st-empty-title">No signals match this view</h4>
                 <p className="st-empty-desc">
-                  {stageFilter === "all" ? "Try another area or clear your search and filters." : "No updates are confirmed at this stage here yet. See all updates or choose another stage."}
+                  {marketRole !== "all"
+                    ? `No active ${MARKET_ROLE_LABELS[marketRole]?.toLowerCase() || "signals"} found for this filter. Switch to All Signals or clear district search.`
+                    : stageFilter === "all"
+                    ? "Try another area or clear your search and filters."
+                    : "No updates are confirmed at this stage here yet. See all updates or choose another stage."}
                 </p>
-                <button type="button" className="st-empty-reset-btn" onClick={() => { handleResetFilters(); if (stageFilter !== "all") onClearStage(); }}>
-                  {stageFilter === "all" ? "CLEAR SEARCH AND FILTERS" : "SEE ALL UPDATES"}
+                <button
+                  type="button"
+                  className="st-empty-reset-btn"
+                  onClick={() => {
+                    handleResetFilters();
+                    if (stageFilter !== "all") onClearStage();
+                  }}
+                >
+                  {marketRole !== "all" ? "VIEW ALL SIGNALS" : stageFilter === "all" ? "CLEAR SEARCH AND FILTERS" : "SEE ALL UPDATES"}
                 </button>
               </div>
             ) : (

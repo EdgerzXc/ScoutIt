@@ -60,10 +60,11 @@ export async function POST(request) {
       return NextResponse.json({ error: policyResult.reason }, { status: 403 });
     }
 
+    let connectsDeducted = false;
+    let refundContext = null;
+
     // 5. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
     // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
-    // NOTE: connect_balances/connect_transactions have no `role` column in the live schema
-    // (per-role wallets are a documented but unbuilt design) — the wallet is per user_id only.
     const { data: spendData, error: spendError } = await supabase.rpc('spend_connects', {
       p_user_id: companyId,
       p_amount: bountyConnects,
@@ -80,28 +81,58 @@ export async function POST(request) {
       );
     }
 
+    connectsDeducted = true;
+    refundContext = { companyId, bountyConnects, targetField, propertyId };
+
     const newBalance = spendData?.[0]?.total_balance ?? null;
     if (newBalance !== null) {
       await supabase.from('user_profiles').update({ connects_balance: newBalance }).eq('id', companyId);
     }
 
     // Insert Quest
-    const { data: questData, error: questError } = await supabase.from('company_quests').insert([{
-      company_id: companyId,
-      property_id: propertyId,
-      target_field: targetField,
-      description: description,
-      bounty_connects: bountyConnects,
-      status: 'open'
-    }]).select().single();
+    let questData = null;
+    let questError = null;
+    try {
+      const insertRes = await supabase.from('company_quests').insert([{
+        company_id: companyId,
+        property_id: propertyId,
+        target_field: targetField,
+        description: description,
+        bounty_connects: bountyConnects,
+        status: 'open'
+      }]).select().single();
+      questData = insertRes.data;
+      questError = insertRes.error;
+    } catch (insertThrow) {
+      questError = insertThrow;
+    }
 
     if (questError) {
-      console.error("[QuestIT API] Failed to create quest:", questError);
-      // NOTE: Connects were already spent by this point (the RPC succeeded, same order as
-      // before this fix). Refunding on quest-insert failure is a known rare edge case, not
-      // auto-handled — flagged rather than silently accepted.
-      return NextResponse.json({ error: "Failed to post bounty to the Quest Board" }, { status: 500 });
+      console.error("[QuestIT API] Failed to create quest, issuing compensating refund:", questError);
+      // GAP-32: Compensating refund when quest creation fails after Connects were deducted
+      try {
+        const { data: refundData } = await supabase.rpc("refund_connects_system_error", {
+          p_user_id: companyId,
+          p_amount: bountyConnects,
+          p_reason: `Compensating refund: QuestIT bounty insert failed for ${targetField}`,
+          p_ref_type: "bounty_refund",
+          p_ref_id: String(propertyId),
+        });
+        const restoredBalance = refundData?.[0]?.total_balance ?? null;
+        if (restoredBalance !== null) {
+          await supabase.from("user_profiles").update({ connects_balance: restoredBalance }).eq("id", companyId);
+        }
+      } catch (refundErr) {
+        console.error("[QuestIT API] Compensating refund RPC failed:", refundErr);
+      }
+      connectsDeducted = false;
+      return NextResponse.json(
+        { error: "Failed to post bounty to the Quest Board. Your Connects have been refunded.", refunded: true },
+        { status: 500 }
+      );
     }
+
+    connectsDeducted = false;
 
     // Also update API key last_used_at
     await supabase.from('questit_api_keys').update({ last_used_at: new Date().toISOString() }).eq('user_id', companyId);
@@ -111,7 +142,6 @@ export async function POST(request) {
       message: "Quest successfully raised.",
       quest: questData,
       remaining_connects: newBalance
-
     });
 
   } catch (err) {

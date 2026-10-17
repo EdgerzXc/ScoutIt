@@ -134,6 +134,19 @@ export async function awardBadge(formData) {
     metadata: { badgeId, email },
   });
 
+  // GAP-74: Notify recipient in-app when a badge is awarded
+  try {
+    await admin.from("user_notifications").insert({
+      user_id: authUser.id,
+      title: `Badge awarded: ${badge.name}`,
+      desc: `You have been awarded the "${badge.name}" badge on ScoutIt.`,
+      icon: "🏅",
+      notification_type: "badge_awarded",
+    });
+  } catch (notifyErr) {
+    console.warn("[badges/awardBadge] Could not insert user_notifications:", notifyErr?.message);
+  }
+
   revalidatePath("/dashboard/badges");
 }
 
@@ -165,6 +178,19 @@ export async function revokeBadge(formData) {
     targetId: userId,
     metadata: { badgeId },
   });
+
+  // GAP-74: Notify user when a badge is revoked
+  try {
+    await admin.from("user_notifications").insert({
+      user_id: userId,
+      title: "Badge revoked",
+      desc: `Your "${badgeId}" badge has been revoked by Trust & Safety.`,
+      icon: "🛡️",
+      notification_type: "badge_revoked",
+    });
+  } catch (notifyErr) {
+    console.warn("[badges/revokeBadge] Could not insert user_notifications:", notifyErr?.message);
+  }
 
   revalidatePath("/dashboard/badges");
 }

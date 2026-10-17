@@ -6,7 +6,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 
 const ERROR_COPY = {
   denied: "Google connection was cancelled.",
-  invalid_state: "That connect link expired — please try again.",
+  invalid_state: "That connect link expired: please try again.",
   store_failed: "Connected, but we couldn't save it. Try again.",
   exchange_failed: "Google sign-in failed. Please try again.",
   not_configured: "Calendar sync isn't switched on yet.",
@@ -68,7 +68,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
     } catch (e) {
       // Most likely an expired sign-in session (401) — tell the user plainly.
       const msg = /unauthor/i.test(e?.message || "")
-        ? "Your sign-in expired — please refresh and log in again, then reconnect."
+        ? "Your sign-in expired: please refresh and log in again, then reconnect."
         : sanitizeError(e, "Couldn't start Google connect.");
       addToast?.(msg, "❌");
     } finally {
@@ -83,7 +83,7 @@ export default function ConnectCalendarPanel({ userId, addToast }) {
       const changed = (res.created || 0) + (res.updated || 0) + (res.deleted || 0);
       addToast?.(
         changed > 0
-          ? `Synced — ${res.created || 0} new, ${res.updated || 0} updated, ${res.deleted || 0} removed`
+          ? `Synced: ${res.created || 0} new, ${res.updated || 0} updated, ${res.deleted || 0} removed`
           : "Already up to date",
         "🔄"
       );

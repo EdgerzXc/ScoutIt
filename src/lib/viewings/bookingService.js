@@ -11,10 +11,10 @@
 
 import { assertSlotBookable } from "@/lib/calendar/availabilityService";
 import { SLOT_REJECTION_MESSAGES } from "@/lib/calendar/slots";
-import { createViewingMeet } from "@/lib/calendar/meetLink";
-import { cancelViewingMeet } from "@/lib/calendar/meetLink";
+import { createViewingMeet, cancelViewingMeet, enqueueCalendarSyncRetry } from "@/lib/calendar/meetLink";
 import { isValidTimeZone } from "@/lib/calendar/timezone";
 import { logActivity } from "@/lib/crmActivity";
+import { notifyUser } from "@/lib/notifications";
 
 /** Statuses in which a deal can still accept a new viewing. */
 const BOOKABLE_DEAL_STATUSES = new Set([
@@ -161,6 +161,7 @@ export async function bookViewing(serviceClient, {
   // meetLink, so the host's Google calendar showed a 45-minute block for what
   // the app treated as a 60-minute viewing.
   let meetLink = null;
+  let calendarSyncPending = false;
   try {
     const meet = await createViewingMeet(hostId, {
       propertyTitle: deal.properties?.title,
@@ -169,7 +170,20 @@ export async function bookViewing(serviceClient, {
       durationMinutes: slot.durationMinutes,
       notes,
     });
-    if (meet.meetLink || meet.googleEventId) {
+    if (meet?.syncFailed) {
+      calendarSyncPending = true;
+      await enqueueCalendarSyncRetry(serviceClient, {
+        appointmentId: inserted.id,
+        hostUserId: hostId,
+        operation: "create",
+        payload: {
+          scheduledAt: inserted.scheduled_at,
+          durationMinutes: slot.durationMinutes,
+          propertyTitle: deal.properties?.title || null,
+        },
+        errorReason: meet.error || "meet_creation_failed",
+      });
+    } else if (meet.meetLink || meet.googleEventId) {
       const { error: meetStoreError } = await serviceClient
         .from("viewing_appointments")
         .update({ meet_link: meet.meetLink, google_event_id: meet.googleEventId })
@@ -185,6 +199,17 @@ export async function bookViewing(serviceClient, {
     }
   } catch (meetErr) {
     console.error("[bookViewing] Meet generation failed:", meetErr?.message);
+    calendarSyncPending = true;
+    await enqueueCalendarSyncRetry(serviceClient, {
+      appointmentId: inserted.id,
+      hostUserId: hostId,
+      operation: "create",
+      payload: {
+        scheduledAt: inserted.scheduled_at,
+        durationMinutes: slot.durationMinutes,
+      },
+      errorReason: meetErr?.message || "meet_generation_exception",
+    });
   }
 
   await logActivity(serviceClient, {
@@ -198,6 +223,15 @@ export async function bookViewing(serviceClient, {
       endsAt: slot.endsAt,
       durationMinutes: slot.durationMinutes,
     },
+  });
+
+  // GAP-21: Notify viewing host of scheduled appointment
+  await notifyUser(serviceClient, {
+    userId: hostId,
+    title: "New viewing appointment",
+    desc: `A viewing has been scheduled for ${new Date(inserted.scheduled_at).toLocaleDateString()}.`,
+    propertyId: deal.properties?.id || deal.property_id || null,
+    notificationType: "viewing_scheduled",
   });
 
   return {

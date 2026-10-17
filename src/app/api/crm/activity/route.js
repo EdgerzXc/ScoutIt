@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isKnownActivityType } from "@/lib/crm/activityRegistry";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 
 export const dynamic = "force-dynamic";
 
@@ -113,10 +114,13 @@ export async function GET(request) {
         .eq("id", dealId)
         .single();
       if (dealError || !deal) return NextResponse.json({ error: "Deal not found" }, { status: 404 });
-      const isParty =
+      let isParty =
         deal.buyer_id === userId ||
         deal.broker_id === userId ||
         deal.properties?.owner_id === userId;
+      if (!isParty) {
+        isParty = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+      }
       if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
       const { data: rows, error } = await ordered(
@@ -156,8 +160,8 @@ export async function GET(request) {
       return NextResponse.json(page(rows || [], limit, { [propertyId]: property.title }));
     }
 
-    // Merged feed. Party membership is resolved server-side, same three angles
-    // as GET /api/deals.
+    // Merged feed. Party membership is resolved server-side, same angles
+    // as GET /api/deals (including routed candidate recipients).
     const [asBuyer, asBroker, ownedProps] = await Promise.all([
       supabaseAdmin.from("deals").select("id").eq("buyer_id", userId),
       supabaseAdmin.from("deals").select("id").eq("broker_id", userId),
@@ -169,6 +173,17 @@ export async function GET(request) {
         asBuyer.error || asBroker.error || ownedProps.error,
       );
       return NextResponse.json({ error: "Failed to load timeline scope" }, { status: 500 });
+    }
+
+    let asRouted = [];
+    try {
+      const { data: routedRows } = await supabaseAdmin
+        .from("deal_routing_recipients")
+        .select("deal_id")
+        .eq("recipient_id", userId);
+      asRouted = (routedRows || []).map((r) => ({ id: r.deal_id })).filter((r) => r.id);
+    } catch {
+      // Non-fatal if routing table is not mocked or unmigrated
     }
 
     const propertyIds = (ownedProps.data || []).map((p) => p.id);
@@ -184,6 +199,7 @@ export async function GET(request) {
       ...(asBuyer.data || []),
       ...(asBroker.data || []),
       ...(asOwner.data || []),
+      ...asRouted,
     ].map((d) => d.id))];
 
     if (dealIds.length === 0 && propertyIds.length === 0) {

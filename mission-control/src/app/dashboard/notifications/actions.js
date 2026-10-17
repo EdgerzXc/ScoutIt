@@ -38,6 +38,20 @@ export async function sendNotification(formData) {
     throw new Error(`Could not send notification: ${error.message}`);
   }
 
+  // GAP-73: Mirror into canonical `user_notifications` table so the main app's
+  // notification bell (`GET /api/notifications`) surfaces staff notices.
+  try {
+    await admin.from("user_notifications").insert({
+      user_id: userId,
+      title,
+      desc: message,
+      icon: "📣",
+      notification_type: "staff_notice",
+    });
+  } catch (mirrorErr) {
+    console.warn("Could not mirror staff notification to user_notifications:", mirrorErr?.message);
+  }
+
   await logAction({
     staff,
     action: "SEND_PRIVATE_NOTIFICATION",

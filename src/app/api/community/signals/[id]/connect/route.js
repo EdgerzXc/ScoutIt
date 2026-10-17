@@ -138,12 +138,13 @@ export async function POST(request, { params }) {
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 14);
+    const nowIso = new Date().toISOString();
     const snapshot = {
       recipient_ids: [recipientId],
       recipient_type: "community_signal",
       signal_id: id,
       signal_title: signal.title,
-      captured_at: new Date().toISOString(),
+      captured_at: nowIso,
     };
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
@@ -153,6 +154,7 @@ export async function POST(request, { params }) {
         broker_id: recipientId,
         status: "pending",
         expires_at: expiresAt.toISOString(),
+        pending_clock_reset_at: nowIso,
         pitch_message: introMessage || `Interested in "${signal.title}".`,
         routing_snapshot: snapshot,
       })

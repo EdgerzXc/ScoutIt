@@ -121,7 +121,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
       if (!res.ok || !json.ok) {
         if (json.redirectToMetropolis) {
           setErrors([
-            { code: "LISTING_SHAPED", message: "This reads as a property ad — post it through Create Space in Metropolis instead, where it gets a verified page." },
+            { code: "LISTING_SHAPED", message: "This reads as a property ad: post it through Create Space in Metropolis instead, where it gets a verified page." },
           ]);
         } else if (json.errors?.length) {
           setErrors(json.errors);
@@ -171,7 +171,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
             <CheckCircle2 size={34} className="scp-success-icon" aria-hidden="true" />
             <h4 className="scp-success-title">Signal live</h4>
             <p className="scp-success-desc">
-              Posted as <strong>{published.scoutId}</strong>. It now sits in the radar dossier and the map lens — members answer with Relevant or Connect.
+              Posted as <strong>{published.scoutId}</strong>. It now sits in the radar dossier and the map lens. Members answer with Relevant or Connect.
             </p>
             <div className="scp-actions">
               <button
@@ -213,7 +213,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                 <label className="scp-field" htmlFor="scp-body">
                   <span className="scp-label">WHAT DO YOU NEED, SEE, OR OFFER?</span>
                   <textarea id="scp-body" className="scp-textarea" rows={4} maxLength={2000}
-                    placeholder="Size, must-haves, timing. No emails, phone numbers, or chat handles — Connect handles introductions."
+                    placeholder="Size, must-haves, timing. No emails, phone numbers, or chat handles: Connect handles introductions."
                     value={form.body} onChange={(e) => set("body", e.target.value)} />
                 </label>
                 <div className="scp-row">
@@ -237,8 +237,8 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                 <label className="scp-field" htmlFor="scp-musts"><span className="scp-label">MUST-HAVES (COMMA-SEPARATED)</span>
                   <input id="scp-musts" className="scp-input" value={form.mustHave} placeholder="8m ceiling, 3-phase power, truck ingress" onChange={(e) => set("mustHave", e.target.value)} /></label>
                 {form.signalType === SIGNAL_TYPES.COMMERCIAL_PROMOTION && (
-                  <label className="scp-field" htmlFor="scp-building"><span className="scp-label">BUILDING (PROMOS ONLY — NAMES THE OFFER)</span>
-                    <input id="scp-building" className="scp-input" value={form.buildingName} placeholder="Name the exact building — only its owner or handling broker may promote it" onChange={(e) => set("buildingName", e.target.value)} /></label>
+                  <label className="scp-field" htmlFor="scp-building"><span className="scp-label">BUILDING (PROMOS ONLY: NAMES THE OFFER)</span>
+                    <input id="scp-building" className="scp-input" value={form.buildingName} placeholder="Name the exact building: only its owner or handling broker may promote it" onChange={(e) => set("buildingName", e.target.value)} /></label>
                 )}
               </div>
             )}
@@ -251,7 +251,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                   <label className="scp-field" htmlFor="scp-district"><span className="scp-label">DISTRICT</span>
                     <input id="scp-district" className="scp-input" value={form.district} placeholder="BGC" onChange={(e) => set("district", e.target.value)} /></label>
                 </div>
-                <p className="scp-place-note"><MapPin size={12} aria-hidden="true" /> City or district is enough — exact pins are never forced.</p>
+                <p className="scp-place-note"><MapPin size={12} aria-hidden="true" /> City or district is enough; exact pins are never forced.</p>
                 <div className="scp-identity" role="radiogroup" aria-label="Posting identity">
                   <button type="button" role="radio" aria-checked={form.identityMode === "anonymous"}
                     className={`scp-id-card${form.identityMode === "anonymous" ? " is-active" : ""}`}
@@ -276,11 +276,11 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
               <div className="scp-review">
                 <dl className="scp-dl">
                   <div className="scp-dl-row"><dt>TYPE</dt><dd>{SIGNAL_TYPE_LABELS[form.signalType]}</dd></div>
-                  <div className="scp-dl-row"><dt>HEADLINE</dt><dd>{form.title.trim() || "—"}</dd></div>
-                  <div className="scp-dl-row"><dt>PLACE</dt><dd>{[form.buildingName.trim(), form.district.trim(), form.city.trim()].filter(Boolean).join(", ") || "—"}</dd></div>
+                  <div className="scp-dl-row"><dt>HEADLINE</dt><dd>{form.title.trim() || "-"}</dd></div>
+                  <div className="scp-dl-row"><dt>PLACE</dt><dd>{[form.buildingName.trim(), form.district.trim(), form.city.trim()].filter(Boolean).join(", ") || "-"}</dd></div>
                   <div className="scp-dl-row"><dt>SIGNED</dt><dd>{form.identityMode === "anonymous" ? identityPreview : `${identityPreview} (public)`}</dd></div>
                 </dl>
-                <p className="scp-review-note">Live for 30 days unless refreshed. No comments — members answer with Relevant or a permissioned Connect.</p>
+                <p className="scp-review-note">Live for 30 days unless refreshed. No comments; members answer with Relevant or a permissioned Connect.</p>
               </div>
             )}
 

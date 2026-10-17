@@ -7,7 +7,7 @@
   width: 100%;
   height: 100%;
   min-height: 480px;
-  background: #0d0d0d;
+  background: var(--bg);
   overflow: hidden;
 }
 
@@ -20,15 +20,15 @@
 
 /* Custom dark styling for MapLibre controls */
 .ssr-container .maplibregl-ctrl-group {
-  background: rgba(18, 18, 18, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(10px);
+  background: rgba(var(--surface-rgb), 0.88) !important;
+  border: 1px solid var(--border) !important;
+  backdrop-filter: blur(12px);
   border-radius: 4px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 .ssr-container .maplibregl-ctrl-group button {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
 }
 
 .ssr-container .maplibregl-ctrl-group button:last-child {
@@ -39,22 +39,35 @@
   filter: invert(0.85) hue-rotate(180deg);
 }
 
-/* ── RADAR HUD WATERMARK OVERLAY ── */
+/* ── CONSOLIDATED RADAR HUD TELEMETRY PILL ── */
 .ssr-hud-overlay {
   position: absolute;
-  inset: 0;
+  top: 14px;
+  left: 14px;
   pointer-events: none;
   z-index: 5;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
-.ssr-hud-top-left {
-  display: flex;
+.ssr-hud-pill-bar {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 5px 12px;
+  background: rgba(var(--surface-rgb), 0.88);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.ssr-hud-segment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ssr-hud-dot {
@@ -62,35 +75,58 @@
   height: 6px;
   border-radius: 50%;
   background: var(--accent-bright);
-  box-shadow: 0 0 8px rgba(247, 198, 78, 0.9);
+  box-shadow: 0 0 8px rgba(var(--accent-bright-rgb), 0.9);
 }
 
-.ssr-hud-text {
-  font-family: var(--font-mono, monospace);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.4);
+.ssr-hud-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.08em;
 }
 
-.ssr-hud-top-right {
-  position: absolute;
-  top: 16px;
-  right: 54px; /* avoid overlapping top-right map controls */
+.ssr-hud-sep {
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
-.ssr-hud-bottom-left {
+.ssr-hud-stat {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ssr-hud-sector {
+  color: var(--accent-bright);
+  font-weight: 600;
+}
+
+/* ── 2D FALLBACK UI ── */
+.ssr-fallback {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
 
-.ssr-hud-tag {
+.ssr-fallback-card {
+  max-width: 440px;
+  padding: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.ssr-fallback-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
   font-family: var(--font-mono, monospace);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  background: rgba(13, 13, 13, 0.85);
-  border: 1px solid rgba(232, 174, 60, 0.25);
-  padding: 3px 8px;
-  border-radius: 3px;
-  backdrop-filter: blur(8px);
+}
+
+.ssr-fallback-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
 }

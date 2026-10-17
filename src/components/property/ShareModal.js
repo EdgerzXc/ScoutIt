@@ -307,7 +307,7 @@ export default function ShareModal({
 
     if (channel.key === "copy") {
       const ok = await copyText(text);
-      setNotice(ok ? "Briefing copied. Paste it anywhere." : "Couldn't copy — select the text below.");
+      setNotice(ok ? "Briefing copied. Paste it anywhere." : "Couldn't copy: select the text below.");
       if (ok) fireShared("copy");
       setTimeout(() => setNotice(""), 4000);
       return;
@@ -330,8 +330,8 @@ export default function ShareModal({
       setNotice(
         ok
           ? (channel.key === "facebook" && FACEBOOK_APP_ID
-              ? "Caption prefilled — review the hashtags, then hit Post. Backup copy kept."
-              : `Briefing copied — paste it into the ${channel.name} post.`)
+              ? "Caption prefilled: review the hashtags, then hit Post. Backup copy kept."
+              : `Briefing copied: paste it into the ${channel.name} post.`)
           : `${channel.name} can't carry the text. Copy it below, then paste.`
       );
       setTimeout(() => setNotice(""), 6000);
@@ -344,7 +344,7 @@ export default function ShareModal({
     if (win) {
       fireShared(channel.key);
     } else {
-      setNotice(`A popup blocker stopped ${channel.name} from opening — allow popups, then try again.`);
+      setNotice(`A popup blocker stopped ${channel.name} from opening: allow popups, then try again.`);
       setTimeout(() => setNotice(""), 6000);
     }
   };

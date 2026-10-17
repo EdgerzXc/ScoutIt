@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
+import { notifyUser } from "@/lib/notifications";
 import { serializeTask, toTaskRow, updateTaskSchema } from "@/lib/crm/taskModel";
 
 export const dynamic = "force-dynamic";
@@ -121,6 +122,39 @@ export async function PATCH(request, { params }) {
         });
       } catch (activityError) {
         console.warn("[CRM TASKS API] Completion entry not recorded for task", updated.id, activityError?.message);
+      }
+    }
+
+    // GAP-90: Notify on task reassignment or completion
+    const reassignedToOther =
+      input.assigneeUserId &&
+      input.assigneeUserId !== userId &&
+      input.assigneeUserId !== access.task.assignee_user_id;
+    if (reassignedToOther) {
+      try {
+        await notifyUser(supabaseAdmin, {
+          userId: input.assigneeUserId,
+          title: "CRM task assigned to you",
+          desc: `You have been assigned a task: "${updated.title}".`,
+          propertyId: updated.property_id || null,
+          notificationType: "task_assigned",
+        });
+      } catch (notifyErr) {
+        console.warn("[CRM TASKS API] Reassignment notification failed:", notifyErr?.message);
+      }
+    }
+
+    if (justCompleted && access.task.owner_user_id && access.task.owner_user_id !== userId) {
+      try {
+        await notifyUser(supabaseAdmin, {
+          userId: access.task.owner_user_id,
+          title: "CRM task completed",
+          desc: `Assigned task "${updated.title}" was marked done.`,
+          propertyId: updated.property_id || null,
+          notificationType: "task_completed",
+        });
+      } catch (notifyErr) {
+        console.warn("[CRM TASKS API] Completion notification failed:", notifyErr?.message);
       }
     }
 

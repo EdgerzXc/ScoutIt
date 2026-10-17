@@ -53,15 +53,15 @@ export const dynamicParams = false;
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const hub = getLocationHub(slug);
-  if (!hub) return { title: "Location not found — ScoutIt" };
+  if (!hub) return { title: "Location not found | ScoutIt" };
 
   const url = siteUrl(`/hubs/${hub.slug}`);
   return {
-    title: `${hub.name} — Property Intelligence | ScoutIt`,
+    title: `${hub.name} · Property Intelligence | ScoutIt`,
     description: hub.tagline,
     alternates: { canonical: url },
     openGraph: {
-      title: `${hub.name} — Property Intelligence`,
+      title: `${hub.name} · Property Intelligence`,
       description: hub.tagline,
       url,
       type: "website",
@@ -99,7 +99,7 @@ export default async function HubPage({ params }) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `${hub.name} — Property Intelligence`,
+    name: `${hub.name} · Property Intelligence`,
     description: hub.tagline,
     url: siteUrl(`/hubs/${hub.slug}`),
     about: {
@@ -179,7 +179,7 @@ export default async function HubPage({ params }) {
             <div className="hub-state" role="alert">
               <p className="hub-state__title">Listings couldn&apos;t be loaded just now</p>
               <p className="hub-state__body">
-                The property catalogue didn&apos;t respond. Nothing is wrong with your connection —
+                The property catalogue didn&apos;t respond. Nothing is wrong with your connection;
                 try again in a moment, or browse the full directory instead.
               </p>
               <Link className="hub-cta" href="/discover">
@@ -194,7 +194,7 @@ export default async function HubPage({ params }) {
               <p className="hub-state__title">No listings in {hub.city} yet</p>
               <p className="hub-state__body">
                 This page covers properties within {HUB_RADIUS_KM} km of {hub.name}, plus anything
-                listed under {hub.city}. Nothing has been published here so far — if you own or
+                listed under {hub.city}. Nothing has been published here so far. If you own or
                 manage a space in the area, yours would be the first.
               </p>
               <Link className="hub-cta" href="/dashboard">

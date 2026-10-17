@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
 import { logActivity } from "@/lib/crmActivity";
+import { notifyUser } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { canTransitionWorkflow } from "@/lib/workflowStateMachines";
@@ -166,6 +167,60 @@ export async function PATCH(request, { params }) {
       actorId: userId,
       metadata: { from: deal.status, to: status, ...(analytics_event ? { analytics_event } : {}) },
     });
+
+    // GAP-21: Notify relevant parties of deal status changes
+    if (userId !== deal.buyer_id && deal.buyer_id) {
+      if (status === "accepted") {
+        await notifyUser(supabaseAdmin, {
+          userId: deal.buyer_id,
+          title: "Deal request accepted",
+          desc: "Your connection request was accepted.",
+          propertyId: deal.property_id,
+          notificationType: "deal_accepted",
+        });
+      } else if (status === "declined") {
+        await notifyUser(supabaseAdmin, {
+          userId: deal.buyer_id,
+          title: "Deal request declined",
+          desc: "Your connection request was declined.",
+          propertyId: deal.property_id,
+          notificationType: "deal_declined",
+        });
+      } else if (status === "connected") {
+        await notifyUser(supabaseAdmin, {
+          userId: deal.buyer_id,
+          title: "Deal connected",
+          desc: "Your connection has been established.",
+          propertyId: deal.property_id,
+          notificationType: "deal_connected",
+        });
+      }
+    } else if (status === "withdrawn" && userId === deal.buyer_id) {
+      let routedRecipientIds = [];
+      try {
+        const { data: routedRows } = await supabaseAdmin
+          .from("deal_routing_recipients")
+          .select("recipient_id")
+          .eq("deal_id", dealId);
+        routedRecipientIds = (routedRows || []).map((r) => r?.recipient_id).filter(Boolean);
+      } catch {
+        // Non-fatal if routing table is unavailable
+      }
+      const recipientIds = new Set(
+        [deal.broker_id, deal.properties?.owner_id, ...routedRecipientIds].filter(
+          (id) => id && id !== userId
+        )
+      );
+      for (const recipientId of recipientIds) {
+        await notifyUser(supabaseAdmin, {
+          userId: recipientId,
+          title: "Request withdrawn",
+          desc: "A pending connection request was withdrawn by the sender.",
+          propertyId: deal.property_id,
+          notificationType: "deal_withdrawn",
+        });
+      }
+    }
 
     return NextResponse.json({ success: true, status: updateData.status, ...(analytics_event ? { analytics_event } : {}) });
   } catch (err) {

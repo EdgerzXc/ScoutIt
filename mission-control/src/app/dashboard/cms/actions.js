@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
-import { publishPropertyToAirtable } from "@/lib/airtable";
+import { publishPropertyToAirtable, unpublishPropertyFromAirtable } from "@/lib/airtable";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
@@ -74,12 +74,20 @@ export async function approveProperty(formData) {
   });
 
   // 2. Airtable succeeded — now mark approved in Supabase with the canonical slug.
+  // GAP-33: Once canonical_slug is locked on first publication, never overwrite slug
+  // with a newly recomputed formula slug.
+  const nowIso = new Date().toISOString();
+  const lockedCanonicalSlug = property.canonical_slug || published.slug;
   const { error } = await admin
     .from("properties")
     .update({
       moderation_status: "approved",
       pipeline_status: "approved",
-      slug: published.slug,
+      lifecycle_state: "live",
+      slug: lockedCanonicalSlug,
+      canonical_slug: lockedCanonicalSlug,
+      canonical_slug_locked_at: property.canonical_slug_locked_at || nowIso,
+      published_at: property.published_at || nowIso,
       rejection_reason: null,
     })
     .eq("id", propertyId);
@@ -87,7 +95,7 @@ export async function approveProperty(formData) {
     // Airtable is live but Supabase didn't record it — surface loudly so
     // staff retries (the retry is idempotent: update-by-slug path).
     throw new Error(
-      `Published to the live site (slug: ${published.slug}) but failed to record approval in Supabase: ${error.message}. Retry the approval.`
+      `Published to the live site (slug: ${lockedCanonicalSlug}) but failed to record approval in Supabase: ${error.message}. Retry the approval.`
     );
   }
 
@@ -96,7 +104,76 @@ export async function approveProperty(formData) {
     action: "property.approve_publish",
     targetTable: "properties",
     targetId: propertyId,
-    metadata: { slug: published.slug, airtable: published.mode, recordId: published.recordId },
+    metadata: { slug: lockedCanonicalSlug, airtable: published.mode, recordId: published.recordId },
+  });
+
+  revalidatePath("/dashboard/cms");
+}
+
+const LOCKED_TITLE_LIFECYCLE_STATES = new Set([
+  "live",
+  "off_market",
+  "staff_suspended",
+  "permanently_removed",
+]);
+
+function canStaffChangeDisplayTitle(property = {}) {
+  if (property.canonical_slug || property.canonical_slug_locked_at) return false;
+  const pipeline = String(property.pipeline_status || "").trim().toLowerCase();
+  if (pipeline === "approved" || pipeline === "archived" || pipeline === "off_market") return false;
+  const lifecycle = String(property.lifecycle_state || "").trim().toLowerCase();
+  return !LOCKED_TITLE_LIFECYCLE_STATES.has(lifecycle);
+}
+
+/**
+ * Updates editable property metadata in Mission Control while enforcing
+ * Dual-CMS Rule #3 (live display titles cannot be mutated once canonical_slug is locked).
+ * @param {FormData} formData
+ */
+export async function updatePropertyMetadata(formData) {
+  const staff = await getCurrentStaff();
+  assertTier(staff, TIERS.AGENT);
+
+  const propertyId = formData.get("propertyId")?.toString();
+  const nextTitle = formData.get("title")?.toString().trim();
+  const nextLocation = formData.get("location")?.toString().trim();
+  if (!propertyId) throw new Error("Missing propertyId.");
+
+  const admin = createAdminClient();
+  const { data: property, error: fetchError } = await admin
+    .from("properties")
+    .select("id, title, slug, canonical_slug, canonical_slug_locked_at, lifecycle_state, pipeline_status")
+    .eq("id", propertyId)
+    .single();
+
+  if (fetchError || !property) {
+    throw new Error(fetchError?.message || "Property not found.");
+  }
+
+  const updates = {};
+  if (nextTitle && nextTitle !== property.title) {
+    if (!canStaffChangeDisplayTitle(property)) {
+      throw new Error(
+        "Display title is locked after first publication because Airtable's Slug formula derives from Title (Dual-CMS Rule #3 / GAP-33)."
+      );
+    }
+    updates.title = nextTitle;
+  }
+  if (typeof nextLocation === "string" && nextLocation.length > 0) {
+    updates.location = nextLocation;
+  }
+
+  if (Object.keys(updates).length === 0) return;
+
+  const { error } = await admin.from("properties").update(updates).eq("id", propertyId);
+  if (error) throw new Error(error.message);
+
+  await logAction({
+    staff,
+    action: "property.update_metadata",
+    targetTable: "properties",
+    targetId: propertyId,
+    metadata: updates,
   });
 
   revalidatePath("/dashboard/cms");
@@ -148,15 +225,34 @@ export async function setPropertyArchived(formData) {
   if (nextValue && !reason) throw new Error("A reason is required to archive a property.");
 
   const admin = createAdminClient();
+  const { data: prop } = await admin
+    .from("properties")
+    .select("slug, canonical_slug")
+    .eq("id", propertyId)
+    .maybeSingle();
+
   const { error } = await admin
     .from("properties")
     .update({
       moderation_status: nextValue ? "archived" : "pending",
+      pipeline_status: nextValue ? "archived" : "pending",
+      lifecycle_state: nextValue ? "off_market" : "draft",
       archived_at: nextValue ? new Date().toISOString() : null,
       rejection_reason: nextValue ? reason : null,
     })
     .eq("id", propertyId);
   if (error) throw new Error(error.message);
+
+  if (nextValue && prop) {
+    const slug = prop.canonical_slug || prop.slug;
+    if (slug) {
+      try {
+        await unpublishPropertyFromAirtable(slug);
+      } catch (err) {
+        console.warn("[MMC ARCHIVE] Airtable unpublish warning:", err.message);
+      }
+    }
+  }
 
   await logAction({
     staff,
@@ -177,16 +273,36 @@ export async function bulkArchiveProperties(propertyIds, reason) {
   if (!reason) throw new Error("A reason is required to bulk archive properties.");
 
   const admin = createAdminClient();
+  const { data: props } = await admin
+    .from("properties")
+    .select("slug, canonical_slug")
+    .in("id", propertyIds);
+
   const { error } = await admin
     .from("properties")
     .update({
       moderation_status: "archived",
+      pipeline_status: "archived",
+      lifecycle_state: "off_market",
       archived_at: new Date().toISOString(),
       rejection_reason: reason,
     })
     .in("id", propertyIds);
   
   if (error) throw new Error(error.message);
+
+  if (props && props.length > 0) {
+    for (const p of props) {
+      const slug = p.canonical_slug || p.slug;
+      if (slug) {
+        try {
+          await unpublishPropertyFromAirtable(slug);
+        } catch (err) {
+          console.warn("[MMC BULK ARCHIVE] Airtable unpublish warning for", slug, err.message);
+        }
+      }
+    }
+  }
 
   await logAction({
     staff,

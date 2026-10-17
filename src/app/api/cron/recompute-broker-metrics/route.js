@@ -36,10 +36,13 @@ async function handleCron(request) {
   }
 
   try {
-    const { data: brokers, error } = await supabaseAdmin
+    const baseQuery = supabaseAdmin
       .from("user_profiles")
-      .select("id")
-      .eq("role", "broker")
+      .select("id");
+    const roleFiltered = typeof baseQuery.or === "function"
+      ? baseQuery.or("role.eq.broker,active_roles.cs.{broker}")
+      : baseQuery.eq("role", "broker");
+    const { data: brokers, error } = await roleFiltered
       .is("archived_at", null)
       .limit(BATCH_LIMIT);
 

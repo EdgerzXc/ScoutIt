@@ -62,3 +62,14 @@ Before writing complex code or modifying data structures, you must immediately r
 - Reuse passing verification for the same unchanged code. For an ordinary push, use existing passing results for unchanged code and focused checks for new edits; run the surface checks around edits as section 5 requires, not again merely because a push is requested. Check the deployment result. Do not rerun the entire unit or browser suite merely because another push is requested.
 - Run a full suite when changes are broad and unverified, a required CI gate demands it, or a specific regression risk cannot be covered by focused checks. After a full-suite failure, fix the cause and run the affected tests. Repeat the entire suite only when the fix could affect unrelated journeys or a required gate demands a fresh full result. Do not keep rerunning full suites to turn an already understood intermittent test green.
 - Keep production migration approval and live feature acceptance as separate follow-up work. State the boundary once and continue the authorized code release.
+
+<!-- antislop:start -->
+## antislop
+For UI, copy, people, mobile layout, or code comments work, read `antislop.md` (core) and then the skill for the task:
+- UI / visual: `.agents/skills/antislop-ui/SKILL.md`
+- Copy & text: `.agents/skills/antislop-copywriting/SKILL.md`
+- People: `.agents/skills/antislop-human/SKILL.md`
+- Mobile / responsive: `.agents/skills/antislop-layoutmobile/SKILL.md`
+- Code comments: `.agents/skills/antislop-code/SKILL.md`
+Before starting, ask the user when antislop applies: during the work, or after it is done.
+<!-- antislop:end -->

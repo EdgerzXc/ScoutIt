@@ -38,21 +38,27 @@ async function fetchCommunitySignals() {
   return response.json();
 }
 
-export default function StratosphereWorkspace() {
+export default function StratosphereWorkspace({
+  initialView = "articles",
+  initialStage = "all",
+  initialQuery = "",
+  initialSignal = null,
+} = {}) {
   const [liveArticles, setLiveArticles] = useState([]);
-  const [view, setView] = useState("articles");
-  const [stage, setStage] = useState("all");
-  const [query, setQuery] = useState("");
-  const [returnSignal, setReturnSignal] = useState(null);
+  const [view, setView] = useState(initialView);
+  const [stage, setStage] = useState(validJourneyStage(initialStage));
+  const [query, setQuery] = useState(initialQuery);
+  const [returnSignal, setReturnSignal] = useState(initialSignal);
   const [liveSignals, setLiveSignals] = useState([]);
   const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("view") === "radar") setView("radar");
-    setStage(validJourneyStage(params.get("stage")));
-    setQuery(params.get("q") || "");
-    setReturnSignal(params.get("signal"));
+    else if (params.get("view") === "articles") setView("articles");
+    if (params.get("stage")) setStage(validJourneyStage(params.get("stage")));
+    if (params.has("q")) setQuery(params.get("q") || "");
+    if (params.has("signal")) setReturnSignal(params.get("signal"));
   }, []);
 
   useEffect(() => {

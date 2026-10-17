@@ -177,7 +177,7 @@ export async function convertToClaimableDraft(prospect) {
   if (!staff) throw new Error("Unauthorized staff session");
   assertTier(staff, TIERS.OPS_MANAGER);
 
-  const { propertyPayload, claimToken, claimUrl } = generateClaimDraftPayload({
+  const { dbPropertyRow, claimToken, claimUrl } = generateClaimDraftPayload({
     propertyName: prospect.property_name,
     propertyAddress: prospect.property_address,
     districtCity: prospect.district_city,
@@ -189,19 +189,31 @@ export async function convertToClaimableDraft(prospect) {
   });
 
   const admin = createAdminClient();
+  const { data: insertedProperty, error: insertError } = await admin
+    .from("properties")
+    .insert(dbPropertyRow)
+    .select("id")
+    .maybeSingle();
+
+  if (insertError) {
+    throw new Error(`Failed to create claimable draft property: ${insertError.message}`);
+  }
+
   try {
-    // Atomically insert into properties if table available
-    await admin.from("properties").insert(propertyPayload);
     await admin
       .from("outreach_prospects")
-      .update({ status: "onboarded", claim_token: claimToken })
+      .update({
+        status: "onboarded",
+        claim_token: claimToken,
+      })
       .eq("id", prospect.id);
-  } catch (err) {
-    // Fail-open
+  } catch {
+    // outreach_prospects table may still be on seed fixture in preview
   }
 
   return {
     success: true,
+    propertyId: insertedProperty?.id || null,
     claimToken,
     claimUrl,
   };

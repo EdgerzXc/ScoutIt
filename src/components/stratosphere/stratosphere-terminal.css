@@ -227,14 +227,23 @@
 }
 
 /* ── DOSSIER HEADER & SCROLL ── */
+/* ── DOSSIER HEADER & TWO-SIDED TAXONOMY (A-212) ── */
 .st-dossier-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface, #121212);
+  flex-shrink: 0;
+}
+
+.st-telemetry-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(18, 18, 18, 0.9);
-  flex-shrink: 0;
+  gap: 8px;
+  width: 100%;
 }
 
 .st-telemetry-tag {
@@ -251,47 +260,130 @@
   color: var(--accent-bright);
 }
 
+.st-telemetry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .st-district-indicator {
   font-family: var(--font-mono, monospace);
   font-size: 12px;
   letter-spacing: 0.1em;
   color: var(--accent);
-  background: rgba(232, 174, 60, 0.1);
+  background: rgba(var(--accent-rgb, 232, 174, 60), 0.1);
+  border: 1px solid var(--accent-border, rgba(232, 174, 60, 0.25));
   padding: 2px 6px;
   border-radius: 2px;
 }
 
-/* Source lens: sharp segmented control. The active segment is the only
-   emphasis in the header besides the live count. */
-.st-source-lens {
-  display: inline-flex;
-  gap: 4px;
-  margin-left: auto;
+.st-market-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
 }
 
-.st-source-chip {
-  min-height: 32px;
-  padding: 0 10px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 2px;
-  color: var(--text-muted);
+.st-market-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.st-market-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: var(--text-secondary, #a1a1aa);
   font-family: var(--font-mono, monospace);
   font-size: 12px;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-.st-source-chip.is-active {
-  border-color: var(--accent-muted);
-  background: rgba(var(--accent-rgb), 0.1);
-  color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .st-market-tab:hover {
+    color: var(--text-primary, #ffffff);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+  }
 }
 
-.st-source-chip:focus-visible {
-  outline: 2px solid var(--accent-bright);
-  outline-offset: 2px;
+.st-market-tab:active {
+  transform: scale(0.97);
+}
+
+.st-market-tab.is-active {
+  background: var(--accent-dim, rgba(232, 174, 60, 0.14));
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.st-market-tab.tab-demand.is-active {
+  background: var(--accent-dim, rgba(232, 174, 60, 0.14));
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.st-market-tab.tab-supply.is-active {
+  background: rgba(var(--green-rgb, 16, 185, 129), 0.14);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.st-market-tab.tab-intel.is-active {
+  background: rgba(var(--intel-cyan-rgb, 56, 189, 248), 0.14);
+  border-color: var(--intel-cyan);
+  color: var(--intel-cyan);
+}
+
+.st-tab-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.st-market-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.st-market-tab.is-active .st-market-tab-count {
+  background: rgba(var(--accent-rgb, 232, 174, 60), 0.25);
+  color: var(--accent-bright);
+}
+
+.st-market-tab.tab-supply.is-active .st-market-tab-count {
+  background: rgba(var(--green-rgb, 16, 185, 129), 0.25);
+  color: var(--green);
+}
+
+.st-market-tab.tab-intel.is-active .st-market-tab-count {
+  background: rgba(var(--intel-cyan-rgb, 56, 189, 248), 0.25);
+  color: var(--intel-cyan);
+}
+
+.st-market-role-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted, #71717a);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
 }
 
 .st-dossier-scroll {

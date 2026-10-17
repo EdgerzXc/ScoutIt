@@ -48,11 +48,55 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Failed to fetch units' }, { status: 500 });
     }
 
-    // Also get saved_intel count
-    const { count: savedCount, error: savedError } = await supabaseAdmin
+    // Also get saved_intel count across all property identity aliases
+    // (UUID id, slug, canonical_slug, airtable_record_id) because public pages
+    // store saved_intel.property_id using the public slug/record ID.
+    const propIdentityMap = new Map();
+    const allPropIdentifiers = new Set();
+    for (const p of userProps) {
+      const aliases = [
+        p.id,
+        p.slug,
+        p.canonical_slug,
+        p.airtable_record_id,
+      ]
+        .filter(Boolean)
+        .map((val) => String(val));
+      for (const alias of aliases) {
+        allPropIdentifiers.add(alias);
+        propIdentityMap.set(alias, p.id);
+      }
+    }
+
+    const { data: savedRows, count: savedCount } = await supabaseAdmin
       .from('saved_intel')
-      .select('*', { count: 'exact', head: true })
-      .in('property_id', propIds);
+      .select('property_id', { count: 'exact' })
+      .in('property_id', Array.from(allPropIdentifiers));
+
+    const savedCountsByPropId = new Map();
+    if (Array.isArray(savedRows)) {
+      for (const row of savedRows) {
+        const canonicalPropId = propIdentityMap.get(String(row?.property_id || ''));
+        if (canonicalPropId) {
+          savedCountsByPropId.set(
+            canonicalPropId,
+            (savedCountsByPropId.get(canonicalPropId) || 0) + 1
+          );
+        }
+      }
+    }
+
+    const enrichedProps = userProps.map((p) => ({
+      ...p,
+      saved_count: savedCountsByPropId.get(p.id) || 0,
+    }));
+
+    const resolvedSavedCount =
+      typeof savedCount === 'number'
+        ? savedCount
+        : Array.isArray(savedRows)
+          ? savedRows.length
+          : 0;
 
     // Calculate stats
     let total = 0;
@@ -68,9 +112,9 @@ export async function GET(request) {
     });
 
     return NextResponse.json({
-      properties: userProps,
+      properties: enrichedProps,
       units, 
-      stats: { total, occupied, vacant, maintenance, saved_intel_count: savedCount || 0 } 
+      stats: { total, occupied, vacant, maintenance, saved_intel_count: resolvedSavedCount } 
     }, { status: 200 });
 
   } catch (error) {

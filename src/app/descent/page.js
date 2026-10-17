@@ -20,7 +20,7 @@ const BUILDINGS = [
 
 const ROLES = [
   { name: "Brokers", head: "Be found.", body: "A public profile owners and buyers actually reach, warm leads from real reactions on your listings, and the intel tools that make you the most prepared advisor in the room." },
-  { name: "Owners", head: "List once, get pursued.", body: "Vetted brokers compete to represent your space, and you see exactly who's interested — through real signals — before you commit to anyone." },
+  { name: "Owners", head: "List once, get pursued.", body: "Vetted brokers compete to represent your space, and you see exactly who's interested (through real signals) before you commit to anyone." },
   { name: "Providers", head: "Work where the demand is.", body: "Photographers, researchers, and planners get a profile that sits right beside the properties that need you, so you're hired from inside the platform." },
 ];
 
@@ -47,7 +47,23 @@ export default function DescentPage() {
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    try { setSignedIn(!!localStorage.getItem("scoutit_user")); } catch (e) { /* signed out */ }
+    let active = true;
+    (async () => {
+      try {
+        if (localStorage.getItem("scoutit_user")) {
+          if (active) setSignedIn(true);
+          return;
+        }
+        const { supabase } = await import("@/lib/supabaseClient");
+        if (supabase?.auth?.getSession) {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user && active) {
+            setSignedIn(true);
+          }
+        }
+      } catch (e) { /* signed out */ }
+    })();
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -140,7 +156,7 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="dl-eyebrow">Layer 02 · the atmosphere</div>
           <h2 className="dl-title">News travels in the air.</h2>
-          <p className="dl-sub">Before your feet touch the ground — what&apos;s moving, what&apos;s shifting, what&apos;s worth knowing. The market, read from above.</p>
+          <p className="dl-sub">Before your feet touch the ground: what&apos;s moving, what&apos;s shifting, what&apos;s worth knowing. The market, read from above.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
             {/* A-098: key was `a.href` — all three cards link to /intel, so
                 three siblings shared one key and React warned on /descent.
@@ -170,7 +186,7 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="dl-eyebrow">Layer 03 · the city</div>
           <h2 className="dl-title">Show the space, not the spreadsheet.</h2>
-          <p className="dl-sub">Down into the streets. Real, desirable spaces — browse the market itself, building by building.</p>
+          <p className="dl-sub">Down into the streets. Real, desirable spaces: browse the market itself, building by building.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
             {[{ t: "The Proscenium", l: "Rockwell Center, Makati", c: "Condo" }, { t: "Ayala Alabang Core", l: "Muntinlupa City", c: "House" }, { t: "High Street South Block", l: "BGC, Taguig", c: "Commercial" }].map((p) => (
               <Link key={p.t} href="/property" style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(var(--bg-rgb),0.55)", border: "0.5px solid var(--border-subtle)", borderRadius: 10, overflow: "hidden", backdropFilter: "blur(4px)" }}>
@@ -199,7 +215,7 @@ export default function DescentPage() {
         <div className="layer-content">
           <div className="dl-eyebrow">Layer 04 · the crust</div>
           <h2 className="dl-title">What holds it all together.</h2>
-          <p className="dl-sub">The vetted ecosystem — the people who make the data trustworthy. The solid layer the whole world rests on.</p>
+          <p className="dl-sub">The vetted ecosystem: the people who make the data trustworthy. The solid layer the whole world rests on.</p>
           <div className="role-grid" style={{ marginBottom: 30 }}>
             {[{ Icon: Building2, t: "Verified advisors", d: "Licensed professionals to guide the deal.", href: "/brokers" }, { Icon: Camera, t: "Space photography", d: "Make every space look the way it deserves.", href: "/photographers" }, { Icon: Search, t: "Site research", d: "Due diligence before you commit.", href: "/researchers" }, { Icon: CalendarDays, t: "Event design", d: "Turn great spaces into great events.", href: "/event-planners" }].map((s) => (
               <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(var(--bg-rgb),0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
@@ -239,7 +255,7 @@ export default function DescentPage() {
             <div>
               <div className="dl-eyebrow" style={{ color: "var(--accent-bright)" }}>Layer 06 · the core</div>
               <h2 className="dl-title" style={{ color: "var(--text-primary)" }}>It was always about you.</h2>
-              <p className="dl-sub">The molten center. Everything above led here — to the people who got here first, and to your own place inside it.</p>
+              <p className="dl-sub">The molten center. Everything above led here: to the people who got here first, and to your own place inside it.</p>
             </div>
             <div>
               <div className="membrane">Outer core · public</div>
@@ -266,7 +282,7 @@ export default function DescentPage() {
               <div className="membrane">Inner core · private</div>
               {signedIn ? (
                 <div className="inner-core">
-                  <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "var(--accent)" }} /> Welcome back — here&apos;s your world.</div>
+                  <div className="ic-head"><LayoutGrid strokeWidth={1.5} size={22} style={{ color: "var(--accent)" }} /> Welcome back: here&apos;s your world.</div>
                   <div className="ic-sub">Your Board and your profile. The center is yours.</div>
                   <div className="ic-links">
                     <Link href="/dashboard" className="dl-cta solid">Enter your space →</Link>
@@ -277,7 +293,7 @@ export default function DescentPage() {
               ) : (
                 <div className="inner-core locked">
                   <div className="ic-head"><Lock strokeWidth={1.5} size={20} style={{ color: "var(--accent)" }} /> Your space is sealed.</div>
-                  <div className="ic-sub">Your Board and profile — the inner core is yours alone, and it opens the moment you join. Becoming a pioneer is the only way to the center.</div>
+                  <div className="ic-sub">Your Board and profile: the inner core is yours alone, and it opens the moment you join. Becoming a pioneer is the only way to the center.</div>
                   <div className="ic-links"><Link href="/onboarding" className="dl-cta solid">Become a pioneer →</Link></div>
                 </div>
               )}

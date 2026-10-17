@@ -46,7 +46,7 @@ export const metadata = {
   // once. "Philippines" is doing more work here than "ScoutIt" is: it separates
   // this entity from India, from the battery, and from outer space in one word.
   title: {
-    default: "ScoutIt — Property & Space Intelligence Philippines",
+    default: "ScoutIt · Property & Space Intelligence Philippines",
     template: "%s · ScoutIt",
   },
   description:
@@ -66,7 +66,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ScoutIt — Property & Space Intelligence Philippines",
+    title: "ScoutIt · Property & Space Intelligence Philippines",
     description: "Property and space intelligence platform for the Philippines. ScoutIt decodes homes, offices, venues, and commercial spaces into clear, structured facts and spatial signals.",
   },
 

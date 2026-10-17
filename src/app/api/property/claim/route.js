@@ -26,6 +26,7 @@ import {
   DISCLAIMER_VERSION,
 } from "@/lib/listerRelationship";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { notifyUser } from "@/lib/notifications";
 
 /** Statuses that mean a claim is still in play. */
 const OPEN_STATUSES = [
@@ -261,6 +262,27 @@ export async function POST(request) {
       );
     }
 
+    // GAP-21 & GAP-39: Notify claimant and property owner of submitted claim with immediate email
+    await notifyUser(supabaseAdmin, {
+      userId,
+      title: "Property claim submitted",
+      desc: `Your ownership claim for "${property.title}" has been submitted for review.`,
+      propertyId: property.id,
+      notificationType: "claim_submitted",
+      forceEmail: true,
+    });
+
+    if (property.owner_id) {
+      await notifyUser(supabaseAdmin, {
+        userId: property.owner_id,
+        title: "Ownership claim filed",
+        desc: `An ownership claim has been submitted for "${property.title}" and is currently under review.`,
+        propertyId: property.id,
+        notificationType: "claim_filed",
+        forceEmail: true,
+      });
+    }
+
     // Audit trail. Never allowed to fail the request — but no longer swallowed
     // silently either: a claim with no event row is a gap in a legal record, and
     // somebody needs to be able to find out why.
@@ -293,4 +315,89 @@ export async function POST(request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * GAP-38: Approves a property claim, transfers `properties.owner_id`, and
+ * promotes the claimant's `user_profiles.active_roles` to include `'owner'`
+ * so the claimant can immediately access Owner Mode in the dashboard.
+ */
+export async function approvePropertyClaim(serviceClient, { claimId, reviewerId = null }) {
+  if (!serviceClient || !claimId) {
+    return { ok: false, error: "Missing serviceClient or claimId" };
+  }
+
+  const { data: claim, error: claimErr } = await serviceClient
+    .from("property_claims")
+    .select("id, property_id, claimant_user_id, claimed_relationship, status")
+    .eq("id", claimId)
+    .maybeSingle();
+
+  if (claimErr || !claim) {
+    return { ok: false, error: claimErr?.message || "Claim not found" };
+  }
+
+  const nowIso = new Date().toISOString();
+
+  const { error: updateClaimErr } = await serviceClient
+    .from("property_claims")
+    .update({ status: "approved", updated_at: nowIso })
+    .eq("id", claimId);
+  if (updateClaimErr) {
+    return { ok: false, error: updateClaimErr.message };
+  }
+
+  await serviceClient
+    .from("properties")
+    .update({
+      owner_id: claim.claimant_user_id,
+      verified: true,
+      lister_relationship: claim.claimed_relationship || "owner",
+      updated_at: nowIso,
+    })
+    .eq("id", claim.property_id);
+
+  // Promote claimant user_profiles to include 'owner' in active_roles
+  const { data: profile } = await serviceClient
+    .from("user_profiles")
+    .select("id, role, active_roles")
+    .eq("id", claim.claimant_user_id)
+    .maybeSingle();
+
+  const existingRoles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
+  const nextRoles = Array.from(new Set([...existingRoles, "owner"]));
+
+  await serviceClient
+    .from("user_profiles")
+    .update({
+      role: profile?.role && profile.role !== "seeker" ? profile.role : "owner",
+      active_roles: nextRoles,
+      updated_at: nowIso,
+    })
+    .eq("id", claim.claimant_user_id);
+
+  try {
+    await serviceClient.from("property_claim_events").insert({
+      claim_id: claim.id,
+      actor_id: reviewerId || claim.claimant_user_id,
+      event_type: "CLAIM_APPROVED",
+      payload: {
+        owner_id: claim.claimant_user_id,
+        granted_roles: nextRoles,
+      },
+    });
+  } catch (err) {
+    console.warn("[PROPERTY CLAIM] Could not write approval event:", err?.message);
+  }
+
+  await notifyUser(serviceClient, {
+    userId: claim.claimant_user_id,
+    title: "Property claim approved",
+    desc: "Your property ownership claim has been verified and Owner Mode is now active on your account.",
+    propertyId: claim.property_id,
+    notificationType: "claim_approved",
+    forceEmail: true,
+  });
+
+  return { ok: true, claimId: claim.id, ownerId: claim.claimant_user_id, activeRoles: nextRoles };
 }

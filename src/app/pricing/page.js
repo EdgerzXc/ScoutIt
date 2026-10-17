@@ -55,7 +55,7 @@ const PERSONAS = [
 const BUNDLE_CARD = {
   id: "bundles",
   title: "Multi-Role Bundles",
-  description: "Wear multiple hats? Bundle Seeker + Broker, Owner + Photographer, or go full Constellation — one plan, every role, up to 20% off.",
+  description: "Wear multiple hats? Bundle Seeker + Broker, Owner + Photographer, or go full Constellation: one plan, every role, up to 20% off.",
   icon: Layers,
   href: "/pricing/bundles",
   accent: "text-gold-accent",

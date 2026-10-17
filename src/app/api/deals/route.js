@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
@@ -7,6 +9,7 @@ import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/d
 import { isManualCreatableStatus } from "@/lib/deals/dealStatus";
 import { isBlocked } from "@/lib/connectBlocks";
 import { checkReceiverGate } from "@/lib/connectGates";
+import { notifyUser } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -159,9 +162,6 @@ export async function GET(request) {
   }
 }
 
-import { z } from "zod";
-import { resolveUserId } from "@/lib/serverAuth";
-
 const postSchema = z.object({
   propertyId: z.string(),
   otherPartyEmail: z.string(), // We use this as ID for simplicity
@@ -264,6 +264,7 @@ export async function POST(request) {
         { status: insufficient ? 403 : 500 }
       );
     }
+    const nowIso = new Date().toISOString();
     const { data: inserted, error } = await supabaseAdmin
       .from("deals")
       .insert({
@@ -273,6 +274,7 @@ export async function POST(request) {
         broker_id: isOwner ? null : userId,
         property_id: property.id,
         connects_spent: 1,
+        pending_clock_reset_at: nowIso,
       })
       .select("*, properties(id, title, slug, owner_id)")
       .single();
@@ -322,6 +324,15 @@ export async function POST(request) {
     if (manualBalance !== null) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: manualBalance }).eq('id', userId);
     }
+
+    // GAP-69: Notify recipient of the newly created manual deal
+    await notifyUser(supabaseAdmin, {
+      userId: otherPartyEmail,
+      title: isOwner ? "New property invitation" : "New Connect request",
+      desc: `A new Connect request was opened for "${property.title || "a property"}".`,
+      propertyId: property.id,
+      notificationType: "deal_created",
+    });
 
     await logActivity(supabaseAdmin, {
       dealId: inserted.id,

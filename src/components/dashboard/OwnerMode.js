@@ -113,7 +113,7 @@ export default function OwnerMode() {
         `• They stop receiving enquiries for it\n` +
         `• Every conversation about it closes, including buyers they were already talking to\n` +
         `• Connects already spent are not refunded\n\n` +
-        `This cannot be undone — they would have to pitch again.`
+        `This cannot be undone. They would have to pitch again.`
     );
     if (!ok) return;
 
@@ -471,7 +471,7 @@ export default function OwnerMode() {
                     creationSource: 'pdf_assisted',
                     details: { ...draft.details, ai_confidence: draft.confidence, ai_gaps: draft.gaps }
                   });
-                  addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields — a reviewer checks it against your PDF before it goes live.`, "✅");
+                  addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields: a reviewer checks it against your PDF before it goes live.`, "✅");
                 }
               } catch (err) {
                 console.error('[Concierge]', err);
@@ -516,7 +516,7 @@ export default function OwnerMode() {
       if (!isUrlValid) return;
       if (activeListing) {
         await updateListing(activeListing.id, { matterportTourUrl: vaultUrl.trim() });
-        addToast("Vault tour linked to your listing — it's live now.", "success");
+        addToast("Vault tour linked to your listing. It's live now.", "success");
       }
       setVaultUrl("");
       setShowWizard(false);
@@ -557,7 +557,7 @@ export default function OwnerMode() {
           })
         }).catch(() => {});
 
-        addToast("Video uploaded — your Spatial Twin will be ready in 24–48 hours.", "✅");
+        addToast("Video uploaded. Your Spatial Twin will be ready in 24-48 hours.", "✅");
       } catch (err) {
         console.error('[Vault upload]', err);
         addToast(`Upload failed: ${sanitizeError(err)}`, "❌");
@@ -570,11 +570,11 @@ export default function OwnerMode() {
     };
 
     const handleJoinQueue = async () => {
-      const queued = await addConciergeListing(`[Vault — ScoutIt Team] ${activeListing?.title || "Property"}`);
+      const queued = await addConciergeListing(`[Vault: ScoutIt Team] ${activeListing?.title || "Property"}`);
       // A-141: addConciergeListing already said what went wrong; do not follow
       // a failed request with "You're in the queue".
       if (!queued) return;
-      addToast("You're in the queue — our team will reach out to schedule your recording.", "success");
+      addToast("You're in the queue. Our team will reach out to schedule your recording.", "success");
       setVaultBuildOption(null);
       setShowWizard(false);
     };
@@ -589,7 +589,7 @@ export default function OwnerMode() {
       <div className="max-w-[700px] mx-auto py-lg animate-[fadeIn_0.5s_ease]">
         <button onClick={handleBack} className="text-text-secondary hover:text-gold-accent mb-8 font-label-caps uppercase tracking-widest transition">{backLabel}</button>
         <h1 className="font-display-md text-5xl text-gold-accent mb-3 drop-shadow-md">The Spatial Vault</h1>
-        <p className="text-text-secondary mb-10 font-working-title text-sm">Give buyers an immersive walk-through — 3D maps, 360° tours, AR experiences. No site visit wasted.</p>
+        <p className="text-text-secondary mb-10 font-working-title text-sm">Give buyers an immersive walk-through with 3D maps, 360° tours, and AR experiences. No site visit wasted.</p>
 
         {/* ── TOP TAB: I have a URL / Build one for me ── */}
         <div className="flex gap-0 mb-8 rounded-lg overflow-hidden border border-surface-variant">
@@ -618,7 +618,7 @@ export default function OwnerMode() {
               <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Paste your tour URL</label>
               <input
                 type="url"
-                className="bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition text-sm"
+                className="bg-surface-alt border border-surface-variant rounded px-4 py-3 text-on-surface focus:outline-none focus:border-gold-accent transition text-base md:text-sm"
                 placeholder="https://my.matterport.com/show/?m=..."
                 value={vaultUrl}
                 onChange={e => setVaultUrl(e.target.value)}
@@ -658,7 +658,7 @@ export default function OwnerMode() {
                 </div>
                 <div>
                   <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition mb-1">I&apos;ll record it myself</h3>
-                  <p className="text-sm text-text-secondary leading-relaxed">Walk through your property with your phone and upload the raw video. Our team processes it into a full 3D tour — you just need to hit record.</p>
+                  <p className="text-sm text-text-secondary leading-relaxed">Walk through your property with your phone and upload the raw video. Our team processes it into a full 3D tour, so you just need to hit record.</p>
                 </div>
               </div>
             </button>
@@ -679,7 +679,7 @@ export default function OwnerMode() {
                 <div>
                   <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition mb-1">Send a QuestIT Professional</h3>
                   <p className="text-sm text-text-secondary leading-relaxed">Book one of our vetted spatial capture experts. They&apos;ll shoot the property and we&apos;ll build the vault. Available in Metro Manila.</p>
-                  <span className="inline-block mt-3 text-[12px] font-label-caps tracking-widest text-gold-accent/70 border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded-full">QUEUE — TYPICALLY 3–5 DAYS</span>
+                  <span className="inline-block mt-3 text-[12px] font-label-caps tracking-widest text-gold-accent/70 border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded-full">QUEUE: TYPICALLY 3-5 DAYS</span>
                 </div>
               </div>
             </button>
@@ -691,7 +691,7 @@ export default function OwnerMode() {
           <div className="bg-background border border-gold-accent/20 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
             <div className="bg-surface-alt/50 border border-gold-accent/20 rounded-lg p-5 w-full">
               <strong className="text-gold-accent font-label-caps uppercase tracking-widest text-sm block mb-1">JUST HIT RECORD</strong>
-              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera or submit your CAD blueprint. Upload the raw footage — we&apos;ll stitch it into an immersive 3D twin and notify you when it&apos;s live, typically within 24–48 hours.</p>
+              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera or submit your CAD blueprint. Upload the raw footage, and we&apos;ll stitch it into an immersive 3D twin and notify you when it&apos;s live, typically within 24-48 hours.</p>
             </div>
 
             {/* Pre-Flight Style & Palette Selector (A-196 Pillar 1) */}
@@ -751,7 +751,7 @@ export default function OwnerMode() {
                 <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-label-caps uppercase tracking-widest font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-background transition duration-300">
                   Select Video File
                 </label>
-                <p className="text-[12px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov — any file size</p>
+                <p className="text-[12px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov (any file size)</p>
               </div>
             )}
 
@@ -802,7 +802,7 @@ export default function OwnerMode() {
 
             <div className="bg-surface-alt/50 border border-surface-variant rounded-lg p-4 text-xs text-text-secondary">
               <strong className="text-on-surface font-label-caps uppercase tracking-widest block mb-1">Included with your Cluster subscription</strong>
-              Team recording is part of your Cluster+ plan. No extra charge — just join the queue.
+              Team recording is part of your Cluster+ plan. No extra charge: just join the queue.
             </div>
 
             <button
@@ -890,20 +890,22 @@ export default function OwnerMode() {
   }
 
   // --- VIEW: LAYER 1 - ACTIVE PROPERTY FILES (PORTFOLIO VIEW) ---
+  const q = searchQuery ? searchQuery.toLowerCase() : "";
+  const filteredListings = q
+    ? myListings.filter(l => 
+        l.title?.toLowerCase().includes(q) || 
+        l.location?.toLowerCase().includes(q)
+      )
+    : myListings;
+
+  const groupedListings = filteredListings.reduce((acc, listing) => {
+    const loc = listing.location || 'Unspecified Location';
+    if (!acc[loc]) acc[loc] = [];
+    acc[loc].push(listing);
+    return acc;
+  }, {});
+
   if (!viewingDossierId && myListings.length > 1) {
-    const filteredListings = myListings.filter(l => 
-      !searchQuery || 
-      l.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      l.location?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    const groupedListings = filteredListings.reduce((acc, listing) => {
-      const loc = listing.location || 'Unspecified Location';
-      if (!acc[loc]) acc[loc] = [];
-      acc[loc].push(listing);
-      return acc;
-    }, {});
-
     return (
       <div className="max-w-[1200px] mx-auto py-lg animate-slide-up-fade">
         <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 border-b border-surface-variant pb-6 gap-4">
@@ -965,7 +967,7 @@ export default function OwnerMode() {
           <input
             type="text"
             placeholder="Search your properties..."
-            className="w-full md:w-96 bg-surface border border-surface-variant rounded px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
+            className="w-full md:w-96 bg-surface border border-surface-variant rounded px-4 py-3 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -980,7 +982,10 @@ export default function OwnerMode() {
             {Object.keys(groupedListings).sort().map(location => (
               <div key={location}>
                 <h2 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-4 border-b border-surface-variant pb-2">{location}</h2>
-                <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+                <div 
+                  className="flex overflow-x-auto snap-x md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide"
+                  style={{ WebkitOverflowScrolling: "touch" }}
+                >
                   {groupedListings[location].map((listing, index) => {
                     const listPitches = pitches.filter(p => p.isCurrentUserOwner && p.listingId === listing.id);
                     const pendingPitches = listPitches.filter(p => p.status === 'pending');
@@ -1146,7 +1151,7 @@ export default function OwnerMode() {
               <p className="font-label-caps text-[12px] tracking-[0.12em] text-error">PERMANENTLY REMOVE LISTING</p>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">This ends public and premium market access. ScoutIt retains the historical row, reserved URL, audit history, FAQs, units, and ScoutIt-owned Spatial Vault/3D assets. Open deals, active viewings, delegations, or unresolved disputes block removal.</p>
               <label className="mt-4 block text-xs text-text-secondary" htmlFor="permanent-removal-title">Type the exact property title to continue</label>
-              <input id="permanent-removal-title" value={removalTitle} onChange={(event) => setRemovalTitle(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-sm text-on-surface" autoComplete="off" />
+              <input id="permanent-removal-title" value={removalTitle} onChange={(event) => setRemovalTitle(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-base md:text-sm text-on-surface" autoComplete="off" />
                <label className="mt-4 block text-xs text-text-secondary" htmlFor="permanent-removal-password">Confirm your account password</label>
                <input id="permanent-removal-password" type="password" value={removalPassword} onChange={(event) => setRemovalPassword(event.target.value)} className="mt-2 min-h-11 w-full rounded border border-surface-variant bg-surface px-3 py-2 text-base text-on-surface" autoComplete="current-password" />
               <div className="mt-4 flex justify-center">
@@ -1263,7 +1268,7 @@ export default function OwnerMode() {
                      <span className="font-data-tabular text-lg font-bold text-gold-accent">{incomingPitches.length}</span>
                    </div>
                  </div>
-                 <p className="text-[12px] text-text-muted mt-4 text-center">View tracking arrives once page instrumentation ships — no invented numbers until then.</p>
+                 <p className="text-[12px] text-text-muted mt-4 text-center">View tracking arrives once page instrumentation ships: no invented numbers until then.</p>
                </>
             )}
           </div>
@@ -1305,10 +1310,10 @@ export default function OwnerMode() {
               <h3 className="font-working-title text-base text-on-surface">Invite an advisor</h3>
               <span className="font-label-caps text-[12px] tracking-widest text-gold-accent">◈ 1 CONNECT · {connects} LEFT</span>
             </div>
-            <p className="text-xs text-text-secondary mb-3">You control who represents this property. Sending a handshake spends 1 Connect — whether or not they accept.</p>
+            <p className="text-xs text-text-secondary mb-3">You control who represents this property. Sending a handshake spends 1 Connect, whether or not they accept.</p>
             <div className="flex flex-col sm:flex-row gap-2">
               <input
-                className="flex-1 hov-card border border-surface-variant rounded px-4 py-3 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition"
+                className="flex-1 hov-card border border-surface-variant rounded px-4 py-3 text-on-surface text-base md:text-sm focus:outline-none focus:border-gold-accent transition"
                 type="text"
                 placeholder="Broker name or PRC #"
                 value={inviteName}
@@ -1395,8 +1400,8 @@ export default function OwnerMode() {
                   <div className="mb-4">
                     <span className="block font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">Private Notes</span>
                     <textarea
-                      className="w-full bg-background border border-surface-alt rounded p-3 text-xs text-text-secondary focus:outline-none focus:border-gold-accent/50 transition resize-y min-h-[60px]"
-                      placeholder="Jot down anything about this inquiry — only visible to you..."
+                      className="w-full bg-background border border-surface-alt rounded p-3 text-base md:text-xs text-text-secondary focus:outline-none focus:border-gold-accent/50 transition resize-y min-h-[60px]"
+                      placeholder="Jot down anything about this inquiry (only visible to you)..."
                       value={dealNotes[pitch.id] !== undefined ? dealNotes[pitch.id] : (pitch.privateNotes || "")}
                       onChange={(e) => handleSaveDealNote(pitch.id, e.target.value)}
                       onClick={(e) => e.stopPropagation()}
@@ -1452,7 +1457,7 @@ export default function OwnerMode() {
                           owner would not otherwise expect. */}
                       <p className="mt-2 text-[12px] leading-relaxed text-text-muted">
                         They stop receiving enquiries for this property, and every conversation
-                        about it closes — including buyers they were already talking to. Connects
+                        about it closes, including buyers they were already talking to. Connects
                         already spent are not refunded.
                       </p>
                     </div>

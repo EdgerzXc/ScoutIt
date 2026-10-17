@@ -39,33 +39,65 @@ export async function POST(request) {
       return NextResponse.json({ error: "This badge cannot be self-claimed" }, { status: 403 });
     }
 
-    // Enforce real scarcity server-side — count actual claims, not the hardcoded display number.
-    const { count: claimedCount, error: countError } = await supabaseAdmin
-      .from("user_badges")
-      .select("id", { count: "exact", head: true })
-      .eq("badge_id", badgeId);
+    // GAP-27: Prevent TOCTOU badge over-minting via atomic PostgreSQL RPC mint_pioneer_badge_atomic
+    const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc("mint_pioneer_badge_atomic", {
+      p_user_id: userId,
+      p_badge_id: badgeId,
+      p_max_slots: badgeDef.max_slots,
+    });
 
-    if (countError) {
-      console.error("[CLAIM API] Failed to count existing claims:", countError);
-      return NextResponse.json({ error: "Failed to verify badge availability" }, { status: 500 });
-    }
-    if ((claimedCount || 0) >= badgeDef.max_slots) {
-      return NextResponse.json({ error: "This cohort is sold out" }, { status: 409 });
-    }
+    let newBadge = null;
 
-    // Insert the claim — unique(user_id, badge_id) rejects a duplicate claim at the DB level.
-    const { data: newBadge, error: insertError } = await supabaseAdmin
-      .from("user_badges")
-      .insert({ user_id: userId, badge_id: badgeId, granted_by: "self_claim" })
-      .select()
-      .single();
-
-    if (insertError) {
-      if (insertError.code === "23505") {
-        return NextResponse.json({ error: "Badge already claimed" }, { status: 400 });
+    if (!rpcError && rpcResult && rpcResult.length > 0) {
+      const outcome = rpcResult[0];
+      if (!outcome.success) {
+        if (outcome.error_code === "ALREADY_CLAIMED") {
+          return NextResponse.json({ error: "Badge already claimed" }, { status: 400 });
+        }
+        if (outcome.error_code === "SOLD_OUT") {
+          return NextResponse.json({ error: "This cohort is sold out" }, { status: 409 });
+        }
+        if (outcome.error_code === "UNAUTHORIZED") {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        return NextResponse.json({ error: "Failed to mint badge" }, { status: 500 });
       }
-      console.error("[CLAIM API] Failed to insert badge claim:", insertError);
-      return NextResponse.json({ error: "Failed to mint badge" }, { status: 500 });
+      newBadge = outcome.badge_record;
+    } else {
+      // Fallback if RPC is not yet applied in environment
+      if (rpcError && rpcError.code !== "PGRST202" && rpcError.code !== "42883") {
+        console.error("[CLAIM API] RPC error during mint:", rpcError);
+      }
+
+      // Enforce real scarcity server-side — count actual claims, not the hardcoded display number.
+      const { count: claimedCount, error: countError } = await supabaseAdmin
+        .from("user_badges")
+        .select("id", { count: "exact", head: true })
+        .eq("badge_id", badgeId);
+
+      if (countError) {
+        console.error("[CLAIM API] Failed to count existing claims:", countError);
+        return NextResponse.json({ error: "Failed to verify badge availability" }, { status: 500 });
+      }
+      if ((claimedCount || 0) >= badgeDef.max_slots) {
+        return NextResponse.json({ error: "This cohort is sold out" }, { status: 409 });
+      }
+
+      // Insert the claim — unique(user_id, badge_id) rejects a duplicate claim at the DB level.
+      const { data: insertedBadge, error: insertError } = await supabaseAdmin
+        .from("user_badges")
+        .insert({ user_id: userId, badge_id: badgeId, granted_by: "self_claim" })
+        .select()
+        .single();
+
+      if (insertError) {
+        if (insertError.code === "23505") {
+          return NextResponse.json({ error: "Badge already claimed" }, { status: 400 });
+        }
+        console.error("[CLAIM API] Failed to insert badge claim:", insertError);
+        return NextResponse.json({ error: "Failed to mint badge" }, { status: 500 });
+      }
+      newBadge = insertedBadge;
     }
 
     const { data: allBadges } = await supabaseAdmin

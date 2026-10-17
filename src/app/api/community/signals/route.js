@@ -119,12 +119,13 @@ export async function POST(request) {
       );
     }
 
-    // Capacity before write (spec §10): closed/expired rows never count.
+    // Capacity & account standing before write (spec §10, GAP-68): closed/expired rows never count,
+    // and shadowbanned/archived accounts cannot post public signals.
     let profile = null;
     try {
       const { data } = await supabaseAdmin
         .from("user_profiles")
-        .select("active_roles")
+        .select("active_roles, is_shadowbanned, archived_at")
         .eq("id", userId)
         .maybeSingle();
       profile = data || null;
@@ -136,6 +137,16 @@ export async function POST(request) {
         );
       }
       throw err;
+    }
+    if (profile?.is_shadowbanned || profile?.archived_at) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Your account is restricted from posting community signals.",
+          code: "ACCOUNT_RESTRICTED",
+        },
+        { status: 403 }
+      );
     }
     const counted = await countActiveSignals(userId);
     if (counted.missing) {

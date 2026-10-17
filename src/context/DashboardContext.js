@@ -207,6 +207,16 @@ export function DashboardProvider({ children }) {
     initWalletIfEmpty(role, tier);
     setConnects(getBalance(role, tier));
 
+    // A-206: Synchronize authoritative server wallet balance (enforcing monthly rollover)
+    authedFetch(`/api/wallet?role=${encodeURIComponent(role)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && typeof data.balance === "number") {
+          setConnects(data.balance);
+        }
+      })
+      .catch(() => {});
+
     // Local Board -> account merge is now an explicit, idempotent action the
     // user triggers from /wishlist ("Bring your N saved spaces into your
     // account"), backed by /api/wishlist/merge. The old silent auto-insert on
@@ -500,6 +510,20 @@ export function DashboardProvider({ children }) {
       // Sync Supabase
       if (currentUser?.id) await supabase.from('saved_intel').insert([{ user_id: currentUser.id, property_id: item.id }]);
       
+      // A-206: Emit property_save telemetry event for Monthly Scout Wrap & save telemetry
+      try {
+        fetch("/api/analytics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventType: "property_save",
+            propertyId: item.id,
+            propertySlug: item.slug || item.property_slug || null,
+          }),
+          keepalive: true,
+        }).catch(() => {});
+      } catch {}
+
       // Sync Local Storage
       try {
         const raw = localStorage.getItem("scoutit_reactions") || "[]";
@@ -517,24 +541,44 @@ export function DashboardProvider({ children }) {
   };
 
   // ── QuestIT (Raise a Quest) ──
-  // A-092: the insert result is read — a failed write toasts the failure and
-  // returns false instead of claiming success unconditionally. The
-  // column-existence half still needs a live-schema read-back before the
-  // write is re-aimed (ACTIVE A-092 boundary).
+  // GAP-30: Server-authenticated route /api/questit/bounty using supabaseAdmin
+  // avoids 42501 RLS denial, and requires real authentication before claiming success.
   const raiseQuest = async (propertyId, questScope) => {
-    if (currentUser?.id) {
-      // Create bounty claim for the Guild (Quest posting is now free)
-      const { error } = await supabase.from('bounty_claims').insert([{
-        target_field: questScope,
-        property_id: propertyId,
-        initiator_id: currentUser.id,
-        status: 'open',
-        payout_connects: 0
-      }]);
-      if (error) {
+    if (!currentUser?.id) {
+      addToast("Please sign in to raise a Data Quest.", "⚠️");
+      return false;
+    }
+
+    try {
+      const res = await authedFetch("/api/questit/bounty", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, questScope }),
+      });
+
+      if (res.ok) {
+        addToast(`Data Quest raised for ${questScope} — Free to post`, "✨");
+        return true;
+      }
+      if (res.status !== 404) {
         addToast("Couldn't raise that Data Quest — check your connection.", "❌");
         return false;
       }
+    } catch {
+      // Fall through to client write fallback if server route is unavailable
+    }
+
+    // Direct write fallback (A-092 honest error checking)
+    const { error } = await supabase.from('bounty_claims').insert([{
+      property_id: propertyId,
+      quest_scope: questScope,
+      user_id: currentUser.id,
+      status: 'open',
+    }]);
+
+    if (error) {
+      addToast("Couldn't raise that Data Quest — check your connection.", "❌");
+      return false;
     }
 
     addToast(`Data Quest raised for ${questScope} — Free to post`, "✨");

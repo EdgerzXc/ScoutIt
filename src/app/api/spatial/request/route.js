@@ -16,7 +16,7 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { propertyId, stylePreset, fileUrl, notes, walletConnects = 0 } = body;
+    const { propertyId, stylePreset, fileUrl, notes } = body;
 
     if (!propertyId) {
       return NextResponse.json(
@@ -34,6 +34,18 @@ export async function POST(request) {
 
     const { tier } = await resolveServerTier(request);
 
+    let currentConnects = 0;
+    if (supabaseAdmin) {
+      const { data: wallet } = await supabaseAdmin
+        .from("user_connect_wallets")
+        .select("granted_balance, purchased_balance, reward_balance")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (wallet) {
+        currentConnects = (wallet.granted_balance || 0) + (wallet.purchased_balance || 0) + (wallet.reward_balance || 0);
+      }
+    }
+
     const result = await submitSpatialGenerationRequest({
       supabaseClient: supabaseAdmin,
       user: { id: userId },
@@ -42,7 +54,7 @@ export async function POST(request) {
       fileUrl,
       notes,
       currentTier: tier,
-      currentConnects: Number(walletConnects) || 0,
+      currentConnects,
     });
 
     if (!result.success) {

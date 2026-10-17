@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser } from "@/lib/notifications";
+import { findProperty } from "@/lib/propertyLookup";
 
 // ─────────────────────────────────────────────────────────────────────────
 // FAQ REVIEW QUEUE — owner confirm / hide  (NEW_IDEAS.md §4, final piece)
@@ -40,15 +41,13 @@ function fail(message, status = 400) {
 }
 
 /**
- * All property slugs owned by this user. Used to scope the queue and to
- * authorise a single-answer mutation.
+ * All property identifiers (id, slug, canonical_slug) owned by this user (GAP-84).
  */
-async function ownedSlugs(userId) {
+async function ownedProperties(userId) {
   const { data, error } = await supabaseAdmin
     .from("properties")
-    .select("slug, title")
-    .eq("owner_id", userId)
-    .not("slug", "is", null);
+    .select("id, slug, canonical_slug, title")
+    .eq("owner_id", userId);
 
   if (error) throw error;
   return data || [];
@@ -67,13 +66,23 @@ export async function GET(req) {
     // render a digit.
     const countOnly = new URL(req.url).searchParams.get("countOnly") === "1";
 
-    const properties = await ownedSlugs(userId);
+    const properties = await ownedProperties(userId);
     if (properties.length === 0) {
       return NextResponse.json({ success: true, items: [], pendingCount: 0 }, { status: 200 });
     }
 
-    const slugs = properties.map((p) => p.slug);
-    const titleBySlug = Object.fromEntries(properties.map((p) => [p.slug, p.title]));
+    const slugs = [];
+    const titleBySlug = {};
+    for (const p of properties) {
+      for (const alias of [p.slug, p.canonical_slug, p.id ? String(p.id) : null].filter(Boolean)) {
+        if (!slugs.includes(alias)) slugs.push(alias);
+        titleBySlug[alias] = p.title;
+      }
+    }
+
+    if (slugs.length === 0) {
+      return NextResponse.json({ success: true, items: [], pendingCount: 0 }, { status: 200 });
+    }
 
     const { data: faqs, error: faqError } = await supabaseAdmin
       .from("property_faqs")
@@ -203,12 +212,12 @@ export async function PATCH(req) {
     if (faqError) throw faqError;
     if (!faq) return fail("Question not found", 404);
 
-    // ── THE SECURITY BOUNDARY ──────────────────────────────────────────
-    const { data: property, error: propError } = await supabaseAdmin
-      .from("properties")
-      .select("id, owner_id, title")
-      .eq("slug", faq.property_id)
-      .maybeSingle();
+    // ── THE SECURITY BOUNDARY (GAP-84: resolves id, slug, or canonical_slug) ─
+    const { property, error: propError } = await findProperty(
+      supabaseAdmin,
+      faq.property_id,
+      ["id", "owner_id", "title"]
+    );
 
     if (propError) throw propError;
     if (!property?.owner_id || property.owner_id !== userId) {

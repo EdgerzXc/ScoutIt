@@ -84,13 +84,26 @@ export async function POST(request) {
     // real UUID here — slug is already identical on both sides today.
     let resolvedListingId = listingId;
     if (!resolvedListingId && propertySlug) {
-      const { data: propBySlug, error: slugErr } = await supabaseAdmin
+      // Parameterized lookups only: slug first, then the frozen canonical slug
+      // (publish sets both identically, but legacy rows may diverge). Never
+      // interpolate raw client input into an `.or()` filter string.
+      let propBySlug = null;
+      const first = await supabaseAdmin
         .from('properties')
         .select('id')
         .eq('slug', propertySlug)
-        .single();
-      if (slugErr || !propBySlug) {
-        return NextResponse.json({ error: "Property not found" }, { status: 404 });
+        .maybeSingle();
+      propBySlug = first.data;
+      if (!propBySlug) {
+        const second = await supabaseAdmin
+          .from('properties')
+          .select('id')
+          .eq('canonical_slug', propertySlug)
+          .maybeSingle();
+        if (second.error || !second.data) {
+          return NextResponse.json({ error: "Property not found" }, { status: 404 });
+        }
+        propBySlug = second.data;
       }
       resolvedListingId = propBySlug.id;
     }

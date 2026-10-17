@@ -134,6 +134,19 @@ describe('/api/wrap API endpoint', () => {
     expect((await GET(url(`entityType=broker&entityId=${OWNER}`))).status).toBe(200);
   });
 
+  it('lets a user read their own seeker/user wrap', async () => {
+    mockDb();
+    expect((await GET(url(`entityType=user&entityId=${OWNER}`))).status).toBe(200);
+    expect((await GET(url(`entityType=seeker&entityId=${OWNER}`))).status).toBe(200);
+  });
+
+  it('BLOCKS a stranger from reading another user\'s wrap', async () => {
+    vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue(STRANGER);
+    mockDb();
+    expect((await GET(url(`entityType=user&entityId=${OWNER}`))).status).toBe(403);
+    expect((await GET(url(`entityType=seeker&entityId=${OWNER}`))).status).toBe(403);
+  });
+
   it('lets staff read any entity wrap', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('staff-1');
     mockDb({ roles: ['staff'], propOwner: OWNER });

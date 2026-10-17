@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { fetchPropertyVerificationDates } from "@/lib/airtable";
+import { getAirtableBudgetStatus, recordAirtableCall } from "@/lib/airtableBudget";
 import { notifyUser } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { authorizeCronRequest } from "@/lib/cronAuth";
@@ -36,6 +37,20 @@ async function handleCron(request) {
   }
 
   try {
+    // GAP-37 (U-042): Respect the Free-plan monthly Airtable call budget before
+    // issuing direct Airtable table queries from the daily cron.
+    const budgetStatus = await getAirtableBudgetStatus();
+    if (budgetStatus.tracked && budgetStatus.exhausted) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: "airtable_monthly_budget_exhausted",
+        budget: budgetStatus,
+      });
+    }
+
+    await recordAirtableCall(1);
+
     const [{ data: properties, error: propError }, verificationRecords] = await Promise.all([
       supabaseAdmin.from("properties").select("id, slug, owner_id, title").eq("pipeline_status", "approved"),
       // A-116: this cron is not the CMS bundle. It makes one Airtable call

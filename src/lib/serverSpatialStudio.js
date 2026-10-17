@@ -85,8 +85,70 @@ export async function submitSpatialGenerationRequest({
     };
   }
 
+  // Verify ownership if property row exists and has an owner
+  if (supabaseClient) {
+    try {
+      const propQuery = supabaseClient
+        .from("properties")
+        .select("owner_id")
+        .eq("id", propertyId);
+      const res = propQuery.maybeSingle ? await propQuery.maybeSingle() : await propQuery.single?.();
+      const ownerId = res?.data?.owner_id;
+      if (ownerId && ownerId !== user.id) {
+        return {
+          success: false,
+          error: "Only the property owner can request 3D spatial generation",
+          code: "forbidden",
+        };
+      }
+    } catch {
+      // Degrade gracefully if properties table unmigrated
+    }
+  }
+
   const connectsSpent = entitlement.connectCostRequired;
   const targetSlaHours = SPATIAL_SLA_HOURS.standard;
+
+  // Deduct Connects atomically via spend_connects RPC if required
+  let spentViaRpc = false;
+  if (connectsSpent > 0 && supabaseClient && typeof supabaseClient.rpc === "function") {
+    const { error: spendError } = await supabaseClient.rpc("spend_connects", {
+      p_user_id: user.id,
+      p_amount: connectsSpent,
+      p_reason: `3D Spatial Studio generation for property ${propertyId}`,
+      p_ref_type: "spatial_generation",
+      p_ref_id: String(propertyId),
+    });
+
+    if (spendError) {
+      return {
+        success: false,
+        error: "Insufficient Connects balance or wallet error.",
+        code: "insufficient_connects",
+        requiresConnects: connectsSpent,
+      };
+    }
+    spentViaRpc = true;
+  }
+
+  const refundConnectsOnSystemFailure = async (failureReason) => {
+    if (!spentViaRpc || connectsSpent <= 0 || !supabaseClient || typeof supabaseClient.rpc !== "function") {
+      return false;
+    }
+    try {
+      await supabaseClient.rpc("refund_connects_system_error", {
+        p_user_id: user.id,
+        p_amount: connectsSpent,
+        p_reason: failureReason,
+        p_staff_id: "system_auto_refund",
+        p_ref_id: String(propertyId),
+      });
+      return true;
+    } catch (refundErr) {
+      console.error("[SPATIAL STUDIO] Critical: failed to refund Connects after queue error:", refundErr);
+      return false;
+    }
+  };
 
   let requestId = `spatial-${Date.now()}`;
 
@@ -109,7 +171,19 @@ export async function submitSpatialGenerationRequest({
         .select("id")
         .single();
 
-      if (!error && data?.id) {
+      if (error) {
+        if (spentViaRpc) {
+          const refunded = await refundConnectsOnSystemFailure(
+            `System error: failed to enqueue 3D Spatial Studio request for property ${propertyId}`
+          );
+          return {
+            success: false,
+            error: "Failed to enqueue spatial generation request. Your Connects have been refunded.",
+            code: "queue_insert_failed",
+            refunded,
+          };
+        }
+      } else if (data?.id) {
         requestId = data.id;
       }
 
@@ -122,7 +196,18 @@ export async function submitSpatialGenerationRequest({
         })
         .eq("id", propertyId);
     } catch {
-      // Degrade gracefully if Supabase offline/unmigrated
+      if (spentViaRpc) {
+        const refunded = await refundConnectsOnSystemFailure(
+          `System exception: failed to enqueue 3D Spatial Studio request for property ${propertyId}`
+        );
+        return {
+          success: false,
+          error: "Failed to enqueue spatial generation request. Your Connects have been refunded.",
+          code: "queue_insert_failed",
+          refunded,
+        };
+      }
+      // Degrade gracefully if Supabase offline/unmigrated and no RPC spend occurred
     }
   }
 
@@ -137,6 +222,77 @@ export async function submitSpatialGenerationRequest({
     coveredByTier: entitlement.coveredByTier,
     remainingAllowance: entitlement.remainingAllowance,
   };
+}
+
+/**
+ * Transitions a spatial generation request to FAILED and automatically refunds
+ * any Connects spent by the requester (GAP-42).
+ */
+export async function handleSpatialGenerationFailure({
+  supabaseClient,
+  requestId,
+  reason = "3D Spatial Studio generation failed",
+}) {
+  if (!supabaseClient || !requestId) {
+    return { success: false, error: "Missing supabaseClient or requestId", code: "invalid_input" };
+  }
+
+  try {
+    const reqQuery = supabaseClient
+      .from("property_spatial_requests")
+      .select("id, property_id, requester_id, status, connects_spent")
+      .eq("id", requestId);
+    const reqRes = reqQuery.maybeSingle ? await reqQuery.maybeSingle() : await reqQuery.single?.();
+    const requestRow = reqRes?.data;
+
+    if (!requestRow) {
+      return { success: false, error: "Spatial request not found", code: "not_found" };
+    }
+
+    const alreadyFailed = String(requestRow.status || "").toUpperCase() === "FAILED";
+    const connectsToRefund = !alreadyFailed ? Number(requestRow.connects_spent || 0) : 0;
+
+    await supabaseClient
+      .from("property_spatial_requests")
+      .update({
+        status: "FAILED",
+        notes: reason ? String(reason).slice(0, 2000) : null,
+      })
+      .eq("id", requestId);
+
+    if (requestRow.property_id) {
+      await supabaseClient
+        .from("properties")
+        .update({ spatial_generation_status: "FAILED" })
+        .eq("id", requestRow.property_id);
+    }
+
+    let refunded = false;
+    if (connectsToRefund > 0 && requestRow.requester_id && typeof supabaseClient.rpc === "function") {
+      const { error: refundErr } = await supabaseClient.rpc("refund_connects_system_error", {
+        p_user_id: requestRow.requester_id,
+        p_amount: connectsToRefund,
+        p_reason: `Auto-refund: ${reason}`,
+        p_staff_id: "system_auto_refund",
+        p_ref_id: String(requestRow.id),
+      });
+      refunded = !refundErr;
+    }
+
+    return {
+      success: true,
+      requestId: requestRow.id,
+      status: "FAILED",
+      connectsRefunded: refunded ? connectsToRefund : 0,
+      refunded,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err?.message || "Failed to transition spatial generation request",
+      code: "transition_failed",
+    };
+  }
 }
 
 /**
@@ -163,6 +319,27 @@ export async function submitSpatialRevisionRequest({
       error: "Detailed revision instructions (minimum 5 characters) are required",
       code: "invalid_revision_notes",
     };
+  }
+
+  // Enforce strict property ownership on revision submissions
+  if (supabaseClient) {
+    try {
+      const propQuery = supabaseClient
+        .from("properties")
+        .select("owner_id")
+        .eq("id", propertyId);
+      const res = propQuery.maybeSingle ? await propQuery.maybeSingle() : await propQuery.single?.();
+      const ownerId = res?.data?.owner_id;
+      if (ownerId && ownerId !== user.id) {
+        return {
+          success: false,
+          error: "Only the property owner can submit spatial revisions",
+          code: "forbidden",
+        };
+      }
+    } catch {
+      // Degrade gracefully if properties table unmigrated
+    }
   }
 
   const targetSlaHours = SPATIAL_SLA_HOURS.express;

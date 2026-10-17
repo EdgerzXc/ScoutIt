@@ -37,7 +37,7 @@ describe("chat retention purge", () => {
 
   it("exempts threads under an active dispute hold", () => {
     expect(DISPUTE_HOLD_STATUSES).toEqual(["open_hold", "under_review"]);
-    expect(route).toContain('.in("status", DISPUTE_HOLD_STATUSES)');
+    expect(route).toMatch(/\.in\("status",\s*(?:DISPUTE_HOLD_STATUSES|\[\.\.\.DISPUTE_HOLD_STATUSES)/);
     expect(route).toContain("held.has(id)");
   });
 

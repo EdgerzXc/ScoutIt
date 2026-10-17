@@ -1,6 +1,8 @@
 "use client";
 
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DeckPanel from "@/components/dashboard/DeckPanel";
+import { deckNeighbors } from "@/lib/workspaceDeck";
 import { DashboardProvider } from "@/context/DashboardContext";
 import CalendarShell from "@/components/calendar/CalendarShell";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
@@ -11,6 +13,9 @@ import Link from "next/link";
 function CalendarInner() {
   return (
     <DashboardLayout>
+      {/* A-205 Workspace Deck: Calendar closes the deck — swipe-right returns
+          to the Inbox for every role; the left end rubber-bands. */}
+      <DeckPanel {...deckNeighbors("calendar", "owner")}>
       {/* Main container — pad the bottom on mobile so the calendar
           and availability editor clear the fixed bottom nav. */}
       <div className="flex flex-col w-full bg-background p-4 sm:p-6 pb-28 sm:pb-6">
@@ -41,6 +46,7 @@ function CalendarInner() {
           </div>
         </div>
       </div>
+      </DeckPanel>
     </DashboardLayout>
   );
 }

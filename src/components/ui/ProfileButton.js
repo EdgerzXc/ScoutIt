@@ -62,7 +62,7 @@ export default function ProfileButton({ floating = false }) {
   }, []);
 
   const href = user ? "/profile" : "/onboarding";
-  const label = user?.name ? `Your profile — ${user.name}` : "Create an account";
+  const label = user?.name ? `Your profile · ${user.name}` : "Create an account";
 
 
   return (

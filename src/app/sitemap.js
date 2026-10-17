@@ -32,6 +32,11 @@ export default async function sitemap() {
     { url: `${baseUrl}/pricing/seeker`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/pricing/creator`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/pricing/bundles`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/platform-tour`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/tutorials/owner-publish`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/contact`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/transit`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/about-you`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/terms`, lastModified: currentDate, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/privacy`, lastModified: currentDate, changeFrequency: "yearly", priority: 0.3 },
   ];
@@ -74,28 +79,38 @@ export default async function sitemap() {
     throw new Error("Sitemap: public catalogue temporarily unavailable");
   }
 
-  // Dynamic property pages from the published catalogue
+  // Dynamic property pages and child space units from the published catalogue (GAP-10)
   let propertyRoutes = [];
+  let unitRoutes = [];
   try {
     if (bundle) {
-      propertyRoutes = bundle.properties
+      const publicProperties = bundle.properties
         // ── A4 · SAMPLES ARE NEVER SUBMITTED (2026-08-08) ──────────────
         // The property page also emits `noindex` for these, but a sitemap
         // entry and a noindex tag are a contradiction Google resolves by
         // crawling the URL anyway to read the tag — spending budget on a page
         // we have already said not to index.
-        //
-        // ⚠️ This file already carries the cost of getting that wrong once:
-        // three /hubs slugs were submitted before the route existed, Google
-        // recorded soft-404s, and crawl budget was suppressed. Never advertise
-        // a URL we do not want fetched.
-        .filter((p) => p.slug && !p.is_sample)
-        .map((p) => ({
-          url: `${baseUrl}/property/${p.slug}`,
-          lastModified: currentDate,
-          changeFrequency: "weekly",
-          priority: 0.8,
-        }));
+        .filter((p) => p.slug && !p.is_sample);
+
+      propertyRoutes = publicProperties.map((p) => ({
+        url: `${baseUrl}/property/${p.slug}`,
+        lastModified: currentDate,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }));
+
+      unitRoutes = publicProperties.flatMap((p) => {
+        if (!Array.isArray(p.units_inventory)) return [];
+        return p.units_inventory
+          .map((u) => u?.id || u?.unit_id || u?.unitId)
+          .filter(Boolean)
+          .map((unitId) => ({
+            url: `${baseUrl}/property/${p.slug}/unit/${unitId}`,
+            lastModified: currentDate,
+            changeFrequency: "weekly",
+            priority: 0.7,
+          }));
+      });
     }
   } catch (error) {
     console.error("Sitemap: Failed to fetch property routes from Airtable", error);
@@ -151,5 +166,5 @@ export default async function sitemap() {
     console.error("Sitemap: Failed to fetch broker routes from Airtable", error);
   }
 
-  return [...staticRoutes, ...hubRoutes, ...propertyRoutes, ...intelRoutes, ...brokerRoutes];
+  return [...staticRoutes, ...hubRoutes, ...propertyRoutes, ...unitRoutes, ...intelRoutes, ...brokerRoutes];
 }

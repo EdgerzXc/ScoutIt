@@ -15,10 +15,19 @@ import {
   ShieldCheck,
   Zap,
   Bookmark,
+  Compass,
+  TrendingUp,
+  Maximize2,
 } from "lucide-react";
 import SignalGlyph from "./glyphs/SignalGlyph";
 import { getSession } from "@/lib/authClient";
-import { SIGNAL_TYPES, SIGNAL_TYPE_LABELS, SIGNAL_COLOR_TOKENS } from "@/lib/communitySignalsAdapter";
+import {
+  SIGNAL_TYPES,
+  SIGNAL_TYPE_LABELS,
+  SIGNAL_COLOR_TOKENS,
+  getSignalMarketRole,
+  MARKET_ROLES,
+} from "@/lib/communitySignalsAdapter";
 import "./signal-dossier-card.css";
 
 export default function SignalDossierCard({
@@ -43,6 +52,12 @@ export default function SignalDossierCard({
   // few seconds instead of dying silent — the count on screen is a promise.
   const [actionError, setActionError] = useState(null);
   const errorTimer = useRef(null);
+  const cardRef = useRef(null);
+  useEffect(() => {
+    if (isActive && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [isActive]);
   const flashActionError = useCallback((message) => {
     setActionError(message);
     if (errorTimer.current) clearTimeout(errorTimer.current);
@@ -58,6 +73,10 @@ export default function SignalDossierCard({
   // reader can tell a human community post from a ScoutIt building update.
   const isPipelineUpdate = typeof signal.id === "string" && signal.id.startsWith("pipeline-");
   const sourceKind = isPipelineUpdate ? "SCOUTIT INTEL" : "COMMUNITY";
+  const marketRole = getSignalMarketRole(signal);
+  const isDemand = marketRole === MARKET_ROLES.DEMAND;
+  const isSupply = marketRole === MARKET_ROLES.SUPPLY;
+  const ceilingHeight = signal.glyphData?.ceilingM || signal.requirements?.ceilingHeight;
 
   // Live member posts vote through the community endpoints (one tap per
   // account, server-counted). Everything else keeps its prior path: samples
@@ -97,14 +116,14 @@ export default function SignalDossierCard({
         if (!json || json.ok !== true) {
           setRelevant(!next);
           setRelevantCount((c) => (next ? Math.max(0, c - 1) : c + 1));
-          if (json) flashActionError("Couldn't record that — try again.");
+          if (json) flashActionError("Couldn't record that: try again.");
         } else if (typeof json.relevantCount === "number") {
           setRelevantCount(json.relevantCount);
         }
       }).catch(() => {
         setRelevant(!next);
         setRelevantCount((c) => (next ? Math.max(0, c - 1) : c + 1));
-        flashActionError("Couldn't record that — try again.");
+        flashActionError("Couldn't record that: try again.");
       });
       return;
     }
@@ -143,11 +162,11 @@ export default function SignalDossierCard({
       communityFetch("/save", nextSaved ? "POST" : "DELETE").then((json) => {
         if (!json || json.ok !== true) {
           setSaved(!nextSaved);
-          if (json) flashActionError("Couldn't save that — try again.");
+          if (json) flashActionError("Couldn't save that: try again.");
         }
       }).catch(() => {
         setSaved(!nextSaved);
-        flashActionError("Couldn't save that — try again.");
+        flashActionError("Couldn't save that: try again.");
       });
       return;
     }
@@ -193,7 +212,7 @@ export default function SignalDossierCard({
       router.push(`/intel/${encodeURIComponent(signal.id.slice(9))}?${query}`);
       return;
     }
-    if (signal.isSample) {
+    if (signal.isSample && signal.actionType === "VIEW_DETAILS") {
       setExpanded(true);
       return;
     }
@@ -218,13 +237,23 @@ export default function SignalDossierCard({
 
   const renderActionButton = () => {
     if (signal.isSample && signal.actionType !== "EXPLORE_DATA") {
-      return <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>VIEW EXAMPLE <ArrowRight size={13} aria-hidden="true" /></button>;
+      if (isDemand) {
+        return (
+          <button type="button" className="sdc-btn sdc-btn-intercept" onClick={handlePrimaryAction}>
+            <Zap size={12} aria-hidden="true" />
+            <span>INTERCEPT DEMAND</span>
+            <span className="sdc-connect-cost">DEMO</span>
+          </button>
+        );
+      }
+      return <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handlePrimaryAction}>VIEW DEMO <ArrowRight size={13} aria-hidden="true" /></button>;
     }
     switch (signal.actionType) {
       case "PROPOSE_SPACE":
         return (
           <button type="button" className="sdc-btn sdc-btn-primary" onClick={handlePrimaryAction}>
-            <span>PROPOSE SPACE</span>
+            <Zap size={12} aria-hidden="true" />
+            <span>INTERCEPT DEMAND</span>
             <ArrowRight size={13} aria-hidden="true" />
           </button>
         );
@@ -261,32 +290,44 @@ export default function SignalDossierCard({
 
   return (
     <article
+      ref={cardRef}
       className={`sdc-card ${isActive ? "active" : ""} ${isHovered ? "hovered" : ""}`}
       onClick={() => onSelect(signal)}
       onMouseEnter={() => onHover(signal.id)}
       onMouseLeave={() => onHover(null)}
       aria-label={`${typeLabel}: ${signal.title}`}
     >
-      {/* ── CARD HEADER (1-3s Scannable Kicker) ── */}
+      {/* ── CARD HEADER (Crisp 2-Sided Market Taxonomy) ── */}
       <div className="sdc-header">
-        <div className="sdc-kicker-row">
-          <span className="sdc-district-tag">
+        <div className="sdc-intent-row">
+          <span className={`sdc-role-badge sdc-role-${marketRole}`}>
+            {isDemand ? (
+              <Compass size={11} aria-hidden="true" />
+            ) : isSupply ? (
+              <Building2 size={11} aria-hidden="true" />
+            ) : (
+              <TrendingUp size={11} aria-hidden="true" />
+            )}
+            <span>{isDemand ? "SEEKER // DEMAND" : isSupply ? "OFF-MARKET SUPPLY" : "SPATIAL INTEL"}</span>
+          </span>
+          <span className="sdc-location-datum">
             <MapPin size={11} aria-hidden="true" />
-            <span>{signal.district.toUpperCase()}</span>
-          </span>
-          <span className="sdc-divider" aria-hidden="true">/</span>
-          <span className="sdc-type-pill" style={{ "--pill-color": typeColor }}>
-            {typeLabel.toUpperCase()}
-          </span>
-          <span className="sdc-divider" aria-hidden="true">/</span>
-          <span className="sdc-source-pill" title={isPipelineUpdate ? "Sourced building update from ScoutIt intelligence" : "Posted by a community member"}>
-            {sourceKind}
+            <span>{signal.city && signal.city !== signal.district ? `${signal.city} · ` : ""}{signal.district}</span>
           </span>
         </div>
 
-        <div className="sdc-freshness-chip" title="Signal Freshness">
-          <span className={`sdc-status-dot ${signal.freshness}`} aria-hidden="true" />
-          <span>{signal.freshness.toUpperCase()}</span>
+        <div className="sdc-meta-status">
+          {signal.isSample ? (
+            <span className="sdc-demo-tag" title="Demonstration signal for exploring radar flow">DEMO</span>
+          ) : (
+            <span className="sdc-source-pill" title={isPipelineUpdate ? "ScoutIt building update" : "Community post"}>
+              {sourceKind}
+            </span>
+          )}
+          <div className="sdc-freshness-chip" title="Signal Freshness">
+            <span className={`sdc-status-dot ${signal.freshness}`} aria-hidden="true" />
+            <span>{signal.freshness.toUpperCase()}</span>
+          </div>
         </div>
       </div>
 
@@ -294,18 +335,24 @@ export default function SignalDossierCard({
       <div className="sdc-main-split">
         <div className="sdc-content-col">
           <h3 className="sdc-title">{signal.title}</h3>
-          {signal.isSample ? <span className="sdc-sample-tag">SAMPLE — FOR EXPLORING ONLY</span> : null}
 
           {/* Quick Specifications Strip */}
           <div className="sdc-specs-strip">
             {signal.areaSqm ? (
-              <span className="sdc-spec-chip">
+              <span className="sdc-spec-chip sdc-area-chip">
                 <Building2 size={11} aria-hidden="true" />
                 <span>
                   {typeof signal.areaSqm === "object"
                     ? `${signal.areaSqm.min}–${signal.areaSqm.max} sqm`
                     : `${signal.areaSqm} sqm`}
                 </span>
+              </span>
+            ) : null}
+
+            {ceilingHeight ? (
+              <span className="sdc-spec-chip sdc-ceiling-chip" title="Clear architectural ceiling height">
+                <Maximize2 size={10} aria-hidden="true" />
+                <span>{ceilingHeight.toString().includes("m") ? ceilingHeight : `${ceilingHeight}m`} Clear</span>
               </span>
             ) : null}
 

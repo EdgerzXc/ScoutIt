@@ -140,7 +140,7 @@ export default function TaskRail({ mockUserId, dealId = null, onSummary }) {
     const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate());
     const dayDiff = Math.round((startOfDue - startOfToday) / 86400000);
-    if (dayDiff < 0) return `Overdue — ${due.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+    if (dayDiff < 0) return `Overdue: ${due.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
     if (dayDiff === 0) return "Due today";
     if (dayDiff === 1) return "Due tomorrow";
     return `Due ${due.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;

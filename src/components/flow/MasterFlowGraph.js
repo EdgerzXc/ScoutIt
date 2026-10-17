@@ -797,7 +797,7 @@ export default function MasterFlowGraph({ onNavigate }) {
       URL.revokeObjectURL(url);
       setExportNotice("🧠 Atomic RAG Knowledge Base downloaded!");
     } catch {
-      setExportNotice("⚠️ Export failed — try again.");
+      setExportNotice("⚠️ Export failed: try again.");
     }
     setTimeout(() => setExportNotice(null), 3000);
   }, []);

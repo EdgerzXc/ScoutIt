@@ -316,7 +316,7 @@ export default function BuyerMode() {
     } catch { /* localStorage unavailable */ }
     addToast(
       next
-        ? "Watching Metro Manila — new drops surface at the top of your feed."
+        ? "Watching Metro Manila: new drops surface at the top of your feed."
         : "Stopped watching Metro Manila.",
       next ? "📡" : "🌍"
     );
@@ -708,7 +708,7 @@ export default function BuyerMode() {
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Market Intel</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">BGC Condo Yields Rise</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Premium residential spaces post 4.2% year-on-year growth. What the transaction data says about where BGC rental demand is heading — and which unit profiles are capturing it.</p>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Premium residential spaces post 4.2% year-on-year growth. What the transaction data says about where BGC rental demand is heading, and which unit profiles are capturing it.</p>
                   </div>
                   <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
                     Read Full Brief <span>→</span>
@@ -726,7 +726,7 @@ export default function BuyerMode() {
                   <div>
                     <span className="inline-block bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] tracking-widest uppercase px-2 py-1 rounded mb-4">Area Guide</span>
                     <h3 className="font-headline-editorial text-xl text-on-surface mb-2">Makati Central Resurgence</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Older luxury buildings across the Makati core are undergoing massive renovations. How the retrofit wave is repricing the district — and what it means if you&apos;re scouting for value.</p>
+                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">Older luxury buildings across the Makati core are undergoing massive renovations. How the retrofit wave is repricing the district, and what it means if you&apos;re scouting for value.</p>
                   </div>
                   <div className="mt-6 font-working-title text-sm text-gold-accent group-hover:underline flex items-center gap-2">
                     Explore Area <span>→</span>

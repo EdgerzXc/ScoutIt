@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Camera } from "lucide-react";
+import { readUser } from "@/lib/entitlements";
 
 // Hardcoded logic rules per Section 8
 const NUDGE_CONTENT = {
@@ -31,32 +32,46 @@ const NUDGE_CONTENT = {
   }
 };
 
-export default function Nudge({ mode }) {
-  // Decided synchronously at mount (not 1.5s after paint): a banner that
-  // slides in late shoves every workspace card down mid-scroll on a phone.
-  // The enter animation still plays on mount, so the pop survives without
-  // the layout jump.
-  const [isVisible, setIsVisible] = useState(() => {
-    try {
-      if (localStorage.getItem(`nudge_dismissed_${mode}`)) {
-        const daysSinceDismissal =
-          (Date.now() - parseInt(localStorage.getItem(`nudge_dismissed_${mode}`), 10)) /
-          (1000 * 60 * 60 * 24);
-        if (daysSinceDismissal < 7) return false;
-      }
-      const user = JSON.parse(localStorage.getItem("scoutit_user") || "null");
-      if (user?.created_at) {
-        const daysSinceSignup =
-          (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24);
-        if (daysSinceSignup < 7) return false;
-      } else {
-        return false;
-      }
-    } catch {
-      return false;
+function isEligibleForNudge(mode, createdAt) {
+  if (!NUDGE_CONTENT[mode] || !createdAt) return false;
+  try {
+    const dismissedAt = localStorage.getItem(`nudge_dismissed_${mode}`);
+    if (dismissedAt) {
+      const daysSinceDismissal = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
+      if (daysSinceDismissal < 7) return false;
     }
-    return Boolean(NUDGE_CONTENT[mode]);
+    const daysSinceSignup = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceSignup >= 7;
+  } catch {
+    return false;
+  }
+}
+
+export default function Nudge({ mode }) {
+  // Decided synchronously at mount when cached user is present, with a fallback
+  // check against Supabase Auth session when `scoutit_user` is absent (GAP-47 / GAP-83).
+  const [isVisible, setIsVisible] = useState(() => {
+    const user = readUser();
+    return isEligibleForNudge(mode, user?.created_at);
   });
+
+  useEffect(() => {
+    if (isVisible || !NUDGE_CONTENT[mode]) return;
+    let active = true;
+    (async () => {
+      try {
+        const { supabase } = await import("@/lib/supabaseClient");
+        if (supabase?.auth?.getSession) {
+          const { data } = await supabase.auth.getSession();
+          const createdAt = data?.session?.user?.created_at;
+          if (active && isEligibleForNudge(mode, createdAt)) {
+            setIsVisible(true);
+          }
+        }
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, [isVisible, mode]);
 
   const handleDismiss = () => {
     setIsVisible(false);

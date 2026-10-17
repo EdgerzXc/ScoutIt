@@ -39,7 +39,7 @@ const DISCLOSURES = {
     label: "Platform Architecture",
     eyebrow: "How the system operates",
     title: "Two data systems. One controlled bridge.",
-    intro: "ScoutIt deliberately separates public content from private user state. That boundary is the operating model—not an implementation detail hidden behind the interface.",
+    intro: "ScoutIt deliberately separates public content from private user state. That boundary is the operating model, not an implementation detail hidden behind the interface.",
     paragraphs: [
       "Airtable is the public read layer for published properties, articles, and professional records. Public pages access it through ScoutIt’s central CMS proxy, which can normalize locations and apply supported discovery filters.",
       "Supabase is the private account layer for authentication, owner drafts, submissions, saved account state, conversations, and permissioned workflows. Publishing is the bridge: an owner-approved Supabase property syncs to Airtable, whose first-publication slug becomes the canonical public URL.",
@@ -222,8 +222,8 @@ export default function MantleArchive() {
               <div className="archive-links">
                 {disclosure.links.map(([label, href]) => (
                   href.startsWith("#")
-                    ? <button type="button" key={label} onClick={() => selectDisclosure(href.slice(1))}>{label} <span aria-hidden="true">→</span></button>
-                    : <Link key={label} href={href}>{label} <span aria-hidden="true">→</span></Link>
+                    ? <button type="button" key={label} onClick={() => selectDisclosure(href.slice(1))}>{label}</button>
+                    : <Link key={label} href={href}>{label}</Link>
                 ))}
               </div>
             </article>

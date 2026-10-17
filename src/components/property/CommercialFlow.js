@@ -223,7 +223,7 @@ function EngineRoomPanel({ property: d }) {
         }}
       >
         <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--accent)", letterSpacing:"0.12em", textTransform:"uppercase"}}>
-          For Operators — Technical Specs
+          For Operators // Technical Specs
         </span>
         <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="var(--accent)" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
@@ -290,7 +290,7 @@ function BackOfHousePanel({ property: d }) {
         }}
       >
         <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--accent)", letterSpacing:"0.12em", textTransform:"uppercase"}}>
-          For Operators — Back of House
+          For Operators // Back of House
         </span>
         <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="var(--accent)" strokeWidth="1.5">
           <path d={open ? "M1 5L5 1L9 5" : "M1 1L5 5L9 1"}/>
@@ -1165,7 +1165,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           letterSpacing: "0.1em",
           gridColumn: "1 / -1"
         }}>
-          [ LOCATION DETAILS N/A — NO DATA IN CMS ]
+          [ LOCATION DETAILS N/A: NO DATA IN CMS ]
         </div>
       );
     }
@@ -1322,7 +1322,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   <a
                     href="/pricing/seeker"
                     className="toggle-btn off"
-                    title="Enhanced photos unlock at Solar tier — upgrade to view"
+                    title="Enhanced photos unlock at Solar tier. Upgrade to view."
                     style={{ display: "inline-flex", alignItems: "center", gap: "5px", textDecoration: "none" }}
                   >
                     <Lock size={9} strokeWidth={2} /> Enhanced
@@ -1506,7 +1506,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} — {ch['space']?.chapterLabel || 'The Space'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} · {ch['space']?.chapterLabel || 'The Space'}</div>
                 <ChapterSubtitle text={ch['space']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -1739,7 +1739,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content chapter-frame--map">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} — {ch['location']?.chapterLabel || 'Location'}</div>
+                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} · {ch['location']?.chapterLabel || 'Location'}</div>
                 <ChapterSubtitle text={ch['location']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -1931,7 +1931,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} — {ch['life']?.chapterLabel || 'Life Here'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} · {ch['life']?.chapterLabel || 'Life Here'}</div>
                 <ChapterSubtitle text={ch['life']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -2058,7 +2058,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} — {ch['whereto']?.chapterLabel || 'Where To?'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} · {ch['whereto']?.chapterLabel || 'Where To?'}</div>
                 <ChapterSubtitle text={ch['whereto']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -2067,7 +2067,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               {(isRestaurant || isVenue) && d.demand_anchors && (
                 <div style={{marginBottom:"28px"}}>
                   <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px"}}>
-                    {isRestaurant ? "Demand Anchors — What Drives Cover Count" : "Demand Anchors — Event Traffic Sources"}
+                    {isRestaurant ? "Demand Anchors // What Drives Cover Count" : "Demand Anchors // Event Traffic Sources"}
                   </div>
                   <div style={{display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"20px"}}>
                     {(Array.isArray(d.demand_anchors)
@@ -2147,7 +2147,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
 
               {whereToTab === "list" && (!d.whereTo || d.whereTo.length === 0) && (
                 <div style={{padding:"32px", background:"var(--surface)", border:"0.5px dashed var(--border)", borderRadius:"2px", textAlign:"center", fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", marginBottom:"24px"}}>
-                  [ LOCATION DETAILS N/A — NO DATA IN CMS ]
+                  [ LOCATION DETAILS N/A: NO DATA IN CMS ]
                 </div>
               )}
 
@@ -2208,7 +2208,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} — {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} · {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
                 <ChapterSubtitle text={ch['buildplans']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -2338,7 +2338,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               <div style={{marginTop:"36px", paddingTop:"20px", borderTop:"1px solid var(--border)"}}>
                 <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px"}}>Regulatory &amp; compliance</div>
                 <p style={{fontFamily:"var(--font-body)", fontSize:"15px", color:"var(--text-secondary)", lineHeight:1.8, margin:0, maxWidth:"540px"}}>
-                  Regulatory and municipal zoning intelligence for this asset — LEED mandates, building code compliance, and environmental covenants.
+                  Regulatory and municipal zoning intelligence for this asset: LEED mandates, building code compliance, and environmental covenants.
                 </p>
               </div>
             </div>
@@ -2361,7 +2361,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} — {ch['units']?.chapterLabel || hierarchy.collectionLabel}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} · {ch['units']?.chapterLabel || hierarchy.collectionLabel}</div>
                 <ChapterSubtitle text={ch['units']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -2482,7 +2482,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} — {ch['universe']?.chapterLabel || 'Property Universe'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} · {ch['universe']?.chapterLabel || 'Property Universe'}</div>
                 <ChapterSubtitle text={ch['universe']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -2565,13 +2565,13 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} — {ch['services']?.chapterLabel || 'Services'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} · {ch['services']?.chapterLabel || 'Services'}</div>
                 <ChapterSubtitle text={ch['services']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
 
               <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
-                Commission a ScoutIt ecosystem partner to go deeper on this space — from spatial renders to full due-diligence research.
+                Commission a ScoutIt ecosystem partner to go deeper on this space, from spatial renders to full due-diligence research.
               </p>
 
               <div style={{display:"flex", flexDirection:"column", gap:"10px"}}>
@@ -2610,7 +2610,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
             <div className="panel-content">
 
               <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} — {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} · {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
                 <ChapterSubtitle text={ch['yourmove']?.subtitle} />
                 <div style={{height:"1px", background:"var(--border)"}}/>
               </div>
@@ -2695,7 +2695,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
               {rosterLoaded && (
                 <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(var(--accent-rgb),0.03)" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented — uploader / lister route"}</div>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented // uploader or lister route"}</div>
                   {rosterLoaded && !rosterUnavailable && propertyRoster.length === 0 && rosterUploader ? (
                     <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "8px" }}>Listed by {rosterUploader}</div>
                   ) : null}

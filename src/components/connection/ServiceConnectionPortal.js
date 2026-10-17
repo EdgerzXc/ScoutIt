@@ -21,7 +21,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
         <h3>Request Sent</h3>
         <p>
           Your request is on its way to <strong>{providerName}</strong>.
-          Keep an eye on <strong>{email}</strong> — that&apos;s where they&apos;ll reach you.
+          Keep an eye on <strong>{email}</strong>: that&apos;s where they&apos;ll reach you.
         </p>
         <button className="reset-portal-btn" onClick={() => setSubmitted(false)}>
           Submit Another Request
@@ -144,7 +144,7 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
           <div className="form-group-item">
             <label>What do you need?</label>
             <textarea
-              placeholder={`Describe your project — the space, the look you're going for, and when you need it done...`}
+              placeholder={`Describe your project: the space, the look you're going for, and when you need it done...`}
               rows="5" 
               value={intent}
               onChange={(e) => setIntent(e.target.value)}

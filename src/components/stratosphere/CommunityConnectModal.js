@@ -153,7 +153,7 @@ export default function CommunityConnectModal({
               </div>
               {isSample ? (
                 <p className="ccm-sample-note" role="note">
-                  SAMPLE SIGNAL — exploring only. Dispatch is disabled: nothing will be sent and no Connect will be spent.
+                  SAMPLE SIGNAL: exploring only. Dispatch is disabled: nothing will be sent and no Connect will be spent.
                 </p>
               ) : null}
             </div>
@@ -194,7 +194,7 @@ export default function CommunityConnectModal({
               </button>
               <button type="submit" className="ccm-primary-btn" disabled={isSample || submitting || !intro.trim()} title={isSample ? "Disabled for sample signals" : undefined}>
                 <Send size={12} aria-hidden="true" />
-                <span>{isSample ? "SAMPLE — DISPATCH DISABLED" : submitting ? "DISPATCHING..." : "DISPATCH (1 CONNECT)"}</span>
+                <span>{isSample ? "SAMPLE: DISPATCH DISABLED" : submitting ? "DISPATCHING..." : "DISPATCH (1 CONNECT)"}</span>
               </button>
             </div>
             {/* A-150: explicit Privacy Policy link (RA 10173 §11). */}

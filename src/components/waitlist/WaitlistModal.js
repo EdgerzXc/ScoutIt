@@ -99,7 +99,7 @@ export default function WaitlistModal() {
               {status === "already" ? "You're already on the list." : "You're on the list."}
             </h2>
             <p className="text-[13.5px] leading-relaxed text-text-secondary mb-5.5">
-              We&apos;ll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens — with your
+              We&apos;ll reach out the moment {roleLabel ? `${roleLabel} ` : ""}access opens: with your
               founding rate locked in. No spam. No pressure.
             </p>
             <button className={`${styles.action} w-full bg-gold-accent text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer`} onClick={() => setOpen(false)}>Done</button>
@@ -110,7 +110,7 @@ export default function WaitlistModal() {
               Lock your founding rate{roleLabel ? <> as a <span className="text-gold-accent">{roleLabel}</span></> : null}.
             </h2>
             <p className="text-[13.5px] leading-relaxed text-text-secondary mb-5">
-              ScoutIt opens in cohorts. Founding members keep their rate forever — only the first
+              ScoutIt opens in cohorts. Founding members keep their rate forever; only the first
               20 slots per role. Drop your email and we&apos;ll bring you in first.
             </p>
 

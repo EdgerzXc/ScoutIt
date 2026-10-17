@@ -8,7 +8,7 @@ const POINTS = [
     icon: Handshake,
     title: "What a Connect does",
     body:
-      "A Connect is spent on a meaningful action — reaching a broker or pitching an owner (1), or commissioning a photographer, researcher, or event planner (2). Browsing, saving, and reading intel are always free.",
+      "A Connect is spent on a meaningful action: reaching a broker or pitching an owner (1), or commissioning a photographer, researcher, or event planner (2). Browsing, saving, and reading intel are always free.",
   },
   {
     icon: Sparkles,
@@ -20,7 +20,7 @@ const POINTS = [
     icon: RefreshCw,
     title: "Monthly reset",
     body:
-      "Your tier allowance refreshes on the 1st of each month — it doesn&apos;t roll over. Connects you bought or earned stay in your wallet until you use them.",
+      "Your tier allowance refreshes on the 1st of each month; it doesn&apos;t roll over. Connects you bought or earned stay in your wallet until you use them.",
   },
 ];
 

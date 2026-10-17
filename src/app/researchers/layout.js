@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Researchers",
   description:
-    "Meet the researchers verifying intel on ScoutIt — credibility scores, bounty participation, and the signals that keep the platform honest.",
+    "Meet the researchers verifying intel on ScoutIt: credibility scores, bounty participation, and the signals that keep the platform honest.",
   alternates: { canonical: "/researchers" },
 };
 

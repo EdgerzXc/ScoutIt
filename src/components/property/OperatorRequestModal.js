@@ -103,7 +103,7 @@ export default function OperatorRequestModal({ isOpen, onClose, propertyTitle, p
     } catch (err) {
       console.error("Operator request failed", err);
       setStatus("error");
-      setErrorMsg("Couldn't send the request — check your connection.");
+      setErrorMsg("Couldn't send the request: check your connection.");
     } finally {
       submitInFlightRef.current = false;
     }

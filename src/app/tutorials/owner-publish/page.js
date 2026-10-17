@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Owner Tutorial — Submit to Publish | ScoutIt",
+  title: "Owner Tutorial · Submit to Publish | ScoutIt",
   description: "Step-by-step: private draft, address-only geocode, RESA declaration, publish, slug lock, inbox.",
 };
 
@@ -48,7 +48,7 @@ export default function OwnerPublishTutorialPage() {
         Publish your space, step by step
       </h1>
       <p style={{ opacity: 0.7, marginBottom: 28, textAlign: "center", maxWidth: 640 }}>
-        Press play. Six steps, mapped to the live product — no guesswork.
+        Press play. Six steps, mapped to the live product: no guesswork.
       </p>
       <video
         controls

@@ -5,6 +5,7 @@ import Papa from "papaparse";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { GoogleGenAI, Type } from "@google/genai";
 import { generateWithFallback } from "@/lib/geminiModel";
 import {
@@ -343,12 +344,22 @@ export async function POST(request) {
       }, { status: 502 });
     }
 
+    let publicCachePending = false;
+    if (publish) {
+      try {
+        publicCachePending = await invalidateCmsBundle();
+      } catch (cacheErr) {
+        console.warn("[Intel Ingest] Cache invalidation warning:", cacheErr?.message);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       engine,
       article,
       recordId: saved.record?.id,
       published: publish,
+      publicCachePending,
       url: `/intel/${article.slug}`,
     });
   } catch (err) {

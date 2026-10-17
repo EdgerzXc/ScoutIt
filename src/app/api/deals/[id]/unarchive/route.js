@@ -5,6 +5,7 @@ import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { DELETE_AFTER_DAYS } from "@/lib/pendingRequestLifecycle";
+import { notifyUser } from "@/lib/notifications";
 
 // ═══════════════════════════════════════════════════════════════
 // UNARCHIVE A PENDING REQUEST — and reset both clocks
@@ -39,7 +40,7 @@ export async function POST(request, { params }) {
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
-      .select("status, archived_at, property_id, buyer_id, broker_id, properties(owner_id)")
+      .select("status, archived_at, property_id, buyer_id, broker_id, properties(id, title, owner_id)")
       .eq("id", dealId)
       .single();
 
@@ -75,6 +76,25 @@ export async function POST(request, { params }) {
     if (updateError) {
       console.error("[UNARCHIVE] Failed:", updateError);
       return NextResponse.json({ error: "Couldn't reopen this request." }, { status: 500 });
+    }
+
+    // GAP-59: Notify counterparties that the request was reopened out of the archive
+    const recipients = [
+      ...new Set(
+        [deal.buyer_id, deal.broker_id, deal.properties?.owner_id].filter(
+          (id) => id && id !== userId
+        )
+      ),
+    ];
+    const propTitle = deal.properties?.title || "a property";
+    for (const recipientId of recipients) {
+      await notifyUser(supabaseAdmin, {
+        userId: recipientId,
+        title: "Archived request reopened",
+        desc: `A pending Connect request for "${propTitle}" has been moved back to the active inbox.`,
+        propertyId: deal.properties?.id || deal.property_id || null,
+        notificationType: "request_unarchived",
+      });
     }
 
     await logActivity(supabaseAdmin, {

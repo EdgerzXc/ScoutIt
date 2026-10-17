@@ -89,6 +89,7 @@ yarn-error.log*
 # Agent review captures left at the repo root (e.g. .codex-profile-review.png).
 # The file stays on disk for whoever wants it; it just is not repo content.
 /.codex-*.png
+*.blend1
 
 # O-021 decided 2026-09-09 (option 2): the Brain is tracked by default.
 # Only genuinely local things stay ignored: the personal daily log, vendored

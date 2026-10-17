@@ -169,7 +169,8 @@ export async function POST(req) {
         .single();
 
       if (subErr) {
-        console.warn("[OSINT API] Supabase Insert Error (Non-blocking):", subErr.message);
+        console.error("[OSINT API] Supabase Insert Error:", subErr.message);
+        return NextResponse.json({ success: false, error: subErr.message }, { status: 500 });
       }
 
       // 2. THE BRIDGE — Supabase draft → Airtable INTEL_CMS.

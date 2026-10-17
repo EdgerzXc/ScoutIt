@@ -3,7 +3,7 @@ import ScoutItImageWordmark from '@/components/brand/ScoutItImageWordmark';
 import ScoutItImageMark from '@/components/brand/ScoutItImageMark';
 
 export const runtime = 'edge';
-export const alt = 'ScoutIt — Space Intelligence';
+export const alt = 'ScoutIt · Space Intelligence';
 export const size = { width: 1200, height: 600 };
 export const contentType = 'image/png';
 

@@ -5,7 +5,7 @@ import { MessageSquare } from "lucide-react";
 export const metadata = {
   alternates: { canonical: "/showcase" },
   title: "Orbit Rankings · ScoutIt",
-  description: "The most-inquired Philippine properties, ranked across cosmic tiers — ScoutIT's Space Intelligence showcase.",
+  description: "The most-inquired Philippine properties, ranked across cosmic tiers: ScoutIT's Space Intelligence showcase.",
 };
 
 export default function ShowcasePage() {

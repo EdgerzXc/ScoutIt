@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // auditLog module — it shares the service-role client and is meant to be
 // called in the same Server Action as the mutation it records.
 import { getCurrentStaff, assertTier, TIERS, logAction } from "@/lib/rbac";
+import { unpublishPropertyFromAirtable, updatePropertyInAirtable } from "@/lib/airtable";
 
 export async function revertAction(formData) {
   const staff = await getCurrentStaff();
@@ -29,10 +30,37 @@ export async function revertAction(formData) {
   // Revert target table state based on original action type
   if (target_table === "properties") {
     const restoreStatus = prevState?.moderation_status || "pending";
+    const pipelineStatus = restoreStatus === "approved" ? "approved" : restoreStatus === "archived" ? "archived" : "pending";
+    const lifecycleState = restoreStatus === "approved" ? "live" : restoreStatus === "archived" ? "off_market" : "draft";
+
+    const { data: prop } = await admin
+      .from("properties")
+      .select("slug, canonical_slug")
+      .eq("id", target_id)
+      .maybeSingle();
+
     await admin
       .from("properties")
-      .update({ moderation_status: restoreStatus, updated_at: new Date().toISOString() })
+      .update({
+        moderation_status: restoreStatus,
+        pipeline_status: pipelineStatus,
+        lifecycle_state: lifecycleState,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", target_id);
+
+    const slug = prop?.canonical_slug || prop?.slug;
+    if (slug) {
+      try {
+        if (restoreStatus === "approved") {
+          await updatePropertyInAirtable(slug, { Approved_For_ScoutIt: true });
+        } else {
+          await unpublishPropertyFromAirtable(slug);
+        }
+      } catch (err) {
+        console.warn("[MMC REVERT] Airtable sync warning:", err.message);
+      }
+    }
   } else if (target_table === "blocked_access") {
     await admin.from("blocked_access").delete().eq("id", target_id);
   } else if (target_table === "verification_requests") {

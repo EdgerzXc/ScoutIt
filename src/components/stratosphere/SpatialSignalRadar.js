@@ -295,20 +295,20 @@ export default function SpatialSignalRadar({
     <div className="ssr-container" aria-label="Stratosphere 3D Spatial Radar">
       <div ref={mapContainerRef} className="ssr-canvas" />
 
-      {/* Radar HUD telemetry watermark */}
+      {/* Consolidated Glass Telemetry HUD Bar */}
       <div className="ssr-hud-overlay" aria-hidden="true">
-        <div className="ssr-hud-top-left">
-          <span className="ssr-hud-dot" />
-          <span className="ssr-hud-text">SPATIAL INTEL RADAR // METRO MANILA</span>
-        </div>
-        <div className="ssr-hud-top-right">
-          <span className="ssr-hud-text">
-            PINS: {filteredSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} SHOWN / {allSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} TOTAL
+        <div className="ssr-hud-pill-bar">
+          <div className="ssr-hud-segment">
+            <span className="ssr-hud-dot" />
+            <span className="ssr-hud-title">METRO MANILA RADAR</span>
+          </div>
+          <span className="ssr-hud-sep">/</span>
+          <span className="ssr-hud-stat">
+            {filteredSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} OF {allSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} BEACONS
           </span>
-        </div>
-        <div className="ssr-hud-bottom-left">
-          <span className="ssr-hud-tag">
-            {selectedDistrict ? `SECTOR: ${selectedDistrict.toUpperCase()}` : "MACRO LEVEL // ALL SECTORS"}
+          <span className="ssr-hud-sep">/</span>
+          <span className="ssr-hud-sector">
+            {selectedDistrict ? `SECTOR: ${selectedDistrict.toUpperCase()}` : "ALL SECTORS"}
           </span>
         </div>
       </div>

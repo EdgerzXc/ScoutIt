@@ -199,7 +199,7 @@ function MarketNumbers({ deepIntel, unlocked }) {
             }}
           >
             <span className="market-numbers__label">{label}</span>
-            <span className="market-numbers__missing">— — —</span>
+            <span className="market-numbers__missing">- - -</span>
           </div>
         ))}
       </div>
@@ -250,7 +250,7 @@ export default function MarketChapter({
     <>
       <div style={{ marginBottom: "32px" }}>
         <div className="market-chapter__eyebrow">
-          {chapterNumber} — {chapterLabel}
+          {chapterNumber} · {chapterLabel}
         </div>
         {subtitle && showDescriptions && (
           <div className="market-chapter__subtitle">{subtitle}</div>
@@ -269,7 +269,7 @@ export default function MarketChapter({
           be removed. */}
       {!subtitle && showDescriptions && (
         <p className="market-chapter__lede">
-          What is being written about this space and the market around it — and,
+          What is being written about this space and the market around it, and,
           for Verified Scouts, the numbers underneath.
         </p>
       )}

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { DashboardProvider, useDashboard } from "../../../context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import AtmosphereBackground from "../../../components/ui/AtmosphereBackground";
+import DeckPanel from "../../../components/dashboard/DeckPanel";
+import { deckNeighbors } from "../../../lib/workspaceDeck";
 import KanbanBoard from "../../../components/dashboard/crm/KanbanBoard";
 import AppointmentsSheet from "../../../components/dashboard/crm/AppointmentsSheet";
 import DealFileSlideOver from "../../../components/dashboard/crm/DealFileSlideOver";
@@ -112,7 +114,7 @@ function CRMPageInner() {
     if (apptsRes.status === "fulfilled") setAppointments(apptsRes.value.appointments || []);
     if (dealsRes.status === "rejected" || apptsRes.status === "rejected") {
       console.error("CRM fetch failed", dealsRes.reason || apptsRes.reason);
-      flashToast("Some of your pipeline data couldn't load — check your connection.");
+      flashToast("Some of your pipeline data couldn't load. Check your connection.");
     }
     setLoading(false);
   }, [currentUser, flashToast]);
@@ -242,6 +244,10 @@ function CRMPageInner() {
   const pipelineValue = pricedDeals.reduce((sum, d) => sum + Number(d.propertyPrice), 0);
 
   return (
+    // A-205 Workspace Deck: CRM sits left of Workspace — swipe-left returns
+    // home, swipe-right rubber-bands at the deck end. Lens is always a
+    // pipeline role here, so the full owner mapping applies.
+    <DeckPanel {...deckNeighbors("crm", viewingAs)}>
     <div role="main" className="relative flex min-h-[calc(100dvh-80px)] flex-col p-4 font-body md:p-6">
       <AtmosphereBackground variant={viewingAs === "broker" ? "broker" : "dashboard"} />
       {/* Additional Atmosphere Layers for CRM per Handoff */}
@@ -330,12 +336,12 @@ function CRMPageInner() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
         <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Active Deals</div>
-          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : activeDeals}</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">-</span> : activeDeals}</div>
         </div>
         <div className="min-w-0 card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-gold-accent">Pipeline Value</div>
           {loading ? (
-            <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">—</div>
+            <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">-</div>
           ) : pricedDeals.length > 0 ? (
             <>
               <div className="font-body text-2xl font-semibold tracking-tight text-on-surface text-glow tabular-nums break-words">₱{pipelineValue.toLocaleString()}</div>
@@ -343,7 +349,7 @@ function CRMPageInner() {
             </>
           ) : (
             <>
-              <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">—</div>
+              <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">-</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">No priced listings in your active pipeline yet</div>
             </>
           )}
@@ -351,19 +357,19 @@ function CRMPageInner() {
         <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Win Rate</div>
           {loading ? (
-            <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">—</div>
+            <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">-</div>
           ) : winRate !== null ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{winRate}%</div>
           ) : (
             <>
-              <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">—</div>
+              <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">-</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">No closed deals yet</div>
             </>
           )}
         </div>
         <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
           <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Upcoming Viewings</div>
-          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">—</span> : upcomingViewings}</div>
+          <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">-</span> : upcomingViewings}</div>
         </div>
       </div>
 
@@ -491,6 +497,7 @@ function CRMPageInner() {
         </div>
       )}
     </div>
+    </DeckPanel>
   );
 }
 

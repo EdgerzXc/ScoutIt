@@ -47,24 +47,40 @@ async function handleCron(request) {
   try {
     const cutoff = contactRetentionCutoffIso();
 
-    // `.neq("email", CLEARED_EMAIL)` is what makes this idempotent: a second
-    // run the same night must report 0, not re-clear rows that are already
-    // clear and then claim it purged them.
-    const { data: cleared, error } = await supabaseAdmin
+    // GAP-80: Select bounded batch IDs first so LIMIT is applied reliably on a
+    // standard SELECT before executing the PII-clearing UPDATE.
+    const { data: candidates, error: selectError } = await supabaseAdmin
       .from("contact_messages")
-      .update(CONTACT_CLEARED_PATCH)
+      .select("id")
       .in("status", CLEARABLE_CONTACT_STATUSES)
       .lte("handled_at", cutoff)
       .neq("email", CLEARED_EMAIL)
-      .select("id")
       .limit(BATCH_LIMIT);
+
+    if (selectError) throw selectError;
+
+    const batchIds = (candidates || []).map((row) => row.id).filter(Boolean);
+    if (batchIds.length === 0) {
+      return NextResponse.json({
+        cleared: 0,
+        retentionDays: CONTACT_RETENTION_DAYS,
+        batchCapped: false,
+      });
+    }
+
+    const { data: cleared, error } = await supabaseAdmin
+      .from("contact_messages")
+      .update(CONTACT_CLEARED_PATCH)
+      .in("id", batchIds)
+      .neq("email", CLEARED_EMAIL)
+      .select("id");
 
     if (error) throw error;
 
     return NextResponse.json({
       cleared: cleared?.length || 0,
       retentionDays: CONTACT_RETENTION_DAYS,
-      batchCapped: (cleared?.length || 0) === BATCH_LIMIT,
+      batchCapped: batchIds.length === BATCH_LIMIT,
     });
   } catch (err) {
     console.error("[CONTACT RETENTION CRON] Error:", err);

@@ -145,6 +145,27 @@ async function sweepArchives() {
 
   const daysLeft = DELETE_AFTER_DAYS - ARCHIVE_AFTER_DAYS;
 
+  // GAP-51: Also notify candidate brokers/operators in deal_routing_recipients
+  // when a routed deal (where broker_id is null until accepted) is archived.
+  const routedRecipientsByDeal = new Map();
+  if (done.size > 0) {
+    try {
+      const { data: routedRows } = await supabaseAdmin
+        .from("deal_routing_recipients")
+        .select("deal_id, recipient_id")
+        .in("deal_id", Array.from(done));
+      for (const row of routedRows || []) {
+        if (!row?.deal_id || !row?.recipient_id) continue;
+        if (!routedRecipientsByDeal.has(row.deal_id)) {
+          routedRecipientsByDeal.set(row.deal_id, new Set());
+        }
+        routedRecipientsByDeal.get(row.deal_id).add(row.recipient_id);
+      }
+    } catch {
+      // Non-fatal if routing table is unavailable
+    }
+  }
+
   for (const deal of stale) {
     if (!done.has(deal.id)) continue;
     const title = deal.properties?.title || "a property";
@@ -152,8 +173,14 @@ async function sweepArchives() {
     // BOTH sides are told, and this is the point of archiving rather than
     // expiring: the recipient gets a last, explicit chance to act while the
     // request is still perfectly acceptable.
-    const recipientId = deal.broker_id || deal.properties?.owner_id;
-    if (recipientId) {
+    const recipientIds = new Set(
+      [
+        deal.broker_id,
+        deal.properties?.owner_id,
+        ...(routedRecipientsByDeal.get(deal.id) || []),
+      ].filter(Boolean)
+    );
+    for (const recipientId of recipientIds) {
       await notifyUser(supabaseAdmin, {
         userId: recipientId,
         title: "A request is waiting in your archive",

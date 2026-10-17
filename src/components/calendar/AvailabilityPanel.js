@@ -143,7 +143,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
       });
       addToast?.("Availability saved!", "✅");
     } catch {
-      addToast?.("Couldn't save availability — please try again.", "❌");
+      addToast?.("Couldn't save availability. Please try again.", "❌");
     } finally {
       setSaving(false);
     }
@@ -331,7 +331,7 @@ export default function AvailabilityPanel({ userId, addToast }) {
           <div className="pt-6 border-t border-surface-variant">
             <h3 className="font-working-title text-base text-on-surface mb-1">Days off</h3>
             <p className="text-sm text-text-secondary mb-4">
-              Block a specific date — a holiday, or a day you are away. This overrides your
+              Block a specific date (a holiday, or a day you are away). This overrides your
               weekly hours for that day only.
             </p>
 

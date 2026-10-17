@@ -52,7 +52,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           </div>
           <button
             disabled
-            title="Submissions open in Phase 2 — previews only today."
+            title="Submissions open in Phase 2: previews only today."
             className="bg-intel-magenta text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
           >
             Submit Concepts · Phase 2
@@ -222,7 +222,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               
               <button
                 disabled
-                title="Profile saving opens in Phase 2 — previews only today."
+                title="Profile saving opens in Phase 2: previews only today."
                 className="w-full mt-4 bg-intel-magenta text-background font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed shadow-[0_0_15px_rgba(var(--intel-magenta-rgb),0.3)]"
               >
                 Save Studio Profile · Phase 2

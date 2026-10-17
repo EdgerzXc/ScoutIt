@@ -243,7 +243,7 @@ export default async function IntelArticlePage({ params, searchParams }) {
             {["INSIGHT", "Insight"].includes(article.category) || ["INSIGHT", "Insight"].includes(article.intelType) || ["INSIGHT", "Insight"].includes(article.type) ? (
               <GlassPanel className="p-4 mb-8 border-l-2 border-l-gold-accent bg-gold-accent/5">
                 <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase block mb-1">ScoutIt Insight</span>
-                <p className="font-serif text-sm text-text-secondary m-0">This is a ScoutIt Insight — a projection based on available data, not a verified fact.</p>
+                <p className="font-serif text-sm text-text-secondary m-0">This is a ScoutIt Insight: a projection based on available data, not a verified fact.</p>
               </GlassPanel>
             ) : null}
             {article.lead ? <p className="article-lead-text">{article.lead}</p> : null}

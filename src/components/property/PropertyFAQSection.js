@@ -25,7 +25,7 @@ const TIERS = {
     border: "rgba(var(--accent-rgb, 232, 174, 60), 0.42)",
     bg: "rgba(var(--accent-rgb, 232, 174, 60), 0.07)",
     glow: "0 0 18px rgba(var(--accent-rgb, 232, 174, 60), 0.14)",
-    blurb: "Canonical truth — house rules, lease terms, legal status.",
+    blurb: "Canonical truth: house rules, lease terms, legal status.",
   },
   silver: {
     medal: "🥈",
@@ -43,7 +43,7 @@ const TIERS = {
     border: "color-mix(in srgb, var(--tier-bronze) 30%, transparent)",
     bg: "color-mix(in srgb, var(--tier-bronze) 5%, transparent)",
     glow: "none",
-    blurb: "Lived reality — cell signal, elevator wait, noise stack.",
+    blurb: "Lived reality: cell signal, elevator wait, noise stack.",
   },
 };
 
@@ -544,7 +544,7 @@ export default function PropertyFAQSection({ propertySlug, propertyTitle }) {
         <div className="faq-thread__empty">Loading questions…</div>
       ) : faqs.length === 0 && archivedFaqs.length === 0 ? (
         <div className="faq-thread__empty">
-          No questions yet — be the first to ask.
+          No questions yet. Be the first to ask.
         </div>
       ) : (
         <>

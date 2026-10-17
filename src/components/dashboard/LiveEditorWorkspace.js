@@ -105,15 +105,30 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
+  const isGestureLocked = useRef(false);
 
   const handleTouchStart = useCallback((e) => {
     if (e.touches && e.touches.length === 1) {
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
+      const target = e.target;
+      if (
+        target &&
+        target.closest &&
+        target.closest("input, textarea, select, button, [data-swipe-lock], .overflow-x-auto, [role='slider']")
+      ) {
+        isGestureLocked.current = true;
+      } else {
+        isGestureLocked.current = false;
+      }
     }
   }, []);
 
   const handleTouchEnd = useCallback((e) => {
+    if (isGestureLocked.current) {
+      isGestureLocked.current = false;
+      return;
+    }
     if (e.changedTouches && e.changedTouches.length === 1) {
       const deltaX = e.changedTouches[0].clientX - touchStartX.current;
       const deltaY = e.changedTouches[0].clientY - touchStartY.current;
@@ -127,6 +142,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         }
       }
     }
+    isGestureLocked.current = false;
   }, [mobileTab]);
 
   useEffect(() => {
@@ -358,15 +374,27 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [debouncedDraftData, setDebouncedDraftData] = useState(draftData);
 
   useEffect(() => {
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+    // On mobile, if preview tab is not active, skip background debounced updates to eliminate typing lag
+    if (!isDesktop && mobileTab !== "preview") {
+      return;
+    }
     const handler = setTimeout(() => {
       setDebouncedDraftData(draftData);
     }, 300);
     return () => clearTimeout(handler);
-  }, [draftData]);
+  }, [draftData, mobileTab]);
+
+  // When switching to preview on mobile, immediately sync draft data
+  useEffect(() => {
+    if (mobileTab === "preview") {
+      setDebouncedDraftData(draftData);
+    }
+  }, [mobileTab, draftData]);
 
   return (
     <div 
-      className={`fixed inset-0 z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
+      className={`fixed inset-0 h-[100dvh] z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}
       style={{ gridTemplateColumns: `calc(${leftWidth}% - 5px) 10px calc(${100 - leftWidth}% - 5px)` }}
       onDragOver={handleDragOver}
       onDragEnter={handleDragOver}
@@ -383,7 +411,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         aria-label="Upload PDF"
       />
       {/* Mobile Responsive Mode Toggle (Floating Capsule Pill) */}
-      <div className="md:hidden sticky top-0 z-50 px-4 py-2 bg-surface/95 backdrop-blur-md border-b border-surface-variant flex items-center justify-between gap-3">
+      <div className="md:hidden sticky top-0 z-50 px-4 py-2 bg-surface/95 backdrop-blur-md border-b border-surface-variant flex items-center justify-between gap-3 touch-manipulation">
         <div className="relative flex items-center bg-surface-alt border border-surface-variant rounded-full p-1 flex-1 max-w-xs mx-auto shadow-md">
           {/* Sliding indicator pill */}
           <div 
@@ -394,7 +422,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <button 
             type="button"
             onClick={() => setMobileTab('editor')}
-            className={`relative z-10 flex-1 min-h-9 py-1 text-xs font-label-caps tracking-wider uppercase text-center transition ${
+            className={`relative z-10 flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-wider uppercase text-center active:scale-95 transition touch-manipulation ${
               mobileTab === 'editor' ? 'text-gold-accent font-bold' : 'text-text-secondary hover:text-on-surface'
             }`}
           >
@@ -403,7 +431,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <button 
             type="button"
             onClick={() => setMobileTab('preview')}
-            className={`relative z-10 flex-1 min-h-9 py-1 text-xs font-label-caps tracking-wider uppercase text-center transition ${
+            className={`relative z-10 flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-wider uppercase text-center active:scale-95 transition touch-manipulation ${
               mobileTab === 'preview' ? 'text-gold-accent font-bold' : 'text-text-secondary hover:text-on-surface'
             }`}
           >
@@ -413,7 +441,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         
         {/* Dynamic Completeness Badge with tactile micro-interaction */}
         <div 
-          className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-surface-variant bg-surface-alt"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] rounded-full border border-surface-variant bg-surface-alt"
           title={`${completionPercentage}% completeness`}
         >
           <div className={`w-2 h-2 rounded-full ${completionPercentage >= 70 ? 'bg-success animate-pulse' : 'bg-gold-accent'}`} />
@@ -474,7 +502,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         <div className={`absolute top-0 left-0 h-1 transition duration-300 ${step === 1 ? 'w-1/2 bg-gold-accent' : 'w-full bg-gold-accent'}`}></div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 pb-32 md:p-12 custom-scrollbar bg-surface flex flex-col items-center">
+      <div className="flex-1 overflow-y-auto p-6 pb-32 md:p-12 custom-scrollbar bg-surface flex flex-col items-center" style={{ touchAction: "pan-y" }}>
         <div className="w-full max-w-3xl">
           {extractionError && (
             <div className="bg-error/10 border border-error/30 text-error p-3 rounded text-sm mb-6">
@@ -486,7 +514,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           {step === 1 && (
             <section className="flex flex-col gap-6 motion-safe:animate-[fadeIn_0.3s_ease]">
               <h3 className="font-headline-editorial text-3xl text-gold-accent border-b border-surface-variant pb-2">Basic Property Information</h3>
-              <p className="text-on-surface-muted text-sm max-w-xl">Fill out the bare minimum details to list your property. Don&apos;t worry if you don&apos;t know everything—our Deep Intelligence Vault will securely collect the rest later.</p>
+              <p className="text-on-surface-muted text-sm max-w-xl">Fill out the bare minimum details to list your property. Don&apos;t worry if you don&apos;t know everything; our Deep Intelligence Vault will securely collect the rest later.</p>
               
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Asset Category <span className="text-error">*</span></label>
@@ -494,7 +522,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   {CATEGORIES.map(c => (
                     <button
                       key={c.id}
-                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
+                      className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm active:scale-95 transition touch-manipulation ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
                     >
                       <span className="text-2xl">{c.icon}</span> {c.label}
@@ -506,7 +534,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Title <span className="text-error">*</span></label>
                 <input 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="text" 
                   value={formData.title} 
                   onChange={e => setField("title", e.target.value)} 
@@ -517,7 +545,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Location / Address <span className="text-error">*</span></label>
                 <input 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="text" 
                   value={formData.location} 
                   onChange={e => setField("location", e.target.value)} 
@@ -528,7 +556,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Listed Price (₱) <span className="text-error">*</span></label>
                 <input 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition" 
                   type="number" 
                   value={formData.price} 
                   onChange={e => setField("price", e.target.value)} 
@@ -553,7 +581,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   </button>
                 </div>
                 <textarea 
-                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition min-h-[120px] resize-y text-sm leading-relaxed" 
+                  className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition min-h-[120px] resize-y text-base md:text-sm leading-relaxed" 
                   value={formData.description} 
                   onChange={e => setField("description", e.target.value)} 
                   placeholder="Describe your property. Click the 'SEO Optimize' button to have our AI restructure it for maximum search engine visibility." 
@@ -594,7 +622,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                       </label>
                       {f.type === "select" ? (
                         <select
-                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none"
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none"
                           value={formData.details[f.key] || formData[f.key] || ""}
                           onChange={(e) => setDetail(f.key, e.target.value)}
                         >
@@ -615,7 +643,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                         </label>
                       ) : (
                         <input
-                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
                           type={f.type}
                           placeholder={`Enter ${f.label.toLowerCase()}`}
                           value={formData.details[f.key] || formData[f.key] || ""}
@@ -705,12 +733,15 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       </div>
       
       {/* Preview Pane (Right on Desktop) */}
-      <div className={`${mobileTab === 'preview' ? 'block motion-safe:animate-[fadeIn_0.25s_cubic-bezier(0.16,1,0.3,1)]' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}>
+      <div 
+        className={`${mobileTab === 'preview' ? 'block motion-safe:animate-[fadeIn_0.25s_cubic-bezier(0.16,1,0.3,1)]' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}
+        style={{ touchAction: "pan-y" }}
+      >
         <div className="sticky top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md flex items-center justify-between px-3">
           <button
             type="button"
             onClick={() => setMobileTab('editor')}
-            className="md:hidden text-xs font-mono uppercase underline hover:opacity-80 py-1"
+            className="md:hidden min-h-[44px] px-2 text-xs font-mono uppercase underline hover:opacity-80 flex items-center active:scale-95 transition touch-manipulation"
           >
             ← Back to Editor
           </button>

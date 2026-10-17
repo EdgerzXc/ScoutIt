@@ -94,9 +94,24 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: reason }, { status: 403 });
     }
 
-    let query = supabaseAdmin.from("properties").select("id, title, slug, owner_id, lifecycle_state, pipeline_status");
+    let query = supabaseAdmin
+      .from("properties")
+      .select("id, title, slug, canonical_slug, owner_id, lifecycle_state, pipeline_status");
     query = propertyId ? query.eq("id", propertyId) : query.eq("slug", propertySlug);
-    const { data: property, error: propError } = await query.single();
+    let { data: property, error: propError } = await (query.maybeSingle ? query.maybeSingle() : query.single());
+
+    // GAP-75: Fall back to canonical_slug when propertySlug matches Airtable's formula slug
+    if (!property && !propertyId && propertySlug) {
+      const fallbackQuery = supabaseAdmin
+        .from("properties")
+        .select("id, title, slug, canonical_slug, owner_id, lifecycle_state, pipeline_status")
+        .eq("canonical_slug", propertySlug);
+      const fallbackRes = await (fallbackQuery.maybeSingle ? fallbackQuery.maybeSingle() : fallbackQuery.single());
+      if (fallbackRes?.data) {
+        property = fallbackRes.data;
+        propError = null;
+      }
+    }
 
     if (propError || !property) {
       return NextResponse.json({ success: false, message: "Property not found" }, { status: 404 });
@@ -151,7 +166,7 @@ export async function POST(req) {
         userId: recipient.recipientId,
         title: "New inquiry",
         desc: `${name || "Someone"} is asking about "${property.title}".`,
-        icon: "ðŸ’¬",
+        icon: "💬",
         propertyId: property.id,
         notificationType: "new_inquiry",
       });

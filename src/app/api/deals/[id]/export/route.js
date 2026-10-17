@@ -118,11 +118,24 @@ export async function GET(request, { params }) {
 
     // Display names for whoever is actually on this thread. These id columns
     // are plain text, not foreign keys, so this is a manual lookup.
-    const partyIds = [
+    // GAP-57: Include routed recipients (when deal.broker_id is null) and any
+    // message senders so their display names resolve in exported transcripts.
+    const rawPartyIds = [
       deal.buyer_id && { id: deal.buyer_id, role: "buyer" },
       deal.broker_id && { id: deal.broker_id, role: "broker" },
       deal.properties?.owner_id && { id: deal.properties.owner_id, role: "owner" },
+      isRoutedRecipient && { id: userId, role: "broker" },
+      ...((messagesResult.data || [])
+        .map((m) => m?.sender_id && { id: m.sender_id, role: m.sender_role || "broker" })
+        .filter(Boolean)),
     ].filter(Boolean);
+
+    const seenPartyIds = new Set();
+    const partyIds = rawPartyIds.filter((p) => {
+      if (seenPartyIds.has(p.id)) return false;
+      seenPartyIds.add(p.id);
+      return true;
+    });
 
     let namesById = {};
     if (partyIds.length) {

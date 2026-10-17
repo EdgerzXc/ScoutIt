@@ -75,7 +75,7 @@ function InventoryInner({ params }) {
         setLocalUnits(data.units || []);
       } else if (!silent) {
         console.error("Failed to load units", data.error);
-        addToast("Couldn't load units — check your connection.", "❌");
+        addToast("Couldn't load units: check your connection.", "❌");
       }
     } catch (e) {
       if (!silent) console.error("Failed to load units", e);
@@ -156,7 +156,7 @@ function InventoryInner({ params }) {
 
     setSaveState(ok ? "saved" : "error");
     if (!ok) {
-      addToast("Couldn't save your changes — check your connection.", "❌");
+      addToast("Couldn't save your changes: check your connection.", "❌");
     }
 
     // Settle the button back to idle after the confirmation has been seen.
@@ -241,7 +241,7 @@ function InventoryInner({ params }) {
             }`}>
               {saveState === 'saving' && 'Saving your changes…'}
               {saveState === 'saved' && 'All changes saved'}
-              {saveState === 'error' && "Couldn't save — tap Retry"}
+              {saveState === 'error' && "Couldn't save: tap Retry"}
               {saveState === 'idle' && 'Auto-saves as you edit'}
             </span>
           </div>

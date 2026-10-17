@@ -24,7 +24,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  let seoTitle = `Property Intel — ${resolvedParams.id} — ScoutIt`;
+  let seoTitle = `Property Intel · ${resolvedParams.id} | ScoutIt`;
   let seoDescription = "Property Intelligence Vector";
   // A-118: this was `/og-default.jpg`, a file that does not exist in `public/`.
   // Every share card that fell back to it pointed at a 404 — and for units that

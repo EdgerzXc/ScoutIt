@@ -44,6 +44,15 @@ export async function POST(request) {
       .eq("id", listingId)
       .single();
     if (propertyError || !property) return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    if (!property.owner_id) {
+      return NextResponse.json(
+        {
+          error: "This listing has no verified owner yet and cannot accept representation pitches. No Connect was spent.",
+          code: "PROPERTY_UNCLAIMED",
+        },
+        { status: 422 }
+      );
+    }
     if (property.owner_id === brokerId) return NextResponse.json({ error: "Owners cannot pitch their own property" }, { status: 400 });
     const sampleRouting = validateSampleInquiryRecipients({
       slug: property.slug,

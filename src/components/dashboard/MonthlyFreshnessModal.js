@@ -328,7 +328,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
             <p className="mf-sub">
               {items.length} listing{items.length === 1 ? "" : "s"} haven&apos;t been verified in
               over 30 days. Confirming means you&apos;re asserting the details are{" "}
-              <strong style={{ color: "var(--text-secondary)" }}>still accurate</strong> — if anything changed,
+              <strong style={{ color: "var(--text-secondary)" }}>still accurate</strong>; if anything changed,
               update it instead.
             </p>
 
@@ -350,7 +350,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
                       className="mf-row__edit"
                       onClick={() => { setOpen(false); onOpenEditor(item); }}
                     >
-                      ✏️ Something changed — update it
+                      ✏️ Something changed: update it
                     </button>
                   )}
                 </div>

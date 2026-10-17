@@ -27,7 +27,7 @@ export default function LegalDoc({ eyebrow, title, meta, intro, sections, relate
 
         <div className="legal-body">
           <div className="legal-disclaimer" role="note">
-            <span className="legal-disclaimer-label">⚠ Draft — not yet legally reviewed</span>
+            <span className="legal-disclaimer-label">⚠ Draft: not yet legally reviewed</span>
             <p>
               This is a working draft, written in plain language to be transparent about how
               ScoutIt intends to operate during our pre-launch period. It has{" "}

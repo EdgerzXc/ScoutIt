@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { isGlobalReadOnly } from "@/lib/featureFlags";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { notifyUser } from "@/lib/notifications";
 import { validateRecommendationSubmission } from "@/lib/brokerRecommendationSubmission";
 import { resolveBrokerAuthorityId } from "@/lib/brokerDossier";
 import {
@@ -158,6 +159,14 @@ export async function POST(request) {
       .then(null, (auditError) => {
         console.warn("[recommendations] consent audit not recorded for", inserted.id, auditError);
       });
+
+    // GAP-21: Notify broker of submitted recommendation under review
+    await notifyUser(supabaseAdmin, {
+      userId: brokerId,
+      title: "New recommendation submitted",
+      desc: "A client has submitted a recommendation for you. It is currently under review.",
+      notificationType: "recommendation_submitted",
+    });
 
     return json(
       {

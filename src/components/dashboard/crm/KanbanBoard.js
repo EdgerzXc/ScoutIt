@@ -42,7 +42,7 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
 
   const getStatusColor = (status, hasViewingScheduled) => {
     if (hasViewingScheduled && !["accepted", "active", "closed", "declined", "withdrawn"].includes(status)) {
-      return "bg-blue-500/5 border-blue-500/30";
+      return "bg-gold-accent/10 border-gold-accent/40";
     }
     if (status === "accepted" || status === "active" || status === "closed") return "bg-success/5 border-success/20";
     if (status === "declined" || status === "withdrawn" || status === "expired" || status === "reported") return "bg-error/5 border-error/20";
@@ -143,8 +143,8 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
 
                       {/* Viewing Scheduled Indicator */}
                       {deal.hasViewingScheduled && (
-                        <div className="mb-2 flex items-center gap-1.5 px-2 py-1 rounded bg-blue-500/10 border border-blue-500/30 text-xs font-mono text-blue-300">
-                          <Calendar size={12} className="shrink-0 text-blue-400" />
+                        <div className="mb-2 flex items-center gap-1.5 px-2 py-1 rounded bg-gold-accent/10 border border-gold-accent/30 text-xs font-mono text-gold-accent">
+                          <Calendar size={12} className="shrink-0 text-gold-accent" />
                           <span>Viewing Appointment Confirmed</span>
                         </div>
                       )}

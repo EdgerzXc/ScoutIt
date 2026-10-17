@@ -2,10 +2,58 @@ import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { isAiSearchActive } from '@/lib/featureFlags';
+import { getCmsBundle } from '@/lib/cmsCache';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "missing_key", // Fallback handles gracefully
 });
+
+/**
+ * GAP-34: Parses Philippine real estate price strings supporting shorthand
+ * multipliers (K, M/Million, B/Billion), ranges ("50M - 60M"), and unpriced
+ * inquiry labels ("Price Upon Inquiry", "Contact for Price").
+ */
+export function parseListingBudgetPhp(rawPrice) {
+  if (rawPrice === null || rawPrice === undefined) {
+    return { isUnpriced: true, min: null, max: null };
+  }
+  const cleaned = String(rawPrice).replace(/,/g, "").trim();
+  if (!cleaned || /contact|inquiry|inquire|negotiable|upon request|tba|n\/a/i.test(cleaned) && !/\d/.test(cleaned)) {
+    return { isUnpriced: true, min: null, max: null };
+  }
+
+  const tokenRegex = /(\d+(?:\.\d+)?)\s*(billion|million|thousand|b|m|k)?\b/gi;
+  const values = [];
+  let match;
+  while ((match = tokenRegex.exec(cleaned)) !== null) {
+    const base = Number(match[1]);
+    if (!Number.isFinite(base)) continue;
+    const unit = (match[2] || "").toLowerCase();
+    let multiplier = 1;
+    if (unit === "b" || unit === "billion") multiplier = 1_000_000_000;
+    else if (unit === "m" || unit === "million") multiplier = 1_000_000;
+    else if (unit === "k" || unit === "thousand") multiplier = 1_000;
+    values.push(base * multiplier);
+  }
+
+  if (values.length === 0) {
+    return { isUnpriced: true, min: null, max: null };
+  }
+
+  return {
+    isUnpriced: false,
+    min: Math.min(...values),
+    max: Math.max(...values),
+  };
+}
+
+export function matchesCatalogBudget(rawPrice, maxBudget) {
+  const numericBudget = Number(maxBudget);
+  if (!Number.isFinite(numericBudget) || numericBudget <= 0) return true;
+  const parsed = parseListingBudgetPhp(rawPrice);
+  if (parsed.isUnpriced) return true; // Keep inquiry-priced luxury listings visible with their label
+  return parsed.min !== null && parsed.min <= numericBudget;
+}
 
 // Tools available to Claude
 const tools = [
@@ -112,21 +160,22 @@ If a user asks to save a property, use the save_to_wishlist tool.`;
 
         if (name === "search_catalog") {
           const { location, space_type, max_budget } = input;
-          let allProps = getProperties();
+          const bundle = await getCmsBundle();
+          let allProps = bundle?.properties || [];
           
           if (location) {
             const locLow = location.toLowerCase();
-            allProps = allProps.filter(p => p.city.toLowerCase().includes(locLow) || p.location.toLowerCase().includes(locLow) || p.title.toLowerCase().includes(locLow));
+            allProps = allProps.filter(p => 
+              (p.city && String(p.city).toLowerCase().includes(locLow)) || 
+              (p.location && String(p.location).toLowerCase().includes(locLow)) || 
+              (p.title && String(p.title).toLowerCase().includes(locLow))
+            );
           }
           if (space_type) {
             allProps = allProps.filter(p => p.spaceCategory && p.spaceCategory.toLowerCase() === space_type.toLowerCase());
           }
           if (max_budget) {
-            allProps = allProps.filter(p => {
-              const m = String(p.listed_price).replace(/,/g, "").match(/\d+(\.\d+)?/);
-              const val = m ? Number(m[0]) : null;
-              return val !== null && val <= max_budget;
-            });
+            allProps = allProps.filter(p => matchesCatalogBudget(p.listed_price, max_budget));
           }
 
           // Return only essential details to Claude so we don't blow up the context window

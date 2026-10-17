@@ -42,12 +42,21 @@ export async function importPropertiesCsv(_prevState, formData) {
   const toInsert = [];
   const failedRows = [];
 
+function sanitizeFormulaInjection(value) {
+  if (typeof value !== "string") return value;
+  if (/^[=+\-@\t\r]/.test(value)) {
+    return `'${value}`;
+  }
+  return value;
+}
+
   rows.forEach((row, index) => {
     const missing = REQUIRED_COLUMNS.filter((col) => !row[col]?.toString().trim());
     if (missing.length > 0) {
       failedRows.push({ row: index + 2, reason: `Missing ${missing.join(", ")}` });
       return;
     }
+
     toInsert.push({
       title: row.title.trim(),
       type: row.type.trim(),
@@ -57,6 +66,8 @@ export async function importPropertiesCsv(_prevState, formData) {
       media_link: row.media_link?.toString().trim() || null,
       owner_id: row.owner_id?.toString().trim() || null,
       moderation_status: "pending",
+      pipeline_status: "pending",
+      lifecycle_state: "draft",
     });
   });
 
@@ -76,7 +87,7 @@ export async function importPropertiesCsv(_prevState, formData) {
     targetTable: "properties",
     targetId: "batch",
     metadata: {
-      filename: file.name,
+      filename: sanitizeFormulaInjection(file.name),
       totalRows: rows.length,
       inserted: insertedCount,
       failed: failedRows.length,

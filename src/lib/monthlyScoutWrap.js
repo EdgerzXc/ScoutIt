@@ -52,3 +52,14 @@ export function deduplicateUniqueEyes(events = []) {
   });
   return set.size;
 }
+
+/**
+ * Returns previous calendar month formatted as 'YYYY-MM'.
+ * Anchors to the 1st of current UTC month before subtracting to prevent day overflow.
+ */
+export function getPreviousPeriodMonth(now = new Date()) {
+  const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  firstOfThisMonth.setUTCMonth(firstOfThisMonth.getUTCMonth() - 1);
+  return firstOfThisMonth.toISOString().slice(0, 7);
+}
+

@@ -218,7 +218,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                   value={notes}
                   onChange={handleNotesChange}
                   placeholder="Jot down notes about this deal. Only you can see this."
-                  className="w-full h-40 bg-surface-alt border border-surface-variant rounded-lg p-4 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition resize-none placeholder:text-text-muted"
+                  className="w-full h-40 bg-surface-alt border border-surface-variant rounded-lg p-4 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition resize-none placeholder:text-text-muted"
                 />
               </div>
 

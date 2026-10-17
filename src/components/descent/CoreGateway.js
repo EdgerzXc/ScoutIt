@@ -37,7 +37,7 @@ export default function CoreGateway() {
               <span className="core-kicker">Mantle → Core → About You</span>
               <h2 id="core-threshold-title">Choose a perspective.</h2>
             </div>
-            <p>This preview changes the explanation only. Account roles and permissions come from verified server records—not this selection.</p>
+            <p>This preview changes the explanation only. Account roles and permissions come from verified server records, not this selection.</p>
           </header>
 
           <div className="core-role-shell">

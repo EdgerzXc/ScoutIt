@@ -80,7 +80,7 @@ export default function BrokerRecordChart({ record }) {
           same question two ways. */}
       <p className="record-chart-foot">
         {record.isExampleSeed
-          ? "Demonstration figures — not measured on real ScoutIt activity"
+          ? "Demonstration figures: not measured on real ScoutIt activity"
           : "Measured on ScoutIt activity only"}
       </p>
     </aside>

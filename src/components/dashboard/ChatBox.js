@@ -420,7 +420,7 @@ export default function ChatBox({
       }).catch(() => {});
     } catch (err) {
       console.error("Failed to load messages", err);
-      setLoadError("Couldn't load this conversation — check your connection.");
+      setLoadError("Couldn't load this conversation: check your connection.");
     } finally {
       setLoading(false);
     }
@@ -1196,7 +1196,7 @@ export default function ChatBox({
               disabled={pendingBusy || !onUnarchive}
               className="mt-3 w-full min-h-11 py-2.5 rounded-lg border border-gold-accent/50 text-gold-accent font-mono text-[12px] uppercase tracking-widest hover:bg-gold-accent/10 transition disabled:opacity-50"
             >
-              {pendingBusy ? "Working…" : "Reopen — restarts the 30-day clock"}
+              {pendingBusy ? "Working…" : "Reopen (restarts 30-day clock)"}
             </button>
           )}
 
@@ -1230,7 +1230,7 @@ export default function ChatBox({
           ) : (
             <>
               <p className="text-sm text-text-secondary mb-5">
-                Accepting opens the chat for both of you. Declining closes it — they are told,
+                Accepting opens the chat for both of you. Declining closes it; they are told,
                 and their Connect is not returned. Take the time you need; nothing here
                 expires on a short timer.
               </p>
@@ -1319,7 +1319,7 @@ export default function ChatBox({
             <h3 className="text-xl font-headline-editorial text-gold-accent mb-2">Exchange Contact Info?</h3>
             <p className="text-sm text-text-secondary mb-6">
               This reveals your phone number and email to {deal.other_party}, and theirs to you.
-              It takes both sides — nothing is revealed until they agree too. The conversation
+              It takes both sides: nothing is revealed until they agree too. The conversation
               stays open either way.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -1637,7 +1637,7 @@ export default function ChatBox({
                 )}
               </>
             ) : (
-              <p className="text-sm text-text-secondary">Contact details aren&apos;t shared automatically — coordinate below in chat.</p>
+              <p className="text-sm text-text-secondary">Contact details aren&apos;t shared automatically; coordinate below in chat.</p>
             )}
 
             <div className="w-full h-px bg-surface-variant my-5"></div>

@@ -42,7 +42,12 @@ export async function GET(request) {
       return NextResponse.json({ error: "Catalog unavailable" }, { status: 503 });
     }
 
-    const property = (bundle.properties || []).find((p) => p.slug === slug);
+    const property = (bundle.properties || []).find(
+      (p) =>
+        p.slug === slug ||
+        p.canonical_slug === slug ||
+        String(p.id) === String(slug),
+    );
 
     if (!property) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });

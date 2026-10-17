@@ -96,21 +96,47 @@ export default function Header({ ambientContext = null }) {
   }, [menuOpen]);
 
   useEffect(() => {
-    function readUser() {
+    let active = true;
+    async function resolveHeaderUser() {
       try {
         const raw = localStorage.getItem("scoutit_user");
-        setUser(raw ? JSON.parse(raw) : null);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed) {
+            if (active) setUser(parsed);
+            return;
+          }
+        }
+        const { supabase } = await import("@/lib/supabaseClient");
+        if (supabase?.auth?.getSession) {
+          const { data } = await supabase.auth.getSession();
+          const sbUser = data?.session?.user;
+          if (sbUser && active) {
+            const meta = sbUser.user_metadata || {};
+            setUser({
+              id: sbUser.id,
+              email: sbUser.email,
+              name: meta.full_name || meta.name || sbUser.email,
+              tier: meta.subscription_tier || meta.tier || "starry",
+              active_roles: Array.isArray(meta.active_roles) ? meta.active_roles : ["seeker"],
+              created_at: sbUser.created_at || null,
+            });
+            return;
+          }
+        }
+        if (active) setUser(null);
       } catch {
-        setUser(null);
+        if (active) setUser(null);
       }
     }
-    readUser();
+    resolveHeaderUser();
     // Pick up sign-in/sign-out from other tabs or after onboarding
-    window.addEventListener("storage", readUser);
-    window.addEventListener("focus", readUser);
+    window.addEventListener("storage", resolveHeaderUser);
+    window.addEventListener("focus", resolveHeaderUser);
     return () => {
-      window.removeEventListener("storage", readUser);
-      window.removeEventListener("focus", readUser);
+      active = false;
+      window.removeEventListener("storage", resolveHeaderUser);
+      window.removeEventListener("focus", resolveHeaderUser);
     };
   }, []);
 

@@ -8,6 +8,7 @@ import { rejectIfContactLeak } from "@/lib/contactLeakFilter";
 import { notifyUser } from "@/lib/notifications";
 import { recordFaqContactLeakTelemetry } from "@/lib/faqContactLeakTelemetry";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
+import { findProperty } from "@/lib/propertyLookup";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PER-PROPERTY 3-TIER FAQ API  (NEW_IDEAS.md §4)
@@ -52,15 +53,16 @@ async function recordBlockedFaq(ruleCode, context) {
 }
 
 /**
- * Derives the caller's answer authority for a given property slug.
+ * Derives the caller's answer authority for a given property slug/canonical_slug/id (GAP-84).
  * @returns {Promise<{ role: string, tier: string }>}
  */
-async function resolveAuthority(userId, propertySlug) {
-  const { data: property } = await supabaseAdmin
-    .from("properties")
-    .select("owner_id")
-    .eq("slug", propertySlug)
-    .maybeSingle();
+async function resolveAuthority(userId, propertyKey) {
+  const { property } = await findProperty(supabaseAdmin, propertyKey, [
+    "id",
+    "slug",
+    "canonical_slug",
+    "owner_id",
+  ]);
 
   if (property?.owner_id && property.owner_id === userId) {
     return { role: "owner", tier: TIER_BY_ROLE.owner };
@@ -91,10 +93,26 @@ export async function GET(req) {
     const propertyId = new URL(req.url).searchParams.get("propertyId");
     if (!propertyId) return fail("Missing propertyId");
 
-    const { data: questions, error: qError } = await supabaseAdmin
+    // GAP-84: Resolve all identity aliases (slug, canonical_slug, id) so FAQs saved
+    // under any alias remain visible on the public wall.
+    const { property } = await findProperty(supabaseAdmin, propertyId, [
+      "id",
+      "slug",
+      "canonical_slug",
+    ]);
+    const propertyKeys = [
+      ...new Set([propertyId, property?.slug, property?.canonical_slug, property?.id].filter(Boolean)),
+    ];
+
+    let faqQuery = supabaseAdmin
       .from("property_faqs")
-      .select("id, question_text, created_at, asked_by_user_id, source")
-      .eq("property_id", propertyId)
+      .select("id, question_text, created_at, asked_by_user_id, source");
+    faqQuery =
+      propertyKeys.length > 1 && typeof faqQuery.in === "function"
+        ? faqQuery.in("property_id", propertyKeys)
+        : faqQuery.eq("property_id", propertyId);
+
+    const { data: questions, error: qError } = await faqQuery
       .eq("is_hidden", false)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -204,6 +222,23 @@ export async function POST(req) {
     const userId = await resolveUserId(req);
     if (!userId) return fail("Sign in to join the conversation on this listing.", 401);
 
+    // GAP-68: Enforce account moderation state (is_shadowbanned / archived_at) on FAQ writes
+    try {
+      const { data: callerProfile } = await supabaseAdmin
+        .from("user_profiles")
+        .select("is_shadowbanned, archived_at")
+        .eq("id", userId)
+        .maybeSingle();
+      if (callerProfile?.archived_at) {
+        return fail("Your account is archived and cannot post questions or answers.", 403);
+      }
+      if (callerProfile?.is_shadowbanned === true) {
+        return fail("Posting is currently restricted on your account.", 403);
+      }
+    } catch {
+      // Degrade gracefully if moderation columns absent in test mocks
+    }
+
     const body = await req.json();
 
     // ── Branch A: answering an existing question ──────────────────────
@@ -288,16 +323,20 @@ export async function POST(req) {
       await recordBlockedFaq(leak.code, "public_question");
       return fail(leak.message, 422, { code: leak.code });
     }
-    const { data: property, error: propertyError } = await supabaseAdmin
-      .from("properties")
-      .select("id, title, slug, owner_id")
-      .eq("slug", parsed.data.propertyId)
-      .maybeSingle();
+
+    // GAP-84: Resolve property across slug, canonical_slug, or id
+    const { property, error: propertyError } = await findProperty(
+      supabaseAdmin,
+      parsed.data.propertyId,
+      ["id", "title", "slug", "canonical_slug", "owner_id"]
+    );
     if (propertyError) throw propertyError;
     if (!property) return fail("Property not found", 404);
 
+    const canonicalPropertyKey = property.canonical_slug || property.slug || parsed.data.propertyId;
+
     const sampleRouting = validateSampleInquiryRecipients({
-      slug: property.slug,
+      slug: property.slug || property.canonical_slug,
       recipientIds: [property.owner_id].filter(Boolean),
       allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
     });
@@ -311,7 +350,7 @@ export async function POST(req) {
     const { count } = await supabaseAdmin
       .from("property_faqs")
       .select("id", { count: "exact", head: true })
-      .eq("property_id", parsed.data.propertyId)
+      .eq("property_id", canonicalPropertyKey)
       .eq("asked_by_user_id", userId)
       .gte("created_at", since);
 
@@ -322,7 +361,7 @@ export async function POST(req) {
     const { data: inserted, error } = await supabaseAdmin
       .from("property_faqs")
       .insert({
-        property_id: parsed.data.propertyId,
+        property_id: canonicalPropertyKey,
         question_text: question,
         asked_by_user_id: userId,
       })

@@ -6,6 +6,7 @@ import { isBlocked } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { checkReceiverGate, IDEMPOTENCY_WINDOW_MINUTES } from "@/lib/connectGates";
 import { logActivity } from "@/lib/crmActivity";
+import { notifyUser } from "@/lib/notifications";
 
 export async function POST(request) {
   try {
@@ -184,6 +185,15 @@ export async function POST(request) {
       activityType: 'deal_created',
       actorId: userId,
       metadata: { source: 'owner_invite', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
+    });
+
+    // GAP-21: Notify invited broker of representation request
+    await notifyUser(supabaseAdmin, {
+      userId: resolvedBrokerId,
+      title: "New representation invitation",
+      desc: "An owner has invited you to represent their property listing.",
+      propertyId: listingId,
+      notificationType: "broker_invite",
     });
 
     return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, source_context: connectSource });

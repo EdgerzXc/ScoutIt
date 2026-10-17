@@ -279,7 +279,7 @@ export default function ImportLeadsModal({
                       <div key={row.id || idx} className="p-3 text-xs font-mono space-y-1.5">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-on-surface font-semibold text-sm">
-                            {row.name || "—"}
+                            {row.name || "-"}
                           </span>
                           {row.isDuplicate ? (
                             <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono uppercase flex items-center gap-1">
@@ -294,15 +294,15 @@ export default function ImportLeadsModal({
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-text-secondary">
                           <div>
                             <span className="text-text-muted">Email: </span>
-                            <span className="text-on-surface">{row.email || "—"}</span>
+                            <span className="text-on-surface">{row.email || "-"}</span>
                           </div>
                           <div>
                             <span className="text-text-muted">Phone: </span>
-                            <span className="text-on-surface">{row.phone || "—"}</span>
+                            <span className="text-on-surface">{row.phone || "-"}</span>
                           </div>
                           <div>
                             <span className="text-text-muted">Property: </span>
-                            <span className="text-on-surface">{row.propertyTitle || "—"}</span>
+                            <span className="text-on-surface">{row.propertyTitle || "-"}</span>
                           </div>
                         </div>
                         {row.isDuplicate && (

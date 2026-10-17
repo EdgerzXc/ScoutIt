@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { getInfoTip } from "@/lib/infoTips";
 
 const POPOVER_WIDTH = 264;
@@ -18,16 +19,30 @@ const VIEWPORT_MARGIN = 12;
 // Tightened and solidified:
 // - Single discrete glyph inside an accessible 44px tap target (negative margins
 //   prevent inline line-height distortion).
-// - Smart vertical flipping: if trigger sits within 150px of viewport top,
+// - Rendered via document.body portal to escape ancestor CSS transforms and
+//   backdrop filters that displace fixed positioning.
+// - Smooth hover bridge with 180ms grace delay allowing pointer travel into popover.
+// - Smart vertical flipping: if trigger sits within 160px of viewport top,
 //   places popover below the trigger so it never clips off the top screen edge.
 // - High-contrast accessible focus ring, press feedback (:active), and reduced-motion.
 // ─────────────────────────────────────────────────────────────────────────
 export default function InfoTip({ tipId, label = "More information", className = "" }) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState(null);
+  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef(null);
+  const popoverRef = useRef(null);
+  const hideTimerRef = useRef(null);
+  const isPinnedRef = useRef(false);
   const popoverId = useId();
   const tip = getInfoTip(tipId);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
 
   const place = useCallback(() => {
     const el = triggerRef.current;
@@ -39,7 +54,7 @@ export default function InfoTip({ tipId, label = "More information", className =
     const left = Math.round(Math.min(Math.max(ideal, VIEWPORT_MARGIN), Math.max(VIEWPORT_MARGIN, maxLeft)));
     
     // Vertical placement: place below if trigger is near viewport top, otherwise place above
-    const placeBelow = r.top < 150;
+    const placeBelow = r.top < 160;
 
     setCoords({
       left,
@@ -49,12 +64,31 @@ export default function InfoTip({ tipId, label = "More information", className =
     });
   }, []);
 
+  const scheduleHide = useCallback(() => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 180);
+  }, []);
+
+  const cancelHide = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }, []);
+
   const show = useCallback(() => {
+    cancelHide();
     place();
     setOpen(true);
-  }, [place]);
+  }, [cancelHide, place]);
 
-  const hide = useCallback(() => setOpen(false), []);
+  const hide = useCallback(() => {
+    cancelHide();
+    isPinnedRef.current = false;
+    setOpen(false);
+  }, [cancelHide]);
 
   useEffect(() => {
     if (!open) return;
@@ -62,7 +96,12 @@ export default function InfoTip({ tipId, label = "More information", className =
       if (e.key === "Escape") hide();
     };
     const onDown = (e) => {
-      if (!triggerRef.current?.contains(e.target)) hide();
+      if (
+        !triggerRef.current?.contains(e.target) &&
+        !popoverRef.current?.contains(e.target)
+      ) {
+        hide();
+      }
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("pointerdown", onDown);
@@ -78,6 +117,33 @@ export default function InfoTip({ tipId, label = "More information", className =
 
   if (!tip) return null;
 
+  const popoverContent = open && coords ? (
+    <span
+      ref={popoverRef}
+      id={popoverId}
+      role="tooltip"
+      className="infotip-pop"
+      style={{
+        position: "fixed",
+        display: "block",
+        left: coords.left,
+        top: coords.top != null ? coords.top : undefined,
+        bottom: coords.bottom != null ? coords.bottom : undefined,
+        width: coords.width,
+        zIndex: 99999,
+      }}
+      onPointerEnter={cancelHide}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse" && !isPinnedRef.current) {
+          scheduleHide();
+        }
+      }}
+    >
+      <span className="infotip-title">{tip.title}</span>
+      <span className="infotip-body">{tip.body}</span>
+    </span>
+  ) : null;
+
   return (
     <span className={`infotip-wrap ${className}`.trim()}>
       <button
@@ -90,37 +156,32 @@ export default function InfoTip({ tipId, label = "More information", className =
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (open) hide();
-          else show();
+          if (isPinnedRef.current) {
+            hide();
+          } else {
+            isPinnedRef.current = true;
+            show();
+          }
         }}
         onPointerEnter={(e) => {
           if (e.pointerType === "mouse") show();
         }}
         onPointerLeave={(e) => {
-          if (e.pointerType === "mouse") hide();
+          if (e.pointerType === "mouse" && !isPinnedRef.current) {
+            scheduleHide();
+          }
         }}
         onFocus={show}
-        onBlur={hide}
+        onBlur={() => {
+          if (!isPinnedRef.current) hide();
+        }}
       >
         <span className="infotip-glyph" aria-hidden="true">?</span>
       </button>
 
-      {open && coords && (
-        <span
-          id={popoverId}
-          role="tooltip"
-          className="infotip-pop"
-          style={{
-            left: coords.left,
-            top: coords.top != null ? coords.top : undefined,
-            bottom: coords.bottom != null ? coords.bottom : undefined,
-            width: coords.width,
-          }}
-        >
-          <span className="infotip-title">{tip.title}</span>
-          <span className="infotip-body">{tip.body}</span>
-        </span>
-      )}
+      {mounted && typeof document !== "undefined" && popoverContent
+        ? createPortal(popoverContent, document.body)
+        : null}
 
       <style jsx>{`
         .infotip-wrap {
@@ -178,10 +239,10 @@ export default function InfoTip({ tipId, label = "More information", className =
           border-color: var(--accent);
           color: var(--accent-bright);
         }
-        .infotip-pop {
+        :global(.infotip-pop) {
           position: fixed;
           display: block;
-          z-index: 2500;
+          z-index: 99999;
           padding: 13px 15px;
           background: rgba(var(--surface-rgb), 0.96);
           backdrop-filter: blur(14px);
@@ -190,10 +251,10 @@ export default function InfoTip({ tipId, label = "More information", className =
           border-radius: 4px;
           box-shadow: 0 14px 34px rgba(var(--bg-rgb), 0.65), 0 0 1px rgba(var(--accent-rgb), 0.3);
           text-align: left;
-          pointer-events: none;
+          pointer-events: auto;
           animation: infotip-in 160ms var(--ease-out-custom);
         }
-        .infotip-title {
+        :global(.infotip-title) {
           display: block;
           margin-bottom: 5px;
           color: var(--accent-bright);
@@ -203,7 +264,7 @@ export default function InfoTip({ tipId, label = "More information", className =
           letter-spacing: 0.1em;
           text-transform: uppercase;
         }
-        .infotip-body {
+        :global(.infotip-body) {
           display: block;
           color: var(--text-secondary);
           font-size: 13px;
@@ -221,7 +282,7 @@ export default function InfoTip({ tipId, label = "More information", className =
           }
         }
         @media (prefers-reduced-motion: reduce) {
-          .infotip-pop {
+          :global(.infotip-pop) {
             animation: none;
           }
           .infotip-glyph {

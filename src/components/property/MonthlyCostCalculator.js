@@ -98,7 +98,7 @@ export default function MonthlyCostCalculator({ d }) {
         )}
       </div>
       <p className="mcs-desc">
-        What would a month here actually cost you? Listing-verified charges are filled in below — add your own bills to complete the picture.
+        What would a month here actually cost you? Listing-verified charges are filled in below: add your own bills to complete the picture.
       </p>
 
       {/* From the listing — owner/manager-provided figures only */}
@@ -114,7 +114,7 @@ export default function MonthlyCostCalculator({ d }) {
         </div>
       ) : (
         <p className="mcs-empty-note">
-          No recurring charges on record for this listing — ask the representative.
+          No recurring charges on record for this listing: ask the representative.
         </p>
       )}
 
@@ -140,12 +140,12 @@ export default function MonthlyCostCalculator({ d }) {
       <div className="mcs-total-row">
         <span className="mcs-total-label">Est. total per month</span>
         <span data-testid="mcs-total" className={`mcs-total-value${!hasAnything ? " is-empty" : ""}`}>
-          {hasAnything ? peso(total) : "—"}
+          {hasAnything ? peso(total) : "-"}
         </span>
       </div>
 
       <p className="mcs-disclaimer">
-        Listing charges are provided by the owner or property manager and shown as-is. Utility and lifestyle figures are your own inputs — ScoutIt does not estimate, verify, or advise on personal costs.
+        Listing charges are provided by the owner or property manager and shown as-is. Utility and lifestyle figures are your own inputs: ScoutIt does not estimate, verify, or advise on personal costs.
       </p>
     </div>
   );

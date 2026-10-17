@@ -6,6 +6,7 @@ import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
 import { parseSynthesis, scoreCompleteness } from "@/lib/ingestSchema";
 import { processPendingScans } from "@/lib/scanWorker";
 import { sha256Hex } from "@/lib/fileScan";
+import { updatePropertyInAirtable } from "@/lib/airtable";
 
 /** B1 Stage 1 — staff-triggered scan of the pending queue. */
 export async function runScanQueue() {
@@ -175,11 +176,30 @@ export async function updateMedia(formData) {
   if (!propertyId) throw new Error("Missing property id.");
 
   const admin = createAdminClient();
+  const { data: prop } = await admin
+    .from("properties")
+    .select("slug, canonical_slug, moderation_status, pipeline_status, lifecycle_state")
+    .eq("id", propertyId)
+    .maybeSingle();
+
   const { error } = await admin
     .from("properties")
     .update({ media_link: mediaLink })
     .eq("id", propertyId);
   if (error) throw new Error(error.message);
+
+  const isLive = prop && (prop.pipeline_status === "approved" || prop.lifecycle_state === "live");
+  const slug = prop?.canonical_slug || prop?.slug;
+  if (isLive && slug) {
+    try {
+      await updatePropertyInAirtable(slug, {
+        Image: mediaLink,
+        Photos: mediaLink || "",
+      });
+    } catch (err) {
+      console.warn("[MMC MEDIA] Airtable media sync warning:", err.message);
+    }
+  }
 
   await logAction({
     staff,

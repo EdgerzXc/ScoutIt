@@ -124,7 +124,7 @@ export const ANONYMITY_SHIELD_DEFAULT_FROM_TIER = "cluster";
  * @param {string} role
  * @returns {boolean}
  */
-function normalizeRole(role, defaultRole = null) {
+export function normalizeRole(role, defaultRole = null) {
   if (!role || typeof role !== "string") return defaultRole;
   const r = role.trim().toLowerCase();
   if (r === "buyer") return "seeker";
@@ -192,12 +192,54 @@ export function monthlyAllowance(role, tier) {
   return r[String(tier || "starry").toLowerCase()] ?? 1;
 }
 
-// ── Reading the current (mock) user — SSR-safe ──────────────────
+// ── Reading the current (authenticated or mock) user — SSR-safe ──────────────────
 // Returns "starry"/"seeker" defaults on the server and when no user is set.
-function readUser() {
+// GAP-47 / GAP-83: Checks legacy `scoutit_user`, in-memory synced auth profile
+// (`window.__scoutitAuthUser`), and Supabase Auth session storage (`sb-*-auth-token`)
+// so authenticated Supabase users without a legacy localStorage cache still resolve
+// their session tier/role/created_at.
+export function syncAuthenticatedUserCache(userProfile) {
+  if (typeof window === "undefined") return;
+  window.__scoutitAuthUser = userProfile || null;
+}
+
+export function readUser() {
   if (typeof window === "undefined") return null;
   try {
-    return JSON.parse(localStorage.getItem("scoutit_user") || "null");
+    const raw = localStorage.getItem("scoutit_user");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed) return parsed;
+    }
+    if (window.__scoutitAuthUser) {
+      return window.__scoutitAuthUser;
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        const sessionRaw = localStorage.getItem(key);
+        if (!sessionRaw) continue;
+        const sessionData = JSON.parse(sessionRaw);
+        const sbUser = sessionData?.user || sessionData?.currentSession?.user;
+        if (sbUser && sbUser.id) {
+          const meta = sbUser.user_metadata || {};
+          return {
+            id: sbUser.id,
+            email: sbUser.email,
+            name: meta.full_name || meta.name || sbUser.email,
+            subscription_tier: meta.subscription_tier || meta.tier || "starry",
+            tier: meta.tier || meta.subscription_tier || "starry",
+            active_roles: Array.isArray(meta.active_roles)
+              ? meta.active_roles
+              : meta.role
+                ? [meta.role]
+                : ["seeker"],
+            created_at: sbUser.created_at || null,
+          };
+        }
+      }
+    }
+    return null;
   } catch {
     return null;
   }

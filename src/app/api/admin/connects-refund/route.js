@@ -5,6 +5,7 @@ import { normalizeConnectRole } from "@/lib/connectsWallet";
 import { isCanonicalConnectWalletActive } from "@/lib/connectsSchemaGate";
 import { z } from "zod";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { notifyUser } from "@/lib/notifications";
 
 // ═══════════════════════════════════════════════════════════════
 // SYSTEM-ERROR CONNECT REFUND — staff only
@@ -267,6 +268,14 @@ export async function POST(request) {
     console.warn(
       `[CONNECTS REFUND] ${amount} Connects credited to ${userId} by admin ${gate.userId}. Reason: ${reason}`,
     );
+
+    // GAP-21: Notify user of refunded Connects
+    await notifyUser(supabaseAdmin, {
+      userId,
+      title: "Connects refunded",
+      desc: `${amount} Connects have been credited back to your account: ${reason}`,
+      notificationType: "connects_refund",
+    });
 
     return NextResponse.json({
       success: true,

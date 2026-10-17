@@ -4,11 +4,12 @@ import { z } from "zod";
 import { logActivity, createTask } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { cancelViewingMeet, rescheduleViewingMeet } from "@/lib/calendar/meetLink";
+import { cancelViewingMeet, rescheduleViewingMeet, enqueueCalendarSyncRetry } from "@/lib/calendar/meetLink";
 import { canTransitionWorkflow } from "@/lib/workflowStateMachines";
 import { assertSlotBookable } from "@/lib/calendar/availabilityService";
 import { SLOT_REJECTION_MESSAGES } from "@/lib/calendar/slots";
 import { isValidTimeZone } from "@/lib/calendar/timezone";
+import { notifyUser } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -143,9 +144,31 @@ async function handleReschedule({ id, appt, payload, userId }) {
       });
       if (!moved) {
         console.error("[APPOINTMENTS API] Google event was not moved; identifiers retained for retry");
+        await enqueueCalendarSyncRetry(supabaseAdmin, {
+          appointmentId: id,
+          hostUserId: appt.host_id,
+          googleEventId: appt.google_event_id,
+          operation: "reschedule",
+          payload: {
+            scheduledAt: updated.scheduled_at,
+            durationMinutes: updated.duration_minutes,
+          },
+          errorReason: "google_event_not_moved",
+        });
       }
     } catch (meetErr) {
       console.error("[APPOINTMENTS API] Meet reschedule failed:", meetErr?.message);
+      await enqueueCalendarSyncRetry(supabaseAdmin, {
+        appointmentId: id,
+        hostUserId: appt.host_id,
+        googleEventId: appt.google_event_id,
+        operation: "reschedule",
+        payload: {
+          scheduledAt: updated.scheduled_at,
+          durationMinutes: updated.duration_minutes,
+        },
+        errorReason: meetErr?.message || "reschedule_exception",
+      });
     }
   }
 
@@ -167,6 +190,18 @@ async function handleReschedule({ id, appt, payload, userId }) {
     });
   } catch (activityError) {
     console.warn("[APPOINTMENTS API] Timeline entry not recorded for", id, activityError?.message);
+  }
+
+  // GAP-21: Notify counterparty of rescheduled viewing
+  const counterpartyId = userId === appt.host_id ? appt.guest_id : appt.host_id;
+  if (counterpartyId) {
+    await notifyUser(supabaseAdmin, {
+      userId: counterpartyId,
+      title: "Viewing rescheduled",
+      desc: `A viewing has been rescheduled for ${new Date(scheduledAt).toLocaleDateString()}.`,
+      propertyId: appt.deals?.property_id || appt.property_id || null,
+      notificationType: "viewing_rescheduled",
+    });
   }
 
   return NextResponse.json({ success: true, appointment: updated });
@@ -226,9 +261,23 @@ async function handleStatusChange({ id, appt, payload, userId }) {
         // Keep the id: clearing it after a failed Google delete makes the
         // external event impossible to retry or reconcile later.
         console.error("[APPOINTMENTS API] Google event was not removed; identifiers retained for retry");
+        await enqueueCalendarSyncRetry(supabaseAdmin, {
+          appointmentId: id,
+          hostUserId: appt.host_id,
+          googleEventId: appt.google_event_id,
+          operation: "cancel",
+          errorReason: "google_event_not_removed",
+        });
       }
     } catch (meetErr) {
       console.error("[APPOINTMENTS API] Meet cleanup failed:", meetErr?.message);
+      await enqueueCalendarSyncRetry(supabaseAdmin, {
+        appointmentId: id,
+        hostUserId: appt.host_id,
+        googleEventId: appt.google_event_id,
+        operation: "cancel",
+        errorReason: meetErr?.message || "cancel_exception",
+      });
     }
   }
 
@@ -260,6 +309,30 @@ async function handleStatusChange({ id, appt, payload, userId }) {
     } catch (taskError) {
       console.warn("[APPOINTMENTS API] Follow-up task not created for", id, taskError?.message);
     }
+  }
+
+  // GAP-21: Notify counterparty of viewing status updates
+  const counterpartyId = userId === appt.host_id ? appt.guest_id : appt.host_id;
+  if (counterpartyId) {
+    const title =
+      status === "confirmed"
+        ? "Viewing confirmed"
+        : status === "cancelled"
+          ? "Viewing cancelled"
+          : "Viewing completed";
+    const desc =
+      status === "confirmed"
+        ? `Your viewing for ${new Date(appt.scheduled_at).toLocaleDateString()} has been confirmed.`
+        : status === "cancelled"
+          ? `The viewing for ${new Date(appt.scheduled_at).toLocaleDateString()} was cancelled.`
+          : `The viewing for ${new Date(appt.scheduled_at).toLocaleDateString()} has been marked completed.`;
+    await notifyUser(supabaseAdmin, {
+      userId: counterpartyId,
+      title,
+      desc,
+      propertyId: appt.deals?.property_id || appt.property_id || null,
+      notificationType: `viewing_${status}`,
+    });
   }
 
   return NextResponse.json({ success: true, status });

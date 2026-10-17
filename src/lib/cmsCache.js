@@ -64,6 +64,7 @@ const CMS_LAST_GOOD_KEY = "cms_bundle_last_good";
 const CMS_LAST_GOOD_TTL_S = 60 * 60 * 24 * 40;
 // For how long an explicit publish/takedown may still spend budgeted calls.
 const PUBLISHER_REBUILD_WINDOW_MS = 10 * 60 * 1000;
+export const CMS_PUBLISHER_REBUILD_KEY = "cms_publisher_rebuild_until";
 const WRITE_CURRENT_BUNDLE_SCRIPT = `
   if (redis.call('GET', KEYS[1]) or '0') ~= ARGV[1] then return 0 end
   redis.call('SET', KEYS[2], ARGV[2], 'EX', tonumber(ARGV[3]))
@@ -105,6 +106,15 @@ export async function invalidateCmsBundle() {
     // A publish or takedown is an explicit instruction to be fresh now. Let the
     // rebuild it triggers draw from the monthly budget regardless of the guard.
     publisherRebuildUntil = Date.now() + PUBLISHER_REBUILD_WINDOW_MS;
+    try {
+      await redis.set(
+        CMS_PUBLISHER_REBUILD_KEY,
+        String(publisherRebuildUntil),
+        { ex: Math.ceil(PUBLISHER_REBUILD_WINDOW_MS / 1000) },
+      );
+    } catch {
+      // Non-fatal: in-process publisherRebuildUntil still applies locally
+    }
   }
   // A local memory clear alone cannot refresh the other public instances.
   // Writers use this result to avoid claiming an immediate public refresh.
@@ -364,7 +374,20 @@ export async function getCmsBundle() {
   // TTL-expiry refresh serves the last good snapshot rather than spending calls
   // Airtable will only reject. The rebuild that a publish or takedown triggers
   // bypasses this, so owner content always reaches the public base.
-  if (redis && Date.now() >= publisherRebuildUntil) {
+  let isPublisherRebuild = Date.now() < publisherRebuildUntil;
+  if (!isPublisherRebuild && redis) {
+    try {
+      const sharedRebuildUntil = Number((await redis.get(CMS_PUBLISHER_REBUILD_KEY)) || 0);
+      if (Date.now() < sharedRebuildUntil) {
+        publisherRebuildUntil = sharedRebuildUntil;
+        isPublisherRebuild = true;
+      }
+    } catch {
+      // Non-fatal if Redis rebuild window key cannot be read
+    }
+  }
+
+  if (redis && !isPublisherRebuild) {
     const budget = await getAirtableBudgetStatus();
     if (budget.exhausted) {
       try {

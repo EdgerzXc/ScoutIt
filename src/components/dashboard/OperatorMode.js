@@ -44,7 +44,7 @@ export default function OperatorMode() {
       });
       const data = await res.json();
       if (!res.ok) {
-        addToast("Couldn't save your changes — check your connection.", "❌");
+        addToast("Couldn't save your changes: check your connection.", "❌");
         return;
       }
       if (data.warning) addToast(data.warning, "⚠️");
@@ -54,7 +54,7 @@ export default function OperatorMode() {
       );
     } catch (e) {
       console.error("Failed to save operated unit changes", e);
-      addToast("Couldn't save your changes — check your connection.", "❌");
+      addToast("Couldn't save your changes: check your connection.", "❌");
     }
   };
 
@@ -81,7 +81,7 @@ export default function OperatorMode() {
         <h1 className="font-display-md text-3xl md:text-4xl text-on-surface">Operated Spaces</h1>
         <p className="text-sm text-text-secondary mt-2 max-w-2xl">
           Units delegated to you across every building you operate (commercial, restaurant, retail, flex spaces).
-          You can rename units, manage photos, and set availability here — everything else about the building stays with its owner.
+          You can rename units, manage photos, and set availability here; everything else about the building stays with its owner.
         </p>
       </div>
 

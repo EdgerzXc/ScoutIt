@@ -42,7 +42,7 @@ export const INFO_TIPS = Object.freeze({
   }),
   crustMission: Object.freeze({
     title: "What Crust is",
-    body: "Crust is the directory of professionals behind property decisions. Broker and appraiser licences are checked before they display, so you know who you are working with.",
+    body: "Crust lists verified property professionals across Metro Manila. PRC broker and appraiser licenses are confirmed before profiles display, so you know exactly who you are contacting.",
   }),
   stratosphereMission: Object.freeze({
     title: "What Stratosphere is",

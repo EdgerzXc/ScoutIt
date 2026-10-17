@@ -13,14 +13,14 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
     if (incoming.length > 0) {
       list.push({
         icon: "🤝",
-        text: `${incoming.length} incoming handshake${incoming.length === 1 ? '' : 's'} awaiting your response — accepting unlocks owner contact details.`,
+        text: `${incoming.length} incoming handshake${incoming.length === 1 ? '' : 's'} awaiting your response: accepting unlocks owner contact details.`,
         rule: "Deals with status 'invited'",
       });
     }
     if (taskSummary?.overdue > 0) {
       list.push({
         icon: "⏰",
-        text: `${taskSummary.overdue} task${taskSummary.overdue === 1 ? ' is' : 's are'} overdue — check your task list below.`,
+        text: `${taskSummary.overdue} task${taskSummary.overdue === 1 ? ' is' : 's are'} overdue: check your task list below.`,
         rule: "Open tasks past their due date",
       });
     }
@@ -38,7 +38,7 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
     if (weakest) {
       list.push({
         icon: "📋",
-        text: `"${weakest.prop.title}" is ${weakest.strength.score}% complete — missing ${weakest.strength.missing.slice(0, 2).join(" and ").toLowerCase()}.`,
+        text: `"${weakest.prop.title}" is ${weakest.strength.score}% complete: missing ${weakest.strength.missing.slice(0, 2).join(" and ").toLowerCase()}.`,
         rule: "Field-completeness check on your verified portfolio",
       });
     }

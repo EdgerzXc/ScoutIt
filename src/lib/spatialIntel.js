@@ -136,19 +136,41 @@ export function getFaultLineProximity(lat, lon) {
   };
 }
 
-// ─── Infrastructure Megaproject Proximity ────────────────────────────────────
+// ─── Infrastructure Megaproject Proximity (GAP-53: full LineString segment geometry) ──
 const INFRA_PROJECTS = (infraProjectsData.features || []).map((f) => {
   const coords = f.geometry.coordinates;
-  // For LineStrings, use the midpoint; for Points, use the coordinate directly
   let lat, lon;
+  let lineCoords = null;
   if (f.geometry.type === "Point") {
-    lon = coords[0]; lat = coords[1];
+    lon = coords[0];
+    lat = coords[1];
   } else {
     const mid = coords[Math.floor(coords.length / 2)];
-    lon = mid[0]; lat = mid[1];
+    lon = mid[0];
+    lat = mid[1];
+    lineCoords = coords.map(([cLon, cLat]) => ({ lat: cLat, lon: cLon }));
   }
-  return { ...f.properties, lat, lon };
+  return { ...f.properties, lat, lon, geometryType: f.geometry.type, lineCoords };
 });
+
+function computeProjectDistanceMeters(lat, lon, proj) {
+  if (proj.lineCoords && proj.lineCoords.length >= 2) {
+    let minSegmentDist = Infinity;
+    for (let i = 0; i < proj.lineCoords.length - 1; i++) {
+      const d = pointToSegmentMeters(
+        lat,
+        lon,
+        proj.lineCoords[i].lat,
+        proj.lineCoords[i].lon,
+        proj.lineCoords[i + 1].lat,
+        proj.lineCoords[i + 1].lon
+      );
+      if (d < minSegmentDist) minSegmentDist = d;
+    }
+    return minSegmentDist;
+  }
+  return haversineMeters(lat, lon, proj.lat, proj.lon);
+}
 
 export function checkInfraProximity(lat, lon) {
   if (!lat || !lon) return null;
@@ -157,7 +179,7 @@ export function checkInfraProximity(lat, lon) {
   let minDist = Infinity;
 
   for (const proj of INFRA_PROJECTS) {
-    const dist = haversineMeters(lat, lon, proj.lat, proj.lon);
+    const dist = computeProjectDistanceMeters(lat, lon, proj);
     if (dist < minDist) {
       minDist = dist;
       nearest = proj;
@@ -175,6 +197,8 @@ export function checkInfraProximity(lat, lon) {
     distance_km: Number((minDist / 1000).toFixed(1)),
   };
 }
+
+export const findNearestInfraProjects = checkInfraProximity;
 
 // ─── Business Continuity & Spatial Risk Index (0-100) ────────────────────────
 export function computeContinuityScore(spatialIntel) {

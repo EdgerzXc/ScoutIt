@@ -325,7 +325,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
       <h3 className="pf-title">Answer what buyers always ask</h3>
       <p className="pf-sub">
         These publish as <strong style={{ color: "var(--accent)" }}>Owner Verified</strong> answers on your
-        listing. ScoutIt never writes them for you — an unanswered question stays blank rather than
+        listing. ScoutIt never writes them for you: an unanswered question stays blank rather than
         guessed. Skip anything that doesn&apos;t apply.
       </p>
 
@@ -367,7 +367,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
                 placeholder="Leave blank if it doesn't apply"
                 aria-label={q.question}
               />
-              {!done && <div className="pf-q__skip">Blank — will not appear on the listing</div>}
+              {!done && <div className="pf-q__skip">Blank: will not appear on the listing</div>}
             </div>
           );
         })
@@ -402,7 +402,7 @@ export default function FAQPreflightPanel({ propertySlug, onProgressChange }) {
             ? "Unsaved changes"
             : savedAt
               ? `Saved ${savedAt.toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" })}`
-              : "No contact details — they're blocked automatically"}
+              : "No contact details: they're blocked automatically"}
         </div>
       </div>
     </section>

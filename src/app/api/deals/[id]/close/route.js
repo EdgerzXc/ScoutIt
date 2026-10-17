@@ -4,6 +4,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { writeAuditLog } from "@/lib/auditTrail";
+import { notifyUser } from "@/lib/notifications";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev only takes effect when no real Bearer token was
@@ -23,7 +24,7 @@ export async function POST(request, { params }) {
     // Validate access
     const { data: deal, error: dealError } = await supabaseAdmin
       .from('deals')
-      .select('status, buyer_id, broker_id, properties(owner_id)')
+      .select('status, property_id, buyer_id, broker_id, properties(id, title, owner_id)')
       .eq('id', dealId)
       .single();
 
@@ -44,15 +45,35 @@ export async function POST(request, { params }) {
     }
 
     // Set to closed and start the 7-day archive timer
+    const closedAt = new Date().toISOString();
     const { error: updateError } = await supabaseAdmin
       .from('deals')
       .update({
         status: 'closed',
-        closed_at: new Date().toISOString()
+        closed_at: closedAt
       })
       .eq('id', dealId);
 
     if (updateError) return NextResponse.json({ error: "Failed to close deal" }, { status: 500 });
+
+    // GAP-58: Notify counterparties that the deal was closed and the 7-day transcript window has started
+    const recipients = [
+      ...new Set(
+        [deal.buyer_id, deal.broker_id, deal.properties?.owner_id].filter(
+          (id) => id && id !== userId
+        )
+      ),
+    ];
+    const propTitle = deal.properties?.title || "your deal";
+    for (const recipientId of recipients) {
+      await notifyUser(supabaseAdmin, {
+        userId: recipientId,
+        title: "Conversation closed",
+        desc: `The conversation for "${propTitle}" has been closed and is now read-only. You can export the transcript within 7 days.`,
+        propertyId: deal.properties?.id || deal.property_id || null,
+        notificationType: "deal_closed",
+      });
+    }
 
     // Write audit log event. This omitted `table_name` and `record_id` — both
     // NOT NULL — so it threw on every close, and the bare `catch {}` ate it.
@@ -63,7 +84,7 @@ export async function POST(request, { params }) {
       recordId: dealId,
       userId,
       resourceType: 'deal',
-      metadata: { closed_at: new Date().toISOString(), retention_days: 7 },
+      metadata: { closed_at: closedAt, retention_days: 7 },
     });
 
     return NextResponse.json({ success: true, message: "Deal closed and marked read-only with 7-day retention policy." });

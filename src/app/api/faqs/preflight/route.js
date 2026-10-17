@@ -13,6 +13,7 @@ import {
   findPreflightQuestion,
   preflightProgress,
 } from "@/lib/faqPreflight";
+import { findProperty } from "@/lib/propertyLookup";
 
 // ─────────────────────────────────────────────────────────────────────────
 // OWNER FAQ PRE-FLIGHT CHECKLIST
@@ -51,22 +52,31 @@ function fail(message, status = 400, extra = {}) {
 }
 
 /**
- * Resolves the listing and asserts the caller owns it.
- * @returns {Promise<{ property: object }|{ error: NextResponse }>}
+ * Resolves the listing across id (UUID), slug, and canonical_slug and asserts the caller owns it (GAP-72).
+ * @returns {Promise<{ property: object, propertyKeys: string[], canonicalKey: string }|{ error: NextResponse }>}
  */
-async function requireOwnedProperty(userId, slug) {
-  const { data: property, error } = await supabaseAdmin
-    .from("properties")
-    .select("id, slug, title, owner_id, space_category")
-    .eq("slug", slug)
-    .maybeSingle();
+async function requireOwnedProperty(userId, idOrSlug) {
+  const { property, error } = await findProperty(supabaseAdmin, idOrSlug, [
+    "id",
+    "slug",
+    "canonical_slug",
+    "title",
+    "owner_id",
+    "space_category",
+  ]);
 
   if (error) return { error: fail("Failed to load listing", 500) };
   if (!property) return { error: fail("Listing not found", 404) };
   if (!property.owner_id || property.owner_id !== userId) {
     return { error: fail("Only the listing owner can answer these questions.", 403) };
   }
-  return { property };
+
+  const canonicalKey = property.canonical_slug || property.slug || String(property.id);
+  const propertyKeys = [
+    ...new Set([idOrSlug, property.slug, property.canonical_slug, String(property.id)].filter(Boolean)),
+  ];
+
+  return { property, propertyKeys, canonicalKey };
 }
 
 // ── GET: checklist + existing answers ────────────────────────────────────
@@ -86,11 +96,15 @@ export async function GET(req) {
     const category = owned.property.space_category;
     const questions = getPreflightQuestions(category);
 
-    const { data: seeded } = await supabaseAdmin
+    let seededQuery = supabaseAdmin
       .from("property_faqs")
-      .select("id, preflight_key")
-      .eq("property_id", slug)
-      .eq("source", "preflight");
+      .select("id, preflight_key");
+    seededQuery =
+      owned.propertyKeys.length > 1 && typeof seededQuery.in === "function"
+        ? seededQuery.in("property_id", owned.propertyKeys)
+        : seededQuery.eq("property_id", owned.canonicalKey);
+
+    const { data: seeded } = await seededQuery.eq("source", "preflight");
 
     const faqIdByKey = {};
     for (const row of seeded || []) {
@@ -209,7 +223,7 @@ export async function POST(req) {
         .from("property_faqs")
         .upsert(
           {
-            property_id: slug,
+            property_id: owned.canonicalKey,
             question_text: item.question.question,
             asked_by_user_id: null, // ScoutIt-authored, not asked by a user
             source: "preflight",
@@ -257,11 +271,15 @@ export async function POST(req) {
 
     // Recount from the database rather than trusting the payload -- the owner
     // may be saving a partial edit of a checklist they filled in earlier.
-    const { data: seeded } = await supabaseAdmin
+    let seededRecountQuery = supabaseAdmin
       .from("property_faqs")
-      .select("id")
-      .eq("property_id", slug)
-      .eq("source", "preflight");
+      .select("id");
+    seededRecountQuery =
+      owned.propertyKeys.length > 1 && typeof seededRecountQuery.in === "function"
+        ? seededRecountQuery.in("property_id", owned.propertyKeys)
+        : seededRecountQuery.eq("property_id", owned.canonicalKey);
+
+    const { data: seeded } = await seededRecountQuery.eq("source", "preflight");
 
     let answeredCount = 0;
     if (seeded?.length) {

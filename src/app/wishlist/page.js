@@ -117,11 +117,11 @@ export default function WishlistPage() {
       const n = result.merged ?? 0;
       setMergeMessage(
         n > 0
-          ? `${n} saved ${n === 1 ? "space" : "spaces"} added to your account — they'll follow you across devices.`
+          ? `${n} saved ${n === 1 ? "space" : "spaces"} added to your account; they'll follow you across devices.`
           : "Your account already had these saved."
       );
     } catch (e) {
-      setMergeMessage("Couldn't sync right now — please try again in a moment.");
+      setMergeMessage("Couldn't sync right now. Please try again in a moment.");
     } finally {
       setMerging(false);
     }

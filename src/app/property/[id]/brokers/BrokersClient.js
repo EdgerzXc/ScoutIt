@@ -75,7 +75,7 @@ export default function BrokersClient({ slug }) {
             {broker.license && <p className="broker-closures-txt">PRC reference on file</p>}
             {broker.specializations?.length > 0 && <div className="niche-pills-row">{broker.specializations.map((tag) => <span key={tag} className="niche-pill-tag">{tag}</span>)}</div>}
           </div>
-          <div className="broker-rating-box"><span className="rating-num">—</span><span className="rating-lbl">BUILDING RECORD</span></div>
+          <div className="broker-rating-box"><span className="rating-num">-</span><span className="rating-lbl">BUILDING RECORD</span></div>
         </div>
         <div className="broker-actions-row">
           <Link href={`/brokers/${broker.id}`} className="action-profile-btn">View Profile →</Link>

@@ -245,7 +245,7 @@ export default function BottomNav() {
     // No curated handler (sample listing, or a property page shape that does
     // not own share copy): degrade to the link, and say what happened.
     const ok = await copyLink(url);
-    setShareToast(ok ? "Link copied" : "Couldn't copy — long-press the address bar");
+    setShareToast(ok ? "Link copied" : "Couldn't copy: long-press the address bar");
     setTimeout(() => setShareToast(""), 2400);
   };
 

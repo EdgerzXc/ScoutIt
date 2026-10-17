@@ -26,6 +26,10 @@ const EMAIL_WORTHY = new Set([
   "operator_request",
   "request_archived",
   "request_deleted",
+  "claim_submitted",
+  "claim_filed",
+  "claim_approved",
+  "deal_dispute",
 ]);
 
 export async function validateSampleNotificationRouting(serviceClient, { userId, propertyId = null, propertySlug = null }) {
@@ -47,44 +51,71 @@ export async function validateSampleNotificationRouting(serviceClient, { userId,
   });
 }
 
-export async function notifyUser(serviceClient, { userId, title, desc, icon = "🔔", propertyId = null, propertySlug = null, notificationType }) {
-  const routing = await validateSampleNotificationRouting(serviceClient, { userId, propertyId, propertySlug });
-  if (!routing.ok) {
-    console.warn("[notifications] Blocked unverified or non-designated property notification:", routing.reason);
+const ICONS_BY_TYPE = {
+  property_claim: "🏢",
+  claim_submitted: "🏢",
+  claim_filed: "🏢",
+  claim_approved: "✅",
+  deal_dispute: "🛡️",
+  review_submitted: "⭐",
+  review_unlocked: "🔓",
+  viewing: "📅",
+  chat_message: "💬",
+  deal_accepted: "🤝",
+  deal_declined: "📁",
+  deal_withdrawn: "↩️",
+  broker_invite: "📨",
+  unit_delegation: "🔑",
+  recommendation: "⭐",
+  connects_refund: "💳",
+  faq_appeal: "⚖️",
+};
+
+export async function notifyUser(serviceClient, { userId, title, desc, icon = null, propertyId = null, propertySlug = null, notificationType, forceEmail = false }) {
+  try {
+    const routing = await validateSampleNotificationRouting(serviceClient, { userId, propertyId, propertySlug });
+    if (!routing.ok) {
+      console.warn("[notifications] Blocked unverified or non-designated property notification:", routing.reason);
+      return null;
+    }
+    if (!userId) return null;
+    const resolvedIcon = icon || ICONS_BY_TYPE[notificationType] || "🔔";
+    const { error } = await serviceClient.from("user_notifications").insert([{
+      user_id: userId,
+      title,
+      desc,
+      icon: resolvedIcon,
+      property_id: propertyId,
+      notification_type: notificationType,
+    }]);
+    if (error) console.error("[notifications] Failed to insert:", error);
+
+    // Email is a FALLBACK, not a second channel. It fires only after the in-app
+    // notification is safely written, and its failure is never propagated — the
+    // notification is the system of record and the caller's action must not
+    // depend on a mail server.
+    if (!error) {
+      maybeEmailFallback(serviceClient, { userId, title, desc, notificationType, forceEmail })
+        .catch((e) => console.error("[notifications] Email fallback failed:", e?.message));
+    }
+
+    return error ? null : true;
+  } catch (err) {
+    console.error("[notifications] Notification error swallowed to protect primary caller:", err?.message);
     return null;
   }
-  if (!userId) return null;
-  const { error } = await serviceClient.from("user_notifications").insert([{
-    user_id: userId,
-    title,
-    desc,
-    icon,
-    property_id: propertyId,
-    notification_type: notificationType,
-  }]);
-  if (error) console.error("[notifications] Failed to insert:", error);
-
-  // Email is a FALLBACK, not a second channel. It fires only after the in-app
-  // notification is safely written, and its failure is never propagated — the
-  // notification is the system of record and the caller's action must not
-  // depend on a mail server.
-  if (!error) {
-    maybeEmailFallback(serviceClient, { userId, title, desc, notificationType })
-      .catch((e) => console.error("[notifications] Email fallback failed:", e?.message));
-  }
-
-  return error ? null : true;
 }
 
 /**
  * Sends the email fallback if — and only if — the user has been away long
- * enough for the in-app notification to have gone unseen.
+ * enough for the in-app notification to have gone unseen (unless `forceEmail`
+ * is set for critical security/ownership alerts).
  *
  * Every gate here exits quietly. Never throws.
  */
-async function maybeEmailFallback(serviceClient, { userId, title, desc, notificationType }) {
+async function maybeEmailFallback(serviceClient, { userId, title, desc, notificationType, forceEmail = false }) {
   if (!isEmailConfigured()) return;            // no provider yet — the current state
-  if (!EMAIL_WORTHY.has(notificationType)) return;
+  if (!EMAIL_WORTHY.has(notificationType) && !forceEmail) return;
 
   // A-152 — the /settings#notifications toggle. An explicit FALSE opts out;
   // anything else (true, null row, unreadable row, pre-migration table
@@ -110,7 +141,7 @@ async function maybeEmailFallback(serviceClient, { userId, title, desc, notifica
   if (authErr || !authUser?.user?.email) return;
 
   const lastSeen = authUser.user.last_sign_in_at;
-  if (lastSeen) {
+  if (!forceEmail && lastSeen) {
     const hoursAway = (Date.now() - new Date(lastSeen).getTime()) / 3_600_000;
     if (hoursAway < EMAIL_AFTER_INACTIVE_HOURS) return; // they're around; in-app is enough
   }

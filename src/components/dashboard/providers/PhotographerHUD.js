@@ -56,7 +56,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
           </div>
           <button
             disabled
-            title="Submissions open in Phase 2 — previews only today."
+            title="Submissions open in Phase 2: previews only today."
             className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
           >
             Submit Final Gallery · Phase 2
@@ -249,7 +249,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               
               <button
                 disabled
-                title="Profile saving opens in Phase 2 — previews only today."
+                title="Profile saving opens in Phase 2: previews only today."
                 className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed"
               >
                 Save Showcase Profile · Phase 2

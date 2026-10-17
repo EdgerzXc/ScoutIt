@@ -27,6 +27,7 @@ import {
 // stays with W-009 and counsel; this job only enforces the ordinary rule.
 
 const BATCH_LIMIT = 500;
+export const DISPUTE_RESOLUTION_GRACE_MS = 24 * 60 * 60 * 1000;
 
 async function handleCron(request) {
   const authFailure = authorizeCronRequest(request);
@@ -61,15 +62,28 @@ async function handleCron(request) {
     // Read the holds rather than trusting the deal row: a dispute is filed
     // against a deal that is already closed, so closure alone says nothing
     // about whether the thread is still under review.
+    // GAP-41: Also include recently resolved/dismissed disputes so parties have
+    // a 24-hour grace window to export their transcript before purge.
     const { data: holds, error: holdErr } = await supabaseAdmin
       .from("deal_disputes")
-      .select("deal_id")
+      .select("deal_id, status, resolved_at, updated_at")
       .in("deal_id", closedIds)
-      .in("status", DISPUTE_HOLD_STATUSES);
+      .in("status", [...DISPUTE_HOLD_STATUSES, "resolved", "dismissed"]);
 
     if (holdErr) throw holdErr;
 
-    const held = new Set((holds || []).map((h) => h.deal_id));
+    const nowMs = Date.now();
+    const held = new Set();
+    for (const h of holds || []) {
+      if (!h.status || DISPUTE_HOLD_STATUSES.includes(h.status)) {
+        held.add(h.deal_id);
+      } else if (h.status === "resolved" || h.status === "dismissed") {
+        const resolvedTs = Date.parse(h.resolved_at || h.updated_at || "");
+        if (Number.isFinite(resolvedTs) && nowMs - resolvedTs < DISPUTE_RESOLUTION_GRACE_MS) {
+          held.add(h.deal_id);
+        }
+      }
+    }
     const eligible = closedIds.filter((id) => !held.has(id));
 
     if (eligible.length === 0) {

@@ -139,7 +139,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
     e.preventDefault();
     if (!newTaskTitle.trim() || isSavingTask) return;
     if (activeMemberId !== "current_user") {
-      addToast("That seat isn't activated yet — tasks can be delegated once they join", "ℹ️");
+      addToast("That seat isn't activated yet. Tasks can be delegated once they join", "ℹ️");
       return;
     }
     setIsSavingTask(true);
@@ -156,7 +156,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
       setNewTaskDue("");
     } catch (err) {
       console.error("Failed to delegate task:", err);
-      addToast("Couldn't save the task — try again", "❌");
+      addToast("Couldn't save the task. Try again", "❌");
     } finally {
       setIsSavingTask(false);
     }
@@ -197,7 +197,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
       email: inviteEmail,
       role: inviteRole,
       avatar: null,
-      lastActive: "Invited — not yet joined",
+      lastActive: "Invited: not yet joined",
       activities: [],
       tasks: [],
       permissions: teamList[0]?.permissions.map(p => ({ ...p, granted: false })) || []
@@ -447,7 +447,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     <div className="space-y-4 animate-in fade-in duration-300">
                       {activeMemberId !== 'current_user' ? (
                         <div className="text-xs text-white/70 italic text-center py-8">
-                          This seat hasn&apos;t been activated yet — activity appears once they join and start working.
+                          This seat hasn&apos;t been activated yet. Activity appears once they join and start working.
                         </div>
                       ) : memberActivity === null ? (
                         <div className="text-xs text-white/70 italic text-center py-8">Loading activity…</div>
@@ -461,7 +461,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                             <div className="absolute w-2 h-2 rounded-full bg-gold-accent -left-[4.5px] top-1.5 ring-4 ring-surface"></div>
                             <div className="text-xs text-white/80">
                               <span className="font-medium text-white">{ACTIVITY_LABELS[act.activityType] || act.activityType}</span>
-                              {act.propertyTitle ? ` — ${act.propertyTitle}` : ""}
+                              {act.propertyTitle ? ` · ${act.propertyTitle}` : ""}
                             </div>
                             <div className="flex items-center gap-1 text-[12px] text-white/70 mt-1 uppercase tracking-widest">
                               <Clock size={10} /> {act.createdAt ? new Date(act.createdAt).toLocaleString() : ""}
@@ -480,7 +480,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       </p>
                       {activeMemberId !== 'current_user' ? (
                         <div className="text-xs text-white/70 italic text-center py-8">
-                          This seat hasn&apos;t been activated yet — connections appear once they join.
+                          This seat hasn&apos;t been activated yet. Connections appear once they join.
                         </div>
                       ) : pitches.length === 0 ? (
                         <div className="text-xs text-white/70 italic text-center py-8">
@@ -559,7 +559,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
 
                       {activeMemberId !== 'current_user' ? (
                         <div className="text-xs text-white/70 italic text-center py-8">
-                          This seat hasn&apos;t been activated yet — delegate tasks once they join.
+                          This seat hasn&apos;t been activated yet. Delegate tasks once they join.
                         </div>
                       ) : memberTasks === null ? (
                         <div className="text-xs text-white/70 italic text-center py-8">Loading tasks…</div>
@@ -587,7 +587,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                   </div>
                                   <div className={`flex items-center gap-1 text-[12px] uppercase tracking-widest ${overdue ? 'text-red-400' : 'text-white/70'}`}>
                                     <AlertCircle size={10} />
-                                    {task.dueAt ? `Due ${new Date(task.dueAt).toLocaleDateString()}${overdue ? ' — overdue' : ''}` : 'No due date'}
+                                    {task.dueAt ? `Due ${new Date(task.dueAt).toLocaleDateString()}${overdue ? ' (overdue)' : ''}` : 'No due date'}
                                   </div>
                                 </div>
                               );

@@ -204,10 +204,10 @@ function getVerdictClass(diff) {
 function getVerdictMessage(diff) {
   const absDiff = Math.abs(Math.round(diff));
   if (diff < -5) {
-    return `Highly Competitive — Priced ${absDiff}% below local market average.`;
+    return `Highly Competitive: Priced ${absDiff}% below local market average.`;
   }
   if (diff > 5) {
-    return `Premium Pricing — Priced ${absDiff}% above local market average.`;
+    return `Premium Pricing: Priced ${absDiff}% above local market average.`;
   }
-  return `At Market Average — Within ${absDiff}% of similar local properties.`;
+  return `At Market Average: Within ${absDiff}% of similar local properties.`;
 }

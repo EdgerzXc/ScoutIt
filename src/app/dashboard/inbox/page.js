@@ -6,12 +6,14 @@ import { bucketOfDeal, isDeletedDeal } from "@/lib/deals/dealStatus";
 import { loadDeals as fetchSharedDeals } from "@/lib/deals/dealsClient";
 import { readDealIdFromSearch } from "@/lib/deals/dealThreadLink";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DeckPanel from "@/components/dashboard/DeckPanel";
+import { deckNeighbors, isPipelineRole } from "@/lib/workspaceDeck";
 import ChatBox from "@/components/dashboard/ChatBox";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { getSession, getUser } from "@/lib/authClient";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
-import { DashboardProvider } from "@/context/DashboardContext";
+import { DashboardProvider, useDashboard } from "@/context/DashboardContext";
 import { MessageSquareText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -123,6 +125,10 @@ const DEMO_DEALS = [
 
 function InboxInner() {
   const reduceMotion = useReducedMotion();
+  const { currentUser } = useDashboard();
+  // A-205 Workspace Deck: the Inbox sits right of Workspace for every role;
+  // pipeline roles additionally reach Calendar one swipe further left.
+  const deckNav = deckNeighbors("inbox", isPipelineRole(currentUser?.active_roles) ? "owner" : "buyer");
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(null);
   const [inboxTab, setInboxTab] = useState("active"); // "waiting" | "active" | "declined"
@@ -326,6 +332,7 @@ function InboxInner() {
   };
   return (
     <DashboardLayout>
+      <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       {/* Mobile: single-column master/detail — show the list, then swap to the
           chat when a lead is picked (with a Back button). Side-by-side from md up. */}
       {/* dvh, not vh: on mobile Safari/Chrome, 100vh is the height WITHOUT the
@@ -365,7 +372,7 @@ function InboxInner() {
               )}
             </p>
 
-            <WorkspaceCommandBar active="inbox" className="mt-4" />
+            <WorkspaceCommandBar active="inbox" badges={{ inbox: activeUnread }} className="mt-4" />
 
             {/* Three-State Inbox Tab Bar (Section 38) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
@@ -406,7 +413,7 @@ function InboxInner() {
                 {inboxTab === "waiting"
                   ? "No pending Connect requests."
                   : inboxTab === "archived"
-                  ? "Nothing archived. Requests move here after 7 days unanswered — they stay acceptable."
+                  ? "Nothing archived. Requests move here after 7 days unanswered; they stay acceptable."
                   : inboxTab === "declined"
                   ? "Nothing closed yet."
                   : "No active conversations."}
@@ -525,6 +532,7 @@ function InboxInner() {
         </div>
 
       </div>
+      </DeckPanel>
     </DashboardLayout>
   );
 }

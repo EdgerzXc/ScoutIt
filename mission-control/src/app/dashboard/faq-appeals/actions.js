@@ -8,6 +8,7 @@ import {
   expectedStatusFor,
   nextStatusFor,
 } from "@/lib/faqAppealReviewPolicy.mjs";
+import { notifyUser } from "@/lib/notifications";
 
 // ═══════════════════════════════════════════════════════════════
 // A-133 — the staff half of the FAQ block-appeal loop.
@@ -95,6 +96,34 @@ export async function reviewFaqAppeal(formData) {
       publishes_answer: false,
     },
   });
+
+  // GAP-21: Notify appellant of FAQ appeal outcome
+  try {
+    const { data: appealRow } = await admin
+      .from("faq_block_appeals")
+      .select("user_id, property_id")
+      .eq("id", appealId)
+      .single();
+
+    if (appealRow?.user_id) {
+      const isApprove = action === APPEAL_ACTIONS.APPROVE;
+      const isReject = action === APPEAL_ACTIONS.REJECT;
+      if (isApprove || isReject) {
+        await notifyUser(admin, {
+          userId: appealRow.user_id,
+          title: isApprove ? "FAQ appeal approved" : "FAQ appeal declined",
+          desc: isApprove
+            ? "Your FAQ block appeal was approved by reviewers."
+            : `Your FAQ block appeal was reviewed and declined${notes ? `: ${notes}` : "."}`,
+          icon: isApprove ? "✅" : "ℹ️",
+          propertyId: appealRow.property_id || null,
+          notificationType: isApprove ? "faq_appeal_approved" : "faq_appeal_rejected",
+        });
+      }
+    }
+  } catch (notifyErr) {
+    console.warn("[MMC faq-appeals] Failed to notify appellant:", notifyErr?.message);
+  }
 
   revalidatePath("/dashboard/faq-appeals");
 }

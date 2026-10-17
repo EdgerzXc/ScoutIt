@@ -69,7 +69,7 @@ export default function BrokerMode() {
     try {
       const { data: { session } } = await getSession();
       if (!session) {
-        if (addToast) addToast("Session expired — sign in again to save your licence", "❌");
+        if (addToast) addToast("Session expired. Sign in again to save your licence.", "❌");
         return;
       }
 
@@ -91,7 +91,7 @@ export default function BrokerMode() {
       }
 
       setPrcVerified(data?.credential?.prcVerified === true);
-      if (addToast) addToast(data.message || "License updated — pending re-verification", "✅");
+      if (addToast) addToast(data.message || "License updated: pending re-verification", "✅");
     } catch (err) {
       console.error("Failed to update license:", err);
       if (addToast) addToast("Failed to update license", "❌");
@@ -412,7 +412,7 @@ export default function BrokerMode() {
       if (success) {
         setPitchingListing(null);
       } else {
-        setPitchError("Couldn't send this pitch — see the notification for details.");
+        setPitchError("Couldn't send this pitch. See the notification for details.");
       }
     } finally {
       setIsSendingPitch(false);
@@ -544,11 +544,11 @@ export default function BrokerMode() {
                     <span className="block text-[12px] tracking-widest text-success uppercase mb-2 font-label-caps">Unlocked Contact Info</span>
                     <div className="mb-2">
                       <span className="text-xs text-text-secondary block">Phone</span>
-                      <span className={`font-working-title ${deal.ownerContact?.phone ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.phone || "Not provided — message them in your Inbox"}</span>
+                      <span className={`font-working-title ${deal.ownerContact?.phone ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.phone || "Not provided (message them in your Inbox)"}</span>
                     </div>
                     <div>
                       <span className="text-xs text-text-secondary block">Email</span>
-                      <span className={`font-working-title ${deal.ownerContact?.email ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.email || "Not provided — message them in your Inbox"}</span>
+                      <span className={`font-working-title ${deal.ownerContact?.email ? 'text-on-surface' : 'text-text-muted'}`}>{deal.ownerContact?.email || "Not provided (message them in your Inbox)"}</span>
                     </div>
                   </div>
                   {/* Lead export (NEW_IDEAS.md §8). Inside the unlocked branch

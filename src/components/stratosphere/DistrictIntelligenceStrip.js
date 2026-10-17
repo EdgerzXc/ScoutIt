@@ -39,9 +39,9 @@ export default function DistrictIntelligenceStrip({
               aria-selected={isSelected}
               className={`dis-pill ${isSelected ? "active" : ""}`}
               onClick={() => onSelectDistrict(isSelected ? null : d.district)}
+              aria-label={`${d.district}: ${d.count} updates`}
             >
               <span className="dis-name">{d.district.toUpperCase()}</span>
-              <span className="dis-trend">{d.trendLabel}</span>
               <span className="dis-badge">{d.count}</span>
             </button>
           );

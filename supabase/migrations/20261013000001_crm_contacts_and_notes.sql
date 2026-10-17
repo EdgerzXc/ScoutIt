@@ -25,10 +25,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS crm_contacts_owner_email_unique ON public.crm_
 
 ALTER TABLE public.crm_contacts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "crm_contacts_owner_manage" ON public.crm_contacts;
 CREATE POLICY "crm_contacts_owner_manage" ON public.crm_contacts
   FOR ALL
-  USING (auth.uid()::text = owner_user_id)
-  WITH CHECK (auth.uid()::text = owner_user_id);
+  USING (owner_user_id = ((select auth.uid()))::text)
+  WITH CHECK (owner_user_id = ((select auth.uid()))::text);
 
 CREATE TABLE IF NOT EXISTS public.crm_deal_notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,7 +45,8 @@ CREATE INDEX IF NOT EXISTS crm_deal_notes_user_idx ON public.crm_deal_notes(user
 
 ALTER TABLE public.crm_deal_notes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "crm_deal_notes_user_manage" ON public.crm_deal_notes;
 CREATE POLICY "crm_deal_notes_user_manage" ON public.crm_deal_notes
   FOR ALL
-  USING (auth.uid()::text = user_id)
-  WITH CHECK (auth.uid()::text = user_id);
+  USING (user_id = ((select auth.uid()))::text)
+  WITH CHECK (user_id = ((select auth.uid()))::text);

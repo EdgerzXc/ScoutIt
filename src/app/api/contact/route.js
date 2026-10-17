@@ -40,6 +40,15 @@ const schema = z.object({
   turnstileToken: z.string().min(1, "Captcha token is required"),
 });
 
+function safeEscape(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // A-146: anonymous stranger + stored PII = the loop target. 10/min/IP, the
 // same ceiling as /api/inquiries — generous to humans, closed to loops.
 const checkContactRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 20_000 });
@@ -121,12 +130,16 @@ export async function POST(request) {
       // so genuine visitor contacts and leads are not dropped during temporary database outages.
       if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
         try {
+          const safeName = safeEscape(name);
+          const safeEmail = safeEscape(email);
+          const safeSubject = safeEscape(subject || "no subject");
+          const safeMessage = safeEscape(message).replace(/\n/g, "<br/>");
           const fallbackResult = await sendEmail({
             to: process.env.CONTACT_NOTIFY_TO,
-            subject: `[DB FALLBACK] New contact message — ${subject || "no subject"}`,
+            subject: `[DB FALLBACK] New contact message — ${safeSubject}`,
             html: renderEmail({
               heading: "Contact Form Message (Direct Email Fallback)",
-              body: `<p><strong>Database storage failed; message delivered via email fallback.</strong></p><p>From: ${name} &lt;${email}&gt;</p><p>${message.replace(/\n/g, "<br/>")}</p>`,
+              body: `<p><strong>Database storage failed; message delivered via email fallback.</strong></p><p>From: ${safeName} &lt;${safeEmail}&gt;</p><p>${safeMessage}</p>`,
               ctaLabel: "Open the contact queue",
               ctaPath: "/contact",
               footnote: "Database insert failed; please verify system health.",
@@ -157,14 +170,17 @@ export async function POST(request) {
     // failed because our own notification bounced would be a lie in the
     // direction that loses their message.
     if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
+      const safeName = safeEscape(name);
+      const safeEmail = safeEscape(email);
+      const safeSubject = safeEscape(subject || "no subject");
+      const safeMessage = safeEscape(message).replace(/\n/g, "<br/>");
       const result = await sendEmail({
         to: process.env.CONTACT_NOTIFY_TO,
-        subject: `New contact message — ${subject || "no subject"}`,
+        subject: `New contact message — ${safeSubject}`,
         html: renderEmail({
           heading: "Someone used the contact form",
-          // Never interpolate the sender's text into HTML by hand — renderEmail
-          // escapes what it is given, and the message is attacker-controlled.
-          body: `${name} <${email}> wrote:\n\n${message}`,
+          // GAP-66: Always HTML-escape sender fields before passing into renderEmail body
+          body: `<p>${safeName} &lt;${safeEmail}&gt; wrote:</p><p>${safeMessage}</p>`,
           ctaLabel: "Open the contact queue",
           ctaPath: "/contact",
           footnote: "Reply from Mission Control → Contact Queue.",
@@ -182,12 +198,16 @@ export async function POST(request) {
     if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO && parsed?.data) {
       try {
         const { name, email, subject, message } = parsed.data;
+        const safeName = escapeHtml(name);
+        const safeEmail = escapeHtml(email);
+        const safeSubject = escapeHtml(subject || "no subject");
+        const safeMessage = escapeHtml(message).replace(/\n/g, "<br/>");
         const fallbackResult = await sendEmail({
           to: process.env.CONTACT_NOTIFY_TO,
-          subject: `[DB FALLBACK] New contact message — ${subject || "no subject"}`,
+          subject: `[DB FALLBACK] New contact message — ${safeSubject}`,
           html: renderEmail({
             heading: "Contact Form Message (Emergency Fallback)",
-            body: `<p><strong>Unexpected system failure occurred; message delivered via email fallback.</strong></p><p>From: ${name} &lt;${email}&gt;</p><p>${message.replace(/\n/g, "<br/>")}</p>`,
+            body: `<p><strong>Unexpected system failure occurred; message delivered via email fallback.</strong></p><p>From: ${safeName} &lt;${safeEmail}&gt;</p><p>${safeMessage}</p>`,
             ctaLabel: "Open the contact queue",
             ctaPath: "/contact",
             footnote: "System error occurred; please verify contact queue health.",

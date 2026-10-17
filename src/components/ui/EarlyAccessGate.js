@@ -463,7 +463,7 @@ export function DetailPageAccessGate({ rosterType = "this profile", providerName
               </svg>
             </div>
             <div>
-              <span className="detail-gate-kicker">ACCESS RESTRICTED — CLOSED BETA</span>
+              <span className="detail-gate-kicker">ACCESS RESTRICTED · CLOSED BETA</span>
               <p className="detail-gate-msg">
                 Full profile access for{" "}
                 <strong style={{ color: "var(--accent)" }}>{providerName}</strong>{" "}

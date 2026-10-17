@@ -364,12 +364,18 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
     const uClickPos = u("u_clickPos");
     const uClickProgress = u("u_clickProgress");
 
+    // Render scale: the raymarch output is soft glows + grain, so rendering
+    // below display resolution and letting the compositor upscale is visually
+    // lossless while fillrate (the entire cost of a 96-step march) falls
+    // quadratically: 0.7x = ~half the pixels on desktop, 0.6x on phones.
+    const renderScale = () =>
+      canvas.getBoundingClientRect().width < 768 ? 0.6 : 0.7;
+
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      // The raymarch renders at CSS-pixel resolution (DPR 1) matching GoldenHorizonCanvas,
-      // avoiding fillrate stalls on high-DPI desktop screens while preserving glowing visuals.
-      canvas.width = Math.max(1, Math.floor(rect.width));
-      canvas.height = Math.max(1, Math.floor(rect.height));
+      const s = renderScale();
+      canvas.width = Math.max(1, Math.floor(rect.width * s));
+      canvas.height = Math.max(1, Math.floor(rect.height * s));
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
@@ -420,27 +426,30 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
 
     let t = 0;
     let raf = 0;
+    let lastFrame = 0;
     const drawFrame = () => {
       const p = paramsRef.current;
       // Loop clock stays constant — spin speed itself is a shader uniform
       // (u_spinSpeed), so it doesn't need to scale the clock too.
-      t += 0.009;
+      // NOTE: the loop below runs at ~30fps, so every per-frame rate here is
+      // the 2-frame compounding of the old 60fps value (motion is identical).
+      t += 0.018;
       if (t >= 2.0 * Math.PI) t -= 2.0 * Math.PI;
-      yaw += (targetYaw - yaw) * 0.03;
+      yaw += (targetYaw - yaw) * 0.06;
       // Drag offsets spring back toward 0 when the pointer isn't down, so
       // the camera always returns to the scripted composition.
       if (!isDragging) {
-        dragYawOffset *= 0.93;
-        dragPitchOffset *= 0.93;
+        dragYawOffset *= 0.865;
+        dragPitchOffset *= 0.865;
       }
       // Breathing camera — slow pitch sway. Base pitch is raised from the
       // spec's near-edge-on 0.12 to 0.42 so the full lensed disk reads as
       // the classic ring instead of a thin sliver.
       const pitch = 0.42 + 0.02 * Math.sin(t * 0.35) + dragPitchOffset;
 
-      easedHover.v += ((mouse.hover ? 1 : 0) - easedHover.v) * 0.08;
+      easedHover.v += ((mouse.hover ? 1 : 0) - easedHover.v) * 0.154;
       if (click.progress > 0) {
-        click.progress += 0.028;
+        click.progress += 0.056;
         if (click.progress > 1) click.progress = 0;
       }
 
@@ -471,8 +480,14 @@ export default function BlackHoleCanvas({ params: paramsProp, onSnapshotReady } 
     let running = false;
     let visible = true;
     let killed = false;
-    const loop = () => {
-      drawFrame();
+    // ~30fps cap: everything on screen drifts slowly (spin 0.8, breathing
+    // sway), so every-other-frame rendering halves GPU fillrate with no
+    // perceptible change. drawFrame's rates above are already compensated.
+    const loop = (now) => {
+      if (now - lastFrame >= 33) {
+        lastFrame = now;
+        drawFrame();
+      }
       raf = requestAnimationFrame(loop);
     };
     const start = () => {

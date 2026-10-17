@@ -77,8 +77,8 @@ export async function GET(request) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
-    // Owner or staff only.
-    if (prop.owner_id && String(prop.owner_id) !== String(userId)) {
+    // Owner or staff only. Unclaimed/ownerless listings also require staff role (GAP-67).
+    if (!prop.owner_id || String(prop.owner_id) !== String(userId)) {
       const { data: profile } = await supabaseAdmin
         .from("user_profiles")
         .select("active_roles")

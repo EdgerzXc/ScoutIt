@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 // ── RA 9646 PRC verification queue ──────────────────────────────────────────
 // GET  → every profile that submitted a PRC license, with verification state.
@@ -61,6 +62,11 @@ export async function POST(request) {
       console.error("[ADMIN PRC] Update failed:", error);
       return NextResponse.json({ error: "Failed to update verification" }, { status: 500 });
     }
+
+    // GAP-45: Immediately invalidate the cached public CMS bundle so PRC badge
+    // updates propagate to the public broker directory without stale cache drift.
+    await invalidateCmsBundle("admin.prc_verify");
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[ADMIN PRC] Error:", err);

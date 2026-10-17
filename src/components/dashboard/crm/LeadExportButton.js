@@ -59,6 +59,12 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
       const auditRes = await requestLeadExportAudit({ leadIds, format });
 
       if (!hasValidLeadExportReceipt(auditRes, leadIds.length, format)) {
+        if (auditRes?.data?.code === "AUDIT_LOG_FAILED" || auditRes?.data?.complianceBlocked || auditRes?.data?.disabled) {
+          setError(
+            "Compliance Hold: Audit ledger is temporarily unavailable. Export is blocked for privacy compliance until audit logging is restored."
+          );
+          return;
+        }
         setError(auditRes?.data?.message || "Export authorization failed. No contact data was released.");
         return;
       }
@@ -91,7 +97,7 @@ export default function LeadExportButton({ lead, leads, label = "Export", compac
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         } catch {
-          setError("Couldn't copy — select the text manually.");
+          setError("Couldn't copy: select the text manually.");
         }
       }
     });

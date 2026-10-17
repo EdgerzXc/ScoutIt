@@ -28,6 +28,50 @@ export const SIGNAL_TYPE_LABELS = Object.freeze({
   SCOUTIT_INTELLIGENCE: "ScoutIt Intelligence",
 });
 
+export const MARKET_ROLES = Object.freeze({
+  ALL: "all",
+  DEMAND: "demand", // Seekers looking for space (tenants, buyers, corporate expansion)
+  SUPPLY: "supply", // Finders offering space (owners, brokers, landlords, off-market)
+  INTEL: "intel",   // Macro observations & pipeline developments
+});
+
+export const MARKET_ROLE_LABELS = Object.freeze({
+  all: "ALL SIGNALS",
+  demand: "SEEKERS & DEMAND",
+  supply: "SPACES AVAILABLE",
+  intel: "MARKET INTEL",
+});
+
+export const MARKET_ROLE_DESCRIPTIONS = Object.freeze({
+  all: "Full Metro Manila spatial exchange across active demand, upcoming supply, and macro intel.",
+  demand: "Active tenant and buyer mandates looking for space. Intercept and propose your property.",
+  supply: "Verified upcoming off-market and pre-leasing spaces from owners and asset trustees.",
+  intel: "Macro absorption trends, zoning updates, and construction pipeline intelligence.",
+});
+
+export function getSignalMarketRole(signal) {
+  if (!signal) return MARKET_ROLES.INTEL;
+  if (typeof signal.id === "string" && signal.id.startsWith("pipeline-")) {
+    return MARKET_ROLES.INTEL;
+  }
+  const type = signal?.signalType;
+  if (
+    type === SIGNAL_TYPES.LOOKING_FOR ||
+    type === SIGNAL_TYPES.REPRESENTING_CLIENT ||
+    type === SIGNAL_TYPES.BUSINESS_EXPANSION
+  ) {
+    return MARKET_ROLES.DEMAND;
+  }
+  if (
+    type === SIGNAL_TYPES.UPCOMING_SUPPLY ||
+    type === SIGNAL_TYPES.OPPORTUNITY ||
+    type === SIGNAL_TYPES.COMMERCIAL_PROMOTION
+  ) {
+    return MARKET_ROLES.SUPPLY;
+  }
+  return MARKET_ROLES.INTEL;
+}
+
 export const SIGNAL_COLORS = Object.freeze({
   LOOKING_FOR: "rgb(232, 174, 60)", // ScoutIt Warm Gold (Demand)
   REPRESENTING_CLIENT: "rgb(247, 198, 78)", // Interactive Bright Gold
@@ -526,10 +570,16 @@ export function filterSignals(signals = COMMUNITY_SIGNALS, {
   signalType = null,
   district = null,
   spaceType = null,
+  marketRole = null,
 } = {}) {
   const q = (query || "").trim().toLowerCase();
 
   return signals.filter((sig) => {
+    // 0. Market Role filter (demand vs supply vs intel)
+    if (marketRole && marketRole !== "all") {
+      const role = getSignalMarketRole(sig);
+      if (role !== marketRole) return false;
+    }
     // 1. Signal Type filter
     if (signalType && sig.signalType !== signalType) return false;
 

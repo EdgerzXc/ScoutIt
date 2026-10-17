@@ -23,6 +23,14 @@
     {
       "path": "/api/cron/purge-contact-messages",
       "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-rollover",
+      "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/verify-prc-status",
+      "schedule": "0 5 * * *"
     }
   ]
 }

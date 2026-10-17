@@ -9,7 +9,7 @@
  */
 export default function manifest() {
   return {
-    name: "ScoutIt — Property & Space Intelligence Philippines",
+    name: "ScoutIt · Property & Space Intelligence Philippines",
     short_name: "ScoutIt",
     description:
       "Property and space intelligence platform for the Philippines. ScoutIt decodes homes, offices, venues, and commercial spaces into clear, structured facts and spatial signals.",

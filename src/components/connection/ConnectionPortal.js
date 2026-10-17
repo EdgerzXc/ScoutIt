@@ -44,7 +44,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
     // catch below rendered the success screen anyway. Refusing here, before the
     // request, is the honest version of the same guard.
     if (!space) {
-      setErrorMsg("Choose which space this is about — a handshake is always opened about a specific space.");
+      setErrorMsg("Choose which space this is about: a handshake is always opened about a specific space.");
       return;
     }
 
@@ -91,7 +91,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
       setSubmitted(true);
     } catch (err) {
       console.error("[HANDSHAKE FAILED]", err);
-      setErrorMsg("Could not reach ScoutIt to open the handshake. No Connect was spent — try again.");
+      setErrorMsg("Could not reach ScoutIt to open the handshake. No Connect was spent: try again.");
     } finally {
       setSubmitting(false);
     }
@@ -285,7 +285,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
             <div className="form-group-item">
               <label>Acquisition / Requirement Brief</label>
               <textarea 
-                placeholder="Describe your space requirements — target location, floor area, budget range, preferred move-in timeline..."
+                placeholder="Describe your space requirements: target location, floor area, budget range, preferred move-in timeline..."
                 rows="5" 
                 value={intent}
                 onChange={(e) => setIntent(e.target.value)}

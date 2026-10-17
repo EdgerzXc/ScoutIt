@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
+import { notifyUser } from "@/lib/notifications";
 import {
   createTaskSchema,
   serializeTask,
@@ -174,6 +175,20 @@ export async function POST(request) {
         });
       } catch (activityError) {
         console.warn("[CRM TASKS API] Timeline entry not recorded for task", inserted.id, activityError?.message);
+      }
+    }
+
+    if (assigneeId && assigneeId !== userId) {
+      try {
+        await notifyUser(supabaseAdmin, {
+          userId: assigneeId,
+          title: "New CRM task assigned",
+          desc: `You have been assigned a task: "${inserted.title}".`,
+          propertyId: inserted.property_id || null,
+          notificationType: "task_assigned",
+        });
+      } catch (notifyErr) {
+        console.warn("[CRM TASKS API] Assignee notification failed:", notifyErr?.message);
       }
     }
 

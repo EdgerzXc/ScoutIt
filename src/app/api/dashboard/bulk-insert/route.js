@@ -5,6 +5,14 @@ import { z } from "zod";
 import { stripAllTags } from "@/lib/sanitize";
 import { sanitizeError } from "@/lib/sanitizeError";
 
+const MAX_BATCH_SIZE = 100;
+const CSV_FORMULA_PREFIX_RE = /^[=+\-@\t\r]+/;
+
+export function sanitizeCsvFormulaValue(value) {
+  const stripped = stripAllTags(value);
+  return stripped.replace(CSV_FORMULA_PREFIX_RE, "");
+}
+
 const propertySchema = z.object({
   title: z.string().max(255).optional(),
   type: z.string().max(100).optional(),
@@ -40,6 +48,16 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid properties array" }, { status: 400 });
     }
 
+    if (properties.length > MAX_BATCH_SIZE) {
+      return NextResponse.json(
+        {
+          error: `Batch size exceeds maximum limit of ${MAX_BATCH_SIZE} rows per request.`,
+          code: "BATCH_LIMIT_EXCEEDED",
+        },
+        { status: 413 }
+      );
+    }
+
     // Validate the array shape
     const validationResult = z.array(propertySchema).safeParse(properties);
     if (!validationResult.success) {
@@ -48,19 +66,25 @@ export async function POST(request) {
 
     const validatedProperties = validationResult.data;
 
-    // Inject verified user id and sanitize
+    // Inject verified user id, sanitize HTML + CSV formula injection, and enforce safe workflow states
     const verifiedProperties = validatedProperties.map(p => {
       const sanitized = {};
       for (const [key, val] of Object.entries(p)) {
+        const cleanKey = stripAllTags(key);
         if (typeof val === 'string') {
-          sanitized[stripAllTags(key)] = stripAllTags(val);
+          sanitized[cleanKey] = sanitizeCsvFormulaValue(val);
         } else {
-          sanitized[stripAllTags(key)] = val;
+          sanitized[cleanKey] = val;
         }
       }
       return {
         ...sanitized,
-        owner_id: userId
+        owner_id: userId,
+        pipeline_status: "pending",
+        lifecycle_state: "draft",
+        moderation_status: "pending",
+        canonical_slug: null,
+        airtable_record_id: null,
       };
     });
 

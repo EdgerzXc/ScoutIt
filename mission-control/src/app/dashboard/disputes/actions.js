@@ -57,7 +57,7 @@ async function syncPartyDispute(admin, { dealDisputeId, transition }) {
 async function loadDisputeLink(admin, disputeId) {
   const { data, error } = await admin
     .from("disputes")
-    .select("id, deal_dispute_id, source, title")
+    .select("id, deal_dispute_id, source, title, property_ref, complainant, respondent")
     .eq("id", disputeId)
     .single();
   if (error) throw new Error(error.message);
@@ -342,6 +342,27 @@ export async function closeDispute(formData) {
     dealDisputeId: link.deal_dispute_id,
     transition: outcome,
   });
+
+  // GAP-63: Reconcile behavioral review quarantine (`user_behavioral_reviews.is_disputed`)
+  // When a behavioral review dispute is dismissed (review vindicated), lift the quarantine (`is_disputed: false`).
+  // When resolved (dispute upheld), keep `is_disputed: true` so the review remains excluded from composite scores.
+  const reviewId = formData.get("reviewId")?.toString().trim() || link.property_ref || null;
+  const isBehavioralReviewDispute =
+    Boolean(formData.get("reviewId")) ||
+    Boolean(link.title && String(link.title).startsWith("Behavioral Review Dispute"));
+
+  if (isBehavioralReviewDispute && reviewId) {
+    try {
+      await admin
+        .from("user_behavioral_reviews")
+        .update({
+          is_disputed: outcome === "resolved",
+        })
+        .eq("id", reviewId);
+    } catch (err) {
+      console.warn("[disputes/closeDispute] Could not update user_behavioral_reviews:", err?.message);
+    }
+  }
 
   await addEvent(admin, {
     disputeId,

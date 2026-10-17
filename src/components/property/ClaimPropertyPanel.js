@@ -39,11 +39,11 @@ const MONO = "var(--font-mono)";
 
 const STATUS_COPY = {
   draft: "Saved, not yet submitted",
-  submitted: "Submitted — waiting for review",
+  submitted: "Submitted: waiting for review",
   technical_review: "Under technical review",
   needs_information: "More information needed from you",
   human_review: "Under review by our team",
-  disputed: "Disputed — under review",
+  disputed: "Disputed: under review",
 };
 
 export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {

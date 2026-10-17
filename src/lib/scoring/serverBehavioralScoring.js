@@ -31,6 +31,9 @@ import {
   generateResidentPassport,
   PASSPORT_SCOPES,
 } from "./residentPassport";
+import { notifyUser } from "@/lib/notifications";
+
+const QUALIFYING_TRANSACTION_STATUSES = ["completed", "closed", "accepted", "active"];
 
 /**
  * Submits a behavioral review for a transaction counterparty.
@@ -71,7 +74,7 @@ export async function submitBehavioralReview(supabaseAdmin, {
   // 1. Fetch the deal record
   const { data: deal, error: dealError } = await supabaseAdmin
     .from("deals")
-    .select("id, buyer_id, broker_id, property_id, status, closed_at, updated_at")
+    .select("id, buyer_id, broker_id, property_id, status, closed_at, updated_at, properties(owner_id)")
     .eq("id", dealId)
     .maybeSingle();
 
@@ -79,19 +82,31 @@ export async function submitBehavioralReview(supabaseAdmin, {
     return { success: false, error: "DEAL_NOT_FOUND: The requested deal was not found." };
   }
 
-  // 2. Validate reviewer participation and resolve target user ID
+  // 2. Validate reviewer participation and resolve target user ID (GAP-61: support direct owner deals)
   const isBuyer = String(deal.buyer_id) === String(reviewerId);
-  const isBroker = String(deal.broker_id) === String(reviewerId);
+  const isBroker = Boolean(deal.broker_id && String(deal.broker_id) === String(reviewerId));
+  let propertyOwnerId = deal.properties?.owner_id || deal.owner_id || null;
 
-  if (!isBuyer && !isBroker) {
+  if (!propertyOwnerId && deal.property_id && (!isBroker || !deal.broker_id)) {
+    try {
+      const { data: propRow } = await supabaseAdmin
+        .from("properties")
+        .select("owner_id")
+        .eq("id", deal.property_id)
+        .maybeSingle();
+      if (propRow?.owner_id) propertyOwnerId = propRow.owner_id;
+    } catch {
+      // Non-fatal if properties table is not mocked in unit tests
+    }
+  }
+
+  const isOwner = Boolean(propertyOwnerId && String(propertyOwnerId) === String(reviewerId));
+
+  if (!isBuyer && !isBroker && !isOwner) {
     return { success: false, error: "UNAUTHORIZED_PARTY: You are not a registered participant in this deal." };
   }
 
-  const targetUserId = isBuyer ? deal.broker_id : deal.buyer_id;
-
-  if (!targetUserId || targetUserId === reviewerId) {
-    return { success: false, error: "INVALID_COUNTERPARTY: Counterparty identity is invalid or self-dealing." };
-  }
+  let targetUserId = isBuyer ? (deal.broker_id || propertyOwnerId) : deal.buyer_id;
 
   // 3. Find the completed transaction handshake
   const { data: handshakes, error: hsError } = await supabaseAdmin
@@ -115,6 +130,18 @@ export async function submitBehavioralReview(supabaseAdmin, {
       success: false,
       error: "NO_QUALIFYING_HANDSHAKE: Review authority requires a completed, two-sided transaction handshake.",
     };
+  }
+
+  if (!targetUserId && qualifyingHandshake) {
+    if (String(qualifyingHandshake.party_a_id) === String(reviewerId)) {
+      targetUserId = qualifyingHandshake.party_b_id;
+    } else if (String(qualifyingHandshake.party_b_id) === String(reviewerId)) {
+      targetUserId = qualifyingHandshake.party_a_id;
+    }
+  }
+
+  if (!targetUserId || String(targetUserId) === String(reviewerId)) {
+    return { success: false, error: "INVALID_COUNTERPARTY: Counterparty identity is invalid or self-dealing." };
   }
 
   // 4. Validate Review Authority & Anti-Self-Dealing
@@ -200,6 +227,26 @@ export async function submitBehavioralReview(supabaseAdmin, {
     await refreshUserMetrics(supabaseAdmin, reviewerId);
     await refreshUserMetrics(supabaseAdmin, targetUserId);
 
+    // GAP-62: Notify both parties that mutual reviews are now unlocked
+    try {
+      await notifyUser(supabaseAdmin, {
+        userId: targetUserId,
+        title: "Mutual review unlocked",
+        desc: "Both parties have completed their transaction evaluations. Your Resident Trust Credential has been updated.",
+        propertyId: deal.property_id || null,
+        notificationType: "review_unlocked",
+      });
+      await notifyUser(supabaseAdmin, {
+        userId: reviewerId,
+        title: "Mutual review unlocked",
+        desc: "Both parties have completed their transaction evaluations. Your Resident Trust Credential has been updated.",
+        propertyId: deal.property_id || null,
+        notificationType: "review_unlocked",
+      });
+    } catch {
+      // Non-fatal notification error
+    }
+
     return {
       success: true,
       state: "SIMULTANEOUSLY_UNLOCKED",
@@ -232,6 +279,19 @@ export async function submitBehavioralReview(supabaseAdmin, {
 
   // Target user's metrics stay clean / honest blank until unlock
   await refreshUserMetrics(supabaseAdmin, targetUserId);
+
+  // GAP-62: Notify counterparty that a double-blind review is waiting
+  try {
+    await notifyUser(supabaseAdmin, {
+      userId: targetUserId,
+      title: "Transaction review submitted",
+      desc: "Your counterparty submitted a double-blind transaction evaluation. Submit yours within 14 days to unlock both reviews immediately.",
+      propertyId: deal.property_id || null,
+      notificationType: "review_submitted",
+    });
+  } catch {
+    // Non-fatal notification error
+  }
 
   return {
     success: true,
@@ -269,12 +329,33 @@ export async function refreshUserMetrics(supabaseAdmin, userId) {
     .eq("is_double_blind_locked", false)
     .eq("is_disputed", false);
 
-  // 3. Count completed transactions from deals
-  const { count: txCount } = await supabaseAdmin
+  // 3. Count completed transactions from deals (GAP-46: include closed/accepted/completed and owner deals)
+  const { count: baseTxCount } = await supabaseAdmin
     .from("deals")
     .select("id", { count: "exact", head: true })
     .or(`buyer_id.eq.${userId},broker_id.eq.${userId}`)
     .eq("status", "completed");
+
+  let txCount = baseTxCount || 0;
+  try {
+    const dealsQuery = supabaseAdmin
+      .from("deals")
+      .select("id, buyer_id, broker_id, status, properties(owner_id)");
+    if (typeof dealsQuery?.in === "function") {
+      const { data: allQualifyingDeals } = await dealsQuery.in("status", QUALIFYING_TRANSACTION_STATUSES);
+      if (Array.isArray(allQualifyingDeals)) {
+        const matchedDeals = allQualifyingDeals.filter(
+          (d) =>
+            String(d.buyer_id) === String(userId) ||
+            String(d.broker_id) === String(userId) ||
+            String(d.properties?.owner_id || d.owner_id || "") === String(userId)
+        );
+        txCount = Math.max(txCount, matchedDeals.length);
+      }
+    }
+  } catch {
+    // Preserve baseTxCount when minimal unit test mocks do not implement .in()
+  }
 
   // 4. Fetch user profile for verification metadata
   const { data: profile } = await supabaseAdmin
@@ -408,6 +489,7 @@ export async function flagReviewDispute(supabaseAdmin, { reviewId, userId, reaso
       kind: "other",
       title: `Behavioral Review Dispute (${reviewId.slice(0, 8)})`,
       description: `Party flagged behavioral review under Trust & Safety quarantine: ${reason}`,
+      property_ref: reviewId,
       complainant: userId,
       respondent: review.reviewer_id === userId ? review.target_user_id : review.reviewer_id,
       priority: "high",

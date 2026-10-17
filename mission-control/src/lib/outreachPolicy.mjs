@@ -266,24 +266,52 @@ export function generateClaimDraftPayload(prospect) {
   }
 
   const claimToken = `claim_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
+  const createdAt = new Date().toISOString();
+  const address = prospect.propertyAddress || "Address Pending Verification";
+  const district = prospect.districtCity || "Metro Manila";
+  const coordinates = prospect.coordinates
+    ? `${prospect.coordinates.latitude},${prospect.coordinates.longitude}`
+    : null;
+  const location = address !== "Address Pending Verification" ? `${address}, ${district}` : district;
 
-  const propertyPayload = {
+  const details = {
+    claim_token: claimToken,
+    source_type: "staff_outreach",
+    address,
+    district,
+    contact_phone: prospect.phoneNumber || null,
+    contact_email: prospect.email || null,
+  };
+
+  // Canonical DB row matching actual public.properties columns (GAP-55)
+  const dbPropertyRow = {
     title: prospect.propertyName,
-    address: prospect.propertyAddress || "Address Pending Verification",
-    district: prospect.districtCity || "Metro Manila",
-    coordinates: prospect.coordinates
-      ? `${prospect.coordinates.latitude},${prospect.coordinates.longitude}`
-      : null,
+    location,
+    type: "commercial",
+    space_category: "commercial",
+    coordinates,
+    lifecycle_state: "draft",
+    pipeline_status: "pending",
+    moderation_status: "pending",
+    details,
+    created_at: createdAt,
+  };
+
+  // Backwards-compatible payload descriptor + canonical schema fields
+  const propertyPayload = {
+    ...dbPropertyRow,
+    address,
+    district,
     lifecycle_status: "DRAFT",
     source_type: "staff_outreach",
     claim_token: claimToken,
     contact_phone: prospect.phoneNumber || null,
     contact_email: prospect.email || null,
-    created_at: new Date().toISOString(),
   };
 
   return {
     propertyPayload,
+    dbPropertyRow,
     claimToken,
     claimUrl: `https://scoutit.space/claim/${claimToken}`,
   };

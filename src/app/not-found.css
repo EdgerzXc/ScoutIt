@@ -14,7 +14,8 @@
 .nf-root {
   position: relative;
   min-height: 100vh;
-  background: #0a0a0a;
+  min-height: 100dvh;
+  background: var(--bg-primary, #0a0a0a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,7 +38,7 @@
   width: 2px;
   height: 2px;
   border-radius: 50%;
-  background: rgba(232, 174, 60, 0.12);
+  background: rgba(var(--accent-rgb, 232, 174, 60), 0.12);
 }
 
 /* radar rings */
@@ -52,7 +53,7 @@
 .nf-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(232, 174, 60, 0.08);
+  border: 1px solid rgba(var(--accent-rgb, 232, 174, 60), 0.08);
 }
 .nf-ring-1 { width: 220px; height: 220px; }
 .nf-ring-2 { width: 420px; height: 420px; }
@@ -64,13 +65,13 @@
   height: 8px;
   border-radius: 50%;
   background: var(--accent, #E8AE3C);
-  box-shadow: 0 0 0 0 rgba(232, 174, 60, 0.6);
+  box-shadow: 0 0 0 0 rgba(var(--accent-rgb, 232, 174, 60), 0.6);
   animation: nf-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 @keyframes nf-ping {
-  0%   { box-shadow: 0 0 0 0 rgba(232, 174, 60, 0.6); }
-  70%  { box-shadow: 0 0 0 28px rgba(232, 174, 60, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(232, 174, 60, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(var(--accent-rgb, 232, 174, 60), 0.6); }
+  70%  { box-shadow: 0 0 0 28px rgba(var(--accent-rgb, 232, 174, 60), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb, 232, 174, 60), 0); }
 }
 
 /* content */
@@ -103,7 +104,7 @@
   font-family: var(--font-display);
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 400;
-  color: #f5f3ee;
+  color: var(--text-primary, #f5f3ee);
   line-height: 1;
   margin: 0;
   letter-spacing: -0.02em;
@@ -112,7 +113,7 @@
 .nf-sub {
   font-size: 14px;
   line-height: 1.7;
-  color: rgba(200, 200, 200, 0.6);
+  color: var(--text-secondary, rgba(200, 200, 200, 0.6));
   max-width: 380px;
   letter-spacing: 0.01em;
 }
@@ -128,7 +129,7 @@
 .nf-btn-primary {
   padding: 12px 28px;
   background: var(--accent, #E8AE3C);
-  color: #0a0a0a;
+  color: var(--bg-primary, #0a0a0a);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -147,13 +148,13 @@
 .nf-btn-secondary {
   padding: 12px 28px;
   background: transparent;
-  color: #f5f3ee;
+  color: var(--text-primary, #f5f3ee);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
   border-radius: 2px;
   transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }

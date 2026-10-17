@@ -76,7 +76,10 @@ export async function POST(req) {
     }).select("id, created_at").single();
     if (auditErr || !auditRow?.id || !auditRow?.created_at) {
       console.error("[api/leads/export-audit] Audit log write failed:", auditErr || "missing receipt");
-      return fail("Audit record creation failed. Export blocked for privacy compliance.", 503);
+      return fail("Audit record creation failed. Export blocked for privacy compliance.", 503, {
+        code: "AUDIT_LOG_FAILED",
+        complianceBlocked: true,
+      });
     }
     return NextResponse.json({
       success: true, authorized: true, auditId: auditRow.id, auditedAt: auditRow.created_at,

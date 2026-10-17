@@ -164,7 +164,7 @@ export default function NotificationPreferencesPanel() {
               {settings.emailAlertsStored === false && (
                 <p className="np-note">
                   Preference sync is pending a database update, so this switch
-                  is paused — email currently follows the default (on).
+                  is paused: email currently follows the default (on).
                 </p>
               )}
             </div>
@@ -183,7 +183,7 @@ export default function NotificationPreferencesPanel() {
 
           <div className="np-row">
             <div>
-              <p className="np-title">Dashboard inbox — always on</p>
+              <p className="np-title">Dashboard inbox · always on</p>
               <p className="np-body">
                 The bell is the system of record for everything addressed to
                 you. It cannot be muted, because muting the record of your own

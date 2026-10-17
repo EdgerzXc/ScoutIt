@@ -26,7 +26,7 @@ const SELF_SERVICE_TAGS = [
 // needs a PRC licence claim (public verification stays a separate staff
 // review); provider needs its Services Offered line filled in.
 const GATED_TAGS = [
-  { id: 'broker', label: 'Licensed Broker', icon: '🤝', requirement: 'PRC licence number required — claim recorded, verified separately by staff.' },
+  { id: 'broker', label: 'Licensed Broker', icon: '🤝', requirement: 'PRC licence number required. Claim recorded, verified separately by staff.' },
   { id: 'provider', label: 'Service Provider', icon: <Camera strokeWidth={1.5} size="1em" />, requirement: 'Services Offered line required below, so the roster knows what you do.' },
 ];
 
@@ -185,7 +185,7 @@ export default function SettingsPage() {
           return;
         }
       } catch {
-        setSecurityMessage({ type: "error", text: "The PRC claim could not be recorded. Check your connection — the broker workspace was not added." });
+        setSecurityMessage({ type: "error", text: "The PRC claim could not be recorded. Check your connection; the broker workspace was not added." });
         return;
       }
     }
@@ -373,7 +373,7 @@ export default function SettingsPage() {
         <div className={styles.formGroup}>
           <label className={styles.label} style={{marginTop: 16}}>Need another lens?</label>
           <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            Broker and provider workspaces are earned by verification, not toggled. Add yours here and save — the dashboard switcher stays clean until then.
+            Broker and provider workspaces are earned by verification, not toggled. Add yours here and save; the dashboard switcher stays clean until then.
           </p>
 
           <div className={styles.tagGrid}>
@@ -381,8 +381,8 @@ export default function SettingsPage() {
               const held = tags.includes(tag.id);
               const newlyAdding = held && !initialTags.includes(tag.id);
               const heldNote = tag.id === 'broker'
-                ? "Held — licence changes re-verify in the Broker workspace."
-                : "Held — keep your Services Offered line below up to date.";
+                ? "Held. Licence changes re-verify in the Broker workspace."
+                : "Held. Keep your Services Offered line below up to date.";
               return (
                 <div key={tag.id}>
                   <div
@@ -393,7 +393,7 @@ export default function SettingsPage() {
                     <span style={{fontSize: 14}}>{tag.label}</span>
                   </div>
                   <p style={{color: 'var(--text-secondary)', fontSize: 12, marginTop: 8}}>
-                    {held && !newlyAdding ? heldNote : (held ? tag.requirement : `Locked — select to begin: ${tag.requirement}`)}
+                    {held && !newlyAdding ? heldNote : (held ? tag.requirement : `Locked: select to begin: ${tag.requirement}`)}
                   </p>
                   {tag.id === 'broker' && newlyAdding && (
                     <>
@@ -436,7 +436,7 @@ export default function SettingsPage() {
             id="public-profile-headline"
             type="text"
             className={styles.input}
-            placeholder={tags.includes('broker') ? "e.g. Makati CBD specialist — 10 yrs in commercial leasing" : "One line that says what you're about"}
+            placeholder={tags.includes('broker') ? "e.g. Makati CBD specialist, 10 yrs in commercial leasing" : "One line that says what you're about"}
             maxLength={80}
             value={publicProfile.headline}
             onChange={(e) => setField('headline', e.target.value)}
@@ -469,7 +469,7 @@ export default function SettingsPage() {
               <input
                 type="text"
                 className={styles.input}
-                placeholder="e.g. Santos Realty Group — or Independent"
+                placeholder="e.g. Santos Realty Group, or Independent"
                 aria-label="Firm or affiliation"
                 value={publicProfile.firm}
                 onChange={(e) => setField('firm', e.target.value)}
@@ -494,7 +494,7 @@ export default function SettingsPage() {
 
         {/* ── Live Preview ── */}
         <div className={styles.formGroup}>
-          <label className={styles.label}>Preview — how others see you</label>
+          <label className={styles.label}>Preview: how others see you</label>
           <div className="bg-surface border border-surface-variant rounded-lg p-5 mt-2 flex gap-4 items-start">
             <div className="w-14 h-14 rounded-full bg-surface-variant border-2 border-gold-accent flex items-center justify-center font-bold text-xl text-on-surface shrink-0">
               {name ? name.substring(0,2).toUpperCase() : '?'}

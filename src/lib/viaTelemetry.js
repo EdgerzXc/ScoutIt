@@ -406,9 +406,20 @@ export function aggregateBrokerViaMetrics({
 
   // Inquiries and decisions
   const inquiriesInitiated = routingList.filter((r) => r.routing_reason === "VIA_ATTRIBUTION").length;
-  const inquiriesAccepted = dealsList.filter((d) => d.status && d.status !== "declined" && d.status !== "cancelled").length;
-  const viewingsScheduled = dealsList.filter((d) => d.stage === "viewing" || d.stage === "negotiation" || d.stage === "closed").length;
-  const dealsClosed = dealsList.filter((d) => d.stage === "closed" || d.status === "completed").length;
+  const inquiriesAccepted = dealsList.filter((d) => d.status && !["declined", "cancelled", "withdrawn", "expired", "deleted"].includes(d.status)).length;
+  const viewingsScheduled = dealsList.filter(
+    (d) =>
+      d.stage === "viewing" ||
+      d.stage === "negotiation" ||
+      d.stage === "closed" ||
+      d.status === "viewing_scheduled" ||
+      d.status === "touring" ||
+      d.status === "closed" ||
+      d.status === "completed"
+  ).length;
+  const dealsClosed = dealsList.filter(
+    (d) => d.stage === "closed" || d.status === "closed" || d.status === "completed"
+  ).length;
 
   // Conversion rates (safe divide)
   const qualificationRate = filteredClicks > 0 ? Math.round((qualifiedVisits / filteredClicks) * 1000) / 1000 : 0;

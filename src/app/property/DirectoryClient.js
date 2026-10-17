@@ -492,7 +492,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
         <header className="directory-header">
           <span className="vector-label">Layer 3.1 // Directory Ledger</span>
           <h1>The Space Directory</h1>
-          <p className="page-subtitle">Every home, office, and venue on ScoutIt — searchable in one place.</p>
+          <p className="page-subtitle">Every home, office, and venue on ScoutIt: searchable in one place.</p>
 
           {/* Fast Category Filter Rail (A-192) */}
           <nav aria-label="Quick Category Filter" className="category-filter-rail">
@@ -804,18 +804,28 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                               </div>
                               <p className="hook">{u.description || p.hook}</p>
 
-                              <div className="property-spec-badges">
-                                <span className="property-spec-badge">{unitCategoryLabel(uCat)}</span>
-                                {uPurpose && <span className="property-spec-badge">{uPurpose.toUpperCase()}</span>}
-                                {u.size ? <span className="property-spec-badge">{u.size} sqm</span> : null}
-                                {u.bedrooms ? <span className="property-spec-badge">{u.bedrooms} BR</span> : null}
-                                {u.details?.wifi_speed_mbps ? (
-                                  <span className="property-spec-badge">{u.details.wifi_speed_mbps} Mbps WiFi</span>
-                                ) : null}
-                                {u.details?.min_stay_nights ? (
-                                  <span className="property-spec-badge">Min {u.details.min_stay_nights} Nights</span>
-                                ) : null}
-                              </div>
+                              {(() => {
+                                const suiteBadges = [
+                                  unitCategoryLabel(uCat),
+                                  uPurpose ? uPurpose.toUpperCase() : null,
+                                  u.size ? `${u.size} sqm` : null,
+                                  u.bedrooms ? `${u.bedrooms} BR` : null,
+                                  u.details?.wifi_speed_mbps ? `${u.details.wifi_speed_mbps} Mbps WiFi` : null,
+                                  u.details?.min_stay_nights ? `Min ${u.details.min_stay_nights} Nights` : null,
+                                ].filter(Boolean);
+                                const visibleBadges = suiteBadges.slice(0, 4);
+                                const extraBadges = suiteBadges.length - visibleBadges.length;
+                                return (
+                                  <div className="property-spec-badges">
+                                    {visibleBadges.map((b, i) => (
+                                      <span key={i} className="property-spec-badge">{b}</span>
+                                    ))}
+                                    {extraBadges > 0 && (
+                                      <span className="property-spec-badge" title={suiteBadges.slice(4).join(", ")}>+{extraBadges}</span>
+                                    )}
+                                  </div>
+                                );
+                              })()}
 
                               <div className="property-card-footer">
                                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
@@ -865,13 +875,25 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
                         {/* Price intentionally omitted on cards — shown only in "Your Move" (compliance). */}
 
-                        <div className="property-spec-badges">
-                          <span className="property-spec-badge">{p.spaceCategory}</span>
-                          {p.aestheticTag && <span className="property-spec-badge">{p.aestheticTag}</span>}
-                          {specBadges.map((b, i) => (
-                            <span key={i} className="property-spec-badge">{b}</span>
-                          ))}
-                        </div>
+                        {(() => {
+                          const allBadges = [
+                            p.spaceCategory,
+                            p.aestheticTag,
+                            ...specBadges,
+                          ].filter(Boolean);
+                          const visibleBadges = allBadges.slice(0, 4);
+                          const extraBadges = allBadges.length - visibleBadges.length;
+                          return (
+                            <div className="property-spec-badges">
+                              {visibleBadges.map((b, i) => (
+                                <span key={i} className="property-spec-badge">{b}</span>
+                              ))}
+                              {extraBadges > 0 && (
+                                <span className="property-spec-badge" title={allBadges.slice(4).join(", ")}>+{extraBadges}</span>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {p.units_inventory && p.units_inventory.length > 0 && (
                           <div
@@ -880,24 +902,17 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                               e.preventDefault();
                               e.stopPropagation();
                             }}
-                            style={{
-                              margin: "0 0 16px 0",
-                              padding: "10px 12px",
-                              background: "var(--surface-alt)",
-                              border: "1px solid var(--border-subtle)",
-                              borderRadius: "4px",
-                            }}
                           >
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                              <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>
+                            <div className="property-units-header">
+                              <span className="property-units-kicker">
                                 Active Units ({p.units_inventory.length})
                               </span>
-                              <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
+                              <span className="property-units-direct">
                                 Direct Access
                               </span>
                             </div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                              {p.units_inventory.slice(0, 3).map((u, uIdx) => (
+                            <div className="property-units-chips">
+                              {p.units_inventory.slice(0, 2).map((u, uIdx) => (
                                 <button
                                   key={u.id || uIdx}
                                   type="button"
@@ -906,33 +921,20 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                                     e.stopPropagation();
                                     router.push(`/property/${p.slug}/unit/${u.id}`);
                                   }}
-                                  style={{
-                                    fontFamily: "var(--font-mono)",
-                                    fontSize: "12px",
-                                    padding: "4px 8px",
-                                    background: "var(--surface)",
-                                    border: "1px solid var(--border-solid)",
-                                    borderRadius: "3px",
-                                    color: "var(--text-secondary)",
-                                    cursor: "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "5px",
-                                  }}
                                   className="unit-tray-chip"
                                 >
                                   <DoorOpen size={12} style={{ color: "var(--accent)" }} />
-                                  <span>{u.name || `Unit ${u.unit_number || uIdx + 1}`}</span>
+                                  <span className="unit-tray-chip-name">{u.name || `Unit ${u.unit_number || uIdx + 1}`}</span>
                                   {u.unit_category && (
-                                    <span style={{ color: "var(--accent-muted)", fontSize: "12px" }}>
+                                    <span className="unit-tray-chip-cat">
                                       · {unitCategoryLabel(u.unit_category)}
                                     </span>
                                   )}
                                 </button>
                               ))}
-                              {p.units_inventory.length > 3 && (
-                                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", alignSelf: "center", padding: "0 4px" }}>
-                                  +{p.units_inventory.length - 3} more
+                              {p.units_inventory.length > 2 && (
+                                <span className="unit-tray-more">
+                                  +{p.units_inventory.length - 2} more
                                 </span>
                               )}
                             </div>

@@ -11,11 +11,33 @@ import {
 } from "@/lib/viaRouting";
 import { resolveServerViaAttribution, recordRoutingDecision } from "@/lib/serverViaRouting";
 import { getPropertyLeadRecipients } from "@/lib/serverBrokerRouting";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 export const dynamic = "force-dynamic";
 
+const checkViaGetRate = createRateLimiter({
+  limit: 60,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
+
+const checkViaPostRate = createRateLimiter({
+  limit: 30,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
+
 export async function GET(request, { params }) {
   try {
+    const rate = checkViaGetRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many VIA attribution requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const { id: slug } = await params;
     if (!slug) return NextResponse.json({ error: "Missing property identifier" }, { status: 400 });
 
@@ -126,6 +148,14 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   try {
+    const rate = checkViaPostRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many routing decision requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const { id: slug } = await params;
     const body = await request.json().catch(() => ({}));
     const {

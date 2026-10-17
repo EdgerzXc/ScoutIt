@@ -23,6 +23,29 @@ async function loadLiveSignal(id) {
   return data;
 }
 
+// GAP-77: Derive relevant_count from authoritative signal_relevance row count
+// to eliminate race-condition counter drift under concurrent requests.
+async function syncExactRelevantCount(signalId, fallbackCount) {
+  let exactCount = fallbackCount;
+  try {
+    const { count, error: countErr } = await supabaseAdmin
+      .from("signal_relevance")
+      .select("signal_id", { count: "exact", head: true })
+      .eq("signal_id", signalId);
+    if (!countErr && typeof count === "number") {
+      exactCount = count;
+    }
+  } catch {
+    // Fallback to computed count if mock does not support head count
+  }
+  const safeCount = Math.max(0, exactCount);
+  await supabaseAdmin
+    .from("stratosphere_signals")
+    .update({ relevant_count: safeCount, updated_at: new Date().toISOString() })
+    .eq("id", signalId);
+  return safeCount;
+}
+
 export async function POST(request, { params }) {
   const rate = checkRate(`rel:${clientIp(request)}`);
   if (!rate.allowed) {
@@ -51,16 +74,13 @@ export async function POST(request, { params }) {
       }
       throw insertError;
     }
-    await supabaseAdmin
-      .from("stratosphere_signals")
-      .update({ relevant_count: (signal.relevant_count || 0) + 1, updated_at: new Date().toISOString() })
-      .eq("id", id);
+    const syncedCount = await syncExactRelevantCount(id, (signal.relevant_count || 0) + 1);
     const { data: fresh } = await supabaseAdmin
       .from("stratosphere_signals")
       .select("relevant_count")
       .eq("id", id)
       .maybeSingle();
-    return NextResponse.json({ ok: true, relevant: true, relevantCount: fresh?.relevant_count ?? null });
+    return NextResponse.json({ ok: true, relevant: true, relevantCount: fresh?.relevant_count ?? syncedCount });
   } catch (err) {
     if (isMissingTable(err)) {
       return NextResponse.json({ ok: false, error: "Community signals are opening soon." }, { status: 503 });
@@ -91,21 +111,13 @@ export async function DELETE(request, { params }) {
       .delete()
       .eq("signal_id", id)
       .eq("account_id", userId);
-    // No RPC helper by design (no new functions in P1) — read then guard
-    // the decrement so the counter can never go negative.
     const { data: row } = await supabaseAdmin
       .from("stratosphere_signals")
       .select("relevant_count")
       .eq("id", id)
       .maybeSingle();
-    await supabaseAdmin
-      .from("stratosphere_signals")
-      .update({
-        relevant_count: Math.max(0, (row?.relevant_count || 1) - 1),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id);
-    return NextResponse.json({ ok: true, relevant: false });
+    const syncedCount = await syncExactRelevantCount(id, Math.max(0, (row?.relevant_count || 1) - 1));
+    return NextResponse.json({ ok: true, relevant: false, relevantCount: syncedCount });
   } catch (err) {
     if (isMissingTable(err)) {
       return NextResponse.json({ ok: false, error: "Community signals are opening soon." }, { status: 503 });

@@ -5,7 +5,7 @@ import {
   listAvailableAgentBlueprints,
   getBlueprintById,
 } from "@/lib/ai/autonomousIntelAgent";
-import { createClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/adminGuard";
 
 /**
  * ═════════════════════════════════════════════════════════════════════════
@@ -16,21 +16,13 @@ import { createClient } from "@supabase/supabase-js";
  *
  * Auth:
  * - Vercel Cron: `Authorization: Bearer CRON_SECRET`
- * - Staff Session: Supabase Auth JWT token
+ * - Staff Session: Supabase Auth JWT token (enforces staff/admin role)
  */
 
 async function isStaffAuthorized(request) {
-  const token = request.headers.get("authorization")?.replace("Bearer ", "");
-  if (!token) return false;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return false;
-
   try {
-    const client = createClient(url, anonKey);
-    const { data: { user } } = await client.auth.getUser(token);
-    return Boolean(user);
+    const auth = await requireAdmin(request, { label: "INTEL AGENT CRON" });
+    return Boolean(auth?.userId && !auth?.error);
   } catch {
     return false;
   }

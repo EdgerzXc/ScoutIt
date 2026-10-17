@@ -142,7 +142,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
     } catch (err) {
       console.error("Unit inquiry failed", err);
       setStatus("error");
-      setErrorMsg("Couldn't send your message — check your connection.");
+      setErrorMsg("Couldn't send your message: check your connection.");
     } finally {
       submitInFlightRef.current = false;
     }
@@ -238,7 +238,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                           🛑 <strong>NEVER pay upfront reservation fees or deposits</strong> prior to in-person physical inspection and title/contract verification. ScoutIt does not manage or hold funds.
                         </p>
                         <p className="mb-1.5">
-                          ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted — they aren&apos;t returned.
+                          ⏱️ <strong>No deadline on their reply.</strong> Your request stays open until they answer, and you can withdraw it any time from your inbox. Connects are spent when you send the request, not when it&apos;s accepted; they aren&apos;t returned.
                         </p>
                         <div className="pt-1.5 border-t border-white/5 font-mono text-[12px] text-text-muted">
                           Display-only platform operating in compliance with <strong>RA 9646 (Real Estate Service Act of the Philippines)</strong>.
@@ -267,7 +267,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
                           aria-label="Send this request anonymously"
                         />
                         <span className="text-[13px] text-text-secondary leading-relaxed">
-                          Send anonymously — they will see <strong className="text-text-primary font-medium">Anonymous</strong> until
+                          Send anonymously: they will see <strong className="text-text-primary font-medium">Anonymous</strong> until
                           they accept, instead of your name.
                         </span>
                       </label>

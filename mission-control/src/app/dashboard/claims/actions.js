@@ -11,6 +11,7 @@ import {
   REVIEW_TRANSITIONS,
   validateDecision,
 } from "@/lib/propertyClaimPolicy.mjs";
+import { notifyUser } from "@/lib/notifications";
 
 /**
  * Ownership claim review.
@@ -242,6 +243,44 @@ export async function decideClaim(formData) {
       subjectId: claim.property_id,
       summary: `Listing '${transfer.slug}' transferred to an approved claimant`,
       detail: transfer,
+    });
+
+    await notifyUser(admin, {
+      userId: claim.claimant_user_id,
+      title: "Property claim approved",
+      desc: "Your ownership claim for the listing has been approved. The property has been transferred to your account.",
+      icon: "🎉",
+      propertyId: claim.property_id,
+      notificationType: "claim_approved",
+    });
+
+    if (transfer.from_owner_id) {
+      await notifyUser(admin, {
+        userId: transfer.from_owner_id,
+        title: "Listing ownership transferred",
+        desc: "Ownership of the listing was transferred following an approved claim review.",
+        icon: "ℹ️",
+        propertyId: claim.property_id,
+        notificationType: "claim_transferred",
+      });
+    }
+  } else if (verdict.status === "rejected") {
+    await notifyUser(admin, {
+      userId: claim.claimant_user_id,
+      title: "Property claim not approved",
+      desc: "Your ownership claim could not be approved at this time.",
+      icon: "ℹ️",
+      propertyId: claim.property_id,
+      notificationType: "claim_rejected",
+    });
+  } else if (verdict.status === "needs_information") {
+    await notifyUser(admin, {
+      userId: claim.claimant_user_id,
+      title: "Property claim needs information",
+      desc: "Reviewers have requested additional details on your property claim.",
+      icon: "📋",
+      propertyId: claim.property_id,
+      notificationType: "claim_needs_info",
     });
   }
 

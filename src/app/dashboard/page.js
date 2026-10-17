@@ -16,6 +16,9 @@ const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMo
 const MissionControlMode = dynamic(() => import("../../components/dashboard/MissionControlMode"), { ssr: false });
 import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
+import DeckPanel from "../../components/dashboard/DeckPanel";
+import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
+import { deckNeighbors } from "../../lib/workspaceDeck";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
 import { loadDeals } from "../../lib/deals/dealsClient";
@@ -209,7 +212,7 @@ function DashboardInner() {
         <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
           <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[12px] mb-2 block">Workspace</span>
           <h1 className="font-headline-editorial text-3xl text-on-surface mb-3">Workspace unavailable</h1>
-          <p className="text-text-secondary text-sm max-w-md mb-6">Your account role did not match a known workspace. Nothing is lost — continue exploring, or contact support if this keeps happening.</p>
+          <p className="text-text-secondary text-sm max-w-md mb-6">Your account role did not match a known workspace. Nothing is lost: continue exploring, or contact support if this keeps happening.</p>
           <Link href="/discover" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent hover:underline">Continue exploring →</Link>
         </div>
       );
@@ -228,6 +231,11 @@ function DashboardInner() {
   // fallback rendered a dead button whose aria-label="" actively REMOVED its
   // accessible name. No entry now means no button rather than a dead one.
   const primaryAction = PRIMARY_ACTIONS[mode] || null;
+
+  // A-205 Workspace Deck: Workspace is the default panel; swipe-left reveals
+  // the Inbox, swipe-right the CRM (pipeline roles) — see workspaceDeck.js.
+  // An unresolved mode fails closed to the buyer-safe two-panel deck.
+  const deckNav = deckNeighbors("workspace", mode || "buyer");
 
   // Mode components listen for this to run their own primary action
   // (owner → open wizard, buyer → focus search, broker → jump to feed)
@@ -253,7 +261,7 @@ function DashboardInner() {
       <AtmosphereBackground variant={mode || "dashboard"} />
 
       {/* Top Nav (Persistent) */}
-      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex items-center justify-between gap-4">
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex items-center gap-4 lg:gap-6 shrink-0">
           <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
           
@@ -455,9 +463,16 @@ function DashboardInner() {
             </button>
           </div>
         </div>
+        {/* A-205 Workspace Deck strip — the swipe deck's tab mirror, riding
+            inside the sticky header so it survives the long workspace scroll.
+            Mobile only; desktop keeps the switcher + header icons. */}
+        <div className="md:hidden w-full">
+          <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
+        </div>
       </header>
 
       {/* Main Content Area (Mode determined) */}
+      <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
         <Nudge mode={mode} />
         {/* The cross-workspace signal comes before the role surface: whether
@@ -486,6 +501,7 @@ function DashboardInner() {
           </div>
         ) : renderActiveMode()}
       </main>
+      </DeckPanel>
 
       <Toasts />
       <ConciergeAI />

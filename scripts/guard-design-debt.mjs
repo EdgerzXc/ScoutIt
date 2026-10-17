@@ -112,6 +112,7 @@ export const BASELINE_EMOJI_FILES = Object.freeze([
   "src/app/api/deals/pitch/route.js",
   "src/app/api/faqs/review/route.js",
   "src/app/api/faqs/route.js",
+  "src/app/api/inquiries/route.js",
   "src/app/api/notifications/route.js",
   "src/app/api/viewing-appointments/route.js",
   "src/app/badges/page.js",

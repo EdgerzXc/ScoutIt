@@ -198,7 +198,7 @@ export default function FloodHeatmapMap({ lat, lng, propertyTitle }) {
       </div>
 
       <div className="flood-heatmap-disclaimer">
-        Source: UP NOAH Archives (open data). {activePeriod.label === '100-yr' ? 'A 100-year rainfall' : activePeriod.label === '25-yr' ? 'A 25-year rainfall' : 'A 5-year (recent-conditions) rainfall'} return-period model — historical hazard modeling, periodically refreshed, not a real-time flood forecast.
+        Source: UP NOAH Archives (open data). {activePeriod.label === '100-yr' ? 'A 100-year rainfall' : activePeriod.label === '25-yr' ? 'A 25-year rainfall' : 'A 5-year (recent-conditions) rainfall'} return-period model: historical hazard modeling, periodically refreshed, not a real-time flood forecast.
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `

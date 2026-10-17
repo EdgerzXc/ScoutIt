@@ -130,7 +130,52 @@ export async function createViewingMeet(hostUserId, details) {
     // Expired refresh token, revoked access, Google outage, quota — none of
     // these should cost the user their booking.
     console.error("[meetLink] createViewingMeet failed:", error?.message);
-    return { meetLink: null, googleEventId: null };
+    return { meetLink: null, googleEventId: null, syncFailed: true, error: error?.message || "calendar_sync_failed" };
+  }
+}
+
+/**
+ * GAP-36: Enqueues a retry record when Google Calendar event creation,
+ * reschedule, or cancellation fails so external calendar state can be
+ * reconciled asynchronously without failing the primary booking request.
+ */
+export async function enqueueCalendarSyncRetry(
+  serviceClient,
+  { appointmentId, hostUserId, googleEventId = null, operation, payload = {}, errorReason = null }
+) {
+  if (!serviceClient || !appointmentId || !operation) return false;
+  const nowIso = new Date().toISOString();
+  try {
+    await serviceClient.from("calendar_sync_queue").insert({
+      appointment_id: appointmentId,
+      host_user_id: hostUserId || null,
+      google_event_id: googleEventId,
+      operation,
+      payload,
+      error_reason: errorReason,
+      status: "pending",
+      created_at: nowIso,
+    });
+    return true;
+  } catch {
+    try {
+      await serviceClient.from("system_events").insert({
+        event_type: "calendar_sync_retry_queued",
+        source: "lib/calendar/meetLink",
+        status: "warning",
+        metadata: {
+          appointment_id: appointmentId,
+          host_user_id: hostUserId || null,
+          google_event_id: googleEventId,
+          operation,
+          payload,
+          error_reason: errorReason,
+        },
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

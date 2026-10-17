@@ -67,6 +67,9 @@ export async function POST(request) {
       ["user_availability", "user_id"],
       ["calendar_events", "owner_user_id"],
       ["calendar_connections", "owner_user_id"], // holds encrypted OAuth tokens
+      ["crm_contacts", "owner_user_id"],
+      ["crm_deal_notes", "user_id"],
+      ["user_blocks", "user_id"],
     ];
 
     // Sequential and checked. A partial erasure must not be reported as a
@@ -75,6 +78,10 @@ export async function POST(request) {
     for (const [table, column] of erasures) {
       const { error } = await supabaseAdmin.from(table).delete().eq(column, userId);
       if (error) {
+        if (error.code === '42P01') {
+          // Table not present in this environment — skip gracefully
+          continue;
+        }
         console.error(`[ACCOUNT DELETION] Failed to erase ${table}:`, error.message);
         return NextResponse.json(
           {
@@ -85,6 +92,12 @@ export async function POST(request) {
           },
           { status: 500 }
         );
+      }
+      if (table === "user_blocks") {
+        try {
+          await supabaseAdmin.from("connect_blocks").delete().eq("blocker_id", userId);
+          await supabaseAdmin.from("connect_blocks").delete().eq("blocked_id", userId);
+        } catch { /* best effort for connect_blocks */ }
       }
       erased.push(table);
     }

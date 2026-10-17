@@ -22,6 +22,9 @@ export const ERASED_DATA_LABELS = Object.freeze({
   user_availability: "Your viewing availability",
   calendar_events: "Your calendar events",
   calendar_connections: "Your connected calendars, including their access keys",
+  crm_contacts: "Your CRM address book contacts and leads",
+  crm_deal_notes: "Your private deal notes",
+  user_blocks: "Your blocked accounts list",
 });
 
 /**

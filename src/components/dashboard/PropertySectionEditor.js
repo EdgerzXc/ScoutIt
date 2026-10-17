@@ -135,7 +135,7 @@ export default function PropertySectionEditor({
         return (
           <section key={sectionName} className={staffOnly ? "sec staff" : "sec"}>
             <header>
-              <h3>{staffOnly ? "Staff only — never public" : sectionName}</h3>
+              <h3>{staffOnly ? "Staff only (never public)" : sectionName}</h3>
               <button
                 type="button"
                 disabled={!dirty || savingSection === sectionName}

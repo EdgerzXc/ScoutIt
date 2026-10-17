@@ -4,6 +4,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { canPostInDealStatus } from "@/lib/deals/dealStatus";
+import { notifyUser } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +76,7 @@ export async function POST(request, { params }) {
     // Validate access & check if deal is active
     const { data: deal, error: dealError } = await supabaseAdmin
       .from('deals')
-      .select('status, buyer_id, broker_id, properties(owner_id)')
+      .select('status, property_id, buyer_id, broker_id, properties(id, title, owner_id)')
       .eq('id', dealId)
       .single();
 
@@ -103,19 +104,59 @@ export async function POST(request, { params }) {
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    // GAP-68: Enforce account suspension / shadowban check before writing messages
+    try {
+      const { data: senderProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('is_shadowbanned, archived_at')
+        .eq('id', userId)
+        .maybeSingle();
+      if (senderProfile?.is_shadowbanned === true || Boolean(senderProfile?.archived_at)) {
+        return NextResponse.json(
+          { error: "Account is restricted from sending messages.", code: "ACCOUNT_RESTRICTED" },
+          { status: 403 }
+        );
+      }
+    } catch {
+      // Fail open if moderation columns are not yet present
+    }
+
+    // GAP-56: Derive sender_role strictly server-side from verified deal membership
+    const verifiedSenderRole =
+      deal.buyer_id === userId
+        ? "buyer"
+        : deal.properties?.owner_id === userId
+          ? "owner"
+          : "broker";
+
     // Insert message
     const { data: message, error: insertError } = await supabaseAdmin
       .from('deal_messages')
       .insert([{
         deal_id: dealId,
         sender_id: userId,
-        sender_role: role,
+        sender_role: verifiedSenderRole,
         body
       }])
       .select()
       .single();
 
     if (insertError) return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
+
+    // GAP-21: Notify counterparties of new message
+    const recipients = [deal.buyer_id, deal.broker_id, deal.properties?.owner_id]
+      .filter((pid) => pid && pid !== userId);
+    const uniqueRecipients = [...new Set(recipients)];
+
+    for (const recipientId of uniqueRecipients) {
+      await notifyUser(supabaseAdmin, {
+        userId: recipientId,
+        title: "New message",
+        desc: `New message on ${deal.properties?.title || "your deal"}: "${body.slice(0, 60)}${body.length > 60 ? "..." : ""}"`,
+        propertyId: deal.properties?.id || deal.property_id || null,
+        notificationType: "deal_message",
+      });
+    }
 
     // Note: there's no updated_at column on deals to bump for an inactivity
     // timer -- GET /api/deals derives "most recent conversation" from

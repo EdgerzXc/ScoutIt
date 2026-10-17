@@ -120,7 +120,7 @@ export default function DealTimeline({
                 <span className="min-w-0 break-words [overflow-wrap:anywhere]">
                   {label}
                   {showPropertyTitles && item.propertyTitle && (
-                    <span className="text-text-secondary"> — {item.propertyTitle}</span>
+                    <span className="text-text-secondary"> · {item.propertyTitle}</span>
                   )}
                 </span>
               </p>
