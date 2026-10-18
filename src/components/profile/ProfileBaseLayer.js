@@ -27,6 +27,7 @@ export default function ProfileBaseLayer({
   publicRoles = [],
 }) {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   if (!profile) return null;
 
@@ -45,14 +46,15 @@ export default function ProfileBaseLayer({
 
   return (
     <>
-      <section style={baseSection}>
+      <section style={baseSection} className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8 pb-8 border-b border-border-subtle w-full">
       {/* Avatar */}
       <div style={avatarWrap}>
-        {profile.avatar_url ? (
+        {profile.avatar_url && !avatarError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={profile.avatar_url}
             alt={profile.display_name}
+            onError={() => setAvatarError(true)}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         ) : (

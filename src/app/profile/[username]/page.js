@@ -145,6 +145,9 @@ export default function PublicProfilePage() {
 
   return (
     <div style={pageWrap} className="keep-dark">
+      {/* Subtle luxury ambient depth */}
+      <div className="absolute top-[60px] left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gold-accent/[0.04] rounded-full blur-[140px] pointer-events-none" />
+
       {/* Nav with contextual return */}
       <header style={navBar}>
         <div style={navInner}>
@@ -157,12 +160,14 @@ export default function PublicProfilePage() {
       </header>
 
       <main style={mainContent}>
-        {/* Base Layer — no connects_balance, no edit controls */}
-        <ProfileBaseLayer
-          profile={profile}
-          isOwnView={false}
-          publicRoles={publicRoles}
-        />
+        {/* Base Layer Card — framed in card-atmosphere */}
+        <div className="card-atmosphere p-6 sm:p-10 rounded-2xl border border-white/[0.06] backdrop-blur-md">
+          <ProfileBaseLayer
+            profile={profile}
+            isOwnView={false}
+            publicRoles={publicRoles}
+          />
+        </div>
 
         {/* Role Panels — only public roles */}
         {hasAnyPanel && (
@@ -219,6 +224,8 @@ const pageWrap = {
   background: "var(--bg)",
   color: "var(--text-primary)",
   paddingBottom: 80,
+  position: "relative",
+  overflowX: "hidden",
 };
 
 const navBar = {
@@ -243,7 +250,7 @@ const backLink = {
 };
 
 const navInner = {
-  maxWidth: 720,
+  maxWidth: 1040,
   width: "100%",
   margin: "0 auto",
   display: "flex",
@@ -269,18 +276,21 @@ const breadcrumbCurrent = {
 };
 
 const mainContent = {
-  maxWidth: 720,
+  maxWidth: 1040,
+  width: "100%",
   margin: "0 auto",
   padding: "40px 24px",
   display: "flex",
   flexDirection: "column",
-  gap: 24,
+  gap: 28,
+  position: "relative",
+  zIndex: 10,
 };
 
 const panelsGrid = {
   display: "flex",
   flexDirection: "column",
-  gap: 12,
+  gap: 16,
 };
 
 const emptyPanels = {

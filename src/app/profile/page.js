@@ -117,27 +117,31 @@ export default function OwnProfilePage() {
     <div style={pageWrap} className="profile-page">
       <AtmosphereBackground variant="default" />
       <header style={navBar}>
-        <Link href="/dashboard" style={backLink}>
-          ← Dashboard
-        </Link>
-        <span style={navTitle}>Your Profile</span>
-        {/* Public pages are addressed by the permanent id, so a name change
-            never breaks the link. A private profile has no public page. */}
-        {profile.is_profile_public === true ? (
-          <Link href={`/profile/${encodeURIComponent(profile.id)}`} style={publicLink}>
-            View public
+        <div style={navInner}>
+          <Link href="/dashboard" style={backLink}>
+            ← Dashboard
           </Link>
-        ) : (
-          <span style={privateNote}>Private profile</span>
-        )}
+          <span style={navTitle}>Your Profile</span>
+          {/* Public pages are addressed by the permanent id, so a name change
+              never breaks the link. A private profile has no public page. */}
+          {profile.is_profile_public === true ? (
+            <Link href={`/profile/${encodeURIComponent(profile.id)}`} style={publicLink}>
+              View public
+            </Link>
+          ) : (
+            <span style={privateNote}>Private profile</span>
+          )}
+        </div>
       </header>
 
       <main style={mainContent}>
-        <ProfileBaseLayer
-          profile={profile}
-          isOwnView
-          publicRoles={privacy?.public_roles ?? []}
-        />
+        <div className="card-atmosphere p-6 sm:p-10 rounded-2xl border border-white/[0.06] backdrop-blur-md">
+          <ProfileBaseLayer
+            profile={profile}
+            isOwnView
+            publicRoles={privacy?.public_roles ?? []}
+          />
+        </div>
 
         {/* Only the panels other people can see. */}
         <div style={panelsGrid}>
@@ -200,13 +204,19 @@ const navBar = {
   position: "sticky",
   top: 0,
   zIndex: 40,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
   padding: "14px 24px",
   background: "rgba(var(--bg-rgb), 0.85)",
   backdropFilter: "blur(20px)",
   borderBottom: "1px solid var(--border-subtle)",
+};
+
+const navInner = {
+  maxWidth: 1040,
+  width: "100%",
+  margin: "0 auto",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
 };
 
 const backLink = {
@@ -242,12 +252,13 @@ const privateNote = {
 };
 
 const mainContent = {
-  maxWidth: 720,
+  maxWidth: 1040,
+  width: "100%",
   margin: "0 auto",
   padding: "40px 24px",
   display: "flex",
   flexDirection: "column",
-  gap: 24,
+  gap: 28,
   position: "relative",
   zIndex: 1,
 };
@@ -255,7 +266,7 @@ const mainContent = {
 const panelsGrid = {
   display: "flex",
   flexDirection: "column",
-  gap: 12,
+  gap: 16,
 };
 
 const loadingScreen = {
