@@ -98,7 +98,7 @@ export default function CreatorPricingPage() {
             </p>
           </div>
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            LAYER 08 // SPECIALIST PLANS
+            COMMERCIAL ARCHITECTURE // SPECIALIST PLANS
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Showcase Your <span className="text-gold-accent">Spatial Work</span>

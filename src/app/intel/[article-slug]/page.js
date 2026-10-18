@@ -185,6 +185,12 @@ export default async function IntelArticlePage({ params, searchParams }) {
             <Link href="/discover">← Back to Discover</Link>
           </nav>
         ) : null}
+        {!fromWorkspace && !fromDiscover && !fromProperty ? (
+          <nav className="article-layer-return" aria-label="Intel Hub return">
+            <Link href="/intel">← Back to Intel Hub</Link>
+            <span>Explore all market briefings and intelligence.</span>
+          </nav>
+        ) : null}
         {/* Dynamic Hero Banner */}
         <section className="article-hero" style={{ backgroundImage: `url(${article.image})` }}>
           <div className="hero-overlay"></div>
@@ -298,7 +304,11 @@ export default async function IntelArticlePage({ params, searchParams }) {
                 </div>
               </GlassPanel>
             ) : null}
-            {fromWorkspace ? <p className="article-layer-return-end"><Link href={workspaceHref}>← Return to Stratosphere</Link></p> : null}
+            {fromWorkspace ? (
+              <p className="article-layer-return-end"><Link href={workspaceHref}>← Return to Stratosphere</Link></p>
+            ) : !fromProperty ? (
+              <p className="article-layer-return-end"><Link href="/intel">← Return to Intel Hub</Link></p>
+            ) : null}
           </div>
         </section>
 

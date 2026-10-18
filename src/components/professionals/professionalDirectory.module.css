@@ -93,6 +93,12 @@
 /* U-039: the display headline scales with the phone and always breaks
    between words — never "Photographe rs" again. */
 @media (max-width: 680px) { .hero { min-height: auto; padding: 86px 20px 46px; } .hero h1 { font-size: clamp(40px, 12.5vw, 56px); line-height: 1; } .protocolRow { padding: 12px 14px; } .protocolRow strong { white-space: normal; } .orbit { width: 290px; height: 290px; right: -80px; top: 15px; } .directory { padding: 0 20px 70px; } .toolbar { padding: 10px; } .selects { display: grid; grid-template-columns: 1fr; } .selects > svg { display: none; } .selects select { width: 100%; max-width: none; } .resultMeta { flex-direction: column; line-height: 1.5; } .card { grid-template-columns: 1fr; transform: none !important; } .portrait { min-height: 210px; } .cardBody { padding: 21px; } .cardActions { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .search input,
+  .selects select {
+    font-size: 16px;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) { .orbit span:nth-child(2) { animation: none; } .card,.portrait img { transition: none; transform: none !important; } }
 

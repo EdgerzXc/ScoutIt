@@ -138,7 +138,7 @@ Managing them: the cookie banner (shown only when Analytics is enabled) records 
 export default function PrivacyPage() {
   return (
     <LegalDoc
-      eyebrow="LAYER 09 // PLATFORM GOVERNANCE"
+      eyebrow="SYSTEM DISCLOSURE // PLATFORM GOVERNANCE"
       title="Privacy Policy"
       meta={`Version ${CURRENT_TERMS_VERSION}  ·  Effective ${CURRENT_TERMS_EFFECTIVE_DATE}  ·  Invited pilot`}
       intro="This invited-pilot notice describes the data ScoutIt currently handles, the providers involved, and the controls available to users. Browsing and saved spaces stay on the device by default. Philippine counsel and the designated privacy lead must review the notice before public commercial launch."

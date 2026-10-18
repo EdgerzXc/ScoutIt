@@ -14,6 +14,7 @@ import ProfileBaseLayer from "@/components/profile/ProfileBaseLayer";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
 import ResearcherPanel from "@/components/profile/panels/ResearcherPanel";
+import EventPlannerPanel from "@/components/profile/panels/EventPlannerPanel";
 import {
   loadPublicProfile,
   loadPublicRoles,
@@ -121,16 +122,38 @@ export default function PublicProfilePage() {
   const showProvider    = roles.includes("provider") && publicRoles.includes("provider");
   const showPhotographer = showProvider && provType === "photographer";
   const showResearcher   = showProvider && provType === "researcher";
+  const showEventPlanner  = showProvider && (provType === "event_planner" || provType === "designer");
   // Seeker (buyer) — NEVER on public view, no condition needed
   // Owner — NEVER on public view, no condition needed
 
-  const hasAnyPanel = showBroker || showPhotographer || showResearcher;
+  const hasAnyPanel = showBroker || showPhotographer || showResearcher || showEventPlanner;
+
+  const backTarget = (() => {
+    if (typeof window !== "undefined") {
+      const fromParam = new URLSearchParams(window.location.search).get("from");
+      if (fromParam === "photographers") return { href: "/photographers", label: "Photographers" };
+      if (fromParam === "researchers") return { href: "/researchers", label: "Researchers" };
+      if (fromParam === "event-planners") return { href: "/event-planners", label: "Event Designers" };
+      if (fromParam === "brokers") return { href: "/brokers", label: "Advisors" };
+    }
+    if (showPhotographer) return { href: "/photographers", label: "Photographers" };
+    if (showResearcher) return { href: "/researchers", label: "Researchers" };
+    if (showEventPlanner) return { href: "/event-planners", label: "Event Designers" };
+    if (showBroker) return { href: "/brokers", label: "Advisors" };
+    return { href: "/layer/crust", label: "Layer 04 · Crust" };
+  })();
 
   return (
     <div style={pageWrap} className="keep-dark">
-      {/* Nav */}
+      {/* Nav with contextual return */}
       <header style={navBar}>
-        <Link href="/" style={backLink}>← ScoutIt</Link>
+        <div style={navInner}>
+          <Link href={backTarget.href} style={backLink}>
+            ← Back to {backTarget.label}
+          </Link>
+          <span style={breadcrumbSep}>/</span>
+          <span style={breadcrumbCurrent}>{profile.display_name || "Profile"}</span>
+        </div>
       </header>
 
       <main style={mainContent}>
@@ -165,6 +188,14 @@ export default function PublicProfilePage() {
                 data={researcherData}
                 isAnonymous={privacy?.anonymous_byline ?? false}
                 isPublic
+              />
+            )}
+            {showEventPlanner && (
+              <EventPlannerPanel
+                userId={profile.id}
+                isAvailable={profile.provider_availability}
+                isOwnView={false}
+                specialties={profile.provider_specialties || []}
               />
             )}
           </div>
@@ -209,6 +240,32 @@ const backLink = {
   letterSpacing: "0.1em",
   textTransform: "uppercase",
   textDecoration: "none",
+};
+
+const navInner = {
+  maxWidth: 720,
+  width: "100%",
+  margin: "0 auto",
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+};
+
+const breadcrumbSep = {
+  color: "var(--text-tertiary)",
+  fontSize: 12,
+  userSelect: "none",
+};
+
+const breadcrumbCurrent = {
+  fontFamily: "var(--font-mono)",
+  fontSize: 12,
+  color: "var(--accent)",
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 };
 
 const mainContent = {

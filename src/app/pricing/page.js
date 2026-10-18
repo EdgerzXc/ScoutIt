@@ -75,7 +75,7 @@ export default function PricingHubPage() {
 
         <header className="pricing-header z-10 relative text-center mb-16">
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            LAYER 08 // INTELLIGENCE TIERS
+            COMMERCIAL ARCHITECTURE // INTELLIGENCE TIERS
           </span>
           <h1 className="page-title text-4xl md:text-5xl font-display-md text-on-surface mb-6 drop-shadow-lg max-w-3xl mx-auto">
             Choose Your <span className="text-gold-accent">Role</span> in the Ecosystem

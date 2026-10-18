@@ -43,6 +43,19 @@ export default function FeatureConsolePanel() {
     fetchFlags();
   }, [fetchFlags]);
 
+  useEffect(() => {
+    if (!confirmModalOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setConfirmModalOpen(false);
+        setPendingFlagToggle(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [confirmModalOpen]);
+
   const handleToggleClick = (flag) => {
     const nextState = !flag.is_enabled;
     // If activating global_read_only, trigger confirmation modal first
@@ -248,14 +261,26 @@ export default function FeatureConsolePanel() {
 
       {/* Caution Confirmation Modal for Emergency Read-Only Mode */}
       {confirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm motion-safe:animate-fadeIn" style={{ background: "var(--modal-scrim)" }}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="emergency-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm motion-safe:animate-fadeIn"
+          style={{ background: "var(--modal-scrim)" }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setConfirmModalOpen(false);
+              setPendingFlagToggle(null);
+            }
+          }}
+        >
           <div className={`max-w-md w-full bg-surface border-2 border-red-500/80 rounded-2xl p-6 shadow-lg space-y-4 ${entrance.panel}`}>
             <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/40 flex items-center justify-center mx-auto text-red-500">
               <AlertTriangle size={24} />
             </div>
 
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-bold text-on-surface tracking-tight">
+              <h3 id="emergency-modal-title" className="text-lg font-bold text-on-surface tracking-tight">
                 ENABLE EMERGENCY READ-ONLY MODE?
               </h3>
               <p className="text-xs text-text-secondary leading-relaxed">

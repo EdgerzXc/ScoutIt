@@ -115,8 +115,9 @@ export async function POST(request) {
           p_user_id: companyId,
           p_amount: bountyConnects,
           p_reason: `Compensating refund: QuestIT bounty insert failed for ${targetField}`,
-          p_ref_type: "bounty_refund",
+          p_staff_id: "system",
           p_ref_id: String(propertyId),
+          p_ref_type: "bounty_refund",
         });
         const restoredBalance = refundData?.[0]?.total_balance ?? null;
         if (restoredBalance !== null) {

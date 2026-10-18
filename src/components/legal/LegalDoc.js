@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer";
 // Pages pass data only — no styling or structure lives in the page files.
 //
 // props:
-//   eyebrow   string  — mono uppercase label (e.g. "LAYER 09 // PLATFORM GOVERNANCE")
+//   eyebrow   string  — mono uppercase label (e.g. "SYSTEM DISCLOSURE // PLATFORM GOVERNANCE")
 //   title     string  — serif page title
 //   meta      string  — effective date / one-line context
 //   intro     string  — lead paragraph above the numbered sections

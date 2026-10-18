@@ -52,13 +52,7 @@ export default function LayerNav({
   next = undefined,
   ambientContext = null,
 }) {
-  let pathname = null;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    pathname = usePathname();
-  } catch {
-    pathname = null;
-  }
+  const pathname = usePathname();
 
   // Find layer index either from explicit layer prop (number 1-6 or string id/label) or pathname
   let currentIdx = -1;

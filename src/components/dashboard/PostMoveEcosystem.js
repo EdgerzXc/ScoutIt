@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle, Circle, Zap, Droplets, Wifi, Sparkles, Truck, ExternalLink } from "lucide-react";
+import { CheckCircle, Circle, ArrowRight } from "lucide-react";
 
 export default function PostMoveEcosystem() {
   const [checklist, setChecklist] = useState([
@@ -27,9 +27,9 @@ export default function PostMoveEcosystem() {
       <div className="border-b border-surface-variant pb-2">
         <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center justify-between">
           Post-Move Ecosystem
-          <span className="font-label-caps tracking-widest text-[12px] text-gold-accent px-2 py-1 bg-gold-accent/10 rounded">THE WIRE</span>
+          <span className="font-label-caps tracking-widest text-[12px] text-gold-accent px-2 py-1 bg-gold-accent/10 rounded">LAYER 04 · CRUST</span>
         </h2>
-        <p className="text-xs text-text-secondary mt-1">Settle in. Connect your utilities, track your move-in steps, and activate essential services.</p>
+        <p className="text-xs text-text-secondary mt-1">Settle in. Track your move-in steps and connect with verified professionals in our service ecosystem.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -73,22 +73,22 @@ export default function PostMoveEcosystem() {
           </div>
         </div>
 
-        {/* Right Column: Utilities CTA */}
+        {/* Right Column: Service Ecosystem CTA */}
         <div className="lg:col-span-7 flex flex-col justify-center">
-          <Link href="/layer/crust#wire" className="relative overflow-hidden bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-gold-accent group transition h-full min-h-[220px]">
+          <Link href="/layer/crust" className="relative overflow-hidden bg-surface-alt border border-surface-variant rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-gold-accent group transition h-full min-h-[220px]">
             <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
             
             <div className="flex flex-col gap-3 relative z-10 w-full max-w-sm">
-              <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent block">The Wire</span>
-              <h3 className="font-headline-editorial text-2xl text-on-surface group-hover:text-gold-accent transition">Access the Utilities Hub</h3>
+              <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent block">Layer 04 · Crust</span>
+              <h3 className="font-headline-editorial text-2xl text-on-surface group-hover:text-gold-accent transition">Verified Service Ecosystem</h3>
               <p className="text-sm text-text-secondary leading-relaxed">
-                Connect your fiber internet, transfer Meralco power accounts, setup water supply, and hire logistics guilds directly from our public Trust layer.
+                Engage licensed real estate advisors, architectural photographers, site researchers, and event designers to support your space decision.
               </p>
             </div>
             
             <div className="relative z-10 shrink-0 mt-4 md:mt-0">
               <div className="w-14 h-14 rounded-full bg-surface border border-surface-variant flex items-center justify-center text-on-surface group-hover:border-gold-accent group-hover:bg-gold-accent group-hover:text-surface transition shadow-xl group-hover:scale-110">
-                <ExternalLink size="1.2em" strokeWidth={1.5} />
+                <ArrowRight size="1.2em" strokeWidth={1.5} />
               </div>
             </div>
           </Link>

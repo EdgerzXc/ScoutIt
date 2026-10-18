@@ -156,7 +156,7 @@ ScoutIt may amend these Terms to reflect product, operational, or legal changes.
 export default function TermsPage() {
   return (
     <LegalDoc
-      eyebrow="LAYER 09 // PLATFORM GOVERNANCE"
+      eyebrow="SYSTEM DISCLOSURE // PLATFORM GOVERNANCE"
       title="Terms of Service"
       meta={`Version ${CURRENT_TERMS_VERSION}  ·  Effective ${CURRENT_TERMS_EFFECTIVE_DATE}  ·  Invited pilot`}
       intro="These pilot Terms describe the current rules for using ScoutIt. Account onboarding requires explicit acceptance of the version shown above. The text is designed with reference to Philippine law but still requires Philippine counsel review before public commercial launch. Intelligence first. Transactions never."

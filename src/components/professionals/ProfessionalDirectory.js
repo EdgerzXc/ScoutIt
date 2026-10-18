@@ -28,6 +28,11 @@ export default function ProfessionalDirectory({ category, initialRecords = [], i
         <section className={styles.hero} aria-labelledby="directory-title">
           <div className={styles.orbit} aria-hidden="true"><span /><span /><span /></div>
           <div className={styles.heroCopy}>
+            <nav aria-label="Layer Breadcrumb" style={{ marginBottom: 12 }}>
+              <Link href="/layer/crust" style={{ color: "var(--text-secondary)", textDecoration: "none", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                ← Back to Layer 04 · Crust
+              </Link>
+            </nav>
             <span className={styles.eyebrow}>{config.eyebrow} <InfoTip tipId="layerNumber" label="About this layer" /></span>
             <h1 id="directory-title">{config.title}</h1>
             <p>{config.description}</p>

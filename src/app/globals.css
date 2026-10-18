@@ -1992,6 +1992,13 @@ body.light-mode .contact-lens-modal .bg-white\/\[0\.02\] {
 body.light-mode .contact-lens-modal .border-gold-accent\/20 {
   border-color: var(--border);
 }
+/* Contact modal: light-mode readable warnings + borders. */
+body.light-mode .contact-lens-modal .text-red-400 {
+  color: var(--red);
+}
+body.light-mode .contact-lens-modal .text-gold-accent {
+  color: var(--accent-muted);
+}
 /* Promote modal: dark header wash + close X. */
 body.light-mode .promo-lens-modal .bg-\[\#0e0e0e\]\/40 {
   background-color: rgba(17, 17, 19, 0.04);

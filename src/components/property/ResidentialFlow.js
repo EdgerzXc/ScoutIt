@@ -1088,6 +1088,24 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           }}
         >
 
+          {/* Platform Back & Escape Navigation */}
+          <Link 
+            href="/property" 
+            className="platform-back-btn" 
+            aria-label="Back to Directory"
+          >
+            ← Back to Directory
+          </Link>
+          <nav className="platform-nav" aria-label="Platform breadcrumb">
+            <Link 
+              href="/layer/metropolis" 
+              className="platform-home-btn"
+              title="Return to Metropolis Layer 03"
+            >
+              Layer 03 · Metropolis
+            </Link>
+          </nav>
+
           {photos.map((url, i) => (
             (i === 0 || galleryWarmed || Math.abs(i - currentImageIndex) <= 1) &&
             <Image

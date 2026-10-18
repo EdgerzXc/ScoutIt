@@ -18,14 +18,14 @@
 import { useEffect, useRef, useState } from "react";
 import "./cinematic.css";
 
-// The 6 layers, matched to the homepage's real sections.
+// The 6 layers, matched to the homepage's active descent launchpad cards.
 export const CINEMATIC_LAYERS = [
-  { sel: ".section-board", label: "01 · THE BOARD", mission: "We raise the ceiling of what Philippine real estate can be. Every player ranked, every listing set to a new standard. The market will never be stale again." },
-  { sel: ".section-property", label: "02 · PROPERTY INTELLIGENCE", mission: "Every detail, every signal, every data point: so any user can walk into a decision with full confidence. No guesswork. No gatekeeping. Ever." },
-  { sel: ".section-discover", label: "03 · DISCOVERY", mission: "Not just headlines. Real insights, real data, real location intelligence, for users, investors, and researchers who need to understand the market, not just follow it." },
-  { sel: ".section-services", label: "04 · THE ECOSYSTEM", mission: "The first of its kind in the Philippines. A platform that connects buyers, owners, brokers, photographers, researchers: everyone the market needs, in one place." },
-  { sel: ".section-wishlist", label: "05 · YOUR BOARD", mission: "For the dreamers. A living board that keeps your goals in view, your options tracked, and your ceiling moving: because wanting more is where it all starts." },
-  { sel: ".section-about", label: "06 · ABOUT US", mission: "This was never about us. It was always about you." },
+  { sel: 'a[href="/layer/orbit"]', label: "01 · ORBIT", mission: "Properties ranked by real buyer and seeker inquiry demand across the market." },
+  { sel: 'a[href="/layer/stratosphere"]', label: "02 · STRATOSPHERE", mission: "Independent neighborhood reports, pricing trends, and zoning analysis." },
+  { sel: 'a[href="/layer/metropolis"]', label: "03 · METROPOLIS", mission: "Search commercial, residential, and event spaces building by building across the Philippines." },
+  { sel: 'a[href="/layer/crust"]', label: "04 · THE CRUST", mission: "The Service Ecosystem: licensed brokers, spatial photographers, site researchers, and event planners." },
+  { sel: 'a[href="/layer/mantle"]', label: "05 · THE MANTLE", mission: "Platform truth: data philosophy, architectural disclosures, and verification standards." },
+  { sel: 'a[href="/layer/core"]', label: "06 · THE CORE", mission: "Your personal board, saved comparisons, property portfolio, and deal inbox." },
 ];
 
 // Build the line's path (in page-content pixel coordinates) from the

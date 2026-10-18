@@ -157,6 +157,18 @@ export default async function BrokerDetailPage({ params }) {
       <Header />
 
       <main className="broker-detail-main">
+        <nav aria-label="Advisor Breadcrumb" style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "var(--font-mono)", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <Link href="/layer/crust" style={{ color: "var(--text-secondary)", textDecoration: "none" }}>
+            ← Layer 04 · Crust
+          </Link>
+          <span style={{ color: "var(--text-tertiary)" }}>/</span>
+          <Link href="/brokers" style={{ color: "var(--text-secondary)", textDecoration: "none" }}>
+            Advisors
+          </Link>
+          <span style={{ color: "var(--text-tertiary)" }}>/</span>
+          <span style={{ color: "var(--accent)" }}>{identity.name}</span>
+        </nav>
+
         <BrokerDossierIdentity identity={identity} record={scoutItRecord} credential={credential} />
 
         <div className="broker-profile-actions-bar">

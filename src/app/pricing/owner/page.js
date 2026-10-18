@@ -98,7 +98,7 @@ export default function OwnerPricingPage() {
             </p>
           </div>
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            LAYER 08 // OWNER PLANS
+            COMMERCIAL ARCHITECTURE // OWNER PLANS
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Manage Your <span className="text-gold-accent">Properties</span>

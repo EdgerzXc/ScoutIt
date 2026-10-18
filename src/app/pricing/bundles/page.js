@@ -130,7 +130,7 @@ export default function BundlesPricingPage() {
           </div>
 
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            LAYER 08 // ECOSYSTEM BUNDLES
+            COMMERCIAL ARCHITECTURE // ECOSYSTEM BUNDLES
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Every Role. <span className="text-gold-accent">One Plan.</span>
