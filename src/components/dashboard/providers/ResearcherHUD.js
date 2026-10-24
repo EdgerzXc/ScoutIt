@@ -67,7 +67,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                     <span className="font-working-title text-sm text-intel-cyan">PEZA Certification Status</span>
                     <span className="text-xs text-text-muted">Target: peza_status</span>
                   </div>
-                  <select className="w-full bg-surface-alt border border-surface-variant p-2 rounded text-sm focus:outline-none focus:border-intel-cyan text-on-surface">
+                  <select className="w-full bg-surface-alt border border-surface-variant p-2 rounded text-base md:text-sm focus:outline-none focus:border-intel-cyan text-on-surface">
                     <option value="">Select verified status...</option>
                     <option value="certified">PEZA Certified</option>
                     <option value="in_process">In Process</option>
@@ -80,7 +80,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
                     <span className="font-working-title text-sm text-intel-cyan">Exact Floor Area (Sqm)</span>
                     <span className="text-xs text-text-muted">Target: floor_sqm</span>
                   </div>
-                  <input type="number" className="w-full bg-surface-alt border border-surface-variant p-2 rounded text-sm focus:outline-none focus:border-intel-cyan text-on-surface" placeholder="e.g. 1200" />
+                  <input type="number" className="w-full bg-surface-alt border border-surface-variant p-2 rounded text-base md:text-sm focus:outline-none focus:border-intel-cyan text-on-surface" placeholder="e.g. 1200" />
                 </div>
               </div>
             </div>
@@ -88,7 +88,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
             <div className="card-atmosphere rounded-lg p-6">
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase mb-4">Audit Notes</h3>
               <textarea 
-                className="w-full bg-surface border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-intel-cyan text-on-surface min-h-[100px]"
+                className="w-full bg-surface border border-surface-variant rounded p-3 text-base md:text-sm focus:outline-none focus:border-intel-cyan text-on-surface min-h-[100px]"
                 placeholder="Include link to LRA records, assessor's office documents, or physical inspection notes..."
               ></textarea>
             </div>

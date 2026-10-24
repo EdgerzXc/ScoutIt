@@ -570,10 +570,11 @@ export function DashboardProvider({ children }) {
 
     // Direct write fallback (A-092 honest error checking)
     const { error } = await supabase.from('bounty_claims').insert([{
+      target_field: questScope,
       property_id: propertyId,
-      quest_scope: questScope,
-      user_id: currentUser.id,
+      initiator_id: currentUser.id,
       status: 'open',
+      payout_connects: 0,
     }]);
 
     if (error) {
@@ -970,6 +971,7 @@ export function DashboardProvider({ children }) {
       slug,
       location: 'Pending',
       pipeline_status: 'ai_drafting',
+      creation_source: 'pdf_assisted',
       details: { source_pdf: fileName }
     }]).select();
 

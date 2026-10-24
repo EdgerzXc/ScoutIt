@@ -20,7 +20,7 @@ export const NAVIGATION_GROUPS = Object.freeze([
 // soon" — their pages stay live at their URLs; add each back when it launches.
 export const PRIMARY_NAV_ENTRIES = Object.freeze([
   { id: "settings", href: "/settings", label: "Settings", group: "account" },
-  { id: "discover", href: "/discover", label: "Discover", group: "explore" },
+  { id: "discover", href: "/property", label: "Space Directory", group: "explore" },
   { id: "brokers", href: "/brokers", label: "Brokers", group: "explore" },
   { id: "wishlist", href: "/wishlist", label: "Your Board", group: "workspace" },
   { id: "dashboard", href: "/dashboard", label: "Dashboard", group: "workspace" },

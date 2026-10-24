@@ -5,7 +5,12 @@ import maplibregl from "@/lib/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapCreditControl from "@/components/maps/MapCreditControl";
 import { isWebglSupported } from "@/lib/webglCheck";
-import { generateBeaconGeoJSON, DISTRICT_COORDS } from "@/lib/communitySignalsAdapter";
+import {
+  generateBeaconGeoJSON,
+  DISTRICT_COORDS,
+  getRadarColorLegendSummary,
+} from "@/lib/communitySignalsAdapter";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import "./spatial-signal-radar.css";
 
 const METRO_MANILA_CENTER = { lng: 121.0350, lat: 14.5500 };
@@ -19,6 +24,8 @@ export default function SpatialSignalRadar({
   selectedSignal = null,
   hoveredSignalId = null,
   selectedDistrict = null,
+  activeColorKey = null,
+  onSelectColorKey = () => {},
   onSelectSignal = () => {},
   onHoverSignal = () => {},
   onSelectDistrict = () => {},
@@ -28,6 +35,23 @@ export default function SpatialSignalRadar({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(DEFAULT_ZOOM);
   const [webglSupported, setWebglSupported] = useState(true);
+  const [legendExpanded, setLegendExpanded] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 680) {
+      setLegendExpanded(false);
+    }
+  }, []);
+
+  // Sector-scoped signals for legend summary count
+  const activeSectorSignals = React.useMemo(() => {
+    if (!selectedDistrict) return allSignals;
+    return allSignals.filter((s) => s.district === selectedDistrict);
+  }, [allSignals, selectedDistrict]);
+
+  const legendSummary = React.useMemo(() => {
+    return getRadarColorLegendSummary(activeSectorSignals);
+  }, [activeSectorSignals]);
 
   const filteredIdsSet = React.useMemo(() => {
     return new Set(filteredSignals.map((s) => s.id));
@@ -311,6 +335,110 @@ export default function SpatialSignalRadar({
             {selectedDistrict ? `SECTOR: ${selectedDistrict.toUpperCase()}` : "ALL SECTORS"}
           </span>
         </div>
+      </div>
+
+      {/* ── SPATIAL RADAR COLOR SIGNAL MAP / LEGEND ── */}
+      <div className="ssr-legend-overlay">
+        {legendExpanded ? (
+          <aside className="ssr-legend-card" aria-label="3D Radar Color Signal Map">
+            <div className="ssr-legend-header">
+              <div className="ssr-legend-title-wrap">
+                <span className="ssr-legend-beacon-dot" aria-hidden="true" />
+                <h4 className="ssr-legend-title">COLOR SIGNAL MAP</h4>
+              </div>
+              <div className="ssr-legend-actions">
+                {activeColorKey ? (
+                  <button
+                    type="button"
+                    className="ssr-legend-reset-btn"
+                    onClick={() => onSelectColorKey(null)}
+                    title="Show all signal colors"
+                  >
+                    RESET
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="ssr-legend-toggle-btn"
+                  onClick={() => setLegendExpanded(false)}
+                  aria-expanded="true"
+                  aria-label="Collapse color signal map"
+                  title="Collapse legend"
+                >
+                  <ChevronDown size={14} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            <div className="ssr-legend-list" role="list">
+              {legendSummary.map((item) => {
+                const isActive = activeColorKey === item.key;
+                return (
+                  <div key={item.key} role="listitem" className="ssr-legend-item-wrap">
+                    <button
+                      type="button"
+                      className={`ssr-legend-row ${isActive ? "is-active" : ""}`}
+                      onClick={() => onSelectColorKey(isActive ? null : item.key)}
+                      aria-pressed={isActive}
+                      title={`${item.colorName} · ${item.label}: ${item.meaning}. Click to ${isActive ? "clear filter" : "filter this color"}.`}
+                    >
+                      <div className="ssr-legend-marker-cell">
+                        <span
+                          className="ssr-legend-pillar-swatch"
+                          style={{
+                            backgroundColor: item.colorToken,
+                            boxShadow: `0 0 8px ${item.glowColor}`,
+                          }}
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div className="ssr-legend-info-cell">
+                        <div className="ssr-legend-label-line">
+                          <span className="ssr-legend-color-tag">{item.colorName.toUpperCase()}</span>
+                          <span className="ssr-legend-dot-sep">·</span>
+                          <span className="ssr-legend-domain-label">{item.label}</span>
+                        </div>
+                        <span className="ssr-legend-meaning">{item.meaning}</span>
+                      </div>
+                      <span className="ssr-legend-count-pill" title={`${item.count} active beacons`}>
+                        {item.count}
+                      </span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
+        ) : (
+          <button
+            type="button"
+            className="ssr-legend-pill-trigger"
+            onClick={() => setLegendExpanded(true)}
+            aria-expanded="false"
+            aria-label="Expand 3D radar color signal map"
+            title="Open color signal map"
+          >
+            <div className="ssr-legend-pill-spectrum" aria-hidden="true">
+              {legendSummary.map((item) => (
+                <span
+                  key={item.key}
+                  className="ssr-legend-micro-dot"
+                  style={{
+                    backgroundColor: item.colorToken,
+                    boxShadow: `0 0 5px ${item.glowColor}`,
+                  }}
+                />
+              ))}
+            </div>
+            <span className="ssr-legend-pill-label">COLOR SIGNAL MAP</span>
+            {activeColorKey ? (
+              <span className="ssr-legend-filter-badge">
+                {activeColorKey.toUpperCase()} ACTIVE
+              </span>
+            ) : null}
+            <ChevronUp size={13} className="ssr-legend-pill-icon" aria-hidden="true" />
+          </button>
+        )}
       </div>
     </div>
   );

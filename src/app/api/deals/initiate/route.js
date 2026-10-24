@@ -431,68 +431,97 @@ export async function POST(request) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
     }
 
-    // Signal exactly the recipient snapshot. When the active roster is
-    // non-empty the owner is deliberately absent; when it is empty the RPC
-    // returns the owner/lister as the sole recipient.
-    const propertyTitle = propertyRow?.title || 'your property';
-    for (const recipientId of recipientIds) {
-      if (!recipientId || recipientId === userId) continue;
-      await notifyUser(supabaseAdmin, {
-        userId: recipientId,
-        title: role === 'operator' ? 'New operator request' : 'New inquiry',
-        desc: role === 'operator'
-          ? `Someone wants to operate units in "${propertyTitle}".`
-          : `Someone is asking about "${propertyTitle}".`,
-        icon: role === 'operator' ? '🏢' : '💬',
-        propertyId: resolvedListingId,
-        notificationType: role === 'operator' ? 'operator_request' : 'new_inquiry',
-      });
-    }
-    if (unitOperatorId && unitOperatorId !== userId && !recipientIds.includes(unitOperatorId)) {
-      await notifyUser(supabaseAdmin, {
-        userId: unitOperatorId,
-        title: 'New inquiry on your unit',
-        desc: `Someone is asking about a unit you operate in "${propertyTitle}".`,
-        icon: '💬',
-        propertyId: resolvedListingId,
-        notificationType: 'new_inquiry',
-      });
-    }
+    try {
+      // Signal exactly the recipient snapshot. When the active roster is
+      // non-empty the owner is deliberately absent; when it is empty the RPC
+      // returns the owner/lister as the sole recipient.
+      const propertyTitle = propertyRow?.title || 'your property';
+      for (const recipientId of recipientIds) {
+        if (!recipientId || recipientId === userId) continue;
+        await notifyUser(supabaseAdmin, {
+          userId: recipientId,
+          title: role === 'operator' ? 'New operator request' : 'New inquiry',
+          desc: role === 'operator'
+            ? `Someone wants to operate units in "${propertyTitle}".`
+            : `Someone is asking about "${propertyTitle}".`,
+          icon: role === 'operator' ? '🏢' : '💬',
+          propertyId: resolvedListingId,
+          notificationType: role === 'operator' ? 'operator_request' : 'new_inquiry',
+        });
+      }
+      if (unitOperatorId && unitOperatorId !== userId && !recipientIds.includes(unitOperatorId)) {
+        await notifyUser(supabaseAdmin, {
+          userId: unitOperatorId,
+          title: 'New inquiry on your unit',
+          desc: `Someone is asking about a unit you operate in "${propertyTitle}".`,
+          icon: '💬',
+          propertyId: resolvedListingId,
+          notificationType: 'new_inquiry',
+        });
+      }
 
-    // CRM Timeline: an initiated contact IS the inquiry event -- log it so it
-    // shows up on the deal's and property's Timeline immediately.
-    // A-144: source context + identity mode + bucket detail ride in metadata
-    // (no deals schema change — O-004 gates columns).
-    await logActivity(supabaseAdmin, {
-      dealId,
-      propertyId: resolvedListingId,
-      activityType: role === 'operator' ? 'operator_request' : 'inquiry',
-      actorId: userId,
-      metadata: {
-        unitId: unitId || null,
-        recipientIds,
+      // CRM Timeline: an initiated contact IS the inquiry event -- log it so it
+      // shows up on the deal's and property's Timeline immediately.
+      // A-144: source context + identity mode + bucket detail ride in metadata
+      // (no deals schema change — O-004 gates columns).
+      await logActivity(supabaseAdmin, {
+        dealId,
+        propertyId: resolvedListingId,
+        activityType: role === 'operator' ? 'operator_request' : 'inquiry',
+        actorId: userId,
+        metadata: {
+          unitId: unitId || null,
+          recipientIds,
+          routedToRoster,
+          openGateFree,
+          ...connectSourceMetadata(connectSource, {
+            // Bucket detail when the RPC returns it (legacy RPC: total only).
+            spent: spendData?.[0] || null,
+          }),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        dealId,
+        connects_spent: openGateFree ? 0 : 1,
+        open_gate: openGateFree,
+        connects_remaining: newBalance,
+        newBalance,
         routedToRoster,
-        openGateFree,
-        ...connectSourceMetadata(connectSource, {
-          // Bucket detail when the RPC returns it (legacy RPC: total only).
-          spent: spendData?.[0] || null,
-        }),
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      dealId,
-      connects_spent: openGateFree ? 0 : 1,
-      open_gate: openGateFree,
-      connects_remaining: newBalance,
-      newBalance,
-      routedToRoster,
-      recipientCount: recipientIds.length,
-      status: "pending",
-      source_context: connectSource,
-      sender_anonymous: requestedAnonymous,
-    });
+        recipientCount: recipientIds.length,
+        status: "pending",
+        source_context: connectSource,
+        sender_anonymous: requestedAnonymous,
+      });
+    } catch (postSpendErr) {
+      console.error("[DEALS INITIATE] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
+      if (!openGateFree && userId !== 'master-dev') {
+        try {
+          await supabaseAdmin.rpc('refund_connects_system_error', {
+            p_user_id: userId,
+            p_amount: 1,
+            p_reason: `Compensating refund: inquiry delivery failed for deal ${dealId}`,
+            p_staff_id: "system",
+            p_ref_id: String(resolvedListingId),
+          });
+        } catch (refundErr) {
+          console.error("[DEALS INITIATE] Compensating refund RPC failed:", refundErr);
+        }
+      }
+      try {
+        if (dealId) {
+          await supabaseAdmin.from('deal_routing_recipients').delete().eq('deal_id', dealId);
+          await supabaseAdmin.from('deals').delete().eq('id', dealId);
+        }
+      } catch (rollbackErr) {
+        console.error("[DEALS INITIATE] Deal rollback failed:", rollbackErr);
+      }
+      return NextResponse.json(
+        { error: openGateFree ? "Inquiry delivery failed." : "Inquiry delivery failed. Your Connect has been refunded." },
+        { status: 500 }
+      );
+    }
 
   } catch (err) {
     console.error("[INITIATE API] Error during initiate process:", err);

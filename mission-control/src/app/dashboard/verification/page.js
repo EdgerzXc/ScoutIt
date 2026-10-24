@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, TIERS } from "@/lib/rbac";
+import { getCurrentStaff } from "@/lib/rbac";
 import {
   createVerificationRequest,
   approveVerification,

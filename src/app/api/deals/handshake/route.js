@@ -7,6 +7,7 @@ import { resolveUserId, assertAdultEligibility } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
+import { SIGNAL_STATUSES } from "@/lib/communityPosting";
 
 /**
  * POST /api/deals/handshake
@@ -67,6 +68,30 @@ export async function POST(request) {
       }
 
       const result = Array.isArray(data) ? data[0] : data;
+      // A-240: If the mutually attested handshake completed, fulfill the originating demand signal if any
+      if (result?.rating_updated || result?.handshake_status === "completed") {
+        try {
+          const { data: dealRow } = await supabaseAdmin
+            .from("deals")
+            .select("routing_snapshot")
+            .eq("id", dealId)
+            .maybeSingle();
+          const signalId = dealRow?.routing_snapshot?.signal_id;
+          if (signalId) {
+            const nowIso = new Date().toISOString();
+            await supabaseAdmin
+              .from("stratosphere_signals")
+              .update({
+                status: SIGNAL_STATUSES.FULFILLED,
+                fulfilled_at: nowIso,
+                updated_at: nowIso,
+              })
+              .eq("id", signalId);
+          }
+        } catch {
+          // Non-fatal if table/columns unmigrated
+        }
+      }
       // A-144 §14 audit: the handshake is the contact-reveal act (acceptance
       // revealed the name; this reveals contact). Store only what is
       // operationally necessary — who, which deal, when — never the contact

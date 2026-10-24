@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { PhoneCall, MapPin, Compass } from "lucide-react";
+import { Compass } from "lucide-react";
 import { loadOutreachProspects } from "./actions";
 import OutreachClient from "./OutreachClient";
 

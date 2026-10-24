@@ -1,20 +1,9 @@
-// ═══════════════════════════════════════════════════════════════
-// Lite Mode — a global "performance" switch for low-end phones.
-//
-// When on, a `lite-mode` class is placed on <html>. The CSS kill-switch in
-// globals.css then freezes every animation/transition, hides the cosmic
-// canvas + drifting particles, and drops expensive backdrop-blur. JS-driven
-// loops (the homepage event-horizon canvas, the title beam, particle spawns)
-// also read isLiteMode() and simply never start.
-//
-// SSR-safe: every reader guards `typeof window`. The no-flash class is applied
-// by an inline <head> script in layout.js before first paint.
-// ═══════════════════════════════════════════════════════════════
+// Lite Mode places `lite-mode` on <html> to freeze CSS animations/transitions,
+// hide canvas particle loops, and disable backdrop-blur on low-end devices.
 
 export const LITE_MODE_KEY = "scoutit_lite_mode";
 export const LITE_MODE_EVENT = "scoutit:litemode";
 
-// True if Lite Mode is currently active (stored preference OR reduced-motion).
 export function isLiteMode() {
   if (typeof document !== "undefined") {
     return document.documentElement.classList.contains("lite-mode");
@@ -22,34 +11,11 @@ export function isLiteMode() {
   return false;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Interactive Mode — the "full experience" hero layer (unlockable via a
-// secret 5-click on the UFO easter egg). Independent of Lite Mode: Lite
-// always wins (checked first by consumers), Interactive only matters when
-// Lite is off. Not a security boundary — this is an easter egg gate, not an
-// auth check. Once Mission Control ships real staff roles, gate this on the
-// role too rather than the click alone.
-//
-// Three effective hero tiers read by src/app/page.js; Interactive lasts only until reload:
-//   lite off + interactive off -> Balance  (BlackHoleCanvas — raymarched golden hero)
-//   lite off + interactive on  -> Interactive (GoldenHorizonCanvas simulator + panel)
-//   lite on                    -> nothing (both components no-op)
-// ═══════════════════════════════════════════════════════════════
-
+// Interactive Mode unlocks the full-experience hero layer via the 5-click UFO
+// easter egg when Lite Mode is off. It lasts only until reload.
 const LEGACY_INTERACTIVE_MODE_KEY = "scoutit_interactive_mode";
 export const INTERACTIVE_MODE_EVENT = "scoutit:interactivemode";
 
-// True if Interactive Mode is currently active (live DOM class, same
-// no-flash pattern as Lite Mode).
-export function isInteractiveMode() {
-  if (typeof document !== "undefined") {
-    return document.documentElement.classList.contains("interactive-mode");
-  }
-  return false;
-}
-
-// The simulator is a temporary easter egg. Never restore it on a new page
-// load, including for browsers carrying the old saved preference.
 export function setInteractiveMode(on) {
   if (typeof document === "undefined") return;
   try {
@@ -59,7 +25,6 @@ export function setInteractiveMode(on) {
   window.dispatchEvent(new CustomEvent(INTERACTIVE_MODE_EVENT, { detail: { on: !!on } }));
 }
 
-// Read the stored preference only (ignores the live DOM class). SSR-safe.
 export function getStoredLiteMode() {
   if (typeof window === "undefined") return false;
   try {
@@ -69,8 +34,6 @@ export function getStoredLiteMode() {
   }
 }
 
-// Turn Lite Mode on/off: persist it, toggle the <html> class, and notify any
-// listening component (homepage canvas, the toggles) so they react live.
 export function setLiteMode(on) {
   if (typeof document === "undefined") return;
   try {

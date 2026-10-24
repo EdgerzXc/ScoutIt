@@ -79,19 +79,6 @@ export function getZonedDateKey(instant, timeZone) {
   return getZonedParts(instant, timeZone).dateKey;
 }
 
-/** Lowercase weekday name ("monday") for `instant` in `timeZone`. */
-export function getZonedWeekday(instant, timeZone) {
-  return getZonedParts(instant, timeZone).weekday;
-}
-
-/**
- * Offset of `timeZone` from UTC at `instant`, in minutes.
- * Positive east of UTC (Asia/Manila => +480).
- */
-export function getTimeZoneOffsetMinutes(instant, timeZone) {
-  return offsetAt(instant, timeZone);
-}
-
 /**
  * Convert a wall-clock time in `timeZone` to the UTC instant it denotes.
  *

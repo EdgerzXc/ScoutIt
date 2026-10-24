@@ -1,7 +1,6 @@
 import { distanceMeters } from "@/lib/geo";
 import {
   ingestedArticleSchema,
-  slugifyTitle,
   blocksToPlainText,
 } from "@/lib/articleSchema";
 

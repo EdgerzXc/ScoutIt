@@ -14,7 +14,6 @@ const read = (p) => readFileSync(join(process.cwd(), p), "utf8");
 const MODALS = [
   "src/components/property/InquiryModal.js",
   "src/components/property/UnitInquiryModal.js",
-  "src/components/ui/EarlyAccessGate.js",
   "src/components/dashboard/BookingModal.js",
   "src/components/stratosphere/CommunityConnectModal.js",
   "src/components/dashboard/ListerDeclarationModal.js",
@@ -109,9 +108,8 @@ describe("A-153 — modal keyboard contract", () => {
   });
 
   it("decorative SVGs in touched modals stay silent", () => {
-    // EarlyAccessGate inlines literal <svg> tags — each must be hidden.
-    const gate = read("src/components/ui/EarlyAccessGate.js");
-    const svgs = gate.match(/<svg[\s\S]*?>/g) || [];
+    const waitlist = read("src/components/waitlist/WaitlistModal.js");
+    const svgs = waitlist.match(/<svg[\s\S]*?>/g) || [];
     expect(svgs.length).toBeGreaterThan(0);
     for (const tag of svgs) {
       expect(tag).toContain('aria-hidden="true"');

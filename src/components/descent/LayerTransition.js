@@ -34,6 +34,10 @@ export default function LayerTransition({ nextNum, nextName, nextHref, teaser, a
             <span className={styles.transitionTeaser}>{teaser}</span>
           )}
           <span className={styles.transitionArrow} aria-hidden="true">↓</span>
+          <span className={styles.transitionCta}>
+            <span>Descend to {nextName}</span>
+            <span className={styles.transitionCtaArrow} aria-hidden="true">→</span>
+          </span>
         </Link>
       </div>
     </section>

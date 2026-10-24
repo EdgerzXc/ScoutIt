@@ -1,14 +1,12 @@
 import { supabase } from './supabaseClient';
 import { anonymityShieldDefaultsOn } from './entitlements';
 
-// ── PROFILE SYNC — RETIRED (A-138) ────────────────────────────────────────────
 // `upsertProfile` copied the browser's `scoutit_user` into the account on every
 // /profile visit. It reverted Settings edits, blanked any field the copy lacked,
 // and let an editable browser copy re-add a gated role past A-137's licence
 // check. My Profile now reads the account (loadOwnProfile) and nothing writes
 // profile fields from browser state. Do not reintroduce it.
 
-// ── OWN PROFILE LOAD ──────────────────────────────────────────────────────────
 // A-138: named columns, never `*`. One column later restricted for the browser
 // would otherwise fail the whole read with 42501 and take the page down.
 // Every column here was confirmed readable by `authenticated` on 2026-09-11.
@@ -26,7 +24,6 @@ export async function loadOwnProfile(userId) {
   return { data, error };
 }
 
-// ── PUBLIC PROFILE LOAD ───────────────────────────────────────────────────────
 // Reads the `public_profiles` VIEW, never the base table (NEW_IDEAS.md §43).
 //
 // This previously said "excludes connects_balance — enforced at query level".
@@ -81,7 +78,6 @@ export async function loadPublicProfile(identifier) {
   };
 }
 
-// ── PUBLIC PROVIDER DIRECTORY ─────────────────────────────────────────────────
 // Powers /researchers and /photographers. RLS only exposes rows with
 // is_profile_public = true to the anon client, so this is public data by
 // definition. Same field discipline as loadPublicProfile — never
@@ -111,7 +107,6 @@ export async function loadPublicProviders(providerType) {
   return { data: enriched, error: null };
 }
 
-// ── PUBLIC ROLES (for viewing someone else's profile) ─────────────────────────
 // privacy_settings is own-rows-only under RLS (correctly, since the 2026-07-09
 // reset), so a visitor can't read the target's public_roles directly — the
 // server route returns just that one display-control field, and only for
@@ -132,9 +127,6 @@ export async function loadPublicRoles(userId) {
   }
 }
 
-// ── PRIVACY SETTINGS ──────────────────────────────────────────────────────────
-//
-// ── ANONYMITY SHIELD (NEW_IDEAS.md §46.8) ──
 // Owner ruling 2026-08-06: the shield is FREE FOR EVERYONE; Cluster+ only
 // changes whether it starts switched ON.
 //
@@ -214,7 +206,6 @@ export async function updateProfilePublic(userId, isPublic) {
   }
 }
 
-// ── BROKER PROFILE ────────────────────────────────────────────────────────────
 export async function loadBrokerProfile(userId, { createIfMissing = true } = {}) {
   const { data, error } = await supabase
     .from('broker_profiles')
@@ -233,7 +224,6 @@ export async function loadBrokerProfile(userId, { createIfMissing = true } = {})
   return { data, error };
 }
 
-// ── RESEARCHER PROFILE ────────────────────────────────────────────────────────
 export async function loadResearcherProfile(userId, { createIfMissing = true } = {}) {
   const { data, error } = await supabase
     .from('researcher_profiles')
@@ -252,7 +242,6 @@ export async function loadResearcherProfile(userId, { createIfMissing = true } =
   return { data, error };
 }
 
-// ── PHOTOGRAPHER PROJECTS ─────────────────────────────────────────────────────
 // Reads from the existing `projects` table (provider_id is their user ID).
 export async function loadPhotographerProjects(userId) {
   const { data, error } = await supabase
@@ -261,15 +250,4 @@ export async function loadPhotographerProjects(userId) {
     .eq('provider_id', userId)
     .order('created_at', { ascending: false });
   return { data: data || [], error };
-}
-
-// Seeker / Owner private-panel loaders were removed with those panels (A-138):
-// they repeated the dashboard's numbers on a page that shows how others see you.
-
-// ── INCREMENT PROFILE VIEWS ───────────────────────────────────────────────────
-export async function incrementBrokerProfileViews(userId) {
-  const { data, error } = await supabase.functions.invoke('increment_profile_views', {
-    body: { user_id: userId },
-  });
-  return { data, error };
 }

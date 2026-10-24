@@ -13,7 +13,7 @@ const read = (p) => readFileSync(join(process.cwd(), p), "utf8");
 
 const FORMS = [
   "src/app/contact/ContactClient.js",
-  "src/components/ui/EarlyAccessGate.js",
+  "src/components/waitlist/WaitlistModal.js",
   "src/components/property/InquiryModal.js",
   "src/components/property/UnitInquiryModal.js",
   "src/components/stratosphere/CommunityConnectModal.js",

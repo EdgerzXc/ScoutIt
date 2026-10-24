@@ -19,7 +19,7 @@ const DEAL_FIELDS =
 // which the render rule treats as false. A missing column never breaks the
 // inbox (same warn-once fallback shape as connectGates.js).
 const DEAL_FIELDS_ANON = `${DEAL_FIELDS}, sender_anonymous`;
-const DEAL_FIELDS_GATE = `${DEAL_FIELDS_ANON}, open_gate_inbound`;
+const DEAL_FIELDS_GATE = `${DEAL_FIELDS_ANON}, open_gate_inbound, routing_snapshot`;
 
 let anonColumnWarned = false;
 

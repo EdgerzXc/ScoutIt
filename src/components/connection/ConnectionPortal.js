@@ -243,7 +243,7 @@ export default function ConnectionPortal({ brokerName, brokerId, spaces = [], is
               Find a space you are interested in and open the conversation from
               its page — it reaches this advisor the same way.
             </p>
-            <Link href="/discover" className="portal-empty-cta">Browse spaces →</Link>
+            <Link href="/property" className="portal-empty-cta">Browse spaces →</Link>
           </div>
         ) : user ? (
           <form className="portal-form" onSubmit={handleHandshakeSubmit}>

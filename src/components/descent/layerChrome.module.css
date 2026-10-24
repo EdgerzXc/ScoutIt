@@ -37,13 +37,14 @@
 
 .pill {
   min-height: 44px;
-  padding: 0 15px;
-  border: 1px solid rgba(var(--accent-rgb), 0.32);
+  padding: 0 16px;
+  border: 1px solid rgba(var(--accent-rgb), 0.42);
   border-radius: var(--radius-pill);
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: rgba(var(--surface-rgb), 0.62);
+  gap: 8px;
+  background: rgba(var(--surface2-rgb), 0.88);
+  backdrop-filter: blur(12px);
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 12px;
@@ -56,6 +57,7 @@
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   transform: translateZ(0);
+  box-shadow: 0 2px 8px rgba(var(--bg-rgb), 0.35);
   transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
 }
 
@@ -73,7 +75,7 @@
     border-color: var(--accent-bright);
     background: var(--accent-bright);
     color: var(--on-accent);
-    box-shadow: var(--shadow-glow-soft);
+    box-shadow: 0 0 18px rgba(var(--accent-bright-rgb), 0.45);
     transform: translateY(-1px) translateZ(10px);
   }
 }
@@ -104,6 +106,16 @@
   color: var(--on-accent);
   box-shadow: var(--shadow-sm);
 }
+:global(body.light-mode) .transitionCta {
+  background: rgba(var(--text-primary-rgb), 0.08);
+  border-color: rgba(var(--text-primary-rgb), 0.2);
+  color: var(--text-primary);
+}
+:global(body.light-mode) .transitionLink:focus-visible .transitionCta {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  border-color: var(--accent-fill);
+}
 @media (hover: hover) and (pointer: fine) {
   :global(body.light-mode) .pill:hover {
     border-color: var(--accent-fill);
@@ -120,23 +132,40 @@
     color: var(--on-accent);
     box-shadow: var(--shadow-sm);
   }
+  :global(body.light-mode) .transitionLink:hover .transitionCta {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    border-color: var(--accent-fill);
+  }
 }
 
 .arrow {
   color: var(--accent-bright);
   font-size: 13px;
   line-height: 1;
-  transition: color var(--transition-slow), transform var(--transition-slow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: rgba(var(--accent-rgb), 0.14);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  transition: color var(--transition-slow), background-color var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow);
 }
 
 .pill:focus-visible .arrow {
-  color: var(--on-accent);
+  color: var(--accent-bright);
+  background: var(--on-accent);
+  border-color: var(--on-accent);
 }
 
 
 @media (hover: hover) and (pointer: fine) {
   .pill:hover .arrow {
-    color: var(--on-accent);
+    color: var(--accent-bright);
+    background: var(--on-accent);
+    border-color: var(--on-accent);
   }
 }
 
@@ -176,6 +205,10 @@
   .pill:hover .plain {
     color: var(--on-accent);
   }
+}
+
+.pillCompactLabel {
+  display: none;
 }
 
 .brand {
@@ -489,6 +522,64 @@
   animation: descentPulse 2.4s ease-in-out infinite;
 }
 
+.transitionCta {
+  margin-top: 14px;
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(var(--accent-rgb), 0.14);
+  border: 1px solid rgba(var(--accent-rgb), 0.55);
+  color: var(--accent-bright);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.2);
+  transform: translateY(0);
+  transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
+}
+
+.transitionCtaArrow {
+  font-size: 14px;
+  line-height: 1;
+  transition: transform var(--transition-slow);
+}
+
+.transitionLink:focus-visible .transitionCta {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+  box-shadow: 0 6px 22px rgba(var(--accent-bright-rgb), 0.45);
+  transform: translateY(-2px);
+}
+
+.transitionLink:focus-visible .transitionCtaArrow {
+  transform: translateX(4px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .transitionLink:hover .transitionCta {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+    box-shadow: 0 6px 22px rgba(var(--accent-bright-rgb), 0.45);
+    transform: translateY(-2px);
+  }
+
+  .transitionLink:hover .transitionCtaArrow {
+    transform: translateX(4px);
+  }
+}
+
+.transitionLink:active .transitionCta {
+  transform: scale(0.98);
+}
+
 @keyframes chromeReveal {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: none; }
@@ -507,10 +598,12 @@
 }
 
 @media (max-width: 520px) {
-  .nav { grid-template-columns: 44px 1fr 44px; gap: 8px; padding-inline: 10px; }
-  .navEdge, .navEnd { width: 44px; }
-  .pill { width: 44px; padding: 0; justify-content: center; }
-  .pillLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .nav { grid-template-columns: auto 1fr auto; gap: 8px; padding-inline: 10px; }
+  .navEdge, .navEnd { min-width: 44px; width: auto; }
+  .pill { min-width: 44px; width: auto; padding: 0 12px; gap: 6px; justify-content: center; }
+  .pillLabel { display: none; }
+  .pillCompactLabel { display: inline; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-primary); }
+  .pill:focus-visible .pillCompactLabel { color: var(--on-accent); }
   .nav .brand,
   .brand { justify-self: center; font-size: 20px; }
   .headerInner { padding-inline: 18px; }
@@ -518,6 +611,13 @@
   .primaryCta { width: 100%; }
   .transition { padding-inline: 16px; }
   .transitionLink { border-radius: 16px; }
+  .transitionCta { width: 100%; min-height: 48px; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover .pillCompactLabel {
+    color: var(--on-accent);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -527,15 +627,21 @@
   .arrow,
   .brand::before,
   .primaryCta,
-  .transitionLink { transition: none; transform: none; }
+  .transitionLink,
+  .transitionCta,
+  .transitionCtaArrow { transition: none; transform: none; }
   .pill:focus-visible,
   .primaryCta:focus-visible,
-  .transitionLink:focus-visible { transform: none; }
+  .transitionLink:focus-visible,
+  .transitionLink:focus-visible .transitionCta,
+  .transitionLink:focus-visible .transitionCtaArrow { transform: none; }
 
   @media (hover: hover) and (pointer: fine) {
     .pill:hover,
-      .primaryCta:hover,
-      .transitionLink:hover { transform: none; }
+    .primaryCta:hover,
+    .transitionLink:hover,
+    .transitionLink:hover .transitionCta,
+    .transitionLink:hover .transitionCtaArrow { transform: none; }
   }
 }
 
@@ -552,4 +658,5 @@
    block, which removes the movement and keeps the control usable. */
 .pill:active,
 .primaryCta:active,
-.transitionLink:active { transform: scale(0.97); transition-duration: 120ms; }
+.transitionLink:active,
+.transitionCta:active { transform: scale(0.97); transition-duration: 120ms; }

@@ -54,18 +54,24 @@ export function getSignalMarketRole(signal) {
   if (typeof signal.id === "string" && signal.id.startsWith("pipeline-")) {
     return MARKET_ROLES.INTEL;
   }
-  const type = signal?.signalType;
+  const rawType = String(signal?.signalType || signal?.signal_type || "").trim().toUpperCase();
   if (
-    type === SIGNAL_TYPES.LOOKING_FOR ||
-    type === SIGNAL_TYPES.REPRESENTING_CLIENT ||
-    type === SIGNAL_TYPES.BUSINESS_EXPANSION
+    rawType === SIGNAL_TYPES.LOOKING_FOR ||
+    rawType === SIGNAL_TYPES.REPRESENTING_CLIENT ||
+    rawType === SIGNAL_TYPES.BUSINESS_EXPANSION ||
+    rawType === "LOOKING_FOR" ||
+    rawType === "REPRESENTING_CLIENT" ||
+    rawType === "BUSINESS_EXPANSION"
   ) {
     return MARKET_ROLES.DEMAND;
   }
   if (
-    type === SIGNAL_TYPES.UPCOMING_SUPPLY ||
-    type === SIGNAL_TYPES.OPPORTUNITY ||
-    type === SIGNAL_TYPES.COMMERCIAL_PROMOTION
+    rawType === SIGNAL_TYPES.UPCOMING_SUPPLY ||
+    rawType === SIGNAL_TYPES.OPPORTUNITY ||
+    rawType === SIGNAL_TYPES.COMMERCIAL_PROMOTION ||
+    rawType === "UPCOMING_SUPPLY" ||
+    rawType === "OPPORTUNITY" ||
+    rawType === "COMMERCIAL_PROMOTION"
   ) {
     return MARKET_ROLES.SUPPLY;
   }
@@ -95,6 +101,104 @@ export const SIGNAL_COLOR_TOKENS = Object.freeze({
   COMMERCIAL_PROMOTION: "var(--yellow)",
   SCOUTIT_INTELLIGENCE: "var(--accent-bright)",
 });
+
+/**
+ * Canonical 3D Radar Beacon Color Signal Key / Legend.
+ * Explicitly maps Stratosphere beacon frequencies to domain meanings.
+ */
+export const RADAR_COLOR_LEGEND = Object.freeze([
+  {
+    key: "gold",
+    colorName: "Gold",
+    colorHex: "rgb(232, 174, 60)",
+    colorToken: "var(--accent)",
+    glowColor: "rgba(232, 174, 60, 0.5)",
+    label: "SEEKERS & DEMAND",
+    meaning: "Active buyer & tenant space searches, corporate mandates",
+    types: [
+      SIGNAL_TYPES.LOOKING_FOR,
+      SIGNAL_TYPES.REPRESENTING_CLIENT,
+      SIGNAL_TYPES.SCOUTIT_INTELLIGENCE,
+    ],
+    marketRole: MARKET_ROLES.DEMAND,
+  },
+  {
+    key: "green",
+    colorName: "Green",
+    colorHex: "#10b981",
+    colorToken: "var(--green)",
+    glowColor: "rgba(16, 185, 129, 0.5)",
+    label: "SPACES AVAILABLE",
+    meaning: "Upcoming off-market supply & pre-leasing inventory",
+    types: [SIGNAL_TYPES.UPCOMING_SUPPLY],
+    marketRole: MARKET_ROLES.SUPPLY,
+  },
+  {
+    key: "purple",
+    colorName: "Purple",
+    colorHex: "#a855f7",
+    colorToken: "var(--amethyst)",
+    glowColor: "rgba(168, 85, 247, 0.5)",
+    label: "BUSINESS EXPANSION",
+    meaning: "Corporate expansions, retail rollouts & HQ relocations",
+    types: [SIGNAL_TYPES.BUSINESS_EXPANSION],
+    marketRole: null,
+  },
+  {
+    key: "red",
+    colorName: "Red / Amber",
+    colorHex: "#d97706",
+    colorToken: "var(--yellow)",
+    glowColor: "rgba(217, 119, 6, 0.5)",
+    label: "MARKET DYNAMICS",
+    meaning: "Macro urban observations, zoning shifts & market velocity",
+    types: [SIGNAL_TYPES.MARKET_OBSERVATION, SIGNAL_TYPES.COMMERCIAL_PROMOTION],
+    marketRole: MARKET_ROLES.INTEL,
+  },
+  {
+    key: "cyan",
+    colorName: "Cyan",
+    colorHex: "#38bdf8",
+    colorToken: "var(--intel-cyan)",
+    glowColor: "rgba(56, 189, 248, 0.5)",
+    label: "SPATIAL OPPORTUNITY",
+    meaning: "Special conversions, PEZA catalysts & high-yield assets",
+    types: [SIGNAL_TYPES.OPPORTUNITY],
+    marketRole: null,
+  },
+]);
+
+export function getSignalLegendItem(signal) {
+  if (!signal) return RADAR_COLOR_LEGEND[0];
+  const rawType = String(signal?.signalType || signal?.signal_type || "").trim().toUpperCase();
+  for (const item of RADAR_COLOR_LEGEND) {
+    if (item.types.some((t) => t.toUpperCase() === rawType)) {
+      return item;
+    }
+  }
+  return RADAR_COLOR_LEGEND[0];
+}
+
+export function getRadarColorLegendSummary(signals = []) {
+  const counts = {
+    gold: 0,
+    green: 0,
+    purple: 0,
+    red: 0,
+    cyan: 0,
+  };
+  for (const s of signals) {
+    const item = getSignalLegendItem(s);
+    if (item && counts[item.key] !== undefined) {
+      counts[item.key]++;
+    }
+  }
+  return RADAR_COLOR_LEGEND.map((item) => ({
+    ...item,
+    count: counts[item.key] || 0,
+  }));
+}
+
 
 export const DISTRICT_COORDS = Object.freeze({
   "BGC": { lat: 14.5409, lng: 121.0503, name: "BGC", city: "Taguig" },
@@ -546,6 +650,15 @@ export function getDistrictsSummary(signals = COMMUNITY_SIGNALS) {
       entry.count += 1;
       entry.totalRelevant += sig.relevantCount || 0;
       entry.signals.push(sig);
+    } else if (d) {
+      summaryMap.set(d, {
+        district: d,
+        count: 1,
+        totalRelevant: sig.relevantCount || 0,
+        signals: [sig],
+        name: d,
+        city: sig.city || d,
+      });
     }
   });
 
@@ -571,14 +684,20 @@ export function filterSignals(signals = COMMUNITY_SIGNALS, {
   district = null,
   spaceType = null,
   marketRole = null,
+  colorKey = null,
 } = {}) {
   const q = (query || "").trim().toLowerCase();
 
   return signals.filter((sig) => {
-    // 0. Market Role filter (demand vs supply vs intel)
+    // 0a. Market Role filter (demand vs supply vs intel)
     if (marketRole && marketRole !== "all") {
       const role = getSignalMarketRole(sig);
       if (role !== marketRole) return false;
+    }
+    // 0b. Radar Color Key filter (gold vs green vs purple vs red vs cyan)
+    if (colorKey && colorKey !== "all") {
+      const item = getSignalLegendItem(sig);
+      if (item.key !== colorKey) return false;
     }
     // 1. Signal Type filter
     if (signalType && sig.signalType !== signalType) return false;

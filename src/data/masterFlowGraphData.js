@@ -2885,7 +2885,7 @@ export const MASTER_FLOW_NODES = [
     "evidence": [
       {
         "kind": "COMPONENT",
-        "path": "src/components/property/SpatialCommandMap.js",
+        "path": "src/components/maps/SpatialCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -2949,7 +2949,7 @@ export const MASTER_FLOW_NODES = [
         "evidence": [
           {
             "kind": "COMPONENT",
-            "path": "src/components/property/SpatialCommandMap.js",
+            "path": "src/components/maps/SpatialCanvas.js",
             "provenance": "EXTRACTED",
             "confidence": 1
           },
@@ -27040,7 +27040,7 @@ export const MASTER_FLOW_EDGES = [
     "evidence": [
       {
         "kind": "COMPONENT",
-        "path": "src/components/property/SpatialCommandMap.js",
+        "path": "src/components/maps/SpatialCanvas.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"

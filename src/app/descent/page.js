@@ -145,8 +145,8 @@ export default function DescentPage() {
         </div>
       </section>
 
-      {/* ATMOSPHERE — News */}
-      <section className="dl layer-atmos">
+      {/* LAYER 02 — STRATOSPHERE (Market Intel & Demand Signals) */}
+      <section className="dl layer-stratosphere">
         <div className="layer-bg">
           <div className="cloud c1" /><div className="cloud c2" /><div className="cloud c3" />
           {["12%", "28%", "44%", "61%", "77%", "90%"].map((l, i) => (
@@ -154,21 +154,21 @@ export default function DescentPage() {
           ))}
         </div>
         <div className="layer-content">
-          <div className="dl-eyebrow">Layer 02 · the atmosphere</div>
-          <h2 className="dl-title">News travels in the air.</h2>
-          <p className="dl-sub">Before your feet touch the ground: what&apos;s moving, what&apos;s shifting, what&apos;s worth knowing. The market, read from above.</p>
+          <div className="dl-eyebrow">Layer 02 · Stratosphere</div>
+          <h2 className="dl-title">Member demand & market signals.</h2>
+          <p className="dl-sub">Before your feet touch the ground: demand signals, market intel, and what&apos;s shifting across districts.</p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 30 }}>
             {/* A-098: key was `a.href` — all three cards link to /intel, so
                 three siblings shared one key and React warned on /descent.
                 Titles are the unique field here. */}
-            {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/intel" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/intel" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/intel" }].map((a) => (
+            {[{ t: "Makati CBD yields drop", k: "Market intel", href: "/stratosphere" }, { t: "Nuvali expansion patterns", k: "Area guide", href: "/stratosphere" }, { t: "Pasig zoning changes", k: "Regulatory", href: "/stratosphere" }].map((a) => (
               <Link key={a.t} href={a.href} style={{ flex: "1 1 240px", textDecoration: "none", background: "rgba(var(--bg-rgb),0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.2)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 10 }}>{a.k}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "var(--text-primary)" }}>{a.t}</div>
               </Link>
             ))}
           </div>
-          <Link href="/discover" className="dl-cta">Enter discovery →</Link>
+          <Link href="/layer/stratosphere" className="dl-cta">Enter Stratosphere →</Link>
         </div>
       </section>
 
@@ -217,7 +217,7 @@ export default function DescentPage() {
           <h2 className="dl-title">What holds it all together.</h2>
           <p className="dl-sub">The vetted ecosystem: the people who make the data trustworthy. The solid layer the whole world rests on.</p>
           <div className="role-grid" style={{ marginBottom: 30 }}>
-            {[{ Icon: Building2, t: "Verified advisors", d: "Licensed professionals to guide the deal.", href: "/brokers" }, { Icon: Camera, t: "Space photography", d: "Make every space look the way it deserves.", href: "/photographers" }, { Icon: Search, t: "Site research", d: "Due diligence before you commit.", href: "/researchers" }, { Icon: CalendarDays, t: "Event design", d: "Turn great spaces into great events.", href: "/event-planners" }].map((s) => (
+            {[{ Icon: Building2, t: "Verified advisors", d: "Licensed professionals to guide the deal.", href: "/brokers" }, { Icon: Camera, t: "Space photography", d: "Make every space look the way it deserves.", href: "/photographers" }, { Icon: Search, t: "Site research", d: "Due diligence before you commit.", href: "/researchers" }, { Icon: CalendarDays, t: "Space & concept design", d: "Turn great spaces into bespoke architectural concepts.", href: "/event-planners" }].map((s) => (
               <Link key={s.href} href={s.href} style={{ textDecoration: "none", background: "rgba(var(--bg-rgb),0.6)", border: "0.5px solid rgba(var(--accent-rgb),0.22)", borderRadius: 10, padding: "18px 20px", backdropFilter: "blur(4px)" }}>
                 <s.Icon strokeWidth={1.5} size={26} style={{ color: "var(--accent)" }} />
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-primary)", margin: "10px 0 5px" }}>{s.t}</div>

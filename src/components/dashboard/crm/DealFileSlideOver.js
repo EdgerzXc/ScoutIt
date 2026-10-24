@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { X, Building2, UserCircle2, Calendar, FileText, CheckCircle2, MapPin, Clock, Download, ShieldCheck } from "lucide-react";
+import { X, Building2, UserCircle2, Calendar, FileText, CheckCircle2, MapPin, Clock, Download, ShieldCheck, ChevronDown } from "lucide-react";
 import { crmFetch } from "../../../lib/crmClient";
 import { getSession } from "../../../lib/authClient";
 import { isDevelopmentMockAllowed } from "../../../lib/developmentMock";
 import { leadToVCard, exportFilename } from "../../../lib/leadExport";
+import { PIPELINE_COLUMNS, columnIdForDeal } from "@/lib/deals/dealStages";
 import DealTimeline from "./DealTimeline";
 
-export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate, mockUserId }) {
+export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate, onStatusChange, mockUserId }) {
   const reduceMotion = useReducedMotion();
   const [notes, setNotes] = useState("");
   const [savingState, setSavingState] = useState("idle"); // idle, saving, saved
@@ -78,6 +79,17 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
     }
   }, [deal]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleNotesChange = (e) => {
     const newNotes = e.target.value;
     setNotes(newNotes);
@@ -143,17 +155,44 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8">
-              {/* Status Pill */}
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-xs uppercase tracking-widest font-label-caps text-text-secondary">Stage</span>
-                <span className={`px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-widest ${getStatusColor(deal.status)}`}>
-                  {deal.status}
-                </span>
-                {deal.open_gate_inbound && (
-                  <span className="px-2.5 py-1 rounded bg-gold-accent/10 border border-gold-accent/30 text-gold-accent text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck size={12} /> Open Gate
-                  </span>
+            <div className="flex-1 overflow-y-auto p-6 pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom)))] flex flex-col gap-8">
+              {/* Status Pill & Stage Transition Selector */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-widest font-label-caps text-text-secondary">Stage</span>
+                    <span className={`px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-widest ${getStatusColor(deal.status)}`}>
+                      {deal.status}
+                    </span>
+                  </div>
+                  {deal.open_gate_inbound && (
+                    <span className="px-2.5 py-1 rounded bg-gold-accent/10 border border-gold-accent/30 text-gold-accent text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldCheck size={12} /> Open Gate
+                    </span>
+                  )}
+                </div>
+
+                {onStatusChange && (
+                  <div className="flex flex-col gap-1.5 pt-1">
+                    <label htmlFor="deal-stage-select" className="text-[12px] uppercase tracking-wider font-label-caps text-text-secondary">
+                      Move Stage (Touch-Friendly)
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="deal-stage-select"
+                        value={columnIdForDeal(deal)}
+                        onChange={(e) => onStatusChange(deal.id, e.target.value)}
+                        className="w-full min-h-[44px] px-3.5 py-2.5 rounded bg-surface border border-surface-variant text-base sm:text-xs font-mono uppercase text-on-surface focus:outline-none focus:border-gold-accent transition appearance-none cursor-pointer pr-10"
+                      >
+                        {PIPELINE_COLUMNS.map((col) => (
+                          <option key={col.id} value={col.id} className="bg-surface text-on-surface font-sans">
+                            {col.ownerLabel} ({col.id})
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                    </div>
+                  </div>
                 )}
               </div>
 

@@ -6,6 +6,16 @@ import { motion, MotionConfig } from "framer-motion";
 import { isLiteMode } from "@/lib/liteMode";
 
 export default function ComparisonMatrix({ properties, onClose }) {
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   if (!properties || properties.length === 0) return null;
 
   // A-146: framer drives inline styles per frame, which the Lite CSS
@@ -24,6 +34,9 @@ export default function ComparisonMatrix({ properties, onClose }) {
     >
       <motion.div 
         className="matrix-modal" 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Asset Comparison"
         onClick={(e) => e.stopPropagation()}
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}

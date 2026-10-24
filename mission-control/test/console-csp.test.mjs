@@ -36,9 +36,7 @@ test("script-src is an allowlist, not open to any origin", () => {
   const scriptSrc = directive("script-src");
   assert.ok(!scriptSrc.includes("*"), "script-src must not contain a wildcard origin");
   assert.ok(!scriptSrc.includes("'unsafe-eval'"), "the console runs no WebGL; unsafe-eval is not needed");
-  // Leaflet is loaded from unpkg by the Security Center map. Pinning it is a
-  // deliberate allowance, recorded — not an accident.
-  assert.match(scriptSrc, /https:\/\/unpkg\.com/);
+  assert.ok(!scriptSrc.includes("unpkg.com"), "Leaflet CDN was retired; unpkg.com must not remain in script-src");
 });
 
 test("the directives the console actually needs are all present", () => {
@@ -67,9 +65,9 @@ test("the browser can still reach Supabase, or the console cannot sign anyone in
   assert.match(directive("connect-src"), /example\.supabase\.co/);
 });
 
-test("the Security Center map can still load its tiles and stylesheet", () => {
+test("the Security Center map needs no external CDN stylesheet", () => {
   assert.match(directive("img-src"), /cartocdn\.com|https:/);
-  assert.match(directive("style-src"), /https:\/\/unpkg\.com/);
+  assert.ok(!directive("style-src").includes("unpkg.com"));
 });
 
 test("the console sends HSTS, which the main app already did and this did not", () => {
@@ -81,7 +79,7 @@ test("the console sends HSTS, which the main app already did and this did not", 
 
 test("Turnstile can load while all other frame origins and console embedding remain denied", () => {
   assert.deepEqual(directive("script-src").split(/\s+/), [
-    "'self'", "'unsafe-inline'", "https://unpkg.com", "https://challenges.cloudflare.com",
+    "'self'", "'unsafe-inline'", "https://challenges.cloudflare.com",
   ]);
   assert.equal(directive("frame-src"), "https://challenges.cloudflare.com");
   assert.equal(directive("frame-ancestors"), "'none'");

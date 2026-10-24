@@ -92,7 +92,7 @@ const ICONS = {
 const ITEMS = {
   home:      { id: "home",      href: "/",          label: "Home",      icon: ICONS.home },
   spaces:    { id: "spaces",    href: "/property",  label: "Spaces",    icon: ICONS.spaces },
-  discover:  { id: "discover",  href: "/discover",  label: "Discover",  icon: ICONS.discover },
+  discover:  { id: "discover",  href: "/property",  label: "Spaces",    icon: ICONS.spaces },
   // "Board" here = YOUR SAVES (/wishlist), matching the "Your Board" header on
   // that page. It kept this label in the 2026-08-08 A7 rename; what moved was
   // the RANKINGS surface, which had also been calling itself "The Board".
@@ -125,6 +125,7 @@ const CONTEXTS = {
 export default function BottomNav() {
   const pathname = usePathname();
   const [themeSheetOpen, setThemeSheetOpen] = useState(false);
+  const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState("dark");
   const [lite, setLite] = useState(false);
   const [simple, setSimple] = useState(false);
@@ -371,7 +372,11 @@ export default function BottomNav() {
               aria-label={`Bottom Nav: ${item.label}`}
               onClick={() => {
                 if (item.action === "scoutit:open-mobile-menu") {
-                  window.dispatchEvent(new CustomEvent("scoutit:open-mobile-menu"));
+                  const detail = { handled: false };
+                  window.dispatchEvent(new CustomEvent("scoutit:open-mobile-menu", { detail }));
+                  if (!detail.handled) {
+                    setRoleSheetOpen(true);
+                  }
                 } else if (item.action === "open-theme-sheet") {
                   setThemeSheetOpen(true);
                 }
@@ -442,6 +447,64 @@ export default function BottomNav() {
                 <span className={`absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-background transition-transform duration-200 ease-out ${simple ? "translate-x-[18px]" : ""}`} />
               </span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Role / Workspace Action Sheet (fallback for non-home dashboard subpages) */}
+      {roleSheetOpen && (
+        <div className="theme-sheet-overlay" onClick={() => setRoleSheetOpen(false)}>
+          <div className="theme-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="theme-sheet-header">
+              <span className="theme-sheet-title">Workspaces &amp; Account</span>
+              <button className="theme-sheet-close" onClick={() => setRoleSheetOpen(false)} aria-label="Close">✕</button>
+            </div>
+
+            <div className="theme-sheet-options">
+              {[
+                { href: "/dashboard", label: "Dashboard Home", desc: "Overview & active workspace" },
+                { href: "/dashboard/crm", label: "CRM & Pipeline", desc: "Deals, leads & opportunities" },
+                { href: "/dashboard/calendar", label: "Calendar & Viewings", desc: "Schedule, tours & appointments" },
+                { href: "/dashboard/inbox", label: "Deal Rooms (Inbox)", desc: "Direct client & broker communications" },
+              ].map(({ href, label, desc }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`theme-option ${pathname === href ? "active" : ""}`}
+                  onClick={() => setRoleSheetOpen(false)}
+                >
+                  <div className="theme-text">
+                    <div className="theme-label">{label}</div>
+                    <div className="theme-desc">{desc}</div>
+                  </div>
+                  {pathname === href && <span className="theme-check">✓</span>}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-2 pt-4 mt-4 border-t border-surface-variant">
+              <Link
+                href="/profile"
+                className="flex items-center min-h-[44px] px-3 py-2 rounded text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                onClick={() => setRoleSheetOpen(false)}
+              >
+                View Profile →
+              </Link>
+              <Link
+                href="/settings#account"
+                className="flex items-center min-h-[44px] px-3 py-2 rounded text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                onClick={() => setRoleSheetOpen(false)}
+              >
+                Unlock Other Workspaces (Settings) →
+              </Link>
+              <Link
+                href="/settings"
+                className="flex items-center min-h-[44px] px-3 py-2 rounded text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                onClick={() => setRoleSheetOpen(false)}
+              >
+                Account Settings →
+              </Link>
+            </div>
           </div>
         </div>
       )}

@@ -100,11 +100,10 @@ describe("MapLibre 2D Fallback Component Contract", () => {
     expect(content).toContain("3D WebGL acceleration is unavailable on this device");
   });
 
-  it("all 10 map surfaces include isWebglSupported check and graceful degradation", () => {
+  it("all 9 map surfaces include isWebglSupported check and graceful degradation", () => {
     const surfaces = [
       "src/components/property/InteractiveRadiusMap.js",
       "src/components/property/FloodHeatmapMap.js",
-      "src/components/property/SpatialCommandMap.js",
       "src/components/maps/SpatialCanvas.js",
       "src/components/transit/ManilaTransitMap.js",
       "src/components/intel/SpatialIntelMap.js",

@@ -23,7 +23,7 @@ export default function StratospherePreview() {
       <main className="strat-main strat-main--entry">
         <div className="strat-top-banner">
           <header className="strat-intro strat-intro--entry">
-            <p className="strat-kicker"><span className="strat-live-dot" aria-hidden="true" />Layer 02 &mdash; Stratosphere <InfoTip tipId="stratosphereMission" label="About Stratosphere" /></p>
+            <p className="strat-kicker"><span className="strat-live-dot" aria-hidden="true" />Layer 02 · Stratosphere <InfoTip tipId="stratosphereMission" label="About Stratosphere" /></p>
             <h1 className="strat-headline">The ground shifts. Find what changed near your <span className="strat-headline-accent">space</span>.</h1>
             <span className="strat-underline" aria-hidden="true" />
             <p className="strat-entry-copy">Enter to explore building updates, areas, and the articles behind them.</p>

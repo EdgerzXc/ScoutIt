@@ -20,7 +20,7 @@ import UnitMasterPage from "../property/UnitMasterPage";
 const newScenarioId = () => "sc_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 const inputCls =
-  "w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-gold-accent transition";
+  "w-full bg-surface-alt border border-surface-variant rounded px-3 py-2 text-base md:text-sm text-text-primary focus:outline-none focus:border-gold-accent transition";
 const labelCls = "block text-[12px] font-label-caps tracking-widest uppercase text-text-secondary mb-1.5";
 
 function Field({ label, hint, children }) {
@@ -94,7 +94,7 @@ export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, o
           </div>
         </div>
 
-        <div className="px-6 py-5 flex flex-col gap-6">
+        <div className="px-6 py-5 pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom)))] flex flex-col gap-6">
           {/* Overview */}
           <section className="flex flex-col gap-4">
             <div className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary">The Space</div>

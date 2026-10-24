@@ -12,7 +12,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* Canonical merged block — design tokens preserve theme behavior. */
-  .page-wrapper { min-height: 100vh; background: var(--bg); color: var(--text-primary); position: relative; }
+  .page-wrapper { min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--text-primary); position: relative; }
   .wishlist-main { max-width: 900px; margin: 0 auto; padding: 120px 24px 80px; position: relative; z-index: 1; }
   .page-header { margin-bottom: 48px; }
   .layer-label { display: block; font-family: system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 16px; }

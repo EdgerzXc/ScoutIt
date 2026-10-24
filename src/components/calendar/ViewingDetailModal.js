@@ -32,7 +32,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
-          <span className="text-[12px] uppercase tracking-wider font-mono text-sky-300">👁 Property Viewing</span>
+          <span className="text-[12px] uppercase tracking-wider font-mono text-[var(--sapphire)]">👁 Property Viewing</span>
           <button
             type="button"
             onClick={onClose}
@@ -43,7 +43,7 @@ export default function ViewingDetailModal({ viewing, onRespond, respondingId, o
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-3">
+        <div className="px-5 py-4 pb-[max(1rem,calc(1rem+env(safe-area-inset-bottom)))] space-y-3">
           <h2 id="viewing-detail-title" className="font-working-title text-lg text-on-surface break-words [overflow-wrap:anywhere]">{viewing.title}</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex gap-2">

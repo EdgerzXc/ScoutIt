@@ -392,6 +392,17 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     }
   }, [mobileTab, draftData]);
 
+  // Keyboard accessibility: dismiss editor workspace via Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <div 
       className={`fixed inset-0 h-[100dvh] z-[1000] bg-background flex flex-col md:grid md:grid-rows-[auto_1fr] overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out] ${isResizing ? 'select-none pointer-events-none' : ''}`}

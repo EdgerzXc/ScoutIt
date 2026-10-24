@@ -219,7 +219,7 @@ function getEvidenceForNode(id) {
       { kind: "ROUTE", path: "src/app/property/page.js", provenance: "EXTRACTED", confidence: 1.0 }
     ],
     spatial_canvas: [
-      { kind: "COMPONENT", path: "src/components/property/SpatialCommandMap.js", provenance: "EXTRACTED", confidence: 1.0 },
+      { kind: "COMPONENT", path: "src/components/maps/SpatialCanvas.js", provenance: "EXTRACTED", confidence: 1.0 },
       { kind: "TEST", path: "src/lib/__tests__/spatialCanvasLenses.test.js", provenance: "EXTRACTED", confidence: 1.0 }
     ],
     wishlist: [

@@ -1,15 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Flame, ShieldAlert, Layers, MapPin, Radio, Smartphone, Search, AlertCircle, Clock, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Layers, MapPin, Radio, Smartphone, Search, AlertCircle, Clock } from "lucide-react";
 
-export default function SecuritySpatialMap({ velocityData = [], flaggedData = [], history30dData = [], blockedHashes = [] }) {
-  const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
+const SECTOR_BOUNDS = {
+  luzon: { label: "Luzon / NCR", minLat: 13.8, maxLat: 15.6, minLng: 120.2, maxLng: 121.8 },
+  ph: { label: "Philippines", minLat: 5.0, maxLat: 19.5, minLng: 116.5, maxLng: 127.0 },
+  global: { label: "Global", minLat: -10.0, maxLat: 40.0, minLng: 95.0, maxLng: 145.0 },
+};
+
+function projectToRadar(lat, lng, bounds, zoom = 1) {
+  const centerLat = (bounds.minLat + bounds.maxLat) / 2;
+  const centerLng = (bounds.minLng + bounds.maxLng) / 2;
+  const spanLat = (bounds.maxLat - bounds.minLat) / zoom;
+  const spanLng = (bounds.maxLng - bounds.minLng) / zoom;
+
+  const rawX = ((lng - (centerLng - spanLng / 2)) / spanLng) * 100;
+  const rawY = (((centerLat + spanLat / 2) - lat) / spanLat) * 100;
+
+  return {
+    x: Math.max(8, Math.min(92, rawX)),
+    y: Math.max(12, Math.min(86, rawY)),
+  };
+}
+
+export default function SecuritySpatialMap({ velocityData = [], flaggedData = [], history30dData = [], blockedHashes: _blockedHashes = [] }) {
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [timeRange, setTimeRange] = useState("5m"); // 5m | 1h | 24h | 7d | 30d | all
-  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [sectorKey, setSectorKey] = useState("luzon");
+  const [zoomLevel, setZoomLevel] = useState(1);
   const [clockNow, setClockNow] = useState(() => new Date().getTime());
 
   useEffect(() => {
@@ -112,105 +132,8 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
 
   const totalDevices = geoPoints.reduce((sum, p) => sum + p.deviceCount, 0);
   const totalRequests = geoPoints.reduce((sum, p) => sum + p.reqCount, 0);
-
-  // Load Leaflet dynamically in browser
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    if (!document.getElementById("leaflet-css")) {
-      const link = document.createElement("link");
-      link.id = "leaflet-css";
-      link.rel = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(link);
-    }
-
-    if (!window.L && !document.getElementById("leaflet-js")) {
-      const script = document.createElement("script");
-      script.id = "leaflet-js";
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.onload = () => setLeafletLoaded(true);
-      document.head.appendChild(script);
-    } else if (window.L) {
-      setLeafletLoaded(true);
-    }
-  }, []);
-
-  // Initialize Leaflet map with custom HTML pin markers
-  useEffect(() => {
-    if (!leafletLoaded || !mapContainerRef.current || typeof window === "undefined" || !window.L) return;
-
-    const L = window.L;
-
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
-
-    const map = L.map(mapContainerRef.current, {
-      center: [14.8135, 121.0453],
-      zoom: 10,
-      zoomControl: false,
-      attributionControl: false
-    });
-
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      maxZoom: 18,
-      subdomains: "abcd"
-    }).addTo(map);
-
-    L.control.zoom({ position: "topright" }).addTo(map);
-
-    filteredPoints.forEach((pt) => {
-      const badgeColor = pt.isFlagged ? "#f87171" : "#E8AE3C";
-
-      const customIcon = L.divIcon({
-        className: "custom-leaflet-marker",
-        html: `
-          <div style="position: relative; display: flex; align-items: center; gap: 6px; background: #0d0d0d; color: #fff; padding: 6px 12px; border-radius: 20px; border: 1px solid ${badgeColor}; box-shadow: 0 0 16px rgba(232,174,60,0.3); font-family: monospace; white-space: nowrap; cursor: pointer;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${badgeColor}; display: inline-block; box-shadow: 0 0 8px ${badgeColor};"></span>
-            <span style="font-size: 12px; font-weight: bold; text-transform: uppercase;">${pt.city}</span>
-            <span style="font-size: 12px; background: rgba(232,174,60,0.15); color: ${badgeColor}; padding: 2px 6px; border-radius: 10px; font-weight: 700;">
-              📱 ${pt.deviceCount} ${pt.deviceCount === 1 ? 'DEV' : 'DEVS'}
-            </span>
-          </div>
-        `,
-        iconSize: [180, 32],
-        iconAnchor: [90, 16]
-      });
-
-      const marker = L.marker([pt.lat, pt.lng], { icon: customIcon }).addTo(map);
-
-      const popupHtml = `
-        <div style="font-family: monospace; color: #fff; background: #0d0d0d; padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(232,174,60,0.4); min-width: 220px;">
-          <div style="font-size: 13px; font-weight: bold; color: #E8AE3C; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
-            📍 ${pt.city}
-          </div>
-          <div style="font-size: 12px; color: #fff; margin-bottom: 4px;">
-            📱 <strong>${pt.deviceCount} Active Device${pt.deviceCount > 1 ? 's' : ''}</strong>
-          </div>
-          <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 6px;">
-            ⚡ <strong>${pt.reqCount} Total Requests (${timeRange.toUpperCase()})</strong>
-          </div>
-          <div style="font-size: 12px; color: rgba(255,255,255,0.4); word-break: break-all;">
-            Hash: ${pt.hashes[0]}
-          </div>
-        </div>
-      `;
-
-      marker.bindPopup(popupHtml);
-      marker.on("click", () => setSelectedPoint(pt));
-    });
-
-    mapInstanceRef.current = map;
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [filteredPoints, leafletLoaded, timeRange]);
+  const activeSector = SECTOR_BOUNDS[sectorKey] || SECTOR_BOUNDS.luzon;
+  const hqCoords = projectToRadar(14.5995, 120.9842, activeSector, zoomLevel);
 
   return (
     <div className="bg-[#121212] border border-white/5 rounded-xl p-6 space-y-6">
@@ -277,19 +200,195 @@ export default function SecuritySpatialMap({ velocityData = [], flaggedData = []
         </div>
       </div>
 
-      {/* Grid: Sleek Leaflet Map + Location Ranking */}
+      {/* Grid: Self-Contained Sentinel Eye Vector Radar + Location Ranking */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 relative min-h-[420px] bg-black border border-white/10 rounded-xl overflow-hidden shadow-2xl">
-          <div ref={mapContainerRef} className="w-full h-[420px] z-10" />
+        <div className="lg:col-span-2 relative min-h-[420px] bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden shadow-2xl select-none">
+          {/* Vector Radar Grid & Telemetry Backdrop */}
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            aria-hidden="true"
+          >
+            <defs>
+              <radialGradient id="sentinelRadarGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(232,174,60,0.16)" />
+                <stop offset="65%" stopColor="rgba(232,174,60,0.04)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+              </radialGradient>
+            </defs>
 
-          {!leafletLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-xs font-mono text-[#E8AE3C] z-20">
-              Loading 30-Day Historical Spatial Map Engine…
-            </div>
-          )}
+            {/* Subtle Graticule Grid */}
+            {[20, 40, 60, 80].map((pos) => (
+              <g key={pos}>
+                <line x1={pos} y1="0" x2={pos} y2="100" stroke="rgba(255,255,255,0.05)" strokeWidth="0.2" />
+                <line x1="0" y1={pos} x2="100" y2={pos} stroke="rgba(255,255,255,0.05)" strokeWidth="0.2" />
+              </g>
+            ))}
+
+            {/* Tactical Sector Contours */}
+            <path
+              d="M36,16 L46,14 L54,22 L56,38 L62,48 L52,54 L44,44 L38,32 Z M52,58 L62,56 L66,66 L56,70 Z M54,74 L68,72 L72,86 L58,88 Z"
+              fill="rgba(232,174,60,0.035)"
+              stroke="rgba(232,174,60,0.16)"
+              strokeWidth="0.3"
+            />
+
+            {/* Concentric Radar Sweep Rings Centered on Core Sector */}
+            <circle cx={hqCoords.x} cy={hqCoords.y} r="34" fill="url(#sentinelRadarGlow)" />
+            {[12, 24, 36].map((r) => (
+              <circle
+                key={r}
+                cx={hqCoords.x}
+                cy={hqCoords.y}
+                r={r}
+                fill="none"
+                stroke="rgba(232,174,60,0.14)"
+                strokeWidth="0.22"
+                strokeDasharray="1.2 1.2"
+              />
+            ))}
+
+            {/* Telemetry Vectors from Active Nodes to Core */}
+            {filteredPoints.map((pt, idx) => {
+              const pos = projectToRadar(pt.lat, pt.lng, activeSector, zoomLevel);
+              return (
+                <line
+                  key={`vec-${idx}`}
+                  x1={hqCoords.x}
+                  y1={hqCoords.y}
+                  x2={pos.x}
+                  y2={pos.y}
+                  stroke={pt.isFlagged ? "rgba(248,113,113,0.35)" : "rgba(232,174,60,0.28)"}
+                  strokeWidth="0.25"
+                  strokeDasharray="0.8 0.8"
+                />
+              );
+            })}
+          </svg>
+
+          {/* Top-Left Coordinate & Sector Telemetry Badge */}
+          <div className="absolute top-3 left-3 z-20 bg-black/85 backdrop-blur border border-white/10 rounded-lg px-3 py-1.5 text-[12px] font-mono text-white/70 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>SECTOR: <strong className="text-[#E8AE3C] uppercase">{activeSector.label}</strong></span>
+            <span className="text-white/70">|</span>
+            <span>ZOOM: {zoomLevel.toFixed(1)}x</span>
+          </div>
+
+          {/* Top-Right Tactical Sector & Zoom Controls */}
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 bg-black/85 backdrop-blur border border-white/10 rounded-lg p-1 text-[12px] font-mono">
+            {Object.entries(SECTOR_BOUNDS).map(([key, cfg]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setSectorKey(key);
+                  setZoomLevel(1);
+                }}
+                className={`px-2 py-1 rounded transition-colors ${
+                  sectorKey === key
+                    ? "bg-[#E8AE3C] text-black font-semibold"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                {cfg.label}
+              </button>
+            ))}
+            <span className="text-white/70 px-0.5">|</span>
+            <button
+              type="button"
+              aria-label="Zoom in radar"
+              onClick={() => setZoomLevel((z) => Math.min(3, Number((z + 0.4).toFixed(1))))}
+              className="px-2 py-1 rounded text-white/80 hover:bg-white/10"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              aria-label="Zoom out radar"
+              onClick={() => setZoomLevel((z) => Math.max(0.6, Number((z - 0.4).toFixed(1))))}
+              className="px-2 py-1 rounded text-white/80 hover:bg-white/10"
+            >
+              −
+            </button>
+          </div>
+
+          {/* Interactive Spatial Node Markers */}
+          <div className="relative w-full h-[420px] z-10">
+            {filteredPoints.length === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-mono text-white/60">
+                No active spatial telemetry nodes in the selected window.
+              </div>
+            ) : (
+              filteredPoints.map((pt, idx) => {
+                const pos = projectToRadar(pt.lat, pt.lng, activeSector, zoomLevel);
+                const isSelected = selectedPoint?.city === pt.city;
+                const badgeColor = pt.isFlagged ? "#f87171" : "#E8AE3C";
+
+                return (
+                  <button
+                    key={`${pt.city}-${idx}`}
+                    type="button"
+                    onClick={() => setSelectedPoint(pt)}
+                    style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                    className={`-translate-x-1/2 -translate-y-1/2 absolute flex items-center gap-1.5 bg-[#0d0d0d]/95 text-white px-3 py-1.5 rounded-full font-mono whitespace-nowrap cursor-pointer transition-transform ${
+                      isSelected ? "scale-110 z-30" : "hover:scale-105 z-20"
+                    }`}
+                  >
+                    <span
+                      style={{
+                        backgroundColor: badgeColor,
+                        boxShadow: `0 0 10px ${badgeColor}`,
+                      }}
+                      className="w-2 h-2 rounded-full inline-block shrink-0"
+                    />
+                    <span className="text-[12px] font-bold uppercase tracking-wide">{pt.city}</span>
+                    <span
+                      style={{
+                        color: badgeColor,
+                        borderColor: badgeColor,
+                      }}
+                      className="text-[12px] bg-[#E8AE3C]/15 border px-2 py-0.5 rounded-full font-bold"
+                    >
+                      📱 {pt.deviceCount} {pt.deviceCount === 1 ? "DEV" : "DEVS"}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+
+            {/* Selected Node Tactical Dossier Popup */}
+            {selectedPoint && (
+              <div className="absolute bottom-14 right-3 z-30 bg-[#0d0d0d]/95 backdrop-blur border border-[#E8AE3C]/50 rounded-xl p-3.5 min-w-[240px] max-w-[300px] font-mono shadow-2xl">
+                <div className="flex items-center justify-between gap-2 text-[13px] font-bold text-[#E8AE3C] border-b border-white/10 pb-1.5 mb-2">
+                  <span>📍 {selectedPoint.city}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPoint(null)}
+                    className="text-white/60 hover:text-white text-[12px] px-1.5"
+                    aria-label="Close node details"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="text-[12px] text-white mb-1">
+                  📱 <strong>{selectedPoint.deviceCount} Active Device{selectedPoint.deviceCount > 1 ? "s" : ""}</strong>
+                </div>
+                <div className="text-[12px] text-white/70 mb-1">
+                  ⚡ <strong>{selectedPoint.reqCount} Total Requests ({timeRange.toUpperCase()})</strong>
+                </div>
+                <div className="text-[12px] text-white/60 mb-1.5">
+                  🌐 {Number(selectedPoint.lat).toFixed(4)}°N, {Number(selectedPoint.lng).toFixed(4)}°E
+                </div>
+                <div className="text-[12px] text-white/70 break-all border-t border-white/10 pt-1.5">
+                  Hash: {selectedPoint.hashes?.[0] || "anon"}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Floating Device Counter Overlay */}
-          <div className="absolute bottom-3 left-3 z-[400] bg-black/90 backdrop-blur border border-white/10 rounded-lg px-3.5 py-2 text-xs font-mono text-white/80 flex items-center gap-4">
+          <div className="absolute bottom-3 left-3 z-20 bg-black/90 backdrop-blur border border-white/10 rounded-lg px-3.5 py-2 text-xs font-mono text-white/80 flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Smartphone className="w-4 h-4 text-[#E8AE3C]" />
               <span>Active Devices ({timeRange.toUpperCase()}): <strong className="text-[#E8AE3C] text-sm">{totalDevices}</strong></span>

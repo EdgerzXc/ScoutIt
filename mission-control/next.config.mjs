@@ -16,16 +16,12 @@ import { fileURLToPath } from "node:url";
 // unrestricted. The main site's CSP is deliberately untouched; removing its
 // 'unsafe-inline'/'unsafe-eval' is A-056 and carries its own risk pass.
 //
-// `https://unpkg.com` is pinned because the Security Center map loads
-// Leaflet 1.9.4 from it (script and stylesheet). That is a deliberate,
-// recorded allowance — bundling it or adding SRI is the open half of A-071's
-// acceptance test 3, and it is the same decision the main site faces.
 const SUPABASE_ORIGIN = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://unpkg.com https://challenges.cloudflare.com",
-  "style-src 'self' 'unsafe-inline' https://unpkg.com",
+  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+  "style-src 'self' 'unsafe-inline'",
   // Map tiles (Carto), Supabase-hosted property media, and inline data/blob
   // previews. Images cannot execute, so this is the one directive kept broad.
   "img-src 'self' data: blob: https:",

@@ -19,6 +19,8 @@ import { matchesJourneyStage } from "@/lib/layerTwoJourney";
 import InfoTip from "@/components/ui/InfoTip";
 import "./stratosphere-terminal.css";
 
+export const SIGNALS_PAGE_SIZE = 20;
+
 export default function StratosphereTerminal({
   initialSignals = COMMUNITY_SIGNALS,
   initialViewMode = "SPATIAL", // 'SPATIAL' | 'SIGNALS'
@@ -40,6 +42,9 @@ export default function StratosphereTerminal({
   const [connectModalSignal, setConnectModalSignal] = useState(null);
   // Two-Sided Market taxonomy: ALL vs DEMAND (Seekers) vs SUPPLY (Spaces Available) vs INTEL
   const [marketRole, setMarketRole] = useState("all");
+  // 3D Radar Beacon Color Signal filter (gold vs green vs purple vs red vs cyan)
+  const [colorKey, setColorKey] = useState(null);
+  const [visibleSignalCount, setVisibleSignalCount] = useState(SIGNALS_PAGE_SIZE);
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 680px)").matches) setViewMode("SIGNALS");
@@ -52,6 +57,10 @@ export default function StratosphereTerminal({
     const role = params.get("role");
     if (role && Object.values(MARKET_ROLES).includes(role)) {
       setMarketRole(role);
+    }
+    const color = params.get("color");
+    if (color && ["gold", "green", "purple", "red", "cyan"].includes(color)) {
+      setColorKey(color);
     }
   }, []);
   useEffect(() => {
@@ -104,13 +113,24 @@ export default function StratosphereTerminal({
       spaceType: filters.spaceType,
       district: activeDistrict,
       marketRole,
+      colorKey,
     });
-  }, [stageSignals, searchQuery, filters, activeDistrict, marketRole]);
+  }, [stageSignals, searchQuery, filters, activeDistrict, marketRole, colorKey]);
+
+  const visibleSignals = useMemo(() => {
+    const sliced = filteredSignals.slice(0, visibleSignalCount);
+    if (selectedSignal && !sliced.some((s) => s.id === selectedSignal.id)) {
+      const match = filteredSignals.find((s) => s.id === selectedSignal.id);
+      if (match) return [match, ...sliced];
+    }
+    return sliced;
+  }, [filteredSignals, visibleSignalCount, selectedSignal]);
 
   const activeFilterCount =
     (filters.signalType ? 1 : 0) +
     (filters.spaceType ? 1 : 0) +
-    (activeDistrict ? 1 : 0);
+    (activeDistrict ? 1 : 0) +
+    (colorKey ? 1 : 0);
 
   const handleSelectDistrict = useCallback((dist) => {
     setSelectedDistrict(dist);
@@ -132,14 +152,27 @@ export default function StratosphereTerminal({
     window.history.replaceState(null, "", url);
   }, []);
 
+  const handleSelectColorKey = useCallback((key) => {
+    setColorKey(key);
+    const url = new URL(window.location.href);
+    if (key && key !== "all") {
+      url.searchParams.set("color", key);
+    } else {
+      url.searchParams.delete("color");
+    }
+    window.history.replaceState(null, "", url);
+  }, []);
+
   const handleResetFilters = useCallback(() => {
     setFilters({ signalType: null, spaceType: null, district: null });
     setSelectedDistrict(null);
     setSearchQuery("");
     setMarketRole("all");
+    setColorKey(null);
     const url = new URL(window.location.href);
     url.searchParams.delete("place");
     url.searchParams.delete("role");
+    url.searchParams.delete("color");
     window.history.replaceState(null, "", url);
   }, []);
 
@@ -242,6 +275,8 @@ export default function StratosphereTerminal({
               selectedSignal={selectedSignal}
               hoveredSignalId={hoveredSignalId}
               selectedDistrict={activeDistrict}
+              activeColorKey={colorKey}
+              onSelectColorKey={handleSelectColorKey}
               onSelectSignal={handleSelectSignal}
               onHoverSignal={handleHoverSignal}
               onSelectDistrict={handleSelectDistrict}
@@ -266,8 +301,31 @@ export default function StratosphereTerminal({
               <div className="st-telemetry-meta">
                 {activeDistrict && (
                   <span className="st-district-indicator">
-                    DISTRICT // {activeDistrict.toUpperCase()}
+                    DISTRICT · {activeDistrict.toUpperCase()}
                   </span>
+                )}
+                {colorKey && (
+                  <button
+                    type="button"
+                    className="st-color-filter-badge"
+                    onClick={() => handleSelectColorKey(null)}
+                    title={`Clear ${colorKey} filter`}
+                    aria-label={`Clear ${colorKey} filter`}
+                  >
+                    <span
+                      className="st-color-filter-dot"
+                      style={{
+                        backgroundColor:
+                          colorKey === "gold" ? "var(--accent)" :
+                          colorKey === "green" ? "var(--green)" :
+                          colorKey === "purple" ? "var(--amethyst)" :
+                          colorKey === "red" ? "var(--yellow)" : "var(--intel-cyan)"
+                      }}
+                      aria-hidden="true"
+                    />
+                    <span>{colorKey.toUpperCase()}</span>
+                    <X size={10} aria-hidden="true" />
+                  </button>
                 )}
                 <InfoTip tipId="signalSources" label="About signal sources" />
               </div>
@@ -276,11 +334,11 @@ export default function StratosphereTerminal({
             {/* Two-Sided Market Intent Switcher */}
             <div className="st-market-tabs" role="tablist" aria-label="Market Intent Taxonomy">
               {[
-                { key: MARKET_ROLES.ALL, label: "ALL", Icon: null, classMod: "" },
-                { key: MARKET_ROLES.DEMAND, label: "SEEKERS // DEMAND", Icon: Zap, classMod: "tab-demand" },
-                { key: MARKET_ROLES.SUPPLY, label: "SPACES AVAILABLE", Icon: Building2, classMod: "tab-supply" },
-                { key: MARKET_ROLES.INTEL, label: "MARKET INTEL", Icon: Radio, classMod: "tab-intel" },
-              ].map(({ key, label, Icon, classMod }) => (
+                { key: MARKET_ROLES.ALL, label: "ALL", shortLabel: "ALL", Icon: null, classMod: "" },
+                { key: MARKET_ROLES.DEMAND, label: "SEEKERS · DEMAND", shortLabel: "DEMAND", Icon: Zap, classMod: "tab-demand" },
+                { key: MARKET_ROLES.SUPPLY, label: "SPACES AVAILABLE", shortLabel: "SUPPLY", Icon: Building2, classMod: "tab-supply" },
+                { key: MARKET_ROLES.INTEL, label: "MARKET INTEL", shortLabel: "INTEL", Icon: Radio, classMod: "tab-intel" },
+              ].map(({ key, label, shortLabel, Icon, classMod }) => (
                 <button
                   key={key}
                   type="button"
@@ -290,7 +348,8 @@ export default function StratosphereTerminal({
                   onClick={() => handleSelectMarketRole(key)}
                 >
                   {Icon && <Icon size={12} className="st-tab-icon" aria-hidden="true" />}
-                  <span>{label}</span>
+                  <span className="st-market-tab-label">{label}</span>
+                  <span className="st-market-tab-label-short">{shortLabel}</span>
                   <span className="st-market-tab-count">{roleCounts[key] || 0}</span>
                 </button>
               ))}
@@ -326,19 +385,30 @@ export default function StratosphereTerminal({
                 </button>
               </div>
             ) : (
-              filteredSignals.map((signal) => (
-                <SignalDossierCard
-                  key={signal.id}
-                  signal={signal}
-                  isActive={selectedSignal?.id === signal.id}
-                  isHovered={hoveredSignalId === signal.id}
-                  onSelect={handleSelectSignal}
-                  onHover={handleHoverSignal}
-                  onConnect={handleOpenConnect}
-                  onClosed={onSignalClosed}
-                  returnStage={stageFilter}
-                />
-              ))
+              <>
+                {visibleSignals.map((signal) => (
+                  <SignalDossierCard
+                    key={signal.id}
+                    signal={signal}
+                    isActive={selectedSignal?.id === signal.id}
+                    isHovered={hoveredSignalId === signal.id}
+                    onSelect={handleSelectSignal}
+                    onHover={handleHoverSignal}
+                    onConnect={handleOpenConnect}
+                    onClosed={onSignalClosed}
+                    returnStage={stageFilter}
+                  />
+                ))}
+                {filteredSignals.length > visibleSignalCount && (
+                  <button
+                    type="button"
+                    className="st-empty-reset-btn"
+                    onClick={() => setVisibleSignalCount((c) => c + SIGNALS_PAGE_SIZE)}
+                  >
+                    LOAD MORE SIGNALS ({filteredSignals.length - visibleSignalCount} REMAINING)
+                  </button>
+                )}
+              </>
             )}
           </div>
         </section>

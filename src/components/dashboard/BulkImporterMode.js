@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Papa from "papaparse";
 import { useDashboard } from "../../context/DashboardContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -131,6 +131,17 @@ export default function BulkImporterMode({ onClose }) {
       setIsProcessing(false);
     }
   };
+
+  // Keyboard accessibility: dismiss bulk importer via Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out]">

@@ -15,12 +15,6 @@ export const WAITING_DEAL_STATUSES = Object.freeze(["pending", "invited"]);
 export const ACTIVE_DEAL_STATUSES = Object.freeze(["active", "accepted", "connected", "pitching"]);
 
 /**
- * Finished. 'expired' is retained only so historical rows still bucket
- * correctly — nothing writes it any more (§40.14).
- */
-export const CLOSED_DEAL_STATUSES = Object.freeze(["closed", "declined", "expired", "reported", "withdrawn"]);
-
-/**
  * A-144 §10.10 — manual dashboard creation is a paid Connect action that must
  * start a request, never manufacture a relationship. Only waiting states may
  * be created this way; accepted/connected/active/closed states from a client

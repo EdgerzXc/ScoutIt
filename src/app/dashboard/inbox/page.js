@@ -331,7 +331,7 @@ function InboxInner() {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, handshakeState: 'linked', contactRevealed: true } : d)));
   };
   return (
-    <DashboardLayout>
+    <DashboardLayout className="pb-0 md:pb-0">
       <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       {/* Mobile: single-column master/detail — show the list, then swap to the
           chat when a lead is picked (with a Back button). Side-by-side from md up. */}
@@ -405,7 +405,17 @@ function InboxInner() {
 
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="p-6 text-text-secondary">Loading...</div>
+              <div className="p-4 space-y-3" aria-busy="true" aria-label="Loading conversations">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} aria-hidden="true" className="p-4 rounded-lg border border-surface-variant/50 bg-surface/40 animate-pulse space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="h-3.5 w-28 rounded bg-surface-variant/60" />
+                      <div className="h-3 w-12 rounded bg-gold-accent/20" />
+                    </div>
+                    <div className="h-3 w-3/4 rounded bg-surface-variant/40" />
+                  </div>
+                ))}
+              </div>
             ) : error && currentList.length === 0 ? (
               <div className="p-6 text-error text-sm">{error}</div>
             ) : currentList.length === 0 ? (

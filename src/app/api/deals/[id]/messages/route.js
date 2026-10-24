@@ -5,12 +5,37 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { canPostInDealStatus } from "@/lib/deals/dealStatus";
 import { notifyUser } from "@/lib/notifications";
+import { createRateLimiter } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev only takes effect when no real Bearer token was
 // sent, so real user sessions are unaffected.
+
+// ─────────────────────────────────────────────────────────────────────────
+// A-236 (GAP-102). The chat write path had no size bound and no rate
+// limit. A script could post a thousand oversized messages in a second: each
+// one stored a row AND fired a notification to every counterparty — which
+// costs an email per recipient.
+//
+// Both bounds are checked BEFORE the write, so a rejected message costs
+// nothing: no row, no notification, no email.
+//
+// The size bound matches the database's own CHECK on deal_messages.body
+// (length between 1 and 2000), so an oversized message is refused with the
+// truth (413) instead of failing a constraint as a 500.
+//
+// The limiter is in-process; lib/rateLimit.js documents honestly what that
+// does and does not guarantee on a multi-instance deployment.
+// ─────────────────────────────────────────────────────────────────────────
+const MAX_MESSAGE_CHARS = 2000;
+const THREAD_MESSAGE_LIMIT = 20; // per user, per conversation, per minute
+const USER_MESSAGE_LIMIT = 60; // per user, across conversations, per minute
+
+const threadMessageLimiter = createRateLimiter({ limit: THREAD_MESSAGE_LIMIT, windowMs: 60_000 });
+const userMessageLimiter = createRateLimiter({ limit: USER_MESSAGE_LIMIT, windowMs: 60_000 });
+
 
 
 export async function GET(request, { params }) {
@@ -65,13 +90,49 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     const { id: dealId } = await params;
-    const { body, role  } = await request.json();
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!body || !role) {
-      return NextResponse.json({ error: "Missing body or role" }, { status: 400 });
+    let payload = null;
+    try {
+      payload = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
+    const body = payload?.body;
+
+    if (typeof body !== "string" || body.trim().length === 0) {
+      return NextResponse.json({ error: "Message cannot be empty" }, { status: 400 });
+    }
+
+    // A-236: the size bound is enforced before the write, and answers with
+    // the reason instead of a constraint violation.
+    if (body.length > MAX_MESSAGE_CHARS) {
+      return NextResponse.json(
+        {
+          error: `Message is too long. The limit is ${MAX_MESSAGE_CHARS} characters.`,
+          code: "MESSAGE_TOO_LONG",
+          limit: MAX_MESSAGE_CHARS,
+        },
+        { status: 413 }
+      );
+    }
+
+    // A-236: the rate bound, per thread and per account, before any storage
+    // or notification work happens.
+    const threadCheck = threadMessageLimiter(`${userId}:${dealId}`);
+    const userCheck = userMessageLimiter(userId);
+    if (!threadCheck.allowed || !userCheck.allowed) {
+      const retryAfter = Math.max(threadCheck.retryAfterSeconds, userCheck.retryAfterSeconds);
+      return NextResponse.json(
+        {
+          error: "You're sending messages too quickly. Wait a moment and try again.",
+          code: "MESSAGE_RATE_LIMIT",
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
 
     // Validate access & check if deal is active
     const { data: deal, error: dealError } = await supabaseAdmin

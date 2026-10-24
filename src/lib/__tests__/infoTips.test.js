@@ -65,6 +65,10 @@ describe("info tips — explanations on demand (A-160)", () => {
       "adminReverification",
       "adminGlobalReadOnly",
       "adminFlowMap",
+      "marketTrends",
+      "pipelineStages",
+      "curatedStreams",
+      "exploreByArea",
     ]) {
       expect(getInfoTip(id), id).toBeTruthy();
     }

@@ -20,6 +20,31 @@
   margin: 0 auto;
 }
 
+/* ── Return Navigation ────────────────────────────────────────────────── */
+
+.contact-nav-back {
+  margin-bottom: 1.5rem;
+}
+
+.contact-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .contact-back-link:hover {
+    color: var(--accent, #E8AE3C);
+  }
+}
+
 /* ── Header ───────────────────────────────────────────────────────────── */
 
 .contact-header {

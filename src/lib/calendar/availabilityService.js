@@ -43,35 +43,6 @@ export async function loadAvailabilityPolicy(serviceClient, hostId) {
   return normalizeAvailability(data || {});
 }
 
-/**
- * Every busy interval on a host's calendar in a window.
- *
- * Reads BOTH viewing_appointments and calendar_events. Only counting viewings
- * (the old behavior) let a synced Google event be double-booked over.
- *
- * @param {object} args
- * @param {string} args.hostId
- * @param {string} args.fromIso inclusive
- * @param {string} args.toIso   exclusive
- * @param {string} [args.excludeAppointmentId] ignore one row, for rescheduling
- */
-export async function loadBusyIntervals(serviceClient, {
-  hostId,
-  fromIso,
-  toIso,
-  excludeAppointmentId = null,
-  defaultDurationMinutes = AVAILABILITY_DEFAULTS.defaultDurationMinutes,
-}) {
-  const state = await loadBusyState(serviceClient, {
-    hostId,
-    fromIso,
-    toIso,
-    excludeAppointmentId,
-    defaultDurationMinutes,
-  });
-  return state.busy;
-}
-
 async function loadBusyState(serviceClient, {
   hostId,
   fromIso,

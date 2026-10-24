@@ -34,7 +34,7 @@ export default function NotFound() {
 
         <div className="nf-actions">
           <Link href="/" className="nf-btn-primary">← Return to Base</Link>
-          <Link href="/discover" className="nf-btn-secondary">Explore Spaces</Link>
+          <Link href="/property" className="nf-btn-secondary">Explore Spaces</Link>
         </div>
       </div>
 

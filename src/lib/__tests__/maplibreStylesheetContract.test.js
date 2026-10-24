@@ -18,7 +18,6 @@ const MAP_CONSUMERS = [
   'src/components/maps/SpatialCanvas.js',
   'src/components/property/FloodHeatmapMap.js',
   'src/components/property/InteractiveRadiusMap.js',
-  'src/components/property/SpatialCommandMap.js',
   'src/components/transit/ManilaTransitMap.js',
 ];
 

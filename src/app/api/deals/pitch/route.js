@@ -163,35 +163,56 @@ export async function POST(request) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', brokerId);
     }
 
-    // Notify the owner — the same real-time signal every other deal-creating
-    // route sends; a pitch landing with no notification is exactly the kind
-    // of silent gap this route exists to close.
-    const { data: propertyRow } = await supabaseAdmin
-      .from('properties')
-      .select('title, owner_id')
-      .eq('id', listingId)
-      .single();
+    // Wrap post-spend side effects so any unexpected downstream error (notification,
+    // logging, or property query) issues a compensating refund and removes the deal.
+    try {
+      // Notify the owner — the same real-time signal every other deal-creating
+      // route sends; a pitch landing with no notification is exactly the kind
+      // of silent gap this route exists to close.
+      const { data: propertyRow } = await supabaseAdmin
+        .from('properties')
+        .select('title, owner_id')
+        .eq('id', listingId)
+        .single();
 
-    if (propertyRow?.owner_id && propertyRow.owner_id !== brokerId) {
-      await notifyUser(supabaseAdmin, {
-        userId: propertyRow.owner_id,
-        title: 'New broker pitch',
-        desc: `A broker wants to represent "${propertyRow.title || 'your property'}".`,
-        icon: '🤝',
+      if (propertyRow?.owner_id && propertyRow.owner_id !== brokerId) {
+        await notifyUser(supabaseAdmin, {
+          userId: propertyRow.owner_id,
+          title: 'New broker pitch',
+          desc: `A broker wants to represent "${propertyRow.title || 'your property'}".`,
+          icon: '🤝',
+          propertyId: listingId,
+          notificationType: 'broker_pitch',
+        });
+      }
+
+      await logActivity(supabaseAdmin, {
+        dealId: dealData[0].id,
         propertyId: listingId,
-        notificationType: 'broker_pitch',
+        activityType: 'deal_created',
+        actorId: brokerId,
+        metadata: { source: 'broker_pitch', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
       });
+
+      return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, propertyTitle: propertyRow?.title, source_context: connectSource });
+    } catch (postSpendErr) {
+      console.error("[PITCH API] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
+      if (brokerId !== 'master-dev') {
+        try {
+          await supabaseAdmin.rpc('refund_connects_system_error', {
+            p_user_id: brokerId,
+            p_amount: 1,
+            p_reason: `Compensating refund: pitch delivery failed for deal ${dealData[0].id}`,
+            p_staff_id: "system",
+            p_ref_id: String(listingId),
+          });
+        } catch (refundErr) {
+          console.error("[PITCH API] Compensating refund RPC failed:", refundErr);
+        }
+      }
+      await rollbackPitchSideEffects(dealData[0].id);
+      return NextResponse.json({ error: "Pitch delivery failed. Your Connect has been refunded." }, { status: 500 });
     }
-
-    await logActivity(supabaseAdmin, {
-      dealId: dealData[0].id,
-      propertyId: listingId,
-      activityType: 'deal_created',
-      actorId: brokerId,
-      metadata: { source: 'broker_pitch', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
-    });
-
-    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, propertyTitle: propertyRow?.title, source_context: connectSource });
 
   } catch (err) {
     console.error("[PITCH API] Error during pitch process:", err);

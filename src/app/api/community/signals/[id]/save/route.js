@@ -22,6 +22,36 @@ async function loadLiveSignal(id) {
   return data;
 }
 
+/**
+ * A-237 (GAP-106): the public saved count is shown on the card, so it has to
+ * be kept in step with the rows that actually exist. The counter used to be
+ * written only when a signal was created, so a card's saved number froze at
+ * zero no matter how many people bookmarked it.
+ *
+ * The count is READ from the rows and then written, so a missed update
+ * self-corrects on the next save instead of drifting forever.
+ */
+async function syncSavedCount(signalId) {
+  try {
+    const { count, error } = await supabaseAdmin
+      .from("signal_saves")
+      .select("id", { count: "exact", head: true })
+      .eq("signal_id", signalId);
+    if (error) {
+      console.error("[community save] saved_count read failed:", error);
+      return;
+    }
+    await supabaseAdmin
+      .from("stratosphere_signals")
+      .update({ saved_count: count ?? 0 })
+      .eq("id", signalId);
+  } catch (err) {
+    // The bookmark itself succeeded. A stale counter is a smaller wrongness
+    // than a failed save, so the error is logged, not thrown.
+    console.error("[community save] saved_count sync failed:", err);
+  }
+}
+
 export async function POST(request, { params }) {
   const rate = checkRate(`save:${clientIp(request)}`);
   if (!rate.allowed) {
@@ -49,6 +79,7 @@ export async function POST(request, { params }) {
       }
       throw insertError;
     }
+    await syncSavedCount(id);
     return NextResponse.json({ ok: true, saved: true });
   } catch (err) {
     if (isMissingTable(err)) {
@@ -73,6 +104,7 @@ export async function DELETE(request, { params }) {
       .delete()
       .eq("signal_id", id)
       .eq("account_id", userId);
+    await syncSavedCount(id);
     return NextResponse.json({ ok: true, saved: false });
   } catch (err) {
     if (isMissingTable(err)) {

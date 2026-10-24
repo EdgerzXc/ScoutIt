@@ -10,6 +10,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import ProfileBaseLayer from "@/components/profile/ProfileBaseLayer";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
@@ -87,11 +88,28 @@ export default function PublicProfilePage() {
 
   if (loading) {
     return (
-        <div role="main" style={loadingScreen} className="keep-dark">
+      <div role="main" style={pageWrap} className="keep-dark" aria-busy="true">
+        <AtmosphereBackground variant="default" />
         <h1 className="sr-only">ScoutIt Profile</h1>
-        <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Loading…
-        </span>
+        <header style={navBar}>
+          <Link href="/" style={backLink}>← ScoutIt</Link>
+        </header>
+        <div style={mainContent}>
+          <div className="card-atmosphere p-6 sm:p-10 rounded-2xl border border-white/[0.06] backdrop-blur-md animate-pulse" aria-hidden="true">
+            <div className="flex items-center gap-5 mb-6">
+              <div className="w-16 h-16 rounded-full bg-surface-variant/60 border border-gold-accent/30 shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div className="h-6 w-48 rounded bg-surface-variant/60" />
+                <div className="h-4 w-64 rounded bg-gold-accent/20" />
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <div className="h-3.5 w-full rounded bg-surface-variant/40" />
+              <div className="h-3.5 w-5/6 rounded bg-surface-variant/40" />
+              <div className="h-3.5 w-2/3 rounded bg-surface-variant/40" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -107,7 +125,7 @@ export default function PublicProfilePage() {
           <p style={notFoundDesc}>
             This profile is private or does not exist.
           </p>
-          <Link href="/discover" style={notFoundCta}>Explore Properties</Link>
+          <Link href="/property" style={notFoundCta}>Explore Properties</Link>
         </main>
       </div>
     );
@@ -130,15 +148,21 @@ export default function PublicProfilePage() {
 
   const backTarget = (() => {
     if (typeof window !== "undefined") {
-      const fromParam = new URLSearchParams(window.location.search).get("from");
+      const sp = new URLSearchParams(window.location.search);
+      const forParam = sp.get("for");
+      const titleParam = sp.get("title");
+      if (forParam) {
+        return { href: `/property/${encodeURIComponent(forParam)}`, label: `Return to ${titleParam || "Property"}` };
+      }
+      const fromParam = sp.get("from");
       if (fromParam === "photographers") return { href: "/photographers", label: "Photographers" };
       if (fromParam === "researchers") return { href: "/researchers", label: "Researchers" };
-      if (fromParam === "event-planners") return { href: "/event-planners", label: "Event Designers" };
+      if (fromParam === "event-planners") return { href: "/event-planners", label: "Space & Concept Designers" };
       if (fromParam === "brokers") return { href: "/brokers", label: "Advisors" };
     }
     if (showPhotographer) return { href: "/photographers", label: "Photographers" };
     if (showResearcher) return { href: "/researchers", label: "Researchers" };
-    if (showEventPlanner) return { href: "/event-planners", label: "Event Designers" };
+    if (showEventPlanner) return { href: "/event-planners", label: "Space & Concept Designers" };
     if (showBroker) return { href: "/brokers", label: "Advisors" };
     return { href: "/layer/crust", label: "Layer 04 · Crust" };
   })();
@@ -151,11 +175,13 @@ export default function PublicProfilePage() {
       {/* Nav with contextual return */}
       <header style={navBar}>
         <div style={navInner}>
-          <Link href={backTarget.href} style={backLink}>
-            ← Back to {backTarget.label}
-          </Link>
-          <span style={breadcrumbSep}>/</span>
-          <span style={breadcrumbCurrent}>{profile.display_name || "Profile"}</span>
+          <Breadcrumb
+            items={[
+              { label: `← Back to ${backTarget.label}`, href: backTarget.href },
+              { label: profile.display_name || "Profile", isCurrent: true }
+            ]}
+            ariaLabel="Profile Breadcrumb"
+          />
         </div>
       </header>
 

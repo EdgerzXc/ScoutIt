@@ -61,7 +61,7 @@ export default function GlobalError({ error, reset }) {
           <button className="err-btn err-btn--gold" onClick={() => reset()}>
             Reload
           </button>
-          <Link href="/discover" className="err-btn err-btn--ghost">
+          <Link href="/property" className="err-btn err-btn--ghost">
             Back to the Map
           </Link>
         </div>
@@ -72,6 +72,7 @@ export default function GlobalError({ error, reset }) {
       <style jsx global>{`
         .err-root {
           min-height: 100vh;
+          min-height: 100dvh;
           background: var(--bg);
           display: flex;
           align-items: center;

@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b",
+  "dataRevision": "fbd40d48e93d5d39f6149e98084beaa40a32f542",
   "lastVerifiedAt": "2026-09-11",
-  "generatedAt": "2026-10-12T05:38:46.359Z",
+  "generatedAt": "2026-10-24T12:00:02.076Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+    "commitSha": "fbd40d48e93d5d39f6149e98084beaa40a32f542"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+    "commitSha": "fbd40d48e93d5d39f6149e98084beaa40a32f542"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "0bb9a54505dbfc2c7287ad063b180e8cdd13b35b"
+    "commitSha": "fbd40d48e93d5d39f6149e98084beaa40a32f542"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -3110,7 +3110,7 @@
       "evidence": [
         {
           "kind": "COMPONENT",
-          "path": "src/components/property/SpatialCommandMap.js",
+          "path": "src/components/maps/SpatialCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
@@ -3172,7 +3172,7 @@
           "evidence": [
             {
               "kind": "COMPONENT",
-              "path": "src/components/property/SpatialCommandMap.js",
+              "path": "src/components/maps/SpatialCanvas.js",
               "provenance": "EXTRACTED",
               "confidence": 1
             },
@@ -27035,7 +27035,7 @@
       "evidence": [
         {
           "kind": "COMPONENT",
-          "path": "src/components/property/SpatialCommandMap.js",
+          "path": "src/components/maps/SpatialCanvas.js",
           "provenance": "EXTRACTED",
           "confidence": 1,
           "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"

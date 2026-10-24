@@ -45,6 +45,13 @@ describe("A-055 transport security headers", () => {
     expect(frameSources).toContain("https://drive.google.com");
   });
 
+  it("allows randomuser.me in img-src for directory mock portraits", () => {
+    const imgSrc = nextConfig.match(/img-src\s+([^;]+)/);
+    expect(imgSrc).not.toBeNull();
+    const sources = imgSrc[1].split(/\s+/);
+    expect(sources).toContain("https://randomuser.me");
+  });
+
   // ── A-123 — browser source maps are not shipped ───────────────────────────
   //
   // `productionBrowserSourceMaps: true` emitted 178 `.js.map` files: **44 MB of

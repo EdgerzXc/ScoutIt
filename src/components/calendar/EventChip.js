@@ -7,15 +7,15 @@ import { formatTime } from "@/lib/calendar/calendarDates";
 // not primary-color confetti. Keyed by the `color` token stored on the event.
 export const EVENT_COLOR_STYLES = {
   gold: "border-gold-accent/50 bg-gold-accent/10 text-gold-accent",
-  blue: "border-sky-500/40 bg-sky-500/10 text-sky-300",
-  green: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  red: "border-red-500/40 bg-red-500/10 text-red-300",
-  purple: "border-purple-500/40 bg-purple-500/10 text-purple-300",
+  blue: "border-[var(--sapphire)]/40 bg-[var(--sapphire-dim)] text-[var(--sapphire)]",
+  green: "border-[var(--emerald)]/40 bg-[var(--emerald-dim)] text-[var(--emerald)]",
+  red: "border-[var(--red)]/40 bg-[var(--red-dim)] text-[var(--red)]",
+  purple: "border-[var(--amethyst)]/40 bg-[var(--amethyst-dim)] text-[var(--amethyst)]",
 };
 
 // Viewing appointments get their own read-only treatment + a badge so they're
 // visually distinct from free-form events (they're managed via accept/decline).
-const VIEWING_STYLE = "border-sky-400/40 bg-sky-400/10 text-sky-200";
+const VIEWING_STYLE = "border-[var(--sapphire)]/40 bg-[var(--sapphire-dim)] text-[var(--sapphire)]";
 
 export function eventStyle(event) {
   if (event.kind === "viewing") return VIEWING_STYLE;

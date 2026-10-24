@@ -88,7 +88,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <span className="font-working-title text-on-surface">Drop .OBJ, .SKP, or Rendered Images</span>
                 <span className="text-xs text-text-muted mt-2">Max file size: 500MB</span>
               </div>
-              <input type="text" placeholder="Or paste external portfolio/drive link..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-intel-magenta transition text-on-surface" />
+              <input type="text" placeholder="Or paste external portfolio/drive link..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-base md:text-sm focus:outline-none focus:border-intel-magenta transition text-on-surface" />
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 .directory-layout {
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-body), sans-serif;
@@ -761,6 +762,13 @@
 
   .directory-header h1 {
     font-size: 28px;
+  }
+
+  .global-search-input {
+    min-height: 48px;
+    font-size: 16px; /* Prevents iOS Safari auto-zoom */
+    touch-action: manipulation;
+    padding: 14px 16px;
   }
 
   /* Single column grid on mobile */

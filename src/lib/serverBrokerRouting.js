@@ -1,5 +1,3 @@
-import { buildLeadRouting } from "@/lib/brokerRepresentation";
-
 export async function getPropertyLeadRecipients(supabaseAdmin, propertyId, preferredBrokerId = null) {
   if (!supabaseAdmin) return { ok: false, reason: "service_unavailable", recipients: [], roster: [] };
 
@@ -35,8 +33,4 @@ export function formatRoutingMetadata(routing) {
     recipient_types: (routing.recipients || []).map((recipient) => recipient.recipientType),
     routed_to_roster: Boolean(routing.routedToRoster),
   };
-}
-
-export function resolveMockRouting(representations, propertyOwnerId, preferredBrokerId = null) {
-  return buildLeadRouting({ representations, propertyOwnerId, preferredBrokerId });
 }

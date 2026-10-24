@@ -9,7 +9,7 @@ import { clientIp } from "@/lib/clientIp";
 import { validateIntroMessage, INTRO_MAX } from "@/lib/connectIntro";
 import { anyBlocked } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
-import { freshnessFor } from "@/lib/communityPosting";
+import { freshnessFor, signalTerminalState, maxAnswersForSignal } from "@/lib/communityPosting";
 import { isMissingTable } from "@/lib/communityStore";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -84,11 +84,41 @@ export async function POST(request, { params }) {
       .eq("id", id)
       .maybeSingle();
     if (signalError) throw signalError;
-    if (!signal || (signal.status !== "live" && signal.status !== "limited")) {
-      return NextResponse.json({ ok: false, error: "That signal is no longer active. No Connect was spent." }, { status: 404 });
+    if (!signal) {
+      return NextResponse.json({ ok: false, error: "That signal does not exist. No Connect was spent." }, { status: 404 });
     }
-    if (freshnessFor(signal.last_confirmed_at) === "expired") {
-      return NextResponse.json({ ok: false, error: "That signal expired. No Connect was spent." }, { status: 410 });
+
+    const state = signalTerminalState({
+      status: signal.status,
+      lastConfirmedAt: signal.last_confirmed_at,
+    });
+
+    if (state === "served") {
+      return NextResponse.json({
+        ok: false,
+        error: "This demand has already been fulfilled. No Connect was spent.",
+        code: "SIGNAL_SERVED",
+      }, { status: 410 });
+    }
+    if (state === "withdrawn") {
+      return NextResponse.json({
+        ok: false,
+        error: "This signal was withdrawn by its author. No Connect was spent.",
+        code: "SIGNAL_WITHDRAWN",
+      }, { status: 410 });
+    }
+    if (state === "expired") {
+      return NextResponse.json({
+        ok: false,
+        error: "That signal expired. No Connect was spent.",
+        code: "SIGNAL_EXPIRED",
+      }, { status: 410 });
+    }
+    if (state !== "live") {
+      return NextResponse.json({
+        ok: false,
+        error: "That signal is no longer active. No Connect was spent.",
+      }, { status: 404 });
     }
     const recipientId = signal.author_account_id;
     if (!recipientId) {
@@ -98,35 +128,40 @@ export async function POST(request, { params }) {
       return NextResponse.json({ ok: false, error: "That is your own signal — no Connect needed." }, { status: 400 });
     }
 
-    // Double-tap guard: a pending request to the same author for the same
-    // signal inside 10 minutes is reused, never re-spent.
-    const { data: recent } = await supabaseAdmin
+    // A-241: Check pending deals for this signal while request is open
+    const { data: openDeals } = await supabaseAdmin
       .from("deals")
-      .select("id, created_at")
-      .eq("buyer_id", userId)
+      .select("id, buyer_id, status, created_at, routing_snapshot")
+      .is("property_id", null)
       .eq("status", "pending")
-      .order("created_at", { ascending: false })
-      .limit(5);
-    const dupe = (recent || []).find((d) => {
-      const age = Date.now() - new Date(d.created_at).getTime();
-      return age >= 0 && age <= DEDUPE_WINDOW_MS;
-    });
-    if (dupe) {
-      const { data: dupeSnap } = await supabaseAdmin
-        .from("deals")
-        .select("routing_snapshot")
-        .eq("id", dupe.id)
-        .maybeSingle();
-      if (dupeSnap?.routing_snapshot?.signal_id === id) {
-        return NextResponse.json({
-          ok: true,
-          success: true,
-          dealId: dupe.id,
-          connects_spent: 0,
-          deduped: true,
-          status: "pending",
-        });
-      }
+      .limit(100);
+
+    const signalPendingDeals = (openDeals || []).filter(
+      (d) => d.routing_snapshot?.signal_id === id
+    );
+
+    // Reuse existing open request for this user (no second spend while open)
+    const existingUserDeal = signalPendingDeals.find((d) => d.buyer_id === userId);
+    if (existingUserDeal) {
+      return NextResponse.json({
+        ok: true,
+        success: true,
+        dealId: existingUserDeal.id,
+        connects_spent: 0,
+        deduped: true,
+        reused: true,
+        status: "pending",
+      });
+    }
+
+    // Bounded answers per post (A-241)
+    const maxAnswers = maxAnswersForSignal(signal);
+    if (signalPendingDeals.length >= maxAnswers) {
+      return NextResponse.json({
+        ok: false,
+        error: "This signal has reached its limit for pending answers. No Connect was spent.",
+        code: "SIGNAL_ANSWERS_FULL",
+      }, { status: 409 });
     }
 
     if (await anyBlocked(supabaseAdmin, userId, [recipientId])) {

@@ -17,9 +17,10 @@ function walk(dir, out = []) {
 const stripComments = (source) =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
-const sourceFiles = walk(resolve(ROOT, "src")).filter((f) =>
-  [".js", ".jsx"].includes(extname(f))
-);
+const sourceFiles = [
+  ...walk(resolve(ROOT, "src")),
+  ...walk(resolve(ROOT, "mission-control", "src")),
+].filter((f) => [".js", ".jsx"].includes(extname(f)));
 
 // ── A-121 — no third-party script is fetched into the page at runtime ───────
 //
@@ -104,5 +105,7 @@ describe("A-121 no remote script or stylesheet is injected at runtime", () => {
   it("drops the CSP exception that only existed for the CDN", () => {
     const config = readFileSync(resolve(ROOT, "next.config.mjs"), "utf8");
     expect(config).not.toContain("unpkg.com");
+    const mcConfig = readFileSync(resolve(ROOT, "mission-control", "next.config.mjs"), "utf8");
+    expect(mcConfig).not.toContain("unpkg.com");
   });
 });

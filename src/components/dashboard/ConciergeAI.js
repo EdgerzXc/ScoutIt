@@ -36,6 +36,17 @@ export default function ConciergeAI() {
     }
   }, [messages, isOpen, isTyping]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const handleSend = (text) => {
     const userMsg = text || input;
     if (!userMsg.trim()) return;
@@ -93,6 +104,15 @@ export default function ConciergeAI() {
           </div>
         </button>
       </div>
+
+      {/* Backdrop overlay for dismissing on click */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-[999] bg-background/60 backdrop-blur-sm transition-opacity"
+          aria-hidden="true"
+        />
+      )}
 
       {/* Chat Modal / Sidebar */}
       <div className={`fixed inset-y-0 right-0 z-[1000] w-full sm:w-[400px] bg-background/95 backdrop-blur-xl border-l border-surface-variant shadow-2xl transform transition-transform duration-200 motion-reduce:transition-none ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>

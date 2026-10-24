@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { getSession } from "@/lib/authClient";
 import BrokerDossierIdentity from "@/components/brokers/BrokerDossierIdentity";
 import styles from "./BrokerDossierEditor.module.css";
@@ -150,6 +151,17 @@ export default function BrokerDossierEditor() {
   return (
     <main className={styles.workspace}>
       <section className={styles.editor} aria-labelledby="broker-editor-title">
+        <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
+          <Link href="/layer/crust" className={styles.breadcrumbLink}>
+            Layer 04 · The Crust
+          </Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <Link href="/brokers" className={styles.breadcrumbLink}>
+            Broker Roster
+          </Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <span className={styles.breadcrumbCurrent}>Private Dossier</span>
+        </nav>
         <span className={styles.eyebrow}>Broker dossier · private draft</span>
         <h2 id="broker-editor-title">Shape the facts. ScoutIt keeps the composition.</h2>
         <p className={styles.intro}>Narrative fields are broker-declared. Credentials, properties, recommendations, metrics, badges, typography, and layout remain read-only.</p>

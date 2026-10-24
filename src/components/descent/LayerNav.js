@@ -36,12 +36,23 @@ function NavPill({ href, label, dir }) {
       className={styles.pill}
       aria-label={`${previous ? "Previous" : "Next"} layer: ${label}${plain ? ` · ${plain}` : ""}`}
     >
-      {previous && <span className={`${styles.arrow} ${styles.arrowPrev}`} aria-hidden="true">←</span>}
+      {previous && (
+        <span className={`${styles.arrow} ${styles.arrowPrev}`} aria-hidden="true">
+          ←
+        </span>
+      )}
       <span className={styles.pillLabel}>
         {label}
         {plain && <span className={styles.plain}> · {plain}</span>}
       </span>
-      {!previous && <span className={`${styles.arrow} ${styles.arrowNext}`} aria-hidden="true">→</span>}
+      <span className={styles.pillCompactLabel} aria-hidden="true">
+        {previous ? "PREV" : "NEXT"}
+      </span>
+      {!previous && (
+        <span className={`${styles.arrow} ${styles.arrowNext}`} aria-hidden="true">
+          →
+        </span>
+      )}
     </Link>
   );
 }

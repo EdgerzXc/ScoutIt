@@ -107,7 +107,7 @@ export async function GET(request) {
           id: d.id,
           status: d.status,
           propertyId: d.properties?.id || null,
-          propertyTitle: d.properties?.title || "Untitled Property",
+          propertyTitle: d.properties?.title || d.routing_snapshot?.signal_title || "Untitled Property",
           propertySlug: d.properties?.slug || null,
           propertyPrice: d.properties?.price ?? null,
           unitId: d.unit_id || null,

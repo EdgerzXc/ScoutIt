@@ -178,25 +178,44 @@ export async function POST(request) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
     }
 
-    // A-144 audit: source context on the handshake activity row (no schema change).
-    await logActivity(supabaseAdmin, {
-      dealId: dealData[0].id,
-      propertyId: listingId,
-      activityType: 'deal_created',
-      actorId: userId,
-      metadata: { source: 'owner_invite', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
-    });
+    try {
+      // A-144 audit: source context on the handshake activity row (no schema change).
+      await logActivity(supabaseAdmin, {
+        dealId: dealData[0].id,
+        propertyId: listingId,
+        activityType: 'deal_created',
+        actorId: userId,
+        metadata: { source: 'owner_invite', ...connectSourceMetadata(connectSource, { reason_tag: 'REPRESENTATION_REQUEST' }) },
+      });
 
-    // GAP-21: Notify invited broker of representation request
-    await notifyUser(supabaseAdmin, {
-      userId: resolvedBrokerId,
-      title: "New representation invitation",
-      desc: "An owner has invited you to represent their property listing.",
-      propertyId: listingId,
-      notificationType: "broker_invite",
-    });
+      // GAP-21: Notify invited broker of representation request
+      await notifyUser(supabaseAdmin, {
+        userId: resolvedBrokerId,
+        title: "New representation invitation",
+        desc: "An owner has invited you to represent their property listing.",
+        propertyId: listingId,
+        notificationType: "broker_invite",
+      });
 
-    return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, source_context: connectSource });
+      return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, source_context: connectSource });
+    } catch (postSpendErr) {
+      console.error("[INVITE API] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
+      if (userId !== 'master-dev') {
+        try {
+          await supabaseAdmin.rpc('refund_connects_system_error', {
+            p_user_id: userId,
+            p_amount: 1,
+            p_reason: `Compensating refund: invite delivery failed for deal ${dealData[0].id}`,
+            p_staff_id: "system",
+            p_ref_id: String(listingId),
+          });
+        } catch (refundErr) {
+          console.error("[INVITE API] Compensating refund RPC failed:", refundErr);
+        }
+      }
+      await rollbackInviteSideEffects(dealData[0].id);
+      return NextResponse.json({ error: "Invitation delivery failed. Your Connect has been refunded." }, { status: 500 });
+    }
 
   } catch (err) {
     console.error("[INVITE API] Error during invite process:", err);

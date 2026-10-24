@@ -59,22 +59,32 @@ function fmtDate(iso) {
 /**
  * Normalises whatever shape a lead arrives in (deal row, pitch, inquiry)
  * into the flat record every export format reads.
+ *
+ * Two shapes reach this function and they are not the same:
+ *   · a platform deal row (`otherParty`, `lastMessage`) — the counterparty's
+ *     name, masked by the server until the handshake opens it;
+ *   · an imported contact card (`otherPartyEmail`, `otherPartyPhone`,
+ *     `budget`) — the account's own records, which the importer supplied.
+ * Reading only one of them is how an imported lead exported without a name,
+ * a number or an address.
  */
 export function normaliseLead(lead = {}) {
   const contact = lead.buyerContact || lead.contact || {};
   return {
-    name: lead.name || contact.name || lead.buyerName || "",
-    email: lead.email || contact.email || "",
-    phone: lead.phone || contact.phone || "",
+    name: lead.name || contact.name || lead.buyerName || lead.otherParty || "",
+    email: lead.email || contact.email || lead.otherPartyEmail || "",
+    phone: lead.phone || contact.phone || lead.otherPartyPhone || "",
     property: lead.propertyTitle || lead.property?.title || lead.targetListing?.title || "",
     // Built from siteUrl, never a hardcoded host — an exported lead with a
     // dead link is worse than one with no link.
     propertyUrl: lead.propertyUrl || (lead.propertySlug ? siteUrl(`/property/${lead.propertySlug}`) : ""),
-    budget: lead.budget || "",
+    // The budget the seeker stated. `propertyPrice` is the listed price of a
+    // property and is never a budget, so it is deliberately not read here.
+    budget: lead.budget ?? contact.budget ?? "",
     status: lead.status || "",
-    message: lead.pitchMessage || lead.pitch_message || lead.message || "",
+    message: lead.pitchMessage || lead.pitch_message || lead.message || lead.lastMessage || "",
     createdAt: fmtDate(lead.createdAt || lead.created_at),
-    source: "ScoutIt",
+    source: lead.source === "csv_import" ? "ScoutIt (imported)" : "ScoutIt",
   };
 }
 

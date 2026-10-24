@@ -100,8 +100,16 @@ function InventoryInner({ params }) {
 
   if (!listing || !unitsLoaded) {
     return (
-      <div className="min-h-screen bg-background pt-24 pb-12 flex items-center justify-center">
-        <span className="text-text-muted font-working-title animate-pulse">Loading Inventory...</span>
+      <div className="min-h-screen bg-background pt-24 pb-12 px-6" aria-busy="true" aria-label="Loading inventory">
+        <div className="max-w-5xl mx-auto space-y-6 animate-pulse" aria-hidden="true">
+          <div className="h-4 w-32 rounded bg-gold-accent/20" />
+          <div className="h-9 w-72 rounded bg-surface-variant/60" />
+          <div className="rounded-2xl border border-surface-variant bg-surface/50 p-6 space-y-4">
+            <div className="h-6 w-48 rounded bg-surface-variant/50" />
+            <div className="h-24 w-full rounded-xl bg-surface-variant/30" />
+            <div className="h-24 w-full rounded-xl bg-surface-variant/30" />
+          </div>
+        </div>
       </div>
     );
   }

@@ -23,6 +23,7 @@ export const SIGNAL_STATUSES = Object.freeze({
   REMOVED: "removed",
   CLOSED: "closed",
   EXPIRED: "expired",
+  FULFILLED: "fulfilled",
 });
 
 export const MODERATION_ACTIONS = Object.freeze({
@@ -86,6 +87,7 @@ const ALLOWED_TRANSITIONS = Object.freeze({
   ]),
   [SIGNAL_STATUSES.CLOSED]: Object.freeze([]),
   [SIGNAL_STATUSES.EXPIRED]: Object.freeze([]),
+  [SIGNAL_STATUSES.FULFILLED]: Object.freeze([]),
 });
 
 /** Return array of actions allowed from the given status. */
@@ -197,6 +199,8 @@ export function signalStatusLabel(status) {
       return "Closed by Author";
     case SIGNAL_STATUSES.EXPIRED:
       return "Expired";
+    case SIGNAL_STATUSES.FULFILLED:
+      return "Fulfilled";
     default:
       return status || "Unknown";
   }

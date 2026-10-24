@@ -143,14 +143,14 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
         }
         .mf-card {
           width: 100%;
-          max-height: 92vh;
+          max-height: 92dvh;
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
           background: var(--surface);
           border: 0.5px solid var(--border-solid);
           border-bottom: none;
           border-radius: 10px 10px 0 0;
-          padding: 22px 18px 18px;
+          padding: 22px 18px max(18px, env(safe-area-inset-bottom));
         }
         @media (prefers-reduced-motion: no-preference) {
           .mf-overlay { animation: mfFade 160ms ease-out backwards; }
@@ -247,6 +247,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
           bottom: 0;
           background: var(--surface);
           padding-top: 12px;
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
         .mf-btn {
           min-height: 48px;

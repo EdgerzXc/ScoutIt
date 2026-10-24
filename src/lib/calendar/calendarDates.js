@@ -7,7 +7,6 @@
 // phases, not here.
 
 export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-export const HOURS_IN_DAY = 24;
 
 /** Midnight (local) of the given date, as a new Date. */
 export function startOfDay(date) {

@@ -87,7 +87,7 @@ export default async function ClaimPropertyTokenPage({ params }) {
                 Verify &amp; Claim Property
               </Link>
               <Link
-                href="/discover"
+                href="/property"
                 className="px-5 py-3 rounded-lg text-xs uppercase tracking-widest"
                 style={{
                   fontFamily: "var(--font-mono)",
@@ -124,7 +124,7 @@ export default async function ClaimPropertyTokenPage({ params }) {
                 Open Owner Dashboard
               </Link>
               <Link
-                href="/discover"
+                href="/property"
                 className="px-5 py-3 rounded-lg text-xs uppercase tracking-widest"
                 style={{
                   fontFamily: "var(--font-mono)",

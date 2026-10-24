@@ -52,8 +52,3 @@ export async function isAiSearchActive() {
   // Fail closed while QuestIT is parked; only an explicit flag enables spend.
   return getFlag("ai_search", false);
 }
-
-/** Deep Intelligence Studio (cap-rate & noise metrics) */
-export async function isDeepIntelActive() {
-  return getFlag("deep_intel", true);
-}

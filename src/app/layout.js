@@ -80,6 +80,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: "#0e0e0e",
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }) {

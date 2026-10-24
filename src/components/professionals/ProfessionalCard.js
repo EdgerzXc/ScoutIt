@@ -7,7 +7,7 @@ import styles from "./professionalDirectory.module.css";
 
 const CATEGORY_MARKS = { broker: "AD", photographer: "LN", researcher: "RX", event_planner: "EV" };
 
-export default function ProfessionalCard({ record, actionLabel }) {
+export default function ProfessionalCard({ record, actionLabel, forSlug, forTitle }) {
   const onPointerMove = (event) => {
     if (event.pointerType !== "mouse") return;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -77,7 +77,14 @@ export default function ProfessionalCard({ record, actionLabel }) {
         </div>
 
         <div className={styles.cardActions}>
-          <Link className={styles.profileLink} href={record.canonicalPath}>
+          <Link
+            className={styles.profileLink}
+            href={
+              forSlug
+                ? `${record.canonicalPath}?for=${encodeURIComponent(forSlug)}${forTitle ? `&title=${encodeURIComponent(forTitle)}` : ""}`
+                : record.canonicalPath
+            }
+          >
             {actionLabel}<ArrowUpRight size={15} aria-hidden="true" />
           </Link>
           <ProfessionalSaveButton record={record} />

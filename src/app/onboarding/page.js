@@ -492,6 +492,19 @@ export default function OnboardingPage() {
           );
         })}
       </div>
+      <div className="p-4 rounded border border-surface-variant bg-surface/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs mb-8">
+        <div>
+          <span className="font-working-title text-on-surface block mb-0.5">Space Photographer, Site Researcher, or Event Designer?</span>
+          <span className="text-text-secondary leading-snug">The Layer 04 Crust specialist network is assembling its founding cohort.</span>
+        </div>
+        <button
+          type="button"
+          className="shrink-0 text-gold-accent hover:text-gold-bright underline font-mono uppercase tracking-wider text-left sm:text-right transition cursor-pointer"
+          onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role: "photographer", source: "onboarding-role-select" } }))}
+        >
+          Apply to Founding Cohort →
+        </button>
+      </div>
       <button className="w-full bg-gold-accent text-background font-working-title font-bold py-4 px-6 rounded disabled:opacity-50" onClick={() => setStep(4)} disabled={!formData.primaryMode}>Continue setup</button>
     </div>
   );

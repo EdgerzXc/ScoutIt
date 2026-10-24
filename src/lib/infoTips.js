@@ -136,6 +136,22 @@ export const INFO_TIPS = Object.freeze({
     title: "System flow map",
     body: "Interactive architecture diagram showing data pathways, state machines, and API connections across the platform.",
   }),
+  marketTrends: Object.freeze({
+    title: "Market trend subcategories",
+    body: "Filter signals across macro demand surges, policy and zoning shifts, infrastructure corridors, and capital yields.",
+  }),
+  pipelineStages: Object.freeze({
+    title: "Development pipeline stages",
+    body: "Track building milestones from site preparation and active structural construction to imminent opening and turnover.",
+  }),
+  curatedStreams: Object.freeze({
+    title: "Curated intelligence streams",
+    body: "Quick filter streams combining development pipeline milestones and macro trend observations across Metro Manila.",
+  }),
+  exploreByArea: Object.freeze({
+    title: "District location signals",
+    body: "Pins appear on the radar when an update has verified district coordinates. Non-spatial updates remain in the signals list.",
+  }),
 });
 
 export function getInfoTip(id) {

@@ -177,7 +177,18 @@ export default function CrustLayer() {
                   {service.cta} <span aria-hidden="true">→</span>
                 </Link>
                 {service.secondaryHref && (
-                  <Link className={styles.secondaryAction} href={service.secondaryHref}>
+                  <Link
+                    className={styles.secondaryAction}
+                    href={service.secondaryHref}
+                    onClick={(e) => {
+                      if (activeCategory !== "advisors") {
+                        e.preventDefault();
+                        const roleMap = { photography: "photographer", research: "researcher", events: "event-planner" };
+                        const role = roleMap[activeCategory] || "photographer";
+                        window.dispatchEvent(new CustomEvent("scoutit:open-waitlist", { detail: { role, source: "crust-ecosystem" } }));
+                      }
+                    }}
+                  >
                     {service.secondaryCta}
                   </Link>
                 )}

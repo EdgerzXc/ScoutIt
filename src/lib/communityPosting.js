@@ -22,6 +22,22 @@ export const POSTABLE_SIGNAL_TYPES = Object.freeze([
 
 export const IDENTITY_MODES = Object.freeze(["anonymous", "public", "organization"]);
 
+// ── Transaction intent (A-238 · GAP-94) ───────────────────────────────────
+// The composer collected a transaction type it never showed a control for,
+// so every signal stored a blank one and the Rent / Buy / STR filters had
+// nothing to filter on. The vocabulary and the rule live here, and the
+// composer reads them from here, so the two cannot disagree.
+export const TRANSACTION_TYPES = Object.freeze(["lease", "buy", "str"]);
+
+/** Signal types that describe a space someone wants, represents or releases. */
+export const TRANSACTION_REQUIRED_SIGNAL_TYPES = new Set([
+  SIGNAL_TYPES.LOOKING_FOR,
+  SIGNAL_TYPES.REPRESENTING_CLIENT,
+  SIGNAL_TYPES.UPCOMING_SUPPLY,
+  SIGNAL_TYPES.BUSINESS_EXPANSION,
+  SIGNAL_TYPES.OPPORTUNITY,
+]);
+
 // ── Signal kinds (owner decision 2026-09-26) ────────────────────────────
 // One surface, two logics: demand signals are answered by owners/brokers
 // connecting to the seeker; promo signals run the reverse direction. Only
@@ -191,6 +207,18 @@ export function validateDraft(input = {}) {
     fail("BAD_MODE", "Choose how the post is signed: anonymous Scout ID, public profile, or organization.");
   }
 
+  // A-238 (GAP-94): the transaction intent, validated server-side. The
+  // composer asks for it; the server refuses a blank one, so the column is
+  // never silently empty for the signal types where it means something.
+  const transactionType = cleanStr(input.transactionType, 41).toLowerCase();
+  if (TRANSACTION_REQUIRED_SIGNAL_TYPES.has(input.signalType)) {
+    if (!transactionType) {
+      fail("NO_TRANSACTION", "Say what kind of transaction this is: lease, buy, or short-term rental.");
+    } else if (!TRANSACTION_TYPES.includes(transactionType)) {
+      fail("BAD_TRANSACTION", "Choose lease, buy, or short-term rental.");
+    }
+  }
+
   const normalized = {
     signalType: POSTABLE_SIGNAL_TYPES.includes(input.signalType) ? input.signalType : null,
     signalKind: kindForSignalType(input.signalType),
@@ -206,7 +234,7 @@ export function validateDraft(input = {}) {
     lat: Number.isFinite(Number(input.lat)) ? Number(input.lat) : null,
     lng: Number.isFinite(Number(input.lng)) ? Number(input.lng) : null,
     identityMode: IDENTITY_MODES.includes(mode) ? mode : "anonymous",
-    transactionType: cleanStr(input.transactionType, 41),
+    transactionType: TRANSACTION_TYPES.includes(transactionType) ? transactionType : "",
     spaceType: cleanStr(input.spaceType, 81),
     budgetMin: toPositiveNumber(input.budgetMin),
     budgetMax: toPositiveNumber(input.budgetMax),
@@ -246,7 +274,7 @@ function toStringList(v, max) {
     .slice(0, max);
 }
 
-// ── Freshness + lifecycle (spec §10) ─────────────────────────────────────
+// ── Freshness + lifecycle (spec §10 · 7-day weekly refresh cadence) ──────
 const DAY_MS = 86_400_000;
 
 export function freshnessFor(lastConfirmedAt, now = new Date()) {
@@ -254,14 +282,131 @@ export function freshnessFor(lastConfirmedAt, now = new Date()) {
   if (!Number.isFinite(t)) return "aging";
   const ageDays = Math.floor((new Date(now).getTime() - t) / DAY_MS);
   if (ageDays < 0) return "fresh";
-  if (ageDays <= 7) return "fresh";
-  if (ageDays <= 21) return "active";
-  if (ageDays <= 30) return "aging";
+  if (ageDays <= 2) return "fresh";
+  if (ageDays <= 5) return "active";
+  if (ageDays <= 7) return "aging";
   return "expired";
 }
 
 export function isLiveStatus(status) {
   return status === "live" || status === "limited";
+}
+
+// ── The shared "still active" predicate (A-237 · GAP-104 / GAP-116) ──────
+//
+// A signal expires 7 days (1 week) after it was last confirmed unless the
+// author refreshes it for another week. Two places need that rule and they
+// were answering it differently:
+//
+//   · the public feed limited to 60 rows in SQL and THEN dropped the expired
+//     ones in memory, so sixty aged signals could starve a live feed of its
+//     newest entries;
+//   · the capacity counter counted rows by status alone, so an expired
+//     signal kept consuming an author's allowance forever.
+//
+// One predicate, used by both. The cut-off is computed here so the feed and
+// the counter cannot drift apart.
+//
+// `last_confirmed_at` is NOT NULL DEFAULT now() in the database, so every row
+// has a confirmation date and the filter is a single comparison. (A null
+// value reads as expired in freshnessFor, so it must not be let back in by a
+// "or null" clause — that would hand the limit back to rows the feed would
+// drop anyway.)
+export const SIGNAL_EXPIRY_DAYS = 7;
+
+/** The oldest confirmation date a signal can still be active at. */
+export function activeSignalCutoffIso(now = new Date()) {
+  const ms = new Date(now).getTime() - SIGNAL_EXPIRY_DAYS * 86_400_000;
+  return new Date(ms).toISOString();
+}
+
+/**
+ * A PostgREST `or=` filter that keeps only rows that have not expired.
+ * Usage: query.or(activeSignalFilter(now))
+ */
+export function activeSignalFilter(now = new Date()) {
+  return `last_confirmed_at.gte.${activeSignalCutoffIso(now)}`;
+}
+
+// ── Signal Terminal State & Fulfilment (A-240 · A-241) ─────────────────────
+export const SIGNAL_STATUSES = Object.freeze({
+  LIVE: "live",
+  LIMITED: "limited",
+  UNDER_REVIEW: "under_review",
+  NEEDS_EDIT: "needs_edit",
+  REMOVED: "removed",
+  CLOSED: "closed",
+  EXPIRED: "expired",
+  FULFILLED: "fulfilled",
+});
+
+/**
+ * Pure decision for signal lifecycle and terminal state (A-240).
+ * Returns: 'live' | 'served' | 'withdrawn' | 'expired' | status
+ * No I/O — tested against a fixed instant.
+ */
+export function signalTerminalState({ status, lastConfirmedAt, dealOutcome, now = new Date() } = {}) {
+  // Fulfilment: mutually attested outcome or explicitly fulfilled status
+  if (
+    status === "fulfilled" ||
+    dealOutcome === "platform_outcome_confirmed" ||
+    dealOutcome === "fulfilled" ||
+    dealOutcome === "completed"
+  ) {
+    return "served";
+  }
+  // Author withdrawal
+  if (status === "closed" || status === "withdrawn") {
+    return "withdrawn";
+  }
+  // Freshness decay (30 days) or explicit expired status
+  if (status === "expired" || (lastConfirmedAt !== undefined && freshnessFor(lastConfirmedAt, now) === "expired")) {
+    return "expired";
+  }
+  // Active states
+  if (status === "live" || status === "limited" || status === "active" || !status) {
+    if (lastConfirmedAt !== undefined && freshnessFor(lastConfirmedAt, now) === "expired") {
+      return "expired";
+    }
+    return "live";
+  }
+  return status || "live";
+}
+
+/** The same rule in JavaScript, for a row already in memory. */
+export function isSignalActive(lastConfirmedAt, now = new Date(), status = "live") {
+  return signalTerminalState({ status, lastConfirmedAt, now }) === "live";
+}
+
+// ── Bounded Answers per Demand Signal (A-241) ─────────────────────────────
+export const DEFAULT_MAX_SIGNAL_ANSWERS = 3;
+
+/**
+ * Determine the allowed number of open answers/connections for a signal.
+ * Reads the signal author's ceiling or falls back to platform default (3).
+ * Bounded between 1 and 10.
+ */
+export function maxAnswersForSignal(signal) {
+  const raw = signal?.max_answers ?? signal?.maxAnswers ?? signal?.requirements?.max_answers;
+  const val = Number(raw);
+  const parsed = Number.isFinite(val) && val > 0 ? val : DEFAULT_MAX_SIGNAL_ANSWERS;
+  return Math.min(Math.max(1, parsed), 10);
+}
+
+/**
+ * Format honest answer status copy for the dossier card.
+ * Example: '2 answers waiting · 1 more welcome' or 'Answers full (3/3)'
+ */
+export function openAnswersText(openCount = 0, max = DEFAULT_MAX_SIGNAL_ANSWERS) {
+  const open = Math.max(0, Number(openCount) || 0);
+  if (open === 0) return null;
+  if (open >= max) {
+    return `Answers full (${open}/${max})`;
+  }
+  const remaining = max - open;
+  const waitingStr = `${open} ${open === 1 ? "answer" : "answers"} waiting`;
+  const welcomeStr = `${remaining} more welcome`;
+  return `${waitingStr} · ${welcomeStr}`;
 }
 
 /** Capacity check: closed/expired rows never count (spec §10). */

@@ -62,7 +62,6 @@ describe("A-143 MapLibre's attribution sink stays unreachable", () => {
     "src/components/maps/SpatialCanvas.js",
     "src/components/property/FloodHeatmapMap.js",
     "src/components/property/InteractiveRadiusMap.js",
-    "src/components/property/SpatialCommandMap.js",
     "src/components/stratosphere/SpatialSignalRadar.js",
     "src/components/transit/ManilaTransitMap.js",
   ];

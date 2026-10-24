@@ -16,6 +16,10 @@ const GOOD = {
   city: "Taguig",
   district: "BGC",
   identityMode: "anonymous",
+  // A-238 (GAP-94): a demand signal now states its transaction. The fixture
+  // was re-aimed with the change that made it required, and the rule itself
+  // is covered below.
+  transactionType: "lease",
 };
 
 describe("community posting — persistent Scout ID", () => {
@@ -46,6 +50,22 @@ describe("community posting — hard rules", () => {
     const { ok, normalized } = validateDraft({ ...GOOD, signalType: "COMMERCIAL_PROMOTION" });
     expect(ok).toBe(true);
     expect(normalized.commercialFlag).toBe(true);
+  });
+
+  it("A-238: a demand signal states its transaction, or it is refused", () => {
+    const { ok, errors } = validateDraft({ ...GOOD, transactionType: "" });
+    expect(ok).toBe(false);
+    expect(errors.some((e) => e.code === "NO_TRANSACTION")).toBe(true);
+  });
+
+  it("A-238: a signal with no transaction concept does not need one", () => {
+    const { ok, normalized } = validateDraft({
+      ...GOOD,
+      signalType: "MARKET_OBSERVATION",
+      transactionType: "",
+    });
+    expect(ok).toBe(true);
+    expect(normalized.transactionType).toBe("");
   });
 
   it("refuses system-only intelligence from members", () => {
@@ -125,12 +145,12 @@ describe("community posting — freshness and capacity", () => {
   const now = new Date("2026-09-24T12:00:00Z");
   const daysAgo = (n) => new Date(now.getTime() - n * 86_400_000).toISOString();
 
-  it("decays fresh → active → aging → expired on fixed instants", () => {
+  it("decays fresh → active → aging → expired on 7-day weekly instants", () => {
     expect(freshnessFor(daysAgo(0), now)).toBe("fresh");
-    expect(freshnessFor(daysAgo(7), now)).toBe("fresh");
-    expect(freshnessFor(daysAgo(8), now)).toBe("active");
-    expect(freshnessFor(daysAgo(22), now)).toBe("aging");
-    expect(freshnessFor(daysAgo(31), now)).toBe("expired");
+    expect(freshnessFor(daysAgo(2), now)).toBe("fresh");
+    expect(freshnessFor(daysAgo(4), now)).toBe("active");
+    expect(freshnessFor(daysAgo(7), now)).toBe("aging");
+    expect(freshnessFor(daysAgo(8), now)).toBe("expired");
   });
 
   it("holds brokers to 10, owners to 5, everyone else to 3", () => {

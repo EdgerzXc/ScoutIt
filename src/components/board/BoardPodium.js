@@ -88,7 +88,7 @@ export default function BoardPodium({ headingLevel = 2 }) {
           <div className="orbit-telemetry-badge">
             <span className="orbit-signal-dot" aria-hidden="true" />
             <span className="orbit-telemetry-text">
-              LAYER 01 // ORBIT · SAMPLE DEMAND INDEX
+              LAYER 01 · ORBIT · SAMPLE DEMAND INDEX
             </span>
           </div>
           <HeroHeading className="orbit-hero-title">
@@ -202,7 +202,8 @@ export default function BoardPodium({ headingLevel = 2 }) {
 
                   <div className="orbit-apex-actions">
                     <Link href="/showcase" className="orbit-primary-btn" aria-label={`View Champion space: ${hero.name}`}>
-                      Explore The Showcase <ArrowRight size={14} aria-hidden="true" />
+                      <span>Explore The Showcase</span>
+                      <ArrowRight size={14} className="orbit-btn-arrow" aria-hidden="true" />
                     </Link>
                     <button
                       type="button"
@@ -310,7 +311,7 @@ export default function BoardPodium({ headingLevel = 2 }) {
         <div className="orbit-portal-action">
           <Link href="/showcase" className="orbit-portal-cta-btn">
             <span>Explore The Showcase</span>
-            <ArrowRight size={15} aria-hidden="true" />
+            <ArrowRight size={15} className="orbit-btn-arrow" aria-hidden="true" />
           </Link>
           <span className="orbit-portal-cta-sub">Curated public intelligence preview · Instant access</span>
         </div>
@@ -733,16 +734,17 @@ export default function BoardPodium({ headingLevel = 2 }) {
           margin-top: auto;
         }
 
-        .orbit-primary-btn {
+        :global(.orbit-primary-btn) {
           flex: 1;
-          min-height: 44px;
+          min-height: 46px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
+          gap: 9px;
           background: var(--accent);
           color: var(--on-accent);
-          border-radius: 8px;
+          border: 1px solid rgba(var(--accent-bright-rgb), 0.4);
+          border-radius: 10px;
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 700;
@@ -750,39 +752,72 @@ export default function BoardPodium({ headingLevel = 2 }) {
           text-transform: uppercase;
           text-decoration: none;
           white-space: nowrap;
-          transition: background var(--transition-slow);
+          padding: 0 20px;
+          box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.28);
+          transform: translateY(0);
+          transition: background-color var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
         }
 
-        .orbit-apex-card:hover .orbit-primary-btn {
-          background: var(--accent-bright);
+        :global(.orbit-primary-btn svg),
+        :global(.orbit-primary-btn .orbit-btn-arrow) {
+          transition: transform var(--transition-slow);
         }
 
-        .orbit-save-btn {
-          min-height: 44px;
-          padding: 0 16px;
+        @media (hover: hover) and (pointer: fine) {
+          :global(.orbit-primary-btn:hover) {
+            background: var(--accent-bright);
+            border-color: var(--accent-bright);
+            box-shadow: 0 6px 20px rgba(var(--accent-bright-rgb), 0.45);
+            transform: translateY(-1.5px);
+          }
+
+          :global(.orbit-primary-btn:hover svg),
+          :global(.orbit-primary-btn:hover .orbit-btn-arrow) {
+            transform: translateX(3px);
+          }
+        }
+
+        :global(.orbit-primary-btn:active) {
+          transform: scale(0.98);
+        }
+
+        :global(.orbit-save-btn) {
+          min-height: 46px;
+          padding: 0 18px;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          border: 1px solid rgba(var(--text-primary-rgb), 0.12);
-          background: rgba(var(--text-primary-rgb), 0.04);
+          justify-content: center;
+          gap: 7px;
+          border: 1px solid rgba(var(--accent-rgb), 0.35);
+          background: rgba(var(--surface2-rgb), 0.85);
+          backdrop-filter: blur(8px);
           color: var(--text-primary);
-          border-radius: 8px;
+          border-radius: 10px;
           font-family: var(--font-mono);
           font-size: 12px;
           font-weight: 600;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
-          transition: color var(--transition-slow), background var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow);
+          transform: translateY(0);
+          transition: color var(--transition-slow), background-color var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
         }
 
-        .orbit-save-btn:hover {
-          border-color: var(--accent);
-          color: var(--accent);
-          background: rgba(var(--accent-rgb), 0.06);
+        @media (hover: hover) and (pointer: fine) {
+          :global(.orbit-save-btn:hover) {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(var(--accent-rgb), 0.14);
+            box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.2);
+            transform: translateY(-1.5px);
+          }
         }
 
-        .orbit-save-btn.is-saved {
+        :global(.orbit-save-btn:active) {
+          transform: scale(0.98);
+        }
+
+        :global(.orbit-save-btn.is-saved) {
           background: var(--accent);
           color: var(--on-accent);
           border-color: var(--accent);
@@ -1030,21 +1065,24 @@ export default function BoardPodium({ headingLevel = 2 }) {
         .orbit-portal-action {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          gap: 6px;
+          align-items: flex-end;
+          gap: 8px;
           flex-shrink: 0;
           position: relative;
           z-index: 2;
         }
 
-        .orbit-portal-cta-btn {
+        :global(.orbit-portal-cta-btn) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          padding: 13px 26px;
-          border-radius: 9px;
-          background: var(--accent);
+          gap: 10px;
+          padding: 14px 28px;
+          min-height: 48px;
+          border-radius: 11px;
+          background-color: var(--accent);
+          background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
+          border: 1px solid rgba(var(--accent-bright-rgb), 0.45);
           color: var(--on-accent);
           font-family: var(--font-mono);
           font-size: 12px;
@@ -1052,14 +1090,33 @@ export default function BoardPodium({ headingLevel = 2 }) {
           letter-spacing: 0.12em;
           text-transform: uppercase;
           text-decoration: none;
-          box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.22);
-          transition: background var(--transition-slow), transform var(--transition-slow);
           white-space: nowrap;
+          box-shadow: 0 6px 22px rgba(var(--accent-rgb), 0.32);
+          transform: translateY(0);
+          transition: background-color var(--transition-slow), border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
         }
 
-        .orbit-portal-cta-btn:hover {
-          background: var(--accent-bright);
-          transform: translateY(-1px);
+        :global(.orbit-portal-cta-btn svg),
+        :global(.orbit-portal-cta-btn .orbit-btn-arrow) {
+          transition: transform var(--transition-slow);
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          :global(.orbit-portal-cta-btn:hover) {
+            background: var(--accent-bright);
+            border-color: var(--accent-bright);
+            box-shadow: 0 8px 28px rgba(var(--accent-bright-rgb), 0.52);
+            transform: translateY(-2px);
+          }
+
+          :global(.orbit-portal-cta-btn:hover svg),
+          :global(.orbit-portal-cta-btn:hover .orbit-btn-arrow) {
+            transform: translateX(4px);
+          }
+        }
+
+        :global(.orbit-portal-cta-btn:active) {
+          transform: scale(0.98);
         }
 
         .orbit-portal-cta-sub {
@@ -1131,10 +1188,13 @@ export default function BoardPodium({ headingLevel = 2 }) {
 
         .orbit-filter-pill:focus-visible,
         .orbit-primary-btn:focus-visible,
+        :global(.orbit-primary-btn:focus-visible),
         .orbit-save-btn:focus-visible,
+        :global(.orbit-save-btn:focus-visible),
         .orbit-runner-name a:focus-visible,
         .orbit-runner-save:focus-visible,
-        .orbit-portal-cta-btn:focus-visible {
+        .orbit-portal-cta-btn:focus-visible,
+        :global(.orbit-portal-cta-btn:focus-visible) {
           outline: 2px solid var(--accent-bright);
           outline-offset: 3px;
         }
@@ -1144,8 +1204,12 @@ export default function BoardPodium({ headingLevel = 2 }) {
           .orbit-apex-card,
           .orbit-runner-card,
           .orbit-portal-cta-btn,
+          :global(.orbit-portal-cta-btn),
           .orbit-filter-pill,
+          .orbit-primary-btn,
+          :global(.orbit-primary-btn),
           .orbit-save-btn,
+          :global(.orbit-save-btn),
           .orbit-runner-save,
           .orbit-loading-lines i {
             transition: none !important;
@@ -1154,7 +1218,10 @@ export default function BoardPodium({ headingLevel = 2 }) {
           }
           .orbit-apex-card:hover,
           .orbit-runner-card:hover,
-          .orbit-portal-cta-btn:hover {
+          .orbit-portal-cta-btn:hover,
+          :global(.orbit-portal-cta-btn:hover),
+          .orbit-primary-btn:hover,
+          :global(.orbit-primary-btn:hover) {
             transform: none !important;
           }
         }
@@ -1234,6 +1301,17 @@ export default function BoardPodium({ headingLevel = 2 }) {
           }
           .orbit-portal-pill {
             width: 100%;
+            justify-content: center;
+          }
+          .orbit-apex-actions {
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+          }
+          :global(.orbit-primary-btn),
+          :global(.orbit-save-btn) {
+            width: 100%;
+            min-height: 48px;
             justify-content: center;
           }
         }

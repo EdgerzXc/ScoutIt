@@ -26,7 +26,7 @@ const CAPABILITIES = [
   {
     id: "radar",
     number: "01",
-    title: "10-Layer Space Radar & Elevation GIS",
+    title: "Multi-Overlay Spatial Radar & Elevation GIS",
     kicker: "SPATIAL CLARITY OVER GUESSWORK",
     icon: Compass,
     problem:
@@ -197,7 +197,7 @@ const TRANSMISSIONS = [
     title: "Genesis Spatial Radar & Dual-CMS",
     date: "JUNE 2026",
     summary:
-      "Launched 10-layer 3D elevation GIS radar with Project NOAH flood modeling, air-gapped Airtable/Supabase dual-database pipeline, and Mapbox geocoding.",
+      "Launched multi-overlay 3D elevation GIS radar with Project NOAH flood modeling, air-gapped Airtable/Supabase dual-database pipeline, and Mapbox geocoding.",
   },
 ];
 
@@ -209,28 +209,28 @@ export default function PlatformTourPage() {
   const currentRole = ROLES.find((r) => r.id === activeRoleId) || ROLES[0];
 
   return (
-    <div className="relative min-h-screen bg-background text-text-primary flex flex-col selection:bg-accent/20">
+    <div className="relative min-h-screen min-h-dvh bg-background text-text-primary flex flex-col selection:bg-accent/20">
       <AtmosphereBackground variant="default" />
 
       {/* Global Kicker Header */}
       <header className="relative z-20 border-b border-border-solid bg-surface/80 backdrop-blur-xl px-4 py-3 sm:px-8 sm:py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <Link
-              href="/"
-              className="font-display text-xl text-accent tracking-tighter hover:text-accent-bright transition-colors"
+              href="/layer/mantle"
+              className="inline-flex items-center gap-1 font-mono text-[12px] uppercase tracking-wider text-accent hover:text-accent-bright transition-colors"
             >
-              S<span className="text-on-surface">cout</span>IT
+              ← Layer 05 · Mantle
             </Link>
             <span className="text-text-muted">/</span>
             <span className="font-mono text-[12px] uppercase tracking-wider text-text-secondary">
-              Platform Tour & Guidebook 101
+              Tour & Guidebook
             </span>
           </div>
 
           <div className="flex items-center gap-4">
             <Link
-              href="/discover"
+              href="/property"
               className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wider text-text-muted hover:text-accent transition-colors"
             >
               <span>Explore Spaces</span>
@@ -251,7 +251,7 @@ export default function PlatformTourPage() {
         <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-solid bg-surface/60 backdrop-blur-md mb-4 text-[12px] font-mono tracking-wider text-accent uppercase">
             <Sparkles size={14} className="text-accent-bright" />
-            <span>LAYER 05 // SYSTEM BRIEFING & OPERATING ARCHITECTURE</span>
+            <span>LAYER 05 · SYSTEM BRIEFING & OPERATING ARCHITECTURE</span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-on-surface font-semibold tracking-tight leading-tight mb-4">
             The features <span className="text-accent">are</span> the promotion.

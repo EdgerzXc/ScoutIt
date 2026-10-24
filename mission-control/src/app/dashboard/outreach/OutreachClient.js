@@ -2,21 +2,16 @@
 
 import { useState } from "react";
 import {
-  MapPin,
   Phone,
   Mail,
-  ExternalLink,
   MessageSquare,
-  Clock,
   Sparkles,
   Search,
   CheckCircle2,
   AlertTriangle,
-  Send,
   Copy,
   Check,
   Building,
-  UserCheck,
   Compass,
 } from "lucide-react";
 import {

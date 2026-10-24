@@ -181,8 +181,8 @@ export default async function IntelArticlePage({ params, searchParams }) {
           </nav>
         ) : null}
         {fromDiscover ? (
-          <nav className="article-layer-return" aria-label="Discover return">
-            <Link href="/discover">← Back to Discover</Link>
+          <nav className="article-layer-return" aria-label="Directory return">
+            <Link href="/property">← Back to Space Directory</Link>
           </nav>
         ) : null}
         {!fromWorkspace && !fromDiscover && !fromProperty ? (

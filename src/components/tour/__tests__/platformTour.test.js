@@ -36,7 +36,7 @@ describe("A-201 Platform Tour & Guidebook 101 Architecture", () => {
     expect(TOUR_PAGE_SOURCE).toContain("<PlatformTheaterPlayer");
     // Act 1: 5 Sovereign Capabilities
     expect(TOUR_PAGE_SOURCE).toContain("ACT 01 // CORE SYSTEM CAPABILITIES");
-    expect(TOUR_PAGE_SOURCE).toContain("10-Layer Space Radar & Elevation GIS");
+    expect(TOUR_PAGE_SOURCE).toContain("Multi-Overlay Spatial Radar & Elevation GIS");
     expect(TOUR_PAGE_SOURCE).toContain("Dual-CMS Publishing & Slug Sovereignty");
     expect(TOUR_PAGE_SOURCE).toContain("VIA Priority Attribution & Broker Portal");
     expect(TOUR_PAGE_SOURCE).toContain("Open Gate Inbound Landlord Flow");

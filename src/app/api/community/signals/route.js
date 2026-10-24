@@ -12,6 +12,7 @@ import {
 } from "@/lib/communityPosting";
 import {
   listLiveSignals,
+  listAuthorSignals,
   countActiveSignals,
   geocodeSignalScope,
   isMissingTable,
@@ -44,6 +45,25 @@ export async function GET(request) {
     const viewerId = request.headers.get("Authorization")
       ? await resolveUserId(request).catch(() => null)
       : null;
+
+    const mineOnly = url.searchParams.get("mine") === "1" || url.searchParams.get("mine") === "true";
+    if (mineOnly) {
+      if (!viewerId) {
+        return NextResponse.json({ ok: false, error: "Sign in to view your signals." }, { status: 401 });
+      }
+      const result = await listAuthorSignals(viewerId);
+      if (result.missing) {
+        return NextResponse.json(
+          { ok: true, signals: [], degraded: true, message: "Community posting is opening soon." },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { ok: true, signals: result.signals },
+        { headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
     const result = await listLiveSignals({
       district: url.searchParams.get("district") || null,
       signalType: POSTABLE_SIGNAL_TYPES.includes(url.searchParams.get("signalType"))

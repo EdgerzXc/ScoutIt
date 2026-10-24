@@ -9,6 +9,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { Building2, Camera, Search, Palette, ArrowUpRight } from "lucide-react";
 import Papa from 'papaparse';
 // A-120: `sanitizeObject` was imported here and never called — an orphaned
 // import that made the security checklist read as though owner input was
@@ -265,7 +266,7 @@ export default function OwnerMode() {
           {/* Choice A: PDF / Brochure Ingestion */}
           <button 
             type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-gold-accent/30 rounded-xl p-8 hover:border-gold-accent hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(var(--bg-rgb),0.4)]"
+            className="bg-surface/40 backdrop-blur-xl border border-gold-accent/30 rounded-xl p-8 hover:border-gold-accent hover:bg-surface/70 active:scale-[0.98] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(var(--bg-rgb),0.4)]"
             onClick={() => setShowWizard('concierge')}
           >
              <div className="flex items-center gap-3 mb-4">
@@ -279,7 +280,7 @@ export default function OwnerMode() {
           {/* Choice B: Step-by-Step Guided Setup */}
           <button 
             type="button"
-            className="bg-surface/40 backdrop-blur-xl border border-white/[0.08] rounded-xl p-8 hover:border-gold-accent/50 hover:bg-surface/70 active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(var(--bg-rgb),0.4)]"
+            className="bg-surface/40 backdrop-blur-xl border border-white/[0.08] rounded-xl p-8 hover:border-gold-accent/50 hover:bg-surface/70 active:scale-[0.98] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out cursor-pointer group relative overflow-hidden text-left block w-full shadow-[0_4px_24px_rgba(var(--bg-rgb),0.4)]"
             onClick={() => setShowWizard('live_editor')}
           >
              <div className="flex items-center gap-3 mb-4">
@@ -292,7 +293,7 @@ export default function OwnerMode() {
         </div>
 
         {/* Secondary Accordion / Drawer: More ways to add */}
-        <div className="border border-white/[0.06] rounded-xl bg-surface/20 backdrop-blur-md overflow-hidden transition-all duration-300">
+        <div className="border border-white/[0.06] rounded-xl bg-surface/20 backdrop-blur-md overflow-hidden transition-colors duration-200">
           <button
             type="button"
             onClick={() => setShowAdvancedIngest(prev => !prev)}
@@ -851,13 +852,13 @@ export default function OwnerMode() {
               <button
                 type="button"
                 onClick={() => refetchInventory?.()}
-                className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold cursor-pointer"
+                className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-[background-color,box-shadow,transform] duration-200 ease-out px-8 py-3 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold cursor-pointer"
               >
                 Retry Loading Portfolio →
               </button>
               <Link
                 href="/property"
-                className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3 rounded-full hover:bg-white/5 hover:text-on-surface"
+                className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-[background-color,border-color,color,transform] duration-200 ease-out px-8 py-3 rounded-full hover:bg-white/5 hover:text-on-surface"
               >
                 View Public Directory
               </Link>
@@ -877,10 +878,10 @@ export default function OwnerMode() {
           <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Add your first property</h3>
           <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Upload a brochure, flyer, or pitch deck to build a complete property dossier in under 10 minutes.</p>
           <div className="flex flex-col sm:flex-row gap-3 relative z-10 mt-2">
-            <button data-scoutit-guide="owner-claim-submit-btn" className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
+            <button data-scoutit-guide="owner-claim-submit-btn" className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-[background-color,box-shadow,transform] duration-200 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
               Add Property →
             </button>
-            <Link href="/property" className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-all duration-300 ease-out px-8 py-3.5 rounded-full hover:bg-white/5 hover:text-on-surface">
+            <Link href="/property" className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-[background-color,border-color,color,transform] duration-200 ease-out px-8 py-3.5 rounded-full hover:bg-white/5 hover:text-on-surface">
               Explore Live Feed
             </Link>
           </div>
@@ -1010,6 +1011,25 @@ export default function OwnerMode() {
             ))}
           </div>
         )}
+
+        {/* Layer 04 Specialist Discovery Strip (A-224) */}
+        <div className="mt-8 p-6 rounded-xl bg-surface/30 border border-white/[0.06] backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent shrink-0">
+              <Building2 size={20} />
+            </div>
+            <div>
+              <h3 className="font-working-title text-base text-on-surface">Explore Spatial Services</h3>
+              <p className="text-xs text-text-secondary mt-0.5">Need aerial drone footage, title diligence, or space staging? Browse vetted Layer 04 specialists.</p>
+            </div>
+          </div>
+          <Link
+            href="/layer/crust"
+            className="px-5 py-2.5 rounded-lg border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/10 transition-colors font-mono text-xs uppercase tracking-wider shrink-0 inline-flex items-center gap-1.5"
+          >
+            Layer 04 Roster <ArrowUpRight size={13} />
+          </Link>
+        </div>
       </div>
     );
   }
@@ -1327,6 +1347,80 @@ export default function OwnerMode() {
               >
                 Send Handshake
               </button>
+            </div>
+          </div>
+
+          {/* Layer 04 Specialist Ecosystem Rail (A-224 / Design Unification) */}
+          <div className="card-atmosphere rounded-lg p-5 mb-6 border border-white/[0.06]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[12px] uppercase tracking-widest text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/30 font-bold">
+                  Layer 04 · The Crust
+                </span>
+                <h3 className="font-working-title text-base text-on-surface">Specialist Services</h3>
+              </div>
+              <Link
+                href="/layer/crust"
+                className="text-xs font-mono uppercase tracking-wider text-gold-accent hover:text-gold-bright transition-colors inline-flex items-center gap-1"
+              >
+                All Services <ArrowUpRight size={13} />
+              </Link>
+            </div>
+            <p className="text-xs text-text-secondary mb-4 leading-relaxed">
+              Commission verified spatial professionals to capture, verify, and market this property. Context carries directly into each directory.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Link
+                href={`/brokers?for=${encodeURIComponent(activeListing.slug || activeListing.id)}&title=${encodeURIComponent(activeListing.title || '')}`}
+                className="p-3 rounded-lg bg-surface/50 border border-surface-variant hover:border-gold-accent/40 transition-colors flex items-start gap-3 group"
+              >
+                <div className="w-8 h-8 rounded bg-gold-accent/10 text-gold-accent flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Building2 size={16} />
+                </div>
+                <div>
+                  <h4 className="font-working-title text-sm text-on-surface group-hover:text-gold-accent transition-colors">Property Advisors</h4>
+                  <p className="text-[12px] text-text-muted mt-0.5">Licensed PRC brokers & commercial advisors</p>
+                </div>
+              </Link>
+
+              <Link
+                href={`/photographers?for=${encodeURIComponent(activeListing.slug || activeListing.id)}&title=${encodeURIComponent(activeListing.title || '')}`}
+                className="p-3 rounded-lg bg-surface/50 border border-surface-variant hover:border-gold-accent/40 transition-colors flex items-start gap-3 group"
+              >
+                <div className="w-8 h-8 rounded bg-gold-accent/10 text-gold-accent flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Camera size={16} />
+                </div>
+                <div>
+                  <h4 className="font-working-title text-sm text-on-surface group-hover:text-gold-accent transition-colors">Space Photography</h4>
+                  <p className="text-[12px] text-text-muted mt-0.5">Architectural stills, aerial drone & 3D captures</p>
+                </div>
+              </Link>
+
+              <Link
+                href={`/researchers?for=${encodeURIComponent(activeListing.slug || activeListing.id)}&title=${encodeURIComponent(activeListing.title || '')}`}
+                className="p-3 rounded-lg bg-surface/50 border border-surface-variant hover:border-gold-accent/40 transition-colors flex items-start gap-3 group"
+              >
+                <div className="w-8 h-8 rounded bg-gold-accent/10 text-gold-accent flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Search size={16} />
+                </div>
+                <div>
+                  <h4 className="font-working-title text-sm text-on-surface group-hover:text-gold-accent transition-colors">Site Research</h4>
+                  <p className="text-[12px] text-text-muted mt-0.5">Title verification, PEZA status & zoning audits</p>
+                </div>
+              </Link>
+
+              <Link
+                href={`/event-planners?for=${encodeURIComponent(activeListing.slug || activeListing.id)}&title=${encodeURIComponent(activeListing.title || '')}`}
+                className="p-3 rounded-lg bg-surface/50 border border-surface-variant hover:border-gold-accent/40 transition-colors flex items-start gap-3 group"
+              >
+                <div className="w-8 h-8 rounded bg-gold-accent/10 text-gold-accent flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Palette size={16} />
+                </div>
+                <div>
+                  <h4 className="font-working-title text-sm text-on-surface group-hover:text-gold-accent transition-colors">Space & Concept Design</h4>
+                  <p className="text-[12px] text-text-muted mt-0.5">Interior staging, fit-outs & spatial concepts</p>
+                </div>
+              </Link>
             </div>
           </div>
 

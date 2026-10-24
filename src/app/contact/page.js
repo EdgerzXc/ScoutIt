@@ -1,3 +1,6 @@
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import Link from "next/link";
 import ContactClient from "./ContactClient";
 import "./contact.css";
 
@@ -19,9 +22,16 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="contact-page">
-      <div className="contact-shell">
-        <header className="contact-header">
+    <>
+      <Header />
+      <main className="contact-page">
+        <div className="contact-shell">
+          <div className="contact-nav-back">
+            <Link href="/property" className="contact-back-link">
+              ← Back to Directory
+            </Link>
+          </div>
+          <header className="contact-header">
           <span className="contact-eyebrow">Contact</span>
           <h1 className="contact-title">Talk to a person.</h1>
           <p className="contact-lede">
@@ -47,5 +57,7 @@ export default function ContactPage() {
         </aside>
       </div>
     </main>
+    <Footer />
+  </>
   );
 }

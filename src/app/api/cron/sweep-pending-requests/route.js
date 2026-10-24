@@ -71,7 +71,7 @@ async function handleCron(request) {
 async function sweepDeletions() {
   const { data: stale, error } = await supabaseAdmin
     .from("deals")
-    .select("id, buyer_id, property_id, properties(title)")
+    .select("id, buyer_id, property_id, routing_snapshot, properties(title)")
     .eq("status", "pending")
     .lt("pending_clock_reset_at", daysAgoIso(DELETE_AFTER_DAYS))
     .limit(BATCH_LIMIT);
@@ -96,12 +96,14 @@ async function sweepDeletions() {
 
   for (const deal of stale) {
     if (!done.has(deal.id)) continue;
-    const title = deal.properties?.title || "a property";
+    const signalTitle = deal.routing_snapshot?.signal_title;
+    const isSignal = !deal.property_id && Boolean(signalTitle);
+    const subjectTitle = isSignal ? `community signal "${signalTitle}"` : (deal.properties?.title ? `"${deal.properties.title}"` : "a property");
     if (deal.buyer_id) {
       await notifyUser(supabaseAdmin, {
         userId: deal.buyer_id,
         title: "Request closed after 30 days",
-        desc: `Your request about "${title}" went unanswered for ${DELETE_AFTER_DAYS} days and has been removed. Connects are spent on sending and aren't returned.`,
+        desc: `Your request about ${subjectTitle} went unanswered for ${DELETE_AFTER_DAYS} days and has been removed. Connects are spent on sending and aren't returned.`,
         icon: "🗑️",
         propertyId: deal.property_id,
         notificationType: "request_deleted",
@@ -122,7 +124,7 @@ async function sweepDeletions() {
 async function sweepArchives() {
   const { data: stale, error } = await supabaseAdmin
     .from("deals")
-    .select("id, buyer_id, broker_id, property_id, properties(title, owner_id)")
+    .select("id, buyer_id, broker_id, property_id, routing_snapshot, properties(title, owner_id)")
     .eq("status", "pending")
     .is("archived_at", null)
     .lt("pending_clock_reset_at", daysAgoIso(ARCHIVE_AFTER_DAYS))
@@ -168,7 +170,9 @@ async function sweepArchives() {
 
   for (const deal of stale) {
     if (!done.has(deal.id)) continue;
-    const title = deal.properties?.title || "a property";
+    const signalTitle = deal.routing_snapshot?.signal_title;
+    const isSignal = !deal.property_id && Boolean(signalTitle);
+    const subjectTitle = isSignal ? `community signal "${signalTitle}"` : (deal.properties?.title ? `"${deal.properties.title}"` : "a property");
 
     // BOTH sides are told, and this is the point of archiving rather than
     // expiring: the recipient gets a last, explicit chance to act while the
@@ -184,7 +188,7 @@ async function sweepArchives() {
       await notifyUser(supabaseAdmin, {
         userId: recipientId,
         title: "A request is waiting in your archive",
-        desc: `A Connect request about "${title}" has been unanswered for ${ARCHIVE_AFTER_DAYS} days and moved to your archive. You can still accept it — it stays there for another ${daysLeft} days.`,
+        desc: `A Connect request about ${subjectTitle} has been unanswered for ${ARCHIVE_AFTER_DAYS} days and moved to your archive. You can still accept it — it stays there for another ${daysLeft} days.`,
         icon: "📥",
         propertyId: deal.property_id,
         notificationType: "request_archived",

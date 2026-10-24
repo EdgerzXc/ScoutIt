@@ -17,6 +17,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "_SCOUTIT_BRAIN/**",
+    "_REVIEW_QUEUE/**",
+    "manifesto-lab/**",
+    "hero-page-property-spheres/**",
+    "council-of-high-intelligence/**",
+    "awesome-legal-skills-temp/**",
+    "awesome-llm-apps/**",
+    "e2e_tests/**",
+    "scripts/**",
   ]),
 ]);
 

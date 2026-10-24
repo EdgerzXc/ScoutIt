@@ -223,6 +223,32 @@
   transform: scale(0.98);
 }
 
+@media (pointer: coarse), (max-width: 680px) {
+  .sfd-chip {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+  }
+
+  .sfd-reset-btn {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  .sfd-apply-btn {
+    min-height: 44px;
+    padding: 8px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sfd-footer {
+    padding-bottom: max(14px, calc(12px + env(safe-area-inset-bottom)));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sfd-overlay,
   .sfd-close-btn,

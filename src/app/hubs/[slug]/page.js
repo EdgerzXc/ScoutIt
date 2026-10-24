@@ -182,7 +182,7 @@ export default async function HubPage({ params }) {
                 The property catalogue didn&apos;t respond. Nothing is wrong with your connection;
                 try again in a moment, or browse the full directory instead.
               </p>
-              <Link className="hub-cta" href="/discover">
+              <Link className="hub-cta" href="/property">
                 Browse all properties
               </Link>
             </div>
@@ -241,7 +241,7 @@ export default async function HubPage({ params }) {
               </li>
             ))}
             <li>
-              <Link className="hub-other" href="/discover">
+              <Link className="hub-other" href="/property">
                 Search the full directory
               </Link>
             </li>

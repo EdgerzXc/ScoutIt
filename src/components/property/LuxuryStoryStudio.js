@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Download, Copy, Check, Sparkles, QrCode, FileText } from "lucide-react";
 import { extractFacts, factSpecs, buildMessagingDispatch } from "@/lib/shareBriefing";
+import { listingVerificationCopy } from "@/lib/listingVerification";
 import { generateQrMatrix, generateQrSvg } from "@/lib/qrCodeGenerator";
 
 export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
@@ -13,6 +14,10 @@ export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
   const facts = extractFacts(property);
   const specs = factSpecs(facts);
   const qrSvg = generateQrSvg(shareUrl, { color: "rgb(232, 174, 60)", background: "#121212", padding: 2 });
+  // A-235 / SH-03: the card may only say VERIFIED when the listing carries a
+  // confirmation. The wording comes from one predicate, not from a template.
+  const isViaLink = Boolean(shareUrl && shareUrl.includes("/via/"));
+  const verification = listingVerificationCopy(property, { via: isViaLink });
 
   const handleCopyDispatch = async (platform) => {
     const text = buildMessagingDispatch(property, shareUrl, { platform });
@@ -55,7 +60,12 @@ export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
 
       ctx.fillStyle = "#888888";
       ctx.font = "22px 'Courier New', monospace";
-      ctx.fillText(shareUrl && shareUrl.includes("/via/") ? "VERIFIED VIA PARTNER DOSSIER" : "VERIFIED SPACE DOSSIER", 540, 180);
+      ctx.fillText(verification.dossierTitle, 540, 180);
+
+      // The claim and its date, together. A claim without a date is a slogan.
+      ctx.fillStyle = "#777777";
+      ctx.font = "18px 'Courier New', monospace";
+      ctx.fillText(verification.verificationLine, 540, 207);
 
       // Hero Image or Fallback Luxury Graphic
       let heroY = 230;
@@ -122,7 +132,7 @@ export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
 
       ctx.fillStyle = "rgb(232, 174, 60)";
       ctx.font = "bold 26px 'Courier New', monospace";
-      ctx.fillText("VERIFIED SPECIFICATIONS", 120, 1215);
+      ctx.fillText(verification.specHeader, 120, 1215);
 
       ctx.fillStyle = "#E0E0E0";
       ctx.font = "28px system-ui, -apple-system, sans-serif";
@@ -158,7 +168,7 @@ export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
       ctx.fillStyle = "#A0A0A0";
       ctx.font = "bold 24px 'Courier New', monospace";
       ctx.textAlign = "center";
-      ctx.fillText(shareUrl && shareUrl.includes("/via/") ? "SCAN FOR PARTNER PRIORITY DOSSIER" : "SCAN TO VIEW VERIFIED DOSSIER", 540, 1765);
+      ctx.fillText(verification.scanLine, 540, 1765);
 
       ctx.fillStyle = "#666666";
       ctx.font = "18px 'Courier New', monospace";
@@ -245,7 +255,7 @@ export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
               9:16 Vertical Story Studio & Showroom Standee
             </h3>
             <p className="text-xs text-text-secondary leading-relaxed mt-1">
-              Generate ultra-luxury vertical cards formatted for Instagram Stories, TikTok, Facebook Stories, and WhatsApp Status with verified specifications and a scannable gold QR code.
+              Generate ultra-luxury vertical cards formatted for Instagram Stories, TikTok, Facebook Stories, and WhatsApp Status with the listing&apos;s recorded specifications and a scannable gold QR code.
             </p>
           </div>
 

@@ -16,13 +16,6 @@ export const TASK_PRIORITIES = Object.freeze(["low", "normal", "high"]);
 /** Statuses that still want the user's attention. */
 export const OPEN_TASK_STATUSES = Object.freeze(["todo", "in_progress"]);
 
-export const TASK_STATUS_LABELS = Object.freeze({
-  todo: "To do",
-  in_progress: "In progress",
-  done: "Done",
-  cancelled: "Cancelled",
-});
-
 export const TASK_PRIORITY_LABELS = Object.freeze({
   low: "Low",
   normal: "Normal",

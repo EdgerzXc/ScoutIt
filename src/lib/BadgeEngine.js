@@ -1,19 +1,12 @@
-/**
- * ScoutIt Badge Engine
- * 
- * Centralized utility for handling all badge-related logic (Discounts, Access, Capabilities).
- * Also acts as the master directory for the public Badge Registry.
- */
-
 export const BADGE_DEFINITIONS = {
   PIONEER_BROKER: {
     id: "PIONEER_BROKER",
     name: "Pioneer Advisor",
     description: "One of the first 20 brokers to join ScoutIt. Secures a massive lifetime discount on the Cluster Strategist tier.",
     max_slots: 20,
-    claimed: 14, // Mocked for now; in production, this is queried from Supabase
-    status: "ACTIVE", // ACTIVE | SOLD_OUT | EXPIRED
-    color: "var(--intel-blue, var(--sapphire))", // Sapphire Blue
+    claimed: 14,
+    status: "ACTIVE",
+    color: "var(--intel-blue, var(--sapphire))",
     perks: {
       discount: true,
       priority_support: true
@@ -26,7 +19,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 20,
     claimed: 8,
     status: "ACTIVE",
-    color: "var(--green)", // Emerald Green
+    color: "var(--green)",
     perks: {
       discount: true,
       priority_support: true
@@ -39,7 +32,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 20,
     claimed: 19,
     status: "ACTIVE",
-    color: "var(--bg)", // Obsidian Black
+    color: "var(--bg)",
     perks: {
       discount: true,
       priority_support: true
@@ -52,7 +45,7 @@ export const BADGE_DEFINITIONS = {
     max_slots: 100,
     claimed: 100,
     status: "SOLD_OUT",
-    color: "var(--accent)", // ScoutIt Gold
+    color: "var(--accent)",
     perks: {
       free_access: true
     }
@@ -64,52 +57,18 @@ export const BADGE_DEFINITIONS = {
     max_slots: 5,
     claimed: 5,
     status: "SOLD_OUT",
-    color: "var(--red)", // Ruby Red
+    color: "var(--red)",
     perks: {
       admin_access: true
     }
   }
 };
 
-/**
- * Validates if a user possesses a specific badge.
- * @param {Array} userBadges - Array of badge objects from Supabase e.g. [{id: "PIONEER_BROKER"}]
- * @param {String} badgeId - The badge ID to check against.
- * @returns {Boolean}
- */
 export const hasBadge = (userBadges, badgeId) => {
   if (!userBadges || !Array.isArray(userBadges)) return false;
   return userBadges.some(badge => badge.id === badgeId);
 };
 
-/**
- * Calculates the final price for a subscription tier based on user badges.
- */
-export const applyBadgeDiscounts = (userBadges, tierId, basePrice) => {
-  if (tierId === "CLUSTER_STRATEGIST" && hasBadge(userBadges, "PIONEER_BROKER")) {
-    return 1999;
-  }
-  if (tierId === "CLUSTER_DEVELOPER" && hasBadge(userBadges, "PIONEER_OWNER")) {
-    return 2499; 
-  }
-  return basePrice;
-};
-
-/**
- * Gets all badges as an array, optionally filtered by status.
- */
-export const getAllBadges = (statusFilter = null) => {
-  const badges = Object.values(BADGE_DEFINITIONS);
-  if (statusFilter) {
-    return badges.filter(b => b.status === statusFilter);
-  }
-  return badges;
-};
-
-/**
- * Master Directory of Explainable Trust Badges (§5)
- * Communicates why and how entities are verified on ScoutIt.
- */
 export const TRUST_BADGES = {
   OWNER_VERIFIED: {
     id: "OWNER_VERIFIED",
@@ -158,21 +117,7 @@ export const TRUST_BADGES = {
   }
 };
 
-/**
- * Resolves details for either a system badge or trust badge.
- * @param {String} badgeId
- * @returns {Object|null}
- */
 export const getBadgeDetails = (badgeId) => {
   if (!badgeId) return null;
   return BADGE_DEFINITIONS[badgeId] || TRUST_BADGES[badgeId] || null;
-};
-
-/**
- * Gets the number of remaining slots for an active badge.
- */
-export const getRemainingSlots = (badgeId) => {
-  const def = BADGE_DEFINITIONS[badgeId];
-  if (!def) return 0;
-  return Math.max(0, def.max_slots - def.claimed);
 };

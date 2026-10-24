@@ -71,6 +71,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
   padding: 4px 10px;
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -123,4 +124,17 @@
   color: var(--on-accent);
   border-color: var(--accent);
   font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .dis-strip {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  .dis-header {
+    padding-right: 8px;
+  }
+  .dis-pill {
+    padding: 4px 8px;
+  }
 }

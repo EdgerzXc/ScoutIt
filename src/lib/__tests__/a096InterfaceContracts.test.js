@@ -64,7 +64,7 @@ describe("A-096 — controls announce themselves", () => {
     const src = read("src/app/dashboard/page.js");
     expect(src).not.toContain("<div>Unknown Mode</div>");
     expect(src).toContain("Workspace unavailable");
-    expect(src).toContain('href="/discover"');
+    expect(src).toContain('href="/property"');
   });
 
   it("Mission Control sign-in CTAs show keyboard focus", () => {

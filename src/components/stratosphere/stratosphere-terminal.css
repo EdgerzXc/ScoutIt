@@ -7,8 +7,8 @@
   flex-direction: column;
   height: calc(100dvh - 52px);
   min-height: 600px;
-  background: #0d0d0d;
-  color: #ffffff;
+  background: var(--bg, #0d0d0d);
+  color: var(--text-primary, #ffffff);
   overflow: hidden;
   position: relative;
 }
@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: rgba(18, 18, 18, 0.95);
+  background: rgba(var(--surface-rgb, 18, 18, 18), 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   gap: 16px;
   z-index: 20;
@@ -60,7 +60,7 @@
   width: 100%;
   background: transparent;
   border: none;
-  color: #ffffff;
+  color: var(--text-primary, #ffffff);
   padding: 8px 10px;
   font-size: 16px;
   outline: none;
@@ -132,7 +132,7 @@
 
 .st-filter-badge {
   background: var(--accent);
-  color: #0d0d0d;
+  color: var(--on-accent, #0d0d0d);
   font-size: 12px;
   font-weight: 700;
   padding: 1px 5px;
@@ -211,19 +211,85 @@
   overflow: hidden;
 }
 
-/* ── 2. FEED LAYOUT (SIGNALS MODE) ── */
+/* ── 2. FEED LAYOUT (SIGNALS MODE — FULL-FRAME BENTO GRID) ── */
+.st-terminal--feed {
+  height: auto;
+  min-height: calc(100dvh - 200px);
+  overflow: visible;
+}
+
+.st-terminal--feed .st-workspace {
+  height: auto;
+  overflow: visible;
+}
+
 .st-feed-layout {
   display: flex;
   justify-content: center;
-  height: 100%;
-  overflow-y: auto;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .st-feed-layout .st-dossier-pane {
   width: 100%;
-  max-width: 860px;
+  max-width: 1720px;
   background: transparent;
-  padding: 0 16px;
+  padding: 0 clamp(16px, 2.5vw, 40px);
+  box-sizing: border-box;
+  height: auto;
+  overflow: visible;
+}
+
+.st-feed-layout .st-dossier-header {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 16px;
+  margin-bottom: 20px;
+  background: rgba(var(--surface-rgb, 18, 18, 18), 0.95);
+  backdrop-filter: blur(12px);
+}
+
+.st-feed-layout .st-dossier-scroll {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  gap: 20px;
+  padding: 4px 0 64px 0;
+  height: auto;
+  overflow: visible;
+  align-items: stretch;
+}
+
+.st-feed-layout .sdc-card {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.st-feed-layout .sdc-card .sdc-main-split {
+  flex: 1;
+}
+
+.st-feed-layout .sdc-card .sdc-footer {
+  margin-top: auto;
+}
+
+@media (max-width: 1080px) {
+  .st-feed-layout .st-dossier-scroll {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .st-feed-layout .st-dossier-scroll {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding-bottom: 40px;
+  }
 }
 
 /* ── DOSSIER HEADER & SCROLL ── */
@@ -277,6 +343,42 @@
   border-radius: 2px;
 }
 
+.st-color-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-bright);
+  background: rgba(var(--accent-bright-rgb, 247, 198, 78), 0.12);
+  border: 1px solid rgba(var(--accent-bright-rgb, 247, 198, 78), 0.35);
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  min-height: 28px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .st-color-filter-badge:hover {
+    background: rgba(var(--accent-bright-rgb, 247, 198, 78), 0.22);
+    border-color: var(--accent-bright);
+  }
+}
+
+.st-color-filter-badge:active {
+  transform: scale(0.96);
+}
+
+.st-color-filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 .st-market-tabs {
   display: flex;
   align-items: center;
@@ -296,6 +398,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
   padding: 5px 10px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -308,6 +411,10 @@
   white-space: nowrap;
   cursor: pointer;
   transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.st-market-tab-label-short {
+  display: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -422,7 +529,7 @@
   font-family: var(--font-mono, monospace);
   font-size: 13px;
   letter-spacing: 0.08em;
-  color: #ffffff;
+  color: var(--text-primary, #ffffff);
   margin: 0;
 }
 
@@ -494,10 +601,19 @@
 
   .st-search-cluster {
     max-width: none;
+    width: 100%;
   }
 
   .st-mode-cluster {
     justify-content: center;
+    width: 100%;
+  }
+
+  .st-mode-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: 12px;
   }
 
   .st-radar-pane {
@@ -506,6 +622,18 @@
 
   .st-dossier-pane {
     height: 55dvh;
+  }
+
+  .st-dossier-scroll {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .st-market-tab-label {
+    display: none;
+  }
+
+  .st-market-tab-label-short {
+    display: inline;
   }
 }
 
@@ -517,16 +645,4 @@
     animation: none;
     transition: none;
   }
-}
-
-@media (max-width: 680px) {
-  .st-terminal--feed,
-  .st-terminal--feed .st-workspace,
-  .st-terminal--feed .st-feed-layout,
-  .st-terminal--feed .st-dossier-pane {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-  }
-  .st-terminal--feed .st-dossier-scroll { overflow: visible; }
 }

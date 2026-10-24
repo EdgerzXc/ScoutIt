@@ -164,7 +164,8 @@ function DashboardInner() {
   }, [user]);
 
   useEffect(() => {
-    const handleOpenMobileMenu = () => {
+    const handleOpenMobileMenu = (e) => {
+      if (e?.detail) e.detail.handled = true;
       setShowMobileProfileMenu(true);
     };
     window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
@@ -182,7 +183,29 @@ function DashboardInner() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [switcherRef]);
 
-  if (!user) return <div className="min-h-screen bg-background flex justify-center items-center font-working-title text-text-secondary">Loading your dashboard…</div>;
+  if (!user) {
+    return (
+      <div className="relative min-h-screen bg-background text-text-primary flex flex-col" aria-busy="true">
+        <AtmosphereBackground variant="dashboard" />
+        <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-3 md:px-6 flex items-center justify-between" aria-hidden="true">
+          <div className="h-7 w-28 rounded bg-surface-variant/60 animate-pulse" />
+          <div className="h-8 w-36 rounded-full bg-gold-accent/15 animate-pulse" />
+        </header>
+        <main className="relative z-10 w-full max-w-[1400px] mx-auto px-4 md:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-6" aria-hidden="true">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="card-atmosphere p-6 rounded-2xl border border-surface-variant/60 animate-pulse min-h-[220px] flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="h-3 w-24 rounded bg-gold-accent/20" />
+                <div className="h-6 w-3/4 rounded bg-surface-variant/60" />
+                <div className="h-3.5 w-full rounded bg-surface-variant/40" />
+              </div>
+              <div className="h-9 w-32 rounded bg-surface-variant/50 mt-6" />
+            </div>
+          ))}
+        </main>
+      </div>
+    );
+  }
 
   const handleSwitchMode = (newMode) => {
     setMode(newMode);
@@ -213,7 +236,7 @@ function DashboardInner() {
           <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[12px] mb-2 block">Workspace</span>
           <h1 className="font-headline-editorial text-3xl text-on-surface mb-3">Workspace unavailable</h1>
           <p className="text-text-secondary text-sm max-w-md mb-6">Your account role did not match a known workspace. Nothing is lost: continue exploring, or contact support if this keeps happening.</p>
-          <Link href="/discover" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent hover:underline">Continue exploring →</Link>
+          <Link href="/property" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent hover:underline">Continue exploring →</Link>
         </div>
       );
     }

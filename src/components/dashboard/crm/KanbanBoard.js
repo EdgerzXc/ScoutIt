@@ -26,7 +26,8 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
     const q = search.toLowerCase();
     return (
       (deal.propertyTitle && deal.propertyTitle.toLowerCase().includes(q)) ||
-      (deal.otherParty && deal.otherParty.toLowerCase().includes(q))
+      (deal.otherParty && deal.otherParty.toLowerCase().includes(q)) ||
+      (deal.otherPartyEmail && deal.otherPartyEmail.toLowerCase().includes(q))
     );
   });
 
@@ -107,19 +108,29 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
               <div className="flex-1 overflow-y-auto space-y-3">
                 {colDeals.map((deal) => {
                   const collisionCount = deal.unitId ? unitInquiryCounts[deal.unitId] : 0;
+                  // A-234: an imported lead is a contact record, not a
+                  // platform conversation. It has no deal to open, no stage
+                  // to drag and no messages — so it is not draggable and not
+                  // clickable. Its details are on the card instead of hidden
+                  // behind a panel that has nothing to show.
+                  const isImported = Boolean(deal.isImportedContact);
 
                   return (
                     <div
                       key={deal.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, deal.id)}
+                      draggable={!isImported}
+                      onDragStart={(e) => !isImported && handleDragStart(e, deal.id)}
                       onDragEnd={() => setDraggingId(null)}
-                      onClick={() => onDealClick(deal)}
-                      className={`p-4 rounded-lg cursor-grab active:cursor-grabbing border transition duration-200 ease-out
+                      onClick={() => !isImported && onDealClick(deal)}
+                      title={isImported ? "Imported lead: stored as a contact record" : undefined}
+                      className={`p-4 rounded-lg border transition duration-200 ease-out
+                        ${isImported ? "cursor-default" : "cursor-grab active:cursor-grabbing"}
                         ${getStatusColor(deal.status, deal.hasViewingScheduled)}
                         ${draggingId === deal.id
                           ? "opacity-40 scale-[0.98] border-gold-accent shadow-none"
-                          : "hover:-translate-y-[2px] active:scale-[0.98] hover:shadow-[0_8px_24px_rgba(var(--bg-rgb),0.5),0_0_15px_rgba(var(--accent-rgb),0.12)] hover:border-gold-accent/40"}
+                          : isImported
+                            ? "border-surface-variant"
+                            : "hover:-translate-y-[2px] active:scale-[0.98] hover:shadow-[0_8px_24px_rgba(var(--bg-rgb),0.5),0_0_15px_rgba(var(--accent-rgb),0.12)] hover:border-gold-accent/40"}
                         bg-surface/80 backdrop-blur-sm
                       `}
                     >
@@ -127,7 +138,11 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
                         <div className="font-body text-base font-semibold text-on-surface break-words truncate">
                           {deal.propertyTitle}
                         </div>
-                        {deal.open_gate_inbound && (
+                        {isImported ? (
+                          <span className="shrink-0 px-2 py-0.5 rounded border border-surface-variant bg-surface-alt text-text-secondary text-xs font-mono font-bold uppercase tracking-wider">
+                            Imported
+                          </span>
+                        ) : deal.open_gate_inbound && (
                           <span className="shrink-0 px-2 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/10 text-gold-accent text-xs font-mono font-bold uppercase tracking-wider">
                             GATE
                           </span>
@@ -140,6 +155,17 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
                           {deal.myRole}
                         </span>
                       </div>
+
+                      {/* An imported lead's contact details live on the card:
+                          there is no conversation panel to open them from. */}
+                      {isImported && (deal.otherPartyEmail || deal.otherPartyPhone) && (
+                        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-text-muted">
+                          {deal.otherPartyEmail && (
+                            <span className="min-w-0 truncate">{deal.otherPartyEmail}</span>
+                          )}
+                          {deal.otherPartyPhone && <span>{deal.otherPartyPhone}</span>}
+                        </div>
+                      )}
 
                       {/* Viewing Scheduled Indicator */}
                       {deal.hasViewingScheduled && (

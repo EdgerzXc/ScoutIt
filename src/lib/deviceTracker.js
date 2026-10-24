@@ -46,22 +46,9 @@ export async function pingDeviceTelemetry(extraData = {}) {
       }),
       keepalive: true
     }).catch(() => {});
-  } catch (err) {
-    // Fail safe
+  } catch {
+    // Best-effort telemetry; never block user interaction
   }
-}
-
-export function trackSearchIntent(_query, category, _location, _minPrice, _maxPrice, matchCount = 0) {
-  const allowedCategories = new Set([
-    "commercial", "residential", "industrial", "land", "office",
-    "retail", "warehouse", "hospitality", "mixed_use",
-  ]);
-  const normalizedCategory = String(category || "").toLowerCase().replace(/[ -]+/g, "_");
-  pingDeviceTelemetry({
-    eventType: "search",
-    searchCategory: allowedCategories.has(normalizedCategory) ? normalizedCategory : "all",
-    matchCount: Number.isInteger(matchCount) && matchCount >= 0 ? Math.min(matchCount, 100000) : 0,
-  });
 }
 
 export function trackFrictionPoint(frictionType, _details = {}) {

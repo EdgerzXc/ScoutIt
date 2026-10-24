@@ -42,10 +42,6 @@ export const AVAILABILITY_DEFAULTS = Object.freeze({
   maxBookingsPerDay: null,
 });
 
-export const WEEKDAY_KEYS = Object.freeze([
-  "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
-]);
-
 const clampInt = (value, { min, max, fallback }) => {
   const n = Number(value);
   if (!Number.isFinite(n)) return fallback;

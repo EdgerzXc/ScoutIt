@@ -1,11 +1,14 @@
 import { supabaseAdmin } from "./supabaseAdmin";
 import {
   freshnessFor,
-  isLiveStatus,
-  normalizeKeyPart,
   promoDedupeKey,
   demandDedupeKey,
+  activeSignalFilter,
+  signalTerminalState,
+  maxAnswersForSignal,
+  openAnswersText,
 } from "./communityPosting";
+import { lifecycleNotice } from "./pendingRequestLifecycle";
 import { getServerMapboxToken } from "./mapboxToken";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { BoundedCache } from "./boundedCache";
@@ -40,6 +43,13 @@ function formatSize(min, max) {
 /** Map one DB row (+ location + requirements) to the dossier-card shape. */
 export function mapDbSignalToCard(row, location = {}, requirements = {}, now = new Date(), viewerId = null) {
   const freshness = freshnessFor(row.last_confirmed_at, now);
+  const terminalState = signalTerminalState({
+    status: row.status,
+    lastConfirmedAt: row.last_confirmed_at,
+    now,
+  });
+  const maxAnswers = maxAnswersForSignal(row);
+  const openAnswersCount = Number(row.open_answers_count) || 0;
   const district = location.district || location.city || "";
   const coords =
     location.precision_level === "exact" &&
@@ -79,10 +89,15 @@ export function mapDbSignalToCard(row, location = {}, requirements = {}, now = n
       verified: false,
     },
     freshness,
+    terminalState,
+    maxAnswers,
+    openAnswersCount,
+    openAnswersText: openAnswersText(openAnswersCount, maxAnswers),
     relevantCount: row.relevant_count || 0,
     savedCount: row.saved_count || 0,
     matchingSpaces: [],
     createdAt: row.created_at,
+    lastConfirmedAt: row.last_confirmed_at,
     isSample: false,
     liveCommunity: true,
     isMine: Boolean(viewerId && row.author_account_id === viewerId),
@@ -99,6 +114,12 @@ export async function listLiveSignals({ district = null, signalType = null, limi
         "id, author_account_id, scout_id_snapshot, public_identity_mode, signal_type, commercial_flag, status, title, body, relevant_count, saved_count, created_at, last_confirmed_at"
       )
       .in("status", ["live", "limited"])
+      // A-237 (GAP-104): the expiry filter runs in the DATABASE, before the
+      // limit. It used to run in memory, after the limit — so sixty aged
+      // signals could take the whole page and the feed showed nothing while
+      // fresh signals existed. The limit now applies to rows that are
+      // actually live.
+      .or(activeSignalFilter())
       .order("created_at", { ascending: false })
       .limit(Math.min(Math.max(Number(limit) || 60, 1), 100));
     if (signalType) query = query.eq("signal_type", signalType);
@@ -109,15 +130,36 @@ export async function listLiveSignals({ district = null, signalType = null, limi
     }
     if (!rows || rows.length === 0) return { signals: [] };
     const ids = rows.map((r) => r.id);
-    const [{ data: locations }, { data: reqs }] = await Promise.all([
+    const [{ data: locations }, { data: reqs }, { data: openDeals }] = await Promise.all([
       supabaseAdmin.from("signal_locations").select("*").in("signal_id", ids),
       supabaseAdmin.from("signal_requirements").select("*").in("signal_id", ids),
+      supabaseAdmin
+        .from("deals")
+        .select("id, status, routing_snapshot")
+        .is("property_id", null)
+        .eq("status", "pending")
+        .not("routing_snapshot", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(300),
     ]);
     const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
     const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
+    const openAnswersBySignal = new Map();
+    for (const d of openDeals || []) {
+      const sId = d.routing_snapshot?.signal_id;
+      if (sId) {
+        openAnswersBySignal.set(sId, (openAnswersBySignal.get(sId) || 0) + 1);
+      }
+    }
     const now = new Date();
     let signals = rows.map((row) =>
-      mapDbSignalToCard(row, locById.get(row.id) || {}, reqById.get(row.id) || {}, now, viewerId)
+      mapDbSignalToCard(
+        { ...row, open_answers_count: openAnswersBySignal.get(row.id) || 0 },
+        locById.get(row.id) || {},
+        reqById.get(row.id) || {},
+        now,
+        viewerId
+      )
     );
     // Expired rows leave the feed until refreshed (spec §10). Unpinned rows
     // (no trusted coords) stay readable in the dossier — honest absence.
@@ -340,10 +382,105 @@ export async function countActiveSignals(authorAccountId) {
     .from("stratosphere_signals")
     .select("id")
     .eq("author_account_id", authorAccountId)
-    .in("status", ["live", "limited", "under_review", "needs_edit"]);
+    .in("status", ["live", "limited", "under_review", "needs_edit"])
+    // A-237 (GAP-116): capacity is not a lifetime quota. An expired signal
+    // stopped being live and must stop consuming the author's allowance —
+    // the same expiry rule the feed uses, so the two cannot disagree.
+    .or(activeSignalFilter());
   if (error) {
     if (isMissingTable(error)) return { missing: true };
     throw error;
   }
   return { count: (data || []).length };
+}
+
+/**
+ * List all community signals by author with full lifecycle receipts (A-240).
+ * Answers "do I already have what I need?" and preserves visibility of
+ * posts with open answers even if aged out of the public feed (A-241).
+ */
+export async function listAuthorSignals(authorAccountId) {
+  if (!supabaseAdmin || !authorAccountId) return { missing: true };
+  try {
+    const { data: rows, error } = await supabaseAdmin
+      .from("stratosphere_signals")
+      .select("*")
+      .eq("author_account_id", authorAccountId)
+      .order("created_at", { ascending: false });
+    if (error) {
+      if (isMissingTable(error)) return { missing: true };
+      throw error;
+    }
+    if (!rows || rows.length === 0) return { signals: [] };
+
+    const ids = rows.map((r) => r.id);
+    const [{ data: locations }, { data: reqs }, { data: openDeals }] = await Promise.all([
+      supabaseAdmin.from("signal_locations").select("*").in("signal_id", ids),
+      supabaseAdmin.from("signal_requirements").select("*").in("signal_id", ids),
+      supabaseAdmin
+        .from("deals")
+        .select("id, status, pending_clock_reset_at, archived_at, routing_snapshot")
+        .is("property_id", null)
+        .eq("status", "pending")
+        .not("routing_snapshot", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(300),
+    ]);
+
+    const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
+    const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
+    const openDealsBySignal = new Map();
+    for (const d of openDeals || []) {
+      const sId = d.routing_snapshot?.signal_id;
+      if (sId) {
+        if (!openDealsBySignal.has(sId)) openDealsBySignal.set(sId, []);
+        openDealsBySignal.get(sId).push(d);
+      }
+    }
+
+    const now = new Date();
+    const signals = rows.map((row) => {
+      const pendingDeals = openDealsBySignal.get(row.id) || [];
+      const card = mapDbSignalToCard(
+        { ...row, open_answers_count: pendingDeals.length },
+        locById.get(row.id) || {},
+        reqById.get(row.id) || {},
+        now,
+        authorAccountId
+      );
+      const terminalState = signalTerminalState({
+        status: row.status,
+        lastConfirmedAt: row.last_confirmed_at,
+        now,
+      });
+
+      const receipt = {
+        terminalState,
+        status: row.status,
+        fulfilledAt: row.fulfilled_at || null,
+        closedAt: row.closed_at || null,
+        openAnswersCount: pendingDeals.length,
+        maxAnswers: maxAnswersForSignal(row),
+        pendingNotice: pendingDeals[0]
+          ? lifecycleNotice(
+              {
+                archivedAt: pendingDeals[0].archived_at,
+                resetAt: pendingDeals[0].pending_clock_reset_at,
+              },
+              now
+            )
+          : null,
+      };
+
+      return {
+        ...card,
+        receipt,
+      };
+    });
+
+    return { signals };
+  } catch (error) {
+    if (isMissingTable(error)) return { missing: true };
+    throw error;
+  }
 }

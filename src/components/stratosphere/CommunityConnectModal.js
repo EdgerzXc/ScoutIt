@@ -27,13 +27,19 @@ export default function CommunityConnectModal({
 
   const isSample = Boolean(signal.isSample);
   const isLive = Boolean(signal.liveCommunity);
+  const isFull =
+    typeof signal.openAnswersCount === "number" &&
+    typeof signal.maxAnswers === "number" &&
+    signal.openAnswersCount >= signal.maxAnswers;
+  const isTerminal = Boolean(signal.terminalState);
+  const isBlocked = isSample || isFull || isTerminal;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // A-145 honesty: a sample card demonstrates the flow. It never sends,
-    // spends, or opens a thread — the control below stays disabled and this
-    // guard holds even if it is reached programmatically.
-    if (isSample) {
-      setError("This is a sample signal for exploring. No request was sent and no Connect was spent.");
+    if (isBlocked) {
+      if (isFull) setError(`This signal has reached the maximum of ${signal.maxAnswers || 3} open answers.`);
+      else if (isTerminal) setError(`This signal is already ${signal.terminalState}.`);
+      else setError("This is a sample signal for exploring. No request was sent and no Connect was spent.");
       return;
     }
     setSubmitting(true);
@@ -156,6 +162,16 @@ export default function CommunityConnectModal({
                   SAMPLE SIGNAL: exploring only. Dispatch is disabled: nothing will be sent and no Connect will be spent.
                 </p>
               ) : null}
+              {isFull ? (
+                <p className="ccm-sample-note" role="note">
+                  ANSWERS FULL: This demand signal has reached its limit of {signal.maxAnswers || 3} open proposals under review. Connect is paused until pending requests resolve or expire.
+                </p>
+              ) : null}
+              {isTerminal ? (
+                <p className="ccm-sample-note" role="note">
+                  SIGNAL {signal.terminalState.toUpperCase()}: This signal is no longer active.
+                </p>
+              ) : null}
             </div>
 
             <div className="ccm-field-group">
@@ -176,6 +192,7 @@ export default function CommunityConnectModal({
                 value={intro}
                 onChange={(e) => setIntro(e.target.value)}
                 required
+                disabled={isBlocked}
               />
             </div>
 
@@ -184,7 +201,7 @@ export default function CommunityConnectModal({
             <div className="ccm-disclosure-bar">
               <Shield size={13} className="ccm-shield-icon" aria-hidden="true" />
               <span>
-                Costs <strong>1 Connect</strong>. The recipient reviews your proposal before opening a private conversation thread.
+                Costs <strong>1 Connect</strong>. The recipient reviews your proposal before opening a private conversation thread. No refunds: a Connect buys delivery of your request, not a guaranteed match.
               </span>
             </div>
 
@@ -192,9 +209,24 @@ export default function CommunityConnectModal({
               <button type="button" className="ccm-cancel-btn" onClick={onClose} disabled={submitting}>
                 CANCEL
               </button>
-              <button type="submit" className="ccm-primary-btn" disabled={isSample || submitting || !intro.trim()} title={isSample ? "Disabled for sample signals" : undefined}>
+              <button
+                type="submit"
+                className="ccm-primary-btn"
+                disabled={isBlocked || submitting || !intro.trim()}
+                title={isBlocked ? "Connect is disabled for this signal" : undefined}
+              >
                 <Send size={12} aria-hidden="true" />
-                <span>{isSample ? "SAMPLE: DISPATCH DISABLED" : submitting ? "DISPATCHING..." : "DISPATCH (1 CONNECT)"}</span>
+                <span>
+                  {isSample
+                    ? "SAMPLE: DISPATCH DISABLED"
+                    : isFull
+                    ? "ANSWERS FULL"
+                    : isTerminal
+                    ? `SIGNAL ${signal.terminalState.toUpperCase()}`
+                    : submitting
+                    ? "DISPATCHING..."
+                    : "DISPATCH (1 CONNECT)"}
+                </span>
               </button>
             </div>
             {/* A-150: explicit Privacy Policy link (RA 10173 §11). */}

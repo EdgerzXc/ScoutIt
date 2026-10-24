@@ -52,10 +52,10 @@ describe("U-028 map popups are built as DOM nodes, never HTML strings", () => {
 
   it("the property marker popup renders its title as text, not markup", () => {
     const source = stripComments(
-      readFileSync(resolve(ROOT, "src/components/property/SpatialCommandMap.js"), "utf8")
+      readFileSync(resolve(ROOT, "src/components/maps/SpatialCanvas.js"), "utf8")
     );
-    expect(source).toContain("setDOMContent(popupNode)");
-    expect(source).toContain("titleEl.textContent = propertyTitle");
+    expect(source).toContain("setDOMContent(");
+    expect(source).toContain("strong.textContent = propertyTitle");
     // The title must never reach a template literal that becomes markup.
     expect(source).not.toMatch(/`[^`]*\$\{propertyTitle\}[^`]*<\//);
   });

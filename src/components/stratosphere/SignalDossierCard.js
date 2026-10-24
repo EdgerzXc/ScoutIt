@@ -48,6 +48,8 @@ export default function SignalDossierCard({
   const [showMetropolisMatches, setShowMetropolisMatches] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [freshnessState, setFreshnessState] = useState(signal.freshness || "fresh");
   // C2: optimism rolls back visibly. A failed tap says so on the card for a
   // few seconds instead of dying silent — the count on screen is a promise.
   const [actionError, setActionError] = useState(null);
@@ -81,7 +83,7 @@ export default function SignalDossierCard({
   // Live member posts vote through the community endpoints (one tap per
   // account, server-counted). Everything else keeps its prior path: samples
   // stay local-only, pipeline rows keep the A-142 reactions meter.
-  const communityFetch = async (path, method) => {
+  const communityFetch = async (path, method, body = null) => {
     const { data: { session } } = await getSession().catch(() => ({ data: {} }));
     const token = session?.access_token;
     if (!token) {
@@ -90,7 +92,11 @@ export default function SignalDossierCard({
     }
     const res = await fetch(`/api/community/signals/${encodeURIComponent(signal.id)}${path}`, {
       method,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      ...(body ? { body: JSON.stringify(body) } : {}),
     });
     if (res.status === 401) {
       router.push("/onboarding");
@@ -187,15 +193,33 @@ export default function SignalDossierCard({
     }
   };
 
-  const handleCloseSignal = async (event) => {
+  const handleRefreshSignal = async (event) => {
+    event.stopPropagation();
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const result = await communityFetch("/refresh", "POST");
+      if (!result) return;
+      if (result.ok !== true) throw new Error(result.error || "refresh failed");
+      setFreshnessState("fresh");
+      setConfirmClose(false);
+      onClosed(signal.id, "refreshed");
+    } catch (err) {
+      flashActionError(err?.message || "Could not refresh signal for 7 days.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleCloseSignal = async (event, outcome = "withdrawn") => {
     event.stopPropagation();
     if (closing) return;
     setClosing(true);
     try {
-      const result = await communityFetch("/close", "POST");
+      const result = await communityFetch("/close", "POST", { outcome });
       if (!result) return; // The sign-in handoff owns this case.
       if (result.ok !== true) throw new Error("close failed");
-      onClosed(signal.id);
+      onClosed(signal.id, outcome);
     } catch {
       flashActionError("Could not confirm closure. Refresh the feed before trying again.");
     } finally {
@@ -236,6 +260,34 @@ export default function SignalDossierCard({
   };
 
   const renderActionButton = () => {
+    if (signal.terminalState && signal.terminalState !== "live") {
+      return (
+        <button
+          type="button"
+          className="sdc-btn sdc-btn-disabled"
+          disabled
+          title={`Signal is ${signal.terminalState}`}
+        >
+          <span>{signal.terminalState.toUpperCase()}</span>
+        </button>
+      );
+    }
+    const answersFull =
+      typeof signal.openAnswersCount === "number" &&
+      typeof signal.maxAnswers === "number" &&
+      signal.openAnswersCount >= signal.maxAnswers;
+    if (answersFull && (isDemand || signal.actionType === "PROPOSE_SPACE" || signal.actionType === "CONNECT")) {
+      return (
+        <button
+          type="button"
+          className="sdc-btn sdc-btn-disabled"
+          disabled
+          title={`Maximum open answers reached (${signal.openAnswersCount}/${signal.maxAnswers})`}
+        >
+          <span>ANSWERS FULL</span>
+        </button>
+      );
+    }
     if (signal.isSample && signal.actionType !== "EXPLORE_DATA") {
       if (isDemand) {
         return (
@@ -308,7 +360,7 @@ export default function SignalDossierCard({
             ) : (
               <TrendingUp size={11} aria-hidden="true" />
             )}
-            <span>{isDemand ? "SEEKER // DEMAND" : isSupply ? "OFF-MARKET SUPPLY" : "SPATIAL INTEL"}</span>
+            <span>{isDemand ? "SEEKER · DEMAND" : isSupply ? "OFF-MARKET SUPPLY" : "SPATIAL INTEL"}</span>
           </span>
           <span className="sdc-location-datum">
             <MapPin size={11} aria-hidden="true" />
@@ -324,9 +376,14 @@ export default function SignalDossierCard({
               {sourceKind}
             </span>
           )}
-          <div className="sdc-freshness-chip" title="Signal Freshness">
-            <span className={`sdc-status-dot ${signal.freshness}`} aria-hidden="true" />
-            <span>{signal.freshness.toUpperCase()}</span>
+          {signal.openAnswersText ? (
+            <span className="sdc-answers-chip" title="Active answers under review">
+              {signal.openAnswersText}
+            </span>
+          ) : null}
+          <div className="sdc-freshness-chip" title="Signal Freshness (7-day weekly cycle)">
+            <span className={`sdc-status-dot ${freshnessState}`} aria-hidden="true" />
+            <span>{freshnessState.toUpperCase()}</span>
           </div>
         </div>
       </div>
@@ -519,20 +576,59 @@ export default function SignalDossierCard({
               </span>
             )}
           </div>
+          {signal.receipt ? (
+            <div className="sdc-receipt-box">
+              <h4 className="sdc-section-heading">LIFECYCLE RECEIPT</h4>
+              <div className="sdc-receipt-row">
+                <span className="sdc-receipt-state">
+                  STATE: <strong>{signal.receipt.terminalState ? signal.receipt.terminalState.toUpperCase() : "LIVE"}</strong>
+                </span>
+                {signal.receipt.openAnswersCount > 0 ? (
+                  <span className="sdc-receipt-answers">
+                    {signal.receipt.openAnswersCount}/{signal.receipt.maxAnswers} ANSWERS UNDER REVIEW
+                  </span>
+                ) : null}
+              </div>
+              {signal.receipt.pendingNotice ? (
+                <p className="sdc-receipt-notice">{signal.receipt.pendingNotice}</p>
+              ) : null}
+              {signal.receipt.fulfilledAt ? (
+                <p className="sdc-receipt-date">Fulfilled: {new Date(signal.receipt.fulfilledAt).toLocaleDateString()}</p>
+              ) : null}
+            </div>
+          ) : null}
           {signal.liveCommunity && signal.isMine && (
             <div className="sdc-manage-signal" onClick={(event) => event.stopPropagation()}>
               {confirmClose ? (
-                <div className="sdc-close-confirm" role="group" aria-label="Confirm signal closure">
-                  <p>Close this signal? It leaves the public feed. Existing conversations remain open.</p>
+                <div className="sdc-close-confirm" role="group" aria-label="Manage or close signal">
+                  <p>Signals stay live for 7 days. Refresh for another week, mark solved when your need is met, or remove it.</p>
                   <div className="sdc-close-actions">
-                    <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(false)} disabled={closing}>KEEP LIVE</button>
-                    <button type="button" className="sdc-btn sdc-close-submit" onClick={handleCloseSignal} disabled={closing}>
-                      {closing ? "CLOSING…" : "CLOSE SIGNAL"}
+                    <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(false)} disabled={closing || refreshing}>KEEP LIVE</button>
+                    {(!signal.terminalState || signal.terminalState === "live" || signal.terminalState === "expired") && (
+                      <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handleRefreshSignal} disabled={closing || refreshing}>
+                        {refreshing ? "REFRESHING…" : "REFRESH (+7 DAYS)"}
+                      </button>
+                    )}
+                    <button type="button" className="sdc-btn sdc-btn-primary" onClick={(e) => handleCloseSignal(e, "fulfilled")} disabled={closing || refreshing}>
+                      {closing ? "CLOSING…" : "MARK FULFILLED"}
+                    </button>
+                    <button type="button" className="sdc-btn sdc-close-submit" onClick={(e) => handleCloseSignal(e, "withdrawn")} disabled={closing || refreshing}>
+                      {closing ? "CLOSING…" : "WITHDRAW SIGNAL"}
+                    </button>
+                    <button type="button" className="sdc-btn sdc-close-submit" onClick={(e) => handleCloseSignal(e, "deleted")} disabled={closing || refreshing}>
+                      {closing ? "DELETING…" : "DELETE SIGNAL"}
                     </button>
                   </div>
                 </div>
               ) : (
-                <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(true)}>CLOSE MY SIGNAL</button>
+                <div className="sdc-close-actions">
+                  {(freshnessState === "aging" || freshnessState === "expired") && (
+                    <button type="button" className="sdc-btn sdc-btn-secondary" onClick={handleRefreshSignal} disabled={refreshing}>
+                      {refreshing ? "REFRESHING…" : "REFRESH (+7 DAYS)"}
+                    </button>
+                  )}
+                  <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(true)}>MANAGE SIGNAL</button>
+                </div>
               )}
             </div>
           )}

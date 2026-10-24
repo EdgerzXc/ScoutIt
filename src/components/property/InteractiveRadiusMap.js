@@ -52,7 +52,8 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         center: center,
         zoom: 11,
         pitch: 45,
-        scrollZoom: false
+        scrollZoom: false,
+        cooperativeGestures: true
       });
       map.addControl(new MapCreditControl(), 'bottom-right');
 
@@ -209,6 +210,12 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           color: var(--text-muted);
           font-size: 16px;
           cursor: pointer;
+          min-width: 44px;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          touch-manipulation: manipulation;
           transition: color 0.2s;
         }
         .close-map-btn:hover { color: var(--text-primary); }
@@ -252,19 +259,30 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           width: 100%;
           appearance: none;
           background: var(--surface2);
-          height: 4px;
-          border-radius: 2px;
+          height: 6px;
+          border-radius: 3px;
           outline: none;
           margin-bottom: 12px;
+          touch-manipulation: none;
         }
         .radius-slider::-webkit-slider-thumb {
           appearance: none;
-          width: 16px;
-          height: 16px;
+          width: 26px;
+          height: 26px;
           border-radius: 50%;
           background: var(--accent-bright);
           cursor: pointer;
           border: 2px solid var(--surface);
+          box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.35);
+        }
+        .radius-slider::-moz-range-thumb {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: var(--accent-bright);
+          cursor: pointer;
+          border: 2px solid var(--surface);
+          box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.35);
         }
         .control-hint {
           font-size: 12px;

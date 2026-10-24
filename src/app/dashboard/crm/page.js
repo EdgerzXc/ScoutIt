@@ -17,6 +17,7 @@ import { crmFetch } from "../../../lib/crmClient";
 import { loadDeals } from "../../../lib/deals/dealsClient";
 import { normalizeDashboardMode } from "../../../lib/dashboardModes";
 import { leadsToCsv, exportFilename } from "../../../lib/leadExport";
+import { contactToPipelineCard } from "../../../lib/crmContactMerge";
 import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole, Upload, Download } from "lucide-react";
 import Link from "next/link";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -48,7 +49,7 @@ function CRMPageInner() {
   // The toast carries a tone. Errors used to render with the same padlock as
   // the tier-lock upsells, so "Couldn't update the deal" read as a paywall.
   const [showToast, setShowToast] = useState("");
-  const [toastTone, setToastTone] = useState("locked"); // "locked" | "error"
+  const [toastTone, setToastTone] = useState("locked"); // "locked" | "error" | "success"
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
@@ -96,6 +97,14 @@ function CRMPageInner() {
 
   const mockUserId = currentUser?.id;
 
+  // The pipeline lens changes what a card is called, not what it is. The
+  // loader below is memoised on the identity, so it reads the lens from a
+  // ref instead of re-fetching the pipeline every time the lens changes.
+  const viewingAsRef = useRef(viewingAs);
+  useEffect(() => {
+    viewingAsRef.current = viewingAs;
+  }, [viewingAs]);
+
   const flashToast = useCallback((message, tone = "error") => {
     setToastTone(tone);
     setShowToast(message);
@@ -106,11 +115,21 @@ function CRMPageInner() {
     if (!currentUser?.id) return;
     // allSettled so one failing feed doesn't blank the other (e.g. an
     // appointments error must not hide the deal pipeline).
-    const [dealsRes, apptsRes] = await Promise.allSettled([
+    const [dealsRes, apptsRes, contactsRes] = await Promise.allSettled([
       loadDeals({ mockUserId: currentUser.id }),
       crmFetch("/api/viewing-appointments", { mockUserId: currentUser.id }),
+      crmFetch("/api/crm/contacts", { mockUserId: currentUser.id }),
     ]);
     if (dealsRes.status === "fulfilled") setDeals(dealsRes.value);
+    // A-234: imported leads live in the account's CRM contact records. They
+    // are loaded from the server on every visit, so an import survives a
+    // refresh, a sign-out and a second device instead of living in the tab.
+    if (contactsRes.status === "fulfilled") {
+      const imported = (contactsRes.value?.contacts || [])
+        .filter((c) => c?.source === "csv_import")
+        .map((c) => contactToPipelineCard(c, viewingAsRef.current));
+      setDeals((prev) => [...prev.filter((d) => !d.isImportedContact), ...imported]);
+    }
     if (apptsRes.status === "fulfilled") setAppointments(apptsRes.value.appointments || []);
     if (dealsRes.status === "rejected" || apptsRes.status === "rejected") {
       console.error("CRM fetch failed", dealsRes.reason || apptsRes.reason);
@@ -134,6 +153,7 @@ function CRMPageInner() {
         body: { status: newStatus },
       });
       setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status: newStatus } : d)));
+      setSelectedDeal((prev) => (prev && prev.id === dealId ? { ...prev, status: newStatus } : prev));
     } catch (e) {
       console.error(e);
       flashToast(sanitizeError(e, "Couldn't update the deal."));
@@ -164,26 +184,58 @@ function CRMPageInner() {
     flashToast(`Unlock ${feature} at ${tier} tier.`, "locked");
   };
 
-  const handleImportLeads = (newLeads) => {
+  const handleImportLeads = async (newLeads) => {
     if (!Array.isArray(newLeads) || newLeads.length === 0) return;
-    const mappedDeals = newLeads.map((item, idx) => ({
-      id: item.id || `imported-${Date.now()}-${idx}`,
-      status: item.status || "connected",
-      propertyTitle: item.propertyTitle || "Direct Inbound Lead",
-      otherParty: item.name || item.email || "Imported Contact",
-      otherPartyEmail: item.email || "",
-      otherPartyPhone: item.phone || "",
-      propertyPrice: item.budget ? Number(item.budget) || null : null,
-      myRole: viewingAs === "broker" ? "broker" : "owner",
-      lastMessage: item.notes || "Imported lead record",
-      createdAt: new Date().toISOString(),
-      lastActivityAt: new Date().toISOString(),
-      private_notes: item.notes || "",
-      source: item.source || "csv_import",
-    }));
+    try {
+      const res = await crmFetch("/api/crm/contacts", {
+        method: "POST",
+        body: {
+          contacts: newLeads.map((item) => ({
+            fullName: item.name || item.otherParty || item.email,
+            email: item.email || item.otherPartyEmail,
+            phone: item.phone || item.otherPartyPhone,
+            companyName: item.company || null,
+            contactType: viewingAs === "broker" ? "buyer" : "prospective_tenant",
+            source: "csv_import",
+            requirements: {
+              budget: item.budget ? Number(item.budget) || null : null,
+              propertyTitle: item.propertyTitle || null,
+              notes: item.notes || null,
+              // The pipeline stage the spreadsheet carried. It used to be
+              // dropped on import, which put every lead in New Inquiry.
+              stage: item.status || "",
+            },
+          })),
+        },
+      });
 
-    setDeals((prev) => [...mappedDeals, ...prev]);
-    flashToast(`Imported ${mappedDeals.length} leads to your pipeline.`);
+      const saved = res?.contacts || [];
+      // Only server-committed rows enter the board. A lead that exists only in
+      // this tab is a lead the owner loses on the next refresh — the import
+      // used to do exactly that and still report success.
+      const incoming = saved.map((c) => contactToPipelineCard(c, viewingAs));
+      const incomingIds = new Set(incoming.map((c) => c.id));
+      setDeals((prev) => [
+        ...incoming,
+        ...prev.filter((d) => !d.isImportedContact || !incomingIds.has(d.id)),
+      ]);
+
+      const failed = res?.failed?.length || 0;
+      if (failed > 0) {
+        flashToast(
+          `Saved ${res?.count ?? 0} of ${newLeads.length} leads. ${failed} could not be saved.`,
+          "error"
+        );
+      } else {
+        flashToast(
+          `Saved ${res?.count ?? 0} lead${(res?.count ?? 0) === 1 ? "" : "s"} to your pipeline.`,
+          "success"
+        );
+      }
+    } catch (err) {
+      console.error("[CRM] Failed to import leads:", err);
+      flashToast("No leads were saved. Check your connection and try again.", "error");
+    }
   };
 
   const handleExportPipelineCsv = () => {
@@ -209,16 +261,23 @@ function CRMPageInner() {
   // slow even when the data arrived at the same time as everywhere else.
   if (userLoading) {
     return (
-      <div role="main" className="flex-1 flex justify-center items-center text-text-secondary h-screen">
+      <div role="main" className="relative min-h-screen bg-background px-6 py-12" aria-busy="true">
         <AtmosphereBackground variant="dashboard" />
-        <span className="relative z-10 animate-pulse font-body text-base">Loading pipeline...</span>
+        <div className="relative z-10 max-w-6xl mx-auto space-y-6 animate-pulse" aria-hidden="true">
+          <div className="h-8 w-48 rounded bg-surface-variant/60" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} className="rounded-xl border border-surface-variant bg-surface/40 p-5 h-64" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!currentUser?.id) {
     return (
-      <div role="main" className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen px-6 relative">
+      <div role="main" className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen h-dvh px-6 relative">
         <AtmosphereBackground variant="dashboard" />
         <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">Master CRM</h1>
         <p className="relative z-10 max-w-sm font-body text-base leading-relaxed text-text-secondary">Sign in to see your pipeline, appointments, and tasks.</p>
@@ -230,10 +289,15 @@ function CRMPageInner() {
   }
 
   // Derived KPIs — computed from the user's real deals only.
+  // An imported lead is an active pipeline entry and counts as one, but it is
+  // never allowed to move a ScoutIt-earned number: a "closed" row in a
+  // spreadsheet is not a win ScoutIt recorded, so imported records stay out of
+  // the win-rate denominators.
+  const platformDeals = deals.filter((d) => !d.isImportedContact);
   const activeDealsList = deals.filter((d) => d.status === "connected" || d.status === "pending" || d.status === "accepted");
   const activeDeals = activeDealsList.length;
-  const closedDeals = deals.filter((d) => d.status === "closed").length;
-  const declinedDeals = deals.filter((d) => d.status === "declined").length;
+  const closedDeals = platformDeals.filter((d) => d.status === "closed").length;
+  const declinedDeals = platformDeals.filter((d) => d.status === "declined").length;
   const totalDecided = closedDeals + declinedDeals;
   const winRate = totalDecided > 0 ? Math.round((closedDeals / totalDecided) * 100) : null;
   const upcomingViewings = appointments.filter((a) => a.status === "pending" || a.status === "confirmed").length;
@@ -374,7 +438,7 @@ function CRMPageInner() {
       </div>
 
       {/* Tabs and Toolbar */}
-      <div className="flex items-center justify-between border-b border-surface-variant mb-6 relative z-10 overflow-x-auto">
+      <div className="flex items-center justify-between border-b border-surface-variant mb-6 relative z-10 overflow-x-auto pr-6">
         <div className="flex gap-4 md:gap-6">
           <button
             onClick={() => setActiveTab("pipeline")}
@@ -423,9 +487,15 @@ function CRMPageInner() {
         )}
 
         {activeTab === "pipeline" && loading && (
-          <p className="animate-pulse py-10 text-center font-body text-base text-text-secondary">
-            Loading your pipeline…
-          </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-6" aria-busy="true" aria-label="Loading pipeline">
+            {[1, 2, 3, 4].map((col) => (
+              <div key={col} aria-hidden="true" className="rounded-xl border border-surface-variant bg-surface/40 p-4 space-y-3 animate-pulse min-h-[260px]">
+                <div className="h-3.5 w-24 rounded bg-gold-accent/25 mb-4" />
+                <div className="h-20 w-full rounded-lg bg-surface-variant/40" />
+                <div className="h-20 w-full rounded-lg bg-surface-variant/30" />
+              </div>
+            ))}
+          </div>
         )}
         {activeTab === "pipeline" && !loading && (
           <KanbanBoard
@@ -437,9 +507,17 @@ function CRMPageInner() {
           />
         )}
         {activeTab === "appointments" && loading && (
-          <p className="animate-pulse py-10 text-center font-body text-base text-text-secondary">
-            Loading your viewings…
-          </p>
+          <div className="space-y-3 py-6" aria-busy="true" aria-label="Loading viewings">
+            {[1, 2, 3].map((row) => (
+              <div key={row} aria-hidden="true" className="rounded-xl border border-surface-variant bg-surface/40 p-5 animate-pulse flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 w-48 rounded bg-surface-variant/60" />
+                  <div className="h-3 w-32 rounded bg-surface-variant/40" />
+                </div>
+                <div className="h-8 w-24 rounded bg-gold-accent/20" />
+              </div>
+            ))}
+          </div>
         )}
         {activeTab === "appointments" && !loading && (
           <AppointmentsSheet
@@ -462,6 +540,7 @@ function CRMPageInner() {
         deal={selectedDeal}
         onClose={() => setSelectedDeal(null)}
         onDealUpdate={handleDealUpdate}
+        onStatusChange={handleStatusChange}
         mockUserId={mockUserId}
       />
 
@@ -487,7 +566,9 @@ function CRMPageInner() {
           className={`fixed bottom-[calc(90px+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 -translate-x-1/2 max-w-[calc(100vw-2rem)] px-6 py-3 rounded shadow-2xl z-[70] animate-[slideUp_0.2s_ease-out] border bg-surface-alt ${
             toastTone === "error"
               ? "border-error/40 text-error"
-              : "border-gold-accent/30 text-gold-accent"
+              : toastTone === "success"
+                ? "border-success/40 text-success"
+                : "border-gold-accent/30 text-gold-accent"
           }`}
         >
           <p className="flex items-center gap-2 font-body text-base break-words">

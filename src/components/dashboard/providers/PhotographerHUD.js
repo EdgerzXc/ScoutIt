@@ -82,7 +82,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 <span className="text-4xl mb-2 opacity-50 group-hover:scale-110 transition-transform">📸</span>
                 <span className="font-working-title text-on-surface">Paste Drive/Dropbox Link</span>
               </div>
-              <input type="text" placeholder="https://drive.google.com/..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent transition" />
+              <input type="text" placeholder="https://drive.google.com/..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-base md:text-sm focus:outline-none focus:border-gold-accent transition" />
             </div>
           </div>
         </div>

@@ -220,7 +220,7 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, o
         <button
           type="button"
           onClick={openNewEvent}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent border border-gold-accent/30 rounded text-xs uppercase tracking-wider font-bold transition"
+          className="flex min-h-11 items-center gap-2 px-3 py-1.5 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent border border-gold-accent/30 rounded text-xs uppercase tracking-wider font-bold transition"
         >
           <Plus size={14} /> Add to schedule
         </button>
@@ -316,7 +316,7 @@ function ContactExchange({ dealId, exchange, userId, onChanged, notify }) {
       type="button"
       onClick={sign}
       disabled={busy}
-      className="px-2.5 py-1.5 rounded border border-gold-accent/30 text-gold-accent hover:bg-gold-accent/10 text-xs font-working-title flex items-center gap-1 shrink-0 disabled:opacity-50"
+      className="min-h-11 px-2.5 py-1.5 rounded border border-gold-accent/30 text-gold-accent hover:bg-gold-accent/10 text-xs font-working-title flex items-center gap-1 shrink-0 disabled:opacity-50"
     >
       {busy ? "Sending…" : label}
     </button>
@@ -385,14 +385,14 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent, userId, o
           <button
             onClick={() => onViewingUpdate(item.raw.id, "cancelled")}
             disabled={updatingId === item.raw.id}
-            className="px-2.5 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
+            className="min-h-11 px-2.5 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
           >
             <XCircle size={13} /> Decline
           </button>
           <button
             onClick={() => onViewingUpdate(item.raw.id, "confirmed")}
             disabled={updatingId === item.raw.id}
-            className="px-2.5 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
+            className="min-h-11 px-2.5 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
           >
             <CheckCircle size={13} /> Confirm
           </button>
@@ -400,7 +400,7 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent, userId, o
       ) : item.kind === "event" ? (
         <button
           onClick={() => onEditEvent(item.raw)}
-          className="px-2.5 py-1.5 rounded border border-white/10 text-white/70 hover:bg-white/5 text-xs font-working-title flex items-center gap-1 shrink-0"
+          className="min-h-11 px-2.5 py-1.5 rounded border border-white/10 text-white/70 hover:bg-white/5 text-xs font-working-title flex items-center gap-1 shrink-0"
         >
           <Edit2 size={12} /> Edit
         </button>

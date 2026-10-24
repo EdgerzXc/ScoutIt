@@ -20,10 +20,6 @@ export async function getConnectionRow(userId, provider = "google") {
   return data || null;
 }
 
-export async function hasActiveConnection(userId, provider = "google") {
-  return Boolean(await getConnectionRow(userId, provider));
-}
-
 /**
  * Return a usable Google access token for the user, refreshing if needed.
  * @returns {Promise<string|null>} access token, or null if not connected.

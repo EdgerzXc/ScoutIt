@@ -1931,7 +1931,7 @@ export default function ChatBox({
               <select
                 value={closeReason}
                 onChange={(e) => setCloseReason(e.target.value)}
-                className="w-full bg-surface border border-surface-variant rounded-lg p-2.5 text-xs text-on-surface focus:border-gold-accent outline-none"
+                className="w-full bg-surface border border-surface-variant rounded-lg p-2.5 text-base sm:text-xs text-on-surface focus:border-gold-accent outline-none"
               >
                 <option value="Client selected alternative property">Client selected alternative property</option>
                 <option value="Price or commercial terms divergence">Price or commercial terms divergence</option>
@@ -1951,7 +1951,7 @@ export default function ChatBox({
                 value={closeNote}
                 onChange={(e) => setCloseNote(e.target.value)}
                 placeholder="e.g. Will follow up next quarter..."
-                className="w-full bg-surface border border-surface-variant rounded-lg p-2.5 text-xs text-on-surface focus:border-gold-accent outline-none"
+                className="w-full bg-surface border border-surface-variant rounded-lg p-2.5 text-base sm:text-xs text-on-surface focus:border-gold-accent outline-none"
               />
             </div>
 
@@ -1990,14 +1990,14 @@ export default function ChatBox({
               <button
                 type="button"
                 onClick={() => setShowConfirmClose(false)}
-                className="flex-1 py-2.5 rounded-lg border border-surface-variant text-xs text-text-secondary hover:text-on-surface transition font-mono uppercase tracking-wider"
+                className="flex-1 min-h-[44px] py-2.5 rounded-lg border border-surface-variant text-xs text-text-secondary hover:text-on-surface transition font-mono uppercase tracking-wider"
               >
                 Keep Open
               </button>
               <button
                 type="button"
                 onClick={handleEndConversation}
-                className="flex-1 py-2.5 rounded-lg bg-error/20 text-error border border-error/50 text-xs font-mono uppercase tracking-wider hover:bg-error/30 transition font-bold"
+                className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-error/20 text-error border border-error/50 text-xs font-mono uppercase tracking-wider hover:bg-error/30 transition font-bold"
               >
                 Conclude Room
               </button>
@@ -2035,7 +2035,7 @@ export default function ChatBox({
                   <select
                     value={staffCategory}
                     onChange={(e) => setStaffCategory(e.target.value)}
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
+                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-base sm:text-xs text-on-surface focus:border-gold-accent outline-none"
                   >
                     <option value="glitch">Technical Glitch / Upload Error</option>
                     <option value="no_show">Client / Broker Viewing No-Show</option>
@@ -2054,7 +2054,7 @@ export default function ChatBox({
                     placeholder="Provide details so staff can review and fix things..."
                     rows={3}
                     required
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-xs text-on-surface focus:border-gold-accent outline-none"
+                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-base sm:text-xs text-on-surface focus:border-gold-accent outline-none"
                   />
                 </div>
 
@@ -2062,14 +2062,14 @@ export default function ChatBox({
                   <button
                     type="button"
                     onClick={() => setShowStaffModal(false)}
-                    className="flex-1 py-2.5 rounded-lg border border-surface-variant text-xs text-text-secondary hover:text-on-surface transition font-mono uppercase tracking-wider"
+                    className="flex-1 min-h-[44px] py-2.5 rounded-lg border border-surface-variant text-xs text-text-secondary hover:text-on-surface transition font-mono uppercase tracking-wider"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={staffSubmitting || !staffMessage.trim()}
-                    className="flex-1 py-2.5 rounded-lg bg-gold-accent/15 text-gold-accent border border-gold-accent/40 text-xs font-mono uppercase tracking-wider hover:bg-gold-accent/25 transition-all duration-300 ease-out font-bold disabled:opacity-40"
+                    className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-gold-accent/15 text-gold-accent border border-gold-accent/40 text-xs font-mono uppercase tracking-wider hover:bg-gold-accent/25 transition-all duration-300 ease-out font-bold disabled:opacity-40"
                   >
                     {staffSubmitting ? "Dispatching..." : "Dispatch to Staff"}
                   </button>

@@ -184,7 +184,21 @@ export default function WishlistPage() {
         {mergeMessage && <div className="merge-message">{mergeMessage}</div>}
 
         {!loaded && (
-          <div className="loading-state">Loading...</div>
+          <div className="cards-grid" aria-busy="true" aria-label="Loading saved spaces">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                aria-hidden="true"
+                className="animate-pulse rounded-lg border border-surface-variant bg-surface/60 p-5"
+                style={{ minHeight: "260px" }}
+              >
+                <div className="h-36 w-full rounded bg-surface-variant/40 mb-4" />
+                <div className="h-3 w-24 rounded bg-gold-accent/20 mb-3" />
+                <div className="h-5 w-3/4 rounded bg-surface-variant/60 mb-2" />
+                <div className="h-3 w-1/2 rounded bg-surface-variant/40" />
+              </div>
+            ))}
+          </div>
         )}
 
         {isEmpty && (
@@ -193,7 +207,7 @@ export default function WishlistPage() {
             <div className="empty-subtitle">
               Dreaming is free. This is your inspiration board.
             </div>
-            <Link href="/discover" className="empty-cta">
+            <Link href="/property" className="empty-cta">
               Start Exploring →
             </Link>
           </div>

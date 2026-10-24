@@ -4,7 +4,7 @@ export const PROFESSIONAL_CATEGORIES = Object.freeze({
   broker: {
     key: "broker",
     source: "airtable",
-    eyebrow: "Layer 04.1 // Property advisory",
+    eyebrow: "Layer 04.1 · Property advisory",
     title: "Verified Advisors",
     description: "Advisor profiles with named credentials.",
     emptyTitle: "No public advisors yet",
@@ -14,7 +14,7 @@ export const PROFESSIONAL_CATEGORIES = Object.freeze({
   photographer: {
     key: "photographer",
     source: "supabase",
-    eyebrow: "Layer 04.2 // Space photography",
+    eyebrow: "Layer 04.2 · Space photography",
     title: "Space Photographers",
     description: "Portfolios of people who document spaces.",
     emptyTitle: "The founding lens roster is being assembled",
@@ -24,7 +24,7 @@ export const PROFESSIONAL_CATEGORIES = Object.freeze({
   researcher: {
     key: "researcher",
     source: "supabase",
-    eyebrow: "Layer 04.3 // Spatial research",
+    eyebrow: "Layer 04.3 · Spatial research",
     title: "Space Researchers",
     description: "Profiles of people who turn place evidence into decisions.",
     emptyTitle: "The founding research roster is being assembled",
@@ -34,11 +34,21 @@ export const PROFESSIONAL_CATEGORIES = Object.freeze({
   event_planner: {
     key: "event_planner",
     source: "supabase",
-    eyebrow: "Layer 04.4 // Event design",
-    title: "Event Professionals",
-    description: "Profiles of people who design gatherings in spaces.",
-    emptyTitle: "The founding event roster is being assembled",
-    emptyCopy: "Public event-professional profiles will appear here when their owners make them available.",
+    eyebrow: "Layer 04.4 · Space & Concept Design",
+    title: "Space & Concept Designers",
+    description: "Profiles of people who plan, stage, and design space concepts.",
+    emptyTitle: "The founding concept design roster is being assembled",
+    emptyCopy: "Public space and concept designer profiles will appear here when their owners make them available.",
+    actionLabel: "View profile",
+  },
+  designer: {
+    key: "designer",
+    source: "supabase",
+    eyebrow: "Layer 04.4 · Space & Concept Design",
+    title: "Space & Concept Designers",
+    description: "Profiles of people who plan, stage, and design space concepts.",
+    emptyTitle: "The founding concept design roster is being assembled",
+    emptyCopy: "Public space and concept designer profiles will appear here when their owners make them available.",
     actionLabel: "View profile",
   },
 });

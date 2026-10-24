@@ -1,29 +1,20 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
 import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
+
+const REQUIRED_ROLES = {
+  PIONEER_BROKER: ["broker"],
+  PIONEER_OWNER: ["owner"],
+  PIONEER_CREATOR: ["provider", "photographer", "designer", "researcher", "creator"],
+};
 
 export async function POST(request) {
   try {
-    // 1. Extract token from Authorization header
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-
-    if (authError || !user) {
+    const userId = await resolveUserId(request);
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
-
-    const userId = user.id;
 
     const { badgeId } = await request.json();
 
@@ -37,6 +28,23 @@ export async function POST(request) {
     }
     if (!badgeId.startsWith("PIONEER_")) {
       return NextResponse.json({ error: "This badge cannot be self-claimed" }, { status: 403 });
+    }
+
+    const required = REQUIRED_ROLES[badgeId];
+    if (required) {
+      const { data: profile } = await supabaseAdmin
+        .from("user_profiles")
+        .select("role, active_roles")
+        .eq("id", userId)
+        .maybeSingle();
+      const userRoles = new Set(
+        [profile?.role, ...(Array.isArray(profile?.active_roles) ? profile.active_roles : [])]
+          .filter(Boolean)
+          .map((r) => String(r).toLowerCase())
+      );
+      if (!required.some((r) => userRoles.has(r))) {
+        return NextResponse.json({ error: `Requires ${required[0]} role` }, { status: 403 });
+      }
     }
 
     // GAP-27: Prevent TOCTOU badge over-minting via atomic PostgreSQL RPC mint_pioneer_badge_atomic

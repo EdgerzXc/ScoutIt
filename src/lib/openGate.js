@@ -46,12 +46,6 @@ export function freeInboundRecipient(recipientIds, preferredBrokerId, unitId, ro
     && recipientIds[0] === preferredBrokerId;
 }
 
-export function freeInboundTarget(recipientIds, targetId, unitId, senderRole) {
-  return senderRole === "buyer" && Boolean(targetId)
-    && Array.isArray(recipientIds) && recipientIds.length === 1
-    && recipientIds[0] === targetId;
-}
-
 export function openGateContactRevealed(deal) {
   return deal?.open_gate_inbound === true
     && ["accepted", "active", "connected"].includes(deal.status);

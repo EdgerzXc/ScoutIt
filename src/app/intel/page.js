@@ -193,10 +193,10 @@ export default function IntelPage() {
           subtitle="Tracing architectural shifts, spatial design, and development dispatches."
         >
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link href="/discover" className="inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
+            <Link href="/property" className="inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
               <span className="text-text-muted">Intel</span>
               <span className="text-gold-accent">→</span>
-              <span className="text-gold-accent">Discover</span>
+              <span className="text-gold-accent">Space Directory</span>
             </Link>
             <Link href="/stratosphere" className="inline-flex items-center gap-3 no-underline border border-surface-variant px-5 py-3 rounded-sm font-mono text-xs uppercase tracking-[0.1em] text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors active:scale-[0.98]">
               <span className="text-text-muted">Intel</span>
@@ -312,8 +312,8 @@ export default function IntelPage() {
                   >
                     Drop a radar
                   </button>
-                  <Link href="/discover" className="intel-radar-search-link">
-                    Need to search? Open Discover
+                  <Link href="/property" className="intel-radar-search-link">
+                    Need to search spaces? Open Space Directory
                   </Link>
                 </>
               )}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import useModalDialog from "@/components/ui/useModalDialog";
 import { joinWaitlist } from "@/lib/waitlist";
+import PrivacyNotice from "@/components/ui/PrivacyNotice";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import styles from "./WaitlistModal.module.css";
 
@@ -135,6 +136,7 @@ export default function WaitlistModal() {
               <button type="submit" className={`${styles.action} w-full bg-gold-accent-bright text-background border-none rounded-lg p-3.5 font-label-caps text-[13px] font-bold tracking-wide uppercase cursor-pointer hover:bg-gold-accent disabled:opacity-60 disabled:cursor-default`} disabled={status === "sending" || !turnstileToken}>
                 {status === "sending" ? "Joining…" : "Join the Waitlist"}
               </button>
+              <PrivacyNotice />
             </form>
             {status === "error" && <p className={`${styles.errorText} text-[12.5px] mt-2.5`}>{error}</p>}
             <p className="text-[12px] text-on-surface/70 mt-3.5 text-center">Intelligence first. We never sell or share your email.</p>

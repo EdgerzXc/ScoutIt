@@ -3,7 +3,7 @@
 /* Dynamic CMS image URLs are intentionally rendered without Next's optimizer. */
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import "@/app/property/[id]/property-detail.css";
 import dynamic from "next/dynamic";
@@ -29,14 +29,6 @@ import {
   unitTypeLabel,
 } from "@/lib/unitMasterPage";
 
-const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCommandMap"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ height: "300px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Loading spatial command map…</span>
-    </div>
-  ),
-});
 const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
   ssr: false,
   loading: () => (
@@ -45,7 +37,6 @@ const SpatialCanvas = dynamic(() => import("@/components/maps/SpatialCanvas"), {
     </div>
   ),
 });
-const USE_SPATIAL_CANVAS = true;
 
 const SpecCard = ({ label, value }) => {
   if (value == null || value === "") return null;
@@ -192,6 +183,21 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     return () => clearInterval(timer);
   }, [isAutoPlaying, isPhotoHovered, displayPhotos.length]);
 
+  const goPrev = useCallback(() => setCurrentImageIndex(i => (i === 0 ? displayPhotos.length - 1 : i - 1)), [displayPhotos.length]);
+  const goNext = useCallback(() => setCurrentImageIndex(i => (i + 1) % displayPhotos.length), [displayPhotos.length]);
+
+  // Keyboard navigation for photo lightbox
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsLightboxOpen(false);
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLightboxOpen, goPrev, goNext]);
+
   if (loading) {
     return (
       <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
@@ -230,9 +236,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   };
 
   // ── Auto-next slideshow timer (pauses on hover/touch) ──
-  // ── Photo navigation ──────────────────────────
-  const goPrev = () => setCurrentImageIndex(i => (i === 0 ? displayPhotos.length - 1 : i - 1));
-  const goNext = () => setCurrentImageIndex(i => (i + 1) % displayPhotos.length);
+  // ── Photo touch navigation ──────────────────────────
   const handleTouchStart = (e) => {
     setIsPhotoHovered(true);
     touchStartX.current = e.touches[0].clientX;
@@ -644,21 +648,13 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   </div>
                 }
               >
-                {USE_SPATIAL_CANVAS ? (
-                  <SpatialCanvas
-                    lat={property.latitude || property.lat || 14.5547}
-                    lng={property.longitude || property.lng || 121.0244}
-                    propertyTitle={property.title}
-                    initialLens="command"
-                    availableLenses={["command", "location", "flood", "transit"]}
-                  />
-                ) : (
-                  <SpatialCommandMap
-                    lat={property.latitude || property.lat || 14.5547}
-                    lng={property.longitude || property.lng || 121.0244}
-                    propertyTitle={property.title}
-                  />
-                )}
+                <SpatialCanvas
+                  lat={property.latitude || property.lat || 14.5547}
+                  lng={property.longitude || property.lng || 121.0244}
+                  propertyTitle={property.title}
+                  initialLens="command"
+                  availableLenses={["command", "location", "flood", "transit"]}
+                />
               </InViewport>
 
               <div style={{ marginTop: "24px" }}>
@@ -848,7 +844,13 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
 
       {/* Lightbox Overlay Modal */}
       {isLightboxOpen && hasPhotos && (
-        <div className="lightbox-overlay" onClick={() => setIsLightboxOpen(false)}>
+        <div 
+          className="lightbox-overlay" 
+          role="dialog"
+          aria-modal="true"
+          aria-label="Fullscreen photo viewer"
+          onClick={() => setIsLightboxOpen(false)}
+        >
           <button 
             className="lightbox-close" 
             onClick={(e) => { e.stopPropagation(); setIsLightboxOpen(false); }}

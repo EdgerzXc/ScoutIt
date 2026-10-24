@@ -301,7 +301,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                             </div>
                           )}
                           {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length > 0 && (
-                            <div className="text-[12px] font-mono bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <div className="text-[12px] font-mono bg-gold-accent/15 text-gold-accent border border-gold-accent/30 px-1.5 py-0.5 rounded flex items-center gap-1">
                               <Link2 size={9} />
                               {pitches.filter((p) => p.status === 'pending' || p.status === 'accepted').length}
                             </div>

@@ -59,7 +59,18 @@ export default function OffMarketPage() {
         <h1 className="mt-3 font-display-md text-4xl md:text-6xl">Quiet inventory, kept private.</h1>
         <p className="mt-4 max-w-2xl text-text-secondary">Withdrawn listings are not part of the ordinary directory. This surface is limited to entitled Cluster and Universe seekers, with contact shown only when the owner has enabled Quietly open to offers.</p>
 
-        {state === "loading" && <p className="mt-12 text-text-secondary">Loading private inventory…</p>}
+        {state === "loading" && (
+          <div className="mt-10 grid gap-5 md:grid-cols-2" aria-busy="true" aria-label="Loading private inventory">
+            {[1, 2].map((n) => (
+              <div key={n} aria-hidden="true" className="rounded border border-surface-variant bg-surface-alt/60 p-5 animate-pulse space-y-3">
+                <div className="h-3 w-32 rounded bg-gold-accent/20" />
+                <div className="h-6 w-3/4 rounded bg-surface-variant/60" />
+                <div className="h-4 w-1/2 rounded bg-surface-variant/40" />
+                <div className="h-9 w-40 rounded bg-surface-variant/50 mt-4" />
+              </div>
+            ))}
+          </div>
+        )}
         {state === "auth" && <p className="mt-12 border border-surface-variant bg-surface-alt p-5 text-text-secondary">Sign in with an entitled account to view off-market inventory.</p>}
         {state === "error" && <p className="mt-12 border border-error/40 bg-surface-alt p-5 text-text-secondary">Private inventory is temporarily unavailable.</p>}
         {state === "ready" && properties.length === 0 && <p className="mt-12 border border-surface-variant bg-surface-alt p-5 text-text-secondary">No off-market properties are available to this account yet.</p>}
@@ -92,7 +103,7 @@ export default function OffMarketPage() {
                 <button type="button" className="min-h-11 min-w-11 text-2xl text-text-secondary" aria-label="Close contact form" onClick={() => setSelected(null)}>×</button>
               </div>
               <p className="mt-4 text-sm text-text-secondary">The owner has enabled Quietly open to offers. Decline, non-response, or timeout does not create an automatic refund.</p>
-              <textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-4 min-h-28 w-full rounded border border-surface-variant bg-background p-3 text-sm text-on-surface" placeholder="What would you like to ask?" required />
+              <textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-4 min-h-28 w-full rounded border border-surface-variant bg-background p-3 text-base md:text-sm text-on-surface" placeholder="What would you like to ask?" required />
               <button type="submit" disabled={sendState === "sending" || sendState === "sent"} className="mt-4 min-h-11 w-full rounded bg-gold-accent px-4 py-3 font-label-caps text-xs font-bold tracking-widest text-background disabled:opacity-50">{sendState === "sending" ? "SENDING…" : sendState === "sent" ? "REQUEST SENT" : "SEND REQUEST · 1 CONNECT"}</button>
               {sendState === "error" && <p className="mt-3 text-sm text-error">The request could not be sent. No successful delivery should be treated as a completed contact.</p>}
             </form>

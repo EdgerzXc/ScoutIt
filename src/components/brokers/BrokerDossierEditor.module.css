@@ -34,6 +34,38 @@
   line-height: 1.04;
 }
 
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.breadcrumbLink {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .breadcrumbLink:hover {
+    color: var(--accent);
+  }
+}
+
+.breadcrumbSep {
+  color: var(--border-solid);
+}
+
+.breadcrumbCurrent {
+  color: var(--accent-muted);
+}
+
 .eyebrow {
   color: var(--accent);
   font-family: var(--font-mono);

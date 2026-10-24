@@ -9,17 +9,17 @@ import {
 import { EVENT_COLOR_STYLES } from "./EventChip";
 
 // A small solid dot carries the event's color without the thick side-border
-// "AI card" tell. Viewings read as sky; free-form events use their token.
+// "AI card" tell. Viewings read as sapphire; free-form events use their token.
 const DOT_COLOR = {
   gold: "bg-gold-accent",
-  blue: "bg-sky-400",
-  green: "bg-emerald-400",
-  red: "bg-red-400",
-  purple: "bg-purple-400",
+  blue: "bg-[var(--sapphire)]",
+  green: "bg-[var(--emerald)]",
+  red: "bg-[var(--red)]",
+  purple: "bg-[var(--amethyst)]",
 };
 
 function dotClass(ev) {
-  if (ev.kind === "viewing") return "bg-sky-400";
+  if (ev.kind === "viewing") return "bg-[var(--sapphire)]";
   return DOT_COLOR[ev.color] || DOT_COLOR.gold;
 }
 

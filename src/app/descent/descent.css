@@ -1,8 +1,4 @@
-/* ============================================================
-   THE DESCENT — each layer carries its OWN animated background,
-   always visible, triggered on scroll-into-view. Scroll-snaps so
-   every layer lands as a clean frame.
-   ============================================================ */
+/* The Descent: each layer carries its own animated background, triggered on scroll-into-view. */
 
 .descent-root {
   height: 100vh;
@@ -30,7 +26,6 @@
 .layer-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .layer-content { position: relative; z-index: 1; width: 100%; }
 
-/* ---- shared content type ---- */
 .dl-eyebrow { font-family: var(--font-mono, monospace); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .dl-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 5vw, 60px); line-height: 1.05; color: var(--text-primary); margin: 0 0 14px; max-width: 16ch; }
 .dl-sub { font-family: var(--font-display); font-size: clamp(15px, 1.6vw, 19px); line-height: 1.7; color: var(--text-secondary); max-width: 52ch; margin: 0 0 30px; }
@@ -40,9 +35,7 @@
 }
 .dl-cta.solid { background: var(--gold-bright); color: var(--bg); border-color: var(--gold-bright); }
 
-/* ============================================================
-   LAYER 1 — ORBIT (space): stars, rings, UFO, wordmark
-   ============================================================ */
+/* Layer 01 Orbit: stars, rings, UFO, wordmark */
 .layer-orbit { align-items: center; text-align: center; }
 .layer-orbit .layer-bg { background: radial-gradient(125% 100% at 50% 26%, #1a1638 0%, #0a0e22 46%, #05060f 100%); }
 .layer-orbit .stars {
@@ -82,9 +75,7 @@
 .cue-arrow { display: inline-block; animation: dz-bounce 1.8s ease-in-out infinite; }
 .event-horizon-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-/* ============================================================
-   SUMMIT — the Board on a space backdrop
-   ============================================================ */
+/* Summit: the Board on a space backdrop */
 .layer-board .layer-bg { background: radial-gradient(125% 100% at 50% 18%, #141a38 0%, #0a0e20 50%, #05060f 100%); }
 .layer-board .bstars {
   position: absolute; inset: 0;
@@ -99,23 +90,19 @@
 }
 .layer-board .bnebula { position: absolute; width: 60vw; height: 50vh; left: 6%; top: 8%; background: radial-gradient(closest-side, rgba(232, 174, 60, 0.1), transparent 70%); filter: blur(50px); animation: dz-drift 26s ease-in-out infinite alternate; }
 .layer-board .bnebula.n2 { left: auto; right: 5%; top: auto; bottom: 6%; width: 50vw; height: 44vh; background: radial-gradient(closest-side, rgba(90, 120, 210, 0.1), transparent 70%); animation-duration: 32s; }
-/* let the space show through the board's own panel */
+/* Let the space backdrop show through the board panel. */
 .layer-board .board-split { background: rgba(8, 9, 14, 0.55) !important; }
 @keyframes dz-drift { from { transform: translate(0, 0); } to { transform: translate(40px, 24px); } }
 
-/* ============================================================
-   LAYER — ATMOSPHERE (news): drifting clouds + rising motes
-   ============================================================ */
-.layer-atmos .layer-bg { background: linear-gradient(180deg, #1b2c52 0%, #2a3a5e 55%, #3a3550 100%); }
-.layer-atmos .cloud { position: absolute; height: 90px; width: 300px; background: radial-gradient(closest-side, rgba(230, 236, 250, 0.55), transparent 72%); filter: blur(14px); animation: dz-cloud linear infinite; }
-.layer-atmos .cloud.c1 { top: 18%; transform: scale(1.2); animation-duration: 42s; }
-.layer-atmos .cloud.c2 { top: 42%; opacity: 0.7; animation-duration: 32s; animation-delay: -10s; }
-.layer-atmos .cloud.c3 { top: 64%; transform: scale(0.85); opacity: 0.55; animation-duration: 52s; animation-delay: -24s; }
-.layer-atmos .mote { position: absolute; bottom: -12px; width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); box-shadow: 0 0 6px rgba(255, 255, 255, 0.5); animation: dz-rise linear infinite; }
+/* Layer 02 Stratosphere: drifting clouds and rising motes */
+.layer-stratosphere .layer-bg { background: linear-gradient(180deg, #1b2c52 0%, #2a3a5e 55%, #3a3550 100%); }
+.layer-stratosphere .cloud { position: absolute; height: 90px; width: 300px; background: radial-gradient(closest-side, rgba(230, 236, 250, 0.55), transparent 72%); filter: blur(14px); animation: dz-cloud linear infinite; }
+.layer-stratosphere .cloud.c1 { top: 18%; transform: scale(1.2); animation-duration: 42s; }
+.layer-stratosphere .cloud.c2 { top: 42%; opacity: 0.7; animation-duration: 32s; animation-delay: -10s; }
+.layer-stratosphere .cloud.c3 { top: 64%; transform: scale(0.85); opacity: 0.55; animation-duration: 52s; animation-delay: -24s; }
+.layer-stratosphere .mote { position: absolute; bottom: -12px; width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); box-shadow: 0 0 6px rgba(255, 255, 255, 0.5); animation: dz-rise linear infinite; }
 
-/* ============================================================
-   LAYER — CITY (properties): skyline + day/night cycle
-   ============================================================ */
+/* Layer 03 Metropolis: skyline and day/night cycle */
 .layer-city .layer-bg { background: #0a0e1c; }
 .layer-city .sky { position: absolute; inset: 0; }
 .layer-city .sky-day { background: linear-gradient(180deg, #7fb5e6 0%, #cfe3f2 100%); animation: dz-skyDay 20s linear infinite; }
@@ -131,32 +118,25 @@
 .layer-city .win-layer { position: absolute; left: 0; bottom: 0; width: 100%; height: var(--bh, 160px); box-sizing: border-box; padding: 7px 5px; display: flex; flex-wrap: wrap; gap: 5px; align-content: flex-end; opacity: 0; animation: dz-winlights 20s linear infinite; }
 .layer-city .win { width: 5px; height: 6px; background: #ffc42a; border-radius: 1px; }
 
-/* ============================================================
-   LAYER — CRUST (services): strata + pulsing gold veins
-   ============================================================ */
+/* Layer 04 Crust: strata and pulsing gold veins */
 .layer-crust .layer-bg { background: linear-gradient(180deg, #2c2a1d 0%, #2e1d10 60%, #271810 100%); }
 .layer-crust .strata { position: absolute; inset: -6% 0; background-image: repeating-linear-gradient(176deg, rgba(0, 0, 0, 0.28) 0px, rgba(0, 0, 0, 0.28) 3px, rgba(120, 80, 40, 0.12) 3px, rgba(120, 80, 40, 0.12) 26px, rgba(0, 0, 0, 0.18) 26px, rgba(0, 0, 0, 0.18) 30px, rgba(90, 55, 28, 0.1) 30px, rgba(90, 55, 28, 0.1) 60px); animation: dz-strata 30s ease-in-out infinite alternate; }
 .layer-crust .vein { position: absolute; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, rgba(255, 150, 30, 0.85), transparent); filter: blur(0.5px); animation: dz-vein 4s ease-in-out infinite; }
 
-/* ============================================================
-   LAYER — MANTLE (about us): molten flow + rising bubbles
-   ============================================================ */
+/* Layer 05 Mantle: molten flow and rising bubbles */
 .layer-mantle .layer-bg { background: radial-gradient(120% 120% at 50% 80%, #6a1c08 0%, #3a160c 50%, #1f0d06 100%); }
 .layer-mantle .magma { position: absolute; border-radius: 50%; filter: blur(46px); animation: dz-magma 18s ease-in-out infinite alternate; }
 .layer-mantle .magma.m1 { left: 12%; top: 30%; width: 46vw; height: 40vh; background: radial-gradient(closest-side, rgba(255, 140, 30, 0.35), transparent 72%); }
 .layer-mantle .magma.m2 { right: 8%; bottom: 12%; width: 40vw; height: 36vh; background: radial-gradient(closest-side, rgba(232, 174, 60, 0.3), transparent 72%); animation-duration: 24s; }
 .layer-mantle .bubble { position: absolute; bottom: -40px; border-radius: 50%; background: radial-gradient(circle at 38% 35%, rgba(255, 210, 110, 0.95), rgba(255, 120, 20, 0.55) 70%); animation: dz-bubble linear infinite; }
 
-/* ============================================================
-   LAYER — CORE (about you): molten gold pulse + energy rings
-   ============================================================ */
+/* Layer 06 Core: molten gold pulse and energy rings */
 .layer-core .layer-bg { background: radial-gradient(120% 120% at 50% 60%, #2a1206 0%, #160a03 60%, #0a0502 100%); }
 .layer-core .coreglow { position: absolute; left: 50%; top: 56%; width: 80vw; height: 80vh; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(247, 198, 78, 0.5), rgba(255, 120, 0, 0.18) 45%, rgba(232, 174, 60, 0) 72%); animation: dz-pulse 6s ease-in-out infinite; }
 .layer-core .ering { position: absolute; left: 50%; top: 56%; width: 200px; height: 200px; border-radius: 50%; border: 1.5px solid rgba(247, 198, 78, 0.55); transform: translate(-50%, -50%) scale(0.12); animation: dz-expand 5.4s ease-out infinite; }
 .layer-core .ering.e2 { animation-delay: -1.8s; }
 .layer-core .ering.e3 { animation-delay: -3.6s; }
 
-/* ---- layer 6 content blocks ---- */
 .core-wrap { display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1000px; }
 .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .role-card { border: 0.5px solid rgba(var(--accent-rgb), 0.4); background: rgba(40, 20, 6, 0.6); border-radius: 10px; padding: 18px 20px; }
@@ -176,9 +156,6 @@
 .inner-core .ic-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 .ic-links { display: flex; gap: 12px; flex-wrap: wrap; }
 
-/* ============================================================
-   KEYFRAMES
-   ============================================================ */
 @keyframes dz-twinkle { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 @keyframes dz-ringpulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 @keyframes dz-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
@@ -202,7 +179,7 @@
 @keyframes dz-pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.06); } }
 @keyframes dz-expand { 0% { transform: translate(-50%, -50%) scale(0.12); opacity: 0.85; } 100% { transform: translate(-50%, -50%) scale(5.5); opacity: 0; } }
 
-/* prefers-reduced-motion: hold a clean static frame */
+/* Hold a static frame when prefers-reduced-motion is active. */
 .descent-root.reduced *, .descent-root.reduced *::before, .descent-root.reduced *::after { animation: none !important; }
 .descent-root.reduced .bld { transform: scaleY(1) !important; }
 .descent-root.reduced .sky-day { opacity: 0; }
@@ -214,15 +191,7 @@
   .dl-title { font-size: clamp(28px, 8vw, 40px); }
   .dl-sub { font-size: clamp(14px, 4vw, 17px); margin-bottom: 24px; }
 
-  /* ============================================================
-     MOBILE PERFORMANCE — same look, far less GPU work.
-     Structure/markup unchanged; we only tame the costly paints.
-     ============================================================ */
-
-  /* 1. backdrop-filter is the #1 cause of scroll jank on phones.
-     Remove it across the descent and lean on slightly more opaque
-     panels so text stays just as readable. Catches both the inline
-     blur cards and the BoardPodium's glass cards. */
+  /* Disable backdrop-filter on mobile to prevent scroll jank; use higher opacity panels instead. */
   .descent-root [style*="backdrop"],
   .descent-root .bp-card,
   .descent-root .bp-rank,
@@ -233,10 +202,8 @@
   .descent-root [style*="backdrop"] { background-color: rgba(10, 11, 18, 0.82) !important; }
   .descent-root .bp-card { background: rgba(12, 12, 16, 0.85) !important; }
 
-  /* 2. Animated filter:blur() layers re-rasterize every frame. Freeze
-     them into a static glow and shrink the blur radius — keeps the
-     mood, drops the per-frame cost to zero. */
-  .layer-atmos .cloud,
+  /* Freeze animated blur layers on mobile to avoid per-frame re-rasterization. */
+  .layer-stratosphere .cloud,
   .layer-board .bnebula,
   .layer-mantle .magma,
   .layer-crust .strata,
@@ -244,21 +211,19 @@
   .layer-core .coreglow {
     animation: none !important;
   }
-  .layer-atmos .cloud { filter: blur(8px); opacity: 0.5; }
+  .layer-stratosphere .cloud { filter: blur(8px); opacity: 0.5; }
   .layer-board .bnebula { filter: blur(26px); }
   .layer-mantle .magma { filter: blur(24px); }
   .layer-core .coreglow { transform: translate(-50%, -50%); }
 
-  /* 3. Tiny perpetual particles: lots of paint, little payoff on a
-     small screen. Drop them (and the redundant extra glows). */
-  .layer-atmos .mote,
+  /* Drop perpetual micro-particles on small screens to save paint cost. */
+  .layer-stratosphere .mote,
   .layer-mantle .bubble,
   .layer-orbit .shoot,
-  .layer-atmos .cloud.c3,
+  .layer-stratosphere .cloud.c3,
   .layer-mantle .magma.m2 { display: none; }
 
-  /* 4. Thin the skyline and hold the city on one calm dusk frame
-     instead of looping full-screen day/night gradients forever. */
+  /* Hold the city on one calm dusk frame on mobile. */
   .layer-city .bld:nth-child(2n) { display: none; }
   .layer-city .sky-day,
   .layer-city .sky-night,
@@ -268,11 +233,10 @@
   .layer-city .sky-dusk { animation: none !important; opacity: 1; }
   .layer-city .win-layer { animation: none !important; opacity: 0.55; }
 
-  /* 5. Core: keep one calm pulse ring, drop the duplicates. */
+  /* Keep one pulse ring in Core on mobile. */
   .layer-core .ering.e2,
   .layer-core .ering.e3 { display: none; }
 
-  /* ---- mobile visual polish: stack + breathe ---- */
   .role-grid { grid-template-columns: 1fr; }
   .core-wrap { gap: 22px; }
   .dl-cta { padding: 14px 20px; }
@@ -281,9 +245,5 @@
   .ic-links { gap: 10px; }
 }
 
-/* A-074. Press feedback. Without a visible :active state a control gives no
-   evidence it heard the tap; on a slow connection people tap again, and on a
-   submit that means duplicate requests. 100-160ms and a small scale, so it
-   reads as a press rather than an animation. Paired with the reduced-motion
-   block, which removes the movement and keeps the control usable. */
+/* Visible press feedback prevents duplicate taps on slow connections. */
 .dl-cta:active { transform: scale(0.97); transition-duration: 120ms; }

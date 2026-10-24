@@ -28,7 +28,7 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
 });
 import { getChapterConfig } from "./chapterConfig";
 import { PROPERTY_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
-import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera } from "lucide-react";
+import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera, Palette } from "lucide-react";
 import Image from "next/image";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
@@ -76,14 +76,6 @@ const ManilaTransitMap = dynamic(() => import("@/components/transit/ManilaTransi
   loading: () => (
     <div style={{ height: "clamp(420px, 52vh, 480px)", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading rail network…</span>
-    </div>
-  ),
-});
-const SpatialCommandMap = dynamic(() => import("@/components/property/SpatialCommandMap"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ height: "420px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)" }}>Loading spatial command HUD…</span>
     </div>
   ),
 });
@@ -2311,33 +2303,42 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 Commission a ScoutIt ecosystem partner to go deeper on this space, from spatial renders to full due-diligence research.
               </p>
 
-              <div style={{display:"flex", flexDirection:"column", gap:"10px"}}>
-                {[
-                  { icon:"🗺️", title:"Curated 3D Map",     desc:"Get a spatial 3D rendering of this property.",            href:"/photographers" },
-                  { icon:"🎨", title:"Pre-Design Concept",  desc:"See this space redesigned to your preferences.",          href:"/event-planners" },
-                  { icon:<Search size={22} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, title:"Site Research",       desc:"Commission a full due-diligence report on this property.", href:"/researchers" },
-                  { icon:<Camera size={22} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, title:"Space Photography",   desc:"Get professional architectural photos taken.",            href:"/photographers" },
-                  { icon:<Building2 size={22} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />, title:"Verified Advisor",    desc:"Connect with an authorized space intelligence advisor.",  href:"/brokers" },
-                ].map(svc => (
-                  <Link
-                    key={svc.title}
-                    href={svc.href}
-                    style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", transition:"border-color 0.2s ease"}}
-                  >
-                    <span style={{fontSize:"22px", flexShrink:0, lineHeight:1}}>{svc.icon}</span>
-                    <span style={{flex:1, minWidth:0}}>
-                      <span style={{display:"block", fontFamily:"var(--font-body)", fontSize:"17px", color:"var(--text-primary)", marginBottom:"3px"}}>{svc.title}</span>
-                      <span style={{display:"block", fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12.5px", color:"var(--text-muted)", lineHeight:1.5}}>{svc.desc}</span>
-                    </span>
-                    <span style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", flexShrink:0}}>→</span>
-                  </Link>
-                ))}
-              </div>
+              {(() => {
+                const propertySlug = slug || d.slug || d.id || "";
+                const propertyTitle = d.title || d.Title || "";
+                const propertyQuery = propertySlug ? `?for=${encodeURIComponent(propertySlug)}${propertyTitle ? `&title=${encodeURIComponent(propertyTitle)}` : ""}` : "";
+                return (
+                  <div style={{display:"flex", flexDirection:"column", gap:"10px"}}>
+                    {[
+                      { icon:<Building2 size={20} strokeWidth={1.5} style={{color:"var(--accent)"}} />, title:"Verified Advisor", layer:"Layer 04.1", desc:"Connect with an authorized space intelligence advisor.", href:`/brokers${propertyQuery}` },
+                      { icon:<Camera size={20} strokeWidth={1.5} style={{color:"var(--accent)"}} />, title:"Space Photography & 3D Scan", layer:"Layer 04.2", desc:"Commission high-fidelity architectural imagery and spatial 3D scans.", href:`/photographers${propertyQuery}` },
+                      { icon:<Search size={20} strokeWidth={1.5} style={{color:"var(--accent)"}} />, title:"Site & Zoning Research", layer:"Layer 04.3", desc:"Connect with vetted advisors or join the diligence waitlist.", href:`/researchers${propertyQuery}` },
+                      { icon:<Palette size={20} strokeWidth={1.5} style={{color:"var(--accent)"}} />, title:"Space & Concept Design", layer:"Layer 04.4", desc:"Explore bespoke architectural concepts and interior space planning.", href:`/event-planners${propertyQuery}` },
+                    ].map(svc => (
+                      <Link
+                        key={svc.title}
+                        href={svc.href}
+                        style={{textDecoration:"none", display:"flex", alignItems:"center", gap:"16px", padding:"18px 20px", background:"var(--surface)", border:"0.5px solid var(--border)", borderRadius:"4px", transition:"border-color 0.2s ease"}}
+                      >
+                        <span style={{display:"flex", alignItems:"center", justifyContent:"center", width:"36px", height:"36px", borderRadius:"4px", background:"var(--surface2)", flexShrink:0}}>{svc.icon}</span>
+                        <span style={{flex:1, minWidth:0}}>
+                          <span style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"3px"}}>
+                            <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", letterSpacing:"0.08em", textTransform:"uppercase", color:"var(--accent-muted)"}}>{svc.layer}</span>
+                            <span style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)"}}>{svc.title}</span>
+                          </span>
+                          <span style={{display:"block", fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-muted)", lineHeight:1.5}}>{svc.desc}</span>
+                        </span>
+                        <span style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", flexShrink:0}}>→</span>
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })()}
 
             </div>
 
             <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">5 services live</div><div className="sidebar-sub">Vetted ScoutIt partners</div></div>
+              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background:"var(--accent)"}}/><div className="sidebar-label">Ecosystem</div><div className="sidebar-value">4 disciplines live</div><div className="sidebar-sub">Layer 04 · The Crust</div></div>
               <div className="sidebar-block"><div className="sidebar-label">Fulfilment</div><div className="sidebar-value">Partner-direct</div></div>
             </div>
           </div>

@@ -101,7 +101,7 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
   };
 
   const inputCls =
-    "w-full bg-background border border-surface-variant rounded px-3 py-2 text-sm text-on-surface " +
+    "w-full bg-background border border-surface-variant rounded px-3 py-2 text-base sm:text-sm text-on-surface " +
     "focus:outline-none focus:border-gold-accent";
 
   return (
@@ -228,13 +228,13 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
 
           {error && <p className="text-sm text-error">{error}</p>}
 
-          <div className="flex items-center justify-between gap-3 pt-2 border-t border-surface-variant">
+          <div className="flex items-center justify-between gap-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] border-t border-surface-variant">
             {isEdit && onDelete ? (
               <button
                 type="button"
                 onClick={() => onDelete(seed.id)}
                 disabled={saving}
-                className="text-xs text-error border border-error/30 px-3 py-2 rounded hover:bg-error/10 active:scale-[0.97]
+                className="min-h-[44px] text-xs text-error border border-error/30 px-3 py-2 rounded hover:bg-error/10 active:scale-[0.97]
                   uppercase tracking-wider font-mono disabled:opacity-50 transition-all duration-160 ease-out"
               >
                 Delete
@@ -246,14 +246,14 @@ export default function EventEditorModal({ seed, onSave, onDelete, onClose, savi
               <button
                 type="button"
                 onClick={onClose}
-                className="text-sm text-text-secondary px-4 py-2 rounded hover:bg-surface-variant active:scale-[0.97] transition-all duration-160 ease-out"
+                className="min-h-[44px] text-sm text-text-secondary px-4 py-2 rounded hover:bg-surface-variant active:scale-[0.97] transition-all duration-160 ease-out"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-5 py-2 rounded
+                className="min-h-[44px] text-sm text-background bg-gold-accent hover:bg-gold-bright active:scale-[0.97] px-5 py-2 rounded
                   font-working-title font-semibold shadow-[0_0_12px_rgba(var(--accent-rgb),0.25)] transition-all duration-160 ease-out disabled:opacity-50"
               >
                 {saving ? "Saving…" : isEdit ? "Save" : "Create"}

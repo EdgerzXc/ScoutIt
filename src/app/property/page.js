@@ -96,7 +96,7 @@ export default async function PropertyRootPage() {
           <Header />
           <main className="directory-main">
             <header className="directory-header">
-              <span className="vector-label">Layer 3.1 // Directory Ledger</span>
+              <span className="vector-label">Layer 03.1 · Space Directory</span>
               <h1>The Space Directory</h1>
               <p className="page-subtitle">Every home, office, and venue on ScoutIt: searchable in one place.</p>
             </header>

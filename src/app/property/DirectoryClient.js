@@ -490,7 +490,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
       <Header />
       <main className="directory-main">
         <header className="directory-header">
-          <span className="vector-label">Layer 3.1 // Directory Ledger</span>
+          <span className="vector-label">Layer 03.1 · Space Directory</span>
           <h1>The Space Directory</h1>
           <p className="page-subtitle">Every home, office, and venue on ScoutIt: searchable in one place.</p>
 
@@ -517,8 +517,23 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
           // Reserve the same vertical footprint the loaded grid will occupy, so
           // the footer stays below the fold through the swap instead of sitting
           // high here and then leaping down when cards arrive (the CLS source).
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-            <h2 style={{ fontFamily: "var(--font-mono)", color: "var(--accent)" }}>LOADING THE DIRECTORY...</h2>
+          <div className="directory-container" aria-busy="true">
+            <aside className="filters-sidebar" aria-hidden="true">
+              <div className="filter-card" style={{ height: "140px", opacity: 0.6 }} />
+              <div className="filter-card" style={{ height: "180px", opacity: 0.6 }} />
+              <div className="filter-card" style={{ height: "180px", opacity: 0.6 }} />
+            </aside>
+            <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }} aria-hidden="true">
+              <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{ flexGrow: 1, height: "48px", background: "rgba(var(--text-primary-rgb), 0.03)", border: "1px solid var(--border-solid)" }} />
+                <div style={{ width: "180px", height: "44px", background: "var(--bg)", border: "1px solid var(--accent)" }} />
+              </div>
+              <div className="directory-grid">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div key={n} style={{ height: "380px", background: "rgba(var(--text-primary-rgb), 0.03)", border: "1px solid var(--border-solid)", borderRadius: "var(--radius-md, 6px)", opacity: 0.6 }} />
+                ))}
+              </div>
+            </section>
           </div>
         ) : (
           <div className="directory-container">

@@ -130,6 +130,9 @@ export default function SpatialCanvas({
   const [hudExpanded, setHudExpanded] = useState(true);
   const [dossierData, setDossierData] = useState(null);
   const [showDossierModal, setShowDossierModal] = useState(false);
+  const [showEntityGraph, setShowEntityGraph] = useState(false);
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiFilterStatus, setAiFilterStatus] = useState("");
   const [recentQuakes, setRecentQuakes] = useState([]);
   const [fireCount, setFireCount] = useState(0);
   const [webglSupported, setWebglSupported] = useState(true);
@@ -823,6 +826,105 @@ export default function SpatialCanvas({
     return lens.getLayerButtons({ quakeCount: recentQuakes.length, fireCount });
   }, [activeLensId, recentQuakes.length, fireCount]);
 
+  // Dynamic Entity & Complex Graph derived from spatialIntel
+  const entityNodes = useMemo(() => {
+    if (!spatialIntel) return [];
+    return [
+      {
+        type: "TRANSIT",
+        label: spatialIntel.transit?.station_name || "Nearest Transit Hub",
+        dist: `${spatialIntel.transit?.walk_minutes ?? 8}m walk`,
+        relevance: "HIGH IMPACT",
+      },
+      {
+        type: "ZONE",
+        label: spatialIntel.peza?.is_accredited ? spatialIntel.peza.zone_name : "Non-PEZA Commercial",
+        dist: spatialIntel.peza?.tax_incentives || "Standard Tax",
+        relevance: "TAX SHIELD",
+      },
+      {
+        type: "RISK",
+        label: spatialIntel.seismic?.nearest_fault || "West Valley Fault",
+        dist: `${spatialIntel.seismic?.distance_km || "3.2"}km buffer`,
+        relevance: "STRUCTURAL",
+      },
+      {
+        type: "INFRA",
+        label: spatialIntel.infra ? spatialIntel.infra.name : "Metro Manila Subway",
+        dist: spatialIntel.infra ? `${spatialIntel.infra.distance_km}km (${spatialIntel.infra.status})` : "Active Corridor",
+        relevance: "CAPITAL APPRECIATION",
+      },
+      {
+        type: "FIBER",
+        label: "Dual-Homed Carrier Node",
+        dist: "PLDT / Converge / Globe Core Ring",
+        relevance: "REDUNDANT",
+      },
+    ];
+  }, [spatialIntel]);
+
+  // Natural Language AI Search Filter across sublayers and lenses
+  const handleAiSearch = useCallback(
+    (query) => {
+      setAiQuery(query);
+      const q = query.toLowerCase().trim();
+      if (!q) {
+        setAiFilterStatus("");
+        handleToggleSubLayer("all");
+        return;
+      }
+      if (q.includes("flood") || q.includes("noah")) {
+        if (availableLenses.includes("flood") && activeLensId !== "flood") {
+          handleSwitchLens("flood");
+        }
+        setAiFilterStatus("🤖 Switched to NOAH Flood Hazard Lens");
+      } else if (q.includes("peza") || q.includes("tax") || q.includes("ecozone")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("peza");
+        setAiFilterStatus("🤖 Filtering: PEZA Tax-Shield Ecozones");
+      } else if (q.includes("cluster") || q.includes("industry") || q.includes("bpo") || q.includes("tech")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("clusters");
+        setAiFilterStatus("🤖 Filtering: Industry & BPO Clusters");
+      } else if (q.includes("ring") || q.includes("walk") || q.includes("isochrone")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("isochrones");
+        setAiFilterStatus("🤖 Filtering: Reach Isochrone Rings");
+      } else if (q.includes("transit") || q.includes("mrt") || q.includes("lrt") || q.includes("subway")) {
+        if (availableLenses.includes("transit") && activeLensId !== "transit") {
+          handleSwitchLens("transit");
+        } else {
+          handleToggleSubLayer("isochrones");
+        }
+        setAiFilterStatus("🤖 Filtering: Mass Transit Network");
+      } else if (q.includes("fault") || q.includes("seismic")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("seismic");
+        setAiFilterStatus("🤖 Filtering: Active Fault Lines");
+      } else if (q.includes("quake") || q.includes("usgs")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("quake");
+        setAiFilterStatus("🤖 Filtering: Live USGS Seismic Feed");
+      } else if (q.includes("fire") || q.includes("thermal")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("fire");
+        setAiFilterStatus("🤖 Filtering: Thermal Hotspots");
+      } else if (q.includes("infra") || q.includes("nsrc")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("infra");
+        setAiFilterStatus("🤖 Filtering: Infrastructure Megaprojects");
+      } else if (q.includes("sat") || q.includes("optical")) {
+        if (activeLensId !== "command" && availableLenses.includes("command")) handleSwitchLens("command");
+        handleToggleSubLayer("satellite");
+        setAiFilterStatus("🤖 Filtering: Optical Satellite Imagery");
+      } else {
+        handleToggleSubLayer("all");
+        setAiFilterStatus(`🤖 Showing all layers matching "${query}"`);
+      }
+    },
+    [activeLensId, availableLenses, handleSwitchLens, handleToggleSubLayer]
+  );
+
   const continuity = spatialIntel ? computeContinuityScore(spatialIntel) : null;
   const continuityTone = continuity?.score >= 90 ? "enterprise" : continuity?.score >= 75 ? "prime" : "standard";
   const continuityInk = continuity ? `var(--scc-continuity-${continuityTone}, ${continuity.badge_color})` : undefined;
@@ -895,7 +997,7 @@ export default function SpatialCanvas({
           }}
         >
           {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span
                 style={{
@@ -909,16 +1011,112 @@ export default function SpatialCanvas({
               />
               <span className="scc-panel__title">{LENS_LABELS[activeLensId] || "Spatial"} lens</span>
             </div>
-            <button
-              type="button"
-              className="scc-chip"
-              aria-expanded={hudExpanded}
-              onClick={() => setHudExpanded(!hudExpanded)}
-              style={{ border: "1px solid transparent", background: "transparent" }}
-            >
-              {hudExpanded ? "▲" : "▼"}
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className={`scc-chip ${showDossierModal ? "is-active" : ""}`}
+                aria-pressed={showDossierModal}
+                onClick={() => setShowDossierModal(!showDossierModal)}
+                title="Inspect Coordinate Telemetry Dossier & Sentinel-2 Satellite Link"
+              >
+                📍 DOSSIER
+              </button>
+              <button
+                type="button"
+                className={`scc-chip ${showEntityGraph ? "is-active" : ""}`}
+                aria-pressed={showEntityGraph}
+                onClick={() => setShowEntityGraph(!showEntityGraph)}
+                title="Toggle Entity & Complex Relationship Graph"
+              >
+                🕸️ GRAPH
+              </button>
+              <button
+                type="button"
+                className="scc-chip"
+                aria-expanded={hudExpanded}
+                onClick={() => setHudExpanded(!hudExpanded)}
+                style={{ border: "1px solid transparent", background: "transparent" }}
+              >
+                {hudExpanded ? "▲" : "▼"}
+              </button>
+            </div>
           </div>
+
+          {/* Visual Mode Switcher & Natural-Language AI Filter (when expanded) */}
+          {hudExpanded && (
+            <>
+              <div className="scc-chiprow" role="group" aria-label="Visual Shader Mode">
+                {[
+                  { id: "DEFAULT", label: "📺 DEFAULT" },
+                  { id: "FLIR", label: "🔥 FLIR" },
+                  { id: "CRT", label: "📟 CRT" },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    className={`scc-chip ${visualMode === mode.id ? "is-active" : ""}`}
+                    aria-pressed={visualMode === mode.id}
+                    onClick={() => setVisualMode(mode.id)}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginBottom: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "var(--surface, #161616)",
+                    border: "1px solid var(--accent-muted, #6E531A)",
+                    borderRadius: "4px",
+                    padding: "4px 8px",
+                  }}
+                >
+                  <span style={{ fontSize: "12px", marginRight: "6px" }} aria-hidden="true">🤖</span>
+                  <input
+                    type="text"
+                    aria-label="Filter spatial layers"
+                    placeholder="AI Filter: 'peza', 'infra', 'quake', 'flood'..."
+                    value={aiQuery}
+                    onChange={(e) => handleAiSearch(e.target.value)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "var(--text-primary, #f0ede8)",
+                      fontSize: "12px",
+                      fontFamily: "var(--font-mono, monospace)",
+                      width: "100%",
+                      outline: "none",
+                    }}
+                  />
+                  {aiQuery && (
+                    <button
+                      type="button"
+                      onClick={() => handleAiSearch("")}
+                      aria-label="Clear filter"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--text-secondary, #c8c8c8)",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                        padding: "0 4px",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {aiFilterStatus && (
+                  <div style={{ fontSize: "12px", color: "var(--accent-bright, #F7C64E)", marginTop: "4px" }}>
+                    {aiFilterStatus}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Sublayer Buttons */}
           {subLayerButtons.length > 0 && (
@@ -1037,6 +1235,188 @@ export default function SpatialCanvas({
               {LENS_LABELS[lensKey] || lensKey}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Entity & Complex Relationship Graph Overlay */}
+      {showEntityGraph && entityNodes.length > 0 && (
+        <div
+          className="scc-panel"
+          style={{
+            position: "absolute",
+            bottom: "68px",
+            left: "16px",
+            zIndex: "var(--scc-z-popup)",
+            padding: "14px",
+            width: "min(330px, calc(100% - 32px))",
+            maxHeight: "calc(100% - 100px)",
+            overflowY: "auto",
+            fontSize: "12px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <span className="scc-panel__title">🕸️ Entity & Complex Graph</span>
+            <button
+              type="button"
+              className="scc-chip"
+              onClick={() => setShowEntityGraph(false)}
+              aria-label="Close entity graph"
+            >
+              ✕
+            </button>
+          </div>
+          <div style={{ color: "var(--text-secondary)", marginBottom: "10px" }}>
+            Target Node: <strong style={{ color: "var(--text-primary)" }}>{propertyTitle}</strong>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {entityNodes.map((node, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "8px",
+                  background: "var(--surface, #161616)",
+                  padding: "6px 8px",
+                  borderRadius: "4px",
+                  borderLeft: "2px solid var(--accent, #E8AE3C)",
+                }}
+              >
+                <div>
+                  <span style={{ color: "var(--accent, #E8AE3C)", fontWeight: 700, marginRight: "6px" }}>
+                    [{node.type}]
+                  </span>
+                  <span style={{ color: "var(--text-primary)" }}>{node.label}</span>
+                </div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{node.dist}</div>
+                  <div style={{ color: "var(--green, #4caf7d)", fontSize: "12px", fontWeight: 700 }}>{node.relevance}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Spatial Location Dossier Modal (Button or Right-Click Context Menu) */}
+      {showDossierModal && dossierData && (
+        <div
+          className="scc-panel"
+          role="dialog"
+          aria-modal="false"
+          aria-label="Spatial Location Dossier"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: "var(--scc-z-popup)",
+            padding: "18px",
+            width: "min(380px, calc(100% - 24px))",
+            maxHeight: "calc(100% - 32px)",
+            overflowY: "auto",
+            fontSize: "12px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "12px",
+              borderBottom: "1px solid var(--accent-muted, #6E531A)",
+              paddingBottom: "8px",
+            }}
+          >
+            <div>
+              <div className="scc-panel__title">📍 SPATIAL LOCATION DOSSIER</div>
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                Coordinate Telemetry & Environmental Analysis
+              </div>
+            </div>
+            <button
+              type="button"
+              className="scc-chip"
+              onClick={() => setShowDossierModal(false)}
+              aria-label="Close dossier"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+              <span style={{ color: "var(--text-secondary)" }}>Coordinates:</span>
+              <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>
+                {dossierData.lat.toFixed(5)}°N, {dossierData.lng.toFixed(5)}°E
+              </span>
+            </div>
+
+            {dossierData.intel?.infra && (
+              <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+                <span style={{ color: "var(--text-secondary)" }}>Infra Megaproject:</span>
+                <span style={{ color: "var(--accent-bright, #F7C64E)", fontWeight: 700 }}>
+                  {dossierData.intel.infra.name} ({dossierData.intel.infra.distance_km}km)
+                </span>
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+              <span style={{ color: "var(--text-secondary)" }}>Solar & Heat Aspect:</span>
+              <span style={{ color: "var(--accent, #E8AE3C)", fontWeight: 700 }}>
+                {dossierData.intel?.solar?.aspect_rating || "Optimal North-East Glare Control"}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+              <span style={{ color: "var(--text-secondary)" }}>Solar Thermal Load:</span>
+              <span style={{ color: "var(--text-primary)" }}>
+                {dossierData.intel?.solar?.afternoon_heat_risk || "Low Afternoon Exposure"}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+              <span style={{ color: "var(--text-secondary)" }}>PEZA Ecozone Status:</span>
+              <span style={{ color: dossierData.intel?.peza?.is_accredited ? "var(--green, #4caf7d)" : "var(--text-secondary)", fontWeight: 700 }}>
+                {dossierData.intel?.peza?.is_accredited ? `✅ Accredited (${dossierData.intel.peza.zone_name})` : "Standard Commercial"}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+              <span style={{ color: "var(--text-secondary)" }}>Nearest Mass Transit:</span>
+              <span style={{ color: "var(--accent-bright, #F7C64E)" }}>
+                {dossierData.intel?.transit?.station_name} ({dossierData.intel?.transit?.walk_minutes}m walk)
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", background: "var(--surface, #161616)", padding: "6px 8px", borderRadius: "4px" }}>
+              <span style={{ color: "var(--text-secondary)" }}>Nearest Active Fault:</span>
+              <span style={{ color: "var(--text-primary)" }}>
+                {dossierData.intel?.seismic?.nearest_fault} ({dossierData.intel?.seismic?.distance_km}km)
+              </span>
+            </div>
+          </div>
+
+          <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px dashed var(--accent-muted, #6E531A)", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <a
+              href={`https://browser.dataspace.copernicus.eu/?zoom=15&lat=${dossierData.lat}&lng=${dossierData.lng}&themeId=DEFAULT-THEME`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="scc-chip is-active"
+              style={{ width: "100%", justifyContent: "center", textDecoration: "none", whiteSpace: "normal", textAlign: "center" }}
+            >
+              🛰️ OPEN SENTINEL-2 OPTICAL SATELLITE PHOTO (10m)
+            </a>
+            <button
+              type="button"
+              onClick={() => setShowDossierModal(false)}
+              className="scc-chip"
+              style={{ width: "100%", justifyContent: "center" }}
+            >
+              CLOSE DOSSIER
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -108,7 +108,7 @@ export default function BadgeRegistryPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-[var(--bg)] badges-lens">
+    <main className="min-h-screen min-h-dvh flex flex-col bg-[var(--bg)] badges-lens">
       <Header />
       
       {/* Toast Notification */}
@@ -120,6 +120,14 @@ export default function BadgeRegistryPage() {
       )}
 
       <div className="flex-grow max-w-4xl w-full mx-auto px-6 py-24 sm:py-32">
+        <div className="mb-6">
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-text-muted hover:text-accent transition-colors"
+          >
+            ← Back to Profile
+          </Link>
+        </div>
         
         {/* Header Section */}
         <div className="mb-16 text-center">
@@ -149,7 +157,7 @@ export default function BadgeRegistryPage() {
               return (
               <div 
                 key={badge.id}
-                className={`bg-surface border rounded-xl p-6 relative overflow-hidden group transition-all duration-500 ${userHasIt ? 'border-[var(--accent-border)] hover:border-[var(--accent)]' : 'border-border'}`}
+                className={`bg-surface border rounded-xl p-6 relative overflow-hidden group transition-[border-color,box-shadow] duration-500 ${userHasIt ? 'border-[var(--accent-border)] hover:border-[var(--accent)]' : 'border-border'}`}
                 style={{ boxShadow: userHasIt ? 'var(--shadow-glow-soft)' : 'var(--shadow-sm)' }}
               >
                 {/* Glow Effect or Shadow */}
@@ -195,7 +203,7 @@ export default function BadgeRegistryPage() {
                   </div>
                   <div className="w-full h-1.5 bg-surface2 rounded-full overflow-hidden border border-border">
                     <div 
-                      className="h-full rounded-full transition-all duration-1000 ease-out"
+                      className="h-full rounded-full transition-[width] duration-1000 ease-out"
                       style={{ 
                         width: `${(badge.claimed / badge.max_slots) * 100}%`,
                         background: userHasIt ? tone.ink : 'var(--border-solid)',
@@ -241,7 +249,7 @@ export default function BadgeRegistryPage() {
               return (
               <div 
                 key={badge.id}
-                className="bg-surface border border-border rounded-lg p-5 relative transition-all"
+                className="bg-surface border border-border rounded-lg p-5 relative transition-[border-color,box-shadow] duration-300"
               >
                 {/* Stone texture overlay for graveyard feel */}
                 {!userHasIt && (

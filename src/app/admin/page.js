@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
-import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet } from "lucide-react";
+import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet, GitBranch } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
 import ConnectsRefundPanel from "@/components/admin/ConnectsRefundPanel";
@@ -207,7 +208,7 @@ function AdminPageInner() {
         <div className="flex border-b border-[var(--surface3)] mb-8 overflow-x-auto gap-2">
           <button
             onClick={() => setActiveTab("flags")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "flags"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -219,7 +220,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("approvals")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "approvals"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -231,7 +232,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("prc")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "prc"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -243,7 +244,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("pdf")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "pdf"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -255,7 +256,7 @@ function AdminPageInner() {
 
           <button
             onClick={() => setActiveTab("intel")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "intel"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -270,7 +271,7 @@ function AdminPageInner() {
               SQL that moved a balance and recorded nothing. */}
           <button
             onClick={() => setActiveTab("refunds")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "refunds"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -283,7 +284,7 @@ function AdminPageInner() {
           {/* ACQ-01 · W12 — /api/property/verify had no caller until now (§51). */}
           <button
             onClick={() => setActiveTab("verify")}
-            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
               activeTab === "verify"
                 ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
                 : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
@@ -292,6 +293,14 @@ function AdminPageInner() {
             <ShieldCheck size={15} />
             Re-verification
           </button>
+
+          <Link
+            href="/admin/flow"
+            className="px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap border-transparent text-gray-400 hover:text-gold-accent hover:bg-[var(--surface2)]"
+          >
+            <GitBranch size={15} />
+            System Flow Graph
+          </Link>
         </div>
 
         <div className="admin-content">

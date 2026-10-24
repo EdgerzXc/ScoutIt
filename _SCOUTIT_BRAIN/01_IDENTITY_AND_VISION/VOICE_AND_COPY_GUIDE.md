@@ -57,6 +57,37 @@ The following AI marketing clichés and lazy luxury buzzwords are strictly prohi
 | *embark on a journey* | AI narrative tell | "Explore spaces", "search the directory", "review the briefing" |
 | *testament to* | Grandiose AI formulation | "Demonstrates", "reflects", or state the direct cause |
 | *verified intelligence* (blanket) | Inaccurate when data is unverified user draft | "Structured facts", "spatial signals", or "owner-attested listing" |
+| *VERIFIED SPACE DOSSIER* / *VERIFIED SPECIFICATIONS* (as a template) | The badge decided nothing: a draft, a sample and a listing ScoutIt has never confirmed all printed it | The claim vocabulary below, chosen from the listing's own record |
+
+---
+
+## 2.1 The verification claim vocabulary (A-235, 2026-10-20)
+
+**One predicate decides what a listing may be called.** It is
+`src/lib/listingVerification.js`, it reads only data that already exists, and
+every promotional surface takes its wording from it. A surface that writes the
+word "verified" on its own is a defect.
+
+| Claim the listing can carry | When it applies | What the surface says |
+|---|---|---|
+| Confirmed | The owner re-confirmed the listing within 30 days | "SCOUTIT-VERIFIED SPACE DOSSIER", "SCOUTIT-VERIFIED SPECIFICATIONS", "ScoutIt-verified signals on record", and the date the claim was made |
+| Owner-submitted | Real, but not re-confirmed (never confirmed, stale, or no confirmation date) | "OWNER-SUBMITTED SPACE DOSSIER", "RECORDED SPECIFICATIONS", "Owner-submitted signals on record" |
+| Sample | The listing is a demo | "SAMPLE SPACE DOSSIER", "SAMPLE LISTING · NOT A REAL SPACE" |
+| Unpublished | The listing is still a draft | "UNPUBLISHED SPACE DOSSIER", "DRAFT SPECIFICATIONS" |
+
+**Rules that travel with the vocabulary.**
+
+- A claim never travels without its date. "Verified" alone is a slogan; the
+  re-confirmation date is the evidence.
+- A tracked-partner link says **partner**, never "verified". The promoter's
+  eligibility is checked server-side; the space is not thereby confirmed.
+- A delegated child unit has its own record and its own confirmation date. It
+  can never inherit its parent's claim, and a unit with no date is
+  owner-submitted, not confirmed.
+- A verified claim describes **the listing's own record**. It is never a
+  statement about title, licensing or a closed transaction, and the
+  transaction-completion wording follows the Brain's two-handshake rule
+  (`platform_outcome_confirmed` vs `transaction_independently_verified`).
 
 ---
 

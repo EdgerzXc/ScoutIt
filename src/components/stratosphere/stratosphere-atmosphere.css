@@ -1,0 +1,150 @@
+/* ==========================================================================
+   Stratosphere Atmosphere — Spatial Telemetry SVG Graphic & MotionMaxxing
+   Layer 02: High-Altitude Atmospheric Radar & Elevation Contours
+   ========================================================================== */
+
+.sw-atmosphere-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: clamp(540px, 62vh, 740px);
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  contain: strict;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.92) 58%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.92) 58%, rgba(0, 0, 0, 0) 100%);
+}
+
+.sw-atmosphere-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── MotionMaxxing: GPU Stream Flow on Isobar Jetstreams ── */
+.sw-stream-dash {
+  will-change: stroke-dashoffset;
+}
+
+.sw-stream-primary {
+  animation: swStreamFlowPrimary 22s linear infinite;
+}
+
+.sw-stream-secondary {
+  animation: swStreamFlowSecondary 28s linear infinite;
+}
+
+@keyframes swStreamFlowPrimary {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -400;
+  }
+}
+
+@keyframes swStreamFlowSecondary {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 350;
+  }
+}
+
+/* ── MotionMaxxing: 360° Radar Radial Sweep Beam ── */
+.sw-sweep-beam-pivot {
+  transform-origin: 1180px 220px;
+  animation: swRadarSweep 30s linear infinite;
+  will-change: transform;
+}
+
+@keyframes swRadarSweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Design Spells: Breathing Waypoint Sensor Pulse Rings ── */
+.sw-node-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: swNodePulse 3.6s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.sw-node-pulse--delay {
+  animation-delay: 1.2s;
+}
+
+.sw-node-pulse--delay2 {
+  animation-delay: 2.4s;
+}
+
+@keyframes swNodePulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.45);
+    opacity: 0.22;
+  }
+  100% {
+    transform: scale(1.95);
+    opacity: 0;
+  }
+}
+
+/* ── Ambient Glow Breathing ── */
+.sw-atmosphere-glow {
+  animation: swAtmosphereGlow 9s ease-in-out infinite alternate;
+}
+
+@keyframes swAtmosphereGlow {
+  0% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ── Tablet & Intermediate Ergonomics (<=1024px) ── */
+@media (max-width: 1024px) {
+  .sw-vernier-scale {
+    display: none;
+  }
+}
+
+/* ── Mobile Ergonomics (<768px) ── */
+@media (max-width: 768px) {
+  .sw-atmosphere-container {
+    height: clamp(440px, 48vh, 540px);
+  }
+
+  .sw-sensor-nodes text {
+    display: none;
+  }
+}
+
+/* ── Accessibility: Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .sw-stream-primary,
+  .sw-stream-secondary,
+  .sw-sweep-beam-pivot,
+  .sw-node-pulse,
+  .sw-atmosphere-glow {
+    animation: none !important;
+  }
+
+  .sw-node-pulse {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}

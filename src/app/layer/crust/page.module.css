@@ -1,5 +1,6 @@
 .root {
   min-height: 100vh;
+  min-height: 100dvh;
   padding-top: 52px;
   overflow: hidden;
   color: var(--text-primary);

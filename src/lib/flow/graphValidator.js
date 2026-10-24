@@ -34,11 +34,6 @@ export const VALID_EDGE_TYPES = new Set([
   'CONDITION_TRUE', 'CONDITION_FALSE', 'TERMINATE', 'SYSTEM'
 ]);
 
-export const VALID_STATUSES = new Set([
-  'VERIFIED', 'PARTIAL', 'PLANNED', 'PROPOSED',
-  'UNVERIFIED', 'CONTRADICTED', 'DEPRECATED', 'NOT_STARTED', 'IMPLEMENTED'
-]);
-
 export const VALID_DOMAINS = new Set([
   'core', 'property', 'deal', 'auth', 'connects', 'owner',
   'broker', 'sentinel', 'gis', 'admin', 'legal', 'infrastructure',

@@ -11,7 +11,7 @@ export default function LayerHeader({ layerNum, layerName, title, description, m
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <div className={styles.headerTop}>
-          <span className={styles.kicker}>{`Layer ${layerNum} // ${layerName}`}</span>
+          <span className={styles.kicker}>{`Layer ${layerNum} · ${layerName}`}</span>
         </div>
 
         <div className={styles.headerSplit}>

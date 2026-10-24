@@ -130,3 +130,385 @@
   color: var(--text-secondary);
   margin: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   RADAR COLOR SIGNAL MAP / KEY OVERLAY (LUXURY DARK AESTHETIC)
+   ═══════════════════════════════════════════════════════════════ */
+
+.ssr-legend-overlay {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  z-index: 10;
+  pointer-events: auto;
+  max-width: calc(100% - 36px);
+}
+
+.ssr-legend-card {
+  width: 320px;
+  max-width: 100%;
+  background: rgba(var(--surface-rgb), 0.92);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-lg), 0 0 24px rgba(0, 0, 0, 0.45);
+  padding: 12px;
+  font-family: var(--font-mono, monospace);
+  animation: ssr-fade-slide-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ssr-fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ssr-legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.ssr-legend-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ssr-legend-beacon-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 8px rgba(var(--accent-bright-rgb), 0.9);
+}
+
+.ssr-legend-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.ssr-legend-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ssr-legend-reset-btn {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent-bright);
+  background: rgba(var(--accent-bright-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-bright-rgb), 0.3);
+  border-radius: 4px;
+  padding: 3px 7px;
+  min-height: 28px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ssr-legend-reset-btn:hover {
+    background: rgba(var(--accent-bright-rgb), 0.2);
+    border-color: var(--accent-bright);
+  }
+}
+
+.ssr-legend-reset-btn:active {
+  transform: scale(0.96);
+}
+
+.ssr-legend-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ssr-legend-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: var(--border-mid);
+  }
+}
+
+.ssr-legend-toggle-btn:active {
+  transform: scale(0.94);
+}
+
+.ssr-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ssr-legend-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-mono, monospace);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ssr-legend-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-mid);
+    transform: translateX(2px);
+  }
+}
+
+.ssr-legend-row:active {
+  transform: translateX(2px) scale(0.99);
+}
+
+.ssr-legend-row.is-active {
+  background: rgba(var(--accent-bright-rgb), 0.09);
+  border-color: rgba(var(--accent-bright-rgb), 0.35);
+}
+
+.ssr-legend-marker-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.ssr-legend-pillar-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.ssr-legend-info-cell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ssr-legend-label-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+}
+
+.ssr-legend-color-tag {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.ssr-legend-dot-sep {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.ssr-legend-domain-label {
+  color: var(--text-primary);
+}
+
+.ssr-legend-meaning {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: normal;
+}
+
+.ssr-legend-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Collapsed micro-pill trigger */
+.ssr-legend-pill-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px;
+  min-height: 44px;
+  background: rgba(var(--surface-rgb), 0.92);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-md), 0 0 16px rgba(0, 0, 0, 0.4);
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ssr-legend-pill-trigger:hover {
+    background: rgba(var(--surface2-rgb), 0.96);
+    border-color: var(--border-mid);
+    transform: translateY(-1px);
+  }
+}
+
+.ssr-legend-pill-trigger:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ssr-legend-pill-spectrum {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ssr-legend-micro-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ssr-legend-pill-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+
+.ssr-legend-filter-badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent-bright);
+  background: rgba(var(--accent-bright-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-bright-rgb), 0.3);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.ssr-legend-pill-icon {
+  color: var(--text-secondary);
+}
+
+/* ── Mobile viewport adaptation (<680px) ── */
+@media (max-width: 680px) {  .ssr-hud-overlay {
+    top: 8px;
+    left: 8px;
+    max-width: calc(100% - 16px);
+  }
+
+  .ssr-hud-pill-bar {
+    padding: 3px 8px;
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .ssr-legend-reset-btn {
+    min-height: 44px;
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ssr-legend-toggle-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ssr-legend-overlay {
+    bottom: 24px;
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+
+  .ssr-legend-card {
+    width: 100%;
+    max-height: 290px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ssr-legend-pill-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ── Reduced motion ──
+   The legend is a reading surface: its entrance slide, its hover lift and
+   its press feedback are decoration, not information. A member who asked
+   the system for less motion gets the same legend, still and immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .ssr-legend-card,
+  .ssr-legend-reset-btn,
+  .ssr-legend-toggle-btn,
+  .ssr-legend-row,
+  .ssr-legend-pill-trigger {
+    animation: none;
+    transition: none;
+  }
+
+  .ssr-legend-row:hover,
+  .ssr-legend-row:active,
+  .ssr-legend-pill-trigger:hover,
+  .ssr-legend-pill-trigger:active {
+    transform: none;
+  }
+}
+

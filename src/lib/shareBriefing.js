@@ -11,6 +11,11 @@
 // same as directory cards).
 // ═══════════════════════════════════════════════════════════════
 
+// A-235 / SH-03: whether this listing may be called "verified" is decided in
+// ONE place (lib/listingVerification.js) and read from here, so the promo
+// pack, the messaging dispatch and the 9:16 story card cannot disagree.
+import { listingVerificationCopy } from "@/lib/listingVerification";
+
 // Parse `details` whether it arrives as an object or a JSON string.
 function parseDetails(raw) {
   if (!raw) return {};
@@ -21,7 +26,6 @@ function parseDetails(raw) {
     return {};
   }
 }
-
 // First non-empty value from a list of candidates.
 function pick(...vals) {
   for (const v of vals) {
@@ -237,6 +241,7 @@ export function buildPromoPack(property, link) {
   const specLine = specs.join(" · ");
   const where = f.location || "the Philippines";
   const safeLink = link || "";
+  const verification = listingVerificationCopy(property);
 
   const fastPitch = [
     `${f.title} — ${f.category}${specLine ? ` · ${specLine}` : ""}.`,
@@ -250,7 +255,7 @@ export function buildPromoPack(property, link) {
   const executiveSummary = [
     `${f.title} is now documented on ScoutIt.`,
     ``,
-    `Verified signals on record:`,
+    `${verification.signalsHeader}:`,
     `— Category: ${f.category}`,
     f.location ? `— Location: ${f.location}` : null,
     ...specs.map((s) => `— ${s.charAt(0).toUpperCase() + s.slice(1)}`),
@@ -293,6 +298,7 @@ export function buildMessagingDispatch(property, url, { platform = 'whatsapp' } 
   const specs = factSpecs(f);
   const safeLink = url || "";
   const loc = f.location ? f.location : "Philippines";
+  const verification = listingVerificationCopy(property);
 
   if (platform === "whatsapp") {
     return [
@@ -300,7 +306,7 @@ export function buildMessagingDispatch(property, url, { platform = 'whatsapp' } 
       `*${f.title}*`,
       `_${f.category} in ${loc}_`,
       ``,
-      `*Verified Signals:*`,
+      `*${verification.signalsHeader}:*`,
       ...specs.map((s) => `• ${s.charAt(0).toUpperCase() + s.slice(1)}`),
       ``,
       `*Private Dossier & Viewing RSVP:*`,
@@ -318,7 +324,7 @@ export function buildMessagingDispatch(property, url, { platform = 'whatsapp' } 
     `Key Specifications:`,
     ...specs.map((s) => `• ${s.charAt(0).toUpperCase() + s.slice(1)}`),
     ``,
-    `View verified dossier & book private viewing:`,
+    `${verification.dossierLinkLine}`,
     `${safeLink}`,
   ].join("\n");
 }

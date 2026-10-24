@@ -264,10 +264,3 @@ export function hasActiveRole(role) {
   const roles = (u && (u.active_roles || u.tags)) || [];
   return Array.isArray(roles) && roles.includes(role);
 }
-
-export async function hasServerEntitlement(feature, request) {
-  const { resolveServerTier } = await import("@/lib/serverAuth");
-  const { tier, freeMode } = await resolveServerTier(request);
-  if (freeMode) return true;
-  return canSee(feature, tier);
-}

@@ -6,7 +6,7 @@ import { getSession } from "@/lib/authClient";
 import PrivacyNotice from "@/components/ui/PrivacyNotice";
 import { useModalDialog } from "@/components/ui/useModalDialog";
 import { SIGNAL_TYPE_LABELS, SIGNAL_TYPES } from "@/lib/communitySignalsAdapter";
-import { POSTABLE_SIGNAL_TYPES } from "@/lib/communityPosting";
+import { POSTABLE_SIGNAL_TYPES, TRANSACTION_REQUIRED_SIGNAL_TYPES, TRANSACTION_TYPES } from "@/lib/communityPosting";
 import "./signal-composer.css";
 
 const STEPS = ["Type", "Details", "Place & Identity", "Review"];
@@ -20,6 +20,22 @@ const TYPE_HINTS = {
   MARKET_OBSERVATION: "Foot traffic, activity, change",
   COMMERCIAL_PROMOTION: "Labeled promotion, never boosted",
 };
+
+// A-238 (GAP-94): the composer collected a transaction type and had no
+// control for it, so every signal stored a blank one — and the Rent / Buy /
+// STR filters had nothing to filter on. The control lives here, and the
+// signal types where a transaction means something ask for it. The values
+// and the rule come from lib/communityPosting.js, which the server also
+// validates against.
+const TRANSACTION_LABELS = { lease: "LEASE", buy: "BUY", str: "STR" };
+const TRANSACTION_HINTS = { lease: "Long-term lease", buy: "Purchase", str: "Short-term rental" };
+// Built from the server's own vocabulary, so the composer cannot offer a
+// value the server would refuse.
+const TRANSACTION_OPTIONS = TRANSACTION_TYPES.map((value) => ({
+  value,
+  label: TRANSACTION_LABELS[value] || value.toUpperCase(),
+  hint: TRANSACTION_HINTS[value] || "",
+}));
 
 const EMPTY = {
   signalType: "",
@@ -76,11 +92,21 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
     setErrors([]);
   }, []);
 
+  // A-238 (GAP-94): a signal about a space someone wants, represents or is
+  // about to release has a transaction. Asking for it is what makes the
+  // Rent / Buy / STR filters able to work at all.
+  const needsTransaction = TRANSACTION_REQUIRED_SIGNAL_TYPES.has(form.signalType);
+  const transactionLabel =
+    TRANSACTION_OPTIONS.find((o) => o.value === form.transactionType)?.label || "-";
+
   if (!isOpen) return null;
 
   const canNext =
     step === 0 ? Boolean(form.signalType)
-    : step === 1 ? form.title.trim().length > 0 && form.body.trim().length > 0
+    : step === 1
+      ? form.title.trim().length > 0 &&
+        form.body.trim().length > 0 &&
+        (!needsTransaction || Boolean(form.transactionType))
     : step === 2 ? (form.city.trim().length > 0 || form.district.trim().length > 0)
     : true;
 
@@ -234,6 +260,26 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                   <label className="scp-field" htmlFor="scp-timing"><span className="scp-label">TIMING</span>
                     <input id="scp-timing" className="scp-input" value={form.timing} placeholder="Q1 2027" onChange={(e) => set("timing", e.target.value)} /></label>
                 </div>
+                {needsTransaction && (
+                  <div className="scp-field">
+                    <span className="scp-label">TRANSACTION</span>
+                    <div className="scp-type-grid" role="radiogroup" aria-label="Transaction type">
+                      {TRANSACTION_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={form.transactionType === opt.value}
+                          className={`scp-type-card${form.transactionType === opt.value ? " is-active" : ""}`}
+                          onClick={() => set("transactionType", opt.value)}
+                        >
+                          <span className="scp-type-name">{opt.label}</span>
+                          <span className="scp-type-hint">{opt.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <label className="scp-field" htmlFor="scp-musts"><span className="scp-label">MUST-HAVES (COMMA-SEPARATED)</span>
                   <input id="scp-musts" className="scp-input" value={form.mustHave} placeholder="8m ceiling, 3-phase power, truck ingress" onChange={(e) => set("mustHave", e.target.value)} /></label>
                 {form.signalType === SIGNAL_TYPES.COMMERCIAL_PROMOTION && (
@@ -276,6 +322,9 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
               <div className="scp-review">
                 <dl className="scp-dl">
                   <div className="scp-dl-row"><dt>TYPE</dt><dd>{SIGNAL_TYPE_LABELS[form.signalType]}</dd></div>
+                  {needsTransaction && (
+                    <div className="scp-dl-row"><dt>TRANSACTION</dt><dd>{transactionLabel}</dd></div>
+                  )}
                   <div className="scp-dl-row"><dt>HEADLINE</dt><dd>{form.title.trim() || "-"}</dd></div>
                   <div className="scp-dl-row"><dt>PLACE</dt><dd>{[form.buildingName.trim(), form.district.trim(), form.city.trim()].filter(Boolean).join(", ") || "-"}</dd></div>
                   <div className="scp-dl-row"><dt>SIGNED</dt><dd>{form.identityMode === "anonymous" ? identityPreview : `${identityPreview} (public)`}</dd></div>

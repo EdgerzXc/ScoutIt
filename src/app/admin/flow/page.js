@@ -50,7 +50,7 @@ function AdminFlowPageInner() {
   const isStaff = role === "admin" || role === "staff";
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-background">
+    <div className="h-screen h-dvh w-screen overflow-hidden flex flex-col bg-background">
       {/* Top Navbar */}
       <header className="h-12 bg-surface border-b border-surface-variant px-4 flex items-center justify-between shrink-0 z-50">
         <div className="flex items-center gap-3">

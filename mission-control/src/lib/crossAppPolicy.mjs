@@ -72,7 +72,6 @@ export const ALLOWED_EXTERNAL_HOSTS = Object.freeze([
   "api.airtable.com",
   "generativelanguage.googleapis.com",
   "www.virustotal.com",
-  "unpkg.com",
   "basemaps.cartocdn.com",
   "images.unsplash.com",
   "api.mapbox.com",

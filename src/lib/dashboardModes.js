@@ -57,7 +57,10 @@ export function pickPrimaryRole(tags, preferred) {
 export function inferProviderType(role, explicitProviderType) {
   if (explicitProviderType) return explicitProviderType;
   const normalizedRole = typeof role === "string" ? role.trim().toLowerCase() : "";
-  return ["photographer", "researcher", "designer"].includes(normalizedRole)
+  if (["event-planner", "event_planner", "events", "concept_designer", "designer"].includes(normalizedRole)) {
+    return "designer";
+  }
+  return ["photographer", "researcher"].includes(normalizedRole)
     ? normalizedRole
     : undefined;
 }

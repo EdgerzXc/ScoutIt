@@ -22,9 +22,13 @@ describe("dashboard mode normalization", () => {
   );
 
   // A-146: event-planner held a wallet row and a directory but no workspace.
-  it("maps event-planner to the generic provider lens", () => {
+  // A-223: maps event-planner and event_planner to designer HUD.
+  it("maps event-planner to the generic provider lens and designer HUD", () => {
     expect(normalizeDashboardMode("event-planner")).toBe("provider");
     expect(pickPrimaryRole(["event-planner"], "buyer")).toBe("provider");
+    expect(inferProviderType("event-planner")).toBe("designer");
+    expect(inferProviderType("event_planner")).toBe("designer");
+    expect(inferProviderType("designer")).toBe("designer");
   });
 
   it("deduplicates mixed legacy and UI role names", () => {

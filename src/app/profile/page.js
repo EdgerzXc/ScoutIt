@@ -87,10 +87,33 @@ export default function OwnProfilePage() {
 
   if (loading) {
     return (
-      <div style={loadingScreen} className="profile-page">
-        <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-secondary)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Loading Profile…
-        </span>
+      <div style={pageWrap} className="profile-page" aria-busy="true">
+        <AtmosphereBackground variant="default" />
+        <header style={navBar}>
+          <div style={navInner}>
+            <Link href="/dashboard" style={backLink}>
+              ← Dashboard
+            </Link>
+            <span style={navTitle}>Your Profile</span>
+            <span style={privateNote} aria-hidden="true">•••</span>
+          </div>
+        </header>
+        <main style={mainContent}>
+          <div className="card-atmosphere p-6 sm:p-10 rounded-2xl border border-white/[0.06] backdrop-blur-md animate-pulse" aria-hidden="true">
+            <div className="flex items-center gap-5 mb-6">
+              <div className="w-16 h-16 rounded-full bg-surface-variant/60 border border-gold-accent/30 shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div className="h-6 w-48 rounded bg-surface-variant/60" />
+                <div className="h-4 w-64 rounded bg-gold-accent/20" />
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <div className="h-3.5 w-full rounded bg-surface-variant/40" />
+              <div className="h-3.5 w-5/6 rounded bg-surface-variant/40" />
+              <div className="h-3.5 w-2/3 rounded bg-surface-variant/40" />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }

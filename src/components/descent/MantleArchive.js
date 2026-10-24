@@ -171,7 +171,7 @@ export default function MantleArchive() {
         <section className="mantle-archive" aria-labelledby="mantle-index-title" data-flow-source={MANTLE_FLOW_SOURCE.chunkId}>
           <header className="archive-intro">
             <div>
-              <span className="archive-kicker">Layer 05 // Authored Index</span>
+              <span className="archive-kicker">Layer 05 · Authored Index</span>
               <h2 id="mantle-index-title">The operating archive.</h2>
             </div>
             <div className="archive-intro-copy">
@@ -197,7 +197,7 @@ export default function MantleArchive() {
 
             <article className="archive-disclosure" key={activeKey} aria-live="polite">
               <div className="disclosure-copy">
-                <span className="archive-kicker">{disclosure.number + " // " + disclosure.eyebrow}</span>
+                <span className="archive-kicker">{disclosure.number + " · " + disclosure.eyebrow}</span>
                 <h2 ref={titleRef} tabIndex={-1}>{disclosure.title}</h2>
                 <p className="disclosure-intro">{disclosure.intro}</p>
                 {disclosure.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
