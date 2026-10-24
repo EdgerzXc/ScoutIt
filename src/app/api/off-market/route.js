@@ -18,7 +18,8 @@ export async function GET(request) {
       .eq("pipeline_status", "off_market")
       .order("withdrawn_at", { ascending: false });
 
-    if (slug) query = query.eq("canonical_slug", slug);
+    // GAP-110: Query both canonical_slug and legacy slug so older or unmigrated off-market rows resolve
+    if (slug) query = query.or(`canonical_slug.eq.${slug},slug.eq.${slug}`);
     const { data: rows, error } = await query;
     if (error) return NextResponse.json({ error: "Unable to read off-market inventory" }, { status: 500 });
 

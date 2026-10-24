@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import ProfileBaseLayer from "@/components/profile/ProfileBaseLayer";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";

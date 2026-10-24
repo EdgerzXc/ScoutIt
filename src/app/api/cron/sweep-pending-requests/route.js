@@ -99,9 +99,11 @@ async function sweepDeletions() {
     const signalTitle = deal.routing_snapshot?.signal_title;
     const isSignal = !deal.property_id && Boolean(signalTitle);
     const subjectTitle = isSignal ? `community signal "${signalTitle}"` : (deal.properties?.title ? `"${deal.properties.title}"` : "a property");
-    if (deal.buyer_id) {
+    // GAP-114: Notify the initiator (whether buyer, pitching broker, or signal responder)
+    const senderId = deal.routing_snapshot?.initiator_id || deal.buyer_id || deal.broker_id;
+    if (senderId) {
       await notifyUser(supabaseAdmin, {
-        userId: deal.buyer_id,
+        userId: senderId,
         title: "Request closed after 30 days",
         desc: `Your request about ${subjectTitle} went unanswered for ${DELETE_AFTER_DAYS} days and has been removed. Connects are spent on sending and aren't returned.`,
         icon: "🗑️",
@@ -194,11 +196,13 @@ async function sweepArchives() {
         notificationType: "request_archived",
       });
     }
-    if (deal.buyer_id) {
+    // GAP-114: Tell the initiator their request was moved to archive
+    const senderId = deal.routing_snapshot?.initiator_id || deal.buyer_id || deal.broker_id;
+    if (senderId && !recipientIds.has(senderId)) {
       await notifyUser(supabaseAdmin, {
-        userId: deal.buyer_id,
+        userId: senderId,
         title: "Request moved to archive",
-        desc: `Your request about "${title}" hasn't been answered in ${ARCHIVE_AFTER_DAYS} days. It's still open and they can still accept — it stays for another ${daysLeft} days.`,
+        desc: `Your request about ${subjectTitle} hasn't been answered in ${ARCHIVE_AFTER_DAYS} days. It's still open and they can still accept — it stays for another ${daysLeft} days.`,
         icon: "📥",
         propertyId: deal.property_id,
         notificationType: "request_archived",

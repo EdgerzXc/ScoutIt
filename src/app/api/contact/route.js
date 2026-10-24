@@ -182,7 +182,8 @@ export async function POST(request) {
           // GAP-66: Always HTML-escape sender fields before passing into renderEmail body
           body: `<p>${safeName} &lt;${safeEmail}&gt; wrote:</p><p>${safeMessage}</p>`,
           ctaLabel: "Open the contact queue",
-          ctaPath: "/contact",
+          // GAP-100: Deep link staff directly to the Mission Control contact queue instead of public form
+          ctaPath: "/dashboard/contact",
           footnote: "Reply from Mission Control → Contact Queue.",
         }),
       });

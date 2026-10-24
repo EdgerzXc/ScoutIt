@@ -4,6 +4,7 @@ import { authorizeCronRequest } from "@/lib/cronAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { withCronEventLog } from "@/lib/cronEventLog";
 import { getPreviousPeriodMonth } from "@/lib/monthlyScoutWrap";
+import { notifyUser } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,14 @@ export async function handleMonthlyRollover(request) {
         failedWraps.push({ type: "owner_portfolio", id: ownerId, error: rpcErr.message });
       } else {
         wrapsGenerated += 1;
+        // GAP-120: Notify owner that their Monthly Scout Wrap is ready
+        await notifyUser(supabaseAdmin, {
+          userId: ownerId,
+          title: "Your Monthly Scout Wrap is Ready",
+          desc: `Your portfolio performance wrap for ${periodMonth} is now available in your dashboard.`,
+          icon: "📊",
+          notificationType: "monthly_wrap",
+        });
       }
     }
 
@@ -89,6 +98,14 @@ export async function handleMonthlyRollover(request) {
         failedWraps.push({ type: "broker", id: broker.id, error: rpcErr.message });
       } else {
         wrapsGenerated += 1;
+        // GAP-120: Notify broker that their Monthly Scout Wrap is ready
+        await notifyUser(supabaseAdmin, {
+          userId: broker.id,
+          title: "Your Monthly Scout Wrap is Ready",
+          desc: `Your deal pipeline wrap for ${periodMonth} is now available in your dashboard.`,
+          icon: "📊",
+          notificationType: "monthly_wrap",
+        });
       }
     }
 

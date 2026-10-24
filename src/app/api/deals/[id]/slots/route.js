@@ -4,6 +4,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { getBookableSlots, loadAvailabilityPolicy } from "@/lib/calendar/availabilityService";
 import { addDaysToDateKey, getZonedDateKey, isValidDateKey } from "@/lib/calendar/timezone";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 import {
   isBookableDealStatus,
   resolveViewingHostId,
@@ -44,7 +45,9 @@ export async function GET(request, { params }) {
     const isBuyer = deal.buyer_id === userId;
     const isBroker = deal.broker_id === userId;
     const isOwner = deal.properties?.owner_id === userId;
-    if (!isBuyer && !isBroker && !isOwner) {
+    // GAP-112: Candidate routed brokers in deal_routing_recipients may inspect viewing availability
+    const isRouted = !isBuyer && !isBroker && !isOwner && (await isRoutedDealRecipient(supabaseAdmin, deal.id, userId));
+    if (!isBuyer && !isBroker && !isOwner && !isRouted) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -56,7 +59,7 @@ export async function GET(request, { params }) {
     }
 
     // The picker and writer share the exact same host-resolution helper.
-    const hostId = resolveViewingHostId({ deal, isBuyer, isBroker });
+    const hostId = isRouted ? (deal.properties?.owner_id || deal.buyer_id || null) : resolveViewingHostId({ deal, isBuyer, isBroker });
 
     if (!hostId || hostId === userId) {
       return NextResponse.json({ slots: [], timezone: null, reason: "no_host" });

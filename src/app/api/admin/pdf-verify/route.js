@@ -47,6 +47,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { notifyUser } from "@/lib/notifications";
 
 // Only what the review card renders. `pdf_source_url` is the document the
 // staff member is meant to be checking against, so it is the one addition
@@ -145,7 +146,7 @@ export async function POST(request) {
       .update({ pdf_verified: true })
       .eq("id", propertyId)
       .eq("creation_source", "pdf_assisted")
-      .select("id");
+      .select("id, owner_id, title");
 
     if (error) {
       console.error("[ADMIN PDF VERIFY] Update failed:", error);
@@ -173,6 +174,17 @@ export async function POST(request) {
       userId: auth.userId,
       metadata: { source: "admin_console", requirement: "AGENTS.md §2.4" },
     });
+
+    // GAP-109: Notify the property owner that their PDF draft is verified and unblocked for publishing
+    if (updated[0]?.owner_id) {
+      await notifyUser(supabaseAdmin, {
+        userId: updated[0].owner_id,
+        title: "PDF Listing Verified",
+        desc: `Your listing "${updated[0].title || "Property"}" was verified against your source PDF and is now ready to publish.`,
+        propertyId,
+        notificationType: "pdf_verified",
+      });
+    }
 
     return NextResponse.json({ success: true }, { headers: NO_STORE });
   } catch (err) {

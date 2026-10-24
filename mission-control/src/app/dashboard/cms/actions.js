@@ -6,6 +6,7 @@ import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
 import { publishPropertyToAirtable, unpublishPropertyFromAirtable } from "@/lib/airtable";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+import { notifyUser } from "@/lib/notifications";
 
 /**
  * Approve & Publish — the full publishing loop.
@@ -193,11 +194,24 @@ export async function rejectProperty(formData) {
   const reason = reasonNote ? `${reasonLabel} — ${reasonNote}` : reasonLabel;
 
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data: updated, error } = await admin
     .from("properties")
     .update({ moderation_status: "rejected", rejection_reason: reason })
-    .eq("id", propertyId);
+    .eq("id", propertyId)
+    .select("id, owner_id, title");
   if (error) throw new Error(error.message);
+
+  // GAP-111: Notify the property owner when a listing is rejected so remediation is not a dead end
+  if (updated?.[0]?.owner_id) {
+    await notifyUser(admin, {
+      userId: updated[0].owner_id,
+      title: "Listing Needs Attention",
+      desc: `Your listing "${updated[0].title || "Property"}" was not approved: ${reason}`,
+      icon: "⚠️",
+      propertyId,
+      notificationType: "property_rejected",
+    });
+  }
 
   await logAction({
     staff,

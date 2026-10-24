@@ -30,6 +30,7 @@ const EMAIL_WORTHY = new Set([
   "claim_filed",
   "claim_approved",
   "deal_dispute",
+  "viewing_scheduled",
 ]);
 
 export async function validateSampleNotificationRouting(serviceClient, { userId, propertyId = null, propertySlug = null }) {
@@ -166,25 +167,34 @@ function escapeText(s) {
     .replace(/>/g, "&gt;");
 }
 
-// Notifies every broker with an accepted (confirmed) property-level handshake
-// on this property — i.e. currently "attached", not just pitching or invited.
+// GAP-117: Notifies every broker with an accepted/active deal handshake or active
+// representation on this property — i.e. currently "attached", not just pitching or invited.
 // Excludes excludeUserId so the person who made the change doesn't get
 // notified about their own edit if they happen to also be a broker on it.
 export async function notifyAttachedBrokers(serviceClient, { propertyId, title, desc, icon = "📋", notificationType, excludeUserId = null }) {
-  const { data: deals, error } = await serviceClient
-    .from("deals")
-    .select("broker_id")
-    .eq("property_id", propertyId)
-    .eq("status", "accepted")
-    .is("unit_id", null) // property-level handshakes only, not unit delegations
-    .not("broker_id", "is", null);
+  const [{ data: deals, error: dealError }, { data: reps }] = await Promise.all([
+    serviceClient
+      .from("deals")
+      .select("broker_id")
+      .eq("property_id", propertyId)
+      .in("status", ["accepted", "active"])
+      .is("unit_id", null) // property-level handshakes only, not unit delegations
+      .not("broker_id", "is", null),
+    serviceClient
+      .from("property_broker_representations")
+      .select("broker_id")
+      .eq("property_id", propertyId)
+      .eq("status", "active")
+      .not("broker_id", "is", null),
+  ]);
 
-  if (error) {
-    console.error("[notifications] Failed to load attached brokers:", error);
-    return;
+  if (dealError) {
+    console.error("[notifications] Failed to load attached brokers:", dealError);
   }
 
-  const brokerIds = [...new Set((deals || []).map((d) => d.broker_id))]
+  const dealBrokers = (deals || []).map((d) => d.broker_id);
+  const repBrokers = (reps || []).map((r) => r.broker_id);
+  const brokerIds = [...new Set([...dealBrokers, ...repBrokers])]
     .filter((id) => id && id !== excludeUserId);
 
   for (const brokerId of brokerIds) {

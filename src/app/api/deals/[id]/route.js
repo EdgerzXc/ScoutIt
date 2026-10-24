@@ -168,11 +168,15 @@ export async function PATCH(request, { params }) {
       metadata: { from: deal.status, to: status, ...(analytics_event ? { analytics_event } : {}) },
     });
 
-    // GAP-21: Notify relevant parties of deal status changes
-    if (userId !== deal.buyer_id && deal.buyer_id) {
+    // GAP-113: Notify counterparty of deal status changes across all directions (inquiries, pitches, invites)
+    const counterpartyId = userId === deal.buyer_id
+      ? (deal.broker_id || deal.properties?.owner_id)
+      : deal.buyer_id;
+
+    if (counterpartyId && counterpartyId !== userId) {
       if (status === "accepted") {
         await notifyUser(supabaseAdmin, {
-          userId: deal.buyer_id,
+          userId: counterpartyId,
           title: "Deal request accepted",
           desc: "Your connection request was accepted.",
           propertyId: deal.property_id,
@@ -180,7 +184,7 @@ export async function PATCH(request, { params }) {
         });
       } else if (status === "declined") {
         await notifyUser(supabaseAdmin, {
-          userId: deal.buyer_id,
+          userId: counterpartyId,
           title: "Deal request declined",
           desc: "Your connection request was declined.",
           propertyId: deal.property_id,
@@ -188,7 +192,7 @@ export async function PATCH(request, { params }) {
         });
       } else if (status === "connected") {
         await notifyUser(supabaseAdmin, {
-          userId: deal.buyer_id,
+          userId: counterpartyId,
           title: "Deal connected",
           desc: "Your connection has been established.",
           propertyId: deal.property_id,

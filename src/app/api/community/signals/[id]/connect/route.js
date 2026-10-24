@@ -9,7 +9,7 @@ import { clientIp } from "@/lib/clientIp";
 import { validateIntroMessage, INTRO_MAX } from "@/lib/connectIntro";
 import { anyBlocked } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
-import { freshnessFor, signalTerminalState, maxAnswersForSignal } from "@/lib/communityPosting";
+import { freshnessFor, signalTerminalState, maxAnswersForSignal, kindForSignalType } from "@/lib/communityPosting";
 import { isMissingTable } from "@/lib/communityStore";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ export async function POST(request, { params }) {
 
     const { data: signal, error: signalError } = await supabaseAdmin
       .from("stratosphere_signals")
-      .select("id, author_account_id, scout_id_snapshot, title, status, last_confirmed_at")
+      .select("id, author_account_id, scout_id_snapshot, title, status, last_confirmed_at, signal_type")
       .eq("id", id)
       .maybeSingle();
     if (signalError) throw signalError;
@@ -141,7 +141,12 @@ export async function POST(request, { params }) {
     );
 
     // Reuse existing open request for this user (no second spend while open)
-    const existingUserDeal = signalPendingDeals.find((d) => d.buyer_id === userId);
+    const existingUserDeal = signalPendingDeals.find(
+      (d) =>
+        d.routing_snapshot?.initiator_id === userId ||
+        d.buyer_id === userId ||
+        d.broker_id === userId
+    );
     if (existingUserDeal) {
       return NextResponse.json({
         ok: true,
@@ -171,6 +176,13 @@ export async function POST(request, { params }) {
       );
     }
 
+    // GAP-95: Contextual party role resolution per signal kind (Rule H-02).
+    // Demand signals (looking for space) are posted by seekers (buyer); responder is offering space (broker).
+    // Promo/supply signals are posted by hosts/brokers; responder is inquiring (buyer).
+    const isDemand = kindForSignalType(signal.signal_type) === "demand";
+    const buyerId = isDemand ? recipientId : userId;
+    const brokerId = isDemand ? userId : recipientId;
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 14);
     const nowIso = new Date().toISOString();
@@ -179,14 +191,18 @@ export async function POST(request, { params }) {
       recipient_type: "community_signal",
       signal_id: id,
       signal_title: signal.title,
+      signal_kind: isDemand ? "demand" : "promo",
+      initiator_id: userId,
+      author_id: recipientId,
+      initiator_role: isDemand ? "responder" : "seeker",
       captured_at: nowIso,
     };
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
       .insert({
         property_id: null,
-        buyer_id: userId,
-        broker_id: recipientId,
+        buyer_id: buyerId,
+        broker_id: brokerId,
         status: "pending",
         expires_at: expiresAt.toISOString(),
         pending_clock_reset_at: nowIso,

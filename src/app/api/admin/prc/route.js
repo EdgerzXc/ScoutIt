@@ -44,18 +44,32 @@ export async function POST(request) {
     } catch {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
-    const { userId, verified } = body || {};
+    const { userId, verified, prcExpiry } = body || {};
     if (!userId || typeof verified !== "boolean") {
       return NextResponse.json({ error: "Missing userId or verified flag" }, { status: 400 });
     }
 
+    const updatePayload = {
+      prc_verified: verified,
+      prc_verified_at: verified ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // GAP-93: Capture and save prc_expiry so the daily expiry sweep cron can monitor it
+    if (typeof prcExpiry === "string") {
+      const cleanExpiry = prcExpiry.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(cleanExpiry)) {
+        updatePayload.prc_expiry = cleanExpiry;
+      } else if (cleanExpiry === "") {
+        updatePayload.prc_expiry = null;
+      }
+    } else if (prcExpiry === null) {
+      updatePayload.prc_expiry = null;
+    }
+
     const { error } = await supabaseAdmin
       .from("user_profiles")
-      .update({
-        prc_verified: verified,
-        prc_verified_at: verified ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", userId);
 
     if (error) {

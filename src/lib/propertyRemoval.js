@@ -1,5 +1,18 @@
-const OPEN_DEAL_STATUSES = new Set(["pending", "pitching", "connected", "active", "awaiting_response"]);
-const OPEN_APPOINTMENT_STATUSES = new Set(["pending", "confirmed"]);
+// GAP-99: All non-terminal deal statuses that represent active obligations
+export const OPEN_DEAL_STATUSES = new Set([
+  "pending",
+  "pitching",
+  "connected",
+  "active",
+  "accepted",
+  "inbound",
+  "invited",
+  "reviewing",
+  "viewing_scheduled",
+  "touring",
+  "awaiting_response",
+]);
+export const OPEN_APPOINTMENT_STATUSES = new Set(["pending", "confirmed"]);
 
 export function collectPropertyRemovalBlockers({ deals = [], appointments = [], units = [], disputes = [] } = {}) {
   const blockers = [];

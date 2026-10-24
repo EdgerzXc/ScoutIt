@@ -107,8 +107,8 @@ export async function GET(request) {
       const deal = dealsMap[appt.deal_id];
       const property = propsMap[appt.property_id];
 
-      // Mask contact info if deal is not accepted
-      const isAccepted = deal?.status === "accepted";
+      // GAP-97: Unmask contact info for accepted, active, or closed (terminal won) deals
+      const isAccepted = ["accepted", "active", "closed"].includes(String(deal?.status || "").toLowerCase());
       const otherName = namesById[otherId] || "Unknown User";
 
       // A-149: what this appointment may offer for contact exchange — the

@@ -110,7 +110,9 @@ export async function POST(request) {
     const supabasePayload = {
       title: validatedData.title ? stripAllTags(validatedData.title) : currentSubmission.title,
       type: validatedData.type ? stripAllTags(validatedData.type) : currentSubmission.type,
-      location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location
+      location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location,
+      // GAP-98: Preserve space_category so Airtable category-scoped field mapping is not bypassed
+      space_category: validatedData.space_category || currentSubmission.space_category,
     };
     if (typeof validatedData.quietly_open_to_offers === "boolean") {
       if (lifecycleState !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {

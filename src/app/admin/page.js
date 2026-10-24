@@ -55,18 +55,20 @@ function AdminPageInner() {
     }
   }
 
-  const handlePrcToggle = async (userId, verified) => {
+  const handlePrcToggle = async (userId, verified, prcExpiry) => {
     setPrcProcessingId(userId);
     setMessage(null);
     try {
+      const payload = { userId, verified };
+      if (prcExpiry !== undefined) payload.prcExpiry = prcExpiry;
       const res = await fetch("/api/admin/prc", {
         method: "POST",
         headers: await authHeaders(),
-        body: JSON.stringify({ userId, verified }),
+        body: JSON.stringify(payload),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Failed to update verification.");
-      setPrcQueue((prev) => prev.map((p) => (p.id === userId ? { ...p, prc_verified: verified } : p)));
+      setPrcQueue((prev) => prev.map((p) => (p.id === userId ? { ...p, prc_verified: verified, ...(prcExpiry !== undefined ? { prc_expiry: prcExpiry } : {}) } : p)));
       setMessage({ type: "success", text: verified ? "Credential marked PRC Verified." : "Verification revoked." });
     } catch (err) {
       setMessage({ type: "error", text: sanitizeError(err) });
@@ -505,7 +507,7 @@ function AdminPageInner() {
                         <button
                           className="btn-approve"
                           disabled={prcProcessingId === p.id}
-                          onClick={() => handlePrcToggle(p.id, !p.prc_verified)}
+                          onClick={() => handlePrcToggle(p.id, !p.prc_verified, p.prc_expiry || undefined)}
                           style={p.prc_verified ? { background: "transparent", border: "1px solid var(--border-mid)", color: "var(--text-secondary)" } : undefined}
                         >
                           {prcProcessingId === p.id

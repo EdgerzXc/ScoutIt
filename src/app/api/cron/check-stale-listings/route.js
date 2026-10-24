@@ -52,7 +52,8 @@ async function handleCron(request) {
     await recordAirtableCall(1);
 
     const [{ data: properties, error: propError }, verificationRecords] = await Promise.all([
-      supabaseAdmin.from("properties").select("id, slug, owner_id, title").eq("pipeline_status", "approved"),
+      // GAP-108: Query canonical_slug alongside slug so drifted listings are not skipped
+      supabaseAdmin.from("properties").select("id, slug, canonical_slug, owner_id, title").eq("pipeline_status", "approved"),
       // A-116: this cron is not the CMS bundle. It makes one Airtable call
       // with the whole function to itself, so it asks for a budget that fits
       // a slow-but-working Airtable instead of inheriting the page-render
@@ -73,8 +74,9 @@ async function handleCron(request) {
     const staleCutoffMs = STALE_DAYS * 24 * 60 * 60 * 1000;
 
     const staleProperties = (properties || []).filter((p) => {
-      if (!p.slug || !p.owner_id) return false;
-      const verification = verificationBySlug.get(p.slug);
+      const activeSlug = p.canonical_slug || p.slug;
+      if (!activeSlug || !p.owner_id) return false;
+      const verification = verificationBySlug.get(activeSlug) || (p.slug ? verificationBySlug.get(p.slug) : null);
       if (!verification) return false; // not synced to Airtable yet — not this cron's problem
       if (!verification.lastVerifiedDate) return true;
       const verifiedMs = new Date(verification.lastVerifiedDate).getTime();

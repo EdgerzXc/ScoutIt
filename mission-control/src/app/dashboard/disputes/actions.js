@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
+import { notifyUser } from "@/lib/notifications";
 import {
   PARTY_REASON_LABELS,
   mirrorStatusFor,
@@ -389,6 +390,31 @@ export async function closeDispute(formData) {
         }
       : {},
   });
+
+  // GAP-103: Notify complainant and respondent of dispute resolution so parties are not left in the dark
+  const partyIds = new Set();
+  if (link.deal_dispute_id) {
+    try {
+      const { data: dd } = await admin
+        .from("deal_disputes")
+        .select("opened_by, against_user_id")
+        .eq("id", link.deal_dispute_id)
+        .maybeSingle();
+      if (dd?.opened_by) partyIds.add(dd.opened_by);
+      if (dd?.against_user_id) partyIds.add(dd.against_user_id);
+    } catch {
+      // Non-fatal if deal_disputes query fails
+    }
+  }
+  for (const partyId of partyIds) {
+    await notifyUser(admin, {
+      userId: partyId,
+      title: `Dispute ${outcome === "resolved" ? "Resolved" : "Closed"}`,
+      desc: `The dispute has been marked ${outcome}. Resolution: ${resolution}`,
+      icon: "⚖️",
+      notificationType: "dispute_closed",
+    });
+  }
 
   revalidatePath("/dashboard/disputes");
   revalidatePath("/dashboard/inbox");
