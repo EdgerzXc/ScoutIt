@@ -97,7 +97,12 @@ word "verified" on its own is a defect.
 - **Title:** The true building or unit name (e.g., `One E-Com Center`, `Cyber Sigma Tower 3`).
 - **Lead Sentence:** Declarative summary: `[Floor Area] [Space Category] located in [District, City].`
 - **Specs List:** Grouped clearly: Floor area (sqm), Floor level, Building grade, Fit-out condition, Title status, Parking allocation.
-- **Your Move Section:** Honest legal statement that ScoutIt does not broker or handle escrow; financial terms and viewings happen directly with retained licensed professionals.
+- **Your Move Section:** Codified statutory statement under R.A. 9646 §31:
+  - *Badge:* `• RA 9646 COMPLIANT · DISPLAY-ONLY`
+  - *Statutory Notice:* `ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed real estate brokers and their accredited salespersons under direct broker supervision.`
+  - *CTA Button:* `Connect with an Authorized Broker or Representative →`
+  - *Guidance Text:* `Ready for introduction. Connect with an authorized broker or accredited representative to arrange a private walkthrough or review commercial lease terms.`
+  - *Ergonomics:* Maintain 80px bottom clearance on mobile to prevent occlusion by the fixed bottom navigation dock.
 
 ### B. Intel Briefings (`/intel`)
 - **Headline:** Specific, informative news trigger (e.g., `LEED-Mandated Office Conversions in Makati CBD`).

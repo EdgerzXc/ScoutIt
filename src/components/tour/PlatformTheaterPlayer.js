@@ -9,65 +9,70 @@ export const TOUR_CLIPS = [
     number: "01",
     title: "10-Layer Space Radar & GIS Hazards",
     subtitle: "3D Vector Terrain, Project NOAH Flood Envelopes & Fault Buffers",
-    duration: "0:45",
-    totalSeconds: 45,
+    duration: "1:00",
+    totalSeconds: 60,
     telemetry: "RADAR // GIS-L10 // ACTIVE",
     description:
       "Interactive 3D elevation modeling cross-referenced with statutory hazards: 5m/25m/100m flood return intervals, West Valley Fault line proximity, and PEZA economic zone boundaries.",
     statutoryBasis: "DOST-PAGASA Project NOAH / PHIVOLCS VFS 2024",
     embedUrl: null, // Pluggable external YouTube / CDN URL
+    videoUrl: "/video/scoutit-60s-commercial.mp4",
   },
   {
     id: "dual-cms",
     number: "02",
     title: "Dual-CMS Publishing & Slug Continuity",
     subtitle: "Airtable Public Read-Only + Supabase Private Workspace Bridge",
-    duration: "0:38",
-    totalSeconds: 38,
+    duration: "1:00",
+    totalSeconds: 60,
     telemetry: "DUAL-CMS // SYNC-V2 // LOCKED",
     description:
       "Dual-database architecture: owner drafts stay in private Supabase PostgreSQL, sync to Airtable CMS on publication, and lock their canonical public URL to prevent broken links.",
     statutoryBasis: "Dual-Database Architectural Invariant",
     embedUrl: null,
+    videoUrl: "/video/scoutit-60s-commercial.mp4",
   },
   {
     id: "via-attribution",
     number: "03",
     title: "VIA Priority Attribution & Broker Portal",
     subtitle: "RESA RA 9646 Lead Protection & Position Zero Routing",
-    duration: "0:42",
-    totalSeconds: 42,
+    duration: "1:00",
+    totalSeconds: 60,
     telemetry: "RESA-RA9646 // PRC-VERIFIED // DIRECT",
     description:
       "Every licensed broker receives a personal VIA link (/property/[id]/via/[broker]). 100% of tenant inquiries route directly to their private inbox with no middleman fees and no commission cuts.",
     statutoryBasis: "Republic Act No. 9646 (RESA Law)",
     embedUrl: null,
+    videoUrl: "/video/scoutit-60s-commercial.mp4",
   },
   {
     id: "open-gate",
     number: "04",
     title: "Open Gate Inbound Landlord Flow",
     subtitle: "Zero-Connect Inquiry Delivery for Direct Building Owners",
-    duration: "0:35",
-    totalSeconds: 35,
+    duration: "1:00",
+    totalSeconds: 60,
     telemetry: "OPEN-GATE // 0-CONNECT // LIVE",
     description:
       "Direct property owners and leasing desks receive qualified enterprise tenant inquiries at zero Connect credit cost. Inbound demand flows directly into their private Landlord Cockpit.",
     statutoryBasis: "ScoutIt Open Gate Standard",
     embedUrl: null,
+    videoUrl: "/video/scoutit-60s-commercial.mp4",
   },
   {
     id: "crm-mobility",
     number: "05",
     title: "People & Dealings CRM & 1-Click Mobility",
     subtitle: "5-Stage Pipeline, Account-Scoped Notes & Complete CSV/vCard Export",
-    duration: "0:40",
-    totalSeconds: 40,
+    duration: "1:00",
+    totalSeconds: 60,
     telemetry: "CRM // 5-STAGE // ZERO-LOCKIN",
     description:
       "A fast, focused CRM for inquiries, viewings, and negotiations. Includes 1-click CSV and vCard export so professionals maintain complete data portability.",
     statutoryBasis: "Data Sovereignty & Portability Standard",
     embedUrl: null,
+    videoUrl: "/video/scoutit-60s-commercial.mp4",
   },
 ];
 
@@ -161,6 +166,28 @@ export default function PlatformTheaterPlayer({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
+        ) : isPlaying && activeClip.videoUrl ? (
+          <div className="relative w-full h-full z-10 bg-black flex items-center justify-center">
+            <video
+              src={activeClip.videoUrl}
+              autoPlay
+              controls
+              playsInline
+              onTimeUpdate={(e) => setProgressSec(Math.floor(e.currentTarget.currentTime))}
+              onEnded={() => {
+                setIsPlaying(false);
+                setProgressSec(0);
+              }}
+              className="w-full h-full object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setIsPlaying(false)}
+              className="absolute top-4 right-4 z-30 px-3 py-1.5 rounded-full bg-surface/80 border border-accent-muted text-accent font-mono text-xs uppercase tracking-wider backdrop-blur hover:bg-surface hover:border-accent transition-colors"
+            >
+              EXIT THEATER X
+            </button>
+          </div>
         ) : (
           /* Interactive Simulation Stage */
           <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center z-10">

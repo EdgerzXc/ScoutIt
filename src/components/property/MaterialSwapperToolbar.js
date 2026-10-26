@@ -11,7 +11,7 @@ export default function MaterialSwapperToolbar({
   canRequestRevision = false,
 }) {
   const [config, setConfig] = useState(activeConfig);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleUpdate = (category, value) => {
     const next = { ...config, [category]: value };
@@ -63,7 +63,7 @@ export default function MaterialSwapperToolbar({
               <span className="font-mono text-[12px] uppercase tracking-wider text-text-muted">
                 Flooring
               </span>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {MATERIAL_SWAP_OPTIONS.flooring.map((option) => {
                   const isActive = config.flooring === option.id;
                   return (
@@ -71,7 +71,7 @@ export default function MaterialSwapperToolbar({
                       key={option.id}
                       type="button"
                       onClick={() => handleUpdate("flooring", option.id)}
-                      className={`flex-1 py-1.5 px-2 rounded-lg font-mono text-[12px] uppercase tracking-wider transition truncate ${
+                      className={`flex-1 py-1.5 px-1 rounded-lg font-mono text-[12px] uppercase tracking-wider transition truncate ${
                         isActive
                           ? "bg-[var(--accent)] text-black font-bold shadow-sm"
                           : "bg-surface-alt/80 text-text-secondary hover:text-text-primary border border-border/50"
@@ -90,7 +90,7 @@ export default function MaterialSwapperToolbar({
               <span className="font-mono text-[12px] uppercase tracking-wider text-text-muted">
                 Partitions
               </span>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {MATERIAL_SWAP_OPTIONS.partitions.map((option) => {
                   const isActive = config.partitions === option.id;
                   return (
@@ -98,7 +98,7 @@ export default function MaterialSwapperToolbar({
                       key={option.id}
                       type="button"
                       onClick={() => handleUpdate("partitions", option.id)}
-                      className={`flex-1 py-1.5 px-2 rounded-lg font-mono text-[12px] uppercase tracking-wider transition truncate ${
+                      className={`flex-1 py-1.5 px-1 rounded-lg font-mono text-[12px] uppercase tracking-wider transition truncate ${
                         isActive
                           ? "bg-[var(--accent)] text-black font-bold shadow-sm"
                           : "bg-surface-alt/80 text-text-secondary hover:text-text-primary border border-border/50"
@@ -117,7 +117,7 @@ export default function MaterialSwapperToolbar({
               <span className="font-mono text-[12px] uppercase tracking-wider text-text-muted">
                 Lighting Mood
               </span>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {MATERIAL_SWAP_OPTIONS.lighting.map((option) => {
                   const isActive = config.lighting === option.id;
                   const Icon = option.id === "daylight" ? Sun : Moon;
@@ -126,7 +126,7 @@ export default function MaterialSwapperToolbar({
                       key={option.id}
                       type="button"
                       onClick={() => handleUpdate("lighting", option.id)}
-                      className={`flex-1 py-1.5 px-2 rounded-lg font-mono text-[12px] uppercase tracking-wider transition flex items-center justify-center gap-1.5 truncate ${
+                      className={`flex-1 py-1.5 px-1.5 rounded-lg font-mono text-[12px] uppercase tracking-wider transition flex items-center justify-center gap-1 truncate ${
                         isActive
                           ? "bg-[var(--accent)] text-black font-bold shadow-sm"
                           : "bg-surface-alt/80 text-text-secondary hover:text-text-primary border border-border/50"

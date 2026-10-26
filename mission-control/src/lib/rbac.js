@@ -36,13 +36,45 @@ export async function getCurrentStaff() {
 
   if (error || !staff || !staff.active) return null;
 
-  return staff;
+  let currentLevel = "aal1";
+  let nextLevel = "aal1";
+  try {
+    if (supabase.auth?.mfa?.getAuthenticatorAssuranceLevel) {
+      const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (mfaData) {
+        currentLevel = mfaData.currentLevel || "aal1";
+        nextLevel = mfaData.nextLevel || "aal1";
+      }
+    }
+  } catch (_mfaErr) {
+    // Non-fatal if MFA endpoint is unavailable in unit test harness
+  }
+
+  const { evaluateMfaStatus } = await import("./mfaPolicy.mjs");
+  const mfaStatus = evaluateMfaStatus({
+    tier: staff.tier,
+    currentLevel,
+    nextLevel,
+  });
+
+  return {
+    ...staff,
+    aal: currentLevel,
+    nextAal: nextLevel,
+    mfaRequired: mfaStatus.mfaRequired,
+    enrolledMfa: mfaStatus.enrolledMfa,
+  };
 }
 
 /** Throws if the current staff member doesn't meet the minimum tier. Use at the top of every Server Action that mutates data. */
 export function assertTier(staff, minTier) {
   if (!staff || !staff.active) {
     throw new Error("Not authenticated as active Mission Control staff.");
+  }
+  if (staff.mfaRequired) {
+    throw new Error(
+      "MFA verification required: session must be stepped up to AAL2 at /dashboard/mfa."
+    );
   }
   if (staff.tier < minTier) {
     throw new Error(

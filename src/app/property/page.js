@@ -101,15 +101,6 @@ export default async function PropertyRootPage() {
               <p className="page-subtitle">Every home, office, and venue on ScoutIt: searchable in one place.</p>
             </header>
             <div className="directory-container">
-              <button
-                className="mobile-filters-toggle"
-                disabled
-                aria-hidden="true"
-                style={{ opacity: 0.6 }}
-              >
-                Filters
-                <span className="filter-chevron">▼</span>
-              </button>
               <aside className="filters-sidebar" aria-hidden="true">
                 <div className="filter-card" style={{ height: "140px", opacity: 0.6 }} />
                 <div className="filter-card" style={{ height: "180px", opacity: 0.6 }} />
@@ -118,7 +109,10 @@ export default async function PropertyRootPage() {
               <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
                 <div className="search-wrapper" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
                   <div style={{ flexGrow: 1, height: "48px", background: "rgba(var(--text-primary-rgb), 0.03)", border: "1px solid var(--border-solid)" }} />
-                  <div style={{ width: "180px", height: "44px", background: "var(--bg)", border: "1px solid var(--accent)" }} />
+                  <div className="search-action-controls" style={{ display: "flex", gap: "8px" }}>
+                    <div style={{ width: "110px", height: "44px", background: "var(--surface)", border: "1px solid var(--border-solid)" }} />
+                    <div style={{ width: "160px", height: "44px", background: "var(--bg)", border: "1px solid var(--accent)" }} />
+                  </div>
                 </div>
                 <div className="directory-grid">
                   {[1, 2, 3, 4, 5, 6].map((n) => (

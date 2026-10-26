@@ -212,11 +212,11 @@ export async function publishOsintBriefing({ briefingData, sourceId }) {
       briefingData.cover_image_url ||
       "/assets/intel-tower-mesh.svg",
     body_json: briefingData.body_json || [],
-    city: briefingData.city || "BGC, Taguig",
-    region: briefingData.region || "Metro Manila",
-    lat: briefingData.lat ?? 14.5547,
-    lng: briefingData.lng ?? 121.0244,
-    source_name: briefingData.sourceName || briefingData.source_name || "OSINT Gazette",
+    city: briefingData.city || "",
+    region: briefingData.region || "",
+    lat: typeof briefingData.lat === "number" ? briefingData.lat : null,
+    lng: typeof briefingData.lng === "number" ? briefingData.lng : null,
+    source_name: briefingData.sourceName || briefingData.source_name || "",
     source_url: briefingData.sourceUrl || briefingData.source_url || "",
     published_to_airtable: false,
   };

@@ -10,6 +10,7 @@ import ScoutItMark from "@/components/brand/ScoutItMark";
 const BlackHoleCanvas = dynamic(() => import("@/components/descent/BlackHoleCanvas"), { ssr: false });
 const GoldenHorizonCanvas = dynamic(() => import("@/components/descent/GoldenHorizonCanvas"), { ssr: false });
 const DriftingPropertyBubbles = dynamic(() => import("@/components/hero/DriftingPropertyBubbles"), { ssr: false });
+const MobileCategoryQuickAccess = dynamic(() => import("@/components/hero/MobileCategoryQuickAccess"), { ssr: false });
 
 const GOLDEN_DEFAULT_PARAMS = {
   horizonRadius: 0.16, diskInner: 0.22, diskOuter: 0.7, lensingStrength: 0.28,
@@ -500,9 +501,13 @@ export default function HomeClient() {
           LAUNCHPAD (ELEVATOR MENU)
           ========================================= */}
       <section data-scoutit-guide="scoutit-home-launchpad" className="relative w-full max-w-6xl mx-auto px-6 py-24 z-20 flex flex-col items-center" style={{ backgroundColor: 'transparent', contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
-        <div className="flex justify-center mb-8" style={{ fontSize: "32px", letterSpacing: "0.12em", color: "var(--accent)" }} aria-hidden="true">
+        <div className="flex justify-center mb-6" style={{ fontSize: "32px", letterSpacing: "0.12em", color: "var(--accent)" }} aria-hidden="true">
           <ScoutItWordmark leading={<ScoutItMark />} />
         </div>
+
+        {/* Immediate Category Fast-Track & Direct Jump Action Sheet */}
+        <MobileCategoryQuickAccess />
+
         <h2 className="font-mono text-sm tracking-[0.12em] uppercase text-gold-accent mb-6 text-center opacity-80" style={{ textShadow: '0 0 10px rgba(var(--accent-rgb), 0.3)' }}>
           Browse Space Catalog
         </h2>
@@ -687,6 +692,7 @@ export default function HomeClient() {
         /* ─── SECTION 1: SPACE HERO ────────────────────────────────── */
         .section-hook {
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
           /* Deliberately dark in BOTH themes: this is the starfield hero and
@@ -695,6 +701,7 @@ export default function HomeClient() {
           background: var(--bg);
           overflow: hidden;
           position: relative;
+          width: 100%;
         }
 
         .space-bg-container {
@@ -793,9 +800,13 @@ export default function HomeClient() {
 
         /* ΓöÇΓöÇ Main wordmark container ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
         .hook-content {
+          width: 100%;
+          max-width: 800px;
+          margin: 0 auto;
           text-align: center;
           z-index: 10;
           position: relative;
+          box-sizing: border-box;
         }
 
         /* Event-horizon canvas ΓÇö full-cover, behind all hero content */
@@ -1124,23 +1135,105 @@ export default function HomeClient() {
             padding: 40px 16px !important;
           }
           .section-hook {
-            min-height: calc(100dvh - 72px) !important;
-            padding: 80px 16px 24px !important;
-            justify-content: flex-start;
-            align-items: flex-end;
+            min-height: 100dvh !important;
+            padding: 60px 16px max(28px, calc(16px + env(safe-area-inset-bottom))) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box !important;
           }
           .hook-content {
-            text-align: center;
+            width: 100% !important;
+            max-width: 480px !important;
+            min-width: 0 !important;
+            margin: 0 auto !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
           }
           .scoutit-wordmark {
-            margin-bottom: 36px;
+            margin: 0 0 16px !important;
+          }
+          .scoutit-wordmark .word-s,
+          .scoutit-wordmark .word-scout,
+          .scoutit-wordmark .word-it {
+            font-size: clamp(36px, 8.5vw, 54px) !important;
+            letter-spacing: 0.08em !important;
           }
           .title-ufo-zone {
-            height: 120px !important;
-            margin-bottom: 4px !important;
+            height: 90px !important;
+            margin-bottom: 2px !important;
           }
           .title-ufo-svg {
-            width: 80px !important;
+            width: 72px !important;
+          }
+          .title-badge {
+            font-size: 12px !important;
+            letter-spacing: 0.1em !important;
+            margin-bottom: 8px !important;
+          }
+          .title-divider {
+            margin: 8px auto 14px !important;
+          }
+          .title-tagline-intro {
+            font-size: 13px !important;
+            line-height: 1.55 !important;
+            margin: 0 auto 14px !important;
+            max-width: 100% !important;
+            padding: 0 8px !important;
+          }
+          .title-tagline-1 {
+            font-size: clamp(16px, 4vw, 19px) !important;
+            margin-bottom: 4px !important;
+          }
+          .title-tagline-2 {
+            font-size: 12px !important;
+            letter-spacing: 0.12em !important;
+            margin: 0 0 18px !important;
+          }
+          .hero-cta-row {
+            width: 100% !important;
+            max-width: 360px !important;
+            margin: 18px auto 0 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .hero-cta-primary {
+            width: 100% !important;
+            min-height: 48px !important;
+            padding: 14px 20px !important;
+            font-size: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+          }
+          .hero-cta-secondary {
+            width: 100% !important;
+            min-height: 44px !important;
+            padding: 12px 18px !important;
+            font-size: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+          }
+          .hero-cta-row a[href="/showcase"] {
+            display: none !important;
+          }
+          .hero-founding-link {
+            margin-top: 14px !important;
+            font-size: 12px !important;
+            min-height: 44px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
           }
         }
 
@@ -1154,12 +1247,8 @@ export default function HomeClient() {
             min-height: auto;
             padding: 24px 14px !important;
           }
-          .section-hook {
-            min-height: 55vh;
-            padding: 24px 12px;
-          }
           .scoutit-wordmark {
-            margin-bottom: 28px;
+            margin-bottom: 16px;
             gap: 0.02em;
           }
           button, [role="button"], .header-menu-btn, .header-back-btn {
@@ -1176,12 +1265,8 @@ export default function HomeClient() {
             min-height: auto;
             padding: 20px 10px !important;
           }
-          .section-hook {
-            min-height: 50vh;
-            padding: 20px 10px 40px;
-          }
           .scoutit-wordmark {
-            margin-bottom: 24px;
+            margin-bottom: 14px;
             gap: 0;
           }
           .drifting-container {

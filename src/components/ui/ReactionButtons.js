@@ -414,16 +414,56 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
   );
 }
 
-export function ReactionBadge({ reactionType }) {
+export function ReactionBadge({ reactionType, showLabel = true, className = "" }) {
   const shapeData = REACTION_SHAPES[reactionType];
   if (!shapeData) return null;
 
   return (
-    <div className="badge-wrapper">
-      <div className="badge-svg-container">
-        {shapeData.svg}
-      </div>
-      <div className="tooltip">{reactionType}</div>
+    <div className={`reaction-badge-pill ${className}`.trim()} aria-label={`Reaction: ${reactionType}`}>
+      <span className="badge-icon" aria-hidden="true">
+        {shapeData.symbol || shapeData.svg}
+      </span>
+      {showLabel && <span className="badge-text">{reactionType}</span>}
+      <style jsx>{`
+        .reaction-badge-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(var(--accent-rgb), 0.10);
+          border: 1px solid rgba(var(--accent-rgb), 0.32);
+          border-radius: 4px;
+          padding: 4px 8px;
+          color: var(--accent);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          line-height: 1;
+          white-space: nowrap;
+          box-sizing: border-box;
+          user-select: none;
+        }
+        .badge-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 14px;
+          height: 14px;
+          color: var(--accent-bright);
+          flex-shrink: 0;
+        }
+        .badge-icon :global(svg) {
+          width: 14px;
+          height: 14px;
+          display: block;
+        }
+        .badge-text {
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--accent-bright);
+          letter-spacing: 0.06em;
+        }
+      `}</style>
     </div>
   );
 }

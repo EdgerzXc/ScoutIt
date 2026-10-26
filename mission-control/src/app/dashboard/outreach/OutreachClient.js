@@ -309,7 +309,14 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {filteredProspects.map((prospect) => {
+              {filteredProspects.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-white/60 font-mono text-xs">
+                    No outreach prospects found in this queue. Ingest leads via the Google Maps snippet parser above.
+                  </td>
+                </tr>
+              ) : (
+                filteredProspects.map((prospect) => {
                 const isOverdue = isAgingOverdue(prospect.last_contacted_at, prospect.status);
                 const isSelected = selectedProspect?.id === prospect.id;
 
@@ -395,7 +402,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
                     </td>
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

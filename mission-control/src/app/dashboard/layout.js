@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import {
-  Shield, LayoutDashboard, Users, Database, Flag, Video, LogOut, Bell,
+  Shield, ShieldAlert, LayoutDashboard, Users, Database, Flag, Video, LogOut, Bell,
   ScrollText, KeyRound, Award, BarChart3, Radar, Inbox, BadgeCheck,
   Scale, BrainCircuit, Radio, Wrench, Crosshair, Mail, Cpu, Gavel, Briefcase,
-   MessageSquareQuote, MessageSquareWarning, Stamp, Compass } from "lucide-react";
+  MessageSquareQuote, MessageSquareWarning, Stamp, Compass, FileText, TrendingUp,
+  Coins, Send, Activity, UserCheck } from "lucide-react";
 import { getCurrentStaff, TIER_LABELS, TIERS } from "@/lib/rbac";
 import SidebarNav from "@/components/dashboard/SidebarNav";
 import SensitiveWorkspaceGuard from "@/components/security/SensitiveWorkspaceGuard";
@@ -21,17 +22,23 @@ export default async function DashboardLayout({ children }) {
     { group: "Command", name: "Notifications", href: "/dashboard/notifications", icon: <Bell className={iconClass} />, minTier: TIERS.AGENT },
 
     { group: "Content & People", name: "CMS / Content", href: "/dashboard/cms", icon: <Database className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Content & People", name: "Articles Publisher", href: "/dashboard/articles", icon: <FileText className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "User CRM", href: "/dashboard/crm", icon: <Users className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Content & People", name: "Broker Directory", href: "/dashboard/brokers", icon: <Users className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Property Outreach CRM", href: "/dashboard/outreach", icon: <Compass className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Verification", href: "/dashboard/verification", icon: <BadgeCheck className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Content & People", name: "Submissions & PDF", href: "/dashboard/submissions", icon: <Send className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Content & People", name: "PRC Licenses", href: "/dashboard/prc", icon: <Award className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Position Queue", href: "/dashboard/coordinates", icon: <Crosshair className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Disputes", href: "/dashboard/disputes", icon: <Scale className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Content & People", name: "Review Disputes", href: "/dashboard/reviews", icon: <Scale className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Recommendations", href: "/dashboard/recommendations", icon: <MessageSquareQuote className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Community Signals", href: "/dashboard/community", icon: <Radio className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "FAQ Appeals", href: "/dashboard/faq-appeals", icon: <MessageSquareWarning className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Contributions", href: "/dashboard/contributions", icon: <Stamp className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Ownership Claims", href: "/dashboard/claims", icon: <Gavel className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Deal Oversight", href: "/dashboard/deals", icon: <Briefcase className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Content & People", name: "Pipeline Demand", href: "/dashboard/pipeline", icon: <TrendingUp className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Contact Queue", href: "/dashboard/contact", icon: <Mail className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Content & People", name: "Badges", href: "/dashboard/badges", icon: <Award className={iconClass} />, minTier: TIERS.AGENT },
     { group: "Content & People", name: "Concierge Ingest", href: "/dashboard/media", icon: <Video className={iconClass} />, minTier: TIERS.AGENT },
@@ -42,7 +49,12 @@ export default async function DashboardLayout({ children }) {
 
     { group: "Administration", name: "Traffic Log", href: "/dashboard/security", icon: <Radar className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "Audit Log", href: "/dashboard/audit", icon: <ScrollText className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Administration", name: "Staff MFA", href: "/dashboard/mfa", icon: <KeyRound className={iconClass} />, minTier: TIERS.AGENT },
+    { group: "Administration", name: "Connects Wallet", href: "/dashboard/wallet", icon: <Coins className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Administration", name: "Data Privacy & SLA", href: "/dashboard/privacy", icon: <ShieldAlert className={iconClass} />, minTier: TIERS.OPS_MANAGER },
     { group: "Administration", name: "System Activity", href: "/dashboard/system", icon: <Cpu className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Administration", name: "System Health", href: "/dashboard/health", icon: <Activity className={iconClass} />, minTier: TIERS.OPS_MANAGER },
+    { group: "Administration", name: "View As User", href: "/dashboard/impersonation", icon: <UserCheck className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "System Operations", href: "/dashboard/operations", icon: <Wrench className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "Feature Flags", href: "/dashboard/features", icon: <Flag className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
     { group: "Administration", name: "Open Gate", href: "/dashboard/open-gate", icon: <Flag className={iconClass} />, minTier: TIERS.SUPER_ADMIN },
@@ -78,6 +90,22 @@ export default async function DashboardLayout({ children }) {
       </aside>
       <div className="relative flex-1 overflow-y-auto bg-background">
         <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-gold opacity-5 blur-[150px]" />
+        {staff.mfaRequired && (
+          <div className="relative z-20 bg-amber-500/10 border-b border-amber-500/30 px-8 py-3 flex items-center justify-between text-xs text-amber-300">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>
+                <strong>AAL2 Verification Required:</strong> Your role ({TIER_LABELS[staff.tier]}) requires TOTP multi-factor verification before executing mutations.
+              </span>
+            </div>
+            <a
+              href="/dashboard/mfa"
+              className="px-3 py-1 rounded bg-amber-400 text-black font-medium text-xs uppercase tracking-wider hover:bg-amber-300 transition-colors shrink-0"
+            >
+              Verify TOTP
+            </a>
+          </div>
+        )}
         <main id="main-content" className="relative z-10 p-8">{children}</main>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useModalDialog } from "@/components/ui/useModalDialog";
 import { SPATIAL_SLA_HOURS } from "@/lib/spatialStudio";
 import { Wrench, Clock, Check, AlertCircle, X } from "lucide-react";
@@ -22,12 +23,17 @@ export default function SpatialStudioRevisionModal({
   const modalRef = useRef(null);
   useModalDialog(modalRef, { active: isOpen, onClose });
 
+  const [mounted, setMounted] = useState(false);
   const [selectedElements, setSelectedElements] = useState(["flooring"]);
   const [revisionNotes, setRevisionNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const toggleElement = (id) => {
     setSelectedElements((prev) =>
@@ -70,9 +76,9 @@ export default function SpatialStudioRevisionModal({
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-[fadeIn_0.2s_ease]"
+      className="fixed inset-0 z-[1050] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-[fadeIn_0.2s_ease]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -195,6 +201,7 @@ export default function SpatialStudioRevisionModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

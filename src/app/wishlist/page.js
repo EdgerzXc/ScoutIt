@@ -3,7 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { supabase } from "@/lib/supabaseClient";
@@ -13,24 +13,25 @@ import { classifySavedItem, liveSlugSet } from "@/lib/wishlistLiveness";
 const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 
 export default function WishlistPage() {
-  const [items, setItems] = useState([]);
+  const [offlineItems, setOfflineItems] = useState([]);
+  const [cloudItems, setCloudItems] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [fadingOut, setFadingOut] = useState(new Set());
 
-  // Account sync: when the visitor is signed in, offer to pull the device's
-  // local Board into their account (saved_intel). The local copy is KEPT so
-  // the device still works signed-out — we just stop showing the prompt once
-  // the account already has everything.
+  // Account sync & session
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [accountSavedIds, setAccountSavedIds] = useState(() => new Set());
   const [merging, setMerging] = useState(false);
   const [mergeMessage, setMergeMessage] = useState(null);
 
-  // A-102: live catalogue slugs for removed-listing markers. Null until the
-  // fetch lands — and a failed fetch leaves it null, so nothing is ever
-  // marked removed from an unreadable catalogue (fail-open display, and the
-  // link stays rather than breaking on a network blip).
+  // Interchangeable storage mode: "all" (unified) | "cloud" (account) | "offline" (device)
+  const [activeMode, setActiveMode] = useState("all");
+
+  // CMS catalogue for live property titles, cities, categories, and liveness checks
+  const [cmsMap, setCmsMap] = useState({});
   const [liveSlugs, setLiveSlugs] = useState(null);
+
   useEffect(() => {
     let cancelled = false;
     fetch("/api/cms")
@@ -38,6 +39,12 @@ export default function WishlistPage() {
       .then((data) => {
         if (!cancelled && data && Array.isArray(data.properties)) {
           setLiveSlugs(liveSlugSet(data.properties));
+          const map = {};
+          data.properties.forEach((p) => {
+            const key = p.slug || p.id;
+            if (key) map[key] = p;
+          });
+          setCmsMap(map);
         }
       })
       .catch(() => {});
@@ -46,40 +53,60 @@ export default function WishlistPage() {
     };
   }, []);
 
+  // 1. Load Local / Offline items from device storage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("scoutit_reactions");
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setItems(parsed);
+          setOfflineItems(parsed);
         }
       }
     } catch (e) {
-      // silently ignore corrupt data
+      // silently ignore corrupt local data
     }
     setLoaded(true);
   }, []);
 
-  // Detect a real signed-in session and read what the account already has
-  // saved (RLS returns only the caller's own rows).
+  // 2. Load Real Supabase Account items if authenticated
   useEffect(() => {
     let cancelled = false;
     const loadAccount = async () => {
       try {
         const { data } = await getSession();
         const session = data?.session;
-        if (!session?.user) return;
-        if (!cancelled) setIsLoggedIn(true);
+        if (!session?.user) {
+          if (!cancelled) {
+            setIsLoggedIn(false);
+            setActiveMode("offline");
+          }
+          return;
+        }
 
-        const { data: savedRows } = await supabase
+        if (!cancelled) {
+          setIsLoggedIn(true);
+          setUserEmail(session.user.email || "");
+          setActiveMode("all");
+        }
+
+        const { data: savedRows, error } = await supabase
           .from("saved_intel")
-          .select("property_id");
-        if (!cancelled && Array.isArray(savedRows)) {
+          .select("property_id, reaction_type, created_at")
+          .order("created_at", { ascending: false });
+
+        if (!cancelled && !error && Array.isArray(savedRows)) {
+          const mappedCloud = savedRows.map((r) => ({
+            property_id: r.property_id,
+            reaction_type: r.reaction_type || "Save",
+            timestamp: r.created_at ? new Date(r.created_at).getTime() : Date.now(),
+            is_cloud: true,
+          }));
+          setCloudItems(mappedCloud);
           setAccountSavedIds(new Set(savedRows.map((r) => r.property_id)));
         }
       } catch (e) {
-        // Not signed in / read failed — the prompt simply won't show.
+        // Not signed in / read failed — fallback gracefully to offline mode
       }
     };
     loadAccount();
@@ -88,13 +115,16 @@ export default function WishlistPage() {
     };
   }, []);
 
-  // Distinct property ids on this device that the account doesn't have yet.
-  const localOnlyIds = [...new Set(items.map((i) => i.property_id).filter(Boolean))]
-    .filter((id) => !accountSavedIds.has(id));
-  const showMergePrompt = isLoggedIn && localOnlyIds.length > 0;
+  // Distinct property ids on this device that the account doesn't have yet
+  const localOnlyItems = useMemo(() => {
+    return offlineItems.filter((i) => i.property_id && !accountSavedIds.has(i.property_id));
+  }, [offlineItems, accountSavedIds]);
 
-  const handleMerge = async () => {
-    if (merging || localOnlyIds.length === 0) return;
+  const showSyncBanner = isLoggedIn && localOnlyItems.length > 0;
+
+  // 1-Tap Cloud Sync / Merge
+  const handleSync = async () => {
+    if (merging || localOnlyItems.length === 0) return;
     setMerging(true);
     setMergeMessage(null);
     try {
@@ -106,20 +136,32 @@ export default function WishlistPage() {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ propertyIds: localOnlyIds }),
+        body: JSON.stringify({
+          items: localOnlyItems.map((it) => ({
+            property_id: it.property_id,
+            reaction_type: it.reaction_type || "Save",
+          })),
+          propertyIds: localOnlyItems.map((it) => it.property_id),
+        }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Merge failed");
+      if (!res.ok) throw new Error(result.error || "Sync failed");
 
-      // Fold the merged ids into the known account set so the prompt clears.
-      // Local storage is intentionally left untouched.
-      setAccountSavedIds((prev) => new Set([...prev, ...localOnlyIds]));
+      // Fold the merged ids into the known account set so the banner clears
+      const newlyAddedIds = localOnlyItems.map((it) => it.property_id);
+      setAccountSavedIds((prev) => new Set([...prev, ...newlyAddedIds]));
+      setCloudItems((prev) => [
+        ...localOnlyItems.map((it) => ({ ...it, is_cloud: true })),
+        ...prev,
+      ]);
+
       const n = result.merged ?? 0;
       setMergeMessage(
         n > 0
-          ? `${n} saved ${n === 1 ? "space" : "spaces"} added to your account; they'll follow you across devices.`
-          : "Your account already had these saved."
+          ? `${n} saved ${n === 1 ? "space" : "spaces"} synchronized to your account across devices.`
+          : "Your account already had these spaces saved."
       );
+      setTimeout(() => setMergeMessage(null), 6000);
     } catch (e) {
       setMergeMessage("Couldn't sync right now. Please try again in a moment.");
     } finally {
@@ -127,28 +169,137 @@ export default function WishlistPage() {
     }
   };
 
-  const removeItem = (timestamp) => {
-    setFadingOut((prev) => new Set([...prev, timestamp]));
+  // Safe removal across both offline storage and cloud account
+  const removeItem = useCallback((item) => {
+    const key = item.timestamp || item.property_id;
+    setFadingOut((prev) => new Set([...prev, key]));
     setTimeout(() => {
-      setItems((prev) => {
-        const updated = prev.filter((item) => item.timestamp !== timestamp);
-        localStorage.setItem("scoutit_reactions", JSON.stringify(updated));
+      // 1. Remove from local storage
+      setOfflineItems((prev) => {
+        const updated = prev.filter(
+          (it) => it.property_id !== item.property_id && it.timestamp !== item.timestamp
+        );
+        try {
+          localStorage.setItem("scoutit_reactions", JSON.stringify(updated));
+        } catch (e) {}
         return updated;
       });
+
+      // 2. Remove from cloud account if authenticated
+      if (isLoggedIn && item.property_id) {
+        setCloudItems((prev) => prev.filter((it) => it.property_id !== item.property_id));
+        setAccountSavedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(item.property_id);
+          return next;
+        });
+        supabase
+          .from("saved_intel")
+          .delete()
+          .eq("property_id", item.property_id)
+          .then(() => {})
+          .catch((err) => console.warn("[WISHLIST] Cloud delete failed:", err));
+      }
+
       setFadingOut((prev) => {
         const next = new Set(prev);
-        next.delete(timestamp);
+        next.delete(key);
         return next;
       });
-    }, 300);
-  };
+    }, 250);
+  }, [isLoggedIn]);
 
-  const grouped = REACTION_ORDER.map((type) => ({
-    type,
-    items: items.filter((item) => item.reaction_type === type),
-  })).filter((group) => group.items.length > 0);
+  // Compute active item set based on interchangeable mode
+  const displayItems = useMemo(() => {
+    let sourceList = [];
+    const localIds = new Set(offlineItems.map((i) => i.property_id));
 
-  const isEmpty = loaded && items.length === 0;
+    if (!isLoggedIn || activeMode === "offline") {
+      sourceList = offlineItems.map((it) => ({
+        ...it,
+        is_local: true,
+        is_cloud: accountSavedIds.has(it.property_id),
+      }));
+    } else if (activeMode === "cloud") {
+      sourceList = cloudItems.map((it) => ({
+        ...it,
+        is_cloud: true,
+        is_local: localIds.has(it.property_id),
+      }));
+    } else {
+      // "all" unified mode
+      const seen = new Set();
+      const combined = [];
+
+      cloudItems.forEach((c) => {
+        seen.add(c.property_id);
+        combined.push({
+          ...c,
+          is_cloud: true,
+          is_local: localIds.has(c.property_id),
+        });
+      });
+
+      offlineItems.forEach((o) => {
+        if (!seen.has(o.property_id)) {
+          seen.add(o.property_id);
+          combined.push({
+            ...o,
+            is_cloud: false,
+            is_local: true,
+          });
+        }
+      });
+
+      sourceList = combined;
+    }
+
+    // Enrich with CMS metadata (title, city, category) if missing
+    return sourceList.map((item) => {
+      const prop = cmsMap[item.property_id];
+      return {
+        ...item,
+        property_title: item.property_title || prop?.title || "Curated Space",
+        city: item.city || prop?.city || "",
+        category: item.category || prop?.spaceCategory || "",
+        is_broker: Boolean(item.is_broker || prop?.is_broker),
+        removed: classifySavedItem(item, liveSlugs) === "removed",
+      };
+    });
+  }, [isLoggedIn, activeMode, offlineItems, cloudItems, accountSavedIds, cmsMap, liveSlugs]);
+
+  // Group items by reaction type
+  const grouped = useMemo(() => {
+    const list = REACTION_ORDER.map((type) => ({
+      type,
+      items: displayItems.filter((item) => (item.reaction_type || "Save") === type),
+    })).filter((group) => group.items.length > 0);
+
+    // Fallback for any items with atypical reaction types
+    const knownReactions = new Set(REACTION_ORDER);
+    const uncategorized = displayItems.filter(
+      (item) => !knownReactions.has(item.reaction_type)
+    );
+    if (uncategorized.length > 0) {
+      const saveGroup = list.find((g) => g.type === "Save");
+      if (saveGroup) {
+        saveGroup.items.push(...uncategorized);
+      } else {
+        list.push({ type: "Save", items: uncategorized });
+      }
+    }
+    return list;
+  }, [displayItems]);
+
+  const totalUniqueCount = useMemo(() => {
+    const ids = new Set([
+      ...offlineItems.map((i) => i.property_id),
+      ...cloudItems.map((i) => i.property_id),
+    ]);
+    return ids.size;
+  }, [offlineItems, cloudItems]);
+
+  const isEmpty = loaded && displayItems.length === 0;
 
   return (
     <div className="page-wrapper">
@@ -157,32 +308,119 @@ export default function WishlistPage() {
       <main className="wishlist-main">
         <header className="page-header">
           <span className="layer-label">LAYER 06 // YOUR BOARD</span>
-          <h1 className="page-title">Your Board</h1>
+          <div className="header-headline-row">
+            <h1 className="page-title">Your Board</h1>
+            <div className="status-pill-badge" title="Active storage mode">
+              <span className={`status-dot ${isLoggedIn ? "online" : "offline"}`} />
+              <span className="status-text">
+                {isLoggedIn ? "ACCOUNT SYNC ACTIVE" : "OFFLINE MODE · THIS DEVICE"}
+              </span>
+            </div>
+          </div>
         </header>
 
-        {showMergePrompt && (
-          <div className="merge-banner">
-            <div className="merge-copy">
-              <span className="merge-label">SYNC // ACCOUNT</span>
-              <p className="merge-text">
-                <strong>{localOnlyIds.length}</strong> saved{" "}
-                {localOnlyIds.length === 1 ? "space is" : "spaces are"} on this device only.
+        {/* Interchangeable Mode Selector */}
+        <nav className="board-mode-nav" role="tablist" aria-label="Board storage view">
+          {isLoggedIn ? (
+            <>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeMode === "all"}
+                className={`mode-tab ${activeMode === "all" ? "active" : ""}`}
+                onClick={() => setActiveMode("all")}
+              >
+                ALL SAVED ({totalUniqueCount})
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeMode === "cloud"}
+                className={`mode-tab ${activeMode === "cloud" ? "active" : ""}`}
+                onClick={() => setActiveMode("cloud")}
+              >
+                <span className="mode-dot cloud" aria-hidden="true" />
+                CLOUD ACCOUNT ({cloudItems.length})
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeMode === "offline"}
+                className={`mode-tab ${activeMode === "offline" ? "active" : ""}`}
+                onClick={() => setActiveMode("offline")}
+              >
+                <span className="mode-dot local" aria-hidden="true" />
+                THIS DEVICE ({offlineItems.length})
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeMode === "offline"}
+                className="mode-tab active"
+                onClick={() => setActiveMode("offline")}
+              >
+                <span className="mode-dot local" aria-hidden="true" />
+                THIS DEVICE (OFFLINE: {offlineItems.length})
+              </button>
+              <Link
+                href="/login?next=%2Fwishlist"
+                className="mode-tab sign-in-tab"
+                title="Sign in to sync your board across devices"
+              >
+                <span className="mode-dot cloud-locked" aria-hidden="true" />
+                SIGN IN TO SYNC CLOUD ↗
+              </Link>
+            </>
+          )}
+        </nav>
+
+        {/* Sync Banner for Local-Only Items */}
+        {showSyncBanner && (
+          <aside className="sync-banner" aria-label="Account synchronization">
+            <div className="sync-copy">
+              <span className="sync-label">SYNC // ACCOUNT</span>
+              <p className="sync-text">
+                <strong>{localOnlyItems.length}</strong> saved{" "}
+                {localOnlyItems.length === 1 ? "space is" : "spaces are"} on this device only.
               </p>
             </div>
             <button
-              className="merge-btn"
-              onClick={handleMerge}
+              className="sync-btn"
+              onClick={handleSync}
               disabled={merging}
             >
               {merging
-                ? "Bringing them in…"
-                : `Bring ${localOnlyIds.length} into your account`}
+                ? "Synchronizing…"
+                : `Sync ${localOnlyItems.length} to Cloud Account`}
             </button>
+          </aside>
+        )}
+
+        {/* Offline Guest Info Banner */}
+        {!isLoggedIn && offlineItems.length > 0 && (
+          <div className="guest-info-banner">
+            <div className="guest-info-copy">
+              <span className="guest-info-title">SAVED LOCALLY</span>
+              <p className="guest-info-desc">
+                Your spaces are stored on this device. Sign in to synchronize your board across your phone, tablet, and desktop.
+              </p>
+            </div>
+            <Link href="/login?next=%2Fwishlist" className="guest-sign-in-btn">
+              SIGN IN TO BACK UP →
+            </Link>
           </div>
         )}
 
-        {mergeMessage && <div className="merge-message">{mergeMessage}</div>}
+        {mergeMessage && (
+          <div className="merge-message" role="status" aria-live="polite">
+            {mergeMessage}
+          </div>
+        )}
 
+        {/* Skeleton Loading State */}
         {!loaded && (
           <div className="cards-grid" aria-busy="true" aria-label="Loading saved spaces">
             {[1, 2, 3].map((n) => (
@@ -190,92 +428,147 @@ export default function WishlistPage() {
                 key={n}
                 aria-hidden="true"
                 className="animate-pulse rounded-lg border border-surface-variant bg-surface/60 p-5"
-                style={{ minHeight: "260px" }}
+                style={{ minHeight: "220px" }}
               >
-                <div className="h-36 w-full rounded bg-surface-variant/40 mb-4" />
-                <div className="h-3 w-24 rounded bg-gold-accent/20 mb-3" />
-                <div className="h-5 w-3/4 rounded bg-surface-variant/60 mb-2" />
-                <div className="h-3 w-1/2 rounded bg-surface-variant/40" />
+                <div className="h-4 w-28 rounded bg-gold-accent/20 mb-3" />
+                <div className="h-6 w-3/4 rounded bg-surface-variant/60 mb-3" />
+                <div className="h-3 w-1/2 rounded bg-surface-variant/40 mb-5" />
+                <div className="h-10 w-full rounded bg-surface-variant/30" />
               </div>
             ))}
           </div>
         )}
 
+        {/* Empty State */}
         {isEmpty && (
           <div className="empty-state">
-            <div className="empty-heading">Your dreams live here.</div>
-            <div className="empty-subtitle">
-              Dreaming is free. This is your inspiration board.
+            <div className="empty-heading">
+              {activeMode === "cloud"
+                ? "No cloud-synced spaces yet."
+                : "Your board is empty."}
             </div>
-            <Link href="/property" className="empty-cta">
-              Start Exploring →
-            </Link>
+            <div className="empty-subtitle">
+              {activeMode === "cloud" && offlineItems.length > 0
+                ? `You have ${offlineItems.length} saved spaces on this device. Sync them to access your board anywhere.`
+                : "Dreaming is free. Browse spaces across the Philippines and save your inspirations."}
+            </div>
+            {activeMode === "cloud" && offlineItems.length > 0 ? (
+              <button className="empty-cta" onClick={handleSync} disabled={merging}>
+                {merging ? "Syncing…" : `Sync ${offlineItems.length} Spaces to Cloud →`}
+              </button>
+            ) : (
+              <Link href="/property" className="empty-cta">
+                Start Exploring Spaces →
+              </Link>
+            )}
           </div>
         )}
 
-        {loaded && items.length > 0 && (
+        {/* Populated Board Content */}
+        {loaded && displayItems.length > 0 && (
           <div className="board-content">
             {grouped.map((group) => (
-              <section key={group.type} className="reaction-group">
-                <h2 className="group-label">{group.type}</h2>
+              <section key={group.type} className="reaction-group" aria-labelledby={`group-${group.type}`}>
+                <h2 id={`group-${group.type}`} className="group-label">
+                  {group.type} ({group.items.length})
+                </h2>
                 <div className="cards-grid">
                   {group.items.map((item, index) => {
-                    // A-102: a slug absent from the loaded catalogue is a dead
-                    // listing — render a non-link marker, never a broken link.
-                    const removed = classifySavedItem(item, liveSlugs) === "removed";
+                    const key = item.property_id || item.timestamp;
                     return (
-                    <div
-                      key={item.timestamp}
-                      className={`board-card stagger-enter ${fadingOut.has(item.timestamp) ? "fading" : ""}`}
-                      style={{ '--i': index }}
-                    >
-                      <div className="badge-corner">
-                        <ReactionBadge reactionType={item.reaction_type} />
-                      </div>
-                      <div className="card-body">
-                        {removed ? (
-                          <>
-                            <h3 className="card-title">{item.property_title}</h3>
-                            <span className="removed-marker">Listing removed</span>
-                          </>
-                        ) : item.is_broker ? (
-                          <Link href={`/brokers/${encodeURIComponent(item.property_id)}`} style={{ textDecoration: "none" }}>
-                            <h3 className="card-title">{item.property_title}</h3>
-                          </Link>
-                        ) : (
-                          <Link href={`/property/${encodeURIComponent(item.property_id)}`} style={{ textDecoration: "none" }}>
-                            <h3 className="card-title">{item.property_title}</h3>
-                          </Link>
-                        )}
-                        <div className="card-meta">
-                          {item.is_broker && <span className="advisor-badge">ADVISOR</span>}
-                          {item.city && <span>{item.city}</span>}
-                          {item.category && !item.is_broker && (
-                            <>
-                              <span className="meta-dot">·</span>
-                              <span>{item.category}</span>
-                            </>
+                      <article
+                        key={key}
+                        className={`board-card stagger-enter ${fadingOut.has(key) ? "fading" : ""}`}
+                        style={{ '--i': index }}
+                      >
+                        {/* Top Header Row */}
+                        <div className="card-top-row">
+                          <div className="card-breadcrumbs">
+                            {item.is_broker ? (
+                              <span className="advisor-badge">ADVISOR</span>
+                            ) : (
+                              <>
+                                {item.category && <span className="cat-text">{item.category}</span>}
+                                {item.category && item.city && <span className="meta-dot">·</span>}
+                                {item.city && <span className="city-text">{item.city}</span>}
+                              </>
+                            )}
+                            {item.removed && (
+                              <span className="removed-marker">Listing removed</span>
+                            )}
+                          </div>
+
+                          <div className="card-badge-cluster">
+                            {isLoggedIn && (
+                              <span
+                                className={`sync-tag ${item.is_cloud ? "sync-cloud" : "sync-device"}`}
+                                title={item.is_cloud ? "Saved to your Cloud Account" : "Saved on this device only"}
+                              >
+                                {item.is_cloud ? "● CLOUD" : "○ DEVICE"}
+                              </span>
+                            )}
+                            <ReactionBadge reactionType={item.reaction_type || "Save"} />
+                          </div>
+                        </div>
+
+                        {/* Card Title */}
+                        <div className="card-title-area">
+                          {item.removed ? (
+                            <h3 className="card-title removed">{item.property_title}</h3>
+                          ) : item.is_broker ? (
+                            <Link
+                              href={`/brokers/${encodeURIComponent(item.property_id)}`}
+                              className="card-title-link"
+                            >
+                              <h3 className="card-title">{item.property_title}</h3>
+                            </Link>
+                          ) : (
+                            <Link
+                              href={`/property/${encodeURIComponent(item.property_id)}`}
+                              className="card-title-link"
+                            >
+                              <h3 className="card-title">{item.property_title}</h3>
+                            </Link>
                           )}
                         </div>
-                      </div>
-                      <div className="card-actions">
-                        <span className="reaction-badge">{item.reaction_type}</span>
-                        <button
-                          className="remove-btn"
-                          onClick={() => removeItem(item.timestamp)}
-                          aria-label="Remove from board"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
+
+                        {/* Card Actions Row */}
+                        <div className="card-actions-row">
+                          {!item.removed && (
+                            <Link
+                              href={
+                                item.is_broker
+                                  ? `/brokers/${encodeURIComponent(item.property_id)}`
+                                  : `/property/${encodeURIComponent(item.property_id)}`
+                              }
+                              className="card-explore-btn"
+                            >
+                              VIEW DOSSIER <span className="arrow-glyph" aria-hidden="true">→</span>
+                            </Link>
+                          )}
+                          <button
+                            className="card-remove-btn"
+                            onClick={() => removeItem(item)}
+                            aria-label={`Remove ${item.property_title} from board`}
+                          >
+                            <span className="remove-icon" aria-hidden="true">✕</span>
+                            <span className="remove-text">REMOVE</span>
+                          </button>
+                        </div>
+                      </article>
                     );
                   })}
                 </div>
               </section>
             ))}
+
             <div className="board-footer">
-              Your board is saved on this device.
+              <span className="footer-status-pill">
+                <span className={`status-dot ${isLoggedIn ? "online" : "offline"}`} />
+                {isLoggedIn
+                  ? `Cloud Sync Active · Backed up as ${userEmail || "Authenticated Member"}`
+                  : "Offline Mode · Stored securely on this browser"}
+              </span>
             </div>
           </div>
         )}
@@ -294,13 +587,13 @@ export default function WishlistPage() {
         .wishlist-main {
           max-width: 900px;
           margin: 0 auto;
-          padding: 120px 24px 80px;
+          padding: 120px 24px calc(110px + env(safe-area-inset-bottom, 0px));
           position: relative;
           z-index: 1;
         }
 
         .page-header {
-          margin-bottom: 48px;
+          margin-bottom: 32px;
         }
 
         .layer-label {
@@ -310,7 +603,15 @@ export default function WishlistPage() {
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: var(--accent);
-          margin-bottom: 16px;
+          margin-bottom: 12px;
+        }
+
+        .header-headline-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
         }
 
         .page-title {
@@ -319,28 +620,137 @@ export default function WishlistPage() {
           font-weight: normal;
           color: var(--text-primary);
           margin: 0;
+          letter-spacing: -0.02em;
+        }
+
+        .status-pill-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          padding: 6px 14px;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          color: var(--text-secondary);
+        }
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--accent);
+          box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+        }
+
+        .status-dot.offline {
+          background: var(--text-muted);
+          box-shadow: none;
+        }
+
+        /* Mode Selector */
+        .board-mode-nav {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0 0 32px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          padding-bottom: 4px;
+        }
+
+        .board-mode-nav::-webkit-scrollbar {
+          display: none;
+        }
+
+        .mode-tab {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 18px;
+          min-height: 44px;
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          color: var(--text-secondary);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: background 0.2s, border-color 0.2s, color 0.2s;
+          touch-action: manipulation;
+        }
+
+        .mode-tab:hover {
+          border-color: rgba(var(--accent-rgb), 0.4);
+          color: var(--text-primary);
+        }
+
+        .mode-tab.active {
+          background: rgba(var(--accent-rgb), 0.12);
+          border-color: var(--accent);
+          color: var(--accent-bright);
+          font-weight: 600;
+        }
+
+        .mode-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+        }
+
+        .mode-dot.cloud {
+          background: var(--accent-bright);
+          box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
+        }
+
+        .mode-dot.local {
+          background: var(--text-muted);
+        }
+
+        .mode-dot.cloud-locked {
+          background: var(--accent);
+        }
+
+        .sign-in-tab {
+          text-decoration: none;
+          color: var(--accent);
+          border-color: rgba(var(--accent-rgb), 0.3);
+          background: rgba(var(--accent-rgb), 0.04);
+        }
+
+        .sign-in-tab:hover {
+          background: rgba(var(--accent-rgb), 0.12);
+          border-color: var(--accent);
+          color: var(--accent-bright);
         }
 
         /* Account sync prompt */
-        .merge-banner {
+        .sync-banner {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 20px;
           flex-wrap: wrap;
-          background: linear-gradient(165deg, rgba(var(--accent-rgb), 0.10), var(--surface));
+          background: linear-gradient(165deg, rgba(var(--accent-rgb), 0.10), var(--surface2));
           border: 1px solid rgba(var(--accent-rgb), 0.35);
-          padding: 20px 24px;
-          margin-bottom: 32px;
+          border-radius: 6px;
+          padding: 18px 24px;
+          margin-bottom: 28px;
         }
 
-        .merge-copy {
+        .sync-copy {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 4px;
         }
 
-        .merge-label {
+        .sync-label {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           text-transform: uppercase;
@@ -348,41 +758,106 @@ export default function WishlistPage() {
           color: var(--accent);
         }
 
-        .merge-text {
+        .sync-text {
           margin: 0;
-          font-size: 15px;
+          font-size: 14px;
           color: var(--text-primary);
         }
 
-        .merge-text strong {
+        .sync-text strong {
           color: var(--accent-bright);
         }
 
-        .merge-btn {
+        .sync-btn {
           background: var(--accent-bright);
           color: var(--on-accent);
           border: none;
           padding: 12px 22px;
+          min-height: 44px;
+          border-radius: 4px;
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 1px;
           font-family: var(--font-mono), monospace;
+          font-weight: 600;
           cursor: pointer;
           white-space: nowrap;
           transition: background 0.2s, transform 0.1s;
+          touch-action: manipulation;
         }
 
-        .merge-btn:hover:not(:disabled) {
+        .sync-btn:hover:not(:disabled) {
           background: var(--accent);
         }
 
-        .merge-btn:active:not(:disabled) {
+        .sync-btn:active:not(:disabled) {
           transform: scale(0.97);
         }
 
-        .merge-btn:disabled {
+        .sync-btn:disabled {
           opacity: 0.6;
           cursor: default;
+        }
+
+        /* Guest Info Banner */
+        .guest-info-banner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          flex-wrap: wrap;
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-left: 3px solid var(--accent);
+          border-radius: 4px;
+          padding: 16px 20px;
+          margin-bottom: 28px;
+        }
+
+        .guest-info-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .guest-info-title {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: var(--accent);
+        }
+
+        .guest-info-desc {
+          margin: 0;
+          font-size: 13px;
+          color: var(--text-secondary);
+          line-height: 1.4;
+          max-width: 540px;
+        }
+
+        .guest-sign-in-btn {
+          display: inline-flex;
+          align-items: center;
+          padding: 10px 18px;
+          min-height: 44px;
+          background: transparent;
+          border: 1px solid var(--accent);
+          color: var(--accent-bright);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          text-decoration: none;
+          border-radius: 4px;
+          white-space: nowrap;
+          transition: background 0.2s, color 0.2s;
+          touch-action: manipulation;
+        }
+
+        .guest-sign-in-btn:hover {
+          background: var(--accent);
+          color: var(--on-accent);
         }
 
         .merge-message {
@@ -390,9 +865,10 @@ export default function WishlistPage() {
           font-size: 12px;
           color: var(--text-primary);
           margin-bottom: 24px;
-          padding: 12px 16px;
-          border-left: 2px solid var(--accent);
-          background: rgba(var(--accent-rgb), 0.06);
+          padding: 14px 18px;
+          border-left: 3px solid var(--accent);
+          background: rgba(var(--accent-rgb), 0.08);
+          border-radius: 0 4px 4px 0;
         }
 
         /* Empty state */
@@ -402,7 +878,7 @@ export default function WishlistPage() {
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: 120px 0;
+          padding: 100px 16px;
         }
 
         .empty-heading {
@@ -412,25 +888,32 @@ export default function WishlistPage() {
         }
 
         .empty-subtitle {
-          font-family: var(--font-mono), monospace;
-          font-size: 14px;
+          font-family: var(--font-body), sans-serif;
+          font-size: 15px;
           color: var(--text-secondary);
-          margin-top: 8px;
+          margin-top: 10px;
+          max-width: 480px;
+          line-height: 1.5;
         }
 
         .empty-cta {
-          display: inline-block;
-          margin-top: 32px;
+          display: inline-flex;
+          align-items: center;
+          margin-top: 28px;
           background: transparent;
           border: 1px solid var(--accent);
-          color: var(--accent);
+          color: var(--accent-bright);
           padding: 12px 28px;
+          min-height: 44px;
           font-size: 13px;
           text-transform: uppercase;
           letter-spacing: 1px;
           text-decoration: none;
           font-family: var(--font-mono), monospace;
+          border-radius: 4px;
           transition: background 0.2s, color 0.2s;
+          cursor: pointer;
+          touch-action: manipulation;
         }
 
         .empty-cta:hover {
@@ -439,28 +922,20 @@ export default function WishlistPage() {
         }
 
         .empty-cta:active {
-          transform: scale(0.95);
-        }
-
-        /* Loading */
-        .loading-state {
-          text-align: center;
-          padding: 120px 0;
-          color: var(--text-secondary);
-          font-size: 14px;
+          transform: scale(0.96);
         }
 
         /* Board content */
         .board-content {
           display: flex;
           flex-direction: column;
-          gap: 40px;
+          gap: 36px;
         }
 
         .reaction-group {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 14px;
         }
 
         .group-label {
@@ -469,7 +944,7 @@ export default function WishlistPage() {
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: var(--accent);
-          margin: 0 0 4px;
+          margin: 0;
           padding-bottom: 8px;
           border-bottom: 1px solid var(--border-solid);
         }
@@ -477,31 +952,26 @@ export default function WishlistPage() {
         .cards-grid {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 12px;
         }
 
         .board-card {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+          flex-direction: column;
+          gap: 16px;
           background: var(--surface2);
           border: 1px solid var(--border);
-          padding: 16px 20px;
-          transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+          border-radius: 6px;
+          padding: 20px;
+          transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
           position: relative;
+          box-sizing: border-box;
         }
 
         .board-card:hover {
-          transform: translateY(-3px);
-          border-color: rgba(var(--accent-rgb), 0.3);
+          transform: translateY(-2px);
+          border-color: rgba(var(--accent-rgb), 0.35);
           box-shadow: var(--shadow-md), var(--shadow-glow-soft);
-        }
-
-        .badge-corner {
-          position: absolute;
-          top: -8px;
-          right: -8px;
-          z-index: 10;
         }
 
         .board-card.fading {
@@ -509,46 +979,47 @@ export default function WishlistPage() {
           transform: translateX(-20px);
         }
 
-        .card-body {
-          flex: 1;
-          min-width: 0;
+        .card-top-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
         }
 
-        .card-title {
-          font-family: var(--font-display);
-          font-size: 20px;
-          font-weight: 400;
-          color: var(--text-primary);
-          margin: 0 0 4px;
-          transition: color 0.2s ease;
-        }
-
-        .card-title:hover {
-          color: var(--accent);
-        }
-
-        /* A-102: dead-listing marker. Muted, non-interactive, unmistakable —
-           it must never read as a link or a badge of honor. */
-        .removed-marker {
+        .card-breadcrumbs {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: var(--text-muted);
-          border: 1px solid var(--border);
-          border-radius: 2px;
-          padding: 2px 8px;
-          margin-top: 6px;
-          display: inline-block;
+          letter-spacing: 0.08em;
+          color: var(--text-secondary);
         }
 
-        .card-meta {
-          font-family: var(--font-mono), monospace;
-          font-size: 12px;
-          color: var(--text-secondary);
+        .card-badge-cluster {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 8px;
+        }
+
+        .sync-tag {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          padding: 3px 8px;
+          border-radius: 3px;
+          border: 1px solid var(--border);
+          color: var(--text-muted);
+          line-height: 1;
+        }
+
+        .sync-tag.sync-cloud {
+          border-color: rgba(var(--accent-rgb), 0.35);
+          color: var(--accent);
+          background: rgba(var(--accent-rgb), 0.06);
         }
 
         .advisor-badge {
@@ -561,156 +1032,251 @@ export default function WishlistPage() {
           padding: 2px 6px;
           border-radius: 2px;
           font-family: var(--font-mono), monospace;
-          margin-right: 6px;
         }
 
         .meta-dot {
           color: var(--text-muted);
         }
 
-        .card-actions {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex-shrink: 0;
+        .card-title-area {
+          min-width: 0;
         }
 
-        .reaction-badge {
+        .card-title-link {
+          text-decoration: none;
+        }
+
+        .card-title {
+          font-family: var(--font-display);
+          font-size: 22px;
+          font-weight: 400;
+          color: var(--text-primary);
+          margin: 0;
+          line-height: 1.3;
+          transition: color 0.2s ease;
+        }
+
+        .card-title-link:hover .card-title {
+          color: var(--accent-bright);
+        }
+
+        .card-title.removed {
+          color: var(--text-muted);
+        }
+
+        .removed-marker {
           font-family: var(--font-mono), monospace;
           font-size: 12px;
           text-transform: uppercase;
-          letter-spacing: 1px;
-          color: var(--accent);
+          letter-spacing: 0.12em;
+          color: var(--text-muted);
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 2px 8px;
+          display: inline-block;
+        }
+
+        .card-actions-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border-top: 1px solid var(--border-solid);
+          padding-top: 14px;
+          margin-top: 4px;
+        }
+
+        .card-explore-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 44px;
+          padding: 8px 18px;
+          background: transparent;
           border: 1px solid rgba(var(--accent-rgb), 0.3);
-          padding: 4px 10px;
-          white-space: nowrap;
-        }
-
-        .remove-btn {
-          background: none;
-          border: 1px solid var(--border-solid);
-          color: var(--text-secondary);
-          font-size: 12px;
-          cursor: pointer;
-          padding: 4px 8px;
-          transition: color 0.2s, border-color 0.2s;
+          color: var(--accent-bright);
           font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: background 0.2s, border-color 0.2s, color 0.2s;
+          touch-action: manipulation;
         }
 
-        .remove-btn:hover {
-          color: var(--text-primary);
-          border-color: var(--text-primary);
+        .card-explore-btn:hover {
+          background: var(--accent);
+          border-color: var(--accent);
+          color: var(--on-accent);
         }
 
-        .remove-btn:active {
-          transform: scale(0.95);
+        .arrow-glyph {
+          font-size: 14px;
+          transition: transform 0.2s ease;
+        }
+
+        .card-explore-btn:hover .arrow-glyph {
+          transform: translateX(3px);
+        }
+
+        .card-remove-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-height: 44px;
+          padding: 8px 14px;
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--text-muted);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+          touch-action: manipulation;
+        }
+
+        .card-remove-btn:hover {
+          border-color: var(--red, #e05252);
+          color: var(--red, #e05252);
+        }
+
+        .remove-icon {
+          font-size: 12px;
         }
 
         .board-footer {
-          font-family: var(--font-mono), monospace;
-          font-size: 12px;
-          color: var(--text-secondary);
-          text-align: center;
+          display: flex;
+          justify-content: center;
           padding-top: 24px;
           border-top: 1px solid var(--border-solid);
         }
 
+        .footer-status-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--text-secondary);
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
         @media (max-width: 768px) {
           .wishlist-main {
-            padding: 80px 16px 40px;
+            padding: 80px 16px calc(110px + env(safe-area-inset-bottom, 0px));
           }
           .page-title {
-            font-size: 30px;
+            font-size: 32px;
           }
-          .merge-banner {
+          .header-headline-row {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .sync-banner,
+          .guest-info-banner {
             flex-direction: column;
             align-items: stretch;
           }
-          .merge-btn {
+          .sync-btn,
+          .guest-sign-in-btn {
             width: 100%;
-            min-height: 44px;
+            justify-content: center;
+            text-align: center;
           }
-          .board-card {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
-            padding: 16px;
-          }
-          .card-actions {
+          .card-actions-row {
+            flex-direction: row;
+            align-items: center;
             justify-content: space-between;
-            width: 100%;
-            border-top: 1px dashed var(--border-solid);
-            padding-top: 10px;
-            margin-top: 4px;
+            gap: 10px;
           }
-          .badge-corner {
-            top: -6px;
-            right: -6px;
+          .card-explore-btn,
+          .card-remove-btn {
+            flex: 1;
+            justify-content: center;
+            text-align: center;
           }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 480px) {
           .wishlist-main {
-            padding: 70px 14px 32px;
+            padding: 68px 12px calc(110px + env(safe-area-inset-bottom, 0px));
           }
           .page-title {
             font-size: 26px;
           }
           .board-card {
             padding: 14px;
-            gap: 10px;
+            gap: 12px;
           }
-          /* Full-width action buttons on small phones */
-          .card-actions button,
-          .card-actions a {
-            flex: 1;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
+          .card-title {
+            font-size: 18px;
           }
         }
 
-        @media (max-width: 480px) {
-          .page-title {
-            font-size: 22px;
-          }
-          .wishlist-main {
-            padding: 60px 12px 28px;
-          }
+        /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): scoped styles */
+        :global(body.light-mode) .mode-tab {
+          background: var(--surface);
+          border-color: var(--border-solid);
+          color: var(--text-secondary);
         }
-
-        /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): scoped styles
-           need in-file :global rules. Dark untouched. */
-        :global(body.light-mode) .merge-btn {
+        :global(body.light-mode) .mode-tab.active {
+          background: var(--accent-dim);
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+        :global(body.light-mode) .sync-banner {
+          background: var(--surface2);
+          border-color: var(--accent-muted);
+        }
+        :global(body.light-mode) .sync-btn {
           background: var(--accent-fill);
           color: var(--on-accent);
+        }
+        :global(body.light-mode) .guest-info-banner {
+          background: var(--surface2);
+          border-color: var(--border-solid);
+        }
+        :global(body.light-mode) .guest-sign-in-btn {
+          border-color: var(--accent-muted);
+          color: var(--accent);
         }
         :global(body.light-mode) .merge-message {
           color: var(--text-secondary);
           border-color: var(--accent-muted);
+        }
+        :global(body.light-mode) .board-card {
+          background: var(--surface2);
+          border-color: var(--border-solid);
         }
         :global(body.light-mode) .empty-heading,
         :global(body.light-mode) .card-title {
           color: var(--text-primary);
         }
         :global(body.light-mode) .empty-subtitle,
-        :global(body.light-mode) .card-meta,
+        :global(body.light-mode) .card-breadcrumbs,
         :global(body.light-mode) .loading-state,
-        :global(body.light-mode) .board-footer {
+        :global(body.light-mode) .footer-status-pill,
+        :global(body.light-mode) .status-pill-badge {
           color: var(--text-secondary);
         }
         :global(body.light-mode) .board-footer {
           border-color: var(--border-solid);
         }
-        :global(body.light-mode) .advisor-badge,
-        :global(body.light-mode) .reaction-badge {
+        :global(body.light-mode) .advisor-badge {
           color: var(--accent);
           border-color: var(--accent-muted);
           background: var(--accent-dim);
         }
-        :global(body.light-mode) .remove-btn {
+        :global(body.light-mode) .card-explore-btn {
+          border-color: var(--accent-muted);
+          color: var(--accent);
+        }
+        :global(body.light-mode) .card-remove-btn {
           color: var(--text-secondary);
           border-color: var(--border-solid);
         }
@@ -718,8 +1284,13 @@ export default function WishlistPage() {
           :global(body.light-mode) .card-title:hover {
             color: var(--accent);
           }
-          :global(body.light-mode) .remove-btn:hover {
-            color: var(--text-primary);
+          :global(body.light-mode) .card-explore-btn:hover {
+            background: var(--accent-fill);
+            color: var(--on-accent);
+          }
+          :global(body.light-mode) .card-remove-btn:hover {
+            color: var(--red);
+            border-color: var(--red);
           }
         }
         :global(body.light-mode) .empty-cta {

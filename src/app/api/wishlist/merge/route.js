@@ -22,7 +22,20 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const rawIds = Array.isArray(body?.propertyIds) ? body.propertyIds : [];
+    const rawIds = Array.isArray(body?.propertyIds)
+      ? body.propertyIds
+      : Array.isArray(body?.items)
+      ? body.items.map((it) => it?.property_id)
+      : [];
+
+    const reactionMap = new Map();
+    if (Array.isArray(body?.items)) {
+      body.items.forEach((it) => {
+        if (typeof it?.property_id === "string" && it.property_id.trim()) {
+          reactionMap.set(it.property_id.trim(), it.reaction_type || "Save");
+        }
+      });
+    }
 
     // Normalize: strings only, trimmed, de-duped, capped to a sane batch size.
     const localIds = [...new Set(
@@ -59,7 +72,11 @@ export async function POST(request) {
       });
     }
 
-    const rowsToInsert = missing.map((property_id) => ({ user_id: userId, property_id }));
+    const rowsToInsert = missing.map((property_id) => ({
+      user_id: userId,
+      property_id,
+      reaction_type: reactionMap.get(property_id) || "Save",
+    }));
     const { error: insertError } = await supabaseAdmin
       .from("saved_intel")
       .insert(rowsToInsert);

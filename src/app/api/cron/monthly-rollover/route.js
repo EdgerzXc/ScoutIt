@@ -72,7 +72,6 @@ export async function handleMonthlyRollover(request) {
           userId: ownerId,
           title: "Your Monthly Scout Wrap is Ready",
           desc: `Your portfolio performance wrap for ${periodMonth} is now available in your dashboard.`,
-          icon: "📊",
           notificationType: "monthly_wrap",
         });
       }
@@ -103,7 +102,6 @@ export async function handleMonthlyRollover(request) {
           userId: broker.id,
           title: "Your Monthly Scout Wrap is Ready",
           desc: `Your deal pipeline wrap for ${periodMonth} is now available in your dashboard.`,
-          icon: "📊",
           notificationType: "monthly_wrap",
         });
       }

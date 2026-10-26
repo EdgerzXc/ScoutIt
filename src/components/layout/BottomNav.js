@@ -43,10 +43,9 @@ const ICONS = {
   ),
   dashboard: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7"/>
-      <rect x="14" y="3" width="7" height="7"/>
-      <rect x="14" y="14" width="7" height="7"/>
-      <rect x="3" y="14" width="7" height="7"/>
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <line x1="3" y1="9" x2="21" y2="9"/>
+      <line x1="9" y1="21" x2="9" y2="9"/>
     </svg>
   ),
   role: (
@@ -92,7 +91,7 @@ const ICONS = {
 const ITEMS = {
   home:      { id: "home",      href: "/",          label: "Home",      icon: ICONS.home },
   spaces:    { id: "spaces",    href: "/property",  label: "Spaces",    icon: ICONS.spaces },
-  discover:  { id: "discover",  href: "/property",  label: "Spaces",    icon: ICONS.spaces },
+  discover:  { id: "discover",  href: "/property",  label: "Discover",  icon: ICONS.discover },
   // "Board" here = YOUR SAVES (/wishlist), matching the "Your Board" header on
   // that page. It kept this label in the 2026-08-08 A7 rename; what moved was
   // the RANKINGS surface, which had also been calling itself "The Board".
@@ -106,19 +105,16 @@ const ITEMS = {
 };
 
 // Contextual Layout Configurations.
-// IA rules (mobile bottom nav, ≤5 items):
-//   • Slot 1 (left) anchors the section you're in — "you are here".
-//   • Home stays reachable from every context.
-//   • Slots 2–4 are the most useful onward destinations for that page.
-//   • Theme/display is a utility, so it always sits in the last slot —
-//     never in the prime, thumb-reachable centre.
+// 6-item quick access mobile bottom nav:
+//   • Stable, predictable thumb muscle memory across all primary views.
+//   • Home (Ground floor), Spaces (Directory), Intel (Briefings), Board (Saved), Dash (Workspace), Theme (Help & Display).
 const CONTEXTS = {
-  default:   [ITEMS.home,      ITEMS.spaces,    ITEMS.discover, ITEMS.board,  ITEMS.theme],
-  dashboard: [ITEMS.dashboard, ITEMS.home,      ITEMS.discover, ITEMS.role,   ITEMS.theme],
-  board:     [ITEMS.board,     ITEMS.home,      ITEMS.spaces,   ITEMS.discover, ITEMS.theme],
-  discover:  [ITEMS.discover,  ITEMS.home,      ITEMS.spaces,   ITEMS.board,  ITEMS.theme],
-  spaces:    [ITEMS.spaces,    ITEMS.home,      ITEMS.discover, ITEMS.board,  ITEMS.theme],
-  intel:     [ITEMS.intel,     ITEMS.home,      ITEMS.spaces,   ITEMS.board,  ITEMS.theme]
+  default:   [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
+  dashboard: [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
+  board:     [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
+  discover:  [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
+  spaces:    [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
+  intel:     [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme]
 };
 
 

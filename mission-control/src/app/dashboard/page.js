@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIER_LABELS } from "@/lib/rbac";
+import { countStalledDisputes } from "@/lib/reviewDisputePolicy.mjs";
 import {
   Activity,
   ShieldAlert,
@@ -12,6 +13,7 @@ import {
   Users,
   ShieldBan,
   Wrench,
+  Scale,
 } from "lucide-react";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -40,6 +42,7 @@ export default async function DashboardOverview() {
     activeFlags,
     blockedCount,
     recentActions,
+    disputedReviews,
   ] = await Promise.all([
     safe(admin.from("properties").select("id", { count: "exact", head: true })),
     safe(
@@ -68,7 +71,16 @@ export default async function DashboardOverview() {
         .order("created_at", { ascending: false })
         .limit(8)
     ),
+    safe(
+      admin
+        .from("user_behavioral_reviews")
+        .select("id, disputed_at")
+        .eq("is_disputed", true)
+    ),
   ]);
+
+  const openDisputesList = disputedReviews.data || [];
+  const stalledCount = countStalledDisputes(openDisputesList);
 
   // Resolve actor names for the recent-actions stream.
   const actorIds = [...new Set((recentActions.data ?? []).map((a) => a.actor_id))];
@@ -119,6 +131,33 @@ export default async function DashboardOverview() {
           {TIER_LABELS[staff.tier]} · live data
         </span>
       </div>
+
+      {openDisputesList.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4">
+          <div className="flex items-center gap-3">
+            <Scale className="h-5 w-5 text-[#E8AE3C] shrink-0" />
+            <div>
+              <div className="text-sm font-medium text-white">
+                {openDisputesList.length} Behavioral Review {openDisputesList.length === 1 ? "Dispute" : "Disputes"} Pending Arbitration
+                {stalledCount > 0 && (
+                  <span className="ml-2 rounded bg-red-500/20 px-2 py-0.5 text-xs font-mono text-red-400 border border-red-500/30">
+                    {stalledCount} Stalled (&gt; 7d)
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-white/60">
+                Disputed reviews remain quarantined from standing scores until resolved by Ops Manager.
+              </div>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/reviews"
+            className="rounded-lg bg-[#E8AE3C] px-3 py-1.5 text-xs font-medium text-black hover:bg-[#F7C64E] transition-colors shrink-0"
+          >
+            Review Queue →
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map((stat) => {

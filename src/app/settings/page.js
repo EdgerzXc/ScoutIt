@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getUser, signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
-import { Camera, Search, Lock } from "lucide-react";
+import InfoTip from "@/components/ui/InfoTip";
+import { Camera, Search, Lock, ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
 import NotificationPreferencesPanel from "@/components/profile/NotificationPreferencesPanel";
@@ -18,16 +19,16 @@ import { canAddRole } from "@/lib/workspaceUnlock";
 import { normalizeDashboardModes, pickPrimaryRole } from "@/lib/dashboardModes";
 
 const SELF_SERVICE_TAGS = [
-  { id: 'buyer', label: 'Looking to Buy/Rent', icon: <Search strokeWidth={1.5} size="1em" /> },
-  { id: 'owner', label: 'I Own Property', icon: '📋' },
+  { id: 'buyer', label: 'Looking to Buy / Rent', icon: <Search strokeWidth={1.5} size="1.1em" /> },
+  { id: 'owner', label: 'Property Owner / Landlord', icon: '📋' },
 ];
 
 // A-137: broker / provider are earned lenses, not one-click tags. Broker
 // needs a PRC licence claim (public verification stays a separate staff
 // review); provider needs its Services Offered line filled in.
 const GATED_TAGS = [
-  { id: 'broker', label: 'Licensed Broker', icon: '🤝', requirement: 'PRC licence number required. Claim recorded, verified separately by staff.' },
-  { id: 'provider', label: 'Service Provider', icon: <Camera strokeWidth={1.5} size="1em" />, requirement: 'Services Offered line required below, so the roster knows what you do.' },
+  { id: 'broker', label: 'Licensed Real Estate Broker', icon: '🤝', requirement: 'PRC licence number required. Enter your license number below; our team verifies it.' },
+  { id: 'provider', label: 'Real Estate Service Provider', icon: <Camera strokeWidth={1.5} size="1.1em" />, requirement: 'Please describe the services you offer below (e.g. photography, appraisal, staging).' },
 ];
 
 const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS];
@@ -43,6 +44,7 @@ export default function SettingsPage() {
     await signOut();
     router.push("/onboarding");
   };
+
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
   const [primaryMode, setPrimaryMode] = useState("");
@@ -61,6 +63,7 @@ export default function SettingsPage() {
   // decide whether the control is shown (Standing Rule 10).
   const [shieldTier, setShieldTier] = useState(null);
   useEffect(() => { setShieldTier(getCurrentTier()); }, []);
+
   const [publicProfile, setPublicProfile] = useState({
     headline: "",
     bio: "",
@@ -68,6 +71,15 @@ export default function SettingsPage() {
     firm: "",
     service: "",
   });
+
+  // Active section tracking for smooth navigation & mobile pill scroll
+  const [activeSection, setActiveSection] = useState("account");
+  const navContainerRef = useRef(null);
+  const navItemRefs = useRef({});
+
+  // Feedback states
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Security State
   const [newPassword, setNewPassword] = useState("");
@@ -123,6 +135,54 @@ export default function SettingsPage() {
     loadSettings();
   }, [router]);
 
+  // Scrollspy observer for active section detection & mobile centering
+  useEffect(() => {
+    const sectionIds = SETTINGS_SECTIONS.map((s) => s.id);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length > 0) {
+          const currentId = visible[0].target.id;
+          setActiveSection(currentId);
+          const navEl = navItemRefs.current[currentId];
+          if (navEl && navContainerRef.current) {
+            navEl.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+              inline: "center",
+            });
+          }
+        }
+      },
+      {
+        rootMargin: "-100px 0px -55% 0px",
+        threshold: [0, 0.2, 0.5],
+      }
+    );
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleNavClick = (e, id) => {
+    e.preventDefault();
+    const target = document.getElementById(id);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+      setActiveSection(id);
+      if (typeof window !== "undefined") {
+        window.history.replaceState(null, "", `#${id}`);
+      }
+    }
+  };
+
   const setField = (field, value) => setPublicProfile(p => ({ ...p, [field]: value }));
 
   const toggleTag = (id) => {
@@ -135,6 +195,9 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSecurityMessage({ type: "", text: "" });
+    setSaveSuccess(false);
+    setIsSaving(true);
+
     // A-137: gated lenses are earned, not toggled. Only newly ADDED lenses
     // are checked — removing one is always allowed, and buyer / owner pass
     // with no evidence. The refusal names the task, not a wall.
@@ -145,6 +208,7 @@ export default function SettingsPage() {
         : { services: publicProfile.service };
       const gate = canAddRole(role, evidence);
       if (!gate.ok) {
+        setIsSaving(false);
         const suffix = role === "broker"
           ? " This records your claim; public verification stays a separate staff review."
           : "";
@@ -154,6 +218,7 @@ export default function SettingsPage() {
     }
     const { data: { user }, error: userError } = await getUser();
     if (userError || !user) {
+      setIsSaving(false);
       // A-146: keep the deep link across the auth bounce.
       router.replace("/onboarding?next=%2Fsettings");
       return;
@@ -166,6 +231,7 @@ export default function SettingsPage() {
     // failed claim left the broker lens held with nothing behind it.
     if (tags.includes("broker") && !initialTags.includes("broker")) {
       if (!brokerClaim.trim()) {
+        setIsSaving(false);
         setSecurityMessage({ type: "error", text: "Enter your PRC licence number to add the broker workspace. This records your claim; public verification stays a separate staff review." });
         return;
       }
@@ -181,10 +247,12 @@ export default function SettingsPage() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
+          setIsSaving(false);
           setSecurityMessage({ type: "error", text: data.error || "The PRC claim could not be recorded. The broker workspace was not added." });
           return;
         }
       } catch {
+        setIsSaving(false);
         setSecurityMessage({ type: "error", text: "The PRC claim could not be recorded. Check your connection; the broker workspace was not added." });
         return;
       }
@@ -206,6 +274,7 @@ export default function SettingsPage() {
       })
       .eq("id", user.id);
 
+    setIsSaving(false);
 
     if (error) {
       setSecurityMessage({ type: "error", text: "Profile update failed. Please try again." });
@@ -215,8 +284,10 @@ export default function SettingsPage() {
     // A-146: the PRC claim is stated BEFORE the profile save above, so a
     // failed claim never leaves the broker lens held with nothing behind it.
     
+    // Update initialTags so subsequent edits understand what is already held
+    setInitialTags(tags);
+    setSaveSuccess(true);
     // Supabase is the only persistent profile store.
-    router.push("/dashboard");
   };
 
   const handlePasswordUpdate = async () => {
@@ -242,7 +313,7 @@ export default function SettingsPage() {
     
     if (error) {
       setSecurityMessage({ type: 'error', text: 'Failed to update password. Please try again or log out and back in.' });
-      console.error("Auth update error:", error); // In production this hits Sentry
+      console.error("Auth update error:", error);
     } else {
       setSecurityMessage({ type: 'success', text: 'Password successfully updated.' });
       setNewPassword("");
@@ -309,218 +380,310 @@ export default function SettingsPage() {
     }
   };
 
-
   return (
     <div className={styles.settingsContainer}>
       <AtmosphereBackground variant="default" />
       <header className={styles.topNav}>
-        <Link href="/dashboard" className={styles.backBtn}>← Back to Dashboard</Link>
+        <Link href="/dashboard" className={styles.backBtn}>
+          <ArrowLeft size={15} />
+          Back to Dashboard
+        </Link>
       </header>
 
       <main className={styles.content}>
         <div className={styles.intro}>
-          <span className={styles.eyebrow}>Control centre</span>
+          <span className={styles.eyebrow}>Account Controls</span>
           <h1 className={styles.title}>Settings</h1>
-          <p>Manage your account, public presence, privacy, security, and browsing experience.</p>
+          <p>Manage your account details, public profile, privacy, alerts, and security in one place.</p>
         </div>
 
-        <nav className={styles.settingsNav} aria-label="Settings sections">
+        <nav
+          ref={navContainerRef}
+          className={styles.settingsNav}
+          aria-label="Settings sections"
+        >
           {SETTINGS_SECTIONS.map((section) => (
-            <a key={section.id} href={section.href}>
+            <a
+              key={section.id}
+              href={section.href}
+              ref={(el) => {
+                navItemRefs.current[section.id] = el;
+              }}
+              className={activeSection === section.id ? styles.navLinkActive : ""}
+              onClick={(e) => handleNavClick(e, section.id)}
+            >
               {section.label}
             </a>
           ))}
         </nav>
 
+        {/* ── Section 1: Account ── */}
         <section id="account" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
             <span>Account</span>
-            <h2>Identity & workspaces</h2>
-            <p>Your private account name and the ScoutIt workspaces attached to it.</p>
+            <h2>Your Details & Roles</h2>
+            <p>Set your display name and choose the roles you use on ScoutIt.</p>
           </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Display Name</label>
-          <input 
-            type="text" 
-            className={styles.input} 
-            aria-label="Display name"
-            value={name} 
-            onChange={(e) => setName(e.target.value)} 
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label} style={{marginTop: 16}}>Your workspaces</label>
-          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            Buyer and owner are ready when you are. The dashboard switcher shows only the workspaces you hold.
-          </p>
-
-          <div className={styles.tagGrid}>
-            {SELF_SERVICE_TAGS.map(tag => (
-              <div
-                key={tag.id}
-                className={`${styles.tagCard} ${tags.includes(tag.id) ? styles.selected : ''}`}
-                onClick={() => toggleTag(tag.id)}
-              >
-                <span className={styles.tagIcon}>{tag.icon}</span>
-                <span style={{fontSize: 14}}>{tag.label}</span>
-              </div>
-            ))}
+          <div className={styles.formGroup}>
+            <label className={styles.label} style={{display: 'inline-flex', alignItems: 'center', gap: 6}}>
+              Display Name <InfoTip tipId="settingsDisplayName" label="About display name" />
+            </label>
+            <input 
+              type="text" 
+              className={styles.input} 
+              aria-label="Display name"
+              placeholder="Your full name or display name"
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+            />
           </div>
-        </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label} style={{marginTop: 16}}>Need another lens?</label>
-          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            Broker and provider workspaces are earned by verification, not toggled. Add yours here and save; the dashboard switcher stays clean until then.
-          </p>
+          <div className={styles.formGroup}>
+            <label className={styles.label} style={{marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 6}}>
+              Your Roles <InfoTip tipId="settingsWorkspaces" label="About your roles and workspaces" />
+            </label>
+            <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
+              Choose the roles that fit what you do. You can easily switch between your active workspaces from your dashboard.
+            </p>
 
-          <div className={styles.tagGrid}>
-            {GATED_TAGS.map(tag => {
-              const held = tags.includes(tag.id);
-              const newlyAdding = held && !initialTags.includes(tag.id);
-              const heldNote = tag.id === 'broker'
-                ? "Held. Licence changes re-verify in the Broker workspace."
-                : "Held. Keep your Services Offered line below up to date.";
-              return (
-                <div key={tag.id}>
-                  <div
-                    className={`${styles.tagCard} ${held ? styles.selected : ''}`}
-                    onClick={() => toggleTag(tag.id)}
-                  >
-                    <span className={styles.tagIcon}>{tag.icon}</span>
-                    <span style={{fontSize: 14}}>{tag.label}</span>
-                  </div>
-                  <p style={{color: 'var(--text-secondary)', fontSize: 12, marginTop: 8}}>
-                    {held && !newlyAdding ? heldNote : (held ? tag.requirement : `Locked: select to begin: ${tag.requirement}`)}
-                  </p>
-                  {tag.id === 'broker' && newlyAdding && (
-                    <>
-                      <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>PRC licence number</label>
-                      <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="PRC-REB-XXXXXXX"
-                        aria-label="PRC licence number"
-                        maxLength={80}
-                        value={brokerClaim}
-                        onChange={(e) => setBrokerClaim(e.target.value)}
-                      />
-                    </>
-                  )}
+            <div className={styles.tagGrid}>
+              {SELF_SERVICE_TAGS.map(tag => (
+                <div
+                  key={tag.id}
+                  className={`${styles.tagCard} ${tags.includes(tag.id) ? styles.selected : ''}`}
+                  onClick={() => toggleTag(tag.id)}
+                  role="checkbox"
+                  aria-checked={tags.includes(tag.id)}
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') toggleTag(tag.id); }}
+                >
+                  <span className={styles.tagIcon}>{tag.icon}</span>
+                  <span style={{fontSize: 14, fontWeight: 500}}>{tag.label}</span>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
 
+          <div className={styles.formGroup}>
+            <label className={styles.label} style={{marginTop: 16}}>Need another lens?</label>
+            <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
+              Licensed brokers and verified service providers require brief verification to activate. Select a role below to get started.
+            </p>
+
+            <div className={styles.tagGrid}>
+              {GATED_TAGS.map(tag => {
+                const held = tags.includes(tag.id);
+                const newlyAdding = held && !initialTags.includes(tag.id);
+                const heldNote = tag.id === 'broker'
+                  ? "Active role. License updates can be submitted from your Broker workspace."
+                  : "Active role. Keep your Services Offered description below updated.";
+                return (
+                  <div key={tag.id}>
+                    <div
+                      className={`${styles.tagCard} ${held ? styles.selected : ''}`}
+                      onClick={() => toggleTag(tag.id)}
+                      role="checkbox"
+                      aria-checked={held}
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') toggleTag(tag.id); }}
+                    >
+                      <span className={styles.tagIcon}>{tag.icon}</span>
+                      <span style={{fontSize: 14, fontWeight: 500}}>{tag.label}</span>
+                    </div>
+                    <p style={{color: 'var(--text-secondary)', fontSize: 12, marginTop: 8, lineHeight: 1.5}}>
+                      {held && !newlyAdding ? heldNote : (held ? tag.requirement : `Tap to select: ${tag.requirement}`)}
+                    </p>
+                    {tag.id === 'broker' && newlyAdding && (
+                      <div style={{marginTop: 12}}>
+                        <label className={styles.label} style={{fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6}}>
+                          PRC licence number <InfoTip tipId="settingsPrcLicense" label="About PRC licence requirement" />
+                        </label>
+                        <input
+                          type="text"
+                          className={styles.input}
+                          placeholder="PRC-REB-XXXXXXX"
+                          aria-label="PRC licence number"
+                          maxLength={80}
+                          value={brokerClaim}
+                          onChange={(e) => setBrokerClaim(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
+        {/* ── Section 2: Public Profile ── */}
         <section id="public-profile" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
-            <span>Public profile</span>
-            <h2>How ScoutIt introduces you</h2>
-            <p>Edit the public facts people see before they choose to connect.</p>
+            <span>Public Profile</span>
+            <h2>Public Profile Card</h2>
+            <p>The details other members see when they view your profile or listings.</p>
           </div>
 
-        {/* ── Public Card Editor ── */}
-        <div className={styles.formGroup}>
-          <label className={styles.label} style={{marginTop: 24}}>Your Public Card</label>
-          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            This is how you appear in public directories and lists. A complete card gets noticed first.
-          </p>
+          <div className={styles.formGroup}>
+            <label className={styles.label} style={{marginTop: 12}}>Your Public Card</label>
+            <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
+              A complete profile helps you connect with buyers, owners, and brokers faster.
+            </p>
 
-          <label htmlFor="public-profile-headline" className={styles.label} style={{fontSize: 13}}>Headline</label>
-          <input
-            id="public-profile-headline"
-            type="text"
-            className={styles.input}
-            placeholder={tags.includes('broker') ? "e.g. Makati CBD specialist, 10 yrs in commercial leasing" : "One line that says what you're about"}
-            maxLength={80}
-            value={publicProfile.headline}
-            onChange={(e) => setField('headline', e.target.value)}
-          />
+            <label htmlFor="public-profile-headline" className={styles.label} style={{fontSize: 12}}>Headline</label>
+            <input
+              id="public-profile-headline"
+              type="text"
+              className={styles.input}
+              placeholder={tags.includes('broker') ? "e.g. Commercial Leasing Specialist in BGC & Makati" : "A short line describing what you do"}
+              maxLength={80}
+              value={publicProfile.headline}
+              onChange={(e) => setField('headline', e.target.value)}
+            />
 
-          <label htmlFor="public-profile-bio" className={styles.label} style={{fontSize: 13, marginTop: 12}}>About You</label>
-          <textarea
-            id="public-profile-bio"
-            className={styles.input}
-            style={{minHeight: 90, resize: 'vertical', fontFamily: 'inherit'}}
-            placeholder="A short bio. What should owners, brokers, or clients know about you?"
-            maxLength={300}
-            value={publicProfile.bio}
-            onChange={(e) => setField('bio', e.target.value)}
-          />
+            <label htmlFor="public-profile-bio" className={styles.label} style={{fontSize: 12, marginTop: 14}}>About You</label>
+            <textarea
+              id="public-profile-bio"
+              className={styles.input}
+              style={{minHeight: 96, resize: 'vertical', fontFamily: 'inherit'}}
+              placeholder="Brief summary. What should owners, brokers, or clients know about you?"
+              maxLength={300}
+              value={publicProfile.bio}
+              onChange={(e) => setField('bio', e.target.value)}
+            />
 
-          <label htmlFor="public-profile-location" className={styles.label} style={{fontSize: 13, marginTop: 12}}>Location</label>
-          <input
-            id="public-profile-location"
-            type="text"
-            className={styles.input}
-            placeholder="e.g. Metro Manila"
-            value={publicProfile.location}
-            onChange={(e) => setField('location', e.target.value)}
-          />
+            <label htmlFor="public-profile-location" className={styles.label} style={{fontSize: 12, marginTop: 14}}>Location</label>
+            <input
+              id="public-profile-location"
+              type="text"
+              className={styles.input}
+              placeholder="e.g. Metro Manila, Cebu, or Bonifacio Global City"
+              value={publicProfile.location}
+              onChange={(e) => setField('location', e.target.value)}
+            />
 
-          {tags.includes('broker') && (
-            <>
-              <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>Firm / Affiliation</label>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder="e.g. Santos Realty Group, or Independent"
-                aria-label="Firm or affiliation"
-                value={publicProfile.firm}
-                onChange={(e) => setField('firm', e.target.value)}
-              />
-            </>
-          )}
+            {tags.includes('broker') && (
+              <>
+                <label className={styles.label} style={{fontSize: 12, marginTop: 14}}>Company or Agency</label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="e.g. Santos Realty Group, or Independent"
+                  aria-label="Firm or affiliation"
+                  value={publicProfile.firm}
+                  onChange={(e) => setField('firm', e.target.value)}
+                />
+              </>
+            )}
 
-          {tags.includes('provider') && (
-            <>
-              <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>Services Offered</label>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder="e.g. Architectural photography, drone shots, floorplans"
-                aria-label="Services offered"
-                value={publicProfile.service}
-                onChange={(e) => setField('service', e.target.value)}
-              />
-            </>
-          )}
-        </div>
+            {tags.includes('provider') && (
+              <>
+                <label className={styles.label} style={{fontSize: 12, marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 6}}>
+                  Services Offered <InfoTip tipId="settingsServicesOffered" label="About services offered" />
+                </label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="e.g. Architectural photography, 3D tours, staging, appraisals"
+                  aria-label="Services offered"
+                  value={publicProfile.service}
+                  onChange={(e) => setField('service', e.target.value)}
+                />
+              </>
+            )}
+          </div>
 
-        {/* ── Live Preview ── */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Preview: how others see you</label>
-          <div className="bg-surface border border-surface-variant rounded-lg p-5 mt-2 flex gap-4 items-start">
-            <div className="w-14 h-14 rounded-full bg-surface-variant border-2 border-gold-accent flex items-center justify-center font-bold text-xl text-on-surface shrink-0">
-              {name ? name.substring(0,2).toUpperCase() : '?'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-working-title text-lg text-on-surface">{name || "Your Name"}</div>
-              <div className="text-sm text-gold-accent">{publicProfile.headline || "Your headline appears here"}</div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {tags.map(t => {
-                  const tag = INTENT_TAGS.find(x => x.id === t);
-                  return tag ? (
-                    <span key={t} className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent border border-gold-accent/30 px-2 py-0.5 rounded-full">{tag.label}</span>
-                  ) : null;
-                })}
-                {publicProfile.location && (
-                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary border border-surface-variant px-2 py-0.5 rounded-full">📍 {publicProfile.location}</span>
+          {/* ── Live Preview ── */}
+          <div className={styles.formGroup}>
+            <label className={styles.label} style={{display: 'inline-flex', alignItems: 'center', gap: 6}}>
+              Preview: How others see your card <InfoTip tipId="settingsPublicCard" label="About public card preview" />
+            </label>
+            <div style={{
+              background: 'var(--surface2)',
+              border: '1px solid var(--accent-muted)',
+              borderRadius: 8,
+              padding: 20,
+              marginTop: 8,
+              display: 'flex',
+              gap: 16,
+              alignItems: 'flex-start'
+            }}>
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: 'var(--surface)',
+                border: '2px solid var(--accent)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: 18,
+                color: 'var(--text-primary)',
+                flexShrink: 0
+              }}>
+                {name ? name.substring(0,2).toUpperCase() : '?'}
+              </div>
+              <div style={{flex: 1, minWidth: 0}}>
+                <div style={{fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text-primary)', fontWeight: 600}}>
+                  {name || "Your Name"}
+                </div>
+                <div style={{fontSize: 14, color: 'var(--accent-bright)', marginTop: 2}}>
+                  {publicProfile.headline || "Your headline will appear here"}
+                </div>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10}}>
+                  {tags.map(t => {
+                    const tag = INTENT_TAGS.find(x => x.id === t);
+                    return tag ? (
+                      <span key={t} style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: 'var(--accent-bright)',
+                        border: '1px solid rgba(var(--accent-rgb), 0.35)',
+                        background: 'rgba(var(--accent-rgb), 0.08)',
+                        padding: '2px 8px',
+                        borderRadius: 9999
+                      }}>
+                        {tag.label}
+                      </span>
+                    ) : null;
+                  })}
+                  {publicProfile.location && (
+                    <span style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: 'var(--text-secondary)',
+                      border: '1px solid var(--border-solid)',
+                      padding: '2px 8px',
+                      borderRadius: 9999
+                    }}>
+                      📍 {publicProfile.location}
+                    </span>
+                  )}
+                </div>
+                {publicProfile.bio && (
+                  <p style={{fontSize: 13, color: 'var(--text-secondary)', marginTop: 8, fontStyle: 'italic', lineHeight: 1.5}}>
+                    {publicProfile.bio}
+                  </p>
+                )}
+                {tags.includes('broker') && publicProfile.firm && (
+                  <p style={{fontSize: 12, color: 'var(--text-muted)', marginTop: 4}}>
+                    🏢 {publicProfile.firm}
+                  </p>
+                )}
+                {tags.includes('provider') && publicProfile.service && (
+                  <p style={{fontSize: 12, color: 'var(--text-muted)', marginTop: 4}}>
+                    🛠 {publicProfile.service}
+                  </p>
                 )}
               </div>
-              {publicProfile.bio && <p className="text-xs text-text-secondary mt-2 italic line-clamp-2">{publicProfile.bio}</p>}
-              {tags.includes('broker') && publicProfile.firm && <p className="text-xs text-text-secondary mt-1">{publicProfile.firm}</p>}
-              {tags.includes('provider') && publicProfile.service && <p className="text-xs text-text-secondary mt-1">{publicProfile.service}</p>}
             </div>
           </div>
-        </div>
-
-
         </section>
 
         {/* A-136 — saves the name, role tags and public card above it. It
@@ -528,25 +691,43 @@ export default function SettingsPage() {
         <button
           className={styles.buttonPrimary}
           onClick={handleSave}
-          disabled={tags.length === 0}
+          disabled={tags.length === 0 || isSaving}
         >
-          Save name & profile
+          {isSaving ? "Saving changes..." : "Save Profile Changes"}
         </button>
 
-        {/* ── Privacy & Anonymity Shield (W13 · C19 · §46.8) ──
-            Placed ABOVE Security & Login deliberately. Privacy is the thing a
-            ScoutIt user is anxious about; burying it under password fields
-            makes it feel like an advanced setting rather than a promise.
+        {saveSuccess && (
+          <div className={styles.saveSuccessBanner} role="status">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className={styles.saveSuccessIcon}>✓</span>
+              <span>Your profile changes have been saved.</span>
+            </div>
+            <Link href="/dashboard" className={styles.saveSuccessLink}>
+              Go to Dashboard →
+            </Link>
+          </div>
+        )}
 
-            ⚠️ No tier is passed as a permission — only as a hint about what
-            the user's DEFAULT already is. Standing Rule 10: never gate a
-            privacy control behind a tier. The role decides who sees it, and
-            brokers correctly see nothing (being found is their whole value). */}
+        {securityMessage.text && (
+          <div style={{
+            marginTop: 12,
+            padding: "12px 16px",
+            borderRadius: 6,
+            fontSize: 13,
+            backgroundColor: securityMessage.type === 'error' ? 'rgba(220, 53, 69, 0.1)' : 'rgba(var(--accent-rgb), 0.1)',
+            border: securityMessage.type === 'error' ? '1px solid rgba(220, 53, 69, 0.4)' : '1px solid var(--accent)',
+            color: securityMessage.type === 'error' ? 'var(--red)' : 'var(--accent-bright)'
+          }}>
+            {securityMessage.text}
+          </div>
+        )}
+
+        {/* ── Section 3: Privacy & Visibility ── */}
         <section id="privacy" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
             <span>Privacy</span>
-            <h2>Visibility & anonymity</h2>
-            <p>Choose what ScoutIt may reveal. Privacy controls never require a paid tier.</p>
+            <h2>Privacy & Visibility</h2>
+            <p>Choose what information is visible to other members. All privacy features are free for all accounts.</p>
           </div>
           <PrivacyShieldPanel
             role={tags.includes('broker') ? 'broker' : (tags.includes('owner') ? 'owner' : 'seeker')}
@@ -555,123 +736,152 @@ export default function SettingsPage() {
           />
         </section>
 
-        {/* ── Notifications (A-152) ── the control the transactional email
-            footer promises. One real toggle (email fallback); the inbox is
-            disclosed as always-on and marketing lives in Privacy. */}
+        {/* ── Section 4: Notifications ── */}
         <section id="notifications" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
             <span>Notifications</span>
-            <h2>Email & inbox alerts</h2>
-            <p>What ScoutIt may send you, and where every message lives.</p>
+            <h2>Email & Alerts</h2>
+            <p>Control what emails and alerts you receive from ScoutIt.</p>
           </div>
           <NotificationPreferencesPanel />
         </section>
 
-        {/* ── Plan & Connects (A-135) ── read from the account, never from
-            localStorage. Plan name only: no price until pricing is final. */}
+        {/* ── Section 5: Plan & Connects ── */}
         <section id="plan" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
             <span>Plan & Connects</span>
-            <h2>Your plan</h2>
-            <p>What your account is on, and the Connects you hold.</p>
+            <h2>Your Plan & Connects</h2>
+            <p>View your active membership plan and available Connects balance.</p>
           </div>
           <PlanPanel />
         </section>
 
-        {/* ── Security & Login ── */}
-        <section id="security" className={styles.settingsSection} tabIndex="-1" style={{ padding: 24 }}>
-          <div className="flex items-center gap-3 mb-2">
-            <Lock className="text-on-surface" size={20} />
-            <h2 className="font-display text-lg text-on-surface">Security & Login</h2>
+        {/* ── Section 6: Security & Login ── */}
+        <section id="security" className={styles.settingsSection} tabIndex="-1">
+          <div className={styles.sectionHeader}>
+            <span>Security</span>
+            <h2>Password & Two-Step Verification</h2>
+            <p>Keep your account safe by updating your password or enabling an authenticator app.</p>
           </div>
-          <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-            Update your password or enable Two-Factor Authentication (2FA) to secure your properties.
-          </p>
 
-          <label className={styles.label} style={{fontSize: 13}}>New Password</label>
-          <input
-            type="password"
-            className={styles.input}
-            placeholder="At least 6 characters"
-            aria-label="New password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
+          <div className={styles.formGroup}>
+            <label className={styles.label}>New Password</label>
+            <input
+              type="password"
+              className={styles.input}
+              placeholder="At least 6 characters"
+              aria-label="New password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
 
-          <label className={styles.label} style={{fontSize: 13, marginTop: 12}}>Confirm New Password</label>
-          <input
-            type="password"
-            className={styles.input}
-            placeholder="Re-type new password"
-            aria-label="Confirm new password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+            <label className={styles.label} style={{marginTop: 12}}>Confirm New Password</label>
+            <input
+              type="password"
+              className={styles.input}
+              placeholder="Re-type new password"
+              aria-label="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
 
-          {securityMessage.text && (
-            <div className={`mt-3 p-3 rounded text-sm ${securityMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-surface border border-gold-accent text-gold-accent'}`}>
-              {securityMessage.text}
+            <div style={{marginTop: 14}}>
+              <button
+                className="bg-on-surface text-background font-working-title text-sm px-5 py-3 rounded disabled:opacity-50"
+                style={{minHeight: 44, cursor: 'pointer', borderRadius: 6}}
+                onClick={handlePasswordUpdate}
+                disabled={isUpdatingPassword || !newPassword || !confirmPassword}
+              >
+                {isUpdatingPassword ? "Updating password..." : "Update Password"}
+              </button>
             </div>
-          )}
-
-          <div className="mt-4 flex gap-4">
-            <button
-              className="bg-on-surface text-background font-working-title text-sm px-4 py-2 rounded disabled:opacity-50"
-              onClick={handlePasswordUpdate}
-              disabled={isUpdatingPassword || !newPassword || !confirmPassword}
-            >
-              {isUpdatingPassword ? "Updating..." : "Update Password"}
-            </button>
           </div>
 
           {/* 2FA Section */}
-          <div className="mt-8 pt-8 border-t border-surface-variant">
-            <h3 className="font-working-title text-md text-on-surface mb-2">Two-Factor Authentication (2FA)</h3>
-            
+          <div style={{marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle, var(--border))'}}>
+            <h3 style={{fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text-primary)', marginBottom: 6, display: 'inline-flex', alignItems: 'center', gap: 6}}>
+              Two-Factor Authentication (2FA) <InfoTip tipId="settingsTwoFactor" label="About two-factor authentication" />
+            </h3>
+            <p style={{color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6, marginBottom: 16}}>
+              Add an extra layer of protection to your account using an authenticator app (such as Google Authenticator, Microsoft Authenticator, or 1Password).
+            </p>
+
             {mfaMessage.text && (
-              <div className={`mb-4 p-3 rounded text-sm ${mfaMessage.type === 'error' ? 'bg-error/10 border border-error/50 text-error' : 'bg-surface border border-gold-accent text-gold-accent'}`}>
+              <div style={{
+                marginBottom: 16,
+                padding: "12px 16px",
+                borderRadius: 6,
+                fontSize: 13,
+                backgroundColor: mfaMessage.type === 'error' ? 'rgba(220, 53, 69, 0.1)' : 'rgba(var(--accent-rgb), 0.1)',
+                border: mfaMessage.type === 'error' ? '1px solid rgba(220, 53, 69, 0.4)' : '1px solid var(--accent)',
+                color: mfaMessage.type === 'error' ? 'var(--red)' : 'var(--accent-bright)'
+              }}>
                 {mfaMessage.text}
               </div>
             )}
 
             {factors.length > 0 && factors.some(f => f.status === 'verified') ? (
-              <div className="flex flex-col gap-3 items-start">
-                <span className="inline-block px-3 py-1 rounded bg-green-900/30 text-green-400 border border-green-800 text-xs tracking-widest font-mono uppercase">
-                  Protected by 2FA
+              <div style={{display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start'}}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '4px 10px',
+                  borderRadius: 4,
+                  background: 'rgba(40, 167, 69, 0.15)',
+                  color: '#48d374',
+                  border: '1px solid rgba(40, 167, 69, 0.4)',
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase'
+                }}>
+                  ✓ Protected by Two-Factor Authentication
                 </span>
-                <p className="text-sm text-text-secondary">Your account is secured with an Authenticator App.</p>
+                <p style={{fontSize: 13, color: 'var(--text-secondary)'}}>
+                  Your account is secured. An authenticator code is required when signing in.
+                </p>
                 <button
-                  className="border border-error/50 text-error font-working-title text-sm px-4 py-2 rounded hover:bg-error/10 transition-colors"
+                  style={{
+                    minHeight: 44,
+                    padding: '0 16px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(220, 53, 69, 0.4)',
+                    color: 'var(--red)',
+                    background: 'transparent',
+                    fontSize: 13,
+                    fontFamily: 'var(--font-mono)',
+                    cursor: 'pointer'
+                  }}
                   onClick={() => disable2FA(factors.find(f => f.status === 'verified').id)}
                 >
                   Disable 2FA
                 </button>
               </div>
             ) : isEnrolling2FA && qrCode ? (
-              <div className="bg-surface-variant p-5 rounded-lg border border-gold-accent/20">
-                <p className="text-sm text-on-surface mb-4">
-                  1. Scan this QR code with your Authenticator App (Google Authenticator, Authy, etc).
+              <div style={{
+                background: 'var(--surface2)',
+                padding: 20,
+                borderRadius: 8,
+                border: '1px solid var(--border-solid)'
+              }}>
+                <p style={{fontSize: 14, color: 'var(--text-primary)', marginBottom: 12}}>
+                  1. Scan this QR code with your Authenticator App:
                 </p>
-                {/* §25.5 flagged this as "trace the source; safe if
-                    server-generated SVG, XSS if any user input reaches it —
-                    NOT YET VERIFIED."
-                    VERIFIED 2026-08-06: SAFE. 'qrCode' is assigned exactly
-                    once, from 'data.totp.qr_code' on the Supabase MFA enroll
-                    response — an SVG string generated by Supabase from the
-                    TOTP secret. No user-supplied value reaches it.
-                    ⚠️ If this ever becomes settable from anything a user
-                    types, it must stop using dangerouslySetInnerHTML. */}
                 <div
-                  className="bg-white p-2 rounded w-48 h-48 mx-auto mb-4 flex items-center justify-center overflow-hidden"
+                  style={{background: '#ffffff', padding: 12, borderRadius: 8, width: 200, height: 200, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}
                   dangerouslySetInnerHTML={{ __html: qrCode }}
                 />
-                <p className="text-sm text-on-surface mb-2">
-                  2. Enter the 6-digit code from the app to verify.
+                <p style={{fontSize: 14, color: 'var(--text-primary)', marginBottom: 8}}>
+                  2. Enter the 6-digit code shown in your app:
                 </p>
-                <div className="flex gap-2">
+                <div style={{display: 'flex', gap: 8, flexWrap: 'wrap'}}>
                   <input
                     type="text"
-                    className={`${styles.input} text-center font-mono tracking-widest text-lg`}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    className={styles.input}
+                    style={{width: 140, textAlign: 'center', fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', fontSize: 18}}
                     placeholder="000000"
                     maxLength={6}
                     aria-label="Authenticator verification code"
@@ -679,55 +889,77 @@ export default function SettingsPage() {
                     onChange={(e) => setVerifyCode(e.target.value)}
                   />
                   <button
-                    className="bg-gold-accent text-background font-working-title text-sm px-6 rounded disabled:opacity-50 whitespace-nowrap"
+                    className="bg-gold-accent text-background font-working-title text-sm px-6 rounded disabled:opacity-50"
+                    style={{minHeight: 44, cursor: 'pointer', borderRadius: 6}}
                     onClick={verify2FA}
                     disabled={verifyCode.length < 6}
                   >
-                    Verify Code
+                    Verify & Activate
                   </button>
                 </div>
                 <button
-                  className="text-text-muted text-xs underline mt-4 hover:text-on-surface"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    fontSize: 12,
+                    textDecoration: 'underline',
+                    marginTop: 14,
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
                   onClick={() => {
                     setIsEnrolling2FA(false);
                     setQrCode("");
                   }}
                 >
-                  Cancel Enrollment
+                  Cancel setup
                 </button>
               </div>
             ) : (
               <div>
-                <p className="text-sm text-text-secondary mb-4">
-                  Add an extra layer of security to your account. You will need an Authenticator App to sign in.
+                <p style={{fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14}}>
+                  Add extra defense against unauthorized logins. You will use an authenticator app when signing in.
                 </p>
                 <button
-                  className="border border-gold-accent text-gold-accent font-working-title text-sm px-4 py-2 rounded hover:bg-gold-accent hover:text-background transition-colors"
+                  style={{
+                    minHeight: 44,
+                    padding: '0 18px',
+                    borderRadius: 6,
+                    border: '1px solid var(--accent)',
+                    color: 'var(--accent-bright)',
+                    background: 'rgba(var(--accent-rgb), 0.08)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
                   onClick={start2FAEnrollment}
                 >
-                  Enable 2FA App
+                  Enable Two-Factor Authentication
                 </button>
               </div>
             )}
           </div>
         </section>
 
-        {/* ── Delete account (A-126) ── RA 10173 §16(e). The route existed and
-            nothing could reach it; this is the way in. */}
+        {/* ── Section 7: Delete Account ── */}
         <section id="delete-account" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
-            <span>Delete account</span>
-            <h2>Your right to erasure</h2>
-            <p>Delete your private data and close your sign-in. You see exactly what goes and what stays before you confirm.</p>
+            <span>Delete Account</span>
+            <h2>Close Account & Delete Data</h2>
+            <p>Permanently delete your personal profile and close your ScoutIt account under Philippine Data Privacy laws (RA 10173).</p>
           </div>
           <DeleteAccountPanel />
         </section>
 
         <button
-          className="w-full mt-4 border border-surface-variant text-text-secondary hover:text-error hover:border-error/50 font-working-title text-sm py-3 rounded transition-colors"
+          className={styles.signOutButton}
           onClick={handleSignOut}
         >
-          🚪 Sign Out
+          Sign Out of ScoutIt
         </button>
       </main>
     </div>

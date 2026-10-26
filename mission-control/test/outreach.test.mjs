@@ -10,6 +10,8 @@ import {
   OUTREACH_TEMPLATES,
   interpolateTemplate,
   generateClaimDraftPayload,
+  resolveProspectsResult,
+  SEED_PROSPECTS,
 } from "../src/lib/outreachPolicy.mjs";
 
 test("extractCoordinatesFromInput extracts from diverse Google Maps URL formats", () => {
@@ -142,4 +144,28 @@ test("generateClaimDraftPayload constructs valid draft listing with claim token"
   assert.equal(propertyPayload.coordinates, "14.5492,121.0503");
   assert.ok(claimToken.startsWith("claim_"));
   assert.equal(claimUrl, `https://scoutit.space/claim/${claimToken}`);
+});
+
+test("resolveProspectsResult returns honest empty list when table exists and has 0 rows (A-264)", () => {
+  const result = resolveProspectsResult({ data: [], error: null, demoMode: false });
+  assert.deepEqual(result, { prospects: [], source: "live_database" });
+});
+
+test("resolveProspectsResult returns seed prospects when demoMode is explicitly true (A-264)", () => {
+  const result = resolveProspectsResult({ data: [], error: null, demoMode: true });
+  assert.deepEqual(result, { prospects: SEED_PROSPECTS, source: "mock_seed" });
+});
+
+test("resolveProspectsResult falls back to seed prospects when table is unmigrated (A-264)", () => {
+  const missingTableErr = { message: 'relation "outreach_prospects" does not exist' };
+  const result = resolveProspectsResult({ data: null, error: missingTableErr, demoMode: false });
+  assert.deepEqual(result, { prospects: SEED_PROSPECTS, source: "mock_seed" });
+});
+
+test("resolveProspectsResult surfaces genuine database error when table exists (A-264)", () => {
+  const connErr = { message: "connection timeout" };
+  const result = resolveProspectsResult({ data: null, error: connErr, demoMode: false });
+  assert.equal(result.source, "error");
+  assert.equal(result.error, "connection timeout");
+  assert.deepEqual(result.prospects, []);
 });

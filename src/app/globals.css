@@ -3860,7 +3860,7 @@ body.high-contrast :focus-visible {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--border-solid);
-    padding: 8px 0 max(12px, env(safe-area-inset-bottom));
+    padding: 8px 4px max(12px, env(safe-area-inset-bottom));
     justify-content: space-around;
     align-items: flex-start;
   }
@@ -3870,9 +3870,10 @@ body.high-contrast :focus-visible {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding: 6px 6px;
-    min-width: 48px;
-    max-width: 72px;
+    padding: 6px 2px;
+    flex: 1 1 0;
+    min-width: 44px;
+    max-width: 68px;
     text-decoration: none;
     color: var(--text-secondary);
     transition: color 0.2s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
@@ -3933,7 +3934,7 @@ body.high-contrast :focus-visible {
     font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     line-height: 1;
     white-space: nowrap;

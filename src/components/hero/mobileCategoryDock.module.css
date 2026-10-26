@@ -1,0 +1,199 @@
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE CATEGORY DOCK — CSS MODULE
+   ScoutIt Space Intelligence Platform · Mobile-First Space Access
+   Strictly Mobile-Only (≤768px) · Apple HIG 44px+ Floor
+   95% Obsidian Black / 5% Amber Gold System
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── DESKTOP ISOLATION: NEVER DISPLAY ON DESKTOP ── */
+@media (min-width: 769px) {
+  .dockWrapper {
+    display: none !important;
+  }
+}
+
+/* ── MOBILE DOCK WRAPPER (≤768px) ── */
+.dockWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 15;
+  pointer-events: auto;
+}
+
+/* ── EYEBROW / HEADER ROW ── */
+.dockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 0 16px;
+}
+
+.statusPulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  flex-shrink: 0;
+}
+
+.headerLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.headerCount {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── HORIZONTAL SCROLL-SNAPPING TRACK ── */
+.dockTrack {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 16px 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dockTrack::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── TACTILE CATEGORY CAPSULE (APPLE HIG 44px+ COMPLIANT) ── */
+.dockCard {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  min-height: 48px;
+  border-radius: 9999px;
+  background: rgba(18, 18, 18, 0.88);
+  border: 1px solid rgba(var(--accent-rgb, 232, 174, 60), 0.28);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(var(--accent-rgb, 232, 174, 60), 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-decoration: none;
+  outline: none;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dockCard:active {
+  transform: scale(0.96);
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 16px rgba(var(--accent-bright-rgb, 247, 198, 78), 0.35);
+}
+
+.dockCard:focus-visible {
+  border-color: var(--accent-bright);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── 3D DIORAMA ORB CONTAINER ── */
+.orbContainer {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, rgba(32, 26, 16, 0.95) 0%, rgba(13, 13, 13, 0.98) 70%);
+  border: 1px solid rgba(var(--accent-rgb, 232, 174, 60), 0.5);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb, 232, 174, 60), 0.35);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.18);
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(var(--accent-rgb, 232, 174, 60), 0.3));
+}
+
+.orbGleam {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 30% 25%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── CARD TYPOGRAPHY ── */
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.zoneTag {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.cardLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.cardArrow {
+  color: rgba(var(--accent-rgb, 232, 174, 60), 0.6);
+  flex-shrink: 0;
+  margin-left: 2px;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.dockCard:active .cardArrow {
+  transform: translateX(2px);
+  color: var(--accent-bright);
+}
+
+/* ── PREFERS-REDUCED-MOTION PER A-074 GATE ── */
+@media (prefers-reduced-motion: reduce) {
+  .dockCard,
+  .cardArrow {
+    transition: none !important;
+  }
+}

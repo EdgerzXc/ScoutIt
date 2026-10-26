@@ -4,10 +4,11 @@
 // SERVER shell (./page.js) so the crawler receives resolved markup. Putting one
 // back in this file would recreate the client-only boundary that made /property
 // serve "LOADING DIRECTORY LEDGER..." to Google. See page.js header.
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Building2, DoorOpen } from "lucide-react";
+import { Building2, DoorOpen, SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ReactionButtons from "@/components/ui/ReactionButtons";
@@ -191,6 +192,41 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
   // Mobile filter drawer (≤900px) — listings show first, filters on demand
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  // Mobile category dropdown state (A-192 mobile reflow)
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const categoryDropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!isCategoryDropdownOpen) return;
+    const handleClickOutside = (event) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isCategoryDropdownOpen]);
+
+  const currentCategoryLabel = useMemo(() => {
+    if (selectedSectors.length === 0) return "All Spaces";
+    if (selectedSectors.length === 1) {
+      const match = FAST_CATEGORIES.find((c) => c.sector === selectedSectors[0]);
+      return match ? match.label : selectedSectors[0];
+    }
+    return `Custom (${selectedSectors.length})`;
+  }, [selectedSectors]);
+
   // Proximity Radar State
   const [showMap, setShowMap] = useState(false);
   const [radius, setRadius] = useState("any");
@@ -253,6 +289,41 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
     setSearchQuery("");
     setRadius("any");
   };
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    count += selectedSectors.length;
+    count += selectedLocations.length;
+    count += selectedAesthetics.length;
+    count += selectedPriceBands.length;
+    count += selectedBuildingGrades.length;
+    count += selectedBeds.length;
+    if (radius && radius !== "any") count += 1;
+    return count;
+  }, [
+    selectedSectors,
+    selectedLocations,
+    selectedAesthetics,
+    selectedPriceBands,
+    selectedBuildingGrades,
+    selectedBeds,
+    radius,
+  ]);
+
+  useEffect(() => {
+    if (showMobileFilters) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") setShowMobileFilters(false);
+      };
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = originalStyle;
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [showMobileFilters]);
 
   const handleFastCategoryClick = (sector) => {
     if (!sector) {
@@ -484,6 +555,175 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
   const widgetArticles = getWidgetArticles().slice(0, 3);
 
+  const renderFilterSections = () => (
+    <>
+      {/* Filter Section: Sectors */}
+      <div className="filter-card">
+        <button
+          type="button"
+          className="filter-trigger"
+          onClick={() => toggleFilterSection("sectors")}
+          aria-expanded={openFilters.sectors}
+        >
+          <span>Sectors</span>
+          <span className={`filter-chevron ${openFilters.sectors ? "open" : ""}`}>▼</span>
+        </button>
+        {openFilters.sectors && (
+          <div className="filter-options">
+            {sectors.map((sec) => (
+              <label key={sec} className="filter-checkbox-label">
+                <input
+                  type="checkbox"
+                  className="filter-checkbox"
+                  checked={selectedSectors.includes(sec)}
+                  onChange={() => handleCheckboxChange(sec, selectedSectors, setSelectedSectors)}
+                />
+                <span>{sec}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Polymorphic Filter: Building Grades (Only shown if Commercial is selected) */}
+      {selectedSectors.includes("Commercial") && buildingGrades.length > 0 && (
+        <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
+          <button
+            type="button"
+            className="filter-trigger"
+            onClick={() => toggleFilterSection("buildingGrades")}
+            aria-expanded={openFilters.buildingGrades}
+          >
+            <span>Building Grade</span>
+            <span className={`filter-chevron ${openFilters.buildingGrades ? "open" : ""}`}>▼</span>
+          </button>
+          {openFilters.buildingGrades && (
+            <div className="filter-options">
+              {buildingGrades.map((grade) => (
+                <label key={grade} className="filter-checkbox-label">
+                  <input
+                    type="checkbox"
+                    className="filter-checkbox"
+                    checked={selectedBuildingGrades.includes(grade)}
+                    onChange={() => handleCheckboxChange(grade, selectedBuildingGrades, setSelectedBuildingGrades)}
+                  />
+                  <span>{grade}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Polymorphic Filter: Bedrooms (Only shown if Residential is selected) */}
+      {selectedSectors.includes("Residential") && (
+        <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
+          <div className="filter-options" style={{ paddingTop: "12px" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px", display: "block" }}>
+              Bedrooms
+            </span>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {bedOptions.map((bed) => (
+                <button
+                  key={bed}
+                  type="button"
+                  className={`granularity-pill ${selectedBeds.includes(bed) ? "active" : ""}`}
+                  onClick={() => handleCheckboxChange(bed, selectedBeds, setSelectedBeds)}
+                >
+                  {bed} {bed !== "4+" && "BR"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filter Section: Price Band — qualitative tiers only, NO peso amounts */}
+      <div className="filter-card">
+        <button
+          type="button"
+          className="filter-trigger"
+          onClick={() => toggleFilterSection("prices")}
+          aria-expanded={openFilters.prices}
+        >
+          <span>Price Band <InfoTip tipId="priceBands" label="About price bands" /></span>
+          <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
+        </button>
+        {openFilters.prices && (
+          <div className="filter-options">
+            {activePriceBands.map((band) => (
+              <label key={band.label} className="filter-checkbox-label">
+                <input
+                  type="checkbox"
+                  className="filter-checkbox"
+                  checked={selectedPriceBands.includes(band.label)}
+                  onChange={() => handleCheckboxChange(band.label, selectedPriceBands, setSelectedPriceBands)}
+                />
+                <span>{band.label}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Section: Locations */}
+      <div className="filter-card">
+        <button
+          type="button"
+          className="filter-trigger"
+          onClick={() => toggleFilterSection("locations")}
+          aria-expanded={openFilters.locations}
+        >
+          <span>Locations</span>
+          <span className={`filter-chevron ${openFilters.locations ? "open" : ""}`}>▼</span>
+        </button>
+        {openFilters.locations && (
+          <div className="filter-options">
+            {locations.map((loc) => (
+              <label key={loc} className="filter-checkbox-label">
+                <input
+                  type="checkbox"
+                  className="filter-checkbox"
+                  checked={selectedLocations.includes(loc)}
+                  onChange={() => handleCheckboxChange(loc, selectedLocations, setSelectedLocations)}
+                />
+                <span>{loc}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Section: Aesthetics */}
+      <div className="filter-card">
+        <button
+          type="button"
+          className="filter-trigger"
+          onClick={() => toggleFilterSection("aesthetics")}
+          aria-expanded={openFilters.aesthetics}
+        >
+          <span>Aesthetics</span>
+          <span className={`filter-chevron ${openFilters.aesthetics ? "open" : ""}`}>▼</span>
+        </button>
+        {openFilters.aesthetics && (
+          <div className="filter-options">
+            {aesthetics.map((aes) => (
+              <label key={aes} className="filter-checkbox-label">
+                <input
+                  type="checkbox"
+                  className="filter-checkbox"
+                  checked={selectedAesthetics.includes(aes)}
+                  onChange={() => handleCheckboxChange(aes, selectedAesthetics, setSelectedAesthetics)}
+                />
+                <span>{aes}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div data-scoutit-guide="scoutit-property-directory" className="directory-layout">
       <AtmosphereBackground variant="default" />
@@ -511,6 +751,83 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
               );
             })}
           </nav>
+
+          {/* Mobile Luxury Category Dropdown Selector */}
+          <div className="category-dropdown-wrapper" ref={categoryDropdownRef}>
+            <button
+              type="button"
+              className={`category-dropdown-trigger ${isCategoryDropdownOpen ? "active" : ""}`}
+              onClick={() => setIsCategoryDropdownOpen((prev) => !prev)}
+              aria-haspopup="listbox"
+              aria-expanded={isCategoryDropdownOpen}
+              aria-controls="mobile-category-listbox"
+              aria-label="Filter spaces by category"
+            >
+              <span className="category-dropdown-label-group">
+                <span className="category-dropdown-indicator" aria-hidden="true" />
+                <span className="category-dropdown-prefix">CATEGORY:</span>
+                <span className="category-dropdown-current">{currentCategoryLabel}</span>
+              </span>
+              <svg
+                className={`category-dropdown-chevron ${isCategoryDropdownOpen ? "open" : ""}`}
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            {isCategoryDropdownOpen && (
+              <div
+                id="mobile-category-listbox"
+                className="category-dropdown-menu"
+                role="listbox"
+                aria-label="Space categories"
+              >
+                {FAST_CATEGORIES.map(({ label, sector }) => {
+                  const active = isCategoryActive(sector);
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      role="option"
+                      aria-selected={active}
+                      className={`category-dropdown-item ${active ? "active" : ""}`}
+                      onClick={() => {
+                        handleFastCategoryClick(sector);
+                        setIsCategoryDropdownOpen(false);
+                      }}
+                    >
+                      <span className="category-dropdown-item-label">{label}</span>
+                      {active && (
+                        <span className="category-dropdown-item-check" aria-hidden="true">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </header>
 
         {loading ? (
@@ -537,157 +854,9 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
           </div>
         ) : (
           <div className="directory-container">
-            {/* Mobile: filters collapse behind one toggle so listings appear immediately */}
-            <button
-              className="mobile-filters-toggle"
-              onClick={() => setShowMobileFilters((v) => !v)}
-              aria-expanded={showMobileFilters}
-            >
-              Filters {(selectedSectors.length + selectedLocations.length + selectedAesthetics.length) > 0 ? `(${selectedSectors.length + selectedLocations.length + selectedAesthetics.length})` : ""}
-              <span className={`filter-chevron ${showMobileFilters ? "open" : ""}`}>▼</span>
-            </button>
-
-            {/* Sidebar Filters */}
-            <aside className={`filters-sidebar ${showMobileFilters ? "mobile-open" : ""}`}>
-              
-              {/* Filter Section: Sectors */}
-              <div className="filter-card">
-                <button className="filter-trigger" onClick={() => toggleFilterSection("sectors")}>
-                  Sectors
-                  <span className={`filter-chevron ${openFilters.sectors ? "open" : ""}`}>▼</span>
-                </button>
-                {openFilters.sectors && (
-                  <div className="filter-options">
-                    {sectors.map(sec => (
-                      <label key={sec} className="filter-checkbox-label">
-                        <input
-                          type="checkbox"
-                          className="filter-checkbox"
-                          checked={selectedSectors.includes(sec)}
-                          onChange={() => handleCheckboxChange(sec, selectedSectors, setSelectedSectors)}
-                        />
-                        {sec}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Polymorphic Filter: Building Grades (Only shown if Commercial is selected) */}
-              {selectedSectors.includes("Commercial") && buildingGrades.length > 0 && (
-                <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
-                  <button className="filter-trigger" onClick={() => toggleFilterSection("buildingGrades")}>
-                    Building Grade
-                    <span className={`filter-chevron ${openFilters.buildingGrades ? "open" : ""}`}>▼</span>
-                  </button>
-                  {openFilters.buildingGrades && (
-                    <div className="filter-options">
-                      {buildingGrades.map(grade => (
-                        <label key={grade} className="filter-checkbox-label">
-                          <input
-                            type="checkbox"
-                            className="filter-checkbox"
-                            checked={selectedBuildingGrades.includes(grade)}
-                            onChange={() => handleCheckboxChange(grade, selectedBuildingGrades, setSelectedBuildingGrades)}
-                          />
-                          {grade}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Polymorphic Filter: Bedrooms (Only shown if Residential is selected) */}
-              {selectedSectors.includes("Residential") && (
-                <div className="filter-card animate-[fadeIn_0.3s_ease-out]">
-                  <div className="filter-options mt-2">
-                    <span className="text-[12px] text-text-secondary uppercase tracking-widest mb-2 block">Bedrooms</span>
-                    <div className="flex gap-2 flex-wrap">
-                      {bedOptions.map(bed => (
-                        <button
-                          key={bed}
-                          className={`px-3 py-1 text-xs border rounded-full transition-colors ${selectedBeds.includes(bed) ? 'border-gold-accent bg-gold-accent/20 text-gold-accent' : 'border-surface-variant bg-surface text-text-secondary hover:border-text-secondary'}`}
-                          onClick={() => handleCheckboxChange(bed, selectedBeds, setSelectedBeds)}
-                        >
-                          {bed} {bed !== "4+" && "BR"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Filter Section: Price Band — qualitative tiers only, NO peso amounts
-                  (compliance). Buckets by internal price magnitude; price itself is
-                  shown only in the property page's "Your Move" section. */}
-              <div className="filter-card">
-                <button className="filter-trigger" onClick={() => toggleFilterSection("prices")}>
-                  <span>Price Band <InfoTip tipId="priceBands" label="About price bands" /></span>
-                  <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
-                </button>
-                {openFilters.prices && (
-                  <div className="filter-options">
-                    {activePriceBands.map(band => (
-                      <label key={band.label} className="filter-checkbox-label">
-                        <input
-                          type="checkbox"
-                          className="filter-checkbox"
-                          checked={selectedPriceBands.includes(band.label)}
-                          onChange={() => handleCheckboxChange(band.label, selectedPriceBands, setSelectedPriceBands)}
-                        />
-                        {band.label}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Filter Section: Locations */}
-              <div className="filter-card">
-                <button className="filter-trigger" onClick={() => toggleFilterSection("locations")}>
-                  Locations
-                  <span className={`filter-chevron ${openFilters.locations ? "open" : ""}`}>▼</span>
-                </button>
-                {openFilters.locations && (
-                  <div className="filter-options">
-                    {locations.map(loc => (
-                      <label key={loc} className="filter-checkbox-label">
-                        <input
-                          type="checkbox"
-                          className="filter-checkbox"
-                          checked={selectedLocations.includes(loc)}
-                          onChange={() => handleCheckboxChange(loc, selectedLocations, setSelectedLocations)}
-                        />
-                        {loc}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Filter Section: Aesthetics */}
-              <div className="filter-card">
-                <button className="filter-trigger" onClick={() => toggleFilterSection("aesthetics")}>
-                  Aesthetics
-                  <span className={`filter-chevron ${openFilters.aesthetics ? "open" : ""}`}>▼</span>
-                </button>
-                {openFilters.aesthetics && (
-                  <div className="filter-options">
-                    {aesthetics.map(aes => (
-                      <label key={aes} className="filter-checkbox-label">
-                        <input
-                          type="checkbox"
-                          className="filter-checkbox"
-                          checked={selectedAesthetics.includes(aes)}
-                          onChange={() => handleCheckboxChange(aes, selectedAesthetics, setSelectedAesthetics)}
-                        />
-                        {aes}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {/* Desktop Sidebar Filters */}
+            <aside className="filters-sidebar" aria-label="Directory Filters">
+              {renderFilterSections()}
 
               {/* Dynamic Sidebar Widget: Neighborhood Intel */}
               <div className="intel-widget">
@@ -758,23 +927,137 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                 </span>
               </div>
 
-              <div className="search-wrapper" style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
+              <div className="search-wrapper">
                 <input
                   type="text"
                   className="global-search-input"
                   placeholder="SEARCH DIRECTORY LEDGER BY KEYWORD, CITY, OR DESIGN TAG..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ flex: "1 1 240px", minWidth: 0, margin: 0 }}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowMap(!showMap)}
-                  className={`directory-radar-btn${showMap ? " is-active" : ""}`}
-                >
-                  {showMap ? "✕ CLOSE RADAR" : "🗺️ PROXIMITY RADAR"}
-                </button>
+                <div className="search-action-controls">
+                  <button
+                    type="button"
+                    onClick={() => setShowMobileFilters(true)}
+                    className={`mobile-filters-trigger ${activeFilterCount > 0 ? "has-active" : ""}`}
+                    aria-haspopup="dialog"
+                    aria-expanded={showMobileFilters}
+                    aria-label={`Open filters${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ""}`}
+                  >
+                    <SlidersHorizontal size={14} className="mobile-filter-icon" />
+                    <span>FILTERS</span>
+                    {activeFilterCount > 0 && (
+                      <span className="mobile-filter-badge">{activeFilterCount}</span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowMap(!showMap)}
+                    className={`directory-radar-btn${showMap ? " is-active" : ""}`}
+                  >
+                    {showMap ? "✕ CLOSE RADAR" : "🗺️ PROXIMITY RADAR"}
+                  </button>
+                </div>
               </div>
+
+              {/* Active Filter Chips Rail (Single-Tap Clear) */}
+              {activeFilterCount > 0 && (
+                <div className="active-filters-rail" aria-label="Active filters">
+                  <span className="active-filters-label">ACTIVE:</span>
+                  {selectedSectors.map((sec) => (
+                    <button
+                      key={`sec-${sec}`}
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setSelectedSectors((prev) => prev.filter((s) => s !== sec))}
+                      title={`Remove ${sec} filter`}
+                    >
+                      <span>{sec}</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  ))}
+                  {selectedLocations.map((loc) => (
+                    <button
+                      key={`loc-${loc}`}
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setSelectedLocations((prev) => prev.filter((l) => l !== loc))}
+                      title={`Remove ${loc} filter`}
+                    >
+                      <span>{loc}</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  ))}
+                  {selectedPriceBands.map((band) => (
+                    <button
+                      key={`band-${band}`}
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setSelectedPriceBands((prev) => prev.filter((b) => b !== band))}
+                      title={`Remove ${band} filter`}
+                    >
+                      <span>{band}</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  ))}
+                  {selectedBuildingGrades.map((bg) => (
+                    <button
+                      key={`bg-${bg}`}
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setSelectedBuildingGrades((prev) => prev.filter((g) => g !== bg))}
+                      title={`Remove Grade ${bg} filter`}
+                    >
+                      <span>Grade {bg}</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  ))}
+                  {selectedBeds.map((bed) => (
+                    <button
+                      key={`bed-${bed}`}
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setSelectedBeds((prev) => prev.filter((b) => b !== bed))}
+                      title={`Remove ${bed} BR filter`}
+                    >
+                      <span>{bed} BR</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  ))}
+                  {selectedAesthetics.map((aes) => (
+                    <button
+                      key={`aes-${aes}`}
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setSelectedAesthetics((prev) => prev.filter((a) => a !== aes))}
+                      title={`Remove ${aes} filter`}
+                    >
+                      <span>{aes}</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  ))}
+                  {radius && radius !== "any" && (
+                    <button
+                      type="button"
+                      className="active-filter-chip"
+                      onClick={() => setRadius("any")}
+                      title="Remove proximity radius"
+                    >
+                      <span>{radius} km Radius</span>
+                      <span className="active-filter-chip-remove" aria-hidden="true">✕</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="active-filters-reset-btn"
+                    onClick={resetAllFilters}
+                    title="Clear all active filters"
+                  >
+                    <RotateCcw size={11} />
+                    <span>CLEAR ALL</span>
+                  </button>
+                </div>
+              )}
 
               {showMap && (
                 <InteractiveRadiusMap 
@@ -1030,6 +1313,58 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                 )}
               </motion.div>
             </section>
+
+            {/* Mobile Dedicated Filter Drawer (Bottom Sheet) */}
+            {showMobileFilters && typeof document !== "undefined" && createPortal(
+              <div className="mobile-filter-drawer" role="dialog" aria-modal="true" aria-label="Filters">
+                <div className="mobile-filter-drawer-scrim" onClick={() => setShowMobileFilters(false)} />
+                <div className="mobile-filter-drawer-sheet">
+                  <header className="mobile-drawer-header">
+                    <div className="mobile-drawer-title-group">
+                      <span className="mobile-drawer-title">FILTERS</span>
+                      {activeFilterCount > 0 && (
+                        <span className="mobile-drawer-active-badge">{activeFilterCount} ACTIVE</span>
+                      )}
+                    </div>
+                    <div className="mobile-drawer-actions">
+                      {activeFilterCount > 0 && (
+                        <button
+                          type="button"
+                          className="mobile-drawer-reset-btn"
+                          onClick={resetAllFilters}
+                        >
+                          <RotateCcw size={12} />
+                          <span>RESET ALL</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="mobile-drawer-close-btn"
+                        onClick={() => setShowMobileFilters(false)}
+                        aria-label="Close filters"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  </header>
+
+                  <div className="mobile-drawer-body">
+                    {renderFilterSections()}
+                  </div>
+
+                  <footer className="mobile-drawer-footer">
+                    <button
+                      type="button"
+                      className="mobile-drawer-apply-btn"
+                      onClick={() => setShowMobileFilters(false)}
+                    >
+                      SHOW {filteredProperties.length} {filteredProperties.length === 1 ? "SPACE" : "SPACES"}
+                    </button>
+                  </footer>
+                </div>
+              </div>,
+              document.body
+            )}
           </div>
         )}
 

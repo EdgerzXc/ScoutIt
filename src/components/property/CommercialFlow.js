@@ -2805,7 +2805,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 {intentStage === "interested" && (
                   <div style={{ marginTop: "12px" }}>
                     <div style={{ padding: "12px 14px", background: "rgba(var(--accent-rgb),0.08)", border: "1px solid var(--accent-muted)", borderRadius: "4px", fontSize: "13px", color: "var(--on-surface)", lineHeight: 1.5, marginBottom: "12px" }}>
-                      Ready for introduction. Connect with an authorized, verified broker to arrange a private walkthrough or review commercial lease terms.
+                      Ready for introduction. Connect with an authorized broker or accredited representative to arrange a private walkthrough or review commercial lease terms.
                     </div>
                     <button
                       type="button"
@@ -2824,7 +2824,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                         fontWeight: "bold"
                       }}
                     >
-                      Connect with an Authorized Broker →
+                      Connect with an Authorized Broker or Representative →
                     </button>
                   </div>
                 )}
@@ -2864,8 +2864,8 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--green)", letterSpacing:"0.14em", textTransform:"uppercase"}}>RA 9646 Compliant · Display-Only</span>
               </div>
 
-              <p style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px", maxWidth:"600px"}}>
-                ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed, authorized real estate brokers.
+              <p style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px", marginBottom:"80px", maxWidth:"600px"}}>
+                ScoutIt is a spatial intelligence archive. In compliance with R.A. 9646, all site walks, direct inquiries, and purchase offers are facilitated exclusively by licensed real estate brokers and their accredited salespersons under direct broker supervision.
               </p>
 
             </div>

@@ -1,0 +1,436 @@
+/* ═══════════════════════════════════════════════════════════════
+   CATEGORY QUICK ACCESS — CSS MODULE
+   ScoutIt Space Intelligence Platform · Space Catalog Quick-Jump
+   Apple HIG 44px+ Floor · 95% Obsidian Black / 5% Amber Gold
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── CONTAINER ── */
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  min-width: 0;
+  margin: 0 auto 20px auto;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 15;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 480px;
+    margin: 0 auto 16px auto;
+    padding: 0 8px;
+  }
+}
+
+/* ── HEADER ROW: LEAD EYEBROW + ALL TRIGGER ── */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.headerLead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leadPulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+  flex-shrink: 0;
+}
+
+.leadText {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.sheetTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--accent-muted);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  min-height: 28px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.sheetTrigger:hover,
+.sheetTrigger:active {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.chevronIcon {
+  transition: transform var(--transition-fast, 0.2s ease);
+}
+
+.sheetTrigger:active .chevronIcon {
+  transform: translateY(1px);
+}
+
+/* ── HORIZONTAL SCROLL TRACK (QUICK CHIPS) ── */
+.chipsTrack {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 2px 2px 4px;
+}
+
+@media (max-width: 768px) {
+  .chipsTrack {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 2px 2px 8px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+.chipsTrack::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── 1-TAP CATEGORY CHIP (APPLE HIG 44px+ FLOOR) ── */
+.categoryChip {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  min-height: 44px;
+  border-radius: 9999px;
+  background: rgba(var(--surface-rgb, 18, 18, 18), 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all var(--transition-fast, 0.2s ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.categoryChip:hover {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+  background: rgba(var(--surface2-rgb, 26, 26, 26), 0.95);
+}
+
+.categoryChip:active {
+  transform: scale(0.96);
+  border-color: var(--accent-bright);
+  background: rgba(var(--accent-rgb), 0.18);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4);
+}
+
+.chipIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.chipLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PORTAL BOTTOM ACTION SHEET
+   ═══════════════════════════════════════════════════════════════ */
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: overlayFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sheetPanel {
+  width: 100%;
+  max-width: 520px;
+  max-height: 84vh;
+  background: var(--surface, #121212);
+  border-top: 1px solid rgba(var(--accent-rgb), 0.35);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(var(--accent-rgb), 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  animation: sheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sheetHandleBar {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+
+.sheetHandle {
+  width: 38px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--text-primary-rgb, 255, 255, 255), 0.2);
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 20px 14px;
+  border-bottom: 1px solid var(--border-solid, rgba(255, 255, 255, 0.08));
+}
+
+.sheetEyebrow {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.sheetTitle {
+  font-family: var(--font-display, serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.sheetSubtitle {
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.sheetCloseBtn {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--surface2-rgb, 26, 26, 26), 0.8);
+  border: 1px solid var(--border-solid, rgba(255, 255, 255, 0.1));
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.sheetCloseBtn:hover,
+.sheetCloseBtn:active {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.sheetList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 14px 16px;
+  -webkit-overflow-scrolling: touch;
+  max-height: 52vh;
+}
+
+.sheetCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 8px;
+  min-height: 56px;
+  border-radius: 12px;
+  background: rgba(var(--surface2-rgb, 24, 24, 24), 0.6);
+  border: 1px solid var(--border-solid, rgba(255, 255, 255, 0.08));
+  text-decoration: none;
+  transition: all var(--transition-fast, 0.2s ease);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheetCard:hover {
+  background: rgba(var(--surface2-rgb, 30, 30, 30), 0.95);
+  border-color: rgba(var(--accent-rgb), 0.35);
+  transform: translateX(2px);
+}
+
+.sheetCard:active {
+  background: rgba(var(--accent-rgb), 0.15);
+  border-color: var(--accent);
+  transform: scale(0.98);
+}
+
+.orbWrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.2) 0%, rgba(0, 0, 0, 0.8) 80%);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.15);
+}
+
+.cardDetails {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardZone {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.85;
+  line-height: 1.2;
+}
+
+.cardName {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-top: 1px;
+}
+
+.cardSubtitle {
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.cardChevron {
+  color: var(--accent-muted);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease);
+}
+
+.sheetCard:hover .cardChevron,
+.sheetCard:active .cardChevron {
+  color: var(--accent-bright);
+  transform: translateX(3px);
+}
+
+.sheetFooter {
+  padding: 12px 16px 4px;
+  border-top: 1px solid var(--border-solid, rgba(255, 255, 255, 0.08));
+}
+
+.viewAllBtn {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid var(--accent-muted);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.viewAllBtn:hover,
+.viewAllBtn:active {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheetSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  .sheetOverlay {
+    animation: none !important;
+  }
+  .sheetPanel {
+    animation: none !important;
+  }
+}

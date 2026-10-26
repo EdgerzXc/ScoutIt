@@ -152,6 +152,30 @@ export const INFO_TIPS = Object.freeze({
     title: "District location signals",
     body: "Pins appear on the radar when an update has verified district coordinates. Non-spatial updates remain in the signals list.",
   }),
+  settingsDisplayName: Object.freeze({
+    title: "Display name",
+    body: "Your name shown across ScoutIt on your public profile, inquiries, and messages. You can use your personal name or company name.",
+  }),
+  settingsWorkspaces: Object.freeze({
+    title: "Your roles and workspaces",
+    body: "Each role gives you a specialized dashboard workspace. You can choose multiple roles and switch between them anytime from your dashboard.",
+  }),
+  settingsPrcLicense: Object.freeze({
+    title: "PRC licence requirement",
+    body: "Your PRC broker or appraiser license number. Our team verifies this so clients know you are an officially licensed practitioner.",
+  }),
+  settingsServicesOffered: Object.freeze({
+    title: "Services offered",
+    body: "List the real estate services you provide, like photography, staging, 3D tours, or valuation. This helps clients find you in the directory.",
+  }),
+  settingsPublicCard: Object.freeze({
+    title: "Public card preview",
+    body: "This is how other members see you in search results and directories. Adding a headline and brief bio builds trust with buyers and owners.",
+  }),
+  settingsTwoFactor: Object.freeze({
+    title: "Two-factor authentication",
+    body: "Adds extra security to your sign-in. You will enter a 6-digit code from an authenticator app (such as Google Authenticator) when you log in.",
+  }),
 });
 
 export function getInfoTip(id) {

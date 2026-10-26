@@ -316,3 +316,105 @@ export function generateClaimDraftPayload(prospect) {
     claimUrl: `https://scoutit.space/claim/${claimToken}`,
   };
 }
+
+export const SEED_PROSPECTS = [
+  {
+    id: "prospect-zuellig",
+    property_name: "Zuellig Building",
+    property_address: "Makati Avenue corner Paseo de Roxas, Makati",
+    district_city: "Makati",
+    google_maps_url: "https://maps.app.goo.gl/zuellig?q=14.5547,121.0244",
+    latitude: 14.5547,
+    longitude: 121.0244,
+    contact_name: "Admin Leasing Desk",
+    contact_role: "property_admin",
+    phone_number: "09178881234",
+    email: "leasing@zuelligbuilding.com",
+    source: "google_maps",
+    status: "discovered",
+    touchpoint_count: 0,
+    last_contacted_at: null,
+    replied_at: null,
+    created_at: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: "prospect-oneayala",
+    property_name: "One Ayala Corporate Center",
+    property_address: "1 Ayala Avenue, Makati",
+    district_city: "Makati",
+    google_maps_url: "https://maps.app.goo.gl/oneayala?q=14.5505,121.0260",
+    latitude: 14.5505,
+    longitude: 121.0260,
+    contact_name: "Ayala Land Offices",
+    contact_role: "owner",
+    phone_number: "09175554321",
+    email: "offices@ayala.com.ph",
+    source: "google_maps",
+    status: "contacted",
+    touchpoint_count: 1,
+    last_contacted_at: new Date(Date.now() - 80 * 3600 * 1000).toISOString(),
+    replied_at: null,
+    created_at: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: "prospect-menarco",
+    property_name: "Menarco Tower",
+    property_address: "32nd Street, BGC, Taguig",
+    district_city: "BGC",
+    google_maps_url: "https://maps.app.goo.gl/menarco?q=14.5492,121.0503",
+    latitude: 14.5492,
+    longitude: 121.0503,
+    contact_name: "Ms. Carmen Tan",
+    contact_role: "owner",
+    phone_number: "09189998877",
+    email: "carmen@menarco.com.ph",
+    source: "signage",
+    status: "replied",
+    touchpoint_count: 2,
+    last_contacted_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+    replied_at: new Date(Date.now() - 10 * 3600 * 1000).toISOString(),
+    created_at: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: "prospect-arthaland",
+    property_name: "Arthaland Century Pacific Tower",
+    property_address: "5th Avenue corner 30th St, BGC",
+    district_city: "BGC",
+    google_maps_url: "https://maps.app.goo.gl/arthaland?q=14.5480,121.0490",
+    latitude: 14.5480,
+    longitude: 121.0490,
+    contact_name: "Commercial Broker Desk",
+    contact_role: "broker",
+    phone_number: "09201234567",
+    email: "broker@arthaland.ph",
+    source: "google_maps",
+    status: "contacted",
+    touchpoint_count: 1,
+    last_contacted_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+    replied_at: null,
+    created_at: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+  },
+];
+
+/**
+ * Resolves the outreach prospects result according to the honest fallback policy (A-264).
+ * If the table exists and is empty, it returns an honest empty list rather than
+ * manufacturing synthetic prospects. Seed data is only returned if table is unmigrated
+ * or if demo mode is explicitly requested.
+ */
+export function resolveProspectsResult({ data, error, demoMode = false }) {
+  if (error) {
+    const isMissingTable = /relation.*does not exist|does not exist|PGRST204/i.test(error.message || "");
+    if (isMissingTable || demoMode) {
+      return { prospects: SEED_PROSPECTS, source: "mock_seed" };
+    }
+    return { prospects: [], source: "error", error: error.message };
+  }
+  if (!data || data.length === 0) {
+    if (demoMode) {
+      return { prospects: SEED_PROSPECTS, source: "mock_seed" };
+    }
+    return { prospects: [], source: "live_database" };
+  }
+  return { prospects: data, source: "live_database" };
+}

@@ -35,7 +35,15 @@
 // removing the field.
 // ═══════════════════════════════════════════════════════════════
 
-import { purgePublicCatalogueCache } from "./publicCatalogueCache";
+async function runPurgeCache(cacheFn) {
+  if (typeof cacheFn === "function") return cacheFn();
+  try {
+    const mod = await import("./publicCatalogueCache.js");
+    return await mod.purgePublicCatalogueCache();
+  } catch {
+    return { purged: false, detail: "Public catalogue cache purger not available in this environment" };
+  }
+}
 
 const BASE_URL = "https://api.airtable.com/v0";
 const INTEL_TABLE = "INTEL_CMS";
@@ -164,6 +172,7 @@ export async function pushBriefingToAirtable({
   // now the bounded client. Previously every production caller silently
   // got a fetch with no timeout because that was the parameter default.
   fetchImpl = fetch,
+  purgeCacheFn,
 }) {
   if (!apiKey || !baseId) throw new Error("intelPublish: missing Airtable credentials");
 
@@ -201,8 +210,68 @@ export async function pushBriefingToAirtable({
     throw new Error("Airtable intel publish returned no record id");
   }
 
-  const cache = await purgePublicCatalogueCache();
+  const cache = await runPurgeCache(purgeCacheFn);
   return { recordId, created: !existingId, cache };
+}
+
+/**
+ * Update the Approved_For_Live_Site flag on an existing Airtable INTEL_CMS record.
+ * Purges the public catalogue cache so visitors immediately see the updated state.
+ *
+ * @param {object} params
+ * @param {string} params.apiKey Airtable Personal Access Token
+ * @param {string} params.baseId Airtable Base ID
+ * @param {string} params.recordId Airtable record ID (rec...)
+ * @param {boolean} params.isLive Desired Approved_For_Live_Site value
+ * @param {typeof fetch} [params.fetchImpl] Injectable fetch for testing
+ * @param {Function} [params.purgeCacheFn] Injectable cache purger for testing
+ * @returns {Promise<{recordId: string, isLive: boolean, cache: any}>}
+ */
+export async function setArticleLiveStateInAirtable({
+  apiKey,
+  baseId,
+  recordId,
+  isLive,
+  fetchImpl = fetch,
+  purgeCacheFn,
+}) {
+  if (!apiKey || !baseId) throw new Error("intelPublish: missing Airtable credentials");
+  if (!recordId) throw new Error("intelPublish: missing recordId to update live state");
+
+  const url = `${BASE_URL}/${baseId}/${INTEL_TABLE}/${recordId}`;
+  const res = await fetchImpl(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fields: {
+        Approved_For_Live_Site: Boolean(isLive),
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`Airtable intel live status update failed: ${res.status} ${errText}`);
+  }
+
+  const cache = await runPurgeCache(purgeCacheFn);
+  return { recordId, isLive: Boolean(isLive), cache };
+}
+
+/**
+ * Fetch a single record from INTEL_CMS by recordId to verify live status.
+ */
+export async function fetchAirtableIntelRecord(apiKey, baseId, recordId, fetchImpl = fetch) {
+  if (!apiKey || !baseId || !recordId) return null;
+  const url = `${BASE_URL}/${baseId}/${INTEL_TABLE}/${recordId}`;
+  const res = await fetchImpl(url, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  if (!res.ok) return null;
+  return res.json();
 }
 
 /**

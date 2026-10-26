@@ -558,11 +558,15 @@
   }
 }
 
-/* ── MOBILE GPU PERF (≤768px) ──
-   backdrop-blur × N bubbles + infinite corona pulse is the top mobile
-   compositor cost. Flat translucent glass keeps the obsidian/gold read
-   without per-pixel blur; static corona keeps the halo. */
+/* ── MOBILE GPU PERF & TOUCH ISOLATION (≤768px) ──
+   On mobile touchscreens, drifting background physics are isolated in favor
+   of the dedicated MobileCategoryDock. This eliminates hit-testing collisions
+   with foreground text, prevents gesture blocking, and eliminates mobile GPU churn.
+   Desktop (>768px) continues rendering the full orbital infall physics. */
 @media (max-width: 768px) {
+  .container {
+    display: none !important;
+  }
   .bubbleBase {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
