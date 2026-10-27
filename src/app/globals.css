@@ -4983,6 +4983,9 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   .header-eye-btn {
     display: none !important;
   }
+  .header-eye-btn.is-homepage {
+    display: flex !important;
+  }
   .ambient-rail {
     min-height: 36px;
   }

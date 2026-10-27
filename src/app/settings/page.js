@@ -205,11 +205,12 @@ export default function SettingsPage() {
           const currentId = visible[0].target.id;
           setActiveSection(currentId);
           const navEl = navItemRefs.current[currentId];
-          if (navEl && navContainerRef.current) {
-            navEl.scrollIntoView({
+          const container = navContainerRef.current;
+          if (navEl && container) {
+            const targetLeft = navEl.offsetLeft - (container.clientWidth - navEl.clientWidth) / 2;
+            container.scrollTo({
+              left: Math.max(0, targetLeft),
               behavior: "smooth",
-              block: "nearest",
-              inline: "center",
             });
           }
         }
@@ -226,6 +227,27 @@ export default function SettingsPage() {
     });
 
     return () => observer.disconnect();
+  }, []);
+
+  // Hash deep linking: smoothly scroll to target section without jumping to top
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const scrollToHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash) {
+        const el = document.getElementById(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          setActiveSection(hash);
+        }
+      }
+    };
+    const timer = setTimeout(scrollToHash, 250);
+    window.addEventListener("hashchange", scrollToHash);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", scrollToHash);
+    };
   }, []);
 
   const handleNavClick = (e, id) => {

@@ -629,7 +629,7 @@ export default function BottomNav() {
             <div className="theme-sheet-header">
               <div>
                 <span className="theme-sheet-title">Workspaces &amp; Roles</span>
-                <span className="block font-mono text-[10px] uppercase tracking-widest text-text-muted mt-0.5">
+                <span className="block font-mono text-xs uppercase tracking-widest text-text-muted mt-0.5">
                   Space Intelligence Platform
                 </span>
               </div>
@@ -638,11 +638,11 @@ export default function BottomNav() {
 
             {/* Section 1: Active Roles (User already has) */}
             <div className="px-3 pb-2 pt-1 flex items-center justify-between">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-gold-accent font-semibold flex items-center gap-1.5">
+              <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold-accent inline-block animate-pulse" />
                 Your Active Roles ({activeRoles.length})
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">
+              <span className="font-mono text-xs uppercase tracking-wider text-text-muted">
                 Tap to switch
               </span>
             </div>
@@ -669,7 +669,7 @@ export default function BottomNav() {
                   <div className="theme-text" style={{ flex: 1 }}>
                     <div className="flex items-center justify-between gap-2">
                       <div className="theme-label text-gold-accent font-semibold">{role.label}</div>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
+                      <span className="font-mono text-xs uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
                         Active ✓
                       </span>
                     </div>
@@ -683,13 +683,22 @@ export default function BottomNav() {
             {availableRoles.length > 0 && (
               <div className="mt-4 pt-3 border-t border-surface-variant">
                 <div className="px-3 pb-2 flex items-center justify-between">
-                  <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary font-semibold">
+                  <span className="font-mono text-xs uppercase tracking-widest text-text-secondary font-semibold">
                     Available Roles to Add ({availableRoles.length})
                   </span>
                   <Link
                     href="/settings#account"
-                    onClick={() => setRoleSheetOpen(false)}
-                    className="font-mono text-[10px] uppercase tracking-wider text-gold-accent hover:underline"
+                    scroll={false}
+                    onClick={(e) => {
+                      setRoleSheetOpen(false);
+                      if (pathname === "/settings") {
+                        e.preventDefault();
+                        const el = document.getElementById("account");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        window.history.replaceState(null, "", "#account");
+                      }
+                    }}
+                    className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline"
                   >
                     Manage in Settings →
                   </Link>
@@ -699,7 +708,16 @@ export default function BottomNav() {
                     <Link
                       key={role.id}
                       href="/settings#account"
-                      onClick={() => setRoleSheetOpen(false)}
+                      scroll={false}
+                      onClick={(e) => {
+                        setRoleSheetOpen(false);
+                        if (pathname === "/settings") {
+                          e.preventDefault();
+                          const el = document.getElementById("account");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                          window.history.replaceState(null, "", "#account");
+                        }
+                      }}
                       className="theme-option is-available-role"
                       style={{
                         textAlign: "left",
@@ -716,7 +734,7 @@ export default function BottomNav() {
                       <div className="theme-text" style={{ flex: 1 }}>
                         <div className="flex items-center justify-between gap-2">
                           <div className="theme-label text-text-primary">{role.label}</div>
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 hover:bg-gold-accent hover:text-black transition">
+                          <span className="font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 hover:bg-gold-accent hover:text-black transition">
                             + Add Role
                           </span>
                         </div>
@@ -732,13 +750,22 @@ export default function BottomNav() {
             <div className="flex flex-col gap-2 pt-4 mt-4 border-t border-surface-variant">
               <Link
                 href="/settings#account"
+                scroll={false}
                 className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded bg-gold-accent/10 border border-gold-accent/40 text-xs font-mono uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold"
-                onClick={() => setRoleSheetOpen(false)}
+                onClick={(e) => {
+                  setRoleSheetOpen(false);
+                  if (pathname === "/settings") {
+                    e.preventDefault();
+                    const el = document.getElementById("account");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    window.history.replaceState(null, "", "#account");
+                  }
+                }}
               >
                 + Add or Increase Roles in Settings →
               </Link>
               <div className="px-3 pt-2 pb-0.5">
-                <span className="font-mono text-[11px] uppercase tracking-widest text-text-muted">Quick Workspace Tools</span>
+                <span className="font-mono text-xs uppercase tracking-widest text-text-muted">Quick Workspace Tools</span>
               </div>
               <div className="grid grid-cols-2 gap-2 px-1">
                 <Link

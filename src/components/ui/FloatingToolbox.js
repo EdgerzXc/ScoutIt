@@ -367,10 +367,11 @@ export default function FloatingToolbox({ showTrigger = true }) {
   const viewW = typeof window !== 'undefined' ? window.innerWidth : 1000;
   const viewH = typeof window !== 'undefined' ? window.innerHeight : 800;
   const navClear = viewW <= 768 ? mobileNavClearance() : 0;
-  const defaultPanelX = Math.max(16, Math.min(viewW - 250, pos.x > viewW - 290 ? viewW - 250 : pos.x));
-  const defaultPanelY = viewW <= 768 ? 16 : Math.max(60, Math.min(viewH - 450, pos.y > viewH - 300 ? viewH - 450 : pos.y));
-  const activePanelX = panelPos ? Math.max(10, Math.min(viewW - 238, panelPos.x)) : defaultPanelX;
-  const activePanelY = panelPos ? Math.max(10, Math.min(viewH - navClear - 160, panelPos.y)) : defaultPanelY;
+  const isMobile = viewW <= 768;
+  const defaultPanelX = isMobile ? 16 : Math.max(16, Math.min(viewW - 250, pos.x > viewW - 290 ? viewW - 250 : pos.x));
+  const defaultPanelY = isMobile ? 20 : Math.max(60, Math.min(viewH - 450, pos.y > viewH - 300 ? viewH - 450 : pos.y));
+  const activePanelX = panelPos && !isMobile ? Math.max(10, Math.min(viewW - 238, panelPos.x)) : defaultPanelX;
+  const activePanelY = panelPos && !isMobile ? Math.max(10, Math.min(viewH - navClear - 160, panelPos.y)) : defaultPanelY;
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -470,6 +471,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   }, [wizardOpen]);
 
   const onPanelPointerDown = (e) => {
+    if (viewW <= 768) return;
     if (e.button !== 0) return;
     if (e.target.closest("button")) return;
     isDraggingPanel.current = true;
@@ -484,7 +486,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
   };
 
   const onPanelPointerMove = (e) => {
-    if (!isDraggingPanel.current) return;
+    if (viewW <= 768 || !isDraggingPanel.current) return;
     const dx = e.clientX - panelAnchor.current.clientX;
     const dy = e.clientY - panelAnchor.current.clientY;
     const nx = Math.max(10, Math.min(viewW - 240, panelAnchor.current.posX + dx));
@@ -556,6 +558,27 @@ export default function FloatingToolbox({ showTrigger = true }) {
         </div>
       </div>}
 
+      {/* Mobile backdrop for outside dismiss */}
+      {open && isMobile && (
+        <div
+          className="toolbox-mobile-backdrop"
+          onClick={() => {
+            setOpen(false);
+            restorePanelTriggerFocus();
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
+            zIndex: 99997,
+            touchAction: "manipulation",
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ── Draggable Toolbox panel ── */}
       {open && (
         <div
@@ -564,13 +587,19 @@ export default function FloatingToolbox({ showTrigger = true }) {
           role="complementary"
           aria-label="Help & Display"
           style={{
-            position: "fixed", left: activePanelX, top: activePanelY,
-            zIndex: 99998, width: 228,
+            position: "fixed",
+            left: isMobile ? "50%" : activePanelX,
+            top: isMobile ? "45%" : activePanelY,
+            transform: isMobile ? "translate(-50%, -50%)" : "none",
+            right: isMobile ? "auto" : undefined,
+            zIndex: 99998,
+            width: isMobile ? "calc(100vw - 32px)" : 228,
+            maxWidth: isMobile ? 360 : 228,
             background: "var(--surface)",
             border: "1px solid var(--border-solid, rgba(var(--accent-rgb), 0.25))",
-            borderRadius: 10,
+            borderRadius: 12,
             boxShadow: "var(--shadow-lg, 0 12px 48px rgba(var(--bg-rgb), 0.75))",
-            maxHeight: Math.max(160, viewH - activePanelY - (viewW <= 768 ? navClear : 10)),
+            maxHeight: isMobile ? `calc(100dvh - ${navClear + 32}px)` : Math.max(160, viewH - activePanelY - 10),
             overflowY: "auto",
             isolation: "isolate",
           }}
@@ -581,15 +610,15 @@ export default function FloatingToolbox({ showTrigger = true }) {
             onPointerMove={onPanelPointerMove}
             onPointerUp={onPanelPointerUp}
             style={{
-              padding: "11px 14px 10px",
+              padding: isMobile ? "12px 16px" : "11px 14px 10px",
               borderBottom: "1px solid var(--border)",
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              cursor: "grab", userSelect: "none", touchAction: "none",
+              cursor: isMobile ? "default" : "grab", userSelect: "none", touchAction: isMobile ? "auto" : "none",
               background: "rgba(var(--text-primary-rgb), 0.03)"
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ cursor: "grab", opacity: 0.5, fontSize: 12, color: "var(--accent)" }}>⠿</span>
+              {!isMobile && <span style={{ cursor: "grab", opacity: 0.5, fontSize: 12, color: "var(--accent)" }}>⠿</span>}
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}>
                 Help & Display
               </span>
@@ -600,25 +629,34 @@ export default function FloatingToolbox({ showTrigger = true }) {
               onClick={(e) => {
                 e.stopPropagation();
                 setOpen(false);
+                restorePanelTriggerFocus();
               }}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+                restorePanelTriggerFocus();
+              }}
               aria-label="Close Help & Display"
               style={{
                 background: "rgba(var(--text-primary-rgb), 0.08)",
                 border: "1px solid var(--border-mid)",
                 color: "var(--text-primary)",
                 cursor: "pointer",
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: "bold",
                 lineHeight: 1,
-                width: 28,
-                height: 28,
+                minWidth: 44,
+                minHeight: 44,
+                width: 44,
+                height: 44,
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 transition: "background 0.2s, transform 0.1s",
+                touchAction: "manipulation",
               }}
             >
               ✕
@@ -796,7 +834,21 @@ export default function FloatingToolbox({ showTrigger = true }) {
             aria-modal="false"
             aria-labelledby="scoutit-guide-title"
             className={`toolbox-float ${motionStyles.guidePanel}`}
-            style={{ position: "fixed", right: 12, bottom: viewW <= 768 ? navClear : 88, zIndex: 100000, width: "min(420px, calc(100vw - 24px))", maxHeight: `calc(100dvh - ${viewW <= 768 ? navClear + 24 : 112}px)`, overflowY: "auto", background: "var(--surface)", border: "1px solid rgba(var(--accent-rgb), 0.3)", borderRadius: 12, boxShadow: "0 18px 60px rgba(var(--bg-rgb),0.75)" }}
+            style={{
+              position: "fixed",
+              left: isMobile ? "50%" : "auto",
+              transform: isMobile ? "translateX(-50%)" : "none",
+              right: isMobile ? "auto" : 12,
+              bottom: isMobile ? navClear + 12 : 88,
+              zIndex: 100000,
+              width: "min(420px, calc(100vw - 24px))",
+              maxHeight: `calc(100dvh - ${isMobile ? navClear + 24 : 112}px)`,
+              overflowY: "auto",
+              background: "var(--surface)",
+              border: "1px solid rgba(var(--accent-rgb), 0.3)",
+              borderRadius: 12,
+              boxShadow: "0 18px 60px rgba(var(--bg-rgb),0.75)"
+            }}
           >
             {/* Wizard header */}
             <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
@@ -808,7 +860,29 @@ export default function FloatingToolbox({ showTrigger = true }) {
                   {currentStep.title}
                 </h2>
               </div>
-              <button onClick={closeWizard} aria-label="Dismiss guide" style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 8, flexShrink: 0 }}>✕</button>
+              <button
+                onClick={closeWizard}
+                onTouchEnd={(e) => { e.stopPropagation(); closeWizard(); }}
+                aria-label="Dismiss guide"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  fontSize: 20,
+                  lineHeight: 1,
+                  minWidth: 44,
+                  minHeight: 44,
+                  padding: 8,
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  touchAction: "manipulation",
+                }}
+              >
+                ✕
+              </button>
             </div>
 
             {/* Wizard body */}
