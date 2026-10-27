@@ -318,14 +318,6 @@ export default function SettingsPage() {
     }
   };
 
-  const toggleTag = (id) => {
-    setTags(prev => 
-      prev.includes(id) 
-        ? prev.filter(t => t !== id)
-        : [...prev, id]
-    );
-  };
-
   const handleSave = async () => {
     setSecurityMessage({ type: "", text: "" });
     setSaveSuccess(false);
@@ -681,11 +673,20 @@ export default function SettingsPage() {
           {/* Platform Roles & Workspaces Catalog */}
           <div className={styles.formGroup} style={{ marginTop: 24 }}>
             <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              Platform Roles &amp; Workspaces <InfoTip tipId="settingsWorkspaces" label="About your platform roles and workspace activation" />
+              Your Roles <InfoTip tipId="settingsWorkspaces" label="About your platform roles and workspace activation" />
             </label>
             <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-              Explore and activate roles across the ScoutIt platform. Every account starts as a Buyer / Seeker. Specialized roles unlock verified workspaces with streamlined, win-win requirements.
+              Explore and activate roles across the ScoutIt platform. Every account starts with Looking to Buy / Rent. Specialized roles like Property Owner / Landlord, Accredited Broker, and Creative Partners unlock verified workspaces with streamlined, win-win requirements.
             </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Need another lens?
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                Tap any role to activate or calibrate
+              </span>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {ALL_PLATFORM_ROLES.map((role) => {
@@ -725,6 +726,8 @@ export default function SettingsPage() {
                             }}>
                               {role.badge}
                             </span>
+                            {role.id === "broker" && <InfoTip tipId="settingsPrcLicense" label="About PRC licence requirement" />}
+                            {(role.id === "photographer" || role.id === "designer") && <InfoTip tipId="settingsServicesOffered" label="About creative services offered" />}
                           </div>
                           <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0', lineHeight: 1.4 }}>
                             {role.desc}

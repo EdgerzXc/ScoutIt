@@ -56,7 +56,7 @@ export async function GET(request) {
 
     const { data, error } = await supabaseAdmin
       .from("user_profiles")
-      .select("role")
+      .select("role, primary_mode, active_roles")
       .eq("id", userId)
       .maybeSingle();
 
@@ -65,8 +65,14 @@ export async function GET(request) {
       return NextResponse.json({ role: null }, { status: 200, headers: NO_STORE });
     }
 
+    const resolvedRole =
+      data?.primary_mode ||
+      data?.role ||
+      (Array.isArray(data?.active_roles) ? data.active_roles[0] : null) ||
+      null;
+
     return NextResponse.json(
-      { role: data?.role || null },
+      { role: resolvedRole },
       { status: 200, headers: NO_STORE },
     );
   } catch (err) {
