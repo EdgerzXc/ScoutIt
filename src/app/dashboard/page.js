@@ -116,7 +116,10 @@ function DashboardInner() {
       currentUser.active_roles,
       currentUser.primary_mode || currentUser.role,
     );
-    const primaryMode = pickPrimaryRole(tags, currentUser.primary_mode);
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const requestedRole = params?.get("role") || params?.get("mode");
+    const preferredMode = requestedRole ? normalizeDashboardMode(requestedRole) : "buyer";
+    const primaryMode = pickPrimaryRole(tags, preferredMode) || "buyer";
     if (!primaryMode || tags.length === 0) {
       router.push("/onboarding");
       return;

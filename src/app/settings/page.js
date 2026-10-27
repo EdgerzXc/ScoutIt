@@ -7,7 +7,8 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import InfoTip from "@/components/ui/InfoTip";
-import { Camera, Search, Lock, ArrowLeft } from "lucide-react";
+import { Camera, Search, Lock, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
+import RoleActivationModal from "@/components/profile/RoleActivationModal";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
 import NotificationPreferencesPanel from "@/components/profile/NotificationPreferencesPanel";
@@ -35,7 +36,17 @@ const GATED_TAGS = [
   { id: 'provider', label: 'Real Estate Service Provider', icon: <Camera strokeWidth={1.5} size="1.1em" />, requirement: 'Please describe the services you offer below (e.g. photography, appraisal, staging).' },
 ];
 
-const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS];
+export const ALL_PLATFORM_ROLES = [
+  { id: 'buyer', label: 'Buyer / Seeker', icon: '🔍', badge: 'Default', desc: 'Search spaces, viewings & private board (Default role on all accounts)', alwaysActive: true },
+  { id: 'owner', label: 'Property Owner & Developer', icon: '📋', badge: 'Asset Mgmt', desc: 'List spaces, manage tenant inquiries & Next of Kin asset continuity' },
+  { id: 'broker', label: 'Accredited Broker', icon: '🤝', badge: 'PRC Licensed', desc: 'Client representation & deal pipeline (PRC Licensed)' },
+  { id: 'salesperson', label: 'Real Estate Salesperson', icon: '💼', badge: 'R.A. 9646', desc: 'Property sales & viewings under broker supervision' },
+  { id: 'operator', label: 'Co-Operator & Facilities', icon: '🏢', badge: 'Operations Desk', desc: 'Space management, facilities desk & guest access operations' },
+  { id: 'photographer', label: 'Spatial Photographer', icon: '📷', badge: 'Creative Network', desc: 'Space photography, Matterport staging & QuestIT photo bounties' },
+  { id: 'designer', label: 'Event & Concept Designer', icon: '✨', badge: 'Spatial Staging', desc: 'Spatial staging, pop-up commercial concepts & design lookbooks' },
+];
+
+const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS, ...ALL_PLATFORM_ROLES];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -61,6 +72,12 @@ export default function SettingsPage() {
   // moment broker is *added*, and is then stated through
   // POST /api/broker/credential after the profile save.
   const [brokerClaim, setBrokerClaim] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dobInput, setDobInput] = useState("");
+  const [adultEligibilityStatus, setAdultEligibilityStatus] = useState("unknown");
+  const [dobSaving, setDobSaving] = useState(false);
+  const [dobMessage, setDobMessage] = useState({ type: "", text: "" });
+  const [activatingRole, setActivatingRole] = useState(null);
   // Read in an effect, not during render: getCurrentTier() touches
   // localStorage, which does not exist on the server and would break SSR.
   // Only used to say whether the shield is already on by default — never to
@@ -168,12 +185,15 @@ export default function SettingsPage() {
       }
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("display_name,active_roles,primary_mode,role,headline,bio,location,firm,service")
+        .select("display_name,active_roles,primary_mode,role,headline,bio,location,firm,service,date_of_birth,adult_eligibility_status")
         .eq("id", user.id)
         .maybeSingle();
       if (!profile) return;
 
       setName(profile.display_name || "");
+      setDateOfBirth(profile.date_of_birth || "");
+      setDobInput(profile.date_of_birth || "");
+      setAdultEligibilityStatus(profile.adult_eligibility_status || "unknown");
       // A-146: normalize on load — a legacy "seeker" tag otherwise matches no
       // workspace card and the primary falls back by insertion order.
       const nextTags = normalizeDashboardModes(profile.active_roles, profile.primary_mode || profile.role);
@@ -188,8 +208,16 @@ export default function SettingsPage() {
         firm: profile.firm || "",
         service: profile.service || "",
       }));
-    }
+    };
     loadSettings();
+
+    const handleProfileUpdated = () => {
+      loadSettings();
+    };
+    window.addEventListener("scoutit:profile-updated", handleProfileUpdated);
+    return () => {
+      window.removeEventListener("scoutit:profile-updated", handleProfileUpdated);
+    };
   }, [router]);
 
   // Scrollspy observer for active section detection & mobile centering
@@ -263,6 +291,32 @@ export default function SettingsPage() {
   };
 
   const setField = (field, value) => setPublicProfile(p => ({ ...p, [field]: value }));
+
+  const handleSaveDateOfBirth = async (dobValue) => {
+    setDobMessage({ type: "", text: "" });
+    setDobSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Please sign in to update your date of birth.");
+      const res = await fetch("/api/user/date-of-birth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ dateOfBirth: dobValue }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Failed to update date of birth.");
+      setDateOfBirth(data.dateOfBirth);
+      setAdultEligibilityStatus(data.adultEligibilityStatus);
+      setDobMessage({ type: "success", text: "Date of birth and 18+ adult eligibility verified." });
+    } catch (err) {
+      setDobMessage({ type: "error", text: err.message || "Failed to save date of birth." });
+    } finally {
+      setDobSaving(false);
+    }
+  };
 
   const toggleTag = (id) => {
     setTags(prev => 
@@ -348,7 +402,7 @@ export default function SettingsPage() {
     const existingNonLens = (existingProfile?.active_roles || []).filter(
       (r) => !INTENT_TAGS.some((t) => t.id === r)
     );
-    const consolidatedActiveRoles = [...new Set([...tags, ...existingNonLens])];
+    const consolidatedActiveRoles = [...new Set([...tags, ...existingNonLens, "buyer"])];
 
     const nextPrimaryMode = pickPrimaryRole(tags, primaryMode);
     const { error } = await supabase
@@ -534,77 +588,214 @@ export default function SettingsPage() {
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} style={{marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 6}}>
-              Your Roles <InfoTip tipId="settingsWorkspaces" label="About your roles and workspaces" />
+          {/* Date of Birth & 18+ Legal Verification */}
+          <div className={styles.formGroup} style={{ marginTop: 20 }}>
+            <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              Date of Birth &amp; Legal Capacity <InfoTip tipId="settingsDateOfBirth" label="About date of birth & 18+ legal capacity check" />
             </label>
-            <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-              Choose the roles that fit what you do (Buyer &amp; Seeker, Property Owner, Licensed Broker, Co-Operator, Spatial Photographer, or Event Designer). You can easily switch between your active workspaces from your dashboard.
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
+              Required under the Civil Code of the Philippines and E-Commerce Act (RA 8792). Confirms 18+ contractual capacity and is kept strictly confidential.
             </p>
-
-            <div className={styles.tagGrid}>
-              {SELF_SERVICE_TAGS.map(tag => (
-                <div
-                  key={tag.id}
-                  className={`${styles.tagCard} ${tags.includes(tag.id) ? styles.selected : ''}`}
-                  onClick={() => toggleTag(tag.id)}
-                  role="checkbox"
-                  aria-checked={tags.includes(tag.id)}
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') toggleTag(tag.id); }}
-                >
-                  <span className={styles.tagIcon}>{tag.icon}</span>
-                  <span style={{fontSize: 14, fontWeight: 500}}>{tag.label}</span>
+            {dateOfBirth ? (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px 18px',
+                borderRadius: 8,
+                background: 'rgba(232, 174, 60, 0.05)',
+                border: '1px solid rgba(232, 174, 60, 0.25)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <ShieldCheck size={20} style={{ color: 'var(--accent)' }} />
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {dateOfBirth}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                      18+ Adult Eligibility Confirmed ({adultEligibilityStatus})
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  padding: '4px 10px',
+                  borderRadius: 4,
+                  background: 'rgba(46, 125, 50, 0.2)',
+                  color: '#81c784',
+                  border: '1px solid rgba(46, 125, 50, 0.4)',
+                  fontWeight: 600,
+                }}>
+                  Verified ✓
+                </span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <input
+                    type="date"
+                    max={new Date().toISOString().slice(0, 10)}
+                    className={styles.input}
+                    style={{ maxWidth: 240 }}
+                    value={dobInput}
+                    onChange={(e) => setDobInput(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    disabled={!dobInput || dobSaving}
+                    onClick={() => handleSaveDateOfBirth(dobInput)}
+                    style={{
+                      minHeight: 44,
+                      padding: '0 20px',
+                      borderRadius: 6,
+                      background: 'var(--accent)',
+                      color: '#000',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      cursor: (!dobInput || dobSaving) ? 'not-allowed' : 'pointer',
+                      opacity: (!dobInput || dobSaving) ? 0.5 : 1,
+                      transition: 'background 160ms ease',
+                    }}
+                  >
+                    {dobSaving ? "Verifying…" : "Confirm Date of Birth →"}
+                  </button>
+                </div>
+                {dobMessage.text && (
+                  <div style={{
+                    fontSize: 12,
+                    color: dobMessage.type === 'error' ? '#ef5350' : '#81c784',
+                  }}>
+                    {dobMessage.text}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} style={{marginTop: 16}}>Need another lens?</label>
-            <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-              Licensed brokers and verified ecosystem partners (photographers, researchers, and event designers) require brief verification to activate. Select a role below to get started.
+          {/* Platform Roles & Workspaces Catalog */}
+          <div className={styles.formGroup} style={{ marginTop: 24 }}>
+            <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              Platform Roles &amp; Workspaces <InfoTip tipId="settingsWorkspaces" label="About your platform roles and workspace activation" />
+            </label>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
+              Explore and activate roles across the ScoutIt platform. Every account starts as a Buyer / Seeker. Specialized roles unlock verified workspaces with streamlined, win-win requirements.
             </p>
 
-            <div className={styles.tagGrid}>
-              {GATED_TAGS.map(tag => {
-                const held = tags.includes(tag.id);
-                const newlyAdding = held && !initialTags.includes(tag.id);
-                const heldNote = tag.id === 'broker'
-                  ? "Active role. License updates can be submitted from your Broker workspace."
-                  : "Active role. Keep your Services Offered description below updated.";
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {ALL_PLATFORM_ROLES.map((role) => {
+                const isHeld = role.alwaysActive || tags.includes(role.id) || role.id === "buyer";
                 return (
-                  <div key={tag.id}>
-                    <div
-                      className={`${styles.tagCard} ${held ? styles.selected : ''}`}
-                      onClick={() => toggleTag(tag.id)}
-                      role="checkbox"
-                      aria-checked={held}
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') toggleTag(tag.id); }}
-                    >
-                      <span className={styles.tagIcon}>{tag.icon}</span>
-                      <span style={{fontSize: 14, fontWeight: 500}}>{tag.label}</span>
-                    </div>
-                    <p style={{color: 'var(--text-secondary)', fontSize: 12, marginTop: 8, lineHeight: 1.5}}>
-                      {held && !newlyAdding ? heldNote : (held ? tag.requirement : `Tap to select: ${tag.requirement}`)}
-                    </p>
-                    {tag.id === 'broker' && newlyAdding && (
-                      <div style={{marginTop: 12}}>
-                        <label className={styles.label} style={{fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6}}>
-                          PRC licence number <InfoTip tipId="settingsPrcLicense" label="About PRC licence requirement" />
-                        </label>
-                        <input
-                          type="text"
-                          className={styles.input}
-                          placeholder="PRC-REB-XXXXXXX"
-                          aria-label="PRC licence number"
-                          maxLength={80}
-                          value={brokerClaim}
-                          onChange={(e) => setBrokerClaim(e.target.value)}
-                        />
+                  <div
+                    key={role.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                      padding: '16px 20px',
+                      borderRadius: 8,
+                      background: isHeld ? 'rgba(232, 174, 60, 0.04)' : 'rgba(255, 255, 255, 0.02)',
+                      border: isHeld ? '1px solid rgba(232, 174, 60, 0.35)' : '1px solid var(--border-solid)',
+                      transition: 'border-color 160ms ease, background 160ms ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontSize: 20 }}>{role.icon}</span>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                              {role.label}
+                            </span>
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 10,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.08em',
+                              padding: '2px 6px',
+                              borderRadius: 4,
+                              background: 'rgba(255, 255, 255, 0.06)',
+                              color: 'var(--text-secondary)',
+                              border: '1px solid var(--border-solid)',
+                            }}>
+                              {role.badge}
+                            </span>
+                          </div>
+                          <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0', lineHeight: 1.4 }}>
+                            {role.desc}
+                          </p>
+                        </div>
                       </div>
-                    )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {isHeld ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 11,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.08em',
+                              padding: '4px 10px',
+                              borderRadius: 4,
+                              background: 'rgba(232, 174, 60, 0.15)',
+                              color: 'var(--accent-bright)',
+                              border: '1px solid rgba(232, 174, 60, 0.4)',
+                              fontWeight: 600,
+                            }}>
+                              Active ✓
+                            </span>
+                            {!role.alwaysActive && (
+                              <button
+                                type="button"
+                                onClick={() => setActivatingRole(role.id)}
+                                style={{
+                                  minHeight: 36,
+                                  padding: '0 12px',
+                                  borderRadius: 4,
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  color: 'var(--text-secondary)',
+                                  border: '1px solid var(--border-solid)',
+                                  fontSize: 11,
+                                  fontFamily: 'var(--font-mono)',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.05em',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Calibrate Details
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setActivatingRole(role.id)}
+                            style={{
+                              minHeight: 40,
+                              padding: '0 16px',
+                              borderRadius: 6,
+                              background: 'rgba(232, 174, 60, 0.12)',
+                              color: 'var(--accent-bright)',
+                              border: '1px solid rgba(232, 174, 60, 0.4)',
+                              fontWeight: 600,
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 12,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.06em',
+                              cursor: 'pointer',
+                              transition: 'all 160ms ease',
+                            }}
+                          >
+                            + Activate Role →
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -1144,6 +1335,16 @@ export default function SettingsPage() {
           Sign Out of ScoutIt
         </button>
       </main>
+
+      <RoleActivationModal
+        role={activatingRole}
+        isOpen={!!activatingRole}
+        onClose={() => setActivatingRole(null)}
+        onSuccess={() => {
+          // Re-trigger profile reload so all roles and workspaces update immediately
+          window.dispatchEvent(new CustomEvent("scoutit:profile-updated"));
+        }}
+      />
     </div>
   );
 }

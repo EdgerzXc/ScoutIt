@@ -8,6 +8,7 @@ import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
+import RoleActivationModal from "@/components/profile/RoleActivationModal";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -252,6 +253,7 @@ export default function BottomNav() {
   const [isSaved, setIsSaved] = useState(false);
   const [shareToast, setShareToast] = useState("");
   const [activeUserRoles, setActiveUserRoles] = useState(["buyer"]);
+  const [activatingRole, setActivatingRole] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -790,18 +792,12 @@ export default function BottomNav() {
                 </div>
                 <div className="theme-sheet-options">
                   {availableRoles.map((role) => (
-                    <Link
+                    <button
                       key={role.id}
-                      href="/settings#account"
-                      scroll={false}
-                      onClick={(e) => {
+                      type="button"
+                      onClick={() => {
                         setRoleSheetOpen(false);
-                        if (pathname === "/settings") {
-                          e.preventDefault();
-                          const el = document.getElementById("account");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                          window.history.replaceState(null, "", "#account");
-                        }
+                        setActivatingRole(role.id);
                       }}
                       className="theme-option is-available-role"
                       style={{
@@ -810,7 +806,7 @@ export default function BottomNav() {
                         gap: "14px",
                         background: "rgba(255, 255, 255, 0.02)",
                         borderColor: "var(--border-solid)",
-                        textDecoration: "none",
+                        cursor: "pointer",
                       }}
                     >
                       <div className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center text-text-secondary shrink-0">
@@ -825,7 +821,7 @@ export default function BottomNav() {
                         </div>
                         <div className="theme-desc">{role.desc}</div>
                       </div>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -882,6 +878,16 @@ export default function BottomNav() {
           </div>
         </div>
       )}
+
+      {/* Role Activation Modal */}
+      <RoleActivationModal
+        role={activatingRole}
+        isOpen={!!activatingRole}
+        onClose={() => setActivatingRole(null)}
+        onSuccess={(newRole) => {
+          handleRoleSelect(newRole);
+        }}
+      />
     </>
   );
 }

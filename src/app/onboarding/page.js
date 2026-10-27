@@ -106,7 +106,7 @@ export default function OnboardingPage() {
     dateOfBirth: "",
     email: "",
     password: "",
-    primaryMode: "",
+    primaryMode: "buyer",
     locationFocus: "",
     prcLicense: "",
     acceptedTerms: false,
@@ -145,7 +145,7 @@ export default function OnboardingPage() {
       name: profile?.display_name || user.user_metadata?.full_name || current.name,
       email: user.email || current.email,
       dateOfBirth: profile?.date_of_birth || current.dateOfBirth,
-      primaryMode: onboardingPrimaryMode(profile) || current.primaryMode,
+      primaryMode: onboardingPrimaryMode(profile) || current.primaryMode || "buyer",
       locationFocus: profile?.location_focus || current.locationFocus,
       prcLicense: profile?.prc_license || current.prcLicense,
     }));
