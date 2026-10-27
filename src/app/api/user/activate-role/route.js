@@ -198,7 +198,9 @@ export async function POST(request) {
         );
       }
       roleUpdates.prc_license = digits;
+      roleUpdates.prc_verified = false;
       auditMetadata.prcLicense = digits;
+      auditMetadata.prcVerified = false;
     }
 
     // Retrieve existing profile to preserve held roles and ensure buyer is always included

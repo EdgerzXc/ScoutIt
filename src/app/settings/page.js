@@ -611,7 +611,7 @@ export default function SettingsPage() {
                 </div>
                 <span style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
+                  fontSize: 12,
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
                   padding: '4px 10px',
@@ -715,7 +715,7 @@ export default function SettingsPage() {
                             </span>
                             <span style={{
                               fontFamily: 'var(--font-mono)',
-                              fontSize: 10,
+                              fontSize: 12,
                               textTransform: 'uppercase',
                               letterSpacing: '0.08em',
                               padding: '2px 6px',
@@ -740,7 +740,7 @@ export default function SettingsPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{
                               fontFamily: 'var(--font-mono)',
-                              fontSize: 11,
+                              fontSize: 12,
                               textTransform: 'uppercase',
                               letterSpacing: '0.08em',
                               padding: '4px 10px',
@@ -763,7 +763,7 @@ export default function SettingsPage() {
                                   background: 'rgba(255, 255, 255, 0.05)',
                                   color: 'var(--text-secondary)',
                                   border: '1px solid var(--border-solid)',
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   fontFamily: 'var(--font-mono)',
                                   textTransform: 'uppercase',
                                   letterSpacing: '0.05em',

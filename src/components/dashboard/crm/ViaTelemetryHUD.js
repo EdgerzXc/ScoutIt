@@ -64,7 +64,7 @@ export default function ViaTelemetryHUD() {
             <Link2 size={18} />
           </div>
           <div>
-            <span className="font-mono text-[11px] sm:text-[12px] uppercase tracking-widest text-gold-accent block">
+            <span className="font-mono text-xs uppercase tracking-widest text-gold-accent block">
               VIP Referral Tracking
             </span>
             <h3 className="font-headline-editorial text-base sm:text-lg text-on-surface font-semibold m-0">
@@ -80,47 +80,47 @@ export default function ViaTelemetryHUD() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <div className="p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1 justify-between">
-          <span className="font-mono text-[11px] sm:text-[12px] uppercase tracking-wider text-text-secondary flex items-center justify-between">
+          <span className="font-mono text-xs uppercase tracking-wider text-text-secondary flex items-center justify-between">
             VIP Clicks
             <Activity size={12} className="text-gold-accent shrink-0" />
           </span>
           <span className="font-mono text-xl sm:text-2xl font-bold text-on-surface tabular-nums">
             {summary?.linkClicks ?? 0}
           </span>
-          <span className="text-[11px] text-text-muted">Unique visitors</span>
+          <span className="text-xs text-text-muted">Unique visitors</span>
         </div>
 
         <div className="p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1 justify-between">
-          <span className="font-mono text-[11px] sm:text-[12px] uppercase tracking-wider text-text-secondary flex items-center justify-between">
+          <span className="font-mono text-xs uppercase tracking-wider text-text-secondary flex items-center justify-between">
             Inquiries
             <Users size={12} className="text-gold-accent shrink-0" />
           </span>
           <span className="font-mono text-xl sm:text-2xl font-bold text-on-surface tabular-nums">
             {summary?.inquiries ?? 0}
           </span>
-          <span className="text-[11px] text-text-muted">Qualified direct inquiries</span>
+          <span className="text-xs text-text-muted">Qualified direct inquiries</span>
         </div>
 
         <div className="p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1 justify-between">
-          <span className="font-mono text-[11px] sm:text-[12px] uppercase tracking-wider text-text-secondary flex items-center justify-between">
+          <span className="font-mono text-xs uppercase tracking-wider text-text-secondary flex items-center justify-between">
             Deals Started
             <TrendingUp size={12} className="text-gold-accent shrink-0" />
           </span>
           <span className="font-mono text-xl sm:text-2xl font-bold text-gold-accent tabular-nums">
             {summary?.dealsInitiated ?? 0}
           </span>
-          <span className="text-[11px] text-text-muted">Active negotiations</span>
+          <span className="text-xs text-text-muted">Active negotiations</span>
         </div>
 
         <div className="p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1 justify-between">
-          <span className="font-mono text-[11px] sm:text-[12px] uppercase tracking-wider text-text-secondary flex items-center justify-between">
+          <span className="font-mono text-xs uppercase tracking-wider text-text-secondary flex items-center justify-between">
             Conversion Rate
             <ArrowUpRight size={12} className="text-emerald-400 shrink-0" />
           </span>
           <span className="font-mono text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">
             {conversionRates?.clickToInquiry ?? "0.0%"}
           </span>
-          <span className="text-[11px] text-text-muted">Click to inquiry rate</span>
+          <span className="text-xs text-text-muted">Click to inquiry rate</span>
         </div>
       </div>
 

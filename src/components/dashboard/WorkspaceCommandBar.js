@@ -65,11 +65,11 @@ export default function WorkspaceCommandBar({ active, badges = {}, className = "
           >
             <Icon size={16} strokeWidth={1.7} className="shrink-0" aria-hidden="true" />
             <span className="min-w-0 flex flex-col items-center sm:items-start text-center sm:text-left leading-none">
-              <span className="block font-mono text-[10px] sm:text-[12px] font-bold uppercase tracking-wider sm:tracking-[0.12em] truncate max-w-full">
+              <span className="block font-mono text-xs font-bold uppercase tracking-wider sm:tracking-[0.12em] truncate max-w-full">
                 {label}
               </span>
               <span
-                className={`hidden text-[11px] sm:block mt-0.5 ${selected ? "text-background/80" : "text-text-muted"}`}
+                className={`hidden text-xs sm:block mt-0.5 ${selected ? "text-background/80" : "text-text-muted"}`}
               >
                 {detail}
               </span>
@@ -77,7 +77,7 @@ export default function WorkspaceCommandBar({ active, badges = {}, className = "
             {badge && (
               <span
                 aria-hidden="true"
-                className={`absolute top-0.5 right-1 sm:-top-1 sm:-right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] sm:text-[11px] font-bold ${
+                className={`absolute top-0.5 right-1 sm:-top-1 sm:-right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs font-bold ${
                   selected ? "bg-background text-gold-accent" : "bg-gold-accent text-background"
                 }`}
               >

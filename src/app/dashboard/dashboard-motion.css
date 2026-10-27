@@ -192,7 +192,7 @@ html.lite-mode .dashboard-lens-motion .card-atmosphere-gold::after {
   .dashboard-ambient-city {
     width: 100%;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: 12px;
   }
   .dashboard-ambient-city span {
     display: inline-block;

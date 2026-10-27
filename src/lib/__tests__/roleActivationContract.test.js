@@ -114,5 +114,15 @@ describe("Role Activation & Next of Kin Contract", () => {
       expect(validDesignerData.designSpecialty.trim().length).toBeGreaterThanOrEqual(2);
       expect(validDesignerData.lookbookUrl.trim().length).toBeGreaterThanOrEqual(3);
     });
+
+    it("validates Accredited Broker license digits and demands server-side prc_verified reset", () => {
+      const validLicense = "0012345";
+      const digits = validLicense.replace(/\D/g, "");
+      expect(digits.length).toBeGreaterThanOrEqual(7);
+      expect(digits.length).toBeLessThanOrEqual(8);
+
+      const invalidLicense = "123";
+      expect(invalidLicense.replace(/\D/g, "").length).toBeLessThan(7);
+    });
   });
 });

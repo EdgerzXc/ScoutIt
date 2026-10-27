@@ -1216,7 +1216,7 @@ export default function IntelPage() {
           }
           .filter-btn {
             padding: 8px 12px;
-            font-size: 11px;
+            font-size: 12px;
           }
           .intel-radar-dock {
             padding: 10px 12px;

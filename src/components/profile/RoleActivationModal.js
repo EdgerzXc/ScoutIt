@@ -275,10 +275,10 @@ export default function RoleActivationModal({ role, isOpen, onClose, onSuccess }
         <div className="flex items-start justify-between gap-3 pb-4 border-b border-surface-variant">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-gold-accent px-2 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/10">
+              <span className="font-mono text-xs uppercase tracking-widest text-gold-accent px-2 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/10">
                 {config.badge}
               </span>
-              <span className="font-mono text-[11px] uppercase tracking-wider text-text-muted">
+              <span className="font-mono text-xs uppercase tracking-wider text-text-muted">
                 Workspace Setup
               </span>
             </div>
@@ -375,7 +375,7 @@ export default function RoleActivationModal({ role, isOpen, onClose, onSuccess }
             disabled={loading || !!successMsg}
             className="min-h-[44px] px-6 rounded bg-gold-accent hover:bg-gold-bright text-black font-working-title font-bold text-sm uppercase tracking-wider transition disabled:opacity-50 flex items-center gap-2"
           >
-            {loading ? "Activating…" : successMsg ? "Activated ✓" : `Activate ${config.title} →`}
+            {loading ? "Activating…" : successMsg ? "Activated" : `Activate ${config.title} →`}
           </button>
         </div>
       </div>

@@ -112,7 +112,7 @@ const OwnerListingCard = memo(({
               {!listing.is_sample && (
                 <button 
                   type="button"
-                  className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 min-h-[38px] sm:min-h-11 inline-flex items-center justify-center text-[11px] sm:text-[12px] uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background active:scale-95 transition"
+                  className="text-gold-accent border border-gold-accent/30 rounded px-3 py-1.5 min-h-[38px] sm:min-h-11 inline-flex items-center justify-center text-xs uppercase font-label-caps tracking-widest hover:bg-gold-accent hover:text-background active:scale-95 transition"
                   onClick={handleShare}
                 >
                   Share

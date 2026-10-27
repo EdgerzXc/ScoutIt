@@ -636,7 +636,7 @@ function DashboardInner() {
               <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent font-semibold">
                 Your Active Workspaces
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">
+              <span className="font-mono text-xs uppercase tracking-wider text-text-muted">
                 Tap to switch
               </span>
             </div>
@@ -649,11 +649,11 @@ function DashboardInner() {
                 >
                   <span className="uppercase tracking-wider">{TAG_LABELS[tagId] || tagId}</span>
                   {mode === tagId ? (
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
+                    <span className="font-mono text-xs uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
                       Active ✓
                     </span>
                   ) : (
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">Switch →</span>
+                    <span className="font-mono text-xs uppercase tracking-wider text-text-muted">Switch →</span>
                   )}
                 </button>
               ))}
@@ -667,7 +667,7 @@ function DashboardInner() {
               <Link
                 href="/settings#account"
                 onClick={() => setShowMobileProfileMenu(false)}
-                className="font-mono text-[10px] uppercase tracking-wider text-gold-accent hover:underline"
+                className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline"
               >
                 Settings →
               </Link>
@@ -691,7 +691,7 @@ function DashboardInner() {
                     <div className="font-working-title text-sm text-text-primary group-hover:text-gold-accent transition">{item.label}</div>
                     <div className="text-xs text-text-muted mt-0.5">{item.desc}</div>
                   </div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 group-hover:bg-gold-accent group-hover:text-black transition">
+                  <span className="font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 group-hover:bg-gold-accent group-hover:text-black transition">
                     + Add Role
                   </span>
                 </Link>
@@ -701,7 +701,7 @@ function DashboardInner() {
             <Link
               href="/settings#account"
               onClick={() => setShowMobileProfileMenu(false)}
-              className="flex items-center justify-center min-h-[44px] p-3 rounded-lg border border-gold-accent/40 bg-gold-accent/10 font-mono text-[11px] uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold mb-2"
+              className="flex items-center justify-center min-h-[44px] p-3 rounded-lg border border-gold-accent/40 bg-gold-accent/10 font-mono text-xs uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold mb-2"
             >
               + Add or Increase Roles in Settings →
             </Link>
