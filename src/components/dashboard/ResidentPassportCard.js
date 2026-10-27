@@ -120,14 +120,14 @@ export default function ResidentPassportCard({
   return (
     <div className="w-full bg-surface border border-surface-variant rounded-lg p-5 flex flex-col gap-4 shadow-xl relative">
       {/* Top Header */}
-      <div className="flex items-center justify-between border-b border-surface-variant pb-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-surface-variant pb-3">
         <div className="flex items-center gap-2.5">
           <ShieldCheck size={18} className="text-gold-accent shrink-0" />
           <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-bold">
-            Resident Passport & Trust Credential
+            Resident Passport & Trust
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {passport.isKycVerified && (
             <span className="px-2 py-0.5 rounded bg-surface-alt border border-surface-variant text-[12px] font-mono text-text-secondary">
               KYC Verified
@@ -150,15 +150,15 @@ export default function ResidentPassportCard({
 
         <div className="p-3 bg-surface-alt rounded border border-surface-variant flex flex-col gap-1">
           <span className="font-mono text-[12px] text-text-secondary uppercase">Verified Transactions</span>
-          <span className="font-mono text-sm font-bold text-on-surface">
-            {passport.verifiedTransactions} Handshake Closures
+          <span className="font-mono text-sm font-bold text-on-surface tabular-nums">
+            {passport.verifiedTransactions} Verified Closures
           </span>
         </div>
 
         <div className="p-3 bg-surface-alt rounded border border-surface-variant flex flex-col gap-1">
           <span className="font-mono text-[12px] text-text-secondary uppercase">Behavioral Index</span>
-          <span className="font-mono text-sm font-bold text-gold-accent">
-            {passport.isHonestBlank ? "Honest Blank [Neutral]" : `${passport.compositeScore} / 100`}
+          <span className="font-mono text-sm font-bold text-gold-accent tabular-nums">
+            {passport.isHonestBlank ? "New Seeker (Neutral)" : `${passport.compositeScore} / 100`}
           </span>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function ResidentPassportCard({
           <Award size={18} className="text-gold-accent shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1">
             <span className="text-xs font-mono text-on-surface font-semibold">
-              Honest Blank Onboarding Rule Active
+              New Resident Trust Protection
             </span>
             <p className="text-xs text-text-secondary leading-relaxed">
               First-time luxury seekers are never penalized or graded with an artificial 0/5 score. Your verified identity and completed inquiries will establish your authentic Resident Passport over time.
@@ -183,7 +183,7 @@ export default function ResidentPassportCard({
             onClick={() => setShowVectors(!showVectors)}
             className="flex items-center justify-between py-2 text-xs font-mono text-gold-accent hover:text-gold-bright transition"
           >
-            <span>{showVectors ? "Hide Verified Vector Vectors" : "View Verified Tenancy Vector Vectors"}</span>
+            <span>{showVectors ? "Hide Tenancy Metrics" : "View Tenancy Metrics"}</span>
             {showVectors ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
@@ -191,19 +191,19 @@ export default function ResidentPassportCard({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3.5 bg-surface-alt rounded border border-surface-variant">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-text-secondary">Payment Punctuality</span>
-                <span className="text-on-surface font-bold">{passport.vectorBreakdown.payment_punctuality} / 5.0</span>
+                <span className="text-on-surface font-bold tabular-nums">{passport.vectorBreakdown.payment_punctuality} / 5.0</span>
               </div>
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-text-secondary">Space Care & Maintenance</span>
-                <span className="text-on-surface font-bold">{passport.vectorBreakdown.space_care_maintenance} / 5.0</span>
+                <span className="text-on-surface font-bold tabular-nums">{passport.vectorBreakdown.space_care_maintenance} / 5.0</span>
               </div>
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-text-secondary">Communication & Conduct</span>
-                <span className="text-on-surface font-bold">{passport.vectorBreakdown.communication_conduct} / 5.0</span>
+                <span className="text-on-surface font-bold tabular-nums">{passport.vectorBreakdown.communication_conduct} / 5.0</span>
               </div>
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-text-secondary">Covenant Adherence</span>
-                <span className="text-on-surface font-bold">{passport.vectorBreakdown.lease_covenant_adherence} / 5.0</span>
+                <span className="text-on-surface font-bold tabular-nums">{passport.vectorBreakdown.lease_covenant_adherence} / 5.0</span>
               </div>
             </div>
           )}
@@ -211,13 +211,13 @@ export default function ResidentPassportCard({
       )}
 
       {/* RA 10173 Consented Disclosure Footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-surface-variant text-[12px] font-mono text-text-secondary">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t border-surface-variant text-[12px] font-mono text-text-secondary">
         <div className="flex items-center gap-2">
           <Lock size={12} className="text-gold-accent shrink-0" />
           <span>RA 10173 Protected · Not searchable on open web</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setShowDisputeModal(true)}

@@ -439,29 +439,29 @@ export default function MissionControlMode() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-6 auto-rows-[minmax(160px,auto)]">
               
               {/* Hero Metric: Company Health (2x2) */}
-              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col relative overflow-hidden group border-white/[0.04] hover:border-gold-accent/30 transition-all duration-300 ease-out shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_40px_rgba(var(--accent-rgb),0.15)] bg-surface/40 backdrop-blur-xl">
+              <GlassPanel className="md:col-span-2 md:row-span-2 rounded-3xl p-5 sm:p-8 flex flex-col relative overflow-hidden group border-white/[0.04] hover:border-gold-accent/30 transition-all duration-300 ease-out shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] hover:shadow-[0_8px_40px_rgba(var(--accent-rgb),0.15)] bg-surface/40 backdrop-blur-xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-200 -translate-y-1/2 translate-x-1/3" />
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
                 
                 <div className="flex items-start justify-between relative z-10 mb-auto">
                   <div>
-                    <h3 className="text-white font-display-md text-2xl tracking-wide mb-1">Portfolio Strength</h3>
-                    <p className="text-text-secondary text-sm font-mono uppercase tracking-widest">Average dossier completeness</p>
+                    <h3 className="text-white font-display-md text-xl sm:text-2xl tracking-wide mb-1">Portfolio Strength</h3>
+                    <p className="text-text-secondary text-xs sm:text-sm font-mono uppercase tracking-widest">Average dossier completeness</p>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-surface-alt border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-200">
-                    <Activity className="text-gold-accent" size={24} />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-surface-alt border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-200 shrink-0">
+                    <Activity className="text-gold-accent" size={22} />
                   </div>
                 </div>
 
-                <div className="relative z-10 mt-12">
+                <div className="relative z-10 mt-8 sm:mt-12">
                   {healthScore !== null ? (
                     <div className="flex items-baseline gap-3">
-                      <span className="font-display-md text-7xl text-white tracking-tighter drop-shadow-md">{healthScore}</span>
+                      <span className="font-display-md text-5xl sm:text-7xl text-white tracking-tighter drop-shadow-md">{healthScore}</span>
                       <span className="text-gold-accent font-mono text-sm uppercase tracking-widest">/ 100</span>
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-3">
-                      <span className="font-display-md text-7xl text-white/70 tracking-tighter">-</span>
+                      <span className="font-display-md text-5xl sm:text-7xl text-white/70 tracking-tighter">-</span>
                       <span className="text-text-secondary font-mono text-sm uppercase tracking-widest">No assets yet</span>
                     </div>
                   )}

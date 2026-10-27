@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
+import { readDevelopmentMockUser } from "@/lib/developmentMock";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -87,6 +88,111 @@ const ICONS = {
   )
 };
 
+const ROLE_ICONS = {
+  buyer: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  ),
+  owner: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    </svg>
+  ),
+  broker: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+  ),
+  provider: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+      <polyline points="2 17 12 22 22 17"/>
+      <polyline points="2 12 12 17 22 12"/>
+    </svg>
+  ),
+  operator: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  ),
+  photographer: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+  ),
+  designer: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    </svg>
+  ),
+  mc_enterprise: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.93 19.07A10 10 0 0 1 2 12C2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.76-1.12 5.26-2.93 7.07"/>
+      <circle cx="12" cy="12" r="4"/>
+      <line x1="12" y1="16" x2="12" y2="22"/>
+    </svg>
+  )
+};
+
+// The 6 platform roles enumerated by ScoutIt:
+// 1. Buyer / Seeker
+// 2. Property Owner & Developer
+// 3. Accredited Broker
+// 4. Co-Operator & Facilities
+// 5. Spatial Photographer
+// 6. Event & Concept Designer
+const CORE_ROLES = [
+  {
+    id: "buyer",
+    aliases: ["buyer", "seeker", "exploring"],
+    label: "Buyer / Seeker",
+    desc: "Search spaces, viewings & private board",
+    targetRole: "buyer",
+  },
+  {
+    id: "owner",
+    aliases: ["owner"],
+    label: "Property Owner & Developer",
+    desc: "List properties, review leads & inventory",
+    targetRole: "owner",
+  },
+  {
+    id: "broker",
+    aliases: ["broker"],
+    label: "Accredited Broker",
+    desc: "Client representation & deal pipeline (PRC)",
+    targetRole: "broker",
+  },
+  {
+    id: "operator",
+    aliases: ["operator", "co-operator", "operations"],
+    label: "Co-Operator & Facilities",
+    desc: "Space management & operations log",
+    targetRole: "operator",
+  },
+  {
+    id: "photographer",
+    aliases: ["photographer"],
+    label: "Spatial Photographer",
+    desc: "Space photography, staging & QuestIT bounties",
+    targetRole: "photographer",
+  },
+  {
+    id: "designer",
+    aliases: ["designer", "event-planner", "event designer", "concept_designer"],
+    label: "Event & Concept Designer",
+    desc: "Bespoke spatial concepts & event staging",
+    targetRole: "designer",
+  },
+];
+
 // Reusable Action / Link Item Definitions
 const ITEMS = {
   home:      { id: "home",      href: "/",          label: "Home",      icon: ICONS.home },
@@ -100,26 +206,27 @@ const ITEMS = {
   board:     { id: "board",     href: "/wishlist",  label: "Board",     icon: ICONS.board },
   intel:     { id: "intel",     href: "/intel",     label: "Intel",     icon: ICONS.intel },
   dashboard: { id: "dashboard", href: "/dashboard", label: "Dash",      icon: ICONS.dashboard },
-  role:      { id: "role",      action: "scoutit:open-mobile-menu", label: "Role",  icon: ICONS.role },
-  theme:     { id: "theme",     action: "open-theme-sheet",         label: "Theme", icon: ICONS.theme }
+  role:      { id: "role",      action: "open-role-sheet", label: "Roles", icon: ICONS.role },
+  theme:     { id: "theme",     action: "open-theme-sheet", label: "Theme", icon: ICONS.theme }
 };
 
 // Contextual Layout Configurations.
 // 6-item quick access mobile bottom nav:
 //   • Stable, predictable thumb muscle memory across all primary views.
-//   • Home (Ground floor), Spaces (Directory), Intel (Briefings), Board (Saved), Dash (Workspace), Theme (Help & Display).
+//   • Home (Ground floor), Spaces (Directory), Intel (Briefings), Board (Saved), Dash (Workspace), Roles (Role & Workspace Switcher).
 const CONTEXTS = {
-  default:   [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
-  dashboard: [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
-  board:     [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
-  discover:  [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
-  spaces:    [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme],
-  intel:     [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.theme]
+  default:   [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.role],
+  dashboard: [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.role],
+  board:     [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.role],
+  discover:  [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.role],
+  spaces:    [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.role],
+  intel:     [ITEMS.home, ITEMS.spaces, ITEMS.intel, ITEMS.board, ITEMS.dashboard, ITEMS.role]
 };
 
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [themeSheetOpen, setThemeSheetOpen] = useState(false);
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState("dark");
@@ -128,6 +235,72 @@ export default function BottomNav() {
   const [mounted, setMounted] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [shareToast, setShareToast] = useState("");
+  const [activeUserRoles, setActiveUserRoles] = useState(["buyer"]);
+
+  useEffect(() => {
+    function resolveUserRoles() {
+      try {
+        const raw = localStorage.getItem("scoutit_user");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed?.tags) && parsed.tags.length > 0) {
+            setActiveUserRoles(parsed.tags);
+            return;
+          }
+          if (Array.isArray(parsed?.active_roles) && parsed.active_roles.length > 0) {
+            setActiveUserRoles(parsed.active_roles);
+            return;
+          }
+          if (parsed?.role) {
+            setActiveUserRoles([parsed.role]);
+            return;
+          }
+        }
+        const devUser = readDevelopmentMockUser(localStorage, {
+          nodeEnv: process.env.NODE_ENV,
+          hostname: typeof window !== "undefined" ? window.location.hostname : "",
+        });
+        if (devUser?.tags && Array.isArray(devUser.tags)) {
+          setActiveUserRoles(devUser.tags);
+          return;
+        }
+      } catch {}
+      setActiveUserRoles(["buyer"]);
+    }
+    resolveUserRoles();
+    window.addEventListener("scoutit:profile-updated", resolveUserRoles);
+    return () => window.removeEventListener("scoutit:profile-updated", resolveUserRoles);
+  }, []);
+
+  const isRoleActive = (roleDef) => {
+    return activeUserRoles.some((r) => {
+      const lower = String(r).toLowerCase().trim();
+      return roleDef.aliases.includes(lower) || roleDef.id === lower;
+    });
+  };
+
+  const activeRoles = CORE_ROLES.filter((r) => isRoleActive(r));
+  const availableRoles = CORE_ROLES.filter((r) => !isRoleActive(r));
+
+  const handleRoleSelect = (roleKey) => {
+    setRoleSheetOpen(false);
+    if (pathname.startsWith("/dashboard")) {
+      window.dispatchEvent(new CustomEvent("scoutit:switch-workspace", { detail: { role: roleKey } }));
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set("role", roleKey);
+        window.history.replaceState(null, "", url.toString());
+      } catch {}
+    } else {
+      router.push(`/dashboard?role=${roleKey}`);
+    }
+  };
+
+  useEffect(() => {
+    const handleOpenTheme = () => setThemeSheetOpen(true);
+    window.addEventListener("scoutit:open-theme-sheet", handleOpenTheme);
+    return () => window.removeEventListener("scoutit:open-theme-sheet", handleOpenTheme);
+  }, []);
 
   // On a single property page (/property/<slug>) the bar becomes an ACTION bar
   // — the page's real jobs (save, inquire, share) under the thumb, not nav links.
@@ -367,7 +540,9 @@ export default function BottomNav() {
               className="bottom-nav-item"
               aria-label={`Bottom Nav: ${item.label}`}
               onClick={() => {
-                if (item.action === "scoutit:open-mobile-menu") {
+                if (item.action === "open-role-sheet") {
+                  setRoleSheetOpen(true);
+                } else if (item.action === "scoutit:open-mobile-menu") {
                   const detail = { handled: false };
                   window.dispatchEvent(new CustomEvent("scoutit:open-mobile-menu", { detail }));
                   if (!detail.handled) {
@@ -447,58 +622,149 @@ export default function BottomNav() {
         </div>
       )}
 
-      {/* Role / Workspace Action Sheet (fallback for non-home dashboard subpages) */}
+      {/* Role / Workspace Action Sheet */}
       {roleSheetOpen && (
         <div className="theme-sheet-overlay" onClick={() => setRoleSheetOpen(false)}>
           <div className="theme-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="theme-sheet-header">
-              <span className="theme-sheet-title">Workspaces &amp; Account</span>
+              <div>
+                <span className="theme-sheet-title">Workspaces &amp; Roles</span>
+                <span className="block font-mono text-[10px] uppercase tracking-widest text-text-muted mt-0.5">
+                  Space Intelligence Platform
+                </span>
+              </div>
               <button className="theme-sheet-close" onClick={() => setRoleSheetOpen(false)} aria-label="Close">✕</button>
             </div>
 
+            {/* Section 1: Active Roles (User already has) */}
+            <div className="px-3 pb-2 pt-1 flex items-center justify-between">
+              <span className="font-mono text-[11px] uppercase tracking-widest text-gold-accent font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold-accent inline-block animate-pulse" />
+                Your Active Roles ({activeRoles.length})
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">
+                Tap to switch
+              </span>
+            </div>
+
             <div className="theme-sheet-options">
-              {[
-                { href: "/dashboard", label: "Dashboard Home", desc: "Overview & active workspace" },
-                { href: "/dashboard/crm", label: "CRM & Pipeline", desc: "Deals, leads & opportunities" },
-                { href: "/dashboard/calendar", label: "Calendar & Viewings", desc: "Schedule, tours & appointments" },
-                { href: "/dashboard/inbox", label: "Deal Rooms (Inbox)", desc: "Direct client & broker communications" },
-              ].map(({ href, label, desc }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`theme-option ${pathname === href ? "active" : ""}`}
-                  onClick={() => setRoleSheetOpen(false)}
+              {activeRoles.map((role) => (
+                <button
+                  key={role.id}
+                  type="button"
+                  className="theme-option is-active-role"
+                  onClick={() => handleRoleSelect(role.targetRole)}
+                  style={{
+                    textAlign: "left",
+                    cursor: "pointer",
+                    width: "100%",
+                    gap: "14px",
+                    borderColor: "rgba(var(--accent-rgb), 0.4)",
+                    background: "rgba(var(--accent-rgb), 0.05)",
+                  }}
                 >
-                  <div className="theme-text">
-                    <div className="theme-label">{label}</div>
-                    <div className="theme-desc">{desc}</div>
+                  <div className="w-10 h-10 rounded-full bg-gold-accent/15 border border-gold-accent/40 flex items-center justify-center text-gold-accent shrink-0">
+                    {ROLE_ICONS[role.id]}
                   </div>
-                  {pathname === href && <span className="theme-check">✓</span>}
-                </Link>
+                  <div className="theme-text" style={{ flex: 1 }}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="theme-label text-gold-accent font-semibold">{role.label}</div>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
+                        Active ✓
+                      </span>
+                    </div>
+                    <div className="theme-desc">{role.desc}</div>
+                  </div>
+                </button>
               ))}
             </div>
 
+            {/* Section 2: Available Roles (To Add or Increase) */}
+            {availableRoles.length > 0 && (
+              <div className="mt-4 pt-3 border-t border-surface-variant">
+                <div className="px-3 pb-2 flex items-center justify-between">
+                  <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary font-semibold">
+                    Available Roles to Add ({availableRoles.length})
+                  </span>
+                  <Link
+                    href="/settings#account"
+                    onClick={() => setRoleSheetOpen(false)}
+                    className="font-mono text-[10px] uppercase tracking-wider text-gold-accent hover:underline"
+                  >
+                    Manage in Settings →
+                  </Link>
+                </div>
+                <div className="theme-sheet-options">
+                  {availableRoles.map((role) => (
+                    <Link
+                      key={role.id}
+                      href="/settings#account"
+                      onClick={() => setRoleSheetOpen(false)}
+                      className="theme-option is-available-role"
+                      style={{
+                        textAlign: "left",
+                        width: "100%",
+                        gap: "14px",
+                        background: "rgba(255, 255, 255, 0.02)",
+                        borderColor: "var(--border-solid)",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center text-text-secondary shrink-0">
+                        {ROLE_ICONS[role.id]}
+                      </div>
+                      <div className="theme-text" style={{ flex: 1 }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="theme-label text-text-primary">{role.label}</div>
+                          <span className="font-mono text-[10px] uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 hover:bg-gold-accent hover:text-black transition">
+                            + Add Role
+                          </span>
+                        </div>
+                        <div className="theme-desc">{role.desc}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quick Actions & Settings Bridge */}
             <div className="flex flex-col gap-2 pt-4 mt-4 border-t border-surface-variant">
               <Link
-                href="/profile"
-                className="flex items-center min-h-[44px] px-3 py-2 rounded text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
-                onClick={() => setRoleSheetOpen(false)}
-              >
-                View Profile →
-              </Link>
-              <Link
                 href="/settings#account"
-                className="flex items-center min-h-[44px] px-3 py-2 rounded text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded bg-gold-accent/10 border border-gold-accent/40 text-xs font-mono uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold"
                 onClick={() => setRoleSheetOpen(false)}
               >
-                Unlock Other Workspaces (Settings) →
+                + Add or Increase Roles in Settings →
               </Link>
+              <div className="px-3 pt-2 pb-0.5">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-text-muted">Quick Workspace Tools</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 px-1">
+                <Link
+                  href="/dashboard/crm"
+                  className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/50 border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent hover:border-gold-accent transition"
+                  onClick={() => setRoleSheetOpen(false)}
+                >
+                  Pipeline (CRM) →
+                </Link>
+                <Link
+                  href="/dashboard/inbox"
+                  className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/50 border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent hover:border-gold-accent transition"
+                  onClick={() => setRoleSheetOpen(false)}
+                >
+                  Deal Rooms →
+                </Link>
+              </div>
               <Link
-                href="/settings"
-                className="flex items-center min-h-[44px] px-3 py-2 rounded text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
-                onClick={() => setRoleSheetOpen(false)}
+                href="/dashboard?role=mc_enterprise"
+                className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/30 border border-surface-variant/80 text-xs font-mono uppercase tracking-wider text-text-muted hover:text-gold-accent transition"
+                onClick={() => {
+                  setRoleSheetOpen(false);
+                  handleRoleSelect("mc_enterprise");
+                }}
               >
-                Account Settings →
+                Enterprise Mission Control (Preview) →
               </Link>
             </div>
           </div>

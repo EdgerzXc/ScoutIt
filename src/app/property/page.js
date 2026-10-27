@@ -94,7 +94,7 @@ export default async function PropertyRootPage() {
         <div data-scoutit-guide="scoutit-property-directory" className="directory-layout" aria-busy="true">
           <AtmosphereBackground variant="default" />
           <Header />
-          <main className="directory-main">
+          <main className="directory-main" id="main-content" tabIndex={-1}>
             <header className="directory-header">
               <span className="vector-label">Layer 03.1 · Space Directory</span>
               <h1>The Space Directory</h1>

@@ -368,7 +368,7 @@
   letter-spacing: 0.1em;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 160ms ease;
+  transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;

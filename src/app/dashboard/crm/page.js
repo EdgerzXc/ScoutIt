@@ -398,41 +398,41 @@ function CRMPageInner() {
           than a number. A "0 Active Deals" that is really "we do not know yet"
           is the same lie as an invented figure. */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 relative z-10">
-        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
-          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Active Deals</div>
+        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-3.5 sm:p-4 md:p-5 flex flex-col justify-between">
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary truncate">Active Deals</div>
           <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">-</span> : activeDeals}</div>
         </div>
-        <div className="min-w-0 card-atmosphere-gold rounded-lg p-4 md:p-5 relative overflow-hidden">
-          <div className="mb-1 font-label-caps text-label-caps uppercase text-gold-accent">Pipeline Value</div>
+        <div className="min-w-0 card-atmosphere-gold rounded-lg p-3.5 sm:p-4 md:p-5 relative overflow-hidden flex flex-col justify-between">
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-gold-accent truncate">Pipeline Value</div>
           {loading ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">-</div>
           ) : pricedDeals.length > 0 ? (
-            <>
+            <div>
               <div className="font-body text-2xl font-semibold tracking-tight text-on-surface text-glow tabular-nums break-words">₱{pipelineValue.toLocaleString()}</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">Listed prices on {pricedDeals.length} of {activeDeals} active deals</div>
-            </>
+            </div>
           ) : (
-            <>
+            <div>
               <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">-</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">No priced listings in your active pipeline yet</div>
-            </>
+            </div>
           )}
         </div>
-        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
-          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Win Rate</div>
+        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-3.5 sm:p-4 md:p-5 flex flex-col justify-between">
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary truncate">Win Rate</div>
           {loading ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-text-muted" aria-label="Loading">-</div>
           ) : winRate !== null ? (
             <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{winRate}%</div>
           ) : (
-            <>
+            <div>
               <div className="font-body text-2xl font-semibold tracking-tight text-text-secondary">-</div>
               <div className="mt-1 font-body text-base leading-snug text-text-muted">No closed deals yet</div>
-            </>
+            </div>
           )}
         </div>
-        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-4 md:p-5">
-          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary">Upcoming Viewings</div>
+        <div className="min-w-0 bg-gradient-to-br from-surface-alt to-surface border border-white/10 rounded-lg p-3.5 sm:p-4 md:p-5 flex flex-col justify-between">
+          <div className="mb-1 font-label-caps text-label-caps uppercase text-text-secondary truncate">Upcoming Viewings</div>
           <div className="font-body text-2xl font-semibold tracking-tight text-on-surface tabular-nums break-words">{loading ? <span className="text-text-muted" aria-label="Loading">-</span> : upcomingViewings}</div>
         </div>
       </div>

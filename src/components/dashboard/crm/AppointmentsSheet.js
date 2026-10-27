@@ -344,55 +344,57 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent, userId, o
   const canRespond = item.kind === "viewing" && item.status === "pending" && item.raw.isHost;
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border border-surface-variant bg-surface-alt hover:border-gold-accent/30 transition">
-      <span className={`w-2 h-2 rounded-full shrink-0 ${meta.dot}`} />
+    <div className="flex flex-col sm:flex-row sm:items-center items-start gap-3 p-3.5 sm:p-3 rounded-lg border border-surface-variant bg-surface-alt hover:border-gold-accent/30 transition">
+      <div className="flex items-start gap-3 w-full min-w-0">
+        <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 sm:mt-0 ${meta.dot}`} />
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[12px] uppercase tracking-widest font-mono text-text-muted">{meta.tag}</span>
-          <span className="font-working-title text-sm text-on-surface truncate">{item.title}</span>
-          {item.kind === "viewing" && item.status && (
-            <span className="text-[12px] uppercase tracking-widest font-mono text-gold-accent">
-              {item.status}
-            </span>
-          )}
-          {overdue && (
-            <span className="flex items-center gap-1 text-[12px] uppercase tracking-widest font-bold text-error">
-              <AlertTriangle size={11} /> Overdue
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-3 text-xs text-text-secondary mt-0.5">
-          <span className="flex items-center gap-1">{meta.icon}{dateLabel}</span>
-          <span className="flex items-center gap-1"><Clock size={12} className="text-text-muted" />{timeLabel}</span>
-          {item.subtitle && <span className="truncate text-text-muted">{item.subtitle}</span>}
-        </div>
-        {item.kind === "viewing" && (item.dealId || item.contactExchange) ? (
-          <div className="mt-1.5">
-            <ContactExchange
-              dealId={item.dealId}
-              exchange={item.contactExchange}
-              userId={userId}
-              onChanged={onExchangeUpdate}
-              notify={notify}
-            />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[12px] uppercase tracking-widest font-mono text-text-muted">{meta.tag}</span>
+            <span className="font-working-title text-sm text-on-surface truncate">{item.title}</span>
+            {item.kind === "viewing" && item.status && (
+              <span className="text-[12px] uppercase tracking-widest font-mono text-gold-accent">
+                {item.status}
+              </span>
+            )}
+            {overdue && (
+              <span className="flex items-center gap-1 text-[12px] uppercase tracking-widest font-bold text-error">
+                <AlertTriangle size={11} /> Overdue
+              </span>
+            )}
           </div>
-        ) : null}
+          <div className="flex items-center gap-3 text-xs text-text-secondary mt-0.5 flex-wrap">
+            <span className="flex items-center gap-1">{meta.icon}{dateLabel}</span>
+            <span className="flex items-center gap-1"><Clock size={12} className="text-text-muted" />{timeLabel}</span>
+            {item.subtitle && <span className="truncate text-text-muted">{item.subtitle}</span>}
+          </div>
+          {item.kind === "viewing" && (item.dealId || item.contactExchange) ? (
+            <div className="mt-1.5">
+              <ContactExchange
+                dealId={item.dealId}
+                exchange={item.contactExchange}
+                userId={userId}
+                onChanged={onExchangeUpdate}
+                notify={notify}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {canRespond ? (
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-variant/40">
           <button
             onClick={() => onViewingUpdate(item.raw.id, "cancelled")}
             disabled={updatingId === item.raw.id}
-            className="min-h-11 px-2.5 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
+            className="flex-1 sm:flex-none justify-center min-h-11 px-3 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
           >
             <XCircle size={13} /> Decline
           </button>
           <button
             onClick={() => onViewingUpdate(item.raw.id, "confirmed")}
             disabled={updatingId === item.raw.id}
-            className="min-h-11 px-2.5 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
+            className="flex-1 sm:flex-none justify-center min-h-11 px-3 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
           >
             <CheckCircle size={13} /> Confirm
           </button>
@@ -400,7 +402,7 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent, userId, o
       ) : item.kind === "event" ? (
         <button
           onClick={() => onEditEvent(item.raw)}
-          className="min-h-11 px-2.5 py-1.5 rounded border border-white/10 text-white/70 hover:bg-white/5 text-xs font-working-title flex items-center gap-1 shrink-0"
+          className="w-full sm:w-auto justify-center min-h-11 px-2.5 py-1.5 rounded border border-white/10 text-white/70 hover:bg-white/5 text-xs font-working-title flex items-center gap-1 shrink-0"
         >
           <Edit2 size={12} /> Edit
         </button>

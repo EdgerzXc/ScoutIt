@@ -58,7 +58,14 @@ export async function POST(request) {
     });
 
     if (!result.success) {
-      const status = result.code === "insufficient_entitlement" ? 402 : 400;
+      const status =
+        result.code === "insufficient_entitlement"
+          ? 402
+          : result.code === "forbidden"
+          ? 403
+          : result.code === "not_found"
+          ? 404
+          : 400;
       return NextResponse.json(result, { status });
     }
 

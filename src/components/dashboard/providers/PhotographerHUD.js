@@ -49,15 +49,15 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
     }
     return (
       <div className="flex flex-col gap-6 animate-slide-up-fade">
-        <div className="flex justify-between items-end border-b border-surface-variant pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-surface-variant pb-4">
           <div>
             <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Gallery</button>
-            <h2 className="font-display-md text-3xl text-on-surface">{project.title}</h2>
+            <h2 className="font-display-md text-2xl sm:text-3xl text-on-surface">{project.title}</h2>
           </div>
           <button
             disabled
             title="Submissions open in Phase 2: previews only today."
-            className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
+            className="w-full sm:w-auto bg-gold-accent text-background font-working-title font-bold px-4 py-2 min-h-11 inline-flex items-center justify-center rounded text-sm opacity-60 cursor-not-allowed"
           >
             Submit Final Gallery · Phase 2
           </button>
@@ -160,7 +160,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                 <div className="flex justify-between items-center mb-5 bg-surface-alt p-4 rounded border border-surface-variant">
                   <div>
                     <h4 className="font-working-title text-on-surface">Accepting New Projects</h4>
-                    <p className="text-xs text-text-secondary mt-1">Toggle off to create artificial scarcity if fully booked.</p>
+                    <p className="text-xs text-text-secondary mt-1">Toggle off if your schedule is currently fully booked.</p>
                   </div>
                   <button type="button"
                     className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}

@@ -373,11 +373,24 @@
     overflow-x: auto;
     scroll-snap-type: x proximity;
     scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .tabList:active {
+    cursor: grabbing;
   }
 
   .tab {
     flex: 0 0 min(230px, 72vw);
     scroll-snap-align: start;
+    touch-action: pan-x pan-y;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .dossierGrid {

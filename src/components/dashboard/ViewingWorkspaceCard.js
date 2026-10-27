@@ -64,7 +64,7 @@ export default function ViewingWorkspaceCard({
               href={appointment.meetLink}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-10 items-center gap-1.5 rounded border border-success/30 bg-success/10 px-3 font-mono text-[12px] font-bold uppercase tracking-wider text-success transition-all duration-300 ease-out hover:bg-success/15"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded border border-success/30 bg-success/10 px-3 font-mono text-[12px] font-bold uppercase tracking-wider text-success transition-all duration-300 ease-out hover:bg-success/15"
             >
               Join <ExternalLink size={12} aria-hidden="true" />
             </a>
@@ -74,7 +74,7 @@ export default function ViewingWorkspaceCard({
               type="button"
               disabled={busy}
               onClick={onConfirm}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded bg-gold-accent px-3 font-mono text-[12px] font-bold uppercase tracking-wider text-background transition-all duration-300 ease-out hover:bg-gold-bright disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded bg-gold-accent px-3 font-mono text-[12px] font-bold uppercase tracking-wider text-background transition-all duration-300 ease-out hover:bg-gold-bright disabled:opacity-40"
             >
               <Check size={13} aria-hidden="true" /> Confirm
             </button>
@@ -84,7 +84,7 @@ export default function ViewingWorkspaceCard({
               type="button"
               disabled={busy}
               onClick={onReschedule}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded border border-surface-variant bg-surface-variant/40 px-3 font-mono text-[12px] uppercase tracking-wider text-text-secondary transition-all duration-300 ease-out hover:border-gold-accent/35 hover:text-on-surface disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded border border-surface-variant bg-surface-variant/40 px-3 font-mono text-[12px] uppercase tracking-wider text-text-secondary transition-all duration-300 ease-out hover:border-gold-accent/35 hover:text-on-surface disabled:opacity-40"
             >
               <RotateCcw size={13} aria-hidden="true" /> Move
             </button>
@@ -94,14 +94,14 @@ export default function ViewingWorkspaceCard({
               type="button"
               disabled={busy}
               onClick={onCancel}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded border border-error/25 px-3 font-mono text-[12px] uppercase tracking-wider text-error transition-all duration-300 ease-out hover:bg-error/10 disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded border border-error/25 px-3 font-mono text-[12px] uppercase tracking-wider text-error transition-all duration-300 ease-out hover:bg-error/10 disabled:opacity-40"
             >
               <X size={13} aria-hidden="true" /> Cancel
             </button>
           )}
           <Link
             href="/dashboard/calendar"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded border border-surface-variant px-3 font-mono text-[12px] uppercase tracking-wider text-text-secondary transition-all duration-300 ease-out hover:border-gold-accent/35 hover:text-on-surface"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded border border-surface-variant px-3 font-mono text-[12px] uppercase tracking-wider text-text-secondary transition-all duration-300 ease-out hover:border-gold-accent/35 hover:text-on-surface"
           >
             <CalendarDays size={13} aria-hidden="true" /> Calendar
           </Link>

@@ -425,7 +425,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
       setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
     };
 
-    el.addEventListener("scroll", checkScroll);
+    el.addEventListener("scroll", checkScroll, { passive: true });
     checkScroll();
 
     // Check again if page elements settle or window size changes
@@ -2662,6 +2662,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
               alt={`${d.title} fullscreen view`} 
               className={`lightbox-image ${photoMode}`} 
               loading="lazy"
+              decoding="async"
             />
           </div>
 

@@ -4,25 +4,24 @@
    Apple HIG 44px+ Floor · 95% Obsidian Black / 5% Amber Gold
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── CONTAINER ── */
+/* ── CONTAINER (MOBILE ONLY: HIDDEN ON DESKTOP WEB MODE) ── */
 .container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 720px;
-  min-width: 0;
-  margin: 0 auto 20px auto;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 15;
-  pointer-events: auto;
+  display: none;
 }
 
 @media (max-width: 768px) {
   .container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     max-width: 480px;
+    min-width: 0;
     margin: 0 auto 16px auto;
     padding: 0 8px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 15;
+    pointer-events: auto;
   }
 }
 
@@ -77,14 +76,21 @@
   text-transform: uppercase;
   color: var(--accent);
   cursor: pointer;
-  transition: all var(--transition-fast, 0.2s ease);
+  transition: background-color var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease);
 }
 
-.sheetTrigger:hover,
 .sheetTrigger:active {
   background: rgba(var(--accent-rgb), 0.12);
   border-color: var(--accent);
   color: var(--accent-bright);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sheetTrigger:hover {
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: var(--accent);
+    color: var(--accent-bright);
+  }
 }
 
 .chevronIcon {
@@ -99,26 +105,27 @@
 .chipsTrack {
   display: flex;
   gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding: 2px 2px 4px;
+  padding: 2px 2px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-@media (max-width: 768px) {
-  .chipsTrack {
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 2px 2px 8px;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+.chipsTrack:active {
+  cursor: grabbing;
 }
 
 .chipsTrack::-webkit-scrollbar {
@@ -142,16 +149,19 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   text-decoration: none;
   color: var(--text-primary);
-  transition: all var(--transition-fast, 0.2s ease);
+  transition: transform var(--transition-fast, 0.2s ease), background-color var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease), box-shadow var(--transition-fast, 0.2s ease);
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y;
   user-select: none;
+  -webkit-user-select: none;
 }
 
-.categoryChip:hover {
-  border-color: var(--accent);
-  color: var(--accent-bright);
-  background: rgba(var(--surface2-rgb, 26, 26, 26), 0.95);
+@media (hover: hover) and (pointer: fine) {
+  .categoryChip:hover {
+    border-color: var(--accent);
+    color: var(--accent-bright);
+    background: rgba(var(--surface2-rgb, 26, 26, 26), 0.95);
+  }
 }
 
 .categoryChip:active {
@@ -198,6 +208,8 @@
   width: 100%;
   max-width: 520px;
   max-height: 84vh;
+  max-height: 84dvh;
+  overscroll-behavior: contain;
   background: var(--surface, #121212);
   border-top: 1px solid rgba(var(--accent-rgb), 0.35);
   border-radius: 20px 20px 0 0;
@@ -267,14 +279,21 @@
   border-radius: 50%;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--transition-fast, 0.2s ease);
+  transition: background-color var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease);
 }
 
-.sheetCloseBtn:hover,
 .sheetCloseBtn:active {
   background: rgba(var(--accent-rgb), 0.2);
   border-color: var(--accent);
   color: var(--accent-bright);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sheetCloseBtn:hover {
+    background: rgba(var(--accent-rgb), 0.2);
+    border-color: var(--accent);
+    color: var(--accent-bright);
+  }
 }
 
 .sheetList {
@@ -285,6 +304,7 @@
   padding: 14px 16px;
   -webkit-overflow-scrolling: touch;
   max-height: 52vh;
+  overscroll-behavior: contain;
 }
 
 .sheetCard {
@@ -297,15 +317,17 @@
   background: rgba(var(--surface2-rgb, 24, 24, 24), 0.6);
   border: 1px solid var(--border-solid, rgba(255, 255, 255, 0.08));
   text-decoration: none;
-  transition: all var(--transition-fast, 0.2s ease);
+  transition: transform var(--transition-fast, 0.2s ease), background-color var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-.sheetCard:hover {
-  background: rgba(var(--surface2-rgb, 30, 30, 30), 0.95);
-  border-color: rgba(var(--accent-rgb), 0.35);
-  transform: translateX(2px);
+@media (hover: hover) and (pointer: fine) {
+  .sheetCard:hover {
+    background: rgba(var(--surface2-rgb, 30, 30, 30), 0.95);
+    border-color: rgba(var(--accent-rgb), 0.35);
+    transform: translateX(2px);
+  }
 }
 
 .sheetCard:active {
@@ -377,10 +399,16 @@
   transition: transform var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease);
 }
 
-.sheetCard:hover .cardChevron,
 .sheetCard:active .cardChevron {
   color: var(--accent-bright);
   transform: translateX(3px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sheetCard:hover .cardChevron {
+    color: var(--accent-bright);
+    transform: translateX(3px);
+  }
 }
 
 .sheetFooter {
@@ -404,14 +432,21 @@
   border: 1px solid var(--accent-muted);
   border-radius: 8px;
   text-decoration: none;
-  transition: all var(--transition-fast, 0.2s ease);
+  transition: background-color var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease), color var(--transition-fast, 0.2s ease);
 }
 
-.viewAllBtn:hover,
 .viewAllBtn:active {
   background: var(--accent-fill);
   border-color: var(--accent-fill);
   color: var(--on-accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .viewAllBtn:hover {
+    background: var(--accent-fill);
+    border-color: var(--accent-fill);
+    color: var(--on-accent);
+  }
 }
 
 /* ── ANIMATIONS ── */

@@ -1067,51 +1067,40 @@ export default function OwnerMode() {
               className="text-text-secondary hover:text-gold-accent text-sm font-label-caps uppercase tracking-widest inline-flex items-center gap-2 mb-4 min-h-11 transition"
               onClick={() => setViewingDossierId(null)}
             >
-              ← Back to Active Files
+              ← Back to Listings
             </button>
           )}
           <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
           <h1 className="font-display-md text-3xl md:text-5xl text-on-surface break-words [overflow-wrap:anywhere] min-w-0">{activeListing.title || 'Untitled Property'}</h1>
         </div>
-        <div className="flex flex-wrap gap-3">
-           <button 
-              className="border border-surface-variant text-text-secondary hover:text-on-surface hover:border-text-secondary font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm flex-1 md:flex-none text-center items-center justify-center"
-              onClick={() => {
-                if(window.confirm("Withdraw this property dossier from the market? Brokers will no longer see it.")) {
-                  closeListing(activeListing.id);
-                }
-              }}
-            >
-              Withdraw
-            </button>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+            {activeListing.pipelineStatus !== 'ai_drafting' && (
+              <Link href={`/property/${activeListing.slug || activeListing.id}`} className="inline-flex min-h-11 items-center justify-center rounded bg-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)] transition-opacity hover:opacity-90 active:scale-95">
+                View Listing
+              </Link>
+            )}
             <button 
-              className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center"
+              className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-accent transition hover:bg-gold-accent/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={activeListing.pipelineStatus === 'ai_drafting'}
               onClick={() => setShowWizard('edit')}
             >
-              Edit Workspace
+              Edit Details
             </button>
             <Link 
               href={`/dashboard/inventory/${activeListing.id}`}
-              className="border border-gold-accent text-gold-accent hover:bg-gold-accent/10 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center"
+              className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-accent transition hover:bg-gold-accent/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Manage Inventory
+              Inventory
             </Link>
-           <button
-             className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 rounded transition text-sm flex-1 md:flex-none text-center justify-center"
-             onClick={() => setShowWizard('select_mode')}
-           >
-             + New Property
-           </button>
             <button 
-              className="bg-gold-accent/10 border border-gold-accent text-gold-accent hover:bg-gold-accent/20 active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center shadow-[0_0_10px_rgba(var(--accent-rgb),0.1)]"
+              className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent/60 bg-gold-accent/10 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.1)] transition hover:bg-gold-accent/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={activeListing.pipelineStatus === 'ai_drafting'}
               onClick={() => setShowWizard('deep_intel_edit')}
             >
-              Add Deep Intel
+              Deep Intel
             </button>
             <button 
-              className="bg-gold-accent text-background hover:bg-gold-bright active:scale-95 font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none text-center items-center justify-center shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)]"
+              className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-gold-accent/80 bg-gold-accent/20 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)] transition hover:bg-gold-accent hover:text-background active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={activeListing.pipelineStatus === 'ai_drafting'}
               onClick={() => {
                 setSpatialTargetProperty(activeListing);
@@ -1120,11 +1109,16 @@ export default function OwnerMode() {
             >
               ✦ 3D Spatial Studio
             </button>
-            {activeListing.pipelineStatus !== 'ai_drafting' && (
-              <Link href={`/property/${activeListing.slug || activeListing.id}`} className="bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-4 py-2 min-h-11 rounded hover:opacity-90 transition-opacity text-sm flex-1 md:flex-none text-center items-center justify-center">
-                View Public File
-              </Link>
-            )}
+            <button
+              className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface"
+              onClick={() => {
+                if(window.confirm("Withdraw this property from the market? Brokers will no longer see it.")) {
+                  closeListing(activeListing.id);
+                }
+              }}
+            >
+              Withdraw
+            </button>
         </div>
       </div>
 

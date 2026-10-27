@@ -2789,9 +2789,25 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   font-optical-sizing: auto;
   font-kerning: normal;
   overflow-x: hidden;
+}
+
+/* ── GLOBAL TOUCH ERGONOMICS & INSTANT TAP ──
+   Eliminates the 300ms mobile tap delay and prevents browser tap-highlight flashes */
+a, button, [role="button"], input, select, textarea, summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── MODAL & DRAWER SCROLL CONTAINMENT ──
+   Prevents touch scroll chaining from scrolling background pages */
+[role="dialog"], dialog {
+  overscroll-behavior: contain;
 }
 
 p {
@@ -2843,9 +2859,9 @@ a {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9999;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 2;
+  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' width='256' height='256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 128px;
 }
 
@@ -3863,6 +3879,8 @@ body.high-contrast :focus-visible {
     padding: 8px 4px max(12px, env(safe-area-inset-bottom));
     justify-content: space-around;
     align-items: flex-start;
+    transform: translateZ(0);
+    will-change: transform;
   }
 
   .bottom-nav-item {
@@ -4049,18 +4067,29 @@ body.high-contrast :focus-visible {
 
   .theme-sheet {
     width: 100%;
+    max-height: 88dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background: var(--surface);
     border-top: 1px solid var(--border-mid);
     border-radius: 20px 20px 0 0;
-    padding: 24px 20px calc(80px + env(safe-area-inset-bottom));
+    padding: 20px 20px calc(80px + env(safe-area-inset-bottom));
     animation: slideUpFromBottom 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+    overscroll-behavior: contain;
   }
 
   .theme-sheet-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    position: sticky;
+    top: -20px;
+    background: var(--surface);
+    z-index: 2;
+    padding-top: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .theme-sheet-title {
@@ -4096,6 +4125,7 @@ body.high-contrast :focus-visible {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    overscroll-behavior: contain;
   }
 
   .theme-option {

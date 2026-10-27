@@ -217,7 +217,7 @@ export default function SpatialVaultWidget({
                     </div>
                   ) : (
                     <div className="relative flex h-[160px] w-full flex-col items-center justify-center bg-surface overflow-hidden">
-                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#E8AE3C_1px,transparent_1px)] [background-size:16px_16px]" />
+                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(var(--accent)_1px,transparent_1px)] [background-size:16px_16px]" />
                       <FileText size={30} className="text-gold-accent mb-2 transition-transform duration-200 group-hover:scale-110" />
                       <span className="font-mono text-[12px] uppercase tracking-widest text-text-primary font-bold">
                         Architectural Dossier

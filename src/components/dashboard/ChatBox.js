@@ -1419,21 +1419,21 @@ export default function ChatBox({
           <>
             <button
               onClick={() => setShowDealFile(true)}
-              className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 transition flex items-center gap-1.5 whitespace-nowrap"
+              className="bg-white/5 text-on-surface border border-white/10 px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-white/10 transition flex items-center gap-1.5 whitespace-nowrap min-h-[44px]"
               title="Open Private Notes & CRM Timeline"
             >
               <span>📁 Lead File</span>
             </button>
 
             {contactRevealed ? (
-              <span className="px-3 py-2 rounded text-xs font-mono uppercase tracking-widest bg-success/15 text-success border border-success/30 whitespace-nowrap">
+              <span className="px-3 py-2 rounded text-xs font-mono uppercase tracking-widest bg-success/15 text-success border border-success/30 whitespace-nowrap min-h-[44px] inline-flex items-center">
                 ✓ Contacts exchanged
               </span>
             ) : deal.handshakeState === 'offered' ? (
               <button
                 onClick={signHandshake}
                 disabled={handshakeBusy}
-                className="bg-success text-white px-3.5 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-success/80 transition flex items-center gap-1 disabled:opacity-50 whitespace-nowrap"
+                className="bg-success text-white px-3.5 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-success/80 transition flex items-center gap-1 disabled:opacity-50 whitespace-nowrap min-h-[44px]"
                 title="Accept Handshake & Reveal Direct Phone / Email"
               >
                 <span>{handshakeBusy ? "…" : "✓ Accept Contact Reveal"}</span>
@@ -1442,7 +1442,7 @@ export default function ChatBox({
               <button
                 onClick={() => setShowConfirmHandshake(true)}
                 disabled={handshakeBusy}
-                className="border border-gold-accent text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/15 transition flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap"
+                className="border border-gold-accent text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/15 transition flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap min-h-[44px]"
                 title="Mutually reveal phone number & email with this party"
               >
                 <span>📇 Exchange Contacts 🤝</span>
@@ -1459,13 +1459,13 @@ export default function ChatBox({
             )}
             <button
               onClick={() => setShowConfirmClose(true)}
-              className="border border-error/50 text-error px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-error/10 transition whitespace-nowrap"
+              className="border border-error/50 text-error px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-error/10 transition whitespace-nowrap min-h-[44px]"
             >
               End Conversation
             </button>
             <button
               onClick={() => setShowStaffModal(true)}
-              className="border border-gold-accent/30 text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/10 transition-all duration-300 ease-out whitespace-nowrap flex items-center gap-1"
+              className="border border-gold-accent/30 text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/10 transition-all duration-300 ease-out whitespace-nowrap flex items-center gap-1 min-h-[44px]"
               title="Report Glitch or Request Staff Review"
             >
               <span>🛡️ Staff Support</span>

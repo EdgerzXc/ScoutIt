@@ -140,18 +140,18 @@ export default function NewDealModal({ isOpen, onClose, onDealCreated, mockUserI
               <div className="text-error text-sm bg-error/10 border border-error/30 rounded px-3 py-2">{error}</div>
             )}
 
-            <div className="pt-4 flex justify-end gap-3">
+            <div className="pt-4 flex flex-col-reverse sm:flex-row justify-end gap-3">
               <button 
                 type="button" 
                 onClick={onClose}
-                className="px-6 py-2 rounded text-sm font-working-title text-text-secondary hover:text-on-surface transition"
+                className="w-full sm:w-auto min-h-11 inline-flex items-center justify-center px-6 py-2 rounded text-sm font-working-title text-text-secondary hover:text-on-surface transition"
               >
                 Cancel
               </button>
               <button 
                 type="submit" 
                 disabled={loading}
-                className="bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(var(--accent-rgb),0.35)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.97] transition duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
+                className="w-full sm:w-auto min-h-11 inline-flex items-center justify-center bg-gold-accent text-background font-bold font-working-title px-6 py-2 rounded shadow-[0_0_15px_rgba(var(--accent-rgb),0.35)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.97] transition duration-160 ease-out disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {loading ? "Creating..." : "Create Deal"}
               </button>

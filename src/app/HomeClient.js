@@ -312,8 +312,6 @@ export default function HomeClient() {
       <ProfileButton floating />
       {/* SECTION 1: SPACE HERO */}
       <section className={`snap-section section-hook ${interactiveMode ? "interactive-hero" : ""}`}>
-        <div className="grain"></div>
-
         {/* Cinematic Cosmic Space Background */}
         <div className="space-bg-container">
           {/* Balance mode (default, everyone): the raymarched golden black

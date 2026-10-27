@@ -28,6 +28,13 @@ function normalizeCategory(value) {
 export default function CrustLayer() {
   const [activeCategory, setActiveCategory] = useState("advisors");
   const tabRefs = useRef({});
+  const tabListRef = useRef(null);
+  const pointerDownX = useRef(null);
+  const scrollStart = useRef(0);
+  const startX = useRef(0);
+  const isDragging = useRef(false);
+  const DRAG_THRESHOLD = 5;
+
   const service = CRUST_SERVICE_DATA[activeCategory];
   const Icon = SERVICE_ICONS[activeCategory];
 
@@ -41,6 +48,55 @@ export default function CrustLayer() {
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
+
+  // Drag-to-scroll handlers for mobile/responsive lens tabs
+  const onDragStart = (e) => {
+    if (e.pointerType === "touch") return; // Touch scrolling handled natively
+    if (e.button !== 0) return; // Only primary mouse button
+    pointerDownX.current = e.pageX;
+    scrollStart.current = tabListRef.current ? tabListRef.current.scrollLeft : 0;
+  };
+
+  const onDragEnd = (e) => {
+    pointerDownX.current = null;
+    if (!isDragging.current) return;
+    if (tabListRef.current) {
+      tabListRef.current.style.cursor = "grab";
+      tabListRef.current.style.scrollBehavior = "";
+      tabListRef.current.style.scrollSnapType = "";
+      if (e?.pointerId != null) {
+        try {
+          tabListRef.current.releasePointerCapture(e.pointerId);
+        } catch {}
+      }
+    }
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 50);
+  };
+
+  const onDragMove = (e) => {
+    if (pointerDownX.current == null || !tabListRef.current) return;
+    if (!isDragging.current) {
+      if (Math.abs(e.pageX - pointerDownX.current) < DRAG_THRESHOLD) return;
+      isDragging.current = true;
+      startX.current = pointerDownX.current;
+      tabListRef.current.style.cursor = "grabbing";
+      tabListRef.current.style.scrollBehavior = "auto";
+      tabListRef.current.style.scrollSnapType = "none";
+      try {
+        tabListRef.current.setPointerCapture(e.pointerId);
+      } catch {}
+    }
+    e.preventDefault();
+    const delta = (e.pageX - startX.current) * 1.3;
+    tabListRef.current.scrollLeft = scrollStart.current - delta;
+  };
+
+  const handleTabClick = (key) => {
+    if (isDragging.current) return;
+    selectCategory(key);
+  };
 
   function selectCategory(key, { updateHistory = true, focus = false } = {}) {
     const normalized = normalizeCategory(key);
@@ -99,10 +155,16 @@ export default function CrustLayer() {
           <aside className={styles.sidebar}>
             <p className={styles.sidebarLabel} id="crust-professional-heading">Choose a professional lens</p>
             <div
+              ref={tabListRef}
               className={styles.tabList}
               role="tablist"
               aria-label="Professional categories"
               aria-orientation="vertical"
+              onPointerDown={onDragStart}
+              onPointerMove={onDragMove}
+              onPointerUp={onDragEnd}
+              onPointerLeave={onDragEnd}
+              onPointerCancel={onDragEnd}
             >
               {CRUST_SERVICE_KEYS.map((key, index) => {
                 const category = CRUST_SERVICE_DATA[key];
@@ -118,7 +180,7 @@ export default function CrustLayer() {
                     aria-selected={selected}
                     tabIndex={selected ? 0 : -1}
                     className={styles.tab}
-                    onClick={() => selectCategory(key)}
+                    onClick={() => handleTabClick(key)}
                     onKeyDown={(event) => onTabKeyDown(event, key)}
                   >
                     <span className={styles.tabIndex}>{String(index + 1).padStart(2, "0")}</span>

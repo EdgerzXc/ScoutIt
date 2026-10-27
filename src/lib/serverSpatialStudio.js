@@ -12,6 +12,7 @@ import {
   SPATIAL_SLA_HOURS,
   DEFAULT_MATERIAL_CONFIG,
 } from "./spatialStudio";
+import { findProperty } from "./propertyLookup";
 
 function getMonthStartTimestamp() {
   const d = new Date();
@@ -85,24 +86,49 @@ export async function submitSpatialGenerationRequest({
     };
   }
 
-  // Verify ownership if property row exists and has an owner
+  // Verify ownership: fail-closed if property missing or caller is not owner
+  let resolvedPropertyId = propertyId;
   if (supabaseClient) {
     try {
-      const propQuery = supabaseClient
-        .from("properties")
-        .select("owner_id")
-        .eq("id", propertyId);
-      const res = propQuery.maybeSingle ? await propQuery.maybeSingle() : await propQuery.single?.();
-      const ownerId = res?.data?.owner_id;
-      if (ownerId && ownerId !== user.id) {
+      const { property, error: propErr } = await findProperty(
+        supabaseClient,
+        propertyId,
+        ["id", "owner_id"]
+      );
+
+      if (propErr) {
+        console.error("[serverSpatialStudio] Property lookup error:", propErr);
+        return {
+          success: false,
+          error: "Failed to verify property ownership",
+          code: "server_error",
+        };
+      }
+
+      if (!property) {
+        return {
+          success: false,
+          error: "Property not found",
+          code: "not_found",
+        };
+      }
+
+      if (!property.owner_id || property.owner_id !== user.id) {
         return {
           success: false,
           error: "Only the property owner can request 3D spatial generation",
           code: "forbidden",
         };
       }
-    } catch {
-      // Degrade gracefully if properties table unmigrated
+
+      resolvedPropertyId = property.id || propertyId;
+    } catch (err) {
+      console.error("[serverSpatialStudio] Property ownership check failed:", err);
+      return {
+        success: false,
+        error: "Only the property owner can request 3D spatial generation",
+        code: "forbidden",
+      };
     }
   }
 
@@ -115,9 +141,9 @@ export async function submitSpatialGenerationRequest({
     const { error: spendError } = await supabaseClient.rpc("spend_connects", {
       p_user_id: user.id,
       p_amount: connectsSpent,
-      p_reason: `3D Spatial Studio generation for property ${propertyId}`,
+      p_reason: `3D Spatial Studio generation for property ${resolvedPropertyId}`,
       p_ref_type: "spatial_generation",
-      p_ref_id: String(propertyId),
+      p_ref_id: String(resolvedPropertyId),
     });
 
     if (spendError) {
@@ -141,7 +167,7 @@ export async function submitSpatialGenerationRequest({
         p_amount: connectsSpent,
         p_reason: failureReason,
         p_staff_id: "system_auto_refund",
-        p_ref_id: String(propertyId),
+        p_ref_id: String(resolvedPropertyId),
       });
       return true;
     } catch (refundErr) {
@@ -157,7 +183,7 @@ export async function submitSpatialGenerationRequest({
       const { data, error } = await supabaseClient
         .from("property_spatial_requests")
         .insert({
-          property_id: String(propertyId),
+          property_id: String(resolvedPropertyId),
           requester_id: user.id,
           status: "REQUESTED",
           style_preset: stylePreset,
@@ -174,7 +200,7 @@ export async function submitSpatialGenerationRequest({
       if (error) {
         if (spentViaRpc) {
           const refunded = await refundConnectsOnSystemFailure(
-            `System error: failed to enqueue 3D Spatial Studio request for property ${propertyId}`
+            `System error: failed to enqueue 3D Spatial Studio request for property ${resolvedPropertyId}`
           );
           return {
             success: false,
@@ -321,24 +347,49 @@ export async function submitSpatialRevisionRequest({
     };
   }
 
-  // Enforce strict property ownership on revision submissions
+  // Enforce strict property ownership on revision submissions (fail-closed)
+  let resolvedPropertyId = propertyId;
   if (supabaseClient) {
     try {
-      const propQuery = supabaseClient
-        .from("properties")
-        .select("owner_id")
-        .eq("id", propertyId);
-      const res = propQuery.maybeSingle ? await propQuery.maybeSingle() : await propQuery.single?.();
-      const ownerId = res?.data?.owner_id;
-      if (ownerId && ownerId !== user.id) {
+      const { property, error: propErr } = await findProperty(
+        supabaseClient,
+        propertyId,
+        ["id", "owner_id"]
+      );
+
+      if (propErr) {
+        console.error("[serverSpatialStudio] Revision property lookup error:", propErr);
+        return {
+          success: false,
+          error: "Failed to verify property ownership",
+          code: "server_error",
+        };
+      }
+
+      if (!property) {
+        return {
+          success: false,
+          error: "Property not found",
+          code: "not_found",
+        };
+      }
+
+      if (!property.owner_id || property.owner_id !== user.id) {
         return {
           success: false,
           error: "Only the property owner can submit spatial revisions",
           code: "forbidden",
         };
       }
-    } catch {
-      // Degrade gracefully if properties table unmigrated
+
+      resolvedPropertyId = property.id || propertyId;
+    } catch (err) {
+      console.error("[serverSpatialStudio] Revision ownership check failed:", err);
+      return {
+        success: false,
+        error: "Only the property owner can submit spatial revisions",
+        code: "forbidden",
+      };
     }
   }
 
@@ -350,7 +401,7 @@ export async function submitSpatialRevisionRequest({
       const { data, error } = await supabaseClient
         .from("property_spatial_requests")
         .insert({
-          property_id: String(propertyId),
+          property_id: String(resolvedPropertyId),
           requester_id: user.id,
           status: "REVISION_REQUESTED",
           style_preset: "minimalist_organic", // fallback preset
@@ -373,7 +424,7 @@ export async function submitSpatialRevisionRequest({
         .update({
           spatial_generation_status: "REVISION_REQUESTED",
         })
-        .eq("id", propertyId);
+        .eq("id", resolvedPropertyId);
     } catch {
       // Degrade gracefully
     }
@@ -405,10 +456,22 @@ export async function getSpatialPropertyStatus({
   }
 
   try {
+    let resolvedId = propertyId;
+    if (typeof findProperty === "function") {
+      try {
+        const { property } = await findProperty(supabaseClient, propertyId, ["id"]);
+        if (property?.id) {
+          resolvedId = property.id;
+        }
+      } catch {
+        // Fall back to original propertyId
+      }
+    }
+
     const { data: latestRequest } = await supabaseClient
       .from("property_spatial_requests")
       .select("*")
-      .eq("property_id", String(propertyId))
+      .eq("property_id", String(resolvedId))
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();

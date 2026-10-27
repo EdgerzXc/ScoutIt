@@ -217,8 +217,8 @@ export default function AmbientRail({ user, context = null }) {
         .ambient-copy-desktop { display: inline-flex; }
         .ambient-copy-mobile { display: none; }
         .ambient-copy-desktop,
-        .ambient-copy-mobile { align-items: center; justify-content: center; min-width: 0; }
-        .ambient-token { display: inline-flex; align-items: center; min-width: 0; transition: color 160ms ease, text-shadow 160ms ease; }
+        .ambient-copy-mobile { align-items: center; justify-content: center; min-width: 0; white-space: nowrap; }
+        .ambient-token { display: inline-flex; align-items: center; min-width: 0; white-space: nowrap; flex-shrink: 0; transition: color 160ms ease, text-shadow 160ms ease; }
         .ambient-token + .ambient-token::before {
           content: "\\00B7";
           flex: 0 0 auto;

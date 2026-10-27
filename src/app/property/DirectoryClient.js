@@ -209,7 +209,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -640,15 +640,30 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
 
       {/* Filter Section: Price Band — qualitative tiers only, NO peso amounts */}
       <div className="filter-card">
-        <button
-          type="button"
-          className="filter-trigger"
-          onClick={() => toggleFilterSection("prices")}
-          aria-expanded={openFilters.prices}
-        >
-          <span>Price Band <InfoTip tipId="priceBands" label="About price bands" /></span>
-          <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
-        </button>
+        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+          <button
+            type="button"
+            className="filter-trigger"
+            onClick={() => toggleFilterSection("prices")}
+            aria-expanded={openFilters.prices}
+            style={{ width: "auto", paddingRight: "8px" }}
+          >
+            <span>Price Band</span>
+          </button>
+          <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", alignItems: "center" }}>
+            <InfoTip tipId="priceBands" label="About price bands" />
+          </div>
+          <button
+            type="button"
+            className="filter-trigger"
+            onClick={() => toggleFilterSection("prices")}
+            aria-expanded={openFilters.prices}
+            aria-label="Toggle price band filter"
+            style={{ flex: 1, justifyContent: "flex-end", paddingLeft: "8px" }}
+          >
+            <span className={`filter-chevron ${openFilters.prices ? "open" : ""}`}>▼</span>
+          </button>
+        </div>
         {openFilters.prices && (
           <div className="filter-options">
             {activePriceBands.map((band) => (
@@ -728,7 +743,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
     <div data-scoutit-guide="scoutit-property-directory" className="directory-layout">
       <AtmosphereBackground variant="default" />
       <Header />
-      <main className="directory-main">
+      <main className="directory-main" id="main-content" tabIndex={-1}>
         <header className="directory-header">
           <span className="vector-label">Layer 03.1 · Space Directory</span>
           <h1>The Space Directory</h1>
@@ -1087,7 +1102,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                               <span className="property-city-badge">{p.city}</span>
                               {unitPhoto ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */
-                                <img src={unitPhoto} alt={unitTitle} className="property-card-img" loading="lazy" />
+                                <img src={unitPhoto} alt={unitTitle} className="property-card-img" loading="lazy" decoding="async" />
                               ) : (
                                 <ImagePlaceholder className="property-card-img" label={unitTitle} />
                               )}
@@ -1161,7 +1176,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                         { }
                         {p.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={p.image} alt={p.title} className="property-card-img" loading="lazy" />
+          <img src={p.image} alt={p.title} className="property-card-img" loading="lazy" decoding="async" />
                         ) : (
                           <ImagePlaceholder className="property-card-img" label={p.title} />
                         )}

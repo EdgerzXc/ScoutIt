@@ -59,8 +59,8 @@ describe("Home Hero · Responsive Mobile Ergonomics & Karpathy Center Axis", () 
     expect(quickAccessSrc).toContain('role="dialog"');
   });
 
-  it("ensures BottomNav includes 6 quick access items: Home, Spaces, Intel, Board, Dashboard, Theme", () => {
+  it("ensures BottomNav includes 6 quick access items: Home, Spaces, Intel, Board, Dashboard, Roles", () => {
     const bottomNavSrc = codeWithoutComments("src/components/layout/BottomNav.js");
-    expect(bottomNavSrc).toMatch(/default:\s*\[\s*ITEMS\.home,\s*ITEMS\.spaces,\s*ITEMS\.intel,\s*ITEMS\.board,\s*ITEMS\.dashboard,\s*ITEMS\.theme\s*\]/);
+    expect(bottomNavSrc).toMatch(/default:\s*\[\s*ITEMS\.home,\s*ITEMS\.spaces,\s*ITEMS\.intel,\s*ITEMS\.board,\s*ITEMS\.dashboard,\s*ITEMS\.role\s*\]/);
   });
 });

@@ -144,7 +144,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
           >
             <div className="flex items-center justify-between p-6 border-b border-surface-variant">
               <h2 className="font-headline-editorial text-2xl text-on-surface flex items-center gap-2">
-                Opportunity File
+                Deal Details
               </h2>
               <button 
                 onClick={onClose}
@@ -175,7 +175,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                 {onStatusChange && (
                   <div className="flex flex-col gap-1.5 pt-1">
                     <label htmlFor="deal-stage-select" className="text-[12px] uppercase tracking-wider font-label-caps text-text-secondary">
-                      Move Stage (Touch-Friendly)
+                      Move Stage
                     </label>
                     <div className="relative">
                       <select

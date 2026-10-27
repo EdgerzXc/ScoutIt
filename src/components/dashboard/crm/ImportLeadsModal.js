@@ -317,14 +317,14 @@ export default function ImportLeadsModal({
 
                 {/* Deduplication Switch */}
                 {duplicateCount > 0 && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
                     <div className="flex items-center gap-2">
                       <AlertTriangle size={16} className="text-amber-400 shrink-0" />
                       <span className="text-xs font-mono text-on-surface">
                         Skip {duplicateCount} duplicate records to preserve pipeline hygiene
                       </span>
                     </div>
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-gold-accent">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-gold-accent self-end sm:self-auto min-h-11 sm:min-h-0">
                       <input
                         type="checkbox"
                         checked={skipDuplicates}
@@ -354,7 +354,7 @@ export default function ImportLeadsModal({
           </div>
 
           {/* Footer Controls */}
-          <div className="flex items-center justify-between p-6 border-t border-surface-variant bg-surface/50">
+          <div className="flex items-center justify-between gap-3 p-4 sm:p-6 border-t border-surface-variant bg-surface/50">
             <button
               type="button"
               onClick={onClose}

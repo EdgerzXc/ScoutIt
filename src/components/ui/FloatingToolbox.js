@@ -572,6 +572,7 @@ export default function FloatingToolbox({ showTrigger = true }) {
             boxShadow: "var(--shadow-lg, 0 12px 48px rgba(var(--bg-rgb), 0.75))",
             maxHeight: Math.max(160, viewH - activePanelY - (viewW <= 768 ? navClear : 10)),
             overflowY: "auto",
+            isolation: "isolate",
           }}
         >
           {/* Draggable Header */}

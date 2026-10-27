@@ -33,11 +33,14 @@ import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
 import "./dashboard-motion.css";
 
 const TAG_LABELS = {
-  buyer: "Buyer Workspace",
-  owner: "Owner Workspace",
+  buyer: "Buyer / Seeker Workspace",
+  seeker: "Buyer / Seeker Workspace",
+  owner: "Owner & Developer Workspace",
   broker: "Broker Workspace",
   provider: "Provider Workspace",
-  operator: "Operator Workspace",
+  photographer: "Photographer Workspace",
+  designer: "Event Designer Workspace",
+  operator: "Co-Operator Workspace",
   exploring: "Buyer Workspace",
   mc_staff: "Staff Console · Simulated",
   mc_enterprise: "Enterprise Console · Preview",
@@ -168,9 +171,64 @@ function DashboardInner() {
       if (e?.detail) e.detail.handled = true;
       setShowMobileProfileMenu(true);
     };
+    const handleSwitchWorkspace = (e) => {
+      const target = e?.detail?.role;
+      if (!target) return;
+      if (target === "photographer") {
+        setMode("provider");
+        setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "photographer" } : prev);
+        return;
+      }
+      if (target === "designer" || target === "event-planner") {
+        setMode("provider");
+        setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "designer" } : prev);
+        return;
+      }
+      if (target === "seeker") {
+        setMode("buyer");
+        setUser((prev) => prev ? { ...prev, primaryMode: "buyer" } : prev);
+        return;
+      }
+      const validModes = ["owner", "broker", "buyer", "provider", "operator", "mc_enterprise", "exploring"];
+      if (validModes.includes(target)) {
+        setMode(target);
+        setUser((prev) => prev ? { ...prev, primaryMode: target } : prev);
+      }
+    };
     window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
-    return () => window.removeEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
+    window.addEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
+    return () => {
+      window.removeEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
+      window.removeEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
+    };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedRole = params.get("role") || params.get("mode");
+    if (!requestedRole) return;
+    if (requestedRole === "photographer") {
+      setMode("provider");
+      setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "photographer" } : prev);
+      return;
+    }
+    if (requestedRole === "designer" || requestedRole === "event-planner") {
+      setMode("provider");
+      setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "designer" } : prev);
+      return;
+    }
+    if (requestedRole === "seeker") {
+      setMode("buyer");
+      setUser((prev) => prev ? { ...prev, primaryMode: "buyer" } : prev);
+      return;
+    }
+    const validModes = ["owner", "broker", "buyer", "provider", "operator", "mc_enterprise", "exploring"];
+    if (validModes.includes(requestedRole)) {
+      setMode(requestedRole);
+      setUser((prev) => prev ? { ...prev, primaryMode: requestedRole } : prev);
+    }
+  }, [user]);
 
   // Click outside to close desktop switcher
   useEffect(() => {
@@ -561,34 +619,89 @@ function DashboardInner() {
               <button className="text-text-secondary w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-surface-variant active:scale-95 touch-manipulation transition-[transform,background-color] duration-150" aria-label="Close" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
             </div>
             
-            {user.tags.length > 1 && (
-            <div className="mb-2">
-              <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent font-semibold">
+                Your Active Workspaces
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">
+                Tap to switch
+              </span>
             </div>
-            )}
-            <div className="flex flex-col gap-2 mb-2">
-              {user.tags.length > 1 && user.tags.map(tagId => (
+            <div className="flex flex-col gap-2 mb-3">
+              {(user.tags.length > 0 ? user.tags : ["buyer"]).map(tagId => (
                 <button
                   key={tagId}
-                  className={`flex items-center justify-between p-4 rounded-lg font-working-title text-sm border transition-[transform,border-color,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
+                  className={`flex items-center justify-between p-3.5 rounded-lg font-working-title text-sm border transition-[transform,border-color,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent font-semibold' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
                   onClick={() => handleSwitchMode(tagId)}
                 >
-                  <span className="uppercase tracking-wider">{TAG_LABELS[tagId]}</span>
-                  {mode === tagId && <span>✓</span>}
+                  <span className="uppercase tracking-wider">{TAG_LABELS[tagId] || tagId}</span>
+                  {mode === tagId ? (
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
+                      Active ✓
+                    </span>
+                  ) : (
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">Switch →</span>
+                  )}
                 </button>
               ))}
-              {/* A-137: earned lenses only above; locked lenses stay unnamed
-                  here — the unlock path lives in Settings behind verification. */}
-              {missingLenses(user.tags).length > 0 && (
+            </div>
+
+            {/* Available Roles to Add / Unlock in Settings */}
+            <div className="pt-3 pb-2 border-t border-surface-variant flex items-center justify-between">
+              <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary font-semibold">
+                Available Roles to Add
+              </span>
+              <Link
+                href="/settings#account"
+                onClick={() => setShowMobileProfileMenu(false)}
+                className="font-mono text-[10px] uppercase tracking-wider text-gold-accent hover:underline"
+              >
+                Settings →
+              </Link>
+            </div>
+            <div className="flex flex-col gap-2 mb-3">
+              {[
+                { id: "buyer", label: "Buyer / Seeker", desc: "Search spaces, viewings & private board" },
+                { id: "owner", label: "Property Owner & Developer", desc: "List spaces, inventory & inquiries" },
+                { id: "broker", label: "Accredited Broker", desc: "Client representation & deal pipeline (PRC)" },
+                { id: "operator", label: "Co-Operator & Facilities", desc: "Space management & operations log" },
+                { id: "photographer", label: "Spatial Photographer", desc: "Space photography & QuestIT bounties" },
+                { id: "designer", label: "Event & Concept Designer", desc: "Bespoke spatial concepts & staging" },
+              ].filter(item => !user.tags.includes(item.id) && !(item.id === "buyer" && user.tags.includes("seeker"))).map(item => (
                 <Link
+                  key={item.id}
                   href="/settings#account"
                   onClick={() => setShowMobileProfileMenu(false)}
-                  className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
+                  className="flex items-center justify-between p-3 rounded-lg border border-surface-variant bg-surface-alt/30 hover:border-gold-accent/40 transition group"
                 >
-                  Need another workspace? Unlock in Settings →
+                  <div>
+                    <div className="font-working-title text-sm text-text-primary group-hover:text-gold-accent transition">{item.label}</div>
+                    <div className="text-xs text-text-muted mt-0.5">{item.desc}</div>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 group-hover:bg-gold-accent group-hover:text-black transition">
+                    + Add Role
+                  </span>
                 </Link>
-              )}
+              ))}
             </div>
+
+            <Link
+              href="/settings#account"
+              onClick={() => setShowMobileProfileMenu(false)}
+              className="flex items-center justify-center min-h-[44px] p-3 rounded-lg border border-gold-accent/40 bg-gold-accent/10 font-mono text-[11px] uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold mb-2"
+            >
+              + Add or Increase Roles in Settings →
+            </Link>
+
+            {missingLenses(user.tags).length > 0 && (
+              <Link
+                href="/settings#account"
+                onClick={() => setShowMobileProfileMenu(false)}
+                className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
+              >
+                Need another workspace? Unlock in Settings →
+              </Link>
+            )}
 
 
             <div className="border-t border-surface-variant pt-4 pb-3">

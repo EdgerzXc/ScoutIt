@@ -45,6 +45,14 @@ export default function IntelPage() {
   const [cmsUnavailable, setCmsUnavailable] = useState(false);
   const [sidePanelArticle, setSidePanelArticle] = useState(null);
 
+  const handleArticleClick = (art) => {
+    if (typeof window !== "undefined" && window.innerWidth <= 768) {
+      router.push(`/intel/${art.slug}`);
+    } else {
+      setSidePanelArticle(art);
+    }
+  };
+
   const handleSelectCity = (city) => {
     setSelectedCity(city);
     if (city) {
@@ -467,7 +475,7 @@ export default function IntelPage() {
                 <HoverCard
                   key={art.slug}
                   className="article-card flex flex-col h-full bg-surface-alt border border-surface-variant rounded-md overflow-hidden"
-                  onClick={() => setSidePanelArticle(art)}
+                  onClick={() => handleArticleClick(art)}
                   style={{ cursor: "pointer" }}
                 >
                   <div className="article-image-container">
@@ -1179,8 +1187,80 @@ export default function IntelPage() {
              out of room: two-word headline lines, and a footer with no space
              left to separate the date from its call to action. Desktop padding
              that was never reduced. */
-          .intel-main { padding: 32px 16px; }
-          .featured-trending-split { padding-left: 0; padding-right: 0; }
+          .intel-main {
+            padding: 24px 16px;
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+          }
+          .spatial-intel-map-hero {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0;
+            margin-right: 0;
+          }
+          .location-filter-active {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+          .featured-trending-split {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-bottom: 32px;
+          }
+          .controls-section {
+            padding: 14px 12px;
+            margin-bottom: 24px;
+            gap: 12px;
+          }
+          .filter-tabs-wrapper {
+            gap: 8px;
+          }
+          .filter-btn {
+            padding: 8px 12px;
+            font-size: 11px;
+          }
+          .intel-radar-dock {
+            padding: 10px 12px;
+          }
+          .intel-radar-strip {
+            gap: 10px;
+          }
+          .intel-radar-range {
+            flex: 1 1 100%;
+            min-width: 100%;
+          }
+          .side-panel {
+            width: 100vw;
+            max-width: 100vw;
+            border-left: none;
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+          }
+          .side-panel-body {
+            padding: 24px 16px;
+          }
+
+          /* The featured card's text is absolutely pinned to the bottom of a
+             fixed 3:2 box. On a phone the badge row + title + excerpt is taller
+             than that box, so the top (the sample-data disclosure) was clipped
+             under the card edge. Let the text flow and size the card; the image
+             stays as a full-bleed backdrop behind it. */
+          .featured-card-new {
+            aspect-ratio: auto;
+            min-height: 0;
+          }
+          .featured-card-new .featured-content-new {
+            position: relative;
+            padding: 20px 16px;
+          }
+          .featured-card-new h2 {
+            font-size: 26px;
+            line-height: 1.15;
+          }
+          .featured-excerpt-new {
+            font-size: 13px;
+          }
+          .featured-badge-row .ml-auto {
+            margin-left: 0;
+          }
 
           .articles-grid { gap: 14px; }
           .article-image-container { height: 140px; }

@@ -147,7 +147,7 @@ export default function BackgroundCore({ isLoggedIn }) {
       if (maxScroll <= 0) scrollProgress = isLoggedIn ? 1 : 0;
       else scrollProgress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
     };
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     onScroll(); // initial sync
 
     import("three").then((THREE) => {

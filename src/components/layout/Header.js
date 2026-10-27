@@ -192,7 +192,7 @@ export default function Header({ ambientContext = null }) {
 
       <nav className="header-nav" ref={menuRef} aria-label="Primary navigation">
         <button
-          className={`header-eye-btn ${displaySettingsOpen ? "is-open" : ""}`}
+          className={`header-eye-btn ${displaySettingsOpen ? "is-open" : ""} ${pathname === "/" ? "is-homepage" : ""}`}
           type="button"
           onClick={openDisplaySettings}
 
@@ -657,6 +657,9 @@ export default function Header({ ambientContext = null }) {
 
           .header-eye-btn {
             display: none;
+          }
+          .header-eye-btn.is-homepage {
+            display: flex;
           }
 
           .header-menu-btn {

@@ -63,6 +63,13 @@ export default function MobileCategoryQuickAccess() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const trackRef = React.useRef(null);
+  const pointerDownX = React.useRef(null);
+  const scrollStart = React.useRef(0);
+  const startX = React.useRef(0);
+  const isDragging = React.useRef(false);
+  const DRAG_THRESHOLD = 5;
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -77,6 +84,59 @@ export default function MobileCategoryQuickAccess() {
     }
     setSheetOpen(false);
   }, []);
+
+  // Drag-to-scroll handlers for mouse / trackpad ergonomics
+  const onDragStart = (e) => {
+    if (e.pointerType === "touch") return; // Touch handles scrolling natively
+    if (e.button !== 0) return; // Only primary click
+    pointerDownX.current = e.pageX;
+    scrollStart.current = trackRef.current ? trackRef.current.scrollLeft : 0;
+  };
+
+  const onDragEnd = (e) => {
+    pointerDownX.current = null;
+    if (!isDragging.current) return;
+    if (trackRef.current) {
+      trackRef.current.style.cursor = "grab";
+      trackRef.current.style.scrollBehavior = "";
+      trackRef.current.style.scrollSnapType = "";
+      if (e?.pointerId != null) {
+        try {
+          trackRef.current.releasePointerCapture(e.pointerId);
+        } catch {}
+      }
+    }
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 50);
+  };
+
+  const onDragMove = (e) => {
+    if (pointerDownX.current == null || !trackRef.current) return;
+    if (!isDragging.current) {
+      if (Math.abs(e.pageX - pointerDownX.current) < DRAG_THRESHOLD) return;
+      isDragging.current = true;
+      startX.current = pointerDownX.current;
+      trackRef.current.style.cursor = "grabbing";
+      trackRef.current.style.scrollBehavior = "auto";
+      trackRef.current.style.scrollSnapType = "none";
+      try {
+        trackRef.current.setPointerCapture(e.pointerId);
+      } catch {}
+    }
+    e.preventDefault();
+    const delta = (e.pageX - startX.current) * 1.3;
+    trackRef.current.scrollLeft = scrollStart.current - delta;
+  };
+
+  const handleChipClick = (e, categoryType) => {
+    if (isDragging.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    handleSelect(categoryType);
+  };
 
   // Escape key listener for the modal sheet
   useEffect(() => {
@@ -126,7 +186,17 @@ export default function MobileCategoryQuickAccess() {
       </div>
 
       {/* Swipeable 1-tap Category Fast-Track Chips */}
-      <div className={styles.chipsTrack} role="list" aria-label="Category quick jump chips">
+      <div
+        ref={trackRef}
+        className={styles.chipsTrack}
+        role="list"
+        aria-label="Category quick jump chips"
+        onPointerDown={onDragStart}
+        onPointerMove={onDragMove}
+        onPointerUp={onDragEnd}
+        onPointerLeave={onDragEnd}
+        onPointerCancel={onDragEnd}
+      >
         {CELESTIAL_SPACES.map((space) => {
           const href = `/property?type=${encodeURIComponent(space.type)}`;
 
@@ -135,7 +205,9 @@ export default function MobileCategoryQuickAccess() {
               <Link
                 href={href}
                 className={styles.categoryChip}
-                onClick={() => handleSelect(space.type)}
+                onClick={(e) => handleChipClick(e, space.type)}
+                draggable={false}
+                onDragStart={(e) => e.preventDefault()}
                 aria-label={`Jump immediately to ${space.label}`}
               >
                 <span className={styles.chipIcon}>

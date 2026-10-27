@@ -377,7 +377,7 @@ export default function BuyerMode() {
           <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
             {item.img || '🏠'}
           </div>
-          <div className="flex flex-col overflow-hidden">
+          <div className="flex flex-col overflow-hidden pr-24">
             <div className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-1">{item.type}</div>
             <div className="font-working-title text-on-surface truncate group-hover:underline">{item.title}</div>
             <div className="text-xs text-text-secondary truncate mt-0.5">{item.loc || 'Metro Manila'}</div>

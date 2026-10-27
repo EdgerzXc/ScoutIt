@@ -9,6 +9,36 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
   const mockUser = { id: "user-123" };
   const mockPropertyId = "prop-456";
 
+  function createMockSupabase({ count = 2, requestId = "req-1", ownerId = mockUser.id, propertyExists = true } = {}) {
+    return {
+      from: vi.fn((table) => {
+        if (table === "properties") {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: propertyExists ? { id: mockPropertyId, owner_id: ownerId } : null,
+              error: null,
+            }),
+            single: vi.fn().mockResolvedValue({
+              data: propertyExists ? { id: mockPropertyId, owner_id: ownerId } : null,
+              error: null,
+            }),
+            update: vi.fn().mockReturnThis(),
+          };
+        }
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          gte: vi.fn().mockResolvedValue({ count, error: null }),
+          insert: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({ data: { id: requestId }, error: null }),
+          update: vi.fn().mockReturnThis(),
+        };
+      }),
+    };
+  }
+
   describe("submitSpatialGenerationRequest", () => {
     it("rejects unauthenticated requests", async () => {
       const res = await submitSpatialGenerationRequest({
@@ -41,16 +71,7 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
     });
 
     it("approves request covered under Cluster tier allowance", async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          gte: vi.fn().mockResolvedValue({ count: 2, error: null }),
-          insert: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: { id: "req-1" }, error: null }),
-          update: vi.fn().mockReturnThis(),
-        }),
-      };
+      const mockSupabase = createMockSupabase({ count: 2, requestId: "req-1" });
 
       const res = await submitSpatialGenerationRequest({
         supabaseClient: mockSupabase,
@@ -70,16 +91,7 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
     });
 
     it("deducts 3 Connects when user exceeds monthly tier allowance", async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          gte: vi.fn().mockResolvedValue({ count: 2, error: null }), // Solar allows 2
-          insert: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: { id: "req-2" }, error: null }),
-          update: vi.fn().mockReturnThis(),
-        }),
-      };
+      const mockSupabase = createMockSupabase({ count: 2, requestId: "req-2" });
 
       const res = await submitSpatialGenerationRequest({
         supabaseClient: mockSupabase,
@@ -96,13 +108,7 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
     });
 
     it("rejects request when allowance exhausted and insufficient wallet connects", async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          gte: vi.fn().mockResolvedValue({ count: 2, error: null }),
-        }),
-      };
+      const mockSupabase = createMockSupabase({ count: 2 });
 
       const res = await submitSpatialGenerationRequest({
         supabaseClient: mockSupabase,
@@ -116,6 +122,39 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
       expect(res.success).toBe(false);
       expect(res.code).toBe("insufficient_entitlement");
       expect(res.requiresConnects).toBe(3);
+    });
+
+    it("rejects request when caller is not property owner with forbidden (IDOR protection)", async () => {
+      const mockSupabase = createMockSupabase({ ownerId: "other-user-999" });
+
+      const res = await submitSpatialGenerationRequest({
+        supabaseClient: mockSupabase,
+        user: mockUser,
+        propertyId: mockPropertyId,
+        stylePreset: "minimalist_organic",
+        currentTier: "cluster",
+        currentConnects: 0,
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.code).toBe("forbidden");
+      expect(res.error).toContain("Only the property owner");
+    });
+
+    it("rejects request when property does not exist with not_found", async () => {
+      const mockSupabase = createMockSupabase({ propertyExists: false });
+
+      const res = await submitSpatialGenerationRequest({
+        supabaseClient: mockSupabase,
+        user: mockUser,
+        propertyId: "non-existent-property",
+        stylePreset: "minimalist_organic",
+        currentTier: "cluster",
+        currentConnects: 0,
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.code).toBe("not_found");
     });
   });
 
@@ -131,15 +170,7 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
     });
 
     it("schedules express revision with 4-12h SLA", async () => {
-      const mockSupabase = {
-        from: vi.fn().mockReturnValue({
-          insert: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: { id: "rev-101" }, error: null }),
-          update: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        }),
-      };
+      const mockSupabase = createMockSupabase({ requestId: "rev-101" });
 
       const res = await submitSpatialRevisionRequest({
         supabaseClient: mockSupabase,
@@ -154,6 +185,22 @@ describe("A-196 · Spatial Studio Server API Logic", () => {
       expect(res.isExpress).toBe(true);
       expect(res.targetSlaHours).toBe(12);
       expect(res.slaLabel).toContain("4–12 Hours");
+    });
+
+    it("rejects revision when caller is not property owner with forbidden (IDOR protection)", async () => {
+      const mockSupabase = createMockSupabase({ ownerId: "other-user-999" });
+
+      const res = await submitSpatialRevisionRequest({
+        supabaseClient: mockSupabase,
+        user: mockUser,
+        propertyId: mockPropertyId,
+        revisionNotes: "Replace kitchen counter travertine with dark polished granite",
+        targetElements: ["kitchen_counter"],
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.code).toBe("forbidden");
+      expect(res.error).toContain("Only the property owner");
     });
   });
 

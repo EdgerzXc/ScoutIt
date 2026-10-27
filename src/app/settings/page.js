@@ -17,6 +17,10 @@ import { getCurrentTier } from "@/lib/entitlements";
 import { SETTINGS_SECTIONS } from "@/lib/settingsNavigation";
 import { canAddRole } from "@/lib/workspaceUnlock";
 import { normalizeDashboardModes, pickPrimaryRole } from "@/lib/dashboardModes";
+import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
+import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
+import { notifyLightModeChanged } from "@/lib/lightMode";
+import { readDevelopmentMockUser } from "@/lib/developmentMock";
 
 const SELF_SERVICE_TAGS = [
   { id: 'buyer', label: 'Looking to Buy / Rent', icon: <Search strokeWidth={1.5} size="1.1em" /> },
@@ -95,6 +99,45 @@ export default function SettingsPage() {
   const [isEnrolling2FA, setIsEnrolling2FA] = useState(false);
   const [mfaMessage, setMfaMessage] = useState({ type: '', text: '' });
 
+  // Appearance & Theme State
+  const [currentMode, setCurrentMode] = useState("dark");
+  const [lite, setLite] = useState(false);
+  const [simple, setSimple] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
+    const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
+    setCurrentMode(requestedMode);
+    setLite(getStoredLiteMode());
+    setSimple(getStoredSimpleMode());
+  }, []);
+
+  const handleThemeChange = (m) => {
+    setCurrentMode(m);
+    document.body.classList.remove("high-contrast", "light-mode");
+    if (m === "high-contrast") document.body.classList.add("high-contrast");
+    if (m === "light") document.body.classList.add("light-mode");
+    notifyLightModeChanged();
+    localStorage.setItem("scoutit_display_mode", m);
+  };
+
+  const handleToggleLite = () => {
+    const next = !lite;
+    setLite(next);
+    setLiteMode(next);
+  };
+
+  const handleToggleSimple = () => {
+    const next = !simple;
+    setSimple(next);
+    setSimpleMode(next);
+  };
+
+  const handleOpenHelpDisplayDrawer = () => {
+    window.dispatchEvent(new CustomEvent("scoutit:open-display-settings"));
+  };
+
   useEffect(() => {
     async function loadSettings() {
       const [factorsResult, userResult] = await Promise.all([
@@ -103,8 +146,22 @@ export default function SettingsPage() {
       ]);
       if (factorsResult.data?.totp) setFactors(factorsResult.data.totp);
 
-      const user = userResult.data?.user;
+      let user = userResult.data?.user;
       if (!user) {
+        const devUser = readDevelopmentMockUser(typeof window !== "undefined" ? localStorage : null, {
+          e2eFlag: "1",
+          nodeEnv: process.env.NODE_ENV,
+          hostname: typeof window !== "undefined" ? window.location.hostname : "",
+        });
+        if (devUser) {
+          user = devUser;
+          setName(devUser.name || devUser.display_name || "ScoutIt Member");
+          const devTags = normalizeDashboardModes(devUser.tags || devUser.active_roles, devUser.primaryMode || devUser.role);
+          setTags(devTags);
+          setInitialTags(devTags);
+          setPrimaryMode(pickPrimaryRole(devTags, devUser.primaryMode || devUser.role));
+          return;
+        }
         // A-146: keep the deep link across the auth bounce.
         router.replace("/onboarding?next=%2Fsettings");
         return;
@@ -444,7 +501,7 @@ export default function SettingsPage() {
               Your Roles <InfoTip tipId="settingsWorkspaces" label="About your roles and workspaces" />
             </label>
             <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-              Choose the roles that fit what you do. You can easily switch between your active workspaces from your dashboard.
+              Choose the roles that fit what you do (Buyer &amp; Seeker, Property Owner, Licensed Broker, Co-Operator, Spatial Photographer, or Event Designer). You can easily switch between your active workspaces from your dashboard.
             </p>
 
             <div className={styles.tagGrid}>
@@ -468,7 +525,7 @@ export default function SettingsPage() {
           <div className={styles.formGroup}>
             <label className={styles.label} style={{marginTop: 16}}>Need another lens?</label>
             <p style={{color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16}}>
-              Licensed brokers and verified service providers require brief verification to activate. Select a role below to get started.
+              Licensed brokers and verified ecosystem partners (photographers, researchers, and event designers) require brief verification to activate. Select a role below to get started.
             </p>
 
             <div className={styles.tagGrid}>
@@ -513,6 +570,93 @@ export default function SettingsPage() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Appearance & Display Settings */}
+          <div className={styles.formGroup} style={{ marginTop: 28, paddingTop: 24, borderTop: "1px solid var(--border-solid)" }}>
+            <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              Appearance &amp; Display <InfoTip tipId="settingsAppearance" label="About appearance and display options" />
+            </label>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
+              Select your preferred visual mode and performance settings. Changes apply across all workspaces immediately.
+            </p>
+
+            {/* Display Mode Cards */}
+            <div className={styles.tagGrid} style={{ marginBottom: 16 }}>
+              {[
+                { key: "dark", label: "Dark Mode", desc: "Cosmic obsidian default", icon: "🌑" },
+                { key: "light", label: "Light / White Lens", desc: "Clean corporate preview", icon: "☀️" },
+                { key: "high-contrast", label: "High Contrast", desc: "Maximum legibility", icon: "👁️" },
+              ].map(({ key, label, desc, icon }) => (
+                <div
+                  key={key}
+                  className={`${styles.tagCard} ${currentMode === key ? styles.selected : ''}`}
+                  onClick={() => handleThemeChange(key)}
+                  role="radio"
+                  aria-checked={currentMode === key}
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') handleThemeChange(key); }}
+                >
+                  <span className={styles.tagIcon} style={{ fontSize: 18 }}>{icon}</span>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)" }}>{label}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>{desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Lite Mode & Simple Mode toggles */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                type="button"
+                className={`${styles.tagCard} ${lite ? styles.selected : ''}`}
+                onClick={handleToggleLite}
+                aria-pressed={lite}
+                style={{ width: "100%", justifyContent: "space-between", textAlign: "left" }}
+              >
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)" }}>
+                    Lite Mode {lite ? "· Active" : "· Inactive"}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
+                    Disable canvas animations for faster performance on mobile or battery saver.
+                  </div>
+                </div>
+                <span style={{ fontSize: 13, fontFamily: "var(--font-mono)", color: lite ? "var(--accent)" : "var(--text-muted)" }}>
+                  {lite ? "ON" : "OFF"}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.tagCard} ${simple ? styles.selected : ''}`}
+                onClick={handleToggleSimple}
+                aria-pressed={simple}
+                style={{ width: "100%", justifyContent: "space-between", textAlign: "left" }}
+              >
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)" }}>
+                    Simple Mode {simple ? "· Active" : "· Inactive"}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
+                    Fewer words with high density. Essential metrics with no decorative copy.
+                  </div>
+                </div>
+                <span style={{ fontSize: 13, fontFamily: "var(--font-mono)", color: simple ? "var(--accent)" : "var(--text-muted)" }}>
+                  {simple ? "ON" : "OFF"}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenHelpDisplayDrawer}
+                className={styles.backBtn}
+                style={{ marginTop: 8, alignSelf: "flex-start", border: "1px solid var(--border-solid)" }}
+              >
+                <span>⚙️</span> Open Floating Display &amp; Help Panel →
+              </button>
             </div>
           </div>
         </section>

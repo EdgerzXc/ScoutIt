@@ -85,19 +85,19 @@ export default function OperatorMode() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-surface/50 border border-white/[0.06] backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent text-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface/50 border border-white/[0.06] backdrop-blur-md">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent text-lg shrink-0 mt-0.5">
             🏢
           </div>
           <div>
             <div className="text-sm font-medium text-on-surface">Branch Operations Center</div>
-            <div className="text-xs text-text-muted">Inbound client inquiries, branch hotline callbacks, and missed call catch-ups route directly to your Operations Inbox.</div>
+            <div className="text-xs text-text-muted mt-0.5">Inbound tenant inquiries and callback requests route directly to your Deal Room Inbox.</div>
           </div>
         </div>
         <Link
           href="/dashboard/inbox"
-          className="px-4 py-2 rounded-lg bg-white/[0.04] hover:bg-gold-accent hover:text-black border border-white/[0.08] hover:border-gold-accent text-xs font-mono tracking-wider uppercase text-text-primary transition-all flex items-center gap-2"
+          className="w-full sm:w-auto min-h-11 justify-center px-4 py-2 rounded-lg bg-white/[0.04] hover:bg-gold-accent hover:text-black border border-white/[0.08] hover:border-gold-accent text-xs font-mono tracking-wider uppercase text-text-primary transition-all flex items-center gap-2"
         >
           <span>Open Operations Inbox →</span>
         </Link>

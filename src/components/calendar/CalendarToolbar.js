@@ -27,12 +27,12 @@ export default function CalendarToolbar({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
       {/* Left: navigation + label */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-0">
         <button
           type="button"
           onClick={onPrev}
           aria-label="Previous"
-          className="w-11 h-11 md:w-8 md:h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
+          className="w-11 h-11 md:w-8 md:h-8 shrink-0 flex items-center justify-center rounded border border-surface-variant text-text-secondary
             hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           ‹
@@ -41,7 +41,7 @@ export default function CalendarToolbar({
           type="button"
           onClick={onNext}
           aria-label="Next"
-          className="w-11 h-11 md:w-8 md:h-8 flex items-center justify-center rounded border border-surface-variant text-text-secondary
+          className="w-11 h-11 md:w-8 md:h-8 shrink-0 flex items-center justify-center rounded border border-surface-variant text-text-secondary
             hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           ›
@@ -50,11 +50,11 @@ export default function CalendarToolbar({
           type="button"
           onClick={onToday}
           className="text-[12px] uppercase tracking-wider font-mono text-text-secondary border border-surface-variant
-            px-3 h-11 md:h-8 rounded hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
+            px-3 h-11 md:h-8 shrink-0 rounded hover:text-on-surface hover:border-gold-accent/50 active:scale-[0.97] transition-all duration-160 ease-out"
         >
           Today
         </button>
-        <h2 className="font-working-title text-lg sm:text-xl text-on-surface ml-1 font-medium">
+        <h2 className="font-working-title text-base sm:text-xl text-on-surface ml-1 font-medium truncate min-w-0">
           {formatMonthYear(viewDate)}
         </h2>
       </div>

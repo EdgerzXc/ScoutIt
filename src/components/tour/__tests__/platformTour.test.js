@@ -62,7 +62,7 @@ describe("A-201 Platform Tour & Guidebook 101 Architecture", () => {
   });
 
   it("verifies Global Footer links to Platform Tour & Guide under Company column", () => {
-    expect(FOOTER_SOURCE).toContain('href="/platform-tour"');
+    expect(FOOTER_SOURCE).toMatch(/href[:=]\s*["']\/platform-tour["']/);
     expect(FOOTER_SOURCE).toContain("Platform Tour & Guide");
   });
 

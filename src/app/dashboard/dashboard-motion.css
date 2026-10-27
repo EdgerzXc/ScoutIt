@@ -177,8 +177,28 @@ html.lite-mode .dashboard-lens-motion .card-atmosphere-gold::after {
   outline-offset: 2px;
 }
 
-@media (max-width: 480px) {
-  .dashboard-ambient-strip { gap: 6px; }
-  .dashboard-ambient-city span { display: none; }
-  .dashboard-ambient-city select { max-width: 100px; }
+@media (max-width: 520px) {
+  .dashboard-ambient-strip {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .dashboard-ambient-rail {
+    width: 100%;
+    max-width: 100%;
+  }
+  .dashboard-ambient-city {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+  .dashboard-ambient-city span {
+    display: inline-block;
+  }
+  .dashboard-ambient-city select {
+    max-width: 140px;
+    height: 32px;
+  }
 }
