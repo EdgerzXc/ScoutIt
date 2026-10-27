@@ -337,12 +337,25 @@ export default function SettingsPage() {
       }
     }
     
+    // Fetch currently held roles from the database to ensure we don't accidentally wipe
+    // non-lens specialized roles (e.g. salesperson, operator, photographer, designer, admin)
+    const { data: existingProfile } = await supabase
+      .from("user_profiles")
+      .select("active_roles")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const existingNonLens = (existingProfile?.active_roles || []).filter(
+      (r) => !INTENT_TAGS.some((t) => t.id === r)
+    );
+    const consolidatedActiveRoles = [...new Set([...tags, ...existingNonLens])];
+
     const nextPrimaryMode = pickPrimaryRole(tags, primaryMode);
     const { error } = await supabase
       .from("user_profiles")
       .update({
         display_name: name.trim(),
-        active_roles: tags,
+        active_roles: consolidatedActiveRoles,
         primary_mode: nextPrimaryMode,
         headline: publicProfile.headline.trim() || null,
         bio: publicProfile.bio.trim() || null,
@@ -366,6 +379,9 @@ export default function SettingsPage() {
     // Update initialTags so subsequent edits understand what is already held
     setInitialTags(tags);
     setSaveSuccess(true);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("scoutit:profile-updated"));
+    }
     // Supabase is the only persistent profile store.
   };
 

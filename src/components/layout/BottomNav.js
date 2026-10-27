@@ -138,16 +138,25 @@ const ROLE_ICONS = {
       <circle cx="12" cy="12" r="4"/>
       <line x1="12" y1="16" x2="12" y2="22"/>
     </svg>
+  ),
+  salesperson: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
   )
 };
 
-// The 6 platform roles enumerated by ScoutIt:
+// The 7 platform roles enumerated by ScoutIt:
 // 1. Buyer / Seeker
 // 2. Property Owner & Developer
-// 3. Accredited Broker
-// 4. Co-Operator & Facilities
-// 5. Spatial Photographer
-// 6. Event & Concept Designer
+// 3. Accredited Broker (PRC Licensed)
+// 4. Real Estate Salesperson (Accredited under PRC Broker per R.A. 9646)
+// 5. Co-Operator & Facilities
+// 6. Spatial Photographer
+// 7. Event & Concept Designer
 const CORE_ROLES = [
   {
     id: "buyer",
@@ -168,6 +177,13 @@ const CORE_ROLES = [
     aliases: ["broker"],
     label: "Accredited Broker",
     desc: "Client representation & deal pipeline (PRC)",
+    targetRole: "broker",
+  },
+  {
+    id: "salesperson",
+    aliases: ["salesperson", "sales_person", "real_estate_salesperson", "agent"],
+    label: "Real Estate Salesperson",
+    desc: "Property sales & viewings under broker supervision",
     targetRole: "broker",
   },
   {
@@ -238,44 +254,113 @@ export default function BottomNav() {
   const [activeUserRoles, setActiveUserRoles] = useState(["buyer"]);
 
   useEffect(() => {
-    function resolveUserRoles() {
+    let active = true;
+
+    async function resolveUserRoles() {
       try {
+        // 1. Authoritative check: Supabase Auth session & user_profiles
+        const { supabase } = await import("@/lib/supabaseClient");
+        if (supabase?.auth?.getSession) {
+          const { data } = await supabase.auth.getSession();
+          const sbUser = data?.session?.user;
+          if (sbUser) {
+            const { data: profile } = await supabase
+              .from("user_profiles")
+              .select("active_roles, role, primary_mode")
+              .eq("id", sbUser.id)
+              .maybeSingle();
+
+            if (active && profile) {
+              const roles = [];
+              if (Array.isArray(profile.active_roles)) {
+                roles.push(...profile.active_roles);
+              }
+              if (profile.role && !roles.includes(profile.role)) {
+                roles.push(profile.role);
+              }
+              if (profile.primary_mode && !roles.includes(profile.primary_mode)) {
+                roles.push(profile.primary_mode);
+              }
+              if (roles.length > 0) {
+                setActiveUserRoles(roles);
+                return;
+              }
+            }
+          }
+        }
+
+        // 2. Client fallback / cached user
         const raw = localStorage.getItem("scoutit_user");
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed?.tags) && parsed.tags.length > 0) {
-            setActiveUserRoles(parsed.tags);
+            if (active) setActiveUserRoles(parsed.tags);
             return;
           }
           if (Array.isArray(parsed?.active_roles) && parsed.active_roles.length > 0) {
-            setActiveUserRoles(parsed.active_roles);
+            if (active) setActiveUserRoles(parsed.active_roles);
             return;
           }
           if (parsed?.role) {
-            setActiveUserRoles([parsed.role]);
+            if (active) setActiveUserRoles([parsed.role]);
             return;
           }
         }
+
+        // 3. Localhost development mock
         const devUser = readDevelopmentMockUser(localStorage, {
           nodeEnv: process.env.NODE_ENV,
           hostname: typeof window !== "undefined" ? window.location.hostname : "",
         });
         if (devUser?.tags && Array.isArray(devUser.tags)) {
-          setActiveUserRoles(devUser.tags);
+          if (active) setActiveUserRoles(devUser.tags);
           return;
         }
       } catch {}
-      setActiveUserRoles(["buyer"]);
+
+      if (active) setActiveUserRoles(["buyer"]);
     }
+
     resolveUserRoles();
+
     window.addEventListener("scoutit:profile-updated", resolveUserRoles);
-    return () => window.removeEventListener("scoutit:profile-updated", resolveUserRoles);
+    window.addEventListener("storage", resolveUserRoles);
+    window.addEventListener("focus", resolveUserRoles);
+
+    let authSub = null;
+    import("@/lib/supabaseClient").then(({ supabase }) => {
+      if (supabase?.auth?.onAuthStateChange) {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+          resolveUserRoles();
+        });
+        authSub = subscription;
+      }
+    });
+
+    return () => {
+      active = false;
+      window.removeEventListener("scoutit:profile-updated", resolveUserRoles);
+      window.removeEventListener("storage", resolveUserRoles);
+      window.removeEventListener("focus", resolveUserRoles);
+      if (authSub?.unsubscribe) authSub.unsubscribe();
+    };
   }, []);
 
   const isRoleActive = (roleDef) => {
+    // Platform administrators hold and have access to all workspaces & roles
+    const isAdmin = activeUserRoles.some((r) =>
+      ["admin", "staff", "superuser"].includes(String(r).toLowerCase().trim())
+    );
+    if (isAdmin) return true;
+
     return activeUserRoles.some((r) => {
       const lower = String(r).toLowerCase().trim();
-      return roleDef.aliases.includes(lower) || roleDef.id === lower;
+      if (["admin", "staff", "superuser"].includes(lower)) return true;
+      if (roleDef.aliases.includes(lower) || roleDef.id === lower) return true;
+      if (lower === "provider" && (roleDef.id === "photographer" || roleDef.id === "designer" || roleDef.targetRole === "provider")) {
+        return true;
+      }
+      return false;
     });
   };
 

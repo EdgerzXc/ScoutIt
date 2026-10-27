@@ -4,6 +4,7 @@ const ROLE_TO_DASHBOARD_MODE = Object.freeze({
   exploring: "exploring",
   owner: "owner",
   broker: "broker",
+  salesperson: "broker",
   provider: "provider",
   photographer: "provider",
   researcher: "provider",

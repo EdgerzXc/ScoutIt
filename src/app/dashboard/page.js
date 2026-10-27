@@ -189,6 +189,11 @@ function DashboardInner() {
         setUser((prev) => prev ? { ...prev, primaryMode: "buyer" } : prev);
         return;
       }
+      if (target === "salesperson") {
+        setMode("broker");
+        setUser((prev) => prev ? { ...prev, primaryMode: "broker" } : prev);
+        return;
+      }
       const validModes = ["owner", "broker", "buyer", "provider", "operator", "mc_enterprise", "exploring"];
       if (validModes.includes(target)) {
         setMode(target);
@@ -221,6 +226,11 @@ function DashboardInner() {
     if (requestedRole === "seeker") {
       setMode("buyer");
       setUser((prev) => prev ? { ...prev, primaryMode: "buyer" } : prev);
+      return;
+    }
+    if (requestedRole === "salesperson") {
+      setMode("broker");
+      setUser((prev) => prev ? { ...prev, primaryMode: "broker" } : prev);
       return;
     }
     const validModes = ["owner", "broker", "buyer", "provider", "operator", "mc_enterprise", "exploring"];

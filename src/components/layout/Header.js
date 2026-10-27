@@ -113,12 +113,23 @@ export default function Header({ ambientContext = null }) {
           const sbUser = data?.session?.user;
           if (sbUser && active) {
             const meta = sbUser.user_metadata || {};
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('display_name, active_roles, role, primary_mode, subscription_tier')
+              .eq('id', sbUser.id)
+              .maybeSingle();
+
+            const profileRoles = Array.isArray(profile?.active_roles) && profile.active_roles.length > 0
+              ? profile.active_roles
+              : (Array.isArray(meta.active_roles) ? meta.active_roles : ["seeker"]);
+
             setUser({
               id: sbUser.id,
               email: sbUser.email,
-              name: meta.full_name || meta.name || sbUser.email,
-              tier: meta.subscription_tier || meta.tier || "starry",
-              active_roles: Array.isArray(meta.active_roles) ? meta.active_roles : ["seeker"],
+              name: profile?.display_name || meta.full_name || meta.name || sbUser.email,
+              tier: profile?.subscription_tier || meta.subscription_tier || meta.tier || "starry",
+              role: profile?.role || "user",
+              active_roles: profileRoles,
               created_at: sbUser.created_at || null,
             });
             return;

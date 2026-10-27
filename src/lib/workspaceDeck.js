@@ -31,7 +31,7 @@ export const DECK_PANELS = Object.freeze({
 });
 
 // Roles whose workspace owns a pipeline (and therefore a CRM panel).
-const PIPELINE_ROLES = new Set(["owner", "broker"]);
+const PIPELINE_ROLES = new Set(["owner", "broker", "salesperson"]);
 
 // True when the account holds a pipeline lens. Accepts the raw
 // `active_roles` array (any casing); unknown or missing roles fail closed

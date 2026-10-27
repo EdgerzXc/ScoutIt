@@ -66,4 +66,16 @@ describe("R.A. 9646 Compliance & Salesperson Representation", () => {
     expect(dealsInitiateRoute).toContain("assertAdultEligibility");
     expect(dealsInitiateRoute).toContain("create_routed_buyer_deal");
   });
+
+  it("BottomNav includes salesperson role representing accredited salespersons under broker supervision", () => {
+    const bottomNav = fs.readFileSync("src/components/layout/BottomNav.js", "utf8");
+    expect(bottomNav).toContain('id: "salesperson"');
+    expect(bottomNav).toContain('label: "Real Estate Salesperson"');
+    expect(bottomNav).toContain("supervision");
+  });
+
+  it("dashboardModes maps salesperson to the broker pipeline workspace", () => {
+    const dashboardModes = fs.readFileSync("src/lib/dashboardModes.js", "utf8");
+    expect(dashboardModes).toContain('salesperson: "broker"');
+  });
 });
