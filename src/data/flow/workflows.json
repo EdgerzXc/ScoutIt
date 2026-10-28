@@ -180,6 +180,46 @@
       "terminal_edge_blacklist"
     ]
   },
+  "stratosphere_signal_journey": {
+    "id": "stratosphere_signal_journey",
+    "name": "Stratosphere Community Signal & Interception Journey",
+    "description": "End-to-end seeker demand broadcast, multi-station catchment radar projection, zero-knowledge behavioral trust, and permissioned broker connect.",
+    "goal": "broadcast_and_intercept_demand",
+    "role": "seeker",
+    "startNodes": [
+      "stratosphere"
+    ],
+    "terminalNodes": [
+      "deal_room"
+    ],
+    "requiredCapabilities": [
+      "deal.participate"
+    ],
+    "requiredOrderedMilestones": [
+      "stratosphere",
+      "community_signals_feed",
+      "api_community_signals",
+      "deal_room"
+    ],
+    "completionPredicate": {
+      "field": "deal.status",
+      "operator": "==",
+      "value": "pending"
+    },
+    "allowedEdgeTypes": [
+      "NAVIGATE",
+      "ACTION",
+      "SUBMIT",
+      "SUCCESS",
+      "SYSTEM"
+    ],
+    "nodeIds": [
+      "stratosphere",
+      "community_signals_feed",
+      "api_community_signals",
+      "deal_room"
+    ]
+  },
   "buyer_journey": {
     "id": "buyer_journey",
     "name": "Buyer Discovery to Offer Journey",

@@ -44,7 +44,25 @@ export default function SignalDossierCard({
   const [expanded, setExpanded] = useState(false);
   const [relevant, setRelevant] = useState(false);
   const [relevantCount, setRelevantCount] = useState(signal.relevantCount || 0);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(Boolean(signal.isSaved));
+
+  useEffect(() => {
+    if (typeof signal.isSaved === "boolean") {
+      setSaved(signal.isSaved);
+    }
+  }, [signal.isSaved]);
+
+  useEffect(() => {
+    const handleSavedChanged = (e) => {
+      if (e.detail?.signalId === signal.id && typeof e.detail?.isSaved === "boolean") {
+        setSaved(e.detail.isSaved);
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+      return () => window.removeEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+    }
+  }, [signal.id]);
   const [showMetropolisMatches, setShowMetropolisMatches] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -155,28 +173,39 @@ export default function SignalDossierCard({
     }
   };
 
+  const notifySavedChanged = (isSavedVal) => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("scoutit:signal-saved-changed", {
+          detail: { signalId: signal.id, isSaved: isSavedVal, signal },
+        })
+      );
+    }
+  };
+
   const handleSaveClick = (e) => {
     e.stopPropagation();
     const nextSaved = !saved;
+    setSaved(nextSaved);
+    notifySavedChanged(nextSaved);
     // A-145 honesty: sample saves are local-only, never a stored row.
     if (signal.isSample) {
-      setSaved(nextSaved);
       return;
     }
     if (signal.liveCommunity) {
-      setSaved(nextSaved);
       communityFetch("/save", nextSaved ? "POST" : "DELETE").then((json) => {
         if (!json || json.ok !== true) {
           setSaved(!nextSaved);
+          notifySavedChanged(!nextSaved);
           if (json) flashActionError("Couldn't save that: try again.");
         }
       }).catch(() => {
         setSaved(!nextSaved);
+        notifySavedChanged(!nextSaved);
         flashActionError("Couldn't save that: try again.");
       });
       return;
     }
-    setSaved(nextSaved);
     if (nextSaved) {
       try {
         fetch("/api/reactions", {
@@ -343,7 +372,7 @@ export default function SignalDossierCard({
   return (
     <article
       ref={cardRef}
-      className={`sdc-card ${isActive ? "active" : ""} ${isHovered ? "hovered" : ""}`}
+      className={`sdc-card sdc-card--${marketRole} ${isActive ? "active" : ""} ${isHovered ? "hovered" : ""}`}
       onClick={() => onSelect(signal)}
       onMouseEnter={() => onHover(signal.id)}
       onMouseLeave={() => onHover(null)}
@@ -364,7 +393,11 @@ export default function SignalDossierCard({
           </span>
           <span className="sdc-location-datum">
             <MapPin size={11} aria-hidden="true" />
-            <span>{signal.city && signal.city !== signal.district ? `${signal.city} · ` : ""}{signal.district}</span>
+            <span>
+              {signal.city && signal.city !== signal.district ? `${signal.city} · ` : ""}
+              {signal.district}
+              {signal.radiusKm && signal.radiusKm >= 1 ? ` (${signal.radiusKm}km zone)` : ""}
+            </span>
           </span>
         </div>
 

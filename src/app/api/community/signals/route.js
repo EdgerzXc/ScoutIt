@@ -13,6 +13,7 @@ import {
 import {
   listLiveSignals,
   listAuthorSignals,
+  listSavedSignals,
   countActiveSignals,
   geocodeSignalScope,
   isMissingTable,
@@ -52,6 +53,24 @@ export async function GET(request) {
         return NextResponse.json({ ok: false, error: "Sign in to view your signals." }, { status: 401 });
       }
       const result = await listAuthorSignals(viewerId);
+      if (result.missing) {
+        return NextResponse.json(
+          { ok: true, signals: [], degraded: true, message: "Community posting is opening soon." },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { ok: true, signals: result.signals },
+        { headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    const savedOnly = url.searchParams.get("saved") === "1" || url.searchParams.get("saved") === "true";
+    if (savedOnly) {
+      if (!viewerId) {
+        return NextResponse.json({ ok: false, error: "Sign in to view your saved signals." }, { status: 401 });
+      }
+      const result = await listSavedSignals(viewerId);
       if (result.missing) {
         return NextResponse.json(
           { ok: true, signals: [], degraded: true, message: "Community posting is opening soon." },

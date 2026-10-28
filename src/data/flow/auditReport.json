@@ -215,6 +215,7 @@
       "/api/community/signals",
       "/api/community/signals/[id]/close",
       "/api/community/signals/[id]/connect",
+      "/api/community/signals/[id]/refresh",
       "/api/community/signals/[id]/relevant",
       "/api/community/signals/[id]/save",
       "/api/contact",
@@ -299,7 +300,9 @@
       "/api/spatial/status",
       "/api/storage/upload",
       "/api/telemetry/device",
+      "/api/user/activate-role",
       "/api/user/blocks",
+      "/api/user/date-of-birth",
       "/api/user/delete-account",
       "/api/user/plan",
       "/api/user/privacy-settings",
@@ -375,7 +378,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 199,
+    "totalCodebaseRoutesDiscovered": 202,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],
@@ -415,7 +418,8 @@
       "src/components/property/ResidentialFlow.js",
       "src/components/property/UnitMasterPage.js",
       "src/components/property/WhereToSection.js",
-      "src/components/property/chapterConfig.js"
+      "src/components/property/chapterConfig.js",
+      "src/components/stratosphere/SpatialSignalRadar.js"
     ],
     "componentsMissing": [],
     "apiRoutesMapped": [
@@ -533,15 +537,15 @@
       "failingItems": []
     },
     "workflowIntegrityScore": {
-      "numerator": 5,
-      "denominator": 5,
+      "numerator": 6,
+      "denominator": 6,
       "percentage": "100%",
       "formula": "dynamically traversable start-to-terminal workflows / total defined workflows",
       "failingItems": []
     },
     "guideIntegrityScore": {
-      "numerator": 3,
-      "denominator": 3,
+      "numerator": 4,
+      "denominator": 4,
       "percentage": "100%",
       "formula": "actor-safe guides with grounded transitions / total defined guides",
       "failingItems": []

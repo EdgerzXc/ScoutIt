@@ -241,9 +241,13 @@ export function validateDraft(input = {}) {
     sizeMinSqm: toPositiveNumber(input.sizeMinSqm),
     sizeMaxSqm: toPositiveNumber(input.sizeMaxSqm),
     timing: cleanStr(input.timing, 121),
+    coverageRadius: Number.isFinite(Number(input.coverageRadius)) && Number(input.coverageRadius) > 0 ? Number(input.coverageRadius) : null,
     mustHave: toStringList(input.mustHave, 8),
     preferred: toStringList(input.preferred, 8),
   };
+  if (normalized.coverageRadius && !normalized.mustHave.some((m) => m.startsWith("radius:"))) {
+    normalized.mustHave.push(`radius:${normalized.coverageRadius}km`);
+  }
   if (normalized.lat != null && (normalized.lat < -90 || normalized.lat > 90)) {
     fail("BAD_COORDS", "That latitude is off the map. Drop the pin again or leave coordinates out.");
     normalized.lat = null;

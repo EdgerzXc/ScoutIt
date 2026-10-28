@@ -884,7 +884,11 @@ export function generateBeaconGeoJSON(allSignals = COMMUNITY_SIGNALS, matchingSi
 
     // Opacity: 0.88 when matching or normal, 0.18 when dimmed by search
     const opacity = isMatch ? 0.88 : 0.18;
-    const ringRadius = 0.14 + strength * 0.18; // km
+    // Ground ring radius: use designated catchment radiusKm if specified, otherwise activity footprint
+    const ringRadius =
+      Number.isFinite(Number(sig.radiusKm)) && Number(sig.radiusKm) > 0
+        ? Number(sig.radiusKm)
+        : 0.14 + strength * 0.18; // km
 
     const props = {
       id: sig.id,
@@ -897,19 +901,22 @@ export function generateBeaconGeoJSON(allSignals = COMMUNITY_SIGNALS, matchingSi
       opacity,
       isMatch,
       strength,
+      radiusKm: sig.radiusKm || null,
       relevantCount: sig.relevantCount,
     };
 
-    // Pillar polygon: 55m radius hexagon/circle footprint
-    const pillarPolygon = circlePolygon(sig.coords.lng, sig.coords.lat, 0.055, 12);
+    // Pillar polygon: 55m radius footprint
+    const pillarRadius = sig.radiusKm ? Math.min(0.08, Math.max(0.055, sig.radiusKm * 0.035)) : 0.055;
+    const pillarPolygon = circlePolygon(sig.coords.lng, sig.coords.lat, pillarRadius, 12);
     beacons.features.push({
       type: "Feature",
       properties: props,
       geometry: pillarPolygon,
     });
 
-    // Ground ring polygon: wider subtle pulse ring
-    const groundPolygon = circlePolygon(sig.coords.lng, sig.coords.lat, ringRadius, 24);
+    // Ground ring polygon: wide glowing catchment circle (smooth 36-segment polygon for wide zones)
+    const segments = ringRadius > 1.0 ? 36 : 24;
+    const groundPolygon = circlePolygon(sig.coords.lng, sig.coords.lat, ringRadius, segments);
     groundRings.features.push({
       type: "Feature",
       properties: props,

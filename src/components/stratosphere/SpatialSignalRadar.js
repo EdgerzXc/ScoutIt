@@ -291,9 +291,16 @@ export default function SpatialSignalRadar({
         typeof window !== "undefined" &&
         window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+      const targetZoom =
+        selectedSignal.radiusKm && selectedSignal.radiusKm >= 3
+          ? 12.2
+          : selectedSignal.radiusKm && selectedSignal.radiusKm >= 1
+          ? 13.4
+          : 14.5;
+
       map.flyTo({
         center: [selectedSignal.coords.lng, selectedSignal.coords.lat],
-        zoom: 14.5,
+        zoom: targetZoom,
         pitch: 58,
         bearing: -10,
         duration: reduceMotion ? 0 : 1400,

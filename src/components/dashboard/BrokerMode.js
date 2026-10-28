@@ -4,8 +4,10 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
+import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { staleCardNotice } from "../../lib/deals/delegationRevoke";
 import ScoutInsightPanel from './panels/ScoutInsightPanel';
 import MeshHero from '../ui/MeshHero';
@@ -28,6 +30,7 @@ import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 import InfoTip from "@/components/ui/InfoTip";
 
 export default function BrokerMode() {
+  const router = useRouter();
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
 
   const [pitchingListing, setPitchingListing] = useState(null);
@@ -49,6 +52,60 @@ export default function BrokerMode() {
       setPrcVerified(!!(currentUser.prcVerified ?? currentUser.prc_verified));
     }
   }, [currentUser]);
+
+  const [savedSignals, setSavedSignals] = useState([]);
+  const [loadingSignals, setLoadingSignals] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    const loadSignals = async () => {
+      try {
+        const { data: { session } } = await getSession().catch(() => ({ data: {} }));
+        const token = session?.access_token;
+        if (!token) {
+          if (alive) setLoadingSignals(false);
+          return;
+        }
+        const res = await fetch("/api/community/signals?saved=1", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (alive && data?.ok && Array.isArray(data.signals)) {
+            setSavedSignals(data.signals);
+          }
+        }
+      } catch {
+        // fail gracefully
+      } finally {
+        if (alive) setLoadingSignals(false);
+      }
+    };
+    loadSignals();
+
+    const handleSavedChanged = (e) => {
+      if (e.detail && typeof e.detail.isSaved === "boolean") {
+        if (!e.detail.isSaved) {
+          setSavedSignals((prev) => prev.filter((s) => s.id !== e.detail.signalId));
+        } else if (e.detail.signal) {
+          setSavedSignals((prev) => {
+            if (prev.some((s) => s.id === e.detail.signalId)) return prev;
+            return [{ ...e.detail.signal, isSaved: true }, ...prev];
+          });
+        }
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+    }
+
+    return () => {
+      alive = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+      }
+    };
+  }, [currentUser?.id]);
 
   // U-025: this used to write `user_profiles` directly. U-022 made all five
   // credential columns server-only by grant, so the direct write has failed
@@ -935,14 +992,21 @@ export default function BrokerMode() {
             💼 Edit Dossier
           </Link>
           <button
-            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50"
+            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50 min-h-[44px]"
             onClick={() => setShowIdCard(true)}
             title="Generate your Verified Broker ID card"
           >
             🪪 ID Card
           </button>
+          <Link
+            href="/stratosphere?view=radar&role=broker"
+            className="border border-gold-accent text-gold-accent font-working-title px-5 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)] active:scale-[0.98] bg-gold-accent/5 inline-flex items-center gap-2 min-h-[44px]"
+            title="Explore seeker demands and off-market opportunities on Stratosphere Radar"
+          >
+            <span>🗺️ Open Deal Radar</span>
+          </Link>
           <button
-            className="border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)] active:scale-[0.98] bg-gold-accent/5"
+            className="border border-surface-variant text-text-secondary font-working-title px-5 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent transition active:scale-[0.98] bg-surface-variant/40 min-h-[44px]"
             onClick={() => {
               setShowMap(prev => !prev);
               if (!showMap) {
@@ -950,7 +1014,7 @@ export default function BrokerMode() {
               }
             }}
           >
-            {showMap ? 'Hide Map' : '+ Find Opportunities (Map)'}
+            {showMap ? 'Hide Quick Map' : 'Quick Map'}
           </button>
         </div>
       </MeshHero>
@@ -981,6 +1045,12 @@ export default function BrokerMode() {
               </div>
               <div className="font-working-title text-on-surface text-lg">{feed.filter(l => l.coordinates || (l.lng && l.lat)).length} targets in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
+              <Link
+                href="/stratosphere?view=radar&role=broker"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-mono tracking-wider text-gold-accent hover:underline uppercase"
+              >
+                Open Full-Screen in Stratosphere →
+              </Link>
             </div>
             
             <select
@@ -1180,6 +1250,57 @@ export default function BrokerMode() {
               </div>
             </>
           )}
+
+          {/* Saved Client Demands & Signals */}
+          <div className="flex flex-col gap-4 mt-8">
+            <div className="flex justify-between items-end border-b border-surface-variant pb-2">
+              <h3 className="font-working-title text-xl text-on-surface flex items-center gap-2">
+                <span className="text-gold-accent">⭐</span> Saved Client Demands &amp; Signals
+                {savedSignals.length > 0 && (
+                  <span className="font-mono text-xs text-text-muted">
+                    ({savedSignals.length})
+                  </span>
+                )}
+              </h3>
+              <Link
+                href="/stratosphere?view=saved-signals"
+                className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
+              >
+                View all in Stratosphere →
+              </Link>
+            </div>
+            <p className="text-xs text-text-secondary">
+              Corporate inquiries, tenant requests, and landlord inventory you saved from Stratosphere Radar.
+            </p>
+            {loadingSignals ? (
+              <p className="text-xs font-mono text-text-muted py-6 text-center">Loading saved demands…</p>
+            ) : savedSignals.length === 0 ? (
+              <div className="py-8 px-4 text-center bg-surface/30 backdrop-blur-xl border border-dashed border-white/[0.08] rounded-2xl flex flex-col items-center">
+                <span className="text-3xl mb-3 opacity-60">📡</span>
+                <p className="text-on-surface font-working-title text-base mb-1">No saved demands yet</p>
+                <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
+                  Discover verified seeker requirements and off-market opportunities on Stratosphere Radar, then bookmark them to track and pitch.
+                </p>
+                <Link
+                  href="/stratosphere?view=radar&role=broker"
+                  className="min-h-11 inline-flex items-center justify-center font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-5 py-2.5 rounded transition active:scale-95 shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)] font-bold"
+                >
+                  Explore Demands on Radar →
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {savedSignals.slice(0, 6).map((signal) => (
+                  <SignalDossierCard
+                    key={signal.id}
+                    signal={{ ...signal, isSaved: true }}
+                    onSelect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                    onConnect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Column: Tasks + Feed */}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { X, Shield, Send, CheckCircle2, Zap } from "lucide-react";
+import { X, Shield, Send, CheckCircle2, Zap, MapPin, ShieldCheck } from "lucide-react";
 import { INTRO_MAX } from "@/lib/connectIntro";
 import { getSession } from "@/lib/authClient";
 import PrivacyNotice from "@/components/ui/PrivacyNotice";
@@ -155,7 +155,19 @@ export default function CommunityConnectModal({
               <div className="ccm-target-meta">
                 <span>AUTHOR: {signal.author?.name || signal.author?.scoutId}</span>
                 <span>•</span>
-                <span>{signal.author?.trustTier}</span>
+                <span className="ccm-trust-badge">{signal.author?.trustTier || "[First-Time Verified Seeker]"}</span>
+              </div>
+              {signal.radiusKm && signal.radiusKm >= 1 ? (
+                <div className="ccm-radius-badge">
+                  <MapPin size={11} aria-hidden="true" />
+                  <span>BROADCAST CATCHMENT: {signal.radiusKm} km coverage area</span>
+                </div>
+              ) : null}
+              <div className="ccm-behavioral-assurance">
+                <ShieldCheck size={13} className="ccm-shield-gold" aria-hidden="true" />
+                <span>
+                  <strong>Behavioral Standing:</strong> {signal.author?.trustTier || "[First-Time Verified Seeker]"} · Zero-Knowledge Verified (Author contact withheld until mutual acceptance).
+                </span>
               </div>
               {isSample ? (
                 <p className="ccm-sample-note" role="note">

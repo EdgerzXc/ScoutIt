@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { Search, Filter, Layers, ListFilter, Compass, Radio, X, Zap, Building2 } from "lucide-react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { Search, Filter, Layers, ListFilter, Compass, Radio, X, Zap, Building2, ChevronDown, Check } from "lucide-react";
 import SpatialSignalRadar from "./SpatialSignalRadar";
 import SignalDossierCard from "./SignalDossierCard";
 import DistrictIntelligenceStrip from "./DistrictIntelligenceStrip";
@@ -21,10 +21,20 @@ import "./stratosphere-terminal.css";
 
 export const SIGNALS_PAGE_SIZE = 20;
 
+const INTELLIGENCE_STREAMS = [
+  { key: "all", label: "ALL INTELLIGENCE", desc: "Combined pipeline and trend coverage" },
+  { key: "building", label: "UNDER CONSTRUCTION", desc: "Active structural build-outs" },
+  { key: "demand", label: "MARKET DEMAND", desc: "Absorption & tenant requirements" },
+  { key: "zoning", label: "POLICY & ZONING", desc: "Mandates & green standards" },
+  { key: "all-buildings", label: "ALL BUILDINGS", desc: "All active development projects" },
+  { key: "all-trends", label: "ALL TRENDS", desc: "All macro & spatial dynamics" },
+];
+
 export default function StratosphereTerminal({
   initialSignals = COMMUNITY_SIGNALS,
   initialViewMode = "SPATIAL", // 'SPATIAL' | 'SIGNALS'
   stageFilter = "all",
+  onSelectStage = () => {},
   onClearStage = () => {},
   onSignalClosed = () => {},
 }) {
@@ -33,6 +43,8 @@ export default function StratosphereTerminal({
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [hoveredSignalId, setHoveredSignalId] = useState(null);
+  const [streamOpen, setStreamOpen] = useState(false);
+  const streamDropdownRef = useRef(null);
   const [filters, setFilters] = useState({
     signalType: null,
     spaceType: null,
@@ -55,8 +67,14 @@ export default function StratosphereTerminal({
     const place = params.get("place");
     if (place) setSelectedDistrict(place);
     const role = params.get("role");
-    if (role && Object.values(MARKET_ROLES).includes(role)) {
-      setMarketRole(role);
+    if (role) {
+      if (role === "buyer" || role === "tenant") {
+        setMarketRole(MARKET_ROLES.SUPPLY);
+      } else if (role === "broker") {
+        setMarketRole(MARKET_ROLES.DEMAND);
+      } else if (Object.values(MARKET_ROLES).includes(role)) {
+        setMarketRole(role);
+      }
     }
     const color = params.get("color");
     if (color && ["gold", "green", "purple", "red", "cyan"].includes(color)) {
@@ -188,6 +206,24 @@ export default function StratosphereTerminal({
     setHoveredSignalId(id);
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (streamDropdownRef.current && !streamDropdownRef.current.contains(event.target)) {
+        setStreamOpen(false);
+      }
+    }
+    if (streamOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [streamOpen]);
+
+  const currentStream = INTELLIGENCE_STREAMS.find((s) => s.key === stageFilter) || INTELLIGENCE_STREAMS[0];
+
   const handleOpenConnect = useCallback((signal) => {
     setConnectModalSignal(signal);
   }, []);
@@ -219,16 +255,72 @@ export default function StratosphereTerminal({
             )}
           </div>
 
-          <button
-            type="button"
-            className={`st-filter-btn ${activeFilterCount > 0 ? "active" : ""}`}
-            onClick={() => setFilterDrawerOpen(true)}
-            aria-label={`Open filters. ${activeFilterCount} active filters.`}
-          >
-            <Filter size={13} aria-hidden="true" />
-            <span>FILTERS</span>
-            {activeFilterCount > 0 && <span className="st-filter-badge">{activeFilterCount}</span>}
-          </button>
+          <div className="st-hud-selectors">
+            {/* Integrated Area / District Dropdown */}
+            <DistrictIntelligenceStrip
+              selectedDistrict={activeDistrict}
+              onSelectDistrict={handleSelectDistrict}
+              signals={stageSignals}
+            />
+
+            {/* Integrated Intelligence Stream Dropdown */}
+            <div className="st-stream-wrap" ref={streamDropdownRef}>
+              <button
+                type="button"
+                className={`st-stream-trigger ${stageFilter !== "all" ? "has-selection" : ""} ${streamOpen ? "is-open" : ""}`}
+                onClick={() => setStreamOpen((prev) => !prev)}
+                aria-expanded={streamOpen}
+                aria-haspopup="listbox"
+                aria-label={`Filter by intelligence stream. Currently: ${currentStream.label}`}
+              >
+                <Layers size={13} className="st-stream-icon" aria-hidden="true" />
+                <span className="st-stream-prefix">STREAM:</span>
+                <span className="st-stream-name">{currentStream.label}</span>
+                <ChevronDown size={12} className={`st-stream-chevron ${streamOpen ? "is-open" : ""}`} aria-hidden="true" />
+              </button>
+
+              {streamOpen && (
+                <div className="st-stream-menu" role="listbox" aria-label="Choose intelligence stream">
+                  <div className="st-stream-header">
+                    <span>INTELLIGENCE STREAM</span>
+                  </div>
+                  {INTELLIGENCE_STREAMS.map((s) => {
+                    const isSelected = stageFilter === s.key;
+                    return (
+                      <button
+                        key={s.key}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        className={`st-stream-item ${isSelected ? "active" : ""}`}
+                        onClick={() => {
+                          onSelectStage(s.key);
+                          setStreamOpen(false);
+                        }}
+                      >
+                        <div className="st-stream-content">
+                          <span className="st-stream-item-name">{s.label}</span>
+                          <span className="st-stream-item-desc">{s.desc}</span>
+                        </div>
+                        {isSelected && <Check size={13} className="st-stream-check" aria-hidden="true" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className={`st-filter-btn ${activeFilterCount > 0 ? "active" : ""}`}
+              onClick={() => setFilterDrawerOpen(true)}
+              aria-label={`Open filters. ${activeFilterCount} active filters.`}
+            >
+              <Filter size={13} aria-hidden="true" />
+              <span>FILTERS</span>
+              {activeFilterCount > 0 && <span className="st-filter-badge">{activeFilterCount}</span>}
+            </button>
+          </div>
         </div>
 
         {/* Mode Switcher: SPATIAL (Split-Screen 3D) vs SIGNALS (Minimalist Feed) */}
@@ -256,13 +348,6 @@ export default function StratosphereTerminal({
           </button>
         </div>
       </header>
-
-      {/* ── LIVE DISTRICT INTELLIGENCE STRIP ── */}
-      <DistrictIntelligenceStrip
-        selectedDistrict={activeDistrict}
-        onSelectDistrict={handleSelectDistrict}
-        signals={stageSignals}
-      />
 
       {/* ── MAIN WORKSPACE ── */}
       <div className={`st-workspace ${viewMode === "SPATIAL" ? "st-split-layout" : "st-feed-layout"}`}>

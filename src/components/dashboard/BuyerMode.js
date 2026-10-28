@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import { Bookmark, Search } from "lucide-react";
+import { getSession } from "@/lib/authClient";
+import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import PostMoveEcosystem from "./PostMoveEcosystem";
 import RecommendationInvitation from "./RecommendationInvitation";
 import VaultOfHonor from "./VaultOfHonor";
@@ -24,19 +27,74 @@ import SimpleDetail from "@/components/ui/SimpleDetail";
 import InfoTip from "@/components/ui/InfoTip";
 
 export default function BuyerMode() {
+  const router = useRouter();
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [radius, setRadius] = useState("5");
   const [radarCenter, setRadarCenter] = useState(null);
   const [selectedForCompare, setSelectedForCompare] = useState([]);
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+  const [savedSignals, setSavedSignals] = useState([]);
+  const [loadingSignals, setLoadingSignals] = useState(true);
+
   // Area watch — device-local (same pattern as Your Board), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
   const [areaWatch, setAreaWatch] = useState(false);
-  const { listings, savedIds, toggleSave, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
+  const { listings, savedIds, toggleSave, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading, currentUser } = useDashboard();
   const searchRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
+
+  useEffect(() => {
+    let alive = true;
+    const loadSignals = async () => {
+      try {
+        const { data: { session } } = await getSession().catch(() => ({ data: {} }));
+        const token = session?.access_token;
+        if (!token) {
+          if (alive) setLoadingSignals(false);
+          return;
+        }
+        const res = await fetch("/api/community/signals?saved=1", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (alive && data?.ok && Array.isArray(data.signals)) {
+            setSavedSignals(data.signals);
+          }
+        }
+      } catch {
+        // fail gracefully
+      } finally {
+        if (alive) setLoadingSignals(false);
+      }
+    };
+    loadSignals();
+
+    const handleSavedChanged = (e) => {
+      if (e.detail && typeof e.detail.isSaved === "boolean") {
+        if (!e.detail.isSaved) {
+          setSavedSignals((prev) => prev.filter((s) => s.id !== e.detail.signalId));
+        } else if (e.detail.signal) {
+          setSavedSignals((prev) => {
+            if (prev.some((s) => s.id === e.detail.signalId)) return prev;
+            return [{ ...e.detail.signal, isSaved: true }, ...prev];
+          });
+        }
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+    }
+
+    return () => {
+      alive = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+      }
+    };
+  }, [currentUser?.id]);
 
   // Store markers to clean them up when listings change
   const markersRef = useRef([]);
@@ -494,8 +552,15 @@ export default function BuyerMode() {
           </select>
         </div>
         
-        <div className="flex items-center gap-6 self-end md:self-auto">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap self-end md:self-auto">
+          <Link
+            href="/stratosphere?view=radar&role=buyer"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent text-xs font-mono tracking-wider uppercase transition min-h-[44px]"
+            title="Explore full-screen spatial radar in Stratosphere"
+          >
+            <span>🗺️ Live Radar</span>
+          </Link>
+          <div className="flex items-center gap-2">
             <span className={`text-xs font-working-title ${!showMap ? 'text-gold-accent' : 'text-text-secondary'}`}>List</span>
             <button 
               className={`w-12 h-6 rounded-full p-1 transition relative ${showMap ? 'bg-gold-accent' : 'bg-surface-variant'}`}
@@ -508,7 +573,6 @@ export default function BuyerMode() {
             </button>
             <span className={`text-xs font-working-title ${showMap ? 'text-gold-accent' : 'text-text-secondary'}`}>Map</span>
           </div>
-          
         </div>
       </div>
 
@@ -533,6 +597,12 @@ export default function BuyerMode() {
               </div>
               <div className="font-working-title text-on-surface text-lg">{filteredListings.filter(l => l.coordinates).length} properties in radar</div>
               {radius !== 'any' && <div className="text-xs text-text-secondary mt-1">{radius}km radius from Makati CBD</div>}
+              <Link
+                href="/stratosphere?view=radar&role=buyer"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-mono tracking-wider text-gold-accent hover:underline uppercase"
+              >
+                Open Full-Screen in Stratosphere →
+              </Link>
             </div>
             
             <select
@@ -615,6 +685,59 @@ export default function BuyerMode() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Saved Signals for Follow-up */}
+          <div className="flex flex-col gap-4 mt-8">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-variant pb-2">
+              <h2 className="font-headline-editorial text-2xl text-on-surface flex min-w-0 items-center gap-3">
+                <span>Signals to Follow Up</span>
+                {savedSignals.length > 0 && (
+                  <span className="font-mono text-xs text-text-muted">
+                    ({savedSignals.length})
+                  </span>
+                )}
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <Link
+                  href="/stratosphere?view=saved-signals"
+                  className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
+                >
+                  View all in Stratosphere →
+                </Link>
+              </div>
+            </div>
+            <p className="text-xs text-text-secondary mb-2">
+              Market opportunities, building progress, and community updates you saved for follow-up.
+            </p>
+            {loadingSignals ? (
+              <p className="text-xs font-mono text-text-muted py-6 text-center">Loading your saved signals…</p>
+            ) : savedSignals.length === 0 ? (
+              <div className="bg-surface/50 border border-dashed border-white/[0.08] rounded-xl p-8 w-full text-center flex flex-col items-center justify-center">
+                <span className="text-3xl mb-3 opacity-60 block">📡</span>
+                <div className="font-working-title text-base text-on-surface mb-1">No saved signals yet</div>
+                <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
+                  Bookmark market signals, demands, and developments on Stratosphere to track them here.
+                </p>
+                <Link
+                  href="/stratosphere?view=radar&role=buyer"
+                  className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(var(--accent-bright-rgb),0.2)] font-bold min-h-[44px] inline-flex items-center"
+                >
+                  Explore Live Radar →
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {savedSignals.slice(0, 6).map((signal) => (
+                  <SignalDossierCard
+                    key={signal.id}
+                    signal={{ ...signal, isSaved: true }}
+                    onSelect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                    onConnect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Feed Rail (New in Area) */}

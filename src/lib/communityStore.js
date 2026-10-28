@@ -12,6 +12,7 @@ import { lifecycleNotice } from "./pendingRequestLifecycle";
 import { getServerMapboxToken } from "./mapboxToken";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { BoundedCache } from "./boundedCache";
+import { resolveTrustTier } from "./scoring/behavioralScoring";
 
 // ─────────────────────────────────────────────────────────────────────────
 // COMMUNITY STORE (A-145 P1, server-only)
@@ -41,7 +42,15 @@ function formatSize(min, max) {
 }
 
 /** Map one DB row (+ location + requirements) to the dossier-card shape. */
-export function mapDbSignalToCard(row, location = {}, requirements = {}, now = new Date(), viewerId = null) {
+export function mapDbSignalToCard(
+  row,
+  location = {},
+  requirements = {},
+  now = new Date(),
+  viewerId = null,
+  isSaved = false,
+  authorMetrics = null
+) {
   const freshness = freshnessFor(row.last_confirmed_at, now);
   const terminalState = signalTerminalState({
     status: row.status,
@@ -51,23 +60,39 @@ export function mapDbSignalToCard(row, location = {}, requirements = {}, now = n
   const maxAnswers = maxAnswersForSignal(row);
   const openAnswersCount = Number(row.open_answers_count) || 0;
   const district = location.district || location.city || "";
+
+  const mustHave = Array.isArray(requirements.must_have) ? requirements.must_have : [];
+  const radiusSpec = mustHave.find((s) => typeof s === "string" && s.startsWith("radius:"));
+  const radiusKm = radiusSpec ? parseFloat(radiusSpec.replace("radius:", "")) : null;
+
+  const hasCoords = Number.isFinite(Number(location.lat)) && Number.isFinite(Number(location.lng));
   const coords =
-    location.precision_level === "exact" &&
-    Number.isFinite(Number(location.lat)) &&
-    Number.isFinite(Number(location.lng))
+    (location.precision_level === "exact" || radiusKm != null) && hasCoords
       ? { lat: Number(location.lat), lng: Number(location.lng) }
       : null;
-  const mustHave = Array.isArray(requirements.must_have) ? requirements.must_have : [];
+
+  const baseLoc = [location.building_name, district].filter(Boolean).join(" · ") || location.city || "";
+  const locationLabel = radiusKm && radiusKm >= 1 ? `${baseLoc} (${radiusKm}km radius)` : baseLoc;
+
+  // Resolve behavioral trust standing (Honest Blank Rule: First-Time Verified Seeker by default)
+  const userMetrics = authorMetrics || {};
+  const compositeScore = userMetrics.composite_score != null ? Number(userMetrics.composite_score) : null;
+  const displayBadge = userMetrics.display_badge || (compositeScore != null ? resolveTrustTier(compositeScore).displayBadge : "[First-Time Verified Seeker]");
+  const trustTierLabel = compositeScore != null
+    ? `${displayBadge} · ${Math.round(compositeScore)} Index`
+    : displayBadge;
+
   return {
     id: row.id,
     title: row.title,
     signalType: row.signal_type,
     category: requirements.space_type || "",
     spaceType: requirements.space_type || "",
-    location: [location.building_name, district].filter(Boolean).join(" · ") || location.city || "",
+    location: locationLabel,
     district,
     city: location.city || "",
     coords,
+    radiusKm,
     areaSqm: formatSize(requirements.size_min_sqm, requirements.size_max_sqm),
     budget: formatBudget(requirements.budget_min, requirements.budget_max),
     timing: requirements.timing || "",
@@ -79,14 +104,17 @@ export function mapDbSignalToCard(row, location = {}, requirements = {}, now = n
     sourceName: "",
     sourceUrl: "",
     actionType: "CONNECT",
-    glyphType: "volume",
-    glyphData: {},
+    glyphType: radiusKm ? "pulse" : "volume",
+    glyphData: radiusKm ? { radiusM: Math.round(radiusKm * 1000) } : {},
     author: {
       scoutId: row.scout_id_snapshot,
       mode: row.public_identity_mode === "anonymous" ? "anonymous" : "public",
       ...(row.public_identity_mode === "anonymous" ? {} : { name: row.author_display_name || row.scout_id_snapshot }),
-      trustTier: "SCOUTIT MEMBER",
-      verified: false,
+      trustTier: trustTierLabel,
+      behavioralBadge: displayBadge,
+      behavioralScore: compositeScore,
+      transactionCount: userMetrics.transaction_count || 0,
+      verified: compositeScore != null ? compositeScore >= 70 : false,
     },
     freshness,
     terminalState,
@@ -100,6 +128,7 @@ export function mapDbSignalToCard(row, location = {}, requirements = {}, now = n
     lastConfirmedAt: row.last_confirmed_at,
     isSample: false,
     liveCommunity: true,
+    isSaved: Boolean(isSaved),
     isMine: Boolean(viewerId && row.author_account_id === viewerId),
   };
 }
@@ -130,7 +159,7 @@ export async function listLiveSignals({ district = null, signalType = null, limi
     }
     if (!rows || rows.length === 0) return { signals: [] };
     const ids = rows.map((r) => r.id);
-    const [{ data: locations }, { data: reqs }, { data: openDeals }] = await Promise.all([
+    const queries = [
       supabaseAdmin.from("signal_locations").select("*").in("signal_id", ids),
       supabaseAdmin.from("signal_requirements").select("*").in("signal_id", ids),
       supabaseAdmin
@@ -141,7 +170,18 @@ export async function listLiveSignals({ district = null, signalType = null, limi
         .not("routing_snapshot", "is", null)
         .order("created_at", { ascending: false })
         .limit(300),
-    ]);
+    ];
+    if (viewerId) {
+      queries.push(
+        supabaseAdmin.from("signal_saves").select("signal_id").eq("account_id", viewerId).in("signal_id", ids)
+      );
+    }
+    const [locationsRes, reqsRes, openDealsRes, savesRes] = await Promise.all(queries);
+    const locations = locationsRes?.data;
+    const reqs = reqsRes?.data;
+    const openDeals = openDealsRes?.data;
+    const savedIds = new Set((savesRes?.data || []).map((s) => s.signal_id));
+
     const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
     const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
     const openAnswersBySignal = new Map();
@@ -151,6 +191,19 @@ export async function listLiveSignals({ district = null, signalType = null, limi
         openAnswersBySignal.set(sId, (openAnswersBySignal.get(sId) || 0) + 1);
       }
     }
+
+    const allAuthorIds = [...new Set(rows.map((r) => r.author_account_id).filter(Boolean))];
+    let metricsByUser = new Map();
+    if (allAuthorIds.length > 0) {
+      try {
+        const { data: metrics } = await supabaseAdmin
+          .from("user_behavioral_metrics")
+          .select("user_id, tier, display_badge, composite_score, transaction_count")
+          .in("user_id", allAuthorIds);
+        metricsByUser = new Map((metrics || []).map((m) => [m.user_id, m]));
+      } catch {}
+    }
+
     const now = new Date();
     let signals = rows.map((row) =>
       mapDbSignalToCard(
@@ -158,7 +211,9 @@ export async function listLiveSignals({ district = null, signalType = null, limi
         locById.get(row.id) || {},
         reqById.get(row.id) || {},
         now,
-        viewerId
+        viewerId,
+        savedIds.has(row.id),
+        metricsByUser.get(row.author_account_id)
       )
     );
     // Expired rows leave the feed until refreshed (spec §10). Unpinned rows
@@ -414,7 +469,7 @@ export async function listAuthorSignals(authorAccountId) {
     if (!rows || rows.length === 0) return { signals: [] };
 
     const ids = rows.map((r) => r.id);
-    const [{ data: locations }, { data: reqs }, { data: openDeals }] = await Promise.all([
+    const [{ data: locations }, { data: reqs }, { data: openDeals }, { data: metrics }] = await Promise.all([
       supabaseAdmin.from("signal_locations").select("*").in("signal_id", ids),
       supabaseAdmin.from("signal_requirements").select("*").in("signal_id", ids),
       supabaseAdmin
@@ -425,8 +480,13 @@ export async function listAuthorSignals(authorAccountId) {
         .not("routing_snapshot", "is", null)
         .order("created_at", { ascending: false })
         .limit(300),
+      supabaseAdmin
+        .from("user_behavioral_metrics")
+        .select("user_id, tier, display_badge, composite_score, transaction_count")
+        .eq("user_id", authorAccountId),
     ]);
 
+    const authorMetrics = metrics?.[0] || null;
     const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
     const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
     const openDealsBySignal = new Map();
@@ -446,7 +506,9 @@ export async function listAuthorSignals(authorAccountId) {
         locById.get(row.id) || {},
         reqById.get(row.id) || {},
         now,
-        authorAccountId
+        authorAccountId,
+        false,
+        authorMetrics
       );
       const terminalState = signalTerminalState({
         status: row.status,
@@ -477,6 +539,111 @@ export async function listAuthorSignals(authorAccountId) {
         receipt,
       };
     });
+
+    return { signals };
+  } catch (error) {
+    if (isMissingTable(error)) return { missing: true };
+    throw error;
+  }
+}
+
+/**
+ * List signals bookmarked / saved by a specific account.
+ * Preserves the user's bookmark timestamp order (newest save first).
+ */
+export async function listSavedSignals(accountId) {
+  if (!supabaseAdmin || !accountId) return { missing: true };
+  try {
+    const { data: saveRows, error: saveErr } = await supabaseAdmin
+      .from("signal_saves")
+      .select("signal_id, created_at")
+      .eq("account_id", accountId)
+      .order("created_at", { ascending: false });
+
+    if (saveErr) {
+      if (isMissingTable(saveErr)) return { missing: true };
+      throw saveErr;
+    }
+    if (!saveRows || saveRows.length === 0) return { signals: [] };
+
+    const signalIds = saveRows.map((s) => s.signal_id);
+    const { data: rows, error: signalErr } = await supabaseAdmin
+      .from("stratosphere_signals")
+      .select(
+        "id, author_account_id, scout_id_snapshot, public_identity_mode, signal_type, commercial_flag, status, title, body, relevant_count, saved_count, created_at, last_confirmed_at"
+      )
+      .in("id", signalIds);
+
+    if (signalErr) {
+      if (isMissingTable(signalErr)) return { missing: true };
+      throw signalErr;
+    }
+    if (!rows || rows.length === 0) return { signals: [] };
+
+    const ids = rows.map((r) => r.id);
+    const authorIds = [...new Set(rows.map((r) => r.author_account_id).filter(Boolean))];
+    const [{ data: locations }, { data: reqs }, { data: openDeals }, { data: metrics }] = await Promise.all([
+      supabaseAdmin.from("signal_locations").select("*").in("signal_id", ids),
+      supabaseAdmin.from("signal_requirements").select("*").in("signal_id", ids),
+      supabaseAdmin
+        .from("deals")
+        .select("id, status, routing_snapshot")
+        .is("property_id", null)
+        .eq("status", "pending")
+        .not("routing_snapshot", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(300),
+      authorIds.length
+        ? supabaseAdmin
+            .from("user_behavioral_metrics")
+            .select("user_id, tier, display_badge, composite_score, transaction_count")
+            .in("user_id", authorIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const metricsByUser = new Map((metrics || []).map((m) => [m.user_id, m]));
+    const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
+    const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
+    const openAnswersBySignal = new Map();
+    for (const d of openDeals || []) {
+      const sId = d.routing_snapshot?.signal_id;
+      if (sId) {
+        openAnswersBySignal.set(sId, (openAnswersBySignal.get(sId) || 0) + 1);
+      }
+    }
+
+    const now = new Date();
+    const rowById = new Map(rows.map((r) => [r.id, r]));
+    let signals = signalIds
+      .map((id) => rowById.get(id))
+      .filter(Boolean)
+      .map((row) =>
+        mapDbSignalToCard(
+          { ...row, open_answers_count: openAnswersBySignal.get(row.id) || 0 },
+          locById.get(row.id) || {},
+          reqById.get(row.id) || {},
+          now,
+          accountId,
+          true,
+          metricsByUser.get(row.author_account_id)
+        )
+      );
+
+    const publicIds = [...new Set(signals.filter((s) => s.author.mode === "public").map((s) => s.id))];
+    if (publicIds.length > 0) {
+      const authorIds = rows.filter((r) => publicIds.includes(r.id)).map((r) => r.author_account_id);
+      const { data: profiles } = await supabaseAdmin
+        .from("user_profiles")
+        .select("id, display_name")
+        .in("id", [...new Set(authorIds)]);
+      const nameById = new Map((profiles || []).map((p) => [p.id, p.display_name]));
+      signals = signals.map((s) => {
+        if (s.author.mode !== "public") return s;
+        const r = rowById.get(s.id);
+        const name = r ? nameById.get(r.author_account_id) : null;
+        return name ? { ...s, author: { ...s.author, name } } : s;
+      });
+    }
 
     return { signals };
   } catch (error) {

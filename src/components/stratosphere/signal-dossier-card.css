@@ -4,27 +4,43 @@
 
 .sdc-card {
   position: relative;
-  background: rgba(var(--surface-rgb), 0.85);
-  border: 1px solid var(--border);
+  background: rgba(20, 20, 23, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 3px solid var(--card-role-accent, var(--accent));
   border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 12px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
+.sdc-card--demand {
+  --card-role-accent: var(--accent-bright);
+}
+
+.sdc-card--supply {
+  --card-role-accent: var(--green);
+}
+
+.sdc-card--intel {
+  --card-role-accent: var(--intel-cyan);
+}
+
 .sdc-card.hovered {
-  border-color: var(--accent-border);
-  background: rgba(var(--surface2-rgb), 0.95);
-  box-shadow: var(--shadow-md), 0 0 12px rgba(var(--accent-rgb), 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  border-left-color: var(--card-role-accent, var(--accent-bright));
+  background: rgba(28, 28, 32, 0.98);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 16px rgba(var(--accent-rgb), 0.12);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .sdc-card:hover {
-    border-color: var(--accent-border);
-    background: rgba(var(--surface2-rgb), 0.95);
-    box-shadow: var(--shadow-md), 0 0 12px rgba(var(--accent-rgb), 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
+    border-left-color: var(--card-role-accent, var(--accent-bright));
+    background: rgba(28, 28, 32, 0.98);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 16px rgba(var(--accent-rgb), 0.12);
   }
 }
 
@@ -33,9 +49,10 @@
 }
 
 .sdc-card.active {
-  border-color: var(--accent);
-  background: rgba(var(--surface2-rgb), 0.95);
-  box-shadow: var(--shadow-glow), var(--shadow-lg);
+  border-color: var(--card-role-accent, var(--accent));
+  border-left-color: var(--card-role-accent, var(--accent-bright));
+  background: rgba(32, 32, 36, 0.98);
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.2), 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 /* ── HEADER ── */
@@ -127,10 +144,10 @@
 }
 
 .sdc-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.4;
-  color: var(--text-primary);
+  color: var(--paper-03, #DBDBDB);
   margin: 0 0 8px 0;
   letter-spacing: 0.01em;
 }
@@ -138,7 +155,7 @@
 .sdc-specs-strip {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
   margin-bottom: 8px;
 }
@@ -146,21 +163,35 @@
 .sdc-spec-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-family: var(--font-mono, monospace);
   font-size: 12px;
-  color: var(--text-secondary);
-  background: rgba(var(--text-primary-rgb), 0.04);
-  padding: 2px 7px;
-  border-radius: 3px;
-  border: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--paper-01, #D5D5D5);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  letter-spacing: 0.04em;
+}
+
+.sdc-area-chip {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  font-weight: 700;
+}
+
+.sdc-ceiling-chip {
+  color: var(--paper-01);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .sdc-budget-chip {
-  color: var(--accent);
-  background: var(--accent-dim);
-  border-color: var(--accent-border);
-  font-weight: 600;
+  color: var(--accent-bright);
+  background: rgba(247, 198, 78, 0.14);
+  border-color: rgba(247, 198, 78, 0.4);
+  font-weight: 700;
 }
 
 .sdc-tag-list {
@@ -626,6 +657,20 @@
   .sdc-glyph-col {
     display: none; /* Hide glyph in cramped mobile card to maintain compactness */
   }
+  .sdc-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .sdc-icon-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .sdc-action-metric {
+    min-height: 44px;
+  }
+  .sdc-btn {
+    min-height: 44px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -654,8 +699,8 @@
 .sdc-role-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 7px;
+  gap: 5px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-family: var(--font-mono, monospace);
   font-size: 12px;
@@ -665,21 +710,21 @@
 }
 
 .sdc-role-demand {
-  background: var(--accent-dim);
+  background: rgba(247, 198, 78, 0.15);
   color: var(--accent-bright);
-  border: 1px solid var(--accent-border);
+  border: 1px solid rgba(247, 198, 78, 0.45);
 }
 
 .sdc-role-supply {
-  background: rgba(var(--green-rgb, 16, 185, 129), 0.12);
+  background: rgba(16, 185, 129, 0.15);
   color: var(--green);
-  border: 1px solid rgba(var(--green-rgb, 16, 185, 129), 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.45);
 }
 
 .sdc-role-intel {
-  background: rgba(var(--intel-cyan-rgb, 56, 189, 248), 0.12);
+  background: rgba(0, 242, 254, 0.14);
   color: var(--intel-cyan);
-  border: 1px solid rgba(var(--intel-cyan-rgb, 56, 189, 248), 0.3);
+  border: 1px solid rgba(0, 242, 254, 0.4);
 }
 
 .sdc-location-datum {

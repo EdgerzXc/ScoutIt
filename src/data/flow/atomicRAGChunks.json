@@ -28899,19 +28899,21 @@
     "chunkType": "NODE_FACT",
     "canonical_id": "layer.community_signals",
     "canonicalId": "layer.community_signals",
-    "title": "Community Space Signals & Bounties Feed",
+    "title": "Stratosphere Space Intelligence & Community Radar",
     "domain": "layer",
     "layer": "stratosphere",
-    "route": "/community",
+    "route": "/stratosphere",
     "roles": [
       "visitor",
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "visibility": [
       "PUBLIC",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "securityClassification": "PUBLIC",
     "status": "VERIFIED",
@@ -28919,35 +28921,45 @@
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Directory of user-submitted space demand signals and commercial tenant search bounties.",
-    "description": "Public feed where prospective tenants broadcast explicit space needs (location, square footage, budget) and accredited brokers connect.",
+    "purpose": "High-altitude spatial intelligence exchange where seekers broadcast verified space requirements and brokers/owners intercept demand.",
+    "description": "High-altitude spatial intelligence exchange where seekers broadcast verified space requirements across multi-station catchment zones (0.5km - 5.0km), and asset owners/brokers intercept demand via permissioned Connects. Powered by MapLibre 3D WebGL radar with glowing dynamic ground pulse rings, 7-day weekly refresh lifecycle, and Zero-Knowledge Behavioral Trust Standing (SCOUT-XXXX / [Verified Resident · XX Index]).",
     "available_actions": [
-      "Broadcast Space Signal",
-      "Browse Demand Bounties",
-      "Connect to Client Signal"
+      "Explore 3D Spatial Radar Beacons",
+      "Filter by Two-Sided Market Taxonomy (Demand, Supply, Intel)",
+      "Compose Space Signal with Catchment Radius (0.5km Spot, 1.5km Corridor, 3.5km Strip, 5.0km District)",
+      "Select Anonymity Mode (SCOUT-XXXX with Zero-Knowledge Behavioral Trust)",
+      "Save Private Signal Bookmark",
+      "Initiate Permissioned Connect Handshake (1 Connect Token)"
     ],
     "entry_conditions": [
-      "Publicly viewable; broadcasting requires authenticated account"
+      "Publicly viewable; broadcasting and connecting require authenticated 18+ adult account"
     ],
     "source_type": "MASTER_FLOW_GRAPH",
     "sourceType": "MASTER_FLOW_GRAPH",
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/community/page.js",
+        "path": "src/app/stratosphere/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/stratosphere/SpatialSignalRadar.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "claims": [],
     "humanReviewedBy": null,
-    "productReviewStatus": "RESEARCHED",
+    "productReviewStatus": "APPROVED",
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "rec_layer.community_signals",
@@ -28955,7 +28967,7 @@
     "chunkType": "RECOVERY",
     "canonical_id": "layer.community_signals",
     "canonicalId": "layer.community_signals",
-    "title": "Recovery Protocol: Community Space Signals & Bounties Feed",
+    "title": "Recovery Protocol: Stratosphere Space Intelligence & Community Radar",
     "domain": "layer",
     "status": "VERIFIED",
     "productStatus": "APPROVED",
@@ -28965,30 +28977,38 @@
     "visibility": [
       "PUBLIC",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "securityClassification": "PUBLIC",
     "exceptions": [
-      "Signal closed by author or duplicate post"
+      "Signal closed by author, duplicate post, or PII contact dump detected"
     ],
     "recovery_mechanisms": [
-      "Marks signal as closed and prevents further connections"
+      "Marks signal as closed/fulfilled, blocks unpermissioned contact dumps, and preserves existing deals at 0 connects"
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/community/page.js",
+        "path": "src/app/stratosphere/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/stratosphere/SpatialSignalRadar.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "impl_layer.community_signals",
@@ -28996,7 +29016,7 @@
     "chunkType": "IMPLEMENTATION_REFERENCE",
     "canonical_id": "layer.community_signals",
     "canonicalId": "layer.community_signals",
-    "title": "Implementation Evidence: Community Space Signals & Bounties Feed",
+    "title": "Implementation Evidence: Stratosphere Space Intelligence & Community Radar",
     "domain": "layer",
     "status": "VERIFIED",
     "productStatus": "APPROVED",
@@ -29009,21 +29029,42 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "src/app/community/page.js",
-      "src/lib/signalsData.js"
+      "src/app/stratosphere/page.js",
+      "src/components/stratosphere/StratosphereWorkspace.js",
+      "src/components/stratosphere/StratosphereTerminal.js",
+      "src/components/stratosphere/SpatialSignalRadar.js",
+      "src/components/stratosphere/SignalComposer.js",
+      "src/components/stratosphere/SignalDossierCard.js",
+      "src/components/stratosphere/CommunityConnectModal.js",
+      "src/lib/communitySignalsAdapter.js",
+      "src/lib/communityStore.js",
+      "src/lib/communityPosting.js"
     ],
     "components": [],
     "apis": [
-      "/api/community/signals"
+      "/api/community/signals",
+      "/api/community/me",
+      "/api/community/signals/[id]/connect",
+      "/api/community/signals/[id]/close",
+      "/api/community/signals/[id]/refresh",
+      "/api/community/signals/[id]/save",
+      "/api/community/signals/[id]/relevant"
     ],
     "database": "Supabase",
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/community/page.js",
+        "path": "src/app/stratosphere/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/stratosphere/SpatialSignalRadar.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "claims": [],
@@ -29031,8 +29072,8 @@
     "sourceType": "CODEBASE_EVIDENCE",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "fact_layer.api_community_signals",
@@ -29046,12 +29087,14 @@
     "route": "/api/community/signals",
     "roles": [
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "visibility": [
       "AUTHENTICATED",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "securityClassification": "CONFIDENTIAL",
     "status": "VERIFIED",
@@ -29059,12 +29102,16 @@
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Persists seeker space bounties and manages broker connection handshakes to claim client leads.",
-    "description": "Backend router validating broker connects balance and establishing private deal room upon connecting with signal creator.",
+    "purpose": "Persists seeker space requirements with catchment radius, scrubs PII, and conducts permissioned Connect handshakes with bounded answers.",
+    "description": "Backend router managing member signal intake, geocoding scope, capacity ceilings (3/5/10), bounded answers (max 3 pending deals), 7-day weekly refresh cadence, and bilateral Connect handshake with atomic spend_connects RPC transaction.",
     "available_actions": [
-      "Create Signal Post",
-      "Connect to Signal Lead",
-      "Close Signal"
+      "Validate Signal Draft & Scrub PII (Email, Phone, Handle)",
+      "Enforce Active Signal Capacity (Standard: 3, Owner: 5, Broker: 10)",
+      "Geocode Geographic Scope via Mapbox Proxy",
+      "Verify Property Ownership or Active Broker Roster for Building Promos",
+      "Enforce Bounded Answers (Max 3 Pending Deals)",
+      "Atomic Connect Handshake (1 Connect spent via spend_connects RPC)",
+      "Extend Freshness Window via 7-Day Refresh"
     ],
     "entry_conditions": [
       "Caller has active authenticated session and required connects stake"
@@ -29073,21 +29120,28 @@
     "sourceType": "MASTER_FLOW_GRAPH",
     "evidence": [
       {
-        "kind": "API",
+        "kind": "ROUTE",
         "path": "src/app/api/community/signals/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/api/community/signals/[id]/connect/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "claims": [],
     "humanReviewedBy": null,
-    "productReviewStatus": "RESEARCHED",
+    "productReviewStatus": "APPROVED",
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "rec_layer.api_community_signals",
@@ -29105,30 +29159,38 @@
     "visibility": [
       "AUTHENTICATED",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "securityClassification": "CONFIDENTIAL",
     "exceptions": [
-      "Insufficient connects balance or closed signal"
+      "Insufficient connects balance, closed/fulfilled signal, or answers full (max 3 pending deals)"
     ],
     "recovery_mechanisms": [
-      "Prompts broker to top up connects wallet"
+      "Prompts user to top up connects wallet, waits for pending requests to resolve, or reuses existing open deal at 0 connects"
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
     "evidence": [
       {
-        "kind": "API",
+        "kind": "ROUTE",
         "path": "src/app/api/community/signals/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/api/community/signals/[id]/connect/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "impl_layer.api_community_signals",
@@ -29149,20 +29211,41 @@
     ],
     "securityClassification": "INTERNAL",
     "systems": [
-      "src/app/api/community/signals/route.js"
+      "src/app/api/community/signals/route.js",
+      "src/app/api/community/signals/[id]/connect/route.js",
+      "src/app/api/community/signals/[id]/close/route.js",
+      "src/app/api/community/signals/[id]/refresh/route.js",
+      "src/app/api/community/signals/[id]/save/route.js",
+      "src/app/api/community/signals/[id]/relevant/route.js",
+      "src/app/api/community/me/route.js",
+      "src/lib/communityPosting.js",
+      "src/lib/communityStore.js"
     ],
     "components": [],
     "apis": [
-      "/api/community/signals"
+      "/api/community/signals",
+      "/api/community/signals/[id]/connect",
+      "/api/community/signals/[id]/close",
+      "/api/community/signals/[id]/refresh",
+      "/api/community/signals/[id]/save",
+      "/api/community/signals/[id]/relevant",
+      "/api/community/me"
     ],
     "database": "Supabase",
     "evidence": [
       {
-        "kind": "API",
+        "kind": "ROUTE",
         "path": "src/app/api/community/signals/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/api/community/signals/[id]/connect/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "claims": [],
@@ -29170,8 +29253,8 @@
     "sourceType": "CODEBASE_EVIDENCE",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "fact_owner.open_gate",

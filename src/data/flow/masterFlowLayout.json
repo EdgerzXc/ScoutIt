@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "generatedAt": "2026-10-24T12:00:02.076Z",
+  "generatedAt": "2026-10-28T05:11:52.662Z",
   "positions": {
     "hero": {
       "x": 80,
@@ -567,8 +567,8 @@
       "y": 800
     },
     "api_community_signals": {
-      "x": 800,
-      "y": 900
+      "x": 650,
+      "y": 1000
     },
     "dashboard_open_gate": {
       "x": 2750,

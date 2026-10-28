@@ -22573,23 +22573,25 @@ export const MASTER_FLOW_NODES = [
   {
     "id": "community_signals_feed",
     "canonicalId": "layer.community_signals",
-    "name": "Community Space Signals & Bounties Feed",
-    "label": "Community Space Signals & Bounties Feed",
+    "name": "Stratosphere Space Intelligence & Community Radar",
+    "label": "Stratosphere Space Intelligence & Community Radar",
     "type": "PAGE",
     "nodeType": "PAGE",
     "domain": "layer",
     "category": "architecture",
-    "route": "/community",
+    "route": "/stratosphere",
     "layer": "stratosphere",
     "roles": [
       "visitor",
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "actorRoles": [
       "visitor",
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "visibility": [
       "PUBLIC"
@@ -22597,7 +22599,8 @@ export const MASTER_FLOW_NODES = [
     "uiAudience": [
       "PUBLIC",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "knowledgeScope": [
       "PUBLIC"
@@ -22607,42 +22610,71 @@ export const MASTER_FLOW_NODES = [
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Directory of user-submitted space demand signals and commercial tenant search bounties.",
-    "description": "Public feed where prospective tenants broadcast explicit space needs (location, square footage, budget) and accredited brokers connect.",
+    "purpose": "High-altitude spatial intelligence exchange where seekers broadcast verified space requirements and brokers/owners intercept demand.",
+    "description": "High-altitude spatial intelligence exchange where seekers broadcast verified space requirements across multi-station catchment zones (0.5km - 5.0km), and asset owners/brokers intercept demand via permissioned Connects. Powered by MapLibre 3D WebGL radar with glowing dynamic ground pulse rings, 7-day weekly refresh lifecycle, and Zero-Knowledge Behavioral Trust Standing (SCOUT-XXXX / [Verified Resident · XX Index]).",
     "actions": [
-      "Broadcast Space Signal",
-      "Browse Demand Bounties",
-      "Connect to Client Signal"
+      "Explore 3D Spatial Radar Beacons",
+      "Filter by Two-Sided Market Taxonomy (Demand, Supply, Intel)",
+      "Compose Space Signal with Catchment Radius (0.5km Spot, 1.5km Corridor, 3.5km Strip, 5.0km District)",
+      "Select Anonymity Mode (SCOUT-XXXX with Zero-Knowledge Behavioral Trust)",
+      "Save Private Signal Bookmark",
+      "Initiate Permissioned Connect Handshake (1 Connect Token)"
     ],
     "conditions": [
-      "Publicly viewable; broadcasting requires authenticated account"
+      "Publicly viewable; broadcasting and connecting require authenticated 18+ adult account"
     ],
     "systems": [
-      "src/app/community/page.js",
-      "src/lib/signalsData.js"
+      "src/app/stratosphere/page.js",
+      "src/components/stratosphere/StratosphereWorkspace.js",
+      "src/components/stratosphere/StratosphereTerminal.js",
+      "src/components/stratosphere/SpatialSignalRadar.js",
+      "src/components/stratosphere/SignalComposer.js",
+      "src/components/stratosphere/SignalDossierCard.js",
+      "src/components/stratosphere/CommunityConnectModal.js",
+      "src/lib/communitySignalsAdapter.js",
+      "src/lib/communityStore.js",
+      "src/lib/communityPosting.js"
     ],
     "components": [],
     "apis": [
-      "/api/community/signals"
+      "/api/community/signals",
+      "/api/community/me",
+      "/api/community/signals/[id]/connect",
+      "/api/community/signals/[id]/close",
+      "/api/community/signals/[id]/refresh",
+      "/api/community/signals/[id]/save",
+      "/api/community/signals/[id]/relevant"
     ],
     "dataRefs": [
-      "community_signals"
+      "stratosphere_signals",
+      "signal_locations",
+      "signal_requirements",
+      "signal_saves",
+      "signal_relevance",
+      "user_behavioral_metrics"
     ],
     "database": "Supabase",
     "auth": "public",
     "exceptions": [
-      "Signal closed by author or duplicate post"
+      "Signal closed by author, duplicate post, or PII contact dump detected"
     ],
     "recovery": [
-      "Marks signal as closed and prevents further connections"
+      "Marks signal as closed/fulfilled, blocks unpermissioned contact dumps, and preserves existing deals at 0 connects"
     ],
     "evidence": [
       {
         "kind": "ROUTE",
-        "path": "src/app/community/page.js",
+        "path": "src/app/stratosphere/page.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "COMPONENT",
+        "path": "src/components/stratosphere/SpatialSignalRadar.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "claims": [],
@@ -22660,22 +22692,23 @@ export const MASTER_FLOW_NODES = [
       "validFrom": null,
       "reviewAfter": null,
       "deprecatedBy": null,
-      "changeReason": "A-145: Ingest Stratosphere community signals page"
+      "changeReason": "A-269: Stratosphere Zero-Knowledge Behavioral Trust & Multi-Station Catchment Radius Engine"
     },
     "guideability": "NONE",
     "isTerminal": false,
     "terminal": false,
-    "machineVerifiedBy": "A-145 Vitest Suite",
+    "machineVerifiedBy": "A-269 Vitest Suite",
     "humanReviewedBy": null,
     "machineVerificationStatus": "VERIFIED",
     "approvedAt": null,
-    "productReviewStatus": "RESEARCHED",
-    "securityReviewStatus": "RESEARCHED",
+    "productReviewStatus": "APPROVED",
+    "securityReviewStatus": "APPROVED",
     "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/STRATOSPHERE_COMMUNITY_SIGNALS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
     ],
     "version": "2.2.0",
-    "lastVerifiedAt": "2026-10-11",
+    "lastVerifiedAt": "2026-10-28",
     "x": 650,
     "y": 800,
     "parents": [
@@ -22698,11 +22731,13 @@ export const MASTER_FLOW_NODES = [
     "layer": "stratosphere",
     "roles": [
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "actorRoles": [
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "visibility": [
       "AUTHENTICATED"
@@ -22710,7 +22745,8 @@ export const MASTER_FLOW_NODES = [
     "uiAudience": [
       "AUTHENTICATED",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "knowledgeScope": [
       "AUTHENTICATED"
@@ -22720,42 +22756,73 @@ export const MASTER_FLOW_NODES = [
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Persists seeker space bounties and manages broker connection handshakes to claim client leads.",
-    "description": "Backend router validating broker connects balance and establishing private deal room upon connecting with signal creator.",
+    "purpose": "Persists seeker space requirements with catchment radius, scrubs PII, and conducts permissioned Connect handshakes with bounded answers.",
+    "description": "Backend router managing member signal intake, geocoding scope, capacity ceilings (3/5/10), bounded answers (max 3 pending deals), 7-day weekly refresh cadence, and bilateral Connect handshake with atomic spend_connects RPC transaction.",
     "actions": [
-      "Create Signal Post",
-      "Connect to Signal Lead",
-      "Close Signal"
+      "Validate Signal Draft & Scrub PII (Email, Phone, Handle)",
+      "Enforce Active Signal Capacity (Standard: 3, Owner: 5, Broker: 10)",
+      "Geocode Geographic Scope via Mapbox Proxy",
+      "Verify Property Ownership or Active Broker Roster for Building Promos",
+      "Enforce Bounded Answers (Max 3 Pending Deals)",
+      "Atomic Connect Handshake (1 Connect spent via spend_connects RPC)",
+      "Extend Freshness Window via 7-Day Refresh"
     ],
     "conditions": [
       "Caller has active authenticated session and required connects stake"
     ],
     "systems": [
-      "src/app/api/community/signals/route.js"
+      "src/app/api/community/signals/route.js",
+      "src/app/api/community/signals/[id]/connect/route.js",
+      "src/app/api/community/signals/[id]/close/route.js",
+      "src/app/api/community/signals/[id]/refresh/route.js",
+      "src/app/api/community/signals/[id]/save/route.js",
+      "src/app/api/community/signals/[id]/relevant/route.js",
+      "src/app/api/community/me/route.js",
+      "src/lib/communityPosting.js",
+      "src/lib/communityStore.js"
     ],
     "components": [],
     "apis": [
-      "/api/community/signals"
+      "/api/community/signals",
+      "/api/community/signals/[id]/connect",
+      "/api/community/signals/[id]/close",
+      "/api/community/signals/[id]/refresh",
+      "/api/community/signals/[id]/save",
+      "/api/community/signals/[id]/relevant",
+      "/api/community/me"
     ],
     "dataRefs": [
-      "community_signals",
-      "deals"
+      "stratosphere_signals",
+      "signal_locations",
+      "signal_requirements",
+      "signal_saves",
+      "signal_relevance",
+      "deals",
+      "user_behavioral_metrics",
+      "user_connect_wallets"
     ],
     "database": "Supabase",
     "auth": "authenticated",
     "exceptions": [
-      "Insufficient connects balance or closed signal"
+      "Insufficient connects balance, closed/fulfilled signal, or answers full (max 3 pending deals)"
     ],
     "recovery": [
-      "Prompts broker to top up connects wallet"
+      "Prompts user to top up connects wallet, waits for pending requests to resolve, or reuses existing open deal at 0 connects"
     ],
     "evidence": [
       {
-        "kind": "API",
+        "kind": "ROUTE",
         "path": "src/app/api/community/signals/route.js",
         "provenance": "EXTRACTED",
         "confidence": 1,
-        "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
+      },
+      {
+        "kind": "ROUTE",
+        "path": "src/app/api/community/signals/[id]/connect/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "649e0b8123f6277995a25adf55cd4d7ff739970f"
       }
     ],
     "claims": [],
@@ -22773,24 +22840,25 @@ export const MASTER_FLOW_NODES = [
       "validFrom": null,
       "reviewAfter": null,
       "deprecatedBy": null,
-      "changeReason": "A-145: Ingest community signals API"
+      "changeReason": "A-269: Stratosphere Connect Handshake, Bounded Answers & Atomic Spend"
     },
     "guideability": "NONE",
     "isTerminal": false,
     "terminal": false,
-    "machineVerifiedBy": "A-145 Vitest Suite",
+    "machineVerifiedBy": "A-269 Vitest Suite",
     "humanReviewedBy": null,
     "machineVerificationStatus": "VERIFIED",
     "approvedAt": null,
-    "productReviewStatus": "RESEARCHED",
-    "securityReviewStatus": "RESEARCHED",
+    "productReviewStatus": "APPROVED",
+    "securityReviewStatus": "APPROVED",
     "brainRefs": [
+      "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/STRATOSPHERE_COMMUNITY_SIGNALS.md",
       "_SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/USER_FLOWS.md"
     ],
     "version": "2.2.0",
-    "lastVerifiedAt": "2026-10-11",
-    "x": 800,
-    "y": 900,
+    "lastVerifiedAt": "2026-10-28",
+    "x": 650,
+    "y": 1000,
     "parents": [
       "community_signals_feed"
     ],

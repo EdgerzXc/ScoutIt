@@ -173,6 +173,34 @@ export const WORKFLOW_DEFINITIONS = {
       "sys_edge_ip_masking", "sys_velocity_radar", "exc_bot_quarantine", "rec_turnstile_challenge", "terminal_edge_blacklist"
     ]
   },
+  stratosphere_signal_journey: {
+    id: "stratosphere_signal_journey",
+    name: "Stratosphere Community Signal & Interception Journey",
+    description: "End-to-end seeker demand broadcast, multi-station catchment radar projection, zero-knowledge behavioral trust, and permissioned broker connect.",
+    goal: "broadcast_and_intercept_demand",
+    role: "seeker",
+    startNodes: ["stratosphere"],
+    terminalNodes: ["deal_room"],
+    requiredCapabilities: ["deal.participate"],
+    requiredOrderedMilestones: [
+      "stratosphere",
+      "community_signals_feed",
+      "api_community_signals",
+      "deal_room"
+    ],
+    completionPredicate: {
+      field: "deal.status",
+      operator: "==",
+      value: "pending"
+    },
+    allowedEdgeTypes: ["NAVIGATE", "ACTION", "SUBMIT", "SUCCESS", "SYSTEM"],
+    nodeIds: [
+      "stratosphere",
+      "community_signals_feed",
+      "api_community_signals",
+      "deal_room"
+    ]
+  },
   buyer_journey: {
     id: "buyer_journey",
     name: "Buyer Discovery to Offer Journey",
@@ -306,6 +334,21 @@ export const LINEAR_GUIDE_DEFINITIONS = {
       { step: 5, nodeId: "sys_transaction_handshake", title: "Two-Sided Deal Handshake", action: "Co-confirm two-sided deal closure and transaction milestones.", tip: "Unlocks seller rating reward.", guideTarget: "deal-handshake-two-sided-signature" }
     ]
   },
+  signal_seeker_guide: {
+    id: "signal_seeker_guide",
+    title: "Stratosphere Signal: Broadcast to Connect",
+    type: "MACRO_GUIDE",
+    role: "seeker",
+    description: "Step-by-step verified workflow for broadcasting space requirements with multi-station catchment radius and anonymous behavioral trust.",
+    steps: [
+      { step: 1, nodeId: "stratosphere", title: "Enter Stratosphere Altitude", action: "Navigate to Stratosphere from the Hero Launchpad or Roles switcher.", tip: "Direct access via /stratosphere?view=radar.", guideTarget: "stratosphere-entry" },
+      { step: 2, nodeId: "community_signals_feed", title: "Explore 3D Spatial Radar", action: "Survey active demand beacons and multi-station catchment rings.", tip: "Filter by Demand, Supply, or District.", guideTarget: "spatial-signal-radar" },
+      { step: 3, nodeId: "community_signals_feed", title: "Compose Signal & Choose Coverage", action: "Click 'POST A SIGNAL', select space type, and specify catchment radius (0.5km to 5.0km).", tip: "PII is scrubbed automatically.", guideTarget: "signal-composer-trigger" },
+      { step: 4, nodeId: "community_signals_feed", title: "Select Identity & Trust Standing", action: "Choose Anonymous (SCOUT-XXXX) to keep private info masked while attaching your verified behavioral score.", tip: "First-time seekers display [First-Time Verified Seeker].", guideTarget: "signal-composer-identity" },
+      { step: 5, nodeId: "api_community_signals", title: "Broadcast Beacon with 7-Day Refresh", action: "Publish your signal; coordinates unlock dynamic radar pulse rings.", tip: "7-day freshness decay keeps the feed fresh.", guideTarget: "api-community-signals" },
+      { step: 6, nodeId: "deal_room", title: "Bilateral Connect Handshake", action: "Accredited broker or owner intercepts your demand and initiates a deal proposal.", tip: "Connects spent; maximum 3 open answers.", guideTarget: "deal-room-negotiation-panel" }
+    ]
+  },
   broker_guide: {
     id: "broker_guide",
     title: "Broker Guide: Roster to Deal Closure",
@@ -342,7 +385,10 @@ export function getLinearGuide(guideId) {
 export function resolveContextualGuide({ route = '/', role = 'seeker', isAuthenticated = false, goal = 'inquire' }) {
   let resolvedGuideSteps = [];
 
-  if (route.startsWith('/property/') || route === '/pep') {
+  if (route.startsWith('/stratosphere') || route.startsWith('/community')) {
+    const guide = LINEAR_GUIDE_DEFINITIONS.signal_seeker_guide;
+    resolvedGuideSteps = guide.steps;
+  } else if (route.startsWith('/property/') || route === '/pep') {
     if (!isAuthenticated) {
       resolvedGuideSteps = [
         { step: 1, nodeId: 'pep', title: 'Property Detail', action: 'Explore listing chapters and specifications', guideTarget: '#node-pep' },

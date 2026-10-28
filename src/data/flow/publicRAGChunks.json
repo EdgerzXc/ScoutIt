@@ -6108,19 +6108,21 @@
     "chunkType": "NODE_FACT",
     "canonical_id": "layer.community_signals",
     "canonicalId": "layer.community_signals",
-    "title": "Community Space Signals & Bounties Feed",
+    "title": "Stratosphere Space Intelligence & Community Radar",
     "domain": "layer",
     "layer": "stratosphere",
-    "route": "/community",
+    "route": "/stratosphere",
     "roles": [
       "visitor",
       "seeker",
-      "broker"
+      "broker",
+      "owner"
     ],
     "visibility": [
       "PUBLIC",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "securityClassification": "PUBLIC",
     "status": "VERIFIED",
@@ -6128,15 +6130,18 @@
     "implementationStatus": "VERIFIED",
     "evidenceStatus": "TEST_GROUNDED",
     "releaseStatus": "PUBLIC_LIVE",
-    "purpose": "Directory of user-submitted space demand signals and commercial tenant search bounties.",
-    "description": "Public feed where prospective tenants broadcast explicit space needs (location, square footage, budget) and accredited brokers connect.",
+    "purpose": "High-altitude spatial intelligence exchange where seekers broadcast verified space requirements and brokers/owners intercept demand.",
+    "description": "High-altitude spatial intelligence exchange where seekers broadcast verified space requirements across multi-station catchment zones (0.5km - 5.0km), and asset owners/brokers intercept demand via permissioned Connects. Powered by MapLibre 3D WebGL radar with glowing dynamic ground pulse rings, 7-day weekly refresh lifecycle, and Zero-Knowledge Behavioral Trust Standing (SCOUT-XXXX / [Verified Resident · XX Index]).",
     "available_actions": [
-      "Broadcast Space Signal",
-      "Browse Demand Bounties",
-      "Connect to Client Signal"
+      "Explore 3D Spatial Radar Beacons",
+      "Filter by Two-Sided Market Taxonomy (Demand, Supply, Intel)",
+      "Compose Space Signal with Catchment Radius (0.5km Spot, 1.5km Corridor, 3.5km Strip, 5.0km District)",
+      "Select Anonymity Mode (SCOUT-XXXX with Zero-Knowledge Behavioral Trust)",
+      "Save Private Signal Bookmark",
+      "Initiate Permissioned Connect Handshake (1 Connect Token)"
     ],
     "entry_conditions": [
-      "Publicly viewable; broadcasting requires authenticated account"
+      "Publicly viewable; broadcasting and connecting require authenticated 18+ adult account"
     ],
     "source_type": "MASTER_FLOW_GRAPH",
     "sourceType": "MASTER_FLOW_GRAPH",
@@ -6149,12 +6154,12 @@
     ],
     "claims": [],
     "humanReviewedBy": null,
-    "productReviewStatus": "RESEARCHED",
+    "productReviewStatus": "APPROVED",
     "legalReviewStatus": "RESEARCHED",
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "rec_layer.community_signals",
@@ -6162,7 +6167,7 @@
     "chunkType": "RECOVERY",
     "canonical_id": "layer.community_signals",
     "canonicalId": "layer.community_signals",
-    "title": "Recovery Protocol: Community Space Signals & Bounties Feed",
+    "title": "Recovery Protocol: Stratosphere Space Intelligence & Community Radar",
     "domain": "layer",
     "status": "VERIFIED",
     "productStatus": "APPROVED",
@@ -6172,14 +6177,15 @@
     "visibility": [
       "PUBLIC",
       "SEEKER",
-      "BROKER"
+      "BROKER",
+      "OWNER"
     ],
     "securityClassification": "PUBLIC",
     "exceptions": [
-      "Signal closed by author or duplicate post"
+      "Signal closed by author, duplicate post, or PII contact dump detected"
     ],
     "recovery_mechanisms": [
-      "Marks signal as closed and prevents further connections"
+      "Marks signal as closed/fulfilled, blocks unpermissioned contact dumps, and preserves existing deals at 0 connects"
     ],
     "source_type": "BEHAVIORAL_FAILSAFE",
     "sourceType": "BEHAVIORAL_FAILSAFE",
@@ -6192,8 +6198,8 @@
     ],
     "graph_version": "2.2.0",
     "graphVersion": "2.2.0",
-    "last_verified_at": "2026-10-11",
-    "lastVerifiedAt": "2026-10-11"
+    "last_verified_at": "2026-10-28",
+    "lastVerifiedAt": "2026-10-28"
   },
   {
     "chunk_id": "fact_broker.dynamic_profile",

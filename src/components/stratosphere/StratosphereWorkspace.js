@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowRight, Building2, Compass, FileText, Layers, Radio, Search, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Building2, Compass, FileText, Layers, Radio, Search, TrendingUp } from "lucide-react";
 import SignalDossierCard from "./SignalDossierCard";
 import SignalComposer from "./SignalComposer";
 
@@ -62,6 +62,17 @@ async function fetchMySignals() {
   return response.json();
 }
 
+async function fetchSavedSignals() {
+  const { data: { session } } = await getSession().catch(() => ({ data: {} }));
+  const token = session?.access_token;
+  if (!token) return { ok: false, error: "Sign in to view your saved signals." };
+  const response = await fetch("/api/community/signals?saved=1", {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  return response.json();
+}
+
 export default function StratosphereWorkspace({
   initialView = "articles",
   initialStage = "all",
@@ -77,6 +88,9 @@ export default function StratosphereWorkspace({
   const [mySignals, setMySignals] = useState([]);
   const [mySignalsLoading, setMySignalsLoading] = useState(false);
   const [mySignalsError, setMySignalsError] = useState(null);
+  const [savedSignals, setSavedSignals] = useState([]);
+  const [savedSignalsLoading, setSavedSignalsLoading] = useState(false);
+  const [savedSignalsError, setSavedSignalsError] = useState(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [visibleArticleCount, setVisibleArticleCount] = useState(ARTICLES_PAGE_SIZE);
   const signalsFetchedRef = useRef(false);
@@ -96,6 +110,40 @@ export default function StratosphereWorkspace({
       .finally(() => setMySignalsLoading(false));
   }, []);
 
+  const loadSavedSignals = useCallback(() => {
+    setSavedSignalsLoading(true);
+    setSavedSignalsError(null);
+    fetchSavedSignals()
+      .then((json) => {
+        if (json?.ok && Array.isArray(json.signals)) {
+          setSavedSignals(json.signals);
+        } else {
+          setSavedSignalsError(json?.error || "Could not load your saved signals.");
+        }
+      })
+      .catch(() => setSavedSignalsError("Could not load your saved signals."))
+      .finally(() => setSavedSignalsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const handleSavedChanged = (e) => {
+      if (e.detail && typeof e.detail.isSaved === "boolean") {
+        if (!e.detail.isSaved) {
+          setSavedSignals((prev) => prev.filter((s) => s.id !== e.detail.signalId));
+        } else if (e.detail.signal) {
+          setSavedSignals((prev) => {
+            if (prev.some((s) => s.id === e.detail.signalId)) return prev;
+            return [{ ...e.detail.signal, isSaved: true }, ...prev];
+          });
+        }
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+      return () => window.removeEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+    }
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("view") === "radar") setView("radar");
@@ -103,11 +151,14 @@ export default function StratosphereWorkspace({
     else if (params.get("view") === "my-signals") {
       setView("my-signals");
       loadMySignals();
+    } else if (params.get("view") === "saved-signals") {
+      setView("saved-signals");
+      loadSavedSignals();
     }
     if (params.get("stage")) setStage(validJourneyStage(params.get("stage")));
     if (params.has("q")) setQuery(params.get("q") || "");
     if (params.has("signal")) setReturnSignal(params.get("signal"));
-  }, [loadMySignals]);
+  }, [loadMySignals, loadSavedSignals]);
 
   // Pipeline 1: Load Articles catalog on mount
   useEffect(() => {
@@ -206,6 +257,8 @@ export default function StratosphereWorkspace({
     updateUrl("view", next === "articles" ? "" : next);
     if (next === "my-signals") {
       loadMySignals();
+    } else if (next === "saved-signals") {
+      loadSavedSignals();
     }
   };
 
@@ -245,6 +298,11 @@ export default function StratosphereWorkspace({
   return (
     <main className={`sw-page${view === "radar" ? " sw-page--radar" : ""}`}>
       <StratosphereAtmosphere />
+      <div className="sw-top-bar">
+        <Link href="/dashboard" className="sw-back-dashboard-btn">
+          <ArrowLeft size={14} aria-hidden="true" /> Back to Dashboard
+        </Link>
+      </div>
       <header className="sw-intro">
         <span className="sw-kicker">INSIDE LAYER 02 · STRATOSPHERE</span>
         <h1>Explore what is <span className="sw-headline-accent">changing</span>.</h1>
@@ -277,6 +335,14 @@ export default function StratosphereWorkspace({
           </button>
           <button
             type="button"
+            aria-pressed={view === "saved-signals"}
+            className={view === "saved-signals" ? "is-active" : ""}
+            onClick={() => chooseView("saved-signals")}
+          >
+            <Bookmark size={15} aria-hidden="true" /> Saved Follow-ups
+          </button>
+          <button
+            type="button"
             aria-pressed={view === "my-signals"}
             className={view === "my-signals" ? "is-active" : ""}
             onClick={() => chooseView("my-signals")}
@@ -299,7 +365,59 @@ export default function StratosphereWorkspace({
         }}
       />
 
-      {view === "my-signals" ? (
+      {view === "saved-signals" ? (
+        <section className="sw-my-signals" aria-label="Saved Signals">
+          <div className="sw-my-signals-header">
+            <div>
+              <span className="sw-kicker">SAVED SIGNALS · FOLLOW-UP LIST</span>
+              <h2>Signals you are following up on</h2>
+              <p>Keep track of opportunities, requests, and updates you saved for later review.</p>
+            </div>
+            <button type="button" className="sw-post-btn" onClick={() => chooseView("radar")}>
+              <Compass size={14} aria-hidden="true" style={{ marginRight: 6 }} /> EXPLORE ON RADAR
+            </button>
+          </div>
+          {savedSignalsLoading ? (
+            <p className="sw-loading-text">Loading your saved signals…</p>
+          ) : savedSignalsError ? (
+            <div className="sw-empty">
+              <p>{savedSignalsError}</p>
+              <Link href="/onboarding" className="sw-auth-link">
+                Sign in to view your saved signals
+              </Link>
+            </div>
+          ) : savedSignals.length === 0 ? (
+            <div className="sw-empty">
+              <Bookmark size={32} style={{ color: "var(--accent-muted)", marginBottom: 12 }} />
+              <p>You have not saved any signals yet.</p>
+              <button type="button" onClick={() => chooseView("radar")}>
+                Browse Live Radar to Save Signals
+              </button>
+            </div>
+          ) : (
+            <div className="sw-my-signals-grid">
+              {savedSignals.map((signal) => (
+                <SignalDossierCard
+                  key={signal.id}
+                  signal={{ ...signal, isSaved: true }}
+                  onSelect={(sig) => {
+                    chooseView("radar");
+                    updateUrl("signal", sig.id);
+                  }}
+                  onConnect={(sig) => {
+                    chooseView("radar");
+                    updateUrl("signal", sig.id);
+                  }}
+                  onClosed={() => {
+                    loadSavedSignals();
+                    refreshLiveSignals();
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ) : view === "my-signals" ? (
         <section className="sw-my-signals" aria-label="My Signals">
           <div className="sw-my-signals-header">
             <div>
@@ -342,7 +460,7 @@ export default function StratosphereWorkspace({
             </div>
           )}
         </section>
-      ) : (
+      ) : view === "articles" ? (
         <>
           <section className="sw-track-deck" aria-label="Intelligence streams and stages">
             <div className="sw-track-nav" role="tablist" aria-label="Filter intelligence track">
@@ -443,8 +561,7 @@ export default function StratosphereWorkspace({
             </div>
           </section>
 
-          {view === "articles" ? (
-            <section className="sw-library" aria-label="Article library">
+          <section className="sw-library" aria-label="Article library">
               <div className="sw-library-head">
                 <div>
                   <span className="sw-kicker">THE LIBRARY</span>
@@ -531,8 +648,9 @@ export default function StratosphereWorkspace({
                 </>
               )}
             </section>
-          ) : (
-            <section className="sw-radar" aria-label="Spatial radar">
+          </>
+        ) : (
+          <section className="sw-radar" aria-label="Spatial radar">
               <div className="sw-radar-note">
                 <span className="sw-radar-note-lead">
                   <strong>Explore by area.</strong>
@@ -543,13 +661,12 @@ export default function StratosphereWorkspace({
               <StratosphereTerminal
                 initialSignals={radarSignals}
                 stageFilter={stage}
+                onSelectStage={chooseStage}
                 onClearStage={() => chooseStage("all")}
                 onSignalClosed={handleSignalClosed}
               />
             </section>
           )}
-        </>
-      )}
-    </main>
-  );
-}
+        </main>
+      );
+    }
