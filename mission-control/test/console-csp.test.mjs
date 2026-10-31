@@ -36,7 +36,7 @@ test("script-src is an allowlist, not open to any origin", () => {
   const scriptSrc = directive("script-src");
   assert.ok(!scriptSrc.includes("*"), "script-src must not contain a wildcard origin");
   assert.ok(!scriptSrc.includes("'unsafe-eval'"), "the console runs no WebGL; unsafe-eval is not needed");
-  assert.ok(!scriptSrc.includes("unpkg.com"), "Leaflet CDN was retired; unpkg.com must not remain in script-src");
+  assert.doesNotMatch(scriptSrc, /\bunpkg\b/i, "Leaflet CDN was retired; unpkg CDN must not remain in script-src");
 });
 
 test("the directives the console actually needs are all present", () => {
@@ -67,7 +67,7 @@ test("the browser can still reach Supabase, or the console cannot sign anyone in
 
 test("the Security Center map needs no external CDN stylesheet", () => {
   assert.match(directive("img-src"), /cartocdn\.com|https:/);
-  assert.ok(!directive("style-src").includes("unpkg.com"));
+  assert.doesNotMatch(directive("style-src"), /\bunpkg\b/i);
 });
 
 test("the console sends HSTS, which the main app already did and this did not", () => {

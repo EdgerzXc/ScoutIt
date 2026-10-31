@@ -53,7 +53,7 @@ describe("A-210 Phase 5: Notification Coverage & Data Integrity", () => {
       expect(res.status).toBe(500);
       const json = await res.json();
       expect(json.success).toBe(false);
-      expect(json.error).toBe("Database connection failed during insert");
+      expect(json.error).toBe("Something went wrong on our end. Please try again.");
     });
   });
 

@@ -12006,7 +12006,7 @@ function isTashkeelArabicChar(char) {
  * @param {string} c a single char
  */
 function isLatinChar(c) {
-    return /[A-z]/.test(c);
+    return /[A-Za-z]/.test(c);
 }
 
 /**
