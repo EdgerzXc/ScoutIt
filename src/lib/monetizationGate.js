@@ -46,6 +46,9 @@ function resolveMonthlyPricePhp(role, tier) {
 
 const MAX_CONVERSION_INTENT_LOG = 250;
 const conversionIntentRingBuffer = [];
+const RUNTIME_PHASE_STORAGE_KEY = "scoutit_monetization_phase";
+export const MONETIZATION_PHASE_CHANGED_EVENT = "scoutit:monetization-phase-changed";
+let runtimeMonetizationPhase = null;
 
 function normalizePhaseToken(raw) {
   if (typeof raw !== "string") return null;
@@ -69,12 +72,77 @@ function normalizePhaseToken(raw) {
   return null;
 }
 
+export function setRuntimeMonetizationPhase(nextPhase) {
+  const normalized = normalizePhaseToken(nextPhase);
+  runtimeMonetizationPhase = normalized;
+  if (typeof window !== "undefined") {
+    try {
+      if (normalized) {
+        window.localStorage?.setItem(RUNTIME_PHASE_STORAGE_KEY, normalized);
+      } else {
+        window.localStorage?.removeItem(RUNTIME_PHASE_STORAGE_KEY);
+      }
+      if (typeof window.dispatchEvent === "function") {
+        window.dispatchEvent(
+          new CustomEvent(MONETIZATION_PHASE_CHANGED_EVENT, {
+            detail: { phase: normalized || MONETIZATION_PHASES.PILOT_ZERO_PAYWALL },
+          })
+        );
+      }
+    } catch {
+      // Non-blocking in restricted browser storage environments
+    }
+  }
+  return normalized;
+}
+
+export function getRuntimeMonetizationPhase() {
+  if (runtimeMonetizationPhase) return runtimeMonetizationPhase;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = normalizePhaseToken(window.localStorage?.getItem(RUNTIME_PHASE_STORAGE_KEY));
+      if (stored) return stored;
+    } catch {
+      // Ignore storage access errors
+    }
+  }
+  return null;
+}
+
+export function clearRuntimeMonetizationPhase() {
+  runtimeMonetizationPhase = null;
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage?.removeItem(RUNTIME_PHASE_STORAGE_KEY);
+    } catch {
+      // Ignore storage access errors
+    }
+  }
+}
+
+export function syncMonetizationPhaseFromFlags(flagsInput) {
+  const dbFlags = {};
+  if (Array.isArray(flagsInput)) {
+    for (const row of flagsInput) {
+      if (row && typeof row.id === "string") {
+        dbFlags[row.id] = Boolean(row.is_enabled);
+      }
+    }
+  } else if (flagsInput && typeof flagsInput === "object") {
+    Object.assign(dbFlags, flagsInput);
+  }
+  const resolved = resolveMonetizationPhase({ dbFlags });
+  setRuntimeMonetizationPhase(resolved);
+  return resolved;
+}
+
 export function resolveMonetizationPhase({
+  phase,
   envPhase,
   dbFlags,
   defaultPhase = MONETIZATION_PHASES.PILOT_ZERO_PAYWALL,
 } = {}) {
-  const explicit = normalizePhaseToken(envPhase);
+  const explicit = normalizePhaseToken(phase ?? envPhase);
   if (explicit) return explicit;
 
   if (typeof process !== "undefined" && process.env) {
@@ -109,6 +177,9 @@ export function resolveMonetizationPhase({
       return MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
     }
   }
+
+  const runtimeOverride = getRuntimeMonetizationPhase();
+  if (runtimeOverride) return runtimeOverride;
 
   return normalizePhaseToken(defaultPhase) || MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
 }
@@ -330,4 +401,5 @@ export function getConversionIntentLog() {
 
 export function clearConversionIntentLog() {
   conversionIntentRingBuffer.length = 0;
+  clearRuntimeMonetizationPhase();
 }

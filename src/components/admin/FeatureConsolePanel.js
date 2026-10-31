@@ -2,13 +2,22 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { ShieldAlert, Unlock, Bot, Brain, AlertTriangle, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { ShieldAlert, Lock, Unlock, Bot, Brain, AlertTriangle, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { sanitizeError } from "@/lib/sanitizeError";
 import InfoTip from "@/components/ui/InfoTip";
 import entrance from "@/components/ui/OverlayEntrance.module.css";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  UNIVERSE_MONTHLY_PRICE_LABEL,
+  resolveMonetizationPhase,
+  setRuntimeMonetizationPhase,
+  syncMonetizationPhaseFromFlags,
+} from "@/lib/monetizationGate";
 
 export default function FeatureConsolePanel() {
   const [flags, setFlags] = useState([]);
+  const [monetizationPhase, setMonetizationPhase] = useState(() => resolveMonetizationPhase());
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
   const [message, setMessage] = useState(null);
@@ -30,7 +39,12 @@ export default function FeatureConsolePanel() {
       const res = await fetch("/api/admin/feature-flags", { headers: await authHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load feature flags.");
-      setFlags(data.flags || []);
+      const loadedFlags = data.flags || [];
+      setFlags(loadedFlags);
+      const resolved = data.monetizationPhase
+        ? setRuntimeMonetizationPhase(data.monetizationPhase)
+        : syncMonetizationPhaseFromFlags(loadedFlags);
+      if (resolved) setMonetizationPhase(resolved);
     } catch (err) {
       console.error(err);
       setMessage({ type: "error", text: sanitizeError(err, "Could not load feature flags.") });
@@ -67,6 +81,45 @@ export default function FeatureConsolePanel() {
     }
   };
 
+  const executePaywallPhaseChange = async (targetPhase) => {
+    setUpdatingId("paywall_master_gate");
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/feature-flags", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({ action: "set_paywall_phase", phase: targetPhase }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to switch paywall gate.");
+
+      const nextPhase = data.monetizationPhase || targetPhase;
+      const isEnforced = nextPhase === MONETIZATION_PHASES.PRODUCTION_ENFORCED;
+      const nowIso = new Date().toISOString();
+
+      setRuntimeMonetizationPhase(nextPhase);
+      setMonetizationPhase(nextPhase);
+      setFlags((prev) =>
+        prev.map((f) => {
+          if (f.id === "monetization_enforced") return { ...f, is_enabled: isEnforced, updated_at: nowIso };
+          if (f.id === "pre_launch_free_mode") return { ...f, is_enabled: !isEnforced, updated_at: nowIso };
+          return f;
+        })
+      );
+      setMessage({
+        type: "success",
+        text: isEnforced
+          ? `Paywall Gate switched ON (${MONETIZATION_PHASES.PRODUCTION_ENFORCED}). Universe tier (${UNIVERSE_MONTHLY_PRICE_LABEL}), listing caps (1/5/20/∞), and paid Connects are now enforced.`
+          : `Paywall Gate switched OFF (${MONETIZATION_PHASES.PILOT_ZERO_PAYWALL}). ${PIONEER_ACCESS_BADGE_TEXT} is now active across the site.`,
+      });
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: sanitizeError(err, "Failed to switch paywall gate.") });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const executeToggle = async (flagId, isEnabled) => {
     setUpdatingId(flagId);
     setMessage(null);
@@ -78,10 +131,24 @@ export default function FeatureConsolePanel() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update feature flag.");
-      
-      setFlags((prev) =>
-        prev.map((f) => (f.id === flagId ? { ...f, is_enabled: isEnabled, updated_at: new Date().toISOString() } : f))
-      );
+
+      const nowIso = new Date().toISOString();
+      if (data.monetizationPhase) {
+        const isEnforced = data.monetizationPhase === MONETIZATION_PHASES.PRODUCTION_ENFORCED;
+        setRuntimeMonetizationPhase(data.monetizationPhase);
+        setMonetizationPhase(data.monetizationPhase);
+        setFlags((prev) =>
+          prev.map((f) => {
+            if (f.id === "monetization_enforced") return { ...f, is_enabled: isEnforced, updated_at: nowIso };
+            if (f.id === "pre_launch_free_mode") return { ...f, is_enabled: !isEnforced, updated_at: nowIso };
+            return f;
+          })
+        );
+      } else {
+        setFlags((prev) =>
+          prev.map((f) => (f.id === flagId ? { ...f, is_enabled: isEnabled, updated_at: nowIso } : f))
+        );
+      }
       setMessage({
         type: "success",
         text: `Flag "${flagId}" toggled ${isEnabled ? "ON" : "OFF"} successfully.`,
@@ -100,6 +167,8 @@ export default function FeatureConsolePanel() {
     switch (id) {
       case "global_read_only":
         return <ShieldAlert size={20} className="text-red-400" />;
+      case "monetization_enforced":
+        return <Lock size={20} className="text-gold-accent" />;
       case "pre_launch_free_mode":
         return <Unlock size={20} className="text-gold-accent" />;
       case "ai_search":
@@ -110,6 +179,12 @@ export default function FeatureConsolePanel() {
         return <RefreshCw size={20} className="text-gray-400" />;
     }
   };
+
+  const isPaywallEnforced = monetizationPhase === MONETIZATION_PHASES.PRODUCTION_ENFORCED;
+  const isSwitchingPaywall =
+    updatingId === "paywall_master_gate" ||
+    updatingId === "monetization_enforced" ||
+    updatingId === "pre_launch_free_mode";
 
   return (
     <div className="feature-console-panel space-y-6">
@@ -148,6 +223,69 @@ export default function FeatureConsolePanel() {
           <span>{message.text}</span>
         </div>
       )}
+
+      {/* 1-Click Master Paywall Gate Card */}
+      <div
+        data-testid="paywall-gate-master-card"
+        className="p-5 md:p-6 rounded-xl border border-gold-accent/40 bg-surface shadow-[0_0_24px_rgba(var(--accent-rgb),0.1)] space-y-4"
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold-accent/40 bg-gold-accent/10 font-mono text-[12px] font-bold uppercase tracking-widest text-gold-accent">
+                {isPaywallEnforced ? <Lock size={13} /> : <Unlock size={13} />}
+                <span>
+                  {isPaywallEnforced
+                    ? `PAYWALL ON // PRODUCTION ENFORCED (${UNIVERSE_MONTHLY_PRICE_LABEL})`
+                    : PIONEER_ACCESS_BADGE_TEXT}
+                </span>
+              </span>
+              <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">
+                Phase: {monetizationPhase}
+              </span>
+            </div>
+            <h3 className="text-base font-bold text-white">
+              Phased Paywall Gate — Master 1-Click Switch
+            </h3>
+            <p className="text-xs text-text-secondary max-w-2xl leading-relaxed">
+              {isPaywallEnforced
+                ? `Commercial monetization is ACTIVE. Off-Market Vault requires Universe tier (${UNIVERSE_MONTHLY_PRICE_LABEL}), owner active listing quotas (1, 5, 20, ∞) and atomic quota swaps are enforced, and Connects spend is required.`
+                : "North Star Zero-Paywall mode is ACTIVE. Visitors and owners can explore the Off-Market Vault, Connects, and cloud storage with zero hard billing barriers while simulated checkout conversion intents are logged."}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              data-testid="paywall-gate-zero-btn"
+              disabled={isSwitchingPaywall || !isPaywallEnforced}
+              onClick={() => executePaywallPhaseChange(MONETIZATION_PHASES.PILOT_ZERO_PAYWALL)}
+              className={`min-h-11 px-4 py-2.5 rounded-lg font-mono text-[12px] uppercase tracking-wider font-bold transition flex items-center gap-2 border ${
+                !isPaywallEnforced
+                  ? "bg-gold-accent text-black border-gold-accent cursor-default"
+                  : "bg-background text-text-secondary border-surface-variant hover:border-gold-accent/50 hover:text-white"
+              }`}
+            >
+              <Unlock size={14} />
+              Paywall OFF (Free Launch)
+            </button>
+            <button
+              type="button"
+              data-testid="paywall-gate-enforced-btn"
+              disabled={isSwitchingPaywall || isPaywallEnforced}
+              onClick={() => executePaywallPhaseChange(MONETIZATION_PHASES.PRODUCTION_ENFORCED)}
+              className={`min-h-11 px-4 py-2.5 rounded-lg font-mono text-[12px] uppercase tracking-wider font-bold transition flex items-center gap-2 border ${
+                isPaywallEnforced
+                  ? "bg-gold-accent text-black border-gold-accent cursor-default"
+                  : "bg-background text-text-secondary border-surface-variant hover:border-gold-accent/50 hover:text-white"
+              }`}
+            >
+              <Lock size={14} />
+              Paywall ON (Enforce Billing)
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Flag Grid */}
       {loading ? (

@@ -105,7 +105,8 @@ function isExemptFromMaintenance(pathname) {
   return (
     pathname.startsWith('/api/webhooks/') ||
     pathname.startsWith('/api/oauth/') ||
-    pathname === '/api/calendar/sync'
+    pathname === '/api/calendar/sync' ||
+    pathname === '/api/admin/feature-flags'
   );
 }
 

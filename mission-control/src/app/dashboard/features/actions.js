@@ -35,6 +35,57 @@ export async function toggleFeatureFlag(formData) {
 }
 
 /**
+ * 1-Click Master Paywall Gate toggle (pilot_zero_paywall <-> production_enforced).
+ * Atomically syncs both `monetization_enforced` and `pre_launch_free_mode`.
+ * @param {FormData} formData
+ */
+export async function togglePaywallGate(formData) {
+  const staff = await getCurrentStaff();
+  assertTier(staff, TIERS.SUPER_ADMIN);
+
+  const enforcePaywall = formData.get("enforcePaywall") === "true";
+  const nowIso = new Date().toISOString();
+  const admin = createAdminClient();
+
+  const { error } = await admin.from("feature_flags").upsert(
+    [
+      {
+        id: "monetization_enforced",
+        is_enabled: enforcePaywall,
+        description:
+          "MASTER PAYWALL GATE: Enforce Universe tier subscriptions (₱2,499/mo), active listing quotas (1/5/20/∞), and paid Connects spend.",
+        updated_at: nowIso,
+        updated_by: staff.id,
+      },
+      {
+        id: "pre_launch_free_mode",
+        is_enabled: !enforcePaywall,
+        description: "Unlock all premium features while seeding the first 200 listings.",
+        updated_at: nowIso,
+        updated_by: staff.id,
+      },
+    ],
+    { onConflict: "id" }
+  );
+
+  if (error) throw new Error(error.message);
+
+  await logAction({
+    staff,
+    action: "paywall_gate.toggle",
+    targetTable: "feature_flags",
+    targetId: "monetization_enforced",
+    metadata: {
+      monetization_enforced: enforcePaywall,
+      pre_launch_free_mode: !enforcePaywall,
+      phase: enforcePaywall ? "production_enforced" : "pilot_zero_paywall",
+    },
+  });
+
+  revalidatePath("/dashboard/features");
+}
+
+/**
  * Create a new feature flag (starts disabled).
  * @param {FormData} formData
  */

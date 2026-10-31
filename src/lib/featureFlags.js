@@ -46,6 +46,8 @@ export async function isGlobalReadOnly() {
 export async function isPreLaunchFreeMode() {
   if (process.env.NEXT_PUBLIC_MONETIZATION_PHASE === "pilot_zero_paywall") return true;
   if (process.env.NEXT_PUBLIC_MONETIZATION_PHASE === "production_enforced") return false;
+  const enforced = await getFlag("monetization_enforced", false);
+  if (enforced) return false;
   return getFlag("pre_launch_free_mode", true);
 }
 
@@ -53,4 +55,9 @@ export async function isPreLaunchFreeMode() {
 export async function isAiSearchActive() {
   // Fail closed while QuestIT is parked; only an explicit flag enables spend.
   return getFlag("ai_search", false);
+}
+
+/** Invalidate the in-process 30s flag cache immediately on admin toggle. */
+export function invalidateFlagsCache() {
+  cache = { flags: null, fetchedAt: 0 };
 }

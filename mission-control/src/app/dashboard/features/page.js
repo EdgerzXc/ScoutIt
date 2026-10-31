@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { toggleFeatureFlag, createFeatureFlag } from "./actions";
-import { Flag } from "lucide-react";
+import { toggleFeatureFlag, togglePaywallGate, createFeatureFlag } from "./actions";
+import { Flag, Lock, Unlock } from "lucide-react";
 
 // Wired to the LIVE `feature_flags` table (id TEXT pk, is_enabled, description) —
 // the one the public site is allowed to read. The old feature_gates/site_banners
@@ -20,12 +20,55 @@ export default async function FeatureFlagsPage() {
     .select("id, is_enabled, description, updated_at")
     .order("id");
 
+  const flagMap = Object.fromEntries((flags ?? []).map((f) => [f.id, Boolean(f.is_enabled)]));
+  const isPaywallEnforced =
+    flagMap.monetization_enforced === true || flagMap.pre_launch_free_mode === false;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Feature Flags</h1>
         <span className="text-xs text-white/70">Public site reads these live</span>
       </div>
+
+      {/* 1-Click Master Paywall Gate Card */}
+      <section className="bg-[#121212] border border-[#E8AE3C]/40 rounded-xl p-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#E8AE3C]/40 bg-[#E8AE3C]/10 text-xs font-mono uppercase tracking-wider text-[#E8AE3C]">
+              {isPaywallEnforced ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+              <span>
+                {isPaywallEnforced
+                  ? "PAYWALL ON // PRODUCTION ENFORCED (₱2,499/MO)"
+                  : "PIONEER ACCESS // FREE FOR LAUNCH (ZERO-PAYWALL)"}
+              </span>
+            </div>
+            <h2 className="text-lg font-semibold text-white">
+              Phased Paywall Gate — Master 1-Click Switch
+            </h2>
+            <p className="text-xs text-white/70 max-w-2xl">
+              {isPaywallEnforced
+                ? "Commercial paywall is currently ACTIVE (production_enforced). Click below to switch back to North Star Zero-Paywall mode."
+                : "North Star Zero-Paywall mode is currently ACTIVE (pilot_zero_paywall). Click below to enforce Universe tier subscriptions (₱2,499/mo), listing caps (1/5/20/∞), and paid Connects."}
+            </p>
+          </div>
+
+          <form action={togglePaywallGate} className="shrink-0">
+            <input type="hidden" name="enforcePaywall" value={(!isPaywallEnforced).toString()} />
+            <button
+              type="submit"
+              className="min-h-11 px-5 py-2.5 rounded-lg bg-[#E8AE3C] hover:bg-[#F7C64E] text-black text-xs font-mono font-bold uppercase tracking-wider transition-colors flex items-center gap-2"
+            >
+              {isPaywallEnforced ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+              <span>
+                {isPaywallEnforced
+                  ? "Turn Paywall OFF (Free Launch)"
+                  : "Turn Paywall ON (Enforce Billing)"}
+              </span>
+            </button>
+          </form>
+        </div>
+      </section>
 
       <section className="space-y-3">
         {error && (

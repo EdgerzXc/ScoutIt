@@ -7,6 +7,10 @@ import {
   UNIVERSE_MONTHLY_PRICE_LABEL,
   ACTIVE_LISTING_QUOTAS,
   resolveMonetizationPhase,
+  setRuntimeMonetizationPhase,
+  getRuntimeMonetizationPhase,
+  clearRuntimeMonetizationPhase,
+  syncMonetizationPhaseFromFlags,
   evaluateMonetizationGate,
   logPaywallConversionIntent,
   getConversionIntentLog,
@@ -341,6 +345,64 @@ describe("Phased Paywall Gate Architecture (monetizationGate & serverMonetizatio
       expect(nudgeSource).not.toContain("🕵️");
       expect(nudgeSource).toContain("logPaywallConversionIntent");
       expect(nudgeSource).toContain("onClick={handleAction}");
+    });
+
+    it("provides a 1-click Master Paywall Gate toggle across Admin Console, Mission Control, and runtime state", async () => {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const root = process.cwd();
+
+      expect(getRuntimeMonetizationPhase()).toBeNull();
+      expect(resolveMonetizationPhase()).toBe("pilot_zero_paywall");
+
+      // 1-click switch to production_enforced
+      setRuntimeMonetizationPhase("production_enforced");
+      expect(getRuntimeMonetizationPhase()).toBe("production_enforced");
+      expect(resolveMonetizationPhase()).toBe("production_enforced");
+      expect(
+        evaluateMonetizationGate({
+          feature: "off_market_vault",
+          role: "seeker",
+          tier: "starry",
+        }).allowed
+      ).toBe(false);
+
+      // 1-click switch back to pilot_zero_paywall via feature_flags sync
+      const synced = syncMonetizationPhaseFromFlags([
+        { id: "monetization_enforced", is_enabled: false },
+        { id: "pre_launch_free_mode", is_enabled: true },
+      ]);
+      expect(synced).toBe("pilot_zero_paywall");
+      expect(resolveMonetizationPhase()).toBe("pilot_zero_paywall");
+      expect(
+        evaluateMonetizationGate({
+          feature: "off_market_vault",
+          role: "seeker",
+          tier: "starry",
+        }).allowed
+      ).toBe(true);
+
+      clearRuntimeMonetizationPhase();
+      expect(getRuntimeMonetizationPhase()).toBeNull();
+
+      // Verify Admin Console UI and API route wire the 1-click Paywall Gate buttons
+      const adminPanel = fs.readFileSync(path.join(root, "src/components/admin/FeatureConsolePanel.js"), "utf8");
+      expect(adminPanel).toContain('data-testid="paywall-gate-master-card"');
+      expect(adminPanel).toContain('data-testid="paywall-gate-zero-btn"');
+      expect(adminPanel).toContain('data-testid="paywall-gate-enforced-btn"');
+      expect(adminPanel).toContain('action: "set_paywall_phase"');
+
+      const adminFlagsRoute = fs.readFileSync(path.join(root, "src/app/api/admin/feature-flags/route.js"), "utf8");
+      expect(adminFlagsRoute).toContain('action === "set_paywall_phase"');
+      expect(adminFlagsRoute).toContain("invalidateFlagsCache()");
+      expect(adminFlagsRoute).toContain("resetFlagCache()");
+
+      const mcFeaturesPage = fs.readFileSync(
+        path.join(root, "mission-control/src/app/dashboard/features/page.js"),
+        "utf8"
+      );
+      expect(mcFeaturesPage).toContain("togglePaywallGate");
+      expect(mcFeaturesPage).toContain("Phased Paywall Gate — Master 1-Click Switch");
     });
   });
 });

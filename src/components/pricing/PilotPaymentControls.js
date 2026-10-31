@@ -1,15 +1,48 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import {
   MONETIZATION_PHASES,
+  MONETIZATION_PHASE_CHANGED_EVENT,
   PIONEER_ACCESS_BADGE_TEXT,
   resolveMonetizationPhase,
+  syncMonetizationPhaseFromFlags,
   logPaywallConversionIntent,
 } from "@/lib/monetizationGate";
 
 export function PilotPaymentNotice() {
-  const phase = resolveMonetizationPhase();
+  const [phase, setPhase] = useState(() => resolveMonetizationPhase());
+
+  useEffect(() => {
+    let alive = true;
+    const handlePhaseChange = (event) => {
+      if (!alive) return;
+      const next = event?.detail?.phase || resolveMonetizationPhase();
+      setPhase(next);
+    };
+    window.addEventListener(MONETIZATION_PHASE_CHANGED_EVENT, handlePhaseChange);
+
+    if (supabase && typeof supabase.from === "function") {
+      supabase
+        .from("feature_flags")
+        .select("id, is_enabled")
+        .in("id", ["monetization_enforced", "pre_launch_free_mode"])
+        .then(({ data }) => {
+          if (alive && Array.isArray(data) && data.length > 0) {
+            const resolved = syncMonetizationPhaseFromFlags(data);
+            setPhase(resolved);
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      alive = false;
+      window.removeEventListener(MONETIZATION_PHASE_CHANGED_EVENT, handlePhaseChange);
+    };
+  }, []);
+
   const isPilotZeroPaywall = phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
 
   return (
