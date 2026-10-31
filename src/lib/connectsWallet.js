@@ -388,3 +388,99 @@ export async function spendConnectsServer({
     return { success: false, remaining: 0, reason: err.message || "wallet_exception" };
   }
 }
+
+/**
+ * Ensures a user has an active, valid wallet row in legacy `connect_balances`
+ * synchronized to their current monthly role allowance and calendar month.
+ *
+ * Prevents the fatal RPC error `spend_connects: no wallet found for user %`
+ * when newly onboarded, OAuth, or unseeded users initiate a contact or handshake,
+ * and rolls over stale granted balances lazily.
+ */
+export async function ensureConnectBalancesWallet(
+  supabaseAdmin,
+  userId,
+  role = "seeker",
+  tier = "starry"
+) {
+  if (!supabaseAdmin || !userId) return null;
+  const normalizedRole = normalizeConnectRole(role) || "seeker";
+  const allowance = monthlyAllowance(normalizedRole, tier);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const currentMonthStr = todayStr.slice(0, 7);
+
+  try {
+    const table = supabaseAdmin.from("connect_balances");
+    if (!table || typeof table.select !== "function") return null;
+
+    const selectStep = table
+      .select("user_id, total_balance, granted_balance, purchased_balance, earned_balance, last_granted_reset")
+      .eq("user_id", userId);
+
+    const { data: existing, error: selectErr } =
+      typeof selectStep.maybeSingle === "function"
+        ? await selectStep.maybeSingle()
+        : typeof selectStep.single === "function"
+          ? await selectStep.single()
+          : { data: null, error: null };
+
+    if (selectErr && process.env.NODE_ENV !== "test") {
+      console.warn("[ensureConnectBalancesWallet] Lookup notice:", selectErr.message);
+    }
+
+    if (!existing) {
+      if (typeof table.upsert !== "function") return null;
+
+      const upsertStep = table
+        .upsert(
+          {
+            user_id: userId,
+            granted_balance: allowance,
+            purchased_balance: 0,
+            earned_balance: 0,
+            last_granted_reset: todayStr,
+          },
+          { onConflict: "user_id", ignoreDuplicates: false }
+        );
+
+      const res =
+        typeof upsertStep.select === "function"
+          ? typeof upsertStep.select().maybeSingle === "function"
+            ? await upsertStep.select().maybeSingle()
+            : await upsertStep.select()
+          : null;
+
+      return res?.data || null;
+    }
+
+    const lastMonth = existing.last_granted_reset
+      ? String(existing.last_granted_reset).slice(0, 7)
+      : "";
+    if (lastMonth && lastMonth < currentMonthStr) {
+      if (typeof table.update !== "function") return existing;
+      const updateStep = table
+        .update({
+          granted_balance: allowance,
+          last_granted_reset: todayStr,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId);
+
+      const res =
+        typeof updateStep.select === "function"
+          ? typeof updateStep.select().maybeSingle === "function"
+            ? await updateStep.select().maybeSingle()
+            : await updateStep.select()
+          : null;
+
+      return res?.data || existing;
+    }
+
+    return existing;
+  } catch (err) {
+    if (process.env.NODE_ENV !== "test") {
+      console.warn("[ensureConnectBalancesWallet] Notice:", err?.message);
+    }
+    return null;
+  }
+}

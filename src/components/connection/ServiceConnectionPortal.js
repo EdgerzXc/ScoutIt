@@ -18,10 +18,10 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
     return (
       <div className="portal-success">
         <span className="success-icon">🔑</span>
-        <h3>Request Sent</h3>
+        <h3>Project Brief Registered</h3>
         <p>
-          Your request is on its way to <strong>{providerName}</strong>.
-          Keep an eye on <strong>{email}</strong>: that&apos;s where they&apos;ll reach you.
+          Your project inquiry for <strong>{providerName}</strong> ({serviceType}) has been logged.
+          During the pilot phase, ScoutIt concierge will introduce you directly at <strong>{email}</strong>.
         </p>
         <button className="reset-portal-btn" onClick={() => setSubmitted(false)}>
           Submit Another Request

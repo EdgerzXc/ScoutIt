@@ -204,6 +204,22 @@ export default function MissionControlMode() {
   const [activeEstateId, setActiveEstateId] = useState(null);
   const [enterpriseUnits, setEnterpriseUnits] = useState([]);
 
+  const isEnterpriseAuthorized = Boolean(
+    currentUser &&
+      (currentUser?.subscription_tier === "universe" ||
+        currentUser?.tier === "universe" ||
+        (Array.isArray(currentUser?.active_roles) &&
+          currentUser.active_roles.some((r) =>
+            ["mc_enterprise", "enterprise", "admin", "staff"].includes(String(r).toLowerCase())
+          )))
+  );
+
+  useEffect(() => {
+    if (isEnterpriseAuthorized) {
+      setIsEnterprise(true);
+    }
+  }, [isEnterpriseAuthorized]);
+
   useEffect(() => {
     if (currentUser?.user_metadata?.full_name) {
       setOrgName(currentUser.user_metadata.full_name);

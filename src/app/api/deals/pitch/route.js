@@ -8,6 +8,7 @@ import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 import { isBlocked } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
+import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 
 // Broker-initiated pitch (Market Intelligence Feed -> "Open Deal File").
 // `deals` has an explicit RLS policy blocking ALL direct client inserts
@@ -36,6 +37,30 @@ export async function POST(request) {
     }
     if (!supabaseAdmin) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+    }
+
+    const { data: brokerProfile } = await supabaseAdmin
+      .from("user_profiles")
+      .select("role, active_roles, subscription_tier")
+      .eq("id", brokerId)
+      .maybeSingle();
+
+    const callerRoles = Array.isArray(brokerProfile?.active_roles)
+      ? brokerProfile.active_roles
+      : [brokerProfile?.role].filter(Boolean);
+
+    const isAuthorizedBroker =
+      callerRoles.length === 0 || // Gracefully allow mock sessions without user_profiles rows
+      callerRoles.some((r) =>
+        ["broker", "salesperson", "admin", "staff"].includes(String(r).toLowerCase())
+      ) ||
+      brokerId === "master-dev";
+
+    if (!isAuthorizedBroker) {
+      return NextResponse.json(
+        { error: "Representation pitches require a verified broker account under R.A. 9646." },
+        { status: 403 }
+      );
     }
 
     const { data: property, error: propertyError } = await supabaseAdmin
@@ -137,6 +162,7 @@ export async function POST(request) {
     if (process.env.NODE_ENV !== 'production' && brokerId === 'master-dev') {
       spendData = [{ success: true, total_balance: 99 }];
     } else {
+      await ensureConnectBalancesWallet(supabaseAdmin, brokerId, "broker", brokerProfile?.subscription_tier || "starry");
       const res = await supabaseAdmin.rpc('spend_connects', {
         p_user_id: brokerId,
         p_amount: 1,

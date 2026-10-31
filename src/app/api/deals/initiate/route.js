@@ -15,6 +15,7 @@ import { freeInboundRecipient, isOpenGateAvailable } from "@/lib/openGate";
 import { getViaCookieName, parseViaCookie, isAttributionExpired, ROUTING_REASONS } from "@/lib/viaRouting";
 import { recordRoutingDecision } from "@/lib/serverViaRouting";
 import { canReadOffMarket } from "@/lib/serverEntitlements";
+import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 
 
 
@@ -394,6 +395,10 @@ export async function POST(request) {
       // Open Gate identity follows the sender's own profile choice; a browser
       // cannot make a private profile public or opt out of this path's rule.
       requestedAnonymous = senderProfile.is_profile_public !== true;
+    }
+
+    if (!openGateFree) {
+      await ensureConnectBalancesWallet(supabaseAdmin, userId, role, 'starry');
     }
 
     const spendResult = openGateFree

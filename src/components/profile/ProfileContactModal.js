@@ -52,11 +52,11 @@ export default function ProfileContactModal({ isOpen, onClose, profile }) {
 
             <div className="contact-modal-body">
               {showBrokerPortal ? (
-                <ConnectionPortal brokerName={profile.display_name} isModal={true} />
+                <ConnectionPortal brokerName={profile.display_name} brokerId={profile.id} spaces={profile.spaces || []} isModal={true} />
               ) : showProviderPortal ? (
-                <ServiceConnectionPortal providerName={profile.display_name} serviceType={providerType || "Provider"} isModal={true} />
+                <ServiceConnectionPortal providerId={profile.id} providerName={profile.display_name} serviceType={providerType || "Provider"} isModal={true} />
               ) : (
-                <ConnectionPortal brokerName={profile.display_name} isModal={true} /> // Fallback generic
+                <ConnectionPortal brokerName={profile.display_name} brokerId={profile.id} spaces={profile.spaces || []} isModal={true} /> // Fallback generic
               )}
             </div>
           </motion.div>

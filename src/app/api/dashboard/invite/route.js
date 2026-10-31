@@ -7,6 +7,7 @@ import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSour
 import { checkReceiverGate, IDEMPOTENCY_WINDOW_MINUTES } from "@/lib/connectGates";
 import { logActivity } from "@/lib/crmActivity";
 import { notifyUser } from "@/lib/notifications";
+import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 
 export async function POST(request) {
   try {
@@ -54,16 +55,20 @@ export async function POST(request) {
     // find this deal. Storing the raw typed string here (the previous
     // behavior) permanently orphaned the invite: no broker account could
     // ever see it in their Inbox, since their real user id never matched.
-    const { data: brokerMatches, error: brokerLookupError } = await supabaseAdmin
+    const { data: brokerCandidates, error: brokerLookupError } = await supabaseAdmin
       .from('user_profiles')
-      .select('id, display_name')
-      .ilike('display_name', brokerName.trim())
-      .contains('active_roles', ['broker']);
+      .select('id, display_name, role, active_roles')
+      .ilike('display_name', brokerName.trim());
 
     if (brokerLookupError) {
       console.error("[INVITE API] Broker lookup failed:", brokerLookupError);
       return NextResponse.json({ error: "Failed to look up broker" }, { status: 500 });
     }
+
+    const brokerMatches = (brokerCandidates || []).filter((p) => {
+      const r = Array.isArray(p.active_roles) ? p.active_roles : [p.role].filter(Boolean);
+      return r.length === 0 || r.some((item) => ["broker", "salesperson"].includes(String(item).toLowerCase()));
+    });
     if (!brokerMatches || brokerMatches.length === 0) {
       return NextResponse.json({ error: `No broker named "${brokerName}" found. Check the spelling or PRC number.` }, { status: 404 });
     }
@@ -153,6 +158,8 @@ export async function POST(request) {
     // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
     // NOTE: connect_balances/connect_transactions have no `role` column in the live schema
     // (per-role wallets are a documented but unbuilt design) — the wallet is per user_id only.
+    await ensureConnectBalancesWallet(supabaseAdmin, userId, 'owner', 'starry');
+
     const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
       p_user_id: userId,
       p_amount: 1,

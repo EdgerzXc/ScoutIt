@@ -22,14 +22,21 @@ const ROLE_LISTING_CAPS = Object.freeze({
   broker: Object.freeze({ starry: 3, solar: 15, cluster: 50, universe: Infinity }),
 });
 
-const ROLE_MONTHLY_PRICES_PHP = Object.freeze({
-  seeker: Object.freeze({ starry: 0, solar: 399, cluster: 999, universe: 2499 }),
-  owner: Object.freeze({ starry: 0, solar: 799, cluster: 1999, universe: 4999 }),
-  broker: Object.freeze({ starry: 0, solar: 599, cluster: 1499, universe: 3499 }),
-  photographer: Object.freeze({ starry: 0, solar: 299, cluster: 799, universe: 1999 }),
-  researcher: Object.freeze({ starry: 0, solar: 299, cluster: 799, universe: 1999 }),
-  designer: Object.freeze({ starry: 0, solar: 299, cluster: 799, universe: 1999 }),
-  "event-planner": Object.freeze({ starry: 0, solar: 299, cluster: 799, universe: 1999 }),
+export const ROLE_MONTHLY_PRICES_PHP = Object.freeze({
+  seeker: Object.freeze({ starry: 0, solar: 149, cluster: 499, universe: 2499 }),
+  owner: Object.freeze({ starry: 0, solar: 899, cluster: 2499, universe: 9999 }),
+  broker: Object.freeze({ starry: 0, solar: 999, cluster: 1999, universe: 7999 }),
+  photographer: Object.freeze({ starry: 0, solar: 199, cluster: 599, universe: 1499 }),
+  researcher: Object.freeze({ starry: 0, solar: 199, cluster: 599, universe: 1499 }),
+  designer: Object.freeze({ starry: 0, solar: 199, cluster: 599, universe: 1499 }),
+  "event-planner": Object.freeze({ starry: 0, solar: 199, cluster: 599, universe: 1499 }),
+});
+
+export const BUNDLE_MONTHLY_PRICES_PHP = Object.freeze({
+  binary: 2199,
+  eclipse: 2599,
+  orbit: 2699,
+  constellation: 3999,
 });
 
 function resolveListingCap(role, tier) {

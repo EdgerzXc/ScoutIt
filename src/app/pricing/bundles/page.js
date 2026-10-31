@@ -7,6 +7,11 @@ import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/P
 import Link from "next/link";
 import { Check, Layers } from "lucide-react";
 import styles from "@/components/pricing/PricingDetail.module.css";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  resolveMonetizationPhase,
+} from "@/lib/monetizationGate";
 
 const BUNDLES = [
   {
@@ -105,6 +110,9 @@ const BUNDLES = [
 ];
 
 export default function BundlesPricingPage() {
+  const phase = resolveMonetizationPhase();
+  const isZeroPaywall = phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
+
   return (
     <div className="pricing-layout">
       <Header />
@@ -116,9 +124,16 @@ export default function BundlesPricingPage() {
         <div className={`${styles.ambient} absolute top-[40%] left-[50%] w-[400px] h-[400px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none`} />
 
         <header className="pricing-header z-10 relative">
-          <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors mb-8 inline-block">
-            ← Back to Personas
-          </Link>
+          <div className="flex items-center justify-between mb-8 max-w-7xl mx-auto px-4">
+            <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors inline-block">
+              ← Back to Personas
+            </Link>
+            {isZeroPaywall && (
+              <span data-testid="pioneer-access-badge" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-3 py-1 rounded-full">
+                {PIONEER_ACCESS_BADGE_TEXT}
+              </span>
+            )}
+          </div>
 
           <div className={`${styles.pioneer} mb-8 p-4 rounded-xl inline-block`}>
             <p className="text-gold-accent font-mono text-xs uppercase tracking-widest font-bold">

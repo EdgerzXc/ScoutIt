@@ -11,6 +11,7 @@ import { anyBlocked } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { freshnessFor, signalTerminalState, maxAnswersForSignal, kindForSignalType } from "@/lib/communityPosting";
 import { isMissingTable } from "@/lib/communityStore";
+import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 
 // ─────────────────────────────────────────────────────────────────────────
 // COMMUNITY SIGNAL CONNECT (A-145 P1)
@@ -215,6 +216,8 @@ export async function POST(request, { params }) {
       return NextResponse.json({ ok: false, error: "Could not start this request. No Connect was spent." }, { status: 503 });
     }
     const dealId = deal.id;
+
+    await ensureConnectBalancesWallet(supabaseAdmin, userId, "seeker", "starry");
 
     const { error: spendError, data: spendData } = await supabaseAdmin.rpc("spend_connects", {
       p_user_id: userId,

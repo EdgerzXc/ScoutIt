@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { resolveConnectRole } from "@/lib/connectsWallet";
+import { resolveConnectRole, ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 import { monthlyAllowance } from "@/lib/entitlements";
 import { sanitizeError } from "@/lib/sanitizeError";
 
@@ -160,6 +160,10 @@ export async function GET(request) {
     const purchased = acct ? (acct.purchased_balance || 0) : 0;
     const reward = acct ? (acct.reward_balance || 0) : 0;
     const balance = granted + purchased + reward;
+
+    // Synchronize legacy connect_balances mirror so server spend routes and
+    // dashboard HUD always reflect identical authoritative figures.
+    await ensureConnectBalancesWallet(supabaseAdmin, userId, role, tier);
 
     return NextResponse.json({
       success: true,
