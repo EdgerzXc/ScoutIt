@@ -61,18 +61,99 @@ const ICONS_BY_TYPE = {
   review_submitted: "⭐",
   review_unlocked: "🔓",
   viewing: "📅",
+  viewing_scheduled: "📅",
+  viewing_rescheduled: "📅",
+  viewing_confirmed: "📅",
+  viewing_cancelled: "📅",
+  new_inquiry: "💼",
+  inquiry: "💼",
+  operator_request: "💼",
   chat_message: "💬",
+  deal_message: "💬",
   deal_accepted: "🤝",
+  deal_connected: "🤝",
   deal_declined: "📁",
   deal_withdrawn: "↩️",
+  deal_closed: "📁",
   broker_invite: "📨",
+  broker_pitch: "📨",
   unit_delegation: "🔑",
+  delegation_accepted: "🔑",
+  delegation_declined: "🔑",
   recommendation: "⭐",
+  recommendation_submitted: "⭐",
   connects_refund: "💳",
   faq_appeal: "⚖️",
+  faq_verified: "⚖️",
+  faq_answered: "⚖️",
+  faq_question: "⚖️",
+  stale_listing: "🕓",
+  task_assigned: "📋",
+  task_completed: "📋",
+  prc_credential_expired: "⚠️",
+  staff_notice: "📢",
+  system_broadcast: "📢",
+  dispute_notice: "🛡️",
+  promotional: "🎁",
 };
 
-export async function notifyUser(serviceClient, { userId, title, desc, icon = null, propertyId = null, propertySlug = null, notificationType, forceEmail = false }) {
+/**
+ * Resolves a reliable default destination for a notification based on its type.
+ * Prevents dead-end button clicks in the dashboard bell dropdown.
+ */
+export function resolveDefaultNotificationLink(notificationType, propertyId = null) {
+  if (!notificationType) return "/dashboard";
+  const type = String(notificationType).toLowerCase();
+
+  if (
+    type === "inquiry" ||
+    type === "new_inquiry" ||
+    type === "operator_request" ||
+    type.startsWith("deal_") ||
+    type.startsWith("broker_") ||
+    type.startsWith("delegation_") ||
+    type.startsWith("request_")
+  ) {
+    return "/dashboard/inbox";
+  }
+
+  if (type.startsWith("viewing_") || type === "viewing") {
+    return "/dashboard/calendar";
+  }
+
+  if (
+    type.startsWith("claim_") ||
+    type.startsWith("property_") ||
+    type === "stale_listing" ||
+    type === "pdf_verified"
+  ) {
+    return propertyId ? `/dashboard/inventory/${propertyId}` : "/dashboard";
+  }
+
+  if (type.startsWith("task_")) {
+    return "/dashboard/crm";
+  }
+
+  if (type.startsWith("prc_")) {
+    return "/settings#verification";
+  }
+
+  if (type.startsWith("connects_") || type.startsWith("subscription_")) {
+    return "/pricing";
+  }
+
+  if (type.startsWith("faq_")) {
+    return "/intel";
+  }
+
+  if (type.startsWith("review_") || type.startsWith("recommendation_")) {
+    return "/dashboard/reviews";
+  }
+
+  return "/dashboard";
+}
+
+export async function notifyUser(serviceClient, { userId, title, desc, icon = null, propertyId = null, propertySlug = null, notificationType, forceEmail = false, link = null }) {
   try {
     const routing = await validateSampleNotificationRouting(serviceClient, { userId, propertyId, propertySlug });
     if (!routing.ok) {
@@ -81,6 +162,10 @@ export async function notifyUser(serviceClient, { userId, title, desc, icon = nu
     }
     if (!userId) return null;
     const resolvedIcon = icon || ICONS_BY_TYPE[notificationType] || "🔔";
+    const channels = ["in_app"];
+    if (link && typeof link === "string" && link.trim()) {
+      channels.push(`link:${link.trim()}`);
+    }
     const { error } = await serviceClient.from("user_notifications").insert([{
       user_id: userId,
       title,
@@ -88,6 +173,7 @@ export async function notifyUser(serviceClient, { userId, title, desc, icon = nu
       icon: resolvedIcon,
       property_id: propertyId,
       notification_type: notificationType,
+      notify_channels: channels,
     }]);
     if (error) console.error("[notifications] Failed to insert:", error);
 

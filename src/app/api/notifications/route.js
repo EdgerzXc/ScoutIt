@@ -3,7 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { notifyUser, validateSampleNotificationRouting } from "@/lib/notifications";
+import { notifyUser, validateSampleNotificationRouting, resolveDefaultNotificationLink } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export async function GET(request) {
 
     const { data, error } = await supabaseAdmin
       .from("user_notifications")
-      .select("id, title, desc, icon, read, property_id, notification_type, created_at")
+      .select("id, title, desc, icon, read, property_id, notification_type, notify_channels, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -37,16 +37,24 @@ export async function GET(request) {
     }
 
     return NextResponse.json({
-      notifications: (data || []).map((n) => ({
-        id: n.id,
-        title: n.title,
-        desc: n.desc,
-        icon: n.icon,
-        read: n.read,
-        propertyId: n.property_id,
-        notificationType: n.notification_type,
-        createdAt: n.created_at,
-      })),
+      notifications: (data || []).map((n) => {
+        const channels = Array.isArray(n.notify_channels) ? n.notify_channels : [];
+        const linkChannel = channels.find((c) => typeof c === "string" && c.startsWith("link:"));
+        const explicitLink = linkChannel ? linkChannel.slice(5) : null;
+        const computedLink = explicitLink || resolveDefaultNotificationLink(n.notification_type, n.property_id);
+
+        return {
+          id: n.id,
+          title: n.title,
+          desc: n.desc,
+          icon: n.icon,
+          read: n.read,
+          propertyId: n.property_id,
+          notificationType: n.notification_type,
+          link: computedLink,
+          createdAt: n.created_at,
+        };
+      }),
     });
   } catch (err) {
     console.error("[NOTIFICATIONS API] GET error:", err);
@@ -117,6 +125,7 @@ const postSchema = z.object({
   icon: z.string().max(20).optional(),
   propertyId: z.string().uuid().optional(),
   notificationType: z.string().max(100),
+  link: z.string().max(500).optional(),
 });
 
 // Lets client-triggered notifications (e.g. "Listing Published") persist
@@ -128,7 +137,7 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { title, desc, icon, propertyId, notificationType  } = parsed.data;
+    const { title, desc, icon, propertyId, notificationType, link } = parsed.data;
     const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
@@ -148,6 +157,7 @@ export async function POST(request) {
       icon: icon || "🔔",
       propertyId: propertyId || null,
       notificationType,
+      link: link || null,
     });
     if (!notified) return NextResponse.json({ error: "Failed to save notification" }, { status: 500 });
     return NextResponse.json({ success: true });

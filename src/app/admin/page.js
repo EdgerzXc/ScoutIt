@@ -5,11 +5,12 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
-import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet, GitBranch } from "lucide-react";
+import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet, GitBranch, Radio } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
 import ConnectsRefundPanel from "@/components/admin/ConnectsRefundPanel";
 import PropertyVerifyPanel from "@/components/admin/PropertyVerifyPanel";
+import NotificationBroadcastPanel from "@/components/admin/NotificationBroadcastPanel";
 import { DashboardProvider } from "@/context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -296,6 +297,18 @@ function AdminPageInner() {
             Re-verification
           </button>
 
+          <button
+            onClick={() => setActiveTab("broadcast")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "broadcast"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <Radio size={15} />
+            Broadcast & Alerts
+          </button>
+
           <Link
             href="/admin/flow"
             className="px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap border-transparent text-gray-400 hover:text-gold-accent hover:bg-[var(--surface2)]"
@@ -307,6 +320,10 @@ function AdminPageInner() {
 
         <div className="admin-content">
           {activeTab === "flags" && <FeatureConsolePanel />}
+
+          {activeTab === "broadcast" && (
+            <NotificationBroadcastPanel authHeaders={authHeaders} />
+          )}
 
           {activeTab === "refunds" && (
             <div className="admin-panel">

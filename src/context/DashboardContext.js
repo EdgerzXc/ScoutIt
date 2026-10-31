@@ -171,6 +171,7 @@ export function DashboardProvider({ children }) {
         read: n.read,
         propertyId: n.propertyId,
         notificationType: n.notificationType,
+        link: n.link,
       })));
     } catch (e) {
       console.error("Failed to fetch notifications", e);
@@ -1234,6 +1235,7 @@ export function DashboardProvider({ children }) {
           icon: typeof notif.icon === "string" ? notif.icon : "🔔",
           notificationType: notif.notificationType || "client_event",
           propertyId: notif.propertyId || undefined,
+          link: notif.link || undefined,
         }),
       }).catch(e => console.error("Failed to persist notification", e));
     }

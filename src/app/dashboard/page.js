@@ -35,7 +35,7 @@ import {
 } from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
-import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
+import { Search, Bookmark, MessageCircle, Briefcase, Bell, Settings, LogOut, ChevronRight } from "lucide-react";
 import "./dashboard-motion.css";
 
 const TAG_LABELS = {
@@ -73,6 +73,30 @@ function DashboardInner() {
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
 
   const switcherRef = useRef(null);
+  const notificationsRef = useRef(null);
+
+  // Close notifications dropdown on outside click or Escape key
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClickOutside = (e) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showNotifications]);
 
   useEffect(() => {
     // A cached profile can shape presentation only after Supabase validates the
@@ -480,72 +504,115 @@ function DashboardInner() {
             )}
           </Link>
 
-          <div className="relative">
+          <div className="relative" ref={notificationsRef}>
             <button
-              className="text-xl hover:opacity-80 transition-opacity relative w-11 h-11 flex items-center justify-center"
+              className="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-variant/40 text-text-secondary hover:text-gold-accent transition-colors"
               onClick={toggleNotifications}
               aria-label="Notifications"
             >
-              🔔
+              <Bell size={20} className={unreadCount > 0 ? "text-gold-bright animate-pulse" : "text-text-secondary hover:text-gold-accent"} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-error rounded-full border-2 border-background flex items-center justify-center text-[12px] font-bold text-white">
-                  {unreadCount}
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-gold-accent text-background font-mono font-bold rounded-full border-2 border-background flex items-center justify-center text-[12px]">
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
 
             {/* Notifications Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50">
-                <div className="p-3 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
-                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Notifications</span>
-                  {notifications.length > 0 && (
-                    <button type="button" className="text-xs text-gold-accent hover:underline" onClick={clearAllNotifications}>Clear All</button>
-                  )}
-                </div>
-                  <div className="max-h-[300px] overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="p-6 text-center text-sm text-text-secondary italic">All caught up.</div>
-                    ) : (
-                      notifications.map(notif => (
-                        <button type="button" 
-                          key={notif.id} 
-                          onClick={() => {
-                            if (notif.notificationType === 'inquiry') {
-                              router.push('/dashboard/inbox');
-                              setShowNotifications(false);
-                            } else if (notif.propertyId) {
-                              router.push(`/dashboard/inventory/${notif.propertyId}`);
-                              setShowNotifications(false);
-                            }
-                          }}
-                          className={`p-4 border-b border-surface-variant/50 flex gap-3 transition text-left block w-full ${!notif.read ? 'bg-surface-container-low' : ''} ${(notif.notificationType === 'inquiry' || notif.propertyId) ? 'cursor-pointer hover:bg-surface-variant' : ''}`}
-                        >
-                          <div className="text-2xl shrink-0">{notif.icon}</div>
-                          <div>
-                            <div className="font-working-title text-sm text-on-surface mb-1">{notif.title}</div>
-                            <div className="text-xs text-text-secondary">{notif.desc}</div>
-                          </div>
-                        </button>
-                      ))
+              <div className="absolute right-0 mt-2 w-84 max-w-[calc(100vw-2rem)] bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.15s_ease-out]">
+                <div className="p-3.5 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[12px] tracking-widest uppercase text-text-secondary font-semibold">Notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="bg-gold-accent/15 text-gold-bright font-mono text-[12px] px-1.5 py-0.5 rounded border border-gold-accent/30 font-bold">
+                        {unreadCount} NEW
+                      </span>
                     )}
                   </div>
+                  {notifications.length > 0 && (
+                    <button
+                      type="button"
+                      className="min-h-[44px] px-2 font-mono text-[12px] uppercase tracking-wider text-gold-accent hover:text-gold-bright transition-colors"
+                      onClick={clearAllNotifications}
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-[360px] overflow-y-auto divide-y divide-surface-variant/40">
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center text-sm text-text-secondary italic">
+                      All caught up. No pending notifications.
+                    </div>
+                  ) : (
+                    notifications.map((notif) => {
+                      const dest = notif.link || (notif.propertyId ? `/dashboard/inventory/${notif.propertyId}` : "/dashboard/inbox");
+                      return (
+                        <button
+                          type="button"
+                          key={notif.id}
+                          onClick={() => {
+                            router.push(dest);
+                            setShowNotifications(false);
+                          }}
+                          className={`p-3.5 flex items-start gap-3 transition-colors text-left w-full group hover:bg-surface-variant/40 active:scale-[0.99] ${
+                            !notif.read ? "bg-gold-accent/5 border-l-2 border-l-gold-accent" : "border-l-2 border-l-transparent"
+                          }`}
+                        >
+                          <div className="text-xl shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-surface-alt border border-surface-variant flex items-center justify-center">
+                            {notif.icon || "🔔"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1 mb-0.5">
+                              <div className="font-working-title text-sm font-semibold text-on-surface truncate group-hover:text-gold-bright transition-colors">
+                                {notif.title}
+                              </div>
+                              <span className="text-[12px] font-mono text-text-muted shrink-0">
+                                {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString([], { month: "short", day: "numeric" }) : ""}
+                              </span>
+                            </div>
+                            <div className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
+                              {notif.desc}
+                            </div>
+                            <div className="mt-1 flex items-center gap-1 text-[12px] font-mono uppercase tracking-wider text-gold-accent group-hover:text-gold-bright transition-colors">
+                              <span>Open</span>
+                              <ChevronRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             )}
           </div>
 
           {/* Desktop User Menu (Hidden on mobile) */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/settings" title="Account Settings" className="text-lg text-text-secondary hover:text-on-surface transition">⚙️</Link>
-            <Link href="/profile" title="Your Profile" className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition">
-              {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
+            <Link
+              href="/settings"
+              title="Account Settings"
+              className="w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors rounded-full hover:bg-surface-variant/40"
+              aria-label="Account Settings"
+            >
+              <Settings size={18} />
             </Link>
-            <button 
-              className="text-lg text-text-secondary hover:text-error transition ml-2"
+            <Link
+              href="/profile"
+              title="Your Profile"
+              className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition"
+            >
+              {user.name ? user.name.substring(0, 2).toUpperCase() : "U"}
+            </Link>
+            <button
+              className="w-11 h-11 flex items-center justify-center text-text-secondary hover:text-error transition-colors rounded-full hover:bg-error/10 ml-1"
               onClick={handleSignOut}
               title="Sign Out"
+              aria-label="Sign Out"
             >
-              🚪
+              <LogOut size={18} />
             </button>
           </div>
           
