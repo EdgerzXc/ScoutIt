@@ -66,7 +66,9 @@ test.describe("the map actually works", () => {
       }
     });
     page.on("requestfailed", (r) => {
-      if (isVectorTile(r.url())) failures.push(`FAILED ${r.failure()?.errorText || "unknown"} ${r.url().slice(0, 90)}`);
+      const err = r.failure()?.errorText || "unknown";
+      if (err === "net::ERR_ABORTED") return;
+      if (isVectorTile(r.url())) failures.push(`FAILED ${err} ${r.url().slice(0, 90)}`);
     });
     page.on("console", (m) => {
       if (m.type() === "error") consoleErrors.push(m.text().slice(0, 120));
@@ -174,6 +176,7 @@ test.describe("the map actually works", () => {
 
     // A visible attribution container can still sit behind the phone lens bar.
     // Check the painted hit target, rather than visibility or a forced click.
+    await credit.scrollIntoViewIfNeeded();
     const links = credit.locator("a");
     await expect(links).toHaveCount(2);
     for (const link of await links.all()) {

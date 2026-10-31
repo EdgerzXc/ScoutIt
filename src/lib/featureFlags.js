@@ -44,6 +44,8 @@ export async function isGlobalReadOnly() {
 
 /** Pre-launch free mode (all premium features unlocked while seeding). */
 export async function isPreLaunchFreeMode() {
+  if (process.env.NEXT_PUBLIC_MONETIZATION_PHASE === "pilot_zero_paywall") return true;
+  if (process.env.NEXT_PUBLIC_MONETIZATION_PHASE === "production_enforced") return false;
   return getFlag("pre_launch_free_mode", true);
 }
 

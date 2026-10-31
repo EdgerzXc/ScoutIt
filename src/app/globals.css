@@ -4950,6 +4950,47 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   align-items: center;
 }
 
+.ambient-content {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  align-items: center;
+  justify-items: center;
+}
+
+.ambient-nav {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .ambient-content {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .ambient-nav {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ambient-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ambient-nav {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
   .global-header {
     padding: 10px 16px;

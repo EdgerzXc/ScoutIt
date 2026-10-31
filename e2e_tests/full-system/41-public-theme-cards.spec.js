@@ -15,7 +15,10 @@ test.describe("A-170 public pages keep dark default and re-ink in White Lens", (
       await expect(page.locator("body")).not.toHaveClass(/light-mode/);
       expect(firstChannel(await heading.evaluate((node) => getComputedStyle(node).color))).toBeGreaterThan(180);
 
-      await page.evaluate(() => document.body.classList.add("light-mode"));
+      await page.evaluate(() => {
+        localStorage.setItem("scoutit_display_mode", "light");
+        document.body.classList.add("light-mode");
+      });
       await expect.poll(async () => firstChannel(await heading.evaluate((node) => getComputedStyle(node).color)))
         .toBeLessThan(80);
       await expect.poll(async () => firstChannel(await seekerSurface.evaluate((node) => getComputedStyle(node).backgroundColor)))
@@ -38,7 +41,10 @@ test.describe("A-170 public pages keep dark default and re-ink in White Lens", (
       await expect(heading).toBeVisible();
       await expect(page.locator("body")).not.toHaveClass(/light-mode/);
       expect(firstChannel(await heading.evaluate((node) => getComputedStyle(node).color))).toBeGreaterThan(180);
-      await page.evaluate(() => document.body.classList.add("light-mode"));
+      await page.evaluate(() => {
+        localStorage.setItem("scoutit_display_mode", "light");
+        document.body.classList.add("light-mode");
+      });
       await expect.poll(async () => firstChannel(await heading.evaluate((node) => getComputedStyle(node).color)))
         .toBeLessThan(80);
     });

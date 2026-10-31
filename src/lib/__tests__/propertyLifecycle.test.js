@@ -61,7 +61,8 @@ describe("property lifecycle contract", () => {
 
   it("requires authentication plus entitlement for off-market reads", () => {
     expect(isEntitledOffMarketViewer({ tier: "starry" })).toBe(false);
-    expect(isEntitledOffMarketViewer({ tier: "cluster" })).toBe(true);
+    expect(isEntitledOffMarketViewer({ tier: "cluster" })).toBe(false);
+    expect(isEntitledOffMarketViewer({ tier: "universe" })).toBe(true);
     expect(isEntitledOffMarketViewer({ tier: "starry", lockerOpen: true })).toBe(true);
     expect(isEntitledOffMarketViewer({ tier: "starry", isOwner: true })).toBe(true);
   });
@@ -80,5 +81,32 @@ describe("property lifecycle contract", () => {
       permanently_removed_reason: "No longer offered",
       quietly_open_to_offers: false,
     });
+  });
+
+  it("enforces tier-gated active listing limits for owners and brokers", async () => {
+    const { getActiveListingCap, OWNER_ACTIVE_LISTING_LIMITS, BROKER_ACTIVE_LISTING_LIMITS } = await import("../propertyLifecycle");
+    expect(OWNER_ACTIVE_LISTING_LIMITS.starry).toBe(1);
+    expect(OWNER_ACTIVE_LISTING_LIMITS.solar).toBe(5);
+    expect(OWNER_ACTIVE_LISTING_LIMITS.cluster).toBe(20);
+    expect(OWNER_ACTIVE_LISTING_LIMITS.universe).toBe(Infinity);
+
+    expect(getActiveListingCap({ tier: "starry", role: "owner" })).toBe(1);
+    expect(getActiveListingCap({ tier: "solar", role: "owner" })).toBe(5);
+    expect(getActiveListingCap({ tier: "cluster", role: "owner" })).toBe(20);
+    expect(getActiveListingCap({ tier: "universe", role: "owner" })).toBe(Infinity);
+
+    expect(BROKER_ACTIVE_LISTING_LIMITS.starry).toBe(3);
+    expect(BROKER_ACTIVE_LISTING_LIMITS.solar).toBe(15);
+    expect(BROKER_ACTIVE_LISTING_LIMITS.cluster).toBe(50);
+    expect(BROKER_ACTIVE_LISTING_LIMITS.universe).toBe(Infinity);
+
+    expect(getActiveListingCap({ tier: "starry", role: "broker" })).toBe(3);
+    expect(getActiveListingCap({ tier: "solar", role: "broker" })).toBe(15);
+    expect(getActiveListingCap({ tier: "cluster", role: "broker" })).toBe(50);
+    expect(getActiveListingCap({ tier: "universe", role: "broker" })).toBe(Infinity);
+
+    // Fallbacks
+    expect(getActiveListingCap({ tier: "unknown" })).toBe(1);
+    expect(getActiveListingCap()).toBe(1);
   });
 });

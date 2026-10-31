@@ -717,7 +717,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                           className={`scp-chip${isSel ? " is-active" : ""}`}
                           onClick={() => toggleMustHave(tag)}
                         >
-                          {isSel ? `✓ ${tag}` : `+ ${tag}`}
+                          {isSel ? tag : `+ ${tag}`}
                         </button>
                       );
                     })}
@@ -832,7 +832,7 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
 
                 <div className="scp-field scp-id-section">
                   <span className="scp-label">HOW SHOULD YOUR NAME BE SHOWN?</span>
-                  <div className="scp-identity" role="radiogroup" aria-label="Posting identity">
+                  <div className="scp-identity" data-scoutit-guide="signal-composer-identity" role="radiogroup" aria-label="Posting identity">
                     <button
                       type="button"
                       role="radio"
@@ -915,22 +915,22 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
                     <div className="scp-preview-specs">
                       {sizeFormatted && (
                         <span className="scp-preview-chip">
-                          📐 {sizeFormatted} SQM
+                          AREA: {sizeFormatted} SQM
                         </span>
                       )}
                       {budgetFormatted && (
                         <span className="scp-preview-chip">
-                          💰 ₱{budgetFormatted}
+                          BUDGET: ₱{budgetFormatted}
                         </span>
                       )}
                       {form.spaceType && (
                         <span className="scp-preview-chip">
-                          🏢 {form.spaceType}
+                          TYPE: {form.spaceType}
                         </span>
                       )}
                       {locationString && (
                         <span className="scp-preview-chip">
-                          📍 {locationString}
+                          LOC: {locationString}
                         </span>
                       )}
                     </div>

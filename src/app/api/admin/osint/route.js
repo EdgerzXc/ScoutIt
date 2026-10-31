@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { pushBriefingToAirtable, publishedMarkers } from "@/lib/intelPublish";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 // ⚠️ 🔴 UNAUTHENTICATED UNTIL 2026-08-06 (§59, full-system audit).
 //
@@ -59,7 +60,7 @@ export async function GET(req) {
       briefings: briefings || [],
     });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: sanitizeError(err) }, { status: 500 });
   }
 }
 
@@ -170,7 +171,7 @@ export async function POST(req) {
 
       if (subErr) {
         console.error("[OSINT API] Supabase Insert Error:", subErr.message);
-        return NextResponse.json({ success: false, error: subErr.message }, { status: 500 });
+        return NextResponse.json({ success: false, error: sanitizeError(subErr) }, { status: 500 });
       }
 
       // 2. THE BRIDGE — Supabase draft → Airtable INTEL_CMS.
@@ -245,6 +246,6 @@ export async function POST(req) {
 
     return NextResponse.json({ success: false, error: "Unknown action" }, { status: 400 });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: sanitizeError(err) }, { status: 500 });
   }
 }

@@ -19,7 +19,13 @@ export default async function UserCrmPage({ searchParams }) {
     .limit(50);
 
   if (q) {
-    query = query.or(`display_name.ilike.%${q}%,id.ilike.%${q}%`);
+    const safeQ = q.replace(/[(),%*\\]/g, "").trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(safeQ);
+    if (isUuid) {
+      query = query.or(`display_name.ilike.%${safeQ}%,id.eq.${safeQ}`);
+    } else if (safeQ) {
+      query = query.ilike("display_name", `%${safeQ}%`);
+    }
   }
 
   const { data: users, error } = await query;

@@ -108,9 +108,14 @@ export default function CalendarShell() {
   const [saving, setSaving] = useState(false);
   const [respondingId, setRespondingId] = useState(null);
 
+  const isFirstMount = useRef(true);
   // Keep the URL shareable (view + date) via replaceState — no re-render churn.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
     const params = new URLSearchParams(window.location.search);
     params.set("view", view);
     params.set("date", toDateInputValue(viewDate));

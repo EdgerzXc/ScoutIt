@@ -5,33 +5,29 @@ import { test, expect } from '@playwright/test';
 import { trackErrors, expectRealContent, gotoAndSettle, openYourMove } from './helpers';
 
 test.describe('Discovery engine', () => {
-  test('discover page renders spotlight cards and switches categories', async ({ page }) => {
+  test('discover page renders and switches categories', async ({ page }) => {
     const errors = trackErrors(page);
     await gotoAndSettle(page, '/discover');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 20000 });
     const cards = page.locator('.spotlightCard');
     await expect(cards.first()).toBeVisible({ timeout: 20000 });
-    const residentialCount = await cards.count();
-    expect(residentialCount).toBeGreaterThan(0);
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
 
-    // Category switch via querystring-backed sidebar nav.
-    await gotoAndSettle(page, '/discover?type=commercial');
+    // Category switch via fast category rail or querystring-backed navigation.
+    await gotoAndSettle(page, '/discover?type=Commercial');
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/commercial/i, { timeout: 20000 });
     await expect(page.locator('.spotlightCard').first()).toBeVisible({ timeout: 20000 });
 
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('a spotlight card leads to a full property briefing', async ({ page }) => {
-    await gotoAndSettle(page, '/discover');
-    const card = page.locator('.spotlightCard').first();
+  test('a directory card leads to a full property briefing', async ({ page }) => {
+    await gotoAndSettle(page, '/property');
+    const card = page.locator('.property-preview-card').first();
     await expect(card).toBeVisible({ timeout: 20000 });
-    await card.click();
-
-    const briefingLink = page.getByRole('link', { name: /view full briefing/i }).first();
-    await expect(briefingLink).toBeVisible({ timeout: 10000 });
-    await briefingLink.click();
+    await card.locator('a[href^="/property/"]').first().click();
 
     await expect(page).toHaveURL(/\/property\/.+/, { timeout: 20000 });
     await expectRealContent(page, 200);
@@ -109,39 +105,29 @@ test.describe('Property directory + briefing page', () => {
 
 test.describe('The Ledger (device-only wishlist)', () => {
   test('saving a reaction surfaces it on Your Board and can be removed', async ({ page }) => {
-    const isMobileLayout = page.viewportSize().width < 900;
+    await page.addInitScript(() => {
+      localStorage.removeItem('scoutit_reactions');
+    });
+    await gotoAndSettle(page, '/property');
 
-    if (isMobileLayout) {
-      // Mobile's designed save path is the bottom action bar on the property
-      // page (the discover card's expanded intel panel is display:none <900px).
-      await gotoAndSettle(page, '/discover');
-      const card = page.locator('.spotlightCard').first();
-      await expect(card).toBeVisible({ timeout: 25000 });
-      await card.click();
-      const briefing = card.getByRole('link', { name: /view full briefing/i }).first();
-      await expect(briefing).toBeVisible({ timeout: 10000 });
-      await briefing.click();
-      await expect(page).toHaveURL(/\/property\/.+/, { timeout: 20000 });
+    const card = page.locator('.property-preview-card').first();
+    await expect(card).toBeVisible({ timeout: 25000 });
 
-      const saveBtn = page.getByRole('button', { name: /save to your board/i }).first();
-      await expect(saveBtn).toBeVisible({ timeout: 20000 });
-      await saveBtn.click();
-    } else {
-      // Desktop: the discover page's expanded spotlight card carries a visible
-      // ReactionButtons row. (On the briefing page the reaction tiles live
-      // inside a chapter panel that's collapsed until its chapter is active,
-      // so the card row is the stable place to exercise the real UI.)
-      await gotoAndSettle(page, '/discover');
-      const card = page.locator('.spotlightCard').first();
-      await expect(card).toBeVisible({ timeout: 25000 });
-      await card.click();
+    const reaction = card
+      .locator('button[aria-label="Save"]')
+      .first();
+    await expect(reaction).toBeVisible({ timeout: 15000 });
 
-      const reaction = card
-        .locator('.discover-reaction-buttons-container button[aria-label="Save"]')
-        .first();
-      await expect(reaction).toBeVisible({ timeout: 15000 });
-      await reaction.click();
-    }
+    // Streamed SSR HTML renders before React hydration attaches onClick.
+    // Retry actionability-checked clicks until the component confirms state.
+    await expect.poll(async () => {
+      if ((await reaction.getAttribute('aria-pressed')) !== 'true') {
+        await reaction.click();
+      }
+      return reaction.getAttribute('aria-pressed');
+    }, { timeout: 15000 }).toBe('true');
+
+    await expect(reaction).toHaveClass(/active/);
 
     const stored = await page.evaluate(() => localStorage.getItem('scoutit_reactions'));
     expect(stored, 'reaction was not persisted to the device ledger').toBeTruthy();

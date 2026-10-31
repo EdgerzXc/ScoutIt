@@ -82,6 +82,23 @@ export function capacityFor(accountClass) {
   return SIGNAL_CAPACITY[accountClass] ?? SIGNAL_CAPACITY.standard;
 }
 
+export function accountClassFor(profile) {
+  const rawList = [
+    ...(Array.isArray(profile?.active_roles) ? profile.active_roles : []),
+    ...(Array.isArray(profile?.activeRoles) ? profile.activeRoles : []),
+    profile?.role,
+  ];
+  const held = new Set(
+    rawList
+      .filter((r) => typeof r === "string" && r.trim().length > 0)
+      .map((r) => r.trim().toLowerCase())
+  );
+  if (held.has("broker")) return "broker";
+  if (held.has("owner")) return "owner";
+  if (held.has("operator") || held.has("co-operator")) return "business";
+  return "standard";
+}
+
 // ── Persistent Scout ID ──────────────────────────────────────────────────
 // One permanent pseudonym per account, derived deterministically so it needs
 // no user-table column and no migration: the same account always resolves to

@@ -175,7 +175,7 @@ test.describe('mobile workspace overflow (390px, data rendered)', () => {
     const errors = trackErrors(page);
     await signInAsMock(page, MASTER_DEV_READONLY);
     await mockWorkspaceData(page);
-    await gotoAndSettle(page, '/dashboard/calendar');
+    await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
     await expectRealContent(page);
     await expectNoPageOverflow(page, '/dashboard/calendar');
     expect(errors, errors.join('\n')).toEqual([]);
@@ -335,7 +335,7 @@ test.describe('mobile workspace overflow (390px, data rendered)', () => {
         },
       }),
     );
-    await gotoAndSettle(page, '/dashboard/calendar');
+    await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
     await expect(
       page.getByText('Site visit at The Super-Long-Named Premium', { exact: false }),
     ).toBeVisible({ timeout: 30000 });

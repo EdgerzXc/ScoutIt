@@ -34,6 +34,7 @@ import {
 import { notifyUser } from "@/lib/notifications";
 
 const QUALIFYING_TRANSACTION_STATUSES = ["completed", "closed", "accepted", "active"];
+const SAFE_ID = /^[A-Za-z0-9_-]{1,128}$/;
 
 /**
  * Submits a behavioral review for a transaction counterparty.
@@ -310,7 +311,7 @@ export async function submitBehavioralReview(supabaseAdmin, {
  * @returns {Promise<{ credential: object, metrics: object, profile: object }>}
  */
 export async function refreshUserMetrics(supabaseAdmin, userId) {
-  if (!supabaseAdmin || !userId) return null;
+  if (!supabaseAdmin || !userId || !SAFE_ID.test(String(userId))) return null;
 
   // 1. Auto-unlock reviews whose 14-day anti-retaliation window has elapsed
   const fourteenDaysAgo = new Date(Date.now() - REVIEW_WINDOW_MS).toISOString();

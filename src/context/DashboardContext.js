@@ -7,8 +7,10 @@ import { supabase } from "../lib/supabaseClient";
 import { loadDeals } from "../lib/deals/dealsClient";
 import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
-import { getBalance, spendConnects, initWalletIfEmpty } from "../lib/connectsWallet";
+import { getBalance, spendConnects, initWalletIfEmpty, resolveConnectRole } from "../lib/connectsWallet";
+import { syncAuthenticatedUserCache } from "../lib/entitlements";
 import ListerDeclarationModal from "../components/dashboard/ListerDeclarationModal";
+import QuotaSwapModal from "../components/dashboard/QuotaSwapModal";
 import { isOnboardingComplete } from "../lib/onboardingProfile";
 import { readDevelopmentMockUser } from "../lib/developmentMock";
 import { trackEvent, GA_EVENTS } from "../lib/analytics";
@@ -129,6 +131,8 @@ export function DashboardProvider({ children }) {
   // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
   // promise resolver so publishListing can await the user's answer.
   const [declarationPrompt, setDeclarationPrompt] = useState(null);
+  // Open quota-swap prompt for owners at active listing limit (A-271).
+  const [quotaSwapPrompt, setQuotaSwapPrompt] = useState(null);
 
   // ── Notifications (persisted — Track 1, PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) ──
   // Stable reference (no reactive closures — reads session/localStorage fresh
@@ -201,8 +205,16 @@ export function DashboardProvider({ children }) {
       id: authUser.id,
     };
     setCurrentUser(mergedUser);
+    syncAuthenticatedUserCache(mergedUser);
 
-    const role = (profile?.role || "seeker").toLowerCase();
+    const rawProfileRole = String(profile?.role || "seeker").trim().toLowerCase();
+    const mappedWalletRole =
+      rawProfileRole === "salesperson"
+        ? "broker"
+        : rawProfileRole === "provider"
+          ? String(profile?.provider_type || "photographer").trim().toLowerCase()
+          : rawProfileRole;
+    const role = resolveConnectRole(mappedWalletRole, "seeker") || "seeker";
     const tier = (profile?.subscription_tier || "starry").toLowerCase();
     initWalletIfEmpty(role, tier);
     setConnects(getBalance(role, tier));
@@ -715,7 +727,7 @@ export function DashboardProvider({ children }) {
     });
   };
 
-  const publishListing = async (listingId, declaration = null) => {
+  const publishListing = async (listingId, declaration = null, swapWithPropertyId = null) => {
     if (!currentUser?.id) return false;
     // Truthful either way: the first attempt may come back asking for the
     // declaration, and "Syncing to live network" would be a claim of progress
@@ -728,6 +740,9 @@ export function DashboardProvider({ children }) {
         // `=== true`, never truthy — the route validates identically, and a
         // negative/loose gate is exactly how the age gate failed open (§47.2).
         body.ownerSovereigntyAgreed = declaration.agreed === true;
+      }
+      if (swapWithPropertyId) {
+        body.swapWithPropertyId = swapWithPropertyId;
       }
 
       const res = await authedFetch("/api/dashboard/publish", {
@@ -747,18 +762,49 @@ export function DashboardProvider({ children }) {
         // Cancelled: the listing stays a draft, which the modal said it would.
         // No error toast — this was a choice, not a failure.
         if (!answer) return false;
-        return await publishListing(listingId, answer);
+        return await publishListing(listingId, answer, swapWithPropertyId);
+      }
+
+      if (res.status === 409 && data.error === "listing_cap_reached") {
+        const listing = listings.find((l) => l.id === listingId);
+        const swapTargetId = await new Promise((resolve) => {
+          setQuotaSwapPrompt({
+            listingId,
+            listingTitle: listing?.title || null,
+            tier: data.tier || "starry",
+            limit: data.limit || 1,
+            currentActiveCount: data.currentActiveCount || 1,
+            liveProperties: Array.isArray(data.liveProperties) ? data.liveProperties : [],
+            busy: false,
+            error: null,
+            resolve,
+          });
+        });
+
+        if (!swapTargetId) return false;
+        return await publishListing(listingId, declaration, swapTargetId);
       }
 
       if (!res.ok) {
         throw new Error(data.error || data.warning || "Failed to publish");
       }
-      setListings(prev => prev.map(l => l.id === listingId ? { ...l, pipelineStatus: 'approved' } : l));
+      setListings(prev => prev.map(l => {
+        if (l.id === listingId) {
+          return { ...l, pipelineStatus: 'approved', lifecycleState: 'live' };
+        }
+        if (data.swappedPropertyId && l.id === data.swappedPropertyId) {
+          return { ...l, pipelineStatus: 'off_market', lifecycleState: 'off_market', quietlyOpenToOffers: false };
+        }
+        return l;
+      }));
       setDeclarationPrompt(null);
+      setQuotaSwapPrompt(null);
       addToast(data.publicCachePending
         ? "Published; public refresh unconfirmed. Check before sharing."
-        : "Property is now LIVE", data.publicCachePending ? "⚠️" : "🌍");
-      trackEvent(GA_EVENTS.PROPERTY_PUBLISHED, { property_id: listingId, with_declaration: Boolean(declaration) });
+        : data.swappedPropertyId
+          ? "Swapped & Published: former listing moved Off-Market, new property is LIVE"
+          : "Property is now LIVE", data.publicCachePending ? "⚠️" : "🌍");
+      trackEvent(GA_EVENTS.PROPERTY_PUBLISHED, { property_id: listingId, with_declaration: Boolean(declaration), swapped: Boolean(data.swappedPropertyId) });
       return true;
     } catch (err) {
       console.error(err);
@@ -768,6 +814,9 @@ export function DashboardProvider({ children }) {
       // busy state and say what went wrong. A modal stuck on "Publishing…"
       // after a failed request is the error state nobody builds.
       setDeclarationPrompt(prev =>
+        prev ? { ...prev, busy: false, error: safeErrorMsg } : prev
+      );
+      setQuotaSwapPrompt(prev =>
         prev ? { ...prev, busy: false, error: safeErrorMsg } : prev
       );
       return false;
@@ -1328,6 +1377,32 @@ export function DashboardProvider({ children }) {
         onCancel={() => {
           const resolve = declarationPrompt?.resolve;
           setDeclarationPrompt(null);
+          resolve?.(null);
+        }}
+      />
+      {/* Active listing cap & swap modal (A-271) */}
+      <QuotaSwapModal
+        open={Boolean(quotaSwapPrompt)}
+        listingTitle={quotaSwapPrompt?.listingTitle}
+        tier={quotaSwapPrompt?.tier}
+        limit={quotaSwapPrompt?.limit}
+        currentActiveCount={quotaSwapPrompt?.currentActiveCount}
+        liveProperties={quotaSwapPrompt?.liveProperties || []}
+        busy={quotaSwapPrompt?.busy === true}
+        error={quotaSwapPrompt?.error || null}
+        onSwap={(swapWithPropertyId) => {
+          const prompt = quotaSwapPrompt;
+          if (!prompt) return;
+          setQuotaSwapPrompt(prev => prev ? { ...prev, busy: true, error: null, resolve: null } : prev);
+          if (prompt.resolve) {
+            prompt.resolve(swapWithPropertyId);
+          } else {
+            publishListing(prompt.listingId, null, swapWithPropertyId);
+          }
+        }}
+        onCancel={() => {
+          const resolve = quotaSwapPrompt?.resolve;
+          setQuotaSwapPrompt(null);
           resolve?.(null);
         }}
       />

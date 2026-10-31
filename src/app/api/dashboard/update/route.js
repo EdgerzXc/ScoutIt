@@ -22,7 +22,8 @@ const updateSchema = z.object({
   type: z.string().max(100).optional(),
   location: z.string().max(255).optional(),
   details: z.record(z.any()).optional(),
-  quietly_open_to_offers: z.boolean().optional()
+  quietly_open_to_offers: z.boolean().optional(),
+  contact_preference: z.enum(["owner_only", "broker_only", "owner_and_brokers"]).optional()
 });
 
 export async function POST(request) {
@@ -122,13 +123,15 @@ export async function POST(request) {
     }
 
     // Merge details JSONB safely with deep recursive sanitization (e.g. units_inventory objects)
-    if (validatedData.details) {
-      const sanitizedDetails = sanitizeObject(validatedData.details);
-
-      supabasePayload.details = {
-        ...(currentSubmission.details || {}),
-        ...sanitizedDetails
-      };
+    const mergedDetails = {
+      ...(currentSubmission.details || {}),
+      ...(validatedData.details ? sanitizeObject(validatedData.details) : {})
+    };
+    if (validatedData.contact_preference) {
+      mergedDetails.contact_preference = validatedData.contact_preference;
+    }
+    if (validatedData.details || validatedData.contact_preference) {
+      supabasePayload.details = mergedDetails;
     }
 
     // 2. Update Supabase

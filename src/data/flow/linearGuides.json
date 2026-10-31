@@ -158,7 +158,7 @@
         "title": "Broadcast Beacon with 7-Day Refresh",
         "action": "Publish your signal; coordinates unlock dynamic radar pulse rings.",
         "tip": "7-day freshness decay keeps the feed fresh.",
-        "guideTarget": "api-community-signals"
+        "guideTarget": null
       },
       {
         "step": 6,

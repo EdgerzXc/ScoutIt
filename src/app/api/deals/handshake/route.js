@@ -8,6 +8,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
 import { SIGNAL_STATUSES } from "@/lib/communityPosting";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 
 /**
  * POST /api/deals/handshake
@@ -51,7 +52,106 @@ export async function POST(request) {
       );
     }
 
+    // ── Ownership & Party verification before any action (§1.0B) ──
+    // This route runs under the service role, which bypasses RLS. Without
+    // an explicit party check, `dealId` alone was enough for any signed-in
+    // user to sign or decline handshakes on the platform. Read the deal first
+    // and confirm the caller is actually an authorized party to it.
+    const { data: deal, error: dealError } = await supabaseAdmin
+      .from("deals")
+      .select("id, buyer_id, broker_id, property_id, status")
+      .eq("id", dealId)
+      .maybeSingle();
+
+    if (dealError) {
+      return NextResponse.json(
+        { error: sanitizeError(dealError, "Could not verify deal.") },
+        { status: 500 }
+      );
+    }
+
+    let isParty = Boolean(
+      deal && (deal.buyer_id === userId || deal.broker_id === userId)
+    );
+
+    let propertyOwnerId = null;
+    if (deal && !isParty && deal.property_id) {
+      const { data: prop } = await supabaseAdmin
+        .from("properties")
+        .select("owner_id")
+        .eq("id", deal.property_id)
+        .maybeSingle();
+      if (prop && prop.owner_id === userId) {
+        isParty = true;
+      }
+      propertyOwnerId = prop?.owner_id || null;
+    } else if (deal?.property_id) {
+      // Retain owner_id for self-dealing checks
+      const { data: prop } = await supabaseAdmin
+        .from("properties")
+        .select("owner_id")
+        .eq("id", deal.property_id)
+        .maybeSingle();
+      propertyOwnerId = prop?.owner_id || null;
+    }
+
+    if (deal && !isParty) {
+      const isRoutedRecipient = await isRoutedDealRecipient(supabaseAdmin, dealId, userId);
+      if (isRoutedRecipient) {
+        isParty = true;
+      }
+    }
+
+    // Same response for "no such deal" and "not your deal" so the endpoint
+    // cannot be used to enumerate deal IDs.
+    if (!deal || !isParty) {
+      return NextResponse.json(
+        { error: "You are not a party to this deal." },
+        { status: 403 }
+      );
+    }
+
+    // Invariant: Self-dealing guard. A party cannot conduct a two-sided handshake with themselves.
+    const sellerPartyId = deal.broker_id || propertyOwnerId;
+    if (deal.buyer_id && sellerPartyId && deal.buyer_id === sellerPartyId) {
+      return NextResponse.json(
+        { error: "Invalid deal: Senders cannot conduct a bilateral handshake with themselves." },
+        { status: 409 }
+      );
+    }
+
+    if (deal.status && ["declined", "withdrawn", "closed", "reported"].includes(deal.status)) {
+      return NextResponse.json(
+        { error: `Cannot execute handshake on a ${deal.status} deal.` },
+        { status: 409 }
+      );
+    }
+
     if (action === "sign") {
+      // If caller is party B (recipient side), heal or align party_b_id on pending handshakes
+      // so routed brokers or operators can complete the signature seamlessly.
+      if (userId !== deal.buyer_id) {
+        try {
+          const { data: existingHandshake } = await supabaseAdmin
+            .from("deal_handshakes")
+            .select("id, party_b_id, party_b_signed_at, status")
+            .eq("deal_id", dealId)
+            .eq("handshake_type", "transaction_handshake")
+            .maybeSingle();
+
+          if (existingHandshake && existingHandshake.status === "pending" && !existingHandshake.party_b_signed_at) {
+            if (existingHandshake.party_b_id !== userId) {
+              await supabaseAdmin
+                .from("deal_handshakes")
+                .update({ party_b_id: userId, updated_at: new Date().toISOString() })
+                .eq("id", existingHandshake.id);
+            }
+          }
+        } catch {
+          // Non-fatal if table unmigrated
+        }
+      }
+
       const { data, error } = await supabaseAdmin.rpc(
         "complete_transaction_handshake",
         {
@@ -116,48 +216,6 @@ export async function POST(request) {
     }
 
     if (action === "decline") {
-      // ── Ownership is verified before any write (§1.0B) ──
-      // This route runs under the service role, which bypasses RLS. Without
-      // an explicit party check, `dealId` alone was enough for any signed-in
-      // user to decline every handshake on the platform. Read the deal first
-      // and confirm the caller is actually a party to it.
-      const { data: deal, error: dealError } = await supabaseAdmin
-        .from("deals")
-        .select("id, buyer_id, broker_id, property_id")
-        .eq("id", dealId)
-        .maybeSingle();
-
-      if (dealError) {
-        return NextResponse.json(
-          { error: sanitizeError(dealError, "Could not decline handshake.") },
-          { status: 500 }
-        );
-      }
-
-      let isParty = Boolean(
-        deal && (deal.buyer_id === userId || deal.broker_id === userId)
-      );
-
-      if (deal && !isParty && deal.property_id) {
-        const { data: prop } = await supabaseAdmin
-          .from("properties")
-          .select("owner_id")
-          .eq("id", deal.property_id)
-          .maybeSingle();
-        if (prop && prop.owner_id === userId) {
-          isParty = true;
-        }
-      }
-
-      // Same response for "no such deal" and "not your deal" so the endpoint
-      // cannot be used to enumerate deal IDs.
-      if (!deal || !isParty) {
-        return NextResponse.json(
-          { error: "You are not a party to this deal." },
-          { status: 403 }
-        );
-      }
-
       const { error } = await supabaseAdmin
         .from("deal_handshakes")
         .update({ status: "declined", updated_at: new Date().toISOString() })

@@ -46,7 +46,7 @@ const BUNDLES = [
     connectsBonus: 3,
     description: "List your properties with full intelligence tools while scouting the market yourself. Only ₱100 more than Owner Cluster alone.",
     features: [
-      "Cluster Owner: 20 listings, QuestIT Spatial Scanning",
+      "Cluster Owner: 20 active live listings, free off-market cloud storage",
       "Cluster Seeker: Vault, 3D Maps, Drone Heatmaps",
       "36 Connects / month (3 loyalty bonus)",
       "Market Intelligence for your portfolio area",
@@ -69,7 +69,7 @@ const BUNDLES = [
     connectsBonus: 3,
     description: "List your properties and shoot them yourself. Full media stack, CDN-hosted, verified, and intelligence-ready.",
     features: [
-      "Cluster Owner: 20 listings, full intelligence suite",
+      "Cluster Owner: 20 active live listings, free off-market cloud storage",
       "Cluster Photographer: 100 photos, CDN delivery",
       "33 Connects / month (3 loyalty bonus)",
       "Priority Bounty Task Access for your own properties",
@@ -92,7 +92,7 @@ const BUNDLES = [
     connectsBonus: 7,
     description: "Every angle of the ecosystem in one plan. List, broker, and scout simultaneously, built for the platform's most embedded power users.",
     features: [
-      "Cluster Owner: 20 listings + QuestIT Spatial",
+      "Cluster Owner: 20 active live listings, free off-market cloud storage",
       "Cluster Broker: 50 listings + Priority Lead Routing",
       "Cluster Seeker: Vault, Heatmaps, Identity Shield",
       "60 Connects / month (7 loyalty bonus)",

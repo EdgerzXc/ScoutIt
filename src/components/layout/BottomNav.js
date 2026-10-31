@@ -351,13 +351,13 @@ export default function BottomNav() {
   const isRoleActive = (roleDef) => {
     // Platform administrators hold and have access to all workspaces & roles
     const isAdmin = activeUserRoles.some((r) =>
-      ["admin", "staff", "superuser"].includes(String(r).toLowerCase().trim())
+      ["admin", "staff"].includes(String(r).toLowerCase().trim())
     );
     if (isAdmin) return true;
 
     return activeUserRoles.some((r) => {
       const lower = String(r).toLowerCase().trim();
-      if (["admin", "staff", "superuser"].includes(lower)) return true;
+      if (["admin", "staff"].includes(lower)) return true;
       if (roleDef.aliases.includes(lower) || roleDef.id === lower) return true;
       if (lower === "provider" && (roleDef.id === "photographer" || roleDef.id === "designer" || roleDef.targetRole === "provider")) {
         return true;
@@ -864,16 +864,20 @@ export default function BottomNav() {
                   Deal Rooms →
                 </Link>
               </div>
-              <Link
-                href="/dashboard?role=mc_enterprise"
-                className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/30 border border-surface-variant/80 text-xs font-mono uppercase tracking-wider text-text-muted hover:text-gold-accent transition"
-                onClick={() => {
-                  setRoleSheetOpen(false);
-                  handleRoleSelect("mc_enterprise");
-                }}
-              >
-                Enterprise Mission Control (Preview) →
-              </Link>
+              {activeUserRoles.some((r) =>
+                ["mc_enterprise", "admin", "staff"].includes(String(r).toLowerCase().trim())
+              ) && (
+                <Link
+                  href="/dashboard?role=mc_enterprise"
+                  className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/30 border border-surface-variant/80 text-xs font-mono uppercase tracking-wider text-text-muted hover:text-gold-accent transition"
+                  onClick={() => {
+                    setRoleSheetOpen(false);
+                    handleRoleSelect("mc_enterprise");
+                  }}
+                >
+                  Enterprise Mission Control (Preview) →
+                </Link>
+              )}
             </div>
           </div>
         </div>

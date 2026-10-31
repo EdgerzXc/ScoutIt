@@ -4,9 +4,16 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
+import InfoTip from "@/components/ui/InfoTip";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import styles from "@/components/pricing/PricingDetail.module.css";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  resolveMonetizationPhase,
+  evaluateMonetizationGate,
+} from "@/lib/monetizationGate";
 
 const TIERS = [
   {
@@ -16,10 +23,11 @@ const TIERS = [
     description: "Get your first space on the map.",
     connects: "1 Connect / month",
     features: [
-      "1 active listing",
+      "1 active live market listing",
+      "Unlimited free off-market cloud storage",
       "Basic fields & Google Drive photos",
       "Attach up to 2 brokers",
-      "Receive broker pitches"
+      "Receive direct inquiries & broker pitches"
     ],
     highlight: false,
     buttonText: "Current Plan"
@@ -32,7 +40,8 @@ const TIERS = [
     description: "Serious about your asset visibility.",
     connects: "6 Connects / month",
     features: [
-      "Up to 5 active listings",
+      "Up to 5 active live market listings",
+      "Unlimited free off-market cloud storage",
       "Full 10-chapter edit capacity",
       "Attach unlimited brokers",
       "Spatial Queue Priority Level 3"
@@ -48,7 +57,8 @@ const TIERS = [
     description: "Multi-asset management with deep intelligence.",
     connects: "18 Connects / month",
     features: [
-      "Up to 20 active listings",
+      "Up to 20 active live market listings",
+      "Unlimited free off-market cloud storage",
       "Accelerated QuestIT Spatial Scanning",
       "Full inquiry analytics & lead funnel",
       "Market intelligence for your area",
@@ -65,9 +75,10 @@ const TIERS = [
     description: "Institutional-grade presence.",
     connects: "40 Connects / month",
     features: [
-      "Unlimited active listings",
+      "Unlimited active live market listings",
+      "Unlimited free off-market cloud storage",
       "Dedicated white-glove curation officer",
-      "Off-market listing option",
+      "Discreet off-market whisper promotion",
       "Universe Principal buyer direct access",
       "CDN-hosted media for massive portfolios"
     ],
@@ -77,6 +88,16 @@ const TIERS = [
 ];
 
 export default function OwnerPricingPage() {
+  const phase = resolveMonetizationPhase();
+  const gateDecision = evaluateMonetizationGate({
+    feature: "owner_cloud_storage",
+    role: "owner",
+    tier: "starry",
+    phase,
+    source: "/pricing/owner",
+    silent: true,
+  });
+
   return (
     <div className="pricing-layout">
       <Header />
@@ -91,7 +112,7 @@ export default function OwnerPricingPage() {
           </Link>
           <div className={`${styles.pioneer} mb-8 p-4 rounded-xl inline-block`}>
             <p className="text-gold-bright font-mono text-xs uppercase tracking-widest font-bold">
-              ◈ PIONEER COHORT
+              ◈ {phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL ? (gateDecision.badgeText || PIONEER_ACCESS_BADGE_TEXT) : "PIONEER COHORT"}
             </p>
             <p className="text-text-primary text-sm mt-1">
               Lock in <span className="text-gold-accent font-bold">Pioneer Member</span> rates forever. Only 20 slots per role.
@@ -104,7 +125,7 @@ export default function OwnerPricingPage() {
             Manage Your <span className="text-gold-accent">Properties</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Publish your spaces with verified accuracy. Higher tiers add multi-property management, 3D floor plan conversion, inquiry analytics, and direct broker collaboration.
+            Publish your spaces with verified accuracy. Off-market digital cloud storage is always free and unlimited across all tiers. Listing limits apply strictly to active live directory publications. <InfoTip tipId="listingCapCloudStorage" label="About listing quotas and cloud storage" />
           </p>
         </header>
 

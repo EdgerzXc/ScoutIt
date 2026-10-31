@@ -28,7 +28,13 @@ const InteractiveMap = dynamic(() => import("@/components/property/InteractiveMa
 });
 import { getChapterConfig } from "./chapterConfig";
 import { PROPERTY_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
-import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera, Palette } from "lucide-react";
+import { Lock, Unlock, Zap, ChevronRight, Share2, MapPin, Eye, Search, Layers, X, Home, Users, ArrowUpRight, Copy, Check, Bed, Bath, Ruler, Car, Building2, Camera, Palette, Utensils, Bell, Sliders } from "lucide-react";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  resolveMonetizationPhase,
+  logPaywallConversionIntent,
+} from "@/lib/monetizationGate";
 import Image from "next/image";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
@@ -129,6 +135,7 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
   // below Solar keeps the blur-locked teaser. Client-trusted for now (later
   // security pass enforces server-side) — real values ship only on demo/seed data.
   const [unlocked, setUnlocked] = useState(false);
+  const phase = resolveMonetizationPhase();
   useEffect(() => { setUnlocked(canSee("deepIntel", getCurrentTier())); }, []);
   if (!fields || fields.length === 0) return null;
 
@@ -146,11 +153,12 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
     <div className="mt-8">
       <div className="h-px bg-surface-variant mb-4" />
       <button
+        type="button"
         onClick={onToggle}
         className="w-full bg-surface-alt border border-surface-variant p-4 cursor-pointer flex justify-between items-center rounded-sm hover:bg-surface-variant transition-colors active:scale-[0.99]"
       >
         <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase">
-          DEEP INTELLIGENCE // {unlocked ? "UNLOCKED" : "VERIFIED SCOUT"}
+          DEEP INTELLIGENCE // {unlocked ? (phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL ? PIONEER_ACCESS_BADGE_TEXT : "UNLOCKED") : "VERIFIED SCOUT"}
         </span>
         <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="var(--accent)" strokeWidth="1.5" className="transition-transform duration-300" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
           <path d="M1 1L5 5L9 1" />
@@ -184,7 +192,11 @@ function DeepIntelWidget({ open, onToggle, fields, values }) {
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-alt/90 rounded-b-sm backdrop-blur-md">
             <span className="font-mono text-[12px] text-gold-accent tracking-[0.12em] uppercase drop-shadow-md">SOLAR TIER UNLOCKS THIS</span>
-            <a href="/pricing/seeker" className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.4)] active:scale-[0.98]">
+            <a
+              href="/pricing/seeker"
+              onClick={() => logPaywallConversionIntent({ feature: "deep_intel", role: "seeker", tier: "solar", source: "/property/deep-intel", phase })}
+              className="no-underline font-serif text-[13px] text-background bg-gold-accent hover:bg-gold-accent-bright border-none px-6 py-2.5 rounded-sm cursor-pointer tracking-[0.04em] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.4)] active:scale-[0.98]"
+            >
               Unlock Full Intelligence →
             </a>
           </div>
@@ -617,12 +629,12 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     pill2Icon = <><circle cx="7" cy="7" r="5"/><path d="M7 2v2M7 10v2M2 7h2M10 7h2" strokeLinecap="round"/></>;
   }
 
-  // Emoji icons for the Chapter 1 editorial stat block
+  // Lucide icons for the Chapter 1 editorial stat block
   let pill1Emoji = <Bed size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />;
   let pill2Emoji = <Bath size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />;
-  if (isRestaurant)      { pill1Emoji = "🍽"; pill2Emoji = "🔪"; }
-  else if (isHospitality){ pill1Emoji = "🛎"; pill2Emoji = "👥"; }
-  else if (isVenue)      { pill1Emoji = "👥"; pill2Emoji = "🎚"; }
+  if (isRestaurant)      { pill1Emoji = <Utensils size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; pill2Emoji = <Sliders size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
+  else if (isHospitality){ pill1Emoji = <Bell size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; pill2Emoji = <Users size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
+  else if (isVenue)      { pill1Emoji = <Users size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; pill2Emoji = <Sliders size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
 
   // ── 3. Dynamic Unit Generation (Mock specs) ──────
   let dynamicUnits = [];

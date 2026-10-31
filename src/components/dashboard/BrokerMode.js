@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { getSession } from "../../lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
+import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
 import { staleCardNotice } from "../../lib/deals/delegationRevoke";
 import ScoutInsightPanel from './panels/ScoutInsightPanel';
 import MeshHero from '../ui/MeshHero';
@@ -55,15 +56,20 @@ export default function BrokerMode() {
 
   const [savedSignals, setSavedSignals] = useState([]);
   const [loadingSignals, setLoadingSignals] = useState(true);
+  const [showAllSignals, setShowAllSignals] = useState(false);
 
   useEffect(() => {
     let alive = true;
     const loadSignals = async () => {
       try {
+        const localList = getLocalSavedSignals();
         const { data: { session } } = await getSession().catch(() => ({ data: {} }));
         const token = session?.access_token;
         if (!token) {
-          if (alive) setLoadingSignals(false);
+          if (alive) {
+            setSavedSignals(localList);
+            setLoadingSignals(false);
+          }
           return;
         }
         const res = await fetch("/api/community/signals?saved=1", {
@@ -72,11 +78,24 @@ export default function BrokerMode() {
         if (res.ok) {
           const data = await res.json();
           if (alive && data?.ok && Array.isArray(data.signals)) {
-            setSavedSignals(data.signals);
+            const serverSignals = data.signals;
+            const serverIds = new Set(serverSignals.map((s) => s.id));
+            const merged = [...serverSignals];
+            for (const loc of localList) {
+              if (!serverIds.has(loc.id)) {
+                merged.push({ ...loc, isSaved: true });
+              }
+            }
+            setSavedSignals(merged);
           }
+        } else if (alive && localList.length > 0) {
+          setSavedSignals(localList);
         }
       } catch {
-        // fail gracefully
+        if (alive) {
+          const localList = getLocalSavedSignals();
+          if (localList.length > 0) setSavedSignals(localList);
+        }
       } finally {
         if (alive) setLoadingSignals(false);
       }
@@ -1262,12 +1281,20 @@ export default function BrokerMode() {
                   </span>
                 )}
               </h3>
-              <Link
-                href="/stratosphere?view=saved-signals"
-                className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
-              >
-                View all in Stratosphere →
-              </Link>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <Link
+                  href="/wishlist"
+                  className="text-[12px] font-label-caps tracking-widest uppercase text-text-secondary hover:text-gold-accent hover:underline py-2.5 px-1 -my-1"
+                >
+                  View on Your Board →
+                </Link>
+                <Link
+                  href="/stratosphere?view=radar&role=broker"
+                  className="text-[12px] font-label-caps tracking-widest uppercase text-gold-accent hover:underline py-2.5 px-1 -my-1"
+                >
+                  Explore Demands on Radar →
+                </Link>
+              </div>
             </div>
             <p className="text-xs text-text-secondary">
               Corporate inquiries, tenant requests, and landlord inventory you saved from Stratosphere Radar.
@@ -1289,16 +1316,31 @@ export default function BrokerMode() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {savedSignals.slice(0, 6).map((signal) => (
-                  <SignalDossierCard
-                    key={signal.id}
-                    signal={{ ...signal, isSaved: true }}
-                    onSelect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
-                    onConnect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(showAllSignals ? savedSignals : savedSignals.slice(0, 6)).map((signal) => (
+                    <SignalDossierCard
+                      key={signal.id}
+                      signal={{ ...signal, isSaved: true }}
+                      onSelect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                      onConnect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                    />
+                  ))}
+                </div>
+                {savedSignals.length > 6 && (
+                  <div className="flex justify-center mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllSignals((v) => !v)}
+                      className="font-mono text-xs uppercase tracking-widest text-gold-accent hover:underline py-2.5 px-4 border border-gold-accent/30 rounded-lg bg-surface/50 transition active:scale-95"
+                    >
+                      {showAllSignals
+                        ? `Show Less (6 of ${savedSignals.length}) ↑`
+                        : `Show All (${savedSignals.length}) Demands ↓`}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

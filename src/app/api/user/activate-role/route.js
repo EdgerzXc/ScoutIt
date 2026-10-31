@@ -199,6 +199,7 @@ export async function POST(request) {
       }
       roleUpdates.prc_license = digits;
       roleUpdates.prc_verified = false;
+      roleUpdates.prc_verified_at = null;
       auditMetadata.prcLicense = digits;
       auditMetadata.prcVerified = false;
     }
@@ -206,7 +207,7 @@ export async function POST(request) {
     // Retrieve existing profile to preserve held roles and ensure buyer is always included
     const { data: existingProfile, error: fetchErr } = await supabaseAdmin
       .from("user_profiles")
-      .select("id, active_roles, role, primary_mode")
+      .select("id, active_roles, role, primary_mode, adult_eligibility_status, archived_at, is_shadowbanned")
       .eq("id", userId)
       .maybeSingle();
 
@@ -215,12 +216,27 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to verify current profile." }, { status: 500 });
     }
 
+    if (existingProfile?.archived_at || existingProfile?.is_shadowbanned === true) {
+      return NextResponse.json(
+        { error: "Forbidden: Account is restricted from activating roles." },
+        { status: 403 },
+      );
+    }
+
+    if (existingProfile?.adult_eligibility_status === "underage") {
+      return NextResponse.json(
+        { error: "Forbidden: 18+ adult legal capacity is required to activate platform roles." },
+        { status: 403 },
+      );
+    }
+
     const existingRoles = Array.isArray(existingProfile?.active_roles)
       ? existingProfile.active_roles
       : [];
-    
+
     // Invariant: buyer / seeker is always active and preserved for every account
-    const consolidatedActiveRoles = Array.from(new Set([...existingRoles, role, "buyer"]));
+    const extraRoles = role === "photographer" || role === "designer" ? [role, "provider"] : [role];
+    const consolidatedActiveRoles = Array.from(new Set([...existingRoles, ...extraRoles, "buyer"]));
 
     const fullPayload = {
       ...roleUpdates,
@@ -241,7 +257,11 @@ export async function POST(request) {
         updated_at: new Date().toISOString(),
       };
       if (roleUpdates.provider_type) corePayload.provider_type = roleUpdates.provider_type;
-      if (roleUpdates.prc_license) corePayload.prc_license = roleUpdates.prc_license;
+      if (roleUpdates.prc_license) {
+        corePayload.prc_license = roleUpdates.prc_license;
+        corePayload.prc_verified = false;
+        corePayload.prc_verified_at = null;
+      }
 
       const { error: coreErr } = await supabaseAdmin
         .from("user_profiles")

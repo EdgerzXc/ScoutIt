@@ -65,15 +65,22 @@ export async function PATCH(request, { params }) {
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    // A free Open Gate request belongs to its routed recipient. Property
+    // The recipient may answer with accept/decline; the buyer (sender) may only withdraw.
+    // A free Open Gate request belongs strictly to its routed recipient. Property
     // ownership alone does not authorize answering a delegated operator or
     // broker's inbound request, and the buyer cannot accept their own send.
     if (["accepted", "declined", "connected"].includes(status)) {
+      if (deal.buyer_id && deal.buyer_id === userId) {
+        return NextResponse.json(
+          { error: "Only the recipient may answer this inquiry. The sender may only withdraw." },
+          { status: 403 },
+        );
+      }
       const { data: gateDeal, error: gateError } = await supabaseAdmin.from("deals")
         .select("open_gate_inbound").eq("id", dealId).single();
       const missingGateColumn = gateError?.code === "42703" || /does not exist|undefined_column/i.test(gateError?.message || "");
       if (gateError && !missingGateColumn) return NextResponse.json({ error: "Request authority unavailable" }, { status: 503 });
-      if (gateDeal?.open_gate_inbound === true && (deal.buyer_id === userId || !isRoutedRecipient)) {
+      if (gateDeal?.open_gate_inbound === true && !isRoutedRecipient) {
         return NextResponse.json({ error: "Only the routed recipient may answer this Open Gate request." }, { status: 403 });
       }
     }

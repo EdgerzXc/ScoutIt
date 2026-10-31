@@ -39,11 +39,22 @@ export async function GET(request) {
     // Fetch user profile for subscription tier and default role
     const { data: profile } = await supabaseAdmin
       .from("user_profiles")
-      .select("role, subscription_tier")
+      .select("role, provider_type, subscription_tier")
       .eq("id", userId)
       .maybeSingle();
 
-    const role = resolveConnectRole(rawRole || profile?.role || "seeker", "seeker");
+    const mapAliasToWalletRole = (inputRole) => {
+      if (!inputRole || typeof inputRole !== "string") return inputRole;
+      const lower = inputRole.trim().toLowerCase();
+      if (lower === "salesperson") return "broker";
+      if (lower === "operator") return "seeker";
+      if (lower === "provider") return String(profile?.provider_type || "photographer").trim().toLowerCase();
+      return inputRole;
+    };
+
+    const role = rawRole
+      ? resolveConnectRole(mapAliasToWalletRole(rawRole), "seeker")
+      : (resolveConnectRole(mapAliasToWalletRole(profile?.role || "seeker"), "seeker") || "seeker");
     if (!role) {
       return NextResponse.json(
         { error: "Invalid role specified for wallet" },

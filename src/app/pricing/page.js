@@ -5,12 +5,17 @@ import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { Search, Briefcase, Building, Camera, Layers } from "lucide-react";
 import { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  resolveMonetizationPhase,
+} from "@/lib/monetizationGate";
 
 const PERSONAS = [
   {
     id: "seeker",
     title: "Seekers & Buyers",
-    description: "Unlock the Spatial Vault, deep intelligence metrics, and identity reveal controls.",
+    description: "Unlock the Spatial Vault, deep intelligence metrics, and exclusive Off-Market Vault access for whisper inventory.",
     icon: Search,
     href: "/pricing/seeker",
     accent: "text-gold-accent",
@@ -35,7 +40,7 @@ const PERSONAS = [
   {
     id: "owner",
     title: "Property Owners",
-    description: "Accelerate 3D Spatial generation and manage your multi-asset portfolio with white-glove curation.",
+    description: "Unlimited free off-market cloud storage, scalable live market slots, and accelerated 3D Spatial generation.",
     icon: Building,
     href: "/pricing/owner",
     accent: "text-gold-accent",
@@ -64,6 +69,9 @@ const BUNDLE_CARD = {
 };
 
 export default function PricingHubPage() {
+  const phase = resolveMonetizationPhase();
+  const isPilotZeroPaywall = phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
+
   return (
     <div className="pricing-layout">
       <Header />
@@ -75,7 +83,7 @@ export default function PricingHubPage() {
 
         <header className="pricing-header z-10 relative text-center mb-16">
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            COMMERCIAL ARCHITECTURE // INTELLIGENCE TIERS
+            {isPilotZeroPaywall ? PIONEER_ACCESS_BADGE_TEXT : "COMMERCIAL ARCHITECTURE // INTELLIGENCE TIERS"}
           </span>
           <h1 className="page-title text-4xl md:text-5xl font-display-md text-on-surface mb-6 drop-shadow-lg max-w-3xl mx-auto">
             Choose Your <span className="text-gold-accent">Role</span> in the Ecosystem

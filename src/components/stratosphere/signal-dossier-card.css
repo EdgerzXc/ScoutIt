@@ -4,7 +4,7 @@
 
 .sdc-card {
   position: relative;
-  background: rgba(20, 20, 23, 0.95);
+  background: rgba(var(--surface-rgb, 18, 18, 18), 0.95);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-left: 3px solid var(--card-role-accent, var(--accent));
   border-radius: 6px;
@@ -89,6 +89,9 @@
 }
 
 .sdc-type-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.08em;
   color: var(--pill-color, var(--accent));
   font-weight: 700;
 }

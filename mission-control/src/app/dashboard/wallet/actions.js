@@ -28,11 +28,15 @@ export async function lookupUserWallet({ query }) {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanQuery);
 
   if (!isUuid) {
-    // Search by email or display_name
+    // Search by email or display_name (strip PostgREST filter delimiters first)
+    const safeSearch = cleanQuery.replace(/[(),%*\\]/g, "").trim();
+    if (!safeSearch) {
+      return { error: "Please provide a valid user ID, email, or name to search." };
+    }
     const { data: profiles } = await admin
       .from("user_profiles")
       .select("id, display_name, role, primary_mode, active_roles, subscription_tier, email")
-      .or(`email.ilike.%${cleanQuery}%,display_name.ilike.%${cleanQuery}%`)
+      .or(`email.ilike.%${safeSearch}%,display_name.ilike.%${safeSearch}%`)
       .limit(1);
 
     if (profiles && profiles.length > 0) {

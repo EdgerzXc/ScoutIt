@@ -345,7 +345,7 @@ export const LINEAR_GUIDE_DEFINITIONS = {
       { step: 2, nodeId: "community_signals_feed", title: "Explore 3D Spatial Radar", action: "Survey active demand beacons and multi-station catchment rings.", tip: "Filter by Demand, Supply, or District.", guideTarget: "spatial-signal-radar" },
       { step: 3, nodeId: "community_signals_feed", title: "Compose Signal & Choose Coverage", action: "Click 'POST A SIGNAL', select space type, and specify catchment radius (0.5km to 5.0km).", tip: "PII is scrubbed automatically.", guideTarget: "signal-composer-trigger" },
       { step: 4, nodeId: "community_signals_feed", title: "Select Identity & Trust Standing", action: "Choose Anonymous (SCOUT-XXXX) to keep private info masked while attaching your verified behavioral score.", tip: "First-time seekers display [First-Time Verified Seeker].", guideTarget: "signal-composer-identity" },
-      { step: 5, nodeId: "api_community_signals", title: "Broadcast Beacon with 7-Day Refresh", action: "Publish your signal; coordinates unlock dynamic radar pulse rings.", tip: "7-day freshness decay keeps the feed fresh.", guideTarget: "api-community-signals" },
+      { step: 5, nodeId: "api_community_signals", title: "Broadcast Beacon with 7-Day Refresh", action: "Publish your signal; coordinates unlock dynamic radar pulse rings.", tip: "7-day freshness decay keeps the feed fresh.", guideTarget: null },
       { step: 6, nodeId: "deal_room", title: "Bilateral Connect Handshake", action: "Accredited broker or owner intercepts your demand and initiates a deal proposal.", tip: "Connects spent; maximum 3 open answers.", guideTarget: "deal-room-negotiation-panel" }
     ]
   },

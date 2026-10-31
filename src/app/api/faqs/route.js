@@ -70,15 +70,23 @@ async function resolveAuthority(userId, propertyKey) {
 
   const { data: profile } = await supabaseAdmin
     .from("user_profiles")
-    .select("active_roles, prc_verified")
+    .select("role, active_roles, prc_verified")
     .eq("id", userId)
     .maybeSingle();
 
+  const ADVISOR_ROLES = new Set([
+    "broker",
+    "provider",
+    "photographer",
+    "researcher",
+    "designer",
+    "event-planner",
+  ]);
   const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
   const isAdvisor =
     profile?.prc_verified === true ||
-    roles.includes("broker") ||
-    roles.includes("provider");
+    ADVISOR_ROLES.has(String(profile?.role || "").trim().toLowerCase()) ||
+    roles.some((r) => ADVISOR_ROLES.has(String(r || "").trim().toLowerCase()));
 
   return isAdvisor
     ? { role: "advisor", tier: TIER_BY_ROLE.advisor }

@@ -4,17 +4,26 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { Bookmark, Compass, ShieldCheck } from "lucide-react";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { supabase } from "@/lib/supabaseClient";
 import { getSession } from "@/lib/authClient";
 import { classifySavedItem, liveSlugSet } from "@/lib/wishlistLiveness";
+import {
+  getLocalSavedSignals,
+  removeSignalLocally,
+  syncOfflineSignalsToAccount,
+} from "@/lib/savedSignalsClient";
 
 const REACTION_ORDER = ["Potential Fit", "Interested", "Inspired Me", "Save"];
 
 export default function WishlistPage() {
   const [offlineItems, setOfflineItems] = useState([]);
   const [cloudItems, setCloudItems] = useState([]);
+  const [offlineSignals, setOfflineSignals] = useState([]);
+  const [cloudSignals, setCloudSignals] = useState([]);
+  const [filterType, setFilterType] = useState("all"); // "all" | "spaces" | "signals"
   const [loaded, setLoaded] = useState(false);
   const [fadingOut, setFadingOut] = useState(new Set());
 
@@ -53,7 +62,7 @@ export default function WishlistPage() {
     };
   }, []);
 
-  // 1. Load Local / Offline items from device storage
+  // 1. Load Local / Offline items from device storage (Spaces + Signals)
   useEffect(() => {
     try {
       const raw = localStorage.getItem("scoutit_reactions");
@@ -63,13 +72,26 @@ export default function WishlistPage() {
           setOfflineItems(parsed);
         }
       }
-    } catch (e) {
+    } catch {
       // silently ignore corrupt local data
     }
+    setOfflineSignals(getLocalSavedSignals());
+
+    const handleSavedChanged = () => {
+      setOfflineSignals(getLocalSavedSignals());
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+    }
     setLoaded(true);
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scoutit:signal-saved-changed", handleSavedChanged);
+      }
+    };
   }, []);
 
-  // 2. Load Real Supabase Account items if authenticated
+  // 2. Load Real Supabase Account items & Saved Signals if authenticated
   useEffect(() => {
     let cancelled = false;
     const loadAccount = async () => {
@@ -105,7 +127,23 @@ export default function WishlistPage() {
           setCloudItems(mappedCloud);
           setAccountSavedIds(new Set(savedRows.map((r) => r.property_id)));
         }
-      } catch (e) {
+
+        // Fetch cloud saved signals
+        try {
+          const token = session.access_token;
+          const sigRes = await fetch("/api/community/signals?saved=1", {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (sigRes.ok) {
+            const sigJson = await sigRes.json();
+            if (!cancelled && sigJson?.ok && Array.isArray(sigJson.signals)) {
+              setCloudSignals(sigJson.signals);
+            }
+          }
+        } catch {
+          // non-blocking
+        }
+      } catch {
         // Not signed in / read failed — fallback gracefully to offline mode
       }
     };
@@ -120,49 +158,67 @@ export default function WishlistPage() {
     return offlineItems.filter((i) => i.property_id && !accountSavedIds.has(i.property_id));
   }, [offlineItems, accountSavedIds]);
 
-  const showSyncBanner = isLoggedIn && localOnlyItems.length > 0;
+  const showSyncBanner = isLoggedIn && (localOnlyItems.length > 0 || offlineSignals.length > 0);
 
-  // 1-Tap Cloud Sync / Merge
+  // 1-Tap Cloud Sync / Merge (Spaces + Signals)
   const handleSync = async () => {
-    if (merging || localOnlyItems.length === 0) return;
+    if (merging || (localOnlyItems.length === 0 && offlineSignals.length === 0)) return;
     setMerging(true);
     setMergeMessage(null);
     try {
       const { data } = await getSession();
       const token = data?.session?.access_token;
-      const res = await fetch("/api/wishlist/merge", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          items: localOnlyItems.map((it) => ({
-            property_id: it.property_id,
-            reaction_type: it.reaction_type || "Save",
-          })),
-          propertyIds: localOnlyItems.map((it) => it.property_id),
-        }),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Sync failed");
 
-      // Fold the merged ids into the known account set so the banner clears
-      const newlyAddedIds = localOnlyItems.map((it) => it.property_id);
-      setAccountSavedIds((prev) => new Set([...prev, ...newlyAddedIds]));
-      setCloudItems((prev) => [
-        ...localOnlyItems.map((it) => ({ ...it, is_cloud: true })),
-        ...prev,
-      ]);
+      let mergedSpaces = 0;
+      if (localOnlyItems.length > 0) {
+        const res = await fetch("/api/wishlist/merge", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            items: localOnlyItems.map((it) => ({
+              property_id: it.property_id,
+              reaction_type: it.reaction_type || "Save",
+            })),
+            propertyIds: localOnlyItems.map((it) => it.property_id),
+          }),
+        });
+        const result = await res.json();
+        if (res.ok) {
+          mergedSpaces = result.merged ?? 0;
+          const newlyAddedIds = localOnlyItems.map((it) => it.property_id);
+          setAccountSavedIds((prev) => new Set([...prev, ...newlyAddedIds]));
+          setCloudItems((prev) => [
+            ...localOnlyItems.map((it) => ({ ...it, is_cloud: true })),
+            ...prev,
+          ]);
+        }
+      }
 
-      const n = result.merged ?? 0;
+      if (offlineSignals.length > 0) {
+        await syncOfflineSignalsToAccount(token);
+        try {
+          const sigRes = await fetch("/api/community/signals?saved=1", {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (sigRes.ok) {
+            const sigJson = await sigRes.json();
+            if (sigJson?.ok && Array.isArray(sigJson.signals)) {
+              setCloudSignals(sigJson.signals);
+            }
+          }
+        } catch {
+          // non-blocking
+        }
+      }
+
       setMergeMessage(
-        n > 0
-          ? `${n} saved ${n === 1 ? "space" : "spaces"} synchronized to your account across devices.`
-          : "Your account already had these spaces saved."
+        "Saved spaces and follow-up signals synchronized to your account across devices."
       );
       setTimeout(() => setMergeMessage(null), 6000);
-    } catch (e) {
+    } catch {
       setMergeMessage("Couldn't sync right now. Please try again in a moment.");
     } finally {
       setMerging(false);
@@ -291,15 +347,84 @@ export default function WishlistPage() {
     return list;
   }, [displayItems]);
 
+  // Safe removal for signals across offline storage and cloud account
+  const removeSignal = useCallback((sig) => {
+    const key = sig.id;
+    setFadingOut((prev) => new Set([...prev, key]));
+    setTimeout(() => {
+      removeSignalLocally(sig.id);
+      setOfflineSignals((prev) => prev.filter((s) => s.id !== sig.id));
+      if (isLoggedIn) {
+        setCloudSignals((prev) => prev.filter((s) => s.id !== sig.id));
+        fetch(`/api/community/signals/${encodeURIComponent(sig.id)}/save`, {
+          method: "DELETE",
+        }).catch(() => {});
+      }
+      setFadingOut((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }, 250);
+  }, [isLoggedIn]);
+
+  // Compute active signal follow-up set based on interchangeable mode
+  const displaySignals = useMemo(() => {
+    const localIds = new Set(offlineSignals.map((s) => s.id));
+    if (!isLoggedIn || activeMode === "offline") {
+      return offlineSignals.map((s) => ({
+        ...s,
+        is_local: true,
+        is_cloud: cloudSignals.some((c) => c.id === s.id),
+      }));
+    } else if (activeMode === "cloud") {
+      return cloudSignals.map((s) => ({
+        ...s,
+        is_cloud: true,
+        is_local: localIds.has(s.id),
+      }));
+    } else {
+      // "all" unified mode
+      const seen = new Set();
+      const combined = [];
+      cloudSignals.forEach((c) => {
+        seen.add(c.id);
+        combined.push({
+          ...c,
+          is_cloud: true,
+          is_local: localIds.has(c.id),
+        });
+      });
+      offlineSignals.forEach((o) => {
+        if (!seen.has(o.id)) {
+          seen.add(o.id);
+          combined.push({
+            ...o,
+            is_cloud: false,
+            is_local: true,
+          });
+        }
+      });
+      return combined;
+    }
+  }, [isLoggedIn, activeMode, offlineSignals, cloudSignals]);
+
   const totalUniqueCount = useMemo(() => {
-    const ids = new Set([
+    const spaceIds = new Set([
       ...offlineItems.map((i) => i.property_id),
       ...cloudItems.map((i) => i.property_id),
     ]);
-    return ids.size;
-  }, [offlineItems, cloudItems]);
+    const signalIds = new Set([
+      ...offlineSignals.map((s) => s.id),
+      ...cloudSignals.map((s) => s.id),
+    ]);
+    return spaceIds.size + signalIds.size;
+  }, [offlineItems, cloudItems, offlineSignals, cloudSignals]);
 
-  const isEmpty = loaded && displayItems.length === 0;
+  const totalCloudCount = cloudItems.length + cloudSignals.length;
+  const totalOfflineCount = offlineItems.length + offlineSignals.length;
+
+  const isEmpty = loaded && displayItems.length === 0 && displaySignals.length === 0;
 
   return (
     <div className="page-wrapper">
@@ -340,7 +465,7 @@ export default function WishlistPage() {
                 onClick={() => setActiveMode("cloud")}
               >
                 <span className="mode-dot cloud" aria-hidden="true" />
-                CLOUD ACCOUNT ({cloudItems.length})
+                CLOUD ACCOUNT ({totalCloudCount})
               </button>
               <button
                 type="button"
@@ -350,7 +475,7 @@ export default function WishlistPage() {
                 onClick={() => setActiveMode("offline")}
               >
                 <span className="mode-dot local" aria-hidden="true" />
-                THIS DEVICE ({offlineItems.length})
+                THIS DEVICE ({totalOfflineCount})
               </button>
             </>
           ) : (
@@ -363,7 +488,7 @@ export default function WishlistPage() {
                 onClick={() => setActiveMode("offline")}
               >
                 <span className="mode-dot local" aria-hidden="true" />
-                THIS DEVICE (OFFLINE: {offlineItems.length})
+                THIS DEVICE (OFFLINE: {totalOfflineCount})
               </button>
               <Link
                 href="/login?next=%2Fwishlist"
@@ -376,6 +501,39 @@ export default function WishlistPage() {
             </>
           )}
         </nav>
+
+        {/* Item Type Sub-Filters (Spaces vs Follow-up Signals) */}
+        {loaded && (displayItems.length > 0 || displaySignals.length > 0) && (
+          <nav className="item-filter-strip" role="tablist" aria-label="Filter board by item type">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterType === "all"}
+              className={`filter-pill ${filterType === "all" ? "active" : ""}`}
+              onClick={() => setFilterType("all")}
+            >
+              ALL ITEMS ({displayItems.length + displaySignals.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterType === "spaces"}
+              className={`filter-pill ${filterType === "spaces" ? "active" : ""}`}
+              onClick={() => setFilterType("spaces")}
+            >
+              SPACES ({displayItems.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterType === "signals"}
+              className={`filter-pill ${filterType === "signals" ? "active" : ""}`}
+              onClick={() => setFilterType("signals")}
+            >
+              FOLLOW-UP SIGNALS ({displaySignals.length})
+            </button>
+          </nav>
+        )}
 
         {/* Sync Banner for Local-Only Items */}
         {showSyncBanner && (
@@ -444,30 +602,35 @@ export default function WishlistPage() {
           <div className="empty-state">
             <div className="empty-heading">
               {activeMode === "cloud"
-                ? "No cloud-synced spaces yet."
+                ? "No cloud-synced items yet."
                 : "Your board is empty."}
             </div>
             <div className="empty-subtitle">
-              {activeMode === "cloud" && offlineItems.length > 0
-                ? `You have ${offlineItems.length} saved spaces on this device. Sync them to access your board anywhere.`
-                : "Dreaming is free. Browse spaces across the Philippines and save your inspirations."}
+              {activeMode === "cloud" && (offlineItems.length > 0 || offlineSignals.length > 0)
+                ? `You have ${offlineItems.length + offlineSignals.length} saved items on this device. Sync them to access your board anywhere.`
+                : "Browse curated spaces or explore market signals across the Philippines and save your follow-ups."}
             </div>
-            {activeMode === "cloud" && offlineItems.length > 0 ? (
+            {activeMode === "cloud" && (offlineItems.length > 0 || offlineSignals.length > 0) ? (
               <button className="empty-cta" onClick={handleSync} disabled={merging}>
-                {merging ? "Syncing…" : `Sync ${offlineItems.length} Spaces to Cloud →`}
+                {merging ? "Syncing…" : `Sync ${offlineItems.length + offlineSignals.length} Items to Cloud →`}
               </button>
             ) : (
-              <Link href="/property" className="empty-cta">
-                Start Exploring Spaces →
-              </Link>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "24px" }}>
+                <Link href="/property" className="empty-cta" style={{ marginTop: 0 }}>
+                  Start Exploring Spaces →
+                </Link>
+                <Link href="/stratosphere?view=radar" className="empty-cta" style={{ marginTop: 0 }}>
+                  Explore Live Radar →
+                </Link>
+              </div>
             )}
           </div>
         )}
 
         {/* Populated Board Content */}
-        {loaded && displayItems.length > 0 && (
+        {loaded && (displayItems.length > 0 || displaySignals.length > 0) && (
           <div className="board-content">
-            {grouped.map((group) => (
+            {(filterType === "all" || filterType === "spaces") && displayItems.length > 0 && grouped.map((group) => (
               <section key={group.type} className="reaction-group" aria-labelledby={`group-${group.type}`}>
                 <h2 id={`group-${group.type}`} className="group-label">
                   {group.type} ({group.items.length})
@@ -561,6 +724,133 @@ export default function WishlistPage() {
                 </div>
               </section>
             ))}
+
+            {filterType === "spaces" && displayItems.length === 0 && (
+              <div className="empty-subfilter-state">
+                <p className="empty-subfilter-title">No spaces saved in this view</p>
+                <Link href="/property" className="empty-subfilter-link">
+                  Start Exploring Spaces →
+                </Link>
+              </div>
+            )}
+
+            {/* Follow-up Signals Section */}
+            {(filterType === "all" || filterType === "signals") && displaySignals.length > 0 && (
+              <section className="reaction-group" aria-labelledby="signals-follow-up-heading" style={{ marginTop: (filterType === "all" && displayItems.length > 0) ? "40px" : "0" }}>
+                <div className="signals-header-row">
+                  <div>
+                    <span className="signals-kicker">STRATOSPHERE COMMUNITY · RADAR FOLLOW-UPS</span>
+                    <h2 id="signals-follow-up-heading" className="group-label" style={{ borderBottom: "none", paddingBottom: "2px" }}>
+                      Follow-Up Signals ({displaySignals.length})
+                    </h2>
+                    <p className="signals-desc-sub">
+                      Market opportunities, requests, and updates bookmarked for follow-up on this board.
+                    </p>
+                  </div>
+                  <Link href="/stratosphere?view=radar" className="signals-radar-link">
+                    <Compass size={14} aria-hidden="true" />
+                    EXPLORE LIVE RADAR →
+                  </Link>
+                </div>
+
+                <div className="cards-grid">
+                  {displaySignals.map((sig, index) => {
+                    const key = sig.id;
+                    const area = sig.requirements?.area;
+                    const budget = sig.requirements?.budget;
+                    const spaceType = sig.requirements?.space_type;
+
+                    return (
+                      <article
+                        key={key}
+                        className={`board-card stagger-enter ${fadingOut.has(key) ? "fading" : ""}`}
+                        style={{ '--i': index }}
+                      >
+                        {/* Top Header Row */}
+                        <div className="card-top-row">
+                          <div className="card-breadcrumbs">
+                            <span className="cat-text" style={{ color: "var(--accent-bright)", fontWeight: 700 }}>
+                              {sig.signal_type ? sig.signal_type.replace(/_/g, " ").toUpperCase() : "COMMUNITY SIGNAL"}
+                            </span>
+                            {(sig.district || sig.city) && <span className="meta-dot">·</span>}
+                            {(sig.district || sig.city) && (
+                              <span className="city-text">{sig.district ? `${sig.district}, ${sig.city}` : sig.city}</span>
+                            )}
+                            {sig.radiusKm > 0 && (
+                              <span className="radius-zone-pill">({sig.radiusKm}km zone)</span>
+                            )}
+                          </div>
+
+                          <div className="card-badge-cluster">
+                            {isLoggedIn && (
+                              <span
+                                className={`sync-tag ${sig.is_cloud ? "sync-cloud" : "sync-device"}`}
+                                title={sig.is_cloud ? "Saved to your Cloud Account" : "Saved on this device only"}
+                              >
+                                {sig.is_cloud ? "● CLOUD" : "○ DEVICE"}
+                              </span>
+                            )}
+                            <span className="signal-board-badge">
+                              <Bookmark size={11} aria-hidden="true" /> FOLLOW-UP
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Title & Specs */}
+                        <div className="card-title-area">
+                          <Link
+                            href={`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`}
+                            className="card-title-link"
+                          >
+                            <h3 className="card-title">{sig.title || "Community Space Signal"}</h3>
+                          </Link>
+                          {(spaceType || area || budget) && (
+                            <div className="signal-specs-strip">
+                              {spaceType && <span className="spec-pill">{spaceType}</span>}
+                              {area && <span className="spec-pill">{area} sqm</span>}
+                              {budget && <span className="spec-pill">{budget}</span>}
+                            </div>
+                          )}
+                          {sig.behavioralBadge && (
+                            <div className="signal-trust-chip">
+                              <ShieldCheck size={12} aria-hidden="true" />
+                              <span>{sig.behavioralBadge}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Card Actions Row */}
+                        <div className="card-actions-row">
+                          <Link
+                            href={`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`}
+                            className="card-explore-btn"
+                          >
+                            EXPLORE ON RADAR <span className="arrow-glyph" aria-hidden="true">→</span>
+                          </Link>
+                          <button
+                            className="card-remove-btn"
+                            onClick={() => removeSignal(sig)}
+                            aria-label={`Remove signal ${sig.title || sig.id} from board`}
+                          >
+                            <span className="remove-icon" aria-hidden="true">✕</span>
+                            <span className="remove-text">REMOVE</span>
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {filterType === "signals" && displaySignals.length === 0 && (
+              <div className="empty-subfilter-state">
+                <p className="empty-subfilter-title">No follow-up signals saved in this view</p>
+                <Link href="/stratosphere?view=radar" className="empty-subfilter-link">
+                  Explore Market Signals on Radar →
+                </Link>
+              </div>
+            )}
 
             <div className="board-footer">
               <span className="footer-status-pill">
@@ -728,6 +1018,86 @@ export default function WishlistPage() {
           background: rgba(var(--accent-rgb), 0.12);
           border-color: var(--accent);
           color: var(--accent-bright);
+        }
+
+        /* Item Type Sub-filters */
+        .item-filter-strip {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: -16px 0 28px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          padding-bottom: 4px;
+        }
+
+        .item-filter-strip::-webkit-scrollbar {
+          display: none;
+        }
+
+        .filter-pill {
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 14px;
+          min-height: 44px;
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 9999px;
+          color: var(--text-secondary);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: background 0.2s, border-color 0.2s, color 0.2s;
+          touch-action: manipulation;
+        }
+
+        .filter-pill:hover {
+          border-color: rgba(var(--accent-rgb), 0.4);
+          color: var(--text-primary);
+        }
+
+        .filter-pill.active {
+          background: rgba(var(--accent-rgb), 0.12);
+          border-color: var(--accent);
+          color: var(--accent-bright);
+          font-weight: 600;
+        }
+
+        .empty-subfilter-state {
+          padding: 48px 24px;
+          text-align: center;
+          background: var(--surface2);
+          border: 1px dashed var(--border);
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .empty-subfilter-title {
+          font-family: var(--font-mono), monospace;
+          font-size: 13px;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin: 0;
+        }
+
+        .empty-subfilter-link {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--accent-bright);
+          text-decoration: underline;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
         }
 
         /* Account sync prompt */
@@ -1148,6 +1518,110 @@ export default function WishlistPage() {
           font-size: 12px;
         }
 
+        .signals-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          margin-bottom: 16px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--border-solid);
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .signals-kicker {
+          display: block;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: var(--accent);
+          margin-bottom: 4px;
+        }
+
+        .signals-desc-sub {
+          font-size: 12px;
+          color: var(--text-secondary);
+          margin: 4px 0 0 0;
+          line-height: 1.4;
+        }
+
+        .signals-radar-link {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--accent-bright);
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          text-decoration: none;
+          padding: 6px 0;
+          min-height: 44px;
+          transition: color 0.15s ease;
+        }
+
+        .signals-radar-link:hover {
+          color: var(--accent);
+          text-decoration: underline;
+        }
+
+        .signal-board-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: rgba(var(--accent-rgb), 0.12);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
+          color: var(--accent-bright);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-weight: 700;
+        }
+
+        .radius-zone-pill {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--accent-bright);
+          margin-left: 6px;
+        }
+
+        .signal-specs-strip {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 8px;
+        }
+
+        .spec-pill {
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 4px;
+          padding: 3px 8px;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .signal-trust-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--accent-bright);
+          margin-top: 8px;
+          background: rgba(var(--accent-rgb), 0.08);
+          padding: 3px 8px;
+          border-radius: 4px;
+          border: 1px solid rgba(var(--accent-rgb), 0.2);
+        }
+
         .board-footer {
           display: flex;
           justify-content: center;
@@ -1219,12 +1693,14 @@ export default function WishlistPage() {
         }
 
         /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): scoped styles */
-        :global(body.light-mode) .mode-tab {
+        :global(body.light-mode) .mode-tab,
+        :global(body.light-mode) .filter-pill {
           background: var(--surface);
           border-color: var(--border-solid);
           color: var(--text-secondary);
         }
-        :global(body.light-mode) .mode-tab.active {
+        :global(body.light-mode) .mode-tab.active,
+        :global(body.light-mode) .filter-pill.active {
           background: var(--accent-dim);
           border-color: var(--accent);
           color: var(--accent);

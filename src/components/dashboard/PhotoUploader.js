@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Lock, X } from 'lucide-react';
 import { uploadPropertyPhoto } from '../../lib/storage';
 import { useDashboard } from '../../context/DashboardContext';
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -84,116 +85,134 @@ export default function PhotoUploader({ photos, onChange, onSetImage, isPro = fa
       {error && <div className="text-error text-[12px] font-mono bg-error/10 border border-error/20 p-2 rounded uppercase tracking-wider">{error}</div>}
       
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {currentPhotos.map((photoUrl, index) => (
-          <button type="button" aria-label={`Upload photo ${index + 1}`}
-            key={index} 
-            className={`block w-full text-left relative aspect-video bg-surface-alt border rounded overflow-hidden group flex flex-col items-center justify-center cursor-pointer transition duration-300 ${
-              dragOverIndex === index 
-                ? 'border-gold-accent border-2 bg-gold-accent/5 scale-[1.02] shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)] z-10' 
-                : 'border-surface-variant hover:border-gold-accent/50'
-            }`}
-            onClick={() => {
-              if (uploadingIndex === null) {
-                fileInputRefs.current[index]?.click();
-              }
-            }}
-            onDragOver={(e) => onDragOver(e, index)}
-            onDragLeave={onDragLeave}
-            onDrop={(e) => onDrop(e, index)}
-          >
-            <input 
-              type="file" 
-              accept="image/jpeg, image/png"
-              className="hidden"
-              ref={el => fileInputRefs.current[index] = el}
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleUpload(index, e.target.files[0]);
-                }
-                // Reset value so same file can be uploaded again if needed
-                e.target.value = '';
-              }}
-            />
-            
-            {uploadingIndex === index ? (
-              <div className="flex flex-col items-center justify-center h-full w-full bg-background/80 backdrop-blur-sm text-gold-accent z-20">
-                <div className="relative w-10 h-10 flex items-center justify-center mb-3">
-                  <svg className="animate-spin absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"></circle>
-                  </svg>
-                  <svg className="animate-spin absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span className="absolute text-[12px] font-mono font-bold">{uploadProgress}%</span>
-                </div>
-                <div className="w-2/3 bg-surface-variant rounded-full h-1 mb-2 overflow-hidden">
-                  <div className="bg-gold-accent h-1 rounded-full transition duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
-                </div>
-                <span className="text-[12px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
-              </div>
-            ) : photoUrl && typeof photoUrl === 'string' && photoUrl.trim() !== "" ? (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoUrl} alt={`Property view ${index + 1}`} className="object-cover w-full h-full" />
-                <div className="absolute inset-0 bg-background/80 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                  <span className="text-white text-[12px] font-mono bg-black/50 px-2 py-1 rounded backdrop-blur border border-white/20">CLICK TO REPLACE</span>
-                  <button 
-                    className="min-h-11 text-white text-[12px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newPhotos = [...currentPhotos];
-                      newPhotos[index] = ""; // Clear content, keep slot
-                      onChange(newPhotos);
-                      if (index === 0 && onSetImage) onSetImage("");
-                    }}
-                  >
-                    CLEAR SLOT
-                  </button>
-                </div>
-                {currentPhotos.length > 5 && (
-                  <button 
-                    className="absolute top-2 right-2 bg-error text-white rounded-full min-h-11 min-w-11 flex items-center justify-center shadow hover:scale-110 transition-transform z-10 text-xs"
-                    onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
-                    aria-label="Remove photo"
-                    title="Remove Photo Slot"
-                  >
-                    ✕
-                  </button>
-                )}
-                {index === 0 && (
-                  <div className="absolute bottom-2 left-2 bg-gold-accent text-background text-[12px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow">
-                    Primary
+        {currentPhotos.map((photoUrl, index) => {
+          const hasPhoto = Boolean(photoUrl && typeof photoUrl === 'string' && photoUrl.trim() !== "");
+          return (
+            <div
+              key={index}
+              className={`relative aspect-video bg-surface-alt border rounded overflow-hidden group transition duration-300 ${
+                dragOverIndex === index
+                  ? 'border-gold-accent border-2 bg-gold-accent/5 scale-[1.02] shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)] z-10'
+                  : 'border-surface-variant hover:border-gold-accent/50'
+              }`}
+              onDragOver={(e) => onDragOver(e, index)}
+              onDragLeave={onDragLeave}
+              onDrop={(e) => onDrop(e, index)}
+            >
+              <input
+                type="file"
+                accept="image/jpeg, image/png"
+                className="hidden"
+                ref={(el) => { fileInputRefs.current[index] = el; }}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleUpload(index, e.target.files[0]);
+                  }
+                  // Reset value so same file can be uploaded again if needed
+                  e.target.value = '';
+                }}
+              />
+              <button
+                type="button"
+                aria-label={`Upload photo ${index + 1}`}
+                className="block w-full h-full text-left flex flex-col items-center justify-center cursor-pointer"
+                onClick={() => {
+                  if (uploadingIndex === null) {
+                    fileInputRefs.current[index]?.click();
+                  }
+                }}
+              >
+                {uploadingIndex === index ? (
+                  <div className="flex flex-col items-center justify-center h-full w-full bg-background/80 backdrop-blur-sm text-gold-accent z-20">
+                    <div className="relative w-10 h-10 flex items-center justify-center mb-3">
+                      <svg className="animate-spin absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"></circle>
+                      </svg>
+                      <svg className="animate-spin absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="absolute text-[12px] font-mono font-bold">{uploadProgress}%</span>
+                    </div>
+                    <div className="w-2/3 bg-surface-variant rounded-full h-1 mb-2 overflow-hidden">
+                      <div className="bg-gold-accent h-1 rounded-full transition duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                    <span className="text-[12px] uppercase tracking-widest font-mono animate-pulse">Uploading...</span>
+                  </div>
+                ) : hasPhoto ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photoUrl} alt={`Property view ${index + 1}`} className="object-cover w-full h-full" />
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full p-2 group-hover:text-gold-accent transition">
+                    <div className="flex flex-col items-center justify-center flex-1 transition-transform group-hover:-translate-y-1">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      <span className="text-[12px] uppercase tracking-widest font-mono text-center px-2">
+                        {index === 0 ? "Upload Primary" : "Upload Photo"}
+                      </span>
+                    </div>
                   </div>
                 )}
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center w-full h-full p-2 group-hover:text-gold-accent transition">
-                <div className="flex flex-col items-center justify-center flex-1 transition-transform group-hover:-translate-y-1">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
-                  </svg>
-                  <span className="text-[12px] uppercase tracking-widest font-mono text-center px-2">
-                    {index === 0 ? "Upload Primary" : "Upload Photo"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </button>
-        ))}
+              </button>
+
+              {uploadingIndex !== index && hasPhoto && (
+                <>
+                  <div className="pointer-events-none absolute inset-0 bg-background/80 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    <span className="text-white text-[12px] font-mono bg-black/50 px-2 py-1 rounded backdrop-blur border border-white/20">CLICK TO REPLACE</span>
+                    <button
+                      type="button"
+                      className="pointer-events-auto min-h-11 text-white text-[12px] font-mono bg-error/80 hover:bg-error px-2 py-1 rounded backdrop-blur border border-white/20 transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newPhotos = [...currentPhotos];
+                        newPhotos[index] = ""; // Clear content, keep slot
+                        onChange(newPhotos);
+                        if (index === 0 && onSetImage) onSetImage("");
+                      }}
+                    >
+                      CLEAR SLOT
+                    </button>
+                  </div>
+                  {currentPhotos.length > 5 && (
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 bg-error text-white rounded-full min-h-11 min-w-11 flex items-center justify-center shadow hover:scale-110 transition-transform z-10 text-xs"
+                      onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
+                      aria-label="Remove photo"
+                      title="Remove Photo Slot"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                  {index === 0 && (
+                    <div className="pointer-events-none absolute bottom-2 left-2 bg-gold-accent text-background text-[12px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow">
+                      Primary
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
       
       {maxReached ? (
-        <button 
-          className="mt-2 py-3 bg-gradient-to-r from-gold-accent to-gold-bright text-background hover:scale-[1.01] rounded text-xs font-bold tracking-widest uppercase transition-transform shadow-lg"
-          onClick={() => { if(addToast) addToast("Upgrade to PRO to unlock more photo slots!", "🔒"); }}
+        <button
+          type="button"
+          className="mt-2 min-h-11 py-3 bg-gradient-to-r from-gold-accent to-gold-bright text-background hover:scale-[1.01] rounded text-xs font-bold tracking-widest uppercase transition-transform shadow-lg flex items-center justify-center gap-2"
+          onClick={() => { if(addToast) addToast("Upgrade to PRO to unlock more photo slots!", "info"); }}
         >
-          🔒 UPGRADE TO PRO FOR MORE PHOTOS
+          <Lock size={14} />
+          <span>UPGRADE TO PRO FOR MORE PHOTOS</span>
         </button>
       ) : (
-        <button 
-          className="mt-2 py-2 border border-dashed border-gold-accent/50 text-gold-accent hover:bg-gold-accent/10 rounded text-sm font-label-caps tracking-widest uppercase transition"
+        <button
+          type="button"
+          className="mt-2 min-h-11 py-2 border border-dashed border-gold-accent/50 text-gold-accent hover:bg-gold-accent/10 rounded text-sm font-label-caps tracking-widest uppercase transition"
           onClick={() => onChange([...currentPhotos, ""])}
         >
           + Add Another Slot

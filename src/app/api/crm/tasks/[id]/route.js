@@ -4,6 +4,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
 import { notifyUser } from "@/lib/notifications";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { serializeTask, toTaskRow, updateTaskSchema } from "@/lib/crm/taskModel";
 
 export const dynamic = "force-dynamic";
@@ -74,11 +75,15 @@ export async function PATCH(request, { params }) {
         .select("buyer_id, broker_id, properties(owner_id)")
         .eq("id", access.task.deal_id)
         .single();
-      const allowed = !dealError && deal && [
-        deal.buyer_id,
-        deal.broker_id,
-        deal.properties?.owner_id,
-      ].includes(input.assigneeUserId);
+      const allowed =
+        !dealError &&
+        deal &&
+        ([
+          deal.buyer_id,
+          deal.broker_id,
+          deal.properties?.owner_id,
+        ].includes(input.assigneeUserId) ||
+          (await isRoutedDealRecipient(supabaseAdmin, access.task.deal_id, input.assigneeUserId)));
       if (!allowed) {
         return NextResponse.json(
           { error: "Tasks can only be assigned to a party on the linked deal" },

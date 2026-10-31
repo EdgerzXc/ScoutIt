@@ -227,8 +227,12 @@ const GUIDES = {
  * @returns {PageGuide & { steps: GuideStep[] }}
  */
 export function guideForPath(pathname, role = null) {
-  const segment = String(pathname || "").split("?")[0].split("/").filter(Boolean)[0];
-  const guide = GUIDES[segment] || DEFAULT_GUIDE;
+  const parts = String(pathname || "").split("?")[0].split("/").filter(Boolean);
+  const segment = parts[0];
+  let guide = GUIDES[segment] || DEFAULT_GUIDE;
+  if (segment === "property" && parts.length === 1) {
+    guide = GUIDES.discover;
+  }
   const steps = (role && guide.byRole?.[role]) || guide.steps;
   return { ...guide, steps };
 }

@@ -96,17 +96,20 @@ test('ambient rail stays inside the universal header and exposes manual controls
   ).not.toBe(initialAmbientState);
 
   const isMobile = page.viewportSize().width < 900;
-  const displayControl = isMobile
-    ? page.getByRole('button', { name: /Bottom Nav: Theme/i })
-    : header.getByRole('button', { name: /Help & Display \(/i });
-
-  await displayControl.click();
-  if (!isMobile) {
+  if (isMobile) {
+    const menu = page.getByRole('button', { name: 'Menu', exact: true });
+    await expect.poll(async () => {
+      if (await menu.getAttribute('aria-expanded') !== 'true') await menu.click();
+      return menu.getAttribute('aria-expanded');
+    }).toBe('true');
+    await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
+  } else {
+    const displayControl = header.getByRole('button', { name: /Help & Display \(/i });
+    await displayControl.click();
     await expect(displayControl).toHaveAttribute('aria-expanded', 'true');
   }
-  const settingsPanel = isMobile
-    ? page.locator('.theme-sheet').filter({ hasText: 'Help & Display' })
-    : page.locator('.toolbox-float').filter({ hasText: 'Help & Display' });
+
+  const settingsPanel = page.locator('.toolbox-float').filter({ hasText: 'Help & Display' });
   await expect(settingsPanel).toBeVisible();
 
   const layout = await header.evaluate((element) => ({

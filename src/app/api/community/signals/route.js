@@ -113,9 +113,18 @@ export async function GET(request) {
 }
 
 function accountClassFor(profile) {
-  const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
-  if (roles.includes("broker")) return "broker";
-  if (roles.includes("owner")) return "owner";
+  const rawList = [
+    ...(Array.isArray(profile?.active_roles) ? profile.active_roles : []),
+    profile?.role,
+  ];
+  const roles = new Set(
+    rawList
+      .filter((r) => typeof r === "string" && r.trim().length > 0)
+      .map((r) => r.trim().toLowerCase())
+  );
+  if (roles.has("broker")) return "broker";
+  if (roles.has("owner")) return "owner";
+  if (roles.has("operator") || roles.has("co-operator")) return "business";
   return "standard";
 }
 
@@ -164,7 +173,7 @@ export async function POST(request) {
     try {
       const { data } = await supabaseAdmin
         .from("user_profiles")
-        .select("active_roles, is_shadowbanned, archived_at")
+        .select("role, active_roles, is_shadowbanned, archived_at")
         .eq("id", userId)
         .maybeSingle();
       profile = data || null;

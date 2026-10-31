@@ -294,21 +294,26 @@ export default function OwnerMode() {
 
         {/* Secondary Accordion / Drawer: More ways to add */}
         <div className="border border-white/[0.06] rounded-xl bg-surface/20 backdrop-blur-md overflow-hidden transition-colors duration-200">
-          <button
-            type="button"
-            onClick={() => setShowAdvancedIngest(prev => !prev)}
-            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xs uppercase tracking-[0.14em] text-text-muted">
-                More ways to add <InfoTip tipId="bulkIngest" label="About bulk upload options" />
+          <div className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedIngest(prev => !prev)}
+              className="flex-1 flex items-center justify-between text-left bg-transparent border-0 p-0 cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs uppercase tracking-[0.14em] text-text-muted">
+                  More ways to add
+                </span>
+                <span className="text-[12px] text-text-muted font-body">(Spreadsheets, Custom Specs, 3D Tours)</span>
+              </div>
+              <span className="text-text-muted text-sm transition-transform duration-200" style={{ transform: showAdvancedIngest ? "rotate(180deg)" : "rotate(0deg)" }}>
+                ▼
               </span>
-              <span className="text-[12px] text-text-muted font-body">(Spreadsheets, Custom Specs, 3D Tours)</span>
+            </button>
+            <div className="ml-2 flex items-center">
+              <InfoTip tipId="bulkIngest" label="About bulk upload options" />
             </div>
-            <span className="text-text-muted text-sm transition-transform duration-200" style={{ transform: showAdvancedIngest ? "rotate(180deg)" : "rotate(0deg)" }}>
-              ▼
-            </span>
-          </button>
+          </div>
 
           {showAdvancedIngest && (
             <div className="p-6 pt-2 grid md:grid-cols-3 gap-4 border-t border-white/[0.04] animate-[fadeIn_0.2s_ease]">
@@ -1075,9 +1080,15 @@ export default function OwnerMode() {
         </div>
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
             {activeListing.pipelineStatus !== 'ai_drafting' && (
-              <Link href={`/property/${activeListing.slug || activeListing.id}`} className="inline-flex min-h-11 items-center justify-center rounded bg-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)] transition-opacity hover:opacity-90 active:scale-95">
-                View Listing
-              </Link>
+              activeListing.lifecycleState === 'off_market' || activeListing.pipelineStatus === 'off_market' ? (
+                <Link href={`/off-market?slug=${encodeURIComponent(activeListing.slug || activeListing.id)}`} className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/10 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-accent shadow-[0_0_12px_rgba(var(--accent-rgb),0.15)] transition hover:bg-gold-accent hover:text-background active:scale-95">
+                  View Off-Market
+                </Link>
+              ) : (
+                <Link href={`/property/${activeListing.slug || activeListing.id}`} className="inline-flex min-h-11 items-center justify-center rounded bg-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)] transition-opacity hover:opacity-90 active:scale-95">
+                  View Listing
+                </Link>
+              )
             )}
             <button 
               className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-accent transition hover:bg-gold-accent/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
@@ -1109,16 +1120,44 @@ export default function OwnerMode() {
             >
               ✦ 3D Spatial Studio
             </button>
-            <button
-              className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface"
-              onClick={() => {
-                if(window.confirm("Withdraw this property from the market? Brokers will no longer see it.")) {
-                  closeListing(activeListing.id);
-                }
-              }}
-            >
-              Withdraw
-            </button>
+            {activeListing.lifecycleState === 'off_market' || activeListing.pipelineStatus === 'off_market' ? (
+              <button
+                type="button"
+                className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/15 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background active:scale-95"
+                onClick={() => publishListing(activeListing.id)}
+              >
+                Publish to Live
+              </button>
+            ) : activeListing.lifecycleState === 'live' || activeListing.pipelineStatus === 'approved' ? (
+              <button
+                type="button"
+                className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface"
+                onClick={() => {
+                  if (window.confirm("Move this property off-market into your private cloud vault? It will be removed from the public live directory and free up 1 listing slot.")) {
+                    closeListing(activeListing.id);
+                  }
+                }}
+              >
+                Move Off-Market
+              </button>
+            ) : (
+              <div className="col-span-2 sm:col-span-auto flex gap-2">
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/15 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background active:scale-95"
+                  onClick={() => publishListing(activeListing.id)}
+                >
+                  Publish to Live
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface"
+                  onClick={() => closeListing(activeListing.id)}
+                >
+                  Store Off-Market
+                </button>
+              </div>
+            )}
         </div>
       </div>
 
@@ -1141,21 +1180,58 @@ export default function OwnerMode() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="font-label-caps text-[12px] tracking-[0.12em] text-text-secondary">LIFECYCLE</p>
-            <h2 id="listing-lifecycle-heading" className="mt-1 text-sm text-on-surface">{activeListing.lifecycleState === "off_market" ? "OFF-MARKET / RECOVERABLE" : "LIVE MARKET ACCESS"}</h2>
+            <h2 id="listing-lifecycle-heading" className="mt-1 text-sm text-on-surface">
+              {activeListing.lifecycleState === "off_market" ? "OFF-MARKET / PRIVATE CLOUD VAULT" : activeListing.lifecycleState === "live" ? "LIVE MARKET ACCESS" : "DRAFT STAGING"}
+            </h2>
           </div>
-          <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary">{activeListing.lifecycleState || activeListing.pipelineStatus || "DRAFT"}</span>
+          <span className="rounded border border-surface-variant px-3 py-2 font-label-caps text-[12px] tracking-widest text-text-secondary">
+            {activeListing.lifecycleState || activeListing.pipelineStatus || "DRAFT"}
+          </span>
         </div>
+
         {activeListing.lifecycleState === "off_market" && (
-          <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
-            <input
-              type="checkbox"
-              className="h-5 w-5 accent-gold-accent"
-              checked={activeListing.quietlyOpenToOffers === true || activeListing.quietly_open_to_offers === true}
-              onChange={(event) => updateListing(activeListing.id, { quietly_open_to_offers: event.target.checked })}
-            />
-            <span><strong className="text-on-surface">Quietly open to offers</strong><br />Only entitled off-market viewers can see this listing, and contact appears only when this is enabled.</span>
-          </label>
+          <div className="mt-4 pt-4 border-t border-surface-variant space-y-3">
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Stored in your private digital cloud at zero quota cost. Excluded from public search, radar, and Google indexing.
+            </p>
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
+              <input
+                type="checkbox"
+                className="h-5 w-5 accent-gold-accent"
+                checked={activeListing.quietlyOpenToOffers === true || activeListing.quietly_open_to_offers === true}
+                onChange={(event) => updateListing(activeListing.id, { quietly_open_to_offers: event.target.checked })}
+              />
+              <span>
+                <strong className="text-on-surface">Quietly open to offers</strong>
+                <br />
+                Permits verified Universe Seekers (₱2,499/mo) to discover this property in the Metropolis Off-Market Vault.
+              </span>
+            </label>
+          </div>
         )}
+
+        <div className="mt-4 pt-4 border-t border-surface-variant">
+          <label className="block font-label-caps text-[12px] tracking-[0.12em] text-text-secondary mb-2" htmlFor="contact-preference-select">
+            INQUIRY ROUTING PREFERENCE
+          </label>
+          <select
+            id="contact-preference-select"
+            className="w-full sm:w-auto min-h-11 rounded border border-surface-variant bg-surface px-3 py-2 text-base md:text-sm text-on-surface focus:border-gold-accent focus:outline-none"
+            value={activeListing.details?.contact_preference || "owner_and_brokers"}
+            onChange={(e) => updateListing(activeListing.id, { contact_preference: e.target.value })}
+          >
+            <option value="owner_and_brokers">Direct &amp; Represented Brokers (Recommended)</option>
+            <option value="owner_only">Direct to Owner Only (Bypass Brokers)</option>
+            <option value="broker_only">Authorized Brokers Only (No Direct Inquiries)</option>
+          </select>
+          <p className="mt-1.5 text-xs text-text-secondary leading-relaxed">
+            {activeListing.details?.contact_preference === "owner_only"
+              ? "All incoming inquiries route directly to your private workspace, bypassing broker representations."
+              : activeListing.details?.contact_preference === "broker_only"
+              ? "Inquiries must go through an active accredited broker on your roster."
+              : "Inquiries route to active accredited brokers first, or directly to you if unassigned."}
+          </p>
+        </div>
         <div className="mt-5 border-t border-surface-variant pt-4">
           <button type="button" className="min-h-11 w-full text-left font-label-caps text-[12px] tracking-[0.12em] text-error hover:text-on-surface" aria-expanded={dangerOpen} aria-controls="listing-danger-zone" onClick={() => setDangerOpen((open) => { if (open) { setRemovalTitle(""); setRemovalPassword(""); setRemovalCaptchaToken(""); removalTurnstileRef.current?.reset(); } return !open; })}>
             {dangerOpen ? "▾ CLOSE DANGER ZONE" : "▸ OPEN DANGER ZONE"}

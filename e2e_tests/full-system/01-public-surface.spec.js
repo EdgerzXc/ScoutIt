@@ -10,7 +10,7 @@ const PUBLIC_ROUTES = [
   { path: '/', anchor: /scout/i },
   { path: '/about', anchor: /scout/i },
   { path: '/about-you', anchor: /center|about you/i },
-  { path: '/discover', anchor: /Discovery|Spotlights/i },
+  { path: '/discover', anchor: /director|space|propert/i },
   { path: '/property', anchor: /director|space|propert/i },
   { path: '/intel', anchor: /intel/i },
   { path: '/brokers', anchor: /broker/i },
@@ -81,7 +81,7 @@ test('metropolis category surface stays operable', async ({ page }) => {
   await helpPanel.getByRole('button', { name: 'Close Help & Display' }).click();
   await expect(helpPanel).toBeHidden();
 
-  const commercialCategory = page.getByRole('button', { name: 'Commercial' });
+  const commercialCategory = page.getByRole('button', { name: /Commercial/i });
   await expect(commercialCategory).toBeVisible();
   await commercialCategory.click();
   await expect(commercialCategory).toHaveAttribute('aria-pressed', 'true');
@@ -89,7 +89,8 @@ test('metropolis category surface stays operable', async ({ page }) => {
   const categorySearch = page.locator('.metro-search');
   await expect(categorySearch).toBeVisible();
   await expect(categorySearch).toHaveAttribute('aria-label', 'Search Commercial spaces');
-  await expect(page.getByRole('heading', { name: 'No commercial previews yet' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Commercial Spaces/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Cyber Sigma/i })).toBeVisible();
 });
 test('unknown route returns the 404 surface, not a crash', async ({ page }) => {
   const response = await page.goto('/definitely-not-a-real-page-e2e', {

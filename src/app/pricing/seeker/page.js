@@ -4,9 +4,16 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ConnectsExplainer from "@/components/pricing/ConnectsExplainer";
 import PilotPaymentControls, { PilotPaymentNotice } from "@/components/pricing/PilotPaymentControls";
+import InfoTip from "@/components/ui/InfoTip";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import styles from "@/components/pricing/PricingDetail.module.css";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  resolveMonetizationPhase,
+  evaluateMonetizationGate,
+} from "@/lib/monetizationGate";
 
 const TIERS = [
   {
@@ -19,7 +26,8 @@ const TIERS = [
       "View public photos & specifications",
       "Full editorial property intel",
       "Unlimited private saves on your device",
-      "Anonymous on-device board"
+      "Anonymous on-device board",
+      "Off-Market Vault: Locked"
     ],
     highlight: false,
     buttonText: "Current Plan"
@@ -34,7 +42,8 @@ const TIERS = [
       "Deep Intel: Cap rates, noise ratings & zoning",
       "High-resolution property photography",
       "Guide Wizard property matcher",
-      "Anonymous connect proxy enabled"
+      "Anonymous connect proxy enabled",
+      "Off-Market Vault: Locked"
     ],
     highlight: false,
     buttonText: "Upgrade to Solar"
@@ -50,7 +59,8 @@ const TIERS = [
       "Drone heatmaps & aerial spatial intel",
       "Identity Reveal Control: Contact brokers anonymously",
       "Priority broker matching",
-      "Bounty task participation"
+      "Bounty task participation",
+      "Off-Market Vault: Locked (Universe Exclusive)"
     ],
     highlight: true,
     buttonText: "Upgrade to Cluster"
@@ -63,7 +73,8 @@ const TIERS = [
     connects: "40 Connects / month",
     features: [
       "Everything in Cluster Scout",
-      "Private off-market listings",
+      "Exclusive Off-Market Vault Access (Whisper Inventory)",
+      "Direct quiet offers & confidential deals",
       "Custom market briefing requests",
       "Dedicated space curator",
       "Full transaction pipeline view"
@@ -74,6 +85,16 @@ const TIERS = [
 ];
 
 export default function SeekerPricingPage() {
+  const phase = resolveMonetizationPhase();
+  const gateDecision = evaluateMonetizationGate({
+    feature: "off_market_vault",
+    role: "seeker",
+    tier: "starry",
+    phase,
+    source: "/pricing/seeker",
+    silent: true,
+  });
+
   return (
     <div className="pricing-layout">
       <Header />
@@ -85,19 +106,21 @@ export default function SeekerPricingPage() {
 
         <header className="pricing-header z-10 relative">
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            COMMERCIAL ARCHITECTURE // SEEKER INTELLIGENCE
+            {phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL
+              ? gateDecision.badgeText || PIONEER_ACCESS_BADGE_TEXT
+              : "COMMERCIAL ARCHITECTURE // SEEKER INTELLIGENCE"}
           </span>
           <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Explore with the <span className="text-gold-accent">Spatial Vault</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Public property records are free forever. Paid tiers add deeper spatial metrics, 3D interactive maps, noise ratings, and verified broker routing.
+            Public property records are free forever. Paid tiers add deeper spatial metrics, 3D interactive maps, noise ratings, and verified broker routing. Exclusive Off-Market Vault access unlocks with Universe Principal. <InfoTip tipId="offMarketVault" label="About Off-Market Vault" />
           </p>
         </header>
 
         <PilotPaymentNotice />
 
-        <div className="pricing-grid z-10 relative w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+        <div className="pricing-grid z-10 relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
           {TIERS.map((tier) => (
             <div 
               key={tier.name} 

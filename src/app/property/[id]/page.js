@@ -19,6 +19,7 @@ import PropertyViewTracker from "@/components/analytics/PropertyViewTracker";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { stripPremiumFields } from "@/lib/premiumFields";
 import { getHistoricalPropertyRedirect } from "@/lib/propertyRedirects";
+import { resolveServerMonetizationPhase } from "@/lib/serverMonetizationGate";
 
 export const revalidate = 3600; 
 
@@ -210,6 +211,7 @@ export default async function PropertyRoute({ params }) {
 
   // The Chameleon Injection
   const InjectedLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey] || CATEGORY_TO_LAYOUT_MAP["default"];
+  const monetizationPhase = await resolveServerMonetizationPhase();
 
   // ── Structured data (NEW_IDEAS.md §1) ────────────────────────────────
   // Read straight from Supabase rather than our own /api/faqs route: the
@@ -265,6 +267,7 @@ export default async function PropertyRoute({ params }) {
           slug={resolvedParams.id}
           initialData={match ? stripPremiumFields(match, "starry") : null}
           articles={articles}
+          monetizationPhase={monetizationPhase}
         />
 
         {/* ── CLAIM THIS PROPERTY (§37 · W8) ────────────────────────────

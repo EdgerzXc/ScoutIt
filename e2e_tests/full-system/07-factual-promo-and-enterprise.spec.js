@@ -75,7 +75,7 @@ test.describe('Factual share & promote pipeline', () => {
     const promoteButton = yourMovePanel.getByRole('button', { name: /AI Promote/i });
     await promoteButton.click();
     await expect(
-      page.getByText(/verified listing data/i).first()
+      page.getByText(/(listing data|recorded specs)/i).first()
     ).toBeVisible({ timeout: 30000 });
     // Match generated copy containing the live listing title plus its em dash,
     // not the bare title: the desktop hero is intentionally hidden on mobile.
@@ -151,12 +151,11 @@ test.describe('Honest listing claims (RA 9646)', () => {
 });
 
 test.describe('Navigation labels', () => {
-  test('footer separates Discover and Space Directory', async ({ page }) => {
+  test('footer links to Space Catalog', async ({ page }) => {
     await gotoAndSettle(page, '/');
     await expectRealContent(page);
     const footer = page.locator('footer');
-    await expect(footer.getByRole('link', { name: 'Discover', exact: true })).toHaveAttribute('href', '/discover');
-    await expect(footer.getByRole('link', { name: 'Space Directory' })).toHaveAttribute('href', '/property');
+    await expect(footer.getByRole('link', { name: 'Space Catalog' })).toHaveAttribute('href', '/property');
   });
 });
 

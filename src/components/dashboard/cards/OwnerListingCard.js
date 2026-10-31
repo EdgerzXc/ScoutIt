@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { Lock } from 'lucide-react';
 import HoverCard from '../../ui/HoverCard';
 import ShareModal from "@/components/property/ShareModal";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
@@ -63,11 +64,35 @@ const OwnerListingCard = memo(({
               <ProvenanceBadge record={listing} />
             </h3>
             <p className="text-xs text-text-secondary break-words [overflow-wrap:anywhere]">{listing.location || 'Location missing'}</p>
-            {listing.spatial_generation_status && listing.spatial_generation_status !== 'NONE' && (
-              <span className="font-mono text-[12px] uppercase tracking-wider text-[var(--accent)] font-semibold inline-block mt-1">
-                3D: {listing.spatial_generation_status === 'LIVE' ? 'Live Twin' : listing.spatial_generation_status === 'REVISION_REQUESTED' ? 'Express Revision (4-12h)' : 'In Production'}
-              </span>
-            )}
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              {listing.lifecycleState === "off_market" || listing.pipelineStatus === "off_market" ? (
+                <span className="inline-flex items-center gap-1 font-mono text-[12px] uppercase tracking-wider text-[var(--accent-bright)] bg-[var(--accent)]/10 border border-[var(--accent-muted)] px-2 py-0.5 rounded">
+                  <Lock size={11} className="text-[var(--accent)] shrink-0" aria-hidden="true" />
+                  <span>Off-Market Cloud</span>
+                  {(listing.quietly_open_to_offers || listing.quietlyOpenToOffers) && (
+                    <span className="text-[var(--accent)]">· Whisper</span>
+                  )}
+                </span>
+              ) : listing.lifecycleState === "live" || listing.pipelineStatus === "approved" ? (
+                <span className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wider text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
+                  <span>Live Market</span>
+                </span>
+              ) : listing.pipelineStatus === "ai_drafting" ? (
+                <span className="inline-flex items-center gap-1 font-mono text-[12px] uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded">
+                  <span>With ScoutIt Team</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 font-mono text-[12px] uppercase tracking-wider text-text-secondary bg-surface-variant/40 border border-surface-variant px-2 py-0.5 rounded">
+                  <span>Draft Staging</span>
+                </span>
+              )}
+              {listing.spatial_generation_status && listing.spatial_generation_status !== 'NONE' && (
+                <span className="font-mono text-[12px] uppercase tracking-wider text-[var(--accent)] font-semibold inline-block">
+                  3D: {listing.spatial_generation_status === 'LIVE' ? 'Live Twin' : listing.spatial_generation_status === 'REVISION_REQUESTED' ? 'Express Revision (4-12h)' : 'In Production'}
+                </span>
+              )}
+            </div>
           </div>
           {!selectMode && (
             // A-146: null means unknown (dashboardListings completenessScoreOf),

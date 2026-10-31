@@ -18,6 +18,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 export const IDEMPOTENCY_WINDOW_MINUTES = 10;
+const SAFE_ID = /^[A-Za-z0-9_-]{1,128}$/;
 
 let receiverGateWarned = false;
 function warnOnce(msg, detail) {
@@ -40,6 +41,7 @@ function warnOnce(msg, detail) {
  */
 export async function findRecentPendingDeal(supabaseAdmin, senderId, propertyId) {
   if (!supabaseAdmin || !senderId || !propertyId) return null;
+  if (!SAFE_ID.test(String(senderId))) return null;
   try {
     const windowStart = new Date(Date.now() - IDEMPOTENCY_WINDOW_MINUTES * 60 * 1000).toISOString();
     const { data, error } = await supabaseAdmin

@@ -34,6 +34,7 @@ export default function InfoTip({ tipId, label = "More information", className =
   const popoverRef = useRef(null);
   const hideTimerRef = useRef(null);
   const isPinnedRef = useRef(false);
+  const openedAtRef = useRef(0);
   const popoverId = useId();
   const tip = getInfoTip(tipId);
 
@@ -81,6 +82,7 @@ export default function InfoTip({ tipId, label = "More information", className =
   const show = useCallback(() => {
     cancelHide();
     place();
+    openedAtRef.current = Date.now();
     setOpen(true);
   }, [cancelHide, place]);
 
@@ -103,14 +105,19 @@ export default function InfoTip({ tipId, label = "More information", className =
         hide();
       }
     };
+    const onScroll = () => {
+      if (isPinnedRef.current) return;
+      if (Date.now() - openedAtRef.current < 200) return;
+      hide();
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("pointerdown", onDown);
-    window.addEventListener("scroll", hide, { passive: true, capture: true });
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     window.addEventListener("resize", hide);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("scroll", hide, { capture: true });
+      window.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("resize", hide);
     };
   }, [open, hide]);
@@ -150,6 +157,7 @@ export default function InfoTip({ tipId, label = "More information", className =
         ref={triggerRef}
         type="button"
         className="infotip-btn"
+        data-hydrated={mounted ? "true" : undefined}
         aria-expanded={open}
         aria-controls={open ? popoverId : undefined}
         aria-label={`${label}: ${tip.title}`}

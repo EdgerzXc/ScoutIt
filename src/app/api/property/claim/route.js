@@ -25,8 +25,11 @@ import {
   isClaimable,
   DISCLAIMER_VERSION,
 } from "@/lib/listerRelationship";
+import { getActiveListingCap } from "@/lib/propertyLifecycle";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser } from "@/lib/notifications";
+import { updateProperty } from "@/lib/airtable";
+import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 /** Statuses that mean a claim is still in play. */
 const OPEN_STATUSES = [
@@ -112,6 +115,40 @@ export async function GET(request) {
       .limit(1)
       .maybeSingle();
 
+    let userTier = "starry";
+    let userRoles = [];
+    let isOwner = false;
+    let activeLiveCount = 0;
+    let listingCap = 1;
+    let atListingCap = false;
+
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from("user_profiles")
+        .select("id, role, active_roles, subscription_tier")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profile) {
+        userTier = profile.subscription_tier || "starry";
+        const role = profile.role || "owner";
+        userRoles = Array.isArray(profile.active_roles) ? profile.active_roles : (profile.role ? [profile.role] : []);
+        isOwner = userRoles.includes("owner");
+        listingCap = getActiveListingCap({ tier: userTier, role });
+      }
+
+      const { data: liveRows } = await supabaseAdmin
+        .from("properties")
+        .select("id")
+        .eq("owner_id", userId)
+        .eq("pipeline_status", "approved");
+
+      activeLiveCount = (liveRows || []).filter((p) => p.id !== property.id).length;
+      atListingCap = activeLiveCount >= listingCap;
+    } catch {
+      // Graceful fallback for mock or isolated test environments
+    }
+
     return NextResponse.json({
       success: true,
       claimable,
@@ -119,6 +156,12 @@ export async function GET(request) {
       isOwnListing,
       propertyId: property.id,
       propertyTitle: property.title,
+      userTier,
+      userRoles,
+      isOwner,
+      activeLiveCount,
+      listingCap,
+      atListingCap,
       myClaim: myClaim || null,
     });
   } catch (err) {
@@ -339,6 +382,62 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
 
   const nowIso = new Date().toISOString();
 
+  // Fetch the property to inspect current state
+  const { data: property } = await serviceClient
+    .from("properties")
+    .select("id, slug, canonical_slug, pipeline_status")
+    .eq("id", claim.property_id)
+    .maybeSingle();
+
+  // Check claimant tier and live listing limits
+  const { data: profile } = await serviceClient
+    .from("user_profiles")
+    .select("id, role, active_roles, subscription_tier")
+    .eq("id", claim.claimant_user_id)
+    .maybeSingle();
+
+  const claimantTier = profile?.subscription_tier || "starry";
+  const claimantRole = profile?.role || "owner";
+  const cap = getActiveListingCap({ tier: claimantTier, role: claimantRole });
+
+  const { data: claimantLiveProps } = await serviceClient
+    .from("properties")
+    .select("id")
+    .eq("owner_id", claim.claimant_user_id)
+    .eq("pipeline_status", "approved");
+
+  const liveCount = (claimantLiveProps || []).filter((p) => p.id !== claim.property_id).length;
+  const willExceedCap = liveCount >= cap;
+
+  const propertyUpdates = {
+    owner_id: claim.claimant_user_id,
+    verified: true,
+    lister_relationship: claim.claimed_relationship || "owner",
+    updated_at: nowIso,
+  };
+
+  if (willExceedCap) {
+    propertyUpdates.pipeline_status = "off_market";
+    propertyUpdates.lifecycle_state = "off_market";
+    propertyUpdates.withdrawn_at = nowIso;
+    propertyUpdates.quietly_open_to_offers = false;
+
+    // Dual-CMS sync: if previously live on Airtable, unpublish it to match off-market state
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    const baseId = process.env.AIRTABLE_BASE_ID;
+    if (apiKey && baseId && property?.pipeline_status === "approved") {
+      const slug = property.canonical_slug || property.slug;
+      if (slug) {
+        try {
+          await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+          await invalidateCmsBundle().catch(() => {});
+        } catch (airtableErr) {
+          console.warn("[PROPERTY CLAIM] Airtable unpublish during off-market cap fallback warning:", airtableErr?.message);
+        }
+      }
+    }
+  }
+
   const { error: updateClaimErr } = await serviceClient
     .from("property_claims")
     .update({ status: "approved", updated_at: nowIso })
@@ -349,21 +448,10 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
 
   await serviceClient
     .from("properties")
-    .update({
-      owner_id: claim.claimant_user_id,
-      verified: true,
-      lister_relationship: claim.claimed_relationship || "owner",
-      updated_at: nowIso,
-    })
+    .update(propertyUpdates)
     .eq("id", claim.property_id);
 
   // Promote claimant user_profiles to include 'owner' in active_roles
-  const { data: profile } = await serviceClient
-    .from("user_profiles")
-    .select("id, role, active_roles")
-    .eq("id", claim.claimant_user_id)
-    .maybeSingle();
-
   const existingRoles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
   const nextRoles = Array.from(new Set([...existingRoles, "owner"]));
 
@@ -384,6 +472,7 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
       payload: {
         owner_id: claim.claimant_user_id,
         granted_roles: nextRoles,
+        defaultedToOffMarket: willExceedCap,
       },
     });
   } catch (err) {
@@ -393,11 +482,13 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
   await notifyUser(serviceClient, {
     userId: claim.claimant_user_id,
     title: "Property claim approved",
-    desc: "Your property ownership claim has been verified and Owner Mode is now active on your account.",
+    desc: willExceedCap
+      ? "Your property ownership claim has been verified. Since your live listing quota is currently full, the property has been deposited in your Free Off-Market Cloud Storage."
+      : "Your property ownership claim has been verified and Owner Mode is now active on your account.",
     propertyId: claim.property_id,
     notificationType: "claim_approved",
     forceEmail: true,
   });
 
-  return { ok: true, claimId: claim.id, ownerId: claim.claimant_user_id, activeRoles: nextRoles };
+  return { ok: true, claimId: claim.id, ownerId: claim.claimant_user_id, activeRoles: nextRoles, defaultedToOffMarket: willExceedCap };
 }

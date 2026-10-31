@@ -26,7 +26,13 @@ import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
 import DashboardAmbientStrip from "../../components/dashboard/DashboardAmbientStrip";
 import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
-import { normalizeDashboardModes, pickPrimaryRole } from "../../lib/dashboardModes";
+import {
+  canAccessDashboardWorkspace,
+  inferProviderType,
+  normalizeDashboardMode,
+  normalizeDashboardModes,
+  pickPrimaryRole,
+} from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { Search, Bookmark, MessageCircle, Briefcase } from "lucide-react";
@@ -57,7 +63,7 @@ function DashboardInner() {
     await signOut();
     router.push("/onboarding");
   };
-  const { connects, currentUser, notifications, markNotificationsRead, clearAllNotifications } = useDashboard();
+  const { connects, currentUser, notifications, markNotificationsRead, clearAllNotifications, addToast } = useDashboard();
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
@@ -112,13 +118,19 @@ function DashboardInner() {
       hostname: window.location.hostname,
     });
     if (developmentUser?.id === currentUser.id) return;
+    const rawHeldRoles = [
+      ...(Array.isArray(currentUser.active_roles) ? currentUser.active_roles : []),
+      currentUser.primary_mode,
+      currentUser.role,
+    ].filter(Boolean);
     const tags = normalizeDashboardModes(
       currentUser.active_roles,
       currentUser.primary_mode || currentUser.role,
     );
     const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
     const requestedRole = params?.get("role") || params?.get("mode");
-    const preferredMode = requestedRole ? normalizeDashboardMode(requestedRole) : "buyer";
+    const isAuthorizedRequest = requestedRole && canAccessDashboardWorkspace(requestedRole, rawHeldRoles);
+    const preferredMode = isAuthorizedRequest ? normalizeDashboardMode(requestedRole) : "buyer";
     const primaryMode = pickPrimaryRole(tags, preferredMode) || "buyer";
     if (!primaryMode || tags.length === 0) {
       router.push("/onboarding");
@@ -130,7 +142,9 @@ function DashboardInner() {
       name: currentUser.display_name || currentUser.user_metadata?.full_name || "ScoutIt User",
       tags,
       primaryMode,
-      providerType: currentUser.provider_type || undefined,
+      providerType: isAuthorizedRequest
+        ? inferProviderType(requestedRole, currentUser.provider_type)
+        : (currentUser.provider_type || undefined),
       prcLicense: currentUser.prc_license || undefined,
     };
     // Keep verified profile data in React state; never persist it in the browser.
@@ -176,32 +190,29 @@ function DashboardInner() {
     };
     const handleSwitchWorkspace = (e) => {
       const target = e?.detail?.role;
-      if (!target) return;
-      if (target === "photographer") {
-        setMode("provider");
-        setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "photographer" } : prev);
+      if (!target || !user) return;
+      const heldRoles = [
+        ...(Array.isArray(user.active_roles) ? user.active_roles : []),
+        ...(Array.isArray(user.tags) ? user.tags : []),
+        user.role,
+      ].filter(Boolean);
+      if (!canAccessDashboardWorkspace(target, heldRoles)) {
+        addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
         return;
       }
-      if (target === "designer" || target === "event-planner") {
-        setMode("provider");
-        setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "designer" } : prev);
-        return;
-      }
-      if (target === "seeker") {
-        setMode("buyer");
-        setUser((prev) => prev ? { ...prev, primaryMode: "buyer" } : prev);
-        return;
-      }
-      if (target === "salesperson") {
-        setMode("broker");
-        setUser((prev) => prev ? { ...prev, primaryMode: "broker" } : prev);
-        return;
-      }
-      const validModes = ["owner", "broker", "buyer", "provider", "operator", "mc_enterprise", "exploring"];
-      if (validModes.includes(target)) {
-        setMode(target);
-        setUser((prev) => prev ? { ...prev, primaryMode: target } : prev);
-      }
+      const nextMode = normalizeDashboardMode(target);
+      if (!nextMode) return;
+      const nextProviderType = inferProviderType(target, user.providerType);
+      setMode(nextMode);
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              primaryMode: nextMode,
+              ...(nextProviderType ? { providerType: nextProviderType } : {}),
+            }
+          : prev
+      );
     };
     window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
     window.addEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
@@ -209,39 +220,39 @@ function DashboardInner() {
       window.removeEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
       window.removeEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
     };
-  }, []);
+  }, [user, addToast]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !user) return;
     const params = new URLSearchParams(window.location.search);
     const requestedRole = params.get("role") || params.get("mode");
     if (!requestedRole) return;
-    if (requestedRole === "photographer") {
-      setMode("provider");
-      setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "photographer" } : prev);
+    const heldRoles = [
+      ...(Array.isArray(user.active_roles) ? user.active_roles : []),
+      ...(Array.isArray(user.tags) ? user.tags : []),
+      user.role,
+    ].filter(Boolean);
+    if (!canAccessDashboardWorkspace(requestedRole, heldRoles)) {
       return;
     }
-    if (requestedRole === "designer" || requestedRole === "event-planner") {
-      setMode("provider");
-      setUser((prev) => prev ? { ...prev, primaryMode: "provider", providerType: "designer" } : prev);
-      return;
+    const nextMode = normalizeDashboardMode(requestedRole);
+    if (!nextMode) return;
+    const nextProviderType = inferProviderType(requestedRole, user.providerType);
+    if (mode !== nextMode) {
+      setMode(nextMode);
     }
-    if (requestedRole === "seeker") {
-      setMode("buyer");
-      setUser((prev) => prev ? { ...prev, primaryMode: "buyer" } : prev);
-      return;
+    if (user.primaryMode !== nextMode || (nextProviderType && user.providerType !== nextProviderType)) {
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              primaryMode: nextMode,
+              ...(nextProviderType ? { providerType: nextProviderType } : {}),
+            }
+          : prev
+      );
     }
-    if (requestedRole === "salesperson") {
-      setMode("broker");
-      setUser((prev) => prev ? { ...prev, primaryMode: "broker" } : prev);
-      return;
-    }
-    const validModes = ["owner", "broker", "buyer", "provider", "operator", "mc_enterprise", "exploring"];
-    if (validModes.includes(requestedRole)) {
-      setMode(requestedRole);
-      setUser((prev) => prev ? { ...prev, primaryMode: requestedRole } : prev);
-    }
-  }, [user]);
+  }, [user, mode]);
 
   // Click outside to close desktop switcher
   useEffect(() => {
@@ -279,13 +290,23 @@ function DashboardInner() {
   }
 
   const handleSwitchMode = (newMode) => {
-    setMode(newMode);
+    const heldRoles = [
+      ...(Array.isArray(user.active_roles) ? user.active_roles : []),
+      ...(Array.isArray(user.tags) ? user.tags : []),
+      user.role,
+    ].filter(Boolean);
+    if (!canAccessDashboardWorkspace(newMode, heldRoles)) {
+      addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
+      return;
+    }
+    const resolvedMode = normalizeDashboardMode(newMode) || newMode;
+    setMode(resolvedMode);
     setShowDesktopSwitcher(false);
     setShowMobileProfileMenu(false);
     
     // Optimistically update the in-memory display mode. Supabase remains the
     // identity authority; authenticated profile data is never browser-cached.
-    const updatedUser = { ...user, primaryMode: newMode };
+    const updatedUser = { ...user, primaryMode: resolvedMode };
     // The server-approved profile refresh is authoritative after navigation.
     setUser(updatedUser);
   };

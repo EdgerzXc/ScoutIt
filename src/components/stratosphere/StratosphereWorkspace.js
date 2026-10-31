@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft, ArrowRight, Bookmark, Building2, Compass, FileText, Layers, Radio, Search, TrendingUp } from "lucide-react";
 import SignalDossierCard from "./SignalDossierCard";
@@ -79,6 +80,7 @@ export default function StratosphereWorkspace({
   initialQuery = "",
   initialSignal = null,
 } = {}) {
+  const router = useRouter();
   const [liveArticles, setLiveArticles] = useState([]);
   const [view, setView] = useState(initialView);
   const [stage, setStage] = useState(validJourneyStage(initialStage));
@@ -152,13 +154,22 @@ export default function StratosphereWorkspace({
       setView("my-signals");
       loadMySignals();
     } else if (params.get("view") === "saved-signals") {
+      // Saved follow-ups belong in the dashboard workplace (when logged in) or Your Board (when offline)
+      getSession().then(({ data }) => {
+        if (data?.session?.user) {
+          router.replace("/dashboard");
+        } else {
+          router.replace("/wishlist");
+        }
+      }).catch(() => {
+        router.replace("/wishlist");
+      });
       setView("saved-signals");
-      loadSavedSignals();
     }
     if (params.get("stage")) setStage(validJourneyStage(params.get("stage")));
     if (params.has("q")) setQuery(params.get("q") || "");
     if (params.has("signal")) setReturnSignal(params.get("signal"));
-  }, [loadMySignals, loadSavedSignals]);
+  }, [loadMySignals, loadSavedSignals, router]);
 
   // Pipeline 1: Load Articles catalog on mount
   useEffect(() => {
@@ -175,16 +186,13 @@ export default function StratosphereWorkspace({
 
   // Pipeline 2: Lazy-load Community Signals only when Radar view is active
   useEffect(() => {
-    if (view !== "radar" || signalsFetchedRef.current) return;
-    signalsFetchedRef.current = true;
+    if (view !== "radar") return;
     let alive = true;
     fetchCommunitySignals()
       .then((json) => {
         if (alive && json?.ok && Array.isArray(json.signals)) setLiveSignals(json.signals);
       })
-      .catch(() => {
-        signalsFetchedRef.current = false;
-      });
+      .catch(() => {});
     return () => {
       alive = false;
     };
@@ -257,8 +265,6 @@ export default function StratosphereWorkspace({
     updateUrl("view", next === "articles" ? "" : next);
     if (next === "my-signals") {
       loadMySignals();
-    } else if (next === "saved-signals") {
-      loadSavedSignals();
     }
   };
 
@@ -296,7 +302,7 @@ export default function StratosphereWorkspace({
   };
 
   return (
-    <main className={`sw-page${view === "radar" ? " sw-page--radar" : ""}`}>
+    <main data-scoutit-guide="stratosphere-entry" className={`sw-page${view === "radar" ? " sw-page--radar" : ""}`}>
       <StratosphereAtmosphere />
       <div className="sw-top-bar">
         <Link href="/dashboard" className="sw-back-dashboard-btn">
@@ -327,19 +333,12 @@ export default function StratosphereWorkspace({
           </button>
           <button
             type="button"
+            data-scoutit-guide="spatial-signal-radar"
             aria-pressed={view === "radar"}
             className={view === "radar" ? "is-active" : ""}
             onClick={() => chooseView("radar")}
           >
             <Compass size={15} aria-hidden="true" /> Radar &amp; Community
-          </button>
-          <button
-            type="button"
-            aria-pressed={view === "saved-signals"}
-            className={view === "saved-signals" ? "is-active" : ""}
-            onClick={() => chooseView("saved-signals")}
-          >
-            <Bookmark size={15} aria-hidden="true" /> Saved Follow-ups
           </button>
           <button
             type="button"
@@ -350,7 +349,7 @@ export default function StratosphereWorkspace({
             <Radio size={15} aria-hidden="true" /> My Signals
           </button>
         </div>
-        <button type="button" className="sw-post-btn" onClick={() => setComposerOpen(true)}>
+        <button type="button" data-scoutit-guide="signal-composer-trigger" className="sw-post-btn" onClick={() => setComposerOpen(true)}>
           <span aria-hidden="true">+</span> POST A SIGNAL
         </button>
       </div>
@@ -366,56 +365,38 @@ export default function StratosphereWorkspace({
       />
 
       {view === "saved-signals" ? (
-        <section className="sw-my-signals" aria-label="Saved Signals">
+        <section className="sw-my-signals" aria-label="Saved Signals Routing">
           <div className="sw-my-signals-header">
             <div>
               <span className="sw-kicker">SAVED SIGNALS · FOLLOW-UP LIST</span>
-              <h2>Signals you are following up on</h2>
-              <p>Keep track of opportunities, requests, and updates you saved for later review.</p>
+              <h2>Saved Follow-ups Location</h2>
+              <p>Saved follow-ups are located in your Dashboard Workspace when signed in, or on Your Board when offline.</p>
             </div>
             <button type="button" className="sw-post-btn" onClick={() => chooseView("radar")}>
               <Compass size={14} aria-hidden="true" style={{ marginRight: 6 }} /> EXPLORE ON RADAR
             </button>
           </div>
-          {savedSignalsLoading ? (
-            <p className="sw-loading-text">Loading your saved signals…</p>
-          ) : savedSignalsError ? (
-            <div className="sw-empty">
-              <p>{savedSignalsError}</p>
-              <Link href="/onboarding" className="sw-auth-link">
-                Sign in to view your saved signals
+          <div className="sw-empty">
+            <Bookmark size={32} style={{ color: "var(--accent)", marginBottom: 12 }} />
+            <p className="font-working-title text-base mb-2">Saved signals are accessible in your personal workspace.</p>
+            <p className="text-xs text-text-secondary max-w-md mb-6 leading-relaxed">
+              If you are signed in, track your opportunities and requests in your Dashboard. If you are browsing as a guest, your saved follow-ups are preserved on Your Board.
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link
+                href="/dashboard"
+                className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-5 py-2.5 rounded transition font-bold"
+              >
+                Dashboard Workspace →
+              </Link>
+              <Link
+                href="/wishlist"
+                className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent border border-gold-accent/40 hover:bg-gold-accent/10 px-5 py-2.5 rounded transition font-bold"
+              >
+                Your Board (Offline) →
               </Link>
             </div>
-          ) : savedSignals.length === 0 ? (
-            <div className="sw-empty">
-              <Bookmark size={32} style={{ color: "var(--accent-muted)", marginBottom: 12 }} />
-              <p>You have not saved any signals yet.</p>
-              <button type="button" onClick={() => chooseView("radar")}>
-                Browse Live Radar to Save Signals
-              </button>
-            </div>
-          ) : (
-            <div className="sw-my-signals-grid">
-              {savedSignals.map((signal) => (
-                <SignalDossierCard
-                  key={signal.id}
-                  signal={{ ...signal, isSaved: true }}
-                  onSelect={(sig) => {
-                    chooseView("radar");
-                    updateUrl("signal", sig.id);
-                  }}
-                  onConnect={(sig) => {
-                    chooseView("radar");
-                    updateUrl("signal", sig.id);
-                  }}
-                  onClosed={() => {
-                    loadSavedSignals();
-                    refreshLiveSignals();
-                  }}
-                />
-              ))}
-            </div>
-          )}
+          </div>
         </section>
       ) : view === "my-signals" ? (
         <section className="sw-my-signals" aria-label="My Signals">

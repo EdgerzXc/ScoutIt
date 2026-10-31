@@ -84,6 +84,36 @@ export async function POST(request) {
       }
     }
 
+    if (newStatus === "withdrawn") {
+      if (!isBuyer) {
+        return NextResponse.json(
+          { error: "Only the person who sent this request can withdraw it." },
+          { status: 403 }
+        );
+      }
+      if (deal.status !== "pending") {
+        return NextResponse.json(
+          { error: "Only pending requests can be withdrawn" },
+          { status: 409 }
+        );
+      }
+    }
+
+    if (["accepted", "declined", "connected"].includes(newStatus)) {
+      if (isBuyer) {
+        return NextResponse.json(
+          { error: "Only the recipient may answer this inquiry. The sender may only withdraw." },
+          { status: 403 }
+        );
+      }
+      if (deal.open_gate_inbound === true && !isRoutedRecipient) {
+        return NextResponse.json(
+          { error: "Only the routed recipient may answer this Open Gate request." },
+          { status: 403 }
+        );
+      }
+    }
+
     if (deal.status === 'invited' && newStatus === 'accepted' && !isBroker) {
       return NextResponse.json({ error: "Only the broker can accept an invitation" }, { status: 403 });
     }

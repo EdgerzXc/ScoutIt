@@ -176,6 +176,26 @@ export const INFO_TIPS = Object.freeze({
     title: "Two-factor authentication",
     body: "Adds extra security to your sign-in. You will enter a 6-digit code from an authenticator app (such as Google Authenticator) when you log in.",
   }),
+  offMarketVault: Object.freeze({
+    title: "Off-Market Vault",
+    body: "Discreet portfolio of private properties and off-market assets. Accessible exclusively to Universe tier seekers. Owners can quietly deposit listings here at zero cost.",
+  }),
+  whisperPricing: Object.freeze({
+    title: "Whisper inventory and pricing",
+    body: "Off-market spaces provide confidential price guidance rather than public price tags. Universe members can initiate direct, quiet inquiries without alerting the public market.",
+  }),
+  listingCapCloudStorage: Object.freeze({
+    title: "Live quota and cloud storage",
+    body: "Your active tier sets how many listings publish live to the public directory. Off-market cloud storage is always free and unlimited across all tiers, so you never lose a space.",
+  }),
+  propertyClaimingSuccession: Object.freeze({
+    title: "Property succession and rights",
+    body: "Claiming establishes primary legal ownership under RESA RA 9646. If a broker previously listed the space, you can retain or revoke their representation. Extra properties deposit directly into free off-market storage.",
+  }),
+  ownerInquiryRouting: Object.freeze({
+    title: "Inquiry dispatch preference",
+    body: "Decide who receives buyer inquiries for your listing: yourself exclusively, both you and attached brokers, or designated brokers only.",
+  }),
 });
 
 export function getInfoTip(id) {

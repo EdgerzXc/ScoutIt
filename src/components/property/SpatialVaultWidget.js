@@ -8,6 +8,13 @@ import MaterialSwapperToolbar from "@/components/property/MaterialSwapperToolbar
 import SpatialStudioRevisionModal from "@/components/property/SpatialStudioRevisionModal";
 import { DEFAULT_MATERIAL_CONFIG } from "@/lib/spatialStudio";
 import { ExternalLink, FileText } from "lucide-react";
+import {
+  MONETIZATION_PHASES,
+  PIONEER_ACCESS_BADGE_TEXT,
+  resolveMonetizationPhase,
+  evaluateMonetizationGate,
+  logPaywallConversionIntent,
+} from "@/lib/monetizationGate";
 
 export default function SpatialVaultWidget({
   slug,
@@ -22,6 +29,15 @@ export default function SpatialVaultWidget({
   const [materialConfig, setMaterialConfig] = useState(DEFAULT_MATERIAL_CONFIG);
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const isSample = isSamplePropertySlug(slug);
+  const phase = resolveMonetizationPhase();
+  const gateDecision = evaluateMonetizationGate({
+    feature: "spatial_vault",
+    role: "seeker",
+    tier: "starry",
+    phase,
+    source: `/property/${slug || ""}`,
+    silent: true,
+  });
 
   const realLuma =
     spatialEmbedUrl(fields.luma3dMapUrl, "luma") ||
@@ -66,6 +82,15 @@ export default function SpatialVaultWidget({
 
   return (
     <div className="mt-8 flex flex-col gap-6">
+      {phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL && (
+        <div
+          data-testid="pioneer-access-badge"
+          className="inline-flex self-start items-center gap-2 rounded-full border border-gold-accent/40 bg-gold-accent/10 px-3 py-1 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent"
+        >
+          <span>◈</span>
+          <span>{gateDecision.badgeText || PIONEER_ACCESS_BADGE_TEXT}</span>
+        </div>
+      )}
       {/* Demonstration notice for sample properties (§4 & §6) */}
       {isSample && (
         <div className="p-3.5 rounded bg-surface/80 border border-gold-accent/25 flex items-start gap-3">
@@ -303,7 +328,15 @@ function VaultStatus({ title, detail, locked = false }) {
       {locked && (
         <a
           href="/pricing/seeker"
-          className="mt-5 inline-flex rounded bg-gold-accent px-6 py-3 font-label-caps text-[12px] font-bold uppercase tracking-widest text-background transition-opacity hover:opacity-90"
+          onClick={() =>
+            logPaywallConversionIntent({
+              feature: "spatial_vault",
+              role: "seeker",
+              tier: "cluster",
+              source: "/property/vault",
+            })
+          }
+          className="mt-5 inline-flex min-h-11 items-center rounded bg-gold-accent px-6 py-3 font-label-caps text-[12px] font-bold uppercase tracking-widest text-background transition-opacity hover:opacity-90"
         >
           View Cluster access →
         </a>

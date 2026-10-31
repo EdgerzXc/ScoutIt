@@ -6,6 +6,7 @@ import {
   getBlueprintById,
 } from "@/lib/ai/autonomousIntelAgent";
 import { requireAdmin } from "@/lib/adminGuard";
+import { sanitizeError } from "@/lib/sanitizeError";
 
 /**
  * ═════════════════════════════════════════════════════════════════════════
@@ -81,7 +82,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("[AUTONOMOUS_INTEL_AGENT] Generation failed:", error);
     return NextResponse.json(
-      { error: "Failed to generate autonomous intel briefing", details: error.message },
+      { error: "Failed to generate autonomous intel briefing", details: sanitizeError(error) },
       { status: 500 }
     );
   }

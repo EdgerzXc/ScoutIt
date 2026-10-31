@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { clientIp } from "@/lib/clientIp";
+import { createRateLimiter } from "@/lib/rateLimit";
 import {
   evaluateAntiAbuse,
   evaluateVisitQualification,
@@ -11,11 +12,34 @@ import { getViaCookieName, parseViaCookie } from "@/lib/viaRouting";
 
 export const dynamic = "force-dynamic";
 
+const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const checkViaTelemetryRate = createRateLimiter({
+  limit: 60,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
+
 export async function POST(request, { params }) {
   try {
+    const rate = checkViaTelemetryRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many telemetry requests. Please try again shortly." },
+        {
+          status: 429,
+          headers: {
+            "Cache-Control": "private, no-store",
+            "Retry-After": String(rate.retryAfterSeconds),
+          },
+        }
+      );
+    }
+
     const { id: slug } = await params;
-    if (!slug) {
-      return NextResponse.json({ ok: false, error: "Missing property identifier" }, { status: 400 });
+    if (!slug || !SAFE_ID.test(slug)) {
+      return NextResponse.json({ ok: false, error: "Invalid or missing property identifier" }, { status: 400 });
     }
 
     const body = await request.json().catch(() => ({}));
@@ -41,11 +65,12 @@ export async function POST(request, { params }) {
     // 1. Resolve property from Supabase
     let propertyId = slug;
     if (supabaseAdmin) {
-      const { data } = await supabaseAdmin
-        .from("properties")
-        .select("id")
-        .or(`canonical_slug.eq.${slug},slug.eq.${slug}`)
-        .maybeSingle();
+      const isUuid = UUID_RE.test(slug);
+      const query = supabaseAdmin.from("properties").select("id");
+      const { data } = await (isUuid
+        ? query.eq("id", slug)
+        : query.or(`canonical_slug.eq.${slug},slug.eq.${slug}`)
+      ).maybeSingle();
       if (data?.id) propertyId = data.id;
     }
 

@@ -46,7 +46,7 @@ export const ALL_PLATFORM_ROLES = [
   { id: 'designer', label: 'Event & Concept Designer', icon: '✨', badge: 'Spatial Staging', desc: 'Spatial staging, pop-up commercial concepts & design lookbooks' },
 ];
 
-const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS, ...ALL_PLATFORM_ROLES];
+const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -62,6 +62,7 @@ export default function SettingsPage() {
 
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
+  const [rawActiveRoles, setRawActiveRoles] = useState(["buyer"]);
   const [primaryMode, setPrimaryMode] = useState("");
   // A-137: the roles the account held when this screen loaded. Only *adding*
   // a gated lens is verified; removing one is always allowed.
@@ -173,7 +174,13 @@ export default function SettingsPage() {
         if (devUser) {
           user = devUser;
           setName(devUser.name || devUser.display_name || "ScoutIt Member");
-          const devTags = normalizeDashboardModes(devUser.tags || devUser.active_roles, devUser.primaryMode || devUser.role);
+          const rawDevRoles = Array.isArray(devUser.active_roles || devUser.tags)
+            ? (devUser.active_roles || devUser.tags).map((r) => String(r || "").toLowerCase().trim()).filter(Boolean)
+            : [];
+          setRawActiveRoles(rawDevRoles.length > 0 ? rawDevRoles : ["buyer"]);
+          const devTags = normalizeDashboardModes(devUser.tags || devUser.active_roles, devUser.primaryMode || devUser.role).filter(
+            (t) => !(t === "broker" && !rawDevRoles.includes("broker") && rawDevRoles.includes("salesperson"))
+          );
           setTags(devTags);
           setInitialTags(devTags);
           setPrimaryMode(pickPrimaryRole(devTags, devUser.primaryMode || devUser.role));
@@ -194,9 +201,16 @@ export default function SettingsPage() {
       setDateOfBirth(profile.date_of_birth || "");
       setDobInput(profile.date_of_birth || "");
       setAdultEligibilityStatus(profile.adult_eligibility_status || "unknown");
+      const rawRoles = Array.isArray(profile.active_roles)
+        ? profile.active_roles.map((r) => String(r || "").toLowerCase().trim()).filter(Boolean)
+        : [];
+      setRawActiveRoles(rawRoles.length > 0 ? rawRoles : ["buyer"]);
       // A-146: normalize on load — a legacy "seeker" tag otherwise matches no
       // workspace card and the primary falls back by insertion order.
-      const nextTags = normalizeDashboardModes(profile.active_roles, profile.primary_mode || profile.role);
+      // Do not escalate a salesperson-only account into holding the "broker" lens tag.
+      const nextTags = normalizeDashboardModes(profile.active_roles, profile.primary_mode || profile.role).filter(
+        (t) => !(t === "broker" && !rawRoles.includes("broker") && rawRoles.includes("salesperson"))
+      );
       setTags(nextTags);
       setInitialTags(nextTags);
       setPrimaryMode(pickPrimaryRole(nextTags, profile.primary_mode || profile.role));
@@ -628,6 +642,8 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                   <input
+                    id="settings-dob-input"
+                    aria-label="Date of birth"
                     type="date"
                     max={new Date().toISOString().slice(0, 10)}
                     className={styles.input}
@@ -690,7 +706,12 @@ export default function SettingsPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {ALL_PLATFORM_ROLES.map((role) => {
-                const isHeld = role.alwaysActive || tags.includes(role.id) || role.id === "buyer";
+                const isHeld =
+                  role.alwaysActive ||
+                  role.id === "buyer" ||
+                  rawActiveRoles.includes(role.id) ||
+                  (role.id === "designer" && rawActiveRoles.includes("event-planner")) ||
+                  tags.includes(role.id);
                 return (
                   <div
                     key={role.id}

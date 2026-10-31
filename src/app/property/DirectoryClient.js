@@ -942,7 +942,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                 </span>
               </div>
 
-              <div className="search-wrapper">
+              <div className="search-wrapper" data-scoutit-guide="scoutit-discover-search">
                 <input
                   type="text"
                   className="global-search-input"
@@ -1170,110 +1170,104 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                     const specBadges = getCardSpecBadges(p);
                     return (
                     <motion.div key={p.id} variants={cardVariants}>
-                      <Link href={`/property/${p.slug}`} className="property-preview-card">
-                      <div className="property-card-visual">
-                        <span className="property-city-badge">{p.city}</span>
-                        { }
-                        {p.image ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={p.image} alt={p.title} className="property-card-img" loading="lazy" decoding="async" />
-                        ) : (
-                          <ImagePlaceholder className="property-card-img" label={p.title} />
-                        )}
-                      </div>
+                      <div className="property-preview-card">
+                        <Link href={`/property/${p.slug}`} tabIndex={-1} aria-hidden="true" style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <div className="property-card-visual">
+                            <span className="property-city-badge">{p.city}</span>
+                            { }
+                            {p.image ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={p.image} alt="" className="property-card-img" loading="lazy" decoding="async" />
+                            ) : (
+                              <ImagePlaceholder className="property-card-img" label={p.title} />
+                            )}
+                          </div>
+                        </Link>
 
-                      <div className="property-card-body">
-                        <h2>{p.title}<ProvenanceBadge record={p} /></h2>
-                        <p className="hook">{p.hook}</p>
+                        <div className="property-card-body">
+                          <Link href={`/property/${p.slug}`} className="property-card-heading-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <h2>{p.title}<ProvenanceBadge record={p} /></h2>
+                            <p className="hook">{p.hook}</p>
 
-                        {/* Price intentionally omitted on cards — shown only in "Your Move" (compliance). */}
+                            {/* Price intentionally omitted on cards — shown only in "Your Move" (compliance). */}
 
-                        {(() => {
-                          const allBadges = [
-                            p.spaceCategory,
-                            p.aestheticTag,
-                            ...specBadges,
-                          ].filter(Boolean);
-                          const visibleBadges = allBadges.slice(0, 4);
-                          const extraBadges = allBadges.length - visibleBadges.length;
-                          return (
-                            <div className="property-spec-badges">
-                              {visibleBadges.map((b, i) => (
-                                <span key={i} className="property-spec-badge">{b}</span>
-                              ))}
-                              {extraBadges > 0 && (
-                                <span className="property-spec-badge" title={allBadges.slice(4).join(", ")}>+{extraBadges}</span>
-                              )}
-                            </div>
-                          );
-                        })()}
-
-                        {p.units_inventory && p.units_inventory.length > 0 && (
-                          <div
-                            className="property-units-tray"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          >
-                            <div className="property-units-header">
-                              <span className="property-units-kicker">
-                                Active Units ({p.units_inventory.length})
-                              </span>
-                              <span className="property-units-direct">
-                                Direct Access
-                              </span>
-                            </div>
-                            <div className="property-units-chips">
-                              {p.units_inventory.slice(0, 2).map((u, uIdx) => (
-                                <button
-                                  key={u.id || uIdx}
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    router.push(`/property/${p.slug}/unit/${u.id}`);
-                                  }}
-                                  className="unit-tray-chip"
-                                >
-                                  <DoorOpen size={12} style={{ color: "var(--accent)" }} />
-                                  <span className="unit-tray-chip-name">{u.name || `Unit ${u.unit_number || uIdx + 1}`}</span>
-                                  {u.unit_category && (
-                                    <span className="unit-tray-chip-cat">
-                                      · {unitCategoryLabel(u.unit_category)}
-                                    </span>
+                            {(() => {
+                              const allBadges = [
+                                p.spaceCategory,
+                                p.aestheticTag,
+                                ...specBadges,
+                              ].filter(Boolean);
+                              const visibleBadges = allBadges.slice(0, 4);
+                              const extraBadges = allBadges.length - visibleBadges.length;
+                              return (
+                                <div className="property-spec-badges">
+                                  {visibleBadges.map((b, i) => (
+                                    <span key={i} className="property-spec-badge">{b}</span>
+                                  ))}
+                                  {extraBadges > 0 && (
+                                    <span className="property-spec-badge" title={allBadges.slice(4).join(", ")}>+{extraBadges}</span>
                                   )}
-                                </button>
-                              ))}
-                              {p.units_inventory.length > 2 && (
-                                <span className="unit-tray-more">
-                                  +{p.units_inventory.length - 2} more
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
+                                </div>
+                              );
+                            })()}
+                          </Link>
 
-                        <div className="property-card-footer">
-                          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button 
-                              className={`compare-toggle-btn ${compareList.find(item => item.id === p.id) ? 'active' : ''}`}
-                              onClick={(e) => toggleCompare(p, e)}
-                            >
-                              {compareList.find(item => item.id === p.id) ? "✓ Added" : "+ Compare"}
-                            </button>
-                            <ReactionButtons
-                              propertyId={p.id}
-                              propertyTitle={p.title}
-                              category={p.spaceCategory}
-                              city={p.city}
-                              small={true}
-                            />
+                          {p.units_inventory && p.units_inventory.length > 0 && (
+                            <div className="property-units-tray">
+                              <div className="property-units-header">
+                                <span className="property-units-kicker">
+                                  Active Units ({p.units_inventory.length})
+                                </span>
+                                <span className="property-units-direct">
+                                  Direct Access
+                                </span>
+                              </div>
+                              <div className="property-units-chips">
+                                {p.units_inventory.slice(0, 2).map((u, uIdx) => (
+                                  <button
+                                    key={u.id || uIdx}
+                                    type="button"
+                                    onClick={() => router.push(`/property/${p.slug}/unit/${u.id}`)}
+                                    className="unit-tray-chip"
+                                  >
+                                    <DoorOpen size={12} style={{ color: "var(--accent)" }} />
+                                    <span className="unit-tray-chip-name">{u.name || `Unit ${u.unit_number || uIdx + 1}`}</span>
+                                    {u.unit_category && (
+                                      <span className="unit-tray-chip-cat">
+                                        · {unitCategoryLabel(u.unit_category)}
+                                      </span>
+                                    )}
+                                  </button>
+                                ))}
+                                {p.units_inventory.length > 2 && (
+                                  <span className="unit-tray-more">
+                                    +{p.units_inventory.length - 2} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="property-card-footer">
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <button 
+                                className={`compare-toggle-btn ${compareList.find(item => item.id === p.id) ? 'active' : ''}`}
+                                onClick={(e) => toggleCompare(p, e)}
+                              >
+                                {compareList.find(item => item.id === p.id) ? "✓ Added" : "+ Compare"}
+                              </button>
+                              <ReactionButtons
+                                propertyId={p.id}
+                                propertyTitle={p.title}
+                                category={p.spaceCategory}
+                                city={p.city}
+                                small={true}
+                              />
+                            </div>
+                            <Link href={`/property/${p.slug}`} className="property-action-btn" style={{ textDecoration: 'none' }}>Enter Showcase →</Link>
                           </div>
-                          <span className="property-action-btn">Enter Showcase →</span>
                         </div>
                       </div>
-                    </Link>
                     </motion.div>
                     );
                   })

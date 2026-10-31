@@ -79,12 +79,17 @@ export async function POST(request) {
     if (prop.owner_id !== userId) {
       const { data: profile } = await supabaseAdmin
         .from("user_profiles")
-        .select("active_roles")
+        .select("role, active_roles")
         .eq("id", userId)
         .maybeSingle();
 
       const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
-      if (!roles.includes("admin") && !roles.includes("staff")) {
+      const isStaff =
+        profile?.role === "admin" ||
+        profile?.role === "staff" ||
+        roles.includes("admin") ||
+        roles.includes("staff");
+      if (!isStaff) {
         return NextResponse.json(
           { error: "Forbidden: You do not have permission to verify this listing" },
           { status: 403 }

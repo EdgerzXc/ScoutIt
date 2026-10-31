@@ -4,6 +4,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
 import { notifyUser } from "@/lib/notifications";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 import {
   createTaskSchema,
   serializeTask,
@@ -41,6 +42,9 @@ export async function GET(request) {
     const propertyFilter = searchParams.get("propertyId");
     if ((dealFilter && !UUID_RE.test(dealFilter)) || (propertyFilter && !UUID_RE.test(propertyFilter))) {
       return NextResponse.json({ error: "Invalid record id" }, { status: 400 });
+    }
+    if (!/^[a-z0-9-_]+$/i.test(String(userId))) {
+      return NextResponse.json({ error: "Invalid user identity" }, { status: 400 });
     }
 
     let query = supabaseAdmin
@@ -106,7 +110,8 @@ export async function POST(request) {
       const isParty =
         deal.buyer_id === userId ||
         deal.broker_id === userId ||
-        deal.properties?.owner_id === userId;
+        deal.properties?.owner_id === userId ||
+        (await isRoutedDealRecipient(supabaseAdmin, input.dealId, userId));
       if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       linkedDeal = deal;
     }
@@ -129,11 +134,14 @@ export async function POST(request) {
     // tasks into any account by guessing its auth UUID.
     const assigneeId = input.assigneeUserId || userId;
     if (assigneeId !== userId) {
-      const allowed = linkedDeal && [
-        linkedDeal.buyer_id,
-        linkedDeal.broker_id,
-        linkedDeal.properties?.owner_id,
-      ].includes(assigneeId);
+      const allowed =
+        linkedDeal &&
+        ([
+          linkedDeal.buyer_id,
+          linkedDeal.broker_id,
+          linkedDeal.properties?.owner_id,
+        ].includes(assigneeId) ||
+          (await isRoutedDealRecipient(supabaseAdmin, input.dealId, assigneeId)));
       if (!allowed) {
         return NextResponse.json(
           { error: "Tasks can only be assigned to a party on the linked deal" },

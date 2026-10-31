@@ -12,6 +12,7 @@ import {
   validateDecision,
 } from "@/lib/propertyClaimPolicy.mjs";
 import { notifyUser } from "@/lib/notifications";
+import { unpublishPropertyFromAirtable } from "@/lib/airtable";
 
 /**
  * Ownership claim review.
@@ -150,11 +151,14 @@ export async function decideClaim(formData) {
   if (!verdict.ok) return { ok: false, message: verdict.message };
 
   let transfer = null;
+  let willExceedCap = false;
+  let claimantTier = "starry";
+  let listingCap = 1;
 
   if (verdict.transfersListing) {
     const { data: property, error: propErr } = await admin
       .from("properties")
-      .select("id, slug, title, owner_id, lister_relationship")
+      .select("id, slug, canonical_slug, title, owner_id, lister_relationship, pipeline_status")
       .eq("id", claim.property_id)
       .single();
     if (propErr || !property) {
@@ -168,6 +172,29 @@ export async function decideClaim(formData) {
       };
     }
 
+    // Check claimant's tier and active listing count
+    const { data: claimantProfile } = await admin
+      .from("user_profiles")
+      .select("subscription_tier, role")
+      .eq("id", claim.claimant_user_id)
+      .maybeSingle();
+
+    claimantTier = String(claimantProfile?.subscription_tier || "starry").toLowerCase();
+    const claimantRole = String(claimantProfile?.role || "owner").toLowerCase();
+    const limits = claimantRole === "broker"
+      ? { starry: 3, solar: 15, cluster: 50, universe: Infinity }
+      : { starry: 1, solar: 5, cluster: 20, universe: Infinity };
+    listingCap = limits[claimantTier] ?? 1;
+
+    const { data: claimantLiveProps } = await admin
+      .from("properties")
+      .select("id")
+      .eq("owner_id", claim.claimant_user_id)
+      .eq("pipeline_status", "approved");
+
+    const liveCount = (claimantLiveProps || []).filter((p) => p.id !== property.id).length;
+    willExceedCap = liveCount >= listingCap;
+
     // The previous holder is recorded BEFORE the write, on the claim event and
     // in the audit entry. An approval is close to irreversible for the person
     // who loses the listing, so who they were must survive the transfer.
@@ -176,15 +203,36 @@ export async function decideClaim(formData) {
       from_lister_relationship: property.lister_relationship ?? null,
       to_owner_id: claim.claimant_user_id,
       to_lister_relationship: claim.claimed_relationship,
-      slug: property.slug,
+      slug: property.canonical_slug || property.slug,
+      defaultedToOffMarket: willExceedCap,
     };
+
+    const transferPayload = {
+      owner_id: claim.claimant_user_id,
+      lister_relationship: claim.claimed_relationship,
+      verified: true,
+    };
+
+    if (willExceedCap) {
+      transferPayload.pipeline_status = "off_market";
+      transferPayload.lifecycle_state = "off_market";
+      transferPayload.withdrawn_at = new Date().toISOString();
+      transferPayload.quietly_open_to_offers = false;
+
+      // If the property was published in Airtable, unpublish it so it leaves public view
+      const slugToUnpublish = property.canonical_slug || property.slug;
+      if (slugToUnpublish) {
+        try {
+          await unpublishPropertyFromAirtable(slugToUnpublish);
+        } catch (unpublishErr) {
+          console.error("[CLAIM APPROVAL] Airtable unpublish failed:", unpublishErr);
+        }
+      }
+    }
 
     const { error: transferErr } = await admin
       .from("properties")
-      .update({
-        owner_id: claim.claimant_user_id,
-        lister_relationship: claim.claimed_relationship,
-      })
+      .update(transferPayload)
       .eq("id", property.id);
 
     if (transferErr) {
@@ -248,7 +296,9 @@ export async function decideClaim(formData) {
     await notifyUser(admin, {
       userId: claim.claimant_user_id,
       title: "Property claim approved",
-      desc: "Your ownership claim for the listing has been approved. The property has been transferred to your account.",
+      desc: willExceedCap
+        ? `Your ownership claim for the listing has been approved. Because your ${claimantTier.toUpperCase()} plan is at its active live listing limit (${listingCap}), this property has been safely transferred into your private Off-Market cloud. You can swap it to live or upgrade your plan anytime in your Dashboard.`
+        : "Your ownership claim for the listing has been approved. The property has been transferred to your account.",
       icon: "🎉",
       propertyId: claim.property_id,
       notificationType: "claim_approved",

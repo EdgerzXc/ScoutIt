@@ -117,17 +117,13 @@ test("Stratosphere route-local motion and focus match the shared system", async 
   const headline = page.locator(".strat-intro");
   expect(await headline.evaluate((node) => getComputedStyle(node).animationName)).toBe("none");
 
-  const cinematic = page.getByRole("button", { name: /Cinematic Descent/i });
-  const mapDoor = page.getByRole("link", { name: /See it on the map/i });
-  await expect.poll(async () => {
-    if (!(await mapDoor.isVisible())) await cinematic.click();
-    return mapDoor.isVisible();
-  }, { timeout: 15000 }).toBe(true);
-  await mapDoor.focus();
-  await expect(mapDoor).toBeFocused();
-  const focus = await mapDoor.evaluate((node) => getComputedStyle(node).outlineWidth);
+  const entryCta = page.getByRole("link", { name: /Enter Stratosphere/i });
+  await expect(entryCta).toBeVisible();
+  await entryCta.focus();
+  await expect(entryCta).toBeFocused();
+  const focus = await entryCta.evaluate((node) => getComputedStyle(node).outlineWidth);
   expect(Number.parseFloat(focus)).toBeGreaterThanOrEqual(2);
-  expect(await mapDoor.evaluate((node) => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+  expect(await entryCta.evaluate((node) => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
 });
 
 test("remaining layer foreground controls share touch, focus, and motion contracts", async ({ page }) => {

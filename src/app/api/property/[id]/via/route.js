@@ -16,6 +16,9 @@ import { clientIp } from "@/lib/clientIp";
 
 export const dynamic = "force-dynamic";
 
+const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const checkViaGetRate = createRateLimiter({
   limit: 60,
   windowMs: 60_000,
@@ -39,7 +42,9 @@ export async function GET(request, { params }) {
     }
 
     const { id: slug } = await params;
-    if (!slug) return NextResponse.json({ error: "Missing property identifier" }, { status: 400 });
+    if (!slug || !SAFE_ID.test(slug)) {
+      return NextResponse.json({ error: "Invalid or missing property identifier" }, { status: 400 });
+    }
 
     const { searchParams } = new URL(request.url);
     const requestedPromoter = searchParams.get("promoter");
@@ -48,11 +53,12 @@ export async function GET(request, { params }) {
     // 1. Resolve property from Supabase
     let property = null;
     if (supabaseAdmin) {
-      const { data } = await supabaseAdmin
-        .from("properties")
-        .select("id, title, slug, canonical_slug")
-        .or(`canonical_slug.eq.${slug},slug.eq.${slug}`)
-        .maybeSingle();
+      const isUuid = UUID_RE.test(slug);
+      const query = supabaseAdmin.from("properties").select("id, title, slug, canonical_slug");
+      const { data } = await (isUuid
+        ? query.eq("id", slug)
+        : query.or(`canonical_slug.eq.${slug},slug.eq.${slug}`)
+      ).maybeSingle();
       property = data;
     }
 
@@ -157,6 +163,9 @@ export async function POST(request, { params }) {
     }
 
     const { id: slug } = await params;
+    if (!slug || !SAFE_ID.test(slug)) {
+      return NextResponse.json({ error: "Invalid or missing property identifier" }, { status: 400 });
+    }
     const body = await request.json().catch(() => ({}));
     const {
       visitorId = "anon",
@@ -168,11 +177,12 @@ export async function POST(request, { params }) {
 
     let propertyId = slug;
     if (supabaseAdmin) {
-      const { data } = await supabaseAdmin
-        .from("properties")
-        .select("id")
-        .or(`canonical_slug.eq.${slug},slug.eq.${slug}`)
-        .maybeSingle();
+      const isUuid = UUID_RE.test(slug);
+      const query = supabaseAdmin.from("properties").select("id");
+      const { data } = await (isUuid
+        ? query.eq("id", slug)
+        : query.or(`canonical_slug.eq.${slug},slug.eq.${slug}`)
+      ).maybeSingle();
       if (data?.id) propertyId = data.id;
 
       await recordRoutingDecision(supabaseAdmin, {

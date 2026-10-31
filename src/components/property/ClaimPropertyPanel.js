@@ -5,6 +5,7 @@ import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { LISTER_RELATIONSHIPS, OWNER_SOVEREIGNTY_DISCLAIMER } from "@/lib/listerRelationship";
 import InfoTip from "@/components/ui/InfoTip";
+import { Scale, Cloud, AlertCircle, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────
 // CLAIM THIS PROPERTY — §37 · WORK ORDER W8
@@ -173,7 +174,14 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
     <section className="cp-root" aria-labelledby="cp-title">
       <ClaimStyles />
       <div className="cp-card">
-        <div className="cp-eyebrow">Owner Sovereignty</div>
+        <div className="cp-header-row">
+          <div className="cp-eyebrow">Owner Sovereignty // Legal Succession</div>
+          {state?.signedIn && (
+            <div className="cp-badge-user">
+              {state.userTier ? state.userTier.toUpperCase() : "STARRY"} · {state.isOwner ? "OWNER MODE" : "SEEKER ACCOUNT"}
+            </div>
+          )}
+        </div>
 
         {/* Already claimed by this user — show status, offer no second claim. */}
         {myClaim ? (
@@ -181,7 +189,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
             <h3 className="cp-title" id="cp-title">Your claim is on file</h3>
             <p className="cp-body">
               {STATUS_COPY[myClaim.status] || "Under review"}. We&apos;ll contact you at
-              your account email if we need documents.
+              your account email if we need title documents.
             </p>
             <div className="cp-meta">
               Claim {myClaim.id.slice(0, 8)} · filed{" "}
@@ -206,8 +214,9 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
               Is this your property? <InfoTip tipId="claimProperty" label="About claiming property" />
             </h3>
             <p className="cp-body">
-              This listing is not yet claimed by a verified owner. If you own or manage
-              this property, claim it here to update its details and inquiries.
+              This listing is not yet claimed by a verified owner. If you hold legal title or
+              written management authority, claim it here to assume custody of its intelligence,
+              photos, and buyer inquiries.
             </p>
 
             {!state.signedIn ? (
@@ -229,6 +238,52 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
               </button>
             ) : (
               <div className="cp-form">
+                {/* Notice: Seeker account converting to owner */}
+                {!state.isOwner && (
+                  <div className="cp-notice cp-notice--info">
+                    <span className="cp-notice__tag">
+                      <AlertCircle size={13} className="text-gold-accent" />
+                      ACCOUNT WORKSPACE NOTICE
+                    </span>
+                    <p className="cp-notice__text">
+                      You are currently signed in with a Seeker account. Submitting an ownership claim
+                      asserts legal title custody and will activate Owner Mode on your profile once
+                      our team verifies your title documents.
+                    </p>
+                  </div>
+                )}
+
+                {/* Notice: Quota limit & Free Off-Market Cloud Storage */}
+                {state.atListingCap && (
+                  <div className="cp-notice cp-notice--quota">
+                    <span className="cp-notice__tag">
+                      <Cloud size={13} className="text-gold-accent" />
+                      ACTIVE LISTING QUOTA NOTICE <InfoTip tipId="listingCapCloudStorage" label="About listing quota" />
+                    </span>
+                    <p className="cp-notice__text">
+                      Your {state.userTier ? state.userTier.toUpperCase() : "STARRY"} plan currently has{" "}
+                      {state.activeLiveCount || 1} active live listing (quota: {state.listingCap || 1}).
+                      Claiming is free with no paywall. Upon verification, this property will be deposited
+                      into your Free Off-Market Cloud Storage, where you can curate its details privately
+                      or swap it to Live Market anytime.
+                    </p>
+                  </div>
+                )}
+
+                {/* Notice: Originating broker succession */}
+                <div className="cp-notice cp-notice--legal">
+                  <span className="cp-notice__tag">
+                    <Scale size={13} className="text-gold-accent" />
+                    ORIGINATING BROKER SUCCESSION <InfoTip tipId="propertyClaimingSuccession" label="About broker succession" />
+                  </span>
+                  <p className="cp-notice__text">
+                    Under Republic Act No. 9646 (RESA) and Republic Act No. 8792 (E-Commerce Act),
+                    claiming this property establishes primary legal ownership sovereignty. If this
+                    space was provisionally listed by an unrepresented broker, you may choose to retain
+                    or revoke their representation once verified.
+                  </p>
+                </div>
+
                 <fieldset className="cp-fieldset">
                   <legend className="cp-legend">Your relationship to it</legend>
                   {LISTER_RELATIONSHIPS.map((option) => (
@@ -264,8 +319,10 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                     disabled={busy}
                   />
                   <span className="cp-agree__text">
-                    I confirm this is true. I understand a false claim against someone
-                    else&apos;s listing can be reported to the PRC and may end my account.
+                    I declare under penalty of perjury and applicable Philippine laws (RA 9646 and Civil Code)
+                    that I am the legal owner or authorized representative. I understand a false claim against
+                    someone else&apos;s listing can be reported to the PRC, forfeits my account, and incurs
+                    civil and criminal liability.
                   </span>
                 </label>
 
@@ -273,7 +330,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                   <div className="cp-hint">
                     {!relationship
                       ? "Choose your relationship to this property."
-                      : "Tick the confirmation to submit."}
+                      : "Tick the legal confirmation to submit."}
                   </div>
                 )}
                 {error && (
@@ -289,7 +346,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                     onClick={submit}
                     disabled={busy || !ready}
                   >
-                    {busy ? "Submitting…" : "Submit claim"}
+                    {busy ? "Submitting…" : "Submit legal claim"}
                   </button>
                   <button
                     type="button"
@@ -303,7 +360,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
 
                 <p className="cp-note">
                   We may ask for your TCT, CCT or OCT, or your written authority from the
-                  owner. Documents stay private and are never shown on the listing.
+                  owner. Documents stay private and are never shown on the public listing.
                 </p>
               </div>
             )}
@@ -337,13 +394,70 @@ function ClaimStyles() {
         border-radius: 4px;
         padding: 20px 17px;
       }
+      .cp-header-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 9px;
+      }
       .cp-eyebrow {
         font-family: ${MONO};
         font-size: 12px;
         color: var(--accent);
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        margin-bottom: 9px;
+      }
+      .cp-badge-user {
+        font-family: ${MONO};
+        font-size: 12px;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        padding: 3px 8px;
+        border-radius: 3px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        text-transform: uppercase;
+      }
+      .cp-notice {
+        padding: 12px 14px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+      }
+      .cp-notice--info {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--border-mid, #444);
+      }
+      .cp-notice--quota {
+        background: rgba(var(--accent-rgb), 0.05);
+        border: 1px solid var(--accent-border);
+        border-left: 3px solid var(--accent);
+      }
+      .cp-notice--legal {
+        background: rgba(var(--accent-rgb), 0.04);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent-bright);
+      }
+      .cp-notice__tag {
+        font-family: ${MONO};
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 5px;
+      }
+      .cp-notice__text {
+        font-family: var(--font-display);
+        font-size: 12.5px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        margin: 0;
       }
       .cp-title {
         font-family: var(--font-display);

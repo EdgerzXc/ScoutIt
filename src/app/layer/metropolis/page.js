@@ -3,7 +3,8 @@
 import LayerNav from "@/components/descent/LayerNav";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, Building2, Search } from "lucide-react";
+import { ArrowRight, Building2, Check, Lock, Search, ShieldCheck } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 import BackgroundMetropolis from "@/components/descent/BackgroundMetropolis";
 import LayerHeader from "@/components/descent/LayerHeader";
 import LayerTransition from "@/components/descent/LayerTransition";
@@ -28,6 +29,13 @@ export default function MetropolisLayer() {
   const [search, setSearch] = useState("");
   const [previews, setPreviews] = useState(INITIAL_PREVIEWS);
   const [loading, setLoading] = useState(true);
+  const [offMarketData, setOffMarketData] = useState({
+    properties: [],
+    isUniverseSeeker: false,
+    userTier: "starry",
+    loaded: false,
+  });
+  const [offMarketLoading, setOffMarketLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -54,10 +62,76 @@ export default function MetropolisLayer() {
     };
   }, []);
 
+  useEffect(() => {
+    if (category !== "Off-Market" || offMarketData.loaded) return;
+    let active = true;
+    setOffMarketLoading(true);
+    async function loadOffMarket() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers = session?.access_token
+          ? { Authorization: `Bearer ${session.access_token}` }
+          : {};
+        const res = await fetch("/api/off-market", { headers });
+        if (!res.ok) {
+          if (active) {
+            setOffMarketData({
+              properties: [],
+              isUniverseSeeker: false,
+              userTier: "starry",
+              loaded: true,
+            });
+          }
+          return;
+        }
+        const data = await res.json();
+        if (active) {
+          setOffMarketData({
+            properties: Array.isArray(data?.properties) ? data.properties : [],
+            isUniverseSeeker: Boolean(data?.isUniverseSeeker),
+            userTier: data?.userTier || "starry",
+            loaded: true,
+          });
+        }
+      } catch (err) {
+        if (active) {
+          setOffMarketData({
+            properties: [],
+            isUniverseSeeker: false,
+            userTier: "starry",
+            loaded: true,
+          });
+        }
+      } finally {
+        if (active) setOffMarketLoading(false);
+      }
+    }
+    loadOffMarket();
+    return () => {
+      active = false;
+    };
+  }, [category, offMarketData.loaded]);
+
   const properties = filterCategoryPreviews(previews, category, search);
   const { counts } = getCategoryCounts(previews);
 
-  const browseLabel = category === "Venues" ? "Venues/Events" : category;
+  const isOffMarketCategory = category === "Off-Market";
+  const browseLabel = isOffMarketCategory
+    ? "Off-Market Vault"
+    : category === "Venues"
+      ? "Venues/Events"
+      : category;
+
+  const filteredOffMarket = (offMarketData.properties || []).filter((p) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      (p.title && p.title.toLowerCase().includes(q)) ||
+      (p.location && p.location.toLowerCase().includes(q)) ||
+      (p.type && p.type.toLowerCase().includes(q)) ||
+      (p.spaceCategory && p.spaceCategory.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <main
@@ -105,11 +179,26 @@ export default function MetropolisLayer() {
                   </button>
                 );
               })}
+              <div className="metro-nav-divider my-2 border-t border-[rgba(232,174,60,0.18)]" />
+              <button
+                className={`descent-cat offmarket-nav-btn${isOffMarketCategory ? " on" : ""}`}
+                type="button"
+                aria-pressed={isOffMarketCategory}
+                onClick={() => { setCategory("Off-Market"); setSearch(""); }}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Lock size={12} className="text-[var(--accent)] shrink-0" aria-hidden="true" />
+                  <span>Off-Market</span>
+                </span>
+                {offMarketData.properties.length > 0 && (
+                  <span className="descent-cat-count ml-1.5 opacity-60 font-normal">({offMarketData.properties.length})</span>
+                )}
+              </button>
             </nav>
 
           </div>
           <Link
-            href={`/property?type=${category}&_cb=1`}
+            href={isOffMarketCategory ? "/off-market" : `/property?type=${category}&_cb=1`}
             className="prominent-action-link metro-browse"
           >
             Browse {browseLabel} →
@@ -120,64 +209,230 @@ export default function MetropolisLayer() {
         <div className="descent-content">
           <div className="metro-content-head">
             <h2 className="metro-content-title">
-              {browseLabel} Spaces
+              {isOffMarketCategory
+                ? offMarketData.isUniverseSeeker
+                  ? "Off-Market Vault"
+                  : offMarketData.properties.some((p) => p.isOwner)
+                    ? "Your Private Cloud"
+                    : "Off-Market Vault"
+                : `${browseLabel} Spaces`}
             </h2>
-            <p className="metro-content-sub">Category preview</p>
+            <p className="metro-content-sub">
+              {isOffMarketCategory
+                ? offMarketData.isUniverseSeeker
+                  ? "Universe Exclusive · Confidential whisper inventory & quiet offers"
+                  : offMarketData.properties.some((p) => p.isOwner)
+                    ? "Owner Cloud View · Your unlisted properties stored in the cloud"
+                    : "Confidential trophy inventory reserved for Universe Principals"
+                : "Category preview"}
+            </p>
           </div>
 
           {/* Search */}
           <label className="metro-search-shell">
             <Search size={18} aria-hidden="true" />
-            <span className="metro-search-label">Search this category</span>
+            <span className="metro-search-label">
+              {isOffMarketCategory ? "Search off-market inventory" : "Search this category"}
+            </span>
             <input
               className="metro-search"
-              aria-label={`Search ${browseLabel} spaces`}
-              placeholder="Name, city, or style"
+              aria-label={isOffMarketCategory ? "Search off-market inventory" : `Search ${browseLabel} spaces`}
+              placeholder={isOffMarketCategory ? "Title, location, or asset type" : "Name, city, or style"}
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </label>
 
-          {/* Property grid */}
-          <div className="metro-grid">
-            {properties.length === 0 ? (
-              <div className="metro-empty" role="status">
-                <span className="metro-empty-icon"><Building2 size={22} aria-hidden="true" /></span>
-                <span className="metro-empty-kicker">Directory signal</span>
-                <h3>{search ? "No matching spaces" : `No ${browseLabel.toLowerCase()} previews yet`}</h3>
-                <p>
-                  {search
-                    ? "Try another name, city, or style—or open the complete directory."
-                    : "This layer stays honest when a preview is unavailable. The complete directory may have more live spaces."}
-                </p>
-                <Link href={`/property?type=${category}&_cb=1`} className="metro-empty-action">
-                  Browse {browseLabel} <ArrowRight size={15} aria-hidden="true" />
-                </Link>
+          {/* Off-Market / Property grid */}
+          {isOffMarketCategory ? (
+            offMarketLoading ? (
+              <div className="metro-grid" aria-busy="true">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="metro-card animate-pulse">
+                    <div className="metro-photo bg-white/5" />
+                    <div className="metro-body space-y-2">
+                      <div className="h-4 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/5 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : offMarketData.isUniverseSeeker ? (
+              filteredOffMarket.length === 0 ? (
+                <div className="metro-empty" role="status">
+                  <span className="metro-empty-icon"><Lock size={22} aria-hidden="true" /></span>
+                  <span className="metro-empty-kicker">Vault Signal</span>
+                  <h3>{search ? "No matching off-market spaces" : "No off-market listings available"}</h3>
+                  <p>
+                    {search
+                      ? "Try another search term or clear the filter."
+                      : "The private whisper pipeline updates as owners deposit assets."}
+                  </p>
+                </div>
+              ) : (
+                <div className="metro-grid">
+                  {filteredOffMarket.map((p) => (
+                    <Link href={`/off-market?slug=${p.slug}`} key={p.id} className="metro-card">
+                      <div
+                        className="metro-photo"
+                        style={{ backgroundImage: `url(${p.image || "/images/property-fallback.webp"})` }}
+                      />
+                      <div className="metro-body">
+                        <span className="inline-block px-2 py-0.5 text-xs font-mono tracking-wider uppercase rounded border border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent-bright)] mb-1">
+                          Confidential · Universe
+                        </span>
+                        <div className="metro-name">{p.title}</div>
+                        <div className="metro-tag-row">
+                          <span className="metro-tag-label">Type</span>
+                          <span className="metro-tag-value">{p.type || p.spaceCategory || "Trophy Space"}</span>
+                        </div>
+                        <div className="metro-tag-row">
+                          <span className="metro-tag-label">Location</span>
+                          <span className="metro-tag-value">{p.location || "Confidential"}</span>
+                        </div>
+                        <div className="metro-tag-row">
+                          <span className="metro-tag-label">Whisper</span>
+                          <span className="metro-tag-value text-[var(--accent-bright)] font-mono">
+                            {p.whisperPrice ? `₱${Number(p.whisperPrice).toLocaleString()}` : "Price Upon Request"}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )
+            ) : offMarketData.properties.some((p) => p.isOwner) ? (
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl border border-[var(--accent-muted)] bg-[rgba(232,174,60,0.06)] backdrop-blur">
+                  <p className="text-xs text-[var(--accent-bright)] font-mono uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-[var(--accent-bright)] shrink-0" aria-hidden="true" />
+                    <span>Private Cloud Storage (Owner View)</span>
+                  </p>
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    You are viewing your own off-market assets stored in the cloud. As a property owner, your private storage is unlimited and free. To browse the global confidential pipeline, subscribe to Universe Seeker.
+                  </p>
+                </div>
+                <div className="metro-grid">
+                  {filteredOffMarket.map((p) => (
+                    <Link href={`/dashboard`} key={p.id} className="metro-card">
+                      <div
+                        className="metro-photo"
+                        style={{ backgroundImage: `url(${p.image || "/images/property-fallback.webp"})` }}
+                      />
+                      <div className="metro-body">
+                        <span className="inline-block px-2 py-0.5 text-xs font-mono tracking-wider uppercase rounded border border-white/20 bg-white/5 text-white/80 mb-1">
+                          Owned · Cloud Vault
+                        </span>
+                        <div className="metro-name">{p.title}</div>
+                        <div className="metro-tag-row">
+                          <span className="metro-tag-label">Status</span>
+                          <span className="metro-tag-value">
+                            {p.quietlyOpenToOffers ? "Quietly Open to Offers" : "Private Storage (Hidden)"}
+                          </span>
+                        </div>
+                        <div className="metro-tag-row">
+                          <span className="metro-tag-label">Location</span>
+                          <span className="metro-tag-value">{p.location || "Philippines"}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             ) : (
-              properties.map(p => (
-                <Link href={`/property/${p.slug || p.id}`} key={p.id} className="metro-card">
-                  <div
-                    className="metro-photo"
-                    style={{ backgroundImage: `url(${p.image || "/images/property-fallback.webp"})` }}
-                  />
-                  <div className="metro-body">
-                    <div className="metro-name">{p.title}</div>
-                    {p.tags.map((tag, i) => {
-                      const [label, ...rest] = tag.split(":");
-                      const value = rest.join(":").trim();
-                      return (
-                        <div className="metro-tag-row" key={i}>
-                          <span className="metro-tag-label">{label.trim()}</span>
-                          <span className="metro-tag-value">{value}</span>
-                        </div>
-                      );
-                    })}
+              <div className="metro-vault-gate p-8 md:p-12 rounded-2xl border border-[rgba(232,174,60,0.35)] bg-gradient-to-b from-[#161616] to-[#0d0d0d] shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-xl text-center max-w-2xl mx-auto my-6">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10 flex items-center justify-center text-xl text-[var(--accent-bright)]">
+                  <Lock size={22} className="text-[var(--accent-bright)]" aria-hidden="true" />
+                </div>
+                <span className="inline-block px-3 py-1 mb-3 text-xs font-mono tracking-widest uppercase rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/15 text-[var(--accent-bright)]">
+                  Universe Seeker Exclusive · ₱2,499/mo
+                </span>
+                <h3 className="text-2xl md:text-3xl font-display text-white mb-3 tracking-wide">
+                  The Confidential Off-Market Vault
+                </h3>
+                <p className="text-sm text-text-secondary max-w-lg mx-auto mb-6 leading-relaxed">
+                  Access unlisted trophy estates, private commercial portfolios, and discreet whisper acquisitions withheld from public channels. Direct quiet offers with verified owners under strict discretion.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 text-left max-w-md mx-auto text-xs text-text-secondary">
+                  <div className="p-3 rounded-lg border border-white/5 bg-white/[0.02]">
+                    <p className="text-[var(--accent-bright)] font-mono font-medium mb-1 flex items-center gap-1">
+                      <Check size={12} aria-hidden="true" />
+                      <span>Whisper Deals</span>
+                    </p>
+                    <p>Pre-market trophy assets before public discovery.</p>
                   </div>
-                </Link>
-              ))
-            )}
-          </div>
+                  <div className="p-3 rounded-lg border border-white/5 bg-white/[0.02]">
+                    <p className="text-[var(--accent-bright)] font-mono font-medium mb-1 flex items-center gap-1">
+                      <Check size={12} aria-hidden="true" />
+                      <span>Quiet Offers</span>
+                    </p>
+                    <p>Discreet counterparty handshake via Connects.</p>
+                  </div>
+                  <div className="p-3 rounded-lg border border-white/5 bg-white/[0.02]">
+                    <p className="text-[var(--accent-bright)] font-mono font-medium mb-1 flex items-center gap-1">
+                      <Check size={12} aria-hidden="true" />
+                      <span>Deed Provenance</span>
+                    </p>
+                    <p>Verified titleholder sovereignty and safe harbor.</p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Link
+                    href="/pricing"
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-bright)] text-black font-semibold text-xs tracking-wider uppercase transition-transform hover:scale-[1.02] shadow-[0_0_25px_rgba(232,174,60,0.35)]"
+                  >
+                    Unlock Universe Access →
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl border border-[var(--accent-muted)] text-[var(--accent-bright)] text-xs font-mono uppercase tracking-wider hover:bg-[rgba(232,174,60,0.08)]"
+                  >
+                    Owner Sign In
+                  </Link>
+                </div>
+              </div>
+            )
+          ) : (
+            <div className="metro-grid">
+              {properties.length === 0 ? (
+                <div className="metro-empty" role="status">
+                  <span className="metro-empty-icon"><Building2 size={22} aria-hidden="true" /></span>
+                  <span className="metro-empty-kicker">Directory signal</span>
+                  <h3>{search ? "No matching spaces" : `No ${browseLabel.toLowerCase()} previews yet`}</h3>
+                  <p>
+                    {search
+                      ? "Try another name, city, or style—or open the complete directory."
+                      : "This layer stays honest when a preview is unavailable. The complete directory may have more live spaces."}
+                  </p>
+                  <Link href={`/property?type=${category}&_cb=1`} className="metro-empty-action">
+                    Browse {browseLabel} <ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                </div>
+              ) : (
+                properties.map(p => (
+                  <Link href={`/property/${p.slug || p.id}`} key={p.id} className="metro-card">
+                    <div
+                      className="metro-photo"
+                      style={{ backgroundImage: `url(${p.image || "/images/property-fallback.webp"})` }}
+                    />
+                    <div className="metro-body">
+                      <div className="metro-name">{p.title}</div>
+                      {p.tags.map((tag, i) => {
+                        const [label, ...rest] = tag.split(":");
+                        const value = rest.join(":").trim();
+                        return (
+                          <div className="metro-tag-row" key={i}>
+                            <span className="metro-tag-label">{label.trim()}</span>
+                            <span className="metro-tag-value">{value}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          )}
           
           </div>
         </div>

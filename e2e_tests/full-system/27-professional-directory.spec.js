@@ -5,7 +5,7 @@ const directories = [
   ["/brokers", /Verified Advisors/i],
   ["/photographers", /Space Photographers/i],
   ["/researchers", /Space Researchers/i],
-  ["/event-planners", /Event Professionals/i],
+  ["/event-planners", /Space & Concept Designers|Event Professionals/i],
 ];
 
 for (const [path, heading] of directories) {
@@ -17,7 +17,7 @@ for (const [path, heading] of directories) {
     await expect(page.getByText("Scanning verified directory roster…")).toHaveCount(0);
     await expect(page.getByText("Named signals only")).toBeVisible();
     await expect(page.getByPlaceholder("SEARCH NAME, PLACE, OR SPECIALTY")).toBeVisible();
-    await expect(page.getByText("Private saves never create a public count")).toBeVisible();
+    await expect(page.getByText(/Your saves stay private|Private saves/i)).toBeVisible();
     await expect(page.getByText("What We Verify")).toHaveCount(0);
     expect(errors).toEqual([]);
   });

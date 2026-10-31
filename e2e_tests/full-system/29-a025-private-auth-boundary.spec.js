@@ -72,7 +72,12 @@ test.describe("A-025 verified private-workspace boundary", () => {
     const codeButton = page.getByRole("button", { name: "Sign in with a code" });
     await expect(codeButton).toBeVisible();
     // Playwright's actionability check fails if another element covers it.
-    await codeButton.click({ timeout: 10_000 });
-    await expect(page.getByRole("button", { name: /Send verification code/i })).toBeVisible();
+    await expect.poll(async () => {
+      const target = page.getByRole("button", { name: /Send verification code/i });
+      if (!(await target.isVisible())) {
+        await codeButton.click().catch(() => {});
+      }
+      return target.isVisible();
+    }, { timeout: 15000 }).toBe(true);
   });
 });

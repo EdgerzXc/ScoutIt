@@ -86,7 +86,7 @@ test.describe('Owner with zero listings (safe mock)', () => {
     // open the editor and prove the preview reacts, then STOP before saving.
     await page.getByRole('heading', { name: /build it myself/i }).click();
     await expect(page.getByRole('heading', { name: /Basic Property Information/i })).toBeVisible();
-    await expect(page.getByText('LIVE PREVIEW / DRAFT MODE').first()).toBeVisible();
+    await expect(page.getByText(/LIVE PREVIEW \/ DRAFT (MODE|DOSSIER)/i).first()).toBeVisible();
 
     const titleInput = page.getByPlaceholder('e.g. Premium High-Rise Office in BGC Core');
     await titleInput.fill('E2E Live Preview');
@@ -203,6 +203,8 @@ test.describe('Settings information architecture', () => {
   test('page help is non-blocking, keyboard dismissible, and restores Eye focus', async ({ page }) => {
     await page.addInitScript(() => window.localStorage.setItem('scoutit_help_seen_v1', 'true'));
     await gotoAndSettle(page, '/discover');
+    const declineCookies = page.getByRole('dialog', { name: 'Cookie consent' }).getByRole('button', { name: 'DECLINE' });
+    if (await declineCookies.isVisible().catch(() => false)) await declineCookies.click();
     const eye = page.getByRole('button', { name: 'Menu', exact: true });
     const help = page.getByRole('button', { name: 'Help for this page' });
     if (!(await help.isVisible().catch(() => false))) {
@@ -211,6 +213,7 @@ test.describe('Settings information architecture', () => {
         return eye.getAttribute('aria-expanded');
       }).toBe('true');
       await page.getByRole('button', { name: 'Help & Display', exact: true }).click();
+      await expect(page.getByRole('complementary', { name: 'Help & Display' })).toBeVisible();
     }
     await help.click();
     const dialog = page.getByRole('dialog', { name: /filter, then narrow/i });

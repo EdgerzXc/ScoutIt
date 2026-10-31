@@ -5,9 +5,16 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isGlobalReadOnly } from "@/lib/featureFlags";
-import { buildFirstPublicationUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import {
+  buildFirstPublicationUpdate,
+  buildWithdrawUpdate,
+  getActiveListingCap,
+  normalizeLifecycleState,
+  PROPERTY_LIFECYCLE_STATES,
+} from "@/lib/propertyLifecycle";
 import { validateDeclaration, hasValidAgreement } from "@/lib/listerRelationship";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
+import { evaluateServerMonetizationGate } from "@/lib/serverMonetizationGate";
 
 export async function POST(request) {
 
@@ -27,7 +34,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
 
-    const { submissionId, listerRelationship, ownerSovereigntyAgreed } = await request.json();
+    const { submissionId, swapWithPropertyId, listerRelationship, ownerSovereigntyAgreed } = await request.json();
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -110,6 +117,70 @@ export async function POST(request) {
       };
     }
 
+    // ── ACTIVE LISTING CAP ENFORCEMENT & SWAP HANDLING ──
+    const { data: profile } = await supabaseAdmin
+      .from("user_profiles")
+      .select("subscription_tier, role, active_roles")
+      .eq("id", userId)
+      .maybeSingle();
+
+    const userTier = profile?.subscription_tier || "starry";
+    const userRole = profile?.role || "owner";
+    const monetizationGate = await evaluateServerMonetizationGate({
+      client: supabaseAdmin,
+      userId,
+      feature: "listing_quota",
+      role: userRole,
+      tier: userTier,
+      swapWithPropertyId,
+    });
+    const cap = monetizationGate.isPilotZeroPaywall
+      ? Infinity
+      : getActiveListingCap({ tier: userTier, role: userRole });
+
+    const { data: liveRows, error: liveCountErr } = await supabaseAdmin
+      .from("properties")
+      .select("id, title, slug, canonical_slug")
+      .eq("owner_id", userId)
+      .eq("pipeline_status", "approved");
+
+    if (liveCountErr) {
+      console.error("[PUBLISH API] Failed to count active listings:", liveCountErr);
+      return NextResponse.json({ error: "Failed to verify active listing limits" }, { status: 500 });
+    }
+
+    const activeLiveProperties = (liveRows || []).filter((r) => r.id !== submissionId);
+    const currentActiveCount = activeLiveProperties.length;
+    let toSwap = null;
+
+    if (currentActiveCount >= cap) {
+      if (!swapWithPropertyId) {
+        return NextResponse.json(
+          {
+            error: "listing_cap_reached",
+            message: `Your ${userTier.toUpperCase()} plan allows up to ${cap} active live ${cap === 1 ? "listing" : "listings"}. You currently have ${currentActiveCount} active live ${currentActiveCount === 1 ? "listing" : "listings"}. Upgrade your plan or choose an existing property to swap to Off-Market.`,
+            limit: cap,
+            currentActiveCount,
+            tier: userTier,
+            liveProperties: activeLiveProperties.map((p) => ({
+              id: p.id,
+              title: p.title,
+              slug: p.canonical_slug || p.slug,
+            })),
+          },
+          { status: 409 }
+        );
+      }
+
+      toSwap = activeLiveProperties.find((p) => p.id === swapWithPropertyId);
+      if (!toSwap) {
+        return NextResponse.json(
+          { error: "Invalid swap selection: the selected property is not currently an active live listing owned by you." },
+          { status: 400 }
+        );
+      }
+    }
+
     // 3. Sync to Airtable (Idempotent Upsert)
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
@@ -178,6 +249,28 @@ export async function POST(request) {
           return NextResponse.json({ error: "Failed to update database status" }, { status: 500 });
         }
 
+        // 5. If swapping, move the former live listing to Off-Market
+        if (toSwap) {
+          const swapSlug = toSwap.canonical_slug || toSwap.slug;
+          if (swapSlug) {
+            try {
+              await updateProperty(apiKey, baseId, swapSlug, { approved_for_scoutit: false });
+            } catch (swapAirtableErr) {
+              console.error("[PUBLISH SWAP] Airtable unpublish failed for swapped property:", swapAirtableErr);
+            }
+          }
+          const withdrawUpdate = buildWithdrawUpdate();
+          const { error: swapUpdateErr } = await supabaseAdmin
+            .from('properties')
+            .update(withdrawUpdate)
+            .eq('id', toSwap.id)
+            .eq('owner_id', userId);
+
+          if (swapUpdateErr) {
+            console.error("[PUBLISH SWAP] Failed to update swapped property in Supabase:", swapUpdateErr);
+          }
+        }
+
       } catch (airtableErr) {
         console.error("[PUBLISH API] Airtable sync failed:", airtableErr);
         return NextResponse.json({ error: "Airtable sync failed: " + airtableErr.message }, { status: 500 });
@@ -197,7 +290,7 @@ export async function POST(request) {
       publicCachePending = true;
     }
 
-    return NextResponse.json({ success: true, publicCachePending });
+    return NextResponse.json({ success: true, publicCachePending, swappedPropertyId: toSwap?.id || null });
 
   } catch (err) {
     console.error("[PUBLISH API] Error during publish process:", err);

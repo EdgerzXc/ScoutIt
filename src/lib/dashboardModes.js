@@ -65,3 +65,30 @@ export function inferProviderType(role, explicitProviderType) {
     ? normalizedRole
     : undefined;
 }
+
+/**
+ * Verifies whether an account holding `heldRoles` is authorized to enter
+ * the dashboard workspace corresponding to `requestedRole`.
+ *
+ * - `buyer` / `seeker` / `exploring` is the universal baseline available to all accounts.
+ * - Canonical staff (`admin` / `staff`) may inspect any valid dashboard workspace.
+ * - Specialized workspaces (`owner`, `broker`, `provider`, `operator`, `mc_enterprise`, `mc_staff`)
+ *   require the matching normalized dashboard mode in `heldRoles`.
+ */
+export function canAccessDashboardWorkspace(requestedRole, heldRoles = []) {
+  if (typeof requestedRole !== "string") return false;
+  const targetMode = normalizeDashboardMode(requestedRole);
+  if (!targetMode) return false;
+  if (targetMode === "buyer" || targetMode === "exploring") return true;
+
+  const rawHeld = (Array.isArray(heldRoles) ? heldRoles : [])
+    .map((r) => (typeof r === "string" ? r.trim().toLowerCase() : ""))
+    .filter(Boolean);
+
+  if (rawHeld.includes("admin") || rawHeld.includes("staff")) {
+    return true;
+  }
+
+  const heldModes = normalizeDashboardModes(rawHeld);
+  return heldModes.includes(targetMode);
+}

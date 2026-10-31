@@ -42,7 +42,8 @@ export function isPipelineRole(activeRoles) {
 }
 
 export function deckOrderForRole(mode) {
-  if (PIPELINE_ROLES.has(mode)) return ["crm", "workspace", "inbox", "calendar"];
+  const normalized = typeof mode === "string" ? mode.trim().toLowerCase() : "";
+  if (PIPELINE_ROLES.has(normalized)) return ["crm", "workspace", "inbox", "calendar"];
   return ["workspace", "inbox"];
 }
 

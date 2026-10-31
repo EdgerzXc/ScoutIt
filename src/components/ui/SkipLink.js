@@ -36,11 +36,13 @@ export default function SkipLink() {
   if (!targetId) return null;
 
   return (
-    <a
-      href={`#${targetId}`}
-      className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded focus:border focus:border-[var(--accent)] focus:bg-[var(--bg)] focus:px-4 focus:py-3 focus:font-mono focus:text-[12px] focus:uppercase focus:tracking-[0.12em] focus:text-[var(--accent)]"
-    >
-      Skip to main content
-    </a>
+    <nav aria-label="Skip links">
+      <a
+        href={`#${targetId}`}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded focus:border focus:border-[var(--accent)] focus:bg-[var(--bg)] focus:px-4 focus:py-3 focus:font-mono focus:text-[12px] focus:uppercase focus:tracking-[0.12em] focus:text-[var(--accent)]"
+      >
+        Skip to main content
+      </a>
+    </nav>
   );
 }

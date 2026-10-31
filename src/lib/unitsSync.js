@@ -17,7 +17,13 @@ async function purgeAfterUnitsSync() {
 // Shared by /api/dashboard/units and /api/dashboard/units/delegate so both
 // write paths stay in sync with a single source of truth.
 export async function syncPropertyUnitsToAirtable(serviceClient, property) {
-  if (property.pipeline_status !== "approved") return null;
+  if (!property || property.pipeline_status !== "approved") return null;
+  if (
+    property.lifecycle_state === "off_market" ||
+    property.lifecycle_state === "permanently_removed"
+  ) {
+    return null;
+  }
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
   if (!apiKey || !baseId) return null;
@@ -63,8 +69,9 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
     subdivision_scenarios: u.subdivision_scenarios || [],
   }));
 
-  if (property.slug) {
-    await updateProperty(apiKey, baseId, property.slug, { details: property.details }, airtableUnits);
+  const publicSlug = property.canonical_slug || property.slug;
+  if (publicSlug) {
+    await updateProperty(apiKey, baseId, publicSlug, { details: property.details }, airtableUnits);
     return { publicCachePending: await purgeAfterUnitsSync() };
   }
   const created = await insertProperty(apiKey, baseId, {

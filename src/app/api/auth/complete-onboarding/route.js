@@ -312,7 +312,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      activeRoles: [primaryMode],
+      activeRoles: Array.from(new Set([primaryMode || "buyer", "buyer"])),
       primaryMode,
       onboardingCompletedAt: completedAt,
       termsVersion: CURRENT_TERMS_VERSION,

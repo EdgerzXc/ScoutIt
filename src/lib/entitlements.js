@@ -67,7 +67,7 @@ export const FEATURE_MIN_TIER = {
   conciergeBasic: "solar",
   vault: "cluster",          // Luma 3D maps, 360 tours, drone heatmaps
   marketIntel: "cluster",    // market/investment panel: txn history, cap-rate benchmark, appreciation modelling
-  offMarket: "cluster",
+  offMarket: "universe",
   compare: "cluster",        // side-by-side comparison
   // ⚠️ `anonymityShield` DELIBERATELY DOES NOT APPEAR IN THIS TABLE.
   //    It is NOT tier-gated. See ANONYMITY_SHIELD_DEFAULT below and §46.8.
@@ -253,14 +253,32 @@ export function getCurrentTier() {
 export function getCurrentRole() {
   const u = readUser();
   const roles = u && (u.active_roles || u.tags);
-  return (Array.isArray(roles) && roles[0]) || "seeker";
+  return (u && (u.primaryMode || u.primary_mode)) || (Array.isArray(roles) && roles[0]) || (u && u.role) || "seeker";
 }
 
 // Unlike getCurrentRole() (the primary/first hat), a user can hold several
 // hats at once — e.g. the Operator hat (SCOUTIT_MASTER_BUILD_SPEC.md §9.4)
 // alongside Owner/Broker. Use this when checking for one specific hat.
 export function hasActiveRole(role) {
+  if (!role || typeof role !== "string") return false;
+  const target = role.trim().toLowerCase();
+  if (!target) return false;
   const u = readUser();
-  const roles = (u && (u.active_roles || u.tags)) || [];
-  return Array.isArray(roles) && roles.includes(role);
+  if (!u) return false;
+  const rawList = [
+    ...(Array.isArray(u.active_roles) ? u.active_roles : []),
+    ...(Array.isArray(u.tags) ? u.tags : []),
+    u.role,
+    u.primary_mode,
+    u.primaryMode,
+  ];
+  const held = new Set(
+    rawList
+      .filter((r) => typeof r === "string" && r.trim().length > 0)
+      .map((r) => r.trim().toLowerCase())
+  );
+  if (target === "buyer" || target === "seeker") {
+    return held.has("buyer") || held.has("seeker");
+  }
+  return held.has(target);
 }

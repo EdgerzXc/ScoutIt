@@ -14,6 +14,7 @@ import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
 import { freeInboundRecipient, isOpenGateAvailable } from "@/lib/openGate";
 import { getViaCookieName, parseViaCookie, isAttributionExpired, ROUTING_REASONS } from "@/lib/viaRouting";
 import { recordRoutingDecision } from "@/lib/serverViaRouting";
+import { canReadOffMarket } from "@/lib/serverEntitlements";
 
 
 
@@ -112,7 +113,7 @@ export async function POST(request) {
     // resolved the property (listingId vs propertySlug).
     const { data: propertyRow } = await supabaseAdmin
       .from('properties')
-      .select('title, slug, owner_id, lifecycle_state, pipeline_status, quietly_open_to_offers')
+      .select('title, slug, owner_id, lifecycle_state, pipeline_status, quietly_open_to_offers, details')
       .eq('id', resolvedListingId)
       .single();
 
@@ -120,14 +121,41 @@ export async function POST(request) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
     const propertyState = normalizeLifecycleState(propertyRow);
-    if (propertyState === PROPERTY_LIFECYCLE_STATES.OFF_MARKET && !canContactProperty(propertyRow)) {
-      return NextResponse.json({ error: "This off-market listing is view-only; the owner has not opened quiet offers" }, { status: 403 });
-    }
     if (propertyState === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED) {
       return NextResponse.json({ error: "This listing has been permanently removed" }, { status: 410 });
     }
     if (propertyState !== PROPERTY_LIFECYCLE_STATES.LIVE && propertyState !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
       return NextResponse.json({ error: "Property is not available for contact" }, { status: 404 });
+    }
+
+    // Invariant: Self-contact guard (prevents self-dealing, accidental connect spend, and handshake manipulation)
+    if (propertyRow.owner_id && String(propertyRow.owner_id) === String(userId) && role === 'buyer') {
+      return NextResponse.json({ error: "You cannot initiate an inquiry on your own property." }, { status: 409 });
+    }
+
+    if (propertyState === PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
+      if (!canContactProperty(propertyRow)) {
+        return NextResponse.json({ error: "This off-market listing is view-only; the owner has not opened quiet offers" }, { status: 403 });
+      }
+
+      // Off-market contact is exclusive to Universe tier seekers, unless referring directly from a Layer 2 promotion
+      const isPromotionalReferral = Boolean(
+        connectSource?.source_id &&
+        ["stratosphere_signal", "promotion"].includes(connectSource?.source_type)
+      );
+      if (!isPromotionalReferral) {
+        const offMarketAccess = await canReadOffMarket({
+          supabaseAdmin,
+          userId,
+          propertyOwnerId: propertyRow.owner_id,
+        });
+        if (!offMarketAccess.allowed) {
+          return NextResponse.json(
+            { error: "Access restricted: Contacting off-market properties requires Universe tier membership." },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     // If this is a per-unit contact (Unit Master Page "Your Move"), look up
@@ -233,8 +261,31 @@ export async function POST(request) {
       return NextResponse.json({ error: reason === "broker_not_contactable" ? "That broker is no longer available for this property." : "Lead routing is temporarily unavailable; no Connect was spent." }, { status: routingFailureStatus(reason) });
     }
     const dealId = routedDeal[0].deal_id;
-    const recipientIds = routedDeal[0].recipient_ids || [];
-    const routedToRoster = routedDeal[0].routed_to_roster === true;
+    let recipientIds = routedDeal[0].recipient_ids || [];
+    let routedToRoster = routedDeal[0].routed_to_roster === true;
+
+    // Owner Sovereignty: Respect contact_preference ('owner_only', 'broker_only', 'owner_and_brokers')
+    const contactPreference = propertyRow?.details?.contact_preference || "owner_and_brokers";
+    if (contactPreference === "broker_only" && !routedToRoster) {
+      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      return NextResponse.json(
+        { error: "The owner of this listing only accepts inquiries through an authorized broker, and no broker is currently assigned." },
+        { status: 409 }
+      );
+    }
+    if (contactPreference === "owner_only" && routedToRoster) {
+      await supabaseAdmin.from('deal_routing_recipients').delete().eq('deal_id', dealId);
+      await supabaseAdmin.from('deal_routing_recipients').insert({
+        deal_id: dealId,
+        property_id: resolvedListingId,
+        recipient_id: propertyRow.owner_id,
+        recipient_type: 'owner',
+      });
+      await supabaseAdmin.from('deals').update({ broker_id: null }).eq('id', dealId);
+      const ownerRecipientId = propertyRow.owner_id;
+      recipientIds = ownerRecipientId ? [ownerRecipientId] : [];
+      routedToRoster = false;
+    }
 
     // A-186 Invariant 5: Auditable Decision Logging
     if (isViaAttributedBroker && recipientIds.length > 0) {

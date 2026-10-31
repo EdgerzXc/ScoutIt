@@ -166,7 +166,7 @@ export async function POST(request) {
     const serviceClient = serviceClientFor();
     const { data: property, error: propErr } = await serviceClient
       .from("properties")
-      .select("id, owner_id, slug, pipeline_status, title, location, type, space_category, details")
+      .select("id, owner_id, slug, canonical_slug, lifecycle_state, pipeline_status, title, location, type, space_category, details")
       .eq("id", propertyId)
       .single();
 

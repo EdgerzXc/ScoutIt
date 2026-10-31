@@ -156,7 +156,7 @@ test.describe('universal menu behaviour', () => {
   });
 
   test('closes on a route change the menu did not initiate', async ({ page }) => {
-    await gotoAndSettle(page, '/discover');
+    await gotoAndSettle(page, '/property');
     const trigger = await openMenu(page);
 
     await page.locator('#header-menu-panel a[href="/brokers"]').click();
@@ -165,12 +165,12 @@ test.describe('universal menu behaviour', () => {
 
     await openMenu(page);
     await page.goBack();
-    await expect(page).toHaveURL(/\/discover$/);
+    await expect(page).toHaveURL(/\/property$/);
     await expect(page.locator('.header-menu-btn')).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('every destination resolves and the current page is marked', async ({ page }) => {
-    await gotoAndSettle(page, '/discover');
+    await gotoAndSettle(page, '/property');
     await openMenu(page);
 
     const hrefs = await page.locator('#header-menu-panel a[href]').evaluateAll((links) =>
@@ -183,7 +183,7 @@ test.describe('universal menu behaviour', () => {
 
     await expect(page.locator('#header-menu-panel [aria-current="page"]')).toHaveAttribute(
       'href',
-      '/discover',
+      '/property',
     );
     await expect(page.locator('.header-menu-btn')).toHaveAttribute('aria-controls', 'header-menu-panel');
   });

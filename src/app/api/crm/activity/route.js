@@ -23,6 +23,7 @@ const ACTIVITY_FIELDS = "id, deal_id, property_id, activity_type, actor_id, meta
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const ISO_CURSOR_TS_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}(?::?\d{2})?)?$/i;
 
 function mapRow(row, propertyTitleById = {}) {
   return {
@@ -45,14 +46,19 @@ function mapRow(row, propertyTitleById = {}) {
  * the same transaction share it — so the id breaks the tie and the cursor
  * carries both. An offset would skip or repeat rows as new activity arrives.
  */
-function encodeCursor(row) {
+export function encodeCursor(row) {
   return Buffer.from(`${row.created_at}|${row.id}`, "utf8").toString("base64url");
 }
 
-function decodeCursor(cursor) {
+export function decodeCursor(cursor) {
+  if (typeof cursor !== "string" || !cursor.trim() || cursor.length > 256) return null;
   try {
-    const [createdAt, id] = Buffer.from(cursor, "base64url").toString("utf8").split("|");
+    const parts = Buffer.from(cursor, "base64url").toString("utf8").split("|");
+    if (parts.length !== 2) return null;
+    const [createdAt, id] = parts;
     if (!createdAt || !id) return null;
+    if (!UUID_RE.test(id)) return null;
+    if (!ISO_CURSOR_TS_RE.test(createdAt) || /[(),%*\\]/.test(createdAt)) return null;
     if (Number.isNaN(new Date(createdAt).getTime())) return null;
     return { createdAt, id };
   } catch {
@@ -200,9 +206,10 @@ export async function GET(request) {
       ...(asBroker.data || []),
       ...(asOwner.data || []),
       ...asRouted,
-    ].map((d) => d.id))];
+    ].map((d) => d.id))].filter((id) => UUID_RE.test(String(id)));
+    const safePropertyIds = propertyIds.filter((id) => UUID_RE.test(String(id)));
 
-    if (dealIds.length === 0 && propertyIds.length === 0) {
+    if (dealIds.length === 0 && safePropertyIds.length === 0) {
       return NextResponse.json({ activity: [], nextCursor: null, hasMore: false });
     }
 
@@ -211,7 +218,7 @@ export async function GET(request) {
     // predicate we want.
     const scopeClauses = [];
     if (dealIds.length > 0) scopeClauses.push(`deal_id.in.(${dealIds.join(",")})`);
-    if (propertyIds.length > 0) scopeClauses.push(`property_id.in.(${propertyIds.join(",")})`);
+    if (safePropertyIds.length > 0) scopeClauses.push(`property_id.in.(${safePropertyIds.join(",")})`);
 
     const { data: rows, error } = await ordered(
       applyCursor(

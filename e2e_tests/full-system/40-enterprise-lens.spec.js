@@ -11,10 +11,10 @@ test.describe("A-170 Enterprise page follows the dark default and White Lens", (
       const action = page.getByRole("link", { name: /Preview the Enterprise Console/ });
       await expect(title).toBeVisible();
       await expect(cardHeading).toBeVisible();
-      expect(await cardHeading.evaluate((heading) => getComputedStyle(heading).fontSize)).toBe("17px");
+      await expect.poll(() => cardHeading.evaluate((heading) => getComputedStyle(heading).fontSize)).toBe("17px");
       await expect(page.locator("body")).not.toHaveClass(/light-mode/);
-      expect(await title.evaluate((heading) => getComputedStyle(heading).color)).toBe("rgb(219, 219, 219)");
-      expect(await action.evaluate((link) => getComputedStyle(link).backgroundColor)).toBe("rgb(232, 174, 60)");
+      await expect.poll(() => title.evaluate((heading) => getComputedStyle(heading).color)).toBe("rgb(219, 219, 219)");
+      await expect.poll(() => action.evaluate((link) => getComputedStyle(link).backgroundColor)).toBe("rgb(232, 174, 60)");
       if (process.env.SCOUTIT_CAPTURE_ENTERPRISE === "1") {
         await page.screenshot({ path: testInfo.outputPath("enterprise-dark.png") });
         await action.scrollIntoViewIfNeeded();

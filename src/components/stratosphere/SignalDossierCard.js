@@ -28,6 +28,11 @@ import {
   getSignalMarketRole,
   MARKET_ROLES,
 } from "@/lib/communitySignalsAdapter";
+import {
+  isSignalSavedLocally,
+  saveSignalLocally,
+  removeSignalLocally,
+} from "@/lib/savedSignalsClient";
 import "./signal-dossier-card.css";
 
 export default function SignalDossierCard({
@@ -44,13 +49,15 @@ export default function SignalDossierCard({
   const [expanded, setExpanded] = useState(false);
   const [relevant, setRelevant] = useState(false);
   const [relevantCount, setRelevantCount] = useState(signal.relevantCount || 0);
-  const [saved, setSaved] = useState(Boolean(signal.isSaved));
+  const [saved, setSaved] = useState(() => Boolean(signal.isSaved || isSignalSavedLocally(signal.id)));
 
   useEffect(() => {
     if (typeof signal.isSaved === "boolean") {
-      setSaved(signal.isSaved);
+      setSaved(signal.isSaved || isSignalSavedLocally(signal.id));
+    } else {
+      setSaved(isSignalSavedLocally(signal.id));
     }
-  }, [signal.isSaved]);
+  }, [signal.id, signal.isSaved]);
 
   useEffect(() => {
     const handleSavedChanged = (e) => {
@@ -183,30 +190,47 @@ export default function SignalDossierCard({
     }
   };
 
-  const handleSaveClick = (e) => {
+  const handleSaveClick = async (e) => {
     e.stopPropagation();
     const nextSaved = !saved;
     setSaved(nextSaved);
     notifySavedChanged(nextSaved);
+
     // A-145 honesty: sample saves are local-only, never a stored row.
     if (signal.isSample) {
+      if (nextSaved) saveSignalLocally(signal);
+      else removeSignalLocally(signal.id);
       return;
     }
+
     if (signal.liveCommunity) {
-      communityFetch("/save", nextSaved ? "POST" : "DELETE").then((json) => {
-        if (!json || json.ok !== true) {
-          setSaved(!nextSaved);
-          notifySavedChanged(!nextSaved);
-          if (json) flashActionError("Couldn't save that: try again.");
+      try {
+        const json = await communityFetch("/save", nextSaved ? "POST" : "DELETE");
+        if (json && json.ok === true) {
+          if (nextSaved) saveSignalLocally(signal);
+          else removeSignalLocally(signal.id);
+        } else {
+          // If unauthenticated or server error, graceful fallback to local storage
+          // ("saved follow-ups should be in your board if they are not login")
+          if (nextSaved) {
+            saveSignalLocally(signal);
+          } else {
+            removeSignalLocally(signal.id);
+          }
         }
-      }).catch(() => {
-        setSaved(!nextSaved);
-        notifySavedChanged(!nextSaved);
-        flashActionError("Couldn't save that: try again.");
-      });
+      } catch {
+        // Offline / network fallback: save locally to Your Board
+        if (nextSaved) {
+          saveSignalLocally(signal);
+        } else {
+          removeSignalLocally(signal.id);
+        }
+      }
       return;
     }
+
     if (nextSaved) {
+      saveSignalLocally(signal);
       try {
         fetch("/api/reactions", {
           method: "POST",
@@ -219,6 +243,8 @@ export default function SignalDossierCard({
           }),
         }).catch(() => {});
       } catch {}
+    } else {
+      removeSignalLocally(signal.id);
     }
   };
 
@@ -390,6 +416,9 @@ export default function SignalDossierCard({
               <TrendingUp size={11} aria-hidden="true" />
             )}
             <span>{isDemand ? "SEEKER · DEMAND" : isSupply ? "OFF-MARKET SUPPLY" : "SPATIAL INTEL"}</span>
+          </span>
+          <span className="sdc-type-pill" style={{ "--pill-color": typeColor }}>
+            {typeLabel.toUpperCase()}
           </span>
           <span className="sdc-location-datum">
             <MapPin size={11} aria-hidden="true" />
@@ -634,7 +663,7 @@ export default function SignalDossierCard({
             <div className="sdc-manage-signal" onClick={(event) => event.stopPropagation()}>
               {confirmClose ? (
                 <div className="sdc-close-confirm" role="group" aria-label="Manage or close signal">
-                  <p>Signals stay live for 7 days. Refresh for another week, mark solved when your need is met, or remove it.</p>
+                  <p>Close this signal? It leaves the public feed. Existing conversations remain open.</p>
                   <div className="sdc-close-actions">
                     <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(false)} disabled={closing || refreshing}>KEEP LIVE</button>
                     {(!signal.terminalState || signal.terminalState === "live" || signal.terminalState === "expired") && (
@@ -646,7 +675,7 @@ export default function SignalDossierCard({
                       {closing ? "CLOSING…" : "MARK FULFILLED"}
                     </button>
                     <button type="button" className="sdc-btn sdc-close-submit" onClick={(e) => handleCloseSignal(e, "withdrawn")} disabled={closing || refreshing}>
-                      {closing ? "CLOSING…" : "WITHDRAW SIGNAL"}
+                      {closing ? "CLOSING…" : "CLOSE SIGNAL"}
                     </button>
                     <button type="button" className="sdc-btn sdc-close-submit" onClick={(e) => handleCloseSignal(e, "deleted")} disabled={closing || refreshing}>
                       {closing ? "DELETING…" : "DELETE SIGNAL"}
@@ -660,7 +689,7 @@ export default function SignalDossierCard({
                       {refreshing ? "REFRESHING…" : "REFRESH (+7 DAYS)"}
                     </button>
                   )}
-                  <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(true)}>MANAGE SIGNAL</button>
+                  <button type="button" className="sdc-btn sdc-btn-ghost" onClick={() => setConfirmClose(true)}>CLOSE MY SIGNAL</button>
                 </div>
               )}
             </div>

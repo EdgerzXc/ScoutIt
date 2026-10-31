@@ -28,7 +28,7 @@ test("Crust category tabs support arrow, Home, End, and browser history", async 
   await expect(page).toHaveURL(/category=research/);
 
   await page.keyboard.press("End");
-  await expect(page.getByRole("tab", { name: /Event Design/i })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: /Space & Concept Design|Event Design/i })).toHaveAttribute("aria-selected", "true");
   await page.goBack();
   await expect(research).toHaveAttribute("aria-selected", "true");
 
@@ -45,7 +45,7 @@ test("Crust remains readable and contained from compact phone to desktop", async
   ]) {
     await page.setViewportSize(viewport);
     await gotoAndSettle(page, "/layer/crust?category=events");
-    await expect(page.getByRole("heading", { level: 2, name: /Event planners & space designers/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: /Space & concept designers|Event planners/i })).toBeVisible();
     const geometry = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,

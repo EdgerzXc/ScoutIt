@@ -115,7 +115,7 @@ export async function POST(request) {
 
     const { data: property, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("id, slug, pipeline_status, title, location, type, space_category, details")
+      .select("id, slug, canonical_slug, lifecycle_state, pipeline_status, title, location, type, space_category, details")
       .eq("id", propertyId)
       .single();
     if (propErr || !property) {

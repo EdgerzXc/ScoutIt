@@ -71,8 +71,13 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               </div>
               <div className="p-3 bg-surface border border-surface-variant rounded flex justify-between items-center text-sm">
                 <span className="text-text-secondary">Raw Assets Provided:</span>
-                <button className="text-intel-magenta hover:underline font-working-title flex items-center gap-2">
-                  <span>↓</span> Download Base .DWG Files
+                <button
+                  type="button"
+                  disabled
+                  title="CAD file downloads open in Phase 2"
+                  className="min-h-11 text-intel-magenta font-working-title flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <span>↓</span> Download Base .DWG Files · Phase 2
                 </button>
               </div>
             </div>

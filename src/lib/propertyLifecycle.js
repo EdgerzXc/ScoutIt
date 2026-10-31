@@ -8,7 +8,7 @@ export const PROPERTY_LIFECYCLE_STATES = Object.freeze({
 });
 
 const VALID_STATES = new Set(Object.values(PROPERTY_LIFECYCLE_STATES));
-const ENTITLED_TIERS = new Set(["cluster", "universe"]);
+const ENTITLED_TIERS = new Set(["universe"]);
 
 const PIPELINE_LIFECYCLE_MAP = Object.freeze({
   approved: PROPERTY_LIFECYCLE_STATES.LIVE,
@@ -117,4 +117,27 @@ export function getRedirectSlug(slug, redirects = []) {
   if (!normalized) return null;
   const redirect = redirects.find((item) => String(item.old_slug || "").toLowerCase() === normalized);
   return redirect?.current_slug || null;
+}
+
+export const OWNER_ACTIVE_LISTING_LIMITS = Object.freeze({
+  starry: 1,
+  solar: 5,
+  cluster: 20,
+  universe: Infinity,
+});
+
+export const BROKER_ACTIVE_LISTING_LIMITS = Object.freeze({
+  starry: 3,
+  solar: 15,
+  cluster: 50,
+  universe: Infinity,
+});
+
+export function getActiveListingCap({ tier = "starry", role = "owner" } = {}) {
+  const t = String(tier || "starry").trim().toLowerCase();
+  const r = String(role || "owner").trim().toLowerCase();
+  if (r === "broker") {
+    return BROKER_ACTIVE_LISTING_LIMITS[t] ?? BROKER_ACTIVE_LISTING_LIMITS.starry;
+  }
+  return OWNER_ACTIVE_LISTING_LIMITS[t] ?? OWNER_ACTIVE_LISTING_LIMITS.starry;
 }

@@ -124,8 +124,13 @@ export default function ProjectManagementPanel({ properties = [] }) {
           <GlassPanel className="p-0 overflow-hidden">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-lg font-medium text-white">Daily Team Updates</h3>
-              <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/90 transition">
-                + Post Update
+              <button
+                type="button"
+                disabled
+                title="Daily team updates open in Phase 2"
+                className="min-h-11 border border-gold-accent/40 bg-gold-accent/10 text-gold-accent px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed transition"
+              >
+                + Post Update · Phase 2
               </button>
             </div>
             <div className="flex flex-col items-center justify-center text-center py-14 px-6 gap-3">

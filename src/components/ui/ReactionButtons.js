@@ -69,7 +69,11 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
     }
   }, [propertyId]);
 
-  const handleReactionClick = (type) => {
+  const handleReactionClick = (type, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     let nextReaction = null;
 
     // The local write and the anonymous ping are two different promises to the
@@ -169,7 +173,7 @@ export default function ReactionButtons({ propertyId, propertyTitle, category, c
               key={type}
               type="button"
               className={`reaction-tile ${isActive ? "active" : ""}`}
-              onClick={() => handleReactionClick(type)}
+              onClick={(e) => handleReactionClick(type, e)}
               aria-pressed={isActive}
               aria-label={data.label}
               title={data.label}

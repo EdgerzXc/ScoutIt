@@ -21,6 +21,15 @@ vi.mock('@/lib/supabaseAdmin', () => ({
 describe('/api/deals/handshake API endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    supabaseAdmin.from = vi.fn((table) => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: { id: 'deal-100', buyer_id: 'user-buyer', broker_id: 'broker-1', property_id: 'prop-1' },
+        error: null,
+      }),
+      update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+    }));
   });
 
   it('rejects unauthenticated requests with 401', async () => {

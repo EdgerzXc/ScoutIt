@@ -46,14 +46,19 @@ test.describe("A-083 dark appearance default", () => {
     await expect(page.locator("body")).toHaveClass(/light-mode/);
     expect(await page.evaluate(() => localStorage.getItem("scoutit_display_mode"))).toBe("light");
 
-    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.reload({ waitUntil: "load" });
     await expect(page.locator("body")).toHaveClass(/light-mode/);
-    await openDisplay().click();
+    await expect.poll(async () => {
+      if (!(await panel().isVisible())) {
+        await openDisplay().click();
+      }
+      return panel().isVisible();
+    }, { timeout: 15000 }).toBe(true);
     await panel().getByRole("button", { name: /Dark Mode/ }).click();
     await expect(page.locator("body")).not.toHaveClass(/light-mode|high-contrast/);
     expect(await page.evaluate(() => localStorage.getItem("scoutit_display_mode"))).toBe("dark");
 
-    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.reload({ waitUntil: "load" });
     await expect(page.locator("body")).not.toHaveClass(/light-mode|high-contrast/);
     expect(await page.evaluate(() => localStorage.getItem("scoutit_display_mode"))).toBe("dark");
   });
