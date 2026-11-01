@@ -534,12 +534,12 @@ function DashboardInner() {
                             <span className="font-working-title text-sm truncate">{opt.label}</span>
                           </div>
                           {active ? (
-                            <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent bg-gold-accent/15 px-1.5 py-0.5 rounded border border-gold-accent/30 shrink-0">
-                              Active ●
+                            <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">
+                              CURRENT ●
                             </span>
                           ) : (
-                            <span className="font-mono text-xs uppercase tracking-wider text-text-muted shrink-0">
-                              Switch →
+                            <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10 hover:bg-gold-accent hover:text-black transition">
+                              SWITCH ↗
                             </span>
                           )}
                         </button>
@@ -734,7 +734,7 @@ function DashboardInner() {
 
       {/* Row 2: Mobile Workspace Deck Command Bar (Dedicated full-width row with zero layout squishing) */}
       <div className="md:hidden w-full px-3 pb-2 pt-0.5 border-t border-surface-variant/40">
-        <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} roleLabel={currentWorkspacePillText} />
+        <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
       </div>
     </header>
 
@@ -761,6 +761,11 @@ function DashboardInner() {
             <span className="uppercase">Role:</span>
             <span className="text-gold-accent font-semibold uppercase">{mode}</span>
           </div>
+        </div>
+
+        {/* Desktop Workspace Deck Command Bar (Exact operating parity with CRM, Inbox & Calendar desktop views) */}
+        <div className="hidden md:block mb-6 max-w-2xl">
+          <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
         </div>
 
         {["buyer", "exploring", "owner", "broker"].includes(mode) ? (
