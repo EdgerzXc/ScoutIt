@@ -101,7 +101,6 @@ function DashboardInner() {
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
-  const [showAttentionHub, setShowAttentionHub] = useState(false);
 
   const switcherRef = useRef(null);
   const notificationsRef = useRef(null);
@@ -506,23 +505,8 @@ function DashboardInner() {
             <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow shrink-0">
               S<span className="text-on-surface">cout</span>IT
             </Link>
-
-            {/* Mobile Active Workspace Pill: Tap to switch */}
-            <button
-              type="button"
-              className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-all text-left shrink-0 active:scale-95 touch-manipulation shadow-[0_0_12px_rgba(var(--accent-rgb),0.1)]"
-              onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"))}
-              title="Active Workspace · Tap to switch"
-              aria-label={`Active Workspace: ${currentWorkspaceLabel}. Tap to switch.`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent truncate max-w-[120px]">
-                {currentWorkspacePillText}
-              </span>
-              <ChevronDown size={13} className="text-gold-accent shrink-0 opacity-80" />
-            </button>
             
-            {/* Custom Desktop Workspace Switcher */}
+            {/* Custom Desktop Workspace Switcher (Desktop only — mobile uses bottom bar ROLES tab) */}
             <div className="hidden md:block relative" ref={switcherRef}>
               <button 
                 className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition duration-160 ease-out"
@@ -764,46 +748,26 @@ function DashboardInner() {
       {/* Main Content Area (Mode determined) */}
       <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
-        {/* Openable Attention & Signals Hub (A-283 simplification: single clean frame) */}
-        <div className="mb-5">
-          <button
-            type="button"
-            onClick={() => setShowAttentionHub((prev) => !prev)}
-            aria-expanded={showAttentionHub}
-            aria-controls="dashboard-attention-hub-panel"
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 active:scale-[0.99] touch-manipulation text-left ${
-              (unreadCount > 0 || unreadInboxCount > 0)
-                ? "bg-gold-accent/10 border-gold-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.1)]"
-                : "bg-surface/50 border-surface-variant/70 hover:border-gold-accent/30 hover:bg-surface-alt/40"
-            }`}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${
-                (unreadCount > 0 || unreadInboxCount > 0) ? "bg-gold-accent animate-pulse" : "bg-emerald-500/80"
-              }`} />
-              <span className="font-mono text-xs uppercase tracking-wider text-text-primary truncate">
-                {(unreadCount > 0 || unreadInboxCount > 0)
-                  ? `${unreadCount + unreadInboxCount} Action ${unreadCount + unreadInboxCount === 1 ? "Item Needs" : "Items Need"} Attention`
-                  : "All Cross-Workspace Signals Nominal · 0 Overdue"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0 font-mono text-xs text-gold-accent font-semibold ml-2">
-              <span className="hidden sm:inline">{showAttentionHub ? "Hide Attention Hub" : "Review Attention & Signals"}</span>
-              <span className="sm:hidden">{showAttentionHub ? "Hide" : "Signals"}</span>
-              <ChevronDown size={14} className={`transition-transform duration-200 ${showAttentionHub ? "rotate-180" : ""}`} />
-            </div>
-          </button>
+        {/* Urgent Cross-Workspace Attention Signal: hidden when nominal to prevent duplicating top bar tabs */}
+        <div className={unreadCount > 0 || unreadInboxCount > 0 ? "mb-5" : "hidden"} aria-hidden={!(unreadCount > 0 || unreadInboxCount > 0)}>
+          <AttentionRail mockUserId={user.id} className="mb-4" />
+        </div>
 
-          {showAttentionHub && (
-            <div id="dashboard-attention-hub-panel" className="mt-3.5 space-y-4 motion-safe:animate-[fadeIn_0.2s_ease-out]">
-              <Nudge mode={mode} />
-              {/* The cross-workspace signal comes before the role surface: whether
-                  something is waiting in the Inbox, CRM or Calendar is the question
-                  people open the dashboard to answer, and it is the same question
-                  for every role. */}
-              <AttentionRail mockUserId={user.id} className="mb-6" />
-            </div>
-          )}
+        {/* Workspace Identity Lens Indicator (Unambiguous context for multi-role users with zero interactive clutter) */}
+        <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-surface-variant/40">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-gold-accent shrink-0 animate-pulse" />
+            <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">
+              Active Workspace:
+            </span>
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-bright truncate">
+              {currentWorkspaceLabel}
+            </span>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 font-mono text-[12px] text-text-muted">
+            <span className="uppercase">Role:</span>
+            <span className="text-gold-accent font-semibold uppercase">{mode}</span>
+          </div>
         </div>
 
         {["buyer", "exploring", "owner", "broker"].includes(mode) ? (
@@ -864,98 +828,48 @@ function DashboardInner() {
               <button className="text-text-secondary w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-surface-variant active:scale-95 touch-manipulation transition-[transform,background-color] duration-150" aria-label="Close" onClick={() => setShowMobileProfileMenu(false)}>✕</button>
             </div>
             
-            <div className="mb-2 flex items-center justify-between">
-              <span className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent font-semibold">
-                Your Active Workspaces
-              </span>
-              <span className="font-mono text-xs uppercase tracking-wider text-text-muted">
-                Tap to switch
-              </span>
-            </div>
-            <div className="flex flex-col gap-2 mb-3">
-              {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
-                const active = isRoleActive(opt);
-                const Icon = opt.icon;
-                return (
-                  <button
-                    key={opt.id}
-                    className={`flex items-center justify-between p-3.5 rounded-xl font-working-title text-sm border transition-[transform,border-color,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation min-h-[52px] ${
-                      active ? 'bg-gold-accent/15 border-gold-accent text-gold-accent font-semibold shadow-[0_0_12px_rgba(var(--accent-rgb),0.12)]' : 'bg-surface border-surface-variant text-on-surface hover:border-gold-accent/40'
-                    }`}
-                    onClick={() => handleSwitchMode(opt.id)}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${active ? 'bg-gold-accent text-background' : 'bg-surface-alt border border-surface-variant text-gold-accent'}`}>
-                        <Icon size={16} />
-                      </div>
-                      <div className="text-left min-w-0">
-                        <div className="truncate font-semibold">{opt.label}</div>
-                        <div className="text-xs text-text-muted truncate mt-0.5">{opt.desc}</div>
-                      </div>
-                    </div>
-                    {active ? (
-                      <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)] ml-2">
-                        CURRENT ●
-                      </span>
-                    ) : (
-                      <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10 ml-2 hover:bg-gold-accent hover:text-black transition">
-                        SWITCH ↗
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Available Roles to Add / Unlock in Settings */}
-            {WORKSPACE_ROLE_OPTIONS.some((opt) => !isRoleUnlocked(opt)) && (
-              <>
-                <div className="pt-3 pb-2 border-t border-surface-variant flex items-center justify-between">
-                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary font-semibold">
-                    Available Roles to Add
-                  </span>
-                  <Link
-                    href="/settings#account"
-                    onClick={() => setShowMobileProfileMenu(false)}
-                    className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline"
-                  >
-                    Settings →
-                  </Link>
+            {/* Mobile Account Navigation */}
+            <div className="space-y-2.5 mb-4">
+              <Link
+                href="/settings"
+                onClick={() => setShowMobileProfileMenu(false)}
+                className="flex items-center justify-between p-3.5 rounded-xl border border-surface-variant bg-surface hover:border-gold-accent/40 active:scale-[0.99] transition duration-150 min-h-[48px]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-surface-alt border border-surface-variant flex items-center justify-center text-gold-accent">
+                    <Settings size={16} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-working-title text-sm text-text-primary font-semibold">Account Settings</div>
+                    <div className="text-xs text-text-muted mt-0.5">Preferences, password and verification</div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2 mb-3">
-                  {WORKSPACE_ROLE_OPTIONS.filter((opt) => !isRoleUnlocked(opt)).map((opt) => {
-                    const Icon = opt.icon;
-                    return (
-                      <Link
-                        key={opt.id}
-                        href="/settings#account"
-                        onClick={() => setShowMobileProfileMenu(false)}
-                        className="flex items-center justify-between p-3 rounded-lg border border-surface-variant bg-surface-alt/30 hover:border-gold-accent/40 transition group"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <Icon size={16} className="text-text-muted group-hover:text-gold-accent shrink-0" />
-                          <div className="min-w-0">
-                            <div className="font-working-title text-sm text-text-primary group-hover:text-gold-accent transition truncate">{opt.label}</div>
-                            <div className="text-xs text-text-muted mt-0.5 truncate">{opt.desc}</div>
-                          </div>
-                        </div>
-                        <span className="font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 group-hover:bg-gold-accent group-hover:text-black transition ml-2">
-                          + Add Role
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+                <ChevronRight size={16} className="text-text-muted" />
+              </Link>
 
-            <Link
-              href="/settings#account"
-              onClick={() => setShowMobileProfileMenu(false)}
-              className="flex items-center justify-center min-h-[44px] p-3 rounded-lg border border-gold-accent/40 bg-gold-accent/10 font-mono text-xs uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold mb-2"
-            >
-              + Add or Increase Roles in Settings →
-            </Link>
+              <Link
+                href="/settings#account"
+                onClick={() => setShowMobileProfileMenu(false)}
+                className="flex items-center justify-between p-3.5 rounded-xl border border-surface-variant bg-surface hover:border-gold-accent/40 active:scale-[0.99] transition duration-150 min-h-[48px]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-surface-alt border border-surface-variant flex items-center justify-center text-gold-accent">
+                    <ShieldCheck size={16} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-working-title text-sm text-text-primary font-semibold">Manage Roles &amp; Entitlements</div>
+                    <div className="text-xs text-text-muted mt-0.5">Unlock or upgrade role tiers in Settings</div>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-text-muted" />
+              </Link>
+
+              {/* Roles guidance note */}
+              <div className="px-3 py-2.5 rounded-lg bg-surface-alt/40 border border-surface-variant/50 flex items-center justify-between">
+                <span className="font-mono text-xs uppercase tracking-wider text-text-muted">Switch Workspace</span>
+                <span className="font-mono text-xs uppercase tracking-wider text-gold-accent font-semibold">Tap &apos;ROLES&apos; in bottom bar ↓</span>
+              </div>
+            </div>
 
             <div className="border-t border-surface-variant pt-4 pb-3">
               <div className="mb-2">
