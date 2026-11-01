@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Building2, Cog } from "lucide-react";
+import { Building2, Cog, X, DoorOpen, MessageSquare, Compass, ChevronRight, SlidersHorizontal } from "lucide-react";
 import InventoryGridManager from "./InventoryGridManager";
 import { getSession } from "../../lib/authClient";
 import { useDashboard } from "../../context/DashboardContext";
@@ -15,6 +15,7 @@ import { useDashboard } from "../../context/DashboardContext";
 export default function OperatorMode() {
   const { addToast, authedFetch } = useDashboard();
   const [buildings, setBuildings] = useState(null); // null = loading
+  const [actionModalOpen, setActionModalOpen] = useState(false);
   const buildingsRef = useRef(buildings);
   useEffect(() => { buildingsRef.current = buildings; }, [buildings]);
 
@@ -38,9 +39,12 @@ export default function OperatorMode() {
 
   // Primary action button listener (Units FAB in Dashboard)
   useEffect(() => {
-    const onPrimary = () => {
-      const el = document.getElementById("operated-buildings-list");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const onPrimary = (e) => {
+      if (!e?.detail?.mode || e.detail?.mode === "operator") {
+        setActionModalOpen(true);
+        const el = document.getElementById("operated-buildings-list");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     };
     window.addEventListener("scoutit:primary-action", onPrimary);
     return () => window.removeEventListener("scoutit:primary-action", onPrimary);
@@ -154,6 +158,129 @@ export default function OperatorMode() {
         ))
       )}
       </div>
+
+      {/* Operator Quick Actions Modal (Triggered by mobile "Units" FAB) */}
+      {actionModalOpen && (
+        <div
+          className="fixed inset-0 z-[100002] bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 motion-safe:animate-[fadeIn_0.2s_ease-out]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="operator-modal-title"
+        >
+          <div
+            className="w-full sm:max-w-md bg-surface border border-surface-variant rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl relative motion-safe:animate-[slideUp_0.25s_ease-out] flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-surface-variant">
+              <div>
+                <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold block mb-0.5">
+                  Operator Command
+                </span>
+                <h3 id="operator-modal-title" className="font-headline-editorial text-xl text-on-surface">
+                  Unit & Space Operations
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActionModalOpen(false)}
+                className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-text-secondary hover:text-on-surface hover:bg-surface-alt transition active:scale-95 touch-manipulation"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2.5 pt-1">
+              <Link
+                href="/property?type=commercial"
+                onClick={() => setActionModalOpen(false)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-gold-accent text-background flex items-center justify-center shrink-0 font-bold">
+                    <Compass size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-working-title text-sm text-gold-bright font-semibold group-hover:underline">
+                      Find Spaces to Operate
+                    </div>
+                    <div className="text-xs text-text-secondary truncate">
+                      Browse commercial buildings & apply for unit delegation
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-gold-accent shrink-0 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+
+              <Link
+                href="/dashboard/inbox"
+                onClick={() => setActionModalOpen(false)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-surface-variant/80 bg-surface-alt/40 hover:border-gold-accent/40 hover:bg-surface-alt transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-surface border border-surface-variant flex items-center justify-center text-gold-accent shrink-0">
+                    <MessageSquare size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-working-title text-sm text-on-surface font-semibold group-hover:text-gold-accent transition-colors">
+                      Deal Room Inbox
+                    </div>
+                    <div className="text-xs text-text-secondary truncate">
+                      Manage prospective tenant chats & tour requests
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-text-muted shrink-0 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+
+              <Link
+                href="/dashboard/open-gate"
+                onClick={() => setActionModalOpen(false)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-surface-variant/80 bg-surface-alt/40 hover:border-gold-accent/40 hover:bg-surface-alt transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-surface border border-surface-variant flex items-center justify-center text-gold-accent shrink-0">
+                    <DoorOpen size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-working-title text-sm text-on-surface font-semibold group-hover:text-gold-accent transition-colors">
+                      Enterprise Open Gate
+                    </div>
+                    <div className="text-xs text-text-secondary truncate">
+                      Toggle free inbound tenant contacts on delegated units
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-text-muted shrink-0 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActionModalOpen(false);
+                  const el = document.getElementById("operated-buildings-list");
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-surface-variant/80 bg-surface-alt/40 hover:border-gold-accent/40 hover:bg-surface-alt transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-surface border border-surface-variant flex items-center justify-center text-gold-accent shrink-0">
+                    <SlidersHorizontal size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-working-title text-sm text-on-surface font-semibold group-hover:text-gold-accent transition-colors">
+                      Unit Inventory & Pricing
+                    </div>
+                    <div className="text-xs text-text-secondary truncate">
+                      Scroll to building inventory manager
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-text-muted shrink-0 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

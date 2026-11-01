@@ -101,34 +101,10 @@ function DashboardInner() {
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
-  const [showWorkspaceDropdown, setShowWorkspaceDropdown] = useState(false);
+  const [showAttentionHub, setShowAttentionHub] = useState(false);
 
   const switcherRef = useRef(null);
   const notificationsRef = useRef(null);
-  const workspaceDropdownRef = useRef(null);
-
-  // Close workspace dropdown on outside click or Escape key
-  useEffect(() => {
-    if (!showWorkspaceDropdown) return;
-    const handleClickOutside = (e) => {
-      if (workspaceDropdownRef.current && !workspaceDropdownRef.current.contains(e.target)) {
-        setShowWorkspaceDropdown(false);
-      }
-    };
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        setShowWorkspaceDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [showWorkspaceDropdown]);
 
   // Close notifications dropdown on outside click or Escape key
   useEffect(() => {
@@ -210,8 +186,10 @@ function DashboardInner() {
     const requestedRole = params?.get("role") || params?.get("mode");
     const isAuthorizedRequest = requestedRole && canAccessDashboardWorkspace(requestedRole, rawHeldRoles);
     const preferredMode = isAuthorizedRequest ? normalizeDashboardMode(requestedRole) : "buyer";
-    const primaryMode = pickPrimaryRole(tags, preferredMode) || "buyer";
-    if (!primaryMode || tags.length === 0) {
+    const primaryMode = isAuthorizedRequest
+      ? preferredMode
+      : (pickPrimaryRole(tags, preferredMode) || "buyer");
+    if (!primaryMode || (tags.length === 0 && !isAuthorizedRequest)) {
       router.push("/onboarding");
       return;
     }
@@ -229,6 +207,13 @@ function DashboardInner() {
     // Keep verified profile data in React state; never persist it in the browser.
     setUser(serverUser);
     setMode(primaryMode);
+
+    if (typeof window !== "undefined") {
+      const activeRoleKey = requestedRole && isAuthorizedRequest
+        ? requestedRole
+        : (primaryMode === "provider" ? (serverUser.providerType || "photographer") : primaryMode);
+      window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: activeRoleKey, mode: primaryMode } }));
+    }
   }, [currentUser, router]);
 
   // Unread-message badge on the Inbox nav entry -- separate from the
@@ -297,6 +282,9 @@ function DashboardInner() {
         url.searchParams.set("role", target);
         window.history.replaceState(null, "", url.toString());
       } catch {}
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: target, mode: nextMode } }));
+      }
     };
     window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
     window.addEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
@@ -308,34 +296,39 @@ function DashboardInner() {
 
   useEffect(() => {
     if (typeof window === "undefined" || !user) return;
-    const params = new URLSearchParams(window.location.search);
-    const requestedRole = params.get("role") || params.get("mode");
-    if (!requestedRole) return;
-    const heldRoles = [
-      ...(Array.isArray(user.active_roles) ? user.active_roles : []),
-      ...(Array.isArray(user.tags) ? user.tags : []),
-      user.role,
-    ].filter(Boolean);
-    if (!canAccessDashboardWorkspace(requestedRole, heldRoles)) {
-      return;
-    }
-    const nextMode = normalizeDashboardMode(requestedRole);
-    if (!nextMode) return;
-    const nextProviderType = inferProviderType(requestedRole, user.providerType);
-    if (mode !== nextMode) {
-      setMode(nextMode);
-    }
-    if (user.primaryMode !== nextMode || (nextProviderType && user.providerType !== nextProviderType)) {
-      setUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              primaryMode: nextMode,
-              ...(nextProviderType ? { providerType: nextProviderType } : {}),
-            }
-          : prev
-      );
-    }
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedRole = params.get("role") || params.get("mode");
+      if (!requestedRole) return;
+      const heldRoles = [
+        ...(Array.isArray(user.active_roles) ? user.active_roles : []),
+        ...(Array.isArray(user.tags) ? user.tags : []),
+        user.role,
+      ].filter(Boolean);
+      if (!canAccessDashboardWorkspace(requestedRole, heldRoles)) {
+        return;
+      }
+      const nextMode = normalizeDashboardMode(requestedRole);
+      if (!nextMode) return;
+      const nextProviderType = inferProviderType(requestedRole, user.providerType);
+      if (mode !== nextMode) {
+        setMode(nextMode);
+      }
+      if (user.primaryMode !== nextMode || (nextProviderType && user.providerType !== nextProviderType)) {
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                primaryMode: nextMode,
+                ...(nextProviderType ? { providerType: nextProviderType } : {}),
+              }
+            : prev
+        );
+      }
+    };
+    syncFromUrl();
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
   }, [user, mode]);
 
   // Click outside to close desktop switcher
@@ -388,6 +381,12 @@ function DashboardInner() {
     if (opt.id === "designer") {
       return mode === "provider" && user?.providerType === "designer";
     }
+    if (opt.id === "salesperson") {
+      return mode === "broker" && user?.role === "salesperson";
+    }
+    if (opt.id === "broker") {
+      return mode === "broker" && user?.role !== "salesperson";
+    }
     if (opt.mode === "buyer" && (mode === "buyer" || mode === "exploring")) return true;
     return mode === opt.mode;
   };
@@ -402,7 +401,6 @@ function DashboardInner() {
     setMode(resolvedMode);
     setShowDesktopSwitcher(false);
     setShowMobileProfileMenu(false);
-    setShowWorkspaceDropdown(false);
     
     // Optimistically update the in-memory display mode. Supabase remains the
     // identity authority; authenticated profile data is never browser-cached.
@@ -420,7 +418,7 @@ function DashboardInner() {
     } catch {}
 
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("scoutit:switch-workspace", { detail: { role: newMode } }));
+      window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: newMode, mode: resolvedMode } }));
     }
   };
 
@@ -450,11 +448,14 @@ function DashboardInner() {
   const PRIMARY_ACTIONS = {
     owner: { icon: <Plus size={20} strokeWidth={2.5} />, label: "List" },
     broker: { icon: <Zap size={18} strokeWidth={2} />, label: "Pitch" },
+    salesperson: { icon: <Zap size={18} strokeWidth={2} />, label: "Pitch" },
     buyer: { icon: <Search strokeWidth={1.8} size={18} />, label: "Scout" },
     exploring: { icon: <Search strokeWidth={1.8} size={18} />, label: "Scout" },
     provider: user?.providerType === "designer"
       ? { icon: <Palette size={18} strokeWidth={2} />, label: "Studio" }
-      : { icon: <Camera size={18} strokeWidth={2} />, label: "Showcase" },
+      : { icon: <Camera size={18} strokeWidth={2} />, label: "Portfolio" },
+    photographer: { icon: <Camera size={18} strokeWidth={2} />, label: "Portfolio" },
+    designer: { icon: <Palette size={18} strokeWidth={2} />, label: "Studio" },
     operator: { icon: <Building2 size={18} strokeWidth={2} />, label: "Units" },
   };
   const primaryAction = PRIMARY_ACTIONS[mode] || null;
@@ -468,11 +469,19 @@ function DashboardInner() {
   // (owner → open wizard, buyer → focus search, broker → jump to feed, provider → jump to showcase)
   const firePrimaryAction = () => {
     window.dispatchEvent(new CustomEvent("scoutit:primary-action", {
-      detail: { mode, providerType: user?.providerType }
+      detail: { mode, providerType: user?.providerType, role: user?.role }
     }));
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const currentWorkspaceLabel = mode === "provider"
+    ? (user?.providerType === "designer" ? "Event & Concept Designer" : "Spatial Photographer")
+    : (mode === "broker" && user?.role === "salesperson" ? "Real Estate Salesperson" : (TAG_LABELS[mode] || "Workspace"));
+
+  const currentWorkspacePillText = mode === "provider"
+    ? (user?.providerType === "designer" ? "Designer" : "Photographer")
+    : (mode === "broker" && user?.role === "salesperson" ? "Salesperson" : (TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"));
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -490,114 +499,116 @@ function DashboardInner() {
       <AtmosphereBackground variant={mode || "dashboard"} />
 
       {/* Top Nav (Persistent) */}
-      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex flex-nowrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-5 shrink-0">
-          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">
-            S<span className="text-on-surface">cout</span>IT
-          </Link>
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant flex flex-col">
+        {/* Row 1: Brand + Workspace Switcher (Left) & Connects + Notifications + Profile (Right) */}
+        <div className="w-full px-4 py-2.5 md:px-6 md:py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-5 shrink-0 min-w-0">
+            <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow shrink-0">
+              S<span className="text-on-surface">cout</span>IT
+            </Link>
 
-          {/* Mobile Active Workspace Pill: Tap to switch */}
-          <button
-            type="button"
-            className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-all text-left shrink-0 active:scale-95 touch-manipulation shadow-[0_0_12px_rgba(var(--accent-rgb),0.1)]"
-            onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"))}
-            title="Active Workspace · Tap to switch"
-            aria-label={`Active Workspace: ${TAG_LABELS[mode] || "Workspace"}. Tap to switch.`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent truncate max-w-[120px]">
-              {TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"}
-            </span>
-            <ChevronDown size={13} className="text-gold-accent shrink-0 opacity-80" />
-          </button>
-          
-          {/* Custom Desktop Workspace Switcher */}
-          <div className="hidden md:block relative" ref={switcherRef}>
-            <button 
-              className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition duration-160 ease-out"
-              onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
-              aria-expanded={showDesktopSwitcher}
-              aria-label="Switch Workspace"
+            {/* Mobile Active Workspace Pill: Tap to switch */}
+            <button
+              type="button"
+              className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-all text-left shrink-0 active:scale-95 touch-manipulation shadow-[0_0_12px_rgba(var(--accent-rgb),0.1)]"
+              onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"))}
+              title="Active Workspace · Tap to switch"
+              aria-label={`Active Workspace: ${currentWorkspaceLabel}. Tap to switch.`}
             >
-              <span className="text-gold-accent font-semibold">Workspace:</span> {TAG_LABELS[mode]}
-              <span className="text-[12px] ml-1">▼</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent truncate max-w-[120px]">
+                {currentWorkspacePillText}
+              </span>
+              <ChevronDown size={13} className="text-gold-accent shrink-0 opacity-80" />
             </button>
             
-            {showDesktopSwitcher && (
-              <div className="absolute top-full left-0 mt-2 w-72 bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
-                <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex items-center justify-between">
-                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
-                  <span className="font-mono text-xs text-gold-accent">{user.tags?.length || 1} Active</span>
-                </div>
-                <div className="flex flex-col py-2 max-h-[380px] overflow-y-auto">
-                  {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
-                    const active = isRoleActive(opt);
-                    const Icon = opt.icon;
-                    return (
-                      <button
-                        key={opt.id}
-                        className={`text-left px-4 py-2.5 flex items-center justify-between gap-3 active:scale-[0.98] transition duration-150 ease-out hover:bg-surface-alt ${
-                          active ? "text-gold-accent bg-gold-accent/10 border-l-2 border-gold-accent" : "text-on-surface border-l-2 border-transparent"
-                        }`}
-                        onClick={() => handleSwitchMode(opt.id)}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <Icon size={16} className={active ? "text-gold-accent shrink-0" : "text-text-muted shrink-0"} />
-                          <span className="font-working-title text-sm truncate">{opt.label}</span>
-                        </div>
-                        {active ? (
-                          <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent bg-gold-accent/15 px-1.5 py-0.5 rounded border border-gold-accent/30 shrink-0">
-                            Active ●
-                          </span>
-                        ) : (
-                          <span className="font-mono text-xs uppercase tracking-wider text-text-muted shrink-0">
-                            Switch →
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                {/* Quick Role Utilities */}
-                <div className="border-t border-surface-variant px-4 py-2 bg-surface-alt/40 flex items-center justify-between gap-2">
-                  <Link
-                    href="/dashboard/open-gate"
-                    onClick={() => setShowDesktopSwitcher(false)}
-                    className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
-                  >
-                    Open Gate ↗
-                  </Link>
-                  <Link
-                    href="/dashboard/crm"
-                    onClick={() => setShowDesktopSwitcher(false)}
-                    className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
-                  >
-                    Master CRM ↗
-                  </Link>
-                </div>
-                {missingLenses(user.tags).length > 0 && (
-                  <div className="border-t border-surface-variant px-4 py-2.5 bg-surface-alt/60">
+            {/* Custom Desktop Workspace Switcher */}
+            <div className="hidden md:block relative" ref={switcherRef}>
+              <button 
+                className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition duration-160 ease-out"
+                onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
+                aria-expanded={showDesktopSwitcher}
+                aria-label="Switch Workspace"
+              >
+                <span className="text-gold-accent font-semibold">Workspace:</span> {currentWorkspaceLabel}
+                <span className="text-[12px] ml-1">▼</span>
+              </button>
+              
+              {showDesktopSwitcher && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
+                  <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex items-center justify-between">
+                    <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
+                    <span className="font-mono text-xs text-gold-accent">{user.tags?.length || 1} Active</span>
+                  </div>
+                  <div className="flex flex-col py-2 max-h-[380px] overflow-y-auto">
+                    {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
+                      const active = isRoleActive(opt);
+                      const Icon = opt.icon;
+                      return (
+                        <button
+                          key={opt.id}
+                          className={`text-left px-4 py-2.5 flex items-center justify-between gap-3 active:scale-[0.98] transition duration-150 ease-out hover:bg-surface-alt ${
+                            active ? "text-gold-accent bg-gold-accent/10 border-l-2 border-gold-accent" : "text-on-surface border-l-2 border-transparent"
+                          }`}
+                          onClick={() => handleSwitchMode(opt.id)}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Icon size={16} className={active ? "text-gold-accent shrink-0" : "text-text-muted shrink-0"} />
+                            <span className="font-working-title text-sm truncate">{opt.label}</span>
+                          </div>
+                          {active ? (
+                            <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent bg-gold-accent/15 px-1.5 py-0.5 rounded border border-gold-accent/30 shrink-0">
+                              Active ●
+                            </span>
+                          ) : (
+                            <span className="font-mono text-xs uppercase tracking-wider text-text-muted shrink-0">
+                              Switch →
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Quick Role Utilities */}
+                  <div className="border-t border-surface-variant px-4 py-2 bg-surface-alt/40 flex items-center justify-between gap-2">
                     <Link
-                      href="/settings#account"
+                      href="/dashboard/open-gate"
                       onClick={() => setShowDesktopSwitcher(false)}
-                      className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
+                      className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
                     >
-                      Unlock more workspaces →
+                      Open Gate ↗
+                    </Link>
+                    <Link
+                      href="/dashboard/crm"
+                      onClick={() => setShowDesktopSwitcher(false)}
+                      className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                    >
+                      Master CRM ↗
                     </Link>
                   </div>
-                )}
-              </div>
-            )}
+                  {missingLenses(user.tags).length > 0 && (
+                    <div className="border-t border-surface-variant px-4 py-2.5 bg-surface-alt/60">
+                      <Link
+                        href="/settings#account"
+                        onClick={() => setShowDesktopSwitcher(false)}
+                        className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
+                      >
+                        Unlock more workspaces →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Forecast & Ambient Conditions in Header */}
-        <div className="hidden lg:flex flex-1 items-center justify-center min-w-0 max-w-xl mx-2">
-          <DashboardAmbientStrip user={user} />
-        </div>
+          {/* Forecast & Ambient Conditions in Header */}
+          <div className="hidden lg:flex flex-1 items-center justify-center min-w-0 max-w-xl mx-2">
+            <DashboardAmbientStrip user={user} />
+          </div>
 
-        {/* Unified Right Cluster: Connects, Notifications, Profile (Stable on all roles!) */}
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0 ml-auto">
+          {/* Unified Right Cluster: Connects, Notifications, Profile (Stable on all roles!) */}
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0">
           {/* Connects Wallet Pill */}
           <div className="relative">
             <button
@@ -742,130 +753,59 @@ function DashboardInner() {
             {user.name ? user.name.substring(0, 2).toUpperCase() : "U"}
           </button>
         </div>
+      </div>
 
-        {/* Mobile Workspace Deck Command Bar */}
-        <div className="md:hidden w-full">
-          <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} roleLabel={TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"} />
-        </div>
-      </header>
+      {/* Row 2: Mobile Workspace Deck Command Bar (Dedicated full-width row with zero layout squishing) */}
+      <div className="md:hidden w-full px-3 pb-2 pt-0.5 border-t border-surface-variant/40">
+        <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} roleLabel={currentWorkspacePillText} />
+      </div>
+    </header>
 
       {/* Main Content Area (Mode determined) */}
       <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
-        {/* Active Workspace Lens Indicator */}
-        <div className="relative mb-5" ref={workspaceDropdownRef}>
-          <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-gold-accent/30 bg-surface/75 backdrop-blur-xl shadow-[0_0_20px_rgba(var(--accent-rgb),0.06)]">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-gold-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)] animate-pulse shrink-0" />
-              <div className="flex flex-col min-w-0">
-                <span className="font-mono text-[12px] uppercase tracking-widest text-text-muted leading-none">
-                  Active Workspace
-                </span>
-                <span className="font-working-title text-sm sm:text-base font-bold uppercase tracking-wider text-gold-accent truncate mt-0.5">
-                  {TAG_LABELS[mode] || mode}
-                </span>
-              </div>
+        {/* Openable Attention & Signals Hub (A-283 simplification: single clean frame) */}
+        <div className="mb-5">
+          <button
+            type="button"
+            onClick={() => setShowAttentionHub((prev) => !prev)}
+            aria-expanded={showAttentionHub}
+            aria-controls="dashboard-attention-hub-panel"
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 active:scale-[0.99] touch-manipulation text-left ${
+              (unreadCount > 0 || unreadInboxCount > 0)
+                ? "bg-gold-accent/10 border-gold-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.1)]"
+                : "bg-surface/50 border-surface-variant/70 hover:border-gold-accent/30 hover:bg-surface-alt/40"
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${
+                (unreadCount > 0 || unreadInboxCount > 0) ? "bg-gold-accent animate-pulse" : "bg-emerald-500/80"
+              }`} />
+              <span className="font-mono text-xs uppercase tracking-wider text-text-primary truncate">
+                {(unreadCount > 0 || unreadInboxCount > 0)
+                  ? `${unreadCount + unreadInboxCount} Action ${unreadCount + unreadInboxCount === 1 ? "Item Needs" : "Items Need"} Attention`
+                  : "All Cross-Workspace Signals Nominal · 0 Overdue"}
+              </span>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof window !== "undefined" && window.innerWidth < 768) {
-                  window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"));
-                } else {
-                  setShowWorkspaceDropdown((v) => !v);
-                }
-              }}
-              className="shrink-0 min-h-[36px] px-3 py-1.5 rounded-lg bg-gold-accent/10 border border-gold-accent/40 font-mono text-xs font-semibold uppercase tracking-wider text-gold-bright hover:bg-gold-accent hover:text-background transition-all flex items-center gap-1.5 active:scale-95 touch-manipulation"
-              aria-expanded={showWorkspaceDropdown}
-              aria-label="Switch Active Workspace Role"
-            >
-              <span>Switch Role</span>
-              <span className={`text-xs transition-transform duration-200 ${showWorkspaceDropdown ? "rotate-180" : ""}`}>▾</span>
-            </button>
-          </div>
+            <div className="flex items-center gap-1.5 shrink-0 font-mono text-xs text-gold-accent font-semibold ml-2">
+              <span className="hidden sm:inline">{showAttentionHub ? "Hide Attention Hub" : "Review Attention & Signals"}</span>
+              <span className="sm:hidden">{showAttentionHub ? "Hide" : "Signals"}</span>
+              <ChevronDown size={14} className={`transition-transform duration-200 ${showAttentionHub ? "rotate-180" : ""}`} />
+            </div>
+          </button>
 
-          {/* Inline Workspace Role Switcher Popover */}
-          {showWorkspaceDropdown && (
-            <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-surface border border-gold-accent/40 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl z-50 motion-safe:animate-[fadeIn_0.15s_ease-out]">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-surface-variant">
-                <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse" />
-                  Your Active Workspaces ({WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).length})
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowWorkspaceDropdown(false)}
-                  className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface-variant text-text-muted hover:text-text-primary transition"
-                  aria-label="Close Role Switcher"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-2 max-h-[380px] overflow-y-auto">
-                {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
-                  const active = isRoleActive(opt);
-                  const Icon = opt.icon;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => handleSwitchMode(opt.id)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[56px] ${
-                        active
-                          ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"
-                          : "border-surface-variant/80 bg-surface/50 hover:border-gold-accent/40 hover:bg-gold-accent/5"
-                      }`}
-                    >
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                        active ? "bg-gold-accent text-background" : "bg-surface-alt border border-surface-variant text-gold-accent"
-                      }`}>
-                        <Icon size={18} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm font-semibold truncate ${active ? "text-gold-bright font-bold" : "text-text-primary"}`}>
-                            {opt.label}
-                          </span>
-                          {active ? (
-                            <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">
-                              ACTIVE ●
-                            </span>
-                          ) : (
-                            <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10">
-                              SWITCH →
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-text-secondary leading-snug line-clamp-1 mt-0.5">
-                          {opt.desc}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-3 pt-2.5 border-t border-surface-variant flex items-center justify-between">
-                <span className="font-mono text-xs text-text-muted">Need more roles?</span>
-                <Link
-                  href="/settings#account"
-                  onClick={() => setShowWorkspaceDropdown(false)}
-                  className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline flex items-center gap-1"
-                >
-                  Manage in Settings →
-                </Link>
-              </div>
+          {showAttentionHub && (
+            <div id="dashboard-attention-hub-panel" className="mt-3.5 space-y-4 motion-safe:animate-[fadeIn_0.2s_ease-out]">
+              <Nudge mode={mode} />
+              {/* The cross-workspace signal comes before the role surface: whether
+                  something is waiting in the Inbox, CRM or Calendar is the question
+                  people open the dashboard to answer, and it is the same question
+                  for every role. */}
+              <AttentionRail mockUserId={user.id} className="mb-6" />
             </div>
           )}
         </div>
 
-        <Nudge mode={mode} />
-        {/* The cross-workspace signal comes before the role surface: whether
-            something is waiting in the Inbox, CRM or Calendar is the question
-            people open the dashboard to answer, and it is the same question
-            for every role. */}
-        <AttentionRail mockUserId={user.id} className="mb-6" />
         {["buyer", "exploring", "owner", "broker"].includes(mode) ? (
           <div className="dashboard-lens-motion">
             <svg

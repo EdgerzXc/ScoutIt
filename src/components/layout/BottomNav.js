@@ -395,7 +395,13 @@ export default function BottomNav() {
       }
     };
     window.addEventListener("scoutit:switch-workspace", onSwitch);
-    return () => window.removeEventListener("scoutit:switch-workspace", onSwitch);
+    window.addEventListener("scoutit:workspace-changed", onSwitch);
+    window.addEventListener("popstate", resolveCurrentRole);
+    return () => {
+      window.removeEventListener("scoutit:switch-workspace", onSwitch);
+      window.removeEventListener("scoutit:workspace-changed", onSwitch);
+      window.removeEventListener("popstate", resolveCurrentRole);
+    };
   }, [pathname]);
 
   const isCurrentWorkspace = (roleDef) => {
@@ -415,7 +421,7 @@ export default function BottomNav() {
   const handleRoleSelect = (roleKey) => {
     setRoleSheetOpen(false);
     setCurrentWorkspaceRole(roleKey);
-    if (pathname.startsWith("/dashboard")) {
+    if (pathname === "/dashboard") {
       window.dispatchEvent(new CustomEvent("scoutit:switch-workspace", { detail: { role: roleKey } }));
       try {
         const url = new URL(window.location.href);
@@ -423,7 +429,7 @@ export default function BottomNav() {
         window.history.replaceState(null, "", url.toString());
       } catch {}
     } else {
-      router.push(`/dashboard?role=${roleKey}`);
+      router.push(`/dashboard?role=${encodeURIComponent(roleKey)}`);
     }
   };
 
@@ -824,7 +830,13 @@ export default function BottomNav() {
                   <button
                     key={role.id}
                     type="button"
-                    onClick={() => handleRoleSelect(role.id)}
+                    onClick={() => {
+                      if (isCurrent) {
+                        setRoleSheetOpen(false);
+                      } else {
+                        handleRoleSelect(role.id);
+                      }
+                    }}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[58px] ${
                       isCurrent
                         ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)] ring-1 ring-gold-accent/40"

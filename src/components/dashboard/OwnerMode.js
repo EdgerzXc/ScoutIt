@@ -873,11 +873,11 @@ export default function OwnerMode() {
       );
     }
     return (
-      <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-0 animate-[fadeIn_0.4s_ease]">
-        <div className="mb-sm">
-          <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Owner Command Center</span>
-          <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
-          <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is ready.</p>
+      <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto py-4 md:py-6 animate-[fadeIn_0.4s_ease]">
+        <div className="border-b border-surface-variant pb-6 mb-6">
+          <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-1 block">Command Center</span>
+          <h1 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
+          <p className="text-text-secondary text-sm mt-1">Your owner and developer workspace is ready.</p>
         </div>
         <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-3xl px-4 py-16 md:p-lg flex flex-col gap-6 relative overflow-hidden items-center justify-center text-center md:py-32 mt-8 mx-0 shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
@@ -917,8 +917,8 @@ export default function OwnerMode() {
       <div className="max-w-[1200px] mx-auto py-lg animate-slide-up-fade">
         <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 border-b border-surface-variant pb-6 gap-4">
           <div>
-            <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
-            <h1 className="font-display-md text-3xl md:text-4xl text-text-primary">Active Listings</h1>
+            <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-1 block">Command Center</span>
+            <h1 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold">Active Listings</h1>
           </div>
           {/* Hidden on mobile — the contextual "+ List" FAB is the canonical add-listing control there (one control per action) */}
           <div className="flex gap-3 w-full md:w-auto">
@@ -1076,8 +1076,8 @@ export default function OwnerMode() {
               ← Back to Listings
             </button>
           )}
-          <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
-          <h1 className="font-display-md text-3xl md:text-5xl text-on-surface break-words [overflow-wrap:anywhere] min-w-0">{activeListing.title || 'Untitled Property'}</h1>
+          <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-1 block">Property Dossier</span>
+          <h1 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold break-words [overflow-wrap:anywhere] min-w-0">{activeListing.title || 'Untitled Property'}</h1>
         </div>
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
             {activeListing.pipelineStatus !== 'ai_drafting' && (

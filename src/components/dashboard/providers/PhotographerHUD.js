@@ -79,15 +79,12 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
     } catch {}
   }, []);
 
-  // Mobile floating primary action (Portfolio) triggers showcase tab
+  // Mobile floating primary action (Showcase/Portfolio) toggles between showcase and bounties
   useEffect(() => {
     const onPrimary = (e) => {
-      if (e.detail?.mode === "provider") {
-        setActiveTab("showcase");
-        setTimeout(() => {
-          const el = document.getElementById("photographer-showcase-preview");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 60);
+      if (e.detail?.mode === "provider" || e.detail?.mode === "photographer" || e.detail?.providerType === "photographer") {
+        setActiveTab((prev) => (prev === "bounties" ? "showcase" : "bounties"));
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
     window.addEventListener("scoutit:primary-action", onPrimary);
@@ -186,7 +183,7 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
           className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'showcase' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("showcase")}
         >
-          My Showcase (Promotion)
+          Portfolio &amp; Showcase
         </button>
       </div>
 

@@ -542,11 +542,11 @@ export default function BuyerMode() {
       <h1 className="sr-only">Buyer workspace</h1>
 
       {/* Harmonic Workspace Header */}
-      <div>
-        <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">
-          Seeker &amp; Buyer Command Center
+      <div className="border-b border-surface-variant pb-6 mb-2">
+        <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-1 block">
+          Command Center
         </span>
-        <h2 className="font-display-md text-3xl md:text-4xl text-on-surface">Explore &amp; Saved Spaces</h2>
+        <h2 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold">Explore &amp; Saved Spaces</h2>
         <p className="text-sm text-text-secondary mt-1 max-w-2xl">
           Curated directory of premium spaces, personal viewing reservations, and geospatial signal dossiers across Metro Manila.
         </p>

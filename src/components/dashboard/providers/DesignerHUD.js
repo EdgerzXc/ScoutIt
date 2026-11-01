@@ -66,14 +66,13 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
     } catch {}
   }, []);
 
-  // Primary action button listener (Portfolio FAB in Dashboard)
+  // Primary action button listener (Studio FAB in Dashboard)
   useEffect(() => {
-    const onPrimary = () => {
-      setActiveTab("studio");
-      setTimeout(() => {
-        const el = document.getElementById("designer-studio-preview");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 60);
+    const onPrimary = (e) => {
+      if (!e?.detail?.mode || e.detail?.mode === "provider" || e.detail?.mode === "designer" || e.detail?.providerType === "designer") {
+        setActiveTab((prev) => (prev === "projects" ? "studio" : "projects"));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     };
     window.addEventListener("scoutit:primary-action", onPrimary);
     return () => window.removeEventListener("scoutit:primary-action", onPrimary);

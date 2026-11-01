@@ -111,8 +111,8 @@ export default function ProviderMode({ type = "photographer" }) {
     <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-8 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-surface-variant pb-6">
         <div>
-          <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Provider Workspace</span>
-          <h1 className="font-display-md text-3xl md:text-5xl text-on-surface mb-2">{providerLabel} Command Center</h1>
+          <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-1 block">Command Center</span>
+          <h1 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold mb-2">{providerLabel} Command Center</h1>
         </div>
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
           <button

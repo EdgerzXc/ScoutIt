@@ -106,8 +106,8 @@ export default function OwnerPricingPage() {
         <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none`}></div>
         <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none`}></div>
 
-        <header className="pricing-header z-10 relative w-full">
-          <div className="flex items-center justify-between mb-6 max-w-7xl mx-auto px-4">
+        <header className="pricing-header z-10 relative w-full text-center">
+          <div className="text-center mb-4 max-w-7xl mx-auto px-4">
             <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-wider hover:text-on-surface transition-colors inline-block">
               ← Back to Personas
             </Link>

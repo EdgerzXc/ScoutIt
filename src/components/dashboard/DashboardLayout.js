@@ -25,15 +25,15 @@ export default function DashboardLayout({ children, variant = "dashboard", class
             <span className="relative">S<span className="text-on-surface">cout</span>IT</span>
           </Link>
         </div>
-        {/* Right side: direct return to active workspace */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Right side: direct return to active workspace (hidden on narrow mobile to prevent header squeeze) */}
+        <div className="hidden sm:flex items-center gap-2 sm:gap-3 shrink-0">
           <Link
             href="/dashboard"
             className="font-mono text-xs uppercase tracking-wider text-gold-accent bg-gold-accent/10 hover:bg-gold-accent/20 border border-gold-accent/30 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full transition-all active:scale-95 min-h-[36px] flex items-center gap-1.5 shadow-[0_0_12px_rgba(var(--accent-rgb),0.1)]"
             title="Return to Workspace Command Center"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
-            <span className="font-semibold">Workspace</span>
+            <span className="font-semibold">Dashboard</span>
           </Link>
         </div>
       </header>

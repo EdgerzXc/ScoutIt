@@ -59,6 +59,15 @@ export default function WorkspaceCommandBar({ active, badges = {}, roleLabel = n
             href={href}
             aria-current={selected ? "page" : undefined}
             aria-label={badge ? `${displayLabel}, ${badge} unread` : displayLabel}
+            onClick={(e) => {
+              if (selected && id === "workspace") {
+                // Tapping active workspace tab on mobile opens the role switcher
+                e.preventDefault();
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"));
+                }
+              }
+            }}
             className={`group relative flex min-h-11 flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 rounded-md border px-1 sm:px-2.5 py-1.5 sm:py-2 transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70 active:scale-[0.98] touch-manipulation ${
               selected
                 ? "border-gold-accent/50 bg-gold-accent text-background shadow-[0_0_18px_rgba(var(--accent-rgb),0.18)]"

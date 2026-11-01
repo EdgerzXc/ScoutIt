@@ -38,6 +38,7 @@ export default function BrokerMode() {
   const [pitchMessage, setPitchMessage] = useState("");
   const [pitchError, setPitchError] = useState("");
   const [isSendingPitch, setIsSendingPitch] = useState(false);
+  const [noInquiriesModalOpen, setNoInquiriesModalOpen] = useState(false);
 
   // License State
   const [prcInput, setPrcInput] = useState("");
@@ -477,12 +478,11 @@ export default function BrokerMode() {
   // Mobile floating primary action (⚡ Pitch) triggers pitch flow or targets the feed
   useEffect(() => {
     const onPrimary = (e) => {
-      if (e.detail?.mode === "broker") {
+      if (!e?.detail?.mode || e.detail?.mode === "broker" || e.detail?.mode === "salesperson") {
         if (feed && feed.length > 0) {
           handleOpenPitchModal(feed[0]);
         } else {
-          const el = document.getElementById("broker-feed");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          setNoInquiriesModalOpen(true);
         }
       }
     };
@@ -979,6 +979,86 @@ export default function BrokerMode() {
                   {isSendingPitch ? "Sending…" : "Send Pitch"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Broker Pitch Pipeline Modal (Triggered when no pending live feed inquiries are active) */}
+      {noInquiriesModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-background/90 backdrop-blur-md p-0 sm:p-4 motion-safe:animate-[fadeIn_0.2s_ease-out]">
+          <div className="w-full sm:max-w-md bg-surface border border-surface-variant rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl relative motion-safe:animate-[slideUp_0.25s_ease-out] flex flex-col gap-4">
+            <div className="flex items-center justify-between pb-3 border-b border-surface-variant">
+              <div>
+                <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold block mb-0.5">
+                  Broker Intelligence
+                </span>
+                <h3 className="font-headline-editorial text-xl text-on-surface">
+                  Pitch &amp; Mandate Opportunities
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setNoInquiriesModalOpen(false)}
+                className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-text-secondary hover:text-on-surface hover:bg-surface-alt transition active:scale-95 touch-manipulation"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-text-secondary leading-relaxed">
+              No matching client buyer briefs are currently pending in your immediate feed. Explore available opportunities:
+            </p>
+
+            <div className="flex flex-col gap-2.5 pt-1">
+              <Link
+                href="/property"
+                onClick={() => setNoInquiriesModalOpen(false)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div>
+                  <div className="font-working-title text-sm text-gold-bright font-semibold group-hover:underline">
+                    Browse Space Directory
+                  </div>
+                  <div className="text-xs text-text-secondary truncate">
+                    Find prime properties and contact landlords directly
+                  </div>
+                </div>
+                <span className="text-gold-accent text-sm font-bold">↗</span>
+              </Link>
+
+              <Link
+                href="/dashboard/crm"
+                onClick={() => setNoInquiriesModalOpen(false)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-surface-variant/80 bg-surface-alt/40 hover:border-gold-accent/40 hover:bg-surface-alt transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div>
+                  <div className="font-working-title text-sm text-on-surface font-semibold group-hover:text-gold-accent transition-colors">
+                    Deal Pipeline (CRM)
+                  </div>
+                  <div className="text-xs text-text-secondary truncate">
+                    Manage your ongoing pitches, viewings &amp; commissions
+                  </div>
+                </div>
+                <span className="text-text-muted text-sm font-bold">→</span>
+              </Link>
+
+              <Link
+                href="/dashboard/inbox"
+                onClick={() => setNoInquiriesModalOpen(false)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-surface-variant/80 bg-surface-alt/40 hover:border-gold-accent/40 hover:bg-surface-alt transition-all text-left group min-h-[56px] active:scale-[0.99] touch-manipulation"
+              >
+                <div>
+                  <div className="font-working-title text-sm text-on-surface font-semibold group-hover:text-gold-accent transition-colors">
+                    Deal Room Messages
+                  </div>
+                  <div className="text-xs text-text-secondary truncate">
+                    Check active negotiations and chat history
+                  </div>
+                </div>
+                <span className="text-text-muted text-sm font-bold">→</span>
+              </Link>
             </div>
           </div>
         </div>

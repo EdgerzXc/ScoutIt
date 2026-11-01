@@ -123,9 +123,9 @@ export default function BundlesPricingPage() {
         <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-gold-accent/8 rounded-full blur-[120px] pointer-events-none`} />
         <div className={`${styles.ambient} absolute top-[40%] left-[50%] w-[400px] h-[400px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none`} />
 
-        <header className="pricing-header z-10 relative">
-          <div className="flex items-center justify-between mb-8 max-w-7xl mx-auto px-4">
-            <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors inline-block">
+        <header className="pricing-header z-10 relative text-center">
+          <div className="text-center mb-4 max-w-7xl mx-auto px-4">
+            <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-wider hover:text-on-surface transition-colors inline-block">
               ← Back to Personas
             </Link>
           </div>
