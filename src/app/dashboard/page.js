@@ -14,7 +14,6 @@ const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), 
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMode"), { ssr: false });
 const MissionControlMode = dynamic(() => import("../../components/dashboard/MissionControlMode"), { ssr: false });
-import Nudge from "../../components/ui/Nudge";
 import Toasts from "../../components/ui/Toasts";
 import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
@@ -37,22 +36,16 @@ import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import {
   Search,
-  Bookmark,
-  MessageCircle,
   Briefcase,
   Bell,
   Settings,
   LogOut,
   ChevronRight,
-  ChevronDown,
   Building2,
   ShieldCheck,
   Cog,
   Camera,
   Palette,
-  Sparkles,
-  X,
-  Check,
   Plus,
   Zap,
 } from "lucide-react";
