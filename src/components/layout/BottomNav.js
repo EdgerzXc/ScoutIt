@@ -814,7 +814,7 @@ export default function BottomNav() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-sm font-semibold truncate ${isCurrent ? "text-gold-bright font-bold" : "text-white"}`}>
+                        <span className={`text-sm font-semibold truncate ${isCurrent ? "text-gold-bright font-bold" : "text-text-primary"}`}>
                           {role.label}
                         </span>
                         {isCurrent ? (
