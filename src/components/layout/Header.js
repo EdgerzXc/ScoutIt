@@ -640,10 +640,7 @@ export default function Header({ ambientContext = null }) {
           }
 
           .header-center {
-            flex: 1 1 0%;
-            max-width: none;
-            min-width: 0;
-            min-height: 0;
+            display: none;
           }
 
           .header-nav {
@@ -736,15 +733,8 @@ export default function Header({ ambientContext = null }) {
            500px scroll while the 900px header held at 0. Hence this approach,
            which keeps the proven sticky element and changes what is inside it. */
         @media (max-width: 560px) {
-
-          /* Back inline, as it was. The rail keeps its own line only in the
-             sense of being the flexible middle column: it shrinks to whatever
-             the controls leave, and the controls now leave enough. */
           .header-center {
-            flex: 1 1 0%;
-            max-width: none;
-            min-width: 0;
-            min-height: 0;
+            display: none;
           }
         }
 

@@ -9,6 +9,7 @@ import { notifyLightModeChanged } from "@/lib/lightMode";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import RoleActivationModal from "@/components/profile/RoleActivationModal";
+import { X, ShieldCheck } from "lucide-react";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -348,11 +349,12 @@ export default function BottomNav() {
     };
   }, []);
 
+  const isAdmin = activeUserRoles.some((r) =>
+    ["admin", "staff"].includes(String(r).toLowerCase().trim())
+  );
+
   const isRoleActive = (roleDef) => {
     // Platform administrators hold and have access to all workspaces & roles
-    const isAdmin = activeUserRoles.some((r) =>
-      ["admin", "staff"].includes(String(r).toLowerCase().trim())
-    );
     if (isAdmin) return true;
 
     return activeUserRoles.some((r) => {
@@ -364,6 +366,43 @@ export default function BottomNav() {
       }
       return false;
     });
+  };
+
+  const [currentWorkspaceRole, setCurrentWorkspaceRole] = useState("buyer");
+
+  useEffect(() => {
+    const resolveCurrentRole = () => {
+      try {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const qRole = params.get("role") || params.get("mode");
+          if (qRole) {
+            setCurrentWorkspaceRole(qRole.toLowerCase().trim());
+            return;
+          }
+          const saved = JSON.parse(localStorage.getItem("scoutit_user") || "{}");
+          if (saved.primaryMode) {
+            setCurrentWorkspaceRole(String(saved.primaryMode).toLowerCase().trim());
+          }
+        }
+      } catch {}
+    };
+    resolveCurrentRole();
+
+    const onSwitch = (e) => {
+      if (e?.detail?.role) {
+        setCurrentWorkspaceRole(String(e.detail.role).toLowerCase().trim());
+      }
+    };
+    window.addEventListener("scoutit:switch-workspace", onSwitch);
+    return () => window.removeEventListener("scoutit:switch-workspace", onSwitch);
+  }, [pathname]);
+
+  const isCurrentWorkspace = (roleDef) => {
+    const activeTarget = String(currentWorkspaceRole).toLowerCase().trim();
+    if (roleDef.id === activeTarget || roleDef.targetRole === activeTarget) return true;
+    if (Array.isArray(roleDef.aliases) && roleDef.aliases.includes(activeTarget)) return true;
+    return false;
   };
 
   const activeRoles = CORE_ROLES.filter((r) => isRoleActive(r));
@@ -720,8 +759,26 @@ export default function BottomNav() {
                   Space Intelligence Platform
                 </span>
               </div>
-              <button className="theme-sheet-close" onClick={() => setRoleSheetOpen(false)} aria-label="Close">✕</button>
+              <button
+                className="theme-sheet-close flex items-center justify-center"
+                onClick={() => setRoleSheetOpen(false)}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
             </div>
+
+            {isAdmin && (
+              <div className="mx-3 mb-3 px-3 py-2 rounded-lg bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={14} className="text-gold-accent shrink-0" />
+                  <span className="font-mono text-xs uppercase tracking-wider text-gold-accent font-bold">
+                    Staff Access · All Workspaces Unlocked
+                  </span>
+                </div>
+                <span className="font-mono text-xs uppercase text-text-muted">Master Admin</span>
+              </div>
+            )}
 
             {/* Section 1: Active Roles (User already has) */}
             <div className="px-3 pb-2 pt-1 flex items-center justify-between">
@@ -734,43 +791,56 @@ export default function BottomNav() {
               </span>
             </div>
 
-            <div className="theme-sheet-options">
-              {activeRoles.map((role) => (
-                <button
-                  key={role.id}
-                  type="button"
-                  className="theme-option is-active-role"
-                  onClick={() => handleRoleSelect(role.targetRole)}
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    width: "100%",
-                    gap: "14px",
-                    borderColor: "rgba(var(--accent-rgb), 0.4)",
-                    background: "rgba(var(--accent-rgb), 0.05)",
-                  }}
-                >
-                  <div className="w-10 h-10 rounded-full bg-gold-accent/15 border border-gold-accent/40 flex items-center justify-center text-gold-accent shrink-0">
-                    {ROLE_ICONS[role.id]}
-                  </div>
-                  <div className="theme-text" style={{ flex: 1 }}>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="theme-label text-gold-accent font-semibold">{role.label}</div>
-                      <span className="font-mono text-xs uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
-                        Active ✓
-                      </span>
+            <div className="flex flex-col gap-2 px-1">
+              {activeRoles.map((role) => {
+                const isCurrent = isCurrentWorkspace(role);
+                return (
+                  <button
+                    key={role.id}
+                    type="button"
+                    onClick={() => handleRoleSelect(role.targetRole)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[58px] ${
+                      isCurrent
+                        ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"
+                        : "border-surface-variant/80 bg-surface/50 hover:border-gold-accent/40 hover:bg-gold-accent/5"
+                    }`}
+                  >
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                      isCurrent
+                        ? "bg-gold-accent text-background"
+                        : "bg-surface-alt border border-surface-variant text-gold-accent"
+                    }`}>
+                      {ROLE_ICONS[role.id]}
                     </div>
-                    <div className="theme-desc">{role.desc}</div>
-                  </div>
-                </button>
-              ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`text-sm font-semibold truncate ${isCurrent ? "text-gold-bright font-bold" : "text-white"}`}>
+                          {role.label}
+                        </span>
+                        {isCurrent ? (
+                          <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">
+                            ACTIVE ●
+                          </span>
+                        ) : (
+                          <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10">
+                            SWITCH →
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-text-secondary leading-snug line-clamp-1 mt-0.5">
+                        {role.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Section 2: Available Roles (To Add or Increase) */}
             {availableRoles.length > 0 && (
               <div className="mt-4 pt-3 border-t border-surface-variant">
                 <div className="px-3 pb-2 flex items-center justify-between">
-                  <span className="font-mono text-xs uppercase tracking-widest text-text-secondary font-semibold">
+                  <span className="font-mono text-xs uppercase tracking-wider text-text-secondary font-semibold">
                     Available Roles to Add ({availableRoles.length})
                   </span>
                   <Link
@@ -790,7 +860,7 @@ export default function BottomNav() {
                     Manage in Settings →
                   </Link>
                 </div>
-                <div className="theme-sheet-options">
+                <div className="flex flex-col gap-2 px-1">
                   {availableRoles.map((role) => (
                     <button
                       key={role.id}
@@ -799,27 +869,23 @@ export default function BottomNav() {
                         setRoleSheetOpen(false);
                         setActivatingRole(role.id);
                       }}
-                      className="theme-option is-available-role"
-                      style={{
-                        textAlign: "left",
-                        width: "100%",
-                        gap: "14px",
-                        background: "rgba(255, 255, 255, 0.02)",
-                        borderColor: "var(--border-solid)",
-                        cursor: "pointer",
-                      }}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-surface-variant/60 bg-surface/30 hover:border-gold-accent/30 hover:bg-gold-accent/5 text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[58px]"
                     >
-                      <div className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center text-text-secondary shrink-0">
+                      <div className="w-9 h-9 rounded-lg bg-surface-alt border border-surface-variant flex items-center justify-center text-text-muted shrink-0">
                         {ROLE_ICONS[role.id]}
                       </div>
-                      <div className="theme-text" style={{ flex: 1 }}>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="theme-label text-text-primary">{role.label}</div>
-                          <span className="font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 hover:bg-gold-accent hover:text-black transition">
+                          <span className="text-sm font-medium text-text-secondary truncate">
+                            {role.label}
+                          </span>
+                          <span className="shrink-0 whitespace-nowrap font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 hover:bg-gold-accent hover:text-black transition">
                             + Add Role
                           </span>
                         </div>
-                        <div className="theme-desc">{role.desc}</div>
+                        <p className="text-xs text-text-muted leading-snug line-clamp-1 mt-0.5">
+                          {role.desc}
+                        </p>
                       </div>
                     </button>
                   ))}
@@ -832,7 +898,7 @@ export default function BottomNav() {
               <Link
                 href="/settings#account"
                 scroll={false}
-                className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded bg-gold-accent/10 border border-gold-accent/40 text-xs font-mono uppercase tracking-widest text-gold-accent hover:bg-gold-accent hover:text-black transition font-semibold"
+                className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-gold-accent/10 border border-gold-accent/40 text-xs font-mono uppercase tracking-wider text-gold-accent hover:bg-gold-accent hover:text-black transition-all font-semibold active:scale-[0.98]"
                 onClick={(e) => {
                   setRoleSheetOpen(false);
                   if (pathname === "/settings") {
@@ -846,19 +912,19 @@ export default function BottomNav() {
                 + Add or Increase Roles in Settings →
               </Link>
               <div className="px-3 pt-2 pb-0.5">
-                <span className="font-mono text-xs uppercase tracking-widest text-text-muted">Quick Workspace Tools</span>
+                <span className="font-mono text-xs uppercase tracking-wider text-text-muted">Quick Workspace Tools</span>
               </div>
               <div className="grid grid-cols-2 gap-2 px-1">
                 <Link
                   href="/dashboard/crm"
-                  className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/50 border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent hover:border-gold-accent transition"
+                  className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-surface-alt/50 border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent hover:border-gold-accent transition text-center"
                   onClick={() => setRoleSheetOpen(false)}
                 >
                   Pipeline (CRM) →
                 </Link>
                 <Link
                   href="/dashboard/inbox"
-                  className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/50 border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent hover:border-gold-accent transition"
+                  className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-surface-alt/50 border border-surface-variant text-xs font-mono uppercase tracking-wider text-text-secondary hover:text-gold-accent hover:border-gold-accent transition text-center"
                   onClick={() => setRoleSheetOpen(false)}
                 >
                   Deal Rooms →
@@ -869,13 +935,13 @@ export default function BottomNav() {
               ) && (
                 <Link
                   href="/dashboard?role=mc_enterprise"
-                  className="flex items-center min-h-[44px] px-3 py-2 rounded bg-surface-alt/30 border border-surface-variant/80 text-xs font-mono uppercase tracking-wider text-text-muted hover:text-gold-accent transition"
+                  className="flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-surface-alt/30 border border-surface-variant/80 text-xs font-mono uppercase tracking-wider text-text-muted hover:text-gold-accent transition text-center mt-1"
                   onClick={() => {
                     setRoleSheetOpen(false);
                     handleRoleSelect("mc_enterprise");
                   }}
                 >
-                  Enterprise Mission Control (Preview) →
+                  Enterprise Mission Control →
                 </Link>
               )}
             </div>

@@ -98,19 +98,22 @@ export default function SeekerPricingPage() {
   return (
     <div className="pricing-layout">
       <Header />
-      <main className="pricing-main relative overflow-hidden">
+      <main className="pricing-main relative overflow-hidden pb-36 sm:pb-24">
         
         {/* Cinematic Background Glows */}
         <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none`}></div>
         <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none`}></div>
 
         <header className="pricing-header z-10 relative">
+          <div className="flex items-center justify-between mb-8 max-w-7xl mx-auto px-4">
+            <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors inline-block">
+              ← Back to Personas
+            </Link>
+          </div>
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            {phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL
-              ? gateDecision.badgeText || PIONEER_ACCESS_BADGE_TEXT
-              : "COMMERCIAL ARCHITECTURE // SEEKER INTELLIGENCE"}
+            COMMERCIAL ARCHITECTURE // SEEKER INTELLIGENCE
           </span>
-          <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
+          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Explore with the <span className="text-gold-accent">Spatial Vault</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">

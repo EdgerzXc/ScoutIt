@@ -75,7 +75,7 @@ export default function PricingHubPage() {
   return (
     <div className="pricing-layout">
       <Header />
-      <main className="pricing-main relative overflow-hidden flex flex-col items-center justify-center min-h-[80vh]">
+      <main className="pricing-main relative overflow-hidden flex flex-col items-center justify-center min-h-[80vh] pb-36 sm:pb-24">
         
         {/* Cinematic Background Glows */}
         <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -83,9 +83,9 @@ export default function PricingHubPage() {
 
         <header className="pricing-header z-10 relative text-center mb-16">
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
-            {isPilotZeroPaywall ? PIONEER_ACCESS_BADGE_TEXT : "COMMERCIAL ARCHITECTURE // INTELLIGENCE TIERS"}
+            COMMERCIAL ARCHITECTURE // INTELLIGENCE TIERS
           </span>
-          <h1 className="page-title text-4xl md:text-5xl font-display-md text-on-surface mb-6 drop-shadow-lg max-w-3xl mx-auto">
+          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl font-display-md text-on-surface mb-6 drop-shadow-lg max-w-3xl mx-auto">
             Choose Your <span className="text-gold-accent">Role</span> in the Ecosystem
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">

@@ -88,7 +88,7 @@ export default function CreatorPricingPage() {
   return (
     <div className="pricing-layout">
       <Header />
-      <main className="pricing-main relative overflow-hidden">
+      <main className="pricing-main relative overflow-hidden pb-36 sm:pb-24">
         
         <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none`}></div>
         <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none`}></div>
@@ -98,24 +98,11 @@ export default function CreatorPricingPage() {
             <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors inline-block">
               ← Back to Personas
             </Link>
-            {isZeroPaywall && (
-              <span data-testid="pioneer-access-badge" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-3 py-1 rounded-full">
-                {PIONEER_ACCESS_BADGE_TEXT}
-              </span>
-            )}
-          </div>
-          <div className={`${styles.pioneer} mb-8 p-4 rounded-xl inline-block`}>
-            <p className="text-gold-bright font-mono text-xs uppercase tracking-widest font-bold">
-              ◈ PIONEER COHORT
-            </p>
-            <p className="text-text-primary text-sm mt-1">
-              Lock in <span className="text-gold-accent font-bold">Pioneer Member</span> rates forever. Only 20 slots per role.
-            </p>
           </div>
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             COMMERCIAL ARCHITECTURE // SPECIALIST PLANS
           </span>
-          <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
+          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Showcase Your <span className="text-gold-accent">Spatial Work</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">

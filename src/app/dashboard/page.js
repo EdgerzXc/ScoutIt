@@ -474,11 +474,11 @@ function DashboardInner() {
             />
           </div>
 
-          {/* CRM Nav (Owner/Broker only) */}
+          {/* CRM Nav (Owner/Broker only, desktop only to prevent mobile top bar cramming) */}
           {(mode === "owner" || mode === "broker") && (
             <Link
               href="/dashboard/crm"
-              className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition"
+              className="hidden sm:flex relative w-11 h-11 items-center justify-center text-text-secondary hover:text-gold-accent transition"
               aria-label="Master CRM"
               title="Master CRM"
             >
@@ -489,20 +489,6 @@ function DashboardInner() {
           {(mode === "owner" || mode === "broker" || mode === "operator") && (
             <Link href="/dashboard/open-gate" className="font-mono text-[12px] uppercase tracking-wider text-gold-accent hover:underline" aria-label="Open Gate settings">Open Gate</Link>
           )}
-
-          <Link
-            href="/dashboard/inbox"
-            className="relative w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition"
-            aria-label="Inbox"
-            title="Inbox"
-          >
-            <MessageCircle strokeWidth={1.5} size={20} />
-            {unreadInboxCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-gold-accent rounded-full border-2 border-background flex items-center justify-center text-[12px] font-bold text-background">
-                {unreadInboxCount}
-              </span>
-            )}
-          </Link>
 
           <div className="relative" ref={notificationsRef}>
             <button
@@ -520,7 +506,7 @@ function DashboardInner() {
 
             {/* Notifications Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-84 max-w-[calc(100vw-2rem)] bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.15s_ease-out]">
+              <div className="absolute right-0 mt-2 w-[340px] max-w-[calc(100vw-1.5rem)] bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.15s_ease-out]">
                 <div className="p-3.5 border-b border-surface-variant bg-surface-alt flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[12px] tracking-widest uppercase text-text-secondary font-semibold">Notifications</span>
@@ -649,13 +635,36 @@ function DashboardInner() {
             inside the sticky header so it survives the long workspace scroll.
             Mobile only; desktop keeps the switcher + header icons. */}
         <div className="md:hidden w-full">
-          <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
+          <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} roleLabel={TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"} />
         </div>
       </header>
 
       {/* Main Content Area (Mode determined) */}
       <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
+        {/* Active Workspace Lens Indicator */}
+        <div className="mb-5 flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-gold-accent/30 bg-surface/75 backdrop-blur-xl shadow-[0_0_20px_rgba(var(--accent-rgb),0.06)]">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-2.5 h-2.5 rounded-full bg-gold-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)] animate-pulse shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="font-mono text-[12px] uppercase tracking-widest text-text-muted leading-none">
+                Active Workspace
+              </span>
+              <span className="font-working-title text-sm sm:text-base font-bold uppercase tracking-wider text-gold-accent truncate mt-0.5">
+                {TAG_LABELS[mode] || mode}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"))}
+            className="shrink-0 min-h-[36px] px-3 py-1.5 rounded-lg bg-gold-accent/10 border border-gold-accent/40 font-mono text-xs font-semibold uppercase tracking-wider text-gold-bright hover:bg-gold-accent hover:text-background transition-all flex items-center gap-1.5 active:scale-95 touch-manipulation"
+          >
+            <span>Switch Role</span>
+            <span className="text-xs">▾</span>
+          </button>
+        </div>
+
         <Nudge mode={mode} />
         {/* The cross-workspace signal comes before the role surface: whether
             something is waiting in the Inbox, CRM or Calendar is the question

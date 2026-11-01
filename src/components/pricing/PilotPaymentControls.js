@@ -46,20 +46,21 @@ export function PilotPaymentNotice() {
   const isPilotZeroPaywall = phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
 
   return (
-    <aside className="mx-auto mb-8 max-w-3xl rounded-xl border border-gold-accent/30 bg-gold-accent/5 px-5 py-4 text-center shadow-[var(--shadow-glow-soft)]" aria-label="Human-testing payment status">
+    <aside className="mx-auto mb-10 max-w-2xl rounded-2xl border border-gold-accent/30 bg-gold-accent/[0.04] p-5 text-center backdrop-blur-xl shadow-[0_0_25px_rgba(var(--accent-rgb),0.07)]" aria-label="Human-testing payment status">
       {isPilotZeroPaywall && (
         <div
           data-testid="pioneer-access-badge"
-          className="mb-2 inline-flex items-center gap-2 rounded-full border border-gold-accent/40 bg-gold-accent/10 px-3 py-1 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent"
+          className="mb-3 inline-flex items-center gap-2 rounded-full border border-gold-accent/40 bg-gold-accent/15 px-3.5 py-1 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-bright shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)]"
         >
-          <span>◈</span>
+          <span className="text-xs">◈</span>
           <span>{PIONEER_ACCESS_BADGE_TEXT}</span>
         </div>
       )}
-      <p className="font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-gold-accent">Invited human-testing pilot</p>
-      <p className="mt-2 text-sm leading-6 text-text-secondary">
-        Plan concepts and prices are visible for evaluation. Payments, upgrades,
-        subscriptions, and Connect purchases are not active during human testing.
+      <p className="font-working-title text-base sm:text-lg font-semibold text-white">
+        Lock in <span className="text-gold-accent font-bold">Pioneer Member</span> rates forever · Only 20 slots per role
+      </p>
+      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-text-secondary max-w-lg mx-auto">
+        Plan concepts and prices are visible for evaluation. All active listings, cloud storage &amp; Connects are 100% free during the launch pilot. Payments and upgrades are inactive during human testing.
       </p>
     </aside>
   );

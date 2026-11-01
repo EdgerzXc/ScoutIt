@@ -116,7 +116,7 @@ export default function BundlesPricingPage() {
   return (
     <div className="pricing-layout">
       <Header />
-      <main className="pricing-main relative overflow-hidden">
+      <main className="pricing-main relative overflow-hidden pb-36 sm:pb-24">
 
         {/* Background glows */}
         <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-gold-accent/8 rounded-full blur-[140px] pointer-events-none`} />
@@ -128,26 +128,12 @@ export default function BundlesPricingPage() {
             <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-widest hover:text-on-surface transition-colors inline-block">
               ← Back to Personas
             </Link>
-            {isZeroPaywall && (
-              <span data-testid="pioneer-access-badge" className="font-mono text-[12px] uppercase tracking-widest text-gold-accent border border-gold-accent/30 bg-gold-accent/10 px-3 py-1 rounded-full">
-                {PIONEER_ACCESS_BADGE_TEXT}
-              </span>
-            )}
-          </div>
-
-          <div className={`${styles.pioneer} mb-8 p-4 rounded-xl inline-block`}>
-            <p className="text-gold-accent font-mono text-xs uppercase tracking-widest font-bold">
-              ◈ MULTI-ROLE BUNDLES
-            </p>
-            <p className="text-text-primary text-sm mt-1">
-              Hold multiple roles, pay as one. Pioneer rates locked forever.
-            </p>
           </div>
 
           <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
             COMMERCIAL ARCHITECTURE // ECOSYSTEM BUNDLES
           </span>
-          <h1 className="page-title text-5xl md:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
+          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
             Every Role. <span className="text-gold-accent">One Plan.</span>
           </h1>
           <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">

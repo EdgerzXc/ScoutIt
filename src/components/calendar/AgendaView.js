@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Calendar, Eye } from "lucide-react";
 import {
   formatDayHeading,
   formatShortRange,
@@ -51,7 +52,9 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
   if (groups.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center px-6">
-        <div className="text-4xl mb-3 opacity-40">🗓</div>
+        <div className="w-12 h-12 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent mb-3">
+          <Calendar size={24} strokeWidth={1.5} />
+        </div>
         <p className="text-text-secondary">Nothing scheduled in this range.</p>
         <p className="text-text-muted text-sm mt-1">Switch to Month or Week and tap a day to add an event.</p>
       </div>
@@ -85,7 +88,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
                     className="flex-1 text-left min-w-0"
                   >
                     <div className="flex items-center gap-2">
-                      {ev.kind === "viewing" && <span>👁</span>}
+                      {ev.kind === "viewing" && <Eye size={13} className="text-gold-accent shrink-0" />}
                       <span className={`font-medium text-on-surface truncate ${ev.status === "cancelled" ? "line-through opacity-50" : ""}`}>
                         {ev.title}
                       </span>
