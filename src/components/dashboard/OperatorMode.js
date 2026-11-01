@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { Building2, Cog } from "lucide-react";
 import InventoryGridManager from "./InventoryGridManager";
 import { getSession } from "../../lib/authClient";
 import { useDashboard } from "../../context/DashboardContext";
@@ -34,6 +35,16 @@ export default function OperatorMode() {
   }, [authedFetch]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Primary action button listener (Units FAB in Dashboard)
+  useEffect(() => {
+    const onPrimary = () => {
+      const el = document.getElementById("operated-buildings-list");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    window.addEventListener("scoutit:primary-action", onPrimary);
+    return () => window.removeEventListener("scoutit:primary-action", onPrimary);
+  }, []);
 
   const saveBuildingUnits = async (propertyId, units) => {
     try {
@@ -87,8 +98,8 @@ export default function OperatorMode() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface/50 border border-white/[0.06] backdrop-blur-md">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent text-lg shrink-0 mt-0.5">
-            🏢
+          <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent shrink-0 mt-0.5">
+            <Building2 size={20} />
           </div>
           <div>
             <div className="text-sm font-medium text-on-surface">Branch Operations Center</div>
@@ -103,10 +114,13 @@ export default function OperatorMode() {
         </Link>
       </div>
 
+      <div id="operated-buildings-list" className="flex flex-col gap-6">
       {buildings.length === 0 ? (
         <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl p-8 md:p-16 flex flex-col items-center text-center gap-2 relative overflow-hidden transition-all duration-300 mx-auto w-full max-w-xl break-words">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/5 rounded-full blur-[60px]" />
-          <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">⚙️</span>
+          <div className="w-14 h-14 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center text-gold-accent mb-4 relative z-10 shadow-md">
+            <Cog size={28} className="animate-spin-slow" />
+          </div>
           <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">
             No units have been delegated to you yet.
           </p>
@@ -139,6 +153,7 @@ export default function OperatorMode() {
           </div>
         ))
       )}
+      </div>
     </div>
   );
 }

@@ -56,14 +56,15 @@ export function pickPrimaryRole(tags, preferred) {
 }
 
 export function inferProviderType(role, explicitProviderType) {
-  if (explicitProviderType) return explicitProviderType;
   const normalizedRole = typeof role === "string" ? role.trim().toLowerCase() : "";
   if (["event-planner", "event_planner", "events", "concept_designer", "designer"].includes(normalizedRole)) {
     return "designer";
   }
-  return ["photographer", "researcher"].includes(normalizedRole)
-    ? normalizedRole
-    : undefined;
+  if (["photographer", "researcher"].includes(normalizedRole)) {
+    return normalizedRole;
+  }
+  if (explicitProviderType) return explicitProviderType;
+  return undefined;
 }
 
 /**

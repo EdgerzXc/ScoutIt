@@ -5,7 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock } from "lucide-react";
+import { Lock, Calendar, Mail, BarChart3, Briefcase, Contact, Compass, Sparkles } from "lucide-react";
 import { getSession } from "../../lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
@@ -473,6 +473,22 @@ export default function BrokerMode() {
     setPitchError("");
     setPitchMessage("Hi, I have a client looking for this exact profile. I'd love to arrange an exclusive viewing.");
   };
+
+  // Mobile floating primary action (⚡ Pitch) triggers pitch flow or targets the feed
+  useEffect(() => {
+    const onPrimary = (e) => {
+      if (e.detail?.mode === "broker") {
+        if (feed && feed.length > 0) {
+          handleOpenPitchModal(feed[0]);
+        } else {
+          const el = document.getElementById("broker-feed");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    };
+    window.addEventListener("scoutit:primary-action", onPrimary);
+    return () => window.removeEventListener("scoutit:primary-action", onPrimary);
+  }, [feed]);
 
   const handleSendPitch = async () => {
     if (!pitchingListing || isSendingPitch) return;
@@ -984,9 +1000,15 @@ export default function BrokerMode() {
       {/* Mobile quick actions — brokers get no dashboard top-nav on mobile, so
           surface the core destinations (schedule/availability, inbox, pipeline). */}
       <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4 hide-scrollbar">
-        <Link href="/dashboard/calendar" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">🗓️ Availability</Link>
-        <Link href="/dashboard/inbox" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">✉️ Inbox</Link>
-        <Link href="/dashboard/crm" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">📊 Pipeline</Link>
+        <Link href="/dashboard/calendar" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">
+          <Calendar size={14} className="text-gold-accent" /> Availability
+        </Link>
+        <Link href="/dashboard/inbox" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">
+          <Mail size={14} className="text-gold-accent" /> Inbox
+        </Link>
+        <Link href="/dashboard/crm" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">
+          <BarChart3 size={14} className="text-gold-accent" /> Pipeline
+        </Link>
       </div>
 
       {/* Action Bar */}
@@ -1005,24 +1027,25 @@ export default function BrokerMode() {
               not be the only way to reach the ID card */}
           <Link
             href="/brokers/portal"
-            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50 flex items-center gap-1.5"
+            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50 flex items-center gap-2"
             title="Edit your private broker dossier and coverage areas"
           >
-            💼 Edit Dossier
+            <Briefcase size={14} className="text-gold-accent" /> Edit Dossier
           </Link>
           <button
-            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50 min-h-[44px]"
+            className="border border-surface-variant text-text-secondary font-working-title px-4 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent/40 transition active:scale-[0.98] bg-surface-variant/50 min-h-[44px] flex items-center gap-2"
             onClick={() => setShowIdCard(true)}
             title="Generate your Verified Broker ID card"
           >
-            🪪 ID Card
+            <Contact size={14} className="text-gold-accent" /> ID Card
           </button>
           <Link
             href="/stratosphere?view=radar&role=broker"
             className="border border-gold-accent text-gold-accent font-working-title px-5 py-3 rounded text-sm font-bold hover:bg-gold-accent hover:text-background transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)] active:scale-[0.98] bg-gold-accent/5 inline-flex items-center gap-2 min-h-[44px]"
             title="Explore seeker demands and off-market opportunities on Stratosphere Radar"
           >
-            <span>🗺️ Open Deal Radar</span>
+            <Compass size={14} className="text-gold-accent" />
+            <span>Open Deal Radar</span>
           </Link>
           <button
             className="border border-surface-variant text-text-secondary font-working-title px-5 py-3 rounded text-sm hover:text-gold-accent hover:border-gold-accent transition active:scale-[0.98] bg-surface-variant/40 min-h-[44px]"

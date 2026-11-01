@@ -875,6 +875,7 @@ export default function OwnerMode() {
     return (
       <div data-scoutit-guide="owner-portfolio-table" className="max-w-[1200px] mx-auto pt-16 md:pt-0 py-lg px-0 animate-[fadeIn_0.4s_ease]">
         <div className="mb-sm">
+          <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Owner Command Center</span>
           <h1 className="font-display-md text-3xl md:text-5xl text-text-primary mb-2 tracking-tight">{firstName ? `Welcome back, ${firstName}` : "Welcome back"}</h1>
           <p className="text-text-secondary font-body-md text-sm md:text-base">Your workspace is ready.</p>
         </div>

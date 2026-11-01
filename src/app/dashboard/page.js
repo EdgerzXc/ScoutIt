@@ -35,7 +35,24 @@ import {
 } from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
-import { Search, Bookmark, MessageCircle, Briefcase, Bell, Settings, LogOut, ChevronRight } from "lucide-react";
+import {
+  Search,
+  Bookmark,
+  MessageCircle,
+  Briefcase,
+  Bell,
+  Settings,
+  LogOut,
+  ChevronRight,
+  Building2,
+  ShieldCheck,
+  Cog,
+  Camera,
+  Palette,
+  Sparkles,
+  X,
+  Check,
+} from "lucide-react";
 import "./dashboard-motion.css";
 
 const TAG_LABELS = {
@@ -51,6 +68,16 @@ const TAG_LABELS = {
   mc_staff: "Staff Console · Simulated",
   mc_enterprise: "Enterprise Console · Preview",
 };
+
+const WORKSPACE_ROLE_OPTIONS = [
+  { id: "buyer", mode: "buyer", label: "Buyer / Seeker", desc: "Search spaces, viewings & private board", icon: Search },
+  { id: "owner", mode: "owner", label: "Property Owner & Developer", desc: "List properties, review leads & inventory", icon: Building2 },
+  { id: "broker", mode: "broker", label: "Accredited Broker", desc: "Client representation & deal pipeline (PRC)", icon: Briefcase },
+  { id: "salesperson", mode: "broker", label: "Real Estate Salesperson", desc: "Property sales & viewings under broker supervision", icon: ShieldCheck },
+  { id: "operator", mode: "operator", label: "Co-Operator & Facilities", desc: "Space management & operations log", icon: Cog },
+  { id: "photographer", mode: "provider", providerType: "photographer", label: "Spatial Photographer", desc: "Space photography & QuestIT bounties", icon: Camera },
+  { id: "designer", mode: "provider", providerType: "designer", label: "Event & Concept Designer", desc: "Bespoke spatial concepts & staging", icon: Palette },
+];
 
 function DashboardInner() {
   const router = useRouter();
@@ -71,9 +98,34 @@ function DashboardInner() {
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
+  const [showWorkspaceDropdown, setShowWorkspaceDropdown] = useState(false);
 
   const switcherRef = useRef(null);
   const notificationsRef = useRef(null);
+  const workspaceDropdownRef = useRef(null);
+
+  // Close workspace dropdown on outside click or Escape key
+  useEffect(() => {
+    if (!showWorkspaceDropdown) return;
+    const handleClickOutside = (e) => {
+      if (workspaceDropdownRef.current && !workspaceDropdownRef.current.contains(e.target)) {
+        setShowWorkspaceDropdown(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowWorkspaceDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showWorkspaceDropdown]);
 
   // Close notifications dropdown on outside click or Escape key
   useEffect(() => {
@@ -237,6 +289,11 @@ function DashboardInner() {
             }
           : prev
       );
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set("role", target);
+        window.history.replaceState(null, "", url.toString());
+      } catch {}
     };
     window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
     window.addEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
@@ -313,26 +370,55 @@ function DashboardInner() {
     );
   }
 
+  const heldRoles = [
+    ...(Array.isArray(user?.active_roles) ? user.active_roles : []),
+    ...(Array.isArray(user?.tags) ? user.tags : []),
+    user?.role,
+  ].filter(Boolean);
+
+  const isRoleUnlocked = (opt) => canAccessDashboardWorkspace(opt.id, heldRoles);
+
+  const isRoleActive = (opt) => {
+    if (opt.id === "photographer") {
+      return mode === "provider" && (user?.providerType === "photographer" || !user?.providerType);
+    }
+    if (opt.id === "designer") {
+      return mode === "provider" && user?.providerType === "designer";
+    }
+    if (opt.mode === "buyer" && (mode === "buyer" || mode === "exploring")) return true;
+    return mode === opt.mode;
+  };
+
   const handleSwitchMode = (newMode) => {
-    const heldRoles = [
-      ...(Array.isArray(user.active_roles) ? user.active_roles : []),
-      ...(Array.isArray(user.tags) ? user.tags : []),
-      user.role,
-    ].filter(Boolean);
     if (!canAccessDashboardWorkspace(newMode, heldRoles)) {
       addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
       return;
     }
     const resolvedMode = normalizeDashboardMode(newMode) || newMode;
+    const resolvedProviderType = inferProviderType(newMode, user?.providerType);
     setMode(resolvedMode);
     setShowDesktopSwitcher(false);
     setShowMobileProfileMenu(false);
+    setShowWorkspaceDropdown(false);
     
     // Optimistically update the in-memory display mode. Supabase remains the
     // identity authority; authenticated profile data is never browser-cached.
-    const updatedUser = { ...user, primaryMode: resolvedMode };
-    // The server-approved profile refresh is authoritative after navigation.
+    const updatedUser = {
+      ...user,
+      primaryMode: resolvedMode,
+      ...(resolvedProviderType ? { providerType: resolvedProviderType } : {}),
+    };
     setUser(updatedUser);
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("role", newMode);
+      window.history.replaceState(null, "", url.toString());
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("scoutit:switch-workspace", { detail: { role: newMode } }));
+    }
   };
 
   const renderActiveMode = () => {
@@ -341,7 +427,7 @@ function DashboardInner() {
       case "broker": return <BrokerMode />;
       case "buyer":
       case "exploring": return <BuyerMode />;
-      case "provider": return <ProviderMode type={user.providerType} />;
+      case "provider": return <ProviderMode type={user?.providerType || "photographer"} />;
       case "operator": return <OperatorMode />;
       case "mc_enterprise": return <MissionControlMode />;
       // A-096: an unrecognised mode used to render bare "Unknown Mode" text
@@ -363,7 +449,8 @@ function DashboardInner() {
     broker: { icon: "⚡", label: "Pitch" },
     buyer: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
     exploring: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
-    provider: { icon: "🖼️", label: "Portfolio" },
+    provider: { icon: <Sparkles strokeWidth={1.5} size="1em" />, label: "Portfolio" },
+    operator: { icon: <Building2 strokeWidth={1.5} size="1em" />, label: "Units" },
   };
   // A-096: operator and enterprise have no entry, and no mode component of
   // theirs hears the primary-action event — so the old `{icon:"●",label:""}`
@@ -400,41 +487,78 @@ function DashboardInner() {
       <AtmosphereBackground variant={mode || "dashboard"} />
 
       {/* Top Nav (Persistent) */}
-      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
-          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">S<span className="text-on-surface">cout</span>IT</Link>
+      <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex flex-nowrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 md:gap-5 shrink-0">
+          <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">
+            S<span className="text-on-surface">cout</span>IT
+          </Link>
           
           {/* Custom Desktop Workspace Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
             <button 
               className="flex items-center gap-2 bg-surface hover:bg-surface-alt border border-surface-variant text-on-surface text-sm font-working-title px-4 py-2 rounded-full uppercase tracking-wider active:scale-[0.97] transition duration-160 ease-out"
               onClick={() => setShowDesktopSwitcher(!showDesktopSwitcher)}
+              aria-expanded={showDesktopSwitcher}
+              aria-label="Switch Workspace"
             >
               <span className="text-gold-accent font-semibold">Workspace:</span> {TAG_LABELS[mode]}
               <span className="text-[12px] ml-1">▼</span>
             </button>
             
             {showDesktopSwitcher && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-surface border border-surface-variant rounded-lg shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
-                <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt">
+              <div className="absolute top-full left-0 mt-2 w-72 bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
+                <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex items-center justify-between">
                   <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
+                  <span className="font-mono text-xs text-gold-accent">{user.tags?.length || 1} Active</span>
                 </div>
-                <div className="flex flex-col py-2">
-                  {user.tags.map(tagId => (
-                    <button
-                      key={tagId}
-                      className={`text-left px-4 py-3 font-working-title text-sm active:scale-[0.97] transition duration-160 ease-out hover:bg-surface-container ${mode === tagId ? 'text-gold-accent bg-surface-container-low border-l-2 border-gold-accent' : 'text-on-surface border-l-2 border-transparent'}`}
-                      onClick={() => handleSwitchMode(tagId)}
-                    >
-                      {TAG_LABELS[tagId]}
-                    </button>
-                  ))}
+                <div className="flex flex-col py-2 max-h-[380px] overflow-y-auto">
+                  {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
+                    const active = isRoleActive(opt);
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.id}
+                        className={`text-left px-4 py-2.5 flex items-center justify-between gap-3 active:scale-[0.98] transition duration-150 ease-out hover:bg-surface-alt ${
+                          active ? "text-gold-accent bg-gold-accent/10 border-l-2 border-gold-accent" : "text-on-surface border-l-2 border-transparent"
+                        }`}
+                        onClick={() => handleSwitchMode(opt.id)}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Icon size={16} className={active ? "text-gold-accent shrink-0" : "text-text-muted shrink-0"} />
+                          <span className="font-working-title text-sm truncate">{opt.label}</span>
+                        </div>
+                        {active ? (
+                          <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent bg-gold-accent/15 px-1.5 py-0.5 rounded border border-gold-accent/30 shrink-0">
+                            Active ●
+                          </span>
+                        ) : (
+                          <span className="font-mono text-xs uppercase tracking-wider text-text-muted shrink-0">
+                            Switch →
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                {/* A-137: the switcher lists earned lenses only. Locked lenses
-                    are never named here — the footer is the one quiet door to
-                    Settings, where broker / provider are earned by verification. */}
+                {/* Quick Role Utilities */}
+                <div className="border-t border-surface-variant px-4 py-2 bg-surface-alt/40 flex items-center justify-between gap-2">
+                  <Link
+                    href="/dashboard/open-gate"
+                    onClick={() => setShowDesktopSwitcher(false)}
+                    className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                  >
+                    Open Gate ↗
+                  </Link>
+                  <Link
+                    href="/dashboard/crm"
+                    onClick={() => setShowDesktopSwitcher(false)}
+                    className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                  >
+                    Master CRM ↗
+                  </Link>
+                </div>
                 {missingLenses(user.tags).length > 0 && (
-                  <div className="border-t border-surface-variant px-4 py-2">
+                  <div className="border-t border-surface-variant px-4 py-2.5 bg-surface-alt/60">
                     <Link
                       href="/settings#account"
                       onClick={() => setShowDesktopSwitcher(false)}
@@ -444,7 +568,6 @@ function DashboardInner() {
                     </Link>
                   </div>
                 )}
-
               </div>
             )}
           </div>
@@ -455,15 +578,19 @@ function DashboardInner() {
           <DashboardAmbientStrip user={user} />
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6 shrink-0">
-          <div className="hidden md:block relative">
+        {/* Unified Right Cluster: Connects, Notifications, Profile (Stable on all roles!) */}
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0 ml-auto">
+          {/* Connects Wallet Pill */}
+          <div className="relative">
             <button
-              className="flex items-center gap-2 text-gold-accent font-label-caps text-[12px] tracking-widest bg-gold-accent/10 px-3 py-1.5 rounded-full hover:bg-gold-accent/20 active:scale-[0.97] transition duration-160 ease-out"
+              className="flex items-center gap-1.5 text-gold-accent font-label-caps text-[12px] tracking-widest bg-gold-accent/10 hover:bg-gold-accent/20 px-2.5 py-1.5 sm:px-3 rounded-full active:scale-[0.97] transition duration-150 ease-out border border-gold-accent/25"
               title="View your Connects breakdown"
               onClick={() => setShowConnectsBreakdown((v) => !v)}
+              aria-label="View Connects Breakdown"
             >
-              <span className="icon">◈</span>
-              <span>{connects !== undefined ? connects : user.connects_balance} CONNECTS</span>
+              <span className="text-xs">◈</span>
+              <span className="font-mono font-semibold">{connects !== undefined ? connects : user.connects_balance}</span>
+              <span className="hidden sm:inline font-mono">CONNECTS</span>
             </button>
             <ConnectsBreakdown
               open={showConnectsBreakdown}
@@ -474,31 +601,16 @@ function DashboardInner() {
             />
           </div>
 
-          {/* CRM Nav (Owner/Broker only, desktop only to prevent mobile top bar cramming) */}
-          {(mode === "owner" || mode === "broker") && (
-            <Link
-              href="/dashboard/crm"
-              className="hidden sm:flex relative w-11 h-11 items-center justify-center text-text-secondary hover:text-gold-accent transition"
-              aria-label="Master CRM"
-              title="Master CRM"
-            >
-              <Briefcase strokeWidth={1.5} size={20} />
-            </Link>
-          )}
-
-          {(mode === "owner" || mode === "broker" || mode === "operator") && (
-            <Link href="/dashboard/open-gate" className="font-mono text-[12px] uppercase tracking-wider text-gold-accent hover:underline" aria-label="Open Gate settings">Open Gate</Link>
-          )}
-
+          {/* Notifications Bell */}
           <div className="relative" ref={notificationsRef}>
             <button
-              className="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-variant/40 text-text-secondary hover:text-gold-accent transition-colors"
+              className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full hover:bg-surface-variant/40 text-text-secondary hover:text-gold-accent transition-colors"
               onClick={toggleNotifications}
               aria-label="Notifications"
             >
-              <Bell size={20} className={unreadCount > 0 ? "text-gold-bright animate-pulse" : "text-text-secondary hover:text-gold-accent"} />
+              <Bell size={19} className={unreadCount > 0 ? "text-gold-bright animate-pulse" : "text-text-secondary hover:text-gold-accent"} />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-gold-accent text-background font-mono font-bold rounded-full border-2 border-background flex items-center justify-center text-[12px]">
+                <span className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 min-w-[18px] h-[18px] px-0.5 bg-gold-accent text-background font-mono font-bold rounded-full border border-background flex items-center justify-center text-xs leading-none">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -547,7 +659,7 @@ function DashboardInner() {
                           }`}
                         >
                           <div className="text-xl shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-surface-alt border border-surface-variant flex items-center justify-center">
-                            {notif.icon || "🔔"}
+                            {notif.icon || <Bell size={16} className="text-gold-accent" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-1 mb-0.5">
@@ -576,11 +688,11 @@ function DashboardInner() {
           </div>
 
           {/* Desktop User Menu (Hidden on mobile) */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             <Link
               href="/settings"
               title="Account Settings"
-              className="w-11 h-11 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors rounded-full hover:bg-surface-variant/40"
+              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-gold-accent transition-colors rounded-full hover:bg-surface-variant/40"
               aria-label="Account Settings"
             >
               <Settings size={18} />
@@ -588,12 +700,12 @@ function DashboardInner() {
             <Link
               href="/profile"
               title="Your Profile"
-              className="w-8 h-8 rounded-full bg-surface-variant border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition"
+              className="w-8 h-8 rounded-full bg-surface-alt border border-gold-accent/30 flex items-center justify-center font-working-title text-xs font-bold text-on-surface hover:border-gold-accent transition"
             >
               {user.name ? user.name.substring(0, 2).toUpperCase() : "U"}
             </Link>
             <button
-              className="w-11 h-11 flex items-center justify-center text-text-secondary hover:text-error transition-colors rounded-full hover:bg-error/10 ml-1"
+              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-error transition-colors rounded-full hover:bg-error/10"
               onClick={handleSignOut}
               title="Sign Out"
               aria-label="Sign Out"
@@ -602,38 +714,18 @@ function DashboardInner() {
             </button>
           </div>
           
-          {/* Mobile Connects & Profile (Menu Trigger) */}
-          <div className="md:hidden flex items-center gap-3">
-            <div className="relative">
-              <button
-                className="flex items-center gap-1 text-gold-accent font-label-caps text-[12px] tracking-widest"
-                title="View your Connects breakdown"
-                onClick={() => setShowConnectsBreakdown((v) => !v)}
-              >
-                <span>◈</span>
-                <span>{connects !== undefined ? connects : user.connects_balance}</span>
-              </button>
-              <ConnectsBreakdown
-                open={showConnectsBreakdown}
-                onClose={() => setShowConnectsBreakdown(false)}
-                mode={mode}
-                providerType={user.providerType}
-                tier={user.subscription_tier || user.tier}
-              />
-            </div>
-            <button
-              className="w-10 h-10 rounded-full bg-surface-alt border border-surface-variant flex items-center justify-center font-working-title text-sm font-bold text-on-surface hover:border-gold-accent transition"
-              onClick={() => setShowMobileProfileMenu(true)}
-              title="Open Mobile Menu"
-              aria-label="Open menu"
-            >
-              {user.name ? user.name.substring(0,2).toUpperCase() : 'U'}
-            </button>
-          </div>
+          {/* Mobile Profile Trigger */}
+          <button
+            className="md:hidden w-8 h-8 rounded-full bg-surface-alt border border-gold-accent/30 flex items-center justify-center font-working-title text-xs font-bold text-on-surface hover:border-gold-accent transition shrink-0"
+            onClick={() => setShowMobileProfileMenu(true)}
+            title="Open Mobile Menu"
+            aria-label="Open menu"
+          >
+            {user.name ? user.name.substring(0, 2).toUpperCase() : "U"}
+          </button>
         </div>
-        {/* A-205 Workspace Deck strip — the swipe deck's tab mirror, riding
-            inside the sticky header so it survives the long workspace scroll.
-            Mobile only; desktop keeps the switcher + header icons. */}
+
+        {/* Mobile Workspace Deck Command Bar */}
         <div className="md:hidden w-full">
           <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} roleLabel={TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"} />
         </div>
@@ -643,26 +735,111 @@ function DashboardInner() {
       <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
         {/* Active Workspace Lens Indicator */}
-        <div className="mb-5 flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-gold-accent/30 bg-surface/75 backdrop-blur-xl shadow-[0_0_20px_rgba(var(--accent-rgb),0.06)]">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-gold-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)] animate-pulse shrink-0" />
-            <div className="flex flex-col min-w-0">
-              <span className="font-mono text-[12px] uppercase tracking-widest text-text-muted leading-none">
-                Active Workspace
-              </span>
-              <span className="font-working-title text-sm sm:text-base font-bold uppercase tracking-wider text-gold-accent truncate mt-0.5">
-                {TAG_LABELS[mode] || mode}
-              </span>
+        <div className="relative mb-5" ref={workspaceDropdownRef}>
+          <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-gold-accent/30 bg-surface/75 backdrop-blur-xl shadow-[0_0_20px_rgba(var(--accent-rgb),0.06)]">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-gold-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)] animate-pulse shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="font-mono text-[12px] uppercase tracking-widest text-text-muted leading-none">
+                  Active Workspace
+                </span>
+                <span className="font-working-title text-sm sm:text-base font-bold uppercase tracking-wider text-gold-accent truncate mt-0.5">
+                  {TAG_LABELS[mode] || mode}
+                </span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth < 768) {
+                  window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"));
+                } else {
+                  setShowWorkspaceDropdown((v) => !v);
+                }
+              }}
+              className="shrink-0 min-h-[36px] px-3 py-1.5 rounded-lg bg-gold-accent/10 border border-gold-accent/40 font-mono text-xs font-semibold uppercase tracking-wider text-gold-bright hover:bg-gold-accent hover:text-background transition-all flex items-center gap-1.5 active:scale-95 touch-manipulation"
+              aria-expanded={showWorkspaceDropdown}
+              aria-label="Switch Active Workspace Role"
+            >
+              <span>Switch Role</span>
+              <span className={`text-xs transition-transform duration-200 ${showWorkspaceDropdown ? "rotate-180" : ""}`}>▾</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"))}
-            className="shrink-0 min-h-[36px] px-3 py-1.5 rounded-lg bg-gold-accent/10 border border-gold-accent/40 font-mono text-xs font-semibold uppercase tracking-wider text-gold-bright hover:bg-gold-accent hover:text-background transition-all flex items-center gap-1.5 active:scale-95 touch-manipulation"
-          >
-            <span>Switch Role</span>
-            <span className="text-xs">▾</span>
-          </button>
+
+          {/* Inline Workspace Role Switcher Popover */}
+          {showWorkspaceDropdown && (
+            <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-surface border border-gold-accent/40 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl z-50 motion-safe:animate-[fadeIn_0.15s_ease-out]">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-surface-variant">
+                <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse" />
+                  Your Active Workspaces ({WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).length})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowWorkspaceDropdown(false)}
+                  className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface-variant text-text-muted hover:text-text-primary transition"
+                  aria-label="Close Role Switcher"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-2 max-h-[380px] overflow-y-auto">
+                {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
+                  const active = isRoleActive(opt);
+                  const Icon = opt.icon;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleSwitchMode(opt.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[56px] ${
+                        active
+                          ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"
+                          : "border-surface-variant/80 bg-surface/50 hover:border-gold-accent/40 hover:bg-gold-accent/5"
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                        active ? "bg-gold-accent text-background" : "bg-surface-alt border border-surface-variant text-gold-accent"
+                      }`}>
+                        <Icon size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-sm font-semibold truncate ${active ? "text-gold-bright font-bold" : "text-text-primary"}`}>
+                            {opt.label}
+                          </span>
+                          {active ? (
+                            <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">
+                              ACTIVE ●
+                            </span>
+                          ) : (
+                            <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10">
+                              SWITCH →
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-text-secondary leading-snug line-clamp-1 mt-0.5">
+                          {opt.desc}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 pt-2.5 border-t border-surface-variant flex items-center justify-between">
+                <span className="font-mono text-xs text-text-muted">Need more roles?</span>
+                <Link
+                  href="/settings#account"
+                  onClick={() => setShowWorkspaceDropdown(false)}
+                  className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline flex items-center gap-1"
+                >
+                  Manage in Settings →
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
         <Nudge mode={mode} />
@@ -738,62 +915,81 @@ function DashboardInner() {
               </span>
             </div>
             <div className="flex flex-col gap-2 mb-3">
-              {(user.tags.length > 0 ? user.tags : ["buyer"]).map(tagId => (
-                <button
-                  key={tagId}
-                  className={`flex items-center justify-between p-3.5 rounded-lg font-working-title text-sm border transition-[transform,border-color,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation ${mode === tagId ? 'bg-surface-container-low border-gold-accent text-gold-accent font-semibold' : 'bg-surface border-surface-variant text-on-surface hover:border-text-secondary'}`}
-                  onClick={() => handleSwitchMode(tagId)}
-                >
-                  <span className="uppercase tracking-wider">{TAG_LABELS[tagId] || tagId}</span>
-                  {mode === tagId ? (
-                    <span className="font-mono text-xs uppercase tracking-widest text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/40 bg-gold-accent/15">
-                      Active ✓
-                    </span>
-                  ) : (
-                    <span className="font-mono text-xs uppercase tracking-wider text-text-muted">Switch →</span>
-                  )}
-                </button>
-              ))}
+              {WORKSPACE_ROLE_OPTIONS.filter((opt) => isRoleUnlocked(opt)).map((opt) => {
+                const active = isRoleActive(opt);
+                const Icon = opt.icon;
+                return (
+                  <button
+                    key={opt.id}
+                    className={`flex items-center justify-between p-3.5 rounded-xl font-working-title text-sm border transition-[transform,border-color,background-color] duration-150 ease-out active:scale-[0.98] touch-manipulation min-h-[52px] ${
+                      active ? 'bg-gold-accent/15 border-gold-accent text-gold-accent font-semibold shadow-[0_0_12px_rgba(var(--accent-rgb),0.12)]' : 'bg-surface border-surface-variant text-on-surface hover:border-gold-accent/40'
+                    }`}
+                    onClick={() => handleSwitchMode(opt.id)}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${active ? 'bg-gold-accent text-background' : 'bg-surface-alt border border-surface-variant text-gold-accent'}`}>
+                        <Icon size={16} />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="truncate font-semibold">{opt.label}</div>
+                        <div className="text-xs text-text-muted truncate mt-0.5">{opt.desc}</div>
+                      </div>
+                    </div>
+                    {active ? (
+                      <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)] ml-2">
+                        ACTIVE ●
+                      </span>
+                    ) : (
+                      <span className="shrink-0 font-mono text-xs uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10 ml-2">
+                        SWITCH →
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Available Roles to Add / Unlock in Settings */}
-            <div className="pt-3 pb-2 border-t border-surface-variant flex items-center justify-between">
-              <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary font-semibold">
-                Available Roles to Add
-              </span>
-              <Link
-                href="/settings#account"
-                onClick={() => setShowMobileProfileMenu(false)}
-                className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline"
-              >
-                Settings →
-              </Link>
-            </div>
-            <div className="flex flex-col gap-2 mb-3">
-              {[
-                { id: "buyer", label: "Buyer / Seeker", desc: "Search spaces, viewings & private board" },
-                { id: "owner", label: "Property Owner & Developer", desc: "List spaces, inventory & inquiries" },
-                { id: "broker", label: "Accredited Broker", desc: "Client representation & deal pipeline (PRC)" },
-                { id: "operator", label: "Co-Operator & Facilities", desc: "Space management & operations log" },
-                { id: "photographer", label: "Spatial Photographer", desc: "Space photography & QuestIT bounties" },
-                { id: "designer", label: "Event & Concept Designer", desc: "Bespoke spatial concepts & staging" },
-              ].filter(item => !user.tags.includes(item.id) && !(item.id === "buyer" && user.tags.includes("seeker"))).map(item => (
-                <Link
-                  key={item.id}
-                  href="/settings#account"
-                  onClick={() => setShowMobileProfileMenu(false)}
-                  className="flex items-center justify-between p-3 rounded-lg border border-surface-variant bg-surface-alt/30 hover:border-gold-accent/40 transition group"
-                >
-                  <div>
-                    <div className="font-working-title text-sm text-text-primary group-hover:text-gold-accent transition">{item.label}</div>
-                    <div className="text-xs text-text-muted mt-0.5">{item.desc}</div>
-                  </div>
-                  <span className="font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 group-hover:bg-gold-accent group-hover:text-black transition">
-                    + Add Role
+            {WORKSPACE_ROLE_OPTIONS.some((opt) => !isRoleUnlocked(opt)) && (
+              <>
+                <div className="pt-3 pb-2 border-t border-surface-variant flex items-center justify-between">
+                  <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary font-semibold">
+                    Available Roles to Add
                   </span>
-                </Link>
-              ))}
-            </div>
+                  <Link
+                    href="/settings#account"
+                    onClick={() => setShowMobileProfileMenu(false)}
+                    className="font-mono text-xs uppercase tracking-wider text-gold-accent hover:underline"
+                  >
+                    Settings →
+                  </Link>
+                </div>
+                <div className="flex flex-col gap-2 mb-3">
+                  {WORKSPACE_ROLE_OPTIONS.filter((opt) => !isRoleUnlocked(opt)).map((opt) => {
+                    const Icon = opt.icon;
+                    return (
+                      <Link
+                        key={opt.id}
+                        href="/settings#account"
+                        onClick={() => setShowMobileProfileMenu(false)}
+                        className="flex items-center justify-between p-3 rounded-lg border border-surface-variant bg-surface-alt/30 hover:border-gold-accent/40 transition group"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Icon size={16} className="text-text-muted group-hover:text-gold-accent shrink-0" />
+                          <div className="min-w-0">
+                            <div className="font-working-title text-sm text-text-primary group-hover:text-gold-accent transition truncate">{opt.label}</div>
+                            <div className="text-xs text-text-muted mt-0.5 truncate">{opt.desc}</div>
+                          </div>
+                        </div>
+                        <span className="font-mono text-xs uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded bg-gold-accent/10 border border-gold-accent/30 shrink-0 group-hover:bg-gold-accent group-hover:text-black transition ml-2">
+                          + Add Role
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
+            )}
 
             <Link
               href="/settings#account"
@@ -802,17 +998,6 @@ function DashboardInner() {
             >
               + Add or Increase Roles in Settings →
             </Link>
-
-            {missingLenses(user.tags).length > 0 && (
-              <Link
-                href="/settings#account"
-                onClick={() => setShowMobileProfileMenu(false)}
-                className="flex items-center min-h-[44px] font-mono text-[12px] uppercase tracking-widest text-text-secondary hover:text-gold-accent transition"
-              >
-                Need another workspace? Unlock in Settings →
-              </Link>
-            )}
-
 
             <div className="border-t border-surface-variant pt-4 pb-3">
               <div className="mb-2">
@@ -823,13 +1008,13 @@ function DashboardInner() {
 
             <div className="border-t border-surface-variant pt-4">
               <Link href="/settings" className="flex items-center gap-3 text-text-secondary hover:text-on-surface font-working-title text-sm py-2">
-                <span>⚙️</span> Account Settings
+                <Settings size={16} className="text-gold-accent" /> Account Settings
               </Link>
               <button
                 className="flex items-center gap-3 text-text-secondary hover:text-error font-working-title text-sm py-2 w-full text-left"
                 onClick={handleSignOut}
               >
-                <span>🚪</span> Sign Out
+                <LogOut size={16} className="text-error" /> Sign Out
               </button>
             </div>
           </div>

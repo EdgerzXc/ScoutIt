@@ -29,6 +29,9 @@ describe("dashboard mode normalization", () => {
     expect(inferProviderType("event-planner")).toBe("designer");
     expect(inferProviderType("event_planner")).toBe("designer");
     expect(inferProviderType("designer")).toBe("designer");
+    expect(inferProviderType("designer", "photographer")).toBe("designer");
+    expect(inferProviderType("photographer", "designer")).toBe("photographer");
+    expect(inferProviderType("provider", "photographer")).toBe("photographer");
   });
 
   it("deduplicates mixed legacy and UI role names", () => {

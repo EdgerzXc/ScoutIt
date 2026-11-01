@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Lock, MessageSquare, FileText, Shield } from "lucide-react";
 import PhotographerHUD from "./providers/PhotographerHUD";
 import ResearcherHUD from "./providers/ResearcherHUD";
 import DesignerHUD from "./providers/DesignerHUD";
 import { MOCK_QUESTS, USE_MOCK_DATA } from "@/data/mock";
 
-export default function ProviderMode({ type }) {
+export default function ProviderMode({ type = "photographer" }) {
   // Define which services are currently active for the MVP
   const ACTIVE_SERVICES = ["photographer", "researcher", "designer"];
   const isActiveService = ACTIVE_SERVICES.includes(type?.toLowerCase());
@@ -46,7 +47,7 @@ export default function ProviderMode({ type }) {
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent/5 rounded-full blur-3xl group-hover:bg-gold-accent/10 transition duration-500 -translate-y-1/2 translate-x-1/3" />
           <div className="w-20 h-20 bg-surface/50 border border-white/[0.04] rounded-full flex items-center justify-center mb-8 relative">
              <div className="absolute inset-0 bg-gold-accent blur-xl opacity-20 rounded-full group-hover:opacity-40 transition-opacity duration-300" />
-             <span className="text-3xl relative z-10">🔒</span>
+             <Lock size={28} className="text-gold-accent relative z-10" />
           </div>
           <h1 className="font-display-md text-4xl md:text-5xl text-on-surface mb-6 relative z-10 break-words">The Roster is Curation-Only.</h1>
           <p className="text-text-secondary font-body-md max-w-xl mb-10 leading-relaxed relative z-10">
@@ -63,21 +64,21 @@ export default function ProviderMode({ type }) {
         </div>
 
         <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card">
-          <span className="text-2xl mb-4 opacity-70">💬</span>
+          <MessageSquare size={24} className="mb-4 text-gold-accent opacity-75" />
           <h3 className="text-white font-medium mb-2">Provider Community</h3>
           <p className="text-xs text-text-secondary leading-relaxed">Connect with other top-tier operators while you wait.</p>
           <span className="mt-3 font-mono text-[12px] uppercase tracking-widest text-text-secondary">Phase 2</span>
         </div>
 
         <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card">
-          <span className="text-2xl mb-4 opacity-70">📑</span>
+          <FileText size={24} className="mb-4 text-gold-accent opacity-75" />
           <h3 className="text-white font-medium mb-2">Quality Standards</h3>
           <p className="text-xs text-text-secondary leading-relaxed">Review the minimum requirements for the ScoutIt roster.</p>
           <span className="mt-3 font-mono text-[12px] uppercase tracking-widest text-text-secondary">Phase 2</span>
         </div>
 
         <div className="md:col-span-1 card-atmosphere p-8 rounded-2xl flex flex-col justify-center hov-card">
-          <span className="text-2xl mb-4 opacity-70">🛡️</span>
+          <Shield size={24} className="mb-4 text-gold-accent opacity-75" />
           <h3 className="text-white font-medium mb-2">Vetting Status</h3>
           <p className="text-xs text-text-secondary leading-relaxed">Track your application through the curation pipeline.</p>
           <span className="mt-3 font-mono text-[12px] uppercase tracking-widest text-text-secondary">Phase 2</span>

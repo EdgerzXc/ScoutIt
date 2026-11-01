@@ -1,6 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Camera, Check, ExternalLink, ShieldCheck, Plane, Sparkles, Building2, ChevronRight } from "lucide-react";
+
+const safePortfolioUrl = (raw) => {
+  if (!raw || typeof raw !== "string") return "#";
+  const trimmed = raw.trim();
+  if (!trimmed) return "#";
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const u = new URL(withProtocol);
+    return ["http:", "https:"].includes(u.protocol) ? u.href : "#";
+  } catch {
+    return "#";
+  }
+};
 
 const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
@@ -17,7 +31,7 @@ const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   </div>
 );
 
-export default function PhotographerHUD({ projects, activeProjectId, setActiveProjectId, setActiveProjectDetails }) {
+export default function PhotographerHUD({ projects = [], activeProjectId, setActiveProjectId, setActiveProjectDetails }) {
   const [activeTab, setActiveTab] = useState("bounties"); // 'bounties' | 'showcase'
   
   // Showcase State (Core)
@@ -39,7 +53,74 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
   const [addonTwilight, setAddonTwilight] = useState(false);
   const [addonFloorplan, setAddonFloorplan] = useState(false);
 
-  // Reusable custom toggle component
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Restore saved showcase profile from localStorage on mount
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const raw = localStorage.getItem("scoutit_photographer_showcase");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.gear) setGear(parsed.gear);
+          if (parsed.portfolio) setPortfolio(parsed.portfolio);
+          if (parsed.baseRate) setBaseRate(parsed.baseRate);
+          if (parsed.specialty) setSpecialty(parsed.specialty);
+          if (typeof parsed.acceptingProjects === "boolean") setAcceptingProjects(parsed.acceptingProjects);
+          if (parsed.turnaroundTime) setTurnaroundTime(parsed.turnaroundTime);
+          if (typeof parsed.certCaaDrone === "boolean") setCertCaaDrone(parsed.certCaaDrone);
+          if (typeof parsed.certInsurance === "boolean") setCertInsurance(parsed.certInsurance);
+          if (typeof parsed.addonMatterport === "boolean") setAddonMatterport(parsed.addonMatterport);
+          if (typeof parsed.addonTwilight === "boolean") setAddonTwilight(parsed.addonTwilight);
+          if (typeof parsed.addonFloorplan === "boolean") setAddonFloorplan(parsed.addonFloorplan);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Mobile floating primary action (Portfolio) triggers showcase tab
+  useEffect(() => {
+    const onPrimary = (e) => {
+      if (e.detail?.mode === "provider") {
+        setActiveTab("showcase");
+        setTimeout(() => {
+          const el = document.getElementById("photographer-showcase-preview");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 60);
+      }
+    };
+    window.addEventListener("scoutit:primary-action", onPrimary);
+    return () => window.removeEventListener("scoutit:primary-action", onPrimary);
+  }, []);
+
+  const handleSaveShowcase = () => {
+    setIsSaving(true);
+    try {
+      const data = {
+        gear,
+        portfolio,
+        baseRate,
+        specialty,
+        acceptingProjects,
+        turnaroundTime,
+        certCaaDrone,
+        certInsurance,
+        addonMatterport,
+        addonTwilight,
+        addonFloorplan,
+        updatedAt: new Date().toISOString(),
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("scoutit_photographer_showcase", JSON.stringify(data));
+      }
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch {}
+    finally {
+      setIsSaving(false);
+    }
+  };
 
   if (activeProjectId) {
     const project = projects.find(p => p.id === activeProjectId);
@@ -79,7 +160,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
             </div>
             <div className="p-6">
               <div className="aspect-video bg-background rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-gold-accent transition cursor-pointer group mb-4">
-                <span className="text-4xl mb-2 opacity-50 group-hover:scale-110 transition-transform">📸</span>
+                <Camera size={36} className="text-gold-accent opacity-60 group-hover:scale-110 transition-transform mb-2" />
                 <span className="font-working-title text-on-surface">Paste Drive/Dropbox Link</span>
               </div>
               <input type="text" placeholder="https://drive.google.com/..." className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-base md:text-sm focus:outline-none focus:border-gold-accent transition" />
@@ -119,7 +200,11 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               onClick={() => setActiveProjectId(project.id)}
             >
               <div className="aspect-video bg-surface-alt flex items-center justify-center text-5xl relative">
-                <span className="group-hover:scale-110 transition-transform">{project.cover || "🏙️"}</span>
+                {project.cover ? (
+                  <span className="group-hover:scale-110 transition-transform">{project.cover}</span>
+                ) : (
+                  <Building2 size={40} className="text-gold-accent/40 group-hover:scale-110 transition-transform" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
                 <div className="absolute bottom-3 left-3 flex gap-2">
                   <span className="bg-background/80 backdrop-blur text-text-primary text-[12px] font-label-caps tracking-widest uppercase px-2 py-1 rounded">
@@ -248,17 +333,28 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               </div>
               
               <button
-                disabled
-                title="Profile saving opens in Phase 2: previews only today."
-                className="w-full mt-4 bg-surface border border-gold-accent/50 text-gold-accent font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm opacity-60 cursor-not-allowed"
+                type="button"
+                onClick={handleSaveShowcase}
+                disabled={isSaving}
+                className="w-full mt-4 bg-gold-accent text-background font-working-title font-bold px-4 py-3.5 rounded uppercase tracking-wider text-sm hover:bg-gold-bright transition-all shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)] active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                Save Showcase Profile · Phase 2
+                {saveSuccess ? (
+                  <>
+                    <Check size={16} />
+                    <span>Showcase Profile Saved ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    <span>{isSaving ? "Saving..." : "Save Showcase Profile"}</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
 
           {/* Preview Card (Right Column) */}
-          <div className="xl:col-span-5 flex flex-col gap-4">
+          <div className="xl:col-span-5 flex flex-col gap-4" id="photographer-showcase-preview">
             <h3 className="font-working-title text-xl text-on-surface flex items-center gap-2">
               How Owners See You <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-accent opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-gold-accent"></span></span>
             </h3>
@@ -269,7 +365,7 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-surface-alt border border-surface-variant rounded-full flex items-center justify-center text-2xl relative">
-                    📸
+                    <Camera size={26} className="text-gold-accent" />
                     {acceptingProjects && (
                       <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full" title="Accepting New Projects"></div>
                     )}
@@ -288,13 +384,13 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
               {/* Certifications Row */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {certCaaDrone && (
-                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]">
-                    <span className="text-[12px]">🚁</span> CAAP Certified
+                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1.5 shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]">
+                    <Plane size={13} className="text-gold-accent" /> CAAP Certified
                   </span>
                 )}
                 {certInsurance && (
-                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]">
-                    <span className="text-[12px]">🛡️</span> Insured
+                  <span className="bg-surface-alt text-gold-accent border border-gold-accent/40 font-label-caps text-[12px] uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1.5 shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]">
+                    <ShieldCheck size={13} className="text-gold-accent" /> Insured
                   </span>
                 )}
                 {!certCaaDrone && !certInsurance && (
@@ -327,7 +423,15 @@ export default function PhotographerHUD({ projects, activeProjectId, setActivePr
                   </div>
                   <div className="flex-1 overflow-hidden">
                     <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Portfolio</span>
-                    <a href={(() => { try { const u = new URL(portfolio); return ["http:", "https:"].includes(u.protocol) ? u.href : "#"; } catch { return "#"; } })()} target="_blank" rel="noopener noreferrer" className="text-sm text-on-surface underline hover:text-gold-accent block truncate">{portfolio}</a>
+                    <a
+                      href={safePortfolioUrl(portfolio)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-on-surface underline hover:text-gold-accent inline-flex items-center gap-1.5 truncate max-w-full"
+                    >
+                      <span className="truncate">{portfolio}</span>
+                      <ExternalLink size={12} className="shrink-0 text-gold-accent" />
+                    </a>
                   </div>
                 </div>
               </div>

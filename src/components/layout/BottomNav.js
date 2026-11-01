@@ -400,7 +400,11 @@ export default function BottomNav() {
 
   const isCurrentWorkspace = (roleDef) => {
     const activeTarget = String(currentWorkspaceRole).toLowerCase().trim();
-    if (roleDef.id === activeTarget || roleDef.targetRole === activeTarget) return true;
+    if (roleDef.id === activeTarget) return true;
+    if (activeTarget === "provider") {
+      return roleDef.id === "photographer";
+    }
+    if (roleDef.targetRole === activeTarget && !["provider", "broker"].includes(activeTarget)) return true;
     if (Array.isArray(roleDef.aliases) && roleDef.aliases.includes(activeTarget)) return true;
     return false;
   };
@@ -410,6 +414,7 @@ export default function BottomNav() {
 
   const handleRoleSelect = (roleKey) => {
     setRoleSheetOpen(false);
+    setCurrentWorkspaceRole(roleKey);
     if (pathname.startsWith("/dashboard")) {
       window.dispatchEvent(new CustomEvent("scoutit:switch-workspace", { detail: { role: roleKey } }));
       try {
@@ -426,6 +431,12 @@ export default function BottomNav() {
     const handleOpenTheme = () => setThemeSheetOpen(true);
     window.addEventListener("scoutit:open-theme-sheet", handleOpenTheme);
     return () => window.removeEventListener("scoutit:open-theme-sheet", handleOpenTheme);
+  }, []);
+
+  useEffect(() => {
+    const handleOpenRoleSheet = () => setRoleSheetOpen(true);
+    window.addEventListener("scoutit:open-role-sheet", handleOpenRoleSheet);
+    return () => window.removeEventListener("scoutit:open-role-sheet", handleOpenRoleSheet);
   }, []);
 
   // On a single property page (/property/<slug>) the bar becomes an ACTION bar
@@ -798,7 +809,7 @@ export default function BottomNav() {
                   <button
                     key={role.id}
                     type="button"
-                    onClick={() => handleRoleSelect(role.targetRole)}
+                    onClick={() => handleRoleSelect(role.id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[58px] ${
                       isCurrent
                         ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"

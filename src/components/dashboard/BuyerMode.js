@@ -537,9 +537,16 @@ export default function BuyerMode() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8 pb-24 animate-[fadeIn_0.5s_ease-out]">
-      {/* A-096: the buyer lens rendered zero h1 — every other role lens has
-          one. Screen-reader-only: the visual composition is unchanged. */}
-      <h1 className="sr-only">Buyer workspace</h1>
+      {/* Harmonic Workspace Header */}
+      <div>
+        <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">
+          Seeker &amp; Buyer Command Center
+        </span>
+        <h1 className="font-display-md text-3xl md:text-4xl text-on-surface">Explore &amp; Saved Spaces</h1>
+        <p className="text-sm text-text-secondary mt-1 max-w-2xl">
+          Curated directory of premium spaces, personal viewing reservations, and geospatial signal dossiers across Metro Manila.
+        </p>
+      </div>
 
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.04] pb-6">
