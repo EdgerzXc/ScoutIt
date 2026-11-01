@@ -46,7 +46,7 @@ export function PilotPaymentNotice() {
   const isPilotZeroPaywall = phase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
 
   return (
-    <aside className="mx-auto mb-10 max-w-2xl rounded-2xl border border-gold-accent/30 bg-surface-alt/70 p-5 text-center backdrop-blur-xl shadow-[0_0_25px_rgba(var(--accent-rgb),0.07)]" aria-label="Human-testing payment status">
+    <aside className="mx-4 sm:mx-auto mb-10 max-w-2xl rounded-2xl border border-gold-accent/30 bg-surface-alt/70 p-4 sm:p-5 text-center backdrop-blur-xl shadow-[0_0_25px_rgba(var(--accent-rgb),0.07)]" aria-label="Human-testing payment status">
       {isPilotZeroPaywall && (
         <div
           data-testid="pioneer-access-badge"

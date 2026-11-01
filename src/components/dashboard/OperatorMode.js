@@ -85,11 +85,11 @@ export default function OperatorMode() {
 
   return (
     <div className="w-full flex flex-col gap-6">
-      <div>
-        <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-1 block">
-          Operator Dashboard
+      <div className="border-b border-surface-variant pb-6">
+        <span className="font-label-caps text-gold-accent tracking-widest uppercase text-xs mb-1 block">
+          Command Center
         </span>
-        <h1 className="font-display-md text-3xl md:text-4xl text-on-surface">Operated Spaces</h1>
+        <h1 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold">Operated Spaces</h1>
         <p className="text-sm text-text-secondary mt-2 max-w-2xl">
           Units delegated to you across every building you operate (commercial, restaurant, retail, flex spaces).
           You can rename units, manage photos, and set availability here; everything else about the building stays with its owner.

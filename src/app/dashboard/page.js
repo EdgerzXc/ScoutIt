@@ -44,6 +44,7 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  ChevronDown,
   Building2,
   ShieldCheck,
   Cog,
@@ -52,6 +53,8 @@ import {
   Sparkles,
   X,
   Check,
+  Plus,
+  Zap,
 } from "lucide-react";
 import "./dashboard-motion.css";
 
@@ -445,17 +448,15 @@ function DashboardInner() {
   };
 
   const PRIMARY_ACTIONS = {
-    owner: { icon: "+", label: "List" },
-    broker: { icon: "⚡", label: "Pitch" },
-    buyer: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
-    exploring: { icon: <Search strokeWidth={1.5} size="1em" />, label: "Scout" },
-    provider: { icon: <Sparkles strokeWidth={1.5} size="1em" />, label: "Portfolio" },
-    operator: { icon: <Building2 strokeWidth={1.5} size="1em" />, label: "Units" },
+    owner: { icon: <Plus size={20} strokeWidth={2.5} />, label: "List" },
+    broker: { icon: <Zap size={18} strokeWidth={2} />, label: "Pitch" },
+    buyer: { icon: <Search strokeWidth={1.8} size={18} />, label: "Scout" },
+    exploring: { icon: <Search strokeWidth={1.8} size={18} />, label: "Scout" },
+    provider: user?.providerType === "designer"
+      ? { icon: <Palette size={18} strokeWidth={2} />, label: "Studio" }
+      : { icon: <Camera size={18} strokeWidth={2} />, label: "Showcase" },
+    operator: { icon: <Building2 size={18} strokeWidth={2} />, label: "Units" },
   };
-  // A-096: operator and enterprise have no entry, and no mode component of
-  // theirs hears the primary-action event — so the old `{icon:"●",label:""}`
-  // fallback rendered a dead button whose aria-label="" actively REMOVED its
-  // accessible name. No entry now means no button rather than a dead one.
   const primaryAction = PRIMARY_ACTIONS[mode] || null;
 
   // A-205 Workspace Deck: Workspace is the default panel; swipe-left reveals
@@ -464,9 +465,11 @@ function DashboardInner() {
   const deckNav = deckNeighbors("workspace", mode || "buyer");
 
   // Mode components listen for this to run their own primary action
-  // (owner → open wizard, buyer → focus search, broker → jump to feed)
+  // (owner → open wizard, buyer → focus search, broker → jump to feed, provider → jump to showcase)
   const firePrimaryAction = () => {
-    window.dispatchEvent(new CustomEvent("scoutit:primary-action", { detail: { mode } }));
+    window.dispatchEvent(new CustomEvent("scoutit:primary-action", {
+      detail: { mode, providerType: user?.providerType }
+    }));
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -488,10 +491,25 @@ function DashboardInner() {
 
       {/* Top Nav (Persistent) */}
       <header className="relative z-40 sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant px-4 py-2.5 md:px-6 md:py-3 flex flex-nowrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 md:gap-5 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-5 shrink-0">
           <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow">
             S<span className="text-on-surface">cout</span>IT
           </Link>
+
+          {/* Mobile Active Workspace Pill: Tap to switch */}
+          <button
+            type="button"
+            className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 transition-all text-left shrink-0 active:scale-95 touch-manipulation shadow-[0_0_12px_rgba(var(--accent-rgb),0.1)]"
+            onClick={() => window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"))}
+            title="Active Workspace · Tap to switch"
+            aria-label={`Active Workspace: ${TAG_LABELS[mode] || "Workspace"}. Tap to switch.`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-accent truncate max-w-[120px]">
+              {TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"}
+            </span>
+            <ChevronDown size={13} className="text-gold-accent shrink-0 opacity-80" />
+          </button>
           
           {/* Custom Desktop Workspace Switcher */}
           <div className="hidden md:block relative" ref={switcherRef}>
@@ -936,12 +954,12 @@ function DashboardInner() {
                       </div>
                     </div>
                     {active ? (
-                      <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)] ml-2">
-                        ACTIVE ●
+                      <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)] ml-2">
+                        CURRENT ●
                       </span>
                     ) : (
-                      <span className="shrink-0 font-mono text-xs uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10 ml-2">
-                        SWITCH →
+                      <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10 ml-2 hover:bg-gold-accent hover:text-black transition">
+                        SWITCH ↗
                       </span>
                     )}
                   </button>

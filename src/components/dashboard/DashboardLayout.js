@@ -25,16 +25,15 @@ export default function DashboardLayout({ children, variant = "dashboard", class
             <span className="relative">S<span className="text-on-surface">cout</span>IT</span>
           </Link>
         </div>
-        <div className="hidden md:flex gap-6 items-center font-label-caps text-[12px] md:text-xs shrink-0">
-          <Link href="/dashboard" className="text-text-secondary hover:text-on-surface active:scale-[0.98] transition-all duration-300 ease-out">
-            Dashboard
-          </Link>
-          <Link href="/dashboard/inbox" className="text-text-secondary hover:text-on-surface active:scale-[0.98] transition-all duration-300 ease-out">
-            Inbox
-          </Link>
-          <Link href="/dashboard/calendar" className="text-text-secondary hover:text-on-surface active:scale-[0.98] transition-all duration-300 ease-out relative">
-            Calendar
-            <span className="absolute -top-1 -right-2 w-1.5 h-1.5 bg-gold-accent rounded-full animate-pulse" />
+        {/* Right side: direct return to active workspace */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <Link
+            href="/dashboard"
+            className="font-mono text-xs uppercase tracking-wider text-gold-accent bg-gold-accent/10 hover:bg-gold-accent/20 border border-gold-accent/30 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full transition-all active:scale-95 min-h-[36px] flex items-center gap-1.5 shadow-[0_0_12px_rgba(var(--accent-rgb),0.1)]"
+            title="Return to Workspace Command Center"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
+            <span className="font-semibold">Workspace</span>
           </Link>
         </div>
       </header>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Coins, ClipboardList } from "lucide-react";
 
 const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
@@ -97,7 +98,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
           <div className="lg:col-span-1">
             <div className="bg-surface border border-intel-cyan/30 rounded-lg p-6 shadow-lg sticky top-24">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">💰</span>
+                <Coins size={20} className="text-intel-cyan" />
                 <h3 className="font-working-title text-lg text-on-surface">Bounty Reward</h3>
               </div>
               <div className="text-4xl font-display-md text-intel-cyan mb-2">{quest.bounty_connects || 5} <span className="text-lg">◈</span></div>
@@ -169,7 +170,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
 
           {quests.length === 0 && (
             <div className="p-8 md:p-12 text-center border border-dashed border-surface-variant rounded-lg">
-              <span className="text-3xl mb-2 block opacity-50">📋</span>
+              <ClipboardList size={32} className="text-intel-cyan opacity-50 mx-auto mb-2" />
               <p className="text-text-secondary text-sm">No active research audits available.</p>
             </div>
           )}
@@ -279,7 +280,7 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
               <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-surface-alt border border-surface-variant rounded flex items-center justify-center text-2xl relative">
-                    📋
+                    <ClipboardList size={28} className="text-intel-cyan" />
                     {acceptingAudits && (
                       <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-background rounded-full" title="Accepting Audits"></div>
                     )}

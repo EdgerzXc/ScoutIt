@@ -106,17 +106,19 @@ export default function OwnerPricingPage() {
         <div className={`${styles.ambient} pricing-detail-ambient absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-gold-accent/10 rounded-full blur-[120px] pointer-events-none`}></div>
         <div className={`${styles.ambient} absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-surface-alt/20 rounded-full blur-[100px] pointer-events-none`}></div>
 
-        <header className="pricing-header z-10 relative">
-          <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-wider hover:text-on-surface transition-colors mb-6 inline-block">
-            ← Back to Personas
-          </Link>
-          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-3 block drop-shadow-md">
+        <header className="pricing-header z-10 relative w-full">
+          <div className="flex items-center justify-between mb-6 max-w-7xl mx-auto px-4">
+            <Link href="/pricing" className="text-gold-accent font-mono text-xs uppercase tracking-wider hover:text-on-surface transition-colors inline-block">
+              ← Back to Personas
+            </Link>
+          </div>
+          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-3 block drop-shadow-md px-4">
             COMMERCIAL ARCHITECTURE // OWNER PLANS
           </span>
-          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display-md text-text-primary mb-4 sm:mb-6 drop-shadow-lg">
+          <h1 className="page-title text-2xl sm:text-4xl md:text-5xl font-display-md text-text-primary mb-3 sm:mb-6 drop-shadow-lg px-4 max-w-3xl mx-auto">
             Manage Your <span className="text-gold-accent">Properties</span>
           </h1>
-          <p className="page-subtitle text-sm sm:text-base md:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed mb-6">
+          <p className="page-subtitle text-xs sm:text-base md:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed mb-6 px-4">
             Publish your spaces with verified accuracy. Off-market digital cloud storage is always free and unlimited across all tiers. Listing limits apply strictly to active live directory publications. <InfoTip tipId="listingCapCloudStorage" label="About listing quotas and cloud storage" />
           </p>
         </header>

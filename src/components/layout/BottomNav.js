@@ -779,12 +779,28 @@ export default function BottomNav() {
               </button>
             </div>
 
+            {/* Active Workspace Status Banner */}
+            <div className="mx-3 mb-3 p-3 rounded-xl bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
+                <div className="min-w-0">
+                  <span className="font-mono text-xs uppercase tracking-wider text-text-muted block">Current Workspace</span>
+                  <span className="font-working-title text-sm font-bold text-gold-bright truncate block">
+                    {CORE_ROLES.find((r) => isCurrentWorkspace(r))?.label || "Workspace"}
+                  </span>
+                </div>
+              </div>
+              <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">
+                ACTIVE NOW ●
+              </span>
+            </div>
+
             {isAdmin && (
-              <div className="mx-3 mb-3 px-3 py-2 rounded-lg bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-between">
+              <div className="mx-3 mb-3 px-3 py-2 rounded-lg bg-surface-alt/70 border border-surface-variant flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={14} className="text-gold-accent shrink-0" />
-                  <span className="font-mono text-xs uppercase tracking-wider text-gold-accent font-bold">
-                    Staff Access · All Workspaces Unlocked
+                  <span className="font-mono text-xs uppercase tracking-wider text-gold-accent font-semibold">
+                    Staff Privileges · All Workspaces Unlocked
                   </span>
                 </div>
                 <span className="font-mono text-xs uppercase text-text-muted">Master Admin</span>
@@ -794,11 +810,10 @@ export default function BottomNav() {
             {/* Section 1: Active Roles (User already has) */}
             <div className="px-3 pb-2 pt-1 flex items-center justify-between">
               <span className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold-accent inline-block animate-pulse" />
-                Your Active Roles ({activeRoles.length})
+                Switch Active Role ({activeRoles.length})
               </span>
               <span className="font-mono text-xs uppercase tracking-wider text-text-muted">
-                Tap to switch
+                Tap to open
               </span>
             </div>
 
@@ -812,7 +827,7 @@ export default function BottomNav() {
                     onClick={() => handleRoleSelect(role.id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.99] touch-manipulation min-h-[58px] ${
                       isCurrent
-                        ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"
+                        ? "border-gold-accent bg-gold-accent/15 shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)] ring-1 ring-gold-accent/40"
                         : "border-surface-variant/80 bg-surface/50 hover:border-gold-accent/40 hover:bg-gold-accent/5"
                     }`}
                   >
@@ -830,11 +845,11 @@ export default function BottomNav() {
                         </span>
                         {isCurrent ? (
                           <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider text-background bg-gold-accent px-2 py-0.5 rounded shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">
-                            ACTIVE ●
+                            CURRENT ●
                           </span>
                         ) : (
-                          <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-1.5 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10">
-                            SWITCH →
+                          <span className="shrink-0 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent px-2 py-0.5 rounded border border-gold-accent/30 bg-gold-accent/10 hover:bg-gold-accent hover:text-black transition">
+                            SWITCH ↗
                           </span>
                         )}
                       </div>

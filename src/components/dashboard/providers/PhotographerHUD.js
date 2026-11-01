@@ -224,7 +224,7 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
           
           {projects.length === 0 && (
             <div className="col-span-full p-8 md:p-12 text-center border border-dashed border-surface-variant rounded-lg">
-              <span className="text-3xl mb-2 block opacity-50">📷</span>
+              <Camera size={36} className="text-gold-accent opacity-50 mx-auto mb-2" />
               <p className="text-text-secondary text-sm">No active photography bounties available.</p>
             </div>
           )}

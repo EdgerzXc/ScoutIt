@@ -110,13 +110,13 @@ export default function SeekerPricingPage() {
               ← Back to Personas
             </Link>
           </div>
-          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
+          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-3 block drop-shadow-md px-4">
             COMMERCIAL ARCHITECTURE // SEEKER INTELLIGENCE
           </span>
-          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
+          <h1 className="page-title text-2xl sm:text-4xl md:text-5xl font-display-md text-text-primary mb-3 sm:mb-6 drop-shadow-lg px-4 max-w-3xl mx-auto">
             Explore with the <span className="text-gold-accent">Spatial Vault</span>
           </h1>
-          <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
+          <p className="page-subtitle text-xs sm:text-base md:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed mb-6 px-4">
             Public property records are free forever. Paid tiers add deeper spatial metrics, 3D interactive maps, noise ratings, and verified broker routing. Exclusive Off-Market Vault access unlocks with Universe Principal. <InfoTip tipId="offMarketVault" label="About Off-Market Vault" />
           </p>
         </header>

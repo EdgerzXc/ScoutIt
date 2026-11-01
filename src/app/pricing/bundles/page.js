@@ -130,13 +130,13 @@ export default function BundlesPricingPage() {
             </Link>
           </div>
 
-          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-4 block drop-shadow-md">
+          <span className="vector-label text-gold-accent tracking-[0.12em] uppercase text-xs font-bold mb-3 block drop-shadow-md px-4">
             COMMERCIAL ARCHITECTURE // ECOSYSTEM BUNDLES
           </span>
-          <h1 className="page-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display-md text-text-primary mb-6 drop-shadow-lg">
+          <h1 className="page-title text-2xl sm:text-4xl md:text-5xl font-display-md text-text-primary mb-3 sm:mb-6 drop-shadow-lg px-4 max-w-3xl mx-auto">
             Every Role. <span className="text-gold-accent">One Plan.</span>
           </h1>
-          <p className="page-subtitle text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
+          <p className="page-subtitle text-xs sm:text-base md:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed mb-6 px-4">
             Many real estate operators fulfill multiple roles. Bundles combine Cluster-tier access across all your perspectives with a monthly Connect bonus and reduced total cost.
           </p>
         </header>

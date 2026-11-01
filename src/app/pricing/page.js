@@ -95,21 +95,21 @@ export default function PricingHubPage() {
 
         <PilotPaymentNotice />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 z-10 relative w-full max-w-5xl px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 z-10 relative w-full max-w-5xl px-4">
           {PERSONAS.map((persona) => {
             const Icon = persona.icon;
             return (
               <Link key={persona.id} href={persona.href} className="group relative block rounded-2xl p-[1px] overflow-hidden bg-surface-variant hover:bg-gradient-to-br hover:from-surface-variant hover:to-gold-accent/30 transition-all duration-500 hover:-translate-y-1 hover:shadow-[var(--shadow-glow-soft)]">
                 <div className="absolute inset-0 backdrop-blur-xl z-0" style={{ background: "var(--surface)" }}></div>
-                <div className="relative z-10 p-8 flex items-start gap-6 h-full">
-                  <div className={`p-4 rounded-xl ${persona.bgAccent} transition-transform duration-500 group-hover:scale-110 flex-shrink-0`}>
-                    <Icon className={`w-8 h-8 ${persona.accent}`} strokeWidth={1.5} />
+                <div className="relative z-10 p-5 sm:p-8 flex items-start gap-4 sm:gap-6 h-full">
+                  <div className={`p-3 sm:p-4 rounded-xl ${persona.bgAccent} transition-transform duration-500 group-hover:scale-110 flex-shrink-0`}>
+                    <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${persona.accent}`} strokeWidth={1.5} />
                   </div>
-                  <div className="flex flex-col h-full">
-                    <h2 className="text-2xl font-working-title text-on-surface mb-2 group-hover:text-gold-accent transition-colors duration-300">
+                  <div className="flex flex-col h-full min-w-0">
+                    <h2 className="text-xl sm:text-2xl font-working-title text-on-surface mb-1.5 sm:mb-2 group-hover:text-gold-accent transition-colors duration-300 truncate">
                       {persona.title}
                     </h2>
-                    <p className="text-sm text-text-secondary leading-relaxed mb-6 group-hover:text-text-primary transition-colors duration-300">
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed mb-4 sm:mb-6 group-hover:text-text-primary transition-colors duration-300">
                       {persona.description}
                     </p>
                     <div className="mt-auto flex items-center gap-2 text-xs font-mono text-text-muted uppercase tracking-wider group-hover:text-gold-accent transition-colors duration-300">
@@ -125,20 +125,20 @@ export default function PricingHubPage() {
           {/* Bundle card — spans full width */}
           <Link href={BUNDLE_CARD.href} className="group relative block rounded-2xl p-[1px] overflow-hidden md:col-span-2 hover:-translate-y-1 transition-all duration-500 hover:shadow-[var(--shadow-glow-soft)]" style={{ background: 'linear-gradient(135deg, var(--accent-border), var(--accent-dim), var(--border))' }}>
             <div className="absolute inset-0 backdrop-blur-xl z-0 rounded-2xl" style={{ background: "var(--surface)" }}></div>
-            <div className="relative z-10 p-8 flex items-center gap-6">
-              <div className="p-4 rounded-xl bg-gradient-to-br from-gold-accent/20 to-gold-accent/5 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">
-                <Layers className="w-8 h-8 text-gold-accent" strokeWidth={1.5} />
+            <div className="relative z-10 p-5 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-gold-accent/20 to-gold-accent/5 transition-transform duration-500 group-hover:scale-110 flex-shrink-0">
+                <Layers className="w-6 h-6 sm:w-8 sm:h-8 text-gold-accent" strokeWidth={1.5} />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-working-title text-on-surface group-hover:text-gold-accent transition-colors duration-300">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
+                  <h2 className="text-xl sm:text-2xl font-working-title text-on-surface group-hover:text-gold-accent transition-colors duration-300">
                     {BUNDLE_CARD.title}
                   </h2>
-                  <span className="text-[12px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-gold-accent/20 text-gold-accent border border-gold-accent/30">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gold-accent/20 text-gold-accent border border-gold-accent/30 shrink-0">
                     Save up to 20%
                   </span>
                 </div>
-                <p className="text-sm text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300 max-w-2xl">
+                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300 max-w-2xl">
                   {BUNDLE_CARD.description}
                 </p>
               </div>
