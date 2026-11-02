@@ -10,6 +10,7 @@ import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import RoleActivationModal from "@/components/profile/RoleActivationModal";
 import { X, ShieldCheck } from "lucide-react";
+import { registerMobileBackAction } from "@/lib/mobileBackStack";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -261,6 +262,23 @@ export default function BottomNav() {
   const [shareToast, setShareToast] = useState("");
   const [activeUserRoles, setActiveUserRoles] = useState(["buyer"]);
   const [activatingRole, setActivatingRole] = useState(null);
+
+  // Back button integration: close sheets if open instead of kicking user home
+  useEffect(() => {
+    if (roleSheetOpen) {
+      return registerMobileBackAction(() => {
+        setRoleSheetOpen(false);
+      }, { action: "role_sheet" });
+    }
+  }, [roleSheetOpen]);
+
+  useEffect(() => {
+    if (themeSheetOpen) {
+      return registerMobileBackAction(() => {
+        setThemeSheetOpen(false);
+      }, { action: "theme_sheet" });
+    }
+  }, [themeSheetOpen]);
 
   useEffect(() => {
     let active = true;

@@ -13,6 +13,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
 import { FileEdit, Eye, ArrowRight, Save } from "lucide-react";
+import { registerMobileBackAction, triggerMobileBack } from "@/lib/mobileBackStack";
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
   const { currentUser, addToast } = useDashboard();
   
@@ -309,13 +310,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     }
   };
 
-  const mustHaves = {
+  const mustHaves = useMemo(() => ({
     title: !!formData.title?.trim(),
     category: !!formData.category,
     location: !!formData.location?.trim(),
     price: !!String(formData.price || "").trim(),
     media: isE2E ? true : (formData.photos ? formData.photos.filter(p => p?.trim()).length >= 5 : false)
-  };
+  }), [formData.title, formData.category, formData.location, formData.price, formData.photos, isE2E]);
 
   const setField = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
   const setDetail = (key, value) => setFormData((prev) => ({
@@ -350,7 +351,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     return "bg-error";
   };
 
-  const handlePublish = () => {
+  const handlePublish = useCallback(() => {
     if (isPublishable) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
       const payload = {
@@ -362,9 +363,9 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       };
       onPublish(payload, true);
     }
-  };
+  }, [isPublishable, isEditing, formData, completionPercentage, onPublish]);
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = useCallback(() => {
     if (mustHaves.title) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
       const payload = {
@@ -376,7 +377,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       };
       onPublish(payload, false);
     }
-  };
+  }, [mustHaves.title, isEditing, formData, completionPercentage, onPublish]);
 
   const draftData = useMemo(() => {
     return {
@@ -422,6 +423,81 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
+
+  // ── MOBILE HARDWARE / GESTURE BACK BUTTON (UNDO LATEST ACTION) ──
+  // 1. If viewing Live Dossier (Preview), back reverts to Spec Sheet (Editor)
+  useEffect(() => {
+    if (mobileTab === "preview") {
+      return registerMobileBackAction(() => {
+        switchMobileTab("editor");
+      }, { action: "editor_tab", tab: "preview" });
+    }
+  }, [mobileTab, switchMobileTab]);
+
+  // 2. If on Step > 1, back reverts to previous step; if on Step 1, back cleanly closes editor
+  useEffect(() => {
+    if (step > 1) {
+      return registerMobileBackAction(() => {
+        setStep((s) => Math.max(1, s - 1));
+      }, { action: "editor_step", step });
+    } else if (typeof onClose === "function") {
+      return registerMobileBackAction(() => {
+        onClose();
+      }, { action: "editor_exit" });
+    }
+  }, [step, onClose]);
+
+  // ── ANDROID QUICK SETTINGS SHADE TWO-WAY SYNC ──
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent("scoutit:editor-quick-state", {
+        detail: {
+          active: true,
+          tab: mobileTab,
+          step: step,
+          isEditing: isEditing,
+          canProceed: step === 1 ? Object.values(mustHaves).every(Boolean) : true,
+        },
+      })
+    );
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("scoutit:editor-quick-state", {
+          detail: { active: false },
+        })
+      );
+    };
+  }, [mobileTab, step, isEditing, mustHaves]);
+
+  useEffect(() => {
+    const handleSetTab = (e) => {
+      if (e?.detail?.tab) {
+        switchMobileTab(e.detail.tab);
+      }
+    };
+    const handleEditorAction = (e) => {
+      if (e?.detail?.action === "next") {
+        if (step === 1 && Object.values(mustHaves).every(Boolean)) {
+          setStep(2);
+        } else if (step === 2) {
+          setStep(3);
+        }
+      } else if (e?.detail?.action === "save") {
+        if (step === 3 && isPublishable) {
+          handlePublish();
+        } else {
+          handleSaveDraft();
+        }
+      }
+    };
+    window.addEventListener("scoutit:set-editor-tab", handleSetTab);
+    window.addEventListener("scoutit:trigger-editor-action", handleEditorAction);
+    return () => {
+      window.removeEventListener("scoutit:set-editor-tab", handleSetTab);
+      window.removeEventListener("scoutit:trigger-editor-action", handleEditorAction);
+    };
+  }, [step, mustHaves, isPublishable, switchMobileTab, handlePublish, handleSaveDraft]);
 
   return (
     <div 
@@ -704,7 +780,12 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <div className="flex flex-wrap justify-between items-center gap-3 mt-12 pt-6 border-t border-surface-variant">
             {step > 1 ? (
               <button 
-                onClick={() => setStep(step - 1)}
+                type="button"
+                onClick={() => {
+                  if (!triggerMobileBack()) {
+                    setStep(step - 1);
+                  }
+                }}
                 className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface text-sm font-label-caps tracking-widest uppercase transition"
               >
                 ← Back
@@ -779,7 +860,11 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         <div className="sticky top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md flex items-center justify-between px-3">
           <button
             type="button"
-            onClick={() => switchMobileTab('editor')}
+            onClick={() => {
+              if (!triggerMobileBack()) {
+                switchMobileTab('editor');
+              }
+            }}
             className="md:hidden min-h-[44px] px-2 text-xs font-mono uppercase underline hover:opacity-80 flex items-center active:scale-95 transition touch-manipulation"
           >
             ← Back to Editor
@@ -795,63 +880,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           )}
         </div>
       </div>
-      </div>
-
-      {/* Mobile Sticky Bottom Action Dock (Thumb ergonomics: 1-tap drag/toggle & primary action) */}
-      <div className="md:hidden sticky bottom-0 z-50 w-full px-4 py-2.5 bg-surface/95 backdrop-blur-xl border-t border-surface-variant/40 flex items-center justify-between gap-3 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]">
-        {/* 1-Tap Thumb Slider */}
-        <div className="flex items-center gap-1 bg-surface-alt border border-surface-variant/50 rounded-full p-1">
-          <button
-            type="button"
-            onClick={() => switchMobileTab("editor")}
-            className={`min-h-[44px] px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1.5 ${
-              mobileTab === "editor"
-                ? "bg-gold-accent text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.3)]"
-                : "text-text-secondary hover:text-on-surface"
-            }`}
-            aria-label="Switch to Spec Sheet"
-          >
-            <FileEdit size={13} />
-            <span>Editor</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => switchMobileTab("preview")}
-            className={`min-h-[44px] px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1.5 ${
-              mobileTab === "preview"
-                ? "bg-gold-accent text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.3)]"
-                : "text-text-secondary hover:text-on-surface"
-            }`}
-            aria-label="Switch to Live Dossier Preview"
-          >
-            <Eye size={13} />
-            <span>Preview</span>
-          </button>
-        </div>
-
-        {/* Primary Bottom Actions */}
-        <div className="flex items-center gap-2">
-          {step < 3 ? (
-            <button
-              type="button"
-              onClick={() => setStep((s) => Math.min(3, s + 1))}
-              className="min-h-[44px] px-4 py-2 rounded-full bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider hover:bg-gold-bright active:scale-95 transition-all shadow-[0_0_14px_rgba(var(--accent-rgb),0.25)] flex items-center gap-1.5"
-            >
-              <span>Next</span>
-              <ArrowRight size={14} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handlePublishClick(false)}
-              disabled={isSaving}
-              className="min-h-[44px] px-4 py-2 rounded-full bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider hover:bg-gold-bright active:scale-95 transition-all shadow-[0_0_14px_rgba(var(--accent-rgb),0.25)] flex items-center gap-1.5"
-            >
-              <span>{isSaving ? "Saving..." : isEditing ? "Update" : "Save"}</span>
-              <Save size={14} />
-            </button>
-          )}
-        </div>
       </div>
 
     </div>

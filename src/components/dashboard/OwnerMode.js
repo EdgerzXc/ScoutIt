@@ -33,6 +33,7 @@ import SimpleDetail from "@/components/ui/SimpleDetail";
 import InfoTip from "@/components/ui/InfoTip";
 import SpatialStudioRequestModal from "./SpatialStudioRequestModal";
 import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
+import { registerMobileBackAction } from "@/lib/mobileBackStack";
 
 export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
@@ -45,6 +46,15 @@ export default function OwnerMode() {
           detail: { active: Boolean(showWizard), mode: showWizard },
         })
       );
+    }
+  }, [showWizard]);
+
+  // Mobile Back button undo integration for Owner mode wizards
+  useEffect(() => {
+    if (showWizard && showWizard !== "live_editor" && showWizard !== "edit" && showWizard !== "deep_intel_edit") {
+      return registerMobileBackAction(() => {
+        setShowWizard(false);
+      }, { action: "owner_wizard", mode: showWizard });
     }
   }, [showWizard]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -63,6 +73,23 @@ export default function OwnerMode() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isArchiving, setIsArchiving] = useState(false);
   const [dangerOpen, setDangerOpen] = useState(false);
+
+  // Mobile Back button undo integration for Owner mode modals
+  useEffect(() => {
+    if (spatialModalOpen) {
+      return registerMobileBackAction(() => {
+        setSpatialModalOpen(false);
+      }, { action: "spatial_modal" });
+    }
+  }, [spatialModalOpen]);
+
+  useEffect(() => {
+    if (dangerOpen) {
+      return registerMobileBackAction(() => {
+        setDangerOpen(false);
+      }, { action: "danger_modal" });
+    }
+  }, [dangerOpen]);
   const [removalTitle, setRemovalTitle] = useState("");
   const [removalPassword, setRemovalPassword] = useState("");
   const [removalCaptchaToken, setRemovalCaptchaToken] = useState("");

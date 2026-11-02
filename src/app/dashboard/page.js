@@ -35,6 +35,7 @@ import {
 } from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
+import { registerMobileBackAction } from "@/lib/mobileBackStack";
 import {
   Search,
   Briefcase,
@@ -130,6 +131,23 @@ function DashboardInner() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [showNotifications]);
+
+  // Mobile Back button undo integration for dropdowns
+  useEffect(() => {
+    if (showNotifications) {
+      return registerMobileBackAction(() => {
+        setShowNotifications(false);
+      }, { action: "notifications_dropdown" });
+    }
+  }, [showNotifications]);
+
+  useEffect(() => {
+    if (showDesktopSwitcher) {
+      return registerMobileBackAction(() => {
+        setShowDesktopSwitcher(false);
+      }, { action: "desktop_role_switcher" });
+    }
+  }, [showDesktopSwitcher]);
 
   useEffect(() => {
     // A cached profile can shape presentation only after Supabase validates the
