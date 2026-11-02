@@ -24,8 +24,8 @@ import { sanitizeError } from "@/lib/sanitizeError";
 const MONO = "'Courier New',monospace";
 
 const TIER = {
-  silver: { medal: "🥈", label: "Advisor Spec",      color: "var(--tier-silver)" },
-  bronze: { medal: "🥉", label: "Resident Verified", color: "var(--tier-bronze)" },
+  silver: { medal: "✦", label: "Advisor Spec",      color: "var(--tier-silver)" },
+  bronze: { medal: "●", label: "Resident Verified", color: "var(--tier-bronze)" },
 };
 
 function timeAgo(iso) {
@@ -386,7 +386,7 @@ export default function FAQReviewQueue({ onPendingCount }) {
                     aria-label="Your answer"
                   />
                   <div className="fq-override__hint">
-                    Posts as 🥇 Owner Verified. Both answers stay visible — yours ranks above theirs.
+                    Posts as ★ Owner Verified. Both answers stay visible — yours ranks above theirs.
                     No contact details.
                   </div>
                   <div className="fq-actions">

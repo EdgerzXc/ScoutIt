@@ -305,7 +305,7 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
               {done.cmsSyncPending.length || done.publicCachePending
                 ? "Your confirmation was saved. Check the public listing before relying on its freshness badge."
                 : <>Marked verified as of today. They&apos;ll show a{" "}
-                    <span style={{ color: "var(--green)" }}>🥇 Verified Fresh</span> badge and return to top
+                    <span style={{ color: "var(--green)" }}>★ Verified Fresh</span> badge and return to top
                     placement in discovery.</>}
             </div>
             {done.cmsSyncPending.length > 0 && (

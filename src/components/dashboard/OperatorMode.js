@@ -6,6 +6,7 @@ import { Building2, Cog, X, DoorOpen, MessageSquare, Compass, ChevronRight, Slid
 import InventoryGridManager from "./InventoryGridManager";
 import { getSession } from "../../lib/authClient";
 import { useDashboard } from "../../context/DashboardContext";
+import { registerMobileBackAction } from "@/lib/mobileBackStack";
 
 // Operator's "Operated Spaces" dashboard (SCOUTIT_MASTER_BUILD_SPEC.md §9.2/§9.6):
 // a filtered view showing only units delegated to this user, grouped by
@@ -18,6 +19,15 @@ export default function OperatorMode() {
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const buildingsRef = useRef(buildings);
   useEffect(() => { buildingsRef.current = buildings; }, [buildings]);
+
+  // Mobile Back button undo integration for Operator action modal
+  useEffect(() => {
+    if (actionModalOpen) {
+      return registerMobileBackAction(() => {
+        setActionModalOpen(false);
+      }, { action: "operator_modal" });
+    }
+  }, [actionModalOpen]);
 
   const load = useCallback(async () => {
     try {

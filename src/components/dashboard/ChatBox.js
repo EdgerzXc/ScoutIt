@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Calendar, RefreshCw } from "lucide-react";
 import { ANONYMOUS_CONNECT_LABEL, viewerIsRequestSender } from "@/lib/identityDisclosure";
 import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import { motion } from "framer-motion";
@@ -43,8 +44,8 @@ const renderTextWithLinks = (
     return (
       <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(var(--bg-rgb),0.32)] backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/40 flex items-center justify-center text-gold-accent shrink-0 text-lg">
-            📅
+          <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/40 flex items-center justify-center text-gold-accent shrink-0">
+            <Calendar size={18} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -94,8 +95,8 @@ const renderTextWithLinks = (
     return (
       <div className="my-1 space-y-3 rounded-xl border border-gold-accent/35 bg-surface/85 p-3.5 shadow-[0_12px_28px_rgba(var(--bg-rgb),0.32)] backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/35 flex items-center justify-center text-gold-accent shrink-0 text-lg">
-            🔄
+          <div className="w-9 h-9 rounded-lg bg-gold-accent/15 border border-gold-accent/35 flex items-center justify-center text-gold-accent shrink-0">
+            <RefreshCw size={18} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">

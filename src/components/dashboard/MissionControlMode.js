@@ -1279,9 +1279,10 @@ export default function MissionControlMode() {
                       <button type="button"
                         onClick={() => {
                           setIs2FAEnforced(!is2FAEnforced);
-                          addToast(`2FA Enforcement ${!is2FAEnforced ? 'Enabled' : 'Disabled'}`, "🛡️");
+                          addToast(`2FA Enforcement ${!is2FAEnforced ? 'Enabled' : 'Disabled'}`, "●");
                         }}
-                        className="flex items-center gap-2 cursor-pointer w-fit text-left"
+                        className="flex items-center gap-2 cursor-pointer w-fit text-left min-h-[44px] py-1"
+                        aria-label="Toggle 2FA Enforcement"
                       >
                         <div className={`w-8 h-4 rounded-full relative transition duration-300 ${is2FAEnforced ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
                           <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_color-mix(in_srgb,var(--green)_50%,transparent)]' : 'left-0 bg-white/40'}`} />

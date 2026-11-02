@@ -5,7 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Calendar, Mail, BarChart3, Briefcase, Contact, Compass, Sparkles } from "lucide-react";
+import { Lock, Calendar, Mail, BarChart3, Briefcase, Contact, Compass, Sparkles, FolderOpen, ShieldCheck, FileEdit, Printer, Camera, Building2, Radio } from "lucide-react";
 import { getSession } from "../../lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
@@ -230,9 +230,9 @@ export default function BrokerMode() {
     setRadius(val);
     searchByRadius(val, radarCenter ? radarCenter[0] : DEFAULT_MAP_CENTER[0], radarCenter ? radarCenter[1] : DEFAULT_MAP_CENTER[1]);
     if (val !== 'any') {
-      if (addToast) addToast(`Radar set to ${val}km`, "📡");
+      if (addToast) addToast(`Radar set to ${val}km`, "●");
     } else {
-      if (addToast) addToast(`Radar removed. Showing all.`, "🌍");
+      if (addToast) addToast(`Radar removed. Showing all areas.`, "○");
     }
   };
 
@@ -392,7 +392,9 @@ export default function BrokerMode() {
       if (coords) {
         const el = document.createElement('div');
         el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
-        el.innerHTML = listing.hasMedia ? '📸' : '🏢';
+        el.innerHTML = listing.hasMedia
+          ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>'
+          : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>';
 
         const popupContent = document.createElement('div');
         popupContent.className = 'bg-surface border border-gold-accent/20 p-4 rounded-lg shadow-xl w-60';
@@ -756,7 +758,7 @@ export default function BrokerMode() {
             <div className="card-atmosphere-gold rounded-lg overflow-hidden flex flex-col shadow-lg">
               <div className="bg-gold-accent/5 border-b border-gold-accent/20 p-4 flex justify-between items-center">
                 <h3 className="font-label-caps text-xs tracking-widest text-gold-accent uppercase flex items-center gap-2">
-                  <span>📝</span> Private Deal Notes
+                  <FileEdit size={15} className="text-gold-accent" /> Private Deal Notes
                 </h3>
                 <span className="font-label-caps text-[12px] text-text-muted uppercase">Only visible to you</span>
               </div>
@@ -799,7 +801,9 @@ export default function BrokerMode() {
       {showNotification && !activeDealId && !showIdCard && (
         <div className="bg-gold-accent/10 border border-gold-accent/30 rounded-lg p-4 mb-6 flex items-start sm:items-center justify-between gap-4 motion-safe:animate-[slideDown_0.4s_ease]">
           <div className="flex gap-4 items-start sm:items-center">
-            <div className="w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background text-lg shrink-0">✨</div>
+            <div className="w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-background shrink-0">
+              <Sparkles size={16} className="text-background" />
+            </div>
             <div>
               <h4 className="font-working-title text-on-surface text-sm font-bold">New Feature: Official Verified ID Card</h4>
               <p className="text-text-secondary text-xs mt-1">You can now generate and download your official ScoutIt Verified Broker ID card for marketing use.</p>
@@ -936,7 +940,7 @@ export default function BrokerMode() {
                 onClick={() => window.print()}
                 className="px-6 py-3 bg-gold-accent text-background rounded font-working-title text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
               >
-                <span>🖨️</span> Print / Save to PDF
+                <Printer size={16} /> Print / Save to PDF
               </button>
             </div>
           </div>
@@ -1219,7 +1223,7 @@ export default function BrokerMode() {
             {!isLoading && activePitches.length === 0 && (
               <div className="col-span-full py-8 sm:py-16 px-4 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300 break-words">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/5 rounded-full blur-[60px]" />
-                <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">📂</span>
+                <FolderOpen size={40} className="text-gold-accent/70 mb-4 relative z-10" />
                 <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No active deal files</p>
                 <p className="text-sm text-text-secondary relative z-10 max-w-sm mb-4 leading-relaxed">Pitch to properties on the map or discover unrepresented assets to start building your pipeline.</p>
                 <button
@@ -1281,7 +1285,7 @@ export default function BrokerMode() {
             {!isLoading && accepted.length === 0 && (
               <div className="col-span-full py-8 sm:py-12 px-4 text-center bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl flex flex-col items-center relative overflow-hidden transition-all duration-300 break-words">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-success/5 rounded-full blur-[60px]" />
-                <span className="text-4xl mb-4 opacity-70 relative z-10 filter drop-shadow-md">🛡️</span>
+                <ShieldCheck size={40} className="text-gold-accent/70 mb-4 relative z-10" />
                 <p className="text-on-surface font-working-title text-xl mb-2 relative z-10 tracking-tight">No Accepted Advisory Mandates</p>
                 <p className="text-sm text-text-secondary relative z-10 max-w-sm mb-4 leading-relaxed">When property owners accept your representation handshake, your authorized advisory files will appear here.</p>
                 <Link
@@ -1302,8 +1306,8 @@ export default function BrokerMode() {
                 >
                   
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-label-caps text-[12px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-success/10 text-success flex items-center gap-1">
-                      <span>🛡️</span> Verified Advisor
+                    <span className="font-label-caps text-[12px] tracking-widest uppercase px-1.5 py-0.5 rounded bg-success/10 text-success flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-success" /> Verified Advisor
                     </span>
                     <span className="text-[12px] text-text-muted font-data-tabular">Active</span>
                   </div>
@@ -1406,7 +1410,7 @@ export default function BrokerMode() {
               <p className="text-xs font-mono text-text-muted py-6 text-center">Loading saved demands…</p>
             ) : savedSignals.length === 0 ? (
               <div className="py-8 px-4 text-center bg-surface/30 backdrop-blur-xl border border-dashed border-white/[0.08] rounded-2xl flex flex-col items-center">
-                <span className="text-3xl mb-3 opacity-60">📡</span>
+                <Radio size={36} className="text-gold-accent/60 mb-3" />
                 <p className="text-on-surface font-working-title text-base mb-1">No saved demands yet</p>
                 <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
                   Discover verified seeker requirements and off-market opportunities on Stratosphere Radar, then bookmark them to track and pitch.

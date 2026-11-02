@@ -18,15 +18,17 @@ const safePortfolioUrl = (raw) => {
 
 const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
-    <span className="font-working-title text-sm text-on-surface">{label}</span>
+    <span className="font-working-title text-sm text-on-surface pr-3">{label}</span>
     <button type="button"
-      className={`w-10 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}
+      className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center -mr-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent rounded-lg"
       onClick={() => onChange(!checked)}
       role="switch"
       aria-checked={checked}
       aria-label={label}
     >
-      <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
+      <span className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors duration-200 ${checked ? (gold ? 'bg-gold-accent' : 'bg-on-surface') : 'bg-surface-variant'}`}>
+        <span className={`w-4 h-4 bg-background rounded-full transition-transform duration-200 block ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
+      </span>
     </button>
   </div>
 );
@@ -174,13 +176,13 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
       {/* Tab Navigation */}
       <div className="flex border-b border-surface-variant overflow-x-auto">
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'bounties' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap min-h-[44px] ${activeTab === 'bounties' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("bounties")}
         >
           Bounty Board
         </button>
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'showcase' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap min-h-[44px] ${activeTab === 'showcase' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("showcase")}
         >
           Portfolio &amp; Showcase
@@ -245,13 +247,15 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
                     <p className="text-xs text-text-secondary mt-1">Toggle off if your schedule is currently fully booked.</p>
                   </div>
                   <button type="button"
-                    className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}
+                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center -mr-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent rounded-lg"
                     onClick={() => setAcceptingProjects(!acceptingProjects)}
                     role="switch"
                     aria-checked={acceptingProjects}
                     aria-label="Accepting new projects"
                   >
-                    <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingProjects ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    <span className={`w-12 h-6 rounded-full flex items-center p-1 active:scale-95 transition cursor-pointer ${acceptingProjects ? 'bg-gold-accent' : 'bg-surface-variant'}`}>
+                      <span className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingProjects ? 'translate-x-6' : 'translate-x-0'}`}></span>
+                    </span>
                   </button>
                 </div>
 

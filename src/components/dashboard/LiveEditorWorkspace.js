@@ -49,7 +49,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       return;
     }
     setIsOptimizing(true);
-    addToast("Our AI is rewriting your description for search...", "🤖");
+    addToast("Optimizing description for search visibility...", "●");
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Papa from "papaparse";
+import { Table } from "lucide-react";
 import { useDashboard } from "../../context/DashboardContext";
 import { supabase } from "@/lib/supabaseClient";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -53,7 +54,7 @@ export default function BulkImporterMode({ onClose }) {
   const handleSubmit = async () => {
     if (csvData.length === 0) return;
     setIsProcessing(true);
-    addToast("Mapping your columns to ScoutIt schema...", "🧠");
+    addToast("Mapping your columns to ScoutIt schema...", "●");
 
     try {
       // Step 1: Get AI blueprint mapping for the CSV headers
@@ -78,7 +79,7 @@ export default function BulkImporterMode({ onClose }) {
       if (!blueprintRes.ok) throw new Error('Blueprint mapping failed');
       const mapping = await blueprintRes.json();
 
-      addToast("Schema mapped. Sending to Supabase...", "🚀");
+      addToast("Schema mapped. Syncing to database...", "●");
 
       // Step 2: Transform rows using the mapping
       const properties = csvData.map(row => {
@@ -247,7 +248,7 @@ export default function BulkImporterMode({ onClose }) {
               </>
             ) : (
               <div className="h-full flex items-center justify-center flex-col text-text-muted">
-                <span className="text-3xl mb-2">🗃️</span>
+                <Table size={32} className="text-gold-accent/50 mb-2" />
                 <p className="text-sm">Grid is empty. Upload a CSV to begin.</p>
               </div>
             )}

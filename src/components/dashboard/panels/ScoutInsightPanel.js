@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { computeListingStrength } from '../../../lib/listingStrength';
 import GlassPanel from '../../ui/GlassPanel';
+import { Handshake, Clock, ClipboardList } from 'lucide-react';
 
 export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
   // Scout Insight (Layer 3, DASHBOARD_ATMOSPHERE_FRAMEWORK.md): rule-based
@@ -12,14 +13,14 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
     const incoming = pitches.filter(p => p.isCurrentUserBroker && p.status === 'invited');
     if (incoming.length > 0) {
       list.push({
-        icon: "🤝",
+        icon: <Handshake size={16} className="text-gold-accent mt-0.5" />,
         text: `${incoming.length} incoming handshake${incoming.length === 1 ? '' : 's'} awaiting your response: accepting unlocks owner contact details.`,
         rule: "Deals with status 'invited'",
       });
     }
     if (taskSummary?.overdue > 0) {
       list.push({
-        icon: "⏰",
+        icon: <Clock size={16} className="text-gold-accent mt-0.5" />,
         text: `${taskSummary.overdue} task${taskSummary.overdue === 1 ? ' is' : 's are'} overdue: check your task list below.`,
         rule: "Open tasks past their due date",
       });
@@ -37,7 +38,7 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
     }
     if (weakest) {
       list.push({
-        icon: "📋",
+        icon: <ClipboardList size={16} className="text-gold-accent mt-0.5" />,
         text: `"${weakest.prop.title}" is ${weakest.strength.score}% complete: missing ${weakest.strength.missing.slice(0, 2).join(" and ").toLowerCase()}.`,
         rule: "Field-completeness check on your verified portfolio",
       });
@@ -58,7 +59,7 @@ export default function ScoutInsightPanel({ pitches, listings, taskSummary }) {
         <div className="flex flex-col gap-2.5">
           {insights.map((insight, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="text-base shrink-0 mt-[-1px]" aria-hidden="true">{insight.icon}</span>
+              <span className="shrink-0 flex items-center justify-center w-5 h-5 mt-0.5" aria-hidden="true">{insight.icon}</span>
               <div>
                 <p className="text-sm text-on-surface leading-snug">{insight.text}</p>
                 <p className="text-[12px] text-text-muted mt-0.5">Rule: {insight.rule}</p>

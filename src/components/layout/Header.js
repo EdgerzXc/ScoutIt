@@ -343,7 +343,7 @@ export default function Header({ ambientContext = null }) {
           text-transform: uppercase;
           color: var(--accent);
           text-decoration: none;
-          transition: all 180ms ease;
+          transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
           white-space: nowrap;
           cursor: pointer;
         }

@@ -9,7 +9,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { Building2, Camera, Search, Palette, ArrowUpRight } from "lucide-react";
+import { Building2, Camera, Search, Palette, ArrowUpRight, FileText, Edit3, FileUp, Bot, Radio, FolderOpen, Sparkles } from "lucide-react";
 import Papa from 'papaparse';
 // A-120: `sanitizeObject` was imported here and never called — an orphaned
 // import that made the security checklist read as though owner input was
@@ -306,7 +306,9 @@ export default function OwnerMode() {
             onClick={() => setShowWizard('concierge')}
           >
              <div className="flex items-center gap-3 mb-4">
-               <span className="text-3xl">📄</span>
+               <div className="w-10 h-10 rounded-lg bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-center text-gold-accent shrink-0">
+                 <FileText size={22} />
+               </div>
                <span className="text-gold-accent font-mono text-[12px] tracking-widest uppercase border border-gold-accent/30 bg-gold-accent/10 px-2.5 py-1 rounded">Fastest Route</span>
              </div>
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">I already have property materials</h3>
@@ -320,7 +322,9 @@ export default function OwnerMode() {
             onClick={() => setShowWizard('live_editor')}
           >
              <div className="flex items-center gap-3 mb-4">
-               <span className="text-3xl">✍️</span>
+               <div className="w-10 h-10 rounded-lg bg-surface border border-white/10 flex items-center justify-center text-gold-accent shrink-0">
+                 <Edit3 size={22} />
+               </div>
                <span className="text-text-muted font-mono text-[12px] tracking-widest uppercase border border-white/10 bg-white/5 px-2.5 py-1 rounded">Guided Builder</span>
              </div>
              <h3 className="font-working-title text-2xl text-on-surface mb-3 group-hover:text-gold-accent transition-colors duration-300">I&apos;ll build it myself</h3>
@@ -421,7 +425,7 @@ export default function OwnerMode() {
         
         <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center relative transition-all duration-300 hover:bg-surface/60 overflow-hidden break-words">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-white/5 rounded-full blur-[60px]" />
-          <span className="text-4xl mb-4 relative z-10 opacity-80 filter drop-shadow-md">📄</span>
+          <FileUp size={42} className="text-gold-accent/80 mb-4 relative z-10" />
           {selectedFile ? (
             <div className="mb-6 w-full relative z-10">
               <div className="bg-surface-alt/50 p-4 rounded-xl border border-white/10 flex items-center justify-between backdrop-blur-md shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]">
@@ -457,7 +461,7 @@ export default function OwnerMode() {
             onClick={async () => {
               if (!selectedFile) return;
               setIsAssimilating(true);
-              addToast("Reading your PDF...", "📄");
+              addToast("Reading your PDF...", "●");
 
               try {
                 // 1. Extract the real text layer from the PDF (server-side via unpdf).
@@ -476,7 +480,7 @@ export default function OwnerMode() {
                 if (!pdfRes.ok) throw new Error(pdfData.error || 'Could not read PDF');
                 const text = pdfData.text;
 
-                addToast("AI is extracting property details...", "🧠");
+                addToast("AI is extracting property details...", "●");
 
                 // 2. Hand the extracted text to the schema-mapping AI.
                 const res = await fetch('/api/ai/assimilate', {
@@ -566,7 +570,7 @@ export default function OwnerMode() {
 
     const handleSubmitVideo = async () => {
       if (!selectedFile) return;
-      addToast("Uploading your video...", "🎬");
+      addToast("Uploading your video...", "●");
 
       try {
         const form = new FormData();
@@ -1304,7 +1308,7 @@ export default function OwnerMode() {
       </section>
       {activeListing.pipelineStatus === 'ai_drafting' && (
         <div className="card-atmosphere-gold rounded-lg p-5 mb-8 flex items-start gap-4">
-           <span className="text-2xl mt-1">🤖</span>
+           <Bot size={24} className="text-gold-accent mt-1 shrink-0" />
            <div>
              <h4 className="font-working-title text-gold-accent text-lg mb-1">With the ScoutIt Team</h4>
              <p className="text-sm text-text-secondary leading-relaxed">
@@ -1545,7 +1549,7 @@ export default function OwnerMode() {
           {incomingPitches.length === 0 ? (
              <div className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] relative overflow-hidden break-words">
                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold-accent/10 rounded-full blur-[60px]" />
-               <span className="text-4xl mb-6 relative z-10 opacity-70 filter drop-shadow-md">📡</span>
+               <Radio size={40} className="text-gold-accent/70 mb-4 relative z-10" />
                <p className="font-working-title text-xl text-on-surface mb-3 relative z-10 tracking-tight">No inquiries yet</p>
                <p className="text-sm text-text-secondary max-w-sm leading-relaxed relative z-10">
                  Brokers are reviewing your dossier. Listings with extensive media galleries receive inquiries 4× faster.

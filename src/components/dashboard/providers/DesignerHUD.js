@@ -5,15 +5,17 @@ import { Palette, Compass, Check, Sparkles, ExternalLink, Download } from "lucid
 
 const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
-    <span className="font-working-title text-sm text-on-surface">{label}</span>
+    <span className="font-working-title text-sm text-on-surface pr-3">{label}</span>
     <button type="button"
-      className={`w-10 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${checked ? (primary ? 'bg-intel-magenta' : 'bg-on-surface') : 'bg-surface-variant'}`}
+      className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center -mr-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent rounded-lg"
       onClick={() => onChange(!checked)}
       role="switch"
       aria-checked={checked}
       aria-label={label}
     >
-      <div className={`w-4 h-4 bg-background rounded-full transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`}></div>
+      <span className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors duration-200 ${checked ? 'bg-gold-accent' : 'bg-surface-variant'}`}>
+        <span className={`w-4 h-4 bg-background rounded-full transition-transform duration-200 block ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
+      </span>
     </button>
   </div>
 );
@@ -111,13 +113,13 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
       <div className="flex flex-col gap-6 animate-[fadeIn_0.3s_ease]">
         <div className="flex justify-between items-end border-b border-surface-variant pb-4">
           <div>
-            <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-intel-magenta text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Workspace</button>
+            <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent text-sm mb-2" onClick={() => setActiveProjectId(null)}>← Back to Workspace</button>
             <h2 className="font-display-md text-3xl text-on-surface">Space Staging: {project.title}</h2>
           </div>
           <button
             disabled
             title="Submissions open in Phase 2: previews only today."
-            className="bg-intel-magenta text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
+            className="bg-gold-accent text-background font-working-title font-bold px-4 py-2 rounded text-sm opacity-60 cursor-not-allowed"
           >
             Submit Concepts · Phase 2
           </button>
@@ -139,7 +141,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                   type="button"
                   disabled
                   title="CAD file downloads open in Phase 2"
-                  className="min-h-11 text-intel-magenta font-working-title flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="min-h-11 text-gold-accent font-working-title flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span>↓</span> Download Base .DWG Files · Phase 2
                 </button>
@@ -152,8 +154,8 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               <h3 className="font-label-caps text-xs tracking-widest text-text-secondary uppercase">Asset Drop</h3>
             </div>
             <div className="p-6">
-              <div className="aspect-video bg-background rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-intel-magenta transition cursor-pointer group mb-4">
-                <Palette size={36} className="mb-2 text-intel-magenta opacity-70 group-hover:scale-110 transition-transform" />
+              <div className="aspect-video bg-background rounded border border-dashed border-surface-variant flex flex-col items-center justify-center text-center hover:border-gold-accent transition cursor-pointer group mb-4">
+                <Palette size={36} className="mb-2 text-gold-accent opacity-70 group-hover:scale-110 transition-transform" />
                 <span className="font-working-title text-on-surface">Drop .OBJ, .SKP, or Rendered Images</span>
                 <span className="text-xs text-text-muted mt-2">Max file size: 500MB</span>
               </div>
@@ -162,7 +164,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 value={externalLink}
                 onChange={(e) => setExternalLink(e.target.value)}
                 placeholder="Or paste external portfolio/drive link (e.g. behance.net/studio)..."
-                className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-base md:text-sm focus:outline-none focus:border-intel-magenta transition text-on-surface"
+                className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-base md:text-sm focus:outline-none focus:border-gold-accent transition text-on-surface"
               />
             </div>
           </div>
@@ -177,13 +179,13 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
       {/* Tab Navigation */}
       <div className="flex border-b border-surface-variant overflow-x-auto">
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'projects' ? 'border-intel-magenta text-intel-magenta' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap min-h-[44px] ${activeTab === 'projects' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("projects")}
         >
           Project Board
         </button>
         <button 
-          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap ${activeTab === 'studio' ? 'border-intel-magenta text-intel-magenta' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
+          className={`px-6 py-3 font-working-title text-sm border-b-2 transition whitespace-nowrap min-h-[44px] ${activeTab === 'studio' ? 'border-gold-accent text-gold-accent' : 'border-transparent text-text-secondary hover:text-on-surface'}`}
           onClick={() => setActiveTab("studio")}
         >
           Design Studio (Profile)
@@ -195,11 +197,11 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           {projects.map(project => (
             <button type="button"
               key={project.id} 
-              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-intel-magenta transition text-left block w-full"
+              className="card-atmosphere hov-card rounded-lg overflow-hidden cursor-pointer group hover:border-gold-accent transition text-left block w-full"
               onClick={() => setActiveProjectId(project.id)}
             >
               <div className="aspect-video bg-surface-alt flex items-center justify-center text-5xl relative">
-                <Compass size={40} className="text-intel-magenta opacity-70 group-hover:scale-110 transition-transform" />
+                <Compass size={40} className="text-gold-accent opacity-70 group-hover:scale-110 transition-transform" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
                 <div className="absolute bottom-3 left-3 flex gap-2">
                   <span className="bg-background/80 backdrop-blur text-text-primary text-[12px] font-label-caps tracking-widest uppercase px-2 py-1 rounded">
@@ -208,10 +210,10 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-working-title text-lg text-on-surface line-clamp-1 mb-1 group-hover:text-intel-magenta transition">{project.title}</h3>
+                <h3 className="font-working-title text-lg text-on-surface line-clamp-1 mb-1 group-hover:text-gold-accent transition">{project.title}</h3>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-text-secondary">{project.date}</span>
-                  <span className="text-intel-magenta font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
+                  <span className="text-gold-accent font-data-tabular">Bounty: {project.bounty_connects || 5} ◈</span>
                 </div>
               </div>
             </button>
@@ -234,7 +236,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
             <div className="card-atmosphere rounded-lg p-6 flex flex-col gap-6">
 
               <div>
-                <h3 className="font-label-caps text-[12px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
+                <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Studio Identity</h3>
                 
                 <div className="flex justify-between items-center mb-5 bg-surface-alt p-4 rounded border border-surface-variant">
                   <div>
@@ -242,13 +244,15 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                     <p className="text-xs text-text-secondary mt-1">Toggle off if your studio is currently fully booked.</p>
                   </div>
                   <button type="button"
-                    className={`w-12 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${acceptingCommissions ? 'bg-intel-magenta' : 'bg-surface-variant'}`}
+                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center -mr-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent rounded-lg"
                     onClick={() => setAcceptingCommissions(!acceptingCommissions)}
                     role="switch"
                     aria-checked={acceptingCommissions}
                     aria-label="Accepting commissions"
                   >
-                    <div className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingCommissions ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    <span className={`w-12 h-6 rounded-full flex items-center p-1 transition cursor-pointer ${acceptingCommissions ? 'bg-gold-accent' : 'bg-surface-variant'}`}>
+                      <span className={`w-4 h-4 bg-background rounded-full transition-transform ${acceptingCommissions ? 'translate-x-6' : 'translate-x-0'}`}></span>
+                    </span>
                   </button>
                 </div>
 
@@ -260,7 +264,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                       value={aesthetic}
                       onChange={(e) => setAesthetic(e.target.value)}
                       placeholder="e.g. Minimalist Corporate, Biophilic"
-                      className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-intel-magenta text-on-surface" 
+                      className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface" 
                     />
                   </div>
                   <div>
@@ -270,9 +274,9 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                         type="number" 
                         value={baseRate}
                         onChange={(e) => setBaseRate(e.target.value)}
-                        className="w-full bg-surface-alt border border-surface-variant rounded p-3 pl-8 text-sm focus:outline-none focus:border-intel-magenta text-intel-magenta font-data-tabular font-bold" 
+                        className="w-full bg-surface-alt border border-surface-variant rounded p-3 pl-8 text-sm focus:outline-none focus:border-gold-accent text-gold-accent font-data-tabular font-bold" 
                       />
-                      <span className="absolute left-3 top-3 text-intel-magenta">◈</span>
+                      <span className="absolute left-3 top-3 text-gold-accent">◈</span>
                     </div>
                   </div>
                 </div>
@@ -284,21 +288,21 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                     value={externalLink}
                     onChange={(e) => setExternalLink(e.target.value)}
                     placeholder="https://behance.net/yourstudio or portfolio link"
-                    className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-intel-magenta text-on-surface"
+                    className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-surface-variant/50 pt-6">
                 <div>
-                  <h3 className="font-label-caps text-[12px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Service Capacity</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Service Capacity</h3>
                   <ToggleSwitch label="Digital 3D Rendering Only" checked={capacityDigital} onChange={setCapacityDigital} primary={true} />
                   <ToggleSwitch label="Physical Furniture Staging" checked={capacityPhysical} onChange={setCapacityPhysical} primary={true} />
                   <p className="text-xs text-text-muted mt-3 leading-relaxed">Let owners know if you handle physical logistics (renting couches) or purely digital vision.</p>
                 </div>
 
                 <div>
-                  <h3 className="font-label-caps text-[12px] tracking-widest text-intel-magenta uppercase mb-4 border-b border-surface-variant/50 pb-2">Software Stack Deliverables</h3>
+                  <h3 className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase mb-4 border-b border-surface-variant/50 pb-2">Software Stack Deliverables</h3>
                   <ToggleSwitch label="AutoCAD (.dwg)" checked={softAutoCAD} onChange={setSoftAutoCAD} />
                   <ToggleSwitch label="SketchUp (.skp)" checked={softSketchUp} onChange={setSoftSketchUp} />
                   <ToggleSwitch label="Blender / Maya" checked={softBlender} onChange={setSoftBlender} />
@@ -309,7 +313,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
               <button
                 type="button"
                 onClick={handleSaveStudio}
-                className="w-full mt-4 bg-intel-magenta text-background font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(var(--intel-magenta-rgb),0.3)] active:scale-[0.98]"
+                className="w-full mt-4 bg-gold-accent text-background font-working-title font-bold px-4 py-4 rounded uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] active:scale-[0.98]"
               >
                 {saveSuccess ? (
                   <>
@@ -327,15 +331,15 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
           {/* Preview Card (Right Column) */}
           <div className="xl:col-span-5 flex flex-col gap-4">
             <h3 className="font-working-title text-xl text-on-surface flex items-center gap-2">
-              Studio Preview <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-intel-magenta opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-intel-magenta"></span></span>
+              Studio Preview <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-accent opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-gold-accent"></span></span>
             </h3>
             
             <div id="designer-studio-preview" className="card-atmosphere rounded-lg p-6 relative overflow-hidden shadow-2xl sticky top-24">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-intel-magenta opacity-[0.04] blur-[60px] rounded-full pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gold-accent opacity-[0.04] blur-[60px] rounded-full pointer-events-none"></div>
               
               <div className="flex items-start justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-surface-alt border border-intel-magenta/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(var(--intel-magenta-rgb),0.1)] text-intel-magenta">
+                  <div className="w-16 h-16 bg-surface-alt border border-gold-accent/30 rounded-lg flex items-center justify-center text-2xl relative shadow-[0_0_10px_rgba(var(--accent-rgb),0.1)] text-gold-accent">
                     <Palette size={28} />
                     {acceptingCommissions && (
                       <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full" title="Accepting Commissions"></div>
@@ -344,7 +348,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-working-title text-xl text-on-surface">ScoutIt Studio</h4>
-                      <span className="bg-intel-magenta/10 text-intel-magenta font-label-caps text-[12px] uppercase tracking-widest px-2 py-0.5 rounded border border-intel-magenta/20">Verified</span>
+                      <span className="bg-gold-accent/10 text-gold-accent font-label-caps text-[12px] uppercase tracking-widest px-2 py-0.5 rounded border border-gold-accent/20">Verified</span>
                     </div>
                     <p className="text-sm text-text-secondary mt-0.5">{aesthetic}</p>
                   </div>
@@ -356,12 +360,12 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps mb-1 block">Service Capacity</span>
                 {capacityDigital && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
-                    <span className="text-intel-magenta">✦</span> Digital 3D Rendering &amp; Concepts
+                    <span className="text-gold-accent">✦</span> Digital 3D Rendering &amp; Concepts
                   </div>
                 )}
                 {capacityPhysical && (
                   <div className="flex items-center gap-2 text-sm text-on-surface">
-                    <span className="text-intel-magenta">✦</span> Full Physical Logistics &amp; Furniture Staging
+                    <span className="text-gold-accent">✦</span> Full Physical Logistics &amp; Furniture Staging
                   </div>
                 )}
                 {!capacityDigital && !capacityPhysical && (
@@ -386,7 +390,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                 <div className="flex items-center justify-between pt-4 border-t border-surface-variant">
                   <div>
                     <span className="text-[12px] text-text-secondary uppercase tracking-widest font-label-caps block mb-1">Base Design Fee</span>
-                    <span className="text-lg text-intel-magenta font-data-tabular font-bold">◈ {baseRate}</span>
+                    <span className="text-lg text-gold-accent font-data-tabular font-bold">◈ {baseRate}</span>
                   </div>
 
                   {externalLink ? (
@@ -394,7 +398,7 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
                       href={safePortfolioUrl(externalLink)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-intel-magenta/15 border border-intel-magenta/40 text-intel-magenta font-mono text-xs uppercase tracking-wider hover:bg-intel-magenta hover:text-black transition"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold-accent/15 border border-gold-accent/40 text-gold-accent font-mono text-xs uppercase tracking-wider hover:bg-gold-accent hover:text-black transition"
                     >
                       <span>Portfolio</span>
                       <ExternalLink size={12} />

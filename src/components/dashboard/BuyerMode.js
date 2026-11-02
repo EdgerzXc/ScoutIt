@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
-import { Bookmark, Search } from "lucide-react";
+import { Bookmark, Search, Building2, Camera, FolderOpen, Radio, Globe, Crosshair, Check, Plus } from "lucide-react";
 import { getSession } from "@/lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
@@ -294,10 +294,12 @@ export default function BuyerMode() {
       }
 
       if (coords) {
-        // Marker element
+        // Marker element with craft SVG icon (antislop-ui)
         const el = document.createElement('div');
         el.className = 'w-8 h-8 rounded-full bg-gold-accent flex items-center justify-center text-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.6)] cursor-pointer hover:scale-110 transition-transform text-background font-bold border-2 border-surface z-10';
-        el.innerHTML = listing.hasMedia ? '📸' : '🏢';
+        el.innerHTML = listing.hasMedia
+          ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>'
+          : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>';
 
         // Secure Popup DOM Construction to prevent XSS
         const popupContent = document.createElement('div');
@@ -372,9 +374,9 @@ export default function BuyerMode() {
     setRadius(val);
     searchByRadius(val, radarCenter ? radarCenter[0] : DEFAULT_MAP_CENTER[0], radarCenter ? radarCenter[1] : DEFAULT_MAP_CENTER[1]);
     if (val !== 'any') {
-      addToast(`Radar set to ${val}km`, "📡");
+      addToast(`Radar set to ${val}km`, "●");
     } else {
-      addToast(`Radar removed. Showing all.`, "🌍");
+      addToast(`Radar removed. Showing all areas.`, "○");
     }
   };
 
@@ -395,7 +397,7 @@ export default function BuyerMode() {
       next
         ? "Watching Metro Manila: new drops surface at the top of your feed."
         : "Stopped watching Metro Manila.",
-      next ? "📡" : "🌍"
+      next ? "●" : "○"
     );
   };
 
@@ -422,7 +424,7 @@ export default function BuyerMode() {
         type: l.spaceCategory || l.type || 'Property',
         title: l.title,
         loc: l.location || l.loc || 'Location hidden',
-        img: l.hasMedia ? '📸' : '🏢',
+        hasMedia: Boolean(l.hasMedia),
       }));
       
     const q = searchQuery.trim().toLowerCase();
@@ -451,8 +453,8 @@ export default function BuyerMode() {
     return (
       <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 min-w-[240px] max-w-[85vw] md:min-w-[280px]">
         <div className={`card-atmosphere hov-card rounded-lg p-4 flex gap-4 items-center transition cursor-pointer h-full group relative ${isSelected ? 'border-gold-accent bg-gold-accent/5' : 'hover:border-gold-accent'}`}>
-          <div className="w-16 h-16 bg-surface-alt rounded flex items-center justify-center text-3xl shrink-0 group-hover:scale-105 transition-transform">
-            {item.img || '🏠'}
+          <div className="w-16 h-16 bg-surface-alt rounded-lg border border-surface-variant/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-gold-accent">
+            {item.hasMedia ? <Camera size={26} strokeWidth={1.8} /> : <Building2 size={26} strokeWidth={1.8} />}
           </div>
           <div className="flex flex-col overflow-hidden pr-24">
             <div className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-1">{item.type}</div>
@@ -503,8 +505,8 @@ export default function BuyerMode() {
   const VerticalListingCard = ({ item }) => (
     <Link href={`/property/${item.slug || item.id}`} className="block shrink-0 w-[280px] max-w-[80vw] snap-start relative">
       <div className="card-atmosphere hov-card rounded-lg p-0 flex flex-col hover:border-text-secondary transition cursor-pointer overflow-hidden group h-full">
-        <div className="h-40 bg-surface-alt flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-200">
-          {item.img || '🏠'}
+        <div className="h-40 bg-surface-alt border-b border-surface-variant/40 flex items-center justify-center group-hover:scale-105 transition-transform duration-200 text-gold-accent">
+          {item.hasMedia ? <Camera size={44} strokeWidth={1.6} /> : <Building2 size={44} strokeWidth={1.6} />}
         </div>
         <div className="p-4 flex flex-col">
           <div className="text-gold-accent font-label-caps text-[12px] tracking-widest uppercase mb-1">{item.type}</div>
@@ -514,7 +516,7 @@ export default function BuyerMode() {
         {/* A-084. See the note on the compact card's toggle above: the pair
             must stay identical or one of them silently loses its state. */}
         <button 
-          className="absolute top-4 right-4 min-h-11 min-w-11 inline-flex items-center justify-center text-2xl drop-shadow-md hover:scale-110 transition-transform bg-background/20 rounded-full"
+          className="absolute top-4 right-4 min-h-11 min-w-11 inline-flex items-center justify-center text-2xl drop-shadow-md hover:scale-110 transition-transform bg-background/40 backdrop-blur-sm border border-white/10 rounded-full"
           aria-pressed={savedIds.includes(item.id)}
           aria-label={
             savedIds.includes(item.id)
@@ -574,11 +576,11 @@ export default function BuyerMode() {
             value={radius}
             onChange={handleRadiusChange}
           >
-            <option value="any">🌍 Any Distance</option>
-            <option value="2">🎯 Within 2 km</option>
-            <option value="5">⭕ Within 5 km</option>
-            <option value="10">📍 Within 10 km</option>
-            <option value="25">🗺️ Within 25 km</option>
+            <option value="any">Any Distance (Metro Manila Wide)</option>
+            <option value="2">Within 2 km (Immediate District)</option>
+            <option value="5">Within 5 km (Core CBDs)</option>
+            <option value="10">Within 10 km (Metropolitan)</option>
+            <option value="25">Within 25 km (Regional Belt)</option>
           </select>
         </div>
         
@@ -588,7 +590,8 @@ export default function BuyerMode() {
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent text-xs font-mono tracking-wider uppercase transition min-h-[44px]"
             title="Explore full-screen spatial radar in Stratosphere"
           >
-            <span>🗺️ Live Radar</span>
+            <Radio size={14} className="text-gold-accent" />
+            <span>Live Radar</span>
           </Link>
           <div className="flex items-center gap-2">
             <span className={`text-xs font-working-title ${!showMap ? 'text-gold-accent' : 'text-text-secondary'}`}>List</span>
@@ -704,12 +707,12 @@ export default function BuyerMode() {
               )}
               {!isLoading && savedFiltered.length === 0 && (
                 <div className="bg-surface/50 border border-dashed border-white/[0.08] rounded-xl p-8 w-full text-center flex flex-col items-center justify-center">
-                  <span className="text-3xl mb-3 opacity-60 block">📂</span>
+                  <FolderOpen size={36} className="text-gold-accent/60 mb-3" />
                   <div className="font-working-title text-base text-on-surface mb-1">Your Board is ready</div>
                   <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
                     Saved spaces and intelligence briefs appear here. <InfoTip tipId="privateSaves" label="About private saves" />
                   </p>
-                  <Link href="/property" className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(var(--accent-bright-rgb),0.2)] font-bold">
+                  <Link href="/property" className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-4 py-2 rounded transition active:scale-95 shadow-[0_0_12px_rgba(var(--accent-bright-rgb),0.2)] font-bold min-h-[44px] inline-flex items-center">
                     Explore Curated Spaces →
                   </Link>
                 </div>
@@ -750,7 +753,7 @@ export default function BuyerMode() {
               <p className="text-xs font-mono text-text-muted py-6 text-center">Loading your saved signals…</p>
             ) : savedSignals.length === 0 ? (
               <div className="bg-surface/50 border border-dashed border-white/[0.08] rounded-xl p-8 w-full text-center flex flex-col items-center justify-center">
-                <span className="text-3xl mb-3 opacity-60 block">📡</span>
+                <Radio size={36} className="text-gold-accent/60 mb-3" />
                 <div className="font-working-title text-base text-on-surface mb-1">No saved signals yet</div>
                 <p className="text-xs text-text-secondary max-w-sm mb-4 leading-relaxed">
                   Bookmark market signals, demands, and developments on Stratosphere to track them here.

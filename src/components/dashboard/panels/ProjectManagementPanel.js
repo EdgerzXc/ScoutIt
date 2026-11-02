@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GlassPanel from "../../ui/GlassPanel";
+import { Building2, ClipboardList } from "lucide-react";
 
 // Illustrative development stages — clearly labeled as a sample preview in the
 // UI until real project milestone data exists (Honest Blank Rule: no invented
@@ -39,7 +40,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
           </p>
         </div>
         <GlassPanel className="p-8 md:p-12 flex flex-col items-center justify-center text-center gap-3 break-words">
-          <span className="text-3xl">🏗️</span>
+          <Building2 size={36} className="text-gold-accent/60 mb-1" />
           <h3 className="text-white font-medium">No projects yet</h3>
           <p className="text-sm text-text-secondary max-w-sm">
             Add a property to your portfolio and it becomes a project you can track here: milestones, team updates, and briefings in one feed.
@@ -134,7 +135,9 @@ export default function ProjectManagementPanel({ properties = [] }) {
               </button>
             </div>
             <div className="flex flex-col items-center justify-center text-center py-14 px-6 gap-3">
-              <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center text-xl">📋</div>
+              <div className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center text-gold-accent">
+                <ClipboardList size={22} />
+              </div>
               <p className="text-sm text-white font-medium">No updates posted yet</p>
               <p className="text-xs text-text-secondary max-w-sm leading-relaxed">
                 When your site managers, marketing, and legal team post daily updates for {currentEstate?.title || "this project"}, they land here as a running feed.
