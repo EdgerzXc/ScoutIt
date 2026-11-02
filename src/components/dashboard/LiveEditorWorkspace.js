@@ -12,6 +12,7 @@ import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
 import { useDashboard } from "../../context/DashboardContext";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
+import { FileEdit, Eye, ArrowRight, Save } from "lucide-react";
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
   const { currentUser, addToast } = useDashboard();
   
@@ -79,11 +80,30 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   const [leftWidth, setLeftWidth] = useState(45);
   const [isResizing, setIsResizing] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview'
+  const mobileSliderRef = useRef(null);
   const isE2E = typeof window !== "undefined" && isDevelopmentMockAllowed({
     e2eFlag: process.env.NEXT_PUBLIC_SCOUTIT_E2E,
     hostname: window.location.hostname,
     userId: currentUser?.id,
   });
+
+  const handleSliderScroll = useCallback((e) => {
+    const el = e.currentTarget;
+    if (!el) return;
+    const width = el.offsetWidth;
+    if (width > 0) {
+      const tab = el.scrollLeft > width * 0.45 ? "preview" : "editor";
+      setMobileTab(tab);
+    }
+  }, []);
+
+  const switchMobileTab = useCallback((tab) => {
+    setMobileTab(tab);
+    if (mobileSliderRef.current) {
+      const targetX = tab === "preview" ? mobileSliderRef.current.offsetWidth : 0;
+      mobileSliderRef.current.scrollTo({ left: targetX, behavior: "smooth" });
+    }
+  }, []);
 
   const startResizing = useCallback((e) => {
     e.preventDefault();
@@ -136,14 +156,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       // Predominant horizontal swipe with 50px release threshold
       if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5 && Math.abs(deltaX) > 50) {
         if (deltaX < -50 && mobileTab === "editor") {
-          setMobileTab("preview");
+          switchMobileTab("preview");
         } else if (deltaX > 50 && mobileTab === "preview") {
-          setMobileTab("editor");
+          switchMobileTab("editor");
         }
       }
     }
     isGestureLocked.current = false;
-  }, [mobileTab]);
+  }, [mobileTab, switchMobileTab]);
 
   useEffect(() => {
     if (isResizing) {
@@ -432,21 +452,23 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           />
           <button 
             type="button"
-            onClick={() => setMobileTab('editor')}
-            className={`relative z-10 flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-wider uppercase text-center active:scale-95 transition touch-manipulation ${
+            onClick={() => switchMobileTab('editor')}
+            className={`relative z-10 flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-wider uppercase text-center active:scale-95 transition touch-manipulation flex items-center justify-center gap-1.5 ${
               mobileTab === 'editor' ? 'text-gold-accent font-bold' : 'text-text-secondary hover:text-on-surface'
             }`}
           >
-            📝 Spec Sheet
+            <FileEdit size={13} className="shrink-0 text-gold-accent" aria-hidden="true" />
+            <span>Spec Sheet</span>
           </button>
           <button 
             type="button"
-            onClick={() => setMobileTab('preview')}
-            className={`relative z-10 flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-wider uppercase text-center active:scale-95 transition touch-manipulation ${
+            onClick={() => switchMobileTab('preview')}
+            className={`relative z-10 flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-wider uppercase text-center active:scale-95 transition touch-manipulation flex items-center justify-center gap-1.5 ${
               mobileTab === 'preview' ? 'text-gold-accent font-bold' : 'text-text-secondary hover:text-on-surface'
             }`}
           >
-            👁️ Live Dossier
+            <Eye size={13} className="shrink-0 text-gold-accent" aria-hidden="true" />
+            <span>Live Dossier</span>
           </button>
         </div>
         
@@ -460,8 +482,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         </div>
       </div>
 
-      {/* Editor Pane (Left on Desktop) */}
-      <div className={`${mobileTab === 'editor' ? 'flex' : 'hidden'} md:flex md:col-start-1 md:row-start-1 md:row-span-2 flex-col overflow-hidden relative pointer-events-auto`}>
+      {/* Outer Horizontal Snap Track on Mobile, Resizable Grid on Desktop */}
+      <div
+        ref={mobileSliderRef}
+        onScroll={handleSliderScroll}
+        className="flex-1 w-full overflow-x-auto md:overflow-hidden snap-x snap-mandatory md:snap-none flex md:grid md:grid-cols-[var(--left-width)_8px_1fr] no-scrollbar touch-pan-x"
+      >
+        {/* Editor Pane (Left on Desktop, Screen 1 on Mobile) */}
+        <div className="w-full min-w-full md:min-w-0 md:w-auto shrink-0 snap-start flex flex-col md:col-start-1 md:row-start-1 md:row-span-2 overflow-hidden relative pointer-events-auto">
       {/* AI Extraction Overlay */}
       {(isDragging || isExtracting) && (
         <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-gold-accent transition">
@@ -743,15 +771,15 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         <div className="w-1 h-8 bg-on-surface/20 rounded-full"></div>
       </div>
       
-      {/* Preview Pane (Right on Desktop) */}
+      {/* Preview Pane (Right on Desktop, Screen 2 on Mobile) */}
       <div 
-        className={`${mobileTab === 'preview' ? 'block motion-safe:animate-[fadeIn_0.25s_cubic-bezier(0.16,1,0.3,1)]' : 'hidden'} md:block md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex-1`}
+        className="w-full min-w-full md:min-w-0 md:w-auto shrink-0 snap-start md:col-start-3 md:row-span-2 relative bg-surface-alt md:border-l border-surface-variant overflow-y-auto custom-scrollbar pointer-events-auto flex flex-col"
         style={{ touchAction: "pan-y" }}
       >
         <div className="sticky top-0 left-0 w-full z-50 bg-gold-accent text-background text-center py-1.5 font-label-caps text-[12px] tracking-[0.12em] font-bold shadow-md flex items-center justify-between px-3">
           <button
             type="button"
-            onClick={() => setMobileTab('editor')}
+            onClick={() => switchMobileTab('editor')}
             className="md:hidden min-h-[44px] px-2 text-xs font-mono uppercase underline hover:opacity-80 flex items-center active:scale-95 transition touch-manipulation"
           >
             ← Back to Editor
@@ -764,6 +792,64 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
             <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           ) : (
             <ResidentialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
+          )}
+        </div>
+      </div>
+      </div>
+
+      {/* Mobile Sticky Bottom Action Dock (Thumb ergonomics: 1-tap drag/toggle & primary action) */}
+      <div className="md:hidden sticky bottom-0 z-50 w-full px-4 py-2.5 bg-surface/95 backdrop-blur-xl border-t border-surface-variant/40 flex items-center justify-between gap-3 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]">
+        {/* 1-Tap Thumb Slider */}
+        <div className="flex items-center gap-1 bg-surface-alt border border-surface-variant/50 rounded-full p-1">
+          <button
+            type="button"
+            onClick={() => switchMobileTab("editor")}
+            className={`min-h-[44px] px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1.5 ${
+              mobileTab === "editor"
+                ? "bg-gold-accent text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.3)]"
+                : "text-text-secondary hover:text-on-surface"
+            }`}
+            aria-label="Switch to Spec Sheet"
+          >
+            <FileEdit size={13} />
+            <span>Editor</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => switchMobileTab("preview")}
+            className={`min-h-[44px] px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1.5 ${
+              mobileTab === "preview"
+                ? "bg-gold-accent text-background shadow-[0_0_12px_rgba(var(--accent-rgb),0.3)]"
+                : "text-text-secondary hover:text-on-surface"
+            }`}
+            aria-label="Switch to Live Dossier Preview"
+          >
+            <Eye size={13} />
+            <span>Preview</span>
+          </button>
+        </div>
+
+        {/* Primary Bottom Actions */}
+        <div className="flex items-center gap-2">
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => Math.min(3, s + 1))}
+              className="min-h-[44px] px-4 py-2 rounded-full bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider hover:bg-gold-bright active:scale-95 transition-all shadow-[0_0_14px_rgba(var(--accent-rgb),0.25)] flex items-center gap-1.5"
+            >
+              <span>Next</span>
+              <ArrowRight size={14} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handlePublishClick(false)}
+              disabled={isSaving}
+              className="min-h-[44px] px-4 py-2 rounded-full bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider hover:bg-gold-bright active:scale-95 transition-all shadow-[0_0_14px_rgba(var(--accent-rgb),0.25)] flex items-center gap-1.5"
+            >
+              <span>{isSaving ? "Saving..." : isEditing ? "Update" : "Save"}</span>
+              <Save size={14} />
+            </button>
           )}
         </div>
       </div>

@@ -17,6 +17,7 @@ const MissionControlMode = dynamic(() => import("../../components/dashboard/Miss
 import Toasts from "../../components/ui/Toasts";
 import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
+import WorkspaceDeckDrawer from "../../components/dashboard/WorkspaceDeckDrawer";
 import { deckNeighbors } from "../../lib/workspaceDeck";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
@@ -94,6 +95,15 @@ function DashboardInner() {
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
+  const [isWizardActive, setIsWizardActive] = useState(false);
+
+  useEffect(() => {
+    const handleWizardState = (e) => {
+      setIsWizardActive(Boolean(e?.detail?.active));
+    };
+    window.addEventListener("scoutit:wizard-state", handleWizardState);
+    return () => window.removeEventListener("scoutit:wizard-state", handleWizardState);
+  }, []);
 
   const switcherRef = useRef(null);
   const notificationsRef = useRef(null);
@@ -732,9 +742,9 @@ function DashboardInner() {
         </div>
       </div>
 
-      {/* Row 2: Mobile Workspace Deck Command Bar (Dedicated full-width row with zero layout squishing) */}
-      <div className="md:hidden w-full px-3 pb-2 pt-0.5 border-t border-surface-variant/40">
-        <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
+      {/* Row 2: Mobile Workspace Deck Command Bar (Android-style glowing capacitive pull-down drawer) */}
+      <div className="md:hidden w-full px-3 pb-1 pt-0.5 border-t border-surface-variant/40">
+        <WorkspaceDeckDrawer active="workspace" badges={{ inbox: unreadInboxCount }} isWizardActive={isWizardActive} />
       </div>
     </header>
 
@@ -747,26 +757,30 @@ function DashboardInner() {
         </div>
 
         {/* Workspace Identity Lens Indicator (Unambiguous context for multi-role users with zero interactive clutter) */}
-        <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-surface-variant/40">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-gold-accent shrink-0 animate-pulse" />
-            <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">
-              Active Workspace:
-            </span>
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-bright truncate">
-              {currentWorkspaceLabel}
-            </span>
+        {!isWizardActive && (
+          <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-surface-variant/40">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-gold-accent shrink-0 animate-pulse" />
+              <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">
+                Active Workspace:
+              </span>
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-bright truncate">
+                {currentWorkspaceLabel}
+              </span>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 font-mono text-[12px] text-text-muted">
+              <span className="uppercase">Role:</span>
+              <span className="text-gold-accent font-semibold uppercase">{mode}</span>
+            </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2 font-mono text-[12px] text-text-muted">
-            <span className="uppercase">Role:</span>
-            <span className="text-gold-accent font-semibold uppercase">{mode}</span>
-          </div>
-        </div>
+        )}
 
-        {/* Desktop Workspace Deck Command Bar (Exact operating parity with CRM, Inbox & Calendar desktop views) */}
-        <div className="hidden md:block mb-6 max-w-2xl">
-          <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
-        </div>
+        {/* Desktop Workspace Deck Command Bar (Exact operating parity with CRM, Inbox & Calendar desktop views, auto-tucked during property creation) */}
+        {!isWizardActive && (
+          <div className="hidden md:block mb-6 max-w-2xl">
+            <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
+          </div>
+        )}
 
         {["buyer", "exploring", "owner", "broker"].includes(mode) ? (
           <div className="dashboard-lens-motion">

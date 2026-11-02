@@ -222,12 +222,25 @@
 
 @media (max-width: 768px) {
   .dis-dropdown-wrap {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
   }
   .dis-dropdown-trigger {
     width: 100%;
     min-height: 44px;
+    padding: 6px 10px;
+    gap: 5px;
     justify-content: space-between;
+  }
+  .dis-trigger-label {
+    display: none;
+  }
+  .dis-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 85px;
   }
   .dis-dropdown-menu {
     left: 0;

@@ -38,6 +38,15 @@ export default function OwnerMode() {
   const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("scoutit:wizard-state", {
+          detail: { active: Boolean(showWizard), mode: showWizard },
+        })
+      );
+    }
+  }, [showWizard]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedStylePreset, setSelectedStylePreset] = useState("minimalist_organic");
   const [spatialModalOpen, setSpatialModalOpen] = useState(false);

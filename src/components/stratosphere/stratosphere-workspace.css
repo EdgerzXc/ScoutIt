@@ -124,6 +124,14 @@
 
 }
 
+.sw-view-label-short {
+  display: none;
+}
+
+.sw-view-label-full {
+  display: inline;
+}
+
 .sw-view-switch button {
   display: inline-flex;
   align-items: center;
@@ -815,10 +823,10 @@ div:has(.sw-page--radar:not(:has(.st-terminal--feed))) > footer {
 
 @media (max-width: 768px) {
   .sw-page {
-    padding: 60px 16px calc(84px + env(safe-area-inset-bottom, 0px));
+    padding: clamp(74px, 11vw, 88px) 16px calc(84px + env(safe-area-inset-bottom, 0px));
   }
   .sw-page--radar {
-    padding: 60px 0 calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: clamp(74px, 11vw, 88px) 0 calc(84px + env(safe-area-inset-bottom, 0px)) !important;
   }
   .sw-page--radar .sw-intro,
   .sw-page--radar .sw-view-row,
@@ -850,13 +858,27 @@ div:has(.sw-page--radar:not(:has(.st-terminal--feed))) > footer {
     display: flex;
     box-sizing: border-box;
     padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sw-view-switch::-webkit-scrollbar {
+    display: none;
+  }
+  .sw-view-label-short {
+    display: inline;
+  }
+  .sw-view-label-full {
+    display: none;
   }
   .sw-view-switch button {
     flex: 1;
+    min-width: 0;
     justify-content: center;
-    padding: 0 10px;
+    padding: 0 6px;
+    gap: 6px;
     min-height: 44px;
     font-size: 12px;
+    white-space: nowrap;
   }
   .sw-post-btn {
     width: 100%;

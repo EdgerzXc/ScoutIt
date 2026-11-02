@@ -329,7 +329,9 @@ export default function StratosphereWorkspace({
             className={view === "articles" ? "is-active" : ""}
             onClick={() => chooseView("articles")}
           >
-            <FileText size={15} aria-hidden="true" /> All Articles
+            <FileText size={15} aria-hidden="true" />
+            <span className="sw-view-label-full">All Articles</span>
+            <span className="sw-view-label-short">Articles</span>
           </button>
           <button
             type="button"
@@ -338,7 +340,9 @@ export default function StratosphereWorkspace({
             className={view === "radar" ? "is-active" : ""}
             onClick={() => chooseView("radar")}
           >
-            <Compass size={15} aria-hidden="true" /> Radar &amp; Community
+            <Compass size={15} aria-hidden="true" />
+            <span className="sw-view-label-full">Radar &amp; Community</span>
+            <span className="sw-view-label-short">Radar</span>
           </button>
           <button
             type="button"
@@ -346,7 +350,9 @@ export default function StratosphereWorkspace({
             className={view === "my-signals" ? "is-active" : ""}
             onClick={() => chooseView("my-signals")}
           >
-            <Radio size={15} aria-hidden="true" /> My Signals
+            <Radio size={15} aria-hidden="true" />
+            <span className="sw-view-label-full">My Signals</span>
+            <span className="sw-view-label-short">Signals</span>
           </button>
         </div>
         <button type="button" data-scoutit-guide="signal-composer-trigger" className="sw-post-btn" onClick={() => setComposerOpen(true)}>
