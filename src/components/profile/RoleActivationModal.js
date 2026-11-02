@@ -160,6 +160,39 @@ const ROLE_CONFIGS = {
       },
     ],
   },
+  researcher: {
+    title: "Zoning & Land Researcher",
+    badge: "Field Due Diligence",
+    desc: "Conduct on-site zoning verifications, title deed checks, LGU/PEZA validation, and land data audits.",
+    winWinNotice: "Connecting your research credentials unlocks QuestIT field audit bounties and commercial due diligence requests with guaranteed escrow payouts.",
+    fields: [
+      {
+        key: "researchSpecialty",
+        label: "Research & Audit Specialty",
+        type: "select",
+        options: [
+          { value: "Commercial Due Diligence", label: "Commercial Due Diligence & Zoning" },
+          { value: "LRA Title Verification", label: "LRA Title Verification & Geodetic Checks" },
+          { value: "PEZA & LGU Compliance", label: "PEZA & LGU Regulatory Compliance" },
+        ],
+        required: true,
+      },
+      {
+        key: "fieldCoverage",
+        label: "Primary Field Coverage & LGUs",
+        type: "text",
+        placeholder: "e.g. Metro Manila (BGC/Makati), Cavite (PEZA), Clark/Subic",
+        required: true,
+      },
+      {
+        key: "credentialsDesc",
+        label: "Professional Credentials / Affiliations",
+        type: "text",
+        placeholder: "e.g. Licensed Geodetic Engineer, Paralegal / Land Title Specialist",
+        required: true,
+      },
+    ],
+  },
   broker: {
     title: "Accredited Real Estate Broker",
     badge: "PRC Licensed",

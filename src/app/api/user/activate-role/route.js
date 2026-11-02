@@ -10,6 +10,7 @@ const VALID_ROLES = Object.freeze([
   "operator",
   "photographer",
   "designer",
+  "researcher",
   "broker",
 ]);
 
@@ -188,6 +189,30 @@ export async function POST(request) {
       auditMetadata.designSpecialty = designSpecialty;
       auditMetadata.lookbookUrl = lookbookUrl;
       auditMetadata.studioName = studioName;
+    } else if (role === "researcher") {
+      const researchSpecialty = sanitizeString(data.researchSpecialty || data.specialty);
+      const fieldCoverage = sanitizeString(data.fieldCoverage || data.locationCoverage);
+      const credentialsDesc = sanitizeString(data.credentialsDesc);
+
+      if (!researchSpecialty || researchSpecialty.length < 2) {
+        return NextResponse.json(
+          { error: "Research specialty (e.g. Commercial Due Diligence, LRA Title Verification) is required." },
+          { status: 400 },
+        );
+      }
+      if (!fieldCoverage || fieldCoverage.length < 2) {
+        return NextResponse.json(
+          { error: "Primary geographic field coverage is required." },
+          { status: 400 },
+        );
+      }
+
+      roleUpdates.provider_type = "researcher";
+      roleUpdates.location_coverage = fieldCoverage;
+      roleUpdates.design_specialty = researchSpecialty;
+      auditMetadata.researchSpecialty = researchSpecialty;
+      auditMetadata.fieldCoverage = fieldCoverage;
+      auditMetadata.credentialsDesc = credentialsDesc;
     } else if (role === "broker") {
       const rawLicense = sanitizeString(data.prcLicense);
       const digits = rawLicense.replace(/\D/g, "");
@@ -235,7 +260,7 @@ export async function POST(request) {
       : [];
 
     // Invariant: buyer / seeker is always active and preserved for every account
-    const extraRoles = role === "photographer" || role === "designer" ? [role, "provider"] : [role];
+    const extraRoles = role === "photographer" || role === "designer" || role === "researcher" ? [role, "provider"] : [role];
     const consolidatedActiveRoles = Array.from(new Set([...existingRoles, ...extraRoles, "buyer"]));
 
     const fullPayload = {

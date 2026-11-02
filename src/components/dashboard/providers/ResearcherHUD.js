@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Coins, ClipboardList } from "lucide-react";
 
 const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
@@ -33,6 +33,18 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
   const [certPRC, setCertPRC] = useState(false);
   const [certLRA, setCertLRA] = useState(false);
   const [certLGU, setCertLGU] = useState(false);
+
+  // Mobile floating primary action (Audit) toggles between audits and credentials
+  useEffect(() => {
+    const onPrimary = (e) => {
+      if (e.detail?.mode === "provider" || e.detail?.mode === "researcher" || e.detail?.providerType === "researcher") {
+        setActiveTab((prev) => (prev === "audits" ? "credentials" : "audits"));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+    window.addEventListener("scoutit:primary-action", onPrimary);
+    return () => window.removeEventListener("scoutit:primary-action", onPrimary);
+  }, []);
 
   // Reusable custom toggle component (Steely/Blue for Researcher vibe)
 

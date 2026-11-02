@@ -243,6 +243,52 @@ describe("A-274 — Comprehensive Role & Authorization Logic Deep-Dive", () => {
       expect(updates[0].provider_type).toBe("photographer");
     });
 
+    it("adds 'provider' alongside 'researcher' and sets provider_type to researcher", async () => {
+      serverAuth.resolveUserId.mockResolvedValue("user-researcher");
+      const updates = [];
+
+      supabaseAdmin.from = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: {
+                active_roles: ["buyer"],
+                role_metadata: {},
+                archived_at: null,
+                is_shadowbanned: false,
+                adult_eligibility_status: "declared_adult",
+              },
+              error: null,
+            }),
+          }),
+        }),
+        update: vi.fn().mockImplementation((payload) => {
+          updates.push(payload);
+          return {
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          };
+        }),
+        insert: vi.fn().mockResolvedValue({ error: null }),
+      });
+
+      const res = await activateRolePOST(
+        makeReq({
+          role: "researcher",
+          data: {
+            researchSpecialty: "Commercial Due Diligence",
+            fieldCoverage: "Metro Manila & Cavite PEZA",
+            credentialsDesc: "Licensed Geodetic Engineer",
+          },
+        })
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.activeRoles).toContain("researcher");
+      expect(body.activeRoles).toContain("provider");
+      expect(body.activeRoles).toContain("buyer");
+      expect(updates[0].provider_type).toBe("researcher");
+    });
+
     it("forces prc_verified = false and prc_verified_at = null when activating or recalibrating broker", async () => {
       serverAuth.resolveUserId.mockResolvedValue("user-broker");
       const updates = [];

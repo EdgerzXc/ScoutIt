@@ -141,6 +141,15 @@ const ROLE_ICONS = {
       <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
     </svg>
   ),
+  researcher: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+  ),
   mc_enterprise: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4.93 19.07A10 10 0 0 1 2 12C2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.76-1.12 5.26-2.93 7.07"/>
@@ -215,6 +224,13 @@ const CORE_ROLES = [
     label: "Event & Concept Designer",
     desc: "Bespoke spatial concepts & event staging",
     targetRole: "designer",
+  },
+  {
+    id: "researcher",
+    aliases: ["researcher", "data-auditor", "field-researcher"],
+    label: "Zoning & Land Researcher",
+    desc: "Field verification, due diligence & land audits",
+    targetRole: "researcher",
   },
 ];
 
@@ -464,7 +480,7 @@ export default function BottomNav() {
       const lower = String(r).toLowerCase().trim();
       if (["admin", "staff"].includes(lower)) return true;
       if (roleDef.aliases.includes(lower) || roleDef.id === lower) return true;
-      if (lower === "provider" && (roleDef.id === "photographer" || roleDef.id === "designer" || roleDef.targetRole === "provider")) {
+      if (lower === "provider" && (roleDef.id === "photographer" || roleDef.id === "designer" || roleDef.id === "researcher" || roleDef.targetRole === "provider")) {
         return true;
       }
       return false;

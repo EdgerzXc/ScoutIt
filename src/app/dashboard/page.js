@@ -48,6 +48,7 @@ import {
   Cog,
   Camera,
   Palette,
+  FileCheck,
   Plus,
   Zap,
 } from "lucide-react";
@@ -61,6 +62,7 @@ const TAG_LABELS = {
   provider: "Provider Workspace",
   photographer: "Photographer Workspace",
   designer: "Event Designer Workspace",
+  researcher: "Researcher Workspace",
   operator: "Co-Operator Workspace",
   exploring: "Buyer Workspace",
   mc_staff: "Staff Console · Simulated",
@@ -75,6 +77,7 @@ const WORKSPACE_ROLE_OPTIONS = [
   { id: "operator", mode: "operator", label: "Co-Operator & Facilities", desc: "Space management & operations log", icon: Cog },
   { id: "photographer", mode: "provider", providerType: "photographer", label: "Spatial Photographer", desc: "Space photography & QuestIT bounties", icon: Camera },
   { id: "designer", mode: "provider", providerType: "designer", label: "Event & Concept Designer", desc: "Bespoke spatial concepts & staging", icon: Palette },
+  { id: "researcher", mode: "provider", providerType: "researcher", label: "Zoning & Land Researcher", desc: "Field verification, due diligence & land audits", icon: FileCheck },
 ];
 
 function DashboardInner() {
@@ -412,6 +415,9 @@ function DashboardInner() {
     if (opt.id === "designer") {
       return mode === "provider" && user?.providerType === "designer";
     }
+    if (opt.id === "researcher") {
+      return mode === "provider" && user?.providerType === "researcher";
+    }
     if (opt.id === "salesperson") {
       return mode === "broker" && user?.role === "salesperson";
     }
@@ -484,9 +490,12 @@ function DashboardInner() {
     exploring: { icon: <Search strokeWidth={1.8} size={18} />, label: "Scout" },
     provider: user?.providerType === "designer"
       ? { icon: <Palette size={18} strokeWidth={2} />, label: "Studio" }
-      : { icon: <Camera size={18} strokeWidth={2} />, label: "Portfolio" },
+      : (user?.providerType === "researcher"
+          ? { icon: <FileCheck size={18} strokeWidth={2} />, label: "Audit" }
+          : { icon: <Camera size={18} strokeWidth={2} />, label: "Portfolio" }),
     photographer: { icon: <Camera size={18} strokeWidth={2} />, label: "Portfolio" },
     designer: { icon: <Palette size={18} strokeWidth={2} />, label: "Studio" },
+    researcher: { icon: <FileCheck size={18} strokeWidth={2} />, label: "Audit" },
     operator: { icon: <Building2 size={18} strokeWidth={2} />, label: "Units" },
   };
   const primaryAction = PRIMARY_ACTIONS[mode] || null;
@@ -507,11 +516,11 @@ function DashboardInner() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const currentWorkspaceLabel = mode === "provider"
-    ? (user?.providerType === "designer" ? "Event & Concept Designer" : "Spatial Photographer")
+    ? (user?.providerType === "designer" ? "Event & Concept Designer" : (user?.providerType === "researcher" ? "Zoning & Land Researcher" : "Spatial Photographer"))
     : (mode === "broker" && user?.role === "salesperson" ? "Real Estate Salesperson" : (TAG_LABELS[mode] || "Workspace"));
 
   const currentWorkspacePillText = mode === "provider"
-    ? (user?.providerType === "designer" ? "Designer" : "Photographer")
+    ? (user?.providerType === "designer" ? "Designer" : (user?.providerType === "researcher" ? "Researcher" : "Photographer"))
     : (mode === "broker" && user?.role === "salesperson" ? "Salesperson" : (TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"));
 
   const toggleNotifications = () => {
