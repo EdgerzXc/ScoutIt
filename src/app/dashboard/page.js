@@ -845,7 +845,7 @@ function DashboardInner() {
         style={{
           bottom: isBottomNavExpanded
             ? "calc(var(--mobile-nav-height, 82px) + 56px)"
-            : "max(38px, calc(32px + env(safe-area-inset-bottom)))",
+            : "max(32px, calc(24px + env(safe-area-inset-bottom)))",
         }}
         onClick={firePrimaryAction}
         aria-label={primaryAction.label}

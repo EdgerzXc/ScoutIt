@@ -264,7 +264,7 @@ export default function WorkspaceDeckDrawer({
         {/* Center: Glowing Gold Capacitive Handle Bar (1-Tap Thumb Action) */}
         <div className="flex flex-col items-center justify-center gap-0.5 px-4 py-1">
           <div
-            className="w-12 h-1 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-16 group-hover:shadow-[0_0_14px_rgba(var(--accent-rgb),0.85)] shadow-[0_0_8px_rgba(var(--accent-rgb),0.55)]"
+            className="w-12 h-1 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-16 group-hover:shadow-[0_0_14px_rgba(var(--accent-rgb),0.85)] shadow-[0_0_8px_rgba(var(--accent-rgb),0.55)] animate-pulse"
             aria-hidden="true"
           />
         </div>

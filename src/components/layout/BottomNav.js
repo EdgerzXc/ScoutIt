@@ -753,13 +753,13 @@ export default function BottomNav() {
       {/* ── DRAGGABLE UP / AUTO-FADE MOBILE BOTTOM QUICK ACCESS ── */}
       <div
         className={`bottom-nav-mobile-container fixed inset-x-0 bottom-0 z-[900] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] select-none md:hidden ${
-          isNavExpanded ? "translate-y-0" : "translate-y-[calc(100%-26px)]"
+          isNavExpanded ? "translate-y-0" : "translate-y-[calc(100%-18px)]"
         }`}
         style={{ overscrollBehaviorY: "contain" }}
         role="region"
         aria-label="Bottom Navigation Drawer"
       >
-        {/* Glowing Capacitive Handle Bar (Draggable UP / 1-Tap Thumb Toggle) */}
+        {/* Glowing Pulsating Golden Line Handle (1-Tap & Drag Up) */}
         <button
           type="button"
           onClick={() => setIsNavExpanded((prev) => !prev)}
@@ -767,13 +767,10 @@ export default function BottomNav() {
           onTouchMove={handleNavTouchMove}
           onTouchEnd={handleNavTouchEnd}
           aria-expanded={isNavExpanded}
-          aria-label={isNavExpanded ? "Tuck Quick Access Navigation" : "Drag Up Quick Access Navigation"}
-          className="w-full min-h-[44px] flex flex-col items-center justify-center pt-2 pb-1 bg-surface/95 border-t border-surface-variant/50 backdrop-blur-2xl cursor-pointer select-none active:scale-[0.99] touch-none shadow-[0_-8px_20px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent"
+          aria-label={isNavExpanded ? "Collapse navigation bar" : "Expand navigation bar"}
+          className="w-full min-h-[44px] flex items-center justify-center py-2 bg-surface/95 border-t border-surface-variant/40 backdrop-blur-2xl cursor-pointer select-none active:scale-[0.99] touch-none shadow-[0_-8px_20px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent group"
         >
-          <div className="w-12 h-1 rounded-full bg-gold-accent transition-all duration-300 shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)]" />
-          <span className="font-mono text-[12px] font-bold uppercase tracking-widest text-gold-accent mt-0.5 flex items-center gap-1">
-            {isNavExpanded ? "▼ Tuck Quick Access" : "▲ Drag Up Quick Access"}
-          </span>
+          <div className="w-14 h-1.5 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-20 shadow-[0_0_12px_rgba(var(--accent-rgb),0.75)] animate-pulse" />
         </button>
 
         {/* Universal 6-Item Bottom Navigation Bar */}
