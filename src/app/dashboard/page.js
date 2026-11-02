@@ -97,7 +97,7 @@ function DashboardInner() {
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
   const [isWizardActive, setIsWizardActive] = useState(false);
-  const [isBottomNavExpanded, setIsBottomNavExpanded] = useState(false);
+  const [isBottomNavExpanded, setIsBottomNavExpanded] = useState(true);
 
   useEffect(() => {
     const handleNavState = (e) => {

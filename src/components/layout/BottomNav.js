@@ -264,13 +264,18 @@ export default function BottomNav() {
   const [activatingRole, setActivatingRole] = useState(null);
 
   const isDashboard = Boolean(pathname?.startsWith("/dashboard"));
-  const [isNavExpanded, setIsNavExpanded] = useState(!isDashboard);
+  const [isNavExpanded, setIsNavExpanded] = useState(true);
   const navTouchStartY = useRef(0);
   const isNavDragging = useRef(false);
 
-  // Sync isNavExpanded when navigating between dashboard and other routes
+  // First-minute onboarding logic: The navigation starts expanded so users learn it exists.
+  // After 60 seconds (1 minute), it automatically tucks down into the glowing pulsating gold line.
   useEffect(() => {
-    setIsNavExpanded(!pathname?.startsWith("/dashboard"));
+    setIsNavExpanded(true);
+    const autoTuckTimer = setTimeout(() => {
+      setIsNavExpanded(false);
+    }, 60000); // 1 minute auto-tuck
+    return () => clearTimeout(autoTuckTimer);
   }, [pathname]);
 
   // Broadcast state to sync FAB positioning in page.js
