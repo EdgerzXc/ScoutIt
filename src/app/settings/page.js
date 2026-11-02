@@ -448,8 +448,8 @@ export default function SettingsPage() {
   const handlePasswordUpdate = async () => {
     setSecurityMessage({ type: '', text: '' });
     
-    if (newPassword.length < 6) {
-      setSecurityMessage({ type: 'error', text: 'Password must be at least 6 characters.' });
+    if (newPassword.length < 8) {
+      setSecurityMessage({ type: 'error', text: 'Password must be at least 8 characters.' });
       return;
     }
     
@@ -467,7 +467,7 @@ export default function SettingsPage() {
     setIsUpdatingPassword(false);
     
     if (error) {
-      setSecurityMessage({ type: 'error', text: 'Failed to update password. Please try again or log out and back in.' });
+      setSecurityMessage({ type: 'error', text: error.message || 'Failed to update password. Please try again or log out and back in.' });
       console.error("Auth update error:", error);
     } else {
       setSecurityMessage({ type: 'success', text: 'Password successfully updated.' });
