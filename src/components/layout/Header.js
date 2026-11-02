@@ -195,6 +195,16 @@ export default function Header({ ambientContext = null }) {
         </button>
 
         <ScoutItWordmark href="/" className="header-brand" leading={<ScoutItMark />} />
+
+        <Link
+          href="/stratosphere"
+          className={`header-layer-pill ${pathname?.startsWith("/stratosphere") ? "is-active" : ""}`}
+          aria-label="Layer 02: Stratosphere Radar & Signals"
+          title="Layer 02: Stratosphere Radar & Signals"
+        >
+          <span className="header-layer-dot" aria-hidden="true" />
+          <span className="header-layer-text">02 // STRATOSPHERE</span>
+        </Link>
       </div>
 
       <div className="header-center">
@@ -315,6 +325,56 @@ export default function Header({ ambientContext = null }) {
           align-items: center;
           gap: 20px;
           flex: 0 0 auto;
+        }
+
+        .header-layer-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          height: 30px;
+          padding: 0 10px;
+          border-radius: 9999px;
+          background: rgba(var(--accent-rgb), 0.05);
+          border: 1px solid rgba(var(--accent-rgb), 0.22);
+          font-family: var(--font-mono, monospace);
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--accent);
+          text-decoration: none;
+          transition: all 180ms ease;
+          white-space: nowrap;
+          cursor: pointer;
+        }
+
+        .header-layer-pill:hover {
+          background: rgba(var(--accent-rgb), 0.12);
+          border-color: var(--accent);
+          color: var(--accent-bright);
+        }
+
+        .header-layer-pill.is-active {
+          background: rgba(var(--accent-rgb), 0.16);
+          border-color: var(--accent-bright);
+          color: var(--accent-bright);
+          box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.25);
+        }
+
+        .header-layer-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--accent-bright);
+          box-shadow: 0 0 6px var(--accent);
+          display: inline-block;
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+          .header-layer-pill {
+            display: none;
+          }
         }
 
         /* Takes whatever is left and gives way first: it is a decorative

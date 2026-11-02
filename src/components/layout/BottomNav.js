@@ -87,6 +87,12 @@ const ICONS = {
       <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
       <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
     </svg>
+  ),
+  signals: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="2" />
+      <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
+    </svg>
   )
 };
 
@@ -222,7 +228,7 @@ const ITEMS = {
   // ⚠️ Do not reintroduce "Board" as a name for rankings — that collision is
   // what the rename removed.
   board:     { id: "board",     href: "/wishlist",  label: "Board",     icon: ICONS.board },
-  intel:     { id: "intel",     href: "/intel",     label: "Intel",     icon: ICONS.intel },
+  intel:     { id: "intel",     href: "/stratosphere", label: "Signals", icon: ICONS.signals },
   dashboard: { id: "dashboard", href: "/dashboard", label: "Dash",      icon: ICONS.dashboard },
   role:      { id: "role",      action: "open-role-sheet", label: "Roles", icon: ICONS.role },
   theme:     { id: "theme",     action: "open-theme-sheet", label: "Theme", icon: ICONS.theme }
@@ -600,6 +606,7 @@ export default function BottomNav() {
   // Determine active item — exact match for home, prefix match for others
   const isActive = (href) => {
     if (href === "/") return pathname === "/";
+    if (href === "/stratosphere") return pathname.startsWith("/stratosphere") || pathname.startsWith("/intel");
     return pathname.startsWith(href);
   };
 
@@ -609,7 +616,7 @@ export default function BottomNav() {
   else if (pathname.startsWith("/wishlist")) itemsToRender = CONTEXTS.board;
   else if (pathname.startsWith("/discover")) itemsToRender = CONTEXTS.discover;
   else if (pathname.startsWith("/property")) itemsToRender = CONTEXTS.spaces;
-  else if (pathname.startsWith("/intel")) itemsToRender = CONTEXTS.intel;
+  else if (pathname.startsWith("/intel") || pathname.startsWith("/stratosphere")) itemsToRender = CONTEXTS.intel;
 
   if (!mounted) return null;
 
