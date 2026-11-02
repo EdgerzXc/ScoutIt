@@ -6,15 +6,16 @@ import WorkspaceCommandBar from "./WorkspaceCommandBar";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
 
 /**
- * WorkspaceDeckDrawer — Android Notification & Quick Settings Shade for Mobile ScoutIt.
+ * WorkspaceDeckDrawer — Android Quick Settings & Command Deck Shade for Mobile ScoutIt.
  *
- * Implements the uppermost mobile pull-down shade pattern:
+ * Designed specifically for Mobile Chrome & Android ergonomics:
+ * - Solves Mobile Chrome Pull-to-Refresh: Removed global top-edge drag interception that triggered
+ *   Chrome browser reload. Opening and collapsing is now a frictionless 1-tap thumb touch
+ *   on the glowing amber handle, with safe direct dragging that blocks browser pull-to-refresh.
  * - Collapsed: Razor-thin capacitive top bar with a central glowing amber handle line.
  *   Takes virtually zero screen height, leaving 100% of the mobile viewport free.
- * - Uppermost Pull-Down Gesture: Dragging down from the top of the phone (>20px)
- *   pulls down the Quick Settings & Notification shade.
  * - Inside the Shade:
- *   1. Quick Settings Toggles: If in Property Wizard, houses Editor/Preview slider,
+ *   1. Quick Settings Toggles: If in Property Wizard, houses Spec Sheet / Live Dossier switcher,
  *      step indicators, and primary Next/Save actions.
  *   2. Command Deck Tiles: 4 connected deal tools (Workspace, Inbox, CRM, Calendar).
  *   3. Quick Status & Notifications: Nominal telemetry and role switcher trigger.
@@ -67,42 +68,19 @@ export default function WorkspaceDeckDrawer({
     }
   }, [isOpen]);
 
-  // Gesture: Uppermost screen drag listener (swipe down from near top of phone)
-  useEffect(() => {
-    const handleGlobalTouchStart = (e) => {
-      if (e.touches && e.touches.length === 1) {
-        const y = e.touches[0].clientY;
-        // If touch starts in uppermost 75px of the phone and shade is closed, prime pull-down
-        if (y <= 75 && !isOpen) {
-          touchStartY.current = y;
-          isDragging.current = true;
-        }
-      }
-    };
-
-    const handleGlobalTouchEnd = (e) => {
-      if (!isDragging.current) return;
-      isDragging.current = false;
-      if (e.changedTouches && e.changedTouches.length === 1) {
-        const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-        if (deltaY > 25 && !isOpen) {
-          setIsOpen(true);
-        }
-      }
-    };
-
-    window.addEventListener("touchstart", handleGlobalTouchStart, { passive: true });
-    window.addEventListener("touchend", handleGlobalTouchEnd, { passive: true });
-    return () => {
-      window.removeEventListener("touchstart", handleGlobalTouchStart);
-      window.removeEventListener("touchend", handleGlobalTouchEnd);
-    };
-  }, [isOpen]);
-
+  // Safe direct handle touch handlers (blocks Chrome pull-to-refresh on direct drag)
   const handleHandleTouchStart = useCallback((e) => {
     if (e.touches && e.touches.length === 1) {
       touchStartY.current = e.touches[0].clientY;
       isDragging.current = true;
+    }
+  }, []);
+
+  const handleHandleTouchMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    // Prevent Mobile Chrome pull-to-refresh while dragging handle
+    if (e.cancelable) {
+      e.preventDefault();
     }
   }, []);
 
@@ -111,9 +89,10 @@ export default function WorkspaceDeckDrawer({
     isDragging.current = false;
     if (e.changedTouches && e.changedTouches.length === 1) {
       const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-      if (deltaY > 20 && !isOpen) {
+      // Drag down > 15px opens drawer; drag up > 15px closes drawer
+      if (deltaY > 15 && !isOpen) {
         setIsOpen(true);
-      } else if (deltaY < -20 && isOpen) {
+      } else if (deltaY < -15 && isOpen) {
         setIsOpen(false);
       }
     }
@@ -141,7 +120,8 @@ export default function WorkspaceDeckDrawer({
 
   return (
     <div
-      className={`workspace-deck-drawer relative w-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${className}`}
+      className={`workspace-deck-drawer relative w-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] select-none ${className}`}
+      style={{ overscrollBehaviorY: "contain" }}
       role="region"
       aria-label="Android Quick Settings and Notification Shade"
     >
@@ -256,16 +236,17 @@ export default function WorkspaceDeckDrawer({
         </div>
       </div>
 
-      {/* ── ANDROID-STYLE GLOWING CAPACITIVE PULL HANDLE (UPPERMOST RAIL) ── */}
+      {/* ── ANDROID-STYLE GLOWING CAPACITIVE PULL HANDLE (1-TAP THUMB OPERABLE) ── */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         onTouchStart={handleHandleTouchStart}
+        onTouchMove={handleHandleTouchMove}
         onTouchEnd={handleHandleTouchEnd}
         aria-expanded={isOpen}
         aria-controls="workspace-deck-content"
-        aria-label={isOpen ? "Collapse Quick Settings Shade" : "Pull down Quick Settings Shade"}
-        className="group relative w-full flex items-center justify-between px-3 py-1 min-h-[44px] bg-surface/85 hover:bg-surface-variant/40 border-y border-surface-variant/30 backdrop-blur-xl transition-all duration-200 select-none active:scale-[0.99] touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent"
+        aria-label={isOpen ? "Collapse Command Deck Shade" : "Open Command Deck Shade"}
+        className="group relative w-full flex items-center justify-between px-3 py-1.5 min-h-[44px] bg-surface/85 hover:bg-surface-variant/40 border-y border-surface-variant/30 backdrop-blur-xl transition-all duration-200 select-none active:scale-[0.99] touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent"
       >
         {/* Left: Active Destination Micro-Label */}
         <div className="flex items-center gap-1.5 min-w-0">
@@ -280,7 +261,7 @@ export default function WorkspaceDeckDrawer({
           )}
         </div>
 
-        {/* Center: Glowing Gold Capacitive Handle Bar (Android notification shade cue) */}
+        {/* Center: Glowing Gold Capacitive Handle Bar (1-Tap Thumb Action) */}
         <div className="flex flex-col items-center justify-center gap-0.5 px-4 py-1">
           <div
             className="w-12 h-1 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-16 group-hover:shadow-[0_0_14px_rgba(var(--accent-rgb),0.85)] shadow-[0_0_8px_rgba(var(--accent-rgb),0.55)]"
@@ -291,7 +272,7 @@ export default function WorkspaceDeckDrawer({
         {/* Right: State Action Cue */}
         <div className="flex items-center gap-1 text-text-muted group-hover:text-gold-accent transition-colors">
           <span className="font-mono text-[12px] uppercase tracking-wider text-text-muted">
-            {isOpen ? "Tuck" : "Pull"}
+            {isOpen ? "Tuck" : "Deck"}
           </span>
           {isOpen ? (
             <ChevronUp size={14} className="shrink-0 transition-transform" aria-hidden="true" />

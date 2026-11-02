@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
@@ -262,6 +262,80 @@ export default function BottomNav() {
   const [shareToast, setShareToast] = useState("");
   const [activeUserRoles, setActiveUserRoles] = useState(["buyer"]);
   const [activatingRole, setActivatingRole] = useState(null);
+
+  const isDashboard = Boolean(pathname?.startsWith("/dashboard"));
+  const [isNavExpanded, setIsNavExpanded] = useState(!isDashboard);
+  const navTouchStartY = useRef(0);
+  const isNavDragging = useRef(false);
+
+  // Sync isNavExpanded when navigating between dashboard and other routes
+  useEffect(() => {
+    setIsNavExpanded(!pathname?.startsWith("/dashboard"));
+  }, [pathname]);
+
+  // Broadcast state to sync FAB positioning in page.js
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("scoutit:bottom-nav-state", {
+          detail: { expanded: isNavExpanded },
+        })
+      );
+    }
+  }, [isNavExpanded]);
+
+  // Auto-fade / tuck bottom nav on downward scroll to prevent dashboard clutter
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 40) {
+        setIsNavExpanded(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Back button integration: if bottom nav is pulled up on dashboard, pressing back tucks it
+  useEffect(() => {
+    if (isNavExpanded && isDashboard) {
+      return registerMobileBackAction(() => {
+        setIsNavExpanded(false);
+      }, { action: "bottom_nav_tuck" });
+    }
+  }, [isNavExpanded, isDashboard]);
+
+  const handleNavTouchStart = useCallback((e) => {
+    if (e.touches && e.touches.length === 1) {
+      navTouchStartY.current = e.touches[0].clientY;
+      isNavDragging.current = true;
+    }
+  }, []);
+
+  const handleNavTouchMove = useCallback((e) => {
+    if (!isNavDragging.current) return;
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleNavTouchEnd = useCallback((e) => {
+    if (!isNavDragging.current) return;
+    isNavDragging.current = false;
+    if (e.changedTouches && e.changedTouches.length === 1) {
+      const deltaY = e.changedTouches[0].clientY - navTouchStartY.current;
+      // Dragging UP (deltaY < -15) opens bottom nav
+      if (deltaY < -15 && !isNavExpanded) {
+        setIsNavExpanded(true);
+      }
+      // Dragging DOWN (deltaY > 15) collapses bottom nav
+      else if (deltaY > 15 && isNavExpanded) {
+        setIsNavExpanded(false);
+      }
+    }
+  }, [isNavExpanded]);
 
   // Back button integration: close sheets if open instead of kicking user home
   useEffect(() => {
@@ -676,56 +750,89 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="bottom-nav" aria-label="Main navigation">
-        {itemsToRender.map((item) => {
-          const active = item.href ? isActive(item.href) : false;
+      {/* ── DRAGGABLE UP / AUTO-FADE MOBILE BOTTOM QUICK ACCESS ── */}
+      <div
+        className={`bottom-nav-mobile-container fixed inset-x-0 bottom-0 z-[900] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] select-none md:hidden ${
+          isNavExpanded ? "translate-y-0" : "translate-y-[calc(100%-26px)]"
+        }`}
+        style={{ overscrollBehaviorY: "contain" }}
+        role="region"
+        aria-label="Bottom Navigation Drawer"
+      >
+        {/* Glowing Capacitive Handle Bar (Draggable UP / 1-Tap Thumb Toggle) */}
+        <button
+          type="button"
+          onClick={() => setIsNavExpanded((prev) => !prev)}
+          onTouchStart={handleNavTouchStart}
+          onTouchMove={handleNavTouchMove}
+          onTouchEnd={handleNavTouchEnd}
+          aria-expanded={isNavExpanded}
+          aria-label={isNavExpanded ? "Tuck Quick Access Navigation" : "Drag Up Quick Access Navigation"}
+          className="w-full min-h-[44px] flex flex-col items-center justify-center pt-2 pb-1 bg-surface/95 border-t border-surface-variant/50 backdrop-blur-2xl cursor-pointer select-none active:scale-[0.99] touch-none shadow-[0_-8px_20px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent"
+        >
+          <div className="w-12 h-1 rounded-full bg-gold-accent transition-all duration-300 shadow-[0_0_10px_rgba(var(--accent-rgb),0.6)]" />
+          <span className="font-mono text-[12px] font-bold uppercase tracking-widest text-gold-accent mt-0.5 flex items-center gap-1">
+            {isNavExpanded ? "▼ Tuck Quick Access" : "▲ Drag Up Quick Access"}
+          </span>
+        </button>
 
-          const content = (
-            <>
-              <span className="bottom-nav-icon">{item.icon}</span>
-              <span className="bottom-nav-label">{item.label}</span>
-              {active && <span className="bottom-nav-dot" aria-hidden="true" />}
-            </>
-          );
+        {/* Universal 6-Item Bottom Navigation Bar */}
+        <nav
+          className={`bottom-nav !static !flex !border-t-0 !pt-0.5 transition-opacity duration-300 ${
+            isNavExpanded ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+          aria-label="Main navigation"
+        >
+          {itemsToRender.map((item) => {
+            const active = item.href ? isActive(item.href) : false;
 
-          if (item.href) {
+            const content = (
+              <>
+                <span className="bottom-nav-icon">{item.icon}</span>
+                <span className="bottom-nav-label">{item.label}</span>
+                {active && <span className="bottom-nav-dot" aria-hidden="true" />}
+              </>
+            );
+
+            if (item.href) {
+              return (
+                <Link
+                  key={item.id || item.href}
+                  href={item.href}
+                  className={`bottom-nav-item${active ? " active" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                  aria-label={`Bottom Nav: ${item.label}`}
+                >
+                  {content}
+                </Link>
+              );
+            }
+
             return (
-              <Link
-                key={item.id || item.href}
-                href={item.href}
-                className={`bottom-nav-item${active ? " active" : ""}`}
-                aria-current={active ? "page" : undefined}
+              <button
+                key={item.id}
+                className="bottom-nav-item"
                 aria-label={`Bottom Nav: ${item.label}`}
+                onClick={() => {
+                  if (item.action === "open-role-sheet") {
+                    setRoleSheetOpen(true);
+                  } else if (item.action === "scoutit:open-mobile-menu") {
+                    const detail = { handled: false };
+                    window.dispatchEvent(new CustomEvent("scoutit:open-mobile-menu", { detail }));
+                    if (!detail.handled) {
+                      setRoleSheetOpen(true);
+                    }
+                  } else if (item.action === "open-theme-sheet") {
+                    setThemeSheetOpen(true);
+                  }
+                }}
               >
                 {content}
-              </Link>
+              </button>
             );
-          }
-
-          return (
-            <button
-              key={item.id}
-              className="bottom-nav-item"
-              aria-label={`Bottom Nav: ${item.label}`}
-              onClick={() => {
-                if (item.action === "open-role-sheet") {
-                  setRoleSheetOpen(true);
-                } else if (item.action === "scoutit:open-mobile-menu") {
-                  const detail = { handled: false };
-                  window.dispatchEvent(new CustomEvent("scoutit:open-mobile-menu", { detail }));
-                  if (!detail.handled) {
-                    setRoleSheetOpen(true);
-                  }
-                } else if (item.action === "open-theme-sheet") {
-                  setThemeSheetOpen(true);
-                }
-              }}
-            >
-              {content}
-            </button>
-          );
-        })}
-      </nav>
+          })}
+        </nav>
+      </div>
 
       {/* Theme Action Sheet */}
       {themeSheetOpen && (

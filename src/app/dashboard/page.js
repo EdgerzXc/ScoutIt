@@ -97,6 +97,17 @@ function DashboardInner() {
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [unreadInboxCount, setUnreadInboxCount] = useState(0);
   const [isWizardActive, setIsWizardActive] = useState(false);
+  const [isBottomNavExpanded, setIsBottomNavExpanded] = useState(false);
+
+  useEffect(() => {
+    const handleNavState = (e) => {
+      if (typeof e?.detail?.expanded === "boolean") {
+        setIsBottomNavExpanded(e.detail.expanded);
+      }
+    };
+    window.addEventListener("scoutit:bottom-nav-state", handleNavState);
+    return () => window.removeEventListener("scoutit:bottom-nav-state", handleNavState);
+  }, []);
 
   useEffect(() => {
     const handleWizardState = (e) => {
@@ -830,8 +841,12 @@ function DashboardInner() {
           for modes that define one — see PRIMARY_ACTIONS above. */}
       {primaryAction && (
       <button
-        className="md:hidden fixed right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(var(--accent-rgb),0.4)] hover:opacity-90 transition-[transform,opacity] duration-150 ease-out active:scale-[0.94] touch-manipulation border-2 border-surface-alt"
-        style={{ bottom: "calc(var(--mobile-nav-height, 82px) + 16px)" }}
+        className="md:hidden fixed right-4 z-40 bg-gold-accent text-background w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(var(--accent-rgb),0.4)] hover:opacity-90 transition-[transform,opacity,bottom] duration-300 ease-out active:scale-[0.94] touch-manipulation border-2 border-surface-alt"
+        style={{
+          bottom: isBottomNavExpanded
+            ? "calc(var(--mobile-nav-height, 82px) + 56px)"
+            : "max(38px, calc(32px + env(safe-area-inset-bottom)))",
+        }}
         onClick={firePrimaryAction}
         aria-label={primaryAction.label}
       >
