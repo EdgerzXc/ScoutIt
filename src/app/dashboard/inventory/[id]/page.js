@@ -8,13 +8,12 @@ import { DashboardProvider, useDashboard } from "../../../../context/DashboardCo
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import InventoryGridManager from "../../../../components/dashboard/InventoryGridManager";
 import DelegationRequests from "../../../../components/dashboard/DelegationRequests";
-import { getCurrentTier } from "../../../../lib/entitlements";
 import { getSession } from "../../../../lib/authClient";
 
 function InventoryInner({ params }) {
   const router = useRouter();
   const { id } = use(params);
-  const { listings, currentUser, addToast, getCurrentTier } = useDashboard();
+  const { listings, addToast, getCurrentTier } = useDashboard();
   
   useEffect(() => {
     if (listings.length > 0 && !listings.find(l => String(l.id) === String(id))) {

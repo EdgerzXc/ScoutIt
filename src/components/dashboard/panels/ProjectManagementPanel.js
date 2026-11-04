@@ -96,7 +96,7 @@ export default function ProjectManagementPanel({ properties = [] }) {
             <div className="absolute top-8 left-0 w-[55%] h-1 bg-gold-accent rounded-full shadow-[0_0_10px_rgba(var(--accent-rgb),0.5)]"></div>
 
             <div className="relative flex justify-between">
-              {SAMPLE_MILESTONES.map((milestone, idx) => (
+              {SAMPLE_MILESTONES.map((milestone) => (
               <div key={milestone.id} className="flex flex-col items-center gap-3 w-24 relative -ml-12 first:ml-0 last:-mr-12">
                 <div className={`w-4 h-4 rounded-full z-10 border-2 ${
                   milestone.status === 'completed' ? 'bg-gold-accent border-gold-accent shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)]' : 

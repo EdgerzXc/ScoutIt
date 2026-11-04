@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { X, Plus, Trash2, Star } from "lucide-react";
 import { UNIT_TYPES, estimateCapacity } from "../../lib/unitMasterPage";
 import { unitDetailPath } from "../../lib/propertyRoutes";
@@ -33,7 +33,7 @@ function Field({ label, hint, children }) {
   );
 }
 
-export default function UnitDetailsDrawer({ unit, isPro, propertyId, property, onField, onDetail, onScenarios, onClose }) {
+export default function UnitDetailsDrawer({ unit, propertyId, property, onField, onDetail, onScenarios, onClose }) {
   const d = unit.details || {};
   const scenarios = Array.isArray(unit.subdivisionScenarios) ? unit.subdivisionScenarios : [];
 

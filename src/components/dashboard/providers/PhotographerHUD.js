@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Camera, Check, ExternalLink, ShieldCheck, Plane, Sparkles, Building2, ChevronRight } from "lucide-react";
+import { Camera, Check, ExternalLink, ShieldCheck, Plane, Sparkles, Building2 } from "lucide-react";
 
 const safePortfolioUrl = (raw) => {
   if (!raw || typeof raw !== "string") return "#";
@@ -33,14 +33,14 @@ const ToggleSwitch = ({ label, checked, onChange, gold = false }) => (
   </div>
 );
 
-export default function PhotographerHUD({ projects = [], activeProjectId, setActiveProjectId, setActiveProjectDetails }) {
+export default function PhotographerHUD({ projects = [], activeProjectId, setActiveProjectId }) {
   const [activeTab, setActiveTab] = useState("bounties"); // 'bounties' | 'showcase'
   
   // Showcase State (Core)
-  const [gear, setGear] = useState("Sony A7S III, DJI Mavic 3 Pro, 16-35mm G Master");
-  const [portfolio, setPortfolio] = useState("https://behance.net/scoutit-photog");
+  const [gear, setGear] = useState("");
+  const [portfolio, setPortfolio] = useState("");
   const [baseRate, setBaseRate] = useState("15"); // in connects
-  const [specialty, setSpecialty] = useState("Twilight Exteriors & Drone Aerials");
+  const [specialty, setSpecialty] = useState("");
 
   // Showcase State (Deep Council Metrics)
   const [acceptingProjects, setAcceptingProjects] = useState(true);
@@ -121,10 +121,15 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
     }
   };
 
+  useEffect(() => {
+    if (activeProjectId && !projects.some(p => p.id === activeProjectId)) {
+      setActiveProjectId(null);
+    }
+  }, [activeProjectId, projects, setActiveProjectId]);
+
   if (activeProjectId) {
     const project = projects.find(p => p.id === activeProjectId);
     if (!project) {
-      setActiveProjectId(null);
       return null;
     }
     return (
@@ -266,7 +271,8 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
                       type="text" 
                       value={specialty}
                       onChange={(e) => setSpecialty(e.target.value)}
-                      className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface" 
+                      placeholder="e.g. Twilight Exteriors & Drone Aerials"
+                      className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface placeholder:text-text-muted" 
                     />
                   </div>
                   <div>
@@ -289,7 +295,8 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
                     type="text" 
                     value={portfolio}
                     onChange={(e) => setPortfolio(e.target.value)}
-                    className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface" 
+                    placeholder="https://behance.net/your-handle"
+                    className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface placeholder:text-text-muted" 
                   />
                 </div>
 
@@ -298,7 +305,8 @@ export default function PhotographerHUD({ projects = [], activeProjectId, setAct
                   <textarea 
                     value={gear}
                     onChange={(e) => setGear(e.target.value)}
-                    className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface min-h-[60px]" 
+                    placeholder="e.g. Sony A7S III, DJI Mavic 3 Pro, 16-35mm G Master"
+                    className="w-full bg-surface-alt border border-surface-variant rounded p-3 text-sm focus:outline-none focus:border-gold-accent text-on-surface min-h-[60px] placeholder:text-text-muted" 
                   />
                 </div>
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, AlertTriangle, Calendar, ShieldCheck } from "lucide-react";
+import { Search, AlertTriangle, Calendar } from "lucide-react";
 import { PIPELINE_COLUMNS as COLUMNS, columnIdForDeal } from "@/lib/deals/dealStages";
 
 export { columnIdForDeal, COLUMNS };

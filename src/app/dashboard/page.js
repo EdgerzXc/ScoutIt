@@ -18,7 +18,7 @@ import Toasts from "../../components/ui/Toasts";
 import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
 import WorkspaceDeckDrawer from "../../components/dashboard/WorkspaceDeckDrawer";
-import { deckNeighbors } from "../../lib/workspaceDeck";
+import { deckNeighbors, isPipelineRole } from "../../lib/workspaceDeck";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
 import { loadDeals } from "../../lib/deals/dealsClient";
@@ -28,6 +28,7 @@ import AtmosphereBackground from "../../components/ui/AtmosphereBackground";
 import { getSession, getUser, signOut } from "../../lib/authClient";
 import {
   canAccessDashboardWorkspace,
+  getHeldRoles,
   inferProviderType,
   normalizeDashboardMode,
   normalizeDashboardModes,
@@ -207,11 +208,7 @@ function DashboardInner() {
       hostname: window.location.hostname,
     });
     if (developmentUser?.id === currentUser.id) return;
-    const rawHeldRoles = [
-      ...(Array.isArray(currentUser.active_roles) ? currentUser.active_roles : []),
-      currentUser.primary_mode,
-      currentUser.role,
-    ].filter(Boolean);
+    const rawHeldRoles = getHeldRoles(currentUser);
     const tags = normalizeDashboardModes(
       currentUser.active_roles,
       currentUser.primary_mode || currentUser.role,
@@ -281,27 +278,21 @@ function DashboardInner() {
     return () => { cancelled = true; };
   }, [user]);
 
-  useEffect(() => {
-    const handleOpenMobileMenu = (e) => {
-      if (e?.detail) e.detail.handled = true;
-      setShowMobileProfileMenu(true);
-    };
-    const handleSwitchWorkspace = (e) => {
-      const target = e?.detail?.role;
-      if (!target || !user) return;
-      const heldRoles = [
-        ...(Array.isArray(user.active_roles) ? user.active_roles : []),
-        ...(Array.isArray(user.tags) ? user.tags : []),
-        user.role,
-      ].filter(Boolean);
-      if (!canAccessDashboardWorkspace(target, heldRoles)) {
-        addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
-        return;
-      }
-      const nextMode = normalizeDashboardMode(target);
-      if (!nextMode) return;
-      const nextProviderType = inferProviderType(target, user.providerType);
+  const applyWorkspaceSwitch = useCallback((targetRole, { updateUrl = true, notify = true, closeMenus = false } = {}) => {
+    if (!targetRole || !user) return false;
+    const held = getHeldRoles(user);
+    if (!canAccessDashboardWorkspace(targetRole, held)) {
+      addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
+      return false;
+    }
+    const nextMode = normalizeDashboardMode(targetRole);
+    if (!nextMode) return false;
+    const nextProviderType = inferProviderType(targetRole, user.providerType);
+
+    if (mode !== nextMode) {
       setMode(nextMode);
+    }
+    if (user.primaryMode !== nextMode || (nextProviderType && user.providerType !== nextProviderType)) {
       setUser((prev) =>
         prev
           ? {
@@ -311,14 +302,44 @@ function DashboardInner() {
             }
           : prev
       );
+    }
+
+    if (closeMenus) {
+      setShowDesktopSwitcher(false);
+      setShowMobileProfileMenu(false);
+    }
+
+    if (updateUrl && typeof window !== "undefined") {
       try {
         const url = new URL(window.location.href);
-        url.searchParams.set("role", target);
+        url.searchParams.set("role", targetRole);
         window.history.replaceState(null, "", url.toString());
       } catch {}
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: target, mode: nextMode } }));
+    }
+
+    if (notify && typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("scoutit:workspace-changed", {
+          detail: { role: targetRole, mode: nextMode },
+        })
+      );
+    }
+    return true;
+  }, [user, mode, addToast]);
+
+  useEffect(() => {
+    const handleOpenMobileMenu = (e) => {
+      if (e?.detail) e.detail.handled = true;
+      setShowMobileProfileMenu(true);
+    };
+    const handleSwitchWorkspace = (e) => {
+      const target = e?.detail?.role;
+      if (!target || !user) return;
+      if (!canAccessDashboardWorkspace(target, getHeldRoles(user))) {
+        addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
+        return;
       }
+      applyWorkspaceSwitch(target);
     };
     window.addEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
     window.addEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
@@ -326,44 +347,21 @@ function DashboardInner() {
       window.removeEventListener("scoutit:open-mobile-menu", handleOpenMobileMenu);
       window.removeEventListener("scoutit:switch-workspace", handleSwitchWorkspace);
     };
-  }, [user, addToast]);
+  }, [applyWorkspaceSwitch, user, addToast]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !user) return;
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
       const requestedRole = params.get("role") || params.get("mode");
-      if (!requestedRole) return;
-      const heldRoles = [
-        ...(Array.isArray(user.active_roles) ? user.active_roles : []),
-        ...(Array.isArray(user.tags) ? user.tags : []),
-        user.role,
-      ].filter(Boolean);
-      if (!canAccessDashboardWorkspace(requestedRole, heldRoles)) {
-        return;
-      }
-      const nextMode = normalizeDashboardMode(requestedRole);
-      if (!nextMode) return;
-      const nextProviderType = inferProviderType(requestedRole, user.providerType);
-      if (mode !== nextMode) {
-        setMode(nextMode);
-      }
-      if (user.primaryMode !== nextMode || (nextProviderType && user.providerType !== nextProviderType)) {
-        setUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                primaryMode: nextMode,
-                ...(nextProviderType ? { providerType: nextProviderType } : {}),
-              }
-            : prev
-        );
+      if (requestedRole && canAccessDashboardWorkspace(requestedRole, getHeldRoles(user))) {
+        applyWorkspaceSwitch(requestedRole, { updateUrl: false, notify: false });
       }
     };
     syncFromUrl();
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
-  }, [user, mode]);
+  }, [user, applyWorkspaceSwitch]);
 
   // Click outside to close desktop switcher
   useEffect(() => {
@@ -400,11 +398,7 @@ function DashboardInner() {
     );
   }
 
-  const heldRoles = [
-    ...(Array.isArray(user?.active_roles) ? user.active_roles : []),
-    ...(Array.isArray(user?.tags) ? user.tags : []),
-    user?.role,
-  ].filter(Boolean);
+  const heldRoles = getHeldRoles(user);
 
   const isRoleUnlocked = (opt) => canAccessDashboardWorkspace(opt.id, heldRoles);
 
@@ -429,34 +423,7 @@ function DashboardInner() {
   };
 
   const handleSwitchMode = (newMode) => {
-    if (!canAccessDashboardWorkspace(newMode, heldRoles)) {
-      addToast?.("Activate that role in Settings first to unlock its workspace.", "⚠️");
-      return;
-    }
-    const resolvedMode = normalizeDashboardMode(newMode) || newMode;
-    const resolvedProviderType = inferProviderType(newMode, user?.providerType);
-    setMode(resolvedMode);
-    setShowDesktopSwitcher(false);
-    setShowMobileProfileMenu(false);
-    
-    // Optimistically update the in-memory display mode. Supabase remains the
-    // identity authority; authenticated profile data is never browser-cached.
-    const updatedUser = {
-      ...user,
-      primaryMode: resolvedMode,
-      ...(resolvedProviderType ? { providerType: resolvedProviderType } : {}),
-    };
-    setUser(updatedUser);
-
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set("role", newMode);
-      window.history.replaceState(null, "", url.toString());
-    } catch {}
-
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: newMode, mode: resolvedMode } }));
-    }
+    applyWorkspaceSwitch(newMode, { closeMenus: true });
   };
 
   const renderActiveMode = () => {
@@ -518,10 +485,6 @@ function DashboardInner() {
   const currentWorkspaceLabel = mode === "provider"
     ? (user?.providerType === "designer" ? "Event & Concept Designer" : (user?.providerType === "researcher" ? "Zoning & Land Researcher" : "Spatial Photographer"))
     : (mode === "broker" && user?.role === "salesperson" ? "Real Estate Salesperson" : (TAG_LABELS[mode] || "Workspace"));
-
-  const currentWorkspacePillText = mode === "provider"
-    ? (user?.providerType === "designer" ? "Designer" : (user?.providerType === "researcher" ? "Researcher" : "Photographer"))
-    : (mode === "broker" && user?.role === "salesperson" ? "Salesperson" : (TAG_LABELS[mode] ? TAG_LABELS[mode].split(" ")[0] : "Workspace"));
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -603,13 +566,23 @@ function DashboardInner() {
                     >
                       Open Gate ↗
                     </Link>
-                    <Link
-                      href="/dashboard/crm"
-                      onClick={() => setShowDesktopSwitcher(false)}
-                      className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
-                    >
-                      Master CRM ↗
-                    </Link>
+                    {isPipelineRole(heldRoles) ? (
+                      <Link
+                        href="/dashboard/crm"
+                        onClick={() => setShowDesktopSwitcher(false)}
+                        className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                      >
+                        Master CRM ↗
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/property"
+                        onClick={() => setShowDesktopSwitcher(false)}
+                        className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+                      >
+                        Explore Spaces ↗
+                      </Link>
+                    )}
                   </div>
                   {missingLenses(user.tags).length > 0 && (
                     <div className="border-t border-surface-variant px-4 py-2.5 bg-surface-alt/60">
@@ -782,41 +755,20 @@ function DashboardInner() {
 
       {/* Row 2: Mobile Workspace Deck Command Bar (Android-style glowing capacitive pull-down drawer) */}
       <div className="md:hidden w-full px-3 pb-1 pt-0.5 border-t border-surface-variant/40">
-        <WorkspaceDeckDrawer active="workspace" badges={{ inbox: unreadInboxCount }} isWizardActive={isWizardActive} />
+        <WorkspaceDeckDrawer active="workspace" badges={{ inbox: unreadInboxCount }} isWizardActive={isWizardActive} mode={mode} />
       </div>
     </header>
 
       {/* Main Content Area (Mode determined) */}
       <DeckPanel leftHref={deckNav.leftHref} rightHref={deckNav.rightHref}>
       <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:p-6">
-        {/* Urgent Cross-Workspace Attention Signal: hidden when nominal to prevent duplicating top bar tabs */}
-        <div className={unreadCount > 0 || unreadInboxCount > 0 ? "mb-5" : "hidden"} aria-hidden={!(unreadCount > 0 || unreadInboxCount > 0)}>
-          <AttentionRail mockUserId={user.id} className="mb-4" />
-        </div>
-
-        {/* Workspace Identity Lens Indicator (Unambiguous context for multi-role users with zero interactive clutter) */}
-        {!isWizardActive && (
-          <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-surface-variant/40">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-gold-accent shrink-0 animate-pulse" />
-              <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">
-                Active Workspace:
-              </span>
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-gold-bright truncate">
-                {currentWorkspaceLabel}
-              </span>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 font-mono text-[12px] text-text-muted">
-              <span className="uppercase">Role:</span>
-              <span className="text-gold-accent font-semibold uppercase">{mode}</span>
-            </div>
-          </div>
-        )}
+        {/* Cross-Workspace Attention Signal: auto-surfaces when actions are waiting (Inbox, CRM tasks, or viewings) */}
+        <AttentionRail mockUserId={user.id} hideWhenClear={true} className="mb-5" />
 
         {/* Desktop Workspace Deck Command Bar (Exact operating parity with CRM, Inbox & Calendar desktop views, auto-tucked during property creation) */}
         {!isWizardActive && (
-          <div className="hidden md:block mb-6 max-w-2xl">
-            <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} />
+          <div className={`hidden md:block mb-6 ${!isPipelineRole([mode]) ? "max-w-md" : "max-w-2xl"}`}>
+            <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} mode={mode} />
           </div>
         )}
 

@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Building2, Cog, X, DoorOpen, MessageSquare, Compass, ChevronRight, SlidersHorizontal } from "lucide-react";
 import InventoryGridManager from "./InventoryGridManager";
-import { getSession } from "../../lib/authClient";
 import { useDashboard } from "../../context/DashboardContext";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
 

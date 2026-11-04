@@ -196,7 +196,7 @@ const renderTextWithLinks = (
         if (["http:", "https:"].includes(parsed.protocol)) {
           safeUrl = parsed.href;
         }
-      } catch (e) {}
+      } catch {}
 
       return (
         <a
@@ -1705,7 +1705,7 @@ export default function ChatBox({
         {loadError && (
           <p className="text-center text-xs text-error font-mono">{loadError}</p>
         )}
-        {!loading && !loadError && messages.map((msg, index) => {
+        {!loading && !loadError && messages.map((msg) => {
           const isMe = msg.sender === 'me';
           return (
             <motion.div 

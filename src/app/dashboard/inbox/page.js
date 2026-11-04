@@ -372,7 +372,7 @@ function InboxInner() {
               )}
             </p>
 
-            <WorkspaceCommandBar active="inbox" badges={{ inbox: activeUnread }} className="mt-4" />
+            <WorkspaceCommandBar active="inbox" badges={{ inbox: activeUnread }} mode={isPipelineRole(currentUser?.active_roles) ? "owner" : "buyer"} className="mt-4" />
 
             {/* Three-State Inbox Tab Bar (Section 38) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">

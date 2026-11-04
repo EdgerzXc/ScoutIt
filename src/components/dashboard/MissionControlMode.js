@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { 
   LayoutDashboard, Building2, Users, ClipboardList, 
@@ -195,9 +195,8 @@ export default function MissionControlMode() {
     return () => { alive = false; };
   }, []);
   const [adminActiveTab, setAdminActiveTab] = useState('Organization Profile');
-  const [orgName, setOrgName] = useState("Acme Holdings");
-  const [orgDomain, setOrgDomain] = useState("acme-holdings.com");
-  const [is2FAEnforced, setIs2FAEnforced] = useState(true);
+  const [orgName, setOrgName] = useState("");
+  const [orgDomain, setOrgDomain] = useState("");
 
   const [inventoryStats, setInventoryStats] = useState({ total: 0, occupied: 0, vacant: 0, maintenance: 0 });
   const [isEnterprise, setIsEnterprise] = useState(false);
@@ -246,12 +245,18 @@ export default function MissionControlMode() {
   }, [isEnterprise]);
 
   // Hard-scoped to only the Enterprise's own properties
-  const scoped = listings.filter((l) => l.ownerId === currentUser?.id);
-  const scopedPitches = (pitches || []).filter((p) => p.isCurrentUserOwner);
+  const scoped = useMemo(
+    () => listings.filter((l) => l.ownerId === currentUser?.id),
+    [listings, currentUser?.id]
+  );
+  const scopedPitches = useMemo(
+    () => (pitches || []).filter((p) => p.isCurrentUserOwner),
+    [pitches]
+  );
 
   // Sync active estate when scoped changes
   useEffect(() => {
-    if (scoped.length > 0 && !activeEstateId) {
+    if (scoped.length > 0 && (!activeEstateId || !scoped.some((s) => s.id === activeEstateId))) {
       setActiveEstateId(scoped[0].id);
     }
   }, [scoped, activeEstateId]);
@@ -260,7 +265,7 @@ export default function MissionControlMode() {
     total: scoped.length,
     approved: scoped.filter((l) => l.pipelineStatus === "approved").length,
     pending: scoped.filter((l) => l.pipelineStatus === "pending" || l.pipelineStatus === "draft").length,
-    newLeads: scopedPitches.filter((p) => p.status === "pending").length || scopedPitches.length,
+    newLeads: scopedPitches.filter((p) => p.status === "pending").length,
     drafting: scoped.filter((l) => l.pipelineStatus === "draft" || l.pipelineStatus === "ai_drafting").length,
   };
 
@@ -329,7 +334,7 @@ export default function MissionControlMode() {
     try {
       await Promise.all(idsToDelete.map(id => closeListing(id)));
       addToast(`Successfully deleted ${idsToDelete.length} properties.`, "✅");
-    } catch (e) {
+    } catch {
       addToast("Error deleting some properties.", "❌");
     } finally {
       setIsDeleting(false);
@@ -1244,7 +1249,8 @@ export default function MissionControlMode() {
                           type="text" 
                           value={orgName} 
                           onChange={e => setOrgName(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent transition" 
+                          placeholder="e.g. Acme Holdings"
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted" 
                         />
                       </div>
                       
@@ -1254,7 +1260,8 @@ export default function MissionControlMode() {
                           type="text" 
                           value={orgDomain} 
                           onChange={e => setOrgDomain(e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent transition" 
+                          placeholder="e.g. acme-holdings.com"
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-base md:text-sm text-white focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted" 
                         />
                       </div>
 
@@ -1271,26 +1278,22 @@ export default function MissionControlMode() {
                   </GlassPanel>
                 )}
 
-                {(adminActiveTab === 'Security & Access' || adminActiveTab === 'Organization Profile') && (
+                {adminActiveTab === 'Security & Access' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in">
                     <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-emerald-500/20 transition">
-                      <h4 className="text-white font-medium text-sm mb-2">Security</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-white font-medium text-sm">Security</h4>
+                        <span className="text-[12px] font-mono uppercase tracking-wider text-text-muted bg-white/5 px-2 py-0.5 rounded">Phase 2</span>
+                      </div>
                       <p className="text-xs text-text-secondary mb-4">Require Two-Factor Authentication for all team members.</p>
-                      <button type="button"
-                        onClick={() => {
-                          setIs2FAEnforced(!is2FAEnforced);
-                          addToast(`2FA Enforcement ${!is2FAEnforced ? 'Enabled' : 'Disabled'}`, "●");
-                        }}
-                        className="flex items-center gap-2 cursor-pointer w-fit text-left min-h-[44px] py-1"
-                        aria-label="Toggle 2FA Enforcement"
-                      >
-                        <div className={`w-8 h-4 rounded-full relative transition duration-300 ${is2FAEnforced ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
-                          <div className={`absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 ${is2FAEnforced ? 'right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_color-mix(in_srgb,var(--green)_50%,transparent)]' : 'left-0 bg-white/40'}`} />
+                      <div className="flex items-center gap-2 w-fit text-left min-h-[44px] py-1 opacity-70 cursor-not-allowed" title="2FA policy enforcement opens in Phase 2">
+                        <div className="w-8 h-4 rounded-full relative transition duration-300 bg-emerald-500/20">
+                          <div className="absolute top-0 bottom-0 w-4 rounded-full shadow-lg transition duration-300 right-0 bg-emerald-500 scale-110 shadow-[0_0_10px_color-mix(in_srgb,var(--green)_50%,transparent)]" />
                         </div>
-                        <span className={`text-xs ${is2FAEnforced ? 'text-emerald-400' : 'text-text-secondary'}`}>
-                          {is2FAEnforced ? 'Enforced' : 'Optional'}
+                        <span className="text-xs text-emerald-400">
+                          Enforced · Phase 2
                         </span>
-                      </button>
+                      </div>
                     </GlassPanel>
 
                     <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition cursor-pointer">

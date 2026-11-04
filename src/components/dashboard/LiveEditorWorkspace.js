@@ -7,12 +7,11 @@ import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import PhotoUploader from "./PhotoUploader";
 import GeoPricingGauge from "./GeoPricingGauge";
-import { getCurrentTier } from "../../lib/entitlements";
 import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
 import { useDashboard } from "../../context/DashboardContext";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
-import { FileEdit, Eye, ArrowRight, Save } from "lucide-react";
+import { FileEdit, Eye } from "lucide-react";
 import { registerMobileBackAction, triggerMobileBack } from "@/lib/mobileBackStack";
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
   const { currentUser, addToast } = useDashboard();
@@ -31,11 +30,8 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     details: initialData?.details || {},
   });
 
-  const isPro = getCurrentTier() !== "starry";
-
   const [lastSaved, setLastSaved] = useState(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
-  const [isBulkEdit, setIsBulkEdit] = useState(false);
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -344,12 +340,6 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
     : Math.round((filledPublicFieldsCount / totalPublicFieldsCount) * 100);
 
   const isPublishable = isE2E ? true : (Object.values(mustHaves).every(Boolean) && completionPercentage >= 70);
-
-  const getProgressColor = () => {
-    if (completionPercentage >= 70) return "bg-success";
-    if (completionPercentage >= 40) return "bg-gold-accent";
-    return "bg-error";
-  };
 
   const handlePublish = useCallback(() => {
     if (isPublishable) {

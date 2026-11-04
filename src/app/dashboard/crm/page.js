@@ -5,7 +5,7 @@ import { DashboardProvider, useDashboard } from "../../../context/DashboardConte
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import AtmosphereBackground from "../../../components/ui/AtmosphereBackground";
 import DeckPanel from "../../../components/dashboard/DeckPanel";
-import { deckNeighbors } from "../../../lib/workspaceDeck";
+import { deckNeighbors, isPipelineRole } from "../../../lib/workspaceDeck";
 import KanbanBoard from "../../../components/dashboard/crm/KanbanBoard";
 import AppointmentsSheet from "../../../components/dashboard/crm/AppointmentsSheet";
 import DealFileSlideOver from "../../../components/dashboard/crm/DealFileSlideOver";
@@ -75,10 +75,11 @@ function CRMPageInner() {
   // as identity) and the menu always offered owner+broker. Both now derive
   // from the server profile: only held lenses are offered, defaulting to the
   // dashboard's last mode when held, else owner.
+  const isPipeline = isPipelineRole(currentUser?.active_roles);
   const heldLenses = (Array.isArray(currentUser?.active_roles) ? currentUser.active_roles : [])
     .map(normalizeDashboardMode)
     .filter((role) => role === "owner" || role === "broker");
-  const lensOptions = heldLenses.length > 0 ? [...new Set(heldLenses)] : ["owner", "broker"];
+  const lensOptions = heldLenses.length > 0 ? [...new Set(heldLenses)] : (isPipeline ? ["owner", "broker"] : []);
 
   // Default the lens to the mode the dashboard was last in.
   useEffect(() => {
@@ -87,10 +88,10 @@ function CRMPageInner() {
       const lastMode = normalizeDashboardMode(saved.primaryMode);
       if (lastMode === "broker" && lensOptions.includes("broker")) setViewingAs("broker");
       else if (lensOptions.includes("owner")) setViewingAs("owner");
-      else setViewingAs(lensOptions[0]);
-    } catch (e) {
+      else if (lensOptions.length > 0) setViewingAs(lensOptions[0]);
+    } catch {
       if (lensOptions.includes("owner")) setViewingAs("owner");
-      else setViewingAs(lensOptions[0]);
+      else if (lensOptions.length > 0) setViewingAs(lensOptions[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [identityResolved]);
@@ -112,7 +113,7 @@ function CRMPageInner() {
   }, []);
 
   const fetchData = useCallback(async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !isPipelineRole(currentUser?.active_roles)) return;
     // allSettled so one failing feed doesn't blank the other (e.g. an
     // appointments error must not hide the deal pipeline).
     const [dealsRes, apptsRes, contactsRes] = await Promise.allSettled([
@@ -288,6 +289,33 @@ function CRMPageInner() {
     );
   }
 
+  if (!isPipeline) {
+    return (
+      <div role="main" className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen h-dvh px-6 relative">
+        <AtmosphereBackground variant="dashboard" />
+        <span className="font-label-caps text-gold-accent tracking-widest uppercase text-label-caps relative z-10">Deal Intelligence</span>
+        <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">Pipeline Workspace Unavailable</h1>
+        <p className="relative z-10 max-w-md font-body text-base leading-relaxed text-text-secondary">
+          ScoutIt CRM is reserved for Property Owners and Accredited Brokers managing listings, clients, and deal rooms.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center gap-3 relative z-10 mt-2">
+          <Link
+            href="/dashboard"
+            className="min-h-11 rounded border border-gold-accent px-6 py-3 font-label-caps text-label-caps uppercase tracking-widest text-gold-accent transition-colors duration-200 ease-out hover:bg-gold-accent hover:text-background"
+          >
+            ← Return to Workspace
+          </Link>
+          <Link
+            href="/settings"
+            className="min-h-11 rounded border border-surface-variant bg-surface px-6 py-3 font-label-caps text-label-caps uppercase tracking-widest text-text-secondary hover:text-gold-accent hover:border-gold-accent/40 transition-colors"
+          >
+            Activate Roles in Settings ↗
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   // Derived KPIs — computed from the user's real deals only.
   // An imported lead is an active pipeline entry and counts as one, but it is
   // never allowed to move a ScoutIt-earned number: a "closed" row in a
@@ -391,7 +419,7 @@ function CRMPageInner() {
         </div>
       </div>
 
-      <WorkspaceCommandBar active="crm" className="relative z-20 mb-6 w-full md:max-w-xl" />
+      <WorkspaceCommandBar active="crm" mode={viewingAs || "owner"} className="relative z-20 mb-6 w-full md:max-w-xl" />
 
       {/* KPI Strip.
           While the pipeline is still loading these show a placeholder rather

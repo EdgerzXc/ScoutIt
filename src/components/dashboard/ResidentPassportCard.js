@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, Award, FileCheck, Copy, Check, Lock, ChevronDown, ChevronUp, Flag, AlertCircle, X } from "lucide-react";
+import { ShieldCheck, Award, Copy, Check, Lock, ChevronDown, ChevronUp, Flag, X } from "lucide-react";
 import { generateResidentPassport, PASSPORT_SCOPES } from "@/lib/scoring/residentPassport";
 
 /**

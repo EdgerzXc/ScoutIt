@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BriefcaseBusiness, CalendarDays, LayoutGrid, MessageSquareText } from "lucide-react";
+import { isPipelineRole } from "@/lib/workspaceDeck";
 
 const DESTINATIONS = [
   {
@@ -37,18 +38,37 @@ const DESTINATIONS = [
  * Keeping this in one component makes Workspace, Inbox, CRM and Calendar
  * feel like views of the same system instead of unrelated tools.
  *
- * A-205 (Workspace Deck): the bar is the deck's tab strip — the same four
- * destinations the swipe gesture moves between, in the same order. `badges`
- * carries unread counts keyed by destination id (e.g. { inbox: 3 }); unknown
- * or zero counts render nothing, never a guessed zero.
+ * A-205 (Workspace Deck) & A-295: the bar is the deck's tab strip.
+ * For non-pipeline roles (buyer / seeker / exploring), CRM and Calendar
+ * are omitted so seekers only see their relevant deal deck (Workspace & Inbox).
+ * Pipeline roles (owner / broker / salesperson) receive all four tools.
  */
-export default function WorkspaceCommandBar({ active, badges = {}, roleLabel = null, className = "" }) {
+export default function WorkspaceCommandBar({
+  active,
+  badges = {},
+  roleLabel = null,
+  className = "",
+  mode = "owner",
+}) {
+  const isPipeline = Array.isArray(mode)
+    ? isPipelineRole(mode)
+    : (mode ? isPipelineRole([mode]) : true);
+
+  const visibleDestinations = DESTINATIONS.filter((d) => {
+    if (d.id === "crm") {
+      return isPipeline;
+    }
+    return true;
+  });
+
+  const gridClass = visibleDestinations.length === 3 ? "grid-cols-3" : "grid-cols-4";
+
   return (
     <nav
       aria-label="Deal workspace"
-      className={`grid grid-cols-4 gap-1 rounded-lg border border-gold-accent/20 bg-surface/75 p-1.5 backdrop-blur-xl ${className}`}
+      className={`grid ${gridClass} gap-1 rounded-lg border border-gold-accent/20 bg-surface/75 p-1.5 backdrop-blur-xl ${className}`}
     >
-      {DESTINATIONS.map(({ id, href, label, detail, Icon }) => {
+      {visibleDestinations.map(({ id, href, label, detail, Icon }) => {
         const selected = active === id;
         const displayLabel = id === "workspace" && roleLabel ? roleLabel : label;
         const displayDetail = id === "workspace" && roleLabel ? "Workspace" : detail;

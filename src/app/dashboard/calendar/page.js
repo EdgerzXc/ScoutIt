@@ -3,14 +3,19 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import DeckPanel from "@/components/dashboard/DeckPanel";
 import { deckNeighbors } from "@/lib/workspaceDeck";
-import { DashboardProvider } from "@/context/DashboardContext";
+import { DashboardProvider, useDashboard } from "@/context/DashboardContext";
 import CalendarShell from "@/components/calendar/CalendarShell";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
+import { isPipelineRole } from "@/lib/workspaceDeck";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 function CalendarInner() {
+  const { currentUser } = useDashboard();
+  const isPipeline = isPipelineRole(currentUser?.active_roles);
+  const activeMode = isPipeline ? "owner" : "buyer";
+
   return (
     <DashboardLayout>
       {/* A-205 Workspace Deck: Calendar closes the deck — swipe-right returns
@@ -39,7 +44,7 @@ function CalendarInner() {
           <p className="text-sm sm:text-base text-text-secondary -mt-1 mb-4">
             Live property viewings, personal events, and host availability in one place.
           </p>
-          <WorkspaceCommandBar active="calendar" className="mb-5 w-full md:max-w-xl" />
+          <WorkspaceCommandBar active="calendar" mode={activeMode} className="mb-5 w-full md:max-w-xl" />
           {/* Give the calendar surface real height to render month/week grids. */}
           <div className="flex flex-col min-h-[560px]">
             <CalendarShell />

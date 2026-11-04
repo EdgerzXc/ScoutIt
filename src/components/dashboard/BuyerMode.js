@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
-import { Bookmark, Search, Building2, Camera, FolderOpen, Radio, Globe, Crosshair, Check, Plus } from "lucide-react";
+import { Bookmark, Search, Building2, Camera, FolderOpen, Radio } from "lucide-react";
 import { getSession } from "@/lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { getLocalSavedSignals } from "@/lib/savedSignalsClient";

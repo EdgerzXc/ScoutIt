@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Coins, ClipboardList } from "lucide-react";
 
-const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
+const ToggleSwitch = ({ label, checked, onChange }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface pr-3">{label}</span>
     <button type="button"
@@ -48,10 +48,15 @@ export default function ResearcherHUD({ quests, activeQuestId, setActiveQuestId 
 
   // Reusable custom toggle component (Steely/Blue for Researcher vibe)
 
-  if (activeQuestId) {
-    const quest = quests.find(q => q.id === activeQuestId);
-    if (!quest) {
+  useEffect(() => {
+    if (activeQuestId && !(quests || []).some(q => q.id === activeQuestId)) {
       setActiveQuestId(null);
+    }
+  }, [activeQuestId, quests, setActiveQuestId]);
+
+  if (activeQuestId) {
+    const quest = (quests || []).find(q => q.id === activeQuestId);
+    if (!quest) {
       return null;
     }
     return (

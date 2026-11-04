@@ -24,7 +24,6 @@ export default function ImportLeadsModal({
   const [skipDuplicates, setSkipDuplicates] = useState(true);
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   if (!isOpen) return null;
 
@@ -36,15 +35,12 @@ export default function ImportLeadsModal({
   };
 
   const processText = (text, name = "") => {
-    setIsProcessing(true);
     setFileName(name);
     try {
       const res = detectAndParseLeads(text, existingDeals);
       setParseResult(res);
     } catch (err) {
       setParseResult({ success: false, error: err.message || "Failed to process lead file." });
-    } finally {
-      setIsProcessing(false);
     }
   };
 

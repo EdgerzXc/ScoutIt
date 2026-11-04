@@ -93,3 +93,19 @@ export function canAccessDashboardWorkspace(requestedRole, heldRoles = []) {
   const heldModes = normalizeDashboardModes(rawHeld);
   return heldModes.includes(targetMode);
 }
+
+/**
+ * Extracts and normalizes the active roles and mode tags held by a user into a
+ * flat, deduplicated array. Replaces duplicated role-harvesting logic across
+ * dashboard views.
+ */
+export function getHeldRoles(user) {
+  if (!user) return [];
+  return [
+    ...(Array.isArray(user.active_roles) ? user.active_roles : []),
+    ...(Array.isArray(user.tags) ? user.tags : []),
+    user.primary_mode,
+    user.primaryMode,
+    user.role,
+  ].filter(Boolean);
+}

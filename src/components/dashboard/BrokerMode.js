@@ -5,7 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Calendar, Mail, BarChart3, Briefcase, Contact, Compass, Sparkles, FolderOpen, ShieldCheck, FileEdit, Printer, Camera, Building2, Radio } from "lucide-react";
+import { Lock, Calendar, Mail, BarChart3, Briefcase, Contact, Compass, Sparkles, FolderOpen, ShieldCheck, FileEdit, Printer, Radio } from "lucide-react";
 import { getSession } from "../../lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
@@ -244,7 +244,7 @@ export default function BrokerMode() {
   // handshake from a one-sided acceptance. The labels now say what this is.
   // Pinned by `brokerLabelSource.test.js`.
   // ⚡ Bolt Optimization: Memoize derived pipelines
-  const { myPitches, pending, accepted, activePitches, stale, feed } = useMemo(() => {
+  const { myPitches, accepted, activePitches, stale, feed } = useMemo(() => {
     const _myPitches = pitches.filter(p => p.isCurrentUserBroker);
     const _pending = [];
     const _accepted = [];

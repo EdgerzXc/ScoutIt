@@ -55,7 +55,7 @@ const TONE = {
 
 const REFRESH_MS = 120_000;
 
-export default function AttentionRail({ mockUserId, className = "" }) {
+export default function AttentionRail({ mockUserId, className = "", hideWhenClear = false }) {
   const reduceMotion = useReducedMotion();
   const [state, setState] = useState({ status: "loading", data: null });
 
@@ -82,6 +82,7 @@ export default function AttentionRail({ mockUserId, className = "" }) {
   }, [load]);
 
   if (state.status === "loading") {
+    if (hideWhenClear) return null;
     return (
       <section aria-label="What needs you" data-scoutit-guide="attention-rail" className={className}>
         <div className="h-[124px] animate-pulse rounded-lg border border-surface-variant bg-surface/40" />
@@ -110,6 +111,10 @@ export default function AttentionRail({ mockUserId, className = "" }) {
   }
 
   const { signals = [], summary, severity, unavailable = [] } = state.data || {};
+
+  if (hideWhenClear && severity === "clear") {
+    return null;
+  }
 
   return (
     <section aria-label="What needs you" data-scoutit-guide="attention-rail" className={className}>

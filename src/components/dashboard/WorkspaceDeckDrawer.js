@@ -28,6 +28,7 @@ export default function WorkspaceDeckDrawer({
   roleLabel = null,
   isWizardActive = false,
   className = "",
+  mode = "owner",
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [editorQuickState, setEditorQuickState] = useState({
@@ -213,6 +214,7 @@ export default function WorkspaceDeckDrawer({
               active={active}
               badges={badges}
               roleLabel={roleLabel}
+              mode={mode}
               className="shadow-inner"
             />
           </div>

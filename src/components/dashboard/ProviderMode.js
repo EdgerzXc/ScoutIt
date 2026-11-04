@@ -28,7 +28,7 @@ export default function ProviderMode({ type = "photographer" }) {
       } else {
         setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
       }
-    } catch (err) {
+    } catch {
       setQuests(USE_MOCK_DATA ? MOCK_QUESTS : []);
     } finally {
       setLoading(false);

@@ -7,7 +7,6 @@ import { sanitizeObject } from "../../lib/sanitize";
 import { supabase } from "../../lib/supabaseClient";
 import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import PhotoUploader from "./PhotoUploader";
-import { useDashboard } from "../../context/DashboardContext";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
 
@@ -29,13 +28,6 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
 
   const [lastSaved, setLastSaved] = useState(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
-  const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [isUploadingCsv, setIsUploadingCsv] = useState(false);
-  const [csvBlueprint, setCsvBlueprint] = useState(null);
-  const [expandedUnitIdx, setExpandedUnitIdx] = useState(null);
-  const fileInputRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isExtracting, setIsExtracting] = useState(false);
   const [extractionError, setExtractionError] = useState(null);
 
   // Resizer state
@@ -162,22 +154,14 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         }
       }
     }
-    setIsDragging(true); 
   };
-  const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
+  const handleDragLeave = (e) => { e.preventDefault(); };
   const handleDrop = async (e) => {
     e.preventDefault();
-    setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       if (e.dataTransfer.files[0].type.startsWith('image/')) return;
       await processPdfFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileUpload = async (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      await processPdfFile(e.target.files[0]);
     }
   };
 
@@ -186,7 +170,6 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       setExtractionError("Please upload a PDF file.");
       return;
     }
-    setIsExtracting(true);
     setExtractionError(null);
 
     try {
@@ -237,8 +220,6 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
     } catch (err) {
       console.error(err);
       setExtractionError(sanitizeError(err, "Extraction failed. Please try again."));
-    } finally {
-      setIsExtracting(false);
     }
   };
 

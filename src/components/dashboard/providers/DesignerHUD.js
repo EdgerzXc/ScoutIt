@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Palette, Compass, Check, Sparkles, ExternalLink, Download } from "lucide-react";
+import { Palette, Compass, Check, Sparkles, ExternalLink } from "lucide-react";
 
-const ToggleSwitch = ({ label, checked, onChange, primary = false }) => (
+const ToggleSwitch = ({ label, checked, onChange }) => (
   <div className="flex items-center justify-between py-2 border-b border-surface-variant/50 last:border-0">
     <span className="font-working-title text-sm text-on-surface pr-3">{label}</span>
     <button type="button"
@@ -103,10 +103,15 @@ export default function DesignerHUD({ projects, activeProjectId, setActiveProjec
 
   // Reusable custom toggle component (Creative/Pink accent for Designer vibe)
 
-  if (activeProjectId) {
-    const project = projects.find(p => p.id === activeProjectId);
-    if (!project) {
+  useEffect(() => {
+    if (activeProjectId && !(projects || []).some(p => p.id === activeProjectId)) {
       setActiveProjectId(null);
+    }
+  }, [activeProjectId, projects, setActiveProjectId]);
+
+  if (activeProjectId) {
+    const project = (projects || []).find(p => p.id === activeProjectId);
+    if (!project) {
       return null;
     }
     return (
