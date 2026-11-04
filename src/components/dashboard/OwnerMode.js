@@ -32,6 +32,7 @@ import TurnstileGate from "@/components/ui/TurnstileGate";
 import SimpleDetail from "@/components/ui/SimpleDetail";
 import InfoTip from "@/components/ui/InfoTip";
 import SpatialStudioRequestModal from "./SpatialStudioRequestModal";
+import PropertyUpdateHub from "./PropertyUpdateHub";
 import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
 
@@ -130,6 +131,30 @@ export default function OwnerMode() {
         console.error('Failed to save deal notes', err);
       }
     }, 800);
+  };
+
+  const handleSaveUnits = async (propertyId, updatedUnits) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch("/api/dashboard/units", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
+          propertyId,
+          units: updatedUnits,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update units");
+      return true;
+    } catch (e) {
+      console.error("Failed to save units", e);
+      throw e;
+    }
   };
 
   // A-131 — removing a broker from a property.
@@ -1010,10 +1035,18 @@ export default function OwnerMode() {
           </div>
         </div>
 
+        <PropertyUpdateHub 
+          listings={myListings}
+          onUpdateListing={updateListing}
+          onSaveUnits={handleSaveUnits}
+          addToast={addToast}
+          currentUser={currentUser}
+        />
+
         <div className="mb-6">
           <input
             type="text"
-            placeholder="Search your properties..."
+            placeholder="Filter list by title or location..."
             className="w-full md:w-96 bg-surface border border-surface-variant rounded px-4 py-3 text-base md:text-sm text-on-surface focus:outline-none focus:border-gold-accent transition"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -1201,6 +1234,14 @@ export default function OwnerMode() {
             )}
         </div>
       </div>
+
+      <PropertyUpdateHub 
+        listings={myListings}
+        onUpdateListing={updateListing}
+        onSaveUnits={handleSaveUnits}
+        addToast={addToast}
+        currentUser={currentUser}
+      />
 
       {/* A-113: the pricing signal was built and wired but mounted only inside
           the live editor, so an owner reading their own dossier saw no pricing
