@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { auth } = vi.hoisted(() => ({
   auth: {
     getUser: vi.fn(),
+    getSession: vi.fn(),
     resend: vi.fn(),
     signUp: vi.fn(),
   },
@@ -10,7 +11,7 @@ const { auth } = vi.hoisted(() => ({
 
 vi.mock("@/lib/supabaseClient", () => ({ supabase: { auth } }));
 
-import { getUser, resendSignupConfirmation, signUp } from "@/lib/authClient";
+import { getSession, getUser, resendSignupConfirmation, signUp } from "@/lib/authClient";
 
 describe("email confirmation auth client", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -19,6 +20,18 @@ describe("email confirmation auth client", () => {
     auth.getUser.mockResolvedValue({ data: { user: { id: "verified" } }, error: null });
     await expect(getUser()).resolves.toEqual({ data: { user: { id: "verified" } }, error: null });
     expect(auth.getUser).toHaveBeenCalledOnce();
+  });
+
+  it("safely returns null user and session without throwing when Supabase Auth rejects or returns null data", async () => {
+    auth.getUser.mockRejectedValue(new Error("network offline"));
+    const userRes = await getUser();
+    expect(userRes.data).toEqual({ user: null });
+    expect(userRes.error).toBeInstanceOf(Error);
+
+    auth.getSession.mockResolvedValue({ data: null, error: new Error("auth error") });
+    const sessionRes = await getSession();
+    expect(sessionRes.data).toEqual({ session: null });
+    expect(sessionRes.error).toBeInstanceOf(Error);
   });
 
   it("sends signup confirmation to the canonical onboarding return", async () => {

@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
+import { createHash, randomUUID } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { notifyUser } from "@/lib/notifications";
 import { verifyFileFamily } from "@/lib/fileTypeCheck";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { calculateQueuePosition } from "@/lib/queuePosition";
 
 const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25MB limit
+const MAX_PENDING_PER_USER = 5;
 const TEMP_BUCKET = "property_photos";
+
+const intakeLimiter = createRateLimiter({
+  limit: 10,
+  windowMs: 60_000, // 10 uploads per minute per user/IP
+});
 
 export async function POST(request) {
   try {
@@ -19,6 +28,37 @@ export async function POST(request) {
       return NextResponse.json(
         { error: "Server configuration missing: supabaseAdmin is not available." },
         { status: 500 }
+      );
+    }
+
+    // 1. Rate limiting check (10 uploads / min)
+    const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const rateKey = `${userId}:${clientIp}`;
+    const rateCheck = intakeLimiter(rateKey);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many document uploads. Please wait before queueing another document.",
+          retryAfterSeconds: rateCheck.retryAfterSeconds,
+        },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
+      );
+    }
+
+    // 2. Per-user active pending queue cap
+    const { count: pendingCount, error: pendingErr } = await supabaseAdmin
+      .from("properties")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", userId)
+      .eq("pipeline_status", "ai_drafting");
+
+    if (!pendingErr && typeof pendingCount === "number" && pendingCount >= MAX_PENDING_PER_USER) {
+      return NextResponse.json(
+        {
+          error: `Queue limit reached: You have ${pendingCount} documents currently in the parsing queue. Please wait for them to finish before uploading more.`,
+          pendingCount,
+        },
+        { status: 429 }
       );
     }
 
@@ -66,10 +106,34 @@ export async function POST(request) {
       );
     }
 
-    // Temporary upload path in storage bucket
-    const safeName = originalFilename.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-    const timestamp = Date.now();
-    const storagePath = `temp_queue_docs/${userId}/${timestamp}_${safeName}`;
+    // 3. Deduplication check via SHA-256 hash
+    const fileHash = createHash("sha256").update(buffer).digest("hex");
+    let dupQuery = supabaseAdmin
+      .from("properties")
+      .select("id, title, created_at, details")
+      .eq("owner_id", userId)
+      .eq("pipeline_status", "ai_drafting");
+    if (typeof dupQuery.contains === "function") {
+      dupQuery = dupQuery.contains("details", { pdf_hash: fileHash });
+    }
+    const { data: existingDraft, error: dupCheckErr } = await dupQuery.maybeSingle();
+
+    if (!dupCheckErr && existingDraft && (!existingDraft.details?.pdf_hash || existingDraft.details.pdf_hash === fileHash)) {
+      const queueNumber = await calculateQueuePosition(supabaseAdmin, existingDraft.id);
+      return NextResponse.json({
+        success: true,
+        propertyId: existingDraft.id,
+        queueNumber,
+        title: existingDraft.title,
+        queuedAt: existingDraft.details?.queued_at || existingDraft.created_at,
+        deduplicated: true,
+      });
+    }
+
+    // 4. Unguessable storage path using randomUUID
+    const safeName = originalFilename.replace(/[^a-zA-Z0-9.\-_]/g, "_").slice(0, 100);
+    const fileUuid = randomUUID();
+    const storagePath = `temp_queue_docs/${userId}/${fileUuid}_${safeName}`;
 
     const { error: uploadError } = await supabaseAdmin.storage
       .from(TEMP_BUCKET)
@@ -91,12 +155,13 @@ export async function POST(request) {
       .replace(/[_\-]+/g, " ")
       .trim();
     const displayTitle = `Drafting: ${cleanTitle}`;
-    const slug = `${displayTitle}-${timestamp}`
+    const timestamp = Date.now();
+    const slug = `${displayTitle}-${timestamp}-${fileUuid.slice(0, 8)}`
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    // Insert draft with pipeline_status = 'ai_drafting'
+    // 5. Insert draft with pipeline_status = 'ai_drafting'
     const nowIso = new Date().toISOString();
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from("properties")
@@ -114,6 +179,7 @@ export async function POST(request) {
           details: {
             source_pdf: originalFilename,
             temp_storage_path: storagePath,
+            pdf_hash: fileHash,
             queued_at: nowIso,
           },
         },
@@ -123,7 +189,6 @@ export async function POST(request) {
 
     if (insertError || !inserted) {
       console.error("[queue-intake] Property insert failed:", insertError);
-      // Clean up uploaded file if property record creation fails
       await supabaseAdmin.storage.from(TEMP_BUCKET).remove([storagePath]).catch(() => {});
       return NextResponse.json(
         { error: sanitizeError(insertError, "Failed to register property in processing queue.") },
@@ -131,17 +196,8 @@ export async function POST(request) {
       );
     }
 
-    // Calculate dynamic queue number based on pending drafts created on or before this one
-    let queueNumber = 1;
-    const { count, error: countError } = await supabaseAdmin
-      .from("properties")
-      .select("id", { count: "exact", head: true })
-      .eq("pipeline_status", "ai_drafting")
-      .lte("created_at", inserted.created_at || nowIso);
-
-    if (!countError && typeof count === "number" && count > 0) {
-      queueNumber = count;
-    }
+    // 6. Deterministic monotonic queue position (created_at ASC, id ASC)
+    const queueNumber = await calculateQueuePosition(supabaseAdmin, inserted.id);
 
     // Dispatch in-app notification confirming queue position
     await notifyUser(supabaseAdmin, {

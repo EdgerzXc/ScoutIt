@@ -34,14 +34,18 @@ describe("PropertyUpdateHub - Shorthand & Synonym Parser", () => {
 
   it("matches natural real estate synonyms to internal schema fields", () => {
     expect(matchFieldFromQuery("rent")).toBe("price_php");
+    expect(matchFieldFromQuery("rent:")).toBe("price_php");
     expect(matchFieldFromQuery("arkila")).toBe("price_php");
+    expect(matchFieldFromQuery("arkila:")).toBe("price_php");
     expect(matchFieldFromQuery("parking")).toBe("parking_slots");
+    expect(matchFieldFromQuery("parking:")).toBe("parking_slots");
     expect(matchFieldFromQuery("parkingan")).toBe("parking_slots");
     expect(matchFieldFromQuery("vacant")).toBe("status");
     expect(matchFieldFromQuery("bakante")).toBe("status");
     expect(matchFieldFromQuery("phone")).toBe("contact_number");
     expect(matchFieldFromQuery("viber")).toBe("contact_number");
     expect(matchFieldFromQuery("sqm")).toBe("sqm");
+    expect(matchFieldFromQuery("sukat")).toBe("sqm");
     expect(matchFieldFromQuery("unknown_field_xyz")).toBeNull();
   });
 
@@ -61,7 +65,7 @@ Contact: 09171234567
     `;
 
     const updates = parseHeuristicUpdates(notes, mockProperties);
-    expect(updates.length).toBeGreaterThanOrEqual(4);
+    expect(updates.length).toBeGreaterThanOrEqual(5);
 
     const u1201 = updates.find(u => u.unitIdentifier === "1201");
     expect(u1201).toBeDefined();
@@ -82,6 +86,45 @@ Contact: 09171234567
     const parking = updates.find(u => u.field === "parking_slots");
     expect(parking).toBeDefined();
     expect(parking.newValue).toBe(5000);
+
+    const contact = updates.find(u => u.field === "contact_number");
+    expect(contact).toBeDefined();
+    expect(contact.newValue).toBe("09171234567");
+  });
+
+  it("A-301: handles combined comma-separated single-line input without unit collision or misclassification", () => {
+    const mockProperties = [{ id: "prop-1", title: "One Corporate Centre" }];
+    const combinedLine = "rent: 45k, 120 sqm, parking 5000, call 09171234567";
+
+    const updates = parseHeuristicUpdates(combinedLine, mockProperties);
+    expect(updates.length).toBe(4);
+
+    const rent = updates.find(u => u.field === "price_php");
+    expect(rent).toBeDefined();
+    expect(rent.newValue).toBe(45000);
+    expect(rent.unitIdentifier).toBeNull(); // No unit collision with 45
+
+    const area = updates.find(u => u.field === "sqm");
+    expect(area).toBeDefined();
+    expect(area.newValue).toBe(120);
+    expect(area.displayValue).toBe("120 sqm");
+
+    const parking = updates.find(u => u.field === "parking_slots");
+    expect(parking).toBeDefined();
+    expect(parking.newValue).toBe(5000);
+
+    const contact = updates.find(u => u.field === "contact_number");
+    expect(contact).toBeDefined();
+    expect(contact.newValue).toBe("09171234567");
+  });
+
+  it("A-301: ensures shorthand rent 'rent 45k' without unit never consumes 45 as unit number", () => {
+    const mockProperties = [{ id: "prop-1", title: "One Corporate Centre" }];
+    const updates = parseHeuristicUpdates("rent 45k", mockProperties);
+    expect(updates.length).toBe(1);
+    expect(updates[0].field).toBe("price_php");
+    expect(updates[0].newValue).toBe(45000);
+    expect(updates[0].unitIdentifier).toBeNull();
   });
 });
 

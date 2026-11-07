@@ -65,7 +65,7 @@ export async function findRecentPendingDeal(supabaseAdmin, senderId, propertyId)
  * Returns { ok: true } or { ok: false, reason, message }.
  * Missing columns/tables => { ok: true } (fail open with warn).
  */
-export async function checkReceiverGate(supabaseAdmin, recipientId, propertyId = null, currentDealId = null) {
+export async function checkReceiverGate(supabaseAdmin, recipientId, propertyId = null, currentDealId = null, options = {}) {
   if (!supabaseAdmin || !recipientId) return { ok: true };
   try {
     const { data, error } = await supabaseAdmin
@@ -84,15 +84,23 @@ export async function checkReceiverGate(supabaseAdmin, recipientId, propertyId =
     // A-144 §10.10: NULL/undefined/empty means unlimited — never coerce it to
     // 0 via Number(NULL). Only a real non-negative number is a cap.
     const rawCap = data?.max_pending_connects;
-    const cap = rawCap === null || rawCap === undefined || rawCap === "" ? null : Number(rawCap);
+    const parsedCap = rawCap === null || rawCap === undefined || rawCap === "" ? null : Number(rawCap);
+    const cap = parsedCap !== null
+      ? parsedCap
+      : (options.isFreeInquiry ? (Number.isFinite(options.defaultCap) ? options.defaultCap : 25) : null);
     if (cap !== null && Number.isFinite(cap) && cap >= 0) {
       // Receiver-scoped: count only waiting requests addressed to THIS
       // recipient — inbound broker rows plus deals on their properties —
       // never the global pending total and never the recipient's own sends.
-      const { data: pendingRows, error: pendingError } = await supabaseAdmin
+      const queryLimit = Math.min(100, Math.max(10, (cap + 5) * 2));
+      let pendingQuery = supabaseAdmin
         .from("deals")
         .select("id, broker_id, buyer_id, properties(owner_id)")
         .in("status", ["pending", "invited"]);
+      if (typeof pendingQuery?.limit === "function") {
+        pendingQuery = pendingQuery.limit(queryLimit);
+      }
+      const { data: pendingRows, error: pendingError } = await pendingQuery;
       if (!pendingError && Array.isArray(pendingRows)) {
         let inbound = 0;
         for (const row of pendingRows) {

@@ -93,6 +93,33 @@ let lastMonthlyLimitLogAt = 0;
 let publisherRebuildUntil = 0;
 let lastBudgetGuardLogAt = 0;
 
+let tableCache = {
+  properties: null,
+  intel: null,
+  brokers: null,
+  homepage: null,
+};
+
+export function _resetCmsCacheForTesting() {
+  cache = { bundle: null, fetchedAt: 0 };
+  inflight = null;
+  publisherRebuildUntil = 0;
+  tableCache = {
+    properties: null,
+    intel: null,
+    brokers: null,
+    homepage: null,
+  };
+}
+
+export function _getTableCacheForTesting() {
+  return { ...tableCache };
+}
+
+export function _setTableCacheForTesting(partial) {
+  tableCache = { ...tableCache, ...partial };
+}
+
 export async function invalidateCmsBundle() {
   // Do not let a rebuild that started before the publish repopulate the cache
   // after invalidation. Wait for it, then clear both cache layers.
@@ -105,15 +132,27 @@ export async function invalidateCmsBundle() {
     await redis.del("cms_bundle");
     // A publish or takedown is an explicit instruction to be fresh now. Let the
     // rebuild it triggers draw from the monthly budget regardless of the guard.
-    publisherRebuildUntil = Date.now() + PUBLISHER_REBUILD_WINDOW_MS;
-    try {
-      await redis.set(
-        CMS_PUBLISHER_REBUILD_KEY,
-        String(publisherRebuildUntil),
-        { ex: Math.ceil(PUBLISHER_REBUILD_WINDOW_MS / 1000) },
-      );
-    } catch {
-      // Non-fatal: in-process publisherRebuildUntil still applies locally
+    // A-307: Budget-aware publisher window. Only grant the rebuild window
+    // if the monthly budget is not already exhausted.
+    const budget = await getAirtableBudgetStatus().catch(() => ({ exhausted: false }));
+    if (!budget.exhausted) {
+      publisherRebuildUntil = Date.now() + PUBLISHER_REBUILD_WINDOW_MS;
+      try {
+        await redis.set(
+          CMS_PUBLISHER_REBUILD_KEY,
+          String(publisherRebuildUntil),
+          { ex: Math.ceil(PUBLISHER_REBUILD_WINDOW_MS / 1000) },
+        );
+      } catch {
+        // Non-fatal: in-process publisherRebuildUntil still applies locally
+      }
+    } else {
+      publisherRebuildUntil = 0;
+      try {
+        await redis.del(CMS_PUBLISHER_REBUILD_KEY);
+      } catch {
+        // Non-fatal
+      }
     }
   }
   // A local memory clear alone cannot refresh the other public instances.
@@ -135,11 +174,22 @@ async function buildSharedBundle() {
       const shared = await redis.get("cms_bundle");
       if (shared) return { ...normalizeSampleBundle(shared), source: "upstash_redis" };
     }
+    const lastGood = await redis.get(CMS_LAST_GOOD_KEY).catch(() => null);
+    if (lastGood) {
+      return { ...normalizeSampleBundle(lastGood), source: "stale_during_rebuild" };
+    }
     throw new Error("CMS rebuild is already in progress");
   }
 
   try {
-    const bundle = normalizeSampleBundle(await buildBundle());
+    const BUILD_TIMEOUT_MS = 25000;
+    const rawBundle = await Promise.race([
+      buildBundle(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("CMS build exceeded deadline (25s)")), BUILD_TIMEOUT_MS)
+      ),
+    ]);
+    const bundle = normalizeSampleBundle(rawBundle);
     // Compare generation and write as one Redis operation. A separate GET then
     // SET lets a withdrawal land between them and leaves old data for 12h.
     const stored = await redis.eval(
@@ -279,12 +329,43 @@ async function buildBundle() {
       void recordAirtableCall();
     },
   };
-  const [properties, intel, brokers, homepage] = await Promise.all([
+  // A-307: Per-table degradation. Fetch tables concurrently with Promise.allSettled.
+  // A transient network error or Airtable outage on one secondary table (e.g. brokers)
+  // degrades only that section using cached data, rather than crashing and emptying the whole bundle.
+  const [propRes, intelRes, brokerRes, homeRes] = await Promise.allSettled([
     fetchProperties(apiKey, baseId, readOptions),
     fetchIntel(apiKey, baseId, readOptions),
     fetchBrokers(apiKey, baseId, readOptions),
     fetchHomepageConfig(apiKey, baseId, readOptions),
   ]);
+
+  let properties = propRes.status === "fulfilled" ? propRes.value : (tableCache.properties || cache.bundle?.properties || null);
+  let intel = intelRes.status === "fulfilled" ? intelRes.value : (tableCache.intel || cache.bundle?.intel || []);
+  let brokers = brokerRes.status === "fulfilled" ? brokerRes.value : (tableCache.brokers || cache.bundle?.brokers || []);
+  let homepage = homeRes.status === "fulfilled" ? homeRes.value : (tableCache.homepage || cache.bundle?.homepage || null);
+
+  if (propRes.status === "fulfilled") tableCache.properties = properties;
+  if (intelRes.status === "fulfilled") tableCache.intel = intel;
+  if (brokerRes.status === "fulfilled") tableCache.brokers = brokers;
+  if (homeRes.status === "fulfilled") tableCache.homepage = homepage;
+
+  if (brokerRes.status === "rejected") {
+    console.warn("[CMS] fetchBrokers failed; degrading section with cached data:", brokerRes.reason?.message);
+  }
+  if (intelRes.status === "rejected") {
+    console.warn("[CMS] fetchIntel failed; degrading section with cached data:", intelRes.reason?.message);
+  }
+  if (homeRes.status === "rejected") {
+    console.warn("[CMS] fetchHomepageConfig failed; degrading section with cached data:", homeRes.reason?.message);
+  }
+  if (propRes.status === "rejected") {
+    console.warn("[CMS] fetchProperties failed; degrading section with cached data:", propRes.reason?.message);
+    if (!properties) {
+      throw propRes.reason || new Error("Failed to load CMS properties table");
+    }
+  }
+
+  const isDegraded = propRes.status === "rejected" || intelRes.status === "rejected" || brokerRes.status === "rejected" || homeRes.status === "rejected";
 
   // Fetch published briefings from Supabase OSINT repository.
   // U-021: the comment used to say "published" while the query filtered on
@@ -329,7 +410,7 @@ async function buildBundle() {
       `Public catalogue rebuilt from Airtable: ${positioned.length} properties, ` +
       `${approximate} on an approximate position, ${unplaced} with none`,
     detail: {
-      source: "airtable",
+      source: isDegraded ? "airtable_partial_degraded" : "airtable",
       executionEnvironment: process.env.VERCEL_ENV
         ? `vercel:${process.env.VERCEL_ENV}`
         : process.env.SCOUTIT_E2E === "1" ? "local:e2e" : "local",
@@ -347,7 +428,7 @@ async function buildBundle() {
     intel: mergedIntel,
     brokers,
     homepage,
-    source: "airtable",
+    source: isDegraded ? "airtable_partial_degraded" : "airtable",
   };
 }
 
@@ -374,6 +455,44 @@ export async function getCmsBundle() {
   // TTL-expiry refresh serves the last good snapshot rather than spending calls
   // Airtable will only reject. The rebuild that a publish or takedown triggers
   // bypasses this, so owner content always reaches the public base.
+  // A-307: Budget-aware publisher window.
+  // A spent monthly budget must not make additional Airtable calls even after a publish.
+  // When budget is exhausted, serve the last good snapshot immediately without extra calls.
+  const budget = await getAirtableBudgetStatus().catch(() => ({ exhausted: false }));
+  if (budget?.exhausted) {
+    try {
+      let lastGood = redis ? await redis.get(CMS_LAST_GOOD_KEY) : null;
+      if (!lastGood && cache.bundle) {
+        lastGood = cache.bundle;
+      }
+      if (lastGood) {
+        const bundle = normalizeSampleBundle(lastGood);
+        cache = { bundle, fetchedAt: Date.now() };
+        if (Date.now() - lastBudgetGuardLogAt >= 15 * 60 * 1000) {
+          lastBudgetGuardLogAt = Date.now();
+          await recordSystemEvent({
+            event: EVENTS.CMS_BUNDLE_BUDGET_GUARDED,
+            severity: "warning",
+            summary:
+              `Airtable monthly call budget reached (${budget.attempts}/${budget.budget}); ` +
+              "serving the last good catalogue snapshot instead of rebuilding",
+            detail: {
+              month: budget.month,
+              attempts: budget.attempts,
+              budget: budget.budget,
+              executionEnvironment: process.env.VERCEL_ENV
+                ? `vercel:${process.env.VERCEL_ENV}`
+                : "local",
+            },
+          });
+        }
+        return { ...bundle, source: "stale_monthly_budget" };
+      }
+    } catch (err) {
+      console.error("[CMS] Budget guard could not read the last-good snapshot:", err.message);
+    }
+  }
+
   let isPublisherRebuild = Date.now() < publisherRebuildUntil;
   if (!isPublisherRebuild && redis) {
     try {
@@ -384,40 +503,6 @@ export async function getCmsBundle() {
       }
     } catch {
       // Non-fatal if Redis rebuild window key cannot be read
-    }
-  }
-
-  if (redis && !isPublisherRebuild) {
-    const budget = await getAirtableBudgetStatus();
-    if (budget.exhausted) {
-      try {
-        const lastGood = await redis.get(CMS_LAST_GOOD_KEY);
-        if (lastGood) {
-          const bundle = normalizeSampleBundle(lastGood);
-          cache = { bundle, fetchedAt: Date.now() };
-          if (Date.now() - lastBudgetGuardLogAt >= 15 * 60 * 1000) {
-            lastBudgetGuardLogAt = Date.now();
-            await recordSystemEvent({
-              event: EVENTS.CMS_BUNDLE_BUDGET_GUARDED,
-              severity: "warning",
-              summary:
-                `Airtable monthly call budget reached (${budget.attempts}/${budget.budget}); ` +
-                "serving the last good catalogue snapshot instead of rebuilding",
-              detail: {
-                month: budget.month,
-                attempts: budget.attempts,
-                budget: budget.budget,
-                executionEnvironment: process.env.VERCEL_ENV
-                  ? `vercel:${process.env.VERCEL_ENV}`
-                  : "local",
-              },
-            });
-          }
-          return { ...bundle, source: "stale_monthly_budget" };
-        }
-      } catch (err) {
-        console.error("[CMS] Budget guard could not read the last-good snapshot:", err.message);
-      }
     }
   }
 

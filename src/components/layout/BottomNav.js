@@ -11,6 +11,7 @@ import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import RoleActivationModal from "@/components/profile/RoleActivationModal";
 import { X, ShieldCheck } from "lucide-react";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
+import { BOTTOM_NAV_ITEMS } from "@/lib/navigationManifest";
 
 // Common Icons Collection to avoid repeating SVGs
 const ICONS = {
@@ -234,21 +235,21 @@ const CORE_ROLES = [
   },
 ];
 
-// Reusable Action / Link Item Definitions
+const findManifestItem = (id, fallback) => {
+  const match = BOTTOM_NAV_ITEMS.find((item) => item.id === id);
+  return match || fallback;
+};
+
+// Reusable Action / Link Item Definitions anchored to navigationManifest
 const ITEMS = {
-  home:      { id: "home",      href: "/",          label: "Home",      icon: ICONS.home },
-  spaces:    { id: "spaces",    href: "/property",  label: "Spaces",    icon: ICONS.spaces },
-  discover:  { id: "discover",  href: "/property",  label: "Discover",  icon: ICONS.discover },
-  // "Board" here = YOUR SAVES (/wishlist), matching the "Your Board" header on
-  // that page. It kept this label in the 2026-08-08 A7 rename; what moved was
-  // the RANKINGS surface, which had also been calling itself "The Board".
-  // ⚠️ Do not reintroduce "Board" as a name for rankings — that collision is
-  // what the rename removed.
-  board:     { id: "board",     href: "/wishlist",  label: "Board",     icon: ICONS.board },
-  intel:     { id: "intel",     href: "/stratosphere", label: "Signals", icon: ICONS.signals },
-  dashboard: { id: "dashboard", href: "/dashboard", label: "Dash",      icon: ICONS.dashboard },
-  role:      { id: "role",      action: "open-role-sheet", label: "Roles", icon: ICONS.role },
-  theme:     { id: "theme",     action: "open-theme-sheet", label: "Theme", icon: ICONS.theme }
+  home:      { ...findManifestItem("home", { id: "home", href: "/", label: "Home" }), icon: ICONS.home },
+  spaces:    { ...findManifestItem("spaces", { id: "spaces", href: "/property", label: "Spaces" }), icon: ICONS.spaces },
+  discover:  { ...findManifestItem("discover", { id: "discover", href: "/property", label: "Discover" }), icon: ICONS.discover },
+  board:     { ...findManifestItem("board", { id: "board", href: "/wishlist", label: "Board" }), icon: ICONS.board },
+  intel:     { ...findManifestItem("intel", { id: "intel", href: "/stratosphere", label: "Signals" }), icon: ICONS.signals },
+  dashboard: { ...findManifestItem("dashboard", { id: "dashboard", href: "/dashboard", label: "Dash" }), icon: ICONS.dashboard },
+  role:      { id: "role", action: "open-role-sheet", label: "Roles", icon: ICONS.role },
+  theme:     { id: "theme", action: "open-theme-sheet", label: "Theme", icon: ICONS.theme }
 };
 
 // Contextual Layout Configurations.
@@ -281,8 +282,19 @@ export default function BottomNav() {
 
   const isDashboard = Boolean(pathname?.startsWith("/dashboard"));
   const [isNavExpanded, setIsNavExpanded] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navTouchStartY = useRef(0);
   const isNavDragging = useRef(false);
+
+  useEffect(() => {
+    const handleUnread = (e) => {
+      if (typeof e?.detail?.count === "number") {
+        setUnreadCount(e.detail.count);
+      }
+    };
+    window.addEventListener("scoutit:unread-inbox-count", handleUnread);
+    return () => window.removeEventListener("scoutit:unread-inbox-count", handleUnread);
+  }, []);
 
   // First-minute onboarding logic: The navigation starts expanded so users learn it exists.
   // After 60 seconds (1 minute), it automatically tucks down into the glowing pulsating gold line.
@@ -791,7 +803,17 @@ export default function BottomNav() {
           aria-label={isNavExpanded ? "Collapse navigation bar" : "Expand navigation bar"}
           className="w-full min-h-[44px] flex items-center justify-center py-2 bg-surface/95 border-t border-surface-variant/40 backdrop-blur-2xl cursor-pointer select-none active:scale-[0.99] touch-none shadow-[0_-8px_20px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent group"
         >
-          <div className="w-14 h-1.5 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-20 shadow-[0_0_12px_rgba(var(--accent-rgb),0.75)] animate-pulse" />
+          <div className="relative flex items-center justify-center">
+            <div className="w-14 h-1.5 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-20 shadow-[0_0_12px_rgba(var(--accent-rgb),0.75)] animate-pulse" />
+            {unreadCount > 0 && !isNavExpanded && (
+              <span
+                className="absolute -right-6 px-1.5 py-0.5 min-w-[18px] h-4 rounded-full bg-gold-accent text-background font-mono text-[12px] font-bold leading-none flex items-center justify-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.6)]"
+                aria-label={`${unreadCount} unread items`}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </div>
         </button>
 
         {/* Universal 6-Item Bottom Navigation Bar */}

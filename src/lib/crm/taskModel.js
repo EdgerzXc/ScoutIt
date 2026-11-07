@@ -34,6 +34,7 @@ export const createTaskSchema = z.object({
   dealId: z.string().uuid().optional().nullable(),
   propertyId: z.string().uuid().optional().nullable(),
   assigneeUserId: z.string().uuid().optional().nullable(),
+  completed: z.boolean().optional(),
 });
 
 export const updateTaskSchema = z

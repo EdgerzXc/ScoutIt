@@ -5,6 +5,8 @@ import {
   ACCOUNT_ENTRIES,
   PRIMARY_NAV_ENTRIES,
   NAVIGATION_GROUPS,
+  WORKSPACE_COMMAND_DESTINATIONS,
+  BOTTOM_NAV_ITEMS,
   menuGroups,
   accountEntry,
   menuEntries,
@@ -64,5 +66,27 @@ describe("universal navigation manifest", () => {
     // A hand-written destination inside the panel would drift away from the
     // manifest silently, and nothing would route-check it.
     expect(panel).not.toMatch(/href="\//);
+  });
+
+  it("points every workspace command destination and bottom nav item at an existing route", () => {
+    for (const item of WORKSPACE_COMMAND_DESTINATIONS) {
+      expect(routeExists(item.href)).toBe(true);
+      expect(item.id.trim()).not.toBe("");
+      expect(item.label.trim()).not.toBe("");
+    }
+
+    for (const item of BOTTOM_NAV_ITEMS) {
+      expect(routeExists(item.href)).toBe(true);
+      expect(item.id.trim()).not.toBe("");
+      expect(item.label.trim()).not.toBe("");
+    }
+  });
+
+  it("is consumed by WorkspaceCommandBar and BottomNav to prevent navigation drift", () => {
+    const commandBarSrc = readFileSync(resolve(process.cwd(), "src/components/dashboard/WorkspaceCommandBar.js"), "utf8");
+    expect(commandBarSrc).toContain("WORKSPACE_COMMAND_DESTINATIONS");
+
+    const bottomNavSrc = readFileSync(resolve(process.cwd(), "src/components/layout/BottomNav.js"), "utf8");
+    expect(bottomNavSrc).toContain("BOTTOM_NAV_ITEMS");
   });
 });

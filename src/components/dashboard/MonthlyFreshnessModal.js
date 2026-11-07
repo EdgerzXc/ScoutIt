@@ -65,7 +65,8 @@ export default function MonthlyFreshnessModal({ onOpenEditor }) {
       if (stale.length === 0) return;
 
       setItems(stale);
-      setSelected(new Set(stale.map((i) => i.id)));
+      // D-08 / A-326: Default empty to require conscious owner opt-in rather than bulk rubber-stamp
+      setSelected(new Set());
       setOpen(true);
     } catch {
       /* the audit prompt is a nudge — never surface a failure for it */

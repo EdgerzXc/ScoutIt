@@ -51,9 +51,20 @@ async function handleCron(request) {
 
     await recordAirtableCall(1);
 
-    const [{ data: properties, error: propError }, verificationRecords] = await Promise.all([
-      // GAP-108: Query canonical_slug alongside slug so drifted listings are not skipped
-      supabaseAdmin.from("properties").select("id, slug, canonical_slug, owner_id, title").eq("pipeline_status", "approved"),
+    const [
+      { data: properties, error: propError },
+      historyResult,
+      verificationRecords,
+    ] = await Promise.all([
+      // A-313: Query last_verified_date alongside canonical_slug and slug
+      supabaseAdmin
+        .from("properties")
+        .select("id, slug, canonical_slug, owner_id, title, last_verified_date")
+        .eq("pipeline_status", "approved"),
+      // A-313: Query slug history so drifted-slug listings can still join to Airtable verification
+      supabaseAdmin
+        .from("property_slug_history")
+        .select("property_id, old_slug, canonical_slug"),
       // A-116: this cron is not the CMS bundle. It makes one Airtable call
       // with the whole function to itself, so it asks for a budget that fits
       // a slow-but-working Airtable instead of inheriting the page-render
@@ -69,19 +80,74 @@ async function handleCron(request) {
       return NextResponse.json({ error: "Failed to load properties" }, { status: 500 });
     }
 
-    const verificationBySlug = new Map(verificationRecords.map((v) => [v.slug, v]));
+    const slugHistoryByPropertyId = new Map();
+    const slugHistoryByCanonical = new Map();
+    for (const h of historyResult?.data || []) {
+      const old = String(h.old_slug || "").trim().toLowerCase();
+      if (!old) continue;
+      if (h.property_id) {
+        if (!slugHistoryByPropertyId.has(h.property_id)) {
+          slugHistoryByPropertyId.set(h.property_id, new Set());
+        }
+        slugHistoryByPropertyId.get(h.property_id).add(old);
+      }
+      if (h.canonical_slug) {
+        const canonical = String(h.canonical_slug).trim().toLowerCase();
+        if (!slugHistoryByCanonical.has(canonical)) {
+          slugHistoryByCanonical.set(canonical, new Set());
+        }
+        slugHistoryByCanonical.get(canonical).add(old);
+      }
+    }
+
+    const verificationBySlug = new Map(
+      (verificationRecords || []).map((v) => [String(v.slug || "").trim().toLowerCase(), v])
+    );
     const now = Date.now();
     const staleCutoffMs = STALE_DAYS * 24 * 60 * 60 * 1000;
 
     const staleProperties = (properties || []).filter((p) => {
-      const activeSlug = p.canonical_slug || p.slug;
-      if (!activeSlug || !p.owner_id) return false;
-      const verification = verificationBySlug.get(activeSlug) || (p.slug ? verificationBySlug.get(p.slug) : null);
-      if (!verification) return false; // not synced to Airtable yet — not this cron's problem
-      if (!verification.lastVerifiedDate) return true;
-      const verifiedMs = new Date(verification.lastVerifiedDate).getTime();
-      if (Number.isNaN(verifiedMs)) return true;
-      return now - verifiedMs > staleCutoffMs;
+      if (!p.owner_id) return false;
+      const canonical = String(p.canonical_slug || "").trim().toLowerCase();
+      const directSlug = String(p.slug || "").trim().toLowerCase();
+
+      // A-313: Find Airtable verification by canonical slug, direct slug, or slug history
+      let verification = canonical ? verificationBySlug.get(canonical) : null;
+      if (!verification && directSlug) {
+        verification = verificationBySlug.get(directSlug);
+      }
+      if (!verification) {
+        const historicalSlugs = new Set([
+          ...(slugHistoryByPropertyId.get(p.id) || []),
+          ...(canonical ? (slugHistoryByCanonical.get(canonical) || []) : []),
+        ]);
+        for (const oldSlug of historicalSlugs) {
+          const match = verificationBySlug.get(oldSlug);
+          if (match) {
+            verification = match;
+            break;
+          }
+        }
+      }
+
+      // Check verification dates across Airtable and Supabase
+      let latestVerifiedMs = null;
+      if (verification?.lastVerifiedDate) {
+        const ms = new Date(verification.lastVerifiedDate).getTime();
+        if (!Number.isNaN(ms)) latestVerifiedMs = ms;
+      }
+      if (p.last_verified_date) {
+        const ms = new Date(p.last_verified_date).getTime();
+        if (!Number.isNaN(ms)) {
+          latestVerifiedMs = latestVerifiedMs !== null ? Math.max(latestVerifiedMs, ms) : ms;
+        }
+      }
+
+      // A-313: If neither Airtable nor Supabase has a valid verification date
+      // (including when the verification record is missing entirely), treat as stale!
+      if (latestVerifiedMs === null) return true;
+
+      return now - latestVerifiedMs > staleCutoffMs;
     });
 
     const adminUserId = process.env.STALE_LISTING_ADMIN_USER_ID || null;

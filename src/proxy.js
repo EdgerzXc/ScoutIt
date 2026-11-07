@@ -67,6 +67,7 @@ function initLimiters() {
 // fast. FAILS SAFE: unreachable table = empty map = defaults below apply
 // (site keeps working, kill switch off).
 const FLAG_CACHE_TTL_MS = 30 * 1000;
+const FLAG_MAX_STALE_MS = 60 * 1000;
 let flagCache = { flags: {}, fetchedAt: 0 };
 
 async function getFlags() {
@@ -79,15 +80,20 @@ async function getFlags() {
     const res = await fetch(`${url}/rest/v1/feature_flags?select=id,is_enabled`, {
       headers: supabaseHeaders(),
     });
-    if (res.ok) {
-      const rows = await res.json();
-      flagCache = {
-        flags: Object.fromEntries(rows.map((r) => [r.id, !!r.is_enabled])),
-        fetchedAt: now,
-      };
+    if (!res.ok) {
+      throw new Error("Upstream feature_flags returned HTTP error");
     }
+    const rows = await res.json();
+    flagCache = {
+      flags: Object.fromEntries(rows.map((r) => [r.id, !!r.is_enabled])),
+      fetchedAt: now,
+    };
   } catch {
-    // keep stale cache
+    // Bounded kill-switch recovery (A-310): if the upstream outage exceeds FLAG_MAX_STALE_MS,
+    // recover to safe defaults (empty map = kill switch off, site keeps working).
+    if (flagCache.fetchedAt && now - flagCache.fetchedAt >= FLAG_MAX_STALE_MS) {
+      flagCache = { flags: {}, fetchedAt: 0 };
+    }
   }
   return flagCache.flags;
 }
@@ -245,5 +251,5 @@ export function resetFlagCache() {
   flagCache = { flags: {}, fetchedAt: 0 };
 }
 
-export { proxy as middleware };
+export { proxy as middleware, getFlags, FLAG_CACHE_TTL_MS, FLAG_MAX_STALE_MS };
 

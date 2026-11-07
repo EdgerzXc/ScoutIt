@@ -54,3 +54,46 @@ export function menuGroups(isSignedIn) {
     entries: entries.filter((entry) => entry.group === group.id),
   })).filter((group) => group.entries.length > 0);
 }
+
+/**
+ * Connected Deal Workspace Command Bar destinations.
+ * Canonical routes for Workspace, Inbox, CRM, and Calendar tools.
+ */
+export const WORKSPACE_COMMAND_DESTINATIONS = Object.freeze([
+  Object.freeze({
+    id: "workspace",
+    href: "/dashboard",
+    label: "Workspace",
+    detail: "Home",
+  }),
+  Object.freeze({
+    id: "inbox",
+    href: "/dashboard/inbox",
+    label: "Inbox",
+    detail: "Deal rooms",
+  }),
+  Object.freeze({
+    id: "crm",
+    href: "/dashboard/crm",
+    label: "CRM",
+    detail: "Pipeline",
+  }),
+  Object.freeze({
+    id: "calendar",
+    href: "/dashboard/calendar",
+    label: "Calendar",
+    detail: "Viewings",
+  }),
+]);
+
+/**
+ * Universal Mobile Bottom Navigation routes.
+ */
+export const BOTTOM_NAV_ITEMS = Object.freeze([
+  Object.freeze({ id: "home", href: "/", label: "Home" }),
+  Object.freeze({ id: "spaces", href: "/property", label: "Spaces" }),
+  Object.freeze({ id: "discover", href: "/property", label: "Discover" }),
+  Object.freeze({ id: "board", href: "/wishlist", label: "Board" }),
+  Object.freeze({ id: "intel", href: "/stratosphere", label: "Signals" }),
+  Object.freeze({ id: "dashboard", href: "/dashboard", label: "Dash" }),
+]);

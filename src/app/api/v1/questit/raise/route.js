@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabaseAdmin";
-import { canRaiseQuest } from "@/lib/questitPolicyEngine";
+import { canRaiseQuest, VALID_QUEST_SCOPES } from "@/lib/questitPolicyEngine";
 
 // This route currently 401s on every call — the questit_api_keys/questit_policies/
 // company_quests tables it queries were never migrated into the live DB. That's
@@ -31,10 +31,62 @@ export async function POST(request) {
     const companyId = keyData.user_id;
 
     // 2. Parse Request Payload
-    const { propertyId, targetField, description, bountyConnects } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const { propertyId, targetField, description, bountyConnects, providerTier } = body || {};
 
     if (!propertyId || !targetField || !bountyConnects) {
       return NextResponse.json({ error: "Missing required fields: propertyId, targetField, bountyConnects" }, { status: 400 });
+    }
+
+    // A-312: Scope allowlist check
+    const normalizedScope = String(targetField).toLowerCase();
+    if (!VALID_QUEST_SCOPES.includes(normalizedScope)) {
+      return NextResponse.json(
+        { error: `Invalid targetField '${targetField}'. Must be an authorized scope: ${VALID_QUEST_SCOPES.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    // A-312: Verify property exists and caller is authorized party (or broker / staff)
+    if (typeof supabase.from("properties")?.select === "function") {
+      const { data: property, error: propErr } = await supabase
+        .from("properties")
+        .select("id, owner_id")
+        .eq("id", propertyId)
+        .maybeSingle();
+
+      if (propErr || !property) {
+        return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      }
+
+      let isParty = property.owner_id === companyId;
+      if (!isParty && typeof supabase.from("broker_representations")?.select === "function") {
+        const { data: rep } = await supabase
+          .from("broker_representations")
+          .select("id")
+          .eq("property_id", property.id)
+          .eq("broker_id", companyId)
+          .eq("status", "active")
+          .maybeSingle();
+        if (rep) isParty = true;
+      }
+      if (!isParty && typeof supabase.from("user_profiles")?.select === "function") {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("role, active_roles")
+          .eq("id", companyId)
+          .maybeSingle();
+        const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
+        if (profile?.role === "admin" || profile?.role === "staff" || roles.includes("admin") || roles.includes("staff")) {
+          isParty = true;
+        }
+      }
+      if (!isParty) {
+        return NextResponse.json(
+          { error: "Forbidden: You must be an authorized party (owner or broker) for this property to raise a Data Quest" },
+          { status: 403 }
+        );
+      }
     }
 
     // 3. Fetch Company Policy & Usage
@@ -55,7 +107,15 @@ export async function POST(request) {
     const currentUsage = { dailyBountiesRaised: dailyCount || 0 };
 
     // 4. Evaluate Side System Policy
-    const policyResult = canRaiseQuest(policyData?.policy_rules, { bounty_connects: bountyConnects }, currentUsage);
+    const policyResult = canRaiseQuest(
+      policyData?.policy_rules,
+      {
+        bounty_connects: bountyConnects,
+        target_field: targetField,
+        provider_tier: providerTier,
+      },
+      currentUsage
+    );
     if (!policyResult.allowed) {
       return NextResponse.json({ error: policyResult.reason }, { status: 403 });
     }

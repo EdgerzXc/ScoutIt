@@ -25,6 +25,14 @@
       "schedule": "30 2 * * *"
     },
     {
+      "path": "/api/cron/purge-crm-activity",
+      "schedule": "15 3 * * *"
+    },
+    {
+      "path": "/api/cron/purge-analytics",
+      "schedule": "45 3 * * *"
+    },
+    {
       "path": "/api/cron/monthly-rollover",
       "schedule": "0 4 1 * *"
     },

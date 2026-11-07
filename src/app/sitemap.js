@@ -6,60 +6,55 @@ import { LOCATION_HUB_SLUGS } from "@/lib/locationHubs";
 // publish/takedown purge instead of freezing at the last deployment build.
 export const dynamic = "force-dynamic";
 
+/** Safe ISO date normalizer with fallback for sitemap entries (D-10) */
+export function safeIsoDate(candidate, fallback) {
+  if (!candidate) return fallback;
+  const d = new Date(candidate);
+  return Number.isFinite(d.getTime()) ? d.toISOString() : fallback;
+}
+
+export const STATIC_SITEMAP_DATE = process.env.VERCEL_GIT_COMMIT_DATE
+  ? safeIsoDate(process.env.VERCEL_GIT_COMMIT_DATE, "2026-11-01T00:00:00.000Z")
+  : "2026-11-01T00:00:00.000Z";
+
 export default async function sitemap() {
   const baseUrl = siteUrl();
-  const currentDate = new Date().toISOString();
 
-  // Core static public pages
+  // Core static public pages (stamped with stable baseline instead of dynamic fetch time)
   const staticRoutes = [
-    { url: `${baseUrl}`, lastModified: currentDate, changeFrequency: "daily", priority: 1.0 },
-    { url: `${baseUrl}/discover`, lastModified: currentDate, changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/property`, lastModified: currentDate, changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/brokers`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/pricing`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/about`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/enterprise`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/intel`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/photographers`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/event-planners`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/researchers`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/badges`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/showcase`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/stratosphere`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/community`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/pricing/owner`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/pricing/broker`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/pricing/seeker`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/pricing/creator`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/pricing/bundles`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/platform-tour`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/tutorials/owner-publish`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/contact`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/transit`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/about-you`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/terms`, lastModified: currentDate, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/privacy`, lastModified: currentDate, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "daily", priority: 1.0 },
+    { url: `${baseUrl}/discover`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/property`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/brokers`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/pricing`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/about`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/enterprise`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/intel`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/photographers`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/event-planners`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/researchers`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/badges`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/showcase`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/stratosphere`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/community`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/pricing/owner`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/pricing/broker`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/pricing/seeker`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/pricing/creator`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/pricing/bundles`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/platform-tour`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/tutorials/owner-publish`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/contact`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/transit`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/about-you`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/terms`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/privacy`, lastModified: STATIC_SITEMAP_DATE, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   // Location Hub routes (SEO-03) — RESTORED 2026-08-06 with W7.
-  //
-  // HISTORY, kept because the sequence is the lesson: these three slugs were
-  // submitted to Google from 2026-08-05 while no `/hubs/[slug]` route existed.
-  // All three returned 404, Google recorded soft-404s, and that suppressed
-  // crawl budget for the pages that DO work — actively fighting §13's indexing
-  // effort. W1 withheld them; W7 built `src/app/hubs/[slug]/page.js`; they are
-  // now true rather than merely absent.
-  //
-  // ⚠️ RULE: a sitemap must never contain a URL that does not return 200.
-  // Advertising a page you have not built costs more than not advertising it.
-  //
-  // The slugs are read from the SAME array that drives the page's
-  // `generateStaticParams`, so the two cannot drift. Hardcoding them here is
-  // what allowed the original mismatch — a literal list has no way to be wrong
-  // out loud.
   const hubRoutes = LOCATION_HUB_SLUGS.map((slug) => ({
     url: `${baseUrl}/hubs/${slug}`,
-    lastModified: currentDate,
+    lastModified: STATIC_SITEMAP_DATE,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
@@ -94,7 +89,7 @@ export default async function sitemap() {
 
       propertyRoutes = publicProperties.map((p) => ({
         url: `${baseUrl}/property/${p.slug}`,
-        lastModified: currentDate,
+        lastModified: safeIsoDate(p.last_verified_date || p.updated_at || p.created_at, STATIC_SITEMAP_DATE),
         changeFrequency: "weekly",
         priority: 0.8,
       }));
@@ -104,12 +99,20 @@ export default async function sitemap() {
         return p.units_inventory
           .map((u) => u?.id || u?.unit_id || u?.unitId)
           .filter(Boolean)
-          .map((unitId) => ({
-            url: `${baseUrl}/property/${p.slug}/unit/${unitId}`,
-            lastModified: currentDate,
-            changeFrequency: "weekly",
-            priority: 0.7,
-          }));
+          .map((unitId) => {
+            const unitObj = p.units_inventory.find(
+              (u) => (u?.id || u?.unit_id || u?.unitId) === unitId
+            );
+            return {
+              url: `${baseUrl}/property/${p.slug}/unit/${unitId}`,
+              lastModified: safeIsoDate(
+                unitObj?.last_verified_date || unitObj?.updated_at || p.last_verified_date || p.updated_at,
+                STATIC_SITEMAP_DATE
+              ),
+              changeFrequency: "weekly",
+              priority: 0.7,
+            };
+          });
       });
     }
   } catch (error) {
@@ -117,13 +120,6 @@ export default async function sitemap() {
   }
 
   // Published intel articles.
-  //
-  // /intel/[article-slug] has existed since the article system shipped and was
-  // never advertised here, so nothing published would have been submitted -
-  // a silent failure that only surfaces the day the first article goes live.
-  //
-  // fetchIntel already filters to Approved_For_Live_Site, so an unapproved
-  // draft cannot reach this list.
   let intelRoutes = [];
   try {
     if (bundle) {
@@ -131,7 +127,7 @@ export default async function sitemap() {
         .filter((a) => a.slug)
         .map((a) => ({
           url: `${baseUrl}/intel/${a.slug}`,
-          lastModified: currentDate,
+          lastModified: safeIsoDate(a.date || a.published_at || a.created_at, STATIC_SITEMAP_DATE),
           changeFrequency: "monthly",
           priority: 0.7,
         }));
@@ -140,16 +136,7 @@ export default async function sitemap() {
     console.error("Sitemap: Failed to fetch intel routes from Airtable", error);
   }
 
-  // Public broker dossiers, addressed by record id the way the page resolves
-  // them (see findPublicBroker).
-  //
-  // ── A4 AGAIN · EXAMPLES ARE NEVER SUBMITTED ────────────────────────────
-  // brokerDossierRobots() emits `index: false` for an example advisor, and a
-  // sitemap entry plus a noindex tag is the exact contradiction the property
-  // block above already paid for: Google crawls the URL anyway to read the
-  // tag, spending budget on a page we have said not to index. All three
-  // brokers are flagged isExample today, so this list is empty until a real
-  // advisor is published - which is the correct behaviour, not a bug.
+  // Public broker dossiers, addressed by record id the way the page resolves them.
   let brokerRoutes = [];
   try {
     if (bundle) {
@@ -157,7 +144,7 @@ export default async function sitemap() {
         .filter((b) => b.id && b.isExample !== true)
         .map((b) => ({
           url: `${baseUrl}/brokers/${b.id}`,
-          lastModified: currentDate,
+          lastModified: safeIsoDate(b.last_verified_date || b.updated_at || b.created_at, STATIC_SITEMAP_DATE),
           changeFrequency: "weekly",
           priority: 0.7,
         }));

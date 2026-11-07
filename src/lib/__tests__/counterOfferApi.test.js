@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { POST } from '@/app/api/ai/counter-offer/route';
 import * as serverAuth from '@/lib/serverAuth';
 
@@ -23,7 +25,7 @@ describe('/api/ai/counter-offer API endpoint', () => {
     expect(res.status).toBe(401);
   });
 
-  it('generates a Taglish counter-offer for lease requests', async () => {
+  it('generates a Taglish counter-offer for lease requests with honest templateEngine metadata', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-1');
 
     const req = new Request('https://www.scoutit.space/api/ai/counter-offer', {
@@ -44,5 +46,12 @@ describe('/api/ai/counter-offer API endpoint', () => {
     expect(json.success).toBe(true);
     expect(json.suggestion).toContain('One Bonifacio High Street Penthouse');
     expect(json.suggestion).toContain('₱ 170,000 / mo');
+    expect(json.meta.templateEngine).toBe('ScoutIt Deal Intelligence v1');
+    expect(json.meta.aiEngine).toBeUndefined();
+  });
+
+  it('provides public/favicon.ico alongside src/app/favicon.ico for static fallback requests', () => {
+    expect(existsSync(resolve(process.cwd(), 'public/favicon.ico'))).toBe(true);
+    expect(existsSync(resolve(process.cwd(), 'src/app/favicon.ico'))).toBe(true);
   });
 });

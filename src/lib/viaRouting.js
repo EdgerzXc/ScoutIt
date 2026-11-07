@@ -10,6 +10,8 @@
  * Reference: _SCOUTIT_BRAIN/07_FEATURES_AND_FLOWS/VIA_CONTACT_ATTRIBUTION_AND_ROUTING.md
  */
 
+import crypto from "crypto";
+
 export const ROUTING_REASONS = Object.freeze({
   USER_SELECTION: "USER_SELECTION",
   ACTIVE_RELATIONSHIP: "ACTIVE_RELATIONSHIP",
@@ -178,18 +180,43 @@ export function orderRemainingContacts(primaryContact, roster = []) {
   });
 }
 
+const DEV_VIA_SECRET = "scoutit-local-dev-via-secret";
+
 /**
- * Serializes attribution data into a tamper-resistant cookie payload string.
+ * Resolves the secret key used to HMAC-sign and verify VIA cookies.
+ * In production, fails closed (returns null) if no secret is configured.
  */
-export function serializeViaCookie({
-  propertyId,
-  promoterId,
-  promoterSlug = null,
-  promoterType = "broker",
-  visitorId,
-  firstSeenAt = Date.now(),
-  expiresAt = Date.now() + VIA_ATTRIBUTION_WINDOW_MS,
-}) {
+export function getViaCookieSecret() {
+  const secret = process.env.VIA_COOKIE_SECRET || process.env.WISHLIST_SHARE_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      return process.env.SUPABASE_SERVICE_ROLE_KEY || null;
+    }
+    return DEV_VIA_SECRET;
+  }
+  return secret;
+}
+
+/**
+ * Serializes attribution data into a tamper-proof HMAC-signed cookie payload string (A-310).
+ */
+export function serializeViaCookie(
+  {
+    propertyId,
+    promoterId,
+    promoterSlug = null,
+    promoterType = "broker",
+    visitorId,
+    firstSeenAt = Date.now(),
+    expiresAt = Date.now() + VIA_ATTRIBUTION_WINDOW_MS,
+  },
+  secretOverride
+) {
+  const secret = secretOverride !== undefined ? secretOverride : getViaCookieSecret();
+  if (!secret) {
+    throw new Error("VIA cookie signing secret is not configured in production");
+  }
+
   const payload = {
     pId: propertyId,
     prId: promoterId,
@@ -199,18 +226,48 @@ export function serializeViaCookie({
     fs: firstSeenAt,
     exp: expiresAt,
   };
-  return encodeURIComponent(JSON.stringify(payload));
+
+  const body = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const sig = crypto.createHmac("sha256", secret).update(body).digest("hex");
+  return `${body}.${sig}`;
 }
 
 /**
- * Parses and validates an attribution cookie payload.
+ * Parses and verifies an attribution cookie payload using timing-safe comparison (A-310).
+ * Treats unsigned or forged cookies as absent (returns null).
  */
-export function parseViaCookie(cookieStr) {
-  if (!cookieStr) return null;
+export function parseViaCookie(cookieStr, secretOverride) {
+  if (!cookieStr || typeof cookieStr !== "string") return null;
+  const secret = secretOverride !== undefined ? secretOverride : getViaCookieSecret();
+  if (!secret) return null;
+
   try {
-    const decoded = decodeURIComponent(cookieStr);
-    const parsed = JSON.parse(decoded);
+    const raw = cookieStr.includes("%") ? decodeURIComponent(cookieStr) : cookieStr;
+    const dotIdx = raw.lastIndexOf(".");
+    // Treat unsigned cookies as absent per N-08
+    if (dotIdx === -1) return null;
+
+    const body = raw.slice(0, dotIdx);
+    const sig = raw.slice(dotIdx + 1);
+    if (!body || !sig) return null;
+
+    const expectedSig = crypto.createHmac("sha256", secret).update(body).digest("hex");
+    const sigBuf = Buffer.from(sig, "hex");
+    const expectedBuf = Buffer.from(expectedSig, "hex");
+
+    // Timing-safe comparison to prevent signature oracle attacks
+    if (
+      sigBuf.length !== 32 ||
+      expectedBuf.length !== 32 ||
+      !crypto.timingSafeEqual(sigBuf, expectedBuf)
+    ) {
+      return null;
+    }
+
+    const jsonStr = Buffer.from(body, "base64url").toString("utf8");
+    const parsed = JSON.parse(jsonStr);
     if (!parsed || !parsed.prId || !parsed.exp) return null;
+
     return {
       propertyId: parsed.pId,
       promoterId: parsed.prId,

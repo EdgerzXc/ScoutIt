@@ -32,7 +32,11 @@ vi.mock("@/lib/notifications", () => ({ notifyUser: vi.fn(async () => true) }));
 vi.mock("@/lib/crmActivity", () => ({ logActivity: vi.fn(async () => true) }));
 vi.mock("@/lib/sampleInventory", () => ({ validateSampleInquiryRecipients: () => ({ ok: true }) }));
 vi.mock("@/lib/turnstile", () => ({ turnstileGuard: async () => null }));
-vi.mock("@/lib/connectBlocks", () => ({ anyBlocked: async () => false, isBlocked: async () => false }));
+vi.mock("@/lib/connectBlocks", () => ({
+  anyBlocked: async () => false,
+  isBlocked: async () => false,
+  checkBlockGuard: async () => ({ ok: true, blocked: false, unavailable: false }),
+}));
 vi.mock("@/lib/connectGates", () => ({
   findRecentPendingDeal: async () => null,
   checkReceiverGate: async () => ({ ok: true }),

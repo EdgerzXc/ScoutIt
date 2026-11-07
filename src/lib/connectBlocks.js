@@ -13,48 +13,97 @@
 
 let missingTableWarned = false;
 
+export function _resetBlockWarningForTesting() {
+  missingTableWarned = false;
+}
+
+function shouldFailClosed(options = {}) {
+  return options.failClosed === true || process.env.CONNECT_BLOCKS_FAIL_CLOSED === "true";
+}
+
 /**
- * True when `receiverId` has blocked `senderId`.
- * Never throws — unknown DB state means "not blocked" + warn, never a 500.
+ * Check whether any recipient in `recipientIds` has blocked `senderId`.
+ * Returns { ok: boolean, blocked: boolean, unavailable: boolean, reason?: string }
+ *
+ * Pre-migration default: fail open with a single operator-visible warning.
+ * Post-O-004 / fail-closed posture (CONNECT_BLOCKS_FAIL_CLOSED="true" or options.failClosed=true):
+ * fails closed on missing table or guard errors.
  */
-export async function isBlocked(supabaseAdmin, senderId, receiverId) {
-  if (!supabaseAdmin || !senderId || !receiverId) return false;
-  if (senderId === receiverId) return false;
+export async function checkBlockGuard(supabaseAdmin, senderId, recipientIds = [], options = {}) {
+  const failClosed = shouldFailClosed(options);
+  const rawIds = Array.isArray(recipientIds) ? recipientIds : [recipientIds];
+  const ids = [...new Set(rawIds.filter(Boolean))].filter((id) => id !== senderId);
+
+  if (!supabaseAdmin || !senderId || ids.length === 0) {
+    return { ok: true, blocked: false, unavailable: false };
+  }
+
   try {
-    const { data, error } = await supabaseAdmin
+    const baseQuery = supabaseAdmin
       .from("connect_blocks")
-      .select("blocker_id")
-      .eq("blocker_id", receiverId)
+      .select("blocker_id");
+
+    let query;
+    if (ids.length === 1 && typeof baseQuery.eq === "function") {
+      query = baseQuery.eq("blocker_id", ids[0]);
+    } else if (typeof baseQuery.in === "function") {
+      query = baseQuery.in("blocker_id", ids);
+    } else {
+      for (const rid of ids) {
+        const single = await checkBlockGuard(supabaseAdmin, senderId, [rid], options);
+        if (single.blocked) return single;
+        if (single.unavailable && failClosed) return single;
+      }
+      return { ok: true, blocked: false, unavailable: false };
+    }
+
+    const { data, error } = await query
       .eq("blocked_id", senderId)
       .limit(1);
+
     if (error) {
-      // 42P01 = undefined_table — migration not applied yet. Any other error
-      // is also non-fatal here; the spend must not hinge on a safety read.
+      // 42P01 = undefined_table — migration not applied yet.
       if (!missingTableWarned) {
         console.warn("[CONNECT BLOCKS] check skipped (table unavailable):", error.code || error.message);
         missingTableWarned = true;
       }
-      return false;
+      if (failClosed) {
+        return { ok: false, blocked: true, unavailable: true, reason: "guard_unavailable" };
+      }
+      return { ok: true, blocked: false, unavailable: true };
     }
-    return Array.isArray(data) && data.length > 0;
+
+    const blocked = Array.isArray(data) && data.length > 0;
+    return { ok: true, blocked, unavailable: false };
   } catch (err) {
     if (!missingTableWarned) {
       console.warn("[CONNECT BLOCKS] check skipped (exception):", err?.message);
       missingTableWarned = true;
     }
-    return false;
+    if (failClosed) {
+      return { ok: false, blocked: true, unavailable: true, reason: "guard_unavailable" };
+    }
+    return { ok: true, blocked: false, unavailable: true };
   }
+}
+
+/**
+ * True when `receiverId` has blocked `senderId`.
+ * By default fails open before O-004 with a single operator warning.
+ * When failClosed is enabled, fails closed on table unavailability.
+ */
+export async function isBlocked(supabaseAdmin, senderId, receiverId, options = {}) {
+  if (!supabaseAdmin || !senderId || !receiverId || senderId === receiverId) return false;
+  const res = await checkBlockGuard(supabaseAdmin, senderId, [receiverId], options);
+  return res.blocked;
 }
 
 /**
  * True when ANY of `receiverIds` has blocked `senderId`.
  */
-export async function anyBlocked(supabaseAdmin, senderId, receiverIds = []) {
-  const ids = (receiverIds || []).filter(Boolean);
-  for (const rid of ids) {
-    if (await isBlocked(supabaseAdmin, senderId, rid)) return true;
-  }
-  return false;
+export async function anyBlocked(supabaseAdmin, senderId, receiverIds = [], options = {}) {
+  const res = await checkBlockGuard(supabaseAdmin, senderId, receiverIds, options);
+  return res.blocked;
 }
 
 /** Open Gate safety read: missing block state refuses the free send. */

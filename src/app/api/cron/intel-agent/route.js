@@ -12,8 +12,10 @@ import { sanitizeError } from "@/lib/sanitizeError";
  * ═════════════════════════════════════════════════════════════════════════
  * /api/cron/intel-agent — Autonomous Intel Article Generation Agent Bot (A-195)
  * ═════════════════════════════════════════════════════════════════════════
- * Periodically or on-demand synthesizes publish-ready market intelligence
- * articles with interactive building widgets.
+ * Status: PARKED for automated cron scheduling (A-309).
+ * Intentionally unscheduled in vercel.json until owner publication cadence,
+ * topic rotation, and review gates are configured. Available on-demand for
+ * staff-authenticated POST triggers with specified blueprintId.
  *
  * Auth:
  * - Vercel Cron: `Authorization: Bearer CRON_SECRET`

@@ -5,8 +5,25 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   {
     rules: {
+      "no-undef": "error",
       "react-hooks/set-state-in-effect": "off"
     }
+  },
+  {
+    files: ["**/*.test.{js,jsx,mjs}", "**/__tests__/**/*.{js,jsx,mjs}"],
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        vi: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+      },
+    },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

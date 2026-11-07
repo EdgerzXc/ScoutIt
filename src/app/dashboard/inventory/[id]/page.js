@@ -9,6 +9,7 @@ import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBounda
 import InventoryGridManager from "../../../../components/dashboard/InventoryGridManager";
 import DelegationRequests from "../../../../components/dashboard/DelegationRequests";
 import { getSession } from "../../../../lib/authClient";
+import { getCurrentTier as getFallbackTier } from "@/lib/entitlements";
 
 function InventoryInner({ params }) {
   const router = useRouter();
@@ -22,7 +23,8 @@ function InventoryInner({ params }) {
   }, [listings, id, router]);
 
   const listing = listings.find(l => String(l.id) === String(id));
-  const isPro = getCurrentTier ? getCurrentTier() !== "starry" : true;
+  const tierGetter = getCurrentTier || getFallbackTier;
+  const isPro = tierGetter ? tierGetter() !== "starry" : true;
 
   // State must be above early return
   const [localUnits, setLocalUnits] = useState([]);

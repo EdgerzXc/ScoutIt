@@ -43,15 +43,39 @@ const CATEGORY_PRICE_FIELD = Object.freeze({
 });
 
 /**
- * Resolves comparable price statically without dynamic method invocation (CodeQL alert 42).
+ * Parses and sanitizes currency / pricing values (A-300).
+ * Strips '₱', 'Php', commas, and whitespace.
+ * Rejects 'k' / 'M' suffixed shorthand strings or non-positive values.
  */
-function getComparablePrice(categoryKey, p) {
+export function parseGeoPrice(val) {
+  if (typeof val === 'number') {
+    return Number.isFinite(val) && val > 0 ? val : null;
+  }
+  if (!val || typeof val !== 'string') return null;
+  const s = val.trim();
+  // Reject 'k' / 'M' suffixed shorthand strings
+  if (/[kmKM]$/.test(s)) return null;
+  const cleaned = s
+    .replace(/^(?:php|[₱pP\$])\s*/i, "")
+    .replace(/,/g, "")
+    .trim();
+  const num = Number(cleaned);
+  return Number.isFinite(num) && num > 0 ? num : null;
+}
+
+/**
+ * Resolves comparable price statically without dynamic method invocation (CodeQL alert 42).
+ * For commercial spaces, filters by unit ('sqm' vs 'total') to prevent mixing per-sqm and total rents (A-300).
+ */
+export function getComparablePrice(categoryKey, p, commercialUnit = "total") {
   if (!p || typeof p !== 'object') return null;
   switch (categoryKey) {
     case 'residential':
       return p.cat?.residential?.price;
     case 'commercial':
-      return p.cat?.commercial?.rentFrom ?? p.cat?.commercial?.rentPerSqm;
+      return commercialUnit === "sqm"
+        ? p.cat?.commercial?.rentPerSqm
+        : (p.cat?.commercial?.rentFrom ?? p.listed_price);
     case 'str':
       return p.cat?.str?.nightlyRate;
     case 'hospitality':
@@ -76,7 +100,11 @@ function resolveCategory(category) {
   return { key };
 }
 
-const COMP_RADIUS_KM = 1.5;
+const RADIUS_TIERS = [
+  { radiusKm: 1.5, scope: "address" },
+  { radiusKm: 5.0, scope: "district" },
+  { radiusKm: 15.0, scope: "city" },
+];
 
 export async function POST(request) {
   const rate = checkGeoPricingRate(clientIp(request));
@@ -95,7 +123,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { location, category, price } = body;
+    const { location, category, price, priceUnit } = body;
 
     if (!location || !category || !price) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -112,10 +140,14 @@ export async function POST(request) {
       );
     }
 
-    const targetPrice = parseFloat(price);
-    if (!Number.isFinite(targetPrice) || targetPrice <= 0) {
+    const targetPrice = parseGeoPrice(price);
+    if (!targetPrice) {
       return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
     }
+
+    const commercialUnit = resolved.key === "commercial"
+      ? ((priceUnit === "sqm" || targetPrice <= 5000) ? "sqm" : "total")
+      : null;
 
     if (typeof location !== 'string' || location.length > 200) {
       return NextResponse.json({ error: 'Invalid location' }, { status: 400 });
@@ -147,40 +179,55 @@ export async function POST(request) {
 
     const [lon, lat] = geocodeData.features[0].center;
 
-    // 2. Filter the approved snapshot by radius and calculate average.
-    let totalPriceSum = 0;
-    let compsCount = 0;
-
+    // 2. Filter the approved snapshot by radius tiers (address -> district -> city)
+    const candidateComps = [];
     (bundle.properties || []).forEach((property) => {
       if (property.is_sample) return;
       if (String(property.spaceCategory || "").toLowerCase() !== resolved.key) return;
-      // Do not treat a city-centroid fallback as an address-level comparable.
       const compLat = property.latitude;
       const compLon = property.longitude;
-      const compPrice = Number.parseFloat(getComparablePrice(resolved.key, property));
+      const rawPrice = getComparablePrice(resolved.key, property, commercialUnit);
+      const compPrice = parseGeoPrice(rawPrice);
 
-      if (compLat && compLon && Number.isFinite(compPrice) && compPrice > 0) {
+      if (compLat && compLon && compPrice) {
         const dist = distanceKm(lat, lon, compLat, compLon);
-        if (dist <= COMP_RADIUS_KM) {
-          totalPriceSum += compPrice;
-          compsCount++;
-        }
+        candidateComps.push({ dist, price: compPrice });
       }
     });
 
-    if (compsCount === 0) {
-      return NextResponse.json({ compsFound: 0 });
+    let selectedTier = RADIUS_TIERS[0];
+    let matchingComps = candidateComps.filter(c => c.dist <= selectedTier.radiusKm);
+
+    if (matchingComps.length === 0) {
+      selectedTier = RADIUS_TIERS[1]; // 5km district
+      matchingComps = candidateComps.filter(c => c.dist <= selectedTier.radiusKm);
+    }
+    if (matchingComps.length === 0) {
+      selectedTier = RADIUS_TIERS[2]; // 15km city
+      matchingComps = candidateComps.filter(c => c.dist <= selectedTier.radiusKm);
     }
 
-    const averagePrice = totalPriceSum / compsCount;
+    if (matchingComps.length === 0) {
+      return NextResponse.json({
+        compsFound: 0,
+        radiusKm: selectedTier.radiusKm,
+        radiusScope: selectedTier.scope,
+        ...(commercialUnit ? { priceUnit: commercialUnit } : {})
+      });
+    }
+
+    const totalPriceSum = matchingComps.reduce((sum, c) => sum + c.price, 0);
+    const averagePrice = totalPriceSum / matchingComps.length;
     const percentageDiff = ((targetPrice - averagePrice) / averagePrice) * 100;
 
     return NextResponse.json({
-      compsFound: compsCount,
+      compsFound: matchingComps.length,
       averagePrice: averagePrice,
       percentageDiff: percentageDiff,
-      radiusKm: COMP_RADIUS_KM,
-      priceField: resolved.key
+      radiusKm: selectedTier.radiusKm,
+      radiusScope: selectedTier.scope,
+      priceField: resolved.key,
+      ...(commercialUnit ? { priceUnit: commercialUnit } : {})
     });
 
   } catch (error) {

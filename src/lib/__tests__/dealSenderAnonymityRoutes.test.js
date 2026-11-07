@@ -21,7 +21,11 @@ vi.mock("@/lib/serverAuth", () => ({
 vi.mock("@/lib/notifications", () => ({ notifyUser: vi.fn(async () => true) }));
 vi.mock("@/lib/crmActivity", () => ({ logActivity: vi.fn(async () => true) }));
 vi.mock("@/lib/sampleInventory", () => ({ validateSampleInquiryRecipients: () => ({ ok: true }) }));
-vi.mock("@/lib/connectBlocks", () => ({ anyBlocked: async () => false, isBlocked: async () => false }));
+vi.mock("@/lib/connectBlocks", () => ({
+  anyBlocked: async () => false,
+  isBlocked: async () => false,
+  checkBlockGuard: async () => ({ ok: true, blocked: false, unavailable: false }),
+}));
 vi.mock("@/lib/connectGates", () => ({
   findRecentPendingDeal: async () => null,
   checkReceiverGate: async () => ({ ok: true }),
@@ -82,7 +86,7 @@ vi.mock("@/lib/supabaseAdmin", () => ({
       if (name === "create_routed_buyer_deal") {
         return { data: [{ deal_id: "deal-1", recipient_ids: ["owner-1"], routed_to_roster: false }], error: null };
       }
-      if (name === "spend_connects") return { data: [{ total_balance: 9 }], error: null };
+      if (name === "spend_connects" || name === "spend_connects_atomic") return { data: [{ total_balance: 9, remaining_total: 9 }], error: null };
       if (name === "refund_connects_system_error") {
         state.refunds.push(args);
         return { data: null, error: null };

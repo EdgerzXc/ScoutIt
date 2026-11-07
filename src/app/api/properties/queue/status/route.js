@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { calculateQueuePosition } from "@/lib/queuePosition";
 
 export async function GET(request) {
   try {
@@ -47,17 +48,8 @@ export async function GET(request) {
       });
     }
 
-    // Still in queue: Calculate current queue position
-    let queueNumber = 1;
-    const { count, error: countError } = await supabaseAdmin
-      .from("properties")
-      .select("id", { count: "exact", head: true })
-      .eq("pipeline_status", "ai_drafting")
-      .lte("created_at", property.created_at);
-
-    if (!countError && typeof count === "number" && count > 0) {
-      queueNumber = count;
-    }
+    // Still in queue: Calculate current queue position deterministically
+    const queueNumber = await calculateQueuePosition(supabaseAdmin, property.id);
 
     return NextResponse.json({
       isDone: false,

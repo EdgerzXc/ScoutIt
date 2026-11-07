@@ -89,6 +89,8 @@ export function mapCatalogueListing(p) {
     price: null,
     tenure: p.tenure || null,
     listed_price: p.listed_price || null,
+    workstations: p.workstations || null,
+    rooms: p.rooms || null,
     // Read from the record: `fetchProperties` admits only rows where
     // `Approved_For_ScoutIt` is set, so presence here is the approval.
     tag: 'LIVE',

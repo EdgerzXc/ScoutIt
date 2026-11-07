@@ -6,7 +6,7 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { getFreshness } from "@/lib/freshness";
 import { stampAirtableFreshness } from "@/lib/airtableFreshness";
-import { invalidateCmsBundle } from "@/lib/cmsCache";
+import { getCmsBundle, invalidateCmsBundle } from "@/lib/cmsCache";
 
 // ─────────────────────────────────────────────────────────────────────────
 // RE-VERIFICATION GATE  (NEW_IDEAS.md §21)
@@ -51,21 +51,44 @@ export async function GET(req) {
 
     const { data: properties, error } = await supabaseAdmin
       .from("properties")
-      .select("id, slug, title, location, last_verified_date, pipeline_status")
+      .select("id, slug, canonical_slug, title, location, last_verified_date, pipeline_status")
       .eq("owner_id", userId)
       .is("archived_at", null)
       .neq("pipeline_status", "archived");
 
     if (error) throw error;
 
+    let bundle = null;
+    try {
+      bundle = await getCmsBundle();
+    } catch {
+      // Degrades gracefully if public CMS cache is unavailable
+    }
+
     const items = (properties || []).map((p) => {
       const freshness = getFreshness(p.last_verified_date);
+      const activeSlug = p.canonical_slug || p.slug;
+      const publicProp =
+        activeSlug && Array.isArray(bundle?.properties)
+          ? bundle.properties.find((pub) => pub.slug === activeSlug || (p.slug && pub.slug === p.slug))
+          : null;
+
+      const publicLastVerifiedDate = publicProp?.last_verified_date || null;
+      const isPublished = p.pipeline_status === "published";
+      const isPublicSyncPending =
+        isPublished &&
+        (!activeSlug || (p.last_verified_date && publicLastVerifiedDate !== p.last_verified_date));
+      const publicFreshness = publicLastVerifiedDate ? getFreshness(publicLastVerifiedDate) : null;
+
       return {
         id: p.id,
         slug: p.slug,
+        canonicalSlug: p.canonical_slug,
         title: p.title,
         location: p.location,
         lastVerifiedDate: p.last_verified_date,
+        publicLastVerifiedDate,
+        cmsSyncPending: Boolean(isPublicSyncPending),
         pipelineStatus: p.pipeline_status,
         freshness: {
           id: freshness.id,
@@ -75,6 +98,9 @@ export async function GET(req) {
           days: freshness.days,
           ownerNote: freshness.ownerNote,
         },
+        ...(publicFreshness
+          ? { publicFreshness: { id: publicFreshness.id, label: publicFreshness.label } }
+          : {}),
       };
     });
 
@@ -107,7 +133,7 @@ export async function POST(req) {
     // client could otherwise stamp "verified" on someone else's listing.
     const { data: owned, error: ownError } = await supabaseAdmin
       .from("properties")
-      .select("id, slug")
+      .select("id, slug, canonical_slug, pipeline_status, title")
       .eq("owner_id", userId)
       .in("id", parsed.data.propertyIds);
 
@@ -129,13 +155,43 @@ export async function POST(req) {
     // parallel: Airtable rate-limits at 5 req/s per base and blowing that
     // takes the public site's CMS proxy down with it (see cmsCache.js).
     const airtableResults = [];
+    const unsluggedPublished = [];
     for (const property of owned) {
-      if (!property.slug) continue;
-      const result = await stampAirtableFreshness({ slug: property.slug, isoDate: iso });
-      airtableResults.push({ slug: property.slug, synced: result.ok });
+      const activeSlug = property.canonical_slug || property.slug;
+      if (!activeSlug) {
+        if (property.pipeline_status === "published") {
+          unsluggedPublished.push(property.title || property.id);
+        }
+        continue;
+      }
+      let result = await stampAirtableFreshness({ slug: activeSlug, isoDate: iso });
+      if (!result.ok && property.slug && property.slug !== activeSlug) {
+        result = await stampAirtableFreshness({ slug: property.slug, isoDate: iso });
+      }
+      if (!result.ok && property.id) {
+        const { data: history } = await supabaseAdmin
+          .from("property_slug_history")
+          .select("old_slug")
+          .eq("property_id", property.id);
+        if (history?.length) {
+          for (const h of history) {
+            if (h.old_slug && h.old_slug !== activeSlug && h.old_slug !== property.slug) {
+              const histRes = await stampAirtableFreshness({ slug: h.old_slug, isoDate: iso });
+              if (histRes.ok) {
+                result = histRes;
+                break;
+              }
+            }
+          }
+        }
+      }
+      airtableResults.push({ slug: activeSlug, synced: result.ok });
     }
 
-    const failedSync = airtableResults.filter((r) => !r.synced).map((r) => r.slug);
+    const failedSync = [
+      ...airtableResults.filter((r) => !r.synced).map((r) => r.slug),
+      ...unsluggedPublished,
+    ];
     let publicCachePending = false;
     if (airtableResults.some((r) => r.synced)) {
       try {

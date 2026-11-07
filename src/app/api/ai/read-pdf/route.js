@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { extractText, getDocumentProxy } from 'unpdf';
 import { createClient } from '@supabase/supabase-js';
+import { createRateLimiter } from '@/lib/rateLimit';
+import { clientIp } from '@/lib/clientIp';
+import { MAX_RAW_TEXT_CHARS, MAX_PDF_PAGES } from '@/lib/assimilateProperty';
 
 // Extracts the real text layer from an uploaded PDF.
 // The concierge flow used to call FileReader.readAsText() on the raw binary,
@@ -8,13 +11,22 @@ import { createClient } from '@supabase/supabase-js';
 // actual property text. This route does proper text extraction server-side.
 //
 // Accepts: multipart/form-data with a `file` field (a .pdf).
-// Returns: { success, text, pages } or { error }.
+// Returns: { success, text, pages, totalPages, truncated } or { error }.
 
 const MAX_BYTES = 20 * 1024 * 1024; // 20MB — pitch decks/flyers are well under this
+const checkPdfRate = createRateLimiter({ limit: 20, windowMs: 60_000, maxKeys: 10_000 });
 
 export async function POST(request) {
-
   try {
+    const ip = clientIp(request);
+    const rate = checkPdfRate(`pdf:${ip}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many PDF read requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const formData = await request.formData();
 
     // PDF processing is available only to a Supabase-validated account.
@@ -38,8 +50,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    if (file.type !== 'application/pdf') {
-      return NextResponse.json({ error: 'Invalid file type. Must be a PDF.' }, { status: 415 });
+    const isDeclaredPdf =
+      file.type === "application/pdf" ||
+      file.type === "application/x-pdf" ||
+      file.type === "application/octet-stream" ||
+      !file.type ||
+      (typeof file.name === "string" && file.name.toLowerCase().endsWith(".pdf"));
+
+    if (!isDeclaredPdf) {
+      return NextResponse.json({ error: "Invalid file type. Must be a PDF." }, { status: 415 });
     }
 
     if (file.size > MAX_BYTES) {
@@ -62,10 +81,31 @@ export async function POST(request) {
       );
     }
     const pdf = await getDocumentProxy(buffer);
-    const { totalPages, text } = await extractText(pdf, { mergePages: true });
+    const totalPages = pdf.numPages || 0;
+    const cappedPages = Math.min(totalPages, MAX_PDF_PAGES);
 
-    const cleaned = (text || '').trim();
-    if (!cleaned) {
+    let rawText = "";
+    if (totalPages > MAX_PDF_PAGES) {
+      // Bounded server-side extraction: extract text only up to MAX_PDF_PAGES
+      const texts = await Promise.all(
+        Array.from({ length: cappedPages }, async (_, i) => {
+          try {
+            const page = await pdf.getPage(i + 1);
+            const content = await page.getTextContent();
+            return content.items.filter((item) => item.str != null).map((item) => item.str).join(" ");
+          } catch {
+            return "";
+          }
+        })
+      );
+      rawText = texts.join("\n").replace(/\s+/g, " ");
+    } else {
+      const extracted = await extractText(pdf, { mergePages: true });
+      rawText = extracted?.text || "";
+    }
+
+    const trimmed = (rawText || '').trim();
+    if (!trimmed) {
       return NextResponse.json(
         {
           error:
@@ -75,7 +115,17 @@ export async function POST(request) {
       );
     }
 
-    return NextResponse.json({ success: true, text: cleaned, pages: totalPages });
+    // Enforce character ceiling to prevent cost/memory blowout
+    const cleaned = trimmed.slice(0, MAX_RAW_TEXT_CHARS);
+    const wasTruncated = totalPages > MAX_PDF_PAGES || trimmed.length > MAX_RAW_TEXT_CHARS;
+
+    return NextResponse.json({
+      success: true,
+      text: cleaned,
+      pages: cappedPages,
+      totalPages,
+      truncated: wasTruncated,
+    });
   } catch (err) {
     console.error('[read-pdf] extraction failed:', err);
     return NextResponse.json({ error: 'Could not read this PDF.' }, { status: 500 });

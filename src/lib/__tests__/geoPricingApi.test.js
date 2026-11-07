@@ -23,7 +23,7 @@ vi.mock("@/lib/cmsCache", () => ({
   })),
 }));
 
-const { POST } = await import("@/app/api/geo-pricing/route");
+const { POST, parseGeoPrice, getComparablePrice } = await import("@/app/api/geo-pricing/route");
 
 const request = (body) =>
   new Request("https://www.scoutit.space/api/geo-pricing", {
@@ -100,5 +100,81 @@ describe("/api/geo-pricing category handling", () => {
 
     expect(res.status).toBe(400);
     expect(urlsHit()).toHaveLength(0);
+  });
+
+  describe("A-300: price parsing, unit separation, and adaptive radius", () => {
+    it("parseGeoPrice parses the five required inputs and rejects shorthand suffixes", () => {
+      expect(parseGeoPrice("₱185,000")).toBe(185000);
+      expect(parseGeoPrice("Php 185,000")).toBe(185000);
+      expect(parseGeoPrice("180,000")).toBe(180000);
+      expect(parseGeoPrice(180000)).toBe(180000);
+      expect(parseGeoPrice("Php 12.5M")).toBeNull();
+      expect(parseGeoPrice("45k")).toBeNull();
+      expect(parseGeoPrice("not-a-price")).toBeNull();
+    });
+
+    it("separates commercial rentPerSqm from total rent in getComparablePrice", () => {
+      const mixedProperty = {
+        cat: {
+          commercial: {
+            rentFrom: 180000,
+            rentPerSqm: 850,
+          },
+        },
+      };
+
+      // Total rent query gets rentFrom
+      expect(getComparablePrice("commercial", mixedProperty, "total")).toBe(180000);
+      // Sqm rent query gets rentPerSqm
+      expect(getComparablePrice("commercial", mixedProperty, "sqm")).toBe(850);
+    });
+
+    it("computes accurate percentageDiff for ₱185,000 target vs ₱180,000 comparable comp", async () => {
+      const { getCmsBundle } = await import("@/lib/cmsCache");
+      getCmsBundle.mockResolvedValueOnce({
+        source: "airtable",
+        properties: [
+          {
+            spaceCategory: "Commercial",
+            latitude: 14.55,
+            longitude: 121.05,
+            cat: { commercial: { rentFrom: 180000 } },
+          },
+        ],
+      });
+
+      const res = await POST(request(validBody({ category: "commercial", price: "₱185,000" })));
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.compsFound).toBe(1);
+      expect(data.averagePrice).toBe(180000);
+      // ((185000 - 180000) / 180000) * 100 = 2.777...%
+      expect(data.percentageDiff).toBeCloseTo(2.778, 2);
+      expect(data.radiusScope).toBe("address");
+      expect(data.priceUnit).toBe("total");
+    });
+
+    it("adaptive radius falls back to district radius when comps are outside 1.5km", async () => {
+      const { getCmsBundle } = await import("@/lib/cmsCache");
+      // Property located ~3.3km away (lat: 14.58 vs center 14.55)
+      getCmsBundle.mockResolvedValueOnce({
+        source: "airtable",
+        properties: [
+          {
+            spaceCategory: "Commercial",
+            latitude: 14.58,
+            longitude: 121.05,
+            cat: { commercial: { rentFrom: 200000 } },
+          },
+        ],
+      });
+
+      const res = await POST(request(validBody({ category: "commercial", price: 200000 })));
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.compsFound).toBe(1);
+      expect(data.radiusKm).toBe(5);
+      expect(data.radiusScope).toBe("district");
+    });
   });
 });

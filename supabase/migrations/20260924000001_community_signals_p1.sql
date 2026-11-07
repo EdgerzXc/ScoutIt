@@ -127,6 +127,92 @@ REVOKE ALL ON TABLE public.signal_requirements FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.signal_relevance FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.signal_saves FROM PUBLIC, anon, authenticated;
 
+-- A-311: Atomic counter subquery functions & triggers to eliminate race condition drift
+CREATE OR REPLACE FUNCTION public.sync_signal_relevant_count(p_signal_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_count integer;
+BEGIN
+  UPDATE public.stratosphere_signals
+  SET
+    relevant_count = (
+      SELECT count(*)::integer
+      FROM public.signal_relevance
+      WHERE signal_id = p_signal_id
+    ),
+    updated_at = now()
+  WHERE id = p_signal_id
+  RETURNING relevant_count INTO v_count;
+
+  RETURN coalesce(v_count, 0);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.sync_signal_saved_count(p_signal_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_count integer;
+BEGIN
+  UPDATE public.stratosphere_signals
+  SET
+    saved_count = (
+      SELECT count(*)::integer
+      FROM public.signal_saves
+      WHERE signal_id = p_signal_id
+    )
+  WHERE id = p_signal_id
+  RETURNING saved_count INTO v_count;
+
+  RETURN coalesce(v_count, 0);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.trigger_sync_signal_relevant_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_id uuid;
+BEGIN
+  v_id := coalesce(NEW.signal_id, OLD.signal_id);
+  PERFORM public.sync_signal_relevant_count(v_id);
+  RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.trigger_sync_signal_saved_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_id uuid;
+BEGIN
+  v_id := coalesce(NEW.signal_id, OLD.signal_id);
+  PERFORM public.sync_signal_saved_count(v_id);
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_signal_relevance_sync ON public.signal_relevance;
+CREATE TRIGGER trg_signal_relevance_sync
+  AFTER INSERT OR DELETE ON public.signal_relevance
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trigger_sync_signal_relevant_count();
+
+DROP TRIGGER IF EXISTS trg_signal_saves_sync ON public.signal_saves;
+CREATE TRIGGER trg_signal_saves_sync
+  AFTER INSERT OR DELETE ON public.signal_saves
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trigger_sync_signal_saved_count();
+
 COMMENT ON TABLE public.stratosphere_signals IS
   'A-145 P1: real member-posted community signals. Samples never land here. Service-role writes only via /api/community/*; public reads serve live rows through the feed route. O-004 row 11, NOT APPLIED.';
 

@@ -2,13 +2,13 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { loadDeals } from "../lib/deals/dealsClient";
 import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
 import { getBalance, spendConnects, initWalletIfEmpty, resolveConnectRole } from "../lib/connectsWallet";
-import { syncAuthenticatedUserCache } from "../lib/entitlements";
+import { syncAuthenticatedUserCache, getCurrentTier as getEntitlementTier } from "../lib/entitlements";
 import ListerDeclarationModal from "../components/dashboard/ListerDeclarationModal";
 import QuotaSwapModal from "../components/dashboard/QuotaSwapModal";
 import { isOnboardingComplete } from "../lib/onboardingProfile";
@@ -20,23 +20,40 @@ import { completenessScoreOf, mapCatalogueListing } from "@/lib/dashboardListing
 import { sanitizeError } from "../lib/sanitizeError";
 import { distanceKm } from "@/lib/geo";
 
+import { ListingsContext, useListings } from "./ListingsContext";
+import { DealsContext, useDeals } from "./DealsContext";
+import { WalletContext, useWallet } from "./WalletContext";
+import { NotificationsContext, NotificationsProvider, useNotifications } from "./NotificationsContext";
+import { UserContext, useUser } from "./UserContext";
+
+export { useListings, ListingsContext, DEFAULT_LISTINGS_VALUE } from "./ListingsContext";
+export { useDeals, DealsContext, DEFAULT_DEALS_VALUE } from "./DealsContext";
+export { useWallet, WalletContext, DEFAULT_WALLET_VALUE } from "./WalletContext";
+export { useNotifications, NotificationsContext, DEFAULT_NOTIFICATIONS_VALUE } from "./NotificationsContext";
+export { useUser, UserContext, DEFAULT_USER_VALUE } from "./UserContext";
+
 const DashboardContext = createContext();
 
 // Default Center: Makati CBD
 const DEFAULT_MAP_CENTER = [121.0215, 14.5547]; 
 
-const DEFAULT_CONTEXT_VALUE = {
+export const DEFAULT_CONTEXT_VALUE = {
   listings: [],
+  catalogue: [],
   pitches: [],
   notifications: [],
   connects: 5,
   currentUser: null,
+  getCurrentTier: () => "starry",
   toasts: [],
   savedIds: [],
   identityResolved: false,
   isLoading: false,
   inventoryError: false,
   refetchInventory: () => {},
+  searchByRadius: async () => {},
+  DEFAULT_MAP_CENTER,
+  authedFetch: async () => ({ ok: false, status: 401, json: async () => ({}) }),
   addToast: () => {},
   toggleSave: () => {},
   raiseQuest: async () => false,
@@ -49,9 +66,11 @@ const DEFAULT_CONTEXT_VALUE = {
   addConciergeListing: async () => {},
   sendPitch: async () => false,
   inviteBroker: async () => false,
+  updatePitchStatus: async () => false,
   markNotificationsRead: async () => {},
   clearAllNotifications: async () => {},
   addNotification: async () => {},
+  setNotifications: () => {},
 };
 
 export function useDashboard() {
@@ -113,17 +132,69 @@ const mapSupabaseProperties = (propertiesData) => {
   }));
 };
 
+function DashboardCompositeBridge({
+  userValue,
+  walletValue,
+  listingsValue,
+  dealsValue,
+  declarationPrompt,
+  quotaSwapPrompt,
+  onDeclarationSubmit,
+  onDeclarationCancel,
+  onQuotaSwapSubmit,
+  onQuotaSwapCancel,
+  children,
+}) {
+  const notificationsValue = useNotifications();
+  const compositeValue = useMemo(() => ({
+    ...userValue,
+    ...walletValue,
+    ...listingsValue,
+    ...dealsValue,
+    ...notificationsValue,
+  }), [userValue, walletValue, listingsValue, dealsValue, notificationsValue]);
+
+  return (
+    <DashboardContext.Provider value={compositeValue}>
+      {children}
+      {/* Rendered at provider level so every publish path is gated, not just
+          OwnerMode's. See the askForDeclaration comment above. */}
+      <ListerDeclarationModal
+        open={Boolean(declarationPrompt)}
+        listingTitle={declarationPrompt?.listingTitle}
+        busy={declarationPrompt?.busy === true}
+        error={declarationPrompt?.error || null}
+        onSubmit={onDeclarationSubmit}
+        onCancel={onDeclarationCancel}
+      />
+      {/* Active listing cap & swap modal (A-271) */}
+      <QuotaSwapModal
+        open={Boolean(quotaSwapPrompt)}
+        listingTitle={quotaSwapPrompt?.listingTitle}
+        tier={quotaSwapPrompt?.tier}
+        limit={quotaSwapPrompt?.limit}
+        currentActiveCount={quotaSwapPrompt?.currentActiveCount}
+        liveProperties={quotaSwapPrompt?.liveProperties || []}
+        busy={quotaSwapPrompt?.busy === true}
+        error={quotaSwapPrompt?.error || null}
+        onSwap={onQuotaSwapSubmit}
+        onCancel={onQuotaSwapCancel}
+      />
+    </DashboardContext.Provider>
+  );
+}
+
 export function DashboardProvider({ children }) {
   const [listings, setListings] = useState([]);
+  const [catalogue, setCatalogue] = useState([]);
   const [pitches, setPitches] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [connects, setConnects] = useState(5);
   const [currentUser, setCurrentUser] = useState(null);
-  const [toasts, setToasts] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
   const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [inventoryError, setInventoryError] = useState(false);
+  const notificationsApiRef = useRef(null);
   // Which identity the provider has already resolved. Auth events that do not
   // change it are ignored, which is what stops the re-verification loop.
   const resolvedUserIdRef = useRef(null);
@@ -163,7 +234,7 @@ export function DashboardProvider({ children }) {
       const res = await authedFetch(`/api/notifications`);
       if (!res.ok) return;
       const data = await res.json();
-      setNotifications((data.notifications || []).map(n => ({
+      notificationsApiRef.current?.setNotifications((data.notifications || []).map(n => ({
         id: n.id,
         title: n.title,
         desc: n.desc,
@@ -393,7 +464,9 @@ export function DashboardProvider({ children }) {
           isDuplicateOfAirtable: existingTitles.has((p.title || '').toLowerCase())
         }));
 
-        setListings([...airtableListings, ...enrichedSupabaseListings]);
+        const fullData = [...airtableListings, ...enrichedSupabaseListings];
+        setCatalogue(fullData);
+        setListings(fullData);
 
         // 2. Fetch Deals (Pitches) — via the real /api/deals server route, NOT
         // a direct client select(). The direct query this replaced had no
@@ -488,16 +561,24 @@ export function DashboardProvider({ children }) {
   }, []);
 
   // ── Toasts ──
-  const addToast = (message, icon = "✓") => {
-    const id = "t_" + Date.now() + Math.random().toString(36).slice(2, 6);
-    setToasts(prev => [...prev, { id, message, icon }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3500);
-  };
+  const addToast = useCallback((message, icon = "✓") => {
+    notificationsApiRef.current?.addToast(message, icon);
+  }, []);
+
+  const addNotification = useCallback((notif) => {
+    notificationsApiRef.current?.addNotification(notif);
+  }, []);
+
+  const markNotificationsRead = useCallback(() => {
+    notificationsApiRef.current?.markNotificationsRead();
+  }, []);
+
+  const clearAllNotifications = useCallback(() => {
+    notificationsApiRef.current?.clearAllNotifications();
+  }, []);
 
   // ── Save / unsave (Supabase & Local Storage) ──
-  const toggleSave = async (item) => {
+  const toggleSave = useCallback(async (item) => {
     const isSaved = savedIds.includes(item.id);
     if (isSaved) {
       setSavedIds(prev => prev.filter(id => id !== item.id));
@@ -551,12 +632,12 @@ export function DashboardProvider({ children }) {
         localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
       } catch(e) {}
     }
-  };
+  }, [savedIds, addToast, currentUser]);
 
   // ── QuestIT (Raise a Quest) ──
   // GAP-30: Server-authenticated route /api/questit/bounty using supabaseAdmin
   // avoids 42501 RLS denial, and requires real authentication before claiming success.
-  const raiseQuest = async (propertyId, questScope) => {
+  const raiseQuest = useCallback(async (propertyId, questScope) => {
     if (!currentUser?.id) {
       addToast("Please sign in to raise a Data Quest.", "⚠️");
       return false;
@@ -597,13 +678,13 @@ export function DashboardProvider({ children }) {
 
     addToast(`Data Quest raised for ${questScope} — Free to post`, "✨");
     return true;
-  };
+  }, [currentUser, addToast, authedFetch]);
 
   // ── Owner listing management (Supabase) ──
   // Returns true if the change was persisted to the server, false otherwise.
   // Pass { silent: true } when the caller renders its own save feedback
   // (e.g. the Inventory page's Save button) to avoid duplicate toasts.
-  const updateListing = async (listingId, data, options = {}) => {
+  const updateListing = useCallback(async (listingId, data, options = {}) => {
     const { silent = false } = options;
 
     // Optimistic UI update
@@ -640,11 +721,11 @@ export function DashboardProvider({ children }) {
       if (!silent) addToast("Failed to sync to database", "❌");
       return false;
     }
-  };
+  }, [authedFetch, addToast]);
 
   // Withdraw is a recoverable off-market transition. Keep the legacy function
   // name as an internal compatibility alias for Mission Control callers.
-  const closeListing = async (listingId) => {
+  const closeListing = useCallback(async (listingId) => {
     try {
       const res = await authedFetch("/api/dashboard/archive", {
         method: "POST",
@@ -665,9 +746,9 @@ export function DashboardProvider({ children }) {
       addToast(sanitizeError(err, "Error withdrawing property"), "❌");
       return false;
     }
-  };
+  }, [authedFetch, addToast]);
 
-  const permanentlyRemoveListing = async (listingId, confirmationTitle, password, captchaToken) => {
+  const permanentlyRemoveListing = useCallback(async (listingId, confirmationTitle, password, captchaToken) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.email || !password) {
@@ -704,7 +785,7 @@ export function DashboardProvider({ children }) {
       addToast(sanitizeError(err, "Removal could not be completed"), "❌");
       return false;
     }
-  };
+  }, [addToast]);
   // ── LISTER DECLARATION GATE (§50 · W2) ────────────────────────────────
   // The gate lives HERE rather than in OwnerMode, because publishListing is
   // the single door to /api/dashboard/publish and §51's lesson was that a
@@ -715,7 +796,7 @@ export function DashboardProvider({ children }) {
   // retries itself with the declaration attached, so callers keep their
   // existing `await publishListing(id)` contract and their return value still
   // means "is it live".
-  const askForDeclaration = (listingId) => {
+  const askForDeclaration = useCallback((listingId) => {
     const listing = listings.find((l) => l.id === listingId);
     return new Promise((resolve) => {
       setDeclarationPrompt({
@@ -726,9 +807,9 @@ export function DashboardProvider({ children }) {
         resolve,
       });
     });
-  };
+  }, [listings]);
 
-  const publishListing = async (listingId, declaration = null, swapWithPropertyId = null) => {
+  const publishListing = useCallback(async function runPublishListing(listingId, declaration = null, swapWithPropertyId = null) {
     if (!currentUser?.id) return false;
     // Truthful either way: the first attempt may come back asking for the
     // declaration, and "Syncing to live network" would be a claim of progress
@@ -763,7 +844,7 @@ export function DashboardProvider({ children }) {
         // Cancelled: the listing stays a draft, which the modal said it would.
         // No error toast — this was a choice, not a failure.
         if (!answer) return false;
-        return await publishListing(listingId, answer, swapWithPropertyId);
+        return await runPublishListing(listingId, answer, swapWithPropertyId);
       }
 
       if (res.status === 409 && data.error === "listing_cap_reached") {
@@ -783,7 +864,7 @@ export function DashboardProvider({ children }) {
         });
 
         if (!swapTargetId) return false;
-        return await publishListing(listingId, declaration, swapTargetId);
+        return await runPublishListing(listingId, declaration, swapTargetId);
       }
 
       if (!res.ok) {
@@ -822,9 +903,9 @@ export function DashboardProvider({ children }) {
       );
       return false;
     }
-  };
+  }, [currentUser, addToast, authedFetch, askForDeclaration, listings]);
 
-  const addListing = async (listing) => {
+  const addListing = useCallback(async (listing) => {
     addToast("Geocoding Location...", "⏳");
     
     // 1. Mapbox Geocoding
@@ -965,9 +1046,9 @@ export function DashboardProvider({ children }) {
     });
     
     return newListing;
-  };
+  }, [addToast, currentUser, addNotification]);
 
-  const bulkAddListings = async (propertiesArray) => {
+  const bulkAddListings = useCallback(async (propertiesArray) => {
     addToast("Bulk processing via AI Blueprint...", "🤖");
     
     // Attempt insertion
@@ -1002,9 +1083,9 @@ export function DashboardProvider({ children }) {
       addToast("Network error during bulk insert.", "❌");
       return false;
     }
-  };
+  }, [addToast, authedFetch, addNotification]);
 
-  const addConciergeListing = async (fileName) => {
+  const addConciergeListing = useCallback(async (fileName) => {
     // A-141: this is a request to the ScoutIt team (OwnerMode "join the queue"),
     // not an upload and not an AI run — nothing is uploaded or parsed here, so
     // nothing below may say so. It returns whether the request was recorded.
@@ -1066,9 +1147,9 @@ export function DashboardProvider({ children }) {
       notificationType: "property_drafting"
     });
     return true;
-  };
+  }, [currentUser, addToast, addNotification]);
 
-  const sendPitch = async (listingId, message) => {
+  const sendPitch = useCallback(async (listingId, message) => {
     const role = (currentUser?.active_roles?.[0] || currentUser?.role || "broker").toLowerCase();
     const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
     // Local balance is a pre-check only — the authoritative spend is the
@@ -1132,9 +1213,9 @@ export function DashboardProvider({ children }) {
       addToast("Failed to send pitch — check your connection.", "❌");
       return false;
     }
-  };
+  }, [currentUser, addToast, authedFetch, listings]);
 
-  const inviteBroker = async (listingId, brokerName) => {
+  const inviteBroker = useCallback(async (listingId, brokerName) => {
     if (!brokerName) return false;
     const role = (currentUser?.active_roles?.[0] || currentUser?.role || "owner").toLowerCase();
     const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
@@ -1185,9 +1266,9 @@ export function DashboardProvider({ children }) {
       addToast(sanitizeError(err, "Failed to send handshake"), "❌");
       return false;
     }
-  };
+  }, [currentUser, addToast, authedFetch, listings]);
 
-  const updatePitchStatus = async (pitchId, newStatus) => {
+  const updatePitchStatus = useCallback(async (pitchId, newStatus) => {
     // Supabase update via Edge Function
     try {
       const res = await authedFetch("/api/dashboard/deals/update", {
@@ -1218,50 +1299,10 @@ export function DashboardProvider({ children }) {
       addToast(sanitizeError(err, "Failed to update deal status"), "❌");
       return false;
     }
-  };
-
-  const addNotification = (notif) => {
-    setNotifications(prev => [{ ...notif, id: 'n_' + Date.now(), read: false }, ...prev]);
-
-    // Persist client-triggered notifications through the same table as the
-    // server-triggered ones (stale-listing, broker-on-change).
-    if (currentUser?.id) {
-      authedFetch(`/api/notifications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: notif.title,
-          desc: notif.desc,
-          icon: typeof notif.icon === "string" ? notif.icon : "🔔",
-          notificationType: notif.notificationType || "client_event",
-          propertyId: notif.propertyId || undefined,
-          link: notif.link || undefined,
-        }),
-      }).catch(e => console.error("Failed to persist notification", e));
-    }
-  };
-
-  const markNotificationsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    if (currentUser?.id) {
-      authedFetch(`/api/notifications`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      }).catch(e => console.error("Failed to mark notifications read", e));
-    }
-  };
-
-  const clearAllNotifications = () => {
-    setNotifications([]);
-    if (currentUser?.id) {
-      authedFetch(`/api/notifications`, { method: "DELETE" })
-        .catch(e => console.error("Failed to clear notifications", e));
-    }
-  };
+  }, [authedFetch, currentUser, addToast]);
 
   // ── Proximity Radar (Radius Search via Local Haversine) ──
-  const searchByRadius = async (radiusKm, centerLng = DEFAULT_MAP_CENTER[0], centerLat = DEFAULT_MAP_CENTER[1]) => {
+  const searchByRadius = useCallback(async (radiusKm, centerLng = DEFAULT_MAP_CENTER[0], centerLat = DEFAULT_MAP_CENTER[1]) => {
     setIsLoading(true);
     try {
       // A-094: bounded, not unbounded. 2000 is ten times the 200-listing
@@ -1298,6 +1339,7 @@ export function DashboardProvider({ children }) {
       const allData = [...airtableListings, ...enrichedSupabaseListings];
 
       if (radiusKm === 'any') {
+        setCatalogue(allData);
         setListings(allData);
       } else {
         const radius = parseFloat(radiusKm);
@@ -1313,101 +1355,143 @@ export function DashboardProvider({ children }) {
           const distance = distanceKm(centerLat, centerLng, pLat, pLng);
           return distance <= radius;
         });
-        setListings(filtered);
+        setCatalogue(filtered);
+
+        // A-319: Separate public catalogue from user inventory.
+        // Private drafts and owner inventory listings without coordinates must
+        // survive radius filtering rather than being dropped from the workspace.
+        const currentDrafts = listings.filter(l =>
+          (l.status === 'draft' || l.pipelineStatus === 'draft' || !l.coordinates) &&
+          (currentUser ? l.ownerId === currentUser.id : true)
+        );
+        const filteredIds = new Set(filtered.map(l => l.id));
+        const mergedListings = [...filtered, ...currentDrafts.filter(d => !filteredIds.has(d.id))];
+        setListings(mergedListings);
       }
     } catch (err) {
       console.error("Radius search failed", err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [listings, currentUser]);
 
+
+  // Provider export: getCurrentTier: useCallback(
+  const getCurrentTier = useCallback(() => {
+    const profileTier = (currentUser?.subscription_tier || currentUser?.tier || "").toLowerCase();
+    if (profileTier) return profileTier;
+    return getEntitlementTier();
+  }, [currentUser]);
+
+  const userValue = useMemo(() => ({
+    currentUser,
+    identityResolved,
+    savedIds,
+    toggleSave,
+    authedFetch,
+  }), [currentUser, identityResolved, savedIds, toggleSave, authedFetch]);
+
+  const walletValue = useMemo(() => ({
+    connects,
+    getCurrentTier,
+    raiseQuest,
+  }), [connects, getCurrentTier, raiseQuest]);
+
+  const listingsValue = useMemo(() => ({
+    listings,
+    catalogue,
+    isLoading,
+    inventoryError,
+    refetchInventory,
+    searchByRadius,
+    updateListing,
+    closeListing,
+    permanentlyRemoveListing,
+    publishListing,
+    addListing,
+    bulkAddListings,
+    addConciergeListing,
+    DEFAULT_MAP_CENTER,
+  }), [
+    listings,
+    catalogue,
+    isLoading,
+    inventoryError,
+    refetchInventory,
+    searchByRadius,
+    updateListing,
+    closeListing,
+    permanentlyRemoveListing,
+    publishListing,
+    addListing,
+    bulkAddListings,
+    addConciergeListing,
+  ]);
+
+  const dealsValue = useMemo(() => ({
+    pitches,
+    sendPitch,
+    inviteBroker,
+    updatePitchStatus,
+  }), [pitches, sendPitch, inviteBroker, updatePitchStatus]);
 
   return (
-    <DashboardContext.Provider value={{
-      listings,
-      pitches,
-      notifications,
-      connects,
-      currentUser,
-      toasts,
-      savedIds,
-      identityResolved,
-      isLoading,
-      addToast,
-      toggleSave,
-      raiseQuest,
-      addListing,
-      bulkAddListings,
-      addConciergeListing,
-      updateListing,
-      publishListing,
-      closeListing,
-      permanentlyRemoveListing,
-      sendPitch,
-      inviteBroker,
-      updatePitchStatus,
-      markNotificationsRead,
-      clearAllNotifications,
-      searchByRadius,
-      DEFAULT_MAP_CENTER,
-      authedFetch,
-      inventoryError,
-      refetchInventory,
-    }}>
-      {children}
-      {/* Rendered at provider level so every publish path is gated, not just
-          OwnerMode's. See the askForDeclaration comment above. */}
-      <ListerDeclarationModal
-        open={Boolean(declarationPrompt)}
-        listingTitle={declarationPrompt?.listingTitle}
-        busy={declarationPrompt?.busy === true}
-        error={declarationPrompt?.error || null}
-        onSubmit={(declaration) => {
-          const prompt = declarationPrompt;
-          if (!prompt) return;
-          setDeclarationPrompt(prev => prev ? { ...prev, busy: true, error: null, resolve: null } : prev);
-          if (prompt.resolve) {
-            prompt.resolve(declaration);
-          } else {
-            // Retry after a failed attempt. The original promise is already
-            // settled, so resolving it again would silently do nothing and
-            // leave the modal spinning — publish directly instead.
-            publishListing(prompt.listingId, declaration);
-          }
-        }}
-        onCancel={() => {
-          const resolve = declarationPrompt?.resolve;
-          setDeclarationPrompt(null);
-          resolve?.(null);
-        }}
-      />
-      {/* Active listing cap & swap modal (A-271) */}
-      <QuotaSwapModal
-        open={Boolean(quotaSwapPrompt)}
-        listingTitle={quotaSwapPrompt?.listingTitle}
-        tier={quotaSwapPrompt?.tier}
-        limit={quotaSwapPrompt?.limit}
-        currentActiveCount={quotaSwapPrompt?.currentActiveCount}
-        liveProperties={quotaSwapPrompt?.liveProperties || []}
-        busy={quotaSwapPrompt?.busy === true}
-        error={quotaSwapPrompt?.error || null}
-        onSwap={(swapWithPropertyId) => {
-          const prompt = quotaSwapPrompt;
-          if (!prompt) return;
-          setQuotaSwapPrompt(prev => prev ? { ...prev, busy: true, error: null, resolve: null } : prev);
-          if (prompt.resolve) {
-            prompt.resolve(swapWithPropertyId);
-          } else {
-            publishListing(prompt.listingId, null, swapWithPropertyId);
-          }
-        }}
-        onCancel={() => {
-          const resolve = quotaSwapPrompt?.resolve;
-          setQuotaSwapPrompt(null);
-          resolve?.(null);
-        }}
-      />
-    </DashboardContext.Provider>
+    <UserContext.Provider value={userValue}>
+      <WalletContext.Provider value={walletValue}>
+        <ListingsContext.Provider value={listingsValue}>
+          <DealsContext.Provider value={dealsValue}>
+            <NotificationsProvider
+              authedFetch={authedFetch}
+              currentUser={currentUser}
+              apiRef={notificationsApiRef}
+            >
+              <DashboardCompositeBridge
+                userValue={userValue}
+                walletValue={walletValue}
+                listingsValue={listingsValue}
+                dealsValue={dealsValue}
+                declarationPrompt={declarationPrompt}
+                quotaSwapPrompt={quotaSwapPrompt}
+                onDeclarationSubmit={(declaration) => {
+                  const prompt = declarationPrompt;
+                  if (!prompt) return;
+                  setDeclarationPrompt(prev => prev ? { ...prev, busy: true, error: null, resolve: null } : prev);
+                  if (prompt.resolve) {
+                    prompt.resolve(declaration);
+                  } else {
+                    // Retry after a failed attempt. The original promise is already
+                    // settled, so resolving it again would silently do nothing and
+                    // leave the modal spinning — publish directly instead.
+                    publishListing(prompt.listingId, declaration);
+                  }
+                }}
+                onDeclarationCancel={() => {
+                  const resolve = declarationPrompt?.resolve;
+                  setDeclarationPrompt(null);
+                  resolve?.(null);
+                }}
+                onQuotaSwapSubmit={(swapWithPropertyId) => {
+                  const prompt = quotaSwapPrompt;
+                  if (!prompt) return;
+                  setQuotaSwapPrompt(prev => prev ? { ...prev, busy: true, error: null, resolve: null } : prev);
+                  if (prompt.resolve) {
+                    prompt.resolve(swapWithPropertyId);
+                  } else {
+                    publishListing(prompt.listingId, null, swapWithPropertyId);
+                  }
+                }}
+                onQuotaSwapCancel={() => {
+                  const resolve = quotaSwapPrompt?.resolve;
+                  setQuotaSwapPrompt(null);
+                  resolve?.(null);
+                }}
+              >
+                {children}
+              </DashboardCompositeBridge>
+            </NotificationsProvider>
+          </DealsContext.Provider>
+        </ListingsContext.Provider>
+      </WalletContext.Provider>
+    </UserContext.Provider>
   );
 }

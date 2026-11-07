@@ -94,4 +94,15 @@ describe("google mapping round-trip", () => {
     expect(canon.allDay).toBe(true);
     expect(canonicalToGoogle(canon).start.date).toBe("2026-07-20");
   });
+
+  it("preserves tentative status across canonical <-> Google round-trip without flipping content hash", () => {
+    const tentativeEvent = { ...baseEvent, status: "tentative" };
+    const initialHash = computeContentHash(tentativeEvent);
+    const googlePayload = canonicalToGoogle(tentativeEvent);
+    expect(googlePayload.status).toBe("tentative");
+
+    const roundTripped = googleToCanonical(googlePayload);
+    expect(roundTripped.status).toBe("tentative");
+    expect(computeContentHash(roundTripped)).toBe(initialHash);
+  });
 });

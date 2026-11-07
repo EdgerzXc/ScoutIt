@@ -41,7 +41,7 @@ export async function POST(request) {
       propertyTitle,
       meta: {
         generatedAt: new Date().toISOString(),
-        aiEngine: "ScoutIt Deal Intelligence v1",
+        templateEngine: "ScoutIt Deal Intelligence v1",
       },
     });
   } catch (err) {

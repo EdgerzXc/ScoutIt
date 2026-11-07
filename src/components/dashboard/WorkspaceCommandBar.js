@@ -1,37 +1,19 @@
 import Link from "next/link";
 import { BriefcaseBusiness, CalendarDays, LayoutGrid, MessageSquareText } from "lucide-react";
 import { isPipelineRole } from "@/lib/workspaceDeck";
+import { WORKSPACE_COMMAND_DESTINATIONS } from "@/lib/navigationManifest";
 
-const DESTINATIONS = [
-  {
-    id: "workspace",
-    href: "/dashboard",
-    label: "Workspace",
-    detail: "Home",
-    Icon: LayoutGrid,
-  },
-  {
-    id: "inbox",
-    href: "/dashboard/inbox",
-    label: "Inbox",
-    detail: "Deal rooms",
-    Icon: MessageSquareText,
-  },
-  {
-    id: "crm",
-    href: "/dashboard/crm",
-    label: "CRM",
-    detail: "Pipeline",
-    Icon: BriefcaseBusiness,
-  },
-  {
-    id: "calendar",
-    href: "/dashboard/calendar",
-    label: "Calendar",
-    detail: "Viewings",
-    Icon: CalendarDays,
-  },
-];
+const ICONS = {
+  workspace: LayoutGrid,
+  inbox: MessageSquareText,
+  crm: BriefcaseBusiness,
+  calendar: CalendarDays,
+};
+
+const DESTINATIONS = WORKSPACE_COMMAND_DESTINATIONS.map((dest) => ({
+  ...dest,
+  Icon: ICONS[dest.id] || LayoutGrid,
+}));
 
 /**
  * The shared navigation language for ScoutIt's connected deal workspace.

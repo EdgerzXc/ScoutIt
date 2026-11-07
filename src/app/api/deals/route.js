@@ -7,7 +7,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
 import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/deals/userDeals";
 import { isManualCreatableStatus } from "@/lib/deals/dealStatus";
-import { isBlocked } from "@/lib/connectBlocks";
+import { isBlocked, checkBlockGuard } from "@/lib/connectBlocks";
 import { checkReceiverGate } from "@/lib/connectGates";
 import { notifyUser } from "@/lib/notifications";
 
@@ -232,9 +232,16 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-    // A-144 shared send gates: blocked / paused / capped recipients fail
-    // before any spend.
-    if (await isBlocked(supabaseAdmin, userId, otherPartyEmail)) {
+    // A-144 shared send gates + A-305: blocked / paused / capped recipients fail
+    // before any spend. In post-O-004 fail-closed posture, unavailable guard returns 503.
+    const blockGuard = await checkBlockGuard(supabaseAdmin, userId, [otherPartyEmail]);
+    if (!blockGuard.ok && blockGuard.unavailable) {
+      return NextResponse.json(
+        { error: "Block safety check unavailable. No Connect was spent." },
+        { status: 503 },
+      );
+    }
+    if (blockGuard.blocked) {
       return NextResponse.json(
         { error: "This request can't be sent. No Connect was spent." },
         { status: 403 },

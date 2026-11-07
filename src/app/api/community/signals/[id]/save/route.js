@@ -23,15 +23,20 @@ async function loadLiveSignal(id) {
 }
 
 /**
- * A-237 (GAP-106): the public saved count is shown on the card, so it has to
- * be kept in step with the rows that actually exist. The counter used to be
- * written only when a signal was created, so a card's saved number froze at
- * zero no matter how many people bookmarked it.
- *
- * The count is READ from the rows and then written, so a missed update
- * self-corrects on the next save instead of drifting forever.
+ * A-237 (GAP-106) / A-311: Atomic synchronization of saved_count to eliminate
+ * race-condition counter drift under concurrent saves.
  */
 async function syncSavedCount(signalId) {
+  // A-311: Try atomic subquery RPC first
+  try {
+    const { data: rpcCount, error: rpcErr } = await supabaseAdmin.rpc("sync_signal_saved_count", {
+      p_signal_id: signalId,
+    });
+    if (!rpcErr && typeof rpcCount === "number") {
+      return rpcCount;
+    }
+  } catch {}
+
   try {
     const { count, error } = await supabaseAdmin
       .from("signal_saves")
@@ -90,6 +95,10 @@ export async function POST(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  const rate = checkRate(`save:${clientIp(request)}`);
+  if (!rate.allowed) {
+    return NextResponse.json({ ok: false, error: "Too many taps — try again in a minute." }, { status: 429 });
+  }
   try {
     const userId = await resolveUserId(request);
     if (!userId) {

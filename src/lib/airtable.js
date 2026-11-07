@@ -8,7 +8,7 @@ import { cityToRegion } from "./regions";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
-import { imageMediaUrl, safeFloorPlans, spatialEmbedUrl, videoEmbedUrl } from "./propertyMedia";
+import { extractPhotoUrls, imageMediaUrl, safeFloorPlans, spatialEmbedUrl, videoEmbedUrl } from "./propertyMedia";
 import { isSamplePropertySlug } from "./sampleInventory";
 
 
@@ -218,7 +218,7 @@ export async function fetchBrokers(apiKey, baseId, options = {}) {
         specialty:        f.Specialty       || "",
         location:         f.Location        || "",
         bio:              f.Bio             || "",
-        image:            f.Image           || "",
+        image:            extractPhotoUrls(f.Image)[0] || (typeof f.Image === "string" ? f.Image.trim() : "") || "",
         license:          f.License         || "",
         // RA 9646 trust badge — true only when staff ticked License_Verified
         // in Airtable after checking the PRC registry. Never assume.
@@ -238,6 +238,18 @@ export async function fetchBrokers(apiKey, baseId, options = {}) {
 // ═══════════════════════════════════════════════════════════════
 // PROPERTIES_CMS → normalized property objects
 // ═══════════════════════════════════════════════════════════════
+
+/**
+ * Normalise string counts ("2+", "3-4", "10 units") into safe non-negative integers.
+ * Resolves A-319 coercion bug where raw strings ("2+") coerced to NaN -> 0.
+ */
+export function normalizeCount(val) {
+  if (val == null || val === "") return 0;
+  if (typeof val === "number") return Number.isFinite(val) ? Math.max(0, Math.floor(val)) : 0;
+  const match = String(val).match(/\d+/);
+  return match ? parseInt(match[0], 10) : 0;
+}
+
 export async function fetchProperties(apiKey, baseId, options = {}) {
   const records = await fetchTable("PROPERTIES_CMS", apiKey, baseId, "", options);
 
@@ -250,6 +262,10 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
       const bestFor = f.BestFor
         ? (Array.isArray(f.BestFor) ? f.BestFor : f.BestFor.split(",").map((b) => b.trim()))
         : [];
+
+      const parsedPhotos = extractPhotoUrls(f.Photos);
+      const parsedImage = extractPhotoUrls(f.Image);
+      const firstPhoto = parsedImage[0] || parsedPhotos[0] || (typeof f.Image === "string" ? f.Image.trim() : "") || "";
 
       return {
         id:              r.id,
@@ -279,11 +295,11 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
         last_verified_date: f.Last_Verified_Date || null,
         year_built:      f.YearBuilt       || "",
         furnishing:      f.Furnishing      || "",
-        beds:            Number(f.Beds)    || 0,
-        baths:           Number(f.Baths)   || 0,
-        floor_sqm:       Number(f.FloorSqm) || 0,
-        lot_sqm:         Number(f.LotSqm)  || 0,
-        parking:         Number(f.Parking) || 0,
+        beds:            normalizeCount(f.Beds),
+        baths:           normalizeCount(f.Baths),
+        floor_sqm:       normalizeCount(f.FloorSqm),
+        lot_sqm:         normalizeCount(f.LotSqm),
+        parking:         normalizeCount(f.Parking),
         floors:          f.Floors          || "",
         // PriceRange_Internal is deliberately excluded from frontend output
         aestheticTag:    f.AestheticTag    || "",
@@ -332,7 +348,7 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
         // Card surfaces read `image`; fall back to the first Photos entry so a
         // property with a populated gallery but no dedicated Image column still
         // shows a real photo instead of the gradient placeholder.
-        image:                f.Image || (f.Photos ? f.Photos.split(",")[0].trim() : "") || "",
+        image:                firstPhoto,
         gradient:             f.Gradient     || "linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%)",
         latitude:             f.Latitude ? Number(f.Latitude) : null,
         longitude:            f.Longitude ? Number(f.Longitude) : null,
@@ -352,18 +368,17 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
         deepIntel: expandDeepIntel(f.DeepIntel_JSON),
         // Schema key for DEEP_INTEL_SCHEMA[...] lookups in the flows
         category: deepIntelCategoryFor(f.SpaceCategory),
-        // Photos stored as comma-separated URLs
-        photos: f.Photos
-          ? f.Photos.split(",").map((u) => u.trim()).filter(Boolean)
-          : (f.Image ? [f.Image] : []),
+        // Photos stored as comma-separated URLs or attachment objects;
+        // hardened to never drop the gallery on a single malformed entry.
+        photos: parsedPhotos.length
+          ? parsedPhotos
+          : (parsedImage.length ? parsedImage : (typeof f.Image === "string" && f.Image.trim() ? [f.Image.trim()] : [])),
 
         // ── Shared media + amenities (per-category SOP) ───────────
         amenities: f.Amenities
           ? (Array.isArray(f.Amenities) ? f.Amenities : f.Amenities.split(",").map((a) => a.trim()))
           : [],
-        enhanced_photos: f.Enhanced_Photos
-          ? f.Enhanced_Photos.split(",").map((u) => u.trim()).filter(Boolean)
-          : [],
+        enhanced_photos: extractPhotoUrls(f.Enhanced_Photos),
         // Provider-aware classification happens at the public CMS boundary.
         // A photo in Video_URL/Luma/Matterport must never become an iframe.
         video_url:        videoEmbedUrl(f.Video_URL),
@@ -392,6 +407,9 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
         accommodations:    f.HOSP_Room_Types || (f.HOSP_Room_Count ? `${f.HOSP_Room_Count} rooms` : "") || f.STR_Bed_Config || "",
         hosting_capacity:  f.HOSP_Room_Count || (f.STR_Max_Guests ? `${f.STR_Max_Guests} Guests` : "") || "",
         setup_grade:       f.VEN_AV_Equipment || "",
+        workstations:      f.CM_Workstations || f.Workstations || f.Desks || "",
+        workstation_capacity: f.CM_Workstations || f.Workstations || "",
+        rooms:             f.Rooms || f.Meeting_Rooms || f.HOSP_Room_Count || "",
 
         // ── Per-category field groups (SOP §2). `cat.<type>` powers
         //    the category Spec Block. Paywalled (MINOR) keys per SOP §8
@@ -541,7 +559,7 @@ export async function fetchIntel(apiKey, baseId, options = {}) {
         // normal case and means a plain block article.
         experienceId:     f.Experience_ID     || "",
         experienceConfig: f.Experience_Config || "",
-        image:        f.Image            || "",
+        image:        extractPhotoUrls(f.Image)[0] || (typeof f.Image === "string" ? f.Image.trim() : "") || "",
         excerpt:      f.Excerpt          || "",
         lead:         f.Lead             || "",
         body: [
@@ -601,10 +619,8 @@ featuredIntel:       f.Featured_Intel           || [], // linked record IDs
 // columns so the public page — which reads photos from Airtable — displays the
 // Supabase-hosted images. Falls back to media_link when no array is present.
 function photoFields(data) {
-  const fromDetails = Array.isArray(data?.details?.photos)
-    ? data.details.photos.filter(Boolean)
-    : [];
-  const list = fromDetails.length ? fromDetails : (data?.media_link ? [data.media_link] : []);
+  const fromDetails = extractPhotoUrls(data?.details?.photos);
+  const list = fromDetails.length ? fromDetails : extractPhotoUrls(data?.media_link);
   if (!list.length) return {};
   return { Photos: list.join(","), Image: list[0] };
 }
@@ -669,6 +685,7 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
           ...(lat != null && lng != null
             ? { Latitude: lat, Longitude: lng }
             : {}),
+          ...(data.last_verified_date ? { Last_Verified_Date: data.last_verified_date } : {}),
           ...photoFields(data),
           ...categoryFields
         }
@@ -735,6 +752,9 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   if (data.seo_json_ld) fieldsToUpdate.SEO_JSON_LD = data.seo_json_ld;
   if (typeof data.approved_for_scoutit === "boolean") {
     fieldsToUpdate.Approved_For_ScoutIt = data.approved_for_scoutit;
+  }
+  if (data.last_verified_date) {
+    fieldsToUpdate.Last_Verified_Date = data.last_verified_date;
   }
   if (unitsOverride) {
     fieldsToUpdate.Units_JSON = JSON.stringify(unitsOverride);
@@ -812,3 +832,6 @@ export async function deleteProperty(apiKey, baseId, slug) {
   // 2. DELETE the record
   return await deletePropertyById(apiKey, baseId, recordId);
 }
+
+export { extractPhotoUrls };
+

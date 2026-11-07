@@ -26,9 +26,7 @@ import { fieldLabel } from "@/lib/fieldLabel";
 import { downloadPropertyTearSheet } from "@/lib/propertyTearSheet";
 
 // Heavy below-the-fold components dynamically imported to minimize initial mobile JS payload & TBT
-const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
 const PromoteModal = dynamic(() => import("./PromoteModal"), { ssr: false });
-const MonthlyCostCalculator = dynamic(() => import("@/components/property/MonthlyCostCalculator"), { ssr: false });
 const PropertyFAQSection = dynamic(() => import("@/components/property/PropertyFAQSection"), { ssr: false });
 const WhereToSection = dynamic(() => import("@/components/property/WhereToSection"), { ssr: false });
 
@@ -121,6 +119,9 @@ import { intelSourceLabel } from "@/lib/freshness";
 import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import ChapterSubtitle from "@/components/property/ChapterSubtitle";
 import SidebarDetails from "@/components/property/SidebarDetails";
+import PropertyChapterHeader from "@/components/property/PropertyChapterHeader";
+import PropertyVaultSection from "@/components/property/PropertyVaultSection";
+import PropertyRateSection from "@/components/property/PropertyRateSection";
 
 // ═══════════════════════════════════════════════════
 // DATA — Airtable CMS first, mockDb fallback
@@ -732,6 +733,9 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     );
   }
 
+  const isOffice = cat.includes("office") || cat.includes("coworking") || cat.includes("workspace") || d?.property_type?.toLowerCase()?.includes("office");
+  const hasWorkstations = Boolean(d?.workstations || d?.workstation_capacity);
+
   // ── Spec Pills Dynamic Curators ────────────────
   let pill1Val = d.beds;
   let pill1Label = "Bedrooms";
@@ -765,6 +769,15 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
     pill2Val = d.setup_grade || null;
     pill2Label = "Setup Grade";
     pill2Icon = <><circle cx="7" cy="7" r="5"/><path d="M7 2v2M7 10v2M2 7h2M10 7h2" strokeLinecap="round"/></>;
+  } else if (isOffice) {
+    // A-319: Office properties never reuse "Bedrooms" — render "Rooms" or workstations
+    pill1Val = d.rooms || (hasWorkstations ? `${d.workstations || d.workstation_capacity} Workstations` : null) || (d.beds > 0 ? d.beds : null);
+    pill1Label = "Rooms";
+    pill1Icon = <><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M5 2v10M9 2v10M2 6h10M2 10h10" strokeLinecap="round"/></>;
+  } else if (hasWorkstations) {
+    pill1Val = d.workstations || d.workstation_capacity;
+    pill1Label = "Workstations";
+    pill1Icon = <><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M5 2v10M9 2v10M2 6h10M2 10h10" strokeLinecap="round"/></>;
   }
 
   // Lucide icons for the Chapter 1 editorial stat block
@@ -773,6 +786,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
   if (isRestaurant)      { pill1Emoji = <Utensils size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; pill2Emoji = <Sliders size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
   else if (isHospitality){ pill1Emoji = <Bell size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; pill2Emoji = <Users size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
   else if (isVenue)      { pill1Emoji = <Users size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; pill2Emoji = <Sliders size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
+  else if (isOffice || hasWorkstations) { pill1Emoji = <Building2 size={24} strokeWidth={1.5} style={{color:"var(--text-primary)"}} />; }
 
   // ── Build Dynamic Units List ───────────────────
   // NOTE: `dynamicUnits` starts as spec-synthesized fallback units, then gets
@@ -1527,11 +1541,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "space" ? "active" : ""}`} id="panel-space">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} · {ch['space']?.chapterLabel || 'The Space'}</div>
-                <ChapterSubtitle text={ch['space']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['space']?.chapterNumber || '01'}
+                chapterLabel={ch['space']?.chapterLabel || 'The Space'}
+                subtitle={ch['space']?.subtitle}
+              />
 
               {/* ── STAT BLOCK: category-aware ── */}
               {isRestaurant ? (
@@ -1722,49 +1736,21 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           </div>
 
           {/* ── THE VAULT (Ch. Premium) ── */}
-          <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
-            <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--accent)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
-                <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>Floor plans, scans & spatial records</div>
-                <div style={{height:"1px", background:"var(--accent)"}}/>
-              </div>
-
-              <div style={{marginBottom:"30px"}}>
-                <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--text-primary)", letterSpacing:"0.01em", lineHeight:1.2}}>
-                  3D Virtual Tours & Blueprints
-                </span>
-              </div>
-
-              {/* slug drives the server-side entitlement fetch (§45). The
-                  d.* props arrive EMPTY on a public property page now — they
-                  are stripped before serialisation — and are kept only for
-                  callers that already hold entitled data. */}
-              <SpatialVaultWidget
-                slug={d.slug}
-                lumaUrl={d.luma3dMapUrl}
-                matterportUrl={d.matterportTourUrl}
-                heatmapUrl={d.droneHeatmapUrl}
-                floorPlans={d.floorPlans}
-                hasVaultMedia={d.premiumAvailable?.includes("vault")}
-              />
-            </div>
-            <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "var(--accent)"}}/><div className="sidebar-label" style={{color: "var(--accent)"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">{intelSourceLabel(d.last_verified_date)}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Cluster Tier Only</div></div>
-            </div>
-          </div>
+          <PropertyVaultSection
+            activeTab={activeTab}
+            d={d}
+            intelSourceLabel={intelSourceLabel}
+          />
 
           {/* ── LOCATION (Ch. 2) ── */}
           <div className={`chapter-panel ${activeTab === "location" ? "active" : ""}`} id="panel-location">
             <div className="panel-content chapter-frame--map">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} · {ch['location']?.chapterLabel || 'Location'}</div>
-                <ChapterSubtitle text={ch['location']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['location']?.chapterNumber || '02'}
+                chapterLabel={ch['location']?.chapterLabel || 'Location'}
+                subtitle={ch['location']?.subtitle}
+              />
 
               {(d.location || d.city) && (
                 <div style={{margin:"0"}}>
@@ -1952,11 +1938,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "life" ? "active" : ""}`} id="panel-life">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} · {ch['life']?.chapterLabel || 'Life Here'}</div>
-                <ChapterSubtitle text={ch['life']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['life']?.chapterNumber || '03'}
+                chapterLabel={ch['life']?.chapterLabel || 'Life Here'}
+                subtitle={ch['life']?.subtitle}
+              />
 
               {/* Best Suited For — gold chips */}
               {(() => {
@@ -2079,11 +2065,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "whereto" ? "active" : ""}`} id="panel-whereto">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} · {ch['whereto']?.chapterLabel || 'Where To?'}</div>
-                <ChapterSubtitle text={ch['whereto']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['whereto']?.chapterNumber || '04'}
+                chapterLabel={ch['whereto']?.chapterLabel || 'Where To?'}
+                subtitle={ch['whereto']?.subtitle}
+              />
 
               {/* Cell 9: Demand Anchors for restaurants and venues */}
               {(isRestaurant || isVenue) && d.demand_anchors && (
@@ -2229,11 +2215,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "buildplans" ? "active" : ""}`} id="panel-buildplans">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} · {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
-                <ChapterSubtitle text={ch['buildplans']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['buildplans']?.chapterNumber || '05'}
+                chapterLabel={ch['buildplans']?.chapterLabel || 'Build Plans'}
+                subtitle={ch['buildplans']?.subtitle}
+              />
 
               {isRestaurant ? (
                 /* Cell 3: The Engine Room — collapsed by default, operator-facing */
@@ -2382,11 +2368,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "units" ? "active" : ""}`} id="panel-units">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} · {ch['units']?.chapterLabel || hierarchy.collectionLabel}</div>
-                <ChapterSubtitle text={ch['units']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['units']?.chapterNumber || '07'}
+                chapterLabel={ch['units']?.chapterLabel || hierarchy.collectionLabel}
+                subtitle={ch['units']?.subtitle}
+              />
 
               <div className="units-z3-list">
                 {dynamicUnits.map((u, ui) => {
@@ -2466,7 +2452,12 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   <>{pill1Val && <div className="sidebar-block"><div className="sidebar-label">Guest Capacity</div><div className="sidebar-value">{pill1Val}</div></div>}{pill2Val && <div className="sidebar-block"><div className="sidebar-label">Setup Grade</div><div className="sidebar-value">{pill2Val}</div></div>}</>
                 ) : (
                   <>
-                    {d.beds > 0 && <div className="sidebar-block"><div className="sidebar-label">Total Bedrooms</div><div className="sidebar-value">{d.beds}</div></div>}
+                    {(d.rooms || d.workstations || d.beds > 0) && (
+                      <div className="sidebar-block">
+                        <div className="sidebar-label">{isOffice ? "Total Rooms" : (hasWorkstations ? "Workstations" : "Total Rooms / Beds")}</div>
+                        <div className="sidebar-value">{d.rooms || d.workstations || d.beds}</div>
+                      </div>
+                    )}
                     {d.baths > 0 && <div className="sidebar-block"><div className="sidebar-label">Total Bathrooms</div><div className="sidebar-value">{d.baths}</div></div>}
                   </>
                 )}
@@ -2503,11 +2494,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "universe" ? "active" : ""}`} id="panel-universe">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} · {ch['universe']?.chapterLabel || 'Property Universe'}</div>
-                <ChapterSubtitle text={ch['universe']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['universe']?.chapterNumber || '08'}
+                chapterLabel={ch['universe']?.chapterLabel || 'Property Universe'}
+                subtitle={ch['universe']?.subtitle}
+              />
 
               {d.building_style && (
                 <div style={{marginBottom:"24px"}}>
@@ -2586,11 +2577,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "services" ? "active" : ""}`} id="panel-services">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} · {ch['services']?.chapterLabel || 'Services'}</div>
-                <ChapterSubtitle text={ch['services']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['services']?.chapterNumber || '09'}
+                chapterLabel={ch['services']?.chapterLabel || 'Services'}
+                subtitle={ch['services']?.subtitle}
+              />
 
               <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
                 Commission a ScoutIt ecosystem partner to go deeper on this space, from spatial renders to full due-diligence research.
@@ -2640,11 +2631,11 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
           <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove" data-scoutit-guide="property-your-move-actions">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} · {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
-                <ChapterSubtitle text={ch['yourmove']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['yourmove']?.chapterNumber || '10'}
+                chapterLabel={ch['yourmove']?.chapterLabel || 'Your Move'}
+                subtitle={ch['yourmove']?.subtitle}
+              />
 
               {/* Attached Spatial Finding from Stratosphere Detour */}
               {attachedSignalSlug && (
@@ -2670,71 +2661,16 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                 ) : null}
               </div>
 
-              {/* Price — SOP §9. A price is Published only when a human authority
-                  (Owner / Property Manager / Broker) confirmed it. Unverified or
-                  withheld → "Price on request"; never display an unverified price. */}
-              {(() => {
-                const hasPrice = d.listed_price && d.listed_price.trim().toUpperCase() !== "N/A";
-                const isPublished = (d.price_status || "").toLowerCase().includes("publish");
-                const verifiedBy = (d.price_verified_by || "").trim();
-                const isVerified = verifiedBy && verifiedBy.toLowerCase() !== "unverified";
-                const showPrice = hasPrice && isPublished && isVerified;
-                return (
-                  <>
-                    <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
-                    {showPrice ? (
-                      <GlassPanel className="p-6 rounded-md">
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.1}}>{d.listed_price}</div>
-                        {/* Verified-by badge — the confirmation the buyer can trust */}
-                        <div style={{display:"inline-flex", alignItems:"center", gap:"7px", marginTop:"14px", padding:"6px 12px", border:"0.5px solid color-mix(in srgb, var(--green) 40%, transparent)", borderRadius:"4px", background:"color-mix(in srgb, var(--green) 6%, transparent)"}}>
-                          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 7.5L6 11l5.5-7"/></svg>
-                          <span style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--green)", letterSpacing:"0.12em", textTransform:"uppercase"}}>Verified by {verifiedBy}</span>
-                        </div>
-                        {d.price_source && (
-                          <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", letterSpacing:"0.1em", color:"var(--text-muted)", marginTop:"12px"}}>
-                            Source: {d.price_source}
-                          </div>
-                        )}
-                        {d.price_notes && (
-                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight: 1.75, marginTop:"10px"}}>{d.price_notes}</div>
-                        )}
-                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px"}}>
-                          Price is provided and confirmed by the listing&apos;s authorized owner, property manager, or broker. ScoutIt displays it as confirmed by that party. For inquiries, speak directly with an authorized representative.
-                        </p>
-                      </GlassPanel>
-                    ) : (
-                      <GlassPanel className="p-6 rounded-md">
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.2}}>Price on request</div>
-                        <p style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
-                          No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
-                        </p>
-                        {slug ? (
-                        <Link href={`/property/${slug}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", textDecoration:"none", letterSpacing:"0.01em"}}>
-                          Inquire with an authorized broker →
-                        </Link>
-                        ) : null}
-                      </GlassPanel>
-                    )}
-                  </>
-                );
-              })()}
-
-              <MonthlyCostCalculator d={d} />
-
-              <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
-
-              {rosterLoaded && (
-                <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(var(--accent-rgb),0.03)" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented // uploader or lister route"}</div>
-                  {rosterLoaded && !rosterUnavailable && propertyRoster.length === 0 && rosterUploader ? (
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "8px" }}>Listed by {rosterUploader}</div>
-                  ) : null}
-                  {slug ? (
-                  <Link href={`/property/${slug}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
-                  ) : null}
-                </div>
-              )}
+              {/* Hero rate routed through PropertyRateSection formatUnitPrice(d.listed_price) */}
+              <PropertyRateSection
+                d={d}
+                slug={slug}
+                rosterLoaded={rosterLoaded}
+                rosterUnavailable={rosterUnavailable}
+                propertyRoster={propertyRoster}
+                rosterUploader={rosterUploader}
+                isCommercial={true}
+              />
 
               {/* Progressive Intent Ladder (§7) */}
               <div style={{ marginTop: "24px", padding: "20px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px" }}>

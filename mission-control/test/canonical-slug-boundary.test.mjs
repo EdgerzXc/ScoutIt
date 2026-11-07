@@ -70,7 +70,7 @@ test("historical property URLs use a permanent redirect", async () => {
 
 test("the unapplied lifecycle migration has a complete sync-state constraint", async () => {
   const sql = await readFile(
-    path.join(root, "..", "supabase", "migrations", "20260802000003_property_lifecycle_safety_guards.sql"),
+    path.join(root, "..", "supabase", "migrations", "20260802000007_property_lifecycle_safety_guards.sql"),
     "utf8"
   );
   assert.match(

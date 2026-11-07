@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { isBlocked } from "@/lib/connectBlocks";
+import { isBlocked, checkBlockGuard } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { checkReceiverGate, IDEMPOTENCY_WINDOW_MINUTES } from "@/lib/connectGates";
 import { logActivity } from "@/lib/crmActivity";
@@ -76,9 +76,16 @@ export async function POST(request) {
       return NextResponse.json({ error: `Multiple brokers named "${brokerName}" found — ask them for their PRC number to disambiguate.` }, { status: 409 });
     }
     const resolvedBrokerId = brokerMatches[0].id;
-    // A-144 invariant #6 FIRST (before any write): a broker who blocked the
-    // owner fails with 0 spend and no representation phantom.
-    if (await isBlocked(supabaseAdmin, userId, resolvedBrokerId)) {
+    // A-144 invariant #6 FIRST + A-305: a broker who blocked the owner fails with 0 spend.
+    // In post-O-004 fail-closed posture, an unavailable guard returns 503 with 0 spend.
+    const blockGuard = await checkBlockGuard(supabaseAdmin, userId, [resolvedBrokerId]);
+    if (!blockGuard.ok && blockGuard.unavailable) {
+      return NextResponse.json(
+        { error: "Block safety check unavailable. No Connect was spent." },
+        { status: 503 },
+      );
+    }
+    if (blockGuard.blocked) {
       return NextResponse.json(
         { error: "This request can't be sent. No Connect was spent." },
         { status: 403 },

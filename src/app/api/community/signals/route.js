@@ -70,7 +70,9 @@ export async function GET(request) {
       if (!viewerId) {
         return NextResponse.json({ ok: false, error: "Sign in to view your saved signals." }, { status: 401 });
       }
-      const result = await listSavedSignals(viewerId);
+      const includeExpired =
+        url.searchParams.get("includeExpired") === "1" || url.searchParams.get("includeExpired") === "true";
+      const result = await listSavedSignals(viewerId, { includeExpired });
       if (result.missing) {
         return NextResponse.json(
           { ok: true, signals: [], degraded: true, message: "Community posting is opening soon." },

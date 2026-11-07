@@ -155,7 +155,7 @@ describe("U-042 Airtable monthly call budget", () => {
     }));
   });
 
-  it("still rebuilds after a publish or takedown when the budget is spent", async () => {
+  it("serves last-good without extra calls after a publish or takedown when the budget is spent (A-307)", async () => {
     const { getCmsBundle, invalidateCmsBundle } = await import("@/lib/cmsCache");
     await getCmsBundle();
     await flush();
@@ -164,8 +164,8 @@ describe("U-042 Airtable monthly call budget", () => {
     await invalidateCmsBundle();
     const result = await getCmsBundle();
 
-    expect(result.source).toBe("airtable");
-    expect(fetchProperties).toHaveBeenCalledTimes(2);
+    expect(result.source).toBe("stale_monthly_budget");
+    expect(fetchProperties).toHaveBeenCalledTimes(1);
   });
 
   it("reports the count as unknown rather than zero when Redis is absent", async () => {

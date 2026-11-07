@@ -81,3 +81,66 @@ export function safeFloorPlans(plans) {
     }];
   }).slice(0, 20);
 }
+
+/**
+ * Hardened photo parser for Airtable and Supabase payloads.
+ * Accepts strings (single or comma-separated), arrays of strings, or arrays of
+ * Airtable attachment objects ({ url, filename, thumbnails }).
+ * Discards malformed or unsafe items without dropping valid images from the gallery.
+ */
+export function extractPhotoUrls(value) {
+  if (!value) return [];
+  const rawList = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : typeof value === "object"
+        ? [value]
+        : [];
+
+  const seen = new Set();
+  const urls = [];
+
+  for (const item of rawList) {
+    if (!item) continue;
+    let candidate = "";
+    if (typeof item === "string") {
+      candidate = item.trim();
+    } else if (typeof item === "object") {
+      if (typeof item.url === "string") {
+        candidate = item.url.trim();
+      } else if (typeof item.thumbnails?.large?.url === "string") {
+        candidate = item.thumbnails.large.url.trim();
+      } else if (typeof item.thumbnails?.full?.url === "string") {
+        candidate = item.thumbnails.full.url.trim();
+      }
+    }
+
+    if (!candidate) continue;
+
+    if (candidate.startsWith("javascript:") || candidate.startsWith("data:") || candidate.startsWith("file:")) {
+      continue;
+    }
+
+    try {
+      if (/^https?:\/\//i.test(candidate)) {
+        const parsed = new URL(candidate);
+        const clean = parsed.toString();
+        if (!seen.has(clean)) {
+          seen.add(clean);
+          urls.push(clean);
+        }
+      } else if (candidate.startsWith("/") && !candidate.startsWith("//")) {
+        if (!seen.has(candidate)) {
+          seen.add(candidate);
+          urls.push(candidate);
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return urls;
+}
+

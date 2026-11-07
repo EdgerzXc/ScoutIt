@@ -181,3 +181,19 @@ test("the publish modal carries pipeline fields into the briefing", () => {
   // Staff override wins over AI JSON; blank means ordinary intel.
   assert.match(component, /lifecycle: publishLifecycle \|\| parsedPreview\.lifecycle/);
 });
+
+// ── A-309: test inventory coverage ────────────────────────────────────
+
+test("A-309: test:security in package.json enumerates every test file in mission-control/test", async () => {
+  const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
+  const testScript = pkg.scripts?.["test:security"] || "";
+  const testFiles = (await readdir(path.join(root, "test"))).filter((f) => f.endsWith(".test.mjs"));
+
+  assert.equal(testFiles.length, 47, "test directory must contain 47 test suites");
+  for (const file of testFiles) {
+    assert.ok(
+      testScript.includes(`test/${file}`),
+      `test:security must enumerate test/${file}`
+    );
+  }
+});

@@ -4,7 +4,7 @@ import { findProperty } from "@/lib/propertyLookup";
 import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/clientIp";
 import { detectContactLeak } from "@/lib/contactLeakFilter";
@@ -92,6 +92,23 @@ export function sanitizeServerMetadata(metadata) {
   return clean;
 }
 
+export function deriveAnalyticsViewerKey(request, secretSalt) {
+  const ip = clientIp(request) || "anon_ip";
+  const ua = request.headers.get("user-agent") || "anon_ua";
+  const monthRotation = new Date().toISOString().substring(0, 7);
+  const salt =
+    secretSalt ||
+    process.env.IP_SALT ||
+    process.env.ANALYTICS_SALT ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    "scoutit_analytics_dev_salt_fallback";
+
+  return createHmac("sha256", salt)
+    .update(`${monthRotation}:${ip}:${ua}`)
+    .digest("hex")
+    .substring(0, 24);
+}
+
 export async function POST(request) {
   const rate = checkAnalyticsRate(clientIp(request));
   if (!rate.allowed) {
@@ -145,18 +162,10 @@ export async function POST(request) {
       resolvedPropertyId = property?.id || null;
     }
 
-    // Privacy-safe viewer key: salted hash of IP + user-agent, re-salted each
-    // month so a viewer cannot be followed across months. Never stores the IP.
-    const ip =
-      request.headers.get("x-forwarded-for") ||
-      request.headers.get("cf-connecting-ip") ||
-      "anon_ip";
-    const ua = request.headers.get("user-agent") || "anon_ua";
-    const monthSalt = new Date().toISOString().substring(0, 7);
-    const viewerKey = createHash("sha256")
-      .update(`${ip}:${ua}:${monthSalt}`)
-      .digest("hex")
-      .substring(0, 24);
+    // Privacy-safe viewer key: cryptographic HMAC of IP + user-agent, re-salted each
+    // month and keyed with server salt so a viewer cannot be followed across months
+    // or reverse-engineered via rainbow tables. Never stores the raw IP.
+    const viewerKey = deriveAnalyticsViewerKey(request);
 
     const success = await trackAnalyticsEvent({
       eventType,

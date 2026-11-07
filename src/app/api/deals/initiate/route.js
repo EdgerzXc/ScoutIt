@@ -8,7 +8,7 @@ import { canContactProperty, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES 
 import { routingFailureStatus } from "@/lib/brokerRepresentation";
 import { validateIntroMessage, INTRO_MAX } from "@/lib/connectIntro";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
-import { anyBlocked, anyBlockedStrict } from "@/lib/connectBlocks";
+import { anyBlocked, anyBlockedStrict, checkBlockGuard } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
 import { freeInboundRecipient, isOpenGateAvailable } from "@/lib/openGate";
@@ -329,9 +329,18 @@ export async function POST(request) {
       });
     }
 
-    // A-144 invariant #6: blocked sends fail BEFORE any spend. The pending
-    // row created above is rolled back so no phantom request remains.
-    if (await anyBlocked(supabaseAdmin, userId, [...recipientIds, unitOperatorId].filter(Boolean))) {
+    // A-144 invariant #6 + A-305: blocked sends fail BEFORE any spend.
+    // In post-O-004 fail-closed posture, an unavailable guard fails closed (503)
+    // without spending Connects; pre-migration fails open with operator signal.
+    const blockGuard = await checkBlockGuard(supabaseAdmin, userId, [...recipientIds, unitOperatorId].filter(Boolean));
+    if (!blockGuard.ok && blockGuard.unavailable) {
+      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      return NextResponse.json(
+        { error: "Block safety check unavailable. No Connect was spent." },
+        { status: 503 },
+      );
+    }
+    if (blockGuard.blocked) {
       await supabaseAdmin.from('deals').delete().eq('id', dealId);
       return NextResponse.json(
         { error: "This request can't be sent. No Connect was spent." },
@@ -401,19 +410,22 @@ export async function POST(request) {
       await ensureConnectBalancesWallet(supabaseAdmin, userId, role, 'starry');
     }
 
+    let spentConnects = false;
     const spendResult = openGateFree
       ? { data: null, error: null }
-      : await supabaseAdmin.rpc('spend_connects', {
-      p_user_id: userId,
-      p_amount: 1,
-      p_reason: role === 'operator'
-        ? 'Operator contacted building owner'
-        : unitOperatorId
-        ? 'Buyer contacted unit operator'
-        : 'Buyer contacted owner',
-      p_ref_type: 'initiate_chat',
-      p_ref_id: resolvedListingId,
-    });
+      : await supabaseAdmin.rpc('spend_connects_atomic', {
+          p_user_id: userId,
+          p_role: role || 'seeker',
+          p_amount: 1,
+          p_tier: 'starry',
+          p_source: 'initiate_chat',
+          p_reason: role === 'operator'
+            ? 'Operator contacted building owner'
+            : unitOperatorId
+            ? 'Buyer contacted unit operator'
+            : 'Buyer contacted owner',
+          p_reference_id: resolvedListingId,
+        });
     spendError = spendResult.error;
     spendData = spendResult.data;
 
@@ -426,68 +438,51 @@ export async function POST(request) {
         { status: insufficient ? 403 : 500 }
       );
     }
-
-    const newBalance = spendData?.[0]?.total_balance ?? null;
-
-    // Record what this conversation cost, on the conversation (§40.14).
-    // Previously the amount was returned to the client and then discarded, so
-    // nothing tied a spend to the thread it bought — which is how a hardcoded
-    // "3 Connects Spent" ended up in the chat header while the ledger charged 1.
-    //
-    // Tie the successful one-Connect ledger spend to this conversation.
-    const { error: stampError } = await supabaseAdmin
-      .from('deals')
-      .update({ connects_spent: openGateFree ? 0 : 1, ...(openGateFree ? { open_gate_inbound: true } : {}) })
-      .eq('id', dealId);
-      if (stampError) {
-        console.error("[INITIATE API] Could not stamp Connect cost:", stampError);
-        await supabaseAdmin.from("deals").delete().eq("id", dealId);
-        if (!openGateFree) {
-          await supabaseAdmin.rpc("refund_connects_system_error", {
-            p_user_id: userId, p_amount: 1, p_reason: "Connect cost stamp failed",
-            p_staff_id: "system", p_ref_id: dealId,
-          });
-        }
-        return NextResponse.json({ error: "Could not complete this request. No request was delivered." }, { status: 503 });
-      }
-
-    // A-148: persist the anonymity choice on the conversation, next to what
-    // it cost. The column is migration-gated: mention it ONLY when requested,
-    // so ordinary sends never touch a column that may not exist yet. A
-    // missing column fails only anonymous sends — honestly, with the deal
-    // rolled back and the just-spent Connect refunded as a platform error —
-    // never ordinary ones.
-    if (requestedAnonymous) {
-      const { error: anonError } = await supabaseAdmin
-        .from('deals')
-        .update({ sender_anonymous: true })
-        .eq('id', dealId);
-      if (anonError) {
-        console.error("[INITIATE API] Could not stamp sender_anonymous:", anonError);
-        await supabaseAdmin.from('deals').delete().eq('id', dealId);
-        if (!openGateFree) {
-          await supabaseAdmin.rpc('refund_connects_system_error', {
-            p_user_id: userId,
-            p_amount: 1,
-            p_reason: 'Anonymous-send stamp failed after spend',
-            p_staff_id: 'system',
-            p_ref_id: dealId,
-          });
-        }
-        const missingColumn = anonError?.code === "42703" || /does not exist|undefined_column/i.test(anonError?.message || "");
-        return NextResponse.json(
-          { error: missingColumn ? "Anonymous sending isn't available yet. No Connect was spent." : "Could not record your anonymity choice. No Connect was spent." },
-          { status: missingColumn ? 503 : 500 }
-        );
-      }
+    if (!openGateFree) {
+      spentConnects = true;
     }
 
-    // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
-    if (newBalance !== null) {
-      await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
-    }
+    const newBalance = spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null;
 
     try {
+      // Record what this conversation cost, on the conversation (§40.14).
+      // Previously the amount was returned to the client and then discarded, so
+      // nothing tied a spend to the thread it bought — which is how a hardcoded
+      // "3 Connects Spent" ended up in the chat header while the ledger charged 1.
+      //
+      // Tie the successful one-Connect ledger spend to this conversation.
+      const { error: stampError } = await supabaseAdmin
+        .from('deals')
+        .update({ connects_spent: openGateFree ? 0 : 1, ...(openGateFree ? { open_gate_inbound: true } : {}) })
+        .eq('id', dealId);
+      if (stampError) {
+        throw new Error(`Connect cost stamp failed: ${stampError.message}`);
+      }
+
+      // A-148: persist the anonymity choice on the conversation, next to what
+      // it cost. The column is migration-gated: mention it ONLY when requested,
+      // so ordinary sends never touch a column that may not exist yet. A
+      // missing column fails only anonymous sends — honestly, with the deal
+      // rolled back and the just-spent Connect refunded as a platform error —
+      // never ordinary ones.
+      if (requestedAnonymous) {
+        const { error: anonError } = await supabaseAdmin
+          .from('deals')
+          .update({ sender_anonymous: true })
+          .eq('id', dealId);
+        if (anonError) {
+          const missingColumn = anonError?.code === "42703" || /does not exist|undefined_column/i.test(anonError?.message || "");
+          const err = new Error(missingColumn ? "ANONYMOUS_COLUMN_MISSING" : `Anonymous stamp failed: ${anonError.message}`);
+          err.code = missingColumn ? "ANONYMOUS_COLUMN_MISSING" : anonError?.code;
+          throw err;
+        }
+      }
+
+      // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
+      if (newBalance !== null) {
+        await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId).catch(() => {});
+      }
+
       // Signal exactly the recipient snapshot. When the active roster is
       // non-empty the owner is deliberately absent; when it is empty the RPC
       // returns the owner/lister as the sole recipient.
@@ -552,12 +547,12 @@ export async function POST(request) {
       });
     } catch (postSpendErr) {
       console.error("[DEALS INITIATE] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
-      if (!openGateFree && userId !== 'master-dev') {
+      if (spentConnects && userId !== 'master-dev') {
         try {
           await supabaseAdmin.rpc('refund_connects_system_error', {
             p_user_id: userId,
             p_amount: 1,
-            p_reason: `Compensating refund: inquiry delivery failed for deal ${dealId}`,
+            p_reason: `Compensating refund: inquiry delivery failed for deal ${dealId} (${postSpendErr.message})`,
             p_staff_id: "system",
             p_ref_id: String(resolvedListingId),
           });
@@ -567,11 +562,17 @@ export async function POST(request) {
       }
       try {
         if (dealId) {
-          await supabaseAdmin.from('deal_routing_recipients').delete().eq('deal_id', dealId);
-          await supabaseAdmin.from('deals').delete().eq('id', dealId);
+          await supabaseAdmin.from('deal_routing_recipients').delete().eq('deal_id', dealId).catch(() => {});
+          await supabaseAdmin.from('deals').delete().eq('id', dealId).catch(() => {});
         }
       } catch (rollbackErr) {
         console.error("[DEALS INITIATE] Deal rollback failed:", rollbackErr);
+      }
+      if (postSpendErr.code === "ANONYMOUS_COLUMN_MISSING" || postSpendErr.message === "ANONYMOUS_COLUMN_MISSING") {
+        return NextResponse.json(
+          { error: "Anonymous sending isn't available yet. No Connect was spent." },
+          { status: 503 }
+        );
       }
       return NextResponse.json(
         { error: openGateFree ? "Inquiry delivery failed." : "Inquiry delivery failed. Your Connect has been refunded." },

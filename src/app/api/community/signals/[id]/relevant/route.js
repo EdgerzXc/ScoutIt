@@ -23,9 +23,19 @@ async function loadLiveSignal(id) {
   return data;
 }
 
-// GAP-77: Derive relevant_count from authoritative signal_relevance row count
-// to eliminate race-condition counter drift under concurrent requests.
+// GAP-77 / A-311: Atomic synchronization of relevant_count to eliminate
+// race-condition counter drift under concurrent taps.
 async function syncExactRelevantCount(signalId, fallbackCount) {
+  // A-311: Try atomic subquery RPC first
+  try {
+    const { data: rpcCount, error: rpcErr } = await supabaseAdmin.rpc("sync_signal_relevant_count", {
+      p_signal_id: signalId,
+    });
+    if (!rpcErr && typeof rpcCount === "number") {
+      return rpcCount;
+    }
+  } catch {}
+
   let exactCount = fallbackCount;
   try {
     const { count, error: countErr } = await supabaseAdmin
@@ -90,6 +100,10 @@ export async function POST(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  const rate = checkRate(`rel:${clientIp(request)}`);
+  if (!rate.allowed) {
+    return NextResponse.json({ ok: false, error: "Too many taps — try again in a minute." }, { status: 429 });
+  }
   try {
     const userId = await resolveUserId(request);
     if (!userId) {

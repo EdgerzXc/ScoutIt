@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { insertProperty } from "@/lib/airtable";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { recordHistoricalSlug } from "@/lib/propertyRedirects";
 
 export async function POST(request) {
   try {
@@ -62,6 +63,25 @@ export async function POST(request) {
     // adopt it as canonical_slug only when none is owner-locked yet.
     const airtableSlug = airtableRecord?.fields?.Slug || null;
     const nowIso = new Date().toISOString();
+
+    if (submission.canonical_slug && airtableSlug && airtableSlug !== submission.canonical_slug) {
+      await recordHistoricalSlug({
+        propertyId: submissionId,
+        oldSlug: airtableSlug,
+        canonicalSlug: submission.canonical_slug,
+        staffId: userId,
+        reason: "Admin approve formula drift mapped to frozen canonical slug",
+      });
+    } else if (!submission.canonical_slug && submission.slug && airtableSlug && submission.slug !== airtableSlug) {
+      await recordHistoricalSlug({
+        propertyId: submissionId,
+        oldSlug: submission.slug,
+        canonicalSlug: airtableSlug,
+        staffId: userId,
+        reason: "Admin approve pre-publish draft slug mapped to initial canonical slug",
+      });
+    }
+
     const slugUpdate = airtableSlug
       ? {
           slug: airtableSlug,

@@ -550,8 +550,9 @@ export async function listAuthorSignals(authorAccountId) {
 /**
  * List signals bookmarked / saved by a specific account.
  * Preserves the user's bookmark timestamp order (newest save first).
+ * Excludes expired rows by default (7-day lifecycle parity with public feed).
  */
-export async function listSavedSignals(accountId) {
+export async function listSavedSignals(accountId, { includeExpired = false } = {}) {
   if (!supabaseAdmin || !accountId) return { missing: true };
   try {
     const { data: saveRows, error: saveErr } = await supabaseAdmin
@@ -628,6 +629,11 @@ export async function listSavedSignals(accountId) {
           metricsByUser.get(row.author_account_id)
         )
       );
+
+    // Expired rows leave the saved list by default (spec §10 & D-09 parity)
+    if (!includeExpired) {
+      signals = signals.filter((s) => s.freshness !== "expired");
+    }
 
     const publicIds = [...new Set(signals.filter((s) => s.author.mode === "public").map((s) => s.id))];
     if (publicIds.length > 0) {

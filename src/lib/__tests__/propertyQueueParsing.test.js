@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // 1. Intake: Upload, register in queue, calculate queue number, notify.
 // 2. Status: Check real-time queue position and completion state.
 // 3. Process: Single-download parse, schema assimilation, file deletion, and completion notification.
+// 4. Poison-Pill Quarantine: Corrupt PDF, oversize PDF (>25MB), max retries exceeded, hostile values.
 
 const storageLog = [];
 const dbLog = [];
@@ -11,6 +12,8 @@ let storageRemoveCalls = [];
 let queryResult = { data: null, error: null, count: 1 };
 let updateResult = { data: null, error: null };
 let insertResult = { data: null, error: null };
+let customDownloadHandler = null;
+let customAssimilateHandler = null;
 
 function makeQueryBuilder() {
   let isCountQuery = false;
@@ -44,6 +47,10 @@ function makeQueryBuilder() {
       dbLog.push(["limit", num]);
       return builder;
     },
+    contains(col, val) {
+      dbLog.push(["contains", col, val]);
+      return builder;
+    },
     single() {
       return Promise.resolve(insertResult);
     },
@@ -51,8 +58,17 @@ function makeQueryBuilder() {
       return Promise.resolve(queryResult);
     },
     then(onFulfilled, onRejected) {
-      const res = isCountQuery ? { count: queryResult.count, error: null } : queryResult;
-      return Promise.resolve(res).then(onFulfilled, onRejected);
+      if (isCountQuery) {
+        return Promise.resolve({ count: queryResult.count, error: null }).then(onFulfilled, onRejected);
+      }
+      if (Array.isArray(queryResult.data)) {
+        return Promise.resolve({ data: queryResult.data, error: null }).then(onFulfilled, onRejected);
+      }
+      const targetId = queryResult.data?.id || insertResult?.data?.id;
+      const items = queryResult.count && targetId
+        ? Array.from({ length: queryResult.count }, (_, i) => ({ id: i === queryResult.count - 1 ? targetId : `prior-${i}` }))
+        : (queryResult.data ? [queryResult.data] : []);
+      return Promise.resolve({ data: items, error: null }).then(onFulfilled, onRejected);
     },
   };
   return builder;
@@ -68,6 +84,9 @@ const mockStorage = {
       },
       download(path) {
         storageLog.push(["download", path]);
+        if (customDownloadHandler) {
+          return customDownloadHandler(path);
+        }
         const pdfHeader = "%PDF-1.4 sample content";
         const blob = new Blob([pdfHeader], { type: "application/pdf" });
         return Promise.resolve({ data: blob, error: null });
@@ -113,7 +132,13 @@ vi.mock("@/lib/auditTrail", () => ({
 }));
 
 vi.mock("unpdf", () => ({
-  getDocumentProxy: async () => ({}),
+  getDocumentProxy: async (buf) => {
+    // If buffer does not have %PDF, throw
+    if (!buf || buf.length < 5 || buf[0] !== 0x25 || buf[1] !== 0x50 || buf[2] !== 0x44 || buf[3] !== 0x46) {
+      throw new Error("Invalid PDF header");
+    }
+    return {};
+  },
   extractText: async () => ({
     text: "Sample Commercial Office Building in BGC Taguig. Price: 15000000. Floor: 350 sqm.",
     totalPages: 2,
@@ -121,17 +146,24 @@ vi.mock("unpdf", () => ({
 }));
 
 vi.mock("@/lib/assimilateProperty", () => ({
-  assimilatePropertyText: async (text, filename) => ({
-    title: "Prime BGC Commercial Tower",
-    location: "BGC, Taguig",
-    space_category: "commercial",
-    price: 15000000,
-    description: "Sample description extracted from PDF.",
-    floor_sqm: 350,
-    confidence: 0.95,
-    gaps: [],
-    details: { parsed_from: filename },
-  }),
+  MAX_PDF_BYTES: 25 * 1024 * 1024,
+  assimilatePropertyText: async (text, filename) => {
+    if (customAssimilateHandler) {
+      return customAssimilateHandler(text, filename);
+    }
+    return {
+      title: "Prime BGC Commercial Tower",
+      location: "BGC, Taguig",
+      space_category: "commercial",
+      price: 15000000,
+      description: "Sample description extracted from PDF.",
+      media_link: null,
+      floor_sqm: 350,
+      confidence: 0.95,
+      gaps: [],
+      details: { parsed_from: filename },
+    };
+  },
 }));
 
 const intakeRoute = await import("@/app/api/properties/queue/intake/route");
@@ -145,6 +177,8 @@ describe("Property Listing Queue · Intake & Status", () => {
     storageRemoveCalls.length = 0;
     notificationLog.length = 0;
     mockUserId = "test-owner-123";
+    customDownloadHandler = null;
+    customAssimilateHandler = null;
     queryResult = { data: null, error: null, count: 3 };
     insertResult = {
       data: {
@@ -246,6 +280,8 @@ describe("Property Listing Queue · Processing & Single-Use Deletion Policy", ()
     storageRemoveCalls.length = 0;
     notificationLog.length = 0;
     mockUserId = "test-owner-123";
+    customDownloadHandler = null;
+    customAssimilateHandler = null;
     queryResult = {
       data: {
         id: "prop-123",
@@ -263,7 +299,7 @@ describe("Property Listing Queue · Processing & Single-Use Deletion Policy", ()
     };
   });
 
-  it("downloads the PDF once, updates listing to pending, deletes PDF from storage, and notifies owner", async () => {
+  it("downloads the PDF once, updates listing to pending with pdf_verified: false, deletes PDF from storage, and notifies owner", async () => {
     const req = new Request("https://scoutit.space/api/properties/queue/process", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -277,6 +313,7 @@ describe("Property Listing Queue · Processing & Single-Use Deletion Policy", ()
     expect(body.success).toBe(true);
     expect(body.done).toBe(true);
     expect(body.deletedPdf).toBe(true);
+    expect(body.pdf_verified).toBe(false);
 
     // Verify single-use download happened
     expect(storageLog.some(([op]) => op === "download")).toBe(true);
@@ -284,19 +321,102 @@ describe("Property Listing Queue · Processing & Single-Use Deletion Policy", ()
     // Verify CRITICAL REQUIREMENT: PDF file was permanently deleted from storage
     expect(storageRemoveCalls).toContain("temp_queue_docs/test-owner-123/123_deck.pdf");
 
-    // Verify DB update transitioned pipeline_status to 'pending' and cleared pdf_source_url
+    // Verify DB update transitioned pipeline_status to 'pending' with pdf_verified: false
     const updateOps = dbLog.filter(([op]) => op === "update");
     expect(updateOps.length).toBeGreaterThan(0);
-    const patch = updateOps[0][1];
-    expect(patch.pipeline_status).toBe("pending");
-    expect(patch.pdf_source_url).toBe(null);
-    expect(patch.pdf_verified).toBe(true);
-    expect(patch.title).toBe("Prime BGC Commercial Tower");
+    const finalPatch = updateOps[updateOps.length - 1][1];
+    expect(finalPatch.pipeline_status).toBe("pending");
+    expect(finalPatch.pdf_source_url).toBe(null);
+    expect(finalPatch.pdf_verified).toBe(false); // A-302: Human verification required
+    expect(finalPatch.details?.pdf_verification_required).toBe(true);
+    expect(finalPatch.title).toBe("Prime BGC Commercial Tower");
 
     // Verify completion notification dispatched to owner
     expect(notificationLog.length).toBe(1);
     expect(notificationLog[0].title).toBe("Property Dossier Ready");
-    expect(notificationLog[0].desc).toContain("Automatic parsing for \"Prime BGC Commercial Tower\" is complete");
+    expect(notificationLog[0].desc).toContain("Human source verification is required");
     expect(notificationLog[0].userId).toBe("test-owner-123");
+  });
+
+  it("quarantines corrupt PDF, purges temporary file, and unblocks queue", async () => {
+    // Return corrupt bytes missing %PDF header
+    customDownloadHandler = () => {
+      const corruptBlob = new Blob(["THIS IS CORRUPT NOT A VALID PDF AT ALL"], { type: "application/pdf" });
+      return Promise.resolve({ data: corruptBlob, error: null });
+    };
+
+    const req = new Request("https://scoutit.space/api/properties/queue/process", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId: "prop-123" }),
+    });
+
+    const res = await processRoute.POST(req);
+    expect(res.status).toBe(422);
+    const body = await res.json();
+
+    expect(body.success).toBe(false);
+    expect(body.quarantined).toBe(true);
+    expect(body.reason).toBe("corrupt_pdf");
+
+    // Verify corrupt file was deleted from storage
+    expect(storageRemoveCalls).toContain("temp_queue_docs/test-owner-123/123_deck.pdf");
+
+    // Verify status was transitioned to quarantined
+    const updateOps = dbLog.filter(([op]) => op === "update");
+    const quarantinePatch = updateOps[updateOps.length - 1][1];
+    expect(quarantinePatch.pipeline_status).toBe("quarantined");
+    expect(quarantinePatch.details?.quarantine_reason).toBe("corrupt_pdf");
+  });
+
+  it("quarantines oversize PDF (> 25 MB) without memory buffering", async () => {
+    // Return a mock blob with size > 25 MB
+    customDownloadHandler = () => {
+      const oversizeBlob = {
+        size: 26 * 1024 * 1024,
+        arrayBuffer: async () => new ArrayBuffer(0),
+      };
+      return Promise.resolve({ data: oversizeBlob, error: null });
+    };
+
+    const req = new Request("https://scoutit.space/api/properties/queue/process", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId: "prop-123" }),
+    });
+
+    const res = await processRoute.POST(req);
+    expect(res.status).toBe(422);
+    const body = await res.json();
+
+    expect(body.success).toBe(false);
+    expect(body.quarantined).toBe(true);
+    expect(body.reason).toBe("pdf_oversize");
+
+    // Verify storage was purged
+    expect(storageRemoveCalls).toContain("temp_queue_docs/test-owner-123/123_deck.pdf");
+
+    // Verify status is quarantined
+    const updateOps = dbLog.filter(([op]) => op === "update");
+    const quarantinePatch = updateOps[updateOps.length - 1][1];
+    expect(quarantinePatch.pipeline_status).toBe("quarantined");
+    expect(quarantinePatch.details?.quarantine_reason).toBe("pdf_oversize");
+  });
+
+  it("quarantines listing when max retries are exceeded", async () => {
+    queryResult.data.details.process_attempts = 3; // Already attempted 3 times
+
+    const req = new Request("https://scoutit.space/api/properties/queue/process", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId: "prop-123" }),
+    });
+
+    const res = await processRoute.POST(req);
+    expect(res.status).toBe(422);
+    const body = await res.json();
+
+    expect(body.quarantined).toBe(true);
+    expect(body.reason).toBe("max_retries_exceeded");
   });
 });

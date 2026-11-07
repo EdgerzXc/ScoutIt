@@ -16,6 +16,8 @@ import { resolveEnterpriseForm } from "@/lib/enterpriseForms";
 import { routingFailureStatus } from "@/lib/brokerRepresentation";
 import { normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
+import { anyBlockedStrict } from "@/lib/connectBlocks";
+import { checkReceiverGate } from "@/lib/connectGates";
 
 // Public lead capture. Previously a stub that console.logged the payload and
 // returned fake success -- every inquiry posted here was silently dropped.
@@ -141,6 +143,66 @@ export async function POST(req) {
         { status: 503 },
       );
     }
+
+    // A-305: Receiver gates (pause and pending caps) apply to free inquiries.
+    for (const recipient of routing.recipients) {
+      if (!recipient.recipientId) continue;
+      const gate = await checkReceiverGate(supabaseAdmin, recipient.recipientId, property.id, null, { isFreeInquiry: true });
+      if (!gate.ok) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: gate.reason === "paused"
+              ? "This recipient has paused incoming inquiries for now."
+              : "This recipient has reached their inquiry limit for now. Please try again later.",
+            reason: gate.reason,
+          },
+          { status: 403 },
+        );
+      }
+    }
+
+    // A-305: Strict block enforcement on free inquiries when sender identity is resolved.
+    let senderId = null;
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.replace("Bearer ", "").trim();
+        const { data: authUser } = await supabaseAdmin.auth.getUser(token);
+        senderId = authUser?.user?.id || null;
+      } catch {
+        // Fallback to email resolution
+      }
+    }
+    if (!senderId && email) {
+      try {
+        const { data: senderProf } = await supabaseAdmin
+          .from("user_profiles")
+          .select("id")
+          .eq("email", email.toLowerCase().trim())
+          .limit(1)
+          .maybeSingle();
+        if (senderProf?.id) {
+          senderId = senderProf.id;
+        }
+      } catch {
+        // Fallback gracefully
+      }
+    }
+
+    if (senderId) {
+      const recipientIds = routing.recipients.map((r) => r.recipientId).filter(Boolean);
+      if (recipientIds.length > 0) {
+        const blockState = await anyBlockedStrict(supabaseAdmin, senderId, recipientIds);
+        if (blockState.blocked) {
+          return NextResponse.json(
+            { success: false, message: "This recipient is not accepting inquiries from your account." },
+            { status: 403 },
+          );
+        }
+      }
+    }
+
     const logged = await logActivity(supabaseAdmin, {
       propertyId: property.id,
       activityType: "inquiry",

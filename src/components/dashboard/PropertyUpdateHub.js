@@ -266,9 +266,9 @@ export default function PropertyUpdateHub({
         label: item.fieldLabel
       });
 
-      addToast?.(`Updated ${item.fieldLabel} successfully`, "✓");
+      addToast?.(`Updated ${item.fieldLabel} successfully`);
     } catch (err) {
-      addToast?.(sanitizeError(err, "Failed to update property"), "⚠️");
+      addToast?.(sanitizeError(err));
     } finally {
       setSavingId(null);
     }
@@ -305,9 +305,9 @@ export default function PropertyUpdateHub({
       }
 
       setUndoStack(null);
-      addToast?.(`Reverted ${label} to ${previousValue}`, "↩");
+      addToast?.(`Reverted ${label} to ${previousValue}`);
     } catch (err) {
-      addToast?.("Failed to undo change", "⚠️");
+      addToast?.("Failed to undo change");
     }
   };
 
@@ -332,23 +332,23 @@ export default function PropertyUpdateHub({
 
       if (data.updates && data.updates.length > 0) {
         setProposedUpdates(data.updates);
-        addToast?.(`Detected ${data.updates.length} updates from notes`, "📋");
+        addToast?.(`Detected ${data.updates.length} updates from notes`);
       } else {
         const localParsed = parseHeuristicUpdates(pastedText, propertiesList);
         setProposedUpdates(localParsed);
         if (localParsed.length > 0) {
-          addToast?.(`Extracted ${localParsed.length} updates from notes`, "📋");
+          addToast?.(`Extracted ${localParsed.length} updates from notes`);
         } else {
-          addToast?.("No clear property or unit updates detected. Please check wording.", "ℹ️");
+          addToast?.("No clear property or unit updates detected. Please check wording.");
         }
       }
     } catch (err) {
       const localParsed = parseHeuristicUpdates(pastedText, propertiesList);
       setProposedUpdates(localParsed);
       if (localParsed.length > 0) {
-        addToast?.(`Parsed ${localParsed.length} updates locally`, "📋");
+        addToast?.(`Parsed ${localParsed.length} updates locally`);
       } else {
-        addToast?.(sanitizeError(err, "Failed to parse updates"), "⚠️");
+        addToast?.(sanitizeError(err));
       }
     } finally {
       setIsParsingIntent(false);
@@ -416,13 +416,13 @@ export default function PropertyUpdateHub({
         }
       }
 
-      addToast?.(`Successfully applied ${successCount} updates across your properties`, "✓");
+      addToast?.(`Successfully applied ${successCount} updates across your properties`);
       setProposedUpdates([]);
       setPastedText("");
       setQuery("");
       setActiveTab("auto");
     } catch (err) {
-      addToast?.(sanitizeError(err, "Batch update encountered an issue"), "⚠️");
+      addToast?.(sanitizeError(err));
     } finally {
       setIsApplyingUpdates(false);
     }
@@ -432,7 +432,7 @@ export default function PropertyUpdateHub({
   const handleQueueUpload = async (file) => {
     if (!file) return;
     if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
-      addToast?.("Please upload a valid PDF document.", "⚠️");
+      addToast?.("Please upload a valid PDF document.");
       return;
     }
 
@@ -459,7 +459,7 @@ export default function PropertyUpdateHub({
         status: "queued"
       });
 
-      addToast?.(`Document Queued · You are #${data.queueNumber} in line`, "📬");
+      addToast?.(`Document Queued · You are #${data.queueNumber} in line`);
 
       // Trigger asynchronous background parsing immediately
       fetch("/api/properties/queue/process", {
@@ -469,7 +469,7 @@ export default function PropertyUpdateHub({
       }).catch(err => console.warn("Background trigger dispatch:", err));
 
     } catch (err) {
-      addToast?.(sanitizeError(err, "Failed to submit document to queue"), "⚠️");
+      addToast?.(sanitizeError(err));
     } finally {
       setIsUploadingQueue(false);
     }
@@ -501,7 +501,7 @@ export default function PropertyUpdateHub({
                 : "text-text-secondary hover:text-on-surface"
             }`}
           >
-            ⚡ Quick Tweak
+            Quick Tweak
           </button>
           <button
             type="button"
@@ -512,7 +512,7 @@ export default function PropertyUpdateHub({
                 : "text-text-secondary hover:text-on-surface"
             }`}
           >
-            📋 Paste Chat
+            Paste Chat
           </button>
           <button
             type="button"
@@ -523,7 +523,7 @@ export default function PropertyUpdateHub({
                 : "text-text-secondary hover:text-on-surface"
             }`}
           >
-            📬 Drop PDF
+            Drop PDF
           </button>
         </div>
       </div>
@@ -580,28 +580,28 @@ export default function PropertyUpdateHub({
               onClick={() => handleQuickPill("price_php")}
               className="px-2.5 py-1 rounded-full bg-surface-alt border border-white/[0.06] hover:border-gold-accent/40 text-text-secondary hover:text-gold-accent font-mono shrink-0 transition-all min-h-[30px]"
             >
-              🏷️ Rent / Price
+              Rent / Price
             </button>
             <button
               type="button"
               onClick={() => handleQuickPill("status")}
               className="px-2.5 py-1 rounded-full bg-surface-alt border border-white/[0.06] hover:border-gold-accent/40 text-text-secondary hover:text-gold-accent font-mono shrink-0 transition-all min-h-[30px]"
             >
-              🟢 Availability
+              Availability
             </button>
             <button
               type="button"
               onClick={() => handleQuickPill("parking_slots")}
               className="px-2.5 py-1 rounded-full bg-surface-alt border border-white/[0.06] hover:border-gold-accent/40 text-text-secondary hover:text-gold-accent font-mono shrink-0 transition-all min-h-[30px]"
             >
-              🚗 Parking
+              Parking
             </button>
             <button
               type="button"
               onClick={() => handleQuickPill("contact_number")}
               className="px-2.5 py-1 rounded-full bg-surface-alt border border-white/[0.06] hover:border-gold-accent/40 text-text-secondary hover:text-gold-accent font-mono shrink-0 transition-all min-h-[30px]"
             >
-              📞 Phone
+              Phone
             </button>
           </div>
 
@@ -663,7 +663,7 @@ export default function PropertyUpdateHub({
                         onClick={() => handleSaveField(item)}
                         className="px-4 py-1.5 rounded-lg bg-gold-accent text-background font-mono text-xs uppercase font-bold hover:bg-gold-bright active:scale-95 disabled:opacity-50 transition-all min-h-[40px]"
                       >
-                        {isSaving ? "Saving..." : "Save ✓"}
+                        {isSaving ? "Saving..." : "Save"}
                       </button>
                     </div>
                   </div>
@@ -753,7 +753,7 @@ export default function PropertyUpdateHub({
                   onClick={handleApproveBatch}
                   className="px-5 py-2 rounded-lg bg-gold-accent text-background font-mono text-xs uppercase font-bold hover:bg-gold-bright active:scale-95 transition-all min-h-[40px]"
                 >
-                  {isApplyingUpdates ? "Applying..." : "Approve All Updates ✓"}
+                  {isApplyingUpdates ? "Applying..." : "Approve All Updates"}
                 </button>
               </div>
             </div>

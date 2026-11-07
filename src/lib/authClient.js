@@ -1,13 +1,29 @@
 import { supabase } from './supabaseClient';
 
 export const getSession = async () => {
-  return await supabase.auth.getSession();
+  try {
+    const res = await supabase.auth.getSession();
+    return {
+      data: { session: res?.data?.session ?? null },
+      error: res?.error ?? null,
+    };
+  } catch (err) {
+    return { data: { session: null }, error: err };
+  }
 };
 
 // Unlike getSession(), getUser() validates the access token with Supabase Auth.
 // Use this for public UI that makes identity or verification claims.
 export const getUser = async () => {
-  return await supabase.auth.getUser();
+  try {
+    const res = await supabase.auth.getUser();
+    return {
+      data: { user: res?.data?.user ?? null },
+      error: res?.error ?? null,
+    };
+  } catch (err) {
+    return { data: { user: null }, error: err };
+  }
 };
 
 export const onAuthStateChange = (callback) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -270,7 +270,12 @@ function DashboardInner() {
         const deals = await loadDeals({ mockUserId: mockOwnerId });
         if (cancelled) return;
         const total = deals.reduce((sum, d) => sum + (d.unreadCount || 0), 0);
-        if (!cancelled) setUnreadInboxCount(total);
+        if (!cancelled) {
+          setUnreadInboxCount(total);
+          try {
+            window.dispatchEvent(new CustomEvent("scoutit:unread-inbox-count", { detail: { count: total } }));
+          } catch {}
+        }
       } catch {
         // Inbox badge is a nice-to-have -- fail quietly, the bell still covers signaling.
       }

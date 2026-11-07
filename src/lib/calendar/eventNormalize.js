@@ -55,7 +55,7 @@ export function canonicalToGoogle(event) {
     summary: event.title,
     description: event.description || undefined,
     location: event.location || undefined,
-    status: event.status === "cancelled" ? "cancelled" : "confirmed",
+    status: event.status === "cancelled" ? "cancelled" : event.status === "tentative" ? "tentative" : "confirmed",
   };
   if (event.allDay) {
     // Google all-day events are date-only; end date is exclusive.

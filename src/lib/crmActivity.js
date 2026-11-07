@@ -53,9 +53,11 @@ export async function logNoteActivityDeduped(serviceClient, { dealId, propertyId
 }
 
 export async function createTask(serviceClient, {
-  ownerUserId, title, dueAt = null, dealId = null, propertyId = null, priority = "normal",
+  ownerUserId, title, dueAt = null, dealId = null, propertyId = null, priority = "normal", status = "todo", completedAt = null,
 }) {
   if (!ownerUserId || !title) return null;
+  const isDone = status === "done";
+  const resolvedCompletedAt = isDone ? (completedAt || new Date().toISOString()) : null;
   const { data, error } = await serviceClient.from("crm_tasks").insert([{
     owner_user_id: ownerUserId,
     // Unassigned work belongs to whoever it was created for, so it shows up in
@@ -65,7 +67,8 @@ export async function createTask(serviceClient, {
     due_at: dueAt,
     deal_id: dealId,
     property_id: propertyId,
-    status: "todo",
+    status: status || "todo",
+    completed_at: resolvedCompletedAt,
     priority,
   }]).select().single();
   if (error) {

@@ -70,37 +70,34 @@ export const uploadAttachment = async (dealId, file, extraMeta = {}) => {
 };
 
 export const uploadPropertyPhoto = async (file) => {
-  // Client-side Validation
+  // Client-side quick check
   const baseType = (file.type || '').split(';')[0].trim().toLowerCase();
   if (!MAX_SIZES[baseType]) {
     throw new Error("Invalid file type. Only JPG, PNG, WEBP, PDF, MP4, and Audio files are allowed.");
   }
-  const maxSize = MAX_SIZES[baseType];
+  const maxSize = MAX_SIZES[baseType] || 10 * 1024 * 1024;
   if (file.size > maxSize) {
     throw new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB for this file type.`);
   }
 
-  // Unique filename
-  const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
-  const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}_${safeName}`;
-  const filePath = `${uniqueFilename}`;
+  // A-317: Route upload through authenticated server gate with magic-bytes verification
+  const formData = new FormData();
+  formData.append("file", file);
 
-  // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
-    .from('property_photos')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false
-    });
+  const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: {} }));
+  const token = session?.access_token || "";
 
-  if (error) {
-    throw new Error(error.message || "Failed to upload file to property_photos bucket.");
+  const res = await fetch("/api/storage/upload-photo", {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error || `Upload failed with status ${res.status}`);
   }
 
-  // Get public URL (bucket must be public)
-  const { data: urlData } = supabase.storage
-    .from('property_photos')
-    .getPublicUrl(filePath);
-
-  return urlData.publicUrl;
+  const json = await res.json();
+  return json.url;
 };

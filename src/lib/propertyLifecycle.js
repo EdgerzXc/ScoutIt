@@ -55,6 +55,7 @@ export function canChangeDisplayTitle(property = {}) {
   // Airtable's current Slug formula is derived from Title. A title edit on a
   // row with a reserved canonical slug would therefore change the public URL.
   // Keep this guard until Airtable has an immutable canonical-slug field.
+  if (property?.canonical_slug) return false;
   const state = normalizeLifecycleState(property);
   return state !== PROPERTY_LIFECYCLE_STATES.LIVE &&
     state !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET &&
@@ -84,6 +85,7 @@ export function buildFirstPublicationUpdate({ current = {}, computedSlug, now = 
     lifecycle_state: PROPERTY_LIFECYCLE_STATES.LIVE,
     pipeline_status: "approved",
     published_at: current.published_at || now,
+    last_verified_date: current.last_verified_date || now,
   };
 }
 

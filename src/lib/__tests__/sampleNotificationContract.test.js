@@ -32,7 +32,7 @@ describe("sample notification defense-in-depth contract", () => {
     const pitchGuard = pitch.indexOf("if (!sampleRouting.ok)");
     expect(pitchGuard).toBeGreaterThan(-1);
     expect(pitchGuard).toBeLessThan(pitch.indexOf('.from("property_broker_representations").insert'));
-    expect(pitchGuard).toBeLessThan(pitch.indexOf("supabaseAdmin.rpc('spend_connects'"));
+    expect(pitchGuard).toBeLessThan(pitch.indexOf("supabaseAdmin.rpc('spend_connects_atomic'"));
 
     const faq = read("src/app/api/faqs/route.js");
     const questionBranch = faq.slice(faq.indexOf("Branch B: asking a new question"));

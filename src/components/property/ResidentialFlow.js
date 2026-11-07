@@ -49,9 +49,6 @@ const InquiryModal = dynamic(() => import("@/components/property/InquiryModal"),
 const PropertyFAQSection = dynamic(() => import("@/components/property/PropertyFAQSection"), { ssr: false });
 const WhereToSection = dynamic(() => import("@/components/property/WhereToSection"), { ssr: false });
 const OperatorRequestModal = dynamic(() => import("@/components/property/OperatorRequestModal"), { ssr: false });
-const AffordabilityCalculator = dynamic(() => import("@/components/property/AffordabilityCalculator"), { ssr: false });
-const SpatialVaultWidget = dynamic(() => import("@/components/property/SpatialVaultWidget"), { ssr: false });
-import MonthlyCostCalculator from "@/components/property/MonthlyCostCalculator";
 import FloodRiskBadge from "@/components/property/FloodRiskBadge";
 import MarketChapter from "@/components/property/MarketChapter";
 import IntelDoorCard from "@/components/intel/IntelDoorCard";
@@ -125,6 +122,9 @@ import { resolveTransitHub } from "@/lib/transit";
 import { intelSourceLabel } from "@/lib/freshness";
 import ChapterSubtitle from "@/components/property/ChapterSubtitle";
 import SidebarDetails from "@/components/property/SidebarDetails";
+import PropertyChapterHeader from "@/components/property/PropertyChapterHeader";
+import PropertyVaultSection from "@/components/property/PropertyVaultSection";
+import PropertyRateSection from "@/components/property/PropertyRateSection";
 
 // ═══════════════════════════════════════════════════
 // HELPER UTILITIES
@@ -1383,11 +1383,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "space" ? "active" : ""}`} id="panel-space">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['space']?.chapterNumber || '01'} · {ch['space']?.chapterLabel || 'The Space'}</div>
-                <ChapterSubtitle text={ch['space']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['space']?.chapterNumber || '01'}
+                chapterLabel={ch['space']?.chapterLabel || 'The Space'}
+                subtitle={ch['space']?.subtitle}
+              />
 
               {(d.aesthetic_tag || d.accordion_3_rating) && (
                 <div style={{marginBottom:"30px"}}>
@@ -1492,49 +1492,21 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           </div>
 
           {/* ── THE VAULT (Ch. Premium) ── */}
-          <div className={`chapter-panel ${activeTab === "vault" ? "active" : ""}`} id="panel-vault">
-            <div className="panel-content" style={{ maxWidth: "100%" }} tabIndex={0} aria-label="Scrollable Spatial Vault content">
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--accent)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>THE VAULT</div>
-                <div style={{fontFamily:"var(--font-body)", fontSize:"13px", color:"var(--text-secondary)", marginBottom:"10px", letterSpacing:"0.01em"}}>Floor plans, scans & spatial records</div>
-                <div style={{height:"1px", background:"var(--accent)"}}/>
-              </div>
-
-              <div style={{marginBottom:"30px"}}>
-                <span style={{fontFamily:"var(--font-body)", fontStyle:"italic", fontSize:"clamp(22px,3vw,30px)", fontWeight:400, color:"var(--text-primary)", letterSpacing:"0.01em", lineHeight:1.2}}>
-                  3D Virtual Tours & Blueprints
-                </span>
-              </div>
-
-              {/* slug drives the server-side entitlement fetch (§45). The
-                  d.* props arrive EMPTY on a public property page now — they
-                  are stripped before serialisation — and are kept only for
-                  callers that already hold entitled data. */}
-              <SpatialVaultWidget
-                slug={d.slug}
-                lumaUrl={d.luma3dMapUrl}
-                matterportUrl={d.matterportTourUrl}
-                heatmapUrl={d.droneHeatmapUrl}
-                floorPlans={d.floorPlans}
-                hasVaultMedia={d.premiumAvailable?.includes("vault")}
-              />
-            </div>
-            <div className="panel-sidebar">
-              <div className="sidebar-block"><div className="sidebar-accent-line" style={{background: "var(--accent)"}}/><div className="sidebar-label" style={{color: "var(--accent)"}}>Vault Status</div><div className="sidebar-value">Secured</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Verification</div><div className="sidebar-value">{intelSourceLabel(d.last_verified_date)}</div></div>
-              <div className="sidebar-block"><div className="sidebar-label">Access</div><div className="sidebar-value">Cluster Tier Only</div></div>
-            </div>
-          </div>
+          <PropertyVaultSection
+            activeTab={activeTab}
+            d={d}
+            intelSourceLabel={intelSourceLabel}
+          />
 
           {/* ── LOCATION (Ch. 2) ── */}
           <div className={`chapter-panel ${activeTab === "location" ? "active" : ""}`} id="panel-location">
             <div className="panel-content chapter-frame--map">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono, monospace)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['location']?.chapterNumber || '02'} · {ch['location']?.chapterLabel || 'Location'}</div>
-                <ChapterSubtitle text={ch['location']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['location']?.chapterNumber || '02'}
+                chapterLabel={ch['location']?.chapterLabel || 'Location'}
+                subtitle={ch['location']?.subtitle}
+              />
 
               {(d.location || d.city) && (
                 <div style={{margin:"0"}}>
@@ -1722,11 +1694,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "life" ? "active" : ""}`} id="panel-life">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['life']?.chapterNumber || '03'} · {ch['life']?.chapterLabel || 'Life Here'}</div>
-                <ChapterSubtitle text={ch['life']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['life']?.chapterNumber || '03'}
+                chapterLabel={ch['life']?.chapterLabel || 'Life Here'}
+                subtitle={ch['life']?.subtitle}
+              />
 
               {/* Best Suited For — gold chips, first thing shown */}
               {(() => {
@@ -1792,11 +1764,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "whereto" ? "active" : ""}`} id="panel-whereto">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['whereto']?.chapterNumber || '04'} · {ch['whereto']?.chapterLabel || 'Where To?'}</div>
-                <ChapterSubtitle text={ch['whereto']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['whereto']?.chapterNumber || '04'}
+                chapterLabel={ch['whereto']?.chapterLabel || 'Where To?'}
+                subtitle={ch['whereto']?.subtitle}
+              />
 
               <div className="whereto-tabs" style={{marginBottom:"20px"}}>
                 <button className={`whereto-tab-btn ${whereToTab === "map" ? "active" : ""}`} onClick={() => setWhereToTab("map")}>
@@ -1919,11 +1891,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "buildplans" ? "active" : ""}`} id="panel-buildplans">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['buildplans']?.chapterNumber || '05'} · {ch['buildplans']?.chapterLabel || 'Build Plans'}</div>
-                <ChapterSubtitle text={ch['buildplans']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['buildplans']?.chapterNumber || '05'}
+                chapterLabel={ch['buildplans']?.chapterLabel || 'Build Plans'}
+                subtitle={ch['buildplans']?.subtitle}
+              />
 
               {isHospitality ? (
                 /* Cell 4: STR Operating Context — short-let legality block */
@@ -2106,11 +2078,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "units" ? "active" : ""}`} id="panel-units">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['units']?.chapterNumber || '07'} · {ch['units']?.chapterLabel || 'Units & Spaces'}</div>
-                <ChapterSubtitle text={ch['units']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['units']?.chapterNumber || '07'}
+                chapterLabel={ch['units']?.chapterLabel || 'Units & Spaces'}
+                subtitle={ch['units']?.subtitle}
+              />
 
               <div className="units-z3-list">
                 {dynamicUnits.map((u, ui) => {
@@ -2222,11 +2194,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "universe" ? "active" : ""}`} id="panel-universe">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['universe']?.chapterNumber || '08'} · {ch['universe']?.chapterLabel || 'Property Universe'}</div>
-                <ChapterSubtitle text={ch['universe']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['universe']?.chapterNumber || '08'}
+                chapterLabel={ch['universe']?.chapterLabel || 'Property Universe'}
+                subtitle={ch['universe']?.subtitle}
+              />
 
               {d.building_style && (
                 <div style={{marginBottom:"24px"}}>
@@ -2305,11 +2277,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "services" ? "active" : ""}`} id="panel-services">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['services']?.chapterNumber || '09'} · {ch['services']?.chapterLabel || 'Services'}</div>
-                <ChapterSubtitle text={ch['services']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['services']?.chapterNumber || '09'}
+                chapterLabel={ch['services']?.chapterLabel || 'Services'}
+                subtitle={ch['services']?.subtitle}
+              />
 
               <p style={{fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--text-primary)", lineHeight:1.85, margin:"0 0 28px", maxWidth:"560px"}}>
                 Commission a ScoutIt ecosystem partner to go deeper on this space, from spatial renders to full due-diligence research.
@@ -2359,11 +2331,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className={`chapter-panel ${activeTab === "yourmove" ? "active" : ""}`} id="panel-yourmove" data-scoutit-guide="property-your-move-actions">
             <div className="panel-content">
 
-              <div style={{marginBottom:"32px"}}>
-                <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", color:"var(--text-muted)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"6px"}}>{ch['yourmove']?.chapterNumber || '10'} · {ch['yourmove']?.chapterLabel || 'Your Move'}</div>
-                <ChapterSubtitle text={ch['yourmove']?.subtitle} />
-                <div style={{height:"1px", background:"var(--border)"}}/>
-              </div>
+              <PropertyChapterHeader
+                chapterNumber={ch['yourmove']?.chapterNumber || '10'}
+                chapterLabel={ch['yourmove']?.chapterLabel || 'Your Move'}
+                subtitle={ch['yourmove']?.subtitle}
+              />
 
               {/* Attached Spatial Finding from Stratosphere Detour */}
               {attachedSignalSlug && (
@@ -2389,66 +2361,16 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                 ) : null}
               </div>
 
-              {/* Price — only when an authorized party has provided one ("N/A"/empty suppresses it) */}
-              {(() => {
-                const hasPrice = d.listed_price && d.listed_price.trim().toUpperCase() !== "N/A";
-                return (
-                  <>
-                    <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
-                    {hasPrice ? (
-                      <GlassPanel className="p-6 rounded-md">
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(30px,4.2vw,44px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.1}}>{d.listed_price}</div>
-                        {d.price_source && (
-                          <div style={{fontFamily:"var(--font-mono)", fontSize:"12px", letterSpacing:"0.1em", color:"var(--text-muted)", marginTop:"10px"}}>
-                            Price indicated by {d.price_source}
-                          </div>
-                        )}
-                        {d.price_notes && (
-                          <div style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight: 1.75, marginTop:"10px"}}>{d.price_notes}</div>
-                        )}
-                        <p style={{fontFamily:"system-ui,-apple-system,sans-serif", fontSize:"12px", color:"var(--text-muted)", lineHeight:1.7, marginTop:"16px"}}>
-                          Price estimates are provided solely by authorized sellers, owners, or licensed property managers. ScoutIt does not set, verify, or guarantee any stated price. For inquiries, speak directly with an authorized representative.
-                        </p>
-                      </GlassPanel>
-                    ) : (
-                      <GlassPanel className="p-6 rounded-md">
-                        <div style={{fontFamily:"var(--font-body)", fontSize:"clamp(20px,2.6vw,26px)", fontWeight:400, color:"var(--text-primary)", lineHeight:1.2}}>Price on request</div>
-                        <p style={{fontFamily:"var(--font-body)", fontSize:"14px", color:"var(--text-secondary)", lineHeight:1.7, margin:"10px 0 16px", maxWidth:"480px"}}>
-                          No confirmed rate has been published for this space. Inquire with the owner, property manager, or broker for current pricing.
-                        </p>
-                        {slug ? (
-                        <Link href={`/property/${slug}/brokers`} style={{display:"inline-block", fontFamily:"var(--font-body)", fontSize:"16px", color:"var(--accent)", textDecoration:"none", letterSpacing:"0.01em"}}>
-                          Inquire with an authorized broker →
-                        </Link>
-                        ) : null}
-                      </GlassPanel>
-                    )}
-                  </>
-                );
-              })()}
-
-              <AffordabilityCalculator
-                listedPrice={d.listed_price}
-                priceStatus={d.price_status}
-                tenure={d.tenure}
+              {/* Hero rate routed through PropertyRateSection formatUnitPrice(d.listed_price) */}
+              <PropertyRateSection
+                d={d}
+                slug={slug}
+                rosterLoaded={rosterLoaded}
+                rosterUnavailable={rosterUnavailable}
+                propertyRoster={propertyRoster}
+                rosterUploader={rosterUploader}
+                isCommercial={false}
               />
-
-              <MonthlyCostCalculator d={d} />
-
-              <div style={{height:"1px", background:"var(--border)", margin:"28px 0 24px"}}/>
-
-              {rosterLoaded && (
-                <div style={{ marginTop: "0", padding: "16px", border: "1px solid var(--accent-muted)", borderRadius: "4px", background: "rgba(var(--accent-rgb),0.03)" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Current Property Representation</div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: "16px", color: "var(--on-surface)" }}>{rosterUnavailable ? "Representation status unavailable" : propertyRoster.length > 0 ? `${propertyRoster.length} active authorized broker${propertyRoster.length === 1 ? "" : "s"}` : "Unrepresented // uploader or lister route"}</div>
-                  {rosterLoaded && !rosterUnavailable && propertyRoster.length === 0 && rosterUploader ? (
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "8px" }}>Listed by {rosterUploader}</div>
-                  ) : null}
-                  {slug ? (
-                  <Link href={`/property/${slug}/brokers`} style={{ display: "inline-block", marginTop: "10px", color: "var(--accent-bright)", fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>View current roster →</Link>
-                  ) : null}
-                </div>
-              )}
 
               {/* Progressive Intent Ladder (§7) */}
               <div style={{ marginTop: "24px", padding: "20px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px" }}>

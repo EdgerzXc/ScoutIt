@@ -3,7 +3,11 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 
 // ═══════════════════════════════════════════════════════════════════════
-// OSINT INGEST — DISARMED 2026-08-06 (§59, full-system audit)
+// OSINT INGEST — DISARMED 2026-08-06 (§59) & EXPLICITLY PARKED (A-309)
+// ═══════════════════════════════════════════════════════════════════════
+// Status: PARKED. Intentionally omitted from vercel.json crons.
+// Staff-only manual trigger for testing; OSINT_FEEDS remains empty until
+// authentic external feed connections are implemented.
 // ═══════════════════════════════════════════════════════════════════════
 //
 // ── WHAT THIS USED TO DO ───────────────────────────────────────────────

@@ -12,13 +12,22 @@ import { sanitizeError } from "@/lib/sanitizeError";
 // read three objects pulls the whole server route into the page graph.
 // Import from "@/lib/locationHubs" instead.
 
+export const revalidate = 86400; // 24h edge cache
+
 export async function GET() {
   try {
-    return NextResponse.json({
-      success: true,
-      hubs: HUBS,
-      count: HUBS.length,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        hubs: HUBS,
+        count: HUBS.length,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        },
+      }
+    );
   } catch (err) {
     console.error("[LOCATION HUBS API] GET failed:", err);
     return NextResponse.json(

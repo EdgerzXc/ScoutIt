@@ -15,6 +15,7 @@ import {
 import { validateDeclaration, hasValidAgreement } from "@/lib/listerRelationship";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { evaluateServerMonetizationGate } from "@/lib/serverMonetizationGate";
+import { recordHistoricalSlug } from "@/lib/propertyRedirects";
 
 export async function POST(request) {
 
@@ -202,6 +203,7 @@ export async function POST(request) {
           type: currentSubmission.type,
           space_category: currentSubmission.space_category,
           details: currentSubmission.details || {},
+          last_verified_date: currentSubmission.last_verified_date || new Date().toISOString(),
           // photoFields() falls back to data.media_link when no array is
           // present. Without this forward the fallback is unreachable and a
           // legacy single-photo row publishes imageless.
@@ -217,17 +219,45 @@ export async function POST(request) {
         // cause of the one-ecom-center Contact-flow break). Both paths read
         // Airtable's computed Slug back and persist it to Supabase below, so
         // Airtable stays the single source of slug truth on every publish.
+        // Once locked as canonical_slug in Supabase, that slug NEVER drifts.
         try {
           // If update succeeds, the record existed
           const lookupSlug = currentSubmission.canonical_slug || currentSubmission.slug;
           if (!lookupSlug) throw new Error("Published properties require a canonical slug before an update");
           const updated = await updateProperty(apiKey, baseId, lookupSlug, payload);
-          finalSlug = updated?.fields?.Slug || lookupSlug;
+          const computedSlug = updated?.fields?.Slug || lookupSlug;
+          finalSlug = currentSubmission.canonical_slug || computedSlug;
+
+          if (currentSubmission.canonical_slug && computedSlug && computedSlug !== currentSubmission.canonical_slug) {
+            await recordHistoricalSlug({
+              propertyId: submissionId,
+              oldSlug: computedSlug,
+              canonicalSlug: currentSubmission.canonical_slug,
+              reason: "Airtable formula drift mapped to frozen canonical slug",
+            });
+          }
         } catch (updateErr) {
           if (!isAirtableRecordNotFoundError(updateErr)) throw updateErr;
           // Record doesn't exist, insert instead
           const created = await insertProperty(apiKey, baseId, payload);
-          finalSlug = created?.fields?.Slug || currentSubmission.slug;
+          const computedSlug = created?.fields?.Slug || currentSubmission.slug;
+          finalSlug = currentSubmission.canonical_slug || computedSlug;
+
+          if (currentSubmission.canonical_slug && computedSlug && computedSlug !== currentSubmission.canonical_slug) {
+            await recordHistoricalSlug({
+              propertyId: submissionId,
+              oldSlug: computedSlug,
+              canonicalSlug: currentSubmission.canonical_slug,
+              reason: "Airtable formula drift mapped to frozen canonical slug on insert",
+            });
+          } else if (!currentSubmission.canonical_slug && currentSubmission.slug && computedSlug && currentSubmission.slug !== computedSlug) {
+            await recordHistoricalSlug({
+              propertyId: submissionId,
+              oldSlug: currentSubmission.slug,
+              canonicalSlug: computedSlug,
+              reason: "Pre-publish draft slug mapped to initial canonical slug",
+            });
+          }
         }
 
         // 4. Update Supabase only AFTER Airtable success

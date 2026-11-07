@@ -124,7 +124,7 @@ describe("Contact Route Fallback Contract", () => {
     vi.resetModules();
   });
 
-  it("dispatches emergency email fallback and returns 201 when database insert fails", async () => {
+  it("fails 500 honestly and leaves no unconsented mailbox copy when database insert fails", async () => {
     process.env.RESEND_API_KEY = "re_test_key";
     process.env.CONTACT_NOTIFY_TO = "alerts@scoutit.space";
 
@@ -164,10 +164,10 @@ describe("Contact Route Fallback Contract", () => {
     });
 
     const res = await POST(req);
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(500);
     const data = await res.json();
-    expect(data.ok).toBe(true);
-    expect(sendEmailMock).toHaveBeenCalled();
+    expect(data.ok).toBe(false);
+    expect(sendEmailMock).not.toHaveBeenCalled();
   });
 
   it("returns 500 when database insert fails and email fallback is not configured", async () => {
@@ -226,6 +226,8 @@ describe("Deals Transactional Rollback Fallback Contract", () => {
     }));
     vi.doMock("@/lib/connectBlocks", () => ({
       isBlocked: async () => false,
+      anyBlocked: async () => false,
+      checkBlockGuard: async () => ({ ok: true, blocked: false, unavailable: false }),
     }));
     vi.doMock("@/lib/connectGates", () => ({
       checkReceiverGate: async () => ({ ok: true }),

@@ -5,7 +5,7 @@ import { logActivity } from "@/lib/crmActivity";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
-import { isBlocked } from "@/lib/connectBlocks";
+import { isBlocked, checkBlockGuard } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
 import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
@@ -140,11 +140,18 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to create pitch" }, { status: 500 });
     }
 
-    // A-144 invariant #6 + §8: blocked / paused / capped recipients fail before any spend.
+    // A-144 invariant #6 + §8 + A-305: blocked / paused / capped recipients fail before any spend.
     const ownerIdForGate = property?.owner_id || null;
-    if (ownerIdForGate && await isBlocked(supabaseAdmin, brokerId, ownerIdForGate)) {
-      await rollbackPitchSideEffects(dealData[0].id);
-      return NextResponse.json({ error: "This request can't be sent. No Connect was spent." }, { status: 403 });
+    if (ownerIdForGate) {
+      const blockGuard = await checkBlockGuard(supabaseAdmin, brokerId, [ownerIdForGate]);
+      if (!blockGuard.ok && blockGuard.unavailable) {
+        await rollbackPitchSideEffects(dealData[0].id);
+        return NextResponse.json({ error: "Block safety check unavailable. No Connect was spent." }, { status: 503 });
+      }
+      if (blockGuard.blocked) {
+        await rollbackPitchSideEffects(dealData[0].id);
+        return NextResponse.json({ error: "This request can't be sent. No Connect was spent." }, { status: 403 });
+      }
     }
     if (ownerIdForGate) {
       const gate = await checkReceiverGate(supabaseAdmin, ownerIdForGate, listingId, dealData[0].id);
@@ -154,21 +161,23 @@ export async function POST(request) {
       }
     }
 
-    // 2. Atomic Connect spend — same spend_connects RPC every other paid
-    // action uses (balance check + 3-bucket deduction + ledger insert).
+    // 2. Atomic Connect spend — pinned to spend_connects_atomic RPC
     let spendError = null;
     let spendData = null;
+    let spentConnects = false;
 
     if (process.env.NODE_ENV !== 'production' && brokerId === 'master-dev') {
-      spendData = [{ success: true, total_balance: 99 }];
+      spendData = [{ success: true, total_balance: 99, remaining_total: 99 }];
     } else {
       await ensureConnectBalancesWallet(supabaseAdmin, brokerId, "broker", brokerProfile?.subscription_tier || "starry");
-      const res = await supabaseAdmin.rpc('spend_connects', {
+      const res = await supabaseAdmin.rpc('spend_connects_atomic', {
         p_user_id: brokerId,
+        p_role: 'broker',
         p_amount: 1,
+        p_tier: brokerProfile?.subscription_tier || "starry",
+        p_source: 'pitch',
         p_reason: 'Broker pitched an owner (deal file)',
-        p_ref_type: 'pitch',
-        p_ref_id: listingId,
+        p_reference_id: listingId,
       });
       spendError = res.error;
       spendData = res.data;
@@ -183,15 +192,26 @@ export async function POST(request) {
         { status: insufficient ? 403 : 500 }
       );
     }
+    spentConnects = true;
 
-    const newBalance = spendData?.[0]?.total_balance ?? null;
-    if (newBalance !== null) {
-      await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', brokerId);
-    }
+    const newBalance = spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null;
 
-    // Wrap post-spend side effects so any unexpected downstream error (notification,
+    // Wrap post-spend side effects so any unexpected downstream error (stamp, notification,
     // logging, or property query) issues a compensating refund and removes the deal.
     try {
+      // Tie the successful one-Connect ledger spend to this conversation (§40.14)
+      const { error: stampError } = await supabaseAdmin
+        .from('deals')
+        .update({ connects_spent: 1 })
+        .eq('id', dealData[0].id);
+      if (stampError) {
+        throw new Error(`Pitch connect cost stamp failed: ${stampError.message}`);
+      }
+
+      if (newBalance !== null) {
+        await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', brokerId).catch(() => {});
+      }
+
       // Notify the owner — the same real-time signal every other deal-creating
       // route sends; a pitch landing with no notification is exactly the kind
       // of silent gap this route exists to close.
@@ -223,12 +243,12 @@ export async function POST(request) {
       return NextResponse.json({ success: true, dealId: dealData[0].id, newBalance, propertyTitle: propertyRow?.title, source_context: connectSource });
     } catch (postSpendErr) {
       console.error("[PITCH API] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
-      if (brokerId !== 'master-dev') {
+      if (spentConnects && brokerId !== 'master-dev') {
         try {
           await supabaseAdmin.rpc('refund_connects_system_error', {
             p_user_id: brokerId,
             p_amount: 1,
-            p_reason: `Compensating refund: pitch delivery failed for deal ${dealData[0].id}`,
+            p_reason: `Compensating refund: pitch delivery failed for deal ${dealData[0].id} (${postSpendErr.message})`,
             p_staff_id: "system",
             p_ref_id: String(listingId),
           });
