@@ -131,10 +131,6 @@ export default function WorkspaceDeckDrawer({
     window.dispatchEvent(new CustomEvent("scoutit:trigger-editor-action", { detail: { action } }));
   };
 
-  const handleOpenRoleSheet = () => {
-    window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"));
-  };
-
   const activeLabel =
     active === "workspace"
       ? (roleLabel ? `${roleLabel.toUpperCase()} WORKSPACE` : "WORKSPACE")
@@ -243,20 +239,13 @@ export default function WorkspaceDeckDrawer({
           </div>
 
           {/* Quick Status & Notifications Bar */}
-          <div className="flex items-center justify-between px-2 pt-2 border-t border-surface-variant/40 text-[12px] font-mono">
+          <div className="flex items-center px-2 pt-2 border-t border-surface-variant/40 text-[12px] font-mono">
             <div className="flex items-center gap-2 text-text-secondary">
               <span className="w-2 h-2 rounded-full bg-gold-accent shrink-0 animate-pulse" />
               <span>
                 {totalUnread > 0 ? `${totalUnread} Unread Inquiries / Alerts` : "All Systems Nominal · 0 Overdue"}
               </span>
             </div>
-            <button
-              type="button"
-              onClick={handleOpenRoleSheet}
-              className="min-h-[44px] inline-flex items-center text-gold-accent hover:text-gold-bright font-bold uppercase tracking-wider underline underline-offset-4"
-            >
-              Switch Lens ▾
-            </button>
           </div>
         </div>
       </div>

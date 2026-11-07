@@ -6,9 +6,6 @@ import {
   Building2,
   Briefcase,
   Search,
-  Kanban,
-  MessageSquare,
-  Calendar,
   ArrowUpRight,
   ArrowRight,
   Coins,
@@ -102,33 +99,6 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
               <p className="text-sm text-text-secondary mt-1 max-w-2xl">
                 Review every incoming inquiry, pitch, viewing, and Connect balance across all your roles in one unified pipeline. Use the Workspace switcher in the header when you want a specific role&apos;s tools.
               </p>
-            </div>
-          </div>
-
-          {/* Symmetrical Unified Actions Frame: identical container sizes & centered harmony */}
-          <div className="w-full pt-4 border-t border-surface-variant/60">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-3xl mx-auto w-full">
-              <Link
-                href="/dashboard/crm"
-                className="w-full min-h-12 px-4 py-2.5 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:bg-gold-bright active:scale-[0.98] transition shadow-[0_0_14px_rgba(var(--accent-rgb),0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-              >
-                <Kanban size={15} aria-hidden="true" />
-                <span>Open CRM</span>
-              </Link>
-              <Link
-                href="/dashboard/inbox"
-                className="w-full min-h-12 px-4 py-2.5 rounded-xl border border-surface-variant bg-surface-alt/90 hover:border-gold-accent/40 text-on-surface hover:text-gold-accent font-mono text-xs font-semibold uppercase tracking-wider inline-flex items-center justify-center gap-2 active:scale-[0.98] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-              >
-                <MessageSquare size={15} aria-hidden="true" />
-                <span>Deal Inbox</span>
-              </Link>
-              <Link
-                href="/dashboard/calendar"
-                className="w-full min-h-12 px-4 py-2.5 rounded-xl border border-surface-variant bg-surface-alt/90 hover:border-gold-accent/40 text-on-surface hover:text-gold-accent font-mono text-xs font-semibold uppercase tracking-wider inline-flex items-center justify-center gap-2 active:scale-[0.98] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-              >
-                <Calendar size={15} aria-hidden="true" />
-                <span>Viewings</span>
-              </Link>
             </div>
           </div>
         </div>

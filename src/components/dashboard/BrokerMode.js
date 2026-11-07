@@ -5,7 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Calendar, Mail, BarChart3, Briefcase, Contact, Compass, Sparkles, FolderOpen, ShieldCheck, FileEdit, Printer, Radio } from "lucide-react";
+import { Lock, Briefcase, Contact, Compass, Sparkles, FolderOpen, ShieldCheck, FileEdit, Printer, Radio } from "lucide-react";
 import { getSession } from "../../lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
 import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
@@ -1076,29 +1076,17 @@ export default function BrokerMode({ subRole = "broker" }) {
           </span>
           {/* A-096: h1 (mobile twin of the desktop h1 below — the responsive-
               variant pattern: one reaches the tree at a time). */}
-          <h1 className="font-headline-editorial text-3xl text-gradient-gold">
-            {isSalespersonLens ? "Salesperson Intelligence" : "Broker Intelligence"}
-          </h1>
+          {isSalespersonLens ? (
+            <h1 className="font-headline-editorial text-3xl text-gradient-gold">Salesperson Intelligence</h1>
+          ) : (
+            <h1 className="font-headline-editorial text-3xl text-gradient-gold">Broker Intelligence</h1>
+          )}
         </div>
         <div className="text-right shrink-0">
           <span className="block text-[12px] font-label-caps uppercase tracking-widest text-text-secondary">Accepted Mandates</span>
           <span className="text-on-surface font-data-tabular text-lg font-bold">{accepted.length}</span>
         </div>
       </header>
-
-      {/* Mobile quick actions — brokers get no dashboard top-nav on mobile, so
-          surface the core destinations (schedule/availability, inbox, pipeline). */}
-      <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4 hide-scrollbar">
-        <Link href="/dashboard/calendar" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">
-          <Calendar size={14} className="text-gold-accent" /> Availability
-        </Link>
-        <Link href="/dashboard/inbox" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">
-          <Mail size={14} className="text-gold-accent" /> Inbox
-        </Link>
-        <Link href="/dashboard/crm" className="shrink-0 min-h-11 flex items-center gap-2 bg-surface-alt border border-surface-variant rounded-full px-4 py-2 text-sm font-working-title text-on-surface hover:border-gold-accent/50 transition">
-          <BarChart3 size={14} className="text-gold-accent" /> Pipeline
-        </Link>
-      </div>
 
       {/* Action Bar */}
       <MeshHero className="py-6 lg:py-10 px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex rounded-2xl shadow-xl border border-white/5">
@@ -1107,9 +1095,11 @@ export default function BrokerMode({ subRole = "broker" }) {
             {isSalespersonLens ? "Command Center · Accredited Salesperson" : "Command Center"}
           </span>
           {/* A-096: h1 (desktop twin — see mobile header above). */}
-          <h1 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">
-            {isSalespersonLens ? "Salesperson Intelligence" : "Broker Intelligence"}
-          </h1>
+          {isSalespersonLens ? (
+            <h1 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">Salesperson Intelligence</h1>
+          ) : (
+            <h1 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h1>
+          )}
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
