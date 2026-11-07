@@ -189,7 +189,7 @@ const CORE_ROLES = [
     id: "all",
     aliases: ["all", "unified"],
     label: "All Workspaces (Unified)",
-    desc: "Master CRM & cross-lens command pulse",
+    desc: "CRM & cross-role command pulse",
     targetRole: "all",
   },
   {

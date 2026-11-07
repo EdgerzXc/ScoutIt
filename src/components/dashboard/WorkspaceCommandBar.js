@@ -11,9 +11,9 @@ const ICONS = {
 };
 
 const DEFAULT_DESTINATIONS = [
-  { id: "crm", href: "/dashboard/crm", label: "CRM", detail: "Pipeline" },
   { id: "workspace", href: "/dashboard", label: "Workspace", detail: "Home" },
   { id: "inbox", href: "/dashboard/inbox", label: "Inbox", detail: "Deal rooms" },
+  { id: "crm", href: "/dashboard/crm", label: "CRM", detail: "Pipeline" },
   { id: "calendar", href: "/dashboard/calendar", label: "Calendar", detail: "Viewings" },
 ];
 

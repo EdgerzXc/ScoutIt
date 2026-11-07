@@ -1230,7 +1230,7 @@ export default function SettingsPage() {
                   </span>
                 </div>
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  Inbound Open Gate chats are stamped with an <span className="font-mono text-gold-accent">OPEN GATE</span> badge and routed directly into your Deal Inbox and Master CRM pipeline.
+                  Inbound Open Gate chats are stamped with an <span className="font-mono text-gold-accent">OPEN GATE</span> badge and routed directly into your Deal Inbox and CRM pipeline.
                 </p>
               </div>
 

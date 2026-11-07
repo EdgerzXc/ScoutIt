@@ -117,13 +117,13 @@ function OpenGateDashboardInner() {
               </Link>
             </div>
             <p className="font-mono text-xs uppercase tracking-widest text-gold-accent">
-              ENTERPRISE CONTACT CONTROL · CONNECTED TO MASTER CRM &amp; INBOX
+              ENTERPRISE CONTACT CONTROL · CONNECTED TO CRM &amp; INBOX
             </p>
             <h1 className="mt-1 font-headline-editorial text-3xl md:text-4xl text-on-surface">
               Open Gate
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-text-secondary">
-              Open free inbound contact on any property or delegated unit you handle so verified buyers can reach you without spending a Connect. Every Open Gate inquiry routes directly into your Deal Inbox and Master CRM pipeline with an <span className="font-mono text-xs text-gold-accent">OPEN GATE</span> badge.
+              Open free inbound contact on any property or delegated unit you handle so verified buyers can reach you without spending a Connect. Every Open Gate inquiry routes directly into your Deal Inbox and CRM pipeline with an <span className="font-mono text-xs text-gold-accent">OPEN GATE</span> badge.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full md:w-auto shrink-0">
@@ -132,7 +132,7 @@ function OpenGateDashboardInner() {
               className="min-h-11 px-4 py-2.5 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5 hover:opacity-95 transition"
             >
               <Kanban size={14} aria-hidden="true" />
-              <span>Master CRM ({deals.length})</span>
+              <span>CRM ({deals.length})</span>
             </Link>
             <Link
               href="/dashboard/inbox"
@@ -148,7 +148,7 @@ function OpenGateDashboardInner() {
           <WorkspaceCommandBar active="workspace" mode={role} />
         </div>
 
-        {/* Open Gate ↔ Master CRM & Inbox Live Bridge Summary */}
+        {/* Open Gate ↔ CRM & Inbox Live Bridge Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="rounded-xl border border-surface-variant bg-surface/90 p-4">
             <span className="font-mono text-xs uppercase tracking-wider text-text-secondary block">
@@ -164,7 +164,7 @@ function OpenGateDashboardInner() {
 
           <div className="rounded-xl border border-gold-accent/30 bg-gold-accent/10 p-4">
             <span className="font-mono text-xs uppercase tracking-wider text-gold-accent block">
-              Open Gate Leads in Master CRM
+              Open Gate Leads in CRM
             </span>
             <div className="mt-1 font-mono text-2xl font-bold text-on-surface tabular-nums">
               {openGateDeals.length}
@@ -266,7 +266,7 @@ function OpenGateDashboardInner() {
                     </h2>
                     <p className="mt-1 text-xs text-text-secondary">
                       {listing.enabled
-                        ? "Seekers can inquire without spending a Connect. Inquiries appear in your Deal Inbox and Master CRM with an OPEN GATE badge."
+                        ? "Seekers can inquire without spending a Connect. Inquiries appear in your Deal Inbox and CRM with an OPEN GATE badge."
                         : "Standard Connect gate active. Seekers spend 1 Connect to open a deal room."}
                     </p>
                   </div>
@@ -299,7 +299,7 @@ function OpenGateDashboardInner() {
           </div>
         )}
 
-        {/* Recent Open Gate Leads routed to Master CRM & Inbox */}
+        {/* Recent Open Gate Leads routed to CRM & Inbox */}
         {openGateDeals.length > 0 && (
           <section className="rounded-2xl border border-surface-variant bg-surface/90 p-5 space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -315,7 +315,7 @@ function OpenGateDashboardInner() {
                 href="/dashboard/crm"
                 className="min-h-11 px-3.5 py-2 rounded-xl border border-gold-accent/40 bg-gold-accent/10 text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5"
               >
-                <span>View in Master CRM</span>
+                <span>View in CRM</span>
                 <ArrowRight size={13} aria-hidden="true" />
               </Link>
             </div>

@@ -117,7 +117,7 @@ export default function ServiceConnectionPortal({
         <h3>{roleHeadline} Request Sent!</h3>
         <p>
           Your Layer 4 project brief for <strong>{providerName}</strong> has been delivered to their{" "}
-          <strong>{roleHeadline} Lens</strong> in Deal Inbox and Master CRM using <strong>1 Connect</strong>.
+          <strong>{roleHeadline} Lens</strong> in Deal Inbox and CRM using <strong>1 Connect</strong>.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/dashboard/inbox" className="reset-portal-btn" style={{ textDecoration: "none" }}>
@@ -249,7 +249,7 @@ export default function ServiceConnectionPortal({
               Sign In to Request {providerName}
             </h4>
             <p style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 20 }}>
-              Sign in to send a verified Layer 4 brief to {providerName}&apos;s {roleHeadline} Inbox and Master CRM.
+              Sign in to send a verified Layer 4 brief to {providerName}&apos;s {roleHeadline} Inbox and CRM.
             </p>
             <Link href="/onboarding" className="portal-submit-btn" style={{ display: "inline-block", textDecoration: "none" }}>
               Sign In / Claim Connects →

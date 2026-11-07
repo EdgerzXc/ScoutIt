@@ -39,32 +39,32 @@ async function resolveAuth() {
 function toChatBoxDeal(d) {
   return {
     id: d.id,
-    property_title: d.propertyTitle,
-    propertySlug: d.propertySlug,
-    propertyPrice: d.propertyPrice,
+    property_title: d.propertyTitle || d.property_title || "Untitled Property",
+    propertySlug: d.propertySlug || d.property_slug || null,
+    propertyPrice: d.propertyPrice ?? d.property_price ?? null,
     status: d.status,
-    other_party: d.otherParty,
+    other_party: d.otherParty || d.other_party || "Verified User",
     // Role label only -- this is what a recipient sees instead of a name while
     // the request is still pending (§38.3: intent and tier, not identity).
-    otherPartyRole: d.otherPartyRole,
-    last_message: d.lastMessage,
-    pitch_message: d.pitch_message,
-    myRole: d.myRole,
-    targetRole: d.targetRole || null,
-    sourceLayer: d.sourceLayer || null,
-    intentBadge: d.intentBadge || null,
-    intentSummary: d.intentSummary || null,
+    otherPartyRole: d.otherPartyRole || d.other_party_role || null,
+    last_message: d.lastMessage || d.last_message || d.pitch_message || "",
+    pitch_message: d.pitch_message || d.pitchMessage || "",
+    myRole: d.myRole || d.my_role || "buyer",
+    targetRole: d.targetRole || d.target_role || null,
+    sourceLayer: d.sourceLayer || d.source_layer || null,
+    intentBadge: d.intentBadge || d.intent_badge || null,
+    intentSummary: d.intentSummary || d.intent_summary || null,
     // NULL on pre-2026-08-05 rows; ChatBox's badge is guarded by
     // Number.isFinite so it stays hidden rather than rendering a guess.
-    connects_spent: d.connects_spent,
-    open_gate_inbound: d.open_gate_inbound === true,
-    archived_at: d.archivedAt,
-    pending_clock_reset_at: d.pendingClockResetAt,
-    unreadCount: d.unreadCount,
-    created_at: d.createdAt,
-    last_activity_at: d.lastActivityAt,
-    expires_at: d.expiresAt,
-    closed_at: d.closedAt,
+    connects_spent: d.connects_spent ?? d.connectsSpent ?? null,
+    open_gate_inbound: d.open_gate_inbound === true || d.openGateInbound === true,
+    archived_at: d.archivedAt || d.archived_at || null,
+    pending_clock_reset_at: d.pendingClockResetAt || d.pending_clock_reset_at || null,
+    unreadCount: d.unreadCount || d.unread_count || 0,
+    created_at: d.createdAt || d.created_at || null,
+    last_activity_at: d.lastActivityAt || d.last_activity_at || d.createdAt || d.created_at || null,
+    expires_at: d.expiresAt || d.expires_at || null,
+    closed_at: d.closedAt || d.closed_at || null,
   };
 }
 
@@ -148,41 +148,28 @@ const DEMO_DEALS = [
 
 function formatDealLensLabel(deal) {
   if (!deal) return null;
-  const rawRole = String(deal.myRole || "").trim().toLowerCase();
   const rawBadge = deal.intentBadge;
-  if (rawBadge === "PROPERTY · REQUIRES OWNER" || rawRole === "owner") {
-    return "PROPERTY · REQUIRES OWNER";
+  if (rawBadge) {
+    if (rawBadge === "FOR OWNER · PROPERTY INQUIRY") return "PROPERTY · REQUIRES OWNER";
+    if (rawBadge === "NEEDS PHOTOGRAPHER · LAYER 4") return "LAYER 4 · REQUIRES PHOTOGRAPHER";
+    if (rawBadge === "NEEDS DESIGNER · LAYER 4") return "LAYER 4 · REQUIRES DESIGNER";
+    if (rawBadge === "NEEDS RESEARCHER · LAYER 4") return "LAYER 4 · REQUIRES RESEARCHER";
+    if (rawBadge === "NEEDS CREATOR · LAYER 4") return "LAYER 4 · REQUIRES CREATOR";
+    if (rawBadge === "FOR OPERATOR · UNIT INQUIRY") return "PROPERTY · REQUIRES OPERATOR";
+    if (rawBadge === "FOR BROKER · PROPERTY / MANDATE") return "MANDATE · REQUIRES BROKER";
+    if (rawBadge === "YOUR PROPERTY INQUIRY") return "YOUR SEEKER INQUIRY";
+    return rawBadge;
   }
-  if (rawBadge === "LAYER 4 · REQUIRES PHOTOGRAPHER" || rawRole === "photographer") {
-    return "LAYER 4 · REQUIRES PHOTOGRAPHER";
-  }
-  if (rawBadge === "LAYER 4 · REQUIRES DESIGNER" || rawRole === "designer") {
-    return "LAYER 4 · REQUIRES DESIGNER";
-  }
-  if (rawBadge === "LAYER 4 · REQUIRES RESEARCHER" || rawRole === "researcher") {
-    return "LAYER 4 · REQUIRES RESEARCHER";
-  }
-  if (rawBadge === "LAYER 4 · REQUIRES CREATOR" || rawRole === "provider") {
-    return "LAYER 4 · REQUIRES CREATOR";
-  }
-  if (rawBadge === "PROPERTY · REQUIRES OPERATOR" || rawRole === "operator") {
-    return "PROPERTY · REQUIRES OPERATOR";
-  }
-  if (rawBadge === "MANDATE · REQUIRES BROKER" || rawRole === "broker" || rawRole === "salesperson") {
-    return "MANDATE · REQUIRES BROKER";
-  }
-  if (rawBadge === "YOUR SEEKER INQUIRY" || rawRole === "buyer" || rawRole === "seeker") {
-    return "YOUR SEEKER INQUIRY";
-  }
-  if (rawBadge === "FOR OWNER · PROPERTY INQUIRY") return "PROPERTY · REQUIRES OWNER";
-  if (rawBadge === "NEEDS PHOTOGRAPHER · LAYER 4") return "LAYER 4 · REQUIRES PHOTOGRAPHER";
-  if (rawBadge === "NEEDS DESIGNER · LAYER 4") return "LAYER 4 · REQUIRES DESIGNER";
-  if (rawBadge === "NEEDS RESEARCHER · LAYER 4") return "LAYER 4 · REQUIRES RESEARCHER";
-  if (rawBadge === "NEEDS CREATOR · LAYER 4") return "LAYER 4 · REQUIRES CREATOR";
-  if (rawBadge === "FOR OPERATOR · UNIT INQUIRY") return "PROPERTY · REQUIRES OPERATOR";
-  if (rawBadge === "FOR BROKER · PROPERTY / MANDATE") return "MANDATE · REQUIRES BROKER";
-  if (rawBadge === "YOUR PROPERTY INQUIRY") return "YOUR SEEKER INQUIRY";
-  return rawBadge || (rawRole ? `REQUIRES ${rawRole.toUpperCase()}` : null);
+  const rawRole = String(deal.myRole || "").trim().toLowerCase();
+  if (rawRole === "owner") return "PROPERTY · REQUIRES OWNER";
+  if (rawRole === "photographer") return "LAYER 4 · REQUIRES PHOTOGRAPHER";
+  if (rawRole === "designer") return "LAYER 4 · REQUIRES DESIGNER";
+  if (rawRole === "researcher") return "LAYER 4 · REQUIRES RESEARCHER";
+  if (rawRole === "provider") return "LAYER 4 · REQUIRES CREATOR";
+  if (rawRole === "operator") return "PROPERTY · REQUIRES OPERATOR";
+  if (rawRole === "broker" || rawRole === "salesperson") return "MANDATE · REQUIRES BROKER";
+  if (rawRole === "buyer" || rawRole === "seeker") return "YOUR SEEKER INQUIRY";
+  return rawRole ? `REQUIRES ${rawRole.toUpperCase()}` : null;
 }
 
 function InboxInner() {
@@ -286,6 +273,9 @@ function InboxInner() {
   };
 
   const patchDealStatus = async (dealId, status) => {
+    if (typeof dealId === "string" && dealId.startsWith("demo-")) {
+      return { status, success: true };
+    }
     const { token, mockOwnerId } = await resolveAuth();
     const res = await fetch(`/api/deals/${dealId}`, {
       method: "PATCH",
@@ -357,6 +347,17 @@ function InboxInner() {
   // then sees is the one the sweep will actually act on.
   const handleUnarchive = async (dealId) => {
     try {
+      if (typeof dealId === "string" && dealId.startsWith("demo-")) {
+        setDeals((prev) =>
+          prev.map((d) =>
+            d.id === dealId
+              ? { ...d, archived_at: null, status: "pending" }
+              : d,
+          ),
+        );
+        setInboxTab("waiting");
+        return;
+      }
       const { token, mockOwnerId } = await resolveAuth();
       const res = await fetch(`/api/deals/${dealId}/unarchive`, {
         method: "POST",

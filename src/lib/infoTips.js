@@ -246,7 +246,7 @@ export const INFO_TIPS = Object.freeze({
   }),
   settingsOpenGate: Object.freeze({
     title: "What is Open Gate?",
-    body: "Open Gate lets verified seekers message you directly on selected properties without spending Connects. Inbound inquiries appear immediately in your Deal Inbox and Master CRM with an Open Gate badge.",
+    body: "Open Gate lets verified seekers message you directly on selected properties without spending Connects. Inbound inquiries appear immediately in your Deal Inbox and CRM with an Open Gate badge.",
   }),
 });
 

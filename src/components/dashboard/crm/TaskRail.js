@@ -15,7 +15,7 @@ import {
 
 // The CRM "don't forget" engine (crm_tasks). Mobile-first: single column,
 // large touch targets, add-form collapses to one row. Used by BrokerMode's
-// command center and the Master CRM's Tasks tab.
+// command center and the CRM's Tasks tab.
 //
 // A task has a LIFECYCLE now, not a checkbox: to do -> in progress -> done,
 // plus cancelled. The circle cycles through those three; "cancelled" is
