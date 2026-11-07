@@ -30,9 +30,10 @@ import { ownerTenureLabel } from "@/lib/dashboardListings";
 import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 import InfoTip from "@/components/ui/InfoTip";
 
-export default function BrokerMode() {
+export default function BrokerMode({ subRole = "broker" }) {
   const router = useRouter();
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
+  const isSalespersonLens = subRole === "salesperson" || currentUser?.role === "salesperson";
 
   const [pitchingListing, setPitchingListing] = useState(null);
   const [pitchMessage, setPitchMessage] = useState("");
@@ -1070,10 +1071,14 @@ export default function BrokerMode() {
 
       <header className="lg:hidden pt-4 pb-6 mb-6 border-b border-surface-variant flex items-end justify-between gap-4 mesh-bg-hero px-4 rounded-xl shadow-lg">
         <div>
-          <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[12px] mb-1 block">Command Center</span>
+          <span className="font-label-caps text-gold-accent tracking-widest uppercase text-[12px] mb-1 block">
+            {isSalespersonLens ? "Command Center · Accredited Salesperson" : "Command Center"}
+          </span>
           {/* A-096: h1 (mobile twin of the desktop h1 below — the responsive-
               variant pattern: one reaches the tree at a time). */}
-          <h1 className="font-headline-editorial text-3xl text-gradient-gold">Broker Intelligence</h1>
+          <h1 className="font-headline-editorial text-3xl text-gradient-gold">
+            {isSalespersonLens ? "Salesperson Intelligence" : "Broker Intelligence"}
+          </h1>
         </div>
         <div className="text-right shrink-0">
           <span className="block text-[12px] font-label-caps uppercase tracking-widest text-text-secondary">Accepted Mandates</span>
@@ -1098,9 +1103,13 @@ export default function BrokerMode() {
       {/* Action Bar */}
       <MeshHero className="py-6 lg:py-10 px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 lg:top-auto z-10 border-b border-surface-variant mb-8 hidden lg:flex rounded-2xl shadow-xl border border-white/5">
         <div>
-          <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">Command Center</span>
+          <span className="font-label-caps text-gold-accent tracking-widest uppercase mb-2 block">
+            {isSalespersonLens ? "Command Center · Accredited Salesperson" : "Command Center"}
+          </span>
           {/* A-096: h1 (desktop twin — see mobile header above). */}
-          <h1 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">Broker Intelligence</h1>
+          <h1 className="font-headline-editorial text-gradient-gold text-4xl lg:text-5xl drop-shadow-md">
+            {isSalespersonLens ? "Salesperson Intelligence" : "Broker Intelligence"}
+          </h1>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">

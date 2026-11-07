@@ -172,14 +172,24 @@ export default function WorkspaceLensBar({
         </div>
 
         {canUseOpenGate && (
-          <Link
-            href="/dashboard/open-gate"
-            className="min-h-11 px-3 py-2 rounded-xl border border-gold-accent/30 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0 transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-            title="Shareable external property intake link"
-          >
-            <span>Open Gate</span>
-            <ArrowUpRight size={14} aria-hidden="true" />
-          </Link>
+          <div className="inline-flex items-center gap-1.5 shrink-0">
+            <Link
+              href="/dashboard/crm"
+              className="min-h-11 px-3 py-2 rounded-xl border border-surface-variant bg-surface/90 hover:border-gold-accent/40 text-on-surface hover:text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0 transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
+              title="Open unified Master CRM pipeline across all lenses"
+            >
+              <span>Master CRM</span>
+              <ArrowUpRight size={14} aria-hidden="true" />
+            </Link>
+            <Link
+              href="/dashboard/open-gate"
+              className="min-h-11 px-3 py-2 rounded-xl border border-gold-accent/30 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0 transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
+              title="Shareable external property intake link"
+            >
+              <span>Open Gate</span>
+              <ArrowUpRight size={14} aria-hidden="true" />
+            </Link>
+          </div>
         )}
       </div>
 
@@ -193,8 +203,11 @@ export default function WorkspaceLensBar({
             Specialty
           </span>
           {unlockedCreatorSubLenses.map((sub) => {
-            const active =
-              providerType === sub.id || (!providerType && sub.id === "photographer");
+            const effectiveProvider =
+              ["photographer", "designer", "researcher"].includes(activeRoleKey)
+                ? activeRoleKey
+                : (providerType || "photographer");
+            const active = effectiveProvider === sub.id;
             const SubIcon = sub.icon;
             return (
               <button

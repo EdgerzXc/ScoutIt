@@ -31,6 +31,17 @@ export function normalizeDashboardMode(role) {
 }
 
 export function normalizeDashboardModes(roles, fallbackRole) {
+  const rawList = [
+    ...(Array.isArray(roles) ? roles : []),
+    fallbackRole,
+  ]
+    .filter((r) => typeof r === "string" && r.trim())
+    .map((r) => r.trim().toLowerCase());
+
+  if (rawList.includes("admin") || rawList.includes("staff")) {
+    return ["buyer", "owner", "broker", "provider", "operator"];
+  }
+
   const normalized = (Array.isArray(roles) ? roles : [])
     .map(normalizeDashboardMode)
     .filter(Boolean);
@@ -144,6 +155,7 @@ export function getPersistedWorkspaceRole(storage = typeof window !== "undefined
 export function setPersistedWorkspaceRole(role, storage = typeof window !== "undefined" ? window.localStorage : null) {
   if (!storage || typeof storage.setItem !== "function" || typeof role !== "string" || !role.trim()) return;
   const clean = role.trim().toLowerCase();
+  const normalized = normalizeDashboardMode(clean);
   try {
     storage.setItem(ACTIVE_WORKSPACE_ROLE_KEY, clean);
     const rawUser = storage.getItem("scoutit_user");
@@ -151,12 +163,18 @@ export function setPersistedWorkspaceRole(role, storage = typeof window !== "und
       const parsed = JSON.parse(rawUser);
       if (parsed && typeof parsed === "object") {
         parsed.activeWorkspaceRole = clean;
-        const normalized = normalizeDashboardMode(clean);
         if (normalized && normalized !== "all") {
           parsed.primaryMode = normalized;
         }
         storage.setItem("scoutit_user", JSON.stringify(parsed));
       }
+    }
+    if (typeof window !== "undefined" && window.__scoutitAuthUser && typeof window.__scoutitAuthUser === "object") {
+      window.__scoutitAuthUser = {
+        ...window.__scoutitAuthUser,
+        activeWorkspaceRole: clean,
+        ...(normalized && normalized !== "all" ? { primaryMode: normalized, primary_mode: normalized } : {}),
+      };
     }
   } catch {}
 }

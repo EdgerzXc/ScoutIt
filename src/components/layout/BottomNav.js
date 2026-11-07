@@ -99,6 +99,14 @@ const ICONS = {
 };
 
 const ROLE_ICONS = {
+  all: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7"/>
+      <rect x="14" y="3" width="7" height="7"/>
+      <rect x="3" y="14" width="7" height="7"/>
+      <rect x="14" y="14" width="7" height="7"/>
+    </svg>
+  ),
   buyer: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="8"/>
@@ -177,6 +185,13 @@ const ROLE_ICONS = {
 // 6. Spatial Photographer
 // 7. Event & Concept Designer
 const CORE_ROLES = [
+  {
+    id: "all",
+    aliases: ["all", "unified"],
+    label: "All Workspaces (Unified)",
+    desc: "Master CRM & cross-lens command pulse",
+    targetRole: "all",
+  },
   {
     id: "buyer",
     aliases: ["buyer", "seeker", "exploring"],
@@ -487,6 +502,9 @@ export default function BottomNav() {
   const isRoleActive = (roleDef) => {
     // Platform administrators hold and have access to all workspaces & roles
     if (isAdmin) return true;
+    if (roleDef.id === "all") {
+      return activeUserRoles.length > 1;
+    }
 
     return activeUserRoles.some((r) => {
       const lower = String(r).toLowerCase().trim();

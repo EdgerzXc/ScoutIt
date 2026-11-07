@@ -7,14 +7,32 @@ import dynamic from "next/dynamic";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import { DashboardProvider, useDashboard } from "../../context/DashboardContext";
 
-// Lazy-loaded mode components
-const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), { ssr: false });
-const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode"), { ssr: false });
-const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false });
-const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
-const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMode"), { ssr: false });
-const MissionControlMode = dynamic(() => import("../../components/dashboard/MissionControlMode"), { ssr: false });
-const UnifiedOverviewMode = dynamic(() => import("../../components/dashboard/UnifiedOverviewMode"), { ssr: false });
+// Lazy-loaded mode components with seamless dark-mode skeleton fallback
+const ModeLoadingFallback = () => (
+  <div className="w-full py-6 grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse" aria-busy="true">
+    {[1, 2, 3].map((n) => (
+      <div
+        key={n}
+        className="card-atmosphere p-5 rounded-xl border border-surface-variant/60 min-h-[160px] flex flex-col justify-between"
+      >
+        <div className="space-y-2.5">
+          <div className="h-3 w-24 rounded bg-gold-accent/20" />
+          <div className="h-5 w-3/4 rounded bg-surface-variant/60" />
+          <div className="h-3 w-full rounded bg-surface-variant/40" />
+        </div>
+        <div className="h-8 w-28 rounded bg-surface-variant/50 mt-4" />
+      </div>
+    ))}
+  </div>
+);
+
+const OwnerMode = dynamic(() => import("../../components/dashboard/OwnerMode"), { ssr: false, loading: ModeLoadingFallback });
+const BrokerMode = dynamic(() => import("../../components/dashboard/BrokerMode"), { ssr: false, loading: ModeLoadingFallback });
+const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), { ssr: false, loading: ModeLoadingFallback });
+const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false, loading: ModeLoadingFallback });
+const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMode"), { ssr: false, loading: ModeLoadingFallback });
+const MissionControlMode = dynamic(() => import("../../components/dashboard/MissionControlMode"), { ssr: false, loading: ModeLoadingFallback });
+const UnifiedOverviewMode = dynamic(() => import("../../components/dashboard/UnifiedOverviewMode"), { ssr: false, loading: ModeLoadingFallback });
 import Toasts from "../../components/ui/Toasts";
 import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
@@ -339,6 +357,7 @@ function DashboardInner() {
     if (updateUrl && typeof window !== "undefined") {
       try {
         const url = new URL(window.location.href);
+        url.searchParams.delete("mode");
         url.searchParams.set("role", targetRole);
         window.history.replaceState(null, "", url.toString());
       } catch {}
@@ -382,7 +401,7 @@ function DashboardInner() {
       const params = new URLSearchParams(window.location.search);
       const requestedRole = params.get("role") || params.get("mode");
       if (requestedRole && canAccessDashboardWorkspace(requestedRole, getHeldRoles(user))) {
-        applyWorkspaceSwitch(requestedRole, { updateUrl: false, notify: false });
+        applyWorkspaceSwitch(requestedRole, { updateUrl: false, notify: true });
       }
     };
     syncFromUrl();
@@ -465,7 +484,7 @@ function DashboardInner() {
     switch (mode) {
       case "all": return <UnifiedOverviewMode onSelectLens={handleSwitchMode} heldRoles={heldRoles} />;
       case "owner": return <OwnerMode />;
-      case "broker": return <BrokerMode />;
+      case "broker": return <BrokerMode subRole={activeRoleKey || user?.role || "broker"} />;
       case "buyer":
       case "exploring": return <BuyerMode />;
       case "provider": return <ProviderMode type={user?.providerType || "photographer"} />;
@@ -520,7 +539,19 @@ function DashboardInner() {
 
   const currentWorkspaceLabel = mode === "provider"
     ? (user?.providerType === "designer" ? "Event & Concept Designer" : (user?.providerType === "researcher" ? "Zoning & Land Researcher" : "Spatial Photographer"))
-    : (mode === "broker" && user?.role === "salesperson" ? "Real Estate Salesperson" : (TAG_LABELS[mode] || "Workspace"));
+    : (mode === "broker" && (activeRoleKey === "salesperson" || user?.role === "salesperson") ? "Real Estate Salesperson" : (TAG_LABELS[mode] || "Workspace"));
+
+  const mobileLensBadgeLabel = mode === "all"
+    ? "All"
+    : mode === "owner"
+      ? "Owner"
+      : mode === "broker"
+        ? (activeRoleKey === "salesperson" || user?.role === "salesperson" ? "Salesperson" : "Broker")
+        : mode === "provider"
+          ? (user?.providerType === "designer" ? "Design" : user?.providerType === "researcher" ? "Research" : "Photo")
+          : mode === "operator"
+            ? "Operator"
+            : "Seeker";
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -545,6 +576,21 @@ function DashboardInner() {
             <Link href="/" className="font-display-md text-xl md:text-2xl text-gold-accent tracking-tighter text-glow shrink-0">
               S<span className="text-on-surface">cout</span>IT
             </Link>
+
+            {/* Compact Mobile Active-Lens Indicator — opens ROLES sheet on tap */}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("scoutit:open-role-sheet"));
+                }
+              }}
+              className="md:hidden inline-flex items-center gap-1.5 min-h-11 px-2.5 py-1 rounded-full bg-surface-alt/80 border border-gold-accent/30 text-gold-accent font-mono text-[12px] uppercase tracking-wider active:scale-95 transition"
+              aria-label={`Active lens: ${mobileLensBadgeLabel}. Tap to switch lens`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-accent shrink-0" />
+              <span className="truncate max-w-[96px]">{mobileLensBadgeLabel}</span>
+            </button>
             
             {/* Custom Desktop Workspace Switcher (Desktop only — mobile uses bottom bar ROLES tab) */}
             <div className="hidden md:block relative" ref={switcherRef}>

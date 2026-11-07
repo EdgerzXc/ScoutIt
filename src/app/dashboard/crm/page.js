@@ -331,13 +331,23 @@ function CRMPageInner() {
     );
   }
 
-  // Derived KPIs — computed from the user's real deals only.
+  // Derived KPIs — computed from the user's real deals in the selected lens.
   // An imported lead is an active pipeline entry and counts as one, but it is
   // never allowed to move a ScoutIt-earned number: a "closed" row in a
   // spreadsheet is not a win ScoutIt recorded, so imported records stay out of
   // the win-rate denominators.
-  const platformDeals = deals.filter((d) => !d.isImportedContact);
-  const activeDealsList = deals.filter((d) => d.status === "connected" || d.status === "pending" || d.status === "accepted");
+  const matchesViewingLens = (deal) => {
+    if (!viewingAs || viewingAs === "all") return true;
+    const role = String(deal.myRole || "owner").trim().toLowerCase();
+    if (viewingAs === "owner") return role === "owner";
+    if (viewingAs === "broker") return role === "broker" || role === "salesperson";
+    if (viewingAs === "buyer") return role === "buyer" || role === "seeker";
+    if (viewingAs === "provider") return ["photographer", "designer", "researcher", "provider"].includes(role);
+    return role === viewingAs;
+  };
+  const scopedDeals = deals.filter(matchesViewingLens);
+  const platformDeals = scopedDeals.filter((d) => !d.isImportedContact);
+  const activeDealsList = scopedDeals.filter((d) => d.status === "connected" || d.status === "pending" || d.status === "accepted");
   const activeDeals = activeDealsList.length;
   const closedDeals = platformDeals.filter((d) => d.status === "closed").length;
   const declinedDeals = platformDeals.filter((d) => d.status === "declined").length;
@@ -349,6 +359,14 @@ function CRMPageInner() {
   // in the pipeline carries a price yet, say so.
   const pricedDeals = activeDealsList.filter((d) => d.propertyPrice != null && Number(d.propertyPrice) > 0);
   const pipelineValue = pricedDeals.reduce((sum, d) => sum + Number(d.propertyPrice), 0);
+
+  const handleSelectCrmLens = (role) => {
+    setViewingAs(role);
+    if (role === "owner" || role === "broker") {
+      setPersistedWorkspaceRole(role);
+    }
+    setShowViewingMenu(false);
+  };
 
   return (
     // A-205 Workspace Deck: CRM sits left of Workspace — swipe-left returns
@@ -403,11 +421,7 @@ function CRMPageInner() {
                 {lensOptions.map(role => (
                   <button
                     key={role}
-                    onClick={() => {
-                      setViewingAs(role);
-                      setPersistedWorkspaceRole(role);
-                      setShowViewingMenu(false);
-                    }}
+                    onClick={() => handleSelectCrmLens(role)}
                     className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out hover:bg-surface-alt"
                   >
                     <span className="text-on-surface">{role === "all" ? "all (combined)" : role}</span>
@@ -438,7 +452,42 @@ function CRMPageInner() {
         </div>
       </div>
 
-      <WorkspaceCommandBar active="crm" mode={viewingAs || "owner"} className="relative z-20 mb-6 w-full md:max-w-xl" />
+      <div className="relative z-20 mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+        <WorkspaceCommandBar active="crm" mode={viewingAs || "owner"} className="w-full md:max-w-xl" />
+
+        {lensOptions.length > 1 && (
+          <div
+            role="group"
+            aria-label="Filter Master CRM by lens"
+            className="inline-flex items-center gap-1 rounded-xl border border-surface-variant bg-surface/90 p-1 overflow-x-auto no-scrollbar shrink-0"
+          >
+            {[
+              { id: "all", label: "All Lenses" },
+              { id: "owner", label: "Owner" },
+              { id: "broker", label: "Broker" },
+              { id: "provider", label: "Creator" },
+              { id: "buyer", label: "Seeker" },
+            ].map((pill) => {
+              const active = viewingAs === pill.id;
+              return (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => handleSelectCrmLens(pill.id)}
+                  aria-pressed={active}
+                  className={`flex min-h-11 items-center px-3 py-1.5 rounded-lg font-label-caps text-label-caps uppercase shrink-0 transition-colors duration-150 ${
+                    active
+                      ? "bg-gold-accent text-background font-bold"
+                      : "text-text-secondary hover:text-on-surface hover:bg-surface-alt"
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* KPI Strip.
           While the pipeline is still loading these show a placeholder rather
@@ -546,7 +595,7 @@ function CRMPageInner() {
         )}
         {activeTab === "pipeline" && !loading && (
           <KanbanBoard
-            deals={deals}
+            deals={scopedDeals}
             viewingAs={viewingAs}
             onStatusChange={handleStatusChange}
             onDealClick={setSelectedDeal}

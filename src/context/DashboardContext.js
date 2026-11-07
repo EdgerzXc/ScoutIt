@@ -279,9 +279,31 @@ export function DashboardProvider({ children }) {
       return false;
     }
 
+    const isStaffAdmin =
+      ["admin", "staff"].includes(String(profile?.role || "").trim().toLowerCase()) ||
+      (Array.isArray(profile?.active_roles) &&
+        profile.active_roles.some((r) => ["admin", "staff"].includes(String(r || "").trim().toLowerCase())));
+    const mergedActiveRoles = isStaffAdmin
+      ? [
+          ...new Set([
+            ...(Array.isArray(profile?.active_roles) ? profile.active_roles : []),
+            "buyer",
+            "owner",
+            "broker",
+            "salesperson",
+            "operator",
+            "photographer",
+            "designer",
+            "researcher",
+            "admin",
+          ]),
+        ]
+      : profile?.active_roles;
+
     const mergedUser = {
       ...authUser,
       ...profile,
+      active_roles: mergedActiveRoles,
       id: authUser.id,
     };
     setCurrentUser(mergedUser);
@@ -345,10 +367,18 @@ export function DashboardProvider({ children }) {
       const roleKey = resolveConnectRole(mappedRole, "seeker") || "seeker";
       initWalletIfEmpty(roleKey, tier);
       setConnects(getBalance(roleKey, tier));
+      authedFetch(`/api/wallet?role=${encodeURIComponent(roleKey)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && typeof data.balance === "number") {
+            setConnects(data.balance);
+          }
+        })
+        .catch(() => {});
     };
     window.addEventListener("scoutit:workspace-changed", handleWorkspaceChanged);
     return () => window.removeEventListener("scoutit:workspace-changed", handleWorkspaceChanged);
-  }, [currentUser]);
+  }, [currentUser, authedFetch]);
 
   // A dashboard identity is either validated by Supabase Auth or an explicit
   // localhost-only development mock. Browser profile cache is never authority.

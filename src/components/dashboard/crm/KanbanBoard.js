@@ -6,6 +6,27 @@ import { PIPELINE_COLUMNS as COLUMNS, columnIdForDeal } from "@/lib/deals/dealSt
 
 export { columnIdForDeal, COLUMNS };
 
+function resolveCardLensBadge(myRole) {
+  const r = String(myRole || "owner").trim().toLowerCase();
+  if (r === "photographer") return "PHOTOGRAPHER LENS";
+  if (r === "designer") return "DESIGNER LENS";
+  if (r === "researcher") return "RESEARCHER LENS";
+  if (r === "provider") return "CREATOR LENS";
+  if (r === "broker" || r === "salesperson") return "BROKER LENS";
+  if (r === "buyer" || r === "seeker") return "SEEKER LENS";
+  return "OWNER LENS";
+}
+
+function matchesLens(deal, viewingAs) {
+  if (!viewingAs || viewingAs === "all") return true;
+  const r = String(deal.myRole || "owner").trim().toLowerCase();
+  if (viewingAs === "owner") return r === "owner";
+  if (viewingAs === "broker") return r === "broker" || r === "salesperson";
+  if (viewingAs === "buyer") return r === "buyer" || r === "seeker";
+  if (viewingAs === "provider") return ["photographer", "designer", "researcher", "provider"].includes(r);
+  return r === viewingAs;
+}
+
 export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusChange, onDealClick, appointments = [] }) {
   const [search, setSearch] = useState("");
   const [draggingId, setDraggingId] = useState(null);
@@ -22,6 +43,7 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
   }));
 
   const filteredDeals = enhancedDeals.filter((deal) => {
+    if (!matchesLens(deal, viewingAs)) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -98,7 +120,13 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
             >
               <div className="flex justify-between items-center mb-4 px-1">
                 <h3 className="font-label-caps text-label-caps uppercase text-text-secondary">
-                  {viewingAs === "owner" ? col.ownerLabel : col.brokerLabel}
+                  {viewingAs === "owner"
+                    ? col.ownerLabel
+                    : viewingAs === "broker"
+                      ? col.brokerLabel
+                      : col.ownerLabel === col.brokerLabel
+                        ? col.ownerLabel
+                        : `${col.ownerLabel} / ${col.brokerLabel}`}
                 </h3>
                 <span className="rounded-full bg-surface-alt px-2 py-0.5 font-body text-sm font-medium text-text-muted tabular-nums">
                   {colDeals.length}
@@ -151,8 +179,8 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
 
                       <div className="mb-2 flex items-center justify-between gap-3 font-body text-sm text-text-secondary">
                         <span className="min-w-0 truncate">{deal.otherParty}</span>
-                        <span className="shrink-0 whitespace-nowrap font-label-caps text-label-caps uppercase text-gold-accent/80">
-                          {deal.myRole}
+                        <span className="shrink-0 whitespace-nowrap rounded border border-gold-accent/35 bg-gold-accent/10 px-2 py-0.5 font-label-caps text-label-caps uppercase text-gold-accent">
+                          {resolveCardLensBadge(deal.myRole)}
                         </span>
                       </div>
 

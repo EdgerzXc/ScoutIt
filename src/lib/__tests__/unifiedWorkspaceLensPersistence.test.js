@@ -6,6 +6,7 @@ import {
   canAccessDashboardWorkspace,
   getPersistedWorkspaceRole,
   normalizeDashboardMode,
+  normalizeDashboardModes,
   resolveActiveWorkspaceSelection,
   setPersistedWorkspaceRole,
 } from "../dashboardModes";
@@ -78,6 +79,15 @@ describe("A-333: Unified Workspace Lens Persistence & Non-Cluttered Domain Filte
     expect(normalizeDashboardMode("all")).toBe("all");
     expect(canAccessDashboardWorkspace("all", ["buyer", "owner"])).toBe(true);
     expect(isPipelineRole(["all"])).toBe(true);
+    expect(isPipelineRole(["admin"])).toBe(true);
+    expect(isPipelineRole(["staff"])).toBe(true);
+    expect(normalizeDashboardModes(["buyer"], "admin")).toEqual([
+      "buyer",
+      "owner",
+      "broker",
+      "provider",
+      "operator",
+    ]);
     expect(deckOrderForRole("all")).toEqual(["crm", "workspace", "inbox", "calendar"]);
 
     setPersistedWorkspaceRole("all", storage);
@@ -157,5 +167,34 @@ describe("A-333: Unified Workspace Lens Persistence & Non-Cluttered Domain Filte
     expect(chatBoxSrc).toContain("For Your Photographer Lens");
     expect(chatBoxSrc).toContain("For Your Broker Lens");
     expect(chatBoxSrc).toContain("Your Seeker Inquiry");
+  });
+
+  it("embeds Master CRM cross-lens deal feed inside UnifiedOverviewMode ('All') and filters KanbanBoard by lens", () => {
+    const overviewSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/components/dashboard/UnifiedOverviewMode.js"),
+      "utf8"
+    );
+    const crmPageSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/app/dashboard/crm/page.js"),
+      "utf8"
+    );
+    const kanbanSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/components/dashboard/crm/KanbanBoard.js"),
+      "utf8"
+    );
+
+    // UnifiedOverviewMode ("All") includes embedded Master CRM deal feed & lens filter pills
+    expect(overviewSrc).toContain("MASTER CRM · UNIFIED DEAL FEED");
+    expect(overviewSrc).toContain("FOR YOUR OWNER LENS");
+    expect(overviewSrc).toContain("FOR YOUR BROKER LENS");
+    expect(overviewSrc).toContain("YOUR SEEKER INQUIRY");
+
+    // Master CRM page & KanbanBoard filter by viewingAs and show explicit lens badges
+    expect(crmPageSrc).toContain("matchesViewingLens");
+    expect(kanbanSrc).toContain("resolveCardLensBadge");
+    expect(kanbanSrc).toContain("OWNER LENS");
+    expect(kanbanSrc).toContain("BROKER LENS");
+    expect(kanbanSrc).toContain("SEEKER LENS");
+    expect(kanbanSrc).toContain("CREATOR LENS");
   });
 });
