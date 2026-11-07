@@ -37,7 +37,6 @@ import Toasts from "../../components/ui/Toasts";
 import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
 import WorkspaceDeckDrawer from "../../components/dashboard/WorkspaceDeckDrawer";
-import WorkspaceLensBar from "../../components/dashboard/WorkspaceLensBar";
 import { deckNeighbors, isPipelineRole } from "../../lib/workspaceDeck";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
@@ -307,7 +306,7 @@ function DashboardInner() {
         // read, while omitting the header that actually carries it.)
         const deals = await loadDeals({ mockUserId: mockOwnerId });
         if (cancelled) return;
-        const total = deals.reduce((sum, d) => sum + (d.unreadCount || 0), 0);
+        const total = (Array.isArray(deals) ? deals : []).reduce((sum, d) => sum + (d?.unreadCount || 0), 0);
         if (!cancelled) {
           setUnreadInboxCount(total);
           try {
@@ -870,21 +869,10 @@ function DashboardInner() {
         {/* Cross-Workspace Attention Signal: auto-surfaces when actions are waiting (Inbox, CRM tasks, or viewings) */}
         <AttentionRail mockUserId={user.id} hideWhenClear={true} className="mb-5" />
 
-        {/* Desktop Workspace Deck Command Bar + Domain Lens Filter Bar (auto-tucked during property creation) */}
+        {/* Desktop Workspace Deck Command Bar (auto-tucked during property creation) */}
         {!isWizardActive && (
-          <div className="mb-6 flex flex-col gap-3">
-            <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
-              <div className={`hidden md:block w-full ${!isPipelineRole([mode]) ? "max-w-md" : "max-w-2xl"}`}>
-                <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} mode={mode} />
-              </div>
-              <WorkspaceLensBar
-                mode={mode}
-                activeRoleKey={activeRoleKey}
-                providerType={user.providerType}
-                heldRoles={heldRoles}
-                onSelectLens={handleSwitchMode}
-              />
-            </div>
+          <div className={`hidden md:block mb-6 w-full ${!isPipelineRole([mode]) ? "max-w-md" : "max-w-2xl"}`}>
+            <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} mode={mode} />
           </div>
         )}
 

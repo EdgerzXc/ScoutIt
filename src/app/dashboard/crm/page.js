@@ -452,41 +452,8 @@ function CRMPageInner() {
         </div>
       </div>
 
-      <div className="relative z-20 mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-        <WorkspaceCommandBar active="crm" mode={viewingAs || "owner"} className="w-full md:max-w-xl" />
-
-        {lensOptions.length > 1 && (
-          <div
-            role="group"
-            aria-label="Filter Master CRM by lens"
-            className="inline-flex items-center gap-1 rounded-xl border border-surface-variant bg-surface/90 p-1 overflow-x-auto no-scrollbar shrink-0"
-          >
-            {[
-              { id: "all", label: "All Lenses" },
-              { id: "owner", label: "Owner" },
-              { id: "broker", label: "Broker" },
-              { id: "provider", label: "Creator" },
-              { id: "buyer", label: "Seeker" },
-            ].map((pill) => {
-              const active = viewingAs === pill.id;
-              return (
-                <button
-                  key={pill.id}
-                  type="button"
-                  onClick={() => handleSelectCrmLens(pill.id)}
-                  aria-pressed={active}
-                  className={`flex min-h-11 items-center px-3 py-1.5 rounded-lg font-label-caps text-label-caps uppercase shrink-0 transition-colors duration-150 ${
-                    active
-                      ? "bg-gold-accent text-background font-bold"
-                      : "text-text-secondary hover:text-on-surface hover:bg-surface-alt"
-                  }`}
-                >
-                  {pill.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+      <div className="relative z-20 mb-6 w-full md:max-w-xl">
+        <WorkspaceCommandBar active="crm" mode={viewingAs || "owner"} />
       </div>
 
       {/* KPI Strip.

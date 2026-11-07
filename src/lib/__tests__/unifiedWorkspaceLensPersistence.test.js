@@ -120,39 +120,55 @@ describe("A-333: Unified Workspace Lens Persistence & Non-Cluttered Domain Filte
     expect(resolved.providerType).toBe("designer");
   });
 
-  it("groups 8 roles into compact domain filter pills in WorkspaceLensBar without raw hex or sub-12px text", () => {
-    const lensBarPath = path.resolve(process.cwd(), "src/components/dashboard/WorkspaceLensBar.js");
-    const overviewPath = path.resolve(process.cwd(), "src/components/dashboard/UnifiedOverviewMode.js");
-    const lensBarSrc = fs.readFileSync(lensBarPath, "utf8");
-    const overviewSrc = fs.readFileSync(overviewPath, "utf8");
+  it("enforces a single role-switching authority on /dashboard and /dashboard/crm without duplicate lens bars", () => {
+    const dashboardSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/app/dashboard/page.js"),
+      "utf8"
+    );
+    const crmPageSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/app/dashboard/crm/page.js"),
+      "utf8"
+    );
+    const overviewSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/components/dashboard/UnifiedOverviewMode.js"),
+      "utf8"
+    );
 
-    // 6 compact domain labels so 8 roles never clutter mobile or web
-    for (const label of ["All", "Seeker", "Owner", "Broker", "Operator", "Creator"]) {
-      expect(lensBarSrc).toContain(`shortLabel: "${label}"`);
-    }
+    // Single role switcher in /dashboard header; no second <WorkspaceLensBar in <main>
+    expect(dashboardSrc).toContain('aria-label="Switch Workspace"');
+    expect(dashboardSrc).not.toContain("<WorkspaceLensBar");
 
-    // Open Gate utility preserved
-    expect(lensBarSrc).toContain('href="/dashboard/open-gate"');
-    expect(lensBarSrc).toContain("Open Gate");
+    // Single pipeline lens control in /dashboard/crm header; no duplicate filter pill bar below header
+    expect(crmPageSrc).toContain("Pipeline lens");
+    expect(crmPageSrc).not.toContain('aria-label="Filter Master CRM by lens"');
+
+    // UnifiedOverviewMode ("All") has no redundant 7-card role switcher directory at bottom
+    expect(overviewSrc).not.toContain("Dedicated Role Workspaces");
 
     // Antislop UI & Layout Mobile compliance: 44px touch targets (min-h-11), zero raw hex, zero sub-12px text
-    expect(lensBarSrc).toContain("min-h-11");
     expect(overviewSrc).toContain("min-h-11");
-    expect(lensBarSrc).not.toMatch(/#[0-9a-fA-F]{3,8}/);
     expect(overviewSrc).not.toMatch(/#[0-9a-fA-F]{3,8}/);
-    expect(lensBarSrc).not.toMatch(/text-\[(?:[0-9]|10|11)px\]/);
     expect(overviewSrc).not.toMatch(/text-\[(?:[0-9]|10|11)px\]/);
   });
 
-  it("provides universal Connects wallet overview, explicit per-role Connect purpose guide, and recipient lens attribution in ChatBox", () => {
+  it("provides universal Connects wallet overview (with safe roles/roleBuckets arrays), explicit per-role Connect purpose guide, and recipient lens attribution in ChatBox", () => {
     expect(resolveWalletRoleForMode("all", undefined, ["buyer", "owner", "photographer"])).toBe("owner");
     expect(resolveWalletRoleForMode("operator", undefined, ["operator", "broker"])).toBe("broker");
     expect(resolveWalletRoleForMode("provider", "photographer", ["photographer"])).toBe("photographer");
 
     const overview = getUniversalWalletOverview(["owner", "photographer", "seeker"], "starry");
     expect(overview.roleBuckets.map((b) => b.role)).toEqual(["owner", "photographer", "seeker"]);
+    expect(Array.isArray(overview.roles)).toBe(true);
     expect(overview.totalGranted).toBeGreaterThan(0);
     expect(overview.universalTotal).toBe(overview.totalGranted + overview.purchased + overview.earned);
+
+    // Regression guard for ScoutItClientCrash: Cannot read properties of undefined (reading 'reduce')
+    const overviewSrc = fs.readFileSync(
+      path.resolve(process.cwd(), "src/components/dashboard/UnifiedOverviewMode.js"),
+      "utf8"
+    );
+    expect(overviewSrc).not.toContain("walletOverview.roles.reduce");
+    expect(overviewSrc).toContain("walletOverview.totalGranted");
 
     for (const roleKey of ["seeker", "owner", "broker", "photographer", "designer", "researcher"]) {
       expect(CONNECT_ROLE_PURPOSES[roleKey]?.spendRule).toBeTruthy();

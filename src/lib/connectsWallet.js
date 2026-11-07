@@ -472,6 +472,7 @@ export function getUniversalWalletOverview(heldRoles = [], tier = "starry") {
     totalGranted,
     universalTotal: totalGranted + purchased + earned,
     roleBuckets,
+    roles: roleBuckets,
   };
 }
 
