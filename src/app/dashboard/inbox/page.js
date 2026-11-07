@@ -93,14 +93,29 @@ const SHOW_DEMO_DEALS = process.env.NODE_ENV !== "production";
 
 const DEMO_DEALS = [
   {
-    id: "demo-deal-pending",
+    id: "demo-deal-owner",
     property_title: "One Bonifacio High Street Penthouse",
     propertySlug: "one-bonifacio-high-street-penthouse",
     status: "pending",
-    other_party: "Arch. Rafael Santos (PRC Broker)",
-    last_message: "Awaiting response (3 Connects Spent · Awaiting Owner Action)",
-    pitch_message: "Hi! I'd like to schedule a viewing of this 3BR BGC Penthouse for this Friday afternoon. Is the owner open to flexible lease terms?",
-    myRole: "buyer",
+    other_party: "Elena Vance (Tech Executive)",
+    last_message: "Awaiting your review (Inquiry for 3BR Penthouse)",
+    pitch_message: "Hi! I would like to schedule a viewing of this 3BR BGC Penthouse for this Friday afternoon. Is the owner open to flexible lease terms?",
+    myRole: "owner",
+    intentBadge: "PROPERTY · REQUIRES OWNER",
+    intentSummary: "Wants Property: One Bonifacio High Street Penthouse (Requires Owner Action)",
+    unreadCount: 1,
+  },
+  {
+    id: "demo-deal-photographer",
+    property_title: "Rockwell Center Luxury 2BR Suite",
+    propertySlug: "rockwell-center-luxury-2br-suite",
+    status: "pending",
+    other_party: "Rafael Santos (Listing Agent)",
+    last_message: "Booked Spatial Photography session for unit 24B",
+    pitch_message: "Requesting twilight architectural photography and virtual tour capture.",
+    myRole: "photographer",
+    intentBadge: "LAYER 4 · REQUIRES PHOTOGRAPHER",
+    intentSummary: "Needs Spatial Photographer · Layer 4 Professional Booking",
     unreadCount: 1,
   },
   {
@@ -112,20 +127,63 @@ const DEMO_DEALS = [
     last_message: "Confirmed! Walkthrough scheduled for Thursday 2:00 PM.",
     pitch_message: "We are looking for a 250 sqm commercial office space for a fintech team of 25. Need 24/7 HVAC options.",
     myRole: "buyer",
+    intentBadge: "YOUR SEEKER INQUIRY",
+    intentSummary: "You inquired about Property: Makati CBD Executive Commercial Suite",
     unreadCount: 0,
   },
   {
     id: "demo-deal-declined",
-    property_title: "Rockwell Center Luxury 2BR Suite",
-    propertySlug: "rockwell-center-luxury-2br-suite",
+    property_title: "Shang Salcedo Place Corner Suite",
+    propertySlug: "shang-salcedo-place-corner-suite",
     status: "declined",
     other_party: "Juan Carlos Tan (Listing Representative)",
-    last_message: "Connect request declined or expired (Connects non-refundable)",
-    pitch_message: "Requesting floor plan and zonal tax breakdown for unit 24B.",
+    last_message: "Connect request declined or expired",
+    pitch_message: "Requesting floor plan and zonal tax breakdown.",
     myRole: "buyer",
+    intentBadge: "YOUR SEEKER INQUIRY",
+    intentSummary: "Inquiry closed",
     unreadCount: 0,
   },
 ];
+
+function formatDealLensLabel(deal) {
+  if (!deal) return null;
+  const rawRole = String(deal.myRole || "").trim().toLowerCase();
+  const rawBadge = deal.intentBadge;
+  if (rawBadge === "PROPERTY · REQUIRES OWNER" || rawRole === "owner") {
+    return "PROPERTY · REQUIRES OWNER";
+  }
+  if (rawBadge === "LAYER 4 · REQUIRES PHOTOGRAPHER" || rawRole === "photographer") {
+    return "LAYER 4 · REQUIRES PHOTOGRAPHER";
+  }
+  if (rawBadge === "LAYER 4 · REQUIRES DESIGNER" || rawRole === "designer") {
+    return "LAYER 4 · REQUIRES DESIGNER";
+  }
+  if (rawBadge === "LAYER 4 · REQUIRES RESEARCHER" || rawRole === "researcher") {
+    return "LAYER 4 · REQUIRES RESEARCHER";
+  }
+  if (rawBadge === "LAYER 4 · REQUIRES CREATOR" || rawRole === "provider") {
+    return "LAYER 4 · REQUIRES CREATOR";
+  }
+  if (rawBadge === "PROPERTY · REQUIRES OPERATOR" || rawRole === "operator") {
+    return "PROPERTY · REQUIRES OPERATOR";
+  }
+  if (rawBadge === "MANDATE · REQUIRES BROKER" || rawRole === "broker" || rawRole === "salesperson") {
+    return "MANDATE · REQUIRES BROKER";
+  }
+  if (rawBadge === "YOUR SEEKER INQUIRY" || rawRole === "buyer" || rawRole === "seeker") {
+    return "YOUR SEEKER INQUIRY";
+  }
+  if (rawBadge === "FOR OWNER · PROPERTY INQUIRY") return "PROPERTY · REQUIRES OWNER";
+  if (rawBadge === "NEEDS PHOTOGRAPHER · LAYER 4") return "LAYER 4 · REQUIRES PHOTOGRAPHER";
+  if (rawBadge === "NEEDS DESIGNER · LAYER 4") return "LAYER 4 · REQUIRES DESIGNER";
+  if (rawBadge === "NEEDS RESEARCHER · LAYER 4") return "LAYER 4 · REQUIRES RESEARCHER";
+  if (rawBadge === "NEEDS CREATOR · LAYER 4") return "LAYER 4 · REQUIRES CREATOR";
+  if (rawBadge === "FOR OPERATOR · UNIT INQUIRY") return "PROPERTY · REQUIRES OPERATOR";
+  if (rawBadge === "FOR BROKER · PROPERTY / MANDATE") return "MANDATE · REQUIRES BROKER";
+  if (rawBadge === "YOUR PROPERTY INQUIRY") return "YOUR SEEKER INQUIRY";
+  return rawBadge || (rawRole ? `REQUIRES ${rawRole.toUpperCase()}` : null);
+}
 
 function InboxInner() {
   const reduceMotion = useReducedMotion();
@@ -136,7 +194,6 @@ function InboxInner() {
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(null);
   const [inboxTab, setInboxTab] = useState("active"); // "waiting" | "active" | "declined"
-  const [roleFilter, setRoleFilter] = useState("all"); // "all" | "owner" | "broker" | "buyer"
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -195,18 +252,9 @@ function InboxInner() {
     }
   }, [deals, loading]);
 
-  // Sorting per §38.4 -- there was none before, so the list arrived in
-  // whatever order the API happened to return and reshuffled on every refetch.
-  const matchesRoleFilter = (deal) => {
-    if (roleFilter === "all") return true;
-    const dealRole = String(deal.myRole || "buyer").toLowerCase();
-    if (roleFilter === "buyer") return dealRole === "buyer" || dealRole === "seeker";
-    if (roleFilter === "provider") {
-      return ["photographer", "designer", "researcher", "provider"].includes(dealRole);
-    }
-    return dealRole === roleFilter;
-  };
-  const visibleDeals = deals.filter((d) => !isDeleted(d.status) && matchesRoleFilter(d));
+  // Sorting per §38.4 -- Universal Deal Inbox connects to one user account.
+  // All conversations flow here with clear internal role tags on each thread.
+  const visibleDeals = deals.filter((d) => !isDeleted(d.status));
   const waitingDeals = visibleDeals.filter((d) => bucketOf(d) === "waiting").sort(byDateDesc("created_at"));
   const activeDeals = visibleDeals.filter((d) => bucketOf(d) === "active").sort(byDateDesc("last_activity_at"));
   // Oldest first: the one closest to being deleted needs attention most.
@@ -388,39 +436,6 @@ function InboxInner() {
 
             <WorkspaceCommandBar active="inbox" badges={{ inbox: activeUnread }} mode={isPipelineRole(currentUser?.active_roles) ? "owner" : "buyer"} className="mt-4" />
 
-            {isPipelineRole(currentUser?.active_roles) && (
-              <div
-                role="group"
-                aria-label="Filter conversations by lens"
-                className="flex items-center gap-1 mt-3 overflow-x-auto no-scrollbar"
-              >
-                {[
-                  { id: "all", label: "All Lenses" },
-                  { id: "owner", label: "Owner" },
-                  { id: "broker", label: "Broker" },
-                  { id: "provider", label: "Creator" },
-                  { id: "buyer", label: "Seeker" },
-                ].map((lens) => {
-                  const active = roleFilter === lens.id;
-                  return (
-                    <button
-                      key={lens.id}
-                      type="button"
-                      onClick={() => setRoleFilter(lens.id)}
-                      aria-pressed={active}
-                      className={`min-h-11 px-2.5 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider shrink-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent ${
-                        active
-                          ? "bg-gold-accent/20 text-gold-bright border border-gold-accent/40 font-semibold"
-                          : "text-text-secondary hover:text-on-surface border border-transparent"
-                      }`}
-                    >
-                      {lens.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
             {/* Three-State Inbox Tab Bar (Section 38) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
               {[
@@ -536,22 +551,9 @@ function InboxInner() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 mb-1 min-w-0">
-                    {deal.myRole && (
-                      <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-gold-accent/35 font-mono text-[12px] uppercase tracking-wider text-gold-accent shrink-0">
-                        {deal.intentBadge ||
-                          (deal.myRole === "owner"
-                            ? "FOR OWNER · PROPERTY INQUIRY"
-                            : deal.myRole === "photographer"
-                              ? "NEEDS PHOTOGRAPHER · LAYER 4"
-                              : deal.myRole === "designer"
-                                ? "NEEDS DESIGNER · LAYER 4"
-                                : deal.myRole === "researcher"
-                                  ? "NEEDS RESEARCHER · LAYER 4"
-                                  : deal.myRole === "broker" || deal.myRole === "salesperson"
-                                    ? "FOR BROKER · MANDATE"
-                                    : deal.myRole === "buyer" || deal.myRole === "seeker"
-                                      ? "AS SEEKER"
-                                      : `FOR: ${deal.myRole}`)}
+                    {formatDealLensLabel(deal) && (
+                      <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-gold-accent/40 font-mono text-[12px] uppercase tracking-wider text-gold-accent font-semibold shrink-0">
+                        {formatDealLensLabel(deal)}
                       </span>
                     )}
                     {deal.open_gate_inbound && (

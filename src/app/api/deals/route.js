@@ -48,8 +48,8 @@ function resolveIntentInfo(row, myRole) {
     return {
       targetRole: "owner",
       sourceLayer: row?.open_gate_inbound ? "open_gate" : "property_listing",
-      intentBadge: "FOR OWNER · PROPERTY INQUIRY",
-      intentSummary: `Wants Property: ${propTitle} (For Owner)`,
+      intentBadge: "PROPERTY · REQUIRES OWNER",
+      intentSummary: `Wants Property: ${propTitle} (Requires Owner Action)`,
     };
   }
   if (role === "photographer" || role === "designer" || role === "researcher") {
@@ -57,7 +57,7 @@ function resolveIntentInfo(row, myRole) {
     return {
       targetRole: role,
       sourceLayer: "layer_4_professionals",
-      intentBadge: `NEEDS ${role.toUpperCase()} · LAYER 4`,
+      intentBadge: `LAYER 4 · REQUIRES ${role.toUpperCase()}`,
       intentSummary: `Needs ${label} · Layer 4 Professional Request`,
     };
   }
@@ -65,14 +65,14 @@ function resolveIntentInfo(row, myRole) {
     return {
       targetRole: "broker",
       sourceLayer: "broker_representation",
-      intentBadge: "FOR BROKER · PROPERTY / MANDATE",
+      intentBadge: "MANDATE · REQUIRES BROKER",
       intentSummary: `Wants Property via Broker: ${propTitle}`,
     };
   }
   return {
     targetRole: "owner",
     sourceLayer: "property_listing",
-    intentBadge: "YOUR PROPERTY INQUIRY",
+    intentBadge: "YOUR SEEKER INQUIRY",
     intentSummary: `You inquired about Property: ${propTitle}`,
   };
 }

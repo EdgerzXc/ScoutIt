@@ -75,8 +75,8 @@ describe("dashboard mode normalization", () => {
     const myOwnerRole = deriveMyRole(propertyRow, "user-multi");
     expect(myOwnerRole).toBe("owner");
     const ownerIntent = describeDealIntent(propertyRow, myOwnerRole);
-    expect(ownerIntent.intentBadge).toBe("FOR OWNER · PROPERTY INQUIRY");
-    expect(ownerIntent.intentSummary).toContain("Wants Property: Ayala Triangle Penthouse (For Owner)");
+    expect(ownerIntent.intentBadge).toBe("PROPERTY · REQUIRES OWNER");
+    expect(ownerIntent.intentSummary).toContain("Wants Property: Ayala Triangle Penthouse (Requires Owner Action)");
 
     const photographerRow = {
       id: "deal-photo-2",
@@ -94,7 +94,7 @@ describe("dashboard mode normalization", () => {
     const myPhotographerRole = deriveMyRole(photographerRow, "user-multi");
     expect(myPhotographerRole).toBe("photographer");
     const photoIntent = describeDealIntent(photographerRow, myPhotographerRole);
-    expect(photoIntent.intentBadge).toBe("NEEDS PHOTOGRAPHER · LAYER 4");
+    expect(photoIntent.intentBadge).toBe("LAYER 4 · REQUIRES PHOTOGRAPHER");
     expect(photoIntent.intentSummary).toContain("Needs Spatial Photographer");
   });
 });

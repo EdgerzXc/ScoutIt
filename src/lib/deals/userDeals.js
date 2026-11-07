@@ -164,10 +164,10 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "owner",
       sourceLayer: row?.open_gate_inbound ? "open_gate" : "property_listing",
-      intentBadge: "FOR OWNER · PROPERTY INQUIRY",
+      intentBadge: "PROPERTY · REQUIRES OWNER",
       intentSummary: propTitle
-        ? `Wants Property: ${propTitle} (For Owner)`
-        : "Wants Property · For Owner Lens",
+        ? `Wants Property: ${propTitle} (Requires Owner Action)`
+        : "Wants Property · Requires Owner Action",
     };
   }
 
@@ -175,7 +175,7 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "photographer",
       sourceLayer: "layer_4_professionals",
-      intentBadge: "NEEDS PHOTOGRAPHER · LAYER 4",
+      intentBadge: "LAYER 4 · REQUIRES PHOTOGRAPHER",
       intentSummary: hasRealProperty
         ? `Needs Spatial Photographer for ${propTitle}`
         : "Needs Spatial Photographer · Layer 4 Professional Booking",
@@ -186,7 +186,7 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "designer",
       sourceLayer: "layer_4_professionals",
-      intentBadge: "NEEDS DESIGNER · LAYER 4",
+      intentBadge: "LAYER 4 · REQUIRES DESIGNER",
       intentSummary: hasRealProperty
         ? `Needs Event & Concept Designer for ${propTitle}`
         : "Needs Event & Concept Designer · Layer 4 Professional Booking",
@@ -197,7 +197,7 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "researcher",
       sourceLayer: "layer_4_professionals",
-      intentBadge: "NEEDS RESEARCHER · LAYER 4",
+      intentBadge: "LAYER 4 · REQUIRES RESEARCHER",
       intentSummary: hasRealProperty
         ? `Needs Zoning & Land Researcher for ${propTitle}`
         : "Needs Zoning & Land Researcher · Layer 4 Professional Audit",
@@ -208,7 +208,7 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "provider",
       sourceLayer: "layer_4_professionals",
-      intentBadge: "NEEDS CREATOR · LAYER 4",
+      intentBadge: "LAYER 4 · REQUIRES CREATOR",
       intentSummary: hasRealProperty
         ? `Needs Layer 4 Professional for ${propTitle}`
         : "Needs Layer 4 Professional Service",
@@ -219,10 +219,10 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "operator",
       sourceLayer: row?.open_gate_inbound ? "open_gate" : "property_unit",
-      intentBadge: "FOR OPERATOR · UNIT INQUIRY",
+      intentBadge: "PROPERTY · REQUIRES OPERATOR",
       intentSummary: propTitle
-        ? `Wants Delegated Unit: ${propTitle} (For Operator)`
-        : "Delegated Unit Inquiry · For Operator Lens",
+        ? `Wants Delegated Unit: ${propTitle} (Requires Operator Action)`
+        : "Delegated Unit Inquiry · Requires Operator Action",
     };
   }
 
@@ -231,7 +231,7 @@ export function describeDealIntent(row, myRole) {
       return {
         targetRole: "broker",
         sourceLayer: "community_signal",
-        intentBadge: "FOR BROKER · SIGNAL RESPONSE",
+        intentBadge: "SIGNAL · REQUIRES BROKER",
         intentSummary: propTitle
           ? `Community Signal: ${propTitle}`
           : "Community Signal Connection",
@@ -240,7 +240,7 @@ export function describeDealIntent(row, myRole) {
     return {
       targetRole: "broker",
       sourceLayer: row?.open_gate_inbound ? "open_gate" : "broker_representation",
-      intentBadge: "FOR BROKER · PROPERTY / MANDATE",
+      intentBadge: "MANDATE · REQUIRES BROKER",
       intentSummary: propTitle
         ? `Wants Property via Broker: ${propTitle}`
         : "Accredited Broker Representation Inquiry",

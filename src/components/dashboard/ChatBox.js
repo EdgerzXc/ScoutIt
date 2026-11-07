@@ -1115,22 +1115,23 @@ export default function ChatBox({
   // Nobody types into a thread the other side hasn't opted into.
   const rawMyRole = String(deal.myRole || "").trim().toLowerCase();
   const recipientLensBadge =
-    deal.intentBadge ||
-    (rawMyRole === "owner"
-      ? "For Owner · Property Inquiry"
-      : rawMyRole === "broker" || rawMyRole === "salesperson"
-        ? "For Broker · Mandate / Inquiry"
-        : rawMyRole === "photographer"
-          ? "Needs Photographer · Layer 4"
-          : rawMyRole === "designer"
-            ? "Needs Designer · Layer 4"
-            : rawMyRole === "researcher"
-              ? "Needs Researcher · Layer 4"
-              : rawMyRole === "provider"
-                ? "Needs Creator · Layer 4"
-                : rawMyRole === "buyer" || rawMyRole === "seeker"
-                  ? "Your Seeker Inquiry"
-                  : null);
+    deal.intentBadge === "PROPERTY · REQUIRES OWNER" || deal.intentBadge === "FOR OWNER · PROPERTY INQUIRY" || rawMyRole === "owner"
+      ? "Property · Requires Owner"
+      : deal.intentBadge === "LAYER 4 · REQUIRES PHOTOGRAPHER" || deal.intentBadge === "NEEDS PHOTOGRAPHER · LAYER 4" || rawMyRole === "photographer"
+        ? "Layer 4 · Requires Photographer"
+        : deal.intentBadge === "LAYER 4 · REQUIRES DESIGNER" || deal.intentBadge === "NEEDS DESIGNER · LAYER 4" || rawMyRole === "designer"
+          ? "Layer 4 · Requires Designer"
+          : deal.intentBadge === "LAYER 4 · REQUIRES RESEARCHER" || deal.intentBadge === "NEEDS RESEARCHER · LAYER 4" || rawMyRole === "researcher"
+            ? "Layer 4 · Requires Researcher"
+            : deal.intentBadge === "LAYER 4 · REQUIRES CREATOR" || deal.intentBadge === "NEEDS CREATOR · LAYER 4" || rawMyRole === "provider"
+              ? "Layer 4 · Requires Creator"
+              : deal.intentBadge === "PROPERTY · REQUIRES OPERATOR" || deal.intentBadge === "FOR OPERATOR · UNIT INQUIRY" || rawMyRole === "operator"
+                ? "Property · Requires Operator"
+                : deal.intentBadge === "MANDATE · REQUIRES BROKER" || deal.intentBadge === "FOR BROKER · PROPERTY / MANDATE" || rawMyRole === "broker" || rawMyRole === "salesperson"
+                  ? "Mandate · Requires Broker"
+                  : rawMyRole === "buyer" || rawMyRole === "seeker" || deal.intentBadge === "YOUR SEEKER INQUIRY" || deal.intentBadge === "YOUR PROPERTY INQUIRY"
+                    ? "Your Seeker Inquiry"
+                    : deal.intentBadge || null;
 
   if (isWaiting) {
     const sentAt = deal.created_at || deal.createdAt;
