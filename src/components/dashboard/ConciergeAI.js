@@ -14,7 +14,7 @@ export default function ConciergeAI() {
     {
       id: "1",
       role: "ai",
-      content: "Welcome to Scout AI. I have synchronized with your Spatial Vault. How can I assist your real estate strategy today?",
+      content: "Welcome to Scout Concierge. I have synchronized with your portfolio and spatial vault. How can I assist your property advisory today?",
 
       timestamp: new Date().toISOString()
     }
@@ -124,8 +124,8 @@ export default function ConciergeAI() {
               <Sparkles size="1em" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-headline-editorial text-lg text-on-surface leading-none">Scout AI</h3>
-              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">VIP Concierge Active</span>
+              <h3 className="font-headline-editorial text-lg text-on-surface leading-none">Scout Concierge</h3>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">Advisory Desk</span>
             </div>
           </div>
           <button 
@@ -142,7 +142,7 @@ export default function ConciergeAI() {
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'self-end items-end' : 'self-start items-start'}`}>
               <span className="font-label-caps text-[12px] tracking-widest text-text-muted uppercase mb-1">
-                {msg.role === 'user' ? 'You' : 'Scout AI'}
+                {msg.role === 'user' ? 'You' : 'Scout Concierge'}
               </span>
               <div className={`p-4 rounded-2xl text-sm leading-relaxed font-body break-words [overflow-wrap:anywhere] min-w-0 ${
                 msg.role === 'user' 
@@ -194,7 +194,7 @@ export default function ConciergeAI() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Command the AI..."
+              placeholder="Ask the spatial concierge..."
               className="w-full bg-surface border border-surface-variant rounded-full pl-11 pr-14 py-3 text-sm text-on-surface focus:outline-none focus:border-gold-accent transition placeholder:text-text-muted font-working-title"
               disabled={isTyping}
             />

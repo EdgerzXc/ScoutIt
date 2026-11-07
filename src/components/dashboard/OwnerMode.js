@@ -9,7 +9,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { Building2, Camera, Search, Palette, ArrowUpRight, FileText, Edit3, FileUp, Bot, Radio, FolderOpen, Sparkles } from "lucide-react";
+import { Building2, Camera, Search, Palette, ArrowUpRight, FileText, Edit3, FileUp, Bot, Radio, FolderOpen, Sparkles, Clock } from "lucide-react";
 import Papa from 'papaparse';
 // A-120: `sanitizeObject` was imported here and never called — an orphaned
 // import that made the security checklist read as though owner input was
@@ -505,7 +505,7 @@ export default function OwnerMode() {
                 if (!pdfRes.ok) throw new Error(pdfData.error || 'Could not read PDF');
                 const text = pdfData.text;
 
-                addToast("AI is extracting property details...", "●");
+                addToast("Processing property dossier...", "●");
 
                 // 2. Hand the extracted text to the schema-mapping AI.
                 const res = await fetch('/api/ai/assimilate', {
@@ -546,7 +546,7 @@ export default function OwnerMode() {
                 }
               } catch (err) {
                 console.error('[Concierge]', err);
-                addToast(`AI extraction failed: ${sanitizeError(err)}`, "❌");
+                addToast(`Dossier intake notice: ${sanitizeError(err)}`, "❌");
               } finally {
                 setIsAssimilating(false);
                 setSelectedFile(null);
@@ -1366,9 +1366,9 @@ export default function OwnerMode() {
           <div className="card-atmosphere rounded-lg p-6">
             <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Listing Health</h3>
             {activeListing.pipelineStatus === 'ai_drafting' ? (
-               <div className="flex flex-col items-center justify-center py-4 opacity-50">
-                 <span className="text-3xl mb-2 animate-pulse">⏳</span>
-                 <p className="text-xs text-center font-label-caps uppercase tracking-widest text-text-muted">AWAITING AI ANALYSIS</p>
+               <div className="flex flex-col items-center justify-center py-4 opacity-75">
+                 <Clock className="w-6 h-6 text-gold-accent animate-spin mb-2" />
+                 <p className="text-xs text-center font-label-caps uppercase tracking-widest text-text-muted">ANALYZING LISTING DOSSIER</p>
                </div>
             ) : (
                <div className="flex items-center gap-4 mb-6">

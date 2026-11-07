@@ -564,7 +564,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               <div className="text-gold-accent">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
               </div>
-              <h2 className="text-2xl font-headline-editorial text-gold-accent">Our AI is reading your document...</h2>
+              <h2 className="text-2xl font-headline-editorial text-gold-accent">Reading property dossier...</h2>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4">
@@ -611,7 +611,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         <div className="w-full max-w-3xl">
           {extractionError && (
             <div className="bg-error/10 border border-error/30 text-error p-3 rounded text-sm mb-6">
-              <strong>AI Extraction Error:</strong> {extractionError}
+              <strong>Document Intake Notice:</strong> {extractionError}
             </div>
           )}
 
@@ -689,7 +689,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface focus:outline-none focus:border-gold-accent transition min-h-[120px] resize-y text-base md:text-sm leading-relaxed" 
                   value={formData.description} 
                   onChange={e => setField("description", e.target.value)} 
-                  placeholder="Describe your property. Click the 'SEO Optimize' button to have our AI restructure it for maximum search engine visibility." 
+                  placeholder="Describe your property. Click 'SEO Optimize Description' to format for high search visibility." 
                 />
               </div>
 

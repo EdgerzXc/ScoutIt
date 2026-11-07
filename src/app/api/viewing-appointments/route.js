@@ -7,6 +7,9 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { bookViewing } from "@/lib/viewings/bookingService";
 import { isValidTimeZone } from "@/lib/calendar/timezone";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 
 
 export async function GET(request) {
@@ -126,11 +129,12 @@ export async function GET(request) {
     }
 
     let namesById = {};
-    if (otherPartyIds.size > 0) {
+    const validPartyIds = [...otherPartyIds].filter((id) => id && typeof id === "string" && UUID_RE.test(id));
+    if (validPartyIds.length > 0) {
       const { data: profiles } = await supabaseAdmin
         .from("user_profiles")
         .select("id, display_name")
-        .in("id", [...otherPartyIds]);
+        .in("id", validPartyIds);
       namesById = Object.fromEntries((profiles || []).map((p) => [p.id, p.display_name]));
     }
 

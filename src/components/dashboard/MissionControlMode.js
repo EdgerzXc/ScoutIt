@@ -1138,10 +1138,10 @@ export default function MissionControlMode() {
         ) : activeTab === "ai" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
             <div>
-              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]">Enterprise Console • AI</span>
+              <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase drop-shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]">Enterprise Console • Intelligence</span>
               <h1 className="font-display-md text-3xl md:text-4xl mt-1 text-white">Intelligence Center</h1>
               <p className="text-sm text-text-secondary mt-2 max-w-xl">
-                Where AI works for your portfolio: drafting dossiers now, portfolio Q&amp;A next.
+                Where spatial data works for your portfolio: structured listing dossiers now, conversational portfolio intelligence next.
               </p>
             </div>
             
@@ -1201,7 +1201,7 @@ export default function MissionControlMode() {
                     </div>
                   ) : (
                     <p className="text-xs text-text-secondary leading-relaxed py-4">
-                      Queue is empty. When a listing enters AI drafting, its progress shows here.
+                      Queue is empty. When a listing enters automated drafting, its progress shows here.
                     </p>
                   )}
                 </GlassPanel>
@@ -1209,7 +1209,7 @@ export default function MissionControlMode() {
                 <GlassPanel className="flex-1 rounded-2xl border-white/5 p-6 flex flex-col justify-between group hover:border-gold-accent/20 transition">
                   <div>
                     <h4 className="text-white font-medium text-sm mb-2">Market Reports</h4>
-                    <p className="text-xs text-text-secondary">AI comp analysis from real closings in your zones, switching on once enough market data accumulates.</p>
+                    <p className="text-xs text-text-secondary">Automated comp analysis from verified closings in your zones, switching on once enough market data accumulates.</p>
                   </div>
                   <div className="text-text-secondary text-[12px] font-mono uppercase tracking-widest">
                     Coming online
@@ -1298,11 +1298,11 @@ export default function MissionControlMode() {
 
                     <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition cursor-pointer">
                       <h4 className="text-white font-medium text-sm mb-2 flex justify-between items-center">
-                        API Keys
+                        Integration Endpoints
                         <ArrowRight size={14} className="text-text-secondary" />
                       </h4>
-                      <p className="text-xs text-text-secondary mb-4">Manage webhooks and external API access tokens.</p>
-                      <div className="text-xs font-mono text-text-secondary bg-black/50 px-2 py-1 rounded inline-block">No tokens issued yet</div>
+                      <p className="text-xs text-text-secondary mb-4">Manage webhooks and external data connectors.</p>
+                      <div className="text-xs font-mono text-text-secondary bg-black/50 px-2 py-1 rounded inline-block">Active · Enterprise Gate</div>
                     </GlassPanel>
                   </div>
                 )}
@@ -1311,7 +1311,7 @@ export default function MissionControlMode() {
                   <GlassPanel className="rounded-2xl border-white/5 p-6 md:p-8 flex flex-col items-center justify-center text-center animate-in fade-in min-h-[300px]">
                     <Settings size={32} className="text-white/70 mb-4" />
                     <h3 className="text-lg text-white font-medium mb-2">{adminActiveTab}</h3>
-                    <p className="text-sm text-text-secondary max-w-sm">This settings module is currently locked in the Developer Preview Sandbox.</p>
+                    <p className="text-sm text-text-secondary max-w-sm">This module is scheduled for upcoming enterprise release.</p>
                   </GlassPanel>
                 )}
               </div>

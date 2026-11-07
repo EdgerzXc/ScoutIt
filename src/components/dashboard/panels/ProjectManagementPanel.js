@@ -153,13 +153,13 @@ export default function ProjectManagementPanel({ properties = [] }) {
             <div className="p-6 border-b border-white/10">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-gold-accent">✨</span>
-                <h3 className="text-sm font-medium tracking-widest text-gold-accent uppercase">AI Executive Briefing</h3>
+                <h3 className="text-sm font-medium tracking-widest text-gold-accent uppercase">Executive Briefing</h3>
               </div>
-              <p className="text-xs text-text-secondary">Synthesized from your team&apos;s updates</p>
+              <p className="text-xs text-text-secondary">Synthesized from team dispatches</p>
             </div>
             <div className="p-6 space-y-4">
               <p className="text-sm text-text-secondary leading-relaxed">
-                Once your team posts daily updates for <span className="text-white font-medium">{currentEstate?.title || "this project"}</span>, the AI distills them into a morning briefing: progress, risks, and momentum in three lines instead of thirty posts.
+                Once your team posts daily updates for <span className="text-white font-medium">{currentEstate?.title || "this project"}</span>, this console synthesizes them into an executive morning briefing: progress, risks, and momentum in three structured lines.
               </p>
               <div className="text-[12px] font-mono uppercase tracking-widest text-text-secondary border border-white/10 bg-white/[0.02] rounded px-2 py-1.5 inline-block">
                 Waiting for first updates

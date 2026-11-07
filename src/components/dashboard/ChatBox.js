@@ -1849,9 +1849,9 @@ export default function ChatBox({
             }}
             disabled={closed || isSubmitting || isRecording}
             className="px-3 py-1.5 rounded-full bg-gold-accent/10 border border-gold-accent/40 text-gold-accent hover:bg-gold-accent/20 text-xs font-mono transition disabled:opacity-50 flex items-center gap-1 shrink-0"
-            title="Draft RESA-compliant AI Counter-Offer"
+            title="Draft RESA-compliant structured counter-offer"
           >
-            <span>🪄 AI Counter-Offer</span>
+            <span>🪄 Counter-Offer Draft</span>
           </button>
 
           <button

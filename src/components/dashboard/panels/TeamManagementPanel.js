@@ -97,7 +97,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
       { id: "invite_members", label: "Invite Members", description: "Allow member to invite new users to the Enterprise OS." },
       { id: "publish_airtable", label: "Publish to Master", description: "Allow direct publishing and sync to the public Airtable directory." },
       { id: "export_data", label: "Export Portfolio Data", description: "Allow downloading of raw CRM and property data CSVs." },
-      { id: "bypass_ai_queue", label: "Priority AI Processing", description: "Bypass the standard drafting queue for instant AI insights." },
+      { id: "bypass_ai_queue", label: "Priority Ingestion Queue", description: "Bypass standard queue for instant dossier processing." },
     ];
 
     // The real signed-in super-admin is the only member until invites go out.

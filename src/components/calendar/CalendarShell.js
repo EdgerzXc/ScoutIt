@@ -135,10 +135,28 @@ export default function CalendarShell() {
     setLoading(true);
     const { from, to } = getRange(view, viewDate);
 
-    const [eventsRes, viewingsRes] = await Promise.allSettled([
+    let [eventsRes, viewingsRes] = await Promise.allSettled([
       fetchCalendarEvents({ from: from.toISOString(), to: to.toISOString(), userId }),
       crmFetch("/api/viewing-appointments", { mockUserId: userId }),
     ]);
+
+    if (generation !== loadGeneration.current) return;
+
+    // Silent 1-shot retry for transient cold-start or connection drops
+    if (eventsRes.status === "rejected" || viewingsRes.status === "rejected") {
+      await new Promise((r) => setTimeout(r, 300));
+      if (generation !== loadGeneration.current) return;
+      const [retryEvents, retryViewings] = await Promise.allSettled([
+        eventsRes.status === "rejected"
+          ? fetchCalendarEvents({ from: from.toISOString(), to: to.toISOString(), userId })
+          : Promise.resolve(eventsRes.value),
+        viewingsRes.status === "rejected"
+          ? crmFetch("/api/viewing-appointments", { mockUserId: userId })
+          : Promise.resolve(viewingsRes.value),
+      ]);
+      if (eventsRes.status === "rejected") eventsRes = retryEvents;
+      if (viewingsRes.status === "rejected") viewingsRes = retryViewings;
+    }
 
     if (generation !== loadGeneration.current) return;
 

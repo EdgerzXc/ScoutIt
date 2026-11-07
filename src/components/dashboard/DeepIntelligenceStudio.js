@@ -447,7 +447,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
         <div className="w-full max-w-3xl">
           {extractionError && (
             <div className="bg-error/10 border border-error/30 text-error p-3 rounded text-sm mb-6">
-              <strong>AI Extraction Error:</strong> {extractionError}
+              <strong>Document Intake Notice:</strong> {extractionError}
             </div>
           )}
 
