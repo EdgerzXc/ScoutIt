@@ -14,7 +14,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const userId = await resolveUserId(request);
 
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!userId) return NextResponse.json({ appointments: [] });
 
     if (!supabaseAdmin) {
       return NextResponse.json({ appointments: [] });

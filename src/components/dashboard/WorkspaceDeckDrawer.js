@@ -69,6 +69,29 @@ export default function WorkspaceDeckDrawer({
     }
   }, [isOpen]);
 
+  // 60-second auto-tuck timer when drawer is opened
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => {
+      setIsOpen(false);
+    }, 60000);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
+  // Auto-tuck drawer on downward scroll to keep workspace view clear
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 40) {
+        setIsOpen(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Safe direct handle touch handlers (blocks Chrome pull-to-refresh on direct drag)
   const handleHandleTouchStart = useCallback((e) => {
     if (e.touches && e.touches.length === 1) {
@@ -238,7 +261,7 @@ export default function WorkspaceDeckDrawer({
         </div>
       </div>
 
-      {/* ── ANDROID-STYLE GLOWING CAPACITIVE PULL HANDLE (1-TAP THUMB OPERABLE) ── */}
+      {/* ── SEAMLESS GLOWING CAPACITIVE PULL HANDLE (1-TAP THUMB OPERABLE) ── */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -247,39 +270,25 @@ export default function WorkspaceDeckDrawer({
         onTouchEnd={handleHandleTouchEnd}
         aria-expanded={isOpen}
         aria-controls="workspace-deck-content"
-        aria-label={isOpen ? "Collapse Command Deck Shade" : "Open Command Deck Shade"}
-        className="group relative w-full flex items-center justify-between px-3 py-1.5 min-h-[44px] bg-surface/85 hover:bg-surface-variant/40 border-y border-surface-variant/30 backdrop-blur-xl transition-all duration-200 select-none active:scale-[0.99] touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent"
+        aria-label={isOpen ? "Tuck Command Deck Shade" : "Open Command Deck Shade"}
+        className="group relative w-full flex flex-col items-center justify-center py-2 min-h-[44px] bg-surface/90 hover:bg-surface-variant/40 border-y border-surface-variant/30 backdrop-blur-xl transition-all duration-200 select-none active:scale-[0.99] touch-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-accent"
       >
-        {/* Left: Active Destination Micro-Label */}
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-gold-accent shrink-0 animate-pulse" />
-          <span className="font-mono text-[12px] font-bold uppercase tracking-widest text-text-secondary truncate">
-            {activeLabel}
-          </span>
-          {totalUnread > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-gold-accent text-background font-mono text-[12px] font-bold">
-              {totalUnread}
-            </span>
-          )}
-        </div>
-
-        {/* Center: Glowing Gold Capacitive Handle Bar (1-Tap Thumb Action) */}
-        <div className="flex flex-col items-center justify-center gap-0.5 px-4 py-1">
+        <div className="relative flex flex-col items-center justify-center gap-1">
           <div
-            className="w-12 h-1 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-16 group-hover:shadow-[0_0_14px_rgba(var(--accent-rgb),0.85)] shadow-[0_0_8px_rgba(var(--accent-rgb),0.55)] animate-pulse"
+            className="w-14 h-1.5 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-20 shadow-[0_0_12px_rgba(var(--accent-rgb),0.75)] animate-pulse"
             aria-hidden="true"
           />
-        </div>
-
-        {/* Right: State Action Cue */}
-        <div className="flex items-center gap-1 text-text-muted group-hover:text-gold-accent transition-colors">
-          <span className="font-mono text-[12px] uppercase tracking-wider text-text-muted">
-            {isOpen ? "Tuck" : "Deck"}
+          <span className="font-mono text-[10px] uppercase tracking-widest text-text-muted group-hover:text-gold-accent transition-colors flex items-center gap-1">
+            <span>‹</span> {isOpen ? "Tap or drag up to tuck" : "Click to drag · Connected Deck"} <span>›</span>
           </span>
-          {isOpen ? (
-            <ChevronUp size={14} className="shrink-0 transition-transform" aria-hidden="true" />
-          ) : (
-            <ChevronDown size={14} className="shrink-0 transition-transform" aria-hidden="true" />
+
+          {totalUnread > 0 && !isOpen && (
+            <span
+              className="absolute -right-8 top-0 px-1.5 py-0.5 min-w-[18px] h-4 rounded-full bg-gold-accent text-background font-mono text-[11px] font-bold leading-none flex items-center justify-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.6)]"
+              aria-label={`${totalUnread} unread items`}
+            >
+              {totalUnread > 99 ? "99+" : totalUnread}
+            </span>
           )}
         </div>
       </button>

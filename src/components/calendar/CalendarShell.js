@@ -148,13 +148,14 @@ export default function CalendarShell() {
       setViewings(appts.map(normalizeViewing));
     }
 
-    const isAuthError = (reason) => /401|unauthorized/i.test(reason?.message || "");
+    const isNonFatalAuthOrPerm = (reason) =>
+      /401|403|unauthorized|forbidden|canceled|abort|rate limit/i.test(reason?.message || "");
     const failed = [
-      eventsRes.status === "rejected" && !isAuthError(eventsRes.reason) ? "your events" : null,
-      viewingsRes.status === "rejected" && !isAuthError(viewingsRes.reason) ? "your viewings" : null,
+      eventsRes.status === "rejected" && !isNonFatalAuthOrPerm(eventsRes.reason) ? "your events" : null,
+      viewingsRes.status === "rejected" && !isNonFatalAuthOrPerm(viewingsRes.reason) ? "your viewings" : null,
     ].filter(Boolean);
     if (failed.length) {
-      console.error("Calendar load failed", eventsRes.reason || viewingsRes.reason);
+      console.warn("Calendar load notice:", eventsRes.reason || viewingsRes.reason);
       setLoadError(`Couldn't load ${failed.join(" or ")}. This calendar may be incomplete.`);
     } else {
       setLoadError("");
@@ -282,16 +283,29 @@ export default function CalendarShell() {
       {loadError && (
         <div
           role="alert"
-          className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-error/40 bg-error/10 px-4 py-3"
+          className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-gold-accent/35 bg-surface/90 px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.4)] backdrop-blur-md"
         >
-          <p className="font-mono text-[12px] uppercase tracking-wider text-error">{loadError}</p>
-          <button
-            type="button"
-            onClick={loadData}
-            className="shrink-0 rounded border border-error/40 px-3 py-1 font-mono text-[12px] uppercase tracking-wider text-error transition-colors hover:bg-error/15"
-          >
-            Retry
-          </button>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-gold-accent shrink-0 animate-pulse" />
+            <p className="font-mono text-[12px] uppercase tracking-wider text-text-secondary truncate">{loadError}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={loadData}
+              className="shrink-0 rounded-lg border border-gold-accent/40 bg-gold-accent/10 px-3 py-1 font-mono text-[12px] font-semibold uppercase tracking-wider text-gold-accent transition-all hover:bg-gold-accent hover:text-background"
+            >
+              Retry
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoadError("")}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-variant transition"
+              aria-label="Dismiss notice"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
