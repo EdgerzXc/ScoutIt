@@ -94,7 +94,7 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <span className="font-mono text-xs uppercase tracking-widest text-gold-accent block mb-1">
-                UNIFIED COMMAND · MASTER CRM &amp; CROSS-LENS PULSE
+                UNIFIED COMMAND · CRM &amp; CROSS-ROLE PIPELINE
               </span>
               <h1 className="font-headline-editorial text-2xl md:text-3xl text-on-surface">
                 All Lenses Connected in One Pipeline
@@ -113,7 +113,7 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
                 className="w-full min-h-12 px-4 py-2.5 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:bg-gold-bright active:scale-[0.98] transition shadow-[0_0_14px_rgba(var(--accent-rgb),0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
               >
                 <Kanban size={15} aria-hidden="true" />
-                <span>Open Master CRM</span>
+                <span>Open CRM</span>
               </Link>
               <Link
                 href="/dashboard/inbox"
@@ -273,7 +273,7 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
                   href="/dashboard/crm"
                   className="min-h-11 px-4 py-2 rounded-xl border border-gold-accent/40 bg-gold-accent/15 hover:bg-gold-accent/25 text-gold-bright font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition"
                 >
-                  <span>Open Master CRM Kanban</span>
+                  <span>Open CRM Pipeline</span>
                   <ArrowUpRight size={14} aria-hidden="true" />
                 </Link>
                 <Link

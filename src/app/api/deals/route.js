@@ -530,12 +530,12 @@ export async function POST(request) {
     await notifyUser(supabaseAdmin, {
       userId: otherPartyEmail,
       title: serviceRoleLabel
-        ? `New ${serviceRoleLabel} inquiry`
+        ? `Layer 4 Booking · ${serviceRoleLabel}`
         : isOwner
-          ? "New property invitation"
-          : "New Connect request",
+          ? "Property Listing Inquiry · Owner"
+          : "New Connect Request",
       desc: serviceRoleLabel
-        ? `Someone requested your ${serviceRoleLabel} services via Layer 4 Professionals.`
+        ? `Someone booked your ${serviceRoleLabel} services via Layer 4. Requires your response as ${serviceRoleLabel}.`
         : `A new Connect request was opened for "${property?.title || "a property"}".`,
       propertyId: property?.id || null,
       notificationType: "deal_created",

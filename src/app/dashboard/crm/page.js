@@ -312,7 +312,7 @@ function CRMPageInner() {
     return (
       <div role="main" className="flex-1 flex flex-col gap-4 justify-center items-center text-center h-screen h-dvh px-6 relative">
         <AtmosphereBackground variant="dashboard" />
-        <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">Master CRM</h1>
+        <h1 className="font-headline-editorial text-3xl text-on-surface relative z-10">ScoutIt CRM</h1>
         <p className="relative z-10 max-w-sm font-body text-base leading-relaxed text-text-secondary">Sign in to see your pipeline, appointments, and tasks.</p>
         <Link href="/dashboard" className="relative z-10 min-h-11 rounded border border-gold-accent px-6 py-3 font-label-caps text-label-caps uppercase tracking-widest text-gold-accent transition-colors duration-200 ease-out hover:bg-gold-accent hover:text-background">
           ← Back to Dashboard

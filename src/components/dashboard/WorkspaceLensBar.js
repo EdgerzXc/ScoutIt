@@ -176,9 +176,9 @@ export default function WorkspaceLensBar({
             <Link
               href="/dashboard/crm"
               className="min-h-11 px-3 py-2 rounded-xl border border-surface-variant bg-surface/90 hover:border-gold-accent/40 text-on-surface hover:text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0 transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-              title="Open unified Master CRM pipeline across all lenses"
+              title="Open unified CRM pipeline across all roles"
             >
-              <span>Master CRM</span>
+              <span>CRM</span>
               <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
           </div>

@@ -489,13 +489,24 @@ export async function POST(request) {
       const propertyTitle = propertyRow?.title || 'your property';
       for (const recipientId of recipientIds) {
         if (!recipientId || recipientId === userId) continue;
+        const isOwnerRecipient = propertyRow?.owner_id === recipientId;
+        const isBrokerRecipient = effectivePreferredBrokerId === recipientId || (!isOwnerRecipient && role !== 'operator');
+        const notifTitle = role === 'operator'
+          ? 'Property Unit Request · Operator'
+          : isBrokerRecipient
+            ? 'Broker Mandate Inquiry · Broker'
+            : 'Property Listing Inquiry · Owner';
+        const notifDesc = role === 'operator'
+          ? `Someone wants to operate units in "${propertyTitle}". Requires Operator response.`
+          : isBrokerRecipient
+            ? `Someone requested representation regarding "${propertyTitle}". Requires Broker response.`
+            : `Someone inquired about your listing "${propertyTitle}". Requires Owner response.`;
+
         await notifyUser(supabaseAdmin, {
           userId: recipientId,
-          title: role === 'operator' ? 'New operator request' : 'New inquiry',
-          desc: role === 'operator'
-            ? `Someone wants to operate units in "${propertyTitle}".`
-            : `Someone is asking about "${propertyTitle}".`,
-          icon: role === 'operator' ? '🏢' : '💬',
+          title: notifTitle,
+          desc: notifDesc,
+          icon: role === 'operator' ? '🏢' : isBrokerRecipient ? '⚡' : '💬',
           propertyId: resolvedListingId,
           notificationType: role === 'operator' ? 'operator_request' : 'new_inquiry',
         });
