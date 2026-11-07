@@ -1,31 +1,132 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-export default function ServiceConnectionPortal({ providerName, serviceType, isModal = false }) {
-  const [alias, setAlias] = useState("");
-  const [email, setEmail] = useState("");
+function inferTargetRole(targetRole, serviceType) {
+  const raw = String(targetRole || serviceType || "").trim().toLowerCase();
+  if (raw.includes("photo")) return "photographer";
+  if (raw.includes("design") || raw.includes("event")) return "designer";
+  if (raw.includes("research")) return "researcher";
+  return "photographer";
+}
+
+export default function ServiceConnectionPortal({
+  providerId,
+  providerName,
+  serviceType = "Spatial Photographer",
+  targetRole,
+  forSlug = "",
+  forTitle = "",
+  isModal = false,
+}) {
+  const [user, setUser] = useState(null);
+  const [projectTitle, setProjectTitle] = useState(forTitle || "");
   const [intent, setIntent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e) => {
+  const resolvedRole = inferTargetRole(targetRole, serviceType);
+  const roleHeadline =
+    resolvedRole === "photographer"
+      ? "Spatial Photographer"
+      : resolvedRole === "designer"
+        ? "Event & Concept Designer"
+        : resolvedRole === "researcher"
+          ? "Zoning & Land Researcher"
+          : serviceType;
+
+  useEffect(() => {
+    let mounted = true;
+    async function checkAuth() {
+      try {
+        const { getSession } = await import("@/lib/authClient");
+        const { data: { session } } = await getSession();
+        if (session?.user && mounted) {
+          setUser(session.user);
+        }
+      } catch {
+        if (mounted) setUser(null);
+      }
+    }
+    checkAuth();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!alias || !email || !intent) return;
-    setSubmitted(true);
+    if (!intent.trim() || submitting) return;
+
+    if (!providerId) {
+      setErrorMsg("This professional profile is a public CMS preview without a linked account yet.");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMsg("");
+
+    try {
+      const { getSession } = await import("@/lib/authClient");
+      const { data: { session } } = await getSession();
+      if (!session?.access_token) {
+        setErrorMsg("Please sign in to connect with this Layer 4 professional.");
+        setSubmitting(false);
+        return;
+      }
+
+      const cleanTitle = (projectTitle || forTitle || `${roleHeadline} Booking`).trim();
+      const res = await fetch("/api/deals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          otherPartyEmail: providerId,
+          propertySlug: forSlug || null,
+          targetRole: resolvedRole,
+          serviceTitle: cleanTitle,
+          sourceLayer: "layer_4_professionals",
+          status: "pending",
+          initialMessage: intent.trim(),
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "Could not send request. No Connect was spent.");
+        return;
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error("[SERVICE PORTAL FAILED]", err);
+      setErrorMsg("Could not reach ScoutIt to send your request. No Connect was spent.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="portal-success">
-        <span className="success-icon">🔑</span>
-        <h3>Project Brief Registered</h3>
+        <span className="success-icon">✦ 🔑</span>
+        <h3>{roleHeadline} Request Sent!</h3>
         <p>
-          Your project inquiry for <strong>{providerName}</strong> ({serviceType}) has been logged.
-          During the pilot phase, ScoutIt concierge will introduce you directly at <strong>{email}</strong>.
+          Your Layer 4 project brief for <strong>{providerName}</strong> has been delivered to their{" "}
+          <strong>{roleHeadline} Lens</strong> in Deal Inbox and Master CRM using <strong>1 Connect</strong>.
         </p>
-        <button className="reset-portal-btn" onClick={() => setSubmitted(false)}>
-          Submit Another Request
-        </button>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/dashboard/inbox" className="reset-portal-btn" style={{ textDecoration: "none" }}>
+            Open Deal Inbox →
+          </Link>
+          <button className="reset-portal-btn" onClick={() => setSubmitted(false)}>
+            Submit Another Request
+          </button>
+        </div>
 
         <style jsx global>{`
           .portal-success {
@@ -113,49 +214,94 @@ export default function ServiceConnectionPortal({ providerName, serviceType, isM
       {/* Connection Portal Card LAST */}
       <div className="connection-portal-card">
         <div className="portal-header">
-          <h4>Request Roster Channel Clearance</h4>
-          <p>Submit security credentials to request a direct connection with this {serviceType}.</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+            <h4 style={{ margin: 0 }}>Request {roleHeadline}</h4>
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "var(--accent)",
+              border: "1px solid var(--accent-muted)",
+              background: "rgba(var(--accent-rgb), 0.1)",
+              padding: "4px 12px",
+              borderRadius: 999,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}>
+              Layer 04 · Needs {roleHeadline} · 1 Connect
+            </span>
+          </div>
+          <p>
+            Open a direct Deal Room with <strong>{providerName}</strong> tagged specifically for their{" "}
+            <strong>{roleHeadline}</strong> workspace lens.
+          </p>
         </div>
-        
-        <form className="portal-form" onSubmit={handleSubmit}>
-          <div className="form-row">
-            <div className="form-group-item">
-              <label>Identification Alias</label>
-              <input 
-                type="text" 
-                placeholder="e.g. Project Lead / Brand Director"
-                value={alias}
-                onChange={(e) => setAlias(e.target.value)}
-                required 
-              />
-            </div>
-            <div className="form-group-item">
-              <label>Secure Comm Link (Email)</label>
-              <input 
-                type="email" 
-                placeholder="name@organization.ph"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required 
-              />
-            </div>
-          </div>
-          
-          <div className="form-group-item">
-            <label>What do you need?</label>
-            <textarea
-              placeholder={`Describe your project: the space, the look you're going for, and when you need it done...`}
-              rows="5" 
-              value={intent}
-              onChange={(e) => setIntent(e.target.value)}
-              required
-            ></textarea>
-          </div>
 
-          <button type="submit" className="portal-submit-btn">
-            Send Request →
-          </button>
-        </form>
+        {!user ? (
+          <div style={{
+            background: "var(--surface2)",
+            border: "1px dashed var(--accent-muted)",
+            borderRadius: 8,
+            padding: 32,
+            textAlign: "center",
+          }}>
+            <h4 style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--on-surface)", marginBottom: 8 }}>
+              Sign In to Request {providerName}
+            </h4>
+            <p style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 20 }}>
+              Sign in to send a verified Layer 4 brief to {providerName}&apos;s {roleHeadline} Inbox and Master CRM.
+            </p>
+            <Link href="/onboarding" className="portal-submit-btn" style={{ display: "inline-block", textDecoration: "none" }}>
+              Sign In / Claim Connects →
+            </Link>
+          </div>
+        ) : (
+          <form className="portal-form" onSubmit={handleSubmit}>
+            {errorMsg && (
+              <div
+                role="alert"
+                style={{
+                  background: "rgba(var(--red-rgb, 239, 68, 68), 0.1)",
+                  border: "1px solid rgba(var(--red-rgb, 239, 68, 68), 0.35)",
+                  color: "var(--red)",
+                  padding: "12px 16px",
+                  borderRadius: 6,
+                  fontSize: 13,
+                }}
+              >
+                {errorMsg}
+              </div>
+            )}
+
+            <div className="form-group-item">
+              <label htmlFor="service-project-title">Space or Project Name</label>
+              <input
+                id="service-project-title"
+                type="text"
+                placeholder={`e.g. BGC Penthouse Shoot / Makati Showroom (${roleHeadline})`}
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group-item">
+              <label htmlFor="service-project-intent">What do you need from this {roleHeadline}?</label>
+              <textarea
+                id="service-project-intent"
+                placeholder="Describe your project: the space, deliverables needed, and target schedule..."
+                rows="5"
+                value={intent}
+                onChange={(e) => setIntent(e.target.value)}
+                required
+              />
+            </div>
+
+            <button type="submit" className="portal-submit-btn" disabled={submitting}>
+              {submitting ? "Sending Request..." : `Request ${roleHeadline} (1 Connect) →`}
+            </button>
+          </form>
+        )}
       </div>
       <style jsx global>{`
         

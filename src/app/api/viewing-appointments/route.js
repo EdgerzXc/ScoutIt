@@ -24,15 +24,33 @@ export async function GET(request) {
       return NextResponse.json({ appointments: [] });
     }
 
-    // Fetch where user is host or guest
-    const { data: appointments, error } = await supabaseAdmin
+    // Fetch where user is host or guest (with 42703 fallback when O-004 columns
+    // ends_at / duration_minutes / booked_timezone / meet_link are not yet migrated).
+    const fullFields = `
+      id, deal_id, host_id, guest_id, property_id, scheduled_at, ends_at,
+      duration_minutes, booked_timezone, status, notes, created_at, meet_link
+    `;
+    const baseFields = "id, deal_id, host_id, guest_id, property_id, scheduled_at, status, notes, created_at";
+
+    let { data: appointments, error } = await supabaseAdmin
       .from("viewing_appointments")
-      .select(`
-        id, deal_id, host_id, guest_id, property_id, scheduled_at, ends_at,
-        duration_minutes, booked_timezone, status, notes, created_at, meet_link
-      `)
+      .select(fullFields)
       .or(`host_id.eq.${userId},guest_id.eq.${userId}`)
       .order("scheduled_at", { ascending: true });
+
+    if (error && (error.code === "42703" || /does not exist|undefined_column/i.test(error.message || ""))) {
+      const retry = await supabaseAdmin
+        .from("viewing_appointments")
+        .select(baseFields)
+        .or(`host_id.eq.${userId},guest_id.eq.${userId}`)
+        .order("scheduled_at", { ascending: true });
+      appointments = retry.data;
+      error = retry.error;
+    }
+
+    if (error && (error.code === "42P01" || /relation .* does not exist/i.test(error.message || ""))) {
+      return NextResponse.json({ appointments: [] });
+    }
 
     if (error) {
       console.error("[APPOINTMENTS API] Fetch error:", error);

@@ -1115,21 +1115,22 @@ export default function ChatBox({
   // Nobody types into a thread the other side hasn't opted into.
   const rawMyRole = String(deal.myRole || "").trim().toLowerCase();
   const recipientLensBadge =
-    rawMyRole === "owner"
-      ? "For Your Owner Lens"
+    deal.intentBadge ||
+    (rawMyRole === "owner"
+      ? "For Owner · Property Inquiry"
       : rawMyRole === "broker" || rawMyRole === "salesperson"
-        ? "For Your Broker Lens"
+        ? "For Broker · Mandate / Inquiry"
         : rawMyRole === "photographer"
-          ? "For Your Photographer Lens"
+          ? "Needs Photographer · Layer 4"
           : rawMyRole === "designer"
-            ? "For Your Designer Lens"
+            ? "Needs Designer · Layer 4"
             : rawMyRole === "researcher"
-              ? "For Your Researcher Lens"
+              ? "Needs Researcher · Layer 4"
               : rawMyRole === "provider"
-                ? "For Your Creator Lens"
+                ? "Needs Creator · Layer 4"
                 : rawMyRole === "buyer" || rawMyRole === "seeker"
                   ? "Your Seeker Inquiry"
-                  : null;
+                  : null);
 
   if (isWaiting) {
     const sentAt = deal.created_at || deal.createdAt;
@@ -1143,8 +1144,13 @@ export default function ChatBox({
               {isRequestSender ? "Awaiting response" : "Connect request"}
             </span>
             {recipientLensBadge && (
-              <span className="inline-block text-[12px] font-mono uppercase tracking-wider text-gold-accent bg-surface-alt border border-surface-variant px-2 py-1 rounded">
+              <span className="inline-block text-[12px] font-mono uppercase tracking-wider text-gold-accent bg-surface-alt border border-gold-accent/35 px-2 py-1 rounded">
                 {recipientLensBadge}
+              </span>
+            )}
+            {deal.open_gate_inbound && (
+              <span className="inline-block text-[12px] font-mono uppercase tracking-wider text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-2 py-1 rounded">
+                Open Gate · Free Inbound
               </span>
             )}
           </div>
@@ -1152,6 +1158,11 @@ export default function ChatBox({
           <h3 className="font-headline-editorial text-xl sm:text-2xl text-on-surface mt-4 mb-1 break-words">
             {deal.property_title}
           </h3>
+          {deal.intentSummary && (
+            <p className="text-xs text-gold-accent font-medium mb-1.5 break-words">
+              {deal.intentSummary}
+            </p>
+          )}
 
           {/* Identity is withheld from the recipient until they accept. The
               sender already knows who they contacted, so they keep the name.
@@ -1388,8 +1399,13 @@ export default function ChatBox({
               {deal.other_party}
             </h3>
             {recipientLensBadge && (
-              <span className="px-2 py-0.5 rounded bg-surface-alt text-gold-accent border border-surface-variant text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
+              <span className="px-2 py-0.5 rounded bg-surface-alt text-gold-accent border border-gold-accent/35 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
                 {recipientLensBadge}
+              </span>
+            )}
+            {deal.open_gate_inbound && (
+              <span className="px-2 py-0.5 rounded bg-gold-accent/15 text-gold-bright border border-gold-accent/40 text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
+                Open Gate · Free Inbound
               </span>
             )}
             {/* Was hardcoded "3 Connects Spent" on every deal. The ledger
@@ -1404,7 +1420,11 @@ export default function ChatBox({
             )}
           </div>
           <p className="text-xs text-text-secondary mt-0.5 truncate">
-            Inquiry for <strong>{deal.property_title}</strong>
+            {deal.intentSummary ? (
+              <span className="text-gold-accent font-medium">{deal.intentSummary}</span>
+            ) : (
+              <>Inquiry for <strong>{deal.property_title}</strong></>
+            )}
           </p>
         </div>
         {/* A-043. Downloading your own copy is deliberately OUTSIDE the

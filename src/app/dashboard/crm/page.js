@@ -83,8 +83,12 @@ function CRMPageInner() {
   const heldLenses = [
     ...new Set(
       (Array.isArray(currentUser?.active_roles) ? currentUser.active_roles : [])
-        .map(normalizeDashboardMode)
-        .filter((role) => role === "owner" || role === "broker")
+        .map((r) => {
+          const norm = normalizeDashboardMode(r);
+          if (["photographer", "designer", "researcher", "provider"].includes(norm)) return "provider";
+          return norm;
+        })
+        .filter((role) => role === "owner" || role === "broker" || role === "provider")
     ),
   ];
   const baseLensOptions = heldLenses.length > 0 ? heldLenses : (isPipeline ? ["owner", "broker"] : []);
@@ -94,8 +98,15 @@ function CRMPageInner() {
   useEffect(() => {
     try {
       const persisted = normalizeDashboardMode(getPersistedWorkspaceRole());
-      if (persisted && lensOptions.includes(persisted)) {
-        setViewingAs(persisted);
+      const mappedPersisted = ["photographer", "designer", "researcher", "provider"].includes(persisted)
+        ? "provider"
+        : persisted;
+      if (mappedPersisted && lensOptions.includes(mappedPersisted)) {
+        setViewingAs(mappedPersisted);
+        return;
+      }
+      if ((persisted === "buyer" || persisted === "all") && lensOptions.includes("all")) {
+        setViewingAs("all");
         return;
       }
       const saved = JSON.parse(localStorage.getItem("scoutit_user") || "{}");
@@ -424,13 +435,25 @@ function CRMPageInner() {
                     onClick={() => handleSelectCrmLens(role)}
                     className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out hover:bg-surface-alt"
                   >
-                    <span className="text-on-surface">{role === "all" ? "all (combined)" : role}</span>
+                    <span className="text-on-surface">
+                      {role === "all"
+                        ? "all (combined)"
+                        : role === "provider"
+                          ? "creator (layer 4)"
+                          : role}
+                    </span>
                     {viewingAs === role && <Check size={14} className="text-gold-accent" />}
                   </button>
                 ))}
               </div>
             )}
           </div>
+          <Link
+            href="/dashboard/open-gate"
+            className="flex min-h-11 items-center gap-2 rounded border border-gold-accent/40 bg-gold-accent/10 px-3.5 py-2 font-label-caps text-label-caps uppercase text-gold-accent transition-colors duration-200 ease-out hover:border-gold-accent"
+          >
+            Open Gate ↗
+          </Link>
           <button
             onClick={() => setIsImportModalOpen(true)}
             className="flex min-h-11 items-center gap-2 rounded border border-surface-variant bg-surface-alt px-3.5 py-2 font-label-caps text-label-caps uppercase text-on-surface transition-colors duration-200 ease-out hover:border-gold-accent/50"

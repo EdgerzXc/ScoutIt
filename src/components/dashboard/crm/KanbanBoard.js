@@ -177,12 +177,18 @@ export default function KanbanBoard({ deals = [], viewingAs = "owner", onStatusC
                         )}
                       </div>
 
-                      <div className="mb-2 flex items-center justify-between gap-3 font-body text-sm text-text-secondary">
+                      <div className="mb-1.5 flex items-center justify-between gap-3 font-body text-sm text-text-secondary">
                         <span className="min-w-0 truncate">{deal.otherParty}</span>
                         <span className="shrink-0 whitespace-nowrap rounded border border-gold-accent/35 bg-gold-accent/10 px-2 py-0.5 font-label-caps text-label-caps uppercase text-gold-accent">
-                          {resolveCardLensBadge(deal.myRole)}
+                          {deal.intentBadge || resolveCardLensBadge(deal.myRole)}
                         </span>
                       </div>
+
+                      {deal.intentSummary && !isImported && (
+                        <div className="mb-2 text-xs text-text-secondary break-words">
+                          {deal.intentSummary}
+                        </div>
+                      )}
 
                       {/* An imported lead's contact details live on the card:
                           there is no conversation panel to open them from. */}

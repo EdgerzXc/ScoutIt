@@ -5,7 +5,77 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
-import { deriveMyRole, loadDealMessageActivity, loadUserDealRows } from "@/lib/deals/userDeals";
+import * as userDealsModule from "@/lib/deals/userDeals";
+const { deriveMyRole, loadDealMessageActivity, loadUserDealRows } = userDealsModule;
+
+function fallbackExtractServiceRole(row) {
+  try {
+    if (typeof userDealsModule.extractServiceTargetRole === "function") {
+      return userDealsModule.extractServiceTargetRole(row);
+    }
+  } catch {
+    // Partially mocked userDeals module in tests
+  }
+  const snapRole = String(
+    row?.routing_snapshot?.target_role ||
+    row?.routing_snapshot?.professional_category ||
+    row?.routing_snapshot?.recipient_role ||
+    ""
+  ).trim().toLowerCase();
+  if (["photographer", "designer", "event_planner", "researcher", "operator", "broker", "owner"].includes(snapRole)) {
+    return snapRole === "event_planner" ? "designer" : snapRole;
+  }
+  const pitch = String(row?.pitch_message || "");
+  const tagMatch = /^\[LAYER\s*4\s*·\s*(PHOTOGRAPHER|DESIGNER|EVENT_PLANNER|RESEARCHER|BROKER)\]/i.exec(pitch);
+  if (tagMatch) {
+    const matched = tagMatch[1].toLowerCase();
+    return matched === "event_planner" ? "designer" : matched;
+  }
+  return null;
+}
+
+function resolveIntentInfo(row, myRole) {
+  try {
+    if (typeof userDealsModule.describeDealIntent === "function") {
+      return userDealsModule.describeDealIntent(row, myRole);
+    }
+  } catch {
+    // Partially mocked userDeals module in tests
+  }
+  const role = String(myRole || "buyer").trim().toLowerCase();
+  const propTitle = row?.properties?.title || row?.routing_snapshot?.signal_title || "Untitled Property";
+  if (role === "owner") {
+    return {
+      targetRole: "owner",
+      sourceLayer: row?.open_gate_inbound ? "open_gate" : "property_listing",
+      intentBadge: "FOR OWNER · PROPERTY INQUIRY",
+      intentSummary: `Wants Property: ${propTitle} (For Owner)`,
+    };
+  }
+  if (role === "photographer" || role === "designer" || role === "researcher") {
+    const label = role === "photographer" ? "Spatial Photographer" : role === "designer" ? "Event & Concept Designer" : "Zoning & Land Researcher";
+    return {
+      targetRole: role,
+      sourceLayer: "layer_4_professionals",
+      intentBadge: `NEEDS ${role.toUpperCase()} · LAYER 4`,
+      intentSummary: `Needs ${label} · Layer 4 Professional Request`,
+    };
+  }
+  if (role === "broker") {
+    return {
+      targetRole: "broker",
+      sourceLayer: "broker_representation",
+      intentBadge: "FOR BROKER · PROPERTY / MANDATE",
+      intentSummary: `Wants Property via Broker: ${propTitle}`,
+    };
+  }
+  return {
+    targetRole: "owner",
+    sourceLayer: "property_listing",
+    intentBadge: "YOUR PROPERTY INQUIRY",
+    intentSummary: `You inquired about Property: ${propTitle}`,
+  };
+}
 import { isManualCreatableStatus } from "@/lib/deals/dealStatus";
 import { isBlocked, checkBlockGuard } from "@/lib/connectBlocks";
 import { checkReceiverGate } from "@/lib/connectGates";
@@ -87,8 +157,29 @@ export async function GET(request) {
     const result = deals
       .map((d) => {
         const myRole = routedOperatorByDeal.get(d.id) === userId ? "operator" : deriveMyRole(d, userId);
-        const otherId = myRole === "buyer" ? (d.broker_id || routedOperatorByDeal.get(d.id) || routedBrokerByDeal.get(d.id) || d.properties?.owner_id) : myRole === "broker" ? (d.buyer_id || d.properties?.owner_id) : (d.broker_id || d.buyer_id);
-        const otherRoleLabel = myRole === "buyer" ? (routedOperatorByDeal.has(d.id) ? "Operator" : (d.broker_id || routedBrokerByDeal.has(d.id)) ? "Broker" : "Owner") : myRole === "broker" ? (d.buyer_id ? "Buyer" : "Owner") : (d.broker_id ? "Broker" : "Buyer");
+        const serviceRole = fallbackExtractServiceRole(d);
+        const otherId =
+          myRole === "buyer"
+            ? (d.broker_id || routedOperatorByDeal.get(d.id) || routedBrokerByDeal.get(d.id) || d.properties?.owner_id)
+            : myRole === "broker" || myRole === "photographer" || myRole === "designer" || myRole === "researcher" || myRole === "provider"
+              ? (d.buyer_id || d.properties?.owner_id)
+              : (d.broker_id || d.buyer_id);
+        const otherRoleLabel =
+          myRole === "buyer"
+            ? serviceRole === "photographer"
+              ? "Photographer"
+              : serviceRole === "designer"
+                ? "Designer"
+                : serviceRole === "researcher"
+                  ? "Researcher"
+                  : routedOperatorByDeal.has(d.id)
+                    ? "Operator"
+                    : (d.broker_id || routedBrokerByDeal.has(d.id))
+                      ? "Broker"
+                      : "Owner"
+            : myRole === "broker" || myRole === "photographer" || myRole === "designer" || myRole === "researcher" || myRole === "provider"
+              ? (d.buyer_id ? "Buyer" : "Owner")
+              : (d.broker_id ? "Broker" : "Buyer");
         let userScopedNote = "";
         if (d.private_notes) {
           try {
@@ -103,15 +194,30 @@ export async function GET(request) {
           }
         }
 
+        const fallbackServiceTitle =
+          serviceRole === "photographer"
+            ? "Spatial Photography Brief"
+            : serviceRole === "designer"
+              ? "Event & Concept Design Brief"
+              : serviceRole === "researcher"
+                ? "Zoning & Land Research Brief"
+                : "Untitled Property";
+        const resolvedTitle = d.properties?.title || d.routing_snapshot?.signal_title || fallbackServiceTitle;
+        const intentInfo = resolveIntentInfo({ ...d, propertyTitle: resolvedTitle }, myRole);
+
         return {
           id: d.id,
           status: d.status,
           propertyId: d.properties?.id || null,
-          propertyTitle: d.properties?.title || d.routing_snapshot?.signal_title || "Untitled Property",
+          propertyTitle: resolvedTitle,
           propertySlug: d.properties?.slug || null,
           propertyPrice: d.properties?.price ?? null,
           unitId: d.unit_id || null,
           myRole,
+          targetRole: intentInfo.targetRole,
+          sourceLayer: intentInfo.sourceLayer,
+          intentBadge: intentInfo.intentBadge,
+          intentSummary: intentInfo.intentSummary,
           // A pending Connect is anonymous: the recipient learns the intent and
           // the tier, not the identity (§38.3). Acceptance is the act that
           // reveals a name; the handshake later reveals contact details. This
@@ -163,11 +269,15 @@ export async function GET(request) {
 }
 
 const postSchema = z.object({
-  propertyId: z.string(),
-  otherPartyEmail: z.string(), // We use this as ID for simplicity
-  status: z.string(),
+  propertyId: z.string().optional().nullable(),
+  propertySlug: z.string().optional().nullable(),
+  otherPartyEmail: z.string(), // Recipient user UUID
+  status: z.string().optional(),
   initialMessage: z.string().optional(),
-  });
+  targetRole: z.enum(["owner", "broker", "photographer", "designer", "event_planner", "researcher", "operator"]).optional(),
+  serviceTitle: z.string().max(160).optional(),
+  sourceLayer: z.string().max(64).optional(),
+});
 
 export async function POST(request) {
   try {
@@ -175,26 +285,46 @@ export async function POST(request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { propertyId, otherPartyEmail, status, initialMessage  } = parsed.data;
+    const {
+      propertyId,
+      propertySlug,
+      otherPartyEmail,
+      status,
+      initialMessage,
+      targetRole,
+      serviceTitle,
+      sourceLayer,
+    } = parsed.data;
     const userId = await resolveUserId(request);
 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // The property decides the creator's role: if they own it, the other
-    // party is the buyer; otherwise the creator is tracking this deal as the
-    // broker and the other party is their buyer. (Previously this inserted
-    // the creator as buyer_id of their own property — a self-deal that
-    // pointed at nobody.)
-    const { data: property, error: propError } = await supabaseAdmin
-      .from("properties")
-      .select("id, title, slug, owner_id")
-      .eq("id", propertyId)
-      .single();
-    if (propError || !property) {
-      return NextResponse.json({ error: "Property not found — use the Supabase property ID" }, { status: 404 });
+    const normalizedTargetRole = targetRole === "event_planner" ? "designer" : (targetRole || null);
+    const isLayer4ServiceInquiry = ["photographer", "designer", "researcher"].includes(normalizedTargetRole);
+
+    let property = null;
+    if (propertyId) {
+      const { data: propData, error: propError } = await supabaseAdmin
+        .from("properties")
+        .select("id, title, slug, owner_id")
+        .eq("id", propertyId)
+        .single();
+      if ((propError || !propData) && !isLayer4ServiceInquiry) {
+        return NextResponse.json({ error: "Property not found — use the Supabase property ID" }, { status: 404 });
+      }
+      property = propData || null;
+    } else if (propertySlug) {
+      const { data: propBySlug } = await supabaseAdmin
+        .from("properties")
+        .select("id, title, slug, owner_id")
+        .eq("slug", propertySlug)
+        .maybeSingle();
+      property = propBySlug || null;
+    } else if (!isLayer4ServiceInquiry) {
+      return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
 
-    const isOwner = property.owner_id === userId;
+    const isOwner = property ? property.owner_id === userId : false;
     // A-144 §10.10: a manual send starts a request — it cannot manufacture an
     // accepted/connected/closed relationship from a client string. Rejected
     // BEFORE any spend so a forged outcome never costs a Connect.
@@ -247,7 +377,7 @@ export async function POST(request) {
         { status: 403 },
       );
     }
-    const manualGate = await checkReceiverGate(supabaseAdmin, otherPartyEmail, property.id);
+    const manualGate = await checkReceiverGate(supabaseAdmin, otherPartyEmail, property?.id || null);
     if (!manualGate.ok) {
       return NextResponse.json(
         { error: manualGate.message || "This account isn't accepting new Connects right now. No Connect was spent." },
@@ -257,12 +387,15 @@ export async function POST(request) {
     // A-144: manual deal creation is a paid Connect action, not a free write.
     // Spend FIRST so a failed payment never leaves a phantom conversation.
     // Legacy per-user wallet stays authoritative (owner decision, A-144).
+    const spendRefId = property?.id || otherPartyEmail;
     const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
       p_user_id: userId,
       p_amount: 1,
-      p_reason: 'Manual deal created from dashboard',
-      p_ref_type: 'manual_deal',
-      p_ref_id: property.id,
+      p_reason: isLayer4ServiceInquiry
+        ? `Layer 4 ${normalizedTargetRole} inquiry`
+        : 'Manual deal created from dashboard',
+      p_ref_type: isLayer4ServiceInquiry ? 'layer4_service_deal' : 'manual_deal',
+      p_ref_id: spendRefId,
     });
     if (spendError) {
       const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
@@ -272,19 +405,72 @@ export async function POST(request) {
       );
     }
     const nowIso = new Date().toISOString();
-    const { data: inserted, error } = await supabaseAdmin
-      .from("deals")
-      .insert({
-        status: requestedStatus,
-        pitch_message: initialMessage || "",
-        buyer_id: otherPartyEmail,
-        broker_id: isOwner ? null : userId,
-        property_id: property.id,
-        connects_spent: 1,
-        pending_clock_reset_at: nowIso,
-      })
-      .select("*, properties(id, title, slug, owner_id)")
-      .single();
+    const rawMsg = initialMessage || "";
+    const formattedMessage = isLayer4ServiceInquiry && !/^\[LAYER\s*4\s*·/i.test(rawMsg)
+      ? `[LAYER 4 · ${normalizedTargetRole.toUpperCase()}] ${rawMsg}`.trim()
+      : rawMsg;
+    const resolvedServiceTitle =
+      property?.title ||
+      serviceTitle ||
+      (normalizedTargetRole === "photographer"
+        ? "Spatial Photography Brief"
+        : normalizedTargetRole === "designer"
+          ? "Event & Concept Design Brief"
+          : normalizedTargetRole === "researcher"
+            ? "Zoning & Land Research Brief"
+            : "Untitled Property");
+
+    const baseInsertRow = {
+      status: requestedStatus,
+      pitch_message: formattedMessage,
+      buyer_id: isLayer4ServiceInquiry ? userId : otherPartyEmail,
+      broker_id: isLayer4ServiceInquiry ? otherPartyEmail : (isOwner ? null : userId),
+      property_id: property?.id || null,
+      connects_spent: 1,
+      pending_clock_reset_at: nowIso,
+    };
+
+    let inserted = null;
+    let error = null;
+    if (isLayer4ServiceInquiry || normalizedTargetRole) {
+      const snapshotPayload = {
+        ...baseInsertRow,
+        routing_snapshot: {
+          recipient_ids: [otherPartyEmail],
+          recipient_type: normalizedTargetRole || (isOwner ? "owner" : "broker"),
+          target_role: normalizedTargetRole || (isOwner ? "owner" : "broker"),
+          source_layer: sourceLayer || (isLayer4ServiceInquiry ? "layer_4_professionals" : "property_listing"),
+          signal_title: resolvedServiceTitle,
+          initiator_id: userId,
+          captured_at: nowIso,
+        },
+      };
+      const firstTry = await supabaseAdmin
+        .from("deals")
+        .insert(snapshotPayload)
+        .select("*, properties(id, title, slug, owner_id)")
+        .single();
+      if (firstTry.error && (firstTry.error.code === "42703" || /does not exist|undefined_column/i.test(firstTry.error.message || ""))) {
+        const retryTry = await supabaseAdmin
+          .from("deals")
+          .insert(baseInsertRow)
+          .select("*, properties(id, title, slug, owner_id)")
+          .single();
+        inserted = retryTry.data;
+        error = retryTry.error;
+      } else {
+        inserted = firstTry.data;
+        error = firstTry.error;
+      }
+    } else {
+      const stdTry = await supabaseAdmin
+        .from("deals")
+        .insert(baseInsertRow)
+        .select("*, properties(id, title, slug, owner_id)")
+        .single();
+      inserted = stdTry.data;
+      error = stdTry.error;
+    }
 
     if (error) {
       // A-144 §10.10: a failed insert must not strand the debit — refund it
@@ -297,7 +483,7 @@ export async function POST(request) {
           p_amount: 1,
           p_reason: 'Manual deal insert failed after spend',
           p_staff_id: 'system',
-          p_ref_id: property.id,
+          p_ref_id: spendRefId,
         });
         if (!refundErr) {
           refundSucceeded = true;
@@ -324,7 +510,7 @@ export async function POST(request) {
 
       return NextResponse.json({
         error: "Failed to create deal. Connect refund encountered a sync issue and has been flagged for staff review.",
-        ref_id: property.id,
+        ref_id: spendRefId,
       }, { status: 500 });
     }
     const manualBalance = spendData?.[0]?.total_balance ?? null;
@@ -332,31 +518,59 @@ export async function POST(request) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: manualBalance }).eq('id', userId);
     }
 
-    // GAP-69: Notify recipient of the newly created manual deal
+    // GAP-69: Notify recipient of the newly created manual or Layer 4 service deal
+    const serviceRoleLabel =
+      normalizedTargetRole === "photographer"
+        ? "Spatial Photographer"
+        : normalizedTargetRole === "designer"
+          ? "Event & Concept Designer"
+          : normalizedTargetRole === "researcher"
+            ? "Zoning & Land Researcher"
+            : null;
     await notifyUser(supabaseAdmin, {
       userId: otherPartyEmail,
-      title: isOwner ? "New property invitation" : "New Connect request",
-      desc: `A new Connect request was opened for "${property.title || "a property"}".`,
-      propertyId: property.id,
+      title: serviceRoleLabel
+        ? `New ${serviceRoleLabel} inquiry`
+        : isOwner
+          ? "New property invitation"
+          : "New Connect request",
+      desc: serviceRoleLabel
+        ? `Someone requested your ${serviceRoleLabel} services via Layer 4 Professionals.`
+        : `A new Connect request was opened for "${property?.title || "a property"}".`,
+      propertyId: property?.id || null,
       notificationType: "deal_created",
     });
 
     await logActivity(supabaseAdmin, {
       dealId: inserted.id,
-      propertyId: property.id,
+      propertyId: property?.id || null,
       activityType: "deal_created",
       actorId: userId,
-      metadata: { source: "manual", status: inserted.status },
+      metadata: {
+        source: isLayer4ServiceInquiry ? "layer_4_professionals" : "manual",
+        targetRole: normalizedTargetRole || (isOwner ? "owner" : "broker"),
+        status: inserted.status,
+      },
     });
+
+    const createdMyRole = isLayer4ServiceInquiry ? "buyer" : (isOwner ? "owner" : "broker");
+    const createdIntent = resolveIntentInfo(
+      { ...inserted, propertyTitle: resolvedServiceTitle },
+      createdMyRole
+    );
 
     // Format like the GET endpoint
     const deal = {
       id: inserted.id,
       status: inserted.status,
-      propertyId: inserted.properties?.id || propertyId,
-      propertyTitle: inserted.properties?.title || "Unknown Property",
-      propertySlug: inserted.properties?.slug || null,
-      myRole: isOwner ? "owner" : "broker",
+      propertyId: inserted.properties?.id || property?.id || propertyId || null,
+      propertyTitle: inserted.properties?.title || resolvedServiceTitle,
+      propertySlug: inserted.properties?.slug || property?.slug || null,
+      myRole: createdMyRole,
+      targetRole: createdIntent.targetRole,
+      sourceLayer: createdIntent.sourceLayer,
+      intentBadge: createdIntent.intentBadge,
+      intentSummary: createdIntent.intentSummary,
       otherParty: otherPartyEmail || "Buyer",
       lastMessage: inserted.pitch_message || "",
       unreadCount: 0,

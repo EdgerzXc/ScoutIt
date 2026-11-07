@@ -105,17 +105,181 @@ export async function loadUserDealRows(client, userId) {
   return { rows: [...byId.values()], error: null, routedRecipients: allRoutedRecipients };
 }
 
+export function extractServiceTargetRole(row) {
+  const snapRole = String(
+    row?.routing_snapshot?.target_role ||
+    row?.routing_snapshot?.professional_category ||
+    row?.routing_snapshot?.recipient_role ||
+    ""
+  ).trim().toLowerCase();
+  if (["photographer", "designer", "event_planner", "researcher", "operator", "broker", "owner"].includes(snapRole)) {
+    return snapRole === "event_planner" ? "designer" : snapRole;
+  }
+  const pitch = String(row?.pitch_message || "");
+  const tagMatch = /^\[LAYER\s*4\s*·\s*(PHOTOGRAPHER|DESIGNER|EVENT_PLANNER|RESEARCHER|BROKER)\]/i.exec(pitch);
+  if (tagMatch) {
+    const matched = tagMatch[1].toLowerCase();
+    return matched === "event_planner" ? "designer" : matched;
+  }
+  return null;
+}
+
 /**
  * Which side of the table the user is sitting on.
  *
- * A routed recipient matches none of the three id columns, and falls through
- * to "broker" — the role the Inbox has always shown them.
+ * Checks Layer 4 service target_role first for recipients, then property owner,
+ * then broker.
  */
 export function deriveMyRole(row, userId) {
   if (row?.buyer_id === userId) return "buyer";
-  if (row?.broker_id === userId) return "broker";
+  const serviceRole = extractServiceTargetRole(row);
+  if (serviceRole) return serviceRole;
   if (row?.properties?.owner_id === userId) return "owner";
+  if (row?.broker_id === userId) return "broker";
   return "broker";
+}
+
+/**
+ * Explicit human-readable attribution for why this connection was opened and
+ * which role/lens it belongs to (Property Owner vs Layer 4 Photographer /
+ * Designer / Researcher / Broker / Operator).
+ */
+export function describeDealIntent(row, myRole) {
+  const role = String(myRole || "buyer").trim().toLowerCase();
+  const serviceRole = extractServiceTargetRole(row);
+  const propTitle =
+    row?.properties?.title ||
+    row?.propertyTitle ||
+    row?.property_title ||
+    row?.routing_snapshot?.signal_title ||
+    "";
+  const hasRealProperty =
+    Boolean(row?.properties?.id || row?.propertyId || row?.propertySlug) ||
+    (propTitle &&
+      propTitle !== "Untitled Property" &&
+      !/^Layer 4\b/i.test(propTitle) &&
+      !/Brief$/i.test(propTitle));
+
+  if (role === "owner") {
+    return {
+      targetRole: "owner",
+      sourceLayer: row?.open_gate_inbound ? "open_gate" : "property_listing",
+      intentBadge: "FOR OWNER · PROPERTY INQUIRY",
+      intentSummary: propTitle
+        ? `Wants Property: ${propTitle} (For Owner)`
+        : "Wants Property · For Owner Lens",
+    };
+  }
+
+  if (role === "photographer") {
+    return {
+      targetRole: "photographer",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "NEEDS PHOTOGRAPHER · LAYER 4",
+      intentSummary: hasRealProperty
+        ? `Needs Spatial Photographer for ${propTitle}`
+        : "Needs Spatial Photographer · Layer 4 Professional Booking",
+    };
+  }
+
+  if (role === "designer") {
+    return {
+      targetRole: "designer",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "NEEDS DESIGNER · LAYER 4",
+      intentSummary: hasRealProperty
+        ? `Needs Event & Concept Designer for ${propTitle}`
+        : "Needs Event & Concept Designer · Layer 4 Professional Booking",
+    };
+  }
+
+  if (role === "researcher") {
+    return {
+      targetRole: "researcher",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "NEEDS RESEARCHER · LAYER 4",
+      intentSummary: hasRealProperty
+        ? `Needs Zoning & Land Researcher for ${propTitle}`
+        : "Needs Zoning & Land Researcher · Layer 4 Professional Audit",
+    };
+  }
+
+  if (role === "provider") {
+    return {
+      targetRole: "provider",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "NEEDS CREATOR · LAYER 4",
+      intentSummary: hasRealProperty
+        ? `Needs Layer 4 Professional for ${propTitle}`
+        : "Needs Layer 4 Professional Service",
+    };
+  }
+
+  if (role === "operator") {
+    return {
+      targetRole: "operator",
+      sourceLayer: row?.open_gate_inbound ? "open_gate" : "property_unit",
+      intentBadge: "FOR OPERATOR · UNIT INQUIRY",
+      intentSummary: propTitle
+        ? `Wants Delegated Unit: ${propTitle} (For Operator)`
+        : "Delegated Unit Inquiry · For Operator Lens",
+    };
+  }
+
+  if (role === "broker" || role === "salesperson") {
+    if (row?.routing_snapshot?.recipient_type === "community_signal") {
+      return {
+        targetRole: "broker",
+        sourceLayer: "community_signal",
+        intentBadge: "FOR BROKER · SIGNAL RESPONSE",
+        intentSummary: propTitle
+          ? `Community Signal: ${propTitle}`
+          : "Community Signal Connection",
+      };
+    }
+    return {
+      targetRole: "broker",
+      sourceLayer: row?.open_gate_inbound ? "open_gate" : "broker_representation",
+      intentBadge: "FOR BROKER · PROPERTY / MANDATE",
+      intentSummary: propTitle
+        ? `Wants Property via Broker: ${propTitle}`
+        : "Accredited Broker Representation Inquiry",
+    };
+  }
+
+  if (serviceRole === "photographer") {
+    return {
+      targetRole: "photographer",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "SEEKER → PHOTOGRAPHER",
+      intentSummary: `You requested Spatial Photographer${hasRealProperty ? ` for ${propTitle}` : ""}`,
+    };
+  }
+  if (serviceRole === "designer") {
+    return {
+      targetRole: "designer",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "SEEKER → DESIGNER",
+      intentSummary: `You requested Event & Concept Designer${hasRealProperty ? ` for ${propTitle}` : ""}`,
+    };
+  }
+  if (serviceRole === "researcher") {
+    return {
+      targetRole: "researcher",
+      sourceLayer: "layer_4_professionals",
+      intentBadge: "SEEKER → RESEARCHER",
+      intentSummary: `You requested Zoning & Land Researcher${hasRealProperty ? ` for ${propTitle}` : ""}`,
+    };
+  }
+
+  return {
+    targetRole: serviceRole || "owner",
+    sourceLayer: "property_listing",
+    intentBadge: "YOUR PROPERTY INQUIRY",
+    intentSummary: propTitle
+      ? `You inquired about Property: ${propTitle}`
+      : "Your Outgoing Property Inquiry",
+  };
 }
 
 /**

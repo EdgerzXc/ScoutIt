@@ -50,6 +50,10 @@ function toChatBoxDeal(d) {
     last_message: d.lastMessage,
     pitch_message: d.pitch_message,
     myRole: d.myRole,
+    targetRole: d.targetRole || null,
+    sourceLayer: d.sourceLayer || null,
+    intentBadge: d.intentBadge || null,
+    intentSummary: d.intentSummary || null,
     // NULL on pre-2026-08-05 rows; ChatBox's badge is guarded by
     // Number.isFinite so it stays hidden rather than rendering a guess.
     connects_spent: d.connects_spent,
@@ -531,16 +535,37 @@ function InboxInner() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5 mb-1 min-w-0">
                     {deal.myRole && (
-                      <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-surface-variant font-mono text-[12px] uppercase tracking-wider text-gold-accent shrink-0">
-                        {deal.myRole === "buyer" || deal.myRole === "seeker"
-                          ? "As: Seeker"
-                          : `For: ${deal.myRole}`}
+                      <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-gold-accent/35 font-mono text-[12px] uppercase tracking-wider text-gold-accent shrink-0">
+                        {deal.intentBadge ||
+                          (deal.myRole === "owner"
+                            ? "FOR OWNER · PROPERTY INQUIRY"
+                            : deal.myRole === "photographer"
+                              ? "NEEDS PHOTOGRAPHER · LAYER 4"
+                              : deal.myRole === "designer"
+                                ? "NEEDS DESIGNER · LAYER 4"
+                                : deal.myRole === "researcher"
+                                  ? "NEEDS RESEARCHER · LAYER 4"
+                                  : deal.myRole === "broker" || deal.myRole === "salesperson"
+                                    ? "FOR BROKER · MANDATE"
+                                    : deal.myRole === "buyer" || deal.myRole === "seeker"
+                                      ? "AS SEEKER"
+                                      : `FOR: ${deal.myRole}`)}
+                      </span>
+                    )}
+                    {deal.open_gate_inbound && (
+                      <span className="px-1.5 py-0.5 rounded bg-gold-accent/15 border border-gold-accent/40 font-mono text-[12px] uppercase tracking-wider text-gold-bright shrink-0">
+                        OPEN GATE
                       </span>
                     )}
                     <p className="text-xs text-text-primary truncate">{deal.other_party}</p>
                   </div>
+                  {deal.intentSummary && (
+                    <p className="text-xs text-gold-accent/90 font-medium truncate mb-0.5">
+                      {deal.intentSummary}
+                    </p>
+                  )}
                   <p className="text-xs text-text-secondary truncate">{deal.last_message}</p>
                 </motion.div>
               ))

@@ -125,6 +125,12 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
               <Calendar size={14} aria-hidden="true" />
               <span>Viewings</span>
             </Link>
+            <Link
+              href="/dashboard/open-gate"
+              className="min-h-11 px-3.5 py-2 rounded-xl border border-gold-accent/40 bg-gold-accent/10 hover:border-gold-accent text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
+            >
+              <span>Open Gate ↗</span>
+            </Link>
           </div>
         </div>
 
@@ -299,7 +305,7 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="px-2 py-0.5 rounded bg-gold-accent/15 border border-gold-accent/35 font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent">
-                          {lensMeta.label}
+                          {deal.intentBadge || lensMeta.label}
                         </span>
                         <span className="px-2 py-0.5 rounded bg-surface-alt border border-surface-variant font-mono text-xs uppercase tracking-wider text-text-secondary">
                           {statusLabel}
@@ -313,6 +319,11 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
                       <div className="font-working-title text-base font-semibold text-on-surface truncate">
                         {deal.propertyTitle || "Untitled Space Inquiry"}
                       </div>
+                      {deal.intentSummary && (
+                        <div className="text-xs font-semibold text-gold-accent/90 truncate">
+                          {deal.intentSummary}
+                        </div>
+                      )}
                       <div className="text-xs text-text-secondary truncate">
                         Counterparty: <span className="text-on-surface">{deal.otherParty || deal.otherPartyRole || "Verified Party"}</span>
                         {deal.lastMessage ? ` · "${deal.lastMessage}"` : ""}

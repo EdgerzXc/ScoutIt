@@ -6,6 +6,27 @@ import ProfessionalSaveButton from "./ProfessionalSaveButton";
 import styles from "./professionalDirectory.module.css";
 
 const CATEGORY_MARKS = { broker: "AD", photographer: "LN", researcher: "RX", event_planner: "EV" };
+const CATEGORY_FROM_SLUG = {
+  broker: "brokers",
+  photographer: "photographers",
+  researcher: "researchers",
+  event_planner: "event-planners",
+};
+
+function buildProfessionalHref(record, forSlug, forTitle) {
+  const basePath = record?.canonicalPath || "#";
+  if (!basePath.startsWith("/profile/")) {
+    if (!forSlug) return basePath;
+    return `${basePath}?for=${encodeURIComponent(forSlug)}${forTitle ? `&title=${encodeURIComponent(forTitle)}` : ""}`;
+  }
+  const params = new URLSearchParams();
+  const fromSlug = CATEGORY_FROM_SLUG[record?.category];
+  if (fromSlug) params.set("from", fromSlug);
+  if (forSlug) params.set("for", forSlug);
+  if (forTitle) params.set("title", forTitle);
+  const qs = params.toString();
+  return qs ? `${basePath}?${qs}` : basePath;
+}
 
 export default function ProfessionalCard({ record, actionLabel, forSlug, forTitle }) {
   const onPointerMove = (event) => {
@@ -79,11 +100,7 @@ export default function ProfessionalCard({ record, actionLabel, forSlug, forTitl
         <div className={styles.cardActions}>
           <Link
             className={styles.profileLink}
-            href={
-              forSlug
-                ? `${record.canonicalPath}?for=${encodeURIComponent(forSlug)}${forTitle ? `&title=${encodeURIComponent(forTitle)}` : ""}`
-                : record.canonicalPath
-            }
+            href={buildProfessionalHref(record, forSlug, forTitle)}
           >
             {actionLabel}<ArrowUpRight size={15} aria-hidden="true" />
           </Link>

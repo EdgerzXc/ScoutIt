@@ -7,13 +7,29 @@ const privateHeaders = { "Cache-Control": "private, no-store" };
 const roles = new Set(["broker", "owner", "operator"]);
 const json = (body, status = 200) => NextResponse.json(body, { status, headers: privateHeaders });
 
+function isMissingSchemaError(err) {
+  if (!err) return false;
+  return (
+    err.code === "42P01" ||
+    err.code === "42703" ||
+    /does not exist|undefined_table|undefined_column/i.test(err.message || "")
+  );
+}
+
 async function accountSession(request, role) {
   const accountId = await resolveUserId(request);
   if (!accountId || !supabaseAdmin || !roles.has(role)) return null;
   const { data: profile, error } = await supabaseAdmin.from("user_profiles")
     .select("role, active_roles").eq("id", accountId).maybeSingle();
-  if (error || !profile || !(profile.role === role || profile.active_roles?.includes(role))) return null;
-  return accountId;
+  if (error || !profile) return null;
+  const activeRoles = Array.isArray(profile.active_roles) ? profile.active_roles : [];
+  const isAdmin =
+    profile.role === "admin" ||
+    profile.role === "staff" ||
+    activeRoles.includes("admin") ||
+    activeRoles.includes("staff");
+  if (!isAdmin && !(profile.role === role || activeRoles.includes(role))) return null;
+  return { accountId, isAdmin };
 }
 
 async function entitlementFor(accountId, role) {
@@ -47,21 +63,30 @@ async function controlledListings(accountId, role) {
 
 export async function GET(request) {
   const role = new URL(request.url).searchParams.get("role") || "broker";
-  const accountId = await accountSession(request, role);
-  if (!accountId) return json({ error: "Eligible account sign-in required" }, 403);
+  const session = await accountSession(request, role);
+  if (!session) return json({ error: "Eligible account sign-in required" }, 403);
+  const { accountId, isAdmin } = session;
   const [entitlementResult, listingsResult, gatesResult] = await Promise.all([
     entitlementFor(accountId, role), controlledListings(accountId, role),
     role === "broker"
       ? supabaseAdmin.from("open_gate_listings").select("property_id, enabled").eq("broker_id", accountId)
       : supabaseAdmin.from("open_gate_role_listings").select("property_id, unit_id, enabled").eq("recipient_id", accountId).eq("role", role),
   ]);
-  if (entitlementResult.error || listingsResult.error || gatesResult.error) return json({ error: "Open Gate is not available yet" }, 503);
+  const fatalError = [entitlementResult.error, listingsResult.error, gatesResult.error]
+    .find((err) => err && !isMissingSchemaError(err));
+  if (fatalError) return json({ error: "Open Gate is not available yet" }, 503);
   const entitlement = entitlementResult.data;
-  const eligible = entitlement?.enabled === true && Boolean(entitlement.expires_at)
-    && Date.parse(entitlement.expires_at) > Date.now();
+  const hasActiveEntitlement =
+    entitlement?.enabled === true &&
+    Boolean(entitlement.expires_at) &&
+    Date.parse(entitlement.expires_at) > Date.now();
+  const eligible = Boolean(hasActiveEntitlement || isAdmin);
+  const defaultAdminExpiry = new Date(Date.now() + 365 * 86_400_000).toISOString();
   const gates = new Map((gatesResult.data || []).map(row => [`${row.property_id}:${row.unit_id || ""}`, row.enabled === true]));
   return json({
-    role, eligible, expiresAt: entitlement?.expires_at || null,
+    role,
+    eligible,
+    expiresAt: entitlement?.expires_at || (isAdmin ? defaultAdminExpiry : null),
     listings: (listingsResult.data || []).map(row => ({
       id: row.propertyId, unitId: row.unitId, title: row.title, slug: row.slug,
       enabled: eligible && gates.get(`${row.propertyId}:${row.unitId || ""}`) === true,
@@ -73,8 +98,9 @@ export async function POST(request) {
   let body;
   try { body = await request.json(); } catch { return json({ error: "Invalid request" }, 400); }
   const role = body?.role || "broker";
-  const accountId = await accountSession(request, role);
-  if (!accountId) return json({ error: "Eligible account sign-in required" }, 403);
+  const session = await accountSession(request, role);
+  if (!session) return json({ error: "Eligible account sign-in required" }, 403);
+  const { accountId, isAdmin } = session;
   const propertyId = typeof body?.propertyId === "string" ? body.propertyId : "";
   const unitId = role === "operator" && typeof body?.unitId === "string" ? body.unitId : null;
   const enabled = body?.enabled;
@@ -100,7 +126,7 @@ export async function POST(request) {
       .eq("contactable", true).limit(1);
     if (error || reps?.length) return json({ error: "This listing currently routes to a broker" }, 403);
   }
-  if (enabled) {
+  if (enabled && !isAdmin) {
     const { data: entitlement, error } = await entitlementFor(accountId, role);
     if (error || entitlement?.enabled !== true || !entitlement.expires_at || Date.parse(entitlement.expires_at) <= Date.now()) {
       return json({ error: "Enterprise Open Gate access is not active" }, 403);
