@@ -38,6 +38,54 @@ describe("GET /api/wallet endpoint", () => {
     expect(res.status).toBe(400);
   });
 
+  it("handles role=all by resolving to user primary role wallet without multiplication", async () => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    supabaseAdmin.from = vi.fn().mockImplementation((table) => {
+      if (table === "user_profiles") {
+        return {
+          select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: { role: "broker", subscription_tier: "starry" } }) }) }),
+        };
+      }
+      if (table === "user_connect_wallets") {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: () => ({
+                maybeSingle: () =>
+                  Promise.resolve({
+                    data: {
+                      id: "wallet-all",
+                      user_id: USER_ID,
+                      role: "broker",
+                      granted_balance: 1,
+                      granted_month: currentMonth,
+                    },
+                  }),
+              }),
+            }),
+          }),
+        };
+      }
+      if (table === "user_connect_accounts") {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: () => Promise.resolve({ data: { purchased_balance: 5, reward_balance: 2 } }),
+            }),
+          }),
+        };
+      }
+      return {};
+    });
+
+    const req = new Request("https://www.scoutit.space/api/wallet?role=all");
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.role).toBe("broker");
+    expect(body.balance).toBe(8); // 1 granted + 5 purchased + 2 reward = 8
+  });
+
   it("returns authoritative wallet balance for user with active wallet", async () => {
     const currentMonth = new Date().toISOString().slice(0, 7);
     supabaseAdmin.from = vi.fn().mockImplementation((table) => {

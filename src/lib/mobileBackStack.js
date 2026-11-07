@@ -74,21 +74,11 @@ export function registerMobileBackAction(onBack, metadata = {}) {
     // Gracefully handle sandboxed iframes or history quota limits
   }
 
-  // Cleanup handler when the UI dismisses this state normally
+  // Cleanup handler when the UI dismisses or replaces this state normally
   return () => {
     const idx = backStack.findIndex((item) => item.id === id);
     if (idx !== -1) {
       backStack.splice(idx, 1);
-      // If the browser history state is currently pointing to this entry and we're not inside a popstate,
-      // pop it so the browser history doesn't retain dead synthetic steps.
-      if (!isPopProcessing && window.history?.state?.scoutitBackId === id) {
-        isProgrammaticRevert = true;
-        try {
-          window.history.back();
-        } catch {
-          isProgrammaticRevert = false;
-        }
-      }
     }
   };
 }

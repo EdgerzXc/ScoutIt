@@ -464,7 +464,13 @@ export function getUniversalWalletOverview(heldRoles = [], tier = "starry") {
 
   const purchased = state.account.purchased || 0;
   const earned = state.account.earned || 0;
-  const totalGranted = roleBuckets.reduce((sum, b) => sum + (b.granted || 0), 0);
+  // A single account has ONE connects wallet logic. Monthly allowance is NOT
+  // multiplied or combined across roles: having 3 roles does not multiply
+  // your free monthly quota. The account uses the unified single monthly allowance.
+  const totalGranted =
+    roleBuckets.length > 0
+      ? Math.max(...roleBuckets.map((b) => Number(b.granted) || 0))
+      : 1;
 
   return {
     purchased,

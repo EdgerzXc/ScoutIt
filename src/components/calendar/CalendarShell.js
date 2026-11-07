@@ -123,6 +123,14 @@ export default function CalendarShell() {
   }, [view, viewDate]);
 
   const loadData = useCallback(async () => {
+    if (!userId) {
+      setEvents([]);
+      setViewings([]);
+      setLoading(false);
+      setLoadError("");
+      return;
+    }
+
     const generation = ++loadGeneration.current;
     setLoading(true);
     const { from, to } = getRange(view, viewDate);
@@ -140,9 +148,10 @@ export default function CalendarShell() {
       setViewings(appts.map(normalizeViewing));
     }
 
+    const isAuthError = (reason) => /401|unauthorized/i.test(reason?.message || "");
     const failed = [
-      eventsRes.status === "rejected" ? "your events" : null,
-      viewingsRes.status === "rejected" ? "your viewings" : null,
+      eventsRes.status === "rejected" && !isAuthError(eventsRes.reason) ? "your events" : null,
+      viewingsRes.status === "rejected" && !isAuthError(viewingsRes.reason) ? "your viewings" : null,
     ].filter(Boolean);
     if (failed.length) {
       console.error("Calendar load failed", eventsRes.reason || viewingsRes.reason);

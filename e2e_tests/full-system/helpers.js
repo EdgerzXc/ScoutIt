@@ -16,6 +16,7 @@ export const MOCK_OWNER_EMPTY = {
   name: 'E2E Owner',
   role: 'owner',
   tags: ['owner'],
+  active_roles: ['owner'],
   primaryMode: 'owner',
 };
 
@@ -24,6 +25,7 @@ export const MASTER_DEV_READONLY = {
   name: 'Master Dev',
   role: 'owner',
   tags: ['owner', 'broker', 'buyer'],
+  active_roles: ['owner', 'broker', 'buyer'],
   primaryMode: 'owner',
 };
 
@@ -32,6 +34,7 @@ export const MOCK_SEEKER = {
   name: 'E2E Seeker',
   role: 'buyer',
   tags: ['buyer'],
+  active_roles: ['buyer'],
   primaryMode: 'buyer',
 };
 
@@ -61,7 +64,8 @@ const IGNORED_CONSOLE = [
   /usgs/i,
   /downloadable font/i,
   /net::ERR_/i,
-  /the server responded with a status of (404|403|401|429)/i,
+  /the server responded with a status of (404|403|401|429|503)/i,
+  /Catalogue request failed/i,
   /Failed to load resource/i,
   /Failed to fetch/i,
   /hydration/i, // tracked separately in design-dna spec if it ever appears

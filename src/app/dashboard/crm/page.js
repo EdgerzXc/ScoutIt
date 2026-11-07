@@ -16,6 +16,7 @@ import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
 import { loadDeals } from "../../../lib/deals/dealsClient";
 import {
+  getHeldRoles,
   getPersistedWorkspaceRole,
   normalizeDashboardMode,
   setPersistedWorkspaceRole,
@@ -79,10 +80,11 @@ function CRMPageInner() {
   // as identity) and the menu always offered owner+broker. Both now derive
   // from the server profile: only held lenses are offered, defaulting to the
   // dashboard's last mode when held, else owner.
+  const heldRoles = getHeldRoles(currentUser);
   const isPipeline = isPipelineRole(currentUser?.active_roles);
   const heldLenses = [
     ...new Set(
-      (Array.isArray(currentUser?.active_roles) ? currentUser.active_roles : [])
+      heldRoles
         .map((r) => {
           const norm = normalizeDashboardMode(r);
           if (["photographer", "designer", "researcher", "provider"].includes(norm)) return "provider";
@@ -139,7 +141,11 @@ function CRMPageInner() {
   }, []);
 
   const fetchData = useCallback(async () => {
-    if (!currentUser?.id || !isPipelineRole(currentUser?.active_roles)) return;
+    const heldRoles = getHeldRoles(currentUser);
+    if (!currentUser?.id || !isPipelineRole(heldRoles)) {
+      setLoading(false);
+      return;
+    }
     // allSettled so one failing feed doesn't blank the other (e.g. an
     // appointments error must not hide the deal pipeline).
     const [dealsRes, apptsRes, contactsRes] = await Promise.allSettled([

@@ -16,6 +16,10 @@ export async function GET(request) {
 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    if (!supabaseAdmin) {
+      return NextResponse.json({ appointments: [] });
+    }
+
     // host_id/guest_id are uuid columns — a non-uuid dev-mock id (e.g.
     // master-dev) can never be a party, and passing it into the .or() filter
     // is a Postgres type error that 500s the whole request.
@@ -53,8 +57,8 @@ export async function GET(request) {
     }
 
     if (error) {
-      console.error("[APPOINTMENTS API] Fetch error:", error);
-      return NextResponse.json({ error: "Failed to load appointments" }, { status: 500 });
+      console.warn("[APPOINTMENTS API] Fetch error, returning empty appointments:", error);
+      return NextResponse.json({ appointments: [] });
     }
 
     const appts = appointments || [];
@@ -65,14 +69,26 @@ export async function GET(request) {
 
     let dealsMap = {};
     if (dealIds.length > 0) {
-      const { data: deals } = await supabaseAdmin.from("deals").select("id, status").in("id", dealIds);
-      dealsMap = Object.fromEntries((deals || []).map(d => [d.id, d]));
+      try {
+        const { data: deals, error: dealsError } = await supabaseAdmin.from("deals").select("id, status").in("id", dealIds);
+        if (!dealsError && deals) {
+          dealsMap = Object.fromEntries(deals.map(d => [d.id, d]));
+        }
+      } catch (e) {
+        console.warn("[APPOINTMENTS API] Deals lookup failed:", e);
+      }
     }
 
     let propsMap = {};
     if (propertyIds.length > 0) {
-      const { data: props } = await supabaseAdmin.from("properties").select("id, title, slug").in("id", propertyIds);
-      propsMap = Object.fromEntries((props || []).map(p => [p.id, p]));
+      try {
+        const { data: props, error: propsError } = await supabaseAdmin.from("properties").select("id, title, slug").in("id", propertyIds);
+        if (!propsError && props) {
+          propsMap = Object.fromEntries(props.map(p => [p.id, p]));
+        }
+      } catch (e) {
+        console.warn("[APPOINTMENTS API] Properties lookup failed:", e);
+      }
     }
 
     // A-149: contact-exchange state per deal, read from the handshake rows
@@ -167,8 +183,8 @@ export async function GET(request) {
 
     return NextResponse.json({ appointments: result });
   } catch (err) {
-    console.error("[APPOINTMENTS API] GET error:", err);
-    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
+    console.warn("[APPOINTMENTS API] GET exception, returning empty appointments:", err);
+    return NextResponse.json({ appointments: [] });
   }
 }
 

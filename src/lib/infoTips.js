@@ -196,6 +196,54 @@ export const INFO_TIPS = Object.freeze({
     title: "Inquiry dispatch preference",
     body: "Decide who receives buyer inquiries for your listing: yourself exclusively, both you and attached brokers, or designated brokers only.",
   }),
+  settingsDateOfBirth: Object.freeze({
+    title: "Date of birth check",
+    body: "Required under the Civil Code of the Philippines and E-Commerce Act (RA 8792) to confirm 18+ contractual capacity. Kept strictly confidential.",
+  }),
+  settingsBuyerRole: Object.freeze({
+    title: "Buyer / Seeker role",
+    body: "Default role for all accounts. Search verified spaces, schedule viewings, save private boards, and initiate direct inquiries.",
+  }),
+  settingsOwnerRole: Object.freeze({
+    title: "Property Owner & Developer",
+    body: "List and manage spaces, review verified buyer inquiries, and manage Next of Kin asset continuity across all properties.",
+  }),
+  settingsSalespersonRole: Object.freeze({
+    title: "Real Estate Salesperson",
+    body: "Property sales and viewings conducted under the supervision of a PRC-licensed broker pursuant to R.A. 9646.",
+  }),
+  settingsCreativePartnerRole: Object.freeze({
+    title: "Creative Partner & Researcher",
+    body: "Earn permanent Connects by completing verified field quests, photography briefs, and land research bounties.",
+  }),
+  settingsAppearance: Object.freeze({
+    title: "Appearance and display",
+    body: "Choose your visual theme or switch on Lite Mode to disable canvas animations for faster performance on mobile and battery saver.",
+  }),
+  connectsRoleRules: Object.freeze({
+    title: "Connect spend rules",
+    body: "Connects let you open inquiries, book viewings, or pitch representation. Replies to inbound messages and accepting requests are always free.",
+  }),
+  connectsBucketMonthly: Object.freeze({
+    title: "Monthly allowance",
+    body: "Your account free monthly Connects based on your active membership tier. Refreshes on the 1st of each month. Unused allowance resets and does not roll over.",
+  }),
+  connectsBucketPurchased: Object.freeze({
+    title: "Purchased Connects",
+    body: "Connect packs you buy. Stored account-wide, shared across all your platform lenses, and never expire.",
+  }),
+  connectsBucketEarned: Object.freeze({
+    title: "Earned Connects",
+    body: "Connects earned by completing QuestIT field bounties and verified briefs. Shared across all your platform lenses and never expire.",
+  }),
+  connectsSingleAccountLogic: Object.freeze({
+    title: "One account, shared wallet",
+    body: "Your Connects belong to your overall ScoutIt account. Unlocking or switching between multiple roles does not multiply or split your Connects balance.",
+  }),
+  connectsSpendOrder: Object.freeze({
+    title: "Spend priority",
+    body: "When you spend a Connect, it draws from your monthly allowance first because it resets every month, followed by purchased, then earned balance.",
+  }),
 });
 
 export function getInfoTip(id) {

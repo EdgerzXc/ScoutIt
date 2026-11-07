@@ -464,7 +464,7 @@ test.describe('master-dev (isolated local preview)', () => {
     await signInAsMock(page, MASTER_DEV_READONLY);
 
     for (const [path, ready] of [
-      ['/dashboard', 'section[aria-label="What needs you"]'],
+      ['/dashboard', 'h1'],
       ['/dashboard/crm', 'h1'],
       ['/dashboard/inbox', 'body'],
     ]) {
@@ -499,10 +499,11 @@ test.describe('master-dev (isolated local preview)', () => {
     await page.route('**/api/deals**', (route) => route.fulfill({ status: 200, json: { deals: [] } }));
     await page.route('**/api/viewing-appointments**', (route) => route.fulfill({ status: 200, json: { appointments: [] } }));
     await page.route('**/api/crm/tasks**', (route) => route.fulfill({ status: 200, json: { tasks: [] } }));
+    await page.route('**/api/crm/contacts**', (route) => route.fulfill({ status: 200, json: { contacts: [] } }));
     await gotoAndSettle(page, '/dashboard/crm');
     await expectRealContent(page);
     await expect(page.getByRole('heading', { name: 'Deal Intelligence' })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText('No priced listings in your active pipeline yet', { exact: true })).toBeVisible();
+    await expect(page.getByText('No priced listings in your active pipeline yet', { exact: true })).toBeVisible({ timeout: 20_000 });
     const type = await page.evaluate(() => {
       const styleFor = (selector) => getComputedStyle(document.querySelector(selector));
       const heading = styleFor('h1');

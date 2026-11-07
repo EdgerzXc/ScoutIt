@@ -79,6 +79,7 @@ export default function SettingsPage() {
   const [dobSaving, setDobSaving] = useState(false);
   const [dobMessage, setDobMessage] = useState({ type: "", text: "" });
   const [activatingRole, setActivatingRole] = useState(null);
+  const [showAvailableRoles, setShowAvailableRoles] = useState(false);
   // Read in an effect, not during render: getCurrentTier() touches
   // localStorage, which does not exist on the server and would break SSR.
   // Only used to say whether the shield is already on by default — never to
@@ -552,270 +553,231 @@ export default function SettingsPage() {
           <p>Manage your account details, public profile, privacy, alerts, and security in one place.</p>
         </div>
 
-        <nav
-          ref={navContainerRef}
-          className={styles.settingsNav}
-          aria-label="Settings sections"
-        >
-          {SETTINGS_SECTIONS.map((section) => (
-            <a
-              key={section.id}
-              href={section.href}
-              ref={(el) => {
-                navItemRefs.current[section.id] = el;
-              }}
-              className={activeSection === section.id ? styles.navLinkActive : ""}
-              onClick={(e) => handleNavClick(e, section.id)}
-            >
-              {section.label}
-            </a>
-          ))}
-        </nav>
+        <div className={styles.navWrapper}>
+          <nav
+            ref={navContainerRef}
+            className={styles.settingsNav}
+            aria-label="Settings sections"
+          >
+            {SETTINGS_SECTIONS.map((section) => (
+              <a
+                key={section.id}
+                href={section.href}
+                ref={(el) => {
+                  navItemRefs.current[section.id] = el;
+                }}
+                className={activeSection === section.id ? styles.navLinkActive : ""}
+                onClick={(e) => handleNavClick(e, section.id)}
+              >
+                {section.label}
+              </a>
+            ))}
+          </nav>
+          <div className={styles.fadingGoldLine} aria-hidden="true" />
+          <div className={styles.dragAffordanceHint} aria-hidden="true">
+            <span>‹</span> Drag horizontally <span>›</span>
+          </div>
+        </div>
 
         {/* ── Section 1: Account ── */}
         <section id="account" className={styles.settingsSection} tabIndex="-1">
           <div className={styles.sectionHeader}>
             <span>Account</span>
             <h2>Your Details & Roles</h2>
-            <p>Set your display name and choose the roles you use on ScoutIt.</p>
+            <p>Account identity, platform lenses, and workspace preferences.</p>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} style={{display: 'inline-flex', alignItems: 'center', gap: 6}}>
-              Display Name <InfoTip tipId="settingsDisplayName" label="About display name" />
-            </label>
-            <input 
-              type="text" 
-              className={styles.input} 
-              aria-label="Display name"
-              placeholder="Your full name or display name"
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-            />
-          </div>
-
-          {/* Date of Birth & 18+ Legal Verification */}
-          <div className={styles.formGroup} style={{ marginTop: 20 }}>
-            <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              Date of Birth &amp; Legal Capacity <InfoTip tipId="settingsDateOfBirth" label="About date of birth & 18+ legal capacity check" />
-            </label>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
-              Required under the Civil Code of the Philippines and E-Commerce Act (RA 8792). Confirms 18+ contractual capacity and is kept strictly confidential.
-            </p>
-            {dateOfBirth ? (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px 18px',
-                borderRadius: 8,
-                background: 'rgba(232, 174, 60, 0.05)',
-                border: '1px solid rgba(232, 174, 60, 0.25)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <ShieldCheck size={20} style={{ color: 'var(--accent)' }} />
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {dateOfBirth}
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                      18+ Adult Eligibility Confirmed ({adultEligibilityStatus})
-                    </div>
-                  </div>
-                </div>
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  padding: '4px 10px',
-                  borderRadius: 4,
-                  background: 'rgba(46, 125, 50, 0.2)',
-                  color: '#81c784',
-                  border: '1px solid rgba(46, 125, 50, 0.4)',
-                  fontWeight: 600,
-                }}>
-                  Verified ✓
-                </span>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <input
-                    id="settings-dob-input"
-                    aria-label="Date of birth"
-                    type="date"
-                    max={new Date().toISOString().slice(0, 10)}
-                    className={styles.input}
-                    style={{ maxWidth: 240 }}
-                    value={dobInput}
-                    onChange={(e) => setDobInput(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    disabled={!dobInput || dobSaving}
-                    onClick={() => handleSaveDateOfBirth(dobInput)}
-                    style={{
-                      minHeight: 44,
-                      padding: '0 20px',
-                      borderRadius: 6,
-                      background: 'var(--accent)',
-                      color: '#000',
-                      fontWeight: 700,
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      cursor: (!dobInput || dobSaving) ? 'not-allowed' : 'pointer',
-                      opacity: (!dobInput || dobSaving) ? 0.5 : 1,
-                      transition: 'background 160ms ease',
-                    }}
-                  >
-                    {dobSaving ? "Verifying…" : "Confirm Date of Birth →"}
-                  </button>
-                </div>
-                {dobMessage.text && (
-                  <div style={{
-                    fontSize: 12,
-                    color: dobMessage.type === 'error' ? '#ef5350' : '#81c784',
-                  }}>
-                    {dobMessage.text}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Platform Roles & Workspaces Catalog */}
-          <div className={styles.formGroup} style={{ marginTop: 24 }}>
-            <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              Your Roles <InfoTip tipId="settingsWorkspaces" label="About your platform roles and workspace activation" />
-            </label>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-              Explore and activate roles across the ScoutIt platform. Every account starts with Looking to Buy / Rent. Specialized roles like Property Owner / Landlord, Accredited Broker, and Creative Partners unlock verified workspaces with streamlined, win-win requirements.
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Need another lens?
+          {/* ── Branch Frame 1: Personal Identity & Capacity ── */}
+          <div className={styles.branchFrame}>
+            <div className={styles.branchFrameHeader}>
+              <span className={styles.branchFrameTitle}>
+                01 · Personal Identity &amp; Capacity
+                <InfoTip tipId="settingsDisplayName" label="About identity and display name" />
               </span>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                Tap any role to activate or calibrate
-              </span>
+              <span className={styles.branchFrameBadge}>Profile</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {ALL_PLATFORM_ROLES.map((role) => {
-                const isHeld =
+            <div className={styles.formGroup}>
+              <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                Display Name
+              </label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                aria-label="Display name"
+                placeholder="Your full name or display name"
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+              />
+            </div>
+
+            {/* Date of Birth & 18+ Legal Verification */}
+            <div className={styles.formGroup} style={{ marginTop: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: 0 }}>
+                  Date of Birth &amp; Legal Capacity
+                  <InfoTip tipId="settingsDateOfBirth" label="About date of birth & 18+ legal capacity check" />
+                </label>
+              </div>
+              {dateOfBirth ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  borderRadius: 8,
+                  background: 'rgba(232, 174, 60, 0.05)',
+                  border: '1px solid rgba(232, 174, 60, 0.25)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <ShieldCheck size={20} style={{ color: 'var(--accent)' }} />
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {dateOfBirth}
+                      </div>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                        18+ Adult Eligibility Confirmed ({adultEligibilityStatus})
+                      </div>
+                    </div>
+                  </div>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    padding: '4px 10px',
+                    borderRadius: 4,
+                    background: 'rgba(46, 125, 50, 0.2)',
+                    color: '#81c784',
+                    border: '1px solid rgba(46, 125, 50, 0.4)',
+                    fontWeight: 600,
+                  }}>
+                    Verified ✓
+                  </span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input
+                      id="settings-dob-input"
+                      aria-label="Date of birth"
+                      type="date"
+                      max={new Date().toISOString().slice(0, 10)}
+                      className={styles.input}
+                      style={{ maxWidth: 240 }}
+                      value={dobInput}
+                      onChange={(e) => setDobInput(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      disabled={!dobInput || dobSaving}
+                      onClick={() => handleSaveDateOfBirth(dobInput)}
+                      style={{
+                        minHeight: 44,
+                        padding: '0 20px',
+                        borderRadius: 6,
+                        background: 'var(--accent)',
+                        color: '#000',
+                        fontWeight: 700,
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        cursor: (!dobInput || dobSaving) ? 'not-allowed' : 'pointer',
+                        opacity: (!dobInput || dobSaving) ? 0.5 : 1,
+                        transition: 'background 160ms ease',
+                      }}
+                    >
+                      {dobSaving ? "Verifying…" : "Confirm Date of Birth →"}
+                    </button>
+                  </div>
+                  {dobMessage.text && (
+                    <div style={{
+                      fontSize: 12,
+                      color: dobMessage.type === 'error' ? '#ef5350' : '#81c784',
+                    }}>
+                      {dobMessage.text}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Branch Frame 2: Active Platform Lenses ── */}
+          <div className={styles.branchFrame}>
+            <div className={styles.branchFrameHeader}>
+              <span className={styles.branchFrameTitle}>
+                02 · Your Roles
+                <InfoTip tipId="settingsWorkspaces" label="About your platform roles and workspace activation" />
+              </span>
+              <span className={styles.branchFrameBadge}>
+                {ALL_PLATFORM_ROLES.filter((role) =>
                   role.alwaysActive ||
                   role.id === "buyer" ||
                   rawActiveRoles.includes(role.id) ||
                   (role.id === "designer" && rawActiveRoles.includes("event-planner")) ||
-                  tags.includes(role.id);
+                  tags.includes(role.id)
+                ).length} Active
+              </span>
+            </div>
+
+            <div className={styles.branchGrid}>
+              {ALL_PLATFORM_ROLES.filter((role) =>
+                role.alwaysActive ||
+                role.id === "buyer" ||
+                rawActiveRoles.includes(role.id) ||
+                (role.id === "designer" && rawActiveRoles.includes("event-planner")) ||
+                tags.includes(role.id)
+              ).map((role) => {
+                const tipId =
+                  role.id === "buyer"
+                    ? "settingsBuyerRole"
+                    : role.id === "owner"
+                    ? "settingsOwnerRole"
+                    : role.id === "broker"
+                    ? "settingsPrcLicense"
+                    : role.id === "salesperson"
+                    ? "settingsSalespersonRole"
+                    : role.id === "photographer" || role.id === "designer"
+                    ? "settingsCreativePartnerRole"
+                    : null;
                 return (
-                  <div
-                    key={role.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 8,
-                      padding: '16px 20px',
-                      borderRadius: 8,
-                      background: isHeld ? 'rgba(232, 174, 60, 0.04)' : 'rgba(255, 255, 255, 0.02)',
-                      border: isHeld ? '1px solid rgba(232, 174, 60, 0.35)' : '1px solid var(--border-solid)',
-                      transition: 'border-color 160ms ease, background 160ms ease',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 20 }}>{role.icon}</span>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <div key={role.id} className={`${styles.roleCard} ${styles.roleCardActive}`}>
+                    <div className={styles.roleCardHeader}>
+                      <div className={styles.roleCardIdentity}>
+                        <span className={styles.roleCardIcon} aria-hidden="true">{role.icon}</span>
+                        <div className={styles.roleCardInfo}>
+                          <div className={styles.roleTitleRow}>
+                            <span className={styles.roleTitle}>
                               {role.label}
                             </span>
-                            <span style={{
-                              fontFamily: 'var(--font-mono)',
-                              fontSize: 12,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.08em',
-                              padding: '2px 6px',
-                              borderRadius: 4,
-                              background: 'rgba(255, 255, 255, 0.06)',
-                              color: 'var(--text-secondary)',
-                              border: '1px solid var(--border-solid)',
-                            }}>
+                            <span className={styles.roleBadge}>
                               {role.badge}
                             </span>
                             {role.id === "broker" && <InfoTip tipId="settingsPrcLicense" label="About PRC licence requirement" />}
                             {(role.id === "photographer" || role.id === "designer") && <InfoTip tipId="settingsServicesOffered" label="About creative services offered" />}
+                            {role.id === "buyer" && <InfoTip tipId="settingsBuyerRole" label="About Buyer / Seeker role" />}
+                            {role.id === "owner" && <InfoTip tipId="settingsOwnerRole" label="About Property Owner role" />}
+                            {role.id === "salesperson" && <InfoTip tipId="settingsSalespersonRole" label="About Salesperson role" />}
                           </div>
-                          <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0', lineHeight: 1.4 }}>
+                          <p className={styles.roleDesc}>
                             {role.desc}
                           </p>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        {isHeld ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{
-                              fontFamily: 'var(--font-mono)',
-                              fontSize: 12,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.08em',
-                              padding: '4px 10px',
-                              borderRadius: 4,
-                              background: 'rgba(232, 174, 60, 0.15)',
-                              color: 'var(--accent-bright)',
-                              border: '1px solid rgba(232, 174, 60, 0.4)',
-                              fontWeight: 600,
-                            }}>
-                              Active ✓
-                            </span>
-                            {!role.alwaysActive && (
-                              <button
-                                type="button"
-                                onClick={() => setActivatingRole(role.id)}
-                                style={{
-                                  minHeight: 36,
-                                  padding: '0 12px',
-                                  borderRadius: 4,
-                                  background: 'rgba(255, 255, 255, 0.05)',
-                                  color: 'var(--text-secondary)',
-                                  border: '1px solid var(--border-solid)',
-                                  fontSize: 12,
-                                  fontFamily: 'var(--font-mono)',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.05em',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Calibrate Details
-                              </button>
-                            )}
-                          </div>
-                        ) : (
+                      <div className={`${styles.roleCardActions} ${role.alwaysActive ? styles.singleAction : ""}`}>
+                        <span className={styles.roleStatusBadge}>
+                          Active ✓
+                        </span>
+                        {!role.alwaysActive && (
                           <button
                             type="button"
                             onClick={() => setActivatingRole(role.id)}
-                            style={{
-                              minHeight: 40,
-                              padding: '0 16px',
-                              borderRadius: 6,
-                              background: 'rgba(232, 174, 60, 0.12)',
-                              color: 'var(--accent-bright)',
-                              border: '1px solid rgba(232, 174, 60, 0.4)',
-                              fontWeight: 600,
-                              fontFamily: 'var(--font-mono)',
-                              fontSize: 12,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.06em',
-                              cursor: 'pointer',
-                              transition: 'all 160ms ease',
-                            }}
+                            className={styles.roleActionButton}
                           >
-                            + Activate Role →
+                            Calibrate Details
                           </button>
                         )}
                       </div>
@@ -826,14 +788,99 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Appearance & Display Settings */}
-          <div className={styles.formGroup} style={{ marginTop: 28, paddingTop: 24, borderTop: "1px solid var(--border-solid)" }}>
-            <label className={styles.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              Appearance &amp; Display <InfoTip tipId="settingsAppearance" label="About appearance and display options" />
-            </label>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-              Select your preferred visual mode and performance settings. Changes apply across all workspaces immediately.
-            </p>
+          {/* ── Branch Frame 3: Extending Branch: Need Another Lens? ── */}
+          <div className={styles.branchFrame}>
+            <div className={styles.branchFrameHeader}>
+              <span className={styles.branchFrameTitle}>
+                03 · Need another lens?
+                <InfoTip tipId="settingsWorkspaces" label="About adding additional roles" />
+              </span>
+              <button
+                type="button"
+                className={styles.branchFrameToggle}
+                onClick={() => setShowAvailableRoles((v) => !v)}
+                aria-expanded={showAvailableRoles}
+              >
+                {showAvailableRoles ? "Collapse Branches ▲" : "Explore Branches ▼"}
+              </button>
+            </div>
+
+            <div className={styles.fadingGoldLine} style={{ marginBottom: 16 }} aria-hidden="true" />
+
+            {showAvailableRoles && (
+              <div className={styles.branchGrid}>
+                {ALL_PLATFORM_ROLES.filter((role) =>
+                  !(
+                    role.alwaysActive ||
+                    role.id === "buyer" ||
+                    rawActiveRoles.includes(role.id) ||
+                    (role.id === "designer" && rawActiveRoles.includes("event-planner")) ||
+                    tags.includes(role.id)
+                  )
+                ).map((role) => {
+                  const tipId =
+                    role.id === "buyer"
+                      ? "settingsBuyerRole"
+                      : role.id === "owner"
+                      ? "settingsOwnerRole"
+                      : role.id === "broker"
+                      ? "settingsPrcLicense"
+                      : role.id === "salesperson"
+                      ? "settingsSalespersonRole"
+                      : role.id === "photographer" || role.id === "designer"
+                      ? "settingsCreativePartnerRole"
+                      : null;
+                  return (
+                    <div key={role.id} className={styles.roleCard}>
+                      <div className={styles.roleCardHeader}>
+                        <div className={styles.roleCardIdentity}>
+                          <span className={styles.roleCardIcon} aria-hidden="true">{role.icon}</span>
+                          <div className={styles.roleCardInfo}>
+                            <div className={styles.roleTitleRow}>
+                              <span className={styles.roleTitle}>
+                                {role.label}
+                              </span>
+                              <span className={styles.roleBadgeSecondary}>
+                                {role.badge}
+                              </span>
+                              {role.id === "broker" && <InfoTip tipId="settingsPrcLicense" label="About PRC licence requirement" />}
+                              {(role.id === "photographer" || role.id === "designer") && <InfoTip tipId="settingsServicesOffered" label="About creative services offered" />}
+                              {role.id === "buyer" && <InfoTip tipId="settingsBuyerRole" label="About Buyer / Seeker role" />}
+                              {role.id === "owner" && <InfoTip tipId="settingsOwnerRole" label="About Property Owner role" />}
+                              {role.id === "salesperson" && <InfoTip tipId="settingsSalespersonRole" label="About Salesperson role" />}
+                            </div>
+                            <p className={styles.roleDesc}>
+                              {role.desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={`${styles.roleCardActions} ${styles.singleAction}`}>
+                          <button
+                            type="button"
+                            onClick={() => setActivatingRole(role.id)}
+                            className={styles.roleActivateButton}
+                          >
+                            + Activate Role →
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ── Branch Frame 4: Appearance & Display Settings ── */}
+          <div className={styles.branchFrame}>
+            <div className={styles.branchFrameHeader}>
+              <span className={styles.branchFrameTitle}>
+                04 · Appearance &amp; Display
+                <InfoTip tipId="settingsAppearance" label="About appearance and display options" />
+              </span>
+              <span className={styles.branchFrameBadge}>Visual Engine</span>
+            </div>
 
             {/* Display Mode Cards */}
             <div className={styles.tagGrid} style={{ marginBottom: 16 }}>

@@ -1,40 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import InfoTip from "@/components/ui/InfoTip";
+import { X } from "lucide-react";
 import {
   CONNECT_ROLE_PURPOSES,
   getUniversalWalletOverview,
   getWallet,
   resolveWalletRoleForMode,
 } from "@/lib/connectsWallet";
-
-const BUCKETS = [
-  {
-    key: "granted",
-    label: "Monthly Allowance",
-    icon: "↻",
-    description:
-      "Your tier's free monthly Connects for this lens. Refreshes on the 1st of each month; spend it before it resets, since it never rolls over.",
-  },
-  {
-    key: "purchased",
-    label: "Purchased (Universal)",
-    icon: "◈",
-    description:
-      "Connect packs you've bought. Shared across all your roles and never expire.",
-  },
-  {
-    key: "earned",
-    label: "Earned (Universal)",
-    icon: "★",
-    description:
-      "Earned by completing QuestIT bounties and verified briefs. Shared across all your roles and never expire.",
-  },
-];
-
-// Spend order note shown once, since it's the one non-obvious mechanic.
-const SPEND_ORDER_NOTE =
-  "When you spend a Connect, it's drawn from Monthly first, then Purchased, then Earned; so the ones that expire go before the ones that don't.";
 
 export default function ConnectsBreakdown({
   open,
@@ -82,121 +56,169 @@ export default function ConnectsBreakdown({
 
   if (!open) return null;
 
+  // Single account connects logic:
+  // An account has ONE connects wallet. In 'all' or single-role mode,
+  // the balance reflects the account's single monthly allowance + purchased + earned.
   const total =
-    mode === "all" && overview.roleBuckets.length > 1
+    mode === "all"
       ? overview.universalTotal
       : wallet.granted + wallet.purchased + wallet.earned;
 
+  const monthlyVal =
+    mode === "all" ? overview.totalGranted : (wallet.granted ?? 0);
+  const purchasedVal =
+    mode === "all" ? overview.purchased : (wallet.purchased ?? 0);
+  const earnedVal =
+    mode === "all" ? overview.earned : (wallet.earned ?? 0);
+
   return (
-    <div
-      ref={ref}
-      role="dialog"
-      aria-label="Connects wallet breakdown"
-      className="absolute right-0 mt-2 w-[340px] sm:w-96 max-w-[calc(100vw-1.5rem)] bg-surface border border-gold-accent/25 rounded-xl shadow-2xl overflow-hidden z-50"
-    >
-      <div className="p-3.5 border-b border-surface-variant bg-surface-alt flex justify-between items-center gap-2">
-        <div>
-          <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary block">
-            Your Connects Wallet
-          </span>
-          <span className="font-mono text-xs text-gold-accent">
-            {mode === "all" && overview.roleBuckets.length > 1
-              ? "Universal Balance (All Lenses)"
-              : `Active Lens: ${activePurpose.roleLabel}`}
-          </span>
-        </div>
-        <span className="flex items-center gap-1.5 font-working-title text-lg font-bold text-gold-accent shrink-0">
-          <span className="text-sm">◈</span>
-          {total}
-        </span>
-      </div>
+    <>
+      {/* Mobile Backdrop Overlay for Clean Centering & Dismissal */}
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      <div className="max-h-[420px] overflow-y-auto divide-y divide-surface-variant/50">
-        {/* What Connects Are Used For in This Role */}
-        <div className="p-3.5 bg-gold-accent/5 space-y-2">
-          <div className="font-mono text-xs uppercase tracking-widest text-gold-accent font-semibold">
-            What Connects Do ({activePurpose.shortLabel} Lens)
+      <div
+        ref={ref}
+        role="dialog"
+        aria-label="Connects wallet breakdown"
+        className="fixed inset-x-4 top-20 sm:inset-x-auto sm:top-full sm:mt-2 sm:right-0 sm:absolute w-auto sm:w-[370px] max-w-[calc(100vw-2rem)] bg-surface border border-gold-accent/35 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.7)] overflow-hidden z-50 text-left transition-all duration-200"
+      >
+        {/* Subtle Fading Gold Accent Line at Top */}
+        <div
+          className="h-[2px] w-full bg-gradient-to-r from-transparent via-gold-accent to-transparent opacity-80"
+          aria-hidden="true"
+        />
+
+        {/* Dialog Header */}
+        <div className="p-4 border-b border-surface-variant/80 bg-surface-alt/70 flex justify-between items-center gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-[12px] font-bold uppercase tracking-widest text-text-secondary">
+                Connects Wallet
+              </span>
+              <InfoTip tipId="connectsSingleAccountLogic" label="About single-account wallet" />
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="font-mono text-xs text-gold-accent truncate">
+                {mode === "all"
+                  ? "Unified Account Pool (All Lenses)"
+                  : `${activePurpose.roleLabel} · 1 to initiate`}
+              </span>
+              <InfoTip tipId="connectsRoleRules" label="About spend & receive rules" />
+            </div>
           </div>
-          <div className="space-y-1.5 text-xs text-text-secondary leading-relaxed">
-            <p>
-              <strong className="text-on-surface font-semibold">Outbound:</strong>{" "}
-              {activePurpose.spendRule}.
-            </p>
-            <p>
-              <strong className="text-on-surface font-semibold">Inbound / Earn:</strong>{" "}
-              {activePurpose.receiveRule}.
-            </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="flex items-center gap-1.5 font-working-title text-xl font-bold text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-3 py-1 rounded-full shadow-[0_0_12px_rgba(var(--accent-rgb),0.2)]">
+              <span className="text-sm">◈</span>
+              {total}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-text-secondary hover:text-gold-accent hover:bg-surface-variant transition"
+              aria-label="Close Connects Breakdown"
+            >
+              <X size={16} />
+            </button>
           </div>
         </div>
 
-        {/* 3 Buckets Breakdown */}
-        <div className="p-4 flex flex-col gap-3">
-          {BUCKETS.map(({ key, label, icon, description }) => {
-            const value =
-              key === "granted" && mode === "all" && overview.roleBuckets.length > 1
-                ? overview.totalGranted
-                : (wallet[key] ?? 0);
-            return (
-              <div key={key} className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-gold-accent/10 flex items-center justify-center text-gold-accent text-sm shrink-0 mt-0.5">
-                  {icon}
+        <div className="max-h-[75vh] sm:max-h-[420px] overflow-y-auto divide-y divide-surface-variant/50">
+          {/* 3 Buckets Breakdown: Centered Symmetric Metric Grid */}
+          <div className="p-4">
+            <div className="grid grid-cols-3 gap-2.5">
+              {/* Monthly Allowance */}
+              <div className="p-2.5 rounded-xl border border-surface-variant/70 bg-surface-alt/40 flex flex-col items-center text-center justify-between min-h-[92px] transition hover:border-gold-accent/40">
+                <div className="flex items-center justify-center gap-1 w-full text-gold-accent">
+                  <span className="text-sm">↻</span>
+                  <InfoTip tipId="connectsBucketMonthly" label="Monthly allowance details" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-working-title text-on-surface">{label}</span>
-                    <span className="font-mono text-sm font-semibold text-gold-accent shrink-0">
-                      {value}
-                    </span>
-                  </div>
-                  <p className="text-xs text-text-secondary leading-relaxed mt-0.5">
-                    {description}
-                  </p>
+                <div className="font-mono text-lg font-bold text-gold-bright my-0.5">
+                  {monthlyVal}
                 </div>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+                  Monthly
+                </span>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Per-Lens Monthly Allowances (shown when user holds > 1 role) */}
-        {overview.roleBuckets.length > 1 && (
-          <div className="p-3.5 space-y-2 bg-surface-alt/40">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-                Monthly Allowance by Lens
-              </span>
-              <span className="font-mono text-xs text-gold-accent">
-                {overview.totalGranted} Total
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {overview.roleBuckets.map((rb) => {
-                const isCurrent = rb.role === activeWalletRole && mode !== "all";
-                return (
-                  <div
-                    key={rb.role}
-                    className={`px-2.5 py-1.5 rounded-lg border flex items-center justify-between gap-2 ${
-                      isCurrent
-                        ? "border-gold-accent/40 bg-gold-accent/10 text-on-surface"
-                        : "border-surface-variant/60 bg-surface text-text-secondary"
-                    }`}
-                  >
-                    <span className="font-mono text-xs truncate">{rb.shortLabel}</span>
-                    <span className="font-mono text-xs font-bold text-gold-accent shrink-0">
-                      ◈ {rb.granted}
-                    </span>
-                  </div>
-                );
-              })}
+              {/* Purchased (Universal) */}
+              <div className="p-2.5 rounded-xl border border-surface-variant/70 bg-surface-alt/40 flex flex-col items-center text-center justify-between min-h-[92px] transition hover:border-gold-accent/40">
+                <div className="flex items-center justify-center gap-1 w-full text-gold-accent">
+                  <span className="text-sm">◈</span>
+                  <InfoTip tipId="connectsBucketPurchased" label="Purchased Connects details" />
+                </div>
+                <div className="font-mono text-lg font-bold text-gold-bright my-0.5">
+                  {purchasedVal}
+                </div>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+                  Purchased
+                </span>
+              </div>
+
+              {/* Earned (Universal) */}
+              <div className="p-2.5 rounded-xl border border-surface-variant/70 bg-surface-alt/40 flex flex-col items-center text-center justify-between min-h-[92px] transition hover:border-gold-accent/40">
+                <div className="flex items-center justify-center gap-1 w-full text-gold-accent">
+                  <span className="text-sm">★</span>
+                  <InfoTip tipId="connectsBucketEarned" label="Earned Connects details" />
+                </div>
+                <div className="font-mono text-lg font-bold text-gold-bright my-0.5">
+                  {earnedVal}
+                </div>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+                  Earned
+                </span>
+              </div>
             </div>
           </div>
-        )}
 
-        <div className="p-3.5">
-          <p className="text-[12px] text-text-secondary leading-relaxed italic">
-            {SPEND_ORDER_NOTE}
-          </p>
+          {/* Shared Across Active Lenses Note (One account = one connects logic) */}
+          {overview.roleBuckets.length > 1 && (
+            <div className="p-3.5 bg-surface-alt/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[12px] uppercase tracking-widest text-text-secondary">
+                  Shared Across Active Lenses
+                </span>
+                <InfoTip tipId="connectsSingleAccountLogic" label="About shared wallet" />
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {overview.roleBuckets.map((rb) => {
+                  const isCurrent = rb.role === activeWalletRole && mode !== "all";
+                  return (
+                    <span
+                      key={rb.role}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono uppercase tracking-wider border ${
+                        isCurrent
+                          ? "border-gold-accent/50 bg-gold-accent/15 text-gold-bright font-semibold"
+                          : "border-surface-variant bg-surface text-text-secondary"
+                      }`}
+                    >
+                      {rb.shortLabel} {isCurrent && "●"}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Spend Priority Footer with ? Mark */}
+          <div className="p-3.5 bg-surface-alt/20 flex items-center justify-between gap-3 text-xs text-text-secondary">
+            <span className="font-mono text-[11px] uppercase tracking-wider truncate">
+              Spend: Monthly 1st → Purchased → Earned
+            </span>
+            <InfoTip tipId="connectsSpendOrder" label="About spend priority order" />
+          </div>
         </div>
+
+        {/* Fading Gold Drag / Scroll Affordance Line at Bottom */}
+        <div
+          className="h-[1.5px] w-full bg-gradient-to-r from-transparent via-gold-accent/50 to-transparent"
+          aria-hidden="true"
+        />
       </div>
-    </div>
+    </>
   );
 }

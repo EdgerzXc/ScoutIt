@@ -988,15 +988,13 @@ function DashboardInner() {
               <DashboardAmbientStrip user={user} />
             </div>
 
-            <div className="border-t border-surface-variant pt-4">
-              <Link href="/settings" className="flex items-center gap-3 text-text-secondary hover:text-on-surface font-working-title text-sm py-2">
-                <Settings size={16} className="text-gold-accent" /> Account Settings
-              </Link>
+            <div className="border-t border-surface-variant pt-3">
               <button
-                className="flex items-center gap-3 text-text-secondary hover:text-error font-working-title text-sm py-2 w-full text-left"
+                type="button"
+                className="flex items-center gap-3 text-text-secondary hover:text-error hover:bg-error/10 font-working-title text-sm min-h-[44px] px-3 w-full text-left rounded-lg transition active:scale-[0.98]"
                 onClick={handleSignOut}
               >
-                <LogOut size={16} className="text-error" /> Sign Out
+                <LogOut size={18} className="text-error" /> Sign Out
               </button>
             </div>
           </div>

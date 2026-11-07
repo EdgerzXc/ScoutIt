@@ -8,12 +8,14 @@ import CalendarShell from "@/components/calendar/CalendarShell";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { isPipelineRole } from "@/lib/workspaceDeck";
+import { getHeldRoles } from "@/lib/dashboardModes";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 function CalendarInner() {
   const { currentUser } = useDashboard();
-  const isPipeline = isPipelineRole(currentUser?.active_roles);
+  const heldRoles = getHeldRoles(currentUser);
+  const isPipeline = isPipelineRole(heldRoles);
   const activeMode = isPipeline ? "owner" : "buyer";
 
   return (

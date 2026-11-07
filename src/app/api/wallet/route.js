@@ -52,8 +52,11 @@ export async function GET(request) {
       return inputRole;
     };
 
-    const role = rawRole
-      ? resolveConnectRole(mapAliasToWalletRole(rawRole), "seeker")
+    const isAll = rawRole && rawRole.trim().toLowerCase() === "all";
+    const effectiveRawRole = isAll ? (profile?.role || "seeker") : rawRole;
+
+    const role = effectiveRawRole
+      ? resolveConnectRole(mapAliasToWalletRole(effectiveRawRole), "seeker")
       : (resolveConnectRole(mapAliasToWalletRole(profile?.role || "seeker"), "seeker") || "seeker");
     if (!role) {
       return NextResponse.json(
