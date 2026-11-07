@@ -14,10 +14,12 @@ const BuyerMode = dynamic(() => import("../../components/dashboard/BuyerMode"), 
 const ProviderMode = dynamic(() => import("../../components/dashboard/ProviderMode"), { ssr: false });
 const OperatorMode = dynamic(() => import("../../components/dashboard/OperatorMode"), { ssr: false });
 const MissionControlMode = dynamic(() => import("../../components/dashboard/MissionControlMode"), { ssr: false });
+const UnifiedOverviewMode = dynamic(() => import("../../components/dashboard/UnifiedOverviewMode"), { ssr: false });
 import Toasts from "../../components/ui/Toasts";
 import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
 import WorkspaceDeckDrawer from "../../components/dashboard/WorkspaceDeckDrawer";
+import WorkspaceLensBar from "../../components/dashboard/WorkspaceLensBar";
 import { deckNeighbors, isPipelineRole } from "../../lib/workspaceDeck";
 import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
@@ -29,15 +31,19 @@ import { getSession, getUser, signOut } from "../../lib/authClient";
 import {
   canAccessDashboardWorkspace,
   getHeldRoles,
+  getPersistedWorkspaceRole,
   inferProviderType,
   normalizeDashboardMode,
   normalizeDashboardModes,
   pickPrimaryRole,
+  resolveActiveWorkspaceSelection,
+  setPersistedWorkspaceRole,
 } from "../../lib/dashboardModes";
 import { missingLenses } from "../../lib/workspaceUnlock";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
 import {
+  LayoutGrid,
   Search,
   Briefcase,
   Bell,
@@ -56,6 +62,7 @@ import {
 import "./dashboard-motion.css";
 
 const TAG_LABELS = {
+  all: "All Workspaces · Unified",
   buyer: "Buyer / Seeker Workspace",
   seeker: "Buyer / Seeker Workspace",
   owner: "Owner & Developer Workspace",
@@ -71,6 +78,7 @@ const TAG_LABELS = {
 };
 
 const WORKSPACE_ROLE_OPTIONS = [
+  { id: "all", mode: "all", label: "All Workspaces (Unified)", desc: "Combined view across all active lenses", icon: LayoutGrid },
   { id: "buyer", mode: "buyer", label: "Buyer / Seeker", desc: "Search spaces, viewings & private board", icon: Search },
   { id: "owner", mode: "owner", label: "Property Owner & Developer", desc: "List properties, review leads & inventory", icon: Building2 },
   { id: "broker", mode: "broker", label: "Accredited Broker", desc: "Client representation & deal pipeline (PRC)", icon: Briefcase },
@@ -95,6 +103,7 @@ function DashboardInner() {
   const { connects, currentUser, notifications, markNotificationsRead, clearAllNotifications, addToast } = useDashboard();
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("");
+  const [activeRoleKey, setActiveRoleKey] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showConnectsBreakdown, setShowConnectsBreakdown] = useState(false);
   const [showDesktopSwitcher, setShowDesktopSwitcher] = useState(false);
@@ -183,13 +192,25 @@ function DashboardInner() {
       }
 
       parsed.tags = normalizeDashboardModes(parsed.tags, parsed.primaryMode);
-      parsed.primaryMode = pickPrimaryRole(parsed.tags, parsed.primaryMode);
+      const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+      const requestedRole = params?.get("role") || params?.get("mode");
+      const resolved = resolveActiveWorkspaceSelection({
+        requestedRole,
+        persistedRole: getPersistedWorkspaceRole(),
+        user: parsed,
+      });
+      parsed.primaryMode = resolved.mode || pickPrimaryRole(parsed.tags, parsed.primaryMode);
+      if (resolved.providerType) {
+        parsed.providerType = resolved.providerType;
+      }
       if (!parsed.primaryMode || parsed.tags.length === 0) {
         router.replace("/onboarding");
         return;
       }
       setUser(parsed);
       setMode(parsed.primaryMode);
+      setActiveRoleKey(resolved.roleKey || parsed.primaryMode);
+      setPersistedWorkspaceRole(resolved.roleKey || parsed.primaryMode);
     };
     hydrateDevelopmentUser();
     return () => { cancelled = true; };
@@ -216,10 +237,12 @@ function DashboardInner() {
     const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
     const requestedRole = params?.get("role") || params?.get("mode");
     const isAuthorizedRequest = requestedRole && canAccessDashboardWorkspace(requestedRole, rawHeldRoles);
-    const preferredMode = isAuthorizedRequest ? normalizeDashboardMode(requestedRole) : "buyer";
-    const primaryMode = isAuthorizedRequest
-      ? preferredMode
-      : (pickPrimaryRole(tags, preferredMode) || "buyer");
+    const resolved = resolveActiveWorkspaceSelection({
+      requestedRole,
+      persistedRole: getPersistedWorkspaceRole(),
+      user: currentUser,
+    });
+    const primaryMode = resolved.mode;
     if (!primaryMode || (tags.length === 0 && !isAuthorizedRequest)) {
       router.push("/onboarding");
       return;
@@ -230,20 +253,17 @@ function DashboardInner() {
       name: currentUser.display_name || currentUser.user_metadata?.full_name || "ScoutIt User",
       tags,
       primaryMode,
-      providerType: isAuthorizedRequest
-        ? inferProviderType(requestedRole, currentUser.provider_type)
-        : (currentUser.provider_type || undefined),
+      providerType: resolved.providerType || currentUser.provider_type || undefined,
       prcLicense: currentUser.prc_license || undefined,
     };
     // Keep verified profile data in React state; never persist it in the browser.
     setUser(serverUser);
     setMode(primaryMode);
+    setActiveRoleKey(resolved.roleKey);
+    setPersistedWorkspaceRole(resolved.roleKey);
 
     if (typeof window !== "undefined") {
-      const activeRoleKey = requestedRole && isAuthorizedRequest
-        ? requestedRole
-        : (primaryMode === "provider" ? (serverUser.providerType || "photographer") : primaryMode);
-      window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: activeRoleKey, mode: primaryMode } }));
+      window.dispatchEvent(new CustomEvent("scoutit:workspace-changed", { detail: { role: resolved.roleKey, mode: primaryMode } }));
     }
   }, [currentUser, router]);
 
@@ -297,6 +317,8 @@ function DashboardInner() {
     if (mode !== nextMode) {
       setMode(nextMode);
     }
+    setActiveRoleKey(targetRole);
+    setPersistedWorkspaceRole(targetRole);
     if (user.primaryMode !== nextMode || (nextProviderType && user.providerType !== nextProviderType)) {
       setUser((prev) =>
         prev
@@ -405,9 +427,17 @@ function DashboardInner() {
 
   const heldRoles = getHeldRoles(user);
 
-  const isRoleUnlocked = (opt) => canAccessDashboardWorkspace(opt.id, heldRoles);
+  const isRoleUnlocked = (opt) => {
+    if (opt.id === "all") {
+      return (user?.tags?.length || 0) > 1 || heldRoles.includes("admin") || heldRoles.includes("staff");
+    }
+    return canAccessDashboardWorkspace(opt.id, heldRoles);
+  };
 
   const isRoleActive = (opt) => {
+    if (opt.id === "all") {
+      return mode === "all";
+    }
     if (opt.id === "photographer") {
       return mode === "provider" && (user?.providerType === "photographer" || !user?.providerType);
     }
@@ -418,10 +448,10 @@ function DashboardInner() {
       return mode === "provider" && user?.providerType === "researcher";
     }
     if (opt.id === "salesperson") {
-      return mode === "broker" && user?.role === "salesperson";
+      return mode === "broker" && (activeRoleKey === "salesperson" || user?.role === "salesperson");
     }
     if (opt.id === "broker") {
-      return mode === "broker" && user?.role !== "salesperson";
+      return mode === "broker" && activeRoleKey !== "salesperson" && user?.role !== "salesperson";
     }
     if (opt.mode === "buyer" && (mode === "buyer" || mode === "exploring")) return true;
     return mode === opt.mode;
@@ -433,6 +463,7 @@ function DashboardInner() {
 
   const renderActiveMode = () => {
     switch (mode) {
+      case "all": return <UnifiedOverviewMode onSelectLens={handleSwitchMode} heldRoles={heldRoles} />;
       case "owner": return <OwnerMode />;
       case "broker": return <BrokerMode />;
       case "buyer":
@@ -528,7 +559,7 @@ function DashboardInner() {
               </button>
               
               {showDesktopSwitcher && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
+                <div className="absolute top-full left-0 mt-2 w-80 bg-surface border border-surface-variant rounded-xl shadow-2xl overflow-hidden z-50 motion-safe:animate-[fadeIn_0.2s_ease-out]">
                   <div className="px-4 py-3 border-b border-surface-variant bg-surface-alt flex items-center justify-between">
                     <span className="font-label-caps text-[12px] tracking-widest uppercase text-text-secondary">Switch Workspace</span>
                     <span className="font-mono text-xs text-gold-accent">{user.tags?.length || 1} Active</span>
@@ -630,6 +661,7 @@ function DashboardInner() {
               mode={mode}
               providerType={user.providerType}
               tier={user.subscription_tier || user.tier}
+              heldRoles={heldRoles}
             />
           </div>
 
@@ -678,11 +710,28 @@ function DashboardInner() {
                   ) : (
                     notifications.map((notif) => {
                       const dest = notif.link || (notif.propertyId ? `/dashboard/inventory/${notif.propertyId}` : "/dashboard/inbox");
+                      const rawType = String(notif.targetRole || notif.role || notif.notificationType || notif.title || "").toLowerCase();
+                      const notifLensMeta = rawType.includes("photo")
+                        ? { label: "PHOTOGRAPHER LENS", role: "photographer" }
+                        : rawType.includes("design")
+                          ? { label: "DESIGNER LENS", role: "designer" }
+                          : rawType.includes("research") || rawType.includes("quest") || rawType.includes("bounty")
+                            ? { label: "CREATOR LENS", role: "photographer" }
+                            : rawType.includes("broker") || rawType.includes("pitch") || rawType.includes("mandate")
+                              ? { label: "BROKER LENS", role: "broker" }
+                              : rawType.includes("seeker") || rawType.includes("buyer") || rawType.includes("saved")
+                                ? { label: "SEEKER LENS", role: "buyer" }
+                                : (notif.propertyId || rawType.includes("owner") || rawType.includes("listing") || rawType.includes("inquiry") || rawType.includes("connect"))
+                                  ? { label: "OWNER LENS", role: "owner" }
+                                  : null;
                       return (
                         <button
                           type="button"
                           key={notif.id}
                           onClick={() => {
+                            if (notifLensMeta?.role && canAccessDashboardWorkspace(notifLensMeta.role, heldRoles)) {
+                              setPersistedWorkspaceRole(notifLensMeta.role);
+                            }
                             router.push(dest);
                             setShowNotifications(false);
                           }}
@@ -694,6 +743,11 @@ function DashboardInner() {
                             {notif.icon || <Bell size={16} className="text-gold-accent" />}
                           </div>
                           <div className="flex-1 min-w-0">
+                            {notifLensMeta?.label && (
+                              <span className="inline-block mb-1 px-1.5 py-0.5 rounded bg-gold-accent/15 border border-gold-accent/30 font-mono text-[12px] uppercase tracking-wider text-gold-accent">
+                                {notifLensMeta.label}
+                              </span>
+                            )}
                             <div className="flex items-center justify-between gap-1 mb-0.5">
                               <div className="font-working-title text-sm font-semibold text-on-surface truncate group-hover:text-gold-bright transition-colors">
                                 {notif.title}
@@ -770,10 +824,21 @@ function DashboardInner() {
         {/* Cross-Workspace Attention Signal: auto-surfaces when actions are waiting (Inbox, CRM tasks, or viewings) */}
         <AttentionRail mockUserId={user.id} hideWhenClear={true} className="mb-5" />
 
-        {/* Desktop Workspace Deck Command Bar (Exact operating parity with CRM, Inbox & Calendar desktop views, auto-tucked during property creation) */}
+        {/* Desktop Workspace Deck Command Bar + Domain Lens Filter Bar (auto-tucked during property creation) */}
         {!isWizardActive && (
-          <div className={`hidden md:block mb-6 ${!isPipelineRole([mode]) ? "max-w-md" : "max-w-2xl"}`}>
-            <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} mode={mode} />
+          <div className="mb-6 flex flex-col gap-3">
+            <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
+              <div className={`hidden md:block w-full ${!isPipelineRole([mode]) ? "max-w-md" : "max-w-2xl"}`}>
+                <WorkspaceCommandBar active="workspace" badges={{ inbox: unreadInboxCount }} mode={mode} />
+              </div>
+              <WorkspaceLensBar
+                mode={mode}
+                activeRoleKey={activeRoleKey}
+                providerType={user.providerType}
+                heldRoles={heldRoles}
+                onSelectLens={handleSwitchMode}
+              />
+            </div>
           </div>
         )}
 

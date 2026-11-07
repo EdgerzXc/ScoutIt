@@ -1,8 +1,47 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { ArrowLeft } from "lucide-react";
+import { getPersistedWorkspaceRole } from "@/lib/dashboardModes";
+
+const LENS_SHORT_LABELS = {
+  all: "All Lenses",
+  owner: "Owner Lens",
+  broker: "Broker Lens",
+  salesperson: "Salesperson Lens",
+  buyer: "Seeker Lens",
+  seeker: "Seeker Lens",
+  exploring: "Seeker Lens",
+  operator: "Operator Lens",
+  photographer: "Photographer Lens",
+  designer: "Designer Lens",
+  researcher: "Researcher Lens",
+  provider: "Creator Lens",
+};
 
 export default function DashboardLayout({ children, variant = "dashboard", className = "" }) {
+  const [activeLensLabel, setActiveLensLabel] = useState("Dashboard");
+
+  useEffect(() => {
+    const syncLensLabel = () => {
+      const persisted = getPersistedWorkspaceRole();
+      if (persisted && LENS_SHORT_LABELS[persisted]) {
+        setActiveLensLabel(LENS_SHORT_LABELS[persisted]);
+      } else {
+        setActiveLensLabel("Dashboard");
+      }
+    };
+    syncLensLabel();
+    window.addEventListener("scoutit:workspace-changed", syncLensLabel);
+    window.addEventListener("storage", syncLensLabel);
+    return () => {
+      window.removeEventListener("scoutit:workspace-changed", syncLensLabel);
+      window.removeEventListener("storage", syncLensLabel);
+    };
+  }, []);
+
   return (
     <div className={`relative min-h-screen bg-background text-text-primary flex flex-col ${className || "pb-16 md:pb-20"}`}>
       <AtmosphereBackground variant={variant} />
@@ -33,7 +72,7 @@ export default function DashboardLayout({ children, variant = "dashboard", class
             title="Return to Workspace Command Center"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-gold-accent animate-pulse shrink-0" />
-            <span className="font-semibold">Dashboard</span>
+            <span className="font-semibold">{activeLensLabel}</span>
           </Link>
         </div>
       </header>

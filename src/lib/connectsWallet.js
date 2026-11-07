@@ -58,6 +58,84 @@ export const SUPPORTED_CONNECT_ROLES = [
   "event-planner",
 ];
 
+export const CONNECT_ROLE_PURPOSES = Object.freeze({
+  seeker: {
+    role: "seeker",
+    shortLabel: "Seeker",
+    roleLabel: "Buyer / Seeker",
+    spendRule: "1 Connect to open a Deal Room or request a live viewing",
+    receiveRule: "Replies from Owners and Brokers cost 0 Connects",
+  },
+  owner: {
+    role: "owner",
+    shortLabel: "Owner",
+    roleLabel: "Property Owner",
+    spendRule: "1 Connect to invite an Accredited Broker to represent your listing",
+    receiveRule: "Accepting inbound Seeker inquiries is always 0 Connects (Free)",
+  },
+  broker: {
+    role: "broker",
+    shortLabel: "Broker",
+    roleLabel: "Accredited Broker",
+    spendRule: "1 Connect to pitch a representation mandate to a Property Owner",
+    receiveRule: "Accepting Seeker inquiries or Owner invites costs 0 Connects",
+  },
+  photographer: {
+    role: "photographer",
+    shortLabel: "Photographer",
+    roleLabel: "Spatial Photographer",
+    spendRule: "0 Connects required to accept photography commissions",
+    receiveRule: "Earn permanent Connects by completing QuestIT field bounties",
+  },
+  designer: {
+    role: "designer",
+    shortLabel: "Designer",
+    roleLabel: "Concept Designer",
+    spendRule: "0 Connects required to accept staging or concept inquiries",
+    receiveRule: "Earn permanent Connects from verified spatial briefs",
+  },
+  researcher: {
+    role: "researcher",
+    shortLabel: "Researcher",
+    roleLabel: "Land Researcher",
+    spendRule: "0 Connects required to accept due-diligence requests",
+    receiveRule: "Earn permanent Connects from zoning & land audits",
+  },
+});
+
+/**
+ * Maps a dashboard mode (including "all", "operator", "provider", "buyer")
+ * to a valid Connects wallet role key so the header pill and breakdown never
+ * fail closed to 0 when viewing unified or operations lenses.
+ */
+export function resolveWalletRoleForMode(mode, providerType, heldRoles = []) {
+  const m = String(mode || "").trim().toLowerCase();
+  if (m === "buyer" || m === "exploring" || m === "seeker") return "seeker";
+  if (m === "owner") return "owner";
+  if (m === "broker" || m === "salesperson") return "broker";
+  if (m === "provider") {
+    return normalizeConnectRole(providerType) || "photographer";
+  }
+  const direct = normalizeConnectRole(m);
+  if (direct) return direct;
+
+  // For "all", "operator", or "mc_enterprise", pick the first held wallet role
+  const normalizedHeld = Array.isArray(heldRoles)
+    ? heldRoles.map((r) => String(r || "").trim().toLowerCase())
+    : [];
+  if (normalizedHeld.includes("admin") || normalizedHeld.includes("staff") || normalizedHeld.includes("owner")) {
+    return "owner";
+  }
+  if (normalizedHeld.includes("broker") || normalizedHeld.includes("salesperson")) {
+    return "broker";
+  }
+  for (const r of normalizedHeld) {
+    const mapped = normalizeConnectRole(r === "provider" ? (providerType || "photographer") : r);
+    if (mapped) return mapped;
+  }
+  return "seeker";
+}
+
 // ── Role Normalization ────────────────────────────────────────
 
 /**
@@ -333,6 +411,68 @@ export function initWalletIfEmpty(role, tier) {
   const key = resolveConnectRole(role, "seeker");
   if (!key) return;
   getWallet(key, tier);
+}
+
+/**
+ * Returns a unified overview of the user's Connects across all unlocked roles,
+ * combining per-role monthly allowances with account-wide permanent Purchased
+ * and Earned Connects.
+ */
+export function getUniversalWalletOverview(heldRoles = [], tier = "starry") {
+  const normalizedHeld = Array.isArray(heldRoles)
+    ? heldRoles.map((r) => String(r || "").trim().toLowerCase())
+    : [];
+  const isAdmin = normalizedHeld.includes("admin") || normalizedHeld.includes("staff");
+
+  const candidateRoles = isAdmin
+    ? ["owner", "broker", "seeker", "photographer", "designer", "researcher"]
+    : Array.from(
+        new Set(
+          normalizedHeld
+            .map((r) => {
+              if (r === "buyer" || r === "exploring" || r === "seeker") return "seeker";
+              if (r === "salesperson") return "broker";
+              if (r === "provider") return "photographer";
+              return normalizeConnectRole(r);
+            })
+            .filter(Boolean)
+        )
+      );
+
+  const activeWalletRoles = candidateRoles.length > 0 ? candidateRoles : ["seeker"];
+  const state = readAllWallets();
+  const roleBuckets = activeWalletRoles.map((roleKey) => {
+    const rw = ensureRoleWallet(state, roleKey, tier);
+    const meta = CONNECT_ROLE_PURPOSES[roleKey] || {
+      role: roleKey,
+      shortLabel: roleKey,
+      roleLabel: roleKey,
+      spendRule: "1 Connect per outbound initiation",
+      receiveRule: "Inbound replies are free",
+    };
+    return {
+      role: roleKey,
+      shortLabel: meta.shortLabel,
+      roleLabel: meta.roleLabel,
+      granted: rw.granted,
+      grantedMonth: rw.grantedMonth,
+      spendRule: meta.spendRule,
+      receiveRule: meta.receiveRule,
+    };
+  });
+  writeAllWallets(state);
+
+  const purchased = state.account.purchased || 0;
+  const earned = state.account.earned || 0;
+  const totalGranted = roleBuckets.reduce((sum, b) => sum + (b.granted || 0), 0);
+
+  return {
+    purchased,
+    earned,
+    totalGranted,
+    universalTotal: totalGranted + purchased + earned,
+    roleBuckets,
+  };
 }
 
 /**

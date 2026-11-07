@@ -15,7 +15,11 @@ import TaskRail from "../../../components/dashboard/crm/TaskRail";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { crmFetch } from "../../../lib/crmClient";
 import { loadDeals } from "../../../lib/deals/dealsClient";
-import { normalizeDashboardMode } from "../../../lib/dashboardModes";
+import {
+  getPersistedWorkspaceRole,
+  normalizeDashboardMode,
+  setPersistedWorkspaceRole,
+} from "../../../lib/dashboardModes";
 import { leadsToCsv, exportFilename } from "../../../lib/leadExport";
 import { contactToPipelineCard } from "../../../lib/crmContactMerge";
 import { Briefcase, Calendar, ListChecks, Mail, Zap, ChevronDown, Check, ArrowLeft, LockKeyhole, Upload, Download } from "lucide-react";
@@ -76,17 +80,28 @@ function CRMPageInner() {
   // from the server profile: only held lenses are offered, defaulting to the
   // dashboard's last mode when held, else owner.
   const isPipeline = isPipelineRole(currentUser?.active_roles);
-  const heldLenses = (Array.isArray(currentUser?.active_roles) ? currentUser.active_roles : [])
-    .map(normalizeDashboardMode)
-    .filter((role) => role === "owner" || role === "broker");
-  const lensOptions = heldLenses.length > 0 ? [...new Set(heldLenses)] : (isPipeline ? ["owner", "broker"] : []);
+  const heldLenses = [
+    ...new Set(
+      (Array.isArray(currentUser?.active_roles) ? currentUser.active_roles : [])
+        .map(normalizeDashboardMode)
+        .filter((role) => role === "owner" || role === "broker")
+    ),
+  ];
+  const baseLensOptions = heldLenses.length > 0 ? heldLenses : (isPipeline ? ["owner", "broker"] : []);
+  const lensOptions = baseLensOptions.length > 1 ? ["all", ...baseLensOptions] : baseLensOptions;
 
-  // Default the lens to the mode the dashboard was last in.
+  // Default the lens to the persisted workspace role or last active mode.
   useEffect(() => {
     try {
+      const persisted = normalizeDashboardMode(getPersistedWorkspaceRole());
+      if (persisted && lensOptions.includes(persisted)) {
+        setViewingAs(persisted);
+        return;
+      }
       const saved = JSON.parse(localStorage.getItem("scoutit_user") || "{}");
       const lastMode = normalizeDashboardMode(saved.primaryMode);
       if (lastMode === "broker" && lensOptions.includes("broker")) setViewingAs("broker");
+      else if (lastMode === "all" && lensOptions.includes("all")) setViewingAs("all");
       else if (lensOptions.includes("owner")) setViewingAs("owner");
       else if (lensOptions.length > 0) setViewingAs(lensOptions[0]);
     } catch {
@@ -388,10 +403,14 @@ function CRMPageInner() {
                 {lensOptions.map(role => (
                   <button
                     key={role}
-                    onClick={() => { setViewingAs(role); setShowViewingMenu(false); }}
+                    onClick={() => {
+                      setViewingAs(role);
+                      setPersistedWorkspaceRole(role);
+                      setShowViewingMenu(false);
+                    }}
                     className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left font-label-caps text-label-caps uppercase transition-colors duration-200 ease-out hover:bg-surface-alt"
                   >
-                    <span className="text-on-surface">{role}</span>
+                    <span className="text-on-surface">{role === "all" ? "all (combined)" : role}</span>
                     {viewingAs === role && <Check size={14} className="text-gold-accent" />}
                   </button>
                 ))}

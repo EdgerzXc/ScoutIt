@@ -511,6 +511,11 @@ export default function BottomNav() {
             setCurrentWorkspaceRole(qRole.toLowerCase().trim());
             return;
           }
+          const persistedRole = localStorage.getItem("scoutit_active_workspace_role");
+          if (persistedRole) {
+            setCurrentWorkspaceRole(String(persistedRole).toLowerCase().trim());
+            return;
+          }
           const saved = JSON.parse(localStorage.getItem("scoutit_user") || "{}");
           if (saved.primaryMode) {
             setCurrentWorkspaceRole(String(saved.primaryMode).toLowerCase().trim());
@@ -552,6 +557,9 @@ export default function BottomNav() {
   const handleRoleSelect = (roleKey) => {
     setRoleSheetOpen(false);
     setCurrentWorkspaceRole(roleKey);
+    try {
+      localStorage.setItem("scoutit_active_workspace_role", roleKey);
+    } catch {}
     if (pathname === "/dashboard") {
       window.dispatchEvent(new CustomEvent("scoutit:switch-workspace", { detail: { role: roleKey } }));
       try {

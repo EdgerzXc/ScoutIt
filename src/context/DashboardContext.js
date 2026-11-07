@@ -7,7 +7,15 @@ import { supabase } from "../lib/supabaseClient";
 import { loadDeals } from "../lib/deals/dealsClient";
 import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
-import { getBalance, spendConnects, initWalletIfEmpty, resolveConnectRole } from "../lib/connectsWallet";
+import {
+  getBalance,
+  getUniversalWalletOverview,
+  initWalletIfEmpty,
+  resolveConnectRole,
+  resolveWalletRoleForMode,
+  spendConnects,
+} from "../lib/connectsWallet";
+import { getHeldRoles, getPersistedWorkspaceRole } from "../lib/dashboardModes";
 import { syncAuthenticatedUserCache, getCurrentTier as getEntitlementTier } from "../lib/entitlements";
 import ListerDeclarationModal from "../components/dashboard/ListerDeclarationModal";
 import QuotaSwapModal from "../components/dashboard/QuotaSwapModal";
@@ -279,27 +287,33 @@ export function DashboardProvider({ children }) {
     setCurrentUser(mergedUser);
     syncAuthenticatedUserCache(mergedUser);
 
-    const rawProfileRole = String(profile?.role || "seeker").trim().toLowerCase();
-    const mappedWalletRole =
-      rawProfileRole === "salesperson"
-        ? "broker"
-        : rawProfileRole === "provider"
-          ? String(profile?.provider_type || "photographer").trim().toLowerCase()
-          : rawProfileRole;
-    const role = resolveConnectRole(mappedWalletRole, "seeker") || "seeker";
+    const persistedRole = getPersistedWorkspaceRole();
+    const rawProfileRole = String(persistedRole || profile?.primary_mode || profile?.role || "seeker").trim().toLowerCase();
+    const heldRoles = getHeldRoles(mergedUser);
     const tier = (profile?.subscription_tier || "starry").toLowerCase();
-    initWalletIfEmpty(role, tier);
-    setConnects(getBalance(role, tier));
+    if (rawProfileRole === "all") {
+      const overview = getUniversalWalletOverview(heldRoles, tier);
+      setConnects(overview.universalTotal);
+    } else {
+      const mappedWalletRole = resolveWalletRoleForMode(
+        rawProfileRole,
+        profile?.provider_type,
+        heldRoles
+      );
+      const role = resolveConnectRole(mappedWalletRole, "seeker") || "seeker";
+      initWalletIfEmpty(role, tier);
+      setConnects(getBalance(role, tier));
 
-    // A-206: Synchronize authoritative server wallet balance (enforcing monthly rollover)
-    authedFetch(`/api/wallet?role=${encodeURIComponent(role)}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && typeof data.balance === "number") {
-          setConnects(data.balance);
-        }
-      })
-      .catch(() => {});
+      // A-206: Synchronize authoritative server wallet balance (enforcing monthly rollover)
+      authedFetch(`/api/wallet?role=${encodeURIComponent(role)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && typeof data.balance === "number") {
+            setConnects(data.balance);
+          }
+        })
+        .catch(() => {});
+    }
 
     // Local Board -> account merge is now an explicit, idempotent action the
     // user triggers from /wishlist ("Bring your N saved spaces into your
@@ -310,6 +324,31 @@ export function DashboardProvider({ children }) {
     fetchNotifications(authUser.id);
     return true;
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !currentUser) return;
+    const handleWorkspaceChanged = (e) => {
+      const targetRole = String(e?.detail?.role || e?.detail?.mode || "").trim().toLowerCase();
+      if (!targetRole) return;
+      const heldRoles = getHeldRoles(currentUser);
+      const tier = String(currentUser.subscription_tier || currentUser.tier || "starry").toLowerCase();
+      if (targetRole === "all") {
+        const overview = getUniversalWalletOverview(heldRoles, tier);
+        setConnects(overview.universalTotal);
+        return;
+      }
+      const mappedRole = resolveWalletRoleForMode(
+        targetRole,
+        currentUser.provider_type || currentUser.providerType,
+        heldRoles
+      );
+      const roleKey = resolveConnectRole(mappedRole, "seeker") || "seeker";
+      initWalletIfEmpty(roleKey, tier);
+      setConnects(getBalance(roleKey, tier));
+    };
+    window.addEventListener("scoutit:workspace-changed", handleWorkspaceChanged);
+    return () => window.removeEventListener("scoutit:workspace-changed", handleWorkspaceChanged);
+  }, [currentUser]);
 
   // A dashboard identity is either validated by Supabase Auth or an explicit
   // localhost-only development mock. Browser profile cache is never authority.

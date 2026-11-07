@@ -1113,6 +1113,24 @@ export default function ChatBox({
   //
   // Recipient sees intent and role only. Sender sees a locked receipt.
   // Nobody types into a thread the other side hasn't opted into.
+  const rawMyRole = String(deal.myRole || "").trim().toLowerCase();
+  const recipientLensBadge =
+    rawMyRole === "owner"
+      ? "For Your Owner Lens"
+      : rawMyRole === "broker" || rawMyRole === "salesperson"
+        ? "For Your Broker Lens"
+        : rawMyRole === "photographer"
+          ? "For Your Photographer Lens"
+          : rawMyRole === "designer"
+            ? "For Your Designer Lens"
+            : rawMyRole === "researcher"
+              ? "For Your Researcher Lens"
+              : rawMyRole === "provider"
+                ? "For Your Creator Lens"
+                : rawMyRole === "buyer" || rawMyRole === "seeker"
+                  ? "Your Seeker Inquiry"
+                  : null;
+
   if (isWaiting) {
     const sentAt = deal.created_at || deal.createdAt;
     const sentLabel = sentAt ? new Date(sentAt).toLocaleString() : null;
@@ -1120,9 +1138,16 @@ export default function ChatBox({
     return (
       <div className="flex flex-col h-full overflow-y-auto bg-gradient-to-b from-background to-surface p-4 sm:p-6">
         <div className="w-full max-w-md mx-auto my-auto bg-surface border border-gold-accent/30 rounded-xl p-5 sm:p-6">
-          <span className="inline-block text-[12px] font-mono uppercase tracking-widest text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-2 py-1 rounded">
-            {isRequestSender ? "Awaiting response" : "Connect request"}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="inline-block text-[12px] font-mono uppercase tracking-widest text-gold-bright bg-gold-accent/15 border border-gold-accent/40 px-2 py-1 rounded">
+              {isRequestSender ? "Awaiting response" : "Connect request"}
+            </span>
+            {recipientLensBadge && (
+              <span className="inline-block text-[12px] font-mono uppercase tracking-wider text-gold-accent bg-surface-alt border border-surface-variant px-2 py-1 rounded">
+                {recipientLensBadge}
+              </span>
+            )}
+          </div>
 
           <h3 className="font-headline-editorial text-xl sm:text-2xl text-on-surface mt-4 mb-1 break-words">
             {deal.property_title}
@@ -1362,6 +1387,11 @@ export default function ChatBox({
             <h3 className="font-headline-editorial text-xl text-on-surface truncate">
               {deal.other_party}
             </h3>
+            {recipientLensBadge && (
+              <span className="px-2 py-0.5 rounded bg-surface-alt text-gold-accent border border-surface-variant text-[12px] font-mono uppercase tracking-wider whitespace-nowrap">
+                {recipientLensBadge}
+              </span>
+            )}
             {/* Was hardcoded "3 Connects Spent" on every deal. The ledger
                 spends 1 (see /api/deals/initiate), and 'deals' carries no
                 per-deal Connects column at all -- so the only honest options

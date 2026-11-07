@@ -10,7 +10,14 @@ const ICONS = {
   calendar: CalendarDays,
 };
 
-const DESTINATIONS = WORKSPACE_COMMAND_DESTINATIONS.map((dest) => ({
+const DEFAULT_DESTINATIONS = [
+  { id: "crm", href: "/dashboard/crm", label: "CRM", detail: "Pipeline" },
+  { id: "workspace", href: "/dashboard", label: "Workspace", detail: "Home" },
+  { id: "inbox", href: "/dashboard/inbox", label: "Inbox", detail: "Deal rooms" },
+  { id: "calendar", href: "/dashboard/calendar", label: "Calendar", detail: "Viewings" },
+];
+
+const DESTINATIONS = (WORKSPACE_COMMAND_DESTINATIONS?.length ? WORKSPACE_COMMAND_DESTINATIONS : DEFAULT_DESTINATIONS).map((dest) => ({
   ...dest,
   Icon: ICONS[dest.id] || LayoutGrid,
 }));

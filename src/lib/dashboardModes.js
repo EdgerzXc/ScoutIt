@@ -1,4 +1,6 @@
 const ROLE_TO_DASHBOARD_MODE = Object.freeze({
+  all: "all",
+  unified: "all",
   seeker: "buyer",
   buyer: "buyer",
   exploring: "exploring",
@@ -20,6 +22,8 @@ const ROLE_TO_DASHBOARD_MODE = Object.freeze({
   mc_enterprise: "mc_enterprise",
   operator: "operator",
 });
+
+export const ACTIVE_WORKSPACE_ROLE_KEY = "scoutit_active_workspace_role";
 
 export function normalizeDashboardMode(role) {
   if (typeof role !== "string") return "";
@@ -91,6 +95,9 @@ export function canAccessDashboardWorkspace(requestedRole, heldRoles = []) {
   }
 
   const heldModes = normalizeDashboardModes(rawHeld);
+  if (targetMode === "all") {
+    return heldModes.length > 0;
+  }
   return heldModes.includes(targetMode);
 }
 
@@ -108,4 +115,103 @@ export function getHeldRoles(user) {
     user.primaryMode,
     user.role,
   ].filter(Boolean);
+}
+
+/**
+ * Reads the user's last selected workspace lens so navigating between
+ * Workspace, Inbox, CRM, and Calendar never resets the active lens back to Buyer.
+ */
+export function getPersistedWorkspaceRole(storage = typeof window !== "undefined" ? window.localStorage : null) {
+  if (!storage || typeof storage.getItem !== "function") return "";
+  try {
+    const direct = storage.getItem(ACTIVE_WORKSPACE_ROLE_KEY);
+    if (direct && typeof direct === "string" && direct.trim()) {
+      return direct.trim().toLowerCase();
+    }
+    const rawUser = storage.getItem("scoutit_user");
+    if (rawUser) {
+      const parsed = JSON.parse(rawUser);
+      if (parsed?.activeWorkspaceRole) return String(parsed.activeWorkspaceRole).trim().toLowerCase();
+      if (parsed?.primaryMode) return String(parsed.primaryMode).trim().toLowerCase();
+    }
+  } catch {}
+  return "";
+}
+
+/**
+ * Persists the user's active workspace lens selection across dashboard routes.
+ */
+export function setPersistedWorkspaceRole(role, storage = typeof window !== "undefined" ? window.localStorage : null) {
+  if (!storage || typeof storage.setItem !== "function" || typeof role !== "string" || !role.trim()) return;
+  const clean = role.trim().toLowerCase();
+  try {
+    storage.setItem(ACTIVE_WORKSPACE_ROLE_KEY, clean);
+    const rawUser = storage.getItem("scoutit_user");
+    if (rawUser) {
+      const parsed = JSON.parse(rawUser);
+      if (parsed && typeof parsed === "object") {
+        parsed.activeWorkspaceRole = clean;
+        const normalized = normalizeDashboardMode(clean);
+        if (normalized && normalized !== "all") {
+          parsed.primaryMode = normalized;
+        }
+        storage.setItem("scoutit_user", JSON.stringify(parsed));
+      }
+    }
+  } catch {}
+}
+
+/**
+ * Resolves the authoritative active workspace mode and role key across URL params,
+ * persisted session state, and profile defaults so switching to Owner/Broker/All
+ * and visiting Inbox/CRM/Calendar never drops the user back to Buyer.
+ */
+export function resolveActiveWorkspaceSelection({ requestedRole = "", persistedRole = "", user = null } = {}) {
+  const rawHeldRoles = getHeldRoles(user);
+  const tags = normalizeDashboardModes(
+    user?.active_roles || user?.tags,
+    user?.primary_mode || user?.primaryMode || user?.role,
+  );
+
+  const candidates = [
+    requestedRole,
+    persistedRole,
+    user?.primary_mode,
+    user?.primaryMode,
+    user?.role,
+  ]
+    .map((c) => (typeof c === "string" ? c.trim().toLowerCase() : ""))
+    .filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (canAccessDashboardWorkspace(candidate, rawHeldRoles)) {
+      const mode = normalizeDashboardMode(candidate);
+      if (mode) {
+        return {
+          mode,
+          roleKey: candidate,
+          providerType: inferProviderType(candidate, user?.provider_type || user?.providerType),
+          tags,
+          isAuthorizedRequest: Boolean(
+            requestedRole &&
+              candidate === String(requestedRole).trim().toLowerCase() &&
+              canAccessDashboardWorkspace(requestedRole, rawHeldRoles),
+          ),
+        };
+      }
+    }
+  }
+
+  const fallbackMode = pickPrimaryRole(tags, "buyer") || "buyer";
+  const fallbackProviderType = user?.provider_type || user?.providerType;
+  const fallbackRoleKey =
+    fallbackMode === "provider" ? (fallbackProviderType || "photographer") : fallbackMode;
+
+  return {
+    mode: fallbackMode,
+    roleKey: fallbackRoleKey,
+    providerType: fallbackProviderType,
+    tags,
+    isAuthorizedRequest: false,
+  };
 }

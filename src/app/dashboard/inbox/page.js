@@ -132,6 +132,7 @@ function InboxInner() {
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(null);
   const [inboxTab, setInboxTab] = useState("active"); // "waiting" | "active" | "declined"
+  const [roleFilter, setRoleFilter] = useState("all"); // "all" | "owner" | "broker" | "buyer"
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -192,7 +193,16 @@ function InboxInner() {
 
   // Sorting per §38.4 -- there was none before, so the list arrived in
   // whatever order the API happened to return and reshuffled on every refetch.
-  const visibleDeals = deals.filter((d) => !isDeleted(d.status));
+  const matchesRoleFilter = (deal) => {
+    if (roleFilter === "all") return true;
+    const dealRole = String(deal.myRole || "buyer").toLowerCase();
+    if (roleFilter === "buyer") return dealRole === "buyer" || dealRole === "seeker";
+    if (roleFilter === "provider") {
+      return ["photographer", "designer", "researcher", "provider"].includes(dealRole);
+    }
+    return dealRole === roleFilter;
+  };
+  const visibleDeals = deals.filter((d) => !isDeleted(d.status) && matchesRoleFilter(d));
   const waitingDeals = visibleDeals.filter((d) => bucketOf(d) === "waiting").sort(byDateDesc("created_at"));
   const activeDeals = visibleDeals.filter((d) => bucketOf(d) === "active").sort(byDateDesc("last_activity_at"));
   // Oldest first: the one closest to being deleted needs attention most.
@@ -374,6 +384,39 @@ function InboxInner() {
 
             <WorkspaceCommandBar active="inbox" badges={{ inbox: activeUnread }} mode={isPipelineRole(currentUser?.active_roles) ? "owner" : "buyer"} className="mt-4" />
 
+            {isPipelineRole(currentUser?.active_roles) && (
+              <div
+                role="group"
+                aria-label="Filter conversations by lens"
+                className="flex items-center gap-1 mt-3 overflow-x-auto no-scrollbar"
+              >
+                {[
+                  { id: "all", label: "All Lenses" },
+                  { id: "owner", label: "Owner" },
+                  { id: "broker", label: "Broker" },
+                  { id: "provider", label: "Creator" },
+                  { id: "buyer", label: "Seeker" },
+                ].map((lens) => {
+                  const active = roleFilter === lens.id;
+                  return (
+                    <button
+                      key={lens.id}
+                      type="button"
+                      onClick={() => setRoleFilter(lens.id)}
+                      aria-pressed={active}
+                      className={`min-h-11 px-2.5 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider shrink-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent ${
+                        active
+                          ? "bg-gold-accent/20 text-gold-bright border border-gold-accent/40 font-semibold"
+                          : "text-text-secondary hover:text-on-surface border border-transparent"
+                      }`}
+                    >
+                      {lens.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Three-State Inbox Tab Bar (Section 38) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mt-4 p-1 bg-surface rounded-lg border border-gold-accent/20">
               {[
@@ -488,7 +531,16 @@ function InboxInner() {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-text-primary mb-1 truncate">{deal.other_party}</p>
+                  <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                    {deal.myRole && (
+                      <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-surface-variant font-mono text-[12px] uppercase tracking-wider text-gold-accent shrink-0">
+                        {deal.myRole === "buyer" || deal.myRole === "seeker"
+                          ? "As: Seeker"
+                          : `For: ${deal.myRole}`}
+                      </span>
+                    )}
+                    <p className="text-xs text-text-primary truncate">{deal.other_party}</p>
+                  </div>
                   <p className="text-xs text-text-secondary truncate">{deal.last_message}</p>
                 </motion.div>
               ))
