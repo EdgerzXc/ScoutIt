@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search, X, MapPin, ArrowRight, SlidersHorizontal } from "lucide-react";
 
@@ -57,7 +58,17 @@ function normalizeArticle(raw) {
 }
 
 export default function DiscoverSearch() {
-  const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams ? (searchParams.get("search") || searchParams.get("q") || "") : "";
+  const [query, setQuery] = useState(initialQuery);
+
+  useEffect(() => {
+    if (!searchParams) return;
+    const incoming = searchParams.get("search") || searchParams.get("q");
+    if (typeof incoming === "string" && incoming !== query) {
+      setQuery(incoming);
+    }
+  }, [searchParams]);
   const [event, setEvent] = useState(null);
   const [space, setSpace] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);

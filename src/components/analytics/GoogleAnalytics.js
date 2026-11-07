@@ -1,6 +1,26 @@
 "use client";
 
+import { useEffect, Suspense } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
+
+function GaRouteTracker({ gaId }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!pathname || typeof window === "undefined" || typeof window.gtag !== "function") return;
+    const search = searchParams?.toString();
+    const url = pathname + (search ? `?${search}` : "");
+    window.gtag("config", gaId, {
+      page_path: url,
+      page_location: window.location.href,
+      page_title: typeof document !== "undefined" ? document.title : "",
+    });
+  }, [pathname, searchParams, gaId]);
+
+  return null;
+}
 
 export default function GoogleAnalytics() {
   // Env only — no hardcoded fallback (§25.5).
@@ -35,11 +55,15 @@ export default function GoogleAnalytics() {
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
+            var storedConsent = false;
+            try {
+              storedConsent = localStorage.getItem('scoutit_cookie_consent') === 'granted';
+            } catch (e) {}
             gtag('consent', 'default', {
               ad_storage: 'denied',
               ad_user_data: 'denied',
               ad_personalization: 'denied',
-              analytics_storage: 'denied',
+              analytics_storage: storedConsent ? 'granted' : 'denied',
             });
             gtag('js', new Date());
             gtag('config', '${gaId}', {
@@ -48,6 +72,9 @@ export default function GoogleAnalytics() {
           `,
         }}
       />
+      <Suspense fallback={null}>
+        <GaRouteTracker gaId={gaId} />
+      </Suspense>
     </>
   );
 }
