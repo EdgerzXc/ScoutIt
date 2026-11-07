@@ -105,9 +105,9 @@ function OpenGateDashboardInner() {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-5xl space-y-6 pb-12 text-on-surface">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 md:px-8 pt-4 pb-36 sm:pb-24 text-on-surface w-full overflow-x-hidden min-w-0">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="mb-2">
               <Link
                 href="/settings#open-gate"
@@ -116,13 +116,13 @@ function OpenGateDashboardInner() {
                 <span>← Back to Settings</span>
               </Link>
             </div>
-            <p className="font-mono text-xs uppercase tracking-widest text-gold-accent">
+            <p className="font-mono text-[11px] sm:text-xs uppercase tracking-wider text-gold-accent break-words [overflow-wrap:anywhere] leading-snug">
               ENTERPRISE CONTACT CONTROL · CONNECTED TO CRM &amp; INBOX
             </p>
-            <h1 className="mt-1 font-headline-editorial text-3xl md:text-4xl text-on-surface">
+            <h1 className="mt-1 font-headline-editorial text-3xl md:text-4xl text-on-surface break-words">
               Open Gate
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-text-secondary">
+            <p className="mt-2 max-w-2xl text-sm text-text-secondary leading-relaxed break-words">
               Open free inbound contact on any property or delegated unit you handle so verified buyers can reach you without spending a Connect. Every Open Gate inquiry routes directly into your Deal Inbox and CRM pipeline with an <span className="font-mono text-xs text-gold-accent">OPEN GATE</span> badge.
             </p>
           </div>
