@@ -38,7 +38,6 @@ import DeckPanel from "../../components/dashboard/DeckPanel";
 import WorkspaceCommandBar from "../../components/dashboard/WorkspaceCommandBar";
 import WorkspaceDeckDrawer from "../../components/dashboard/WorkspaceDeckDrawer";
 import { deckNeighbors, isPipelineRole } from "../../lib/workspaceDeck";
-import ConciergeAI from "../../components/dashboard/ConciergeAI";
 import AttentionRail from "../../components/dashboard/AttentionRail";
 import { loadDeals } from "../../lib/deals/dealsClient";
 import ConnectsBreakdown from "../../components/dashboard/ConnectsBreakdown";
@@ -901,7 +900,6 @@ function DashboardInner() {
       </DeckPanel>
 
       <Toasts />
-      <ConciergeAI />
 
       {/* Primary Action FAB (Floating above global BottomNav). Rendered only
           for modes that define one — see PRIMARY_ACTIONS above. */}
