@@ -244,6 +244,10 @@ export const INFO_TIPS = Object.freeze({
     title: "Spend priority",
     body: "When you spend a Connect, it draws from your monthly allowance first because it resets every month, followed by purchased, then earned balance.",
   }),
+  settingsOpenGate: Object.freeze({
+    title: "What is Open Gate?",
+    body: "Open Gate lets verified seekers message you directly on selected properties without spending Connects. Inbound inquiries appear immediately in your Deal Inbox and Master CRM with an Open Gate badge.",
+  }),
 });
 
 export function getInfoTip(id) {

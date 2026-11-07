@@ -108,6 +108,14 @@ function OpenGateDashboardInner() {
       <div className="mx-auto max-w-5xl space-y-6 pb-12 text-on-surface">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
+            <div className="mb-2">
+              <Link
+                href="/settings#open-gate"
+                className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
+              >
+                <span>← Back to Settings</span>
+              </Link>
+            </div>
             <p className="font-mono text-xs uppercase tracking-widest text-gold-accent">
               ENTERPRISE CONTACT CONTROL · CONNECTED TO MASTER CRM &amp; INBOX
             </p>
@@ -118,17 +126,17 @@ function OpenGateDashboardInner() {
               Open free inbound contact on any property or delegated unit you handle so verified buyers can reach you without spending a Connect. Every Open Gate inquiry routes directly into your Deal Inbox and Master CRM pipeline with an <span className="font-mono text-xs text-gold-accent">OPEN GATE</span> badge.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full md:w-auto shrink-0">
             <Link
               href="/dashboard/crm"
-              className="min-h-11 px-4 py-2 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 hover:opacity-95 transition"
+              className="min-h-11 px-4 py-2.5 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5 hover:opacity-95 transition"
             >
               <Kanban size={14} aria-hidden="true" />
               <span>Master CRM ({deals.length})</span>
             </Link>
             <Link
               href="/dashboard/inbox"
-              className="min-h-11 px-4 py-2 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 text-on-surface font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition"
+              className="min-h-11 px-4 py-2.5 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 text-on-surface font-mono text-xs uppercase tracking-wider inline-flex items-center justify-center gap-1.5 transition"
             >
               <MessageSquare size={14} aria-hidden="true" />
               <span>Deal Inbox</span>
@@ -171,8 +179,8 @@ function OpenGateDashboardInner() {
               <span className="font-mono text-xs uppercase tracking-wider text-text-secondary block">
                 Enterprise Gate Status
               </span>
-              <div className="mt-1 flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent">
-                <ShieldCheck size={15} aria-hidden="true" />
+              <div className="mt-1 flex items-center flex-wrap gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-gold-accent break-words [overflow-wrap:anywhere]">
+                <ShieldCheck size={15} className="shrink-0" aria-hidden="true" />
                 <span>
                   {state.eligible
                     ? `Active until ${new Date(state.expiresAt).toLocaleDateString()}`
@@ -187,8 +195,8 @@ function OpenGateDashboardInner() {
         </div>
 
         {/* Role Selector */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Choose your Open Gate role">
+        <div className="pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full" role="group" aria-label="Choose your Open Gate role">
             {ROLES.map((item) => {
               const active = role === item.id;
               return (
@@ -201,9 +209,9 @@ function OpenGateDashboardInner() {
                     setState({ loading: true, listings: [] });
                   }}
                   aria-pressed={active}
-                  className={`min-h-11 rounded-xl border px-4 py-2 font-mono text-xs uppercase tracking-wider transition ${
+                  className={`min-h-11 rounded-xl border px-4 py-2 font-mono text-xs uppercase tracking-wider transition inline-flex items-center justify-center text-center ${
                     active
-                      ? "border-gold-accent bg-gold-accent text-background font-bold"
+                      ? "border-gold-accent bg-gold-accent text-background font-bold shadow-[0_0_12px_rgba(var(--accent-rgb),0.3)]"
                       : "border-surface-variant bg-surface-alt text-text-secondary hover:text-on-surface hover:border-gold-accent/40"
                   }`}
                 >
@@ -266,7 +274,7 @@ function OpenGateDashboardInner() {
                     type="button"
                     onClick={() => toggle(listing)}
                     disabled={busy === key || (!state.eligible && !listing.enabled)}
-                    className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider transition disabled:opacity-50 inline-flex items-center gap-1.5 ${
+                    className={`min-h-11 w-full sm:w-auto shrink-0 rounded-xl border px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider transition disabled:opacity-50 inline-flex items-center justify-center gap-1.5 ${
                       listing.enabled
                         ? "border-surface-variant bg-surface-alt text-on-surface hover:border-gold-accent/40"
                         : "border-gold-accent bg-gold-accent text-background hover:opacity-95"
@@ -332,7 +340,7 @@ function OpenGateDashboardInner() {
                   </div>
                   <Link
                     href={`/dashboard/inbox?dealId=${encodeURIComponent(deal.id)}`}
-                    className="min-h-11 px-3.5 py-2 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 font-mono text-xs uppercase tracking-wider text-on-surface inline-flex items-center gap-1.5 shrink-0"
+                    className="min-h-11 w-full sm:w-auto px-3.5 py-2 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 font-mono text-xs uppercase tracking-wider text-on-surface inline-flex items-center justify-center gap-1.5 shrink-0"
                   >
                     <span>Open in Inbox</span>
                     <ArrowRight size={13} aria-hidden="true" />

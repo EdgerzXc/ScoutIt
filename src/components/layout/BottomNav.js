@@ -503,7 +503,7 @@ export default function BottomNav() {
     // Platform administrators hold and have access to all workspaces & roles
     if (isAdmin) return true;
     if (roleDef.id === "all") {
-      return activeUserRoles.length > 1;
+      return activeUserRoles.length >= 3;
     }
 
     return activeUserRoles.some((r) => {

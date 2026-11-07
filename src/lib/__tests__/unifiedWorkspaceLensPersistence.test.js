@@ -77,7 +77,8 @@ describe("A-333: Unified Workspace Lens Persistence & Non-Cluttered Domain Filte
     };
 
     expect(normalizeDashboardMode("all")).toBe("all");
-    expect(canAccessDashboardWorkspace("all", ["buyer", "owner"])).toBe(true);
+    expect(canAccessDashboardWorkspace("all", ["buyer", "owner"])).toBe(false);
+    expect(canAccessDashboardWorkspace("all", ["buyer", "owner", "broker"])).toBe(true);
     expect(isPipelineRole(["all"])).toBe(true);
     expect(isPipelineRole(["admin"])).toBe(true);
     expect(isPipelineRole(["staff"])).toBe(true);
@@ -179,9 +180,9 @@ describe("A-333: Unified Workspace Lens Persistence & Non-Cluttered Domain Filte
       path.resolve(process.cwd(), "src/components/dashboard/ChatBox.js"),
       "utf8"
     );
-    expect(chatBoxSrc).toContain("For Your Owner Lens");
-    expect(chatBoxSrc).toContain("For Your Photographer Lens");
-    expect(chatBoxSrc).toContain("For Your Broker Lens");
+    expect(chatBoxSrc).toContain("For Owner · Property Inquiry");
+    expect(chatBoxSrc).toContain("Needs Photographer · Layer 4");
+    expect(chatBoxSrc).toContain("For Broker · Mandate / Inquiry");
     expect(chatBoxSrc).toContain("Your Seeker Inquiry");
   });
 

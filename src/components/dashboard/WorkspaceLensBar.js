@@ -181,14 +181,6 @@ export default function WorkspaceLensBar({
               <span>Master CRM</span>
               <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
-            <Link
-              href="/dashboard/open-gate"
-              className="min-h-11 px-3 py-2 rounded-xl border border-gold-accent/30 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0 transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-              title="Shareable external property intake link"
-            >
-              <span>Open Gate</span>
-              <ArrowUpRight size={14} aria-hidden="true" />
-            </Link>
           </div>
         )}
       </div>

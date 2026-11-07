@@ -90,47 +90,46 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
     <section aria-label="Unified workspace overview" className="space-y-6">
       {/* Header banner: explains why Unified View focuses on Master CRM & Cross-Lens Pulse */}
       <div className="rounded-2xl border border-surface-variant bg-surface/90 p-5 md:p-6 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <span className="font-mono text-xs uppercase tracking-widest text-gold-accent block mb-1">
-              UNIFIED COMMAND · MASTER CRM &amp; CROSS-LENS PULSE
-            </span>
-            <h1 className="font-headline-editorial text-2xl md:text-3xl text-on-surface">
-              All Lenses Connected in One Pipeline
-            </h1>
-            <p className="text-sm text-text-secondary mt-1 max-w-2xl">
-              Review every incoming inquiry, pitch, viewing, and Connect balance across all your roles in one unified pipeline. Use the Workspace switcher in the header when you want a specific role&apos;s tools.
-            </p>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span className="font-mono text-xs uppercase tracking-widest text-gold-accent block mb-1">
+                UNIFIED COMMAND · MASTER CRM &amp; CROSS-LENS PULSE
+              </span>
+              <h1 className="font-headline-editorial text-2xl md:text-3xl text-on-surface">
+                All Lenses Connected in One Pipeline
+              </h1>
+              <p className="text-sm text-text-secondary mt-1 max-w-2xl">
+                Review every incoming inquiry, pitch, viewing, and Connect balance across all your roles in one unified pipeline. Use the Workspace switcher in the header when you want a specific role&apos;s tools.
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <Link
-              href="/dashboard/crm"
-              className="min-h-11 px-4 py-2 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 hover:opacity-95 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-            >
-              <Kanban size={14} aria-hidden="true" />
-              <span>Open Master CRM</span>
-            </Link>
-            <Link
-              href="/dashboard/inbox"
-              className="min-h-11 px-3.5 py-2 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 text-on-surface font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-            >
-              <MessageSquare size={14} aria-hidden="true" />
-              <span>Deal Inbox</span>
-            </Link>
-            <Link
-              href="/dashboard/calendar"
-              className="min-h-11 px-3.5 py-2 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 text-on-surface font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-            >
-              <Calendar size={14} aria-hidden="true" />
-              <span>Viewings</span>
-            </Link>
-            <Link
-              href="/dashboard/open-gate"
-              className="min-h-11 px-3.5 py-2 rounded-xl border border-gold-accent/40 bg-gold-accent/10 hover:border-gold-accent text-gold-accent font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
-            >
-              <span>Open Gate ↗</span>
-            </Link>
+          {/* Symmetrical Unified Actions Frame: identical container sizes & centered harmony */}
+          <div className="w-full pt-4 border-t border-surface-variant/60">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-3xl mx-auto w-full">
+              <Link
+                href="/dashboard/crm"
+                className="w-full min-h-12 px-4 py-2.5 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:bg-gold-bright active:scale-[0.98] transition shadow-[0_0_14px_rgba(var(--accent-rgb),0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
+              >
+                <Kanban size={15} aria-hidden="true" />
+                <span>Open Master CRM</span>
+              </Link>
+              <Link
+                href="/dashboard/inbox"
+                className="w-full min-h-12 px-4 py-2.5 rounded-xl border border-surface-variant bg-surface-alt/90 hover:border-gold-accent/40 text-on-surface hover:text-gold-accent font-mono text-xs font-semibold uppercase tracking-wider inline-flex items-center justify-center gap-2 active:scale-[0.98] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
+              >
+                <MessageSquare size={15} aria-hidden="true" />
+                <span>Deal Inbox</span>
+              </Link>
+              <Link
+                href="/dashboard/calendar"
+                className="w-full min-h-12 px-4 py-2.5 rounded-xl border border-surface-variant bg-surface-alt/90 hover:border-gold-accent/40 text-on-surface hover:text-gold-accent font-mono text-xs font-semibold uppercase tracking-wider inline-flex items-center justify-center gap-2 active:scale-[0.98] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent"
+              >
+                <Calendar size={15} aria-hidden="true" />
+                <span>Viewings</span>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -278,10 +277,10 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
                   <ArrowUpRight size={14} aria-hidden="true" />
                 </Link>
                 <Link
-                  href="/dashboard/open-gate"
+                  href="/settings#open-gate"
                   className="min-h-11 px-4 py-2 rounded-xl border border-surface-variant bg-surface-alt hover:border-gold-accent/40 text-on-surface font-mono text-xs uppercase tracking-wider inline-flex items-center gap-1.5 transition"
                 >
-                  <span>Share Open Gate Link</span>
+                  <span>Open Gate in Settings</span>
                   <ArrowUpRight size={14} aria-hidden="true" />
                 </Link>
               </div>

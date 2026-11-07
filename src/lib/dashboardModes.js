@@ -107,7 +107,7 @@ export function canAccessDashboardWorkspace(requestedRole, heldRoles = []) {
 
   const heldModes = normalizeDashboardModes(rawHeld);
   if (targetMode === "all") {
-    return heldModes.length > 0;
+    return heldModes.length >= 3;
   }
   return heldModes.includes(targetMode);
 }

@@ -7,7 +7,7 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import InfoTip from "@/components/ui/InfoTip";
-import { Camera, Search, Lock, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Camera, Search, Lock, ArrowLeft, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import RoleActivationModal from "@/components/profile/RoleActivationModal";
 import { supabase } from "@/lib/supabaseClient";
 import PrivacyShieldPanel from "@/components/profile/PrivacyShieldPanel";
@@ -1198,6 +1198,53 @@ export default function SettingsPage() {
             <p>View your active membership plan and available Connects balance.</p>
           </div>
           <PlanPanel />
+
+          {/* Subframe: Open Gate Inbound Access Controls */}
+          <div id="open-gate" className="mt-8 pt-6 border-t border-surface-variant/80">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="font-mono text-xs uppercase tracking-widest text-gold-accent">
+                Inbound Permissions
+              </span>
+              <span className="px-2 py-0.5 rounded bg-gold-accent/15 border border-gold-accent/35 font-mono text-xs uppercase text-gold-accent">
+                Privileged Access
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-working-title text-xl text-on-surface font-semibold">
+                Open Gate Access Controls
+              </h3>
+              <InfoTip tipId="settingsOpenGate" label="About Open Gate inbound permissions" />
+            </div>
+            <p className="text-sm text-text-secondary mt-1 max-w-2xl leading-relaxed">
+              Open Gate allows verified seekers and buyers to initiate direct inquiries on your properties without spending Connects. Because this bypasses standard gatekeeping, listing permissions must be explicitly configured and audited here.
+            </p>
+
+            <div className="mt-4 rounded-xl border border-surface-variant bg-surface-alt/40 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1 max-w-xl">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold uppercase tracking-wider text-on-surface">
+                    Property-by-Property Intake Control
+                  </span>
+                  <span className="font-mono text-xs text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/25">
+                    CRM Synchronized
+                  </span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Inbound Open Gate chats are stamped with an <span className="font-mono text-gold-accent">OPEN GATE</span> badge and routed directly into your Deal Inbox and Master CRM pipeline.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+                <Link
+                  href="/dashboard/open-gate"
+                  className="min-h-11 px-4 py-2.5 rounded-xl bg-gold-accent text-background font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:bg-gold-bright transition shadow-[0_0_12px_rgba(var(--accent-rgb),0.25)] active:scale-[0.98]"
+                >
+                  <span>Configure Listings</span>
+                  <ArrowRight size={14} aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* ── Section 6: Security & Login ── */}

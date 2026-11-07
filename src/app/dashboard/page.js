@@ -447,7 +447,8 @@ function DashboardInner() {
 
   const isRoleUnlocked = (opt) => {
     if (opt.id === "all") {
-      return (user?.tags?.length || 0) > 1 || heldRoles.includes("admin") || heldRoles.includes("staff");
+      const heldModes = normalizeDashboardModes(heldRoles);
+      return heldModes.length >= 3 || heldRoles.includes("admin") || heldRoles.includes("staff");
     }
     return canAccessDashboardWorkspace(opt.id, heldRoles);
   };
@@ -641,11 +642,11 @@ function DashboardInner() {
                   {/* Quick Role Utilities */}
                   <div className="border-t border-surface-variant px-4 py-2 bg-surface-alt/40 flex items-center justify-between gap-2">
                     <Link
-                      href="/dashboard/open-gate"
+                      href="/settings#open-gate"
                       onClick={() => setShowDesktopSwitcher(false)}
                       className="font-mono text-xs uppercase tracking-wider text-text-secondary hover:text-gold-accent transition"
                     >
-                      Open Gate ↗
+                      Settings · Open Gate ↗
                     </Link>
                     {isPipelineRole(heldRoles) ? (
                       <Link
