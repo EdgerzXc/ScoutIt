@@ -28,6 +28,14 @@ import "./property.css";
 import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
 import { matchesPropertyCategory, getAdaptivePriceBands, unitCategoryLabel } from "@/lib/unitCategory";
 
+const DIRECTORY_AMBIENT_CONTEXT = Object.freeze({
+  key: "directory:metro-manila",
+  source: "property",
+  latitude: 14.5492,
+  longitude: 121.0494,
+  shortName: "METRO MANILA",
+});
+
 
 // Carry the category-spec + price fields through the card mappers (the source
 // objects have them; the old mappers cherry-picked them away). Spread into each
@@ -742,7 +750,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
   return (
     <div data-scoutit-guide="scoutit-property-directory" className="directory-layout">
       <AtmosphereBackground variant="default" />
-      <Header />
+      <Header ambientContext={DIRECTORY_AMBIENT_CONTEXT} />
       <main className="directory-main" id="main-content" tabIndex={-1}>
         <header className="directory-header">
           <span className="vector-label">Layer 03.1 · Space Directory</span>

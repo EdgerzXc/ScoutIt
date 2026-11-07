@@ -181,30 +181,22 @@ export default function Header({ ambientContext = null }) {
       <div className="header-left">
         <button
           onClick={() => {
-            if (window.history.length > 1) {
+            if (pathname?.startsWith("/property/")) {
+              router.push("/property");
+            } else if (window.history.length > 1) {
               router.back();
             } else {
-              router.push("/");
+              router.push("/property");
             }
           }}
           className="header-back-btn"
-          aria-label="Go back"
+          aria-label={pathname?.startsWith("/property/") ? "Back to Directory" : "Go back"}
         >
           <span aria-hidden="true">←</span>
           <span className="header-back-label">Back</span>
         </button>
 
         <ScoutItWordmark href="/" className="header-brand" leading={<ScoutItMark />} />
-
-        <Link
-          href="/stratosphere"
-          className={`header-layer-pill ${pathname?.startsWith("/stratosphere") ? "is-active" : ""}`}
-          aria-label="Layer 02: Stratosphere Radar & Signals"
-          title="Layer 02: Stratosphere Radar & Signals"
-        >
-          <span className="header-layer-dot" aria-hidden="true" />
-          <span className="header-layer-text">02 // STRATOSPHERE</span>
-        </Link>
       </div>
 
       <div className="header-center">
@@ -300,6 +292,10 @@ export default function Header({ ambientContext = null }) {
           align-items: center;
           gap: 18px;
           min-height: 72px;
+          width: 100%;
+          max-width: 100vw;
+          overflow-x: clip;
+          box-sizing: border-box;
           padding: 12px 24px;
           background: radial-gradient(circle at 50% -80%, rgba(var(--accent-rgb),.085), transparent 54%), linear-gradient(180deg, rgba(var(--bg-rgb),.94), rgba(var(--bg-rgb),.89));
           backdrop-filter: blur(18px) saturate(118%);
@@ -323,58 +319,8 @@ export default function Header({ ambientContext = null }) {
         .header-left {
           display: flex;
           align-items: center;
-          gap: 20px;
+          gap: 16px;
           flex: 0 0 auto;
-        }
-
-        .header-layer-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          height: 30px;
-          padding: 0 10px;
-          border-radius: 9999px;
-          background: rgba(var(--accent-rgb), 0.05);
-          border: 1px solid rgba(var(--accent-rgb), 0.22);
-          font-family: var(--font-mono, monospace);
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--accent);
-          text-decoration: none;
-          transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-          white-space: nowrap;
-          cursor: pointer;
-        }
-
-        .header-layer-pill:hover {
-          background: rgba(var(--accent-rgb), 0.12);
-          border-color: var(--accent);
-          color: var(--accent-bright);
-        }
-
-        .header-layer-pill.is-active {
-          background: rgba(var(--accent-rgb), 0.16);
-          border-color: var(--accent-bright);
-          color: var(--accent-bright);
-          box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.25);
-        }
-
-        .header-layer-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: var(--accent-bright);
-          box-shadow: 0 0 6px var(--accent);
-          display: inline-block;
-          flex-shrink: 0;
-        }
-
-        @media (max-width: 768px) {
-          .header-layer-pill {
-            display: none;
-          }
         }
 
         /* Takes whatever is left and gives way first: it is a decorative
@@ -382,13 +328,13 @@ export default function Header({ ambientContext = null }) {
            squeeze, not the brand. */
         .header-center {
           position: relative;
-          flex: 1 1 0%;
+          flex: 1 1 auto;
           display: flex;
           align-items: center;
           justify-content: center;
           min-height: 48px;
-          min-width: 70px;
-          max-width: 416px;
+          min-width: 0;
+          max-width: 540px;
         }
 
         .header-back-btn {
