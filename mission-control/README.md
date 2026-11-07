@@ -52,9 +52,10 @@ crawlable `robots.txt` advertising its own sitemap — a duplicate public site
 competing with the real domain. Nothing was lost, but the console was gone until
 the setting was corrected.
 
-There is deliberately **no `vercel.json` in this folder**. Next.js is
-auto-detected, and the repo-root `vercel.json` declares the *public site's* four
-cron jobs, which must not run under this project.
+`mission-control/vercel.json` declares only this console's daily `/api/scan/process`
+cron job (`0 6 * * *`, compatible with Vercel Hobby's once-per-day cron limit),
+keeping it isolated from the repo-root `vercel.json` which declares the *public site's*
+cron jobs.
 
 ### Two things that surprise people
 

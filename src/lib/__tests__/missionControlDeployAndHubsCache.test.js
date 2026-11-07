@@ -24,13 +24,29 @@ describe("A-329: Mission Control Deploy Environment Parity, Automated Scan Cron 
     }
   });
 
-  it("mission-control/vercel.json defines a cron schedule for /api/scan/process", () => {
+  it("mission-control/vercel.json defines a Hobby-compatible daily cron schedule for /api/scan/process", () => {
     expect(existsSync("mission-control/vercel.json")).toBe(true);
     const vercelConfig = JSON.parse(read("mission-control/vercel.json"));
     expect(Array.isArray(vercelConfig.crons)).toBe(true);
     const scanCron = vercelConfig.crons.find((c) => c.path === "/api/scan/process");
     expect(scanCron).toBeDefined();
-    expect(scanCron.schedule).toBe("*/10 * * * *");
+    expect(scanCron.schedule).toBe("0 6 * * *");
+  });
+
+  it("enforces Vercel Hobby daily-or-less-frequent cron expressions across all vercel.json files", () => {
+    // Vercel Hobby accounts reject any cron expression that runs more than once per day
+    // (minute and hour fields must be fixed single integers 0-59 and 0-23, never *, */n, ranges, or lists).
+    const hobbyDailyOrLessRegex = /^([0-9]|[1-5][0-9])\s+([0-9]|1[0-9]|2[0-3])\s+(\*|[1-9]|[12][0-9]|3[01])\s+(\*|[1-9]|1[0-2])\s+(\*|[0-7])$/;
+
+    for (const configPath of ["vercel.json", "mission-control/vercel.json"]) {
+      const config = JSON.parse(read(configPath));
+      for (const cron of config.crons || []) {
+        expect(
+          hobbyDailyOrLessRegex.test(cron.schedule.trim()),
+          `${configPath} cron ${cron.path} has sub-daily schedule "${cron.schedule}" which fails Vercel Hobby builds`
+        ).toBe(true);
+      }
+    }
   });
 
   it("mission-control /api/scan/process route exports both POST and GET handlers", () => {
