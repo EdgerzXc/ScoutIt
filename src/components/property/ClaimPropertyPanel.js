@@ -513,7 +513,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                     RA 9646 RESA Law, and Arts. 171, 183 &amp; 315 of the Revised Penal Code) that I am the lawful
                     Torrens title owner or duly authorized representative of this property. I warrant that all attached
                     documents are authentic, and I accept the 72-hour review terms and legal indemnity under
-                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-[#E8AE3C] hover:text-[#F7C64E] ml-1">Terms of Service Section 08</a>.
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-[var(--accent)] hover:text-[var(--accent-bright)] ml-1">Terms of Service Section 08</a>.
                   </span>
                 </label>
 

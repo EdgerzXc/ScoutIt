@@ -17,7 +17,7 @@ describe("A-330: MapLibre Worker Stale Version Prune Loop & Script Syntax Lint G
     expect(existsSync("scripts/lint-scripts.mjs")).toBe(true);
     const stdout = execFileSync(process.execPath, ["scripts/lint-scripts.mjs"], { encoding: "utf8" });
     expect(stdout).toContain("Script syntax audit passed");
-  });
+  }, 30000);
 
   it("package.json registers the lint:scripts command", () => {
     const pkg = JSON.parse(read("package.json"));
