@@ -23,6 +23,7 @@ ScoutIt is engineered around principles of data minimization and privacy-by-defa
     body: `We collect personal data through voluntary submission, platform usage, and account interactions:
 — Basic Users / Seekers: Full name, email address, password hash, selected role identity, and platform communication preferences.
 — Licensed Brokers: Professional Regulation Commission (PRC) License Number, PRC ID expiration date, Accredited Integrated Professional Organization (AIPO) membership details, brokerage affiliation, and professional identity documents.
+— Property Claimants & Ownership Verification: Government-issued identification (Philippine Passport, Driver's License, UMID, PhilID, or PRC License), Land Titles (Transfer Certificate of Title, Condominium Certificate of Title), Real Property Tax (RPT) Declarations, official amilyar tax receipts, developer Contracts to Sell (CTS), and notarized Special Powers of Attorney (SPA) or corporate Secretary's Certificates.
 — Service Providers (Photographers, Researchers, Event Planners): Portfolio media, verification credentials, professional bio, and service specialties.
 — Submission and Telemetry Data: Property submission details, photos, spatial descriptions, geotagged bounty proofs, search filters, and interaction logs.
 
@@ -108,6 +109,17 @@ To exercise any right, contact our Data Protection Officer as provided in Sectio
     num: "12",
     title: "NPC registration & compliance status",
     body: `ScoutIt does not represent that an NPC registration, Data Processing System registration, or Sworn Declaration and Undertaking has been completed. The owner and Philippine counsel must close the applicable filing and documentation gates before any such statement is published.`,
+  },
+  {
+    num: "13",
+    title: "Property verification documents and sensitive personal information (SPI)",
+    body: `Pursuant to Chapter III, Section 13 of Republic Act No. 10173 (Data Privacy Act of 2012) and National Privacy Commission guidelines, ScoutIt enforces rigorous, purpose-bound safeguards over Sensitive Personal Information (SPI) collected during property ownership verification:
+
+1. PURPOSE LIMITATION (DPA SECTION 11): Government-issued IDs, Land Titles (TCT/CCT), tax declarations, and notarized authorizations are collected strictly and exclusively for verifying legitimate property ownership and representation authority to prevent unlawful hijacking of listings. These documents are never processed for advertising, never sold or monetized, and never indexed in public search engines.
+2. ZERO-PUBLIC-EXPOSURE VAULT: All verification enclosures are transmitted via TLS 1.3 encryption and stored in an isolated, private cloud storage bucket ("claim-documents") with AES-256 server-side encryption and PostgreSQL Row Level Security (RLS). Under no circumstances are verification documents rendered on the public website or made visible to seekers or other platform users.
+3. RESTRICTED ROLE-BASED ACCESS (RBAC): Only authorized compliance officers (Operations Managers and Super Admins) holding Multi-Factor Authentication (AAL2) credentials may inspect submitted verification documents. Document previews are generated on-demand as temporary, single-use signed URLs with a maximum lifespan of one (1) hour (3,600 seconds), after which they expire permanently.
+4. WATERMARKING RECOMMENDATION: Claimants are explicitly encouraged to apply digital or handwritten watermarks across uploaded documents (e.g., "FOR SCOUTIT VERIFICATION ONLY"). The presence of a protective watermark does not impair the validity of the verification document.
+5. RETENTION & DATA SUBJECT ERASURE: Verification documents are retained for the active duration of the listing to preserve the chain of custody and defend against adverse third-party claims under Section 13(f) of the DPA. Upon verified property delisting or account deletion, verification documents are permanently purged in accordance with our PII-Detachment Purge protocol, unless a legal hold is mandated by active dispute proceedings or law enforcement order.`,
   },
   {
     num: "14",

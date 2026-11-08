@@ -72,13 +72,36 @@ ScoutIt strictly prohibits data invention. Missing data points remain blank (ind
   },
   {
     num: "08",
+    title: "Property claims, ownership verification, and legal warranties",
+    body: `ScoutIt operates on the foundational principle of Owner Sovereignty: any property listing published by an authorized broker or representative is strictly provisional until the legitimate legal title holder asserts authority.
+
+A. SOLEMN AFFIRMATION & ELECTRONIC SIGNATURE UNDER RA 8792:
+When you submit an ownership claim for a property listing on ScoutIt, you execute a legally binding electronic affirmation pursuant to Sections 6 to 11 of Republic Act No. 8792 (Electronic Commerce Act of 2000). You expressly warrant and represent under oath that:
+1. You are the sole registered Torrens title holder (Transfer Certificate of Title / Condominium Certificate of Title), beneficial owner, or duly authorized corporate officer (backed by a valid Board Resolution or Secretary's Certificate) of the subject property; or
+2. If acting as a licensed real estate broker or property manager, you hold an active, unrevoked Special Power of Attorney (SPA) or written Authority to Sell or Lease (ATS/ATL) executed by the registered owner in strict compliance with Articles 1403 and 1878 of the Civil Code of the Philippines and Section 29 of Republic Act No. 9646 (RESA Law).
+
+B. CRIMINAL PENALTIES FOR FALSIFICATION & PERJURY:
+Submitting forged, simulated, altered, or fraudulent Land Titles, government IDs, tax declarations, or notarized authorizations constitutes a serious criminal offense under the Revised Penal Code of the Philippines, including:
+• Articles 171 and 172 (Falsification of Public, Official, or Commercial Documents);
+• Article 183 (False Testimony and Perjury in Solemn Affirmation); and
+• Article 315 (Swindling / Estafa through False Pretenses).
+Any claimant attempting to unlawfully claim or commandeer a property listing will face immediate permanent account termination, forfeiture of platform assets, listing freeze, and criminal referral with digital evidence (including IP addresses, device identifiers, and timestamped document enclosures) transmitted to the Philippine National Police Anti-Cybercrime Group (PNP-ACG) and the National Bureau of Investigation (NBI).
+
+C. 72-HOUR PROVISIONAL REVIEW WINDOW & REVERSIBILITY:
+In recognition of the conclusive nature of Torrens Titles under Presidential Decree No. 1529 (Property Registration Decree), claims verified automatically through clean registry matching enter a seventy-two (72) hour Provisional Verification period. Prior listers receive immediate electronic notification and a 72-hour grace period to review the claim. ScoutIt reserves the unconditional right to freeze, suspend, or reverse any listing transfer upon notice of conflicting ownership claims, adverse claims registered under Section 70 of PD 1529, or active judicial litigation.
+
+D. STATUTORY SAFE HARBOR & CLAIMANT INDEMNITY (RA 8792 SECTION 30):
+Pursuant to Section 30 of Republic Act No. 8792, ScoutIt functions strictly as a technology intermediary and spatial intelligence directory. ScoutIt does not warrant title perfection, boundary lines, or encumbrance-free status of any property. The claimant unconditionally agrees to defend, indemnify, and hold harmless ScoutIt, its parent company, directors, officers, employees, and users from and against any and all third-party claims, lawsuits, liabilities, damages, boundary disputes, or legal expenses arising out of or related to fraudulent claims, contested titles, or unauthorized listings submitted by the claimant.`,
+  },
+  {
+    num: "09",
     title: "Bounties and field telemetry tasks",
     body: `ScoutIt may issue small real-world data verification tasks ("Bounties"), allowing qualified researchers or photographers to verify location facts, capture geotagged photo evidence, or audit spatial details in exchange for reward Connects.
 
 Bounties tied to specific private properties require Cluster-tier or higher owner approval before reward payout. Submitting falsified proof, fake coordinates, or altered media results in immediate forfeiture of earned rewards, bounty disqualification, and permanent account termination.`,
   },
   {
-    num: "09",
+    num: "10",
     title: "Temporary communication and ephemeral chat retention",
     body: `Handshake Chat provides a private, temporary communication space for connected parties. Closing a chat thread converts it to read-only status for seven (7) days as an operational retention benchmark. Upon expiration of the 7-day window, message body text is permanently purged from active database storage, while non-message transaction metadata (timestamps, participant IDs, status flags) is retained for audit trails.
 
@@ -87,7 +110,7 @@ Every chat interface displays the following mandatory operational disclosure: "N
 Disputed or reported chat threads are placed under restricted administrative holds for Trust & Safety review until resolved. Exchanging personal contact details within the chat is done entirely at your own risk; ScoutIt cannot un-share information once transmitted.`,
   },
   {
-    num: "10",
+    num: "11",
     title: "The Spatial Vault and intellectual property ownership",
     body: `Spatial Vault assets (including Luma AI 3D spatial scans, 360-degree virtual tours, acoustic heatmaps, and aerial visualisations) produced directly by ScoutIt or its commissioned agents are the exclusive intellectual property of ScoutIt under the Intellectual Property Code of the Philippines (Republic Act No. 8293).
 
@@ -96,14 +119,14 @@ Subscribed property owners receive a limited, revocable, non-exclusive, non-tran
 Photos, descriptions, and virtual tours directly uploaded by Users remain the intellectual property of the respective User. By uploading, the User grants ScoutIt a worldwide, perpetual, royalty-free, non-exclusive license to host, display, format, and distribute the content in connection with the Platform.`,
   },
   {
-    num: "11",
+    num: "12",
     title: "Removing a listing: soft-delete vs. permanent removal",
     body: `Property owners may withdraw a listing at any time, moving it off-market. Off-market properties are immediately removed from public discovery feeds and search engines, remaining accessible only to entitled Cluster/Universe users if explicitly set to "Quietly open to offers".
 
 Permanent listing removal is an irreversible Danger Zone action. Executing permanent removal removes the listing from owner portfolios, public directories, off-market indexes, and sitemaps. Permanent removal does not delete ScoutIt-owned spatial media, historical transaction metadata, reserved canonical URLs, or internal security audit logs. True erasure of personal data is governed by Privacy Policy Section 08 under the Data Privacy Act (RA 10173).`,
   },
   {
-    num: "12",
+    num: "13",
     title: "Prohibited activities and platform security",
     body: `You expressly agree not to:
 1. Act as, advertise as, or convey the impression of being a licensed real estate broker, salesperson, appraiser, or consultant without holding valid credentials issued by the Professional Regulation Commission (PRC) under RA 9646;
@@ -116,38 +139,38 @@ Permanent listing removal is an irreversible Danger Zone action. Executing perma
 Breach of these prohibitions results in immediate account revocation, asset forfeiture, and reporting to legal authorities.`,
   },
   {
-    num: "13",
+    num: "14",
     title: "Platform identity and proprietary rights",
     body: `The ScoutIt brand, software code, dynamic interfaces, scrollytelling visual tracks, Connects architecture, spatial display systems, and original editorial publications are proprietary ScoutIt materials. Unauthorized reproduction, modification, or distribution is prohibited.`,
   },
   {
-    num: "14",
+    num: "15",
     title: "Disclaimer of advice and limitation of liability",
     body: `All intelligence briefings, spatial telemetry, neighborhood metrics, visualisations, and price displays are provided strictly for informational purposes. ScoutIt does not render professional legal, real estate, financial, tax, or investment advice. Users must perform independent due diligence with licensed professionals before entering into any transaction.
 
 The Platform is provided on an "AS IS" and "AS AVAILABLE" basis. To the maximum extent permitted under Philippine law, ScoutIt disclaims all warranties, express or implied. ScoutIt is not liable for indirect, incidental, consequential, special, or punitive damages, nor for any financial loss, loss of contract, commission dispute, or physical property damages arising from off-platform transactions or reliance on platform data.`,
   },
   {
-    num: "15",
+    num: "16",
     title: "Dispute resolution framework",
     body: `ScoutIt handles platform operational disputes only (such as impersonation, unauthorized listing uploads, user harassment, or system technical errors).
 
 ScoutIt WILL NOT mediate, arbitrate, or involve itself in transaction disputes regarding property defects, asking prices, earnest money deposits, lease terms, commission splits, or broker representation contracts. All such disputes are strictly between the contracting parties and their licensed advisors.`,
   },
   {
-    num: "16",
+    num: "17",
     title: "Electronic acceptance and terms modifications",
     body: `ScoutIt records acceptance only when an authenticated user checks the Terms and Privacy box and submits onboarding for the exact version displayed. The server stores the user, version, time, acceptance method, and a snapshot hash as evidence of that electronic action. Republic Act No. 8792 recognizes electronic data messages and documents, but ScoutIt does not claim that merely browsing the Platform creates acceptance.
 
 ScoutIt may amend these Terms to reflect product, operational, or legal changes. Material revisions receive a new version and effective date; account flows must request acceptance of that current version instead of silently treating continued browsing as assent. Philippine counsel should review this pilot text before public commercial launch.`,
   },
   {
-    num: "17",
+    num: "18",
     title: "Governing law and venue selection",
     body: `These Terms are governed by, construed, and enforced in accordance with the laws of the Republic of the Philippines, including RA 9646, RA 10173, RA 8792, RA 7394, and RA 8293. Any legal suit, action, or proceeding arising out of these Terms or the Platform shall be instituted exclusively in the proper courts of Taguig City, Metro Manila, Philippines.`,
   },
   {
-    num: "18",
+    num: "19",
     title: "Official legal contact details",
     body: `ScoutIt has not yet published a dedicated legal mailbox or office address. During the invited pilot, use the official Contact surface for legal, privacy, or operational notices. This section will be replaced only after the owner verifies the receiving channel and counsel approves the wording.`,
   },
