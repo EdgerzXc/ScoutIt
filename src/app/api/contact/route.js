@@ -5,6 +5,7 @@ import { turnstileGuard, clientIpFrom } from "@/lib/turnstile";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/clientIp";
 import { sendEmail, renderEmail, isEmailConfigured } from "@/lib/email";
+import { classifyContactSpam } from "@/lib/contactSpamPolicy.mjs";
 
 // Public contact intake — the logged-out path for someone who has not signed up
 // and has a question.
@@ -109,14 +110,17 @@ export async function POST(request) {
   const blocked = await turnstileGuard(request, turnstileToken);
   if (blocked) return blocked;
 
+  // Zero-cost in-memory spam triage (runs locally with 0 API calls)
+  const spamAssessment = classifyContactSpam({ name, email, subject, message });
+  const messageStatus = spamAssessment.isSpam ? "spam" : "new";
+
   try {
     const { error } = await supabaseAdmin.from("contact_messages").insert({
       name,
       email,
       subject: subject || null,
       message,
-      // status is intentionally NOT accepted from the body — a client-set
-      // status would let a spammer file their own message as already handled.
+      status: messageStatus,
       ip_hash: await maskIp(request),
       user_agent: (request.headers.get("user-agent") || "").slice(0, 500) || null,
     });
@@ -133,15 +137,8 @@ export async function POST(request) {
     }
 
     // Tell a human, without letting that failure reach the sender.
-    //
-    // The row is already committed by this point, and Mission Control's contact
-    // queue is the system of record — this email is a nudge so the queue gets
-    // opened, not the delivery mechanism. Awaited so a provider rejection is
-    // logged rather than lost to an unhandled rejection after the response, but
-    // never surfaced: the visitor's message IS saved, and telling them it
-    // failed because our own notification bounced would be a lie in the
-    // direction that loses their message.
-    if (isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
+    // Suppressed for spam to save email quota and prevent staff notification noise.
+    if (!spamAssessment.isSpam && isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
       const safeName = escapeHtml(name);
       const safeEmail = escapeHtml(email);
       const safeSubject = escapeHtml(subject || "no subject");
