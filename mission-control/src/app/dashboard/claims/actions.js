@@ -90,7 +90,7 @@ export async function loadClaimQueue() {
       : Promise.resolve({ data: [] }),
   ]);
 
-  const mainSiteBase = process.env.NEXT_PUBLIC_MAIN_SITE_URL || "https://www.scoutit.space";
+  const mainSiteBase = "https://www.scoutit.space";
 
   const propertyById = Object.fromEntries(
     (properties.data || []).map((p) => [
