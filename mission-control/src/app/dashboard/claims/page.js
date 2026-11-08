@@ -102,7 +102,7 @@ export default async function ClaimsPage() {
                           href={claim.property.publicUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-mono uppercase tracking-wider bg-[rgba(232,174,60,0.12)] hover:bg-[rgba(232,174,60,0.22)] text-[#F7C64E] border border-[rgba(232,174,60,0.3)] transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[12px] font-mono uppercase tracking-wider bg-[rgba(232,174,60,0.12)] hover:bg-[rgba(232,174,60,0.22)] text-[#F7C64E] border border-[rgba(232,174,60,0.3)] transition-colors"
                           title="Open public listing dossier on ScoutIt in a new tab"
                         >
                           <ExternalLink className="w-3 h-3" />
@@ -111,7 +111,7 @@ export default async function ClaimsPage() {
                       )}
                       <Link
                         href="/dashboard/verification"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-mono uppercase tracking-wider bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[12px] font-mono uppercase tracking-wider bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
                         title="Inspect internal verification queue"
                       >
                         <ShieldCheck className="w-3 h-3" />
@@ -121,7 +121,7 @@ export default async function ClaimsPage() {
                     <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-white/60">
                       {claim.property?.location && <span>{claim.property.location}</span>}
                       {claim.property?.slug && (
-                        <span className="font-mono text-white/40">{claim.property.slug}</span>
+                        <span className="font-mono text-white/60">{claim.property.slug}</span>
                       )}
                       <span>filed {new Date(claim.created_at).toLocaleString()}</span>
                     </div>
@@ -134,17 +134,17 @@ export default async function ClaimsPage() {
                 {/* Claimant profile summary */}
                 <div className="bg-white/[0.02] border border-white/5 rounded-lg p-3 text-xs flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-white/40 shrink-0" />
+                    <User className="w-4 h-4 text-white/60 shrink-0" />
                     <div>
                       <span className="text-white/90 font-medium">
                         {claim.claimant?.full_name || `User ID: ${claim.claimant_user_id.slice(0, 8)}...`}
                       </span>
                       {claim.claimant?.email && (
-                        <span className="text-white/50 ml-2 font-mono">({claim.claimant.email})</span>
+                        <span className="text-white/70 ml-2 font-mono">({claim.claimant.email})</span>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 font-mono text-[11px]">
+                  <div className="flex items-center gap-2 font-mono text-[12px]">
                     <span className="uppercase text-[#F7C64E] bg-[rgba(232,174,60,0.1)] px-2 py-0.5 rounded border border-[rgba(232,174,60,0.25)]">
                       {claim.claimant?.subscription_tier || "STARRY"} PLAN
                     </span>
@@ -205,7 +205,7 @@ export default async function ClaimsPage() {
                             <FileText className="w-4 h-4 text-[#E8AE3C] shrink-0" />
                             <div className="min-w-0">
                               <p className="text-xs font-medium text-white/90 truncate">{d.original_filename}</p>
-                              <p className="text-[11px] font-mono text-white/50 uppercase">
+                              <p className="text-[12px] font-mono text-white/60 uppercase">
                                 {d.document_type.replace(/_/g, " ")}{" "}
                                 {d.file_size_bytes ? `· ${(d.file_size_bytes / 1024).toFixed(0)} KB` : ""}
                               </p>
@@ -213,7 +213,7 @@ export default async function ClaimsPage() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span
-                              className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
+                              className={`text-[12px] font-mono uppercase px-2 py-0.5 rounded border ${
                                 d.malware_scan_status === "clean"
                                   ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
                                   : "text-amber-400 bg-amber-400/10 border-amber-400/20"
@@ -226,13 +226,13 @@ export default async function ClaimsPage() {
                                 href={d.previewUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F7C64E] hover:bg-[#E8AE3C] text-black font-semibold text-[11px] tracking-wider uppercase transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F7C64E] hover:bg-[#E8AE3C] text-black font-semibold text-[12px] tracking-wider uppercase transition-colors"
                               >
                                 <Eye className="w-3 h-3" />
                                 Inspect Document
                               </a>
                             ) : (
-                              <span className="text-[11px] text-white/40 italic">File on secure record</span>
+                              <span className="text-[12px] text-white/60 italic">File on secure record</span>
                             )}
                           </div>
                         </li>
@@ -249,7 +249,7 @@ export default async function ClaimsPage() {
 
                 {/* Staff Fast-Verification Toolbelt */}
                 <div className="border border-white/5 rounded-lg p-3 bg-white/[0.015] space-y-2">
-                  <div className="text-[11px] font-mono uppercase tracking-wider text-white/60 flex items-center gap-1.5">
+                  <div className="text-[12px] font-mono uppercase tracking-wider text-white/60 flex items-center gap-1.5">
                     <Search className="w-3 h-3 text-[#E8AE3C]" />
                     Staff Fast-Verification Toolbelt
                   </div>
@@ -263,7 +263,7 @@ export default async function ClaimsPage() {
                     >
                       <Landmark className="w-3.5 h-3.5 text-blue-400" />
                       LRA eTitle Portal
-                      <ExternalLink className="w-2.5 h-2.5 text-white/40" />
+                      <ExternalLink className="w-2.5 h-2.5 text-white/60" />
                     </a>
                     <Link
                       href="/dashboard/prc"
@@ -292,7 +292,7 @@ export default async function ClaimsPage() {
                     >
                       <Building2 className="w-3.5 h-3.5 text-purple-400" />
                       SEC Company Registry
-                      <ExternalLink className="w-2.5 h-2.5 text-white/40" />
+                      <ExternalLink className="w-2.5 h-2.5 text-white/60" />
                     </a>
                     {claim.property?.location && (
                       <a
@@ -304,7 +304,7 @@ export default async function ClaimsPage() {
                       >
                         <MapPin className="w-3.5 h-3.5 text-emerald-400" />
                         Satellite / Map
-                        <ExternalLink className="w-2.5 h-2.5 text-white/40" />
+                        <ExternalLink className="w-2.5 h-2.5 text-white/60" />
                       </a>
                     )}
                   </div>

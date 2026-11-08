@@ -42,7 +42,8 @@ export async function POST(request) {
       );
     }
 
-    const originalFilename = String(file.name || "document").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const rawName = String(file.name || "document").split(/[\/\\]/).pop() || "document";
+    const originalFilename = rawName.replace(/\.\.+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "_");
     const ext = originalFilename.split(".").pop().toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
       return NextResponse.json(

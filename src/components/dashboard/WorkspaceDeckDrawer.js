@@ -267,13 +267,13 @@ export default function WorkspaceDeckDrawer({
             className="w-14 h-1.5 rounded-full bg-gold-accent transition-all duration-300 group-hover:w-20 shadow-[0_0_12px_rgba(var(--accent-rgb),0.75)] animate-pulse"
             aria-hidden="true"
           />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-text-muted group-hover:text-gold-accent transition-colors flex items-center gap-1">
+          <span className="font-mono text-xs uppercase tracking-widest text-text-muted group-hover:text-gold-accent transition-colors flex items-center gap-1">
             <span>‹</span> {isOpen ? "Tap or drag up to tuck" : "Click to drag · Connected Deck"} <span>›</span>
           </span>
 
           {totalUnread > 0 && !isOpen && (
             <span
-              className="absolute -right-8 top-0 px-1.5 py-0.5 min-w-[18px] h-4 rounded-full bg-gold-accent text-background font-mono text-[11px] font-bold leading-none flex items-center justify-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.6)]"
+              className="absolute -right-8 top-0 px-1.5 py-0.5 min-w-[18px] h-4 rounded-full bg-gold-accent text-background font-mono text-xs font-bold leading-none flex items-center justify-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.6)]"
               aria-label={`${totalUnread} unread items`}
             >
               {totalUnread > 99 ? "99+" : totalUnread}

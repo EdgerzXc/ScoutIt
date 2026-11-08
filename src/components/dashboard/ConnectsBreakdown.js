@@ -140,7 +140,7 @@ export default function ConnectsBreakdown({
                 <div className="font-mono text-lg font-bold text-gold-bright my-0.5">
                   {monthlyVal}
                 </div>
-                <span className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+                <span className="font-mono text-xs uppercase tracking-wider text-text-secondary">
                   Monthly
                 </span>
               </div>
@@ -154,7 +154,7 @@ export default function ConnectsBreakdown({
                 <div className="font-mono text-lg font-bold text-gold-bright my-0.5">
                   {purchasedVal}
                 </div>
-                <span className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+                <span className="font-mono text-xs uppercase tracking-wider text-text-secondary">
                   Purchased
                 </span>
               </div>
@@ -168,7 +168,7 @@ export default function ConnectsBreakdown({
                 <div className="font-mono text-lg font-bold text-gold-bright my-0.5">
                   {earnedVal}
                 </div>
-                <span className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+                <span className="font-mono text-xs uppercase tracking-wider text-text-secondary">
                   Earned
                 </span>
               </div>
@@ -206,7 +206,7 @@ export default function ConnectsBreakdown({
 
           {/* Spend Priority Footer with ? Mark */}
           <div className="p-3.5 bg-surface-alt/20 flex items-center justify-between gap-3 text-xs text-text-secondary">
-            <span className="font-mono text-[11px] uppercase tracking-wider truncate">
+            <span className="font-mono text-xs uppercase tracking-wider truncate">
               Spend: Monthly 1st → Purchased → Earned
             </span>
             <InfoTip tipId="connectsSpendOrder" label="About spend priority order" />

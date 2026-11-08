@@ -134,7 +134,7 @@
   justify-content: center;
   gap: 6px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--accent);
@@ -537,7 +537,7 @@
 
 .branchFrameBadge {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 3px 10px;
@@ -647,7 +647,7 @@
 
 .roleBadge {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 2px 8px;
@@ -661,7 +661,7 @@
 
 .roleBadgeSecondary {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 2px 8px;
@@ -830,7 +830,7 @@
 
   .roleBadge,
   .roleBadgeSecondary {
-    font-size: 10px;
+    font-size: 12px;
     padding: 2px 6px;
   }
 

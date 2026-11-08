@@ -116,7 +116,7 @@ function OpenGateDashboardInner() {
                 <span>← Back to Settings</span>
               </Link>
             </div>
-            <p className="font-mono text-[11px] sm:text-xs uppercase tracking-wider text-gold-accent break-words [overflow-wrap:anywhere] leading-snug">
+            <p className="font-mono text-xs uppercase tracking-wider text-gold-accent break-words [overflow-wrap:anywhere] leading-snug">
               ENTERPRISE CONTACT CONTROL · CONNECTED TO CRM &amp; INBOX
             </p>
             <h1 className="mt-1 font-headline-editorial text-3xl md:text-4xl text-on-surface break-words">

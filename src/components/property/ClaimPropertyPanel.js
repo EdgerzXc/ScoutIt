@@ -832,7 +832,7 @@ function ClaimStyles() {
       }
       .cp-docs-title {
         font-family: ${MONO};
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         color: var(--accent);
         letter-spacing: 0.1em;
@@ -843,7 +843,7 @@ function ClaimStyles() {
       }
       .cp-docs-badge {
         font-family: ${MONO};
-        font-size: 10px;
+        font-size: 12px;
         color: var(--text-muted);
         letter-spacing: 0.08em;
         padding: 2px 6px;
@@ -875,7 +875,7 @@ function ClaimStyles() {
       }
       .cp-doc-slot__label {
         font-family: ${MONO};
-        font-size: 11px;
+        font-size: 12px;
         color: var(--text-secondary);
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -924,7 +924,7 @@ function ClaimStyles() {
       }
       .cp-dropzone__sub {
         font-family: ${MONO};
-        font-size: 10px;
+        font-size: 12px;
         color: var(--text-muted);
         margin-top: 3px;
         letter-spacing: 0.04em;
@@ -957,7 +957,7 @@ function ClaimStyles() {
       }
       .cp-doc-attached__meta {
         font-family: ${MONO};
-        font-size: 10px;
+        font-size: 12px;
         color: var(--accent);
         letter-spacing: 0.06em;
       }
@@ -980,7 +980,7 @@ function ClaimStyles() {
       }
       .cp-docs-error {
         font-family: ${MONO};
-        font-size: 11px;
+        font-size: 12px;
         color: var(--red, #f87171);
         letter-spacing: 0.04em;
         margin-top: 8px;
