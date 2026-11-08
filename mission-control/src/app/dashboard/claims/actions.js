@@ -65,28 +65,64 @@ export async function loadClaimQueue() {
 
   const claimIds = claims.map((c) => c.id);
   const propertyIds = [...new Set(claims.map((c) => c.property_id))];
+  const claimantUserIds = [...new Set(claims.map((c) => c.claimant_user_id).filter(Boolean))];
 
-  // The listing the claim is about, and what its lister declared — the
-  // comparison the whole decision turns on.
-  const [properties, documents, events] = await Promise.all([
+  // The listing the claim is about, what its lister declared, and claimant profile
+  const [properties, documents, events, profiles] = await Promise.all([
     admin
       .from("properties")
-      .select("id, slug, title, location, owner_id, lister_relationship, pipeline_status")
+      .select("id, slug, canonical_slug, title, location, owner_id, lister_relationship, pipeline_status")
       .in("id", propertyIds),
     admin
       .from("property_claim_documents")
-      .select("id, claim_id, document_type, original_filename, malware_scan_status, ocr_status, upload_timestamp")
+      .select("id, claim_id, document_type, original_filename, private_storage_path, mime_type, file_size_bytes, malware_scan_status, ocr_status, upload_timestamp")
       .in("claim_id", claimIds),
     admin
       .from("property_claim_events")
       .select("id, claim_id, actor_id, event_type, payload, created_at")
       .in("claim_id", claimIds)
       .order("created_at", { ascending: true }),
+    claimantUserIds.length > 0
+      ? admin
+          .from("user_profiles")
+          .select("id, full_name, email, role, active_roles, subscription_tier")
+          .in("id", claimantUserIds)
+      : Promise.resolve({ data: [] }),
   ]);
 
-  const propertyById = Object.fromEntries((properties.data || []).map((p) => [p.id, p]));
+  const mainSiteBase = process.env.NEXT_PUBLIC_MAIN_SITE_URL || "https://www.scoutit.space";
+
+  const propertyById = Object.fromEntries(
+    (properties.data || []).map((p) => [
+      p.id,
+      {
+        ...p,
+        publicUrl: p.canonical_slug || p.slug ? `${mainSiteBase}/property/${p.canonical_slug || p.slug}` : null,
+      },
+    ])
+  );
+  const profileById = Object.fromEntries((profiles.data || []).map((prof) => [prof.id, prof]));
+
+  // Generate secure 1-hour signed URLs for attached documents so reviewers can inspect them
+  const docsWithSignedUrls = await Promise.all(
+    (documents.data || []).map(async (doc) => {
+      let previewUrl = null;
+      if (doc.private_storage_path) {
+        try {
+          const { data: signed } = await admin.storage
+            .from("claim-documents")
+            .createSignedUrl(doc.private_storage_path, 3600);
+          previewUrl = signed?.signedUrl || null;
+        } catch {
+          // Graceful fallback if storage bucket or file not accessible in local environment
+        }
+      }
+      return { ...doc, previewUrl };
+    })
+  );
+
   const docsByClaim = {};
-  for (const d of documents.data || []) (docsByClaim[d.claim_id] ||= []).push(d);
+  for (const d of docsWithSignedUrls) (docsByClaim[d.claim_id] ||= []).push(d);
   const eventsByClaim = {};
   for (const e of events.data || []) (eventsByClaim[e.claim_id] ||= []).push(e);
 
@@ -94,6 +130,7 @@ export async function loadClaimQueue() {
     claims: claims.map((c) => ({
       ...c,
       property: propertyById[c.property_id] || null,
+      claimant: profileById[c.claimant_user_id] || null,
       documents: docsByClaim[c.id] || [],
       events: eventsByClaim[c.id] || [],
     })),

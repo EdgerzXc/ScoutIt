@@ -56,7 +56,7 @@ describe("A-067 · both property flows changed together and cannot drift apart",
     for (const flow of FLOWS) {
       const source = read(flow);
       expect(source).not.toContain(">ScoutIT Pros<");
-      expect(source).toContain('<div className="sidebar-label">Verification</div><div className="sidebar-value">{intelSourceLabel(d.last_verified_date)}</div>');
+      expect(source).toMatch(/<div className="sidebar-label">(?:Verification|Intel source)<\/div><div className="sidebar-value">\{intelSourceLabel\(d\.last_verified_date\)\}<\/div>/);
     }
   });
 

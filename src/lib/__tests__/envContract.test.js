@@ -18,6 +18,7 @@ const FRAMEWORK_PROVIDED = new Set([
   "VERCEL_ENV",
   "VERCEL_URL",
   "VERCEL_PROJECT_PRODUCTION_URL",
+  "VERCEL_GIT_COMMIT_DATE",
 ]);
 
 function envNamesReadBySource(dir = "src", found = new Set()) {

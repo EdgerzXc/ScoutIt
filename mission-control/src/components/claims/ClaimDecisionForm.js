@@ -133,12 +133,89 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
 
           <label className="block text-[12px] uppercase tracking-wide text-white/70">
             What you decided, and why
+            <div className="mt-1 flex flex-wrap gap-1.5 mb-2">
+              {transition === "approve" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setNote("The title document matches the claimant's identification.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Title &amp; ID match
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Authority to Sell (ATS) and active PRC Broker credentials verified.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + ATS &amp; PRC verified
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Contract to Sell & developer turnover notice verified.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + CTS &amp; Turnover verified
+                  </button>
+                </>
+              )}
+              {transition === "request_information" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Please upload a valid government ID matching the name on the title.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Missing Gov ID
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Tax Declaration requires accompanying current year Official RPT Tax Receipt.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Need Tax Receipt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Authority to Sell requires active PRC Real Estate Broker ID.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Need PRC Broker ID
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Document scan unreadable. Please re-upload a clear, high-resolution photo.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Re-upload clear scan
+                  </button>
+                </>
+              )}
+              {transition === "reject" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Documentation does not match registered title holder or authorized agent.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Unmatched authority
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNote("Utility bills or informal receipts are insufficient to claim property title.")}
+                    className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10"
+                  >
+                    + Insufficient proof
+                  </button>
+                </>
+              )}
+            </div>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               placeholder="At least a sentence. This is kept on the claim permanently."
-              className="mt-1 w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90 normal-case tracking-normal"
+              className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90 normal-case tracking-normal"
             />
           </label>
         </div>

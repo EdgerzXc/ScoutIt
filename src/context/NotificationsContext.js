@@ -45,7 +45,7 @@ export function NotificationsProvider({
         body: JSON.stringify({
           title: notif.title,
           desc: notif.desc,
-          icon: typeof notif.icon === "string" ? notif.icon : "🔔",
+          icon: typeof notif.icon === "string" ? notif.icon : undefined,
           notificationType: notif.notificationType || "client_event",
           propertyId: notif.propertyId || undefined,
           link: notif.link || undefined,

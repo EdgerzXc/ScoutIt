@@ -147,6 +147,8 @@ vi.mock("unpdf", () => ({
 
 vi.mock("@/lib/assimilateProperty", () => ({
   MAX_PDF_BYTES: 25 * 1024 * 1024,
+  MAX_PDF_PAGES: 30,
+  MAX_RAW_TEXT_CHARS: 50_000,
   assimilatePropertyText: async (text, filename) => {
     if (customAssimilateHandler) {
       return customAssimilateHandler(text, filename);

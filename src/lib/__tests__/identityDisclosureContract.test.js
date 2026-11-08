@@ -244,12 +244,15 @@ describe("identity disclosure — Your Move uploader label (A-147)", () => {
   });
 
   it("both property flows render the server-resolved label, never a local guess", () => {
+    const rateSection = stripComments(read("src/components/property/PropertyRateSection.js"));
+    expect(rateSection, "PropertyRateSection shows the uploader label").toContain("Listed by {rosterUploader}");
+
     for (const flow of [
       "src/components/property/CommercialFlow.js",
       "src/components/property/ResidentialFlow.js",
     ]) {
       const source = stripComments(read(flow));
-      expect(source, `${flow} shows the uploader label`).toContain("Listed by {rosterUploader}");
+      expect(source, `${flow} passes rosterUploader to PropertyRateSection`).toContain("rosterUploader={rosterUploader}");
       expect(source, `${flow} gates on the server value`).toContain('typeof data?.uploader === "string"');
     }
     const roster = stripComments(read("src/app/property/[id]/brokers/BrokersClient.js"));

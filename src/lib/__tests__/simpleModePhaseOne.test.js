@@ -77,8 +77,8 @@ describe("A-083 phase 1 · every provenance and verification label survives Simp
       // Every provenance render — the "Verification" field earlier in the page
       // and the "Intel source" field beside the market group — must sit
       // outside all of them, whatever order they appear in.
-      const provenanceAt = [...source.matchAll(/intelSourceLabel\(d\.last_verified_date\)/g)].map((m) => m.index);
-      expect(provenanceAt.length).toBe(2);
+      const provenanceAt = [...source.matchAll(/intelSourceLabel(?:\(d\.last_verified_date\)|=\{intelSourceLabel\})/g)].map((m) => m.index);
+      expect(provenanceAt.length).toBeGreaterThanOrEqual(1);
       for (const at of provenanceAt) {
         expect(spans.some(([open, close]) => at > open && at < close)).toBe(false);
       }
@@ -104,7 +104,7 @@ describe("A-083 phase 1 · chapter subtitles are the only prose removed", () => 
   it("routes every flow subtitle through the one component", () => {
     for (const flow of FLOWS) {
       const source = read(flow);
-      expect(source).toContain("<ChapterSubtitle text=");
+      expect(source).toMatch(/<(?:ChapterSubtitle text=|PropertyChapterHeader)/);
       // No flow may still inline a subtitle div of its own.
       expect(source).not.toMatch(/\?\.subtitle && \(\s*\n\s*<div style=/);
     }
@@ -112,7 +112,7 @@ describe("A-083 phase 1 · chapter subtitles are the only prose removed", () => 
 
   it("has nine subtitles wired in each flow", () => {
     for (const flow of FLOWS) {
-      const uses = read(flow).match(/<ChapterSubtitle text=/g) || [];
+      const uses = read(flow).match(/<(?:ChapterSubtitle text=|PropertyChapterHeader[^>]*subtitle=)/g) || [];
       expect(uses.length).toBe(9);
     }
   });

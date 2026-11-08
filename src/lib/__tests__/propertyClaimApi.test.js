@@ -88,6 +88,15 @@ function mockDb({ property = PROP, existingClaim = null, insertError = null, liv
         }),
       };
     }
+    if (table === 'property_claim_documents') {
+      return {
+        insert: vi.fn().mockImplementation((rows) => {
+          const list = Array.isArray(rows) ? rows : [rows];
+          inserted.push(...list.map((r) => ({ ...r, _table: 'property_claim_documents' })));
+          return Promise.resolve({ error: null });
+        }),
+      };
+    }
     if (table === 'property_claim_events') {
       return {
         insert: vi.fn().mockImplementation((row) => {
@@ -176,6 +185,42 @@ describe('/api/property/claim — POST', () => {
     expect(event).toBeTruthy();
     expect(event.payload.relationship).toBe('owner');
     expect(event.payload).toHaveProperty('property_lister_relationship');
+  });
+
+  it('stores submitted document attachments into property_claim_documents and records them in audit event', async () => {
+    const inserted = mockDb();
+    const payload = {
+      ...VALID,
+      documents: [
+        {
+          documentType: 'title_deed',
+          storagePath: 'user-123/prop-101/title.pdf',
+          originalFilename: 'condo_cct_title.pdf',
+          mimeType: 'application/pdf',
+          fileSizeBytes: 2048576,
+        },
+        {
+          documentType: 'gov_id',
+          storagePath: 'user-123/prop-101/passport.jpg',
+          originalFilename: 'passport_scan.jpg',
+          mimeType: 'image/jpeg',
+          fileSizeBytes: 1048576,
+        },
+      ],
+    };
+
+    const res = await POST(post(payload));
+    expect(res.status).toBe(200);
+
+    const docRows = inserted.filter((r) => r._table === 'property_claim_documents');
+    expect(docRows).toHaveLength(2);
+    expect(docRows[0].document_type).toBe('title_deed');
+    expect(docRows[0].private_storage_path).toBe('user-123/prop-101/title.pdf');
+    expect(docRows[1].document_type).toBe('gov_id');
+
+    const event = inserted.find((r) => r.event_type === 'CLAIM_SUBMITTED');
+    expect(event.payload.documents_count).toBe(2);
+    expect(event.payload.document_types).toEqual(['title_deed', 'gov_id']);
   });
 
   it('404s when the property does not exist', async () => {

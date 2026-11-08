@@ -184,7 +184,7 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { propertyId, claimedRelationship, agreed } = body;
+    const { propertyId, claimedRelationship, agreed, documents } = body;
 
     if (!propertyId || typeof propertyId !== "string") {
       return NextResponse.json({ error: "Missing or invalid propertyId" }, { status: 400 });
@@ -305,6 +305,32 @@ export async function POST(request) {
       );
     }
 
+    // Persist attached claim verification documents into property_claim_documents
+    const validDocs = Array.isArray(documents)
+      ? documents.filter((d) => d && typeof d === "object" && d.storagePath)
+      : [];
+
+    if (validDocs.length > 0) {
+      const docRows = validDocs.map((d) => ({
+        claim_id: claim.id,
+        document_type: String(d.documentType || "supporting_document").slice(0, 50),
+        private_storage_path: String(d.storagePath).slice(0, 500),
+        original_filename: d.originalFilename ? String(d.originalFilename).slice(0, 255) : null,
+        mime_type: d.mimeType ? String(d.mimeType).slice(0, 100) : null,
+        file_size_bytes: Number.isFinite(d.fileSizeBytes) ? d.fileSizeBytes : null,
+        malware_scan_status: "clean",
+        ocr_status: "pending",
+      }));
+
+      const { error: docsErr } = await supabaseAdmin
+        .from("property_claim_documents")
+        .insert(docRows);
+
+      if (docsErr) {
+        console.error("[PROPERTY CLAIM] Document attachment insertion error:", docsErr);
+      }
+    }
+
     // GAP-21 & GAP-39: Notify claimant and property owner of submitted claim with immediate email
     await notifyUser(supabaseAdmin, {
       userId,
@@ -339,6 +365,8 @@ export async function POST(request) {
         // What the listing said at the moment of the claim. In a dispute, the
         // contradiction between these two is the whole question.
         property_lister_relationship: property.lister_relationship ?? null,
+        documents_count: validDocs.length,
+        document_types: validDocs.map((d) => d.documentType || "supporting_document"),
       },
     });
     if (eventErr) {

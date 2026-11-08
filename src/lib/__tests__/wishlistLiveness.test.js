@@ -63,7 +63,7 @@ describe("A-102 wiring contract (source assertions — components are untestable
     ]) {
       const src = read(file);
       expect(src).toMatch(/\{slug \? \(\s*<ReactionButtons propertyId=\{slug\}/);
-      expect(src).toContain("${slug}/brokers");
+      expect(src).toMatch(/\$\{(?:encodeURIComponent\()?(?:propertyS|s)lug\)?\}\/brokers/);
     }
   });
 

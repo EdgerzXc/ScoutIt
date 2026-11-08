@@ -174,7 +174,8 @@ class Q {
     if (error) return { data: null, error };
     return { data: data[0] || null, error: null };
   }
-  then(resolve) { resolve(this.run()); }
+  then(resolve, reject) { return Promise.resolve(this.run()).then(resolve, reject); }
+  catch(reject) { return Promise.resolve(this.run()).catch(reject); }
 }
 
 function fakeAdmin() {

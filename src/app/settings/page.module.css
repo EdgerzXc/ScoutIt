@@ -564,12 +564,14 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   cursor: pointer;
-  transition: all 160ms ease;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
-.branchFrameToggle:hover {
-  background: rgba(232, 174, 60, 0.18);
-  border-color: var(--accent-bright);
+@media (hover: hover) and (pointer: fine) {
+  .branchFrameToggle:hover {
+    background: rgba(232, 174, 60, 0.18);
+    border-color: var(--accent-bright);
+  }
 }
 
 .branchGrid {
@@ -717,14 +719,16 @@
   letter-spacing: 0.05em;
   cursor: pointer;
   text-align: center;
-  transition: all 160ms ease;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
   box-sizing: border-box;
 }
 
-.roleActionButton:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(232, 174, 60, 0.4);
-  color: var(--accent-bright);
+@media (hover: hover) and (pointer: fine) {
+  .roleActionButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(232, 174, 60, 0.4);
+    color: var(--accent-bright);
+  }
 }
 
 .roleActionButton:active {
@@ -748,14 +752,16 @@
   letter-spacing: 0.06em;
   cursor: pointer;
   text-align: center;
-  transition: all 160ms ease;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   box-sizing: border-box;
 }
 
-.roleActivateButton:hover {
-  background: rgba(232, 174, 60, 0.22);
-  border-color: var(--accent-bright);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .roleActivateButton:hover {
+    background: rgba(232, 174, 60, 0.22);
+    border-color: var(--accent-bright);
+    box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.2);
+  }
 }
 
 .roleActivateButton:active {

@@ -5,7 +5,19 @@ import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { LISTER_RELATIONSHIPS, OWNER_SOVEREIGNTY_DISCLAIMER } from "@/lib/listerRelationship";
 import InfoTip from "@/components/ui/InfoTip";
-import { Scale, Cloud, AlertCircle, ShieldAlert, CheckCircle2 } from "lucide-react";
+import {
+  Scale,
+  Cloud,
+  AlertCircle,
+  ShieldAlert,
+  CheckCircle2,
+  FileText,
+  UploadCloud,
+  X,
+  Lock,
+  ShieldCheck,
+  Check,
+} from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────
 // CLAIM THIS PROPERTY — §37 · WORK ORDER W8
@@ -59,6 +71,60 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
   const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
 
+  // Document enclosure states (Facial consistency match)
+  const [authorityDoc, setAuthorityDoc] = useState(null);
+  const [idDoc, setIdDoc] = useState(null);
+  const [uploadingAuthority, setUploadingAuthority] = useState(false);
+  const [uploadingId, setUploadingId] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+
+  const handleFileUpload = async (file, isAuthority) => {
+    if (!file) return;
+    if (isAuthority) setUploadingAuthority(true);
+    else setUploadingId(true);
+    setUploadError(null);
+    try {
+      const { data: { session } } = await getSession();
+      if (!session?.access_token) {
+        setUploadError("Your session expired. Sign in again to upload documents.");
+        return;
+      }
+      const documentType = isAuthority
+        ? (relationship === "authorized_broker" ? "authority_to_sell" : (relationship === "property_manager" ? "management_agreement" : "title_deed"))
+        : (relationship === "authorized_broker" ? "prc_license" : "gov_id");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("documentType", documentType);
+      formData.append("propertyId", propertyId);
+
+      const res = await fetch("/api/property/claim/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: formData,
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        setUploadError(json.error || "Could not upload document.");
+        return;
+      }
+
+      if (isAuthority) {
+        setAuthorityDoc(json);
+      } else {
+        setIdDoc(json);
+      }
+    } catch {
+      setUploadError("Upload failed. Please ensure file is a valid PDF or image under 15MB.");
+    } finally {
+      if (isAuthority) setUploadingAuthority(false);
+      else setUploadingId(false);
+    }
+  };
+
   const load = useCallback(async () => {
     if (!propertyId) {
       setLoading(false);
@@ -102,6 +168,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
         setError("Your session expired. Sign in again to submit this claim.");
         return;
       }
+      const documents = [authorityDoc, idDoc].filter(Boolean);
       const res = await fetch("/api/property/claim", {
         method: "POST",
         headers: {
@@ -112,6 +179,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
           propertyId,
           claimedRelationship: relationship,
           agreed: true,
+          documents,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -307,6 +375,128 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                     </label>
                   ))}
                 </fieldset>
+
+                {/* Document Verification Enclosure */}
+                <div className="cp-docs-enclosure">
+                  <div className="cp-docs-header">
+                    <span className="cp-docs-title">
+                      <Lock size={13} className="text-gold-accent" />
+                      ENCRYPTED TITLE &amp; AUTHORITY ENCLOSURE
+                    </span>
+                    <span className="cp-docs-badge">FACIAL MATCH VERIFICATION</span>
+                  </div>
+                  <p className="cp-docs-intro">
+                    Documents remain strictly confidential and encrypted under RA 10173 (Data Privacy Act).
+                    They are accessed solely by Trust &amp; Safety to verify your legal authority and are never displayed publicly.
+                    <span className="cp-docs-watermark-tip"> You may watermark your files: &ldquo;FOR SCOUTIT VERIFICATION ONLY&rdquo;.</span>
+                  </p>
+
+                  <div className="cp-docs-grid">
+                    {/* Slot A: Proof of Authority */}
+                    <div className="cp-doc-slot">
+                      <span className="cp-doc-slot__label">
+                        {relationship === "authorized_broker"
+                          ? "1. Authority to Sell / Lease (ATS/ATL)"
+                          : relationship === "property_manager"
+                          ? "1. Property Management Contract / LOA"
+                          : "1. Land Title (TCT/CCT), Tax Dec, or CTS"}
+                      </span>
+                      {authorityDoc ? (
+                        <div className="cp-doc-attached">
+                          <FileText size={16} className="text-gold-accent shrink-0" />
+                          <div className="cp-doc-attached__info">
+                            <span className="cp-doc-attached__name">{authorityDoc.originalFilename}</span>
+                            <span className="cp-doc-attached__meta">
+                              {authorityDoc.fileSizeBytes ? `${(authorityDoc.fileSizeBytes / 1024).toFixed(0)} KB · ` : ""}
+                              READY
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="cp-doc-remove"
+                            onClick={() => setAuthorityDoc(null)}
+                            title="Remove file"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className={`cp-dropzone${uploadingAuthority ? " cp-dropzone--uploading" : ""}`}>
+                          <input
+                            type="file"
+                            accept="application/pdf,image/jpeg,image/png,image/webp"
+                            className="cp-file-input"
+                            disabled={busy || uploadingAuthority}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(file, true);
+                              e.target.value = "";
+                            }}
+                          />
+                          <UploadCloud size={18} className="cp-dropzone__icon" />
+                          <span className="cp-dropzone__text">
+                            {uploadingAuthority ? "Encrypting & uploading…" : "Attach document or snap photo"}
+                          </span>
+                          <span className="cp-dropzone__sub">PDF, JPG, PNG up to 15MB</span>
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Slot B: Claimant Identity */}
+                    <div className="cp-doc-slot">
+                      <span className="cp-doc-slot__label">
+                        {relationship === "authorized_broker"
+                          ? "2. PRC Real Estate Broker License ID"
+                          : "2. Valid Government-Issued Photo ID"}
+                      </span>
+                      {idDoc ? (
+                        <div className="cp-doc-attached">
+                          <Check size={16} className="text-gold-accent shrink-0" />
+                          <div className="cp-doc-attached__info">
+                            <span className="cp-doc-attached__name">{idDoc.originalFilename}</span>
+                            <span className="cp-doc-attached__meta">
+                              {idDoc.fileSizeBytes ? `${(idDoc.fileSizeBytes / 1024).toFixed(0)} KB · ` : ""}
+                              MATCH READY
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="cp-doc-remove"
+                            onClick={() => setIdDoc(null)}
+                            title="Remove file"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className={`cp-dropzone${uploadingId ? " cp-dropzone--uploading" : ""}`}>
+                          <input
+                            type="file"
+                            accept="application/pdf,image/jpeg,image/png,image/webp"
+                            className="cp-file-input"
+                            disabled={busy || uploadingId}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(file, false);
+                              e.target.value = "";
+                            }}
+                          />
+                          <UploadCloud size={18} className="cp-dropzone__icon" />
+                          <span className="cp-dropzone__text">
+                            {uploadingId ? "Encrypting & uploading…" : "Attach ID or snap photo"}
+                          </span>
+                          <span className="cp-dropzone__sub">Passport, UMID, Driver&apos;s, PhilID</span>
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {uploadError && (
+                    <div className="cp-docs-error" role="alert">
+                      {uploadError}
+                    </div>
+                  )}
+                </div>
 
                 <div className="cp-disclaimer">{OWNER_SOVEREIGNTY_DISCLAIMER}</div>
 
@@ -624,9 +814,182 @@ function ClaimStyles() {
       .cp-btn--gold { background: var(--accent-bright); border: none; color: var(--on-accent); font-weight: bold; }
       .cp-btn--ghost { background: transparent; border: 0.5px solid var(--border); color: var(--text-secondary); }
 
+      /* ── DOCUMENT ENCLOSURE & DROPZONE ── */
+      .cp-docs-enclosure {
+        margin: 16px 0;
+        padding: 14px 15px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+      }
+      .cp-docs-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .cp-docs-title {
+        font-family: ${MONO};
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .cp-docs-badge {
+        font-family: ${MONO};
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        padding: 2px 6px;
+        border-radius: 2px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        text-transform: uppercase;
+      }
+      .cp-docs-intro {
+        font-family: var(--font-display);
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        margin: 0 0 14px;
+      }
+      .cp-docs-watermark-tip {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+      .cp-docs-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .cp-doc-slot {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .cp-doc-slot__label {
+        font-family: ${MONO};
+        font-size: 11px;
+        color: var(--text-secondary);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .cp-dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 12px;
+        min-height: 84px;
+        background: var(--surface);
+        border: 1px dashed var(--border-mid, #444);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: border-color 160ms ease-out, background-color 160ms ease-out;
+        position: relative;
+      }
+      .cp-dropzone:hover {
+        border-color: var(--accent-muted);
+        background: rgba(var(--accent-rgb), 0.03);
+      }
+      .cp-dropzone--uploading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      .cp-file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      .cp-dropzone__icon {
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+      .cp-dropzone__text {
+        font-family: var(--font-display);
+        font-size: 12.5px;
+        color: var(--text-primary);
+        text-align: center;
+      }
+      .cp-dropzone__sub {
+        font-family: ${MONO};
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-top: 3px;
+        letter-spacing: 0.04em;
+      }
+      .cp-doc-attached {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        min-height: 48px;
+        background: rgba(var(--accent-rgb), 0.06);
+        border: 1px solid var(--accent-muted);
+        border-radius: 4px;
+      }
+      .cp-doc-attached__info {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .cp-doc-attached__name {
+        font-family: var(--font-display);
+        font-size: 12.5px;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .cp-doc-attached__meta {
+        font-family: ${MONO};
+        font-size: 10px;
+        color: var(--accent);
+        letter-spacing: 0.06em;
+      }
+      .cp-doc-remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 3px;
+        transition: color 140ms ease-out, background 140ms ease-out;
+      }
+      .cp-doc-remove:hover {
+        color: var(--red, #f87171);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .cp-docs-error {
+        font-family: ${MONO};
+        font-size: 11px;
+        color: var(--red, #f87171);
+        letter-spacing: 0.04em;
+        margin-top: 8px;
+      }
+
       @media (min-width: 700px) {
         .cp-card { padding: 24px 26px; }
         .cp-title { font-size: 20px; }
+        .cp-docs-grid { grid-template-columns: 1fr 1fr; }
         .cp-actions { flex-direction: row-reverse; justify-content: flex-end; }
         .cp-btn { width: auto; min-width: 180px; }
       }

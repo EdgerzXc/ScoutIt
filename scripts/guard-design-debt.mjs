@@ -194,6 +194,7 @@ export const BASELINE_EMOJI_FILES = Object.freeze([
   "src/components/ui/TrustBadge.js",
   "src/components/waitlist/WaitlistModal.js",
   "src/context/DashboardContext.js",
+  "src/context/NotificationsContext.js",
   "src/data/mock/investigations.js",
   "src/data/mock/mockQuests.js",
   "src/lib/BadgeEngine.js",
