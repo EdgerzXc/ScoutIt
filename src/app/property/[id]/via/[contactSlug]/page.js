@@ -17,6 +17,7 @@ import ViaTelemetryTracker from "@/components/property/ViaTelemetryTracker";
 import { getCmsBundle } from "@/lib/cmsCache";
 import { stripPremiumFields } from "@/lib/premiumFields";
 import { getHistoricalPropertyRedirect } from "@/lib/propertyRedirects";
+import { resolveServerMonetizationPhase } from "@/lib/serverMonetizationGate";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { VIA_STATUS } from "@/lib/viaRouting";
 
@@ -190,6 +191,7 @@ export default async function ViaPropertyRoute({ params }) {
   }
 
   const InjectedLayout = CATEGORY_TO_LAYOUT_MAP[layoutKey] || CATEGORY_TO_LAYOUT_MAP["default"];
+  const monetizationPhase = await resolveServerMonetizationPhase();
 
   let jsonLd = null;
   if (match && !match.is_sample) {
@@ -222,6 +224,7 @@ export default async function ViaPropertyRoute({ params }) {
           slug={propertyParam}
           initialData={match ? stripPremiumFields(match, "starry") : null}
           articles={articles}
+          monetizationPhase={monetizationPhase}
         />
 
         <div className="claim-panel-slot">

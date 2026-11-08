@@ -621,8 +621,16 @@ featuredIntel:       f.Featured_Intel           || [], // linked record IDs
 function photoFields(data) {
   const fromDetails = extractPhotoUrls(data?.details?.photos);
   const list = fromDetails.length ? fromDetails : extractPhotoUrls(data?.media_link);
-  if (!list.length) return {};
-  return { Photos: list.join(","), Image: list[0] };
+  const out = {};
+  if (list.length) {
+    out.Photos = list.join(",");
+    out.Image = list[0];
+  }
+  const enhancedList = extractPhotoUrls(data?.details?.enhanced_photos || data?.details?.enhancedPhotos);
+  if (enhancedList.length) {
+    out.Enhanced_Photos = enhancedList.join(",");
+  }
+  return out;
 }
 
 // ═══════════════════════════════════════════════════

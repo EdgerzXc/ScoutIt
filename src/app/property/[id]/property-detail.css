@@ -39,6 +39,7 @@
 .photo-slide.active { opacity: 1; }
 .photo-slide.natural  { filter: saturate(1.0) brightness(1.05); }
 .photo-slide.enhanced { filter: saturate(1.2) brightness(1.1) contrast(1.05) sepia(0.06); }
+.photo-slide.enhanced.genuine-enhanced { filter: none; }
 .photo-decor { position: absolute; inset: 0; pointer-events: none; }
 .photo-decor svg { width: 100%; height: 100%; }
 .light-shaft { position: absolute; top: -10%; left: 40%;
@@ -829,6 +830,10 @@
 
 .lightbox-image.enhanced {
   filter: saturate(1.2) brightness(1.1) contrast(1.05) sepia(0.06);
+}
+
+.lightbox-image.enhanced.genuine-enhanced {
+  filter: none;
 }
 
 .lightbox-close {

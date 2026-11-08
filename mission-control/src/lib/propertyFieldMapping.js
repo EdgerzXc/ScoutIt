@@ -86,6 +86,15 @@ export function reverseMapCategoryFields(details, category = null) {
       ? details.amenities.map(cleanStr).filter(Boolean)
       : String(details.amenities).split(",").map((s) => s.trim()).filter(Boolean);
   }
+  if (details.enhanced_photos !== undefined || details.enhancedPhotos !== undefined) {
+    const ep = details.enhanced_photos || details.enhancedPhotos;
+    const urls = Array.isArray(ep)
+      ? ep.map(cleanStr).filter(Boolean)
+      : typeof ep === "string" && ep.trim()
+        ? [ep.trim()]
+        : [];
+    if (urls.length) map.Enhanced_Photos = urls.join(",");
+  }
 
   // Commercial
   if (details.rentPerSqm !== undefined) map.CM_Rent_Per_Sqm = cleanStr(details.rentPerSqm);

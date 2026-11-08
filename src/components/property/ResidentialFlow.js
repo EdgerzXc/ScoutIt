@@ -35,6 +35,7 @@ import {
   resolveMonetizationPhase,
   logPaywallConversionIntent,
 } from "@/lib/monetizationGate";
+import { usePremiumFields } from "@/lib/usePremiumFields";
 import Image from "next/image";
 import FreshnessBadge from "@/components/ui/FreshnessBadge";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
@@ -221,8 +222,9 @@ function initialChapterFromUrl(fallback) {
   return urlChapter && VALID_CHAPTERS.has(urlChapter) ? urlChapter : fallback;
 }
 
-export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null, articles = [] }) {
+export default function ResidentialFlow({ slug, draftData, isDraftMode, externalActiveTab, initialData = null, articles = [], monetizationPhase }) {
   const router = useRouter();
+  const { fields: premiumFields } = usePremiumFields(slug);
   // ── Interactive UI states ──────────────────────
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photoMode,         setPhotoMode]         = useState("natural");
@@ -241,8 +243,15 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     return () => clearTimeout(t);
   }, []);
   // Enhanced photos unlock at Solar+. SSR-safe — locked until the client reads the viewer's tier.
+  // In Pioneer Access (pilot_zero_paywall / pre_launch_free_mode), all visitors unlock Universe privileges.
+  const activeMonetizationPhase = monetizationPhase || resolveMonetizationPhase();
+  const isZeroPaywall = activeMonetizationPhase === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL;
   const [canEnhance,        setCanEnhance]        = useState(false);
-  useEffect(() => { setCanEnhance(canSee("enhancedPhotos", getCurrentTier())); }, []);
+  useEffect(() => {
+    const currentTier = getCurrentTier();
+    const effectiveTier = isZeroPaywall ? "universe" : currentTier;
+    setCanEnhance(canSee("enhancedPhotos", effectiveTier));
+  }, [isZeroPaywall]);
   // Market/investment "Hidden Intel" panel unlocks at Cluster+ (same SSR-safe pattern).
   // Operator role check (SSR-safe).
   const [isOperator,        setIsOperator]        = useState(false);
@@ -525,6 +534,11 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
     const rawP = (Array.isArray(d?.photos) ? d.photos : [d?.photo || d?.image]).filter(p => typeof p === "string" && p.trim().length > 0);
     return rawP.length > 0 ? rawP : ["/assets/intel-geometric-capital.svg"];
   }, [d]);
+
+  const enhancedPhotos = useMemo(() => {
+    const list = premiumFields?.enhanced_photos || d?.enhanced_photos || d?.enhancedPhotos || [];
+    return (Array.isArray(list) ? list : [list]).filter(p => typeof p === "string" && p.trim().length > 0);
+  }, [premiumFields?.enhanced_photos, d?.enhanced_photos, d?.enhancedPhotos]);
 
   const brokerInitials = useMemo(() => {
     return (d?.broker_name || " ").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
@@ -1092,21 +1106,28 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           }}
         >
 
-          {photos.map((url, i) => (
-            (i === 0 || galleryWarmed || Math.abs(i - currentImageIndex) <= 1) &&
-            <Image
-              key={i}
-              src={url}
-              alt={`${d.title} - ${d.spaceCategory || d.property_type || 'Residential Asset'} in ${d.location || d.city || 'Philippines'} | Photo ${i + 1} of ${photos.length}`}
-              fill
-              priority={i === 0}
-              fetchPriority={i === 0 ? "high" : "low"}
-              loading={i === 0 ? "eager" : "lazy"}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"
-              quality={75}
-              className={`photo-slide ${photoMode} ${currentImageIndex === i ? "active" : ""}`}
-            />
-          ))}
+          {photos.map((url, i) => {
+            const enhancedUrl = enhancedPhotos?.[i];
+            const displayUrl = (photoMode === "enhanced" && enhancedUrl) ? enhancedUrl : url;
+            const hasGenuineEnhanced = photoMode === "enhanced" && Boolean(enhancedUrl);
+
+            return (
+              (i === 0 || galleryWarmed || Math.abs(i - currentImageIndex) <= 1) && (
+                <Image
+                  key={i}
+                  src={displayUrl}
+                  alt={`${d.title} - ${d.spaceCategory || d.property_type || 'Residential Asset'} in ${d.location || d.city || 'Philippines'} | Photo ${i + 1} of ${photos.length}`}
+                  fill
+                  priority={i === 0}
+                  fetchPriority={i === 0 ? "high" : "low"}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"
+                  quality={75}
+                  className={`photo-slide ${photoMode} ${hasGenuineEnhanced ? "genuine-enhanced" : ""} ${currentImageIndex === i ? "active" : ""}`}
+                />
+              )
+            );
+          })}
 
           <div className="light-shaft" />
 
@@ -1183,13 +1204,29 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   <button
                     className={`toggle-btn ${photoMode === "enhanced" ? "active" : "off"}`}
                     onClick={() => setPhotoMode("enhanced")}
-                  >Enhanced</button>
+                  >
+                    Enhanced
+                    {enhancedPhotos.length > 0 && (
+                      <span style={{ fontSize: "9px", letterSpacing: "0.08em", opacity: 0.8, marginLeft: "4px" }}>
+                        [AI]
+                      </span>
+                    )}
+                  </button>
                 ) : (
                   <a
                     href="/pricing/seeker"
                     className="toggle-btn off"
                     title="Enhanced photos unlock at Solar tier. Upgrade to view."
                     style={{ display: "inline-flex", alignItems: "center", gap: "5px", textDecoration: "none" }}
+                    onClick={() => {
+                      logPaywallConversionIntent({
+                        feature: "enhanced_photos",
+                        phase: activeMonetizationPhase,
+                        role: "seeker",
+                        tier: "starry",
+                        source: `/property/${slug || ""}`,
+                      });
+                    }}
                   >
                     <Lock size={9} strokeWidth={2} /> Enhanced
                   </a>
@@ -2574,9 +2611,9 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src={photos[currentImageIndex]} 
+              src={(photoMode === "enhanced" && enhancedPhotos?.[currentImageIndex]) ? enhancedPhotos[currentImageIndex] : photos[currentImageIndex]} 
               alt={`${d.title} fullscreen view`} 
-              className={`lightbox-image ${photoMode}`} 
+              className={`lightbox-image ${photoMode} ${(photoMode === "enhanced" && enhancedPhotos?.[currentImageIndex]) ? "genuine-enhanced" : ""}`} 
               loading="lazy"
               decoding="async"
             />
