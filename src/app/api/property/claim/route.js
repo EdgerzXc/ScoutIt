@@ -30,6 +30,10 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser } from "@/lib/notifications";
 import { updateProperty } from "@/lib/airtable";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
+import {
+  evaluateClaimAutoVerification,
+  AUTO_VERIFIER_SYSTEM_ACTOR_ID,
+} from "@/lib/claimAutoVerificationPolicy.mjs";
 
 /** Statuses that mean a claim is still in play. */
 const OPEN_STATUSES = [
@@ -184,7 +188,7 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { propertyId, claimedRelationship, agreed, documents } = body;
+    const { propertyId, claimedRelationship, agreed, documents, ocrData } = body;
 
     if (!propertyId || typeof propertyId !== "string") {
       return NextResponse.json({ error: "Missing or invalid propertyId" }, { status: 400 });
@@ -373,10 +377,132 @@ export async function POST(request) {
       console.error("[PROPERTY CLAIM] Audit event failed for claim", claim.id, eventErr);
     }
 
+    // ── Safe Auto-Verification Engine Evaluation ─────────────────────────────
+    // Evaluates the 4 strict safety guardrails:
+    // 1. Direct Owner only (no SPAs or representatives)
+    // 2. Primary Land Title (TCT/CCT) present and confirmed clean
+    // 3. Zero-Contest (no active competing claims, verified owners, or open deals)
+    // 4. Strict 98%+ Name Matching between claimant and Land Title
+    let autoVerification = { canAutoVerify: false, reason: "OCR title scan not provided" };
+
+    try {
+      let claimantProfile = null;
+      let competingClaims = [];
+      let activeDeals = [];
+
+      try {
+        const profileQuery = supabaseAdmin
+          .from("user_profiles")
+          .select("id, role, active_roles, subscription_tier, full_name, display_name")
+          .eq("id", userId);
+        const profileRes = typeof profileQuery?.maybeSingle === "function" ? await profileQuery.maybeSingle() : await profileQuery;
+        claimantProfile = profileRes?.data || null;
+      } catch (_pErr) {}
+
+      try {
+        const claimsRes = await supabaseAdmin
+          .from("property_claims")
+          .select("id, claimant_user_id, status")
+          .eq("property_id", property.id);
+        competingClaims = (claimsRes?.data || []).filter(
+          (c) =>
+            String(c?.claimant_user_id) !== String(userId) &&
+            ["submitted", "technical_review", "human_review", "disputed"].includes(c?.status)
+        );
+      } catch (_cErr) {}
+
+      try {
+        const dealsRes = await supabaseAdmin
+          .from("deals")
+          .select("id, status")
+          .eq("property_id", property.id);
+        activeDeals = (dealsRes?.data || []).filter((d) =>
+          ["open", "handshake_pending", "under_review", "contract_prep"].includes(d?.status)
+        );
+      } catch (_dErr) {}
+
+      autoVerification = evaluateClaimAutoVerification({
+        property,
+        claimantProfile,
+        claimedRelationship: relationship,
+        documents: validDocs,
+        existingClaims: competingClaims,
+        activeDeals,
+        ocrData: ocrData || null,
+        agreed: agreed === true,
+      });
+    } catch (evalErr) {
+      console.warn("[PROPERTY CLAIM] Auto-verification evaluation warning:", evalErr?.message);
+    }
+
+    if (autoVerification.canAutoVerify) {
+      const approvalResult = await approvePropertyClaim(supabaseAdmin, {
+        claimId: claim.id,
+        reviewerId: AUTO_VERIFIER_SYSTEM_ACTOR_ID,
+      });
+
+      if (approvalResult?.ok) {
+        // Record auto-verification audit event
+        try {
+          await supabaseAdmin.from("property_claim_events").insert({
+            claim_id: claim.id,
+            actor_id: userId,
+            event_type: "CLAIM_AUTO_VERIFIED_CLEAN_TITLE",
+            payload: {
+              systemActor: AUTO_VERIFIER_SYSTEM_ACTOR_ID,
+              provisionalWindowHours: autoVerification.provisionalWindowHours,
+              confidence: autoVerification.confidence,
+              titleNumber: autoVerification.titleNumber,
+              registeredOwner: autoVerification.registeredOwner,
+              provisionalUntil: new Date(Date.now() + autoVerification.provisionalWindowHours * 3600 * 1000).toISOString(),
+            },
+          });
+        } catch (_auditErr) {}
+
+        // Notify prior lister if any of the 72h provisional protection grace window
+        if (property.owner_id && String(property.owner_id) !== String(userId)) {
+          await notifyUser(supabaseAdmin, {
+            userId: property.owner_id,
+            title: "Land Title ownership verified (72h review window)",
+            desc: `A verified Land Title claim has been registered for "${property.title}". You have a 72-hour grace window to review or dispute this transfer.`,
+            propertyId: property.id,
+            notificationType: "claim_provisional_notice",
+            forceEmail: true,
+          });
+        }
+
+        return NextResponse.json({
+          success: true,
+          claimId: claim.id,
+          status: "approved",
+          autoVerified: true,
+          provisional: true,
+          provisionalWindowHours: autoVerification.provisionalWindowHours,
+          message: "Land Title ownership verified. Owner Mode is now active on your account with 72h provisional protection.",
+        });
+      }
+    }
+
+    // When auto-verification is not applicable or requires human staff oversight:
+    try {
+      await supabaseAdmin.from("property_claim_events").insert({
+        claim_id: claim.id,
+        actor_id: userId,
+        event_type: "CLAIM_ROUTED_TO_STAFF_REVIEW",
+        payload: {
+          reasonCode: autoVerification.reasonCode || "standard_staff_review",
+          reason: autoVerification.reason || "Routed for staff document verification.",
+        },
+      });
+    } catch (_eventErr) {}
+
     return NextResponse.json({
       success: true,
       claimId: claim.id,
       status: claim.status,
+      autoVerified: false,
+      routedToStaff: true,
+      staffReviewReason: autoVerification.reason || null,
       message: "Property claim submitted for verification.",
     });
   } catch (err) {
