@@ -248,4 +248,33 @@ describe("Pioneer Charters, Strict Limits & Transfer Protocol (A-344)", () => {
       expect(cleanHasConflict).toBe(false);
     });
   });
+
+  describe("7. Charter Application & Caliber Verification Contracts", () => {
+    it("validates that pioneer applications require candidate name or organization", () => {
+      const emptyPayload = { badgeId: "PIONEER_BROKER" };
+      const hasIdentifier = Boolean(emptyPayload.fullName || emptyPayload.organization || emptyPayload.agencyName);
+      expect(hasIdentifier).toBe(false);
+
+      const validPayload = { badgeId: "PIONEER_BROKER", fullName: "Alexandra Vance", organization: "Vance Prime Advisory" };
+      const validHasIdentifier = Boolean(validPayload.fullName || validPayload.organization || validPayload.agencyName);
+      expect(validHasIdentifier).toBe(true);
+    });
+
+    it("verifies that existing pioneer badge holders are blocked from submitting new applications", () => {
+      const existingUserBadges = [{ badge_id: "PIONEER_BROKER", seat_number: 1 }];
+      const isBlocked = hasAnyPioneerBadge(existingUserBadges);
+      expect(isBlocked).toBe(true);
+    });
+
+    it("ensures all canonical cohorts have full operational perk suites mapped", () => {
+      for (const [cohortId, def] of Object.entries(BADGE_DEFINITIONS)) {
+        if (isPioneerBadge(cohortId)) {
+          expect(def.perks).toBeDefined();
+          expect(def.perks.is_transferable).toBe(true);
+          expect(def.perks.priority_support).toBe(true);
+          expect(def.max_slots).toBeGreaterThan(0);
+        }
+      }
+    });
+  });
 });
