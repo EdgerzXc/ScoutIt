@@ -58,3 +58,49 @@ export async function setContactStatus(formData) {
   revalidatePath("/dashboard/contact");
   return { ok: true };
 }
+
+/**
+ * Update internal staff notes on a contact message.
+ *
+ * Operational staff use this to coordinate who is speaking to the sender,
+ * record verification notes, or log phone/offline touchpoints.
+ */
+export async function saveStaffNotes(formData) {
+  const staff = await getCurrentStaff();
+  if (!staff) {
+    return { ok: false, error: "Insufficient tier" };
+  }
+  try {
+    assertTier(staff, TIERS.OPS_MANAGER);
+  } catch {
+    return { ok: false, error: "Insufficient tier" };
+  }
+
+  const id = String(formData.get("id") || "");
+  const staffNotes = String(formData.get("staff_notes") || "").slice(0, 5000);
+
+  if (!id) {
+    return { ok: false, error: "Invalid contact message ID" };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("contact_messages")
+    .update({ staff_notes: staffNotes })
+    .eq("id", id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  await logActionStrict({
+    staff,
+    action: "contact_staff_notes_update",
+    targetTable: "contact_messages",
+    targetId: id,
+    reason: "Updated internal staff triage notes",
+  });
+
+  revalidatePath("/dashboard/contact");
+  return { ok: true };
+}

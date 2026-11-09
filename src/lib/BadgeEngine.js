@@ -101,7 +101,8 @@ export const hasBadge = (userBadges, badgeId) => {
 
 export const isPioneerBadge = (badgeId) => {
   if (!badgeId || typeof badgeId !== "string") return false;
-  return badgeId.startsWith("PIONEER_") || badgeId === "FOUNDING_SEEKER";
+  const upper = badgeId.toUpperCase();
+  return upper.startsWith("PIONEER_") || upper === "FOUNDING_SEEKER" || upper.includes("PIONEER");
 };
 
 export const hasAnyPioneerBadge = (userBadges) => {

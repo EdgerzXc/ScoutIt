@@ -20,7 +20,12 @@ export const metadata = {
 // channel nobody answers is the bug this page exists to fix, not a decoration
 // to keep.
 
-export default function ContactPage() {
+export default async function ContactPage({ searchParams }) {
+  const params = await searchParams;
+  const initialTopic = params?.topic || params?.type || "general";
+
+  const isSupport = initialTopic === "support" || initialTopic === "vip_support";
+
   return (
     <>
       <Header />
@@ -32,32 +37,37 @@ export default function ContactPage() {
             </Link>
           </div>
           <header className="contact-header">
-          <span className="contact-eyebrow">Contact</span>
-          <h1 className="contact-title">Talk to a person.</h1>
-          <p className="contact-lede">
-            Questions about a space, joining as a broker or provider, or anything about how
-            ScoutIt works. One of us reads every message.
-          </p>
-        </header>
+            <span className="contact-eyebrow">
+              {isSupport ? "DIRECT SUPPORT // HELPDESK & TECHNICAL DESK" : "CONTACT // DIRECT PLATFORM ACCESS"}
+            </span>
+            <h1 className="contact-title">
+              {isSupport ? "Direct Support & Helpdesk." : "Talk to a person."}
+            </h1>
+            <p className="contact-lede">
+              {isSupport
+                ? "Platform troubleshooting, account assistance, or Pioneer VIP SLA escalations. Directly monitored by engineering and operational staff."
+                : "Questions about a space, joining as a broker or provider, or anything about how ScoutIt works. One of us reads every message."}
+            </p>
+          </header>
 
-        <ContactClient />
+          <ContactClient initialTopic={initialTopic} />
 
-        <aside className="contact-aside">
-          <h2 className="contact-aside-title">Faster routes</h2>
-          <ul className="contact-aside-list">
-            <li>
-              <strong>Asking about a specific space?</strong> Use the enquiry button on that
-              property page — it reaches whoever actually holds it, not our general queue.
-            </li>
-            <li>
-              <strong>Already have an account?</strong> Your dashboard inbox keeps the
-              conversation attached to the deal it belongs to.
-            </li>
-          </ul>
-        </aside>
-      </div>
-    </main>
-    <Footer />
-  </>
+          <aside className="contact-aside">
+            <h2 className="contact-aside-title">Faster routes</h2>
+            <ul className="contact-aside-list">
+              <li>
+                <strong>Asking about a specific space?</strong> Use the enquiry button on that
+                property page — it reaches whoever actually holds it, not our general queue.
+              </li>
+              <li>
+                <strong>Already have an account?</strong> Your dashboard inbox keeps the
+                conversation attached to the deal it belongs to.
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }

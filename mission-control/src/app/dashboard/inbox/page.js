@@ -7,6 +7,7 @@ import {
   CheckSquare,
   BadgeCheck,
   Scale,
+  Headphones,
   Radar,
   FileWarning,
   ArrowRight,
@@ -39,7 +40,7 @@ export default async function MissionInboxPage() {
   const admin = createAdminClient();
   const isOps = staff.tier >= TIERS.OPS_MANAGER;
 
-  const [approvals, verifications, disputes, flags, quarantine] = await Promise.all([
+  const [approvals, verifications, disputes, support, flags, quarantine] = await Promise.all([
     safe(
       admin
         .from("properties")
@@ -64,6 +65,16 @@ export default async function MissionInboxPage() {
         .order("created_at", { ascending: true })
         .limit(6)
     ),
+    isOps
+      ? safe(
+          admin
+            .from("contact_messages")
+            .select("id, name, email, subject, status, created_at")
+            .in("status", ["new", "in_progress"])
+            .order("created_at", { ascending: true })
+            .limit(6)
+        )
+      : Promise.resolve([]),
     isOps
       ? safe(
           admin
@@ -128,6 +139,22 @@ export default async function MissionInboxPage() {
         primary: d.title || "Untitled dispute",
         secondary: `${labelize(d.kind)}${d.priority ? ` · ${labelize(d.priority)}` : ""}`,
         at: d.created_at,
+      })),
+    },
+    {
+      key: "support",
+      title: "Direct Support & Helpdesk",
+      subtitle: isOps ? "Public inquiries & VIP Pioneer support tickets awaiting triage" : "Ops Manager access required",
+      icon: <Headphones className="w-4 h-4 text-sky-400" />,
+      href: "/dashboard/contact",
+      cta: "Open Support Desk",
+      count: support.length,
+      hidden: !isOps,
+      items: support.map((s) => ({
+        id: s.id,
+        primary: s.subject || s.name || "Inbound message",
+        secondary: `${s.name} · ${s.email} (${s.status === "in_progress" ? "In Progress" : "New"})`,
+        at: s.created_at,
       })),
     },
     {

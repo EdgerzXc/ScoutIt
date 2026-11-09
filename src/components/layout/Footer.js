@@ -86,7 +86,7 @@ const FOOTER_SECTIONS = [
       { label: "Owner Publishing Guide", href: "/tutorials/owner-publish" },
       { label: "Enterprise Solutions", href: "/enterprise" },
       { label: "Workspace Dashboard", href: "/dashboard" },
-      { label: "Direct Support", href: "mailto:hello@scoutit.space", isExternal: true },
+      { label: "Direct Support", href: "/contact?topic=support", badge: "DESK" },
     ],
   },
 ];
@@ -154,8 +154,14 @@ export default function Footer() {
                     {link.label}
                   </a>
                 ) : (
-                  <Link key={link.label} href={link.href}>
-                    {link.label}
+                  <Link key={link.label} href={link.href} className={link.badge ? "footer-support-link" : undefined}>
+                    <span>{link.label}</span>
+                    {link.badge && (
+                      <span className="footer-live-badge" aria-label="Support desk online">
+                        <span className="live-dot" aria-hidden="true" />
+                        {link.badge}
+                      </span>
+                    )}
                   </Link>
                 )
               )}
@@ -174,7 +180,7 @@ export default function Footer() {
             <span className="meta-separator">•</span>
             <Link href="/privacy">Privacy Policy</Link>
             <span className="meta-separator">•</span>
-            <a href="mailto:hello@scoutit.space">Contact</a>
+            <Link href="/contact">Contact</Link>
           </div>
         </div>
       </div>
@@ -344,6 +350,38 @@ export default function Footer() {
         .nav-col a:hover {
           color: var(--accent-bright);
           transform: translateX(2px);
+        }
+
+        .footer-support-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .footer-live-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--accent-bright);
+          background: rgba(var(--accent-rgb), 0.1);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
+          border-radius: 4px;
+          padding: 1px 6px;
+          line-height: 1.4;
+          transition: border-color 0.2s, background 0.2s;
+        }
+
+        .live-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+          display: inline-block;
         }
 
         .footer-bottom {

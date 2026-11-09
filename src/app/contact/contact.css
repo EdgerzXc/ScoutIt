@@ -273,6 +273,141 @@
   }
 }
 
+/* ── Topic Selector & Direct Support Triage ────────────────────────── */
+
+.contact-topics-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.contact-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.contact-topic-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.25rem;
+  background: var(--bg-root, #0e0e0e);
+  border: 1px solid var(--border-solid, #262626);
+  border-radius: 4px;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  color: var(--text-secondary, #c8c8c8);
+  font-family: inherit;
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-topic-btn:hover:not(:disabled) {
+  border-color: var(--accent-muted, #6E531A);
+  color: var(--text-primary, #f0ede8);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.contact-topic-btn--active {
+  border-color: var(--accent, #E8AE3C);
+  background: rgba(232, 174, 60, 0.06);
+  color: var(--accent-bright, #F7C64E);
+  box-shadow: 0 0 16px rgba(232, 174, 60, 0.12);
+}
+
+.contact-topic-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.contact-topic-desc {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted, #888);
+}
+
+.contact-topic-btn--active .contact-topic-desc {
+  color: var(--text-secondary, #c8c8c8);
+}
+
+/* ── VIP Pioneer SLA Banner ────────────────────────────────────────── */
+
+.contact-vip-banner {
+  background: linear-gradient(135deg, rgba(232, 174, 60, 0.08) 0%, rgba(18, 18, 18, 0.95) 100%);
+  border: 1px solid rgba(232, 174, 60, 0.35);
+  border-radius: 6px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 4px 20px rgba(232, 174, 60, 0.08);
+}
+
+.contact-vip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-bright, #F7C64E);
+}
+
+.contact-vip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-bright, #F7C64E);
+  box-shadow: 0 0 8px rgba(247, 198, 78, 0.8);
+}
+
+.contact-vip-body {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary, #c8c8c8);
+  margin: 0;
+}
+
+/* ── Urgency Selector ─────────────────────────────────────────────── */
+
+.contact-urgency-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.contact-urgency-chip {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.8rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-solid, #262626);
+  background: var(--bg-root, #0e0e0e);
+  color: var(--text-secondary, #c8c8c8);
+  cursor: pointer;
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-urgency-chip:hover:not(:disabled) {
+  border-color: var(--accent-muted, #6E531A);
+  color: var(--text-primary, #f0ede8);
+}
+
+.contact-urgency-chip--active {
+  border-color: var(--accent, #E8AE3C);
+  background: rgba(232, 174, 60, 0.08);
+  color: var(--accent-bright, #F7C64E);
+}
+
 /* ── Aside ────────────────────────────────────────────────────────────── */
 
 .contact-aside {

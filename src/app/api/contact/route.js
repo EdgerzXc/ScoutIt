@@ -6,9 +6,11 @@ import { createRateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/clientIp";
 import { sendEmail, renderEmail, isEmailConfigured } from "@/lib/email";
 import { classifyContactSpam } from "@/lib/contactSpamPolicy.mjs";
+import { resolveUserId } from "@/lib/serverAuth";
+import { getPioneerBadge } from "@/lib/BadgeEngine";
 
 // Public contact intake — the logged-out path for someone who has not signed up
-// and has a question.
+// and has a question, or member direct support intake.
 //
 // WHAT THIS REPLACES
 // ------------------
@@ -39,6 +41,8 @@ const schema = z.object({
   // Public writes require a token in the request shape and server-side
   // verification below. There is no configuration-dependent bypass.
   turnstileToken: z.string().min(1, "Captcha token is required"),
+  topic: z.enum(["general", "support", "vip_support", "listing"]).optional(),
+  priority: z.enum(["normal", "urgent"]).optional(),
 });
 
 function escapeHtml(str) {
@@ -103,7 +107,7 @@ export async function POST(request) {
     );
   }
 
-  const { name, email, subject, message, turnstileToken } = parsed.data;
+  const { name, email, subject, message, turnstileToken, topic, priority } = parsed.data;
 
   // Unauthenticated write path. Left open it is a spam cannon aimed at whoever
   // reads the queue, and a queue nobody trusts is a queue nobody reads.
@@ -114,13 +118,63 @@ export async function POST(request) {
   const spamAssessment = classifyContactSpam({ name, email, subject, message });
   const messageStatus = spamAssessment.isSpam ? "spam" : "new";
 
+  // Check if sender is signed in and detect Pioneer Charter honors
+  let senderUserId = null;
+  let isVipPioneer = topic === "vip_support";
+  let pioneerSeatLabel = null;
+
+  try {
+    senderUserId = await resolveUserId(request);
+    if (senderUserId && supabaseAdmin) {
+      const { data: userBadges } = await supabaseAdmin
+        .from("user_badges")
+        .select("badge_id, seat_number")
+        .eq("user_id", senderUserId);
+
+      const pioneer = getPioneerBadge(userBadges);
+      if (pioneer) {
+        isVipPioneer = true;
+        if (pioneer.seat_number) {
+          pioneerSeatLabel = `Charter #${String(pioneer.seat_number).padStart(3, "0")}`;
+        }
+      }
+    }
+  } catch (authErr) {
+    console.warn("[Contact] Sender user resolution warning:", authErr?.message);
+  }
+
+  // Intelligently prefix and structure the subject for staff triage in Mission Control
+  let finalSubject = (subject || "").trim();
+  if (isVipPioneer) {
+    const seatTag = pioneerSeatLabel ? ` · ${pioneerSeatLabel}` : "";
+    finalSubject = `[VIP PIONEER SUPPORT${seatTag}] ${finalSubject || "Priority SLA Request"}`;
+  } else if (topic === "support") {
+    const urgencyTag = priority === "urgent" ? " · URGENT" : "";
+    finalSubject = `[DIRECT SUPPORT${urgencyTag}] ${finalSubject || "Technical Assistance"}`;
+  } else if (topic === "listing") {
+    finalSubject = `[LISTING / CLAIM] ${finalSubject || "Listing Inquiry"}`;
+  }
+
+  finalSubject = finalSubject.slice(0, 200);
+
+  // Intelligently embed triage metadata into message if present
+  let finalMessage = message;
+  const metaLines = [];
+  if (topic && topic !== "general") metaLines.push(`Topic: ${topic}`);
+  if (priority === "urgent") metaLines.push(`Urgency: URGENT / BLOCKING SLA`);
+  if (isVipPioneer) metaLines.push(`VIP Tier: Verified Pioneer Charter (${pioneerSeatLabel || "Active"})`);
+  if (metaLines.length > 0) {
+    finalMessage = `[${metaLines.join(" | ")}]\n\n${message}`;
+  }
+
   try {
     const { error } = await supabaseAdmin.from("contact_messages").insert({
       name,
       email,
-      subject: subject || null,
-      message,
+      subject: finalSubject || null,
+      message: finalMessage,
       status: messageStatus,
+      user_id: senderUserId || null,
       ip_hash: await maskIp(request),
       user_agent: (request.headers.get("user-agent") || "").slice(0, 500) || null,
     });
@@ -141,19 +195,29 @@ export async function POST(request) {
     if (!spamAssessment.isSpam && isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
       const safeName = escapeHtml(name);
       const safeEmail = escapeHtml(email);
-      const safeSubject = escapeHtml(subject || "no subject");
-      const safeMessage = escapeHtml(message).replace(/\n/g, "<br/>");
+      const safeSubject = escapeHtml(finalSubject || "no subject");
+      const safeMessage = escapeHtml(finalMessage).replace(/\n/g, "<br/>");
+      const emailHeading = isVipPioneer
+        ? "🚨 VIP Pioneer Support SLA Ticket"
+        : topic === "support"
+        ? "🛠️ Inbound Direct Support Ticket"
+        : "Someone used the contact form";
+
       const result = await sendEmail({
         to: process.env.CONTACT_NOTIFY_TO,
-        subject: `New contact message — ${safeSubject}`,
+        subject: isVipPioneer
+          ? `[VIP SLA] New message from ${safeName} (${pioneerSeatLabel || "Pioneer"})`
+          : `New contact message — ${safeSubject}`,
         html: renderEmail({
-          heading: "Someone used the contact form",
+          heading: emailHeading,
           // GAP-66: Always HTML-escape sender fields before passing into renderEmail body
-          body: `<p>${safeName} &lt;${safeEmail}&gt; wrote:</p><p>${safeMessage}</p>`,
+          body: `<p><strong>${safeName}</strong> &lt;${safeEmail}&gt; wrote:</p><p>${safeMessage}</p>`,
           ctaLabel: "Open the contact queue",
           // GAP-100: Deep link staff directly to the Mission Control contact queue instead of public form
           ctaPath: "/dashboard/contact",
-          footnote: "Reply from Mission Control → Contact Queue.",
+          footnote: isVipPioneer
+            ? "VIP SLA Ticket: Priority resolution required under Terms of Service Section 09."
+            : "Reply from Mission Control → Contact Queue.",
         }),
       });
       if (!result.sent) {
