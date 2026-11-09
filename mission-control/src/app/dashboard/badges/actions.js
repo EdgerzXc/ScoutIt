@@ -18,6 +18,27 @@ export async function createBadge(formData) {
   const maxSlotsRaw = formData.get("maxSlots")?.toString().trim();
   const color = formData.get("color")?.toString().trim() || null;
 
+  // Extract perks configuration from form
+  const queuePriority = formData.get("perk_queue_priority") === "on";
+  const discountPct = Number(formData.get("perk_discount_pct") || 0);
+  const prioritySupport = formData.get("perk_priority_support") === "on";
+  const monthlyConnects = Number(formData.get("perk_monthly_connects") || 0);
+  const whiteLabelPdf = formData.get("perk_white_label_pdf") === "on";
+  const charterSeal = formData.get("perk_charter_seal") === "on";
+  const alphaNotes = formData.get("perk_alpha_notes") === "on";
+  const isTransferable = formData.get("perk_is_transferable") === "on";
+
+  const perks = {
+    ...(queuePriority ? { queue_priority: true } : {}),
+    ...(discountPct > 0 ? { discount_pct: discountPct } : {}),
+    ...(prioritySupport ? { priority_support: true } : {}),
+    ...(monthlyConnects > 0 ? { monthly_connects: monthlyConnects } : {}),
+    ...(whiteLabelPdf ? { white_label_pdf: true } : {}),
+    ...(charterSeal ? { charter_seal: true } : {}),
+    ...(alphaNotes ? { alpha_notes: true } : {}),
+    ...(isTransferable ? { is_transferable: true } : {}),
+  };
+
   if (!id || !/^[a-zA-Z0-9_]+$/.test(id)) {
     throw new Error("Badge id is required and can only contain letters, numbers, underscores.");
   }
@@ -32,6 +53,7 @@ export async function createBadge(formData) {
     category,
     max_slots: maxSlotsRaw ? Number(maxSlotsRaw) : null,
     color,
+    perks,
     created_by: staff.id,
     updated_by: staff.id,
   });
@@ -42,7 +64,7 @@ export async function createBadge(formData) {
     action: "badge.create",
     targetTable: "badge_definitions",
     targetId: id,
-    metadata: { name, rarity, category, max_slots: maxSlotsRaw || null },
+    metadata: { name, rarity, category, max_slots: maxSlotsRaw || null, perks },
   });
 
   revalidatePath("/dashboard/badges");
@@ -105,6 +127,23 @@ export async function awardBadge(formData) {
     );
   }
 
+  const isPioneer = badgeId.startsWith("PIONEER_") || badgeId === "FOUNDING_SEEKER";
+
+  // Strict "One Pioneer Per Account" check
+  if (isPioneer) {
+    const { data: existingUserBadges } = await admin
+      .from("user_badges")
+      .select("badge_id")
+      .eq("user_id", authUser.id);
+    const hasPioneer = (existingUserBadges || []).some(
+      (b) => b.badge_id.startsWith("PIONEER_") || b.badge_id === "FOUNDING_SEEKER"
+    );
+    if (hasPioneer) {
+      throw new Error(`${email} already holds a Pioneer Charter. Limit is strictly one Pioneer seat per account.`);
+    }
+  }
+
+  let assignedSeat = null;
   if (badge.max_slots != null) {
     const { count, error: countError } = await admin
       .from("user_badges")
@@ -114,12 +153,16 @@ export async function awardBadge(formData) {
     if ((count ?? 0) >= badge.max_slots) {
       throw new Error(`"${badge.name}" is sold out (${count}/${badge.max_slots} claimed).`);
     }
+    assignedSeat = (count ?? 0) + 1;
   }
 
   const { error: insertError } = await admin.from("user_badges").insert({
     user_id: authUser.id,
     badge_id: badgeId,
     granted_by: `staff:${staff.email}`,
+    seat_number: assignedSeat,
+    is_transferable: isPioneer,
+    transfer_locked_until: isPioneer ? new Date(Date.now() + 180 * 86400 * 1000).toISOString() : null,
   });
   if (insertError) {
     if (insertError.code === "23505") throw new Error(`${email} already has this badge.`);

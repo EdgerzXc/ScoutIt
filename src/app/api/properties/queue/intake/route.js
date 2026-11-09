@@ -7,6 +7,7 @@ import { verifyFileFamily } from "@/lib/fileTypeCheck";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { calculateQueuePosition } from "@/lib/queuePosition";
+import { resolveUserPerks } from "@/lib/BadgeEngine";
 
 const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25MB limit
 const MAX_PENDING_PER_USER = 5;
@@ -161,6 +162,23 @@ export async function POST(request) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+    // Check if owner holds queue_priority privilege from Pioneer charters
+    let hasQueuePriority = false;
+    try {
+      const { data: userBadges } = await supabaseAdmin
+        .from("user_badges")
+        .select("badge_id")
+        .eq("user_id", userId);
+      if (Array.isArray(userBadges) && userBadges.length > 0) {
+        const perks = resolveUserPerks(userBadges);
+        if (perks.queue_priority) {
+          hasQueuePriority = true;
+        }
+      }
+    } catch (perkErr) {
+      console.warn("[queue-intake] perk lookup error:", perkErr?.message);
+    }
+
     // 5. Insert draft with pipeline_status = 'ai_drafting'
     const nowIso = new Date().toISOString();
     const { data: inserted, error: insertError } = await supabaseAdmin
@@ -181,6 +199,7 @@ export async function POST(request) {
             temp_storage_path: storagePath,
             pdf_hash: fileHash,
             queued_at: nowIso,
+            queue_priority: hasQueuePriority,
           },
         },
       ])

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { hasBadge } from "@/lib/BadgeEngine";
+import { hasBadge, formatCharterSeatLabel, isPioneerBadge, hasAnyPioneerBadge, PIONEER_PERKS } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
 import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
 
@@ -47,9 +47,14 @@ export default function BadgeRegistryPage() {
       if (session?.user) {
         const { data: rows } = await supabase
           .from("user_badges")
-          .select("badge_id, earned_at")
+          .select("badge_id, earned_at, seat_number, is_transferable")
           .eq("user_id", session.user.id);
-        setUserBadges((rows || []).map((r) => ({ id: r.badge_id, minted_at: r.earned_at })));
+        setUserBadges((rows || []).map((r) => ({
+          id: r.badge_id,
+          minted_at: r.earned_at,
+          seat_number: r.seat_number,
+          is_transferable: r.is_transferable,
+        })));
         return;
       }
       // No real session — fall back to the dev-toolbox mock user, if any.
@@ -130,7 +135,7 @@ export default function BadgeRegistryPage() {
         </div>
         
         {/* Header Section */}
-        <div className="mb-16 text-center">
+        <div className="mb-12 text-center">
           <p className="text-accent font-mono text-xs uppercase tracking-[0.12em] font-bold mb-4 drop-shadow-md">
             Milestones & Achievements
           </p>
@@ -139,6 +144,16 @@ export default function BadgeRegistryPage() {
           </h1>
           <p className="font-body text-text-secondary text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
             A public ledger of the platform&apos;s earned honors. Badges are staff-granted for verified contributions or claimed through the pioneer flow — they are never sold and confer no priced benefit today. Once a cohort is full, it is permanently locked.
+          </p>
+        </div>
+
+        {/* Pioneer Charter Rule Notice */}
+        <div className="mb-12 p-5 rounded-xl border border-[var(--accent-muted)] bg-surface text-center max-w-2xl mx-auto shadow-sm">
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent font-bold mb-2">
+            Strict Pioneer Charter Protocol
+          </p>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Strict limit of <span className="text-text-primary font-semibold">1 Pioneer Charter per account</span> across all roles. Seats are sequentially numbered, hard-capped, and non-expiring. Charters are transferable to verified peers and carry their operational privileges.
           </p>
         </div>
 
@@ -151,8 +166,13 @@ export default function BadgeRegistryPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {activeBadges.map((badge) => {
-              const userHasIt = hasBadge(userBadges, badge.id);
+              const userBadge = userBadges.find((b) => b.id === badge.id);
+              const userHasIt = Boolean(userBadge);
               const tone = toneForBadge(badge);
+              const seatLabel = userBadge?.seat_number ? formatCharterSeatLabel(userBadge.seat_number) : null;
+              const perks = badge.perks || PIONEER_PERKS[badge.id] || null;
+              const isPioneer = isPioneerBadge(badge.id);
+              const userHasAnyPioneer = hasAnyPioneerBadge(userBadges);
               
               return (
               <div 
@@ -179,7 +199,7 @@ export default function BadgeRegistryPage() {
                   </div>
                   {userHasIt ? (
                     <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-[var(--accent-border)] text-text-primary bg-[var(--accent-dim)]">
-                      ★ OWNED
+                      ★ OWNED{seatLabel ? ` · ${seatLabel}` : ''}
                     </span>
                   ) : (
                     <span className="font-mono text-[12px] uppercase tracking-widest px-2 py-1 rounded border border-border text-text-secondary bg-surface2">
@@ -191,9 +211,50 @@ export default function BadgeRegistryPage() {
                 <h3 className="font-display text-xl text-text-primary mb-2" style={{ color: userHasIt ? 'var(--on-surface)' : 'var(--text-secondary)' }}>
                   {userHasIt ? badge.name : "??? RARE HONOR ???"}
                 </h3>
-                <p className="text-text-secondary text-sm mb-6 h-12 overflow-hidden text-ellipsis line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-text-secondary text-sm mb-4 h-12 overflow-hidden text-ellipsis line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
                   {userHasIt ? badge.description : "Requirement details are hidden. Only the worthy may claim this."}
                 </p>
+
+                {/* Active Perks / Incentives Matrix */}
+                {perks && (
+                  <div className="mb-4 pt-3 border-t border-border flex flex-wrap gap-1.5">
+                    {perks.queue_priority && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
+                        ⚡ Queue Priority
+                      </span>
+                    )}
+                    {Boolean(perks.rate_lock_percent) && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
+                        🔒 {perks.rate_lock_percent}% Rate Lock
+                      </span>
+                    )}
+                    {Boolean(perks.support_sla_hours) && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                        ⏱️ {perks.support_sla_hours}h VIP SLA
+                      </span>
+                    )}
+                    {perks.white_label_pdf && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                        📄 White-Label PDF
+                      </span>
+                    )}
+                    {perks.gold_seal && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
+                        👑 Gold Seal
+                      </span>
+                    )}
+                    {Boolean(perks.monthly_connects) && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                        💎 +{perks.monthly_connects} Connects
+                      </span>
+                    )}
+                    {perks.transferable && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                        🔁 Transferable
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Progress Bar */}
                 <div className="mt-auto">
@@ -214,14 +275,20 @@ export default function BadgeRegistryPage() {
                 </div>
 
                 {!userHasIt && (
-                  badge.id.startsWith("PIONEER_") ? (
-                    <button 
-                      onClick={() => handleClaimBadge(badge.id)}
-                      disabled={claimingId === badge.id}
-                      className="badge-claim-btn mt-6 w-full block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border transition-colors"
-                    >
-                      {claimingId === badge.id ? 'CLAIMING...' : 'CLAIM FREE BADGE →'}
-                    </button>
+                  isPioneer ? (
+                    userHasAnyPioneer ? (
+                      <div className="mt-6 w-full text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-border bg-surface2 text-text-muted">
+                        1 Pioneer Per Account Limit Reached
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => handleClaimBadge(badge.id)}
+                        disabled={claimingId === badge.id}
+                        className="badge-claim-btn mt-6 w-full block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border transition-colors"
+                      >
+                        {claimingId === badge.id ? 'CLAIMING...' : 'CLAIM FREE BADGE →'}
+                      </button>
+                    )
                   ) : (
                     <span className="mt-6 block text-center font-mono text-[12px] uppercase tracking-[0.12em] py-3 rounded border border-border bg-surface2 text-text-secondary">
                       Staff-granted honor — no purchase path

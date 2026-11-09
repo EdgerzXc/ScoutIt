@@ -1207,7 +1207,7 @@ export default function ResidentialFlow({ slug, draftData, isDraftMode, external
                   >
                     Enhanced
                     {enhancedPhotos.length > 0 && (
-                      <span style={{ fontSize: "9px", letterSpacing: "0.08em", opacity: 0.8, marginLeft: "4px" }}>
+                      <span style={{ fontSize: "12px", letterSpacing: "0.08em", opacity: 0.8, marginLeft: "4px" }}>
                         [AI]
                       </span>
                     )}

@@ -1,13 +1,50 @@
-import { Compass, Bookmark, Briefcase, MapPin, Handshake } from "lucide-react";
+import { Compass, Bookmark, Briefcase, MapPin, Handshake, Building2, Sparkles, Award, UserCheck } from "lucide-react";
 
 export const BADGE_REGISTRY = [
   {
-    id: "pioneer",
-    name: "The Pioneer",
-    description: "Joined ScoutIt during the Early Access phase.",
-    unlockCondition: "Create an account before July 2026.",
+    id: "PIONEER_BROKER",
+    name: "Pioneer Advisor",
+    description: "One of the first 25 verified luxury brokers on ScoutIt. Holds a permanent Founding Charter.",
+    unlockCondition: "Submit broker credentials, verify PRC, and publish 1 listing.",
+    icon: Briefcase,
+    rarity: "legendary",
+    isPioneer: true,
+  },
+  {
+    id: "PIONEER_OWNER",
+    name: "Pioneer Landlord",
+    description: "One of the first 20 trophy asset developers and landlords on ScoutIt.",
+    unlockCondition: "Verify title or lease deed and publish 1 active trophy asset.",
+    icon: Building2,
+    rarity: "legendary",
+    isPioneer: true,
+  },
+  {
+    id: "PIONEER_CREATOR",
+    name: "Pioneer Creator",
+    description: "One of the first 15 premier visual architects and spatial photographers on ScoutIt.",
+    unlockCondition: "Complete certified spatial capture missions on Metropolis.",
+    icon: Sparkles,
+    rarity: "epic",
+    isPioneer: true,
+  },
+  {
+    id: "FOUNDING_SEEKER",
+    name: "Founding Seeker",
+    description: "The original 100 accredited luxury seekers and investors on ScoutIt.",
+    unlockCondition: "Hold verified seeker status and activate Spatial Vault.",
     icon: Compass,
-    rarity: "legendary"
+    rarity: "rare",
+    isPioneer: true,
+  },
+  {
+    id: "ALPHA_CARTOGRAPHER",
+    name: "Alpha Cartographer",
+    description: "Mapped the very first 50 properties into the ScoutIt engine before public launch.",
+    unlockCondition: "Contributed foundational GIS data during alpha testing.",
+    icon: MapPin,
+    rarity: "legendary",
+    isPioneer: true,
   },
   {
     id: "master_scout",
@@ -22,7 +59,7 @@ export const BADGE_REGISTRY = [
     name: "The Guildmaster",
     description: "Master of logistics and service delegation.",
     unlockCondition: "Hire 3+ service providers (Movers, Cleaners, etc.).",
-    icon: Briefcase,
+    icon: Award,
     rarity: "rare"
   },
   {
@@ -30,7 +67,7 @@ export const BADGE_REGISTRY = [
     name: "Spatial Analyst",
     description: "Contributed critical ground truth data to the ecosystem.",
     unlockCondition: "Submit 10+ location reviews or market insights.",
-    icon: MapPin,
+    icon: UserCheck,
     rarity: "rare"
   },
   {

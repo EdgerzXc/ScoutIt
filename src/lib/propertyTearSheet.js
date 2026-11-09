@@ -55,14 +55,16 @@ function visibleText(element, selector, fallback = '') {
   return element.querySelector(selector)?.textContent?.trim() || fallback;
 }
 
-export async function downloadPropertyTearSheet({ element, title }) {
+export async function downloadPropertyTearSheet({ element, title, options = {} }) {
   if (!element) return false;
 
   const { jsPDF } = await import('jspdf');
   const documentTitle = String(title || visibleText(element, '.hero-title', 'ScoutIt Property')).trim();
   const location = visibleText(element, '.hero-location', 'Philippines');
   const hook = visibleText(element, '.hero-hook', 'A verified ScoutIt space briefing.');
-  const briefLabel = visibleText(element, '.hero-label', 'ScoutIt · Space Intelligence');
+  const isWhiteLabel = Boolean(options.whiteLabel);
+  const defaultLabel = isWhiteLabel ? 'CONFIDENTIAL PROPERTY DOSSIER' : 'ScoutIt · Space Intelligence';
+  const briefLabel = options.briefLabel || visibleText(element, '.hero-label', defaultLabel);
   const canonicalUrl = `${window.location.origin}${window.location.pathname}`;
 
   const background = cssColorTuple('--bg', [13, 13, 13]);
@@ -85,7 +87,11 @@ export async function downloadPropertyTearSheet({ element, title }) {
   pdf.setLineWidth(1.25);
   pdf.line(52, 56, pageWidth - 52, 56);
 
-  const markPng = await renderMarkPng(`rgb(${accent.join(",")})`);
+  // If user has custom agency logo or standard ScoutIt brand
+  let markPng = null;
+  if (!isWhiteLabel || !options.agencyLogoUrl) {
+    markPng = await renderMarkPng(`rgb(${accent.join(",")})`);
+  }
   const MARK_PT = 26;
   if (markPng) pdf.addImage(markPng, 'PNG', 52, 20, MARK_PT, MARK_PT);
   const eyebrowX = markPng ? 52 + MARK_PT + 12 : 52;
@@ -124,8 +130,12 @@ export async function downloadPropertyTearSheet({ element, title }) {
   pdf.setFontSize(8);
   pdf.setTextColor(...secondary);
   pdf.text(canonicalUrl, 52, pageHeight - 48);
-  pdf.text('SCOUTIT · SPACE INTELLIGENCE', pageWidth - 52, pageHeight - 48, { align: 'right' });
+  const footerBrand = isWhiteLabel
+    ? (options.agencyName ? `${options.agencyName.toUpperCase()} · EXCLUSIVE ADVISORY` : 'CONFIDENTIAL PRIVATE DOSSIER')
+    : 'SCOUTIT · SPACE INTELLIGENCE';
+  pdf.text(footerBrand, pageWidth - 52, pageHeight - 48, { align: 'right' });
 
-  pdf.save(`ScoutIt_${safeFilenamePart(documentTitle)}.pdf`);
+  const filenamePrefix = isWhiteLabel && options.agencyName ? safeFilenamePart(options.agencyName) : 'ScoutIt';
+  pdf.save(`${filenamePrefix}_${safeFilenamePart(documentTitle)}.pdf`);
   return true;
 }

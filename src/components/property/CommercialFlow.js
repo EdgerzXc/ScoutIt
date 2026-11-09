@@ -1359,7 +1359,7 @@ export default function CommercialFlow({ slug, draftData, isDraftMode, externalA
                   >
                     Enhanced
                     {enhancedPhotos.length > 0 && (
-                      <span style={{ fontSize: "9px", letterSpacing: "0.08em", opacity: 0.8, marginLeft: "4px" }}>
+                      <span style={{ fontSize: "12px", letterSpacing: "0.08em", opacity: 0.8, marginLeft: "4px" }}>
                         [AI]
                       </span>
                     )}

@@ -19,7 +19,7 @@ export default async function BadgesPage() {
         .order("name"),
       admin
         .from("user_badges")
-        .select("user_id, badge_id, granted_by, earned_at")
+        .select("user_id, badge_id, granted_by, seat_number, earned_at")
         .order("earned_at", { ascending: false })
         .limit(25),
     ]);
@@ -213,6 +213,46 @@ export default async function BadgesPage() {
                 className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
               />
             </label>
+            <div className="col-span-2 space-y-3 bg-black/40 border border-white/10 rounded-xl p-4">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#E8AE3C]">
+                Incentives & Operational Privileges
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-white/80">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="perk_queue_priority" className="rounded bg-black border-white/20 text-[#E8AE3C]" />
+                  <span>VIP Fast-Track Queue Priority</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="perk_priority_support" className="rounded bg-black border-white/20 text-[#E8AE3C]" />
+                  <span>Priority Concierge Support SLA</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="perk_white_label_pdf" className="rounded bg-black border-white/20 text-[#E8AE3C]" />
+                  <span>White-Label Agency PDF Export</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="perk_charter_seal" className="rounded bg-black border-white/20 text-[#E8AE3C]" />
+                  <span>Charter Gold Seal on Listings</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="perk_alpha_notes" className="rounded bg-black border-white/20 text-[#E8AE3C]" />
+                  <span>Inner Circle Pre-Update Patch Notes</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="perk_is_transferable" className="rounded bg-black border-white/20 text-[#E8AE3C]" />
+                  <span>Transferable Seat License</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <span>Subscription Rate Lock:</span>
+                  <input type="number" name="perk_discount_pct" min="0" max="100" placeholder="50" className="w-16 bg-black/60 border border-white/20 rounded px-2 py-1 text-white" />
+                  <span>%</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <span>Monthly Connects:</span>
+                  <input type="number" name="perk_monthly_connects" min="0" placeholder="25" className="w-16 bg-black/60 border border-white/20 rounded px-2 py-1 text-white" />
+                </label>
+              </div>
+            </div>
             <button className="col-span-2 justify-self-start px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
               Create badge
             </button>

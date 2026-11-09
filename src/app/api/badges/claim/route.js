@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
-import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
+import {
+  BADGE_DEFINITIONS,
+  isPioneerBadge,
+  hasAnyPioneerBadge,
+  formatCharterSeatLabel,
+} from "@/lib/BadgeEngine";
 
 const REQUIRED_ROLES = {
   PIONEER_BROKER: ["broker"],
@@ -47,6 +52,20 @@ export async function POST(request) {
       }
     }
 
+    // Strict Mutual Exclusivity: Verify account does not already hold another Pioneer Charter
+    if (isPioneerBadge(badgeId)) {
+      const { data: existingUserBadges } = await supabaseAdmin
+        .from("user_badges")
+        .select("badge_id, seat_number")
+        .eq("user_id", userId);
+      if (hasAnyPioneerBadge(existingUserBadges)) {
+        return NextResponse.json(
+          { error: "Account already holds a Pioneer Charter. Pioneer seats are strictly limited to one badge per account." },
+          { status: 409 }
+        );
+      }
+    }
+
     // GAP-27: Prevent TOCTOU badge over-minting via atomic PostgreSQL RPC mint_pioneer_badge_atomic
     const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc("mint_pioneer_badge_atomic", {
       p_user_id: userId,
@@ -61,6 +80,12 @@ export async function POST(request) {
       if (!outcome.success) {
         if (outcome.error_code === "ALREADY_CLAIMED") {
           return NextResponse.json({ error: "Badge already claimed" }, { status: 400 });
+        }
+        if (outcome.error_code === "ONE_PIONEER_PER_ACCOUNT") {
+          return NextResponse.json(
+            { error: "Account already holds a Pioneer Charter. Pioneer seats are strictly limited to one badge per account." },
+            { status: 409 }
+          );
         }
         if (outcome.error_code === "SOLD_OUT") {
           return NextResponse.json({ error: "This cohort is sold out" }, { status: 409 });
@@ -91,10 +116,19 @@ export async function POST(request) {
         return NextResponse.json({ error: "This cohort is sold out" }, { status: 409 });
       }
 
+      const assignedSeat = (claimedCount || 0) + 1;
+
       // Insert the claim — unique(user_id, badge_id) rejects a duplicate claim at the DB level.
       const { data: insertedBadge, error: insertError } = await supabaseAdmin
         .from("user_badges")
-        .insert({ user_id: userId, badge_id: badgeId, granted_by: "self_claim" })
+        .insert({
+          user_id: userId,
+          badge_id: badgeId,
+          granted_by: "self_claim",
+          seat_number: assignedSeat,
+          is_transferable: true,
+          transfer_locked_until: new Date(Date.now() + 180 * 86400 * 1000).toISOString(),
+        })
         .select()
         .single();
 
@@ -110,10 +144,17 @@ export async function POST(request) {
 
     const { data: allBadges } = await supabaseAdmin
       .from("user_badges")
-      .select("badge_id, earned_at")
+      .select("badge_id, seat_number, is_transferable, earned_at")
       .eq("user_id", userId);
 
-    return NextResponse.json({ success: true, badge: newBadge, badges: allBadges || [] });
+    return NextResponse.json({
+      success: true,
+      badge: newBadge,
+      seatNumber: newBadge?.seat_number || null,
+      seatLabel: formatCharterSeatLabel(newBadge?.seat_number),
+      perks: badgeDef.perks || {},
+      badges: allBadges || [],
+    });
 
   } catch (err) {
     console.error("[CLAIM API] Error during badge claim process:", err);
