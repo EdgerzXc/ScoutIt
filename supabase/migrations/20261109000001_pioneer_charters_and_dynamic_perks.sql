@@ -53,6 +53,20 @@ CREATE TABLE IF NOT EXISTS public.badge_definitions (
   updated_by UUID
 );
 
+-- Ensure perks column exists if table was created in an earlier migration
+ALTER TABLE public.badge_definitions
+  ADD COLUMN IF NOT EXISTS perks JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+-- Ensure category constraint supports pioneer_cohort and trust_seal
+DO $$
+BEGIN
+  ALTER TABLE public.badge_definitions DROP CONSTRAINT IF EXISTS badge_definitions_category_check;
+  ALTER TABLE public.badge_definitions ADD CONSTRAINT badge_definitions_category_check 
+    CHECK (category = ANY (ARRAY['achievement'::text, 'pioneer_cohort'::text, 'trust_seal'::text, 'milestone'::text, 'custom'::text]));
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
+
 ALTER TABLE public.badge_definitions ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "public read badge_definitions" ON public.badge_definitions;
@@ -174,8 +188,12 @@ CREATE TABLE IF NOT EXISTS public.charter_applications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL,
   badge_id TEXT NOT NULL,
-  agency_name TEXT NOT NULL,
-  territory TEXT NOT NULL,
+  agency_name TEXT,
+  territory TEXT,
+  full_name TEXT,
+  organization TEXT,
+  license_number TEXT,
+  statement TEXT,
   annual_volume_tier TEXT,
   proof_document_url TEXT,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
@@ -184,6 +202,14 @@ CREATE TABLE IF NOT EXISTS public.charter_applications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.charter_applications
+  ADD COLUMN IF NOT EXISTS full_name TEXT,
+  ADD COLUMN IF NOT EXISTS organization TEXT,
+  ADD COLUMN IF NOT EXISTS license_number TEXT,
+  ADD COLUMN IF NOT EXISTS statement TEXT,
+  ADD COLUMN IF NOT EXISTS agency_name TEXT,
+  ADD COLUMN IF NOT EXISTS territory TEXT;
 
 ALTER TABLE public.charter_applications ENABLE ROW LEVEL SECURITY;
 

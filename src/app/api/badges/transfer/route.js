@@ -26,20 +26,22 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { badgeId, recipientEmail, recipientUserId, notes } = body || {};
+    const { badgeId, notes } = body || {};
+    const recipientRaw = body?.recipientInput || body?.recipientEmail || body?.recipientUserId;
 
     if (!badgeId) {
       return NextResponse.json({ error: "Missing badgeId." }, { status: 400 });
     }
 
-    if (!recipientEmail && !recipientUserId) {
+    if (!recipientRaw) {
       return NextResponse.json({ error: "Recipient email or user ID is required." }, { status: 400 });
     }
 
-    // 1. Resolve Recipient ID
-    let targetRecipientId = recipientUserId ? String(recipientUserId).trim() : null;
-    if (!targetRecipientId && recipientEmail) {
-      const cleanEmail = String(recipientEmail).trim().toLowerCase();
+    const cleanInput = String(recipientRaw).trim();
+    let targetRecipientId = null;
+
+    if (cleanInput.includes("@")) {
+      const cleanEmail = cleanInput.toLowerCase();
       const { data: foundProfile, error: profileErr } = await supabaseAdmin
         .from("user_profiles")
         .select("id, role, active_roles, email")
@@ -53,6 +55,8 @@ export async function POST(request) {
         );
       }
       targetRecipientId = foundProfile.id;
+    } else {
+      targetRecipientId = cleanInput;
     }
 
     if (senderId === targetRecipientId) {

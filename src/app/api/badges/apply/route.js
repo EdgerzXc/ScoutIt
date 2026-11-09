@@ -27,27 +27,23 @@ export async function POST(request) {
     const body = await request.json();
     const {
       badgeId,
-      agencyName,
-      territory,
       annualVolumeTier,
       proofDocumentUrl,
-      affirmation,
     } = body || {};
+
+    const cleanAgency = String(body?.agencyName || body?.organization || body?.agency || "").trim();
+    const cleanTerritory = String(body?.territory || "Metro Manila / Prime Corridors").trim();
+    const cleanFullName = String(body?.fullName || body?.name || "").trim();
+    const cleanLicense = String(body?.licenseNumber || body?.proofReference || "").trim();
+    const cleanStatement = String(body?.statement || body?.notes || "").trim();
 
     if (!badgeId || !isPioneerBadge(badgeId)) {
       return NextResponse.json({ error: "Invalid Pioneer badge ID specified." }, { status: 400 });
     }
 
-    if (!agencyName || !territory) {
+    if (!cleanAgency && !cleanFullName) {
       return NextResponse.json(
-        { error: "Agency name and primary territory are required." },
-        { status: 400 }
-      );
-    }
-
-    if (!affirmation) {
-      return NextResponse.json(
-        { error: "You must affirm adherence to the ScoutIt Charter professional code." },
+        { error: "Full legal name or agency organization is required." },
         { status: 400 }
       );
     }
@@ -125,8 +121,12 @@ export async function POST(request) {
       .insert({
         user_id: userId,
         badge_id: badgeId,
-        agency_name: String(agencyName).trim(),
-        territory: String(territory).trim(),
+        agency_name: cleanAgency || cleanFullName,
+        territory: cleanTerritory,
+        full_name: cleanFullName || null,
+        organization: cleanAgency || null,
+        license_number: cleanLicense || null,
+        statement: cleanStatement || null,
         annual_volume_tier: annualVolumeTier || null,
         proof_document_url: proofDocumentUrl || null,
         status: "pending",
