@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { createBadge, setBadgeActive, awardBadge, revokeBadge } from "./actions";
-import { Award, Plus } from "lucide-react";
+import { createBadge, setBadgeActive, awardBadge, revokeBadge, approveCharterApplication, rejectCharterApplication } from "./actions";
+import { Award, Plus, FileCheck } from "lucide-react";
 
 export default async function BadgesPage() {
   const staff = await getCurrentStaff();
@@ -10,19 +10,27 @@ export default async function BadgesPage() {
 
   const admin = createAdminClient();
 
-  const [{ data: badges, error: badgesError }, { data: grants, error: grantsError }] =
-    await Promise.all([
-      admin
-        .from("badge_definitions")
-        .select("id, name, description, rarity, category, max_slots, color, is_active")
-        .order("category")
-        .order("name"),
-      admin
-        .from("user_badges")
-        .select("user_id, badge_id, granted_by, seat_number, earned_at")
-        .order("earned_at", { ascending: false })
-        .limit(25),
-    ]);
+  const [
+    { data: badges, error: badgesError },
+    { data: grants, error: grantsError },
+    { data: pendingApplications, error: appsError },
+  ] = await Promise.all([
+    admin
+      .from("badge_definitions")
+      .select("id, name, description, rarity, category, max_slots, color, is_active")
+      .order("category")
+      .order("name"),
+    admin
+      .from("user_badges")
+      .select("user_id, badge_id, granted_by, seat_number, earned_at")
+      .order("earned_at", { ascending: false })
+      .limit(25),
+    admin
+      .from("charter_applications")
+      .select("id, user_id, badge_id, full_name, organization, license_number, statement, agency_name, territory, annual_volume_tier, proof_document_url, status, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false }),
+  ]);
 
   const claimedCounts = {};
   if (!grantsError) {
@@ -47,6 +55,82 @@ export default async function BadgesPage() {
         awarded what; wiring the public site to read from this table is a follow-up main-app
         change.
       </div>
+
+      {/* ── Charter Applications Intake Queue ── */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <FileCheck className="w-4 h-4 text-[#E8AE3C]" />
+            Charter Applications Intake
+          </span>
+          <span className="text-xs font-mono text-[#E8AE3C]">
+            {(pendingApplications ?? []).length} Pending Review
+          </span>
+        </h2>
+        
+        {appsError && (
+          <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-4">
+            Failed to load charter applications: {appsError.message}
+          </div>
+        )}
+
+        {(pendingApplications ?? []).length === 0 ? (
+          <div className="text-xs text-white/60 bg-[#121212] border border-white/5 rounded-xl p-6 text-center">
+            No pending charter applications in the intake queue.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {pendingApplications.map((app) => (
+              <div key={app.id} className="bg-[#121212] border border-white/10 rounded-xl p-5 space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <span className="text-xs font-mono px-2 py-0.5 rounded border border-[#E8AE3C]/40 bg-[#E8AE3C]/10 text-[#E8AE3C] uppercase tracking-wider">
+                      {app.badge_id}
+                    </span>
+                    <h3 className="text-base font-semibold text-white mt-1.5">
+                      {app.full_name || app.agency_name || "Applicant"}
+                    </h3>
+                    <p className="text-xs text-white/70">
+                      {app.organization || app.agency_name} {app.license_number ? `· PRC ${app.license_number}` : ""} {app.territory ? `· ${app.territory}` : ""}
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono text-white/70">
+                    {new Date(app.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {app.statement && (
+                  <p className="text-xs text-white/80 bg-black/40 border border-white/5 rounded-lg p-3 italic">
+                    &quot;{app.statement}&quot;
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <div className="text-xs font-mono text-white/70">
+                    Candidate: {app.user_id.slice(0, 12)}...
+                  </div>
+                  {canRevoke && (
+                    <div className="flex items-center gap-2">
+                      <form action={rejectCharterApplication}>
+                        <input type="hidden" name="applicationId" value={app.id} />
+                        <button className="px-3 py-1.5 rounded-lg text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors">
+                          Reject
+                        </button>
+                      </form>
+                      <form action={approveCharterApplication}>
+                        <input type="hidden" name="applicationId" value={app.id} />
+                        <button className="px-3 py-1.5 rounded-lg text-xs bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium transition-colors">
+                          Approve & Mint Seat →
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-medium text-white/70 uppercase tracking-wide">

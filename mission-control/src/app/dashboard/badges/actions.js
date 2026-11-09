@@ -237,3 +237,132 @@ export async function revokeBadge(formData) {
 
   revalidatePath("/dashboard/badges");
 }
+
+/**
+ * Approve a pending Pioneer Charter application.
+ * Mints an atomic Pioneer Badge seat and notifies the candidate.
+ * @param {FormData} formData
+ */
+export async function approveCharterApplication(formData) {
+  const staff = await getCurrentStaff();
+  assertTier(staff, TIERS.OPS_MANAGER);
+
+  const applicationId = formData.get("applicationId")?.toString();
+  if (!applicationId) throw new Error("Missing application ID.");
+
+  const admin = createAdminClient();
+
+  const { data: app, error: appError } = await admin
+    .from("charter_applications")
+    .select("*")
+    .eq("id", applicationId)
+    .single();
+
+  if (appError || !app) throw new Error("Application not found.");
+  if (app.status !== "pending") throw new Error(`Application already ${app.status}.`);
+
+  const maxSlots = app.badge_id === "PIONEER_BROKER" ? 25 : app.badge_id === "PIONEER_OWNER" ? 20 : 15;
+
+  const { data: mintResult, error: mintError } = await admin.rpc("mint_pioneer_badge_atomic", {
+    p_user_id: app.user_id,
+    p_badge_id: app.badge_id,
+    p_max_slots: maxSlots,
+  });
+
+  if (mintError || (mintResult && mintResult[0]?.success === false)) {
+    const code = mintResult ? mintResult[0]?.error_code : mintError?.message;
+    throw new Error(`Failed to mint charter seat: ${code}`);
+  }
+
+  const { error: updateError } = await admin
+    .from("charter_applications")
+    .update({
+      status: "approved",
+      reviewed_by: staff.id,
+      reviewed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", applicationId);
+
+  if (updateError) throw new Error(updateError.message);
+
+  await logAction({
+    staff,
+    action: "charter_application.approve",
+    targetTable: "charter_applications",
+    targetId: applicationId,
+    metadata: { userId: app.user_id, badgeId: app.badge_id },
+  });
+
+  try {
+    await admin.from("user_notifications").insert({
+      user_id: app.user_id,
+      title: "Founding Charter Approved",
+      desc: `Your application for ${app.badge_id} has been approved by Mission Control. Welcome to the Founding Cohort.`,
+      icon: "🎖️",
+      notification_type: "charter_approved",
+    });
+  } catch (notifyErr) {
+    console.warn("[approveCharterApplication] notification failed:", notifyErr?.message);
+  }
+
+  revalidatePath("/dashboard/badges");
+}
+
+/**
+ * Reject a pending Pioneer Charter application.
+ * @param {FormData} formData
+ */
+export async function rejectCharterApplication(formData) {
+  const staff = await getCurrentStaff();
+  assertTier(staff, TIERS.OPS_MANAGER);
+
+  const applicationId = formData.get("applicationId")?.toString();
+  const reason = formData.get("reason")?.toString()?.trim() || "Requirements not met";
+  if (!applicationId) throw new Error("Missing application ID.");
+
+  const admin = createAdminClient();
+
+  const { data: app, error: appError } = await admin
+    .from("charter_applications")
+    .select("*")
+    .eq("id", applicationId)
+    .single();
+
+  if (appError || !app) throw new Error("Application not found.");
+  if (app.status !== "pending") throw new Error(`Application already ${app.status}.`);
+
+  const { error: updateError } = await admin
+    .from("charter_applications")
+    .update({
+      status: "rejected",
+      reviewed_by: staff.id,
+      reviewed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", applicationId);
+
+  if (updateError) throw new Error(updateError.message);
+
+  await logAction({
+    staff,
+    action: "charter_application.reject",
+    targetTable: "charter_applications",
+    targetId: applicationId,
+    metadata: { userId: app.user_id, badgeId: app.badge_id, reason },
+  });
+
+  try {
+    await admin.from("user_notifications").insert({
+      user_id: app.user_id,
+      title: "Charter Application Update",
+      desc: `Your Pioneer Charter application was reviewed: ${reason}`,
+      icon: "📋",
+      notification_type: "charter_rejected",
+    });
+  } catch (notifyErr) {
+    console.warn("[rejectCharterApplication] notification failed:", notifyErr?.message);
+  }
+
+  revalidatePath("/dashboard/badges");
+}

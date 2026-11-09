@@ -339,14 +339,44 @@ export default function VaultOfHonor() {
                             Queue Priority
                           </span>
                         )}
-                        {perks.rate_lock_percent && (
+                        {Boolean(perks.discount_pct || perks.rate_lock_percent) && (
                           <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-accent-muted bg-surface2 text-accent">
-                            {perks.rate_lock_percent}% Rate Lock
+                            {perks.discount_pct || perks.rate_lock_percent}% Rate Lock
+                          </span>
+                        )}
+                        {perks.priority_support && (
+                          <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                            VIP Priority SLA
                           </span>
                         )}
                         {perks.white_label_pdf && (
                           <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
                             White-Label PDF
+                          </span>
+                        )}
+                        {perks.charter_seal && (
+                          <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-accent-muted bg-surface2 text-accent">
+                            Charter Gold Seal
+                          </span>
+                        )}
+                        {Boolean(perks.monthly_connects) && (
+                          <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                            +{perks.monthly_connects} Connects/mo
+                          </span>
+                        )}
+                        {perks.alpha_notes && (
+                          <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                            Inner Circle Notes
+                          </span>
+                        )}
+                        {perks.free_vault_access && (
+                          <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-accent-muted bg-surface2 text-accent">
+                            Spatial Vault
+                          </span>
+                        )}
+                        {perks.priority_bounties && (
+                          <span className="font-mono text-[12px] uppercase px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                            VIP Bounties
                           </span>
                         )}
                       </div>

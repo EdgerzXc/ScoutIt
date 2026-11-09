@@ -6,7 +6,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { hasBadge, formatCharterSeatLabel, isPioneerBadge, hasAnyPioneerBadge, PIONEER_PERKS } from "@/lib/BadgeEngine";
 import { supabase } from "@/lib/supabaseClient";
-import { Shield, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
+import { Shield, ShieldAlert, ShieldCheck, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
 
 // Public badge definitions carry historical display hex values. The page
 // resolves their semantic role locally so the same cohort is legible in both
@@ -119,7 +119,7 @@ export default function BadgeRegistryPage() {
       {/* Toast Notification */}
       {toast && (
         <div role="status" aria-live="polite" className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] bg-surface border border-[var(--accent-border)] text-text-primary px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
-          <span className="text-accent">{toast.type === "error" ? "⚠️" : "✅"}</span>
+          <span className="text-accent">{toast.type === "error" ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}</span>
           <span className="text-sm font-working-title">{toast.message}</span>
         </div>
       )}
@@ -220,37 +220,52 @@ export default function BadgeRegistryPage() {
                   <div className="mb-4 pt-3 border-t border-border flex flex-wrap gap-1.5">
                     {perks.queue_priority && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
-                        ⚡ Queue Priority
+                        Queue Priority
                       </span>
                     )}
-                    {Boolean(perks.rate_lock_percent) && (
+                    {Boolean(perks.discount_pct || perks.rate_lock_percent) && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
-                        🔒 {perks.rate_lock_percent}% Rate Lock
+                        {perks.discount_pct || perks.rate_lock_percent}% Rate Lock
                       </span>
                     )}
-                    {Boolean(perks.support_sla_hours) && (
+                    {Boolean(perks.priority_support || perks.support_sla_hours) && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
-                        ⏱️ {perks.support_sla_hours}h VIP SLA
+                        VIP Priority SLA
                       </span>
                     )}
                     {perks.white_label_pdf && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
-                        📄 White-Label PDF
+                        White-Label PDF
                       </span>
                     )}
-                    {perks.gold_seal && (
+                    {Boolean(perks.charter_seal || perks.gold_seal) && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
-                        👑 Gold Seal
+                        Charter Gold Seal
                       </span>
                     )}
                     {Boolean(perks.monthly_connects) && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
-                        💎 +{perks.monthly_connects} Connects
+                        +{perks.monthly_connects} Connects/mo
                       </span>
                     )}
-                    {perks.transferable && (
+                    {Boolean(perks.is_transferable || perks.transferable) && (
                       <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
-                        🔁 Transferable
+                        Transferable Seat
+                      </span>
+                    )}
+                    {perks.alpha_notes && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                        Inner Circle Notes
+                      </span>
+                    )}
+                    {perks.free_vault_access && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--accent-muted)] bg-surface2 text-accent">
+                        Spatial Vault
+                      </span>
+                    )}
+                    {perks.priority_bounties && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded border border-border bg-surface2 text-text-secondary">
+                        VIP Bounties
                       </span>
                     )}
                   </div>
@@ -312,6 +327,7 @@ export default function BadgeRegistryPage() {
             {soldOutBadges.map((badge) => {
               const userHasIt = hasBadge(userBadges, badge.id);
               const tone = toneForBadge(badge);
+              const perks = badge.perks || PIONEER_PERKS[badge.id] || null;
               
               return (
               <div 
@@ -341,9 +357,34 @@ export default function BadgeRegistryPage() {
                 </div>
                 
                 <h3 className="font-display text-lg mb-1" style={{ color: userHasIt ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{badge.name}</h3>
-                <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
                   {badge.description}
                 </p>
+
+                {perks && (
+                  <div className="mb-3 pt-2 border-t border-border flex flex-wrap gap-1">
+                    {perks.free_vault_access && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-muted">
+                        Spatial Vault
+                      </span>
+                    )}
+                    {perks.admin_access && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-muted">
+                        Admin Access
+                      </span>
+                    )}
+                    {perks.charter_seal && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-muted">
+                        Charter Seal
+                      </span>
+                    )}
+                    {Boolean(perks.monthly_connects) && (
+                      <span className="font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 rounded border border-border bg-surface2 text-text-muted">
+                        +{perks.monthly_connects} Connects/mo
+                      </span>
+                    )}
+                  </div>
+                )}
                 
                 <div className="font-mono text-[12px] uppercase tracking-widest" style={{ color: userHasIt ? tone.ink : 'var(--text-muted)' }}>
                   Closed at {badge.max_slots} slots
