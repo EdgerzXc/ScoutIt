@@ -95,13 +95,50 @@ Pursuant to Section 30 of Republic Act No. 8792, ScoutIt functions strictly as a
   },
   {
     num: "09",
+    title: "Pioneer Charters, honors, operational incentives, and transfer rules",
+    body: `ScoutIt awards limited digital honors and operational privileges to early founding ecosystem participants across designated professional cohorts: Pioneer Brokers, Pioneer Owners, Pioneer Creators, Founding Seekers, and Alpha Cartographers ("Pioneer Charters").
+
+A. NON-EQUITY AND NON-SECURITIES WARRANTY UNDER RA 8799:
+Pioneer Charters, badges, sequential seat numbers, and digital insignia issued by ScoutIt are strictly non-equity platform operational licenses and experiential honors. Pursuant to Republic Act No. 8799 (The Securities Regulation Code of the Philippines) and the Howey Test, Pioneer Charters DO NOT constitute shares of capital stock, equity ownership, membership interests, partnership units, commercial paper, debentures, profit-sharing agreements, investment contracts, or securities of any nature.
+NO PROFIT-SHARING OR DIVIDENDS: ScoutIt does not distribute company revenues, profits, dividends, royalties, or financial yields to Charter holders. A Pioneer Charter confers exclusively internal software operational perks and service accelerations within the Platform environment.
+
+B. OPERATIONAL INCENTIVES & SOFTWARE PRIVILEGES:
+Subject to maintaining good standing and compliance with these Terms, active Pioneer Charter holders receive the following software operational incentives:
+• Lifetime Subscription Rate Lock: A perpetual fifty percent (50%) discount on future paid subscription tiers (Solar, Cluster, Universe) once commercial billing operations activate.
+• Fast-Track Processing Queue Prioritization: Expedited automated document extraction and listing review pipelines.
+• VIP Customer Support SLA: Priority escalation and direct routing for platform inquiries and technical support.
+• Pre-Release Editorial & Feature Access: Early previews of platform patch notes, architectural updates, and market intelligence digests.
+• Spatial Dossier & Directory Accreditations: Dedicated gold insignia seals, sequential charter seat identifiers (#001 to #100), and custom branding rights on exported PDF dossiers.
+
+C. SCARCITY CAPS & STRICT "ONE PIONEER PER ACCOUNT" LIMITATION:
+Each Pioneer cohort is subject to an immutable hard cap: Pioneer Brokers (25 seats), Pioneer Owners (20 seats), Pioneer Creators (15 seats), Founding Seekers (100 seats), and Alpha Cartographers (5 seats). Once a cohort is fully subscribed, zero additional seats are minted.
+To prevent market monopolization and protect ecosystem integrity:
+1. Mutual Exclusivity: An individual or corporate entity may hold at most ONE (1) Pioneer Charter seat across all categories. An account holding a Pioneer Broker seat is strictly barred from acquiring or claiming an Owner, Creator, or Seeker charter seat.
+2. Anti-Sybil Prohibition: Any attempt to circumvent cohort scarcity or seat limits by operating multiple accounts, surrogate identities, or automated bots constitutes a fraudulent breach of these Terms, resulting in immediate forfeiture of all held Charters and permanent account termination.
+
+D. SECONDARY TRANSFER PROTOCOL & VESTING RESTRICTIONS:
+Pioneer Charters may be reassigned or transferred to eligible third parties solely through the platform's secure transfer protocol, subject to strict operational guardrails:
+1. Initial Holding & Vesting Lock: Newly minted or awarded Pioneer Charters are locked against transfer for a mandatory one-hundred eighty (180) day initial vesting period from issuance.
+2. Transfer Cooldown Period: Following any completed transfer, the charter seat enters a mandatory ninety (90) day cooldown lock during which further transfer is disabled.
+3. Role Eligibility: Transfers are valid only to recipient accounts with accredited, active status matching the specific cohort requirements (e.g., Pioneer Broker seats may only transfer to PRC-licensed brokers; Pioneer Owner seats only to property title holders).
+4. One-Charter Rule Enforcement: A transfer to an account that already holds any active Pioneer Charter will be rejected by the system.
+5. Private Consideration Disclaimer: ScoutIt does not broker, escrow, price, guarantee, or process secondary market payments between transferors and transferees. Any private consideration or agreement between users occurs strictly off-platform at the sole risk and responsibility of the transacting parties.
+
+E. REVOCATION FOR CAUSE:
+ScoutIt reserves the unconditional right to revoke, cancel, or repossess any Pioneer Charter without refund or compensation upon:
+1. PRC License Revocation: Invalidation, suspension, or lapse of professional licensure under RA 9646;
+2. Fraudulent Claims: Submission of forged land titles, fake listings, deceptive pricing, or sham verifications under Section 08;
+3. Terms Violations: Material breach of the Prohibited Activities specified in Section 14 or abuse of platform anti-spam mechanisms.`,
+  },
+  {
+    num: "10",
     title: "Bounties and field telemetry tasks",
     body: `ScoutIt may issue small real-world data verification tasks ("Bounties"), allowing qualified researchers or photographers to verify location facts, capture geotagged photo evidence, or audit spatial details in exchange for reward Connects.
 
 Bounties tied to specific private properties require Cluster-tier or higher owner approval before reward payout. Submitting falsified proof, fake coordinates, or altered media results in immediate forfeiture of earned rewards, bounty disqualification, and permanent account termination.`,
   },
   {
-    num: "10",
+    num: "11",
     title: "Temporary communication and ephemeral chat retention",
     body: `Handshake Chat provides a private, temporary communication space for connected parties. Closing a chat thread converts it to read-only status for seven (7) days as an operational retention benchmark. Upon expiration of the 7-day window, message body text is permanently purged from active database storage, while non-message transaction metadata (timestamps, participant IDs, status flags) is retained for audit trails.
 
@@ -110,7 +147,7 @@ Every chat interface displays the following mandatory operational disclosure: "N
 Disputed or reported chat threads are placed under restricted administrative holds for Trust & Safety review until resolved. Exchanging personal contact details within the chat is done entirely at your own risk; ScoutIt cannot un-share information once transmitted.`,
   },
   {
-    num: "11",
+    num: "12",
     title: "The Spatial Vault and intellectual property ownership",
     body: `Spatial Vault assets (including Luma AI 3D spatial scans, 360-degree virtual tours, acoustic heatmaps, and aerial visualisations) produced directly by ScoutIt or its commissioned agents are the exclusive intellectual property of ScoutIt under the Intellectual Property Code of the Philippines (Republic Act No. 8293).
 
@@ -119,14 +156,14 @@ Subscribed property owners receive a limited, revocable, non-exclusive, non-tran
 Photos, descriptions, and virtual tours directly uploaded by Users remain the intellectual property of the respective User. By uploading, the User grants ScoutIt a worldwide, perpetual, royalty-free, non-exclusive license to host, display, format, and distribute the content in connection with the Platform.`,
   },
   {
-    num: "12",
+    num: "13",
     title: "Removing a listing: soft-delete vs. permanent removal",
     body: `Property owners may withdraw a listing at any time, moving it off-market. Off-market properties are immediately removed from public discovery feeds and search engines, remaining accessible only to entitled Cluster/Universe users if explicitly set to "Quietly open to offers".
 
 Permanent listing removal is an irreversible Danger Zone action. Executing permanent removal removes the listing from owner portfolios, public directories, off-market indexes, and sitemaps. Permanent removal does not delete ScoutIt-owned spatial media, historical transaction metadata, reserved canonical URLs, or internal security audit logs. True erasure of personal data is governed by Privacy Policy Section 08 under the Data Privacy Act (RA 10173).`,
   },
   {
-    num: "13",
+    num: "14",
     title: "Prohibited activities and platform security",
     body: `You expressly agree not to:
 1. Act as, advertise as, or convey the impression of being a licensed real estate broker, salesperson, appraiser, or consultant without holding valid credentials issued by the Professional Regulation Commission (PRC) under RA 9646;
@@ -139,38 +176,38 @@ Permanent listing removal is an irreversible Danger Zone action. Executing perma
 Breach of these prohibitions results in immediate account revocation, asset forfeiture, and reporting to legal authorities.`,
   },
   {
-    num: "14",
+    num: "15",
     title: "Platform identity and proprietary rights",
     body: `The ScoutIt brand, software code, dynamic interfaces, scrollytelling visual tracks, Connects architecture, spatial display systems, and original editorial publications are proprietary ScoutIt materials. Unauthorized reproduction, modification, or distribution is prohibited.`,
   },
   {
-    num: "15",
+    num: "16",
     title: "Disclaimer of advice and limitation of liability",
     body: `All intelligence briefings, spatial telemetry, neighborhood metrics, visualisations, and price displays are provided strictly for informational purposes. ScoutIt does not render professional legal, real estate, financial, tax, or investment advice. Users must perform independent due diligence with licensed professionals before entering into any transaction.
 
 The Platform is provided on an "AS IS" and "AS AVAILABLE" basis. To the maximum extent permitted under Philippine law, ScoutIt disclaims all warranties, express or implied. ScoutIt is not liable for indirect, incidental, consequential, special, or punitive damages, nor for any financial loss, loss of contract, commission dispute, or physical property damages arising from off-platform transactions or reliance on platform data.`,
   },
   {
-    num: "16",
+    num: "17",
     title: "Dispute resolution framework",
     body: `ScoutIt handles platform operational disputes only (such as impersonation, unauthorized listing uploads, user harassment, or system technical errors).
 
 ScoutIt WILL NOT mediate, arbitrate, or involve itself in transaction disputes regarding property defects, asking prices, earnest money deposits, lease terms, commission splits, or broker representation contracts. All such disputes are strictly between the contracting parties and their licensed advisors.`,
   },
   {
-    num: "17",
+    num: "18",
     title: "Electronic acceptance and terms modifications",
     body: `ScoutIt records acceptance only when an authenticated user checks the Terms and Privacy box and submits onboarding for the exact version displayed. The server stores the user, version, time, acceptance method, and a snapshot hash as evidence of that electronic action. Republic Act No. 8792 recognizes electronic data messages and documents, but ScoutIt does not claim that merely browsing the Platform creates acceptance.
 
 ScoutIt may amend these Terms to reflect product, operational, or legal changes. Material revisions receive a new version and effective date; account flows must request acceptance of that current version instead of silently treating continued browsing as assent. Philippine counsel should review this pilot text before public commercial launch.`,
   },
   {
-    num: "18",
+    num: "19",
     title: "Governing law and venue selection",
     body: `These Terms are governed by, construed, and enforced in accordance with the laws of the Republic of the Philippines, including RA 9646, RA 10173, RA 8792, RA 7394, and RA 8293. Any legal suit, action, or proceeding arising out of these Terms or the Platform shall be instituted exclusively in the proper courts of Taguig City, Metro Manila, Philippines.`,
   },
   {
-    num: "19",
+    num: "20",
     title: "Official legal contact details",
     body: `ScoutIt has not yet published a dedicated legal mailbox or office address. During the invited pilot, use the official Contact surface for legal, privacy, or operational notices. This section will be replaced only after the owner verifies the receiving channel and counsel approves the wording.`,
   },

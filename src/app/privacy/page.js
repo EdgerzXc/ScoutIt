@@ -24,6 +24,7 @@ ScoutIt is engineered around principles of data minimization and privacy-by-defa
 — Basic Users / Seekers: Full name, email address, password hash, selected role identity, and platform communication preferences.
 — Licensed Brokers: Professional Regulation Commission (PRC) License Number, PRC ID expiration date, Accredited Integrated Professional Organization (AIPO) membership details, brokerage affiliation, and professional identity documents.
 — Property Claimants & Ownership Verification: Government-issued identification (Philippine Passport, Driver's License, UMID, PhilID, or PRC License), Land Titles (Transfer Certificate of Title, Condominium Certificate of Title), Real Property Tax (RPT) Declarations, official amilyar tax receipts, developer Contracts to Sell (CTS), and notarized Special Powers of Attorney (SPA) or corporate Secretary's Certificates.
+— Pioneer Charter & Badge Applicants: Professional credentials, agency affiliation, portfolio links, and attestation statements submitted for Pioneer Charter seats and honors.
 — Service Providers (Photographers, Researchers, Event Planners): Portfolio media, verification credentials, professional bio, and service specialties.
 — Submission and Telemetry Data: Property submission details, photos, spatial descriptions, geotagged bounty proofs, search filters, and interaction logs.
 

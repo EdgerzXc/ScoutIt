@@ -19,6 +19,15 @@ const REQUIRED_ROLES = {
   PIONEER_CREATOR: ["provider", "photographer", "designer", "researcher", "creator"],
 };
 
+const ERROR_MESSAGES = {
+  INVALID_PARTIES: "Invalid sender or recipient.",
+  CANNOT_TRANSFER_TO_SELF: "Cannot transfer a charter seat to yourself.",
+  NOT_BADGE_OWNER: "You do not own this badge.",
+  BADGE_NOT_TRANSFERABLE: "This badge is not a transferable Charter license.",
+  TRANSFER_LOCKED: "Charter seat is currently locked under transfer vesting.",
+  RECIPIENT_ALREADY_HAS_PIONEER: "Recipient already holds a Pioneer Charter. Accounts are strictly limited to one Pioneer seat across all cohorts.",
+};
+
 export async function POST(request) {
   try {
     const senderId = await resolveUserId(request);
@@ -54,30 +63,79 @@ export async function POST(request) {
     const cleanInput = String(recipientRaw).trim();
     let targetRecipientId = null;
 
+    // 1. Resolve Recipient (Dual-lookup: Auth Admin email registry + profile fallback)
     if (cleanInput.includes("@")) {
       const cleanEmail = cleanInput.toLowerCase();
-      const { data: foundProfile, error: profileErr } = await supabaseAdmin
-        .from("user_profiles")
-        .select("id, role, active_roles, email")
-        .eq("email", cleanEmail)
-        .maybeSingle();
 
-      if (profileErr || !foundProfile) {
+      // Check auth.admin first (where emails reside in Supabase Auth)
+      if (supabaseAdmin.auth?.admin?.listUsers) {
+        try {
+          const { data: authData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+          const matchedUser = authData?.users?.find(
+            (u) => u.email && u.email.toLowerCase() === cleanEmail
+          );
+          if (matchedUser?.id) {
+            targetRecipientId = matchedUser.id;
+          }
+        } catch (authErr) {
+          console.warn("[BADGE TRANSFER] auth.admin.listUsers warning:", authErr?.message);
+        }
+      }
+
+      // Fallback: check user_profiles if email is stored on the profile row
+      if (!targetRecipientId) {
+        try {
+          const { data: foundProfile } = await supabaseAdmin
+            .from("user_profiles")
+            .select("id, role, active_roles, email")
+            .eq("email", cleanEmail)
+            .maybeSingle();
+
+          if (foundProfile?.id) {
+            targetRecipientId = foundProfile.id;
+          }
+        } catch {
+          // Column may not exist on user_profiles
+        }
+      }
+
+      if (!targetRecipientId) {
         return NextResponse.json(
           { error: `Recipient with email "${cleanEmail}" not found on ScoutIt.` },
           { status: 404 }
         );
       }
-      targetRecipientId = foundProfile.id;
     } else {
       targetRecipientId = cleanInput;
     }
 
-    if (senderId === targetRecipientId) {
+    // 2. Strict Self-Transfer Prevention
+    if (String(senderId).trim().toLowerCase() === String(targetRecipientId).trim().toLowerCase()) {
       return NextResponse.json({ error: "Cannot transfer a charter seat to yourself." }, { status: 400 });
     }
 
-    // 2. Verify Sender Ownership
+    // 3. Verify Recipient Profile Standing & Exclusions
+    const { data: recipientProfile, error: profileErr } = await supabaseAdmin
+      .from("user_profiles")
+      .select("id, role, active_roles, is_banned, status, archived_at")
+      .eq("id", targetRecipientId)
+      .maybeSingle();
+
+    if (profileErr || !recipientProfile) {
+      return NextResponse.json(
+        { error: "Recipient account not found or has not completed initial profile setup." },
+        { status: 404 }
+      );
+    }
+
+    if (recipientProfile.is_banned === true || recipientProfile.status === "suspended" || recipientProfile.archived_at) {
+      return NextResponse.json(
+        { error: "Cannot transfer charter seat to a suspended, banned, or deactivated account." },
+        { status: 403 }
+      );
+    }
+
+    // 4. Verify Sender Ownership
     const { data: senderBadge, error: senderBadgeErr } = await supabaseAdmin
       .from("user_badges")
       .select("id, user_id, badge_id, seat_number, is_transferable, transfer_locked_until")
@@ -96,7 +154,7 @@ export async function POST(request) {
       );
     }
 
-    // 3. Verify Vesting / Cooldown Lock
+    // 5. Verify Vesting / Cooldown Lock
     if (senderBadge.transfer_locked_until) {
       const lockDate = new Date(senderBadge.transfer_locked_until);
       if (lockDate.getTime() > Date.now()) {
@@ -110,15 +168,9 @@ export async function POST(request) {
       }
     }
 
-    // 4. Verify Recipient Role Eligibility
+    // 6. Verify Recipient Role Eligibility
     const required = REQUIRED_ROLES[badgeId];
     if (required) {
-      const { data: recipientProfile } = await supabaseAdmin
-        .from("user_profiles")
-        .select("role, active_roles")
-        .eq("id", targetRecipientId)
-        .maybeSingle();
-
       const userRoles = new Set(
         [recipientProfile?.role, ...(Array.isArray(recipientProfile?.active_roles) ? recipientProfile.active_roles : [])]
           .filter(Boolean)
@@ -133,7 +185,7 @@ export async function POST(request) {
       }
     }
 
-    // 5. Enforce Strict "One Pioneer Per Account" on Recipient
+    // 7. Enforce Strict "One Pioneer Per Account" on Recipient
     if (isPioneerBadge(badgeId)) {
       const { data: recipientBadges } = await supabaseAdmin
         .from("user_badges")
@@ -142,25 +194,27 @@ export async function POST(request) {
 
       if (hasAnyPioneerBadge(recipientBadges)) {
         return NextResponse.json(
-          { error: "Recipient already holds a Pioneer Charter. Accounts are strictly limited to one Pioneer seat." },
+          { error: "Recipient already holds a Pioneer Charter. Accounts are strictly limited to one Pioneer seat across all cohorts." },
           { status: 409 }
         );
       }
     }
 
-    // 6. Execute Transfer via Atomic RPC
+    // 8. Execute Transfer via Atomic RPC
+    const cleanNotes = notes ? String(notes).trim().slice(0, 500) : "Member portal secondary transfer";
     const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc("transfer_pioneer_badge_atomic", {
       p_from_user_id: senderId,
       p_to_user_id: targetRecipientId,
       p_badge_id: badgeId,
-      p_notes: notes || "Transfer executed via member portal",
+      p_notes: cleanNotes,
     });
 
     let transferredRecord = null;
     if (!rpcError && rpcResult && rpcResult.length > 0) {
       const outcome = rpcResult[0];
       if (!outcome.success) {
-        return NextResponse.json({ error: outcome.error_code || "Transfer failed" }, { status: 400 });
+        const errMessage = ERROR_MESSAGES[outcome.error_code] || outcome.error_code || "Transfer failed";
+        return NextResponse.json({ error: errMessage }, { status: 400 });
       }
       transferredRecord = outcome.badge_record;
     } else {
@@ -190,7 +244,7 @@ export async function POST(request) {
           from_user_id: senderId,
           to_user_id: targetRecipientId,
           status: "completed",
-          notes: notes || "Member portal secondary transfer",
+          notes: cleanNotes,
         });
       } catch (auditErr) {
         console.warn("[BADGE TRANSFER] Transfer audit log warning:", auditErr?.message);
