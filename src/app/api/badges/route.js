@@ -2,11 +2,46 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { BADGE_DEFINITIONS } from "@/lib/BadgeEngine";
 
+// Bounded in-memory cache for high-concurrency server protection
+let cachedDefinitions = null;
+let cachedAt = 0;
+const CACHE_TTL_MS = 15_000; // 15 seconds
+
+/**
+ * Invalidate the in-memory cache so subsequent reads see fresh claims immediately.
+ */
+export function invalidateBadgesCache() {
+  cachedDefinitions = null;
+  cachedAt = 0;
+}
+
 // Public: returns badge definitions merged with real claimed counts from user_badges and database catalog.
 export async function GET() {
   try {
+    const now = Date.now();
+    if (cachedDefinitions && now - cachedAt < CACHE_TTL_MS) {
+      return NextResponse.json(
+        { definitions: cachedDefinitions },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=15, stale-while-revalidate=60",
+            "X-Cache": "HIT",
+          },
+        }
+      );
+    }
+
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+      // Graceful fallback to static code catalog if database is temporarily unavailable
+      return NextResponse.json(
+        { definitions: Object.values(BADGE_DEFINITIONS) },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=5, stale-while-revalidate=15",
+            "X-Cache": "FALLBACK",
+          },
+        }
+      );
     }
 
     // 1. Fetch real claimed counts from user_badges
@@ -16,7 +51,14 @@ export async function GET() {
 
     if (countErr) {
       console.error("[BADGES API] Failed to fetch claim counts:", countErr);
-      return NextResponse.json({ error: "Failed to load badge counts" }, { status: 500 });
+      if (cachedDefinitions) {
+        // Return stale cache if DB count fails, preventing public site 500 error
+        return NextResponse.json(
+          { definitions: cachedDefinitions },
+          { headers: { "X-Cache": "STALE-ERROR-FALLBACK" } }
+        );
+      }
+      return NextResponse.json({ definitions: Object.values(BADGE_DEFINITIONS) }, { status: 200 });
     }
 
     const claimedCounts = {};
@@ -52,8 +94,7 @@ export async function GET() {
       });
     }
 
-    // Only the PIONEER_* cohorts are live-claimable through /api/badges/claim; FOUNDING_SEEKER
-    // and ALPHA_CARTOGRAPHER are historical/pre-launch cohorts unless database records exist.
+    // Compute status and caps
     const definitions = Array.from(mergedMap.values()).map((def) => {
       const isPioneer = def.id.startsWith("PIONEER_");
       const realClaimed = claimedCounts[def.id] || (isPioneer ? 0 : def.claimed || 0);
@@ -68,9 +109,23 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ definitions });
+    cachedDefinitions = definitions;
+    cachedAt = Date.now();
+
+    return NextResponse.json(
+      { definitions },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=15, stale-while-revalidate=60",
+          "X-Cache": "MISS",
+        },
+      }
+    );
   } catch (err) {
     console.error("[BADGES API] Error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { definitions: Object.values(BADGE_DEFINITIONS) },
+      { status: 200 }
+    );
   }
 }

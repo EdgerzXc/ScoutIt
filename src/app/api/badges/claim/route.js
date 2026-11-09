@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+import { invalidateBadgesCache } from "@/app/api/badges/route";
 import {
   BADGE_DEFINITIONS,
   isPioneerBadge,
   hasAnyPioneerBadge,
   formatCharterSeatLabel,
 } from "@/lib/BadgeEngine";
+
+const checkClaimRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 5000 });
 
 const REQUIRED_ROLES = {
   PIONEER_BROKER: ["broker"],
@@ -19,6 +24,15 @@ export async function POST(request) {
     const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    const ip = clientIp(request);
+    const rate = checkClaimRate(`claim:${ip}:${userId}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many claim attempts. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 60) } }
+      );
     }
 
     const { badgeId } = await request.json();
@@ -146,6 +160,8 @@ export async function POST(request) {
       .from("user_badges")
       .select("badge_id, seat_number, is_transferable, earned_at")
       .eq("user_id", userId);
+
+    invalidateBadgesCache();
 
     return NextResponse.json({
       success: true,

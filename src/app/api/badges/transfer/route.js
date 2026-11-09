@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+import { invalidateBadgesCache } from "@/app/api/badges/route";
 import {
   BADGE_DEFINITIONS,
   isPioneerBadge,
   hasAnyPioneerBadge,
   formatCharterSeatLabel,
 } from "@/lib/BadgeEngine";
+
+const checkTransferRate = createRateLimiter({ limit: 5, windowMs: 60_000, maxKeys: 2000 });
 
 const REQUIRED_ROLES = {
   PIONEER_BROKER: ["broker"],
@@ -19,6 +24,15 @@ export async function POST(request) {
     const senderId = await resolveUserId(request);
     if (!senderId) {
       return NextResponse.json({ error: "Unauthorized: Please sign in." }, { status: 401 });
+    }
+
+    const ip = clientIp(request);
+    const rate = checkTransferRate(`transfer:${ip}:${senderId}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many transfer attempts. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 60) } }
+      );
     }
 
     if (!supabaseAdmin) {
@@ -197,6 +211,8 @@ export async function POST(request) {
     } catch {
       // Notification is non-blocking
     }
+
+    invalidateBadgesCache();
 
     return NextResponse.json({
       success: true,

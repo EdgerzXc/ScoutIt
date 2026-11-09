@@ -73,7 +73,7 @@ export async function loadPublicProfile(identifier) {
   }
 
   return {
-    data: { ...data, is_pilot_participant: isPilotParticipant, badges: badgeRows.map((b) => ({ id: b.badge_id, minted_at: b.earned_at })) },
+    data: { ...data, is_pilot_participant: isPilotParticipant, badges: badgeRows.map((b) => ({ id: b.badge_id, seat_number: b.seat_number, minted_at: b.earned_at })) },
     error: null,
   };
 }

@@ -8,7 +8,7 @@ export async function publicBadgeGrantsByUserId(userIds) {
   if (!ids.length || !supabaseAdmin) return grants;
   const { data, error } = await supabaseAdmin
     .from("user_badges")
-    .select("user_id, badge_id, earned_at")
+    .select("user_id, badge_id, seat_number, earned_at")
     .in("user_id", ids);
   if (error) {
     console.warn("[professional provenance] Public badge grants could not be resolved:", error.code || error.message);
@@ -16,7 +16,7 @@ export async function publicBadgeGrantsByUserId(userIds) {
   }
   for (const row of data || []) {
     const current = grants.get(row.user_id) || [];
-    current.push({ id: row.badge_id, minted_at: row.earned_at });
+    current.push({ id: row.badge_id, seat_number: row.seat_number, minted_at: row.earned_at });
     grants.set(row.user_id, current);
   }
   return grants;

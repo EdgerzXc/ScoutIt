@@ -38,6 +38,22 @@ describe("professional directory truth contract", () => {
     expect(record.badges).toEqual([{ id: "pioneer", label: "The Pioneer", minted_at: "2026-08-01T00:00:00Z", source: "ScoutIt badge grant" }]);
   });
 
+  it("normalizes Pioneer Charters with sequential seat numbers", () => {
+    const record = normalizeSupabaseProfessional({
+      id: "u-creator",
+      display_name: "Architect Vance",
+      badges: [
+        { id: "PIONEER_CREATOR", seat_number: 3, minted_at: "2026-11-09T00:00:00Z" },
+        { id: "dealmaker" },
+      ],
+    }, "photographer");
+
+    expect(record.badges).toEqual([
+      { id: "PIONEER_CREATOR", seat_number: 3, label: "Pioneer Creator · Charter #003", minted_at: "2026-11-09T00:00:00Z", source: "ScoutIt badge grant" },
+      { id: "dealmaker", label: "Dealmaker", source: "ScoutIt badge grant" },
+    ]);
+  });
+
   it("only emits named, sourced, fresh activity", () => {
     const now = new Date("2026-08-23T00:00:00.000Z");
     expect(activitySignal({ label: "Responded recently", observedAt: "2026-08-10", source: "Inquiry response log" }, now)).not.toBeNull();

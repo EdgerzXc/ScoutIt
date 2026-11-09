@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 import {
   BADGE_DEFINITIONS,
   isPioneerBadge,
   hasAnyPioneerBadge,
 } from "@/lib/BadgeEngine";
+
+const checkApplyRate = createRateLimiter({ limit: 5, windowMs: 600_000, maxKeys: 2000 });
 
 const REQUIRED_ROLES = {
   PIONEER_BROKER: ["broker"],
@@ -18,6 +22,15 @@ export async function POST(request) {
     const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Please sign in." }, { status: 401 });
+    }
+
+    const ip = clientIp(request);
+    const rate = checkApplyRate(`apply:${ip}:${userId}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many application submissions. Please wait a few minutes before submitting another dossier." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 600) } }
+      );
     }
 
     if (!supabaseAdmin) {

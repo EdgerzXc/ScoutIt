@@ -41,7 +41,7 @@ export async function GET(request) {
     // as public_roles: service-role, public profiles only.
     const { data: badgeRows } = await supabaseAdmin
       .from("user_badges")
-      .select("badge_id, earned_at")
+      .select("badge_id, seat_number, earned_at")
       .eq("user_id", userId);
     // Cohort membership itself stays service-role-only. Public profiles receive
     // only this boolean provenance signal so invited testers cannot be mistaken

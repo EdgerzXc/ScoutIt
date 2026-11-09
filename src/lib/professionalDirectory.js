@@ -1,3 +1,5 @@
+import { formatCharterSeatLabel } from "@/lib/BadgeEngine";
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const PROFESSIONAL_CATEGORIES = Object.freeze({
@@ -55,6 +57,11 @@ export const PROFESSIONAL_CATEGORIES = Object.freeze({
 
 export const PUBLIC_BADGE_LABELS = Object.freeze({
   pioneer: "The Pioneer",
+  PIONEER_BROKER: "Pioneer Advisor",
+  PIONEER_OWNER: "Pioneer Landlord",
+  PIONEER_CREATOR: "Pioneer Creator",
+  FOUNDING_SEEKER: "Founding Seeker",
+  ALPHA_CARTOGRAPHER: "Alpha Cartographer",
   master_scout: "Master Scout",
   guildmaster: "The Guildmaster",
   spatial_analyst: "Spatial Analyst",
@@ -125,7 +132,15 @@ export function normalizeSupabaseProfessional(profile, category) {
     badges: (Array.isArray(profile.badges) ? profile.badges : [])
       .map((badge) => typeof badge === "string" ? { id: badge } : badge)
       .filter((badge) => badge?.id && PUBLIC_BADGE_LABELS[badge.id])
-      .map((badge) => ({ ...badge, label: PUBLIC_BADGE_LABELS[badge.id], source: "ScoutIt badge grant" })),
+      .map((badge) => {
+        const baseLabel = PUBLIC_BADGE_LABELS[badge.id];
+        const seatLabel = badge.seat_number ? formatCharterSeatLabel(badge.seat_number) : null;
+        return {
+          ...badge,
+          label: seatLabel ? `${baseLabel} · ${seatLabel}` : baseLabel,
+          source: "ScoutIt badge grant",
+        };
+      }),
     accomplishments: [],
     experience: [],
     availability: typeof profile.provider_availability === "boolean"
