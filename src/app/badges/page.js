@@ -94,7 +94,12 @@ export default function BadgeRegistryPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setUserBadges((data.badges || []).map((b) => ({ id: b.badge_id, minted_at: b.earned_at })));
+        setUserBadges((data.badges || []).map((b) => ({
+          id: b.badge_id,
+          minted_at: b.earned_at,
+          seat_number: b.seat_number,
+          is_transferable: b.is_transferable,
+        })));
         // Refresh real counts so the progress bar reflects the new claim immediately.
         fetch("/api/badges")
           .then((r) => r.json())

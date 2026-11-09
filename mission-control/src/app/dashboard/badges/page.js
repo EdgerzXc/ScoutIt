@@ -49,11 +49,9 @@ export default async function BadgesPage() {
       </div>
 
       <div className="text-xs text-white/70 bg-[#121212] border border-white/5 rounded-xl p-4">
-        Badges created or edited here don&apos;t automatically appear on the public site yet —
-        scoutit.ph still reads its badge catalog from <code>src/lib/badges.js</code> and{" "}
-        <code>src/lib/BadgeEngine.js</code>. This screen manages the catalog and who&apos;s been
-        awarded what; wiring the public site to read from this table is a follow-up main-app
-        change.
+        Badges and operational perks configured here synchronize directly with the public registry at{" "}
+        <code>/badges</code> and the Member Vault of Honor via <code>/api/badges</code>. Manage cohort caps,
+        perk matrices, manual awards, and charter applications below.
       </div>
 
       {/* ── Charter Applications Intake Queue ── */}

@@ -255,7 +255,9 @@ export default function VaultOfHonor() {
               const Icon = badge.icon;
               const seatLabel = badgeData?.seat_number ? formatCharterSeatLabel(badgeData.seat_number) : null;
               const perks = PIONEER_PERKS[badge.id] || null;
-              const isTransferable = Boolean(badgeData?.is_transferable);
+              const isTransferable = badgeData?.is_transferable !== undefined && badgeData?.is_transferable !== null
+                ? Boolean(badgeData.is_transferable)
+                : Boolean(badge.isPioneer || perks?.is_transferable);
 
               return (
                 <div
