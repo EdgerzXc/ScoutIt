@@ -8,9 +8,18 @@ import ScoutItMark from "@/components/brand/ScoutItMark";
 import AmbientRail from "@/components/layout/ambient/AmbientRail";
 import { menuGroups } from "@/lib/navigationManifest";
 
+export const DEFAULT_AMBIENT_CONTEXT = Object.freeze({
+  key: "global:bgc-taguig",
+  source: "property",
+  latitude: 14.5492,
+  longitude: 121.0494,
+  shortName: "BGC",
+});
+
 export default function Header({ ambientContext = null }) {
   const router = useRouter();
   const pathname = usePathname();
+  const activeAmbient = ambientContext || DEFAULT_AMBIENT_CONTEXT;
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
@@ -200,7 +209,7 @@ export default function Header({ ambientContext = null }) {
       </div>
 
       <div className="header-center">
-        <AmbientRail user={user} context={ambientContext} />
+        <AmbientRail user={user} context={activeAmbient} />
       </div>
 
       <nav className="header-nav" ref={menuRef} aria-label="Primary navigation">
@@ -646,7 +655,11 @@ export default function Header({ ambientContext = null }) {
           }
 
           .header-center {
-            display: none;
+            display: flex;
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            justify-content: center;
           }
 
           .header-nav {
@@ -740,7 +753,11 @@ export default function Header({ ambientContext = null }) {
            which keeps the proven sticky element and changes what is inside it. */
         @media (max-width: 560px) {
           .header-center {
-            display: none;
+            display: flex;
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            justify-content: center;
           }
         }
 

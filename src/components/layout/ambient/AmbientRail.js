@@ -109,7 +109,13 @@ export default function AmbientRail({ user, context = null }) {
         <button type="button" className="ambient-nav" onClick={() => previous(true)} aria-label="Previous ambient information" aria-controls="ambient-rail-status" disabled={items.length <= 1}>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m9.75 3.5-4 4.5 4 4.5" /></svg>
         </button>
-        <div id="ambient-rail-status" className="ambient-viewport" aria-hidden="true">
+        <div
+          id="ambient-rail-status"
+          className="ambient-viewport"
+          aria-hidden="true"
+          onClick={() => next(true)}
+          style={{ cursor: "pointer" }}
+        >
           {currentItem && (
             <span key={currentItem.id} className={`ambient-copy ${transitioning ? "is-leaving" : ""}`}>
               <span className="ambient-copy-desktop">
