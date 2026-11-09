@@ -223,7 +223,7 @@ export default function AmbientRail({ user, context = null }) {
         .ambient-copy-desktop { display: inline-flex; }
         .ambient-copy-mobile { display: none; }
         .ambient-copy-desktop,
-        .ambient-copy-mobile { align-items: center; justify-content: center; min-width: 0; white-space: nowrap; }
+        .ambient-copy-mobile { align-items: center; justify-content: center; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .ambient-token { display: inline-flex; align-items: center; min-width: 0; white-space: nowrap; flex-shrink: 0; transition: color 160ms ease, text-shadow 160ms ease; }
         .ambient-token + .ambient-token::before {
           content: "\\00B7";
@@ -341,36 +341,29 @@ export default function AmbientRail({ user, context = null }) {
           .ambient-track { --ambient-travel: 76px; width: 100px; }
           .ambient-segment { width: 28px; }
         }
-        @media (max-width: 560px) {
+        @media (max-width: 640px) {
           .ambient-rail {
             min-height: 36px;
             box-sizing: border-box;
             padding: 0 4px 2px;
+            max-width: 100%;
           }
           .ambient-copy-desktop { display: none; }
           .ambient-copy-mobile { display: inline-flex; }
 
-          /* The header collapses this row by animating a grid track to 0fr.
-             That only works if the grid item can actually reach zero, and the
-             min-height above stops it dead: the row measured 89px collapsed
-             and 89px open until this was added. The grid track holds the open
-             height, so releasing the min-height costs nothing at rest. */
-
+          /* On mobile phones the rail is tap-to-cycle and touch-swipe interactive,
+             so removing the two arrow buttons returns 64px of space for weather
+             tokens with zero overflow. */
           .ambient-content {
-            grid-template-columns: 32px minmax(0,1fr) 32px;
+            grid-template-columns: minmax(0,1fr);
           }
-          .ambient-nav {
-            position: relative;
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            min-height: 32px;
-            padding: 0;
-          }
-          .ambient-nav svg { width: 9px; height: 9px; }
+          .ambient-nav { display: none; }
           .ambient-copy {
             font-size: 12px;
-            letter-spacing: .06em;
+            letter-spacing: .04em;
+          }
+          .ambient-token + .ambient-token::before {
+            margin: 0 .32em;
           }
         }
 

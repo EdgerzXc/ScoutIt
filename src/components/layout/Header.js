@@ -652,6 +652,7 @@ export default function Header({ ambientContext = null }) {
           .header-left {
             flex: 0 0 auto;
             gap: 6px;
+            min-width: 0;
           }
 
           .header-center {
@@ -660,11 +661,13 @@ export default function Header({ ambientContext = null }) {
             min-width: 0;
             max-width: none;
             justify-content: center;
+            overflow: hidden;
           }
 
           .header-nav {
             flex: 0 0 auto;
             gap: 4px;
+            min-width: 0;
           }
 
 
@@ -685,9 +688,6 @@ export default function Header({ ambientContext = null }) {
           .header-eye-btn {
             display: none;
           }
-          .header-eye-btn.is-homepage {
-            display: flex;
-          }
 
           .header-menu-btn {
             width: 44px;
@@ -696,13 +696,33 @@ export default function Header({ ambientContext = null }) {
           .header-menu-btn svg { width: 13px; height: 13px; }
         }
 
+        @media (max-width: 560px) {
+          /* The word "Back" goes below 560px; the arrow stays and carries the
+             meaning with aria-label, recovering 32px of width so the ambient
+             weather rail renders inline with zero overflow. */
+          .header-back-label {
+            display: none;
+          }
+          .header-back-btn {
+            gap: 0;
+            padding: 0 10px;
+          }
+
+          .header-center {
+            display: flex;
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            justify-content: center;
+            overflow: hidden;
+          }
+        }
+
         @media (max-width: 480px) {
-          .global-header { padding: 4px 8px; gap: 5px; min-height: 44px; }
+          .global-header { padding: 4px 6px; gap: 4px; min-height: 44px; }
           .header-left { gap: 4px; min-width: 0; }
-          /* U-041: the button keeps its 44px floor but may shrink, and the
-             label truncates instead of shoving the rail off its slot. */
-          .header-back-btn { font-size: 12px; padding: 0 6px; min-height: 44px; min-width: 0; letter-spacing: 0.06em; border-radius: 14px; }
-          .header-back-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+          .header-back-label { display: none; }
+          .header-back-btn { font-size: 12px; padding: 0 8px; min-height: 44px; min-width: 0; letter-spacing: 0.06em; border-radius: 14px; gap: 0; }
           .header-menu-btn { width: 44px; height: 44px; }
           .header-menu-btn svg { width: 12px; height: 12px; }
         }
@@ -716,49 +736,10 @@ export default function Header({ ambientContext = null }) {
            gap as shorthands, so an earlier rule here is silently overwritten.
            Third time this ordering has bitten in this file. */
         @media (max-width: 340px) {
-          .global-header { padding: 4px 4px; gap: 2px; }
-          .header-back-btn { padding: 0 4px; }
+          .global-header { padding: 4px 3px; gap: 2px; }
+          .header-left { gap: 2px; }
+          .header-back-btn { padding: 0 6px; }
           .header-eye-btn, .header-menu-btn { width: 44px; height: 44px; }
-        }
-
-        /* ── The ambient rail stops competing for the same row ──────────────
-           It used to sit between the back/brand cluster and the nav buttons,
-           all three on one line, with min-width 0 on this one alone. The other
-           two are touch targets and refuse to shrink, so the rail absorbed
-           every shortfall. Measured: at 320px it was handed 28px to render text
-           needing 93px, and at 390px it got 98px for 128px. The ellipsis
-           everyone saw was the symptom, not the cause. No message could ever
-           have fitted, however short it was written.
-
-           §1.5 of the action plan already prescribes the answer: preserve
-           brand, context and essential actions, and let secondary ambient
-           content shorten, scroll or move rather than be squeezed. So below
-           560px the header wraps and the rail takes its own full-width line.
-
-           560px, not the 640px used above, because the single row still fits
-           between roughly 560 and 640. Wrapping there only bought a taller
-           header for no gain.
-
-           AND THE RAIL SCROLLS AWAY, so the extra line is not paid for on every
-           screen of every page. Once the reader has scrolled past the top, the
-           rail is removed and the header returns to a single compact row. It is
-           ambient information, not navigation, so losing it on scroll costs
-           nothing — and it comes back at the top of the page.
-
-           An earlier attempt made only the control row sticky and left the rail
-           outside it. That does not work: a sticky element is bounded by its
-           parent's box, so with a short static wrapper the "pinned" row simply
-           left with the header. Measured at 390px it sat at -500px after a
-           500px scroll while the 900px header held at 0. Hence this approach,
-           which keeps the proven sticky element and changes what is inside it. */
-        @media (max-width: 560px) {
-          .header-center {
-            display: flex;
-            flex: 1 1 0%;
-            min-width: 0;
-            max-width: none;
-            justify-content: center;
-          }
         }
 
 

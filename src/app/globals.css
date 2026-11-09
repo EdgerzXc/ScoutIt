@@ -5006,26 +5006,28 @@ button:disabled, button[disabled], [aria-disabled="true"], .disabled-state {
   .header-left {
     flex: 0 0 auto;
     gap: 6px;
+    min-width: 0;
   }
   /* The compact header already runs a back button, brand, centre slot and nav
      inside 52px at 4px gaps. The mark is the only piece carrying nothing the
      wordmark doesn't, so it is the one that gives up the space. */
-  .global-header .header-brand > span:first-child { display: none; }
+  .global-header .header-brand > span:first-child { display: none !important; }
   .header-center {
+    display: flex;
     flex: 1 1 0%;
     max-width: none;
     min-width: 0;
     min-height: 0;
+    justify-content: center;
+    overflow: hidden;
   }
   .header-nav {
     flex: 0 0 auto;
     gap: 4px;
+    min-width: 0;
   }
   .header-eye-btn {
     display: none !important;
-  }
-  .header-eye-btn.is-homepage {
-    display: flex !important;
   }
   .ambient-rail {
     min-height: 36px;

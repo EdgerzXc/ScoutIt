@@ -198,9 +198,9 @@ export async function POST(request) {
       const safeSubject = escapeHtml(finalSubject || "no subject");
       const safeMessage = escapeHtml(finalMessage).replace(/\n/g, "<br/>");
       const emailHeading = isVipPioneer
-        ? "🚨 VIP Pioneer Support SLA Ticket"
+        ? "[VIP PIONEER] Support SLA Ticket"
         : topic === "support"
-        ? "🛠️ Inbound Direct Support Ticket"
+        ? "[DIRECT SUPPORT] Inbound Support Ticket"
         : "Someone used the contact form";
 
       const result = await sendEmail({

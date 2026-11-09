@@ -41,4 +41,23 @@ describe("Mobile Header Weather App & Ambient Rail Invariant", () => {
     expect(ambientRailSource).toContain("onTouchEnd");
     expect(ambientRailSource).toContain("onClick={() => next(true)}");
   });
+
+  it("ensures mobile header layout prevents word overflow", () => {
+    // 1. Back button label is hidden below 560px/480px to prevent squeezing the row
+    expect(headerSource).toContain(".header-back-label {");
+    expect(headerSource).toContain("display: none;");
+
+    // 2. Eye button is hidden on mobile viewports (<= 640px)
+    const media640Eye = headerSource.match(/@media\s*\(max-width:\s*640px\)[\s\S]*?\.header-eye-btn\s*\{([^}]*)\}/);
+    expect(media640Eye, "640px media query for .header-eye-btn should exist").not.toBeNull();
+    expect(media640Eye[1]).toContain("display: none");
+
+    // 3. AmbientRail on mobile (<= 640px) switches to mobile copy and hides arrows
+    const ambientRailPath = path.resolve(process.cwd(), "src/components/layout/ambient/AmbientRail.js");
+    const ambientRailSource = fs.readFileSync(ambientRailPath, "utf-8");
+    const ambientMedia640 = ambientRailSource.match(/@media\s*\(max-width:\s*640px\)[\s\S]*?\.ambient-copy-mobile\s*\{([^}]*)\}/);
+    expect(ambientMedia640).not.toBeNull();
+    expect(ambientMedia640[1]).toContain("display: inline-flex");
+    expect(ambientRailSource).toMatch(/@media\s*\(max-width:\s*640px\)[\s\S]*?\.ambient-nav\s*\{\s*display:\s*none;\s*\}/);
+  });
 });
