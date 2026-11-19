@@ -1099,16 +1099,14 @@ export default function MissionControlMode() {
                      <Activity size={20} className="text-emerald-400" />
                    </div>
                    <div>
-                     <h3 className="text-white font-medium text-sm">Intel Synergy</h3>
-                     {inventoryStats.saved_intel_count > 0 ? (
-                       <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-                         {inventoryStats.saved_intel_count} intel {inventoryStats.saved_intel_count === 1 ? "report is" : "reports are"} saved against your properties. Cross-referencing them against market movement arrives with live analytics.
-                       </p>
-                     ) : (
-                       <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-                         No intel saved yet. Save market intel from your Master Property Pages and this panel will surface patterns across your scope.
-                       </p>
-                     )}
+                     <h3 className="text-white font-medium text-sm">Board saves</h3>
+                     <p className="text-xs text-text-secondary mt-2 leading-relaxed">
+                       {inventoryStats.saved_intel_count == null
+                         ? "The Board save count is temporarily unavailable."
+                         : inventoryStats.saved_intel_count === 0
+                           ? "No Board saves for your listings yet."
+                           : `${inventoryStats.saved_intel_count} Board ${inventoryStats.saved_intel_count === 1 ? "save" : "saves"} across your listings.`}
+                     </p>
                    </div>
                 </div>
               </GlassPanel>

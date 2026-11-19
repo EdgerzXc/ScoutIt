@@ -154,10 +154,10 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
       expect(content).toContain("redis.get(CMS_PUBLISHER_REBUILD_KEY)");
     });
 
-    test("GAP-91: dashboard/inventory resolves saved_intel across id, slug, canonical_slug, and airtable_record_id", () => {
+    test("GAP-91: dashboard inventory uses saved_intel property UUIDs", () => {
       const content = read("src/app/api/dashboard/inventory/route.js");
       expect(content).toContain("saved_intel");
-      expect(content).toContain("saved_count: savedCount");
+      expect(content).toContain("saves.byProperty.get(property.id)");
     });
 
     test("GAP-92: bulk-insert enforces MAX_BATCH_SIZE=100, strips CSV formula prefixes, and sets draft/pending status", () => {
