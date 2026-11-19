@@ -98,11 +98,7 @@ export default async function ContactQueuePage({ searchParams }) {
   }
 
   function isVipMessage(m) {
-    const hasSubjectFlag = m.subject?.includes("[VIP PIONEER");
-    const hasMessageFlag = m.message?.includes("VIP Tier:") || m.message?.includes("vip_support");
-    const badges = m.user_id ? userBadgesMap[m.user_id] || [] : [];
-    const hasPioneerBadge = badges.some((b) => b.badge_id?.toLowerCase().includes("pioneer"));
-    return hasSubjectFlag || hasMessageFlag || hasPioneerBadge;
+    return Boolean(getPioneerCharterBadge(m.user_id));
   }
 
   function isSupportMessage(m) {
@@ -123,7 +119,10 @@ export default async function ContactQueuePage({ searchParams }) {
   function getPioneerCharterBadge(userId) {
     if (!userId) return null;
     const badges = userBadgesMap[userId] || [];
-    return badges.find((b) => b.badge_id?.toLowerCase().includes("pioneer")) || null;
+    return badges.find(({ badge_id: badgeId }) => {
+      const id = badgeId?.toUpperCase();
+      return id === "FOUNDING_SEEKER" || id?.includes("PIONEER");
+    }) || null;
   }
 
   // Telemetry KPIs

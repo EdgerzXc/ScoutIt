@@ -30,15 +30,14 @@ function routeHasPage(pathname) {
   return candidates.some((directory) => existsSync(join(directory, "page.js")));
 }
 
-describe("same-origin navigation contracts", () => {
-  const sources = sourceFiles(SRC_ROOT);
+const sources = sourceFiles(SRC_ROOT).map((file) => [file, readFileSync(file, "utf8")]);
 
+describe("same-origin navigation contracts", () => {
   it("points every literal page link at an App Router page", () => {
     const broken = [];
     const hrefPattern = /\bhref\s*(?:=|:)\s*["'](\/[^"'?#]*)["']/g;
 
-    for (const file of sources) {
-      const source = readFileSync(file, "utf8");
+    for (const [file, source] of sources) {
       for (const match of source.matchAll(hrefPattern)) {
         const pathname = match[1].replace(/\/$/, "") || "/";
         if (pathname.startsWith("/api/") || pathname.startsWith("/_next/")) continue;
@@ -55,8 +54,7 @@ describe("same-origin navigation contracts", () => {
     const offenders = [];
     const intelPattern = /["']\/intel\/[^"'${}?#]+["']/g;
 
-    for (const file of sources) {
-      const source = readFileSync(file, "utf8");
+    for (const [file, source] of sources) {
       if (intelPattern.test(source)) offenders.push(relative(process.cwd(), file));
     }
 

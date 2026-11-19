@@ -58,25 +58,18 @@ export function listSrcJs(root) {
 
 const rel = (root, full) => path.relative(root, full).replaceAll("\\", "/");
 
-export function filesWithRawAccentHex(root = process.cwd()) {
-  return listSrcJs(root)
-    .filter((f) => RAW_ACCENT_HEX.test(stripCode(fs.readFileSync(f, "utf8"))))
-    .map((f) => rel(root, f))
-    .sort();
-}
-
-export function filesWithEmoji(root = process.cwd()) {
-  return listSrcJs(root)
-    .filter((f) => EMOJI_RE.test(stripCode(fs.readFileSync(f, "utf8"))))
-    .map((f) => rel(root, f))
-    .sort();
-}
-
-export function filesWithImgMissingAlt(root = process.cwd()) {
-  return listSrcJs(root)
-    .filter((f) => IMG_WITHOUT_ALT_RE.test(stripCode(fs.readFileSync(f, "utf8"))))
-    .map((f) => rel(root, f))
-    .sort();
+export function scanDesignDebt(root = process.cwd()) {
+  const rawAccentHex = [];
+  const emoji = [];
+  const imagesWithoutAlt = [];
+  for (const file of listSrcJs(root).sort()) {
+    const name = rel(root, file);
+    const source = stripCode(fs.readFileSync(file, "utf8"));
+    if (RAW_ACCENT_HEX.test(source)) rawAccentHex.push(name);
+    if (EMOJI_RE.test(source)) emoji.push(name);
+    if (IMG_WITHOUT_ALT_RE.test(source)) imagesWithoutAlt.push(name);
+  }
+  return { rawAccentHex, emoji, imagesWithoutAlt };
 }
 
 // Frozen 2026-09-09. Grandfathered, convert-on-touch only

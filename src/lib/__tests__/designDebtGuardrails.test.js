@@ -3,11 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   BASELINE_EMOJI_FILES,
   BASELINE_HEX_FILES,
-  filesWithEmoji,
-  filesWithImgMissingAlt,
-  filesWithRawAccentHex,
+  scanDesignDebt,
 } from "../../../scripts/guard-design-debt.mjs";
 import { filesWithTransitionAll } from "../../../scripts/name-transition-properties.mjs";
+import surfaces from "../../../scripts/approved-surfaces.json";
 
 // A-098 — design-debt guardrails, no sweeps on locked surfaces. The audit
 // measured wide drift; the fix policy is convert-on-touch only, and what
@@ -20,15 +19,17 @@ import { filesWithTransitionAll } from "../../../scripts/name-transition-propert
 // surfaces (ShowcaseStage, Metropolis) stay untouched throughout.
 
 const readSrc = (p) => fs.readFileSync(p, "utf8");
+const { rawAccentHex, emoji, imagesWithoutAlt } = scanDesignDebt();
+const transitionAllFiles = filesWithTransitionAll();
 
 describe("A-098 · no new raw accent hex", () => {
   it("scans a real set of files", () => {
     // A-170 token migration reduced files with raw accent hex from 57 down to 20
-    expect(filesWithRawAccentHex().length).toBeGreaterThan(15);
+    expect(rawAccentHex.length).toBeGreaterThan(15);
   }, 30000);
 
   it("no file outside the frozen baseline introduces one", () => {
-    const fresh = filesWithRawAccentHex().filter(
+    const fresh = rawAccentHex.filter(
       (f) => !BASELINE_HEX_FILES.includes(f),
     );
     expect(fresh).toEqual([]);
@@ -37,11 +38,11 @@ describe("A-098 · no new raw accent hex", () => {
 
 describe("A-098 · no new emoji iconography", () => {
   it("scans a real set of files", () => {
-    expect(filesWithEmoji().length).toBeGreaterThan(40);
+    expect(emoji.length).toBeGreaterThan(40);
   }, 30000);
 
   it("no file outside the frozen baseline introduces one", () => {
-    const fresh = filesWithEmoji().filter(
+    const fresh = emoji.filter(
       (f) => !BASELINE_EMOJI_FILES.includes(f),
     );
     expect(fresh).toEqual([]);
@@ -50,7 +51,7 @@ describe("A-098 · no new emoji iconography", () => {
 
 describe("A-098 · every raw <img> carries an alt", () => {
   it("adjudicated 2026-09-09: all 14 present uses are correct (meaningful alt, or empty alt beside a named heading) — this pins the state", () => {
-    expect(filesWithImgMissingAlt()).toEqual([]);
+    expect(imagesWithoutAlt).toEqual([]);
   });
 });
 
@@ -64,13 +65,9 @@ describe("A-098 · /descent duplicate key is fixed", () => {
 });
 
 describe("A-098 · transition:all stays named except the locked surface", () => {
-  it("leaves `transition: all` only in the locked Showcase surface", async () => {
-    const { default: surfaces } = await import(
-      "../../../scripts/approved-surfaces.json",
-      { with: { type: "json" } }
-    );
+  it("leaves `transition: all` only in the locked Showcase surface", () => {
     const locked = new Set(surfaces.surfaces.map((s) => s.path.replaceAll("\\", "/")));
-    for (const file of filesWithTransitionAll()) {
+    for (const file of transitionAllFiles) {
       expect(locked.has(file)).toBe(true);
     }
   });

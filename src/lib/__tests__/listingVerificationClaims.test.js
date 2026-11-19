@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -122,8 +122,14 @@ describe("A-235 share copy carries the claim", () => {
   });
 
   it("says verified in the promo pack of a confirmed listing", () => {
-    const pack = buildPromoPack(confirmed, "https://scoutit.space/property/some-tower");
-    expect(pack.executiveSummary).toContain("ScoutIt-verified signals on record");
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(NOW);
+      const pack = buildPromoPack(confirmed, "https://scoutit.space/property/some-tower");
+      expect(pack.executiveSummary).toContain("ScoutIt-verified signals on record");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not say verified in a messaging dispatch of an unconfirmed listing", () => {

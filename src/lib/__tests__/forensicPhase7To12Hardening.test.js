@@ -262,13 +262,10 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
       expect(content).toContain("role.eq.broker,active_roles.cs.{broker}");
     });
 
-    test("GAP-66: escapeHtml neutralizes XSS vectors and contact route escapes user-supplied fields", () => {
+    test("GAP-66: escapeHtml neutralizes XSS vectors in the shared email renderer", () => {
       expect(escapeHtml('<script>alert("xss")</script>')).toBe(
         "&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;"
       );
-      const contactContent = read("src/app/api/contact/route.js");
-      expect(contactContent).toContain("escapeHtml(name)");
-      expect(contactContent).toContain("escapeHtml(message)");
     });
 
     test("GAP-67 & GAP-68: seo/readiness rejects unclaimed listings for non-staff and community/signals blocks shadowbanned users", () => {

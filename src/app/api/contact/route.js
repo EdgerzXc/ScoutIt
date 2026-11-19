@@ -45,16 +45,6 @@ const schema = z.object({
   priority: z.enum(["normal", "urgent"]).optional(),
 });
 
-function escapeHtml(str) {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-const safeEscape = escapeHtml;
-
 // A-146: anonymous stranger + stored PII = the loop target. 10/min/IP, the
 // same ceiling as /api/inquiries — generous to humans, closed to loops.
 const checkContactRate = createRateLimiter({ limit: 10, windowMs: 60_000, maxKeys: 20_000 });
@@ -120,18 +110,18 @@ export async function POST(request) {
 
   // Check if sender is signed in and detect Pioneer Charter honors
   let senderUserId = null;
-  let isVipPioneer = topic === "vip_support";
+  let isVipPioneer = false;
   let pioneerSeatLabel = null;
 
   try {
     senderUserId = await resolveUserId(request);
     if (senderUserId && supabaseAdmin) {
-      const { data: userBadges } = await supabaseAdmin
+      const { data: userBadges, error: badgeError } = await supabaseAdmin
         .from("user_badges")
         .select("badge_id, seat_number")
         .eq("user_id", senderUserId);
 
-      const pioneer = getPioneerBadge(userBadges);
+      const pioneer = badgeError ? null : getPioneerBadge(userBadges);
       if (pioneer) {
         isVipPioneer = true;
         if (pioneer.seat_number) {
@@ -142,16 +132,17 @@ export async function POST(request) {
   } catch (authErr) {
     console.warn("[Contact] Sender user resolution warning:", authErr?.message);
   }
+  const supportTopic = topic === "vip_support" && !isVipPioneer ? "support" : topic;
 
   // Intelligently prefix and structure the subject for staff triage in Mission Control
   let finalSubject = (subject || "").trim();
   if (isVipPioneer) {
     const seatTag = pioneerSeatLabel ? ` · ${pioneerSeatLabel}` : "";
     finalSubject = `[VIP PIONEER SUPPORT${seatTag}] ${finalSubject || "Priority SLA Request"}`;
-  } else if (topic === "support") {
+  } else if (supportTopic === "support") {
     const urgencyTag = priority === "urgent" ? " · URGENT" : "";
     finalSubject = `[DIRECT SUPPORT${urgencyTag}] ${finalSubject || "Technical Assistance"}`;
-  } else if (topic === "listing") {
+  } else if (supportTopic === "listing") {
     finalSubject = `[LISTING / CLAIM] ${finalSubject || "Listing Inquiry"}`;
   }
 
@@ -160,7 +151,7 @@ export async function POST(request) {
   // Intelligently embed triage metadata into message if present
   let finalMessage = message;
   const metaLines = [];
-  if (topic && topic !== "general") metaLines.push(`Topic: ${topic}`);
+  if (supportTopic && supportTopic !== "general") metaLines.push(`Topic: ${supportTopic}`);
   if (priority === "urgent") metaLines.push(`Urgency: URGENT / BLOCKING SLA`);
   if (isVipPioneer) metaLines.push(`VIP Tier: Verified Pioneer Charter (${pioneerSeatLabel || "Active"})`);
   if (metaLines.length > 0) {
@@ -193,35 +184,24 @@ export async function POST(request) {
     // Tell a human, without letting that failure reach the sender.
     // Suppressed for spam to save email quota and prevent staff notification noise.
     if (!spamAssessment.isSpam && isEmailConfigured() && process.env.CONTACT_NOTIFY_TO) {
-      const safeName = escapeHtml(name);
-      const safeEmail = escapeHtml(email);
-      const safeSubject = escapeHtml(finalSubject || "no subject");
-      const safeMessage = escapeHtml(finalMessage).replace(/\n/g, "<br/>");
       const emailHeading = isVipPioneer
-        ? "[VIP PIONEER] Support SLA Ticket"
-        : topic === "support"
-        ? "[DIRECT SUPPORT] Inbound Support Ticket"
-        : "Someone used the contact form";
+        ? "VIP Pioneer support ticket"
+        : supportTopic === "support" ? "New support ticket" : "New contact message";
 
-      const result = await sendEmail({
-        to: process.env.CONTACT_NOTIFY_TO,
-        subject: isVipPioneer
-          ? `[VIP SLA] New message from ${safeName} (${pioneerSeatLabel || "Pioneer"})`
-          : `New contact message — ${safeSubject}`,
-        html: renderEmail({
-          heading: emailHeading,
-          // GAP-66: Always HTML-escape sender fields before passing into renderEmail body
-          body: `<p><strong>${safeName}</strong> &lt;${safeEmail}&gt; wrote:</p><p>${safeMessage}</p>`,
-          ctaLabel: "Open the contact queue",
-          // GAP-100: Deep link staff directly to the Mission Control contact queue instead of public form
-          ctaPath: "/dashboard/contact",
-          footnote: isVipPioneer
-            ? "VIP SLA Ticket: Priority resolution required under Terms of Service Section 09."
-            : "Reply from Mission Control → Contact Queue.",
-        }),
-      });
-      if (!result.sent) {
-        console.error("[Contact] Staff notification not sent:", result.error || result.skipped);
+      try {
+        const result = await sendEmail({
+          to: process.env.CONTACT_NOTIFY_TO,
+          subject: isVipPioneer ? "[VIP SLA] New Pioneer support ticket" : emailHeading,
+          html: renderEmail({
+            heading: emailHeading,
+            body: '<p><a href="https://mantle.scoutit.space/dashboard/contact">Open the contact queue</a> to review and reply.</p>',
+          }),
+        });
+        if (!result.sent) {
+          console.error("[Contact] Staff notification not sent:", result.error || result.skipped);
+        }
+      } catch (error) {
+        console.error("[Contact] Staff notification failed:", error?.name);
       }
     }
 

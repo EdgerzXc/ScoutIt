@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -37,10 +37,10 @@ vi.mock("@/lib/turnstile", () => ({
 }));
 
 // Mock email
-vi.mock("@/lib/email", () => ({
+vi.mock("@/lib/email", async (importOriginal) => ({
+  ...await importOriginal(),
   isEmailConfigured: vi.fn().mockReturnValue(true),
   sendEmail: vi.fn().mockResolvedValue({ sent: true }),
-  renderEmail: vi.fn(({ heading, body, footnote }) => `<html><body><h1>${heading}</h1>${body}<p>${footnote}</p></body></html>`),
 }));
 
 // Mock @supabase/supabase-js for auth resolution
@@ -74,8 +74,12 @@ const { sendEmail } = await import("@/lib/email");
 describe("Direct Support & Contact Desk Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.CONTACT_NOTIFY_TO = "ops@scoutit.space";
+    vi.stubEnv("CONTACT_NOTIFY_TO", "ops@scoutit.space");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://fixture.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "fixture-anon-key");
   });
+
+  afterEach(() => vi.unstubAllEnvs());
 
   it("ensures Footer.js routes Direct Support and Contact to /contact instead of dead mailto", () => {
     const footerPath = path.resolve(process.cwd(), "src/components/layout/Footer.js");
@@ -148,9 +152,33 @@ describe("Direct Support & Contact Desk Integration", () => {
 
     expect(sendEmail).toHaveBeenCalledTimes(1);
     const emailArgs = sendEmail.mock.calls[0][0];
-    expect(emailArgs.subject).toContain("[VIP SLA]");
-    expect(emailArgs.subject).toContain("Charter #012");
-    expect(emailArgs.html).toContain("VIP Pioneer Support SLA Ticket");
+    expect(emailArgs.subject).toBe("[VIP SLA] New Pioneer support ticket");
+    expect(emailArgs.html).toContain('href="https://mantle.scoutit.space/dashboard/contact"');
+    expect(JSON.stringify(emailArgs)).not.toMatch(/Charter Owner|pioneer@scoutit\.ph|Charter #012|Escrow settlement|clause 4/);
+  });
+
+  it("routes a guest VIP selection as standard support even if staff mail fails", async () => {
+    sendEmail.mockRejectedValueOnce(new Error("fixture provider failure"));
+    const response = await POST(new Request("https://www.scoutit.space/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": "198.51.100.9" },
+      body: JSON.stringify({
+        name: "Support Visitor",
+        email: "visitor@example.ph",
+        subject: "Listing shows a blank screen",
+        message: "I need help opening the listing on my phone.",
+        turnstileToken: "tok-valid",
+        topic: "vip_support",
+      }),
+    }));
+
+    expect(response.status).toBe(201);
+    expect(__mocks.insertMock).toHaveBeenCalledTimes(1);
+    expect(__mocks.insertMock.mock.calls[0][0]).toMatchObject({
+      subject: "[DIRECT SUPPORT] Listing shows a blank screen",
+      user_id: null,
+    });
+    expect(sendEmail.mock.calls[0][0].subject).toBe("New support ticket");
   });
 
   it("verifies Mission Control contact actions export both setContactStatus and saveStaffNotes with RBAC", async () => {
@@ -164,5 +192,13 @@ describe("Direct Support & Contact Desk Integration", () => {
     expect(content).toContain("export async function saveStaffNotes");
     expect(content).toContain("TIERS.OPS_MANAGER");
     expect(content).toContain("logActionStrict");
+  });
+
+  it("keeps visitor-written priority markers out of Mission Control VIP classification", () => {
+    const pagePath = path.resolve(process.cwd(), "mission-control/src/app/dashboard/contact/page.js");
+    const source = fs.readFileSync(pagePath, "utf8");
+    expect(source).toMatch(/function isVipMessage\(m\) \{\s*return Boolean\(getPioneerCharterBadge\(m\.user_id\)\);\s*\}/);
+    expect(source).toContain("const badges = userBadgesMap[userId] || []");
+    expect(source).toContain('id === "FOUNDING_SEEKER"');
   });
 });
