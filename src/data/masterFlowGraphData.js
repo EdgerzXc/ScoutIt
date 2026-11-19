@@ -8467,28 +8467,32 @@ export const MASTER_FLOW_NODES = [
         "path": "src/app/api/properties/queue/upload/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
       },
       {
         "kind": "API",
         "path": "src/app/api/properties/queue/upload/route.js",
         "symbol": "PATCH",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
       },
       {
         "kind": "API",
         "path": "src/app/api/properties/queue/process/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
       },
       {
         "kind": "API",
         "path": "src/app/api/cron/purge-expired-property-pdf-uploads/route.js",
         "symbol": "GET",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
       }
     ],
     "telemetry": {
@@ -10616,14 +10620,16 @@ export const MASTER_FLOW_NODES = [
         "path": "src/app/api/properties/queue/process/route.js",
         "symbol": "POST",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
       },
       {
         "kind": "API",
         "path": "src/app/api/admin/pdf-verify/route.js",
         "symbol": "GET",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d"
       }
     ],
     "telemetry": {
@@ -15405,7 +15411,8 @@ export const MASTER_FLOW_NODES = [
         "path": "src/app/api/admin/pdf-verify/route.js",
         "symbol": "GET",
         "provenance": "EXTRACTED",
-        "confidence": 1
+        "confidence": 1,
+        "commitSha": "8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d"
       }
     ],
     "telemetry": {

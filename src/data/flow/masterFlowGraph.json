@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "4c0133e102219f3ae65b066f58aa7791ca4a635f",
+  "dataRevision": "1ec2d5dcfeca67f57fea627f916b276f2b971426",
   "lastVerifiedAt": "2026-09-11",
-  "generatedAt": "2026-11-19T10:27:09.123Z",
+  "generatedAt": "2026-11-19T15:58:34.125Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
+    "commitSha": "1ec2d5dcfeca67f57fea627f916b276f2b971426"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
+    "commitSha": "1ec2d5dcfeca67f57fea627f916b276f2b971426"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
+    "commitSha": "1ec2d5dcfeca67f57fea627f916b276f2b971426"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -8645,28 +8645,32 @@
           "path": "src/app/api/properties/queue/upload/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
         },
         {
           "kind": "API",
           "path": "src/app/api/properties/queue/upload/route.js",
           "symbol": "PATCH",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
         },
         {
           "kind": "API",
           "path": "src/app/api/properties/queue/process/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
         },
         {
           "kind": "API",
           "path": "src/app/api/cron/purge-expired-property-pdf-uploads/route.js",
           "symbol": "GET",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
         }
       ],
       "telemetry": {
@@ -10772,14 +10776,16 @@
           "path": "src/app/api/properties/queue/process/route.js",
           "symbol": "POST",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "4c0133e102219f3ae65b066f58aa7791ca4a635f"
         },
         {
           "kind": "API",
           "path": "src/app/api/admin/pdf-verify/route.js",
           "symbol": "GET",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d"
         }
       ],
       "telemetry": {
@@ -15508,7 +15514,8 @@
           "path": "src/app/api/admin/pdf-verify/route.js",
           "symbol": "GET",
           "provenance": "EXTRACTED",
-          "confidence": 1
+          "confidence": 1,
+          "commitSha": "8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d"
         }
       ],
       "telemetry": {
