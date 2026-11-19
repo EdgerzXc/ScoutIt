@@ -20,6 +20,8 @@ const cspHeader = `
     frame-ancestors 'none';
     upgrade-insecure-requests;
 `;
+const contentSecurityPolicy = cspHeader.replace(/\n/g, '');
+const previewNoEvalPolicy = contentSecurityPolicy.replace(" 'unsafe-eval'", '');
 
 const nextConfig = {
   allowedDevOrigins: ['127.0.0.1', '192.168.100.42'],
@@ -99,8 +101,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: cspHeader.replace(/\n/g, ''),
+            value: contentSecurityPolicy,
           },
+          ...(process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'preview'
+            ? [{ key: 'Content-Security-Policy-Report-Only', value: previewNoEvalPolicy }]
+            : []),
           {
             key: 'X-Frame-Options',
             value: 'DENY',
