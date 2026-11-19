@@ -59,16 +59,12 @@ function normalizeArticle(raw) {
 
 export default function DiscoverSearch() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams ? (searchParams.get("search") || searchParams.get("q") || "") : "";
-  const [query, setQuery] = useState(initialQuery);
+  const urlQuery = searchParams?.get("search") || searchParams?.get("q") || "";
+  const [query, setQuery] = useState(urlQuery);
 
   useEffect(() => {
-    if (!searchParams) return;
-    const incoming = searchParams.get("search") || searchParams.get("q");
-    if (typeof incoming === "string" && incoming !== query) {
-      setQuery(incoming);
-    }
-  }, [searchParams]);
+    setQuery(urlQuery);
+  }, [urlQuery]);
   const [event, setEvent] = useState(null);
   const [space, setSpace] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);

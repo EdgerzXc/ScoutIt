@@ -5,6 +5,26 @@ import { test, expect } from '@playwright/test';
 import { trackErrors, expectRealContent, gotoAndSettle, openYourMove } from './helpers';
 
 test.describe('Discovery engine', () => {
+  test('keeps Discover search in sync with browser history', async ({ page }) => {
+    await page.goto('/discover?q=Makati');
+    const search = page.getByRole('searchbox', { name: 'Search intel' });
+    await expect(search).toHaveValue('Makati');
+
+    await search.fill('Cebu');
+    await page.evaluate(() => history.pushState(null, '', '/discover?q=Makati#refine'));
+    await expect(search).toHaveValue('Cebu');
+
+    await page.evaluate(() => history.pushState(null, '', '/discover?search=Siargao'));
+    await expect(search).toHaveValue('Siargao');
+    await page.evaluate(() => history.pushState(null, '', '/discover'));
+    await expect(search).toHaveValue('');
+
+    await page.goBack();
+    await expect(search).toHaveValue('Siargao');
+    await page.goBack();
+    await expect(search).toHaveValue('Makati');
+  });
+
   test('discover page renders and switches categories', async ({ page }) => {
     const errors = trackErrors(page);
     await gotoAndSettle(page, '/discover');
