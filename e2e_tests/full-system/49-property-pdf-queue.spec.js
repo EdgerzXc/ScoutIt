@@ -87,3 +87,63 @@ test('staff download the source before confirming and can retry PDF deletion', a
   await expect(page.getByText('No PDF-assisted drafts awaiting verification.', { exact: false })).toBeVisible();
   expect(attestations).toEqual([{ propertyId, sourceReviewed: true, reviewedDraft }, { propertyId }]);
 });
+
+test('large property PDFs go directly to private storage', async ({ page, baseURL }) => {
+  test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
+  await signInAsMock(page, MOCK_OWNER_EMPTY);
+
+  const uploadId = '87998441-6c10-4a24-ac27-5614c6867355';
+  const propertyId = 'e32a7c21-a388-498a-84f0-3fc62bec83c0';
+  const path = `source_queue_docs/${MOCK_OWNER_EMPTY.id}/${uploadId}.pdf`;
+  const pdf = Buffer.alloc(7 * 1024 * 1024);
+  pdf.write('%PDF-1.4 large browser fixture');
+  const requests = [];
+
+  await page.route('**/api/dashboard/inventory**', (route) => route.fulfill({ json: {
+    properties: [{ id: 'large-pdf-test-listing', owner_id: MOCK_OWNER_EMPTY.id, title: 'Property for Upload', location: 'BGC', space_category: 'commercial', pipeline_status: 'approved', lifecycle_state: 'live', details: {} }],
+    units: [],
+  } }));
+  await page.route('**/api/properties/queue/intake', (route) => {
+    requests.push('relayed');
+    return route.abort();
+  });
+  await page.route('**/api/properties/queue/upload', (route) => {
+    const request = route.request();
+    requests.push(request.method());
+    expect(request.postDataBuffer().length).toBeLessThan(1024);
+    if (request.method() === 'POST') {
+      expect(request.postDataJSON()).toEqual({ filename: 'brochure.pdf', size: pdf.length });
+      return route.fulfill({ json: { uploadId, path, token: 'fixture-token' } });
+    }
+    expect(request.postDataJSON()).toEqual({ uploadId });
+    return route.fulfill({ json: { success: true, propertyId } });
+  });
+  await page.route('**/storage/v1/object/upload/sign/**', (route) => {
+    const request = route.request();
+    const headers = {
+      'access-control-allow-origin': new URL(baseURL).origin,
+      'access-control-allow-methods': 'PUT, OPTIONS',
+      'access-control-allow-headers': '*',
+    };
+    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+    requests.push(request.method());
+    expect(new URL(request.url()).pathname.endsWith(`/property-documents-temp/${path}`)).toBe(true);
+    expect(request.postDataBuffer().length).toBeGreaterThanOrEqual(pdf.length);
+    return route.fulfill({ headers, json: { Key: path } });
+  });
+  await page.route('**/api/properties/queue/process', (route) => {
+    expect(route.request().postDataJSON()).toEqual({ propertyId });
+    requests.push('process');
+    return route.fulfill({ json: { success: true, done: true, propertyId } });
+  });
+
+  await gotoAndSettle(page, '/dashboard');
+  await page.getByRole('button', { name: 'Drop PDF' }).click();
+  const [chooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('button', { name: 'Upload a PDF brochure' }).click(),
+  ]);
+  await chooser.setFiles({ name: 'brochure.pdf', mimeType: 'application/octet-stream', buffer: pdf });
+  await expect(page.getByText('Draft created. Staff verification is required before publication.')).toBeVisible();
+  expect(requests).toEqual(['POST', 'PUT', 'PATCH', 'process']);
+});

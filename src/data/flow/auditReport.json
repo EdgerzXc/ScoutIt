@@ -183,6 +183,7 @@
       "/api/admin/connects-refund",
       "/api/admin/feature-flags",
       "/api/admin/generate-seo",
+      "/api/admin/notifications",
       "/api/admin/osint",
       "/api/admin/pdf-verify",
       "/api/admin/pending",
@@ -197,8 +198,10 @@
       "/api/analytics",
       "/api/auth/complete-onboarding",
       "/api/availability",
+      "/api/badges/apply",
       "/api/badges/claim",
       "/api/badges",
+      "/api/badges/transfer",
       "/api/broker/briefing-log",
       "/api/broker/credential",
       "/api/broker/dossier",
@@ -227,8 +230,11 @@
       "/api/cron/intel-agent",
       "/api/cron/monthly-rollover",
       "/api/cron/osint-scraper",
+      "/api/cron/purge-analytics",
       "/api/cron/purge-chat-messages",
       "/api/cron/purge-contact-messages",
+      "/api/cron/purge-crm-activity",
+      "/api/cron/purge-expired-property-pdf-uploads",
       "/api/cron/recompute-broker-metrics",
       "/api/cron/sweep-pending-requests",
       "/api/cron/verify-prc-status",
@@ -281,7 +287,13 @@
       "/api/professionals/saved",
       "/api/profile/me/role",
       "/api/profile/public-roles",
+      "/api/properties/queue/intake",
+      "/api/properties/queue/process",
+      "/api/properties/queue/status",
+      "/api/properties/queue/upload",
+      "/api/properties/updates/intent",
       "/api/property/claim",
+      "/api/property/claim/upload",
       "/api/property/premium",
       "/api/property/verify",
       "/api/property/[id]/brokers",
@@ -299,6 +311,7 @@
       "/api/spatial/revision",
       "/api/spatial/status",
       "/api/storage/upload",
+      "/api/storage/upload-photo",
       "/api/telemetry/device",
       "/api/user/activate-role",
       "/api/user/blocks",
@@ -368,6 +381,7 @@
       "/property/[id]/via/[contactSlug]",
       "/researchers",
       "/researchers/[researcher-slug]",
+      "/reset-password",
       "/settings",
       "/showcase/chatbox",
       "/showcase",
@@ -378,7 +392,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 202,
+    "totalCodebaseRoutesDiscovered": 216,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],
@@ -476,7 +490,7 @@
     "staleReleasedGraphOnlyRoutes": [
       "/lib/aiListingEngine.js"
     ],
-    "verifiedCodeEvidenceCount": 111,
+    "verifiedCodeEvidenceCount": 110,
     "staleCodeEvidenceCount": 0
   },
   "scores": {
@@ -488,13 +502,14 @@
       "failingItems": []
     },
     "graphEvidenceScore": {
-      "numerator": 111,
+      "numerator": 110,
       "denominator": 145,
-      "percentage": "77%",
+      "percentage": "76%",
       "formula": "verified nodes with existing grounded code evidence / total nodes",
       "failingItems": [
         "sys_velocity_radar",
         "offer_modal",
+        "method_pdf",
         "sys_gemini_ocr_extractor",
         "sys_web_researcher",
         "gate_viewing",
@@ -572,14 +587,14 @@
       "failingItems": []
     },
     "ghostGraphScore": {
-      "numerator": 111,
-      "denominator": 111,
+      "numerator": 110,
+      "denominator": 110,
       "percentage": "100%",
       "formula": "verified nodes with real codebase artifacts / total verified nodes",
       "failingItems": []
     },
     "overallTrustScore": {
-      "percentage": "94.3%",
+      "percentage": "94.0%",
       "formula": "weighted sum: (evidence * 0.25) + (canonical-route * 0.15) + (ghost * 0.15) + (workflow * 0.15) + (guide * 0.15) + (rag * 0.15) - penalties",
       "penalties": {
         "placeholderPredicates": 0,
@@ -589,5 +604,5 @@
       "failingItems": []
     }
   },
-  "auditScore": "94.3% TRUST GROUNDED"
+  "auditScore": "94.0% TRUST GROUNDED"
 }

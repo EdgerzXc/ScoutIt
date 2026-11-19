@@ -1,5 +1,10 @@
 export const PRIVATE_QUEUE_BUCKET = "property-documents-temp";
 export const PRIVATE_QUEUE_PREFIX = "source_queue_docs";
+export const PROPERTY_PDF_MAX_BYTES = 25 * 1024 * 1024;
+
+export function propertyPdfUploadPath(ownerId, uploadId) {
+  return `${PRIVATE_QUEUE_PREFIX}/${ownerId}/${uploadId}.pdf`;
+}
 
 export function resolveQueueDocument(property) {
   const path = property.pdf_source_url;

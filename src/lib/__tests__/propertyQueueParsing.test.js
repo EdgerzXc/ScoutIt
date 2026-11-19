@@ -14,6 +14,7 @@ let updateResult = { data: null, error: null };
 let insertResult = { data: null, error: null };
 let customDownloadHandler = null;
 let customAssimilateHandler = null;
+let extractedPdfText;
 
 function makeQueryBuilder() {
   let isCountQuery = false;
@@ -145,7 +146,7 @@ vi.mock("unpdf", () => ({
     return {};
   },
   extractText: async () => ({
-    text: "Sample Commercial Office Building in BGC Taguig. Price: 15000000. Floor: 350 sqm.",
+    text: extractedPdfText,
     totalPages: 2,
   }),
 }));
@@ -309,6 +310,7 @@ describe("Property Listing Queue · Processing and source retention", () => {
     mockUserId = "test-owner-123";
     customDownloadHandler = null;
     customAssimilateHandler = null;
+    extractedPdfText = "Sample Commercial Office Building in BGC Taguig. Price: 15000000. Floor: 350 sqm.";
     queryResult = {
       data: {
         id: "prop-123",
@@ -428,6 +430,22 @@ describe("Property Listing Queue · Processing and source retention", () => {
     const quarantinePatch = updateOps[updateOps.length - 1][1];
     expect(quarantinePatch.pipeline_status).toBe("quarantined");
     expect(quarantinePatch.details?.quarantine_reason).toBe("corrupt_pdf");
+  });
+
+  it("does not create a listing draft from an image-only PDF", async () => {
+    extractedPdfText = "   ";
+    customAssimilateHandler = vi.fn();
+    const req = new Request("https://scoutit.space/api/properties/queue/process", {
+      method: "POST",
+      body: JSON.stringify({ propertyId: "prop-123" }),
+    });
+
+    const res = await processRoute.POST(req);
+
+    expect(res.status).toBe(422);
+    expect(await res.json()).toMatchObject({ reason: "no_readable_text", quarantined: true });
+    expect(customAssimilateHandler).not.toHaveBeenCalled();
+    expect(dbLog.filter(([op]) => op === "update").at(-1)[1].pipeline_status).toBe("quarantined");
   });
 
   it("quarantines oversize PDF (> 25 MB) without memory buffering", async () => {

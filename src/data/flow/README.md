@@ -1,7 +1,7 @@
 # ScoutIt Flow Knowledge Backbone & Export Bundle
 
 Authoritative export and knowledge bundle representing the complete behavioral and architectural graph of **ScoutIt** (Schema V2.2.0).
-Commit Bound: `9421f1825d2dabe6eeda2b46b87351cda93b579c`
+Commit Bound: `8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d`
 
 ---
 
@@ -34,5 +34,5 @@ Commit Bound: `9421f1825d2dabe6eeda2b46b87351cda93b579c`
 
 ## 🔍 Validation Status
 - **JSON Schema:** Validated with Ajv Strict Mode.
-- **Commit Binding:** `9421f1825d2dabe6eeda2b46b87351cda93b579c`
+- **Commit Binding:** `8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d`
 - **Public Isolation:** Zero internal endpoint or database table leakage.

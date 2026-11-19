@@ -33,6 +33,10 @@
       "schedule": "45 3 * * *"
     },
     {
+      "path": "/api/cron/purge-expired-property-pdf-uploads",
+      "schedule": "15 4 * * *"
+    },
+    {
       "path": "/api/cron/monthly-rollover",
       "schedule": "0 4 1 * *"
     },

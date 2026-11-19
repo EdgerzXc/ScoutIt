@@ -8407,28 +8407,37 @@ export const MASTER_FLOW_NODES = [
     "goals": [
       "owner"
     ],
-    "implementationStatus": "VERIFIED",
-    "purpose": "Upload developer PDF brochure for automated fact extraction by the AI Listing Engine pipeline.",
-    "description": "Receives raw PDF brochure or pitch deck, establishes processing job, and hands off to Gemini OCR extractor.",
+    "implementationStatus": "PARTIAL",
+    "purpose": "Turn an owner PDF into a staff-reviewed listing draft.",
+    "description": "The release candidate accepts a PDF up to 25 MiB. Files above 4 MiB go directly to private Storage with an owner-bound signed upload. A server check validates and queues the file. Hosted acceptance is pending.",
     "actions": [
-      "Upload Developer Pitch Deck PDF",
-      "Initiate AI Listing Job",
-      "Monitor Extraction Progress"
+      "Upload a PDF brochure",
+      "Process the draft",
+      "Check draft status"
     ],
     "conditions": [
-      "PDF file size <= 35MB"
+      "Signed-in owner",
+      "PDF up to 25 MiB"
     ],
     "systems": [
-      "PdfExtractor.js",
-      "ingestExtractor.js"
+      "Supabase Storage",
+      "Property PDF queue"
     ],
     "components": [
-      "PdfExtractor.js",
-      "ingestExtractor.js"
+      "OwnerMode.js",
+      "PropertyUpdateHub.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/properties/queue/intake",
+      "/api/properties/queue/upload",
+      "/api/properties/queue/process",
+      "/api/properties/queue/status",
+      "/api/cron/purge-expired-property-pdf-uploads"
+    ],
     "dataRefs": [
-      "Supabase properties (draft state)"
+      "Supabase properties",
+      "Supabase property_pdf_uploads",
+      "Private property-documents-temp bucket"
     ],
     "database": "Supabase properties (draft state)",
     "auth": "owner",
@@ -8452,6 +8461,34 @@ export const MASTER_FLOW_NODES = [
         "provenance": "EXTRACTED",
         "confidence": 1,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/properties/queue/upload/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/properties/queue/upload/route.js",
+        "symbol": "PATCH",
+        "provenance": "EXTRACTED",
+        "confidence": 1
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/properties/queue/process/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-expired-property-pdf-uploads/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1
       }
     ],
     "telemetry": {
@@ -8493,7 +8530,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_method_pdf_behavior",
-        "text": "Method 4 — PDF Pitch Deck Intake enforces defined owner behavioral contracts and access rules.",
+        "text": "The release candidate accepts a PDF up to 25 MiB. Files above 4 MiB go directly to private Storage with an owner-bound signed upload. A server check validates and queues the file. Hosted acceptance is pending.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "VERIFIED",
         "evidence": [
@@ -8547,7 +8584,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "CODE_GROUNDED",
-    "releaseStatus": "PUBLIC_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "sys_gemini_ocr_extractor",
@@ -10478,35 +10515,38 @@ export const MASTER_FLOW_NODES = [
       "owner"
     ],
     "implementationStatus": "PARTIAL",
-    "purpose": "Coordinates the entire extraction pipeline: OCR ingest, web research, multi-voice council deliberation, and Arbiter routing.",
-    "description": "Built today: an owner uploads a PDF in the Owner workspace; /api/ai/read-pdf extracts its text layer; /api/ai/assimilate makes one Gemini pass that fills the listing fields, leaves a missing fact empty and lists it as a gap; the draft is tagged pdf_assisted and cannot publish until staff verify it against the source in /admin. Not built: web research, the four-voice council and the arbiter.",
+    "purpose": "Extract listing facts from an owner PDF and queue the draft for source review.",
+    "description": "The release candidate extracts the text layer and maps listing fields with Gemini and a deterministic fallback. Staff compare the result with the private source before the owner can publish. Scanned image-only documents require a text-based PDF or manual listing entry.",
     "actions": [
-      "Coordinate AI Sub-Pipelines",
-      "Manage Fact vs Editorial Routing",
-      "Publish Verified Drafts"
+      "Extract PDF text",
+      "Build a draft",
+      "Request staff verification"
     ],
     "conditions": [
       "PDF upload or listing ingestion request"
     ],
     "systems": [
-      "aiListingEngine.js",
-      "ingestExtractor.js",
-      "MultiLlmPipeline.js"
+      "unpdf",
+      "Gemini",
+      "Property PDF queue"
     ],
     "components": [
-      "aiListingEngine.js",
-      "ingestExtractor.js",
-      "MultiLlmPipeline.js"
+      "OwnerMode.js",
+      "PropertyUpdateHub.js"
     ],
-    "apis": [],
+    "apis": [
+      "/api/properties/queue/process",
+      "/api/admin/pdf-verify",
+      "/api/dashboard/publish"
+    ],
     "dataRefs": [
       "Supabase properties"
     ],
     "database": "Supabase properties",
     "auth": "owner",
     "exceptions": [
-      "AI cannot find specific metric (e.g. ceiling height)",
-      "AI Council detects document contradiction"
+      "Unreadable PDF",
+      "Required listing fact is missing from the source"
     ],
     "recovery": [
       "Honest Blank Rule: leaves field empty and flags for human queue or owner override"
@@ -10570,6 +10610,20 @@ export const MASTER_FLOW_NODES = [
         "provenance": "INFERRED",
         "confidence": 0.8,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/properties/queue/process/route.js",
+        "symbol": "POST",
+        "provenance": "EXTRACTED",
+        "confidence": 1
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/admin/pdf-verify/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1
       }
     ],
     "telemetry": {
@@ -10614,7 +10668,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_ai_listing_engine_behavior",
-        "text": "An owner PDF becomes a draft through text extraction and one Gemini pass, and staff must verify it against the source before it publishes. Research, council and arbiter stages are not built.",
+        "text": "The release candidate extracts the text layer and maps listing fields with Gemini and a deterministic fallback. Staff compare the result with the private source before the owner can publish. Scanned image-only documents require a text-based PDF or manual listing entry.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "PARTIAL",
         "evidence": [
@@ -10701,7 +10755,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "TEST_GROUNDED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "sys_ai_council",
@@ -15277,21 +15331,22 @@ export const MASTER_FLOW_NODES = [
       "layer"
     ],
     "implementationStatus": "PARTIAL",
-    "purpose": "Human operator reviews contradictory documents, cross-checks registry, and resolves stalemate.",
-    "description": "Staff open the PDF tab in /admin, see every unverified PDF-assisted draft (/api/admin/pdf-verify GET) and mark one verified against its source (POST, audited). Every PDF draft reaches this queue; there is no council deadlock to route from. Not built: sending a draft back to the owner with a question. The /admin page check is a disclosure, not a gate (A-073); the route itself requires an admin.",
+    "purpose": "Compare a PDF-assisted listing with the owner’s source before publication.",
+    "description": "Staff open PDF Drafts in the Admin Console and compare the draft with a private, short-lived PDF download. The release candidate records the staff actor and draft version before deleting the source. Staff can retry a failed deletion.",
     "actions": [
-      "Inspect Contradictory Records",
-      "Confirm Ground Truth",
-      "Authorize Listing Publication"
+      "Review draft and PDF",
+      "Confirm the comparison",
+      "Retry source deletion when needed"
     ],
     "conditions": [
       "Authenticated staff credentials"
     ],
     "systems": [
-      "MissionControlDashboard.js"
+      "ScoutIt Admin Console",
+      "Supabase Storage"
     ],
     "components": [
-      "MissionControlDashboard.js"
+      "src/app/admin/page.js"
     ],
     "apis": [
       "/api/admin/pdf-verify"
@@ -15302,10 +15357,11 @@ export const MASTER_FLOW_NODES = [
     "database": "Supabase properties",
     "auth": "staff",
     "exceptions": [
-      "Document confirmed fraudulent"
+      "Source unavailable",
+      "Draft changed after opening the review"
     ],
     "recovery": [
-      "Reject listing and ban fraudulent user profile"
+      "Load the latest draft and compare it with the source again"
     ],
     "evidence": [
       {
@@ -15343,6 +15399,13 @@ export const MASTER_FLOW_NODES = [
         "provenance": "INFERRED",
         "confidence": 0.8,
         "commitSha": "cda10372d983a2cf9bb5f3a04274364fcb1a5d43"
+      },
+      {
+        "kind": "API",
+        "path": "src/app/api/admin/pdf-verify/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1
       }
     ],
     "telemetry": {
@@ -15382,7 +15445,7 @@ export const MASTER_FLOW_NODES = [
     "claims": [
       {
         "id": "claim_rec_manual_approval_queue_behavior",
-        "text": "Staff verify PDF-assisted drafts against their source from /admin; there is no path to return a draft to the owner.",
+        "text": "Staff open PDF Drafts in the Admin Console and compare the draft with a private, short-lived PDF download. The release candidate records the staff actor and draft version before deleting the source. Staff can retry a failed deletion.",
         "kind": "PRODUCT_BEHAVIOR",
         "status": "PARTIAL",
         "evidence": [
@@ -15449,7 +15512,7 @@ export const MASTER_FLOW_NODES = [
     "securityReviewStatus": "RESEARCHED",
     "productStatus": "APPROVED",
     "evidenceStatus": "TEST_GROUNDED",
-    "releaseStatus": "LIMITED_LIVE"
+    "releaseStatus": "NOT_DEPLOYED"
   },
   {
     "id": "scenario_churned_owner_escrow",

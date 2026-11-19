@@ -259,7 +259,17 @@ export async function POST(request) {
       );
     }
 
-    // 4. Assimilate text into validated structured property data
+    if (!extractedText) {
+      const quarantined = await quarantineProperty(property.id, "no_readable_text", property.details, property.owner_id, document);
+      if (!quarantined) return NextResponse.json({ processed: 0 });
+      return NextResponse.json({
+        success: false,
+        quarantined: true,
+        reason: "no_readable_text",
+        error: "This PDF has no readable text. Upload a text-based PDF or enter the listing manually.",
+      }, { status: 422 });
+    }
+
     const extracted = await assimilatePropertyText(
       extractedText,
       property.details?.source_pdf || property.title

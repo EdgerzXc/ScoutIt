@@ -1,18 +1,18 @@
 {
   "bundleVersion": "2.2.0",
-  "dataRevision": "9421f1825d2dabe6eeda2b46b87351cda93b579c",
-  "generatedAt": "2026-10-31T07:26:16.835Z",
+  "dataRevision": "8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d",
+  "generatedAt": "2026-11-19T10:18:33.839Z",
   "checksums": {
     "schema.json": "84107b9ac4501e93c3fad3b0537d9c8eeeedf4d73572f160112e3debf92261cf",
-    "masterFlowGraph.json": "c94f28183adcf419b42f4b87c9ce1aedc99423216421963dbe5625172bc7a995",
-    "masterFlowLayout.json": "7ca227ecf4ae5760f6617bc0f8d45ea994066ded9a24911f177e7d1a2a185508",
-    "atomicRAGChunks.json": "09de9677d7ed24df739426290c987db920e0720f75f001e4f39a840e5aad16c4",
+    "masterFlowGraph.json": "58b147c16349c58201297ef397f66af2e23fd6aa62e83574b0b80c6815f42783",
+    "masterFlowLayout.json": "0eca2ea4a6b79032999c6f6e098158251665e06625d0e91ae63a8a021139a9d4",
+    "atomicRAGChunks.json": "71112ff7021648729112b117c24721e5a85218042373e990a648c961d8c258de",
     "publicRAGChunks.json": "22240fd3a0e7dc3b07dd87e489138fd4db008c4cc780d7096fe20d4f4853cbbb",
     "workflows.json": "4b294e9c1fa1ac91e33688a867e6dd03958fbe02e7f1f82ec8a7dfa21835efeb",
     "linearGuides.json": "2fd27bd270f36904663cf468d0c246b49bb8b9ec23e6d9aef1677a0d10981ac9",
     "coverageReport.json": "903a9bb21b08ec6b276279a2ff07bbe82e8c411d63db166dc0c4a6106efcea80",
-    "auditReport.json": "1258de646c8bd4bad49afb914620302ddaea11e9a7ac3a28f6fdc882a7c6da15",
+    "auditReport.json": "ca6c6e9decd085e37228a669f3f2ef02aabb9aad4b6afe6369fcee7004a0c2e2",
     "index.js": "e5c6a3b8e0fdf3d55b29b4465cef26225bf1f497c24fa7133eeaafe49d577429",
-    "README.md": "60c9641688e10a0347eac7a17d0d815f1479c5c8e615e4365ae97a5119b61efa"
+    "README.md": "de1b701cd0e1dc6a9b80c0c4bb1ce75c4226293690aa09f64447a0605413adfb"
   }
 }
