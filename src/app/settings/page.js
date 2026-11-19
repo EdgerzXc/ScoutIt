@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { getUser, signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import InfoTip from "@/components/ui/InfoTip";
@@ -22,6 +23,7 @@ import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
+import { authenticatorQrImage } from "@/lib/authenticatorQrImage";
 
 const SELF_SERVICE_TAGS = [
   { id: 'buyer', label: 'Looking to Buy / Rent', icon: <Search strokeWidth={1.5} size="1.1em" /> },
@@ -113,6 +115,7 @@ export default function SettingsPage() {
   // 2FA State
   const [factors, setFactors] = useState([]);
   const [qrCode, setQrCode] = useState("");
+  const [setupKey, setSetupKey] = useState("");
   const [factorId, setFactorId] = useState("");
   const [verifyCode, setVerifyCode] = useState("");
   const [isEnrolling2FA, setIsEnrolling2FA] = useState(false);
@@ -480,17 +483,26 @@ export default function SettingsPage() {
   const start2FAEnrollment = async () => {
     setMfaMessage({ type: '', text: '' });
     setIsEnrolling2FA(true);
-    
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
-    
-    if (error) {
-      setMfaMessage({ type: 'error', text: 'Failed to start 2FA enrollment.' });
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+      const image = authenticatorQrImage(data?.totp?.qr_code);
+      const secret = typeof data?.totp?.secret === "string" ? data.totp.secret : "";
+      if (error || !data?.id || (!image && !secret)) throw new Error("Missing authenticator setup details");
+      setFactorId(data.id);
+      setQrCode(image);
+      setSetupKey(secret);
+    } catch {
+      setMfaMessage({ type: 'error', text: 'Could not start authenticator setup. Try again.' });
       setIsEnrolling2FA(false);
-      return;
     }
-    
-    setFactorId(data.id);
-    setQrCode(data.totp.qr_code); // SVG string
+  };
+
+  const clear2FASetup = () => {
+    setIsEnrolling2FA(false);
+    setFactorId("");
+    setQrCode("");
+    setSetupKey("");
+    setVerifyCode("");
   };
 
   const verify2FA = async () => {
@@ -513,10 +525,8 @@ export default function SettingsPage() {
     if (verify.error) {
       setMfaMessage({ type: 'error', text: 'Invalid verification code.' });
     } else {
-      setMfaMessage({ type: 'success', text: '2FA successfully enabled!' });
-      setIsEnrolling2FA(false);
-      setQrCode("");
-      setVerifyCode("");
+      setMfaMessage({ type: 'success', text: 'Authenticator registered.' });
+      clear2FASetup();
       
       const { data } = await supabase.auth.mfa.listFactors();
       if (data && data.totp) setFactors(data.totp);
@@ -1294,11 +1304,11 @@ export default function SettingsPage() {
               Two-Factor Authentication (2FA) <InfoTip tipId="settingsTwoFactor" label="About two-factor authentication" />
             </h3>
             <p style={{color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6, marginBottom: 16}}>
-              Add an extra layer of protection to your account using an authenticator app (such as Google Authenticator, Microsoft Authenticator, or 1Password).
+              Register an authenticator app such as Google Authenticator, Microsoft Authenticator, or 1Password.
             </p>
 
             {mfaMessage.text && (
-              <div style={{
+              <div role={mfaMessage.type === 'error' ? 'alert' : 'status'} style={{
                 marginBottom: 16,
                 padding: "12px 16px",
                 borderRadius: 6,
@@ -1327,10 +1337,10 @@ export default function SettingsPage() {
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase'
                 }}>
-                  ✓ Protected by Two-Factor Authentication
+                  Authenticator registered
                 </span>
                 <p style={{fontSize: 13, color: 'var(--text-secondary)'}}>
-                  Your account is secured. An authenticator code is required when signing in.
+                  Your authenticator app is paired with this account.
                 </p>
                 <button
                   style={{
@@ -1349,23 +1359,35 @@ export default function SettingsPage() {
                   Disable 2FA
                 </button>
               </div>
-            ) : isEnrolling2FA && qrCode ? (
+            ) : isEnrolling2FA && factorId ? (
               <div style={{
                 background: 'var(--surface2)',
                 padding: 20,
                 borderRadius: 8,
                 border: '1px solid var(--border-solid)'
               }}>
-                <p style={{fontSize: 14, color: 'var(--text-primary)', marginBottom: 12}}>
-                  1. Scan this QR code with your Authenticator App:
-                </p>
-                <div
-                  style={{background: '#ffffff', padding: 12, borderRadius: 8, width: 200, height: 200, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}
-                  dangerouslySetInnerHTML={{ __html: qrCode }}
-                />
-                <p style={{fontSize: 14, color: 'var(--text-primary)', marginBottom: 8}}>
-                  2. Enter the 6-digit code shown in your app:
-                </p>
+                {qrCode && (
+                  <>
+                    <p className="mb-3 text-sm text-on-surface">Scan this QR code with your authenticator app.</p>
+                    <Image src={qrCode} alt="Authenticator setup QR code" width={200} height={200} unoptimized loading="eager"
+                      className="mx-auto mb-4 max-w-full rounded-lg bg-white p-3"
+                      onError={() => {
+                        setQrCode("");
+                        if (!setupKey) {
+                          clear2FASetup();
+                          setMfaMessage({ type: 'error', text: 'Could not display the setup QR code. Try again.' });
+                        }
+                      }} />
+                  </>
+                )}
+                {setupKey && (
+                  <details className="mb-4 text-sm text-text-secondary" open={qrCode ? undefined : true}>
+                    <summary className="min-h-11 cursor-pointer py-3 text-on-surface">Enter a setup key instead</summary>
+                    <p className="mb-2">Copy this key into your authenticator app.</p>
+                    <code className="block break-all font-mono text-on-surface">{setupKey}</code>
+                  </details>
+                )}
+                <p className="mb-2 text-sm text-on-surface">Enter the six-digit code from your authenticator app.</p>
                 <div style={{display: 'flex', gap: 8, flexWrap: 'wrap'}}>
                   <input
                     type="text"
@@ -1377,7 +1399,7 @@ export default function SettingsPage() {
                     maxLength={6}
                     aria-label="Authenticator verification code"
                     value={verifyCode}
-                    onChange={(e) => setVerifyCode(e.target.value)}
+                    onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   />
                   <button
                     className="bg-gold-accent text-background font-working-title text-sm px-6 rounded disabled:opacity-50"
@@ -1399,10 +1421,7 @@ export default function SettingsPage() {
                     cursor: 'pointer',
                     padding: 0
                   }}
-                  onClick={() => {
-                    setIsEnrolling2FA(false);
-                    setQrCode("");
-                  }}
+                  onClick={clear2FASetup}
                 >
                   Cancel setup
                 </button>
@@ -1410,7 +1429,7 @@ export default function SettingsPage() {
             ) : (
               <div>
                 <p style={{fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14}}>
-                  Add extra defense against unauthorized logins. You will use an authenticator app when signing in.
+                  Pair your account with an authenticator app to generate verification codes.
                 </p>
                 <button
                   style={{
@@ -1428,8 +1447,9 @@ export default function SettingsPage() {
                     cursor: 'pointer'
                   }}
                   onClick={start2FAEnrollment}
+                  disabled={isEnrolling2FA}
                 >
-                  Enable Two-Factor Authentication
+                  {isEnrolling2FA ? "Starting authenticator setup…" : "Enable Two-Factor Authentication"}
                 </button>
               </div>
             )}
