@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
+import { getSession } from "@/lib/authClient";
 import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet, GitBranch, Radio } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
 import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
@@ -29,6 +30,7 @@ function AdminPageInner() {
   const [pdfLoading, setPdfLoading] = useState(true);
   const [pdfError, setPdfError] = useState(null);
   const [pdfProcessingId, setPdfProcessingId] = useState(null);
+  const [pdfReview, setPdfReview] = useState(null);
   const [processingId, setProcessingId] = useState(null);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
 
@@ -38,7 +40,7 @@ function AdminPageInner() {
   const [prcProcessingId, setPrcProcessingId] = useState(null);
 
   async function authHeaders() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await getSession();
     const token = session?.access_token;
     return { "Content-Type": "application/json", "Authorization": token ? `Bearer ${token}` : "" };
   }
@@ -120,17 +122,41 @@ function AdminPageInner() {
     }
   }
 
-  async function handleVerifyPdfDraft(propertyId) {
+  async function loadPdfReview(propertyId) {
     setPdfProcessingId(propertyId);
+    setPdfReview(null);
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/pdf-verify?propertyId=${encodeURIComponent(propertyId)}`, { headers: await authHeaders() });
+      const review = await response.json();
+      if (!response.ok) throw new Error(review.error || "Could not open the source PDF.");
+      setPdfReview({ propertyId, ...review, sourceOpened: false });
+    } catch (error) {
+      setMessage({ type: "error", text: sanitizeError(error) });
+    } finally {
+      setPdfProcessingId(null);
+    }
+  }
+
+  async function handleVerifyPdfDraft(propertyId, cleanupOnly) {
+    setPdfProcessingId(propertyId);
+    setMessage(null);
     try {
       const res = await fetch("/api/admin/pdf-verify", {
         method: "POST",
         headers: await authHeaders(),
-        body: JSON.stringify({ propertyId }),
+        body: JSON.stringify({
+          propertyId,
+          ...(cleanupOnly ? {} : { sourceReviewed: true, reviewedDraft: pdfReview?.reviewedDraft }),
+        }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Could not record the verification.");
-      setMessage({ type: "success", text: "Draft verified against its source document. The owner can now publish." });
+      setPdfReview(null);
+      const text = result.cleanupPending
+        ? "The draft is verified. The source PDF is still stored. You can retry deletion."
+        : cleanupOnly ? "Source PDF deleted." : "Draft verified and source PDF deleted. The owner can publish.";
+      setMessage({ type: "success", text });
       await fetchPdfQueue();
     } catch (err) {
       setMessage({ type: "error", text: sanitizeError(err) });
@@ -447,32 +473,52 @@ function AdminPageInner() {
                           {draft.type && <span className="info-tag">{draft.type}</span>}
                           {draft.location && <span className="info-tag">{draft.location}</span>}
                           <span className="info-tag coords">
-                            {draft.pdf_source_url ? "Source attached" : "No source file"}
+                            {draft.sourceAttached ? "Source attached" : "No source file"}
                           </span>
                         </div>
                         <div className="info-meta">
-                          {/* Says what the staff member is attesting to, not just
-                              "approve" — the attestation is the whole point. */}
-                          Compare every field against the owner&apos;s document before verifying.
-                          {draft.pdf_source_url && (
-                            <>
-                              {" "}
-                              <a href={draft.pdf_source_url} target="_blank" rel="noopener noreferrer">
-                                Open source document
-                              </a>
-                            </>
-                          )}
+                          {draft.cleanupPending ? "Verification was recorded. Delete the source PDF to finish processing."
+                            : draft.sourceAttached ? "Compare the draft with the source before confirming."
+                            : "A source PDF is required before this draft can be verified."}
                         </div>
+                        {pdfReview?.propertyId === draft.id && (
+                          <div className="mt-3 break-words">
+                            <a href={pdfReview.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline"
+                              onClick={() => setPdfReview((review) => ({ ...review, sourceOpened: true }))}>
+                              Download source PDF
+                            </a>
+                            <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                              {Object.entries(pdfReview.reviewedDraft).map(([key, value]) => (
+                                <div key={key} className="min-w-0">
+                                  <dt className="font-mono text-xs uppercase text-text-secondary">{key.replaceAll("_", " ")}</dt>
+                                  <dd>{value == null || value === "" ? "—" : String(value)}</dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </div>
+                        )}
                       </div>
 
                       <div className="submission-actions">
-                        <button
-                          className="btn-approve"
-                          disabled={pdfProcessingId === draft.id}
-                          onClick={() => handleVerifyPdfDraft(draft.id)}
-                        >
-                          {pdfProcessingId === draft.id ? "RECORDING..." : "VERIFIED AGAINST SOURCE"}
-                        </button>
+                        {draft.cleanupPending ? (
+                          <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId)}
+                            onClick={() => handleVerifyPdfDraft(draft.id, true)}>
+                            Retry PDF deletion
+                          </button>
+                        ) : draft.sourceAttached && (
+                          <>
+                            <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId)}
+                              onClick={() => loadPdfReview(draft.id)}>
+                              {pdfReview?.propertyId === draft.id ? "Refresh source link" : "Review draft and PDF"}
+                            </button>
+                            {pdfReview?.propertyId === draft.id && (
+                              <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId) || !pdfReview.sourceOpened}
+                                onClick={() => handleVerifyPdfDraft(draft.id, false)}>
+                                Confirm review and delete PDF
+                              </button>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

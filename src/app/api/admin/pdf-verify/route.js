@@ -1,197 +1,136 @@
-// ═══════════════════════════════════════════════════════════════
-// PDF-ASSISTED DRAFT VERIFICATION — A-076
-//
-// WHY THIS EXISTS
-// AGENTS.md §2.4 mandates that a ScoutIt-created PDF-assisted draft is checked
-// against its source document before publication. Every piece of that workflow
-// existed except the one that runs it:
-//
-//   • the publish-time block  — /api/dashboard/publish/route.js:69 (422)   EXISTS
-//   • the unlock RPC          — verify_pdf_draft, service_role-only        EXISTS
-//   • any caller of the RPC                                                ZERO
-//   • anything writing creation_source: 'pdf_assisted'                     ZERO
-//
-// ⚠️ THE CORRECTION THAT MATTERS (verified 2026-09-05).
-// A-076 recorded this as a gate whose two ends were both unbuilt. The producer
-// is in fact BUILT AND LIVE: `OwnerMode.js:360` uploads an owner PDF to
-// /api/ai/read-pdf, hands the text to /api/ai/assimilate, and creates a draft.
-// It simply never tagged the row, so `creation_source` defaulted to 'manual'.
-//
-// So the mandated verification has silently never applied to a single real
-// listing — not because the workflow was missing, but because the door was
-// never labelled. This route is the key; tagging the producer is the label,
-// and the two must ship together or PDF listings become unpublishable.
-//
-// SECURITY
-// • `requireAdmin` before any read or write — the one gate (Rule 6).
-// • The RPC is SECURITY DEFINER and granted to service_role only, so it runs
-//   through `supabaseAdmin`. It scopes its own UPDATE to
-//   `creation_source = 'pdf_assisted'` and returns FOUND, so verifying a row
-//   that is not a PDF draft is a no-op that reports false rather than a
-//   silent success.
-// • Every verification is audited. A staff attestation that leaves no record
-//   is not an attestation.
-//
-// ⚠️ KNOWN, DOCUMENTED WEAKNESS — see WAITING A-076.
-// `authenticated` still holds column-level UPDATE on `creation_source`, proven
-// live on 2026-09-05 inside a rolled-back transaction with a passing control.
-// An owner can therefore flip their own draft back to 'manual' and walk past
-// the 422 entirely. `pdf_verified` itself is correctly locked (U-015). The
-// revoke is prepared but NOT applied — it needs the owner's migration gate.
-// This route is still worth shipping: it closes the legitimate path, and the
-// bypass requires deliberately crafting a PostgREST call.
-// ═══════════════════════════════════════════════════════════════
-
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
-import { writeAuditLog } from "@/lib/auditTrail";
-import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser } from "@/lib/notifications";
+import { resolveQueueDocument, removeReviewedQueueDocument } from "@/lib/propertyQueueStorage";
 
-// Only what the review card renders. `pdf_source_url` is the document the
-// staff member is meant to be checking against, so it is the one addition
-// over the ordinary queue shape.
-const QUEUE_FIELDS =
-  "id, title, location, type, owner_id, created_at, pdf_source_url, pdf_verified";
+const REVIEW_COLUMNS = ["title", "location", "space_category", "price", "description", "media_link"];
+const REVIEW_DETAILS = ["floor_sqm", "lot_sqm", "beds", "baths", "parking"];
+const REVIEW_SELECT = ["id", "owner_id", "type", "pdf_source_url", "pdf_verified", "pipeline_status", "details", ...REVIEW_COLUMNS].join(", ");
+const NO_STORE = { "Cache-Control": "private, no-store" };
 
-const NO_STORE = { "Cache-Control": "no-store" };
+function json(data, status = 200) {
+  return NextResponse.json(data, { status, headers: NO_STORE });
+}
 
-// ── GET /api/admin/pdf-verify ───────────────────────────────────
-// PDF-assisted drafts still awaiting their source-document check.
+function reviewDraft(property) {
+  return Object.fromEntries([
+    ...REVIEW_COLUMNS.map((key) => [key, property[key] ?? null]),
+    ...REVIEW_DETAILS.map((key) => [key, property.details?.[key] ?? null]),
+  ]);
+}
+
+function reviewSource(property) {
+  return resolveQueueDocument({ owner_id: property.owner_id, pdf_source_url: property.pdf_source_url });
+}
+
+async function findDraft(propertyId) {
+  return supabaseAdmin.from("properties")
+    .select(REVIEW_SELECT)
+    .eq("id", propertyId)
+    .eq("creation_source", "pdf_assisted")
+    .maybeSingle();
+}
+
 export async function GET(request) {
   try {
     const auth = await requireAdmin(request, { label: "ADMIN PDF VERIFY" });
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (auth.error) return json({ error: auth.error }, auth.status);
+    if (!supabaseAdmin) return json({ error: "The verification queue is unavailable." }, 503);
+
+    const propertyId = new URL(request.url).searchParams.get("propertyId");
+    if (propertyId) {
+      const { data: draft, error } = await findDraft(propertyId);
+      if (error) return json({ error: "Could not load the draft." }, 503);
+      if (!draft || draft.pdf_verified || draft.pipeline_status !== "pending") {
+        return json({ error: "That draft is unavailable for verification." }, 404);
+      }
+      const document = reviewSource(draft);
+      if (!document) return json({ error: "This draft has no source PDF to review." }, 409);
+
+      const { data, error: signingError } = await supabaseAdmin.storage.from(document.bucket)
+        .createSignedUrl(document.path, 300, { download: "scoutit-source.pdf" });
+      if (signingError || !data?.signedUrl) {
+        return json({ error: "Could not open the source PDF. Refresh the link or check the upload." }, 503);
+      }
+      return json({ sourceUrl: data.signedUrl, reviewedDraft: reviewDraft(draft) });
     }
 
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: "The verification queue is unavailable right now." },
-        { status: 503, headers: NO_STORE },
-      );
-    }
-
-    const { data, error } = await supabaseAdmin
-      .from("properties")
-      .select(QUEUE_FIELDS)
+    const { data, error } = await supabaseAdmin.from("properties")
+      .select("id, title, location, type, owner_id, pdf_source_url, pdf_verified")
       .eq("creation_source", "pdf_assisted")
-      .eq("pdf_verified", false)
-      .order("created_at", { ascending: true }); // oldest first — nobody waits longest by accident
+      .or("and(pdf_verified.eq.false,pipeline_status.eq.pending),and(pdf_verified.eq.true,pdf_source_url.not.is.null)")
+      .order("created_at", { ascending: true }).limit(100);
+    if (error) return json({ error: "Could not load the verification queue." }, 503);
 
-    if (error) {
-      console.error("[ADMIN PDF VERIFY] Query failed:", error);
-      return NextResponse.json(
-        { error: sanitizeError(error, "Could not load the verification queue.") },
-        { status: 500, headers: NO_STORE },
-      );
-    }
-
-    return NextResponse.json({ drafts: data || [] }, { headers: NO_STORE });
-  } catch (err) {
-    console.error("[ADMIN PDF VERIFY] GET failed:", err);
-    return NextResponse.json(
-      { error: sanitizeError(err, "Could not load the verification queue.") },
-      { status: 500, headers: NO_STORE },
-    );
+    const drafts = (data || []).map(({ pdf_source_url, owner_id, pdf_verified, ...draft }) => ({
+      ...draft,
+      sourceAttached: Boolean(reviewSource({ pdf_source_url, owner_id })),
+      cleanupPending: pdf_verified,
+    }));
+    return json({ drafts });
+  } catch (error) {
+    console.error("[pdf-review] Unable to read verification queue:", error?.code || error?.name);
+    return json({ error: "Could not load the verification queue." }, 500);
   }
 }
 
-// ── POST /api/admin/pdf-verify ──────────────────────────────────
-// Body: { propertyId }
-// Records that a staff member compared the draft against its source document.
 export async function POST(request) {
   try {
     const auth = await requireAdmin(request, { label: "ADMIN PDF VERIFY" });
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (auth.error) return json({ error: auth.error }, auth.status);
+    if (!supabaseAdmin) return json({ error: "Verification is unavailable." }, 503);
+
+    const body = await request.json().catch(() => null);
+    const propertyId = typeof body?.propertyId === "string" ? body.propertyId.trim() : "";
+    if (!propertyId) return json({ error: "A property ID is required." }, 400);
+
+    const { data: draft, error } = await findDraft(propertyId);
+    if (error) return json({ error: "Could not load the draft." }, 503);
+    if (!draft) return json({ error: "PDF-assisted draft not found." }, 404);
+
+    if (draft.pdf_verified) {
+      const removed = !draft.pdf_source_url || await removeReviewedQueueDocument(supabaseAdmin, draft);
+      return json({ success: true, cleanupPending: !removed });
     }
 
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: "Verification is unavailable right now." },
-        { status: 503, headers: NO_STORE },
-      );
+    if (draft.pipeline_status !== "pending") {
+      return json({ error: "This draft is still being processed or needs a new PDF." }, 409);
+    }
+    if (body.sourceReviewed !== true || !body.reviewedDraft || typeof body.reviewedDraft !== "object" || Array.isArray(body.reviewedDraft)) {
+      return json({ error: "Review the source and compare it with the draft before confirming." }, 400);
     }
 
-    const body = await request.json().catch(() => ({}));
-    const propertyId = body?.propertyId;
-    if (!propertyId) {
-      return NextResponse.json(
-        { error: "Missing propertyId" },
-        { status: 400, headers: NO_STORE },
-      );
-    }
+    const document = reviewSource(draft);
+    if (!document) return json({ error: "This draft has no source PDF to review." }, 409);
 
-    // ⚠️ NOT `rpc("verify_pdf_draft")`. That function is BROKEN in the live
-    // database and always has been — verified 2026-09-05:
-    //
-    //   ERROR 42703: column "updated_at" of relation "properties" does not exist
-    //   CONTEXT: PL/pgSQL function verify_pdf_draft(uuid,text) line 3
-    //
-    // `properties` has `created_at`, `published_at`, `archived_at` and others,
-    // but no `updated_at`. Every call throws. Nobody found out because nothing
-    // ever called it (Standing Rule 15: RUN the endpoint before building a UI
-    // on it — the failure was silent for a month).
-    //
-    // Fixing the function needs a migration, which is owner-gated. This does
-    // the same work through the service client, keeping the RPC's own scoping
-    // (`creation_source = 'pdf_assisted'`) so a non-PDF row still matches
-    // nothing. Proven live in a rolled-back transaction. The migration that
-    // repairs the dead function is prepared at
-    // `supabase/migrations/20260905000001_lock_creation_source.sql`.
-    const { data: updated, error } = await supabaseAdmin
-      .from("properties")
-      .update({ pdf_verified: true })
-      .eq("id", propertyId)
-      .eq("creation_source", "pdf_assisted")
-      .select("id, owner_id, title");
+    const { data: source, error: storageError } = await supabaseAdmin.storage.from(document.bucket).info(document.path);
+    if (storageError || !source) return json({ error: "The source PDF is unavailable. Verification has not been recorded." }, 409);
 
-    if (error) {
-      console.error("[ADMIN PDF VERIFY] Update failed:", error);
-      return NextResponse.json(
-        { error: sanitizeError(error, "Could not record the verification.") },
-        { status: 500, headers: NO_STORE },
-      );
-    }
-
-    // No matched row means a wrong id, or a listing that was never
-    // PDF-assisted. Reporting that as success would record an attestation
-    // about nothing (Rule 7).
-    if (!updated || updated.length === 0) {
-      return NextResponse.json(
-        { error: "No PDF-assisted draft matched that id. Nothing was verified." },
-        { status: 404, headers: NO_STORE },
-      );
-    }
-
-    // Non-blocking by design, but never silent — see lib/auditTrail.js.
-    await writeAuditLog(supabaseAdmin, {
-      action: "PDF_DRAFT_VERIFIED",
-      tableName: "properties",
-      recordId: propertyId,
-      userId: auth.userId,
-      metadata: { source: "admin_console", requirement: "AGENTS.md §2.4" },
+    const { data: recorded, error: recordError } = await supabaseAdmin.rpc("record_property_pdf_review", {
+      p_property_id: draft.id,
+      p_source_path: document.path,
+      p_staff_id: auth.userId,
+      p_reviewed_draft: body.reviewedDraft,
     });
-
-    // GAP-109: Notify the property owner that their PDF draft is verified and unblocked for publishing
-    if (updated[0]?.owner_id) {
-      await notifyUser(supabaseAdmin, {
-        userId: updated[0].owner_id,
-        title: "PDF Listing Verified",
-        desc: `Your listing "${updated[0].title || "Property"}" was verified against your source PDF and is now ready to publish.`,
-        propertyId,
-        notificationType: "pdf_verified",
-      });
+    if (recordError) {
+      console.error("[pdf-review] Attestation failed:", draft.id, recordError.code);
+      return json({ error: "Could not record the verification." }, 503);
     }
+    if (!recorded) return json({ error: "The draft changed. Reload it and compare it with the source again." }, 409);
 
-    return NextResponse.json({ success: true }, { headers: NO_STORE });
-  } catch (err) {
-    console.error("[ADMIN PDF VERIFY] POST failed:", err);
-    return NextResponse.json(
-      { error: sanitizeError(err, "Could not record the verification.") },
-      { status: 500, headers: NO_STORE },
-    );
+    const removed = await removeReviewedQueueDocument(supabaseAdmin, { ...draft, pdf_verified: true });
+    await notifyUser(supabaseAdmin, {
+      userId: draft.owner_id,
+      title: "PDF Listing Verified",
+      desc: `Staff verified "${draft.title || "Property"}" against the source PDF. You can now publish the draft.`,
+      propertyId: draft.id,
+      notificationType: "pdf_verified",
+    }).catch(() => {});
+
+    return json({ success: true, cleanupPending: !removed });
+  } catch (error) {
+    console.error("[pdf-review] Unable to record verification:", error?.code || error?.name);
+    return json({ error: "Could not record the verification." }, 500);
   }
 }

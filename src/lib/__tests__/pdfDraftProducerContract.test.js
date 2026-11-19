@@ -38,14 +38,10 @@ describe("A-076 · PDF-assisted drafts are tagged at creation", () => {
     expect(src).not.toMatch(/pdf_verified:/);
   });
 
-  it("the owner PDF concierge tags its draft as pdf_assisted", () => {
-    const src = read("src/components/dashboard/OwnerMode.js");
-
-    // This is the live path: read-pdf -> assimilate -> addListing. It existed
-    // and worked; it simply never labelled its output, so every PDF listing
-    // looked hand-typed to the publish gate.
-    expect(src).toMatch(/creationSource:\s*'pdf_assisted'/);
-    expect(src).toContain("/api/ai/read-pdf");
+  it("the owner PDF concierge uses the authenticated source-retaining producer", () => {
+    expect(read("src/components/dashboard/OwnerMode.js")).toContain("submitPropertyPdfDraft(selectedFile, authedFetch)");
+    expect(read("src/lib/propertyPdfQueueClient.js")).toContain("/api/properties/queue/intake");
+    expect(read("src/app/api/properties/queue/intake/route.js")).toMatch(/creation_source:\s*"pdf_assisted"/);
   });
 
   it("the publish gate refuses with an explanation the owner can act on", () => {

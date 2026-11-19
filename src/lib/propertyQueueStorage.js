@@ -2,7 +2,7 @@ export const PRIVATE_QUEUE_BUCKET = "property-documents-temp";
 export const PRIVATE_QUEUE_PREFIX = "source_queue_docs";
 
 export function resolveQueueDocument(property) {
-  const path = property.details?.temp_storage_path || property.pdf_source_url;
+  const path = property.pdf_source_url;
   if (typeof path !== "string" || !property.owner_id) return null;
 
   const [prefix, ownerId, filename, ...rest] = path.split("/");
@@ -11,4 +11,32 @@ export function resolveQueueDocument(property) {
   if (prefix === PRIVATE_QUEUE_PREFIX) return { bucket: PRIVATE_QUEUE_BUCKET, path };
   if (prefix === "temp_queue_docs") return { bucket: "property_photos", path };
   return null;
+}
+
+export async function removeReviewedQueueDocument(client, property) {
+  const document = resolveQueueDocument({ owner_id: property.owner_id, pdf_source_url: property.pdf_source_url });
+  if (!property.pdf_verified || !document) return false;
+
+  try {
+    const { error: storageError } = await client.storage.from(document.bucket).remove([document.path]);
+    if (storageError) {
+      console.error("[pdf-review] Storage cleanup failed:", property.id, storageError.code || storageError.statusCode);
+      return false;
+    }
+
+    const { error: updateError } = await client
+      .from("properties")
+      .update({ pdf_source_url: null })
+      .eq("id", property.id)
+      .eq("pdf_verified", true)
+      .eq("pdf_source_url", document.path);
+    if (updateError) {
+      console.error("[pdf-review] Failed to clear the removed document reference:", property.id, updateError.code);
+      return false;
+    }
+    return true;
+  } catch {
+    console.error("[pdf-review] Could not complete document cleanup:", property.id);
+    return false;
+  }
 }

@@ -27,8 +27,6 @@ export async function POST(request) {
       );
     }
 
-    const formData = await request.formData();
-
     // PDF processing is available only to a Supabase-validated account.
     const token = request.headers.get("Authorization")?.replace("Bearer ", "");
     if (!token) {
@@ -44,6 +42,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
 
+    const formData = await request.formData().catch(() => null);
+    if (!formData) {
+      return NextResponse.json({ error: "Choose a PDF to upload." }, { status: 400 });
+    }
     const file = formData.get('file');
 
     if (!file || typeof file.arrayBuffer !== 'function') {

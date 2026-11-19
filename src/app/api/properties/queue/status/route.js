@@ -29,15 +29,15 @@ export async function GET(request) {
       .from("properties")
       .select("id, owner_id, title, location, type, space_category, price, pipeline_status, created_at, details")
       .eq("id", propertyId)
+      .eq("owner_id", userId)
       .maybeSingle();
 
-    if (fetchError || !property) {
-      return NextResponse.json({ error: "Property listing not found." }, { status: 404 });
+    if (fetchError) {
+      console.error("[queue-status] Query failed:", fetchError.code);
+      return NextResponse.json({ error: "Could not check queue status." }, { status: 503 });
     }
-
-    // Owner check: Ensure caller owns the listing
-    if (property.owner_id !== userId) {
-      return NextResponse.json({ error: "Forbidden: You do not own this listing." }, { status: 403 });
+    if (!property) {
+      return NextResponse.json({ error: "Property listing not found." }, { status: 404 });
     }
 
     if (property.pipeline_status !== "ai_drafting") {

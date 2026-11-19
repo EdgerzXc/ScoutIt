@@ -115,6 +115,7 @@ describe("Queue Intake Quota, Private Lifecycle, and Concurrency (A-303)", () =>
     });
     expect(resolveQueueDocument({ owner_id, pdf_source_url: "source_queue_docs/u-2/token.pdf" })).toBeNull();
     expect(resolveQueueDocument({ owner_id, pdf_source_url: "source_queue_docs/u-1/nested/token.pdf" })).toBeNull();
+    expect(resolveQueueDocument({ owner_id, details: { temp_storage_path: privatePath } })).toBeNull();
   });
 
   describe("Source Code Contracts for Intake Route", () => {

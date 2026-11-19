@@ -35,6 +35,16 @@ describe("A-315: AI PDF Chain Rate Limit, Oversize Cap & Text/Page Budget Bounds
   });
 
   describe("API: /api/ai/read-pdf (POST)", () => {
+    it("requires authentication before reading the upload body", async () => {
+      const { POST } = await import("@/app/api/ai/read-pdf/route");
+      const formData = vi.fn().mockRejectedValue(new Error("invalid multipart body"));
+
+      const res = await POST({ headers: new Headers(), formData });
+
+      expect(res.status).toBe(401);
+      expect(formData).not.toHaveBeenCalled();
+    });
+
     it("rejects oversized file (e.g. 61 MB) with HTTP 413", async () => {
       const { clientIp } = await import("@/lib/clientIp");
       clientIp.mockReturnValueOnce("192.168.1.10");

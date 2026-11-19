@@ -19,6 +19,8 @@ import {
   parseHeuristicUpdates
 } from "@/lib/propertyUpdateParser";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { useDashboard } from "@/context/DashboardContext";
+import { requestPropertyPdfProcessing, submitPropertyPdfDraft } from "@/lib/propertyPdfQueueClient";
 
 export default function PropertyUpdateHub({ 
   listings = [], 
@@ -26,6 +28,7 @@ export default function PropertyUpdateHub({
   onSaveUnits,
   addToast
 }) {
+  const { authedFetch, refetchInventory } = useDashboard();
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("auto"); // "auto" | "paste" | "queue"
   const [undoStack, setUndoStack] = useState(null); // { id, type, propertyId, field, previousValue, expiresAt }
@@ -39,9 +42,9 @@ export default function PropertyUpdateHub({
   const [proposedUpdates, setProposedUpdates] = useState([]);
   const [isApplyingUpdates, setIsApplyingUpdates] = useState(false);
 
-  // Tier 3: Queue State
   const [isUploadingQueue, setIsUploadingQueue] = useState(false);
-  const [queueInfo, setQueueInfo] = useState(null); // { queueNumber, propertyId, status }
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+  const [queueInfo, setQueueInfo] = useState(null);
   const fileInputRef = useRef(null);
 
   // Fetch real property_units rows for accurate unit-level searching
@@ -428,10 +431,22 @@ export default function PropertyUpdateHub({
     }
   };
 
-  // Tier 3: Drop / Upload PDF into Single-Use Queue
+  const processQueuedPdf = async (propertyId) => {
+    setIsProcessingQueue(true);
+    try {
+      const status = await requestPropertyPdfProcessing(propertyId, authedFetch);
+      setQueueInfo((previous) => ({ ...previous, status }));
+      if (status !== "queued") refetchInventory();
+    } catch {
+      setQueueInfo((previous) => ({ ...previous, status: "queued" }));
+    } finally {
+      setIsProcessingQueue(false);
+    }
+  };
+
   const handleQueueUpload = async (file) => {
-    if (!file) return;
-    if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
+    if (!file || isUploadingQueue || isProcessingQueue) return;
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
       addToast?.("Please upload a valid PDF document.");
       return;
     }
@@ -440,34 +455,13 @@ export default function PropertyUpdateHub({
     setQueueInfo(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("title", file.name.replace(/\.[^/.]+$/, ""));
-
-      const res = await fetch("/api/properties/queue/intake", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to queue document");
-
+      const propertyId = await submitPropertyPdfDraft(file, authedFetch);
       setQueueInfo({
-        queueNumber: data.queueNumber || 1,
-        propertyId: data.property?.id,
+        propertyId,
         filename: file.name,
-        status: "queued"
+        status: "queued",
       });
-
-      addToast?.(`Document Queued · You are #${data.queueNumber} in line`);
-
-      // Trigger asynchronous background parsing immediately
-      fetch("/api/properties/queue/process", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId: data.property?.id })
-      }).catch(err => console.warn("Background trigger dispatch:", err));
-
+      await processQueuedPdf(propertyId);
     } catch (err) {
       addToast?.(sanitizeError(err));
     } finally {
@@ -761,53 +755,57 @@ export default function PropertyUpdateHub({
         </div>
       )}
 
-      {/* ══ TIER 3: QUEUE-ASSISTED (SINGLE-USE PDF INGESTION) ══ */}
       {activeTab === "queue" && (
         <div className="flex flex-col gap-3">
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-white/[0.15] hover:border-gold-accent/50 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center gap-3 cursor-pointer bg-black/40 hover:bg-black/60 transition-all"
+          <button
+            type="button"
+            aria-disabled={isUploadingQueue || isProcessingQueue}
+            onClick={() => {
+              if (!isUploadingQueue && !isProcessingQueue) fileInputRef.current?.click();
+            }}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              void handleQueueUpload(event.dataTransfer.files[0]);
+            }}
+            className="border-2 border-dashed border-white/[0.15] hover:border-gold-accent/50 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center gap-3 cursor-pointer bg-black/40 hover:bg-black/60 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-disabled:cursor-wait"
           >
-            <div className="w-12 h-12 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
-              <UploadCloud size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-working-title text-on-surface font-bold">
-                {isUploadingQueue ? "Submitting to Queue..." : "Click or Drag to Upload PDF Brochure"}
-              </p>
-              <p className="text-xs text-text-muted mt-1 font-mono">
-                Single-use policy: raw document will be deleted immediately after parsing.
-              </p>
-            </div>
-            <input 
-              ref={fileInputRef}
-              type="file" 
-              accept="application/pdf" 
-              className="hidden" 
-              onChange={(e) => handleQueueUpload(e.target.files?.[0])}
-            />
-          </div>
+            <UploadCloud aria-hidden="true" className="text-accent" size={24} />
+            <span className="text-sm font-mono uppercase tracking-wide text-on-surface font-bold">Upload a PDF brochure</span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            hidden
+            onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+              event.currentTarget.value = "";
+              void handleQueueUpload(file);
+            }}
+          />
+          <p className="text-xs text-text-secondary">Drop a file here or choose one. ScoutIt keeps it private until staff verify the draft, then deletes it.</p>
 
-          {/* Queue Status Confirmation Card */}
-          {queueInfo && (
-            <div className="p-4 rounded-xl bg-gold-accent/10 border border-gold-accent/40 flex items-center justify-between animate-fadeIn">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gold-accent/20 border border-gold-accent/40 flex items-center justify-center text-gold-accent font-mono font-bold text-sm">
-                  #{queueInfo.queueNumber}
-                </div>
-                <div>
-                  <p className="text-sm font-working-title text-on-surface font-bold">
-                    Property Dossier In Queue
-                  </p>
-                  <p className="text-xs text-text-secondary font-mono">
-                    Position #{queueInfo.queueNumber} · Processing in background. You will be notified.
-                  </p>
-                </div>
+          <div role="status" className="text-sm text-text-secondary break-words">
+            {queueInfo && (
+              <div className="p-4 rounded-xl border border-accent-muted">
+                <p className="font-medium text-on-surface">{queueInfo.filename}</p>
+                {isProcessingQueue && <p>PDF accepted. Parsing your document.</p>}
+                {!isProcessingQueue && queueInfo.status === "queued" && <p>Still queued. You can retry processing.</p>}
+                {queueInfo.status === "pending" && <p>Draft created. Staff verification is required before publication.</p>}
+                {queueInfo.status === "quarantined" && <p>ScoutIt could not process this PDF. Try a readable PDF.</p>}
+                {!isProcessingQueue && !["queued", "pending", "quarantined"].includes(queueInfo.status) && <p>Processing has ended. Check your listings for the latest status.</p>}
               </div>
-              <span className="px-2.5 py-1 rounded bg-black/60 text-gold-accent border border-gold-accent/30 text-[12px] font-mono uppercase font-bold">
-                In Progress
-              </span>
-            </div>
+            )}
+          </div>
+          {queueInfo?.status === "queued" && !isProcessingQueue && (
+            <button
+              type="button"
+              onClick={() => void processQueuedPdf(queueInfo.propertyId)}
+              className="self-start min-h-11 px-3 rounded border border-accent-muted text-accent font-mono text-xs uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              Retry processing
+            </button>
           )}
         </div>
       )}

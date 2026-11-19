@@ -33,11 +33,12 @@ import SimpleDetail from "@/components/ui/SimpleDetail";
 import InfoTip from "@/components/ui/InfoTip";
 import SpatialStudioRequestModal from "./SpatialStudioRequestModal";
 import PropertyUpdateHub from "./PropertyUpdateHub";
+import { requestPropertyPdfProcessing, submitPropertyPdfDraft } from "@/lib/propertyPdfQueueClient";
 import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory, authedFetch } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   useEffect(() => {
@@ -435,7 +436,7 @@ export default function OwnerMode() {
         <button onClick={() => setShowWizard('select_mode')} className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent mb-8 font-working-title">← Back</button>
         <h1 className="font-display-md text-4xl text-text-primary mb-2">Upload Property Materials</h1>
         <p className="text-text-secondary mb-6 leading-relaxed">
-          Upload your brochure, floor plan packet, or pitch deck. ScoutIt parses specifications and creates an editable draft.
+          Upload a brochure, floor plan packet, or pitch deck. ScoutIt creates a draft and keeps the PDF private until staff verify the listing and delete the source.
         </p>
 
         {/* Accepted Formats Chips */}
@@ -486,71 +487,25 @@ export default function OwnerMode() {
             onClick={async () => {
               if (!selectedFile) return;
               setIsAssimilating(true);
-              addToast("Reading your PDF...", "●");
-
               try {
-                // 1. Extract the real text layer from the PDF (server-side via unpdf).
-                //    FileReader.readAsText on a binary PDF returns garbage, so we
-                //    send the file to /api/ai/read-pdf which does proper extraction.
-                const pdfForm = new FormData();
-                pdfForm.append('file', selectedFile);
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
-                const pdfRes = await fetch('/api/ai/read-pdf', {
-                  method: 'POST',
-                  headers: { 'Authorization': token ? `Bearer ${token}` : "" },
-                  body: pdfForm
-                });
-                const pdfData = await pdfRes.json();
-                if (!pdfRes.ok) throw new Error(pdfData.error || 'Could not read PDF');
-                const text = pdfData.text;
-
-                addToast("Processing property dossier...", "●");
-
-                // 2. Hand the extracted text to the schema-mapping AI.
-                const res = await fetch('/api/ai/assimilate', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                  },
-                  body: JSON.stringify({
-                    source: 'pdf_concierge',
-                    payload: [{ raw_text: text, filename: selectedFile.name }]
-                  })
-                });
-
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.error || 'Assimilation failed');
-
-                const draft = result.drafts?.[0];
-                if (draft) {
-                  await addListing({
-                    title: draft.title || selectedFile.name,
-                    location: draft.location || '',
-                    space_category: draft.space_category || 'commercial',
-                    type: draft.space_category || 'commercial',
-                    price: draft.price || null,
-                    description: draft.description || '',
-                    media_link: draft.media_link || '',
-                    pipeline_status: 'pending',
-                    // A-076: ScoutIt built this listing from the owner's document,
-                    // so AGENTS.md §2.4 requires a staff check against that source
-                    // before it can go public. Tagging it is what makes the
-                    // publish route's 422 gate apply — without this the draft is
-                    // indistinguishable from a hand-typed one.
-                    creationSource: 'pdf_assisted',
-                    details: { ...draft.details, ai_confidence: draft.confidence, ai_gaps: draft.gaps }
-                  });
-                  addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields: a reviewer checks it against your PDF before it goes live.`, "✅");
+                const propertyId = await submitPropertyPdfDraft(selectedFile, authedFetch);
+                const status = await requestPropertyPdfProcessing(propertyId, authedFetch).catch(() => "queued");
+                if (status === "queued") {
+                  addToast("PDF is still queued. Select Create draft again to retry processing.");
+                  return;
                 }
-              } catch (err) {
-                console.error('[Concierge]', err);
-                addToast(`Dossier intake notice: ${sanitizeError(err)}`, "❌");
-              } finally {
-                setIsAssimilating(false);
+                if (status === "quarantined") {
+                  addToast("ScoutIt could not process this PDF. Choose a readable PDF.");
+                  return;
+                }
+                refetchInventory();
+                addToast("Draft created. Staff verification is required before publication.");
                 setSelectedFile(null);
                 setShowWizard(false);
+              } catch (error) {
+                addToast(sanitizeError(error, "Could not queue the PDF. Try again."));
+              } finally {
+                setIsAssimilating(false);
               }
             }}
           >

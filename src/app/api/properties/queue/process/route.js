@@ -15,10 +15,10 @@ const MAX_PROCESS_ATTEMPTS = 3;
 /**
  * Quarantines a poison pill or corrupt listing so it does not block the queue.
  */
-async function quarantineProperty(propertyId, reason, details = {}, ownerId = null) {
+async function quarantineProperty(propertyId, reason, details = {}, ownerId = null, document = null) {
   const nowIso = new Date().toISOString();
   try {
-    await supabaseAdmin
+    const { data: quarantined, error } = await supabaseAdmin
       .from("properties")
       .update({
         pipeline_status: "quarantined",
@@ -29,7 +29,16 @@ async function quarantineProperty(propertyId, reason, details = {}, ownerId = nu
           quarantined_at: nowIso,
         },
       })
-      .eq("id", propertyId);
+      .eq("id", propertyId)
+      .eq("pipeline_status", "ai_drafting")
+      .select("id")
+      .maybeSingle();
+    if (error || !quarantined) return false;
+
+    if (document) {
+      const { error: cleanupError } = await supabaseAdmin.storage.from(document.bucket).remove([document.path]);
+      if (cleanupError) console.error("[queue-process] Could not remove quarantined PDF:", propertyId, cleanupError.code);
+    }
 
     await writeAuditLog(supabaseAdmin, {
       action: "PROPERTY_PROCESSING_QUARANTINED",
@@ -48,30 +57,13 @@ async function quarantineProperty(propertyId, reason, details = {}, ownerId = nu
         notificationType: "property_drafting",
       }).catch(() => {});
     }
+    return true;
   } catch (err) {
     console.error("[queue-process] Failed to quarantine property:", err);
+    return false;
   }
 }
 
-/**
- * ═════════════════════════════════════════════════════════════════════════
- * /api/properties/queue/process — Asynchronous Property Intake Processing Worker
- * ═════════════════════════════════════════════════════════════════════════
- *
- * CONTRACT & ARCHITECTURE (A-309):
- * The property queue runs as an on-demand, owner-and-worker-triggered pipeline
- * rather than an unbatched periodic cron:
- *   1. Triggered on intake: /api/properties/queue/intake queues the PDF and
- *      initiates background processing.
- *   2. Owner-triggered: The owner dashboard client triggers and polls processing
- *      while awaiting completion for their specific propertyId.
- *   3. Staff reconciliation: Staff admins can invoke this worker via requireAdmin.
- *   4. Standalone worker / cron: An external worker with CRON_SECRET can process
- *      the next queued item (FIFO total ordering) without a specific propertyId.
- *
- * It is intentionally not scheduled in vercel.json to avoid uncoordinated empty
- * polling and redundant serverless invocation when no uploads are queued.
- */
 export async function POST(request) {
   try {
     if (!supabaseAdmin) {
@@ -82,46 +74,45 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const requestedPropertyId = body?.propertyId || null;
+    const requestedPropertyId = typeof body?.propertyId === "string" ? body.propertyId.trim() : "";
 
-    // Check authorization: Cron, Admin, or Owner of the requested property
-    let isAuthorized = false;
+    let canProcessAny = false;
     let authUserId = null;
 
-    // 1. Cron invocation check: evaluate when caller presents a Bearer token
     const authHeader = request.headers.get("authorization");
     if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
-      const cronFailure = authorizeCronRequest(request);
-      if (!cronFailure) {
-        isAuthorized = true;
-      }
+      canProcessAny = !authorizeCronRequest(request);
     }
 
-    // 2. Admin check
-    if (!isAuthorized) {
+    if (!canProcessAny) {
       const adminResult = await requireAdmin(request, { label: "QUEUE PROCESSOR" });
       if (!adminResult.error && adminResult.userId) {
-        isAuthorized = true;
+        canProcessAny = true;
         authUserId = adminResult.userId;
+      } else {
+        authUserId = await resolveUserId(request);
       }
     }
 
-    // 3. User session check (owner checking their own listing)
-    if (!isAuthorized) {
-      authUserId = await resolveUserId(request);
+    if (!canProcessAny && !authUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!canProcessAny && !requestedPropertyId) {
+      return NextResponse.json({ error: "A property ID is required." }, { status: 400 });
     }
 
-    // Select the property to process
     let query = supabaseAdmin
       .from("properties")
       .select("id, owner_id, title, location, type, space_category, price, description, media_link, pipeline_status, pdf_source_url, created_at, details")
-      .eq("pipeline_status", "ai_drafting");
+      .eq("pipeline_status", "ai_drafting")
+      .eq("creation_source", "pdf_assisted");
 
     if (requestedPropertyId) {
       query = query.eq("id", requestedPropertyId);
     } else {
-      query = query.order("created_at", { ascending: true }).limit(1);
+      query = query.order("created_at", { ascending: true }).order("id", { ascending: true }).limit(1);
     }
+    if (!canProcessAny) query = query.eq("owner_id", authUserId);
 
     const { data: property, error: fetchError } = await query.maybeSingle();
 
@@ -142,27 +133,14 @@ export async function POST(request) {
       });
     }
 
-    // If caller is an authenticated owner, verify they own this property
-    if (!isAuthorized && authUserId) {
-      if (property.owner_id === authUserId) {
-        isAuthorized = true;
-      }
-    }
-
-    if (!isAuthorized) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const document = resolveQueueDocument(property);
     const storagePath = document?.path;
     const currentAttempts = (property.details?.process_attempts || 0) + 1;
 
     // Poison-pill protection: if this property has failed too many times, quarantine it
     if (currentAttempts > MAX_PROCESS_ATTEMPTS) {
-      if (storagePath) {
-        await supabaseAdmin.storage.from(document.bucket).remove([storagePath]).catch(() => {});
-      }
-      await quarantineProperty(property.id, "max_retries_exceeded", property.details, property.owner_id);
+      const quarantined = await quarantineProperty(property.id, "max_retries_exceeded", property.details, property.owner_id, document);
+      if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,
         quarantined: true,
@@ -181,7 +159,8 @@ export async function POST(request) {
           last_attempt_at: new Date().toISOString(),
         },
       })
-      .eq("id", property.id);
+      .eq("id", property.id)
+      .eq("pipeline_status", "ai_drafting");
 
     if (!storagePath) {
       await quarantineProperty(property.id, "missing_storage_path", property.details, property.owner_id);
@@ -225,8 +204,8 @@ export async function POST(request) {
     // 2. Oversize check: Enforce MAX_PDF_BYTES (25 MB)
     if (blob.size > MAX_PDF_BYTES) {
       console.warn(`[queue-process] PDF size ${blob.size} exceeds maximum ${MAX_PDF_BYTES} bytes`);
-      await supabaseAdmin.storage.from(document.bucket).remove([storagePath]).catch(() => {});
-      await quarantineProperty(property.id, "pdf_oversize", { ...property.details, size_bytes: blob.size, max_bytes: MAX_PDF_BYTES }, property.owner_id);
+      const quarantined = await quarantineProperty(property.id, "pdf_oversize", { ...property.details, size_bytes: blob.size, max_bytes: MAX_PDF_BYTES }, property.owner_id, document);
+      if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,
         quarantined: true,
@@ -267,8 +246,8 @@ export async function POST(request) {
       extractedText = (rawText || "").trim().slice(0, MAX_RAW_TEXT_CHARS);
     } catch (pdfErr) {
       console.error("[queue-process] Corrupt PDF extraction failed:", pdfErr.message);
-      await supabaseAdmin.storage.from(document.bucket).remove([storagePath]).catch(() => {});
-      await quarantineProperty(property.id, "corrupt_pdf", { ...property.details, error: pdfErr.message }, property.owner_id);
+      const quarantined = await quarantineProperty(property.id, "corrupt_pdf", { ...property.details, error: pdfErr.message }, property.owner_id, document);
+      if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json(
         {
           success: false,
@@ -291,8 +270,11 @@ export async function POST(request) {
     const resolvedTitle = extracted.title || property.title || "Untitled Property";
     const resolvedLocation = extracted.location || (property.location !== "Pending" && property.location !== "Location Pending" ? property.location : "Location Pending");
     const resolvedCategory = extracted.space_category || property.space_category || "commercial";
+    const draftDetails = { ...property.details, ...extracted.details };
+    delete draftDetails.temp_storage_path;
+    delete draftDetails.pdf_deleted_at;
 
-    const { error: updateError } = await supabaseAdmin
+    const { data: updatedDraft, error: updateError } = await supabaseAdmin
       .from("properties")
       .update({
         title: resolvedTitle,
@@ -303,11 +285,10 @@ export async function POST(request) {
         description: extracted.description || property.description || "",
         media_link: extracted.media_link || null,
         pipeline_status: "pending",
-        pdf_verified: false, // CRITICAL A-302: Human verification required before publication
-        pdf_source_url: null, // Clear URL reference as file is deleted per single-use policy
+        pdf_verified: false,
+        pdf_source_url: storagePath,
         details: {
-          ...(property.details || {}),
-          ...(extracted.details || {}),
+          ...draftDetails,
           floor_sqm: extracted.floor_sqm || null,
           lot_sqm: extracted.lot_sqm || null,
           beds: extracted.beds || null,
@@ -316,11 +297,13 @@ export async function POST(request) {
           ai_confidence: extracted.confidence || 0.8,
           ai_gaps: extracted.gaps || [],
           pdf_verification_required: true,
-          pdf_deleted_at: nowIso,
           processed_at: nowIso,
         },
       })
-      .eq("id", property.id);
+      .eq("id", property.id)
+      .eq("pipeline_status", "ai_drafting")
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       console.error("[queue-process] Failed to update property:", updateError);
@@ -329,26 +312,8 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+    if (!updatedDraft) return NextResponse.json({ processed: 0 });
 
-    // 6. CRITICAL: Permanently delete the temporary PDF from storage (Single-download policy)
-    let pdfDeleted = false;
-    if (storagePath) {
-      try {
-        const { error: removeError } = await supabaseAdmin.storage
-          .from(document.bucket)
-          .remove([storagePath]);
-
-        if (removeError) {
-          console.warn("[queue-process] Failed to delete temp PDF:", removeError.message);
-        } else {
-          pdfDeleted = true;
-        }
-      } catch (remErr) {
-        console.error("[queue-process] Exception deleting temp PDF:", remErr);
-      }
-    }
-
-    // 7. Audit trail
     await writeAuditLog(supabaseAdmin, {
       action: "PROPERTY_PARSED_AND_DRAFTED",
       tableName: "properties",
@@ -356,12 +321,10 @@ export async function POST(request) {
       userId: property.owner_id || authUserId,
       metadata: {
         source: "queue_processor",
-        source_pdf: property.details?.source_pdf,
-        pdf_deleted: pdfDeleted,
+        pending_source_review: true,
       },
     });
 
-    // 8. Dispatch completion notification to owner
     if (property.owner_id) {
       await notifyUser(supabaseAdmin, {
         userId: property.owner_id,
@@ -376,7 +339,7 @@ export async function POST(request) {
       success: true,
       propertyId: property.id,
       done: true,
-      deletedPdf: pdfDeleted,
+      deletedPdf: false,
       title: resolvedTitle,
       pdf_verified: false,
     });

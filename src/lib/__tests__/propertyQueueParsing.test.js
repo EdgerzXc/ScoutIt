@@ -17,6 +17,7 @@ let customAssimilateHandler = null;
 
 function makeQueryBuilder() {
   let isCountQuery = false;
+  let ownerFilter;
   const builder = {
     select(fields, opts) {
       dbLog.push(["select", fields, opts]);
@@ -33,6 +34,7 @@ function makeQueryBuilder() {
     },
     eq(col, val) {
       dbLog.push(["eq", col, val]);
+      if (col === "owner_id") ownerFilter = val;
       return builder;
     },
     lte(col, val) {
@@ -55,11 +57,14 @@ function makeQueryBuilder() {
       return Promise.resolve(insertResult);
     },
     maybeSingle() {
+      if (ownerFilter && queryResult.data?.owner_id && queryResult.data.owner_id !== ownerFilter) {
+        return Promise.resolve({ data: null, error: null });
+      }
       return Promise.resolve(queryResult);
     },
     then(onFulfilled, onRejected) {
       if (isCountQuery) {
-        return Promise.resolve({ count: queryResult.count, error: null }).then(onFulfilled, onRejected);
+        return Promise.resolve({ count: queryResult.count, error: queryResult.countError || null }).then(onFulfilled, onRejected);
       }
       if (Array.isArray(queryResult.data)) {
         return Promise.resolve({ data: queryResult.data, error: null }).then(onFulfilled, onRejected);
@@ -201,6 +206,16 @@ describe("Property Listing Queue · Intake & Status", () => {
     expect(res.status).toBe(401);
   });
 
+  it("does not upload a PDF if the owner queue limit cannot be checked", async () => {
+    queryResult.countError = { code: "PGRST001" };
+    const req = new Request("https://scoutit.space/api/properties/queue/intake", { method: "POST" });
+
+    const res = await intakeRoute.POST(req);
+
+    expect(res.status).toBe(503);
+    expect(storageLog).toEqual([]);
+  });
+
   it("intake accepts a valid PDF, stores it temporarily, registers queue, and notifies owner of queue number", async () => {
     const pdfBytes = Buffer.from("%PDF-1.4 sample property brochure content");
     const req = new Request("https://scoutit.space/api/properties/queue/intake", {
@@ -273,9 +288,19 @@ describe("Property Listing Queue · Intake & Status", () => {
     expect(body.isDone).toBe(true);
     expect(body.pipelineStatus).toBe("pending");
   });
+
+  it("returns the same missing status for another owner's draft", async () => {
+    queryResult.data = { id: "prop-new-1", owner_id: "another-owner", pipeline_status: "pending" };
+    const req = new Request("https://scoutit.space/api/properties/queue/status?propertyId=prop-new-1");
+
+    const res = await statusRoute.GET(req);
+
+    expect(res.status).toBe(404);
+    expect(dbLog).toContainEqual(["eq", "owner_id", mockUserId]);
+  });
 });
 
-describe("Property Listing Queue · Processing & Single-Use Deletion Policy", () => {
+describe("Property Listing Queue · Processing and source retention", () => {
   beforeEach(() => {
     storageLog.length = 0;
     dbLog.length = 0;
@@ -301,7 +326,42 @@ describe("Property Listing Queue · Processing & Single-Use Deletion Policy", ()
     };
   });
 
-  it("downloads the PDF once, updates listing to pending with pdf_verified: false, deletes PDF from storage, and notifies owner", async () => {
+  it("rejects a signed-out process request before querying the queue", async () => {
+    mockUserId = null;
+    const req = new Request("https://scoutit.space/api/properties/queue/process", { method: "POST" });
+
+    const res = await processRoute.POST(req);
+
+    expect(res.status).toBe(401);
+    expect(dbLog).toEqual([]);
+    expect(storageLog).toEqual([]);
+  });
+
+  it("requires an explicit property ID for a non-staff owner", async () => {
+    const req = new Request("https://scoutit.space/api/properties/queue/process", { method: "POST" });
+
+    const res = await processRoute.POST(req);
+
+    expect(res.status).toBe(400);
+    expect(dbLog).toEqual([]);
+  });
+
+  it("does not read or mutate another owner's document", async () => {
+    mockUserId = "another-owner";
+    const req = new Request("https://scoutit.space/api/properties/queue/process", {
+      method: "POST",
+      body: JSON.stringify({ propertyId: "prop-123" }),
+    });
+
+    const res = await processRoute.POST(req);
+
+    expect(await res.json()).toMatchObject({ processed: 0 });
+    expect(dbLog).toContainEqual(["eq", "owner_id", "another-owner"]);
+    expect(dbLog.some(([op]) => op === "update")).toBe(false);
+    expect(storageLog).toEqual([]);
+  });
+
+  it("prepares the pending draft and retains its source for staff review", async () => {
     const req = new Request("https://scoutit.space/api/properties/queue/process", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -314,21 +374,20 @@ describe("Property Listing Queue · Processing & Single-Use Deletion Policy", ()
 
     expect(body.success).toBe(true);
     expect(body.done).toBe(true);
-    expect(body.deletedPdf).toBe(true);
+    expect(body.deletedPdf).toBe(false);
     expect(body.pdf_verified).toBe(false);
 
     // Verify single-use download happened
     expect(storageLog.some(([op]) => op === "download")).toBe(true);
 
-    // Verify CRITICAL REQUIREMENT: PDF file was permanently deleted from storage
-    expect(storageRemoveCalls).toContain("temp_queue_docs/test-owner-123/123_deck.pdf");
+    expect(storageRemoveCalls).toEqual([]);
 
     // Verify DB update transitioned pipeline_status to 'pending' with pdf_verified: false
     const updateOps = dbLog.filter(([op]) => op === "update");
     expect(updateOps.length).toBeGreaterThan(0);
     const finalPatch = updateOps[updateOps.length - 1][1];
     expect(finalPatch.pipeline_status).toBe("pending");
-    expect(finalPatch.pdf_source_url).toBe(null);
+    expect(finalPatch.pdf_source_url).toBe("temp_queue_docs/test-owner-123/123_deck.pdf");
     expect(finalPatch.pdf_verified).toBe(false); // A-302: Human verification required
     expect(finalPatch.details?.pdf_verification_required).toBe(true);
     expect(finalPatch.title).toBe("Prime BGC Commercial Tower");

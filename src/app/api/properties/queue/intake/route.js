@@ -6,6 +6,7 @@ import { notifyUser } from "@/lib/notifications";
 import { verifyFileFamily } from "@/lib/fileTypeCheck";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 import { calculateQueuePosition } from "@/lib/queuePosition";
 import { resolveUserPerks } from "@/lib/BadgeEngine";
 import { PRIVATE_QUEUE_BUCKET, PRIVATE_QUEUE_PREFIX } from "@/lib/propertyQueueStorage";
@@ -33,8 +34,7 @@ export async function POST(request) {
     }
 
     // 1. Rate limiting check (10 uploads / min)
-    const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    const rateKey = `${userId}:${clientIp}`;
+    const rateKey = `${userId}:${clientIp(request)}`;
     const rateCheck = intakeLimiter(rateKey);
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -53,7 +53,10 @@ export async function POST(request) {
       .eq("owner_id", userId)
       .eq("pipeline_status", "ai_drafting");
 
-    if (!pendingErr && typeof pendingCount === "number" && pendingCount >= MAX_PENDING_PER_USER) {
+    if (pendingErr || typeof pendingCount !== "number") {
+      return NextResponse.json({ error: "Could not check the queue limit. Try again." }, { status: 503 });
+    }
+    if (pendingCount >= MAX_PENDING_PER_USER) {
       return NextResponse.json(
         {
           error: `Queue limit reached: You have ${pendingCount} documents currently in the parsing queue. Please wait for them to finish before uploading more.`,
@@ -196,7 +199,6 @@ export async function POST(request) {
           pdf_source_url: storagePath,
           details: {
             source_pdf: originalFilename,
-            temp_storage_path: storagePath,
             pdf_hash: fileHash,
             queued_at: nowIso,
             queue_priority: hasQueuePriority,
