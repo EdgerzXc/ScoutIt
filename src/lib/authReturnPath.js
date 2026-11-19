@@ -1,4 +1,4 @@
-const PRIVATE_WORKSPACE_PATH = /^\/(?:dashboard(?:\/|$)|admin(?:\/|$)|settings(?:\/|$)|wishlist(?:\/|$))/;
+const PRIVATE_WORKSPACE_PATH = /^\/(?:dashboard(?:\/|$)|admin(?:\/|$)|settings(?:\/|$)|wishlist(?:\/|$)|profile$)/;
 
 export function normalizePrivateReturnPath(candidate, fallback = "/dashboard") {
   if (typeof candidate !== "string" || !candidate.startsWith("/") || candidate.startsWith("//")) {

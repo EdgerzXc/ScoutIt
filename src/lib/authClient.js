@@ -26,6 +26,24 @@ export const getUser = async () => {
   }
 };
 
+export const getWorkspaceUser = async () => {
+  const result = await getUser();
+  const user = result.data.user;
+  if (!user?.factors?.some((factor) => factor.status === 'verified')) return result;
+
+  try {
+    const { data: { session }, error: sessionError } = await getSession();
+    if (sessionError || session?.user?.id !== user.id) {
+      return { data: { user: null }, error: sessionError };
+    }
+    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (!error && data?.currentLevel === 'aal2') return result;
+    return { data: { user: null }, error: error ?? null };
+  } catch (error) {
+    return { data: { user: null }, error };
+  }
+};
+
 export const onAuthStateChange = (callback) => {
   return supabase.auth.onAuthStateChange(callback);
 };

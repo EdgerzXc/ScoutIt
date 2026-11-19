@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getUser, signOut } from "@/lib/authClient";
+import { getWorkspaceUser, signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -162,12 +162,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function loadSettings() {
-      const [factorsResult, userResult] = await Promise.all([
-        supabase.auth.mfa.listFactors(),
-        getUser(),
-      ]);
-      if (factorsResult.data?.totp) setFactors(factorsResult.data.totp);
-
+      const userResult = await getWorkspaceUser();
       let user = userResult.data?.user;
       if (!user) {
         const devUser = readDevelopmentMockUser(typeof window !== "undefined" ? localStorage : null, {
@@ -191,9 +186,10 @@ export default function SettingsPage() {
           return;
         }
         // A-146: keep the deep link across the auth bounce.
-        router.replace("/onboarding?next=%2Fsettings");
+        router.replace(`/onboarding?next=${encodeURIComponent(`/settings${window.location.search}${window.location.hash}`)}`);
         return;
       }
+      setFactors((user.factors ?? []).filter((factor) => factor.factor_type === "totp" && factor.status === "verified"));
       const { data: profile } = await supabase
         .from("user_profiles")
         .select("display_name,active_roles,primary_mode,role,headline,bio,location,firm,service,date_of_birth,adult_eligibility_status")
@@ -359,7 +355,7 @@ export default function SettingsPage() {
         return;
       }
     }
-    const { data: { user }, error: userError } = await getUser();
+    const { data: { user }, error: userError } = await getWorkspaceUser();
     if (userError || !user) {
       setIsSaving(false);
       // A-146: keep the deep link across the auth bounce.

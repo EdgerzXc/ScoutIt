@@ -5,7 +5,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { loadDeals } from "../lib/deals/dealsClient";
-import { onAuthStateChange, getSession, getUser, signInWithPassword } from "../lib/authClient";
+import { onAuthStateChange, getSession, getWorkspaceUser, signInWithPassword } from "../lib/authClient";
 import { Bookmark } from "lucide-react";
 import {
   getBalance,
@@ -396,7 +396,7 @@ export function DashboardProvider({ children }) {
         // workspace boundary showing "Verifying your access…" forever. A
         // timeout is treated as "not signed in", which sends the visitor to
         // sign-in rather than stranding them on a spinner.
-        const { data: { user }, error } = await withAuthTimeout(getUser());
+        const { data: { user }, error } = await withAuthTimeout(getWorkspaceUser());
         if (!error && user) {
           resolvedUserIdRef.current = user.id;
           const ready = await handleUserLogin(user);
@@ -445,6 +445,10 @@ export function DashboardProvider({ children }) {
     // The id comparison is what makes this safe: a repeated SIGNED_IN for the
     // same person is a no-op rather than another full round trip.
     const { data: { subscription } } = onAuthStateChange((event, session) => {
+      if (event === "MFA_CHALLENGE_VERIFIED") {
+        setTimeout(() => { fetchVerifiedUser(); }, 0);
+        return;
+      }
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
       const nextUserId = session?.user?.id || null;
       if (nextUserId === resolvedUserIdRef.current) return;

@@ -6,12 +6,13 @@ const { auth } = vi.hoisted(() => ({
     getSession: vi.fn(),
     resend: vi.fn(),
     signUp: vi.fn(),
+    mfa: { getAuthenticatorAssuranceLevel: vi.fn() },
   },
 }));
 
 vi.mock("@/lib/supabaseClient", () => ({ supabase: { auth } }));
 
-import { getSession, getUser, resendSignupConfirmation, signUp } from "@/lib/authClient";
+import { getSession, getUser, getWorkspaceUser, resendSignupConfirmation, signUp } from "@/lib/authClient";
 
 describe("email confirmation auth client", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -20,6 +21,32 @@ describe("email confirmation auth client", () => {
     auth.getUser.mockResolvedValue({ data: { user: { id: "verified" } }, error: null });
     await expect(getUser()).resolves.toEqual({ data: { user: { id: "verified" } }, error: null });
     expect(auth.getUser).toHaveBeenCalledOnce();
+  });
+
+  it("keeps ordinary sign-in available when authenticator enrollment is unverified", async () => {
+    const user = { id: "verified", factors: [{ status: "unverified" }] };
+    auth.getUser.mockResolvedValue({ data: { user }, error: null });
+
+    await expect(getWorkspaceUser()).resolves.toEqual({ data: { user }, error: null });
+    expect(auth.getSession).not.toHaveBeenCalled();
+  });
+
+  it.each(["aal1", "aal2"])("applies workspace assurance %s for an enrolled user", async (currentLevel) => {
+    const user = { id: "verified", factors: [{ status: "verified" }] };
+    auth.getUser.mockResolvedValue({ data: { user }, error: null });
+    auth.getSession.mockResolvedValue({ data: { session: { user } }, error: null });
+    auth.mfa.getAuthenticatorAssuranceLevel.mockResolvedValue({ data: { currentLevel }, error: null });
+
+    await expect(getWorkspaceUser()).resolves.toEqual({ data: { user: currentLevel === "aal2" ? user : null }, error: null });
+  });
+
+  it("rejects assurance from a different account after a session change", async () => {
+    const user = { id: "verified", factors: [{ status: "verified" }] };
+    auth.getUser.mockResolvedValue({ data: { user }, error: null });
+    auth.getSession.mockResolvedValue({ data: { session: { user: { id: "other" } } }, error: null });
+
+    await expect(getWorkspaceUser()).resolves.toEqual({ data: { user: null }, error: null });
+    expect(auth.mfa.getAuthenticatorAssuranceLevel).not.toHaveBeenCalled();
   });
 
   it("safely returns null user and session without throwing when Supabase Auth rejects or returns null data", async () => {

@@ -117,9 +117,9 @@ export default function Header({ ambientContext = null }) {
           }
         }
         const { supabase } = await import("@/lib/supabaseClient");
-        if (supabase?.auth?.getSession) {
-          const { data } = await supabase.auth.getSession();
-          const sbUser = data?.session?.user;
+        const { getWorkspaceUser } = await import("@/lib/authClient");
+        if (supabase?.auth) {
+          const { data: { user: sbUser } } = await getWorkspaceUser();
           if (sbUser && active) {
             const meta = sbUser.user_metadata || {};
             const { data: profile } = await supabase

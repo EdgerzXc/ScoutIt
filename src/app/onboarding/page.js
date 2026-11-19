@@ -11,6 +11,7 @@ import {
   signInWithOtp,
   signInWithPassword,
   resendSignupConfirmation,
+  signOut,
   signUp,
   verifyOtp,
 } from "@/lib/authClient";
@@ -101,6 +102,13 @@ export default function OnboardingPage() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [authenticator, setAuthenticator] = useState(null);
+  const [authenticatorCode, setAuthenticatorCode] = useState("");
+  const [authenticatorError, setAuthenticatorError] = useState("");
+  const [authenticatorBusy, setAuthenticatorBusy] = useState(false);
+  const authenticatorAction = useRef(false);
+  const authenticatorHeading = useRef(null);
+  const needsAuthenticator = Boolean(authenticator);
   const [formData, setFormData] = useState({
     name: "",
     dateOfBirth: "",
@@ -128,7 +136,7 @@ export default function OnboardingPage() {
 
   const resetCaptcha = () => turnstileRef.current?.reset();
 
-  const continueAuthenticatedUser = async (user) => {
+  const loadProfile = async (user) => {
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("*")
@@ -152,6 +160,80 @@ export default function OnboardingPage() {
     setStep(2);
   };
 
+  const continueAuthenticatedUser = async (user) => {
+    try {
+      const { data: { session } } = await getSession();
+      if (session?.user?.id !== user.id || !session.access_token) throw new Error("Missing sign-in session");
+
+      const { data: assurance, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(session.access_token);
+      if (error || !["aal1", "aal2"].includes(assurance?.currentLevel)) throw new Error("Unknown session assurance");
+
+      if (assurance.currentLevel === "aal1" && assurance.nextLevel === "aal2") {
+        const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
+        if (factorsError) throw factorsError;
+        setAuthenticator({ user, factors: factors?.totp ?? [], factorId: factors?.totp?.[0]?.id ?? "" });
+        setAuthenticatorCode("");
+        setAuthenticatorError("");
+        return;
+      }
+
+      setAuthenticator(null);
+      await loadProfile(user);
+    } catch {
+      setAuthenticator({ user, retry: true });
+      setAuthenticatorError("Could not check your sign-in. Try again.");
+    }
+  };
+
+  const completeAuthenticator = async (event) => {
+    event.preventDefault();
+    if (!authenticator || authenticatorAction.current) return;
+    if (!authenticator.retry && (!authenticator.factorId || !/^\d{6}$/.test(authenticatorCode))) return;
+
+    authenticatorAction.current = true;
+    setAuthenticatorBusy(true);
+    setAuthenticatorError("");
+
+    try {
+      if (!authenticator.retry) {
+        const { data, error } = await supabase.auth.mfa.challengeAndVerify({
+          factorId: authenticator.factorId,
+          code: authenticatorCode,
+        });
+        if (error || data?.user?.id !== authenticator.user.id) {
+          setAuthenticatorCode("");
+          setAuthenticatorError("Could not verify that code. Try the current code from your app.");
+          return;
+        }
+      }
+      await continueAuthenticatedUser(authenticator.user);
+    } catch {
+      setAuthenticatorError("Could not verify your sign-in. Try again.");
+    } finally {
+      authenticatorAction.current = false;
+      setAuthenticatorBusy(false);
+    }
+  };
+
+  const cancelAuthenticator = async () => {
+    if (authenticatorAction.current) return;
+    authenticatorAction.current = true;
+    setAuthenticatorBusy(true);
+    try {
+      await signOut("local");
+      setAuthenticator(null);
+      setAuthenticatorCode("");
+      setAuthenticatorError("");
+      setOtpSent(false);
+      setOtpCode("");
+      setCaptchaToken("");
+      setFormData((current) => ({ ...current, password: "" }));
+    } finally {
+      authenticatorAction.current = false;
+      setAuthenticatorBusy(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
     const checkSession = async () => {
@@ -170,6 +252,10 @@ export default function OnboardingPage() {
   useEffect(() => {
     trackEvent(GA_EVENTS.ONBOARDING_STEP, { step });
   }, [step]);
+
+  useEffect(() => {
+    if (needsAuthenticator) authenticatorHeading.current?.focus();
+  }, [needsAuthenticator]);
 
   const setEmail = (email) => {
     setEmailConfirmationSent(false);
@@ -353,6 +439,51 @@ export default function OnboardingPage() {
       setSaving(false);
     }
   };
+
+  const renderAuthenticator = () => (
+    <form className="flex flex-col gap-4" onSubmit={completeAuthenticator}>
+      <h1 ref={authenticatorHeading} tabIndex={-1} className="font-headline-editorial text-4xl text-on-surface">Verify your sign-in</h1>
+      {authenticator.factorId && !authenticator.retry && (
+        <>
+          <p className="text-text-secondary">Enter the six-digit code from your authenticator app.</p>
+          {authenticator.factors.length > 1 && (
+            <label className="flex flex-col gap-2 text-sm text-on-surface">
+              Authenticator
+              <select className="min-h-11 rounded border border-surface-variant bg-surface px-3" value={authenticator.factorId}
+                disabled={authenticatorBusy} onChange={(event) => {
+                  const factorId = event.target.value;
+                  setAuthenticator((current) => ({ ...current, factorId }));
+                  setAuthenticatorCode("");
+                  setAuthenticatorError("");
+                }}>
+                {authenticator.factors.map((factor, index) => (
+                  <option key={factor.id} value={factor.id}>{factor.friendly_name || `Authenticator ${index + 1}`}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className="flex flex-col gap-2 text-sm text-on-surface">
+            Authenticator code
+            <input className="min-h-11 w-full rounded border border-surface-variant bg-surface px-3 font-mono" inputMode="numeric"
+              autoComplete="one-time-code" value={authenticatorCode} disabled={authenticatorBusy}
+              onChange={(event) => setAuthenticatorCode(event.target.value.replace(/\D/g, "").slice(0, 6))} />
+          </label>
+        </>
+      )}
+      {!authenticator.factorId && !authenticator.retry && (
+        <p className="text-text-secondary">No supported authenticator is available. <Link className="text-gold-accent underline" href="/contact">Contact support</Link>.</p>
+      )}
+      {authenticatorError && <p role="alert" className="text-error text-sm">{authenticatorError}</p>}
+      {(authenticator.retry || authenticator.factorId) && (
+        <button type="submit" className="min-h-11 rounded bg-gold-accent px-4 text-background font-working-title disabled:opacity-50"
+          disabled={authenticatorBusy || (!authenticator.retry && authenticatorCode.length !== 6)}>
+          {authenticatorBusy ? "Checking…" : authenticator.retry ? "Try again" : "Verify code"}
+        </button>
+      )}
+      <button type="button" className="min-h-11 self-start text-sm text-text-secondary underline disabled:opacity-50"
+        onClick={cancelAuthenticator} disabled={authenticatorBusy}>Cancel and sign out</button>
+    </form>
+  );
 
   const renderAuth = () => (
     <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
@@ -553,12 +684,12 @@ export default function OnboardingPage() {
       <AtmosphereBackground variant="hero" />
       {toast && <div role="status" aria-live="polite" className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-surface border border-gold-accent/50 text-on-surface px-6 py-3 rounded-full shadow-2xl"><span className="text-sm font-working-title">{toast.message}</span></div>}
       <header className="relative z-40 p-6 md:p-8 grid grid-cols-3 items-center sticky top-0 bg-background/90 backdrop-blur-md border-b border-surface-variant">
-        <button onClick={() => step === 1 ? router.back() : setStep((current) => current - 1)} className="justify-self-start text-text-secondary hover:text-gold-accent text-sm font-bold tracking-widest uppercase">← Back</button>
+        {authenticator ? <span /> : <button onClick={() => step === 1 ? router.back() : setStep((current) => current - 1)} className="justify-self-start text-text-secondary hover:text-gold-accent text-sm font-bold tracking-widest uppercase">← Back</button>}
         <Link href="/" className="justify-self-center font-display-md text-2xl text-gold-accent tracking-tighter">S<span className="text-on-surface">cout</span>IT</Link>
         <div className="justify-self-end flex gap-2">{[1, 2, 3, 4].map((phase) => <div key={phase} className={"h-1.5 rounded-full transition-all " + (step >= phase ? "w-6 bg-gold-accent" : "w-2 bg-surface-variant")} />)}</div>
       </header>
       <main className="relative z-10 flex-1 flex flex-col justify-center max-w-[600px] mx-auto w-full p-6 md:p-8 py-12">
-        {step === 1 && renderAuth()}
+        {step === 1 && (authenticator ? renderAuthenticator() : renderAuth())}
         {step === 2 && renderProfile()}
         {step === 3 && renderRole()}
         {step === 4 && renderCalibration()}

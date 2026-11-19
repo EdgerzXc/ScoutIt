@@ -407,11 +407,10 @@ export default function BottomNav() {
 
     async function resolveUserRoles() {
       try {
-        // 1. Authoritative check: Supabase Auth session & user_profiles
         const { supabase } = await import("@/lib/supabaseClient");
-        if (supabase?.auth?.getSession) {
-          const { data } = await supabase.auth.getSession();
-          const sbUser = data?.session?.user;
+        const { getWorkspaceUser } = await import("@/lib/authClient");
+        if (supabase?.auth) {
+          const { data: { user: sbUser } } = await getWorkspaceUser();
           if (sbUser) {
             const { data: profile } = await supabase
               .from("user_profiles")
@@ -479,8 +478,10 @@ export default function BottomNav() {
     let authSub = null;
     import("@/lib/supabaseClient").then(({ supabase }) => {
       if (supabase?.auth?.onAuthStateChange) {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-          resolveUserRoles();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+          if (["SIGNED_IN", "SIGNED_OUT", "MFA_CHALLENGE_VERIFIED"].includes(event)) {
+            setTimeout(() => { if (active) resolveUserRoles(); }, 0);
+          }
         });
         authSub = subscription;
       }

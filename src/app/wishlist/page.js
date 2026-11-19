@@ -8,7 +8,7 @@ import { Bookmark, Compass, ShieldCheck } from "lucide-react";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import { supabase } from "@/lib/supabaseClient";
-import { getSession } from "@/lib/authClient";
+import { getSession, getWorkspaceUser } from "@/lib/authClient";
 import { classifySavedItem, liveSlugSet } from "@/lib/wishlistLiveness";
 import {
   getLocalSavedSignals,
@@ -96,9 +96,9 @@ export default function WishlistPage() {
     let cancelled = false;
     const loadAccount = async () => {
       try {
-        const { data } = await getSession();
-        const session = data?.session;
-        if (!session?.user) {
+        const { data: { user } } = await getWorkspaceUser();
+        const { data: { session } } = user ? await getSession() : { data: {} };
+        if (!user || session?.user?.id !== user.id) {
           if (!cancelled) {
             setIsLoggedIn(false);
             setActiveMode("offline");
@@ -108,7 +108,7 @@ export default function WishlistPage() {
 
         if (!cancelled) {
           setIsLoggedIn(true);
-          setUserEmail(session.user.email || "");
+          setUserEmail(user.email || "");
           setActiveMode("all");
         }
 

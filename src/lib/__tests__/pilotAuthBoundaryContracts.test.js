@@ -7,7 +7,7 @@ describe("controlled-pilot authentication boundary", () => {
   it("requires validated Supabase identity before dashboard hydration", () => {
     const context = read("src/context/DashboardContext.js");
     const dashboard = read("src/app/dashboard/page.js");
-    expect(context).toContain("getUser");
+    expect(context).toContain("getWorkspaceUser");
     expect(dashboard).toContain("getUser");
     expect(context).toContain("readDevelopmentMockUser");
     expect(dashboard).toContain("readDevelopmentMockUser");

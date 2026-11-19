@@ -27,6 +27,7 @@ const CALLBACK_SITES = [
   "context/DashboardContext.js",
   "components/descent/useVerifiedIdentity.js",
   "components/ui/ProfileButton.js",
+  "components/layout/BottomNav.js",
 ];
 
 /** Extract the argument list of the onAuthStateChange( ... ) call. */
@@ -66,20 +67,21 @@ describe("onAuthStateChange callbacks cannot deadlock supabase-js", () => {
 
   it("DashboardContext bounds the auth check so it cannot spin forever", () => {
     const source = read("context/DashboardContext.js");
-    expect(source).toMatch(/withAuthTimeout\(\s*getUser\(\)\s*\)/);
+    expect(source).toMatch(/withAuthTimeout\(\s*getWorkspaceUser\(\)\s*\)/);
     expect(source).toMatch(/AUTH_RESOLVE_TIMEOUT_MS/);
     // A timeout must resolve to a signed-out shape, never reject — a
     // rejection here would land in the catch and strand the spinner again.
     expect(source).toMatch(/resolve\(\{\s*data:\s*\{\s*user:\s*null\s*\}/);
   });
 
-  it("DashboardContext re-verifies only on a real identity change", () => {
+  it("DashboardContext re-verifies on an identity change or a successful MFA challenge", () => {
     const body = callbackSource(read("context/DashboardContext.js"));
     // Reacting to TOKEN_REFRESHED re-entered getUser(), which can itself
     // trigger a refresh and fire the event again — the loop that flickered
     // the workspace between its spinner and the dashboard.
     expect(body).toMatch(/event !== "SIGNED_IN" && event !== "SIGNED_OUT"/);
     expect(body).toMatch(/nextUserId === resolvedUserIdRef\.current/);
+    expect(body).toContain('event === "MFA_CHALLENGE_VERIFIED"');
   });
 
   it("the workspace boundary gates identity resolution, not dashboard data loading", () => {

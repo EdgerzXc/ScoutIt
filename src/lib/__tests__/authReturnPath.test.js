@@ -15,6 +15,11 @@ describe("private auth return paths", () => {
     expect(normalizePrivateReturnPath("/settings?tab=privacy")).toBe("/settings?tab=privacy");
   });
 
+  it("preserves only the signed-in profile destination", () => {
+    expect(normalizePrivateReturnPath("/profile")).toBe("/profile");
+    expect(normalizePrivateReturnPath("/profile/public-profile")).toBe("/dashboard");
+  });
+
   it.each([
     "https://attacker.example/dashboard",
     "//attacker.example/dashboard",

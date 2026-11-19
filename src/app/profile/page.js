@@ -19,7 +19,7 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
 import ResearcherPanel from "@/components/profile/panels/ResearcherPanel";
-import { getUser } from "@/lib/authClient";
+import { getWorkspaceUser } from "@/lib/authClient";
 import {
   loadOwnProfile,
   loadPrivacySettings,
@@ -40,9 +40,9 @@ export default function OwnProfilePage() {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } = {} } = await getUser();
+      const { data: { user } = {} } = await getWorkspaceUser();
       if (!user) {
-        router.push("/onboarding");
+        router.replace("/onboarding?next=%2Fprofile");
         return;
       }
 
