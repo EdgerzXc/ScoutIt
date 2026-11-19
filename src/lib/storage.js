@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { PROPERTY_PHOTO_MAX_BYTES, PROPERTY_PHOTO_MIME_TYPES } from "./propertyPhotoLimits";
 
 // 10MB for documents/images/audio, 50MB for videos
 const MAX_SIZES = {
@@ -72,12 +73,11 @@ export const uploadAttachment = async (dealId, file, extraMeta = {}) => {
 export const uploadPropertyPhoto = async (file) => {
   // Client-side quick check
   const baseType = (file.type || '').split(';')[0].trim().toLowerCase();
-  if (!MAX_SIZES[baseType]) {
-    throw new Error("Invalid file type. Only JPG, PNG, WEBP, PDF, MP4, and Audio files are allowed.");
+  if (baseType && !PROPERTY_PHOTO_MIME_TYPES.includes(baseType)) {
+    throw new Error("Only JPEG, PNG, and WebP images are supported.");
   }
-  const maxSize = MAX_SIZES[baseType] || 10 * 1024 * 1024;
-  if (file.size > maxSize) {
-    throw new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB for this file type.`);
+  if (file.size > PROPERTY_PHOTO_MAX_BYTES) {
+    throw new Error("The photo exceeds the 4 MB limit.");
   }
 
   // A-317: Route upload through authenticated server gate with magic-bytes verification

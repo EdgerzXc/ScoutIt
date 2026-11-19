@@ -1,8 +1,10 @@
+import { resolveQueueDocument } from "./propertyQueueStorage";
+
 /**
  * Stale Queue Temp Object & Draft Purge Lifecycle
  * Cleans up abandoned or hung ai_drafting uploads older than maxAgeHours.
  */
-export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24, tempBucket = "property_photos" } = {}) {
+export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24 } = {}) {
   if (!supabaseAdmin) return { purged: 0, errors: [] };
 
   const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000).toISOString();
@@ -22,12 +24,17 @@ export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24, tem
     const errors = [];
 
     for (const row of staleRows) {
-      const storagePath = row.pdf_source_url || row.details?.temp_storage_path;
-      if (storagePath) {
+      const document = resolveQueueDocument(row);
+      if (document) {
         try {
-          await supabaseAdmin.storage.from(tempBucket).remove([storagePath]);
+          const { error } = await supabaseAdmin.storage.from(document.bucket).remove([document.path]);
+          if (error) {
+            errors.push(`Storage delete failed for ${row.id}: ${error.message}`);
+            continue;
+          }
         } catch (removeErr) {
           errors.push(`Storage delete failed for ${row.id}: ${removeErr.message}`);
+          continue;
         }
       }
 

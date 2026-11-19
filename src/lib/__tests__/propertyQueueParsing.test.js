@@ -227,7 +227,7 @@ describe("Property Listing Queue · Intake & Status", () => {
     expect(notificationLog[0].notificationType).toBe("property_drafting");
 
     // Verify storage upload occurred
-    expect(storageLog.some(([op, bucket]) => op === "from" && bucket === "property_photos")).toBe(true);
+    expect(storageLog.filter(([op]) => op === "from")).toEqual([["from", "property-documents-temp"]]);
   });
 
   it("status reports in-queue position when listing is in ai_drafting", async () => {

@@ -8,8 +8,8 @@ import { notifyUser } from "@/lib/notifications";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { assimilatePropertyText, MAX_PDF_BYTES, MAX_RAW_TEXT_CHARS, MAX_PDF_PAGES } from "@/lib/assimilateProperty";
+import { resolveQueueDocument } from "@/lib/propertyQueueStorage";
 
-const TEMP_BUCKET = "property_photos";
 const MAX_PROCESS_ATTEMPTS = 3;
 
 /**
@@ -153,13 +153,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const storagePath = property.details?.temp_storage_path || property.pdf_source_url;
+    const document = resolveQueueDocument(property);
+    const storagePath = document?.path;
     const currentAttempts = (property.details?.process_attempts || 0) + 1;
 
     // Poison-pill protection: if this property has failed too many times, quarantine it
     if (currentAttempts > MAX_PROCESS_ATTEMPTS) {
       if (storagePath) {
-        await supabaseAdmin.storage.from(TEMP_BUCKET).remove([storagePath]).catch(() => {});
+        await supabaseAdmin.storage.from(document.bucket).remove([storagePath]).catch(() => {});
       }
       await quarantineProperty(property.id, "max_retries_exceeded", property.details, property.owner_id);
       return NextResponse.json({
@@ -196,7 +197,7 @@ export async function POST(request) {
     let blob = null;
     try {
       const { data: dlBlob, error: dlError } = await supabaseAdmin.storage
-        .from(TEMP_BUCKET)
+        .from(document.bucket)
         .download(storagePath);
 
       if (dlError || !dlBlob) {
@@ -224,7 +225,7 @@ export async function POST(request) {
     // 2. Oversize check: Enforce MAX_PDF_BYTES (25 MB)
     if (blob.size > MAX_PDF_BYTES) {
       console.warn(`[queue-process] PDF size ${blob.size} exceeds maximum ${MAX_PDF_BYTES} bytes`);
-      await supabaseAdmin.storage.from(TEMP_BUCKET).remove([storagePath]).catch(() => {});
+      await supabaseAdmin.storage.from(document.bucket).remove([storagePath]).catch(() => {});
       await quarantineProperty(property.id, "pdf_oversize", { ...property.details, size_bytes: blob.size, max_bytes: MAX_PDF_BYTES }, property.owner_id);
       return NextResponse.json({
         success: false,
@@ -266,7 +267,7 @@ export async function POST(request) {
       extractedText = (rawText || "").trim().slice(0, MAX_RAW_TEXT_CHARS);
     } catch (pdfErr) {
       console.error("[queue-process] Corrupt PDF extraction failed:", pdfErr.message);
-      await supabaseAdmin.storage.from(TEMP_BUCKET).remove([storagePath]).catch(() => {});
+      await supabaseAdmin.storage.from(document.bucket).remove([storagePath]).catch(() => {});
       await quarantineProperty(property.id, "corrupt_pdf", { ...property.details, error: pdfErr.message }, property.owner_id);
       return NextResponse.json(
         {
@@ -334,7 +335,7 @@ export async function POST(request) {
     if (storagePath) {
       try {
         const { error: removeError } = await supabaseAdmin.storage
-          .from(TEMP_BUCKET)
+          .from(document.bucket)
           .remove([storagePath]);
 
         if (removeError) {

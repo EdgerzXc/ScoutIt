@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { calculateQueuePosition } from "../queuePosition.js";
 import { purgeStaleQueueDocs } from "../queueMaintenance.js";
+import { resolveQueueDocument } from "../propertyQueueStorage.js";
 
 describe("Queue Intake Quota, Private Lifecycle, and Concurrency (A-303)", () => {
   describe("calculateQueuePosition", () => {
@@ -66,6 +67,7 @@ describe("Queue Intake Quota, Private Lifecycle, and Concurrency (A-303)", () =>
                 data: [
                   {
                     id: "stale-1",
+                    owner_id: "u-1",
                     pdf_source_url: "temp_queue_docs/u-1/token_stale.pdf",
                     details: { queued_at: "2026-11-05T00:00:00.000Z" },
                   },
@@ -97,6 +99,22 @@ describe("Queue Intake Quota, Private Lifecycle, and Concurrency (A-303)", () =>
       expect(updatedRows[0].payload.pipeline_status).toBe("quarantined");
       expect(updatedRows[0].payload.details.quarantine_reason).toContain("Stale intake TTL expired");
     });
+  });
+
+  it("resolves private and legacy queue keys only for the stored owner", () => {
+    const owner_id = "u-1";
+    const privatePath = "source_queue_docs/u-1/token.pdf";
+    const legacyPath = "temp_queue_docs/u-1/token.pdf";
+    expect(resolveQueueDocument({ owner_id, pdf_source_url: privatePath })).toEqual({
+      bucket: "property-documents-temp",
+      path: privatePath,
+    });
+    expect(resolveQueueDocument({ owner_id, pdf_source_url: legacyPath })).toEqual({
+      bucket: "property_photos",
+      path: legacyPath,
+    });
+    expect(resolveQueueDocument({ owner_id, pdf_source_url: "source_queue_docs/u-2/token.pdf" })).toBeNull();
+    expect(resolveQueueDocument({ owner_id, pdf_source_url: "source_queue_docs/u-1/nested/token.pdf" })).toBeNull();
   });
 
   describe("Source Code Contracts for Intake Route", () => {

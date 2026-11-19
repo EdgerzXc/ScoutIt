@@ -8,10 +8,10 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { calculateQueuePosition } from "@/lib/queuePosition";
 import { resolveUserPerks } from "@/lib/BadgeEngine";
+import { PRIVATE_QUEUE_BUCKET, PRIVATE_QUEUE_PREFIX } from "@/lib/propertyQueueStorage";
 
 const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25MB limit
 const MAX_PENDING_PER_USER = 5;
-const TEMP_BUCKET = "property_photos";
 
 const intakeLimiter = createRateLimiter({
   limit: 10,
@@ -134,10 +134,10 @@ export async function POST(request) {
     // 4. Unguessable storage path using randomUUID
     const safeName = originalFilename.replace(/[^a-zA-Z0-9.\-_]/g, "_").slice(0, 100);
     const fileUuid = randomUUID();
-    const storagePath = `temp_queue_docs/${userId}/${fileUuid}_${safeName}`;
+    const storagePath = `${PRIVATE_QUEUE_PREFIX}/${userId}/${fileUuid}_${safeName}`;
 
     const { error: uploadError } = await supabaseAdmin.storage
-      .from(TEMP_BUCKET)
+      .from(PRIVATE_QUEUE_BUCKET)
       .upload(storagePath, buffer, {
         contentType: "application/pdf",
         upsert: false,
@@ -208,7 +208,7 @@ export async function POST(request) {
 
     if (insertError || !inserted) {
       console.error("[queue-intake] Property insert failed:", insertError);
-      await supabaseAdmin.storage.from(TEMP_BUCKET).remove([storagePath]).catch(() => {});
+      await supabaseAdmin.storage.from(PRIVATE_QUEUE_BUCKET).remove([storagePath]).catch(() => {});
       return NextResponse.json(
         { error: sanitizeError(insertError, "Failed to register property in processing queue.") },
         { status: 500 }
