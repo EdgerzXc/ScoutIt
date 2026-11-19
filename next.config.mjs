@@ -155,6 +155,10 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/api/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+      },
     ]
   },
 };

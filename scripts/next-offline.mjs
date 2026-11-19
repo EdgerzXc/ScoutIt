@@ -18,6 +18,8 @@ export const OFFLINE_BLANKED_ENV = Object.freeze({
 
   // Mapbox Geocoding & Tile API Quota
   NEXT_PUBLIC_MAPBOX_TOKEN: "",
+  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: "",
+  MAPBOX_SERVER_TOKEN: "",
   MAPBOX_ACCESS_TOKEN: "",
   MAPBOX_SECRET_TOKEN: "",
 
@@ -37,7 +39,13 @@ export const OFFLINE_BLANKED_ENV = Object.freeze({
   WISHLIST_SHARE_SECRET: "",
 
   // Cloudflare Turnstile Verification Secret
+  TURNSTILE_SECRET: "",
   TURNSTILE_SECRET_KEY: "",
+
+  RESEND_API_KEY: "",
+  GOOGLE_OAUTH_CLIENT_SECRET: "",
+  CALENDAR_TOKEN_KEY: "",
+  SENTRY_AUTH_TOKEN: "",
 
   // Decouple CMS to offline mock fixtures
   SCOUTIT_OFFLINE_CMS: "1",

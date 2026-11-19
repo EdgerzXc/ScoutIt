@@ -141,7 +141,7 @@ export default function SpatialVaultWidget({
               href="#vault-floorplans"
               className="px-2.5 py-1 rounded font-mono text-[12px] uppercase tracking-wider bg-surface border border-border text-text-secondary hover:text-gold-accent hover:border-gold-accent transition-colors"
             >
-              Floor Plans ({realFloorPlans.length})
+              {isSample ? "Reference Media" : "Floor Plans"} ({realFloorPlans.length})
             </a>
           )}
         </div>
@@ -152,7 +152,7 @@ export default function SpatialVaultWidget({
           <EmbedCard
             title="3D Spatial Map"
             url={realLuma}
-            iframeTitle="Verified 3D spatial map"
+            iframeTitle={isSample ? "Example Luma 3D spatial map" : "Verified 3D spatial map"}
             materialConfig={materialConfig}
             onMaterialChange={setMaterialConfig}
             onRequestRevision={() => setRevisionModalOpen(true)}
@@ -168,9 +168,9 @@ export default function SpatialVaultWidget({
           <EmbedCard
             title="360° Room Tour"
             url={realMatterport}
-            iframeTitle="Verified Matterport room tour"
+            iframeTitle={isSample ? "Matterport Gallery example room tour" : "Verified Matterport room tour"}
             hasMaterialSwapper={false}
-            badgeText="Matterport · Photometric Walkthrough"
+            badgeText={isSample ? "Matterport Gallery Example" : "Matterport · Photometric Walkthrough"}
           />
         </div>
       )}
@@ -215,7 +215,7 @@ export default function SpatialVaultWidget({
       {realFloorPlans.length > 0 && (
         <section id="vault-floorplans" className="vault-item">
           <h2 className="mb-3 font-label-caps text-[12px] uppercase tracking-widest text-gold-accent">
-            Floor Plans{realFloorPlans.length > 1 ? ` · ${realFloorPlans.length}` : ""}
+            {isSample ? "Reference Media" : "Floor Plans"}{realFloorPlans.length > 1 ? ` · ${realFloorPlans.length}` : ""}
           </h2>
           <div className="grid grid-cols-1 gap-3 rounded border border-surface-variant bg-surface p-3 sm:grid-cols-2">
             {realFloorPlans.map((plan) => {
@@ -233,11 +233,12 @@ export default function SpatialVaultWidget({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={plan.url}
-                        alt={plan.name}
+                        alt=""
+                        loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                       />
                       <span className="absolute top-2 right-2 rounded bg-background/90 px-2 py-0.5 font-mono text-[12px] uppercase tracking-wider text-text-secondary border border-border">
-                        Schematic Preview
+                        {isSample ? "Reference Image" : "Schematic Preview"}
                       </span>
                     </div>
                   ) : (

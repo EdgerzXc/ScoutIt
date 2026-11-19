@@ -1272,7 +1272,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                                 small={true}
                               />
                             </div>
-                            <Link href={`/property/${p.slug}`} className="property-action-btn" style={{ textDecoration: 'none' }}>Enter Showcase →</Link>
+                            <Link href={`/property/${p.slug}`} aria-label={`Enter Showcase for ${p.title}`} className="property-action-btn" style={{ textDecoration: 'none' }}>Enter Showcase <span aria-hidden="true">→</span></Link>
                           </div>
                         </div>
                       </div>

@@ -5,6 +5,8 @@ describe("A-309: Offline Environment Secret & Paid Token Isolation", () => {
   it("blanks the complete paid token family to prevent offline quota spending", () => {
     // Mapbox
     expect(OFFLINE_BLANKED_ENV.NEXT_PUBLIC_MAPBOX_TOKEN).toBe("");
+    expect(OFFLINE_BLANKED_ENV.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN).toBe("");
+    expect(OFFLINE_BLANKED_ENV.MAPBOX_SERVER_TOKEN).toBe("");
     expect(OFFLINE_BLANKED_ENV.MAPBOX_ACCESS_TOKEN).toBe("");
     expect(OFFLINE_BLANKED_ENV.MAPBOX_SECRET_TOKEN).toBe("");
 
@@ -25,9 +27,14 @@ describe("A-309: Offline Environment Secret & Paid Token Isolation", () => {
   it("blanks privileged service role keys and webhook/cron secrets", () => {
     expect(OFFLINE_BLANKED_ENV.SUPABASE_SERVICE_ROLE_KEY).toBe("");
     expect(OFFLINE_BLANKED_ENV.CRON_SECRET).toBe("");
+    expect(OFFLINE_BLANKED_ENV.TURNSTILE_SECRET).toBe("");
     expect(OFFLINE_BLANKED_ENV.TURNSTILE_SECRET_KEY).toBe("");
     expect(OFFLINE_BLANKED_ENV.VIA_COOKIE_SECRET).toBe("");
     expect(OFFLINE_BLANKED_ENV.WISHLIST_SHARE_SECRET).toBe("");
+    expect(OFFLINE_BLANKED_ENV.RESEND_API_KEY).toBe("");
+    expect(OFFLINE_BLANKED_ENV.GOOGLE_OAUTH_CLIENT_SECRET).toBe("");
+    expect(OFFLINE_BLANKED_ENV.CALENDAR_TOKEN_KEY).toBe("");
+    expect(OFFLINE_BLANKED_ENV.SENTRY_AUTH_TOKEN).toBe("");
   });
 
   it("sets SCOUTIT_OFFLINE_CMS to 1 to enforce offline fixtures", () => {
