@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { randomUUID } from "node:crypto";
 import { insertProperty, isAirtableRecordNotFoundError, updateProperty } from "@/lib/airtable";
 import { createClient } from "@supabase/supabase-js";
@@ -42,7 +43,7 @@ export async function POST(request) {
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
     
     // Validate session server-side
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    const { data: { user }, error: authError } = await getVerifiedWorkspaceUser(authClient, token);
     
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });

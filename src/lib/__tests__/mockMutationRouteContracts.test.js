@@ -21,8 +21,8 @@ describe("mock identities cannot authorize real mutations", () => {
   });
 
   it("requires verified tokens for PDF and Intel ingest", () => {
-    expect(read("src/app/api/ai/read-pdf/route.js")).toContain("auth.getUser(token)");
-    expect(read("src/app/api/intel/ingest/route.js")).toContain("auth.getUser(token)");
+    expect(read("src/app/api/ai/read-pdf/route.js")).toContain("await getVerifiedWorkspaceUser(authClient, token)");
+    expect(read("src/app/api/intel/ingest/route.js")).toContain("await getVerifiedWorkspaceUser(authClient, token)");
   });
 
   it("requires a verified user and real Connect accounting for inquiry creation", () => {

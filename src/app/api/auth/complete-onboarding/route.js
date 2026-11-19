@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { monthlyAllowance } from "@/lib/entitlements";
@@ -74,7 +75,7 @@ export async function POST(request) {
     const {
       data: { user },
       error: userError,
-    } = await userClient.auth.getUser();
+    } = await getVerifiedWorkspaceUser(userClient, token);
 
     if (userError || !user) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });

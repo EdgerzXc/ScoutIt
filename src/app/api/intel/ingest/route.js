@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { fetchWithRetry } from "@/lib/fetchWithRetry";
 import { extractText, getDocumentProxy } from "unpdf";
 import Papa from "papaparse";
@@ -92,7 +93,7 @@ async function authenticate(request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
-  const { data: { user }, error } = await authClient.auth.getUser(token);
+  const { data: { user }, error } = await getVerifiedWorkspaceUser(authClient, token);
   if (error || !user) return { ok: false, error: "Unauthorized: Invalid session" };
   return { ok: true, user };
 }

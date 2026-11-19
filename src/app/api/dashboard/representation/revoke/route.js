@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -66,7 +67,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: auth is not configured" }, { status: 500 });
     }
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    const { data: { user }, error: authError } = await getVerifiedWorkspaceUser(authClient, token);
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }

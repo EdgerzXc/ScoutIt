@@ -37,6 +37,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 
 /** Roles that may act on staff-only surfaces. */
 const STAFF_ROLES = ["admin", "staff"];
@@ -78,10 +79,13 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
-  const authResult = await authClient.auth.getUser(token);
+  const authResult = await getVerifiedWorkspaceUser(authClient, token);
   const user = authResult?.data?.user;
   if (authResult?.error?.name === "AuthRetryableFetchError" || Number(authResult?.error?.status) >= 500) {
     return { error: "Could not verify staff access", status: 503 };
+  }
+  if (authResult?.error?.code === "mfa_required") {
+    return { error: "Verify your authenticator to continue", status: 403 };
   }
   if (authResult?.error || !user) return { error: "Unauthorized: Invalid session", status: 401 };
 

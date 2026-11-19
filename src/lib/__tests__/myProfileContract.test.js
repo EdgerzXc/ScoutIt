@@ -19,7 +19,7 @@ describe("A-138 · My Profile reads the account and writes nothing", () => {
 
   it("never reads or syncs the browser copy", () => {
     expect(page).not.toMatch(/localStorage|scoutit_user|upsertProfile/);
-    expect(page).toContain("await getUser()");
+    expect(page).toContain("await getWorkspaceUser()");
     expect(page).toContain("loadOwnProfile(user.id)");
   });
 

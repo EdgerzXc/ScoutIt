@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { isAiSearchActive } from '@/lib/featureFlags';
@@ -113,7 +114,7 @@ export async function POST(request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    const { data: { user }, error: authError } = await getVerifiedWorkspaceUser(authClient, token);
     
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });

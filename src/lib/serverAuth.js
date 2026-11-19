@@ -1,17 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 
 export async function resolveUserId(request) {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
+  const authHeader = request.headers.get("Authorization") || "";
+  const token = /^Bearer\s+(\S+)$/i.exec(authHeader.trim())?.[1];
 
-  if (token && token.trim() !== "") {
+  if (token) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
+    const { data: { user }, error } = await getVerifiedWorkspaceUser(authClient, token);
     if (!error && user) return user.id;
+    return null;
   }
+  if (authHeader.trim()) return null;
   
   const requestHost = new URL(request.url).hostname;
   const isLocalE2E =

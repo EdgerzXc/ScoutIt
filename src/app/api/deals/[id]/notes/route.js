@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { z } from "zod";
@@ -34,7 +35,7 @@ export async function PATCH(request, { params }) {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       const authClient = createClient(supabaseUrl, supabaseAnonKey);
-      const { data: { user }, error } = await authClient.auth.getUser(token);
+      const { data: { user }, error } = await getVerifiedWorkspaceUser(authClient, token);
       if (!error && user) userId = user.id;
     }
     // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).

@@ -11,8 +11,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // ─────────────────────────────────────────────────────────────────────────
 
 const getUser = vi.fn();
+const getClaims = vi.fn();
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: () => ({ auth: { getUser } }),
+  createClient: () => ({ auth: { getUser, getClaims } }),
 }));
 
 const maybeSingle = vi.fn();
@@ -68,6 +69,14 @@ describe('requireAdmin', () => {
   it('denies an invalid session', async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: new Error('bad jwt') });
     expect((await requireAdmin(req('t'))).status).toBe(401);
+  });
+
+  it('denies an enrolled actor below AAL2 before reading their staff role', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'u1', factors: [{ status: 'verified' }] } }, error: null });
+    getClaims.mockResolvedValue({ data: { claims: { sub: 'u1', aal: 'aal1' } }, error: null });
+
+    await expect(requireAdmin(req('t'))).resolves.toEqual({ error: 'Verify your authenticator to continue', status: 403 });
+    expect(maybeSingle).not.toHaveBeenCalled();
   });
 
   it('fails closed with 503 when the identity service is unavailable', async () => {

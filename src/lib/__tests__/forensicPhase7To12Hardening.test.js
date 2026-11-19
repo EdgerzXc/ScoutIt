@@ -314,7 +314,7 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
     test("GAP-47 & GAP-83: entitlements, Header, HomeClient, descent, and Nudge fall back to Supabase Auth session", () => {
       expect(read("src/lib/entitlements.js")).toContain("syncAuthenticatedUserCache");
       expect(read("src/lib/entitlements.js")).toContain("-auth-token");
-      expect(read("src/components/layout/Header.js")).toContain("supabase.auth.getSession()");
+      expect(read("src/components/layout/Header.js")).toContain("await getWorkspaceUser()");
       expect(read("src/app/HomeClient.js")).toContain("supabase.auth.getSession()");
       expect(read("src/app/descent/page.js")).toContain("supabase.auth.getSession()");
       expect(read("src/components/ui/Nudge.js")).toContain("supabase.auth.getSession()");

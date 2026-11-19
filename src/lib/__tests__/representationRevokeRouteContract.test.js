@@ -24,7 +24,7 @@ describe("A-131 — the owner's exit route exists and is owner-only", () => {
     expect(code).toContain("property.owner_id !== userId");
     expect(code).toMatch(/status:\s*403/);
     // and it authenticates at all
-    expect(code).toContain("auth.getUser(token)");
+    expect(code).toContain("await getVerifiedWorkspaceUser(authClient, token)");
     expect(code).toMatch(/status:\s*401/);
   });
 

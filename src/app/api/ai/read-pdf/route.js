@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { extractText, getDocumentProxy } from 'unpdf';
 import { createClient } from '@supabase/supabase-js';
 import { createRateLimiter } from '@/lib/rateLimit';
@@ -37,7 +38,7 @@ export async function POST(request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     );
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    const { data: { user }, error: authError } = await getVerifiedWorkspaceUser(authClient, token);
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }

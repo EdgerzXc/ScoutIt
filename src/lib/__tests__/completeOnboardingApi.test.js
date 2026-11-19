@@ -2,6 +2,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
+  getClaims: vi.fn(),
   profileMaybeSingle: vi.fn(),
   profileUpsert: vi.fn(),
   profileUpdate: vi.fn(),
@@ -14,7 +15,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@supabase/supabase-js", () => ({
-  createClient: () => ({ auth: { getUser: mocks.getUser } }),
+  createClient: () => ({ auth: { getUser: mocks.getUser, getClaims: mocks.getClaims } }),
 }));
 
 vi.mock("@/lib/supabaseAdmin", () => ({
@@ -75,6 +76,19 @@ describe("complete onboarding API", () => {
     } else {
       delete process.env.CONNECTS_CANONICAL_ACTIVE;
     }
+  });
+
+  it("denies first-factor sessions for enrolled accounts before writing a profile or wallet", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-1", factors: [{ status: "verified" }] } }, error: null });
+    mocks.getClaims.mockResolvedValue({ data: { claims: { sub: "user-1", aal: "aal1" } }, error: null });
+
+    const response = await POST(request({ name: "Jane Scout", role: "buyer", dateOfBirth: "1990-01-02" }));
+
+    expect(response.status).toBe(401);
+    expect(mocks.getClaims).toHaveBeenCalledWith("valid-token");
+    expect(mocks.profileUpsert).not.toHaveBeenCalled();
+    expect(mocks.legacyWalletUpsert).not.toHaveBeenCalled();
+    expect(mocks.canonicalAccountUpsert).not.toHaveBeenCalled();
   });
 
   describe("Pre-migration default (legacy mode)", () => {

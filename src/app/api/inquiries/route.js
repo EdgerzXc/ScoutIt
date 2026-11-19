@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { notifyUser } from "@/lib/notifications";
 import { logActivity } from "@/lib/crmActivity";
@@ -168,7 +169,13 @@ export async function POST(req) {
     if (authHeader?.startsWith("Bearer ")) {
       try {
         const token = authHeader.replace("Bearer ", "").trim();
-        const { data: authUser } = await supabaseAdmin.auth.getUser(token);
+        const { data: authUser, error } = await getVerifiedWorkspaceUser(supabaseAdmin, token);
+        if (error?.code === "mfa_required") {
+          return NextResponse.json(
+            { success: false, message: "Verify your authenticator before submitting this inquiry." },
+            { status: 403 },
+          );
+        }
         senderId = authUser?.user?.id || null;
       } catch {
         // Fallback to email resolution
