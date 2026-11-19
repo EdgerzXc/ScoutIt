@@ -52,7 +52,7 @@ export default function IncidentSignalBanner({
       error: `Simulated runtime failure on ${node?.name || targetId}`,
       severity: "CRITICAL",
       source: "manual_probe"
-    });
+    }, nodeMap);
     recordSignal(newSig);
     if (onInjectCustomFault) {
       onInjectCustomFault(targetId);

@@ -261,6 +261,7 @@ test.describe('mobile workspace overflow (390px, data rendered)', () => {
         },
       }),
     );
+    await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
     await gotoAndSettle(page, '/admin');
     await expectRealContent(page);
     await expect(

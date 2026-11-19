@@ -80,6 +80,9 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
   );
   const authResult = await authClient.auth.getUser(token);
   const user = authResult?.data?.user;
+  if (authResult?.error?.name === "AuthRetryableFetchError" || Number(authResult?.error?.status) >= 500) {
+    return { error: "Could not verify staff access", status: 503 };
+  }
   if (authResult?.error || !user) return { error: "Unauthorized: Invalid session", status: 401 };
 
   const { data: profile, error: profileError } = await supabaseAdmin
@@ -88,8 +91,11 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profileError || !profile) {
-    console.warn(`[${label}] Role lookup failed for ${user.id} — denying.`);
+  if (profileError) {
+    console.warn(`[${label}] Role lookup unavailable:`, profileError.code || profileError.name);
+    return { error: "Could not verify staff access", status: 503 };
+  }
+  if (!profile) {
     return { error: "Unauthorized: Could not verify privileges", status: 403 };
   }
 

@@ -12,17 +12,15 @@ import {
   MapPin, Database, Sparkle, Link2, Shield, Lock, Activity, FileCode, Check,
   Radio, Flame, ShieldAlert, FileText, Terminal
 } from "lucide-react";
-import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from "@/data/masterFlowGraphData";
 import {
   getRoleSubgraph,
   getWorkflowSubgraph,
   getLinearGuide,
-  getRAGKnowledgeExport,
   getAtomicRAGChunks,
   exportSubgraphJSON,
   WORKFLOW_DEFINITIONS,
   LINEAR_GUIDE_DEFINITIONS
-} from "@/lib/flow/subgraphExtractor";
+} from "@/lib/flow/subgraphLogic";
 import {
   INCIDENT_SCENARIOS,
   calculateBlastRadius,
@@ -33,9 +31,7 @@ import NodeLogicDiagram from "./NodeLogicDiagram";
 import IncidentSignalBanner from "./IncidentSignalBanner";
 import {
   initIncidentSignalHub,
-  parseUrlIncidentParams,
-  recordSignal,
-  createSignal
+  parseUrlIncidentParams
 } from "@/lib/flow/incidentSignalHub";
 
 // Enhanced card dimensions for maximum text readability and breathing room
@@ -346,7 +342,7 @@ function useCanvasEdges({
 }
 
 // ── Main Master Flow Component ────────────────────────────────────────────────
-export default function MasterFlowGraph({ onNavigate }) {
+export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: graphEdges }) {
   const router = useRouter();
   const containerRef   = useRef(null);
   const canvasLayerRef = useRef(null);
@@ -355,9 +351,9 @@ export default function MasterFlowGraph({ onNavigate }) {
   // Position state with clean initial memory
   const initialPositions = useMemo(() => {
     const m = {};
-    MASTER_FLOW_NODES.forEach(n => { m[n.id] = { x: n.x, y: n.y }; });
+    graphNodes.forEach(n => { m[n.id] = { x: n.x, y: n.y }; });
     return m;
-  }, []);
+  }, [graphNodes]);
   const positionsRef = useRef(initialPositions);
   const [positions, setPositions] = useState(initialPositions);
 
@@ -404,10 +400,10 @@ export default function MasterFlowGraph({ onNavigate }) {
 
   const nodeMap = useMemo(() => {
     const m = new Map();
-    MASTER_FLOW_NODES.forEach(n => m.set(n.id, n));
+    graphNodes.forEach(n => m.set(n.id, n));
     return m;
-  }, []);
-  const selectedNode = nodeMap.get(selectedNodeId) || MASTER_FLOW_NODES[0];
+  }, [graphNodes]);
+  const selectedNode = nodeMap.get(selectedNodeId) || graphNodes[0];
 
   // Incident Scenarios & Topological Blast Radius Computation
   const currentScenario = useMemo(() => {
@@ -430,26 +426,26 @@ export default function MasterFlowGraph({ onNavigate }) {
 
   // Memoize dropdown options
   const nodeOptions = useMemo(() =>
-    MASTER_FLOW_NODES.map(n => <option key={n.id} value={n.id}>{n.name}</option>)
-  , []);
+    graphNodes.map(n => <option key={n.id} value={n.id}>{n.name}</option>)
+  , [graphNodes]);
 
   // Compute Active Subgraph based on graphMode
   const activeSlice = useMemo(() => {
     if (graphMode === "role") {
-      return getRoleSubgraph(activeRole);
+      return getRoleSubgraph(activeRole, graphNodes, graphEdges);
     }
     if (graphMode === "workflow") {
-      return getWorkflowSubgraph(activeWorkflow);
+      return getWorkflowSubgraph(activeWorkflow, graphNodes, graphEdges);
     }
     if (graphMode === "guide") {
       const g = getLinearGuide(activeGuideId);
       const guideNodeIds = new Set(g.steps.map(s => s.nodeId));
-      const gNodes = MASTER_FLOW_NODES.filter(n => guideNodeIds.has(n.id));
-      const gEdges = MASTER_FLOW_EDGES.filter(e => guideNodeIds.has(e.source) && guideNodeIds.has(e.target));
+      const gNodes = graphNodes.filter(n => guideNodeIds.has(n.id));
+      const gEdges = graphEdges.filter(e => guideNodeIds.has(e.source) && guideNodeIds.has(e.target));
       return { nodes: gNodes, edges: gEdges, guide: g };
     }
-    return { nodes: MASTER_FLOW_NODES, edges: MASTER_FLOW_EDGES };
-  }, [graphMode, activeRole, activeWorkflow, activeGuideId]);
+    return { nodes: graphNodes, edges: graphEdges };
+  }, [graphMode, activeRole, activeWorkflow, activeGuideId, graphNodes, graphEdges]);
 
   // Focus branch set
   const focusedNodeSet = useMemo(() => {
@@ -627,7 +623,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
   const resetEntireLayout = useCallback(() => {
     const m = {};
-    MASTER_FLOW_NODES.forEach(n => { m[n.id] = { x: n.x, y: n.y }; });
+    graphNodes.forEach(n => { m[n.id] = { x: n.x, y: n.y }; });
     positionsRef.current = m;
     setPositions(m);
 
@@ -648,7 +644,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
     setExportNotice("✨ All nodes & canvas reset to original placement");
     setTimeout(() => setExportNotice(null), 3000);
-  }, [applyDOM, updateCull]);
+  }, [applyDOM, updateCull, graphNodes]);
 
   const centerOnNode = useCallback((nodeId) => {
     const p = positionsRef.current[nodeId];
@@ -661,8 +657,8 @@ export default function MasterFlowGraph({ onNavigate }) {
 
   // A-187: On-call incident deep-link intake & signal hub initialization
   useEffect(() => {
-    initIncidentSignalHub();
-    if (typeof window === "undefined") return;
+    const stopSignals = initIncidentSignalHub(nodeMap);
+    let timer;
     try {
       const parsed = parseUrlIncidentParams(window.location.search);
       if (parsed.hasParams) {
@@ -679,15 +675,18 @@ export default function MasterFlowGraph({ onNavigate }) {
             setCustomFaultedNodeIds(prev => prev.includes(parsed.nodeId) ? prev : [...prev, parsed.nodeId]);
             setActiveScenarioId("CUSTOM");
           }
-          const timer = setTimeout(() => {
+          timer = setTimeout(() => {
             centerOnNode(parsed.nodeId);
           }, 150);
-          return () => clearTimeout(timer);
         }
       }
     } catch {
       // Safe no-op on invalid query strings
     }
+    return () => {
+      clearTimeout(timer);
+      stopSignals?.();
+    };
   }, [nodeMap, centerOnNode]);
 
   const handleNodeDragStart = useCallback((e, nodeId) => {
@@ -787,7 +786,7 @@ export default function MasterFlowGraph({ onNavigate }) {
     setExportNotice("🧠 Building knowledge base…");
     await new Promise((r) => setTimeout(r, 30));
     try {
-      const data = JSON.stringify(getAtomicRAGChunks(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, { role: "admin", includePlanned: true }), null, 2);
+      const data = JSON.stringify(getAtomicRAGChunks(graphNodes, graphEdges, { role: "admin", includePlanned: true }), null, 2);
       const blob = new Blob([data], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -800,7 +799,7 @@ export default function MasterFlowGraph({ onNavigate }) {
       setExportNotice("⚠️ Export failed: try again.");
     }
     setTimeout(() => setExportNotice(null), 3000);
-  }, []);
+  }, [graphNodes, graphEdges]);
 
   return (
     <div ref={containerRef}
@@ -826,7 +825,7 @@ export default function MasterFlowGraph({ onNavigate }) {
               }`}
             >
               <Layers size={14} />
-              <span>Master Graph ({MASTER_FLOW_NODES.length})</span>
+              <span>Master Graph ({graphNodes.length})</span>
             </button>
             <button
               onClick={() => { setGraphMode("role"); resetView(); }}

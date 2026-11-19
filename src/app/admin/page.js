@@ -14,6 +14,7 @@ import PropertyVerifyPanel from "@/components/admin/PropertyVerifyPanel";
 import NotificationBroadcastPanel from "@/components/admin/NotificationBroadcastPanel";
 import { DashboardProvider } from "@/context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
+import StaffWorkspaceAccess from "@/components/auth/StaffWorkspaceAccess";
 import { sanitizeError } from "@/lib/sanitizeError";
 import InfoTip from "@/components/ui/InfoTip";
 
@@ -975,7 +976,9 @@ export default function AdminPage() {
   return (
     <DashboardProvider>
       <VerifiedWorkspaceBoundary>
-        <AdminPageInner />
+        <StaffWorkspaceAccess>
+          <AdminPageInner />
+        </StaffWorkspaceAccess>
       </VerifiedWorkspaceBoundary>
     </DashboardProvider>
   );

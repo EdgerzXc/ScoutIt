@@ -1,0 +1,116 @@
+{
+  "seeker": {
+    "id": "buyer_guide",
+    "role": "seeker",
+    "title": "Buyer Journey: Search to Handshake",
+    "description": "Step-by-step verified workflow guide for property seekers.",
+    "steps": [
+      {
+        "nodeId": "hero",
+        "route": "/",
+        "target": "scoutit-home-launchpad",
+        "title": "Global Search & Filters",
+        "body": "Enter desired city or property type in the hero search.",
+        "tip": "Use natural language search.",
+        "graphName": "Hero Landing & Space Canvas"
+      },
+      {
+        "nodeId": "discover_directory",
+        "route": "/discover",
+        "target": "scoutit-discover-search",
+        "title": "Catalog & Neighborhood Intel",
+        "body": "Filter listings and view spatial map intelligence.",
+        "tip": "Toggle Satellite and Traffic layers.",
+        "graphName": "Space Directory & Radius Radar"
+      },
+      {
+        "nodeId": "pep",
+        "route": "/property",
+        "target": "scoutit-property-directory",
+        "title": "Property Detail Exploration",
+        "body": "Review chapters, verified title documents, and pricing.",
+        "tip": "Scroll to Chapter 10: Your Move.",
+        "graphName": "Property Experience Page (PEP)"
+      },
+      {
+        "nodeId": "deal_room",
+        "route": "/dashboard/inbox",
+        "target": "deal-room-negotiation-panel",
+        "title": "Private Inquiry Workspace",
+        "body": "Enter the private workspace with the owner or broker.",
+        "tip": "Coordinate messages and viewing appointments here.",
+        "graphName": "Private Inquiry Workspace & Scheduling"
+      }
+    ]
+  },
+  "owner": {
+    "id": "owner_guide",
+    "role": "owner",
+    "title": "Owner Pipeline: Listing to Handshake",
+    "description": "Step-by-step verified guide for property owners.",
+    "steps": [
+      {
+        "nodeId": "dashboard_owner",
+        "route": "/dashboard",
+        "target": "owner-portfolio-table",
+        "title": "Owner Workspace",
+        "body": "View current property listings and performance metrics.",
+        "tip": "Check inquiry response rates.",
+        "graphName": "Owner Workspace & Property Management"
+      },
+      {
+        "nodeId": "owner_creation_pipeline",
+        "route": "/dashboard",
+        "target": "owner-claim-submit-btn",
+        "title": "Create Property Listing",
+        "body": "Configure property details, unit types, pricing, and amenities.",
+        "tip": "PDF text extraction plus one AI drafting pass; staff verify against the source before publish.",
+        "graphName": "Owner Listing Creation Hub"
+      },
+      {
+        "nodeId": "deal_room",
+        "route": "/dashboard/inbox",
+        "target": "deal-room-negotiation-panel",
+        "title": "Review Private Inquiries",
+        "body": "Respond to buyer inquiries and coordinate viewing details.",
+        "tip": "Structured offer negotiation remains planned.",
+        "graphName": "Private Inquiry Workspace & Scheduling"
+      }
+    ]
+  },
+  "broker": {
+    "id": "broker_guide",
+    "role": "broker",
+    "title": "Broker Guide: Roster to Deal Closure",
+    "description": "Step-by-step verified workflow guide for licensed real estate brokers.",
+    "steps": [
+      {
+        "nodeId": "dashboard_broker",
+        "route": "/dashboard",
+        "target": "broker-lead-roster-view",
+        "title": "Broker Command Hub",
+        "body": "View assigned leads, roster listings, and client communications.",
+        "tip": "RESA Law compliant.",
+        "graphName": "Broker Workspace & Deal Pipeline"
+      },
+      {
+        "nodeId": "brokers_roster",
+        "route": "/brokers",
+        "target": "broker-prc-license-form",
+        "title": "Verified Broker Directory",
+        "body": "View verified broker directory and client representation roster.",
+        "tip": "PRC accredited.",
+        "graphName": "Verified Licensed Brokers Directory"
+      },
+      {
+        "nodeId": "deal_room",
+        "route": "/dashboard/inbox",
+        "target": "deal-room-negotiation-panel",
+        "title": "Coordinate Private Inquiries",
+        "body": "Guide parties through communication and viewing logistics.",
+        "tip": "Structured offer negotiation remains planned.",
+        "graphName": "Private Inquiry Workspace & Scheduling"
+      }
+    ]
+  }
+}

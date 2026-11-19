@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
+import { getSession } from "@/lib/authClient";
 import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
 import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
 import { notifyLightModeChanged } from "@/lib/lightMode";
@@ -15,11 +16,6 @@ import motionStyles from "./FloatingToolboxMotion.module.css";
 
 const PRESENTATION_CHOICE_KEY = "scoutit_presentation_choice_seen_v1";
 const FIRST_VISIT_HELP_KEY = "scoutit_help_seen_v1";
-// A-093: `@/lib/journeyGuides` pulls the ~1MB internal system graph
-// (`masterFlowGraphData`) into this layout-mounted chunk. It is imported
-// dynamically below, gated on the fetched role, so anonymous readers
-// download no internal paths. journeyGuides keeps its sync exports for
-// tests and staff surfaces; only THIS call site goes lazy.
 
 function mobileNavClearance() {
   if (typeof window === "undefined" || !window.matchMedia("(max-width: 768px)").matches) return 0;
@@ -53,8 +49,13 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/profile/me/role")
-      .then((r) => (r.ok ? r.json() : null))
+    getSession()
+      .then(({ data }) => {
+        const token = data?.session?.access_token;
+        if (!token || cancelled) return null;
+        return fetch("/api/profile/me/role", { headers: { Authorization: `Bearer ${token}` } });
+      })
+      .then((r) => (r?.ok ? r.json() : null))
       .then((d) => {
         if (!cancelled && d?.role) setRole(d.role);
       })
@@ -67,11 +68,6 @@ export default function FloatingToolbox({ showTrigger = true }) {
   }, []);
 
   const activeGuide = guideForPath(pathname, role);
-  // A-093: the verified journey (and the internal graph behind it) loads
-  // only after the role fetch above resolves to a real role. Signed-out
-  // readers stay on the role-neutral guide and download nothing internal.
-  // This is code-splitting, not access control — the journey is help copy,
-  // and anything granting access re-derives the role server-side.
   const [verifiedJourney, setVerifiedJourney] = useState(null);
   useEffect(() => {
     if (!role) { setVerifiedJourney(null); return; }

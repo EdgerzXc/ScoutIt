@@ -51,6 +51,7 @@ test('owner can submit a PDF, retry the same draft and see when review is needed
 test('staff download the source before confirming and can retry PDF deletion', async ({ context, page, baseURL }) => {
   test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
   await signInAsMock(page, MOCK_OWNER_EMPTY);
+  await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
 
   const reviewedDraft = { title: 'Staff Review Fixture', floor_sqm: 42 };
   const propertyId = '87998441-6c10-4a24-ac27-5614c6867355';

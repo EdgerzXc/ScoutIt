@@ -179,9 +179,11 @@
       "/about-you",
       "/admin/flow",
       "/admin",
+      "/api/admin/access",
       "/api/admin/approve",
       "/api/admin/connects-refund",
       "/api/admin/feature-flags",
+      "/api/admin/flow",
       "/api/admin/generate-seo",
       "/api/admin/notifications",
       "/api/admin/osint",
@@ -392,7 +394,7 @@
       "/wishlist",
       "/wishlist/shared/[token]"
     ],
-    "totalCodebaseRoutesDiscovered": 216,
+    "totalCodebaseRoutesDiscovered": 218,
     "dynamicAliases": [
       "/property/[id] -> /property/:param"
     ],

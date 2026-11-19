@@ -29,6 +29,8 @@ const BUNDLE_FILES = [
   "publicRAGChunks.json",
   "workflows.json",
   "linearGuides.json",
+  "browserFlowRoutes.json",
+  "browserJourneys.json",
   "coverageReport.json",
   "auditReport.json",
   "index.js",

@@ -1,5 +1,3 @@
-import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from "@/data/masterFlowGraphData";
-
 /**
  * Predefined incident scenarios grounded in ScoutIt operational failure modes.
  */
@@ -96,7 +94,7 @@ export const INCIDENT_SCENARIOS = {
  * @returns {object} Blast radius telemetry and metrics
  */
 export function calculateBlastRadius(faultedNodeIds, nodeMap) {
-  const map = nodeMap || new Map(MASTER_FLOW_NODES.map(n => [n.id, n]));
+  const map = nodeMap;
   const rootFaults = Array.from(faultedNodeIds || []).filter(id => map.has(id));
 
   if (rootFaults.length === 0) {
@@ -206,7 +204,7 @@ export function getNodeHealthStatus(nodeId, faultedNodeSet, blastRadiusSet) {
 export function getIncidentDossier(node, nodeMap, blastRadiusInfo) {
   if (!node) return null;
 
-  const map = nodeMap || new Map(MASTER_FLOW_NODES.map(n => [n.id, n]));
+  const map = nodeMap;
   const faultedSet = new Set(blastRadiusInfo?.faultedNodeIds || []);
   const blastSet = blastRadiusInfo?.blastRadiusSet || new Set();
 

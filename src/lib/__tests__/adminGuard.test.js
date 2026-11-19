@@ -70,6 +70,12 @@ describe('requireAdmin', () => {
     expect((await requireAdmin(req('t'))).status).toBe(401);
   });
 
+  it('fails closed with 503 when the identity service is unavailable', async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: { status: 503 } });
+    expect((await requireAdmin(req('t'))).status).toBe(503);
+    expect(maybeSingle).not.toHaveBeenCalled();
+  });
+
   it('denies a signed-in user with no staff role', async () => {
     signedIn();
     profile({ role: 'owner', active_roles: ['owner', 'seeker'] });
@@ -85,10 +91,10 @@ describe('requireAdmin', () => {
     expect((await requireAdmin(req('t'))).status).toBe(403);
   });
 
-  it('denies when the role lookup errors', async () => {
+  it('fails closed with 503 when the role lookup errors', async () => {
     signedIn();
     maybeSingle.mockResolvedValue({ data: null, error: new Error('db down') });
-    expect((await requireAdmin(req('t'))).status).toBe(403);
+    expect((await requireAdmin(req('t'))).status).toBe(503);
   });
 
   it('denies an unrecognised role rather than assuming it is fine (Rule 6)', async () => {

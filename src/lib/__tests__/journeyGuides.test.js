@@ -51,7 +51,8 @@ describe("A-020 public Master Flow guide adapter", () => {
 
   it("keeps role choice server-derived and guide state non-authoritative", () => {
     const toolbox = readFileSync(path.join(ROOT, "src/components/ui/FloatingToolbox.js"), "utf8");
-    expect(toolbox).toContain('fetch("/api/profile/me/role")');
+    expect(toolbox).toContain('fetch("/api/profile/me/role",');
+    expect(toolbox).toContain('Authorization: `Bearer ${token}`');
     expect(toolbox).not.toMatch(/setRole\([^)]*localStorage/);
     expect(toolbox).not.toMatch(/subscription|entitlement|active_roles/);
   });

@@ -1,53 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { DashboardProvider } from "@/context/DashboardContext";
 import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
+import { StaffAccessState, useStaffRead } from "@/components/auth/StaffWorkspaceAccess";
 import { ArrowLeft } from "lucide-react";
 import InfoTip from "@/components/ui/InfoTip";
 
-// The viewer carries the ~1MB graph source. Code-split it so the admin route
-// shell (and its role check) paints without waiting for it; staff see the
-// existing pulse skeleton meanwhile. ssr:false — the canvas viewer is
-// pointer-driven and never meaningful as server HTML.
 const MasterFlowGraph = dynamic(() => import("@/components/flow/MasterFlowGraph"), {
   ssr: false,
   loading: () => <div className="h-full w-full animate-pulse bg-surface/50" aria-label="Loading" />,
 });
 
-// A-093: the internal system map no longer renders to every signed-in user.
-// The map shows only for staff roles read from the server-side role route
-// (the same endpoint the toolbox uses — the client never names its own
-// role). This is disclosure reduction, NOT a gate: it grants and denies
-// nothing, and every endpoint behind this surface stays independently
-// staff-checked server-side. The real page-level gate ships with the
-// cookie-session migration (A-073), which alone can see a session
-// server-side on the main site.
 function AdminFlowPageInner() {
-  const [role, setRole] = useState(null);
-  const [roleChecked, setRoleChecked] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/profile/me/role")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (!cancelled) {
-          setRole(d?.role ?? null);
-          setRoleChecked(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setRoleChecked(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const isStaff = role === "admin" || role === "staff";
+  const { status, data, retry } = useStaffRead("/api/admin/flow");
+  if (status !== "ready" || !Array.isArray(data?.nodes) || !data.nodes.length || !Array.isArray(data.edges)) {
+    return <StaffAccessState status={status === "ready" ? "unavailable" : status} retry={retry} />;
+  }
 
   return (
     <div className="h-screen h-dvh w-screen overflow-hidden flex flex-col bg-background">
@@ -66,12 +36,10 @@ function AdminFlowPageInner() {
             <span className="font-display font-bold text-sm tracking-wider text-white">
               <span className="text-gold-accent">S</span>cout<span className="text-gold-accent">IT</span>
             </span>
-            {isStaff && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gold-accent whitespace-nowrap">
-                Master System Flow Map (Internal)
-                <InfoTip tipId="adminFlowMap" label="About system flow map" />
-              </span>
-            )}
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gold-accent whitespace-nowrap">
+              Master System Flow Map (Internal)
+              <InfoTip tipId="adminFlowMap" label="About system flow map" />
+            </span>
           </div>
         </div>
 
@@ -111,26 +79,7 @@ function AdminFlowPageInner() {
 
       {/* Main Graph Component */}
       <main className="flex-1 overflow-hidden">
-        {!roleChecked ? (
-          <div className="h-full w-full animate-pulse bg-surface/50" aria-label="Loading" />
-        ) : isStaff ? (
-          <MasterFlowGraph />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center p-8">
-            <div className="max-w-md text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.12em] text-gold-accent mb-3">
-                Staff workspace
-              </p>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                The system flow map is limited to staff workspaces. Page-level
-                staff checks for /admin ship with the session migration
-                (A-073). Until then, this preview hides the map without
-                granting or denying anything: every endpoint behind it stays
-                independently staff-checked server-side.
-              </p>
-            </div>
-          </div>
-        )}
+        <MasterFlowGraph nodes={data.nodes} edges={data.edges} />
       </main>
     </div>
   );

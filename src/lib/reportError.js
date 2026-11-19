@@ -1,14 +1,16 @@
 import * as Sentry from "@sentry/nextjs";
 import { supabase } from "./supabaseClient";
-import { resolveFlowNode } from "./flow/flowNodeResolver";
+import browserRoutes from "@/data/flow/browserFlowRoutes.json";
+import { createFlowNodeResolver } from "./flow/createFlowNodeResolver";
+
+const { resolveFlowNode } = createFlowNodeResolver(browserRoutes);
 
 /**
  * Sends an error or user-submitted problem report to the configured Sentry
  * project. Session Replay remains disabled; reports contain only the submitted
  * text, bounded diagnostic context, the page path, and an optional verified
  * opaque Supabase user id.
- * Tags events with Master Flow Graph node ID, domain, and primary evidence path
- * to enable instant topological incident localization.
+ * Tags events with a browser-safe flow node ID and domain.
  * Best-effort: never throws (we do not want the logger to cause errors).
  * @param {{ kind?: 'crash'|'user_report', message?: string, stack?: string, context?: object, nodeId?: string }} payload
  */
@@ -23,19 +25,17 @@ export async function reportError(payload = {}) {
     const { data } = await supabase.auth.getUser();
     const kind = payload.kind === "user_report" ? "user_report" : "crash";
     const pagePath = typeof window !== "undefined" ? window.location.pathname : "";
-    const flowNode = resolveFlowNode(pagePath, payload.nodeId);
+    const flowNode = payload.nodeId ? resolveFlowNode(null, payload.nodeId) : resolveFlowNode(pagePath);
 
     if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
       try {
         window.dispatchEvent(
           new CustomEvent("scoutit:flow-error", {
             detail: {
-              nodeId: flowNode?.nodeId || payload.nodeId || "unknown_node",
+              nodeId: payload.nodeId || flowNode?.nodeId || "unknown_node",
               message,
               route: pagePath,
               severity: payload.kind === "crash" ? "CRITICAL" : "HIGH",
-              triageFile: flowNode?.evidencePath || null,
-              recoveryPlaybook: flowNode?.recovery?.[0] || null,
             },
           })
         );
@@ -62,9 +62,6 @@ export async function reportError(payload = {}) {
           node_id: flowNode.nodeId,
           canonical_id: flowNode.canonicalId,
           domain: flowNode.domain,
-          evidence_path: flowNode.evidencePath,
-          exceptions: flowNode.exceptions,
-          recovery: flowNode.recovery,
         });
       }
 

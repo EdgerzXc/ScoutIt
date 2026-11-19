@@ -1,18 +1,20 @@
 {
   "bundleVersion": "2.2.0",
-  "dataRevision": "8262a5fb1ad02522b0c74bbfe0b337c1d9e8770d",
-  "generatedAt": "2026-11-19T10:18:33.839Z",
+  "dataRevision": "4c0133e102219f3ae65b066f58aa7791ca4a635f",
+  "generatedAt": "2026-11-19T10:27:09.123Z",
   "checksums": {
     "schema.json": "84107b9ac4501e93c3fad3b0537d9c8eeeedf4d73572f160112e3debf92261cf",
-    "masterFlowGraph.json": "58b147c16349c58201297ef397f66af2e23fd6aa62e83574b0b80c6815f42783",
-    "masterFlowLayout.json": "0eca2ea4a6b79032999c6f6e098158251665e06625d0e91ae63a8a021139a9d4",
+    "masterFlowGraph.json": "3946fd9e948603185b0e306a2f89e89e50391812b02197cc8ce58aeb51ceffa5",
+    "masterFlowLayout.json": "e157aa3e9fda9e9c048fe8f96029a94d3e630f45547375b176e91feaddb72392",
     "atomicRAGChunks.json": "71112ff7021648729112b117c24721e5a85218042373e990a648c961d8c258de",
     "publicRAGChunks.json": "22240fd3a0e7dc3b07dd87e489138fd4db008c4cc780d7096fe20d4f4853cbbb",
     "workflows.json": "4b294e9c1fa1ac91e33688a867e6dd03958fbe02e7f1f82ec8a7dfa21835efeb",
     "linearGuides.json": "2fd27bd270f36904663cf468d0c246b49bb8b9ec23e6d9aef1677a0d10981ac9",
+    "browserFlowRoutes.json": "d77a970f2f542e7139027d429e238cef6a6aa4d9939c92310a2a137f442f0026",
+    "browserJourneys.json": "393ca247f329ec9db3c29baa4801451680ce3734fbe38a5afb88f7f7408bcbb4",
     "coverageReport.json": "903a9bb21b08ec6b276279a2ff07bbe82e8c411d63db166dc0c4a6106efcea80",
-    "auditReport.json": "ca6c6e9decd085e37228a669f3f2ef02aabb9aad4b6afe6369fcee7004a0c2e2",
+    "auditReport.json": "40030ddf7fa4731285dd479888b8f8a037e6c69a5fd8c6c6e5610db8bc05a2ce",
     "index.js": "e5c6a3b8e0fdf3d55b29b4465cef26225bf1f497c24fa7133eeaafe49d577429",
-    "README.md": "de1b701cd0e1dc6a9b80c0c4bb1ce75c4226293690aa09f64447a0605413adfb"
+    "README.md": "945368586b1e5e47e48c4c4bd7ce0262d7c011ce6364ae0edf93488a0e1ad2a8"
   }
 }

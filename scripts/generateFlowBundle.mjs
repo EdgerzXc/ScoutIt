@@ -18,6 +18,7 @@ try {
 // Import flow data & extractor
 const graphDataPath = path.join(rootDir, 'src', 'data', 'masterFlowGraphData.js');
 const { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } = await import(pathToFileURL(graphDataPath).href);
+const { BROWSER_JOURNEYS } = await import('../src/lib/flow/generateBrowserJourneys.js');
 
 const {
   WORKFLOW_DEFINITIONS,
@@ -169,6 +170,14 @@ fs.writeFileSync(path.join(targetDir, 'workflows.json'), JSON.stringify(WORKFLOW
 // 7. Linear Guides JSON
 fs.writeFileSync(path.join(targetDir, 'linearGuides.json'), JSON.stringify(LINEAR_GUIDE_DEFINITIONS, null, 2), 'utf-8');
 
+const browserRoutes = MASTER_FLOW_NODES
+  .filter((node) => ['PUBLIC', 'AUTHENTICATED'].includes(node.securityClassification) &&
+    node.route?.startsWith('/') && !/^\/(?:api\/)?admin(?:\/|$)/.test(node.route) &&
+    !(node.visibility || []).every((role) => ['ADMIN', 'STAFF'].includes(role)))
+  .map(({ id, route, canonicalId, domain, actorRoles }) => ({ id, route, canonicalId, domain, actorRoles }));
+fs.writeFileSync(path.join(targetDir, 'browserFlowRoutes.json'), JSON.stringify(browserRoutes, null, 2), 'utf-8');
+fs.writeFileSync(path.join(targetDir, 'browserJourneys.json'), JSON.stringify(BROWSER_JOURNEYS, null, 2), 'utf-8');
+
 // 8. Coverage Report JSON
 const coverageMetrics = calculateGraphCoverage(MASTER_FLOW_NODES, MASTER_FLOW_EDGES);
 fs.writeFileSync(path.join(targetDir, 'coverageReport.json'), JSON.stringify(coverageMetrics, null, 2), 'utf-8');
@@ -228,6 +237,8 @@ const bundleFiles = [
   'publicRAGChunks.json',
   'workflows.json',
   'linearGuides.json',
+  'browserFlowRoutes.json',
+  'browserJourneys.json',
   'coverageReport.json',
   'auditReport.json',
   'index.js',

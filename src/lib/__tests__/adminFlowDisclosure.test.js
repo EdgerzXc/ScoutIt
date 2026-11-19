@@ -1,63 +1,60 @@
 import fs from "node:fs";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// A-093 — the layout-mounted toolbox pulled the full internal system graph
-// onto public pages (`FloatingToolbox → journeyGuides → masterFlowGraphData`,
-// ~1MB), and `/admin/flow` rendered the internal map to any signed-in user.
-// The full server gate stays with A-073 (cookie-session migration); what is
-// buildable now: (1) the verified journey loads behind the role fetch the
-// toolbox already performs, so anonymous chunks ship no internal paths, and
-// (2) the flow map renders only for staff roles behind an explicitly
-// NON-authoritative client check that names A-073 as the real gate.
-// Standing Rule 5: a client-side check presented as authorization would be
-// the defect, not the fix — the placeholder must say so.
+const read = (path) => fs.readFileSync(path, "utf8");
+let staffCheck;
 
-function codeOf(p) {
-  const source = fs.readFileSync(p, "utf8");
-  return {
-    source,
-    code: source
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .split(/\r?\n/)
-      .map((line) => line.replace(/(^|\s)\/\/.*/, "$1"))
-      .join("\n"),
-  };
-}
+vi.mock("@/lib/adminGuard", () => ({ requireAdmin: (...args) => staffCheck(...args) }));
 
-const toolbox = codeOf("src/components/ui/FloatingToolbox.js");
-const flowPage = codeOf("src/app/admin/flow/page.js");
+const flow = await import("@/app/api/admin/flow/route");
+const access = await import("@/app/api/admin/access/route");
+const request = new Request("https://scoutit.space/api/admin/flow");
 
-describe("A-093 · the anonymous chunk ships no internal graph", () => {
-  it("guards the guard — the toolbox still owns help & display", () => {
-    expect(toolbox.code).toContain('fetch("/api/profile/me/role")');
-    expect(toolbox.code).toContain("scoutit_journey_guide_v1");
+describe("staff flow delivery", () => {
+  beforeEach(() => { staffCheck = vi.fn(); });
+
+  it.each([401, 403, 503])("returns %i with no graph for a failed staff check", async (status) => {
+    staffCheck.mockResolvedValue({ error: "Denied", status });
+    for (const route of [flow, access]) {
+      const response = await route.GET(request);
+      expect(response.status).toBe(status);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      expect(await response.json()).toEqual({ error: "Denied" });
+    }
   });
 
-  it("no static import pulls the graph into the layout chunk", () => {
-    // Static import statements only — the dynamic `import()` call and the
-    // function it invokes legitimately name the module below.
-    expect(toolbox.code).not.toMatch(/^\s*import\s.*journeyGuides/m);
-    expect(toolbox.code).not.toContain("masterFlowGraphData");
-    expect(toolbox.code).not.toMatch(/^\s*import\s*\{[^}]*guideForVerifiedRole/m);
-  });
-
-  it("the verified journey loads dynamically, gated on the fetched role", () => {
-    // Dynamic import of the journey module, reached only when a role exists.
-    // Anonymous readers (role null) download no graph data at all.
-    expect(toolbox.code).toContain('import("@/lib/journeyGuides")');
-    expect(toolbox.code).toMatch(/if \(!role\)[\s\S]{0,120}setVerifiedJourney\(null\)/);
+  it("serves the internal dataset only after the staff check and never caches it", async () => {
+    staffCheck.mockResolvedValue({ userId: "staff" });
+    const response = await flow.GET(request);
+    expect(staffCheck).toHaveBeenCalledWith(request, { label: "ADMIN FLOW" });
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    const data = await response.json();
+    expect(data.nodes.some(({ id }) => id === "rec_manual_approval_queue")).toBe(true);
+    expect(data.edges.length).toBeGreaterThan(0);
+    expect(await (await access.GET(request)).json()).toEqual({ allowed: true });
   });
 });
 
-describe("A-093 · the flow map is staff-scoped, honestly", () => {
-  it("renders the graph only for staff roles from the server-read role", () => {
-    expect(flowPage.code).toContain('fetch("/api/profile/me/role")');
-    expect(flowPage.code).toMatch(/role === "admin" \|\| role === "staff"/);
-    expect(flowPage.code).toContain("MasterFlowGraph");
+describe("browser guide and telemetry projection", () => {
+  it("gives browser telemetry only route and node identifiers for non-staff routes", () => {
+    const routes = JSON.parse(read("src/data/flow/browserFlowRoutes.json"));
+    const keys = new Set(["id", "route", "canonicalId", "domain", "actorRoles"]);
+    expect(routes.some(({ id }) => id === "deal_room")).toBe(true);
+    for (const entry of routes) {
+      expect(entry.route).not.toMatch(/^\/(?:api\/)?admin(?:\/|$)/);
+      expect(Object.keys(entry).every((key) => keys.has(key))).toBe(true);
+    }
   });
 
-  it("names A-073 as the real gate — never presents the check as authorization", () => {
-    expect(flowPage.source).toContain("A-073");
-    expect(flowPage.source).not.toMatch(/authoriz/i);
+  it("keeps guide help lazy and passes the verified staff response into the viewer", () => {
+    const toolbox = read("src/components/ui/FloatingToolbox.js");
+    expect(toolbox).toContain('fetch("/api/profile/me/role",');
+    expect(toolbox).toContain("scoutit_journey_guide_v1");
+    expect(toolbox).toContain('import("@/lib/journeyGuides")');
+    expect(read("src/app/admin/flow/page.js")).toContain('useStaffRead("/api/admin/flow")');
+    expect(read("src/app/admin/flow/page.js")).toContain("<MasterFlowGraph nodes={data.nodes} edges={data.edges}");
+    for (const file of ["src/lib/journeyGuides.js", "src/lib/reportError.js", "src/components/flow/MasterFlowGraph.js"]) {
+      expect(read(file)).not.toContain("masterFlowGraphData");
+    }
   });
 });

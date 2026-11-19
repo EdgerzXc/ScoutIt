@@ -1,4 +1,3 @@
-import { MASTER_FLOW_NODES } from "@/data/masterFlowGraphData";
 import { calculateBlastRadius } from "./incidentSimulator";
 
 const STORAGE_KEY = "scoutit_flow_incident_signals";
@@ -25,8 +24,8 @@ export function createSignal({
   route = null,
   triageFile = null,
   recoveryPlaybook = null
-}) {
-  const node = MASTER_FLOW_NODES.find(n => n.id === nodeId);
+}, nodeMap) {
+  const node = nodeMap?.get(nodeId);
   const now = new Date();
 
   return {
@@ -68,7 +67,12 @@ function loadPersistedSignals() {
 function savePersistedSignals(signals) {
   if (typeof window === "undefined" || !window.localStorage) return;
   try {
-    const trimmed = signals.slice(0, MAX_STORED_SIGNALS);
+    const trimmed = signals.slice(0, MAX_STORED_SIGNALS).map((signal) => {
+      const stored = { ...signal };
+      delete stored.triageFile;
+      delete stored.recoveryPlaybook;
+      return stored;
+    });
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch {
     // Ignore storage quota or disabled errors
@@ -92,14 +96,16 @@ function notifySubscribers() {
 /**
  * Initializes listeners for client-side error dispatches
  */
-export function initIncidentSignalHub() {
+export function initIncidentSignalHub(nodeMap) {
   if (isInitialized || typeof window === "undefined") return;
   isInitialized = true;
 
   activeSignals = loadPersistedSignals();
+  savePersistedSignals(activeSignals);
+  notifySubscribers();
 
   // Listen for scoutit:flow-error events dispatched by reportError or tests
-  window.addEventListener("scoutit:flow-error", (e) => {
+  const onSignal = (e) => {
     const detail = e.detail || {};
     const signal = createSignal({
       nodeId: detail.nodeId,
@@ -109,9 +115,15 @@ export function initIncidentSignalHub() {
       route: detail.route,
       triageFile: detail.triageFile,
       recoveryPlaybook: detail.recoveryPlaybook
-    });
+    }, nodeMap);
     recordSignal(signal);
-  });
+  };
+  window.addEventListener("scoutit:flow-error", onSignal);
+  return () => {
+    window.removeEventListener("scoutit:flow-error", onSignal);
+    activeSignals = [];
+    isInitialized = false;
+  };
 }
 
 /**
@@ -224,7 +236,7 @@ export function parseUrlIncidentParams(search = "") {
  * @returns {object} Operational status summary
  */
 export function computeSignalHealthSummary(signals, nodeMap) {
-  const map = nodeMap || new Map(MASTER_FLOW_NODES.map(n => [n.id, n]));
+  const map = nodeMap;
   const unacknowledged = (signals || []).filter(s => !s.acknowledged);
 
   if (unacknowledged.length === 0) {
@@ -234,7 +246,7 @@ export function computeSignalHealthSummary(signals, nodeMap) {
       faultedNodeIds: [],
       affectedTotalCount: 0,
       criticalSignal: null,
-      message: "All 131 nodes and connections are running smoothly. No active alerts."
+      message: "No active alerts."
     };
   }
 

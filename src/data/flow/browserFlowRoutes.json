@@ -1,0 +1,1019 @@
+[
+  {
+    "id": "hero",
+    "route": "/",
+    "canonicalId": "entry.hero",
+    "domain": "core",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "direct_slug",
+    "route": "/property/[id]",
+    "canonicalId": "property.direct_slug",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "login",
+    "route": "/login",
+    "canonicalId": "auth.login",
+    "domain": "auth",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise",
+      "staff"
+    ]
+  },
+  {
+    "id": "gate_adult_age",
+    "route": "/onboarding",
+    "canonicalId": "auth.gate.adult_age",
+    "domain": "auth",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "auth_onboarding_flow",
+    "route": "/onboarding",
+    "canonicalId": "auth.onboarding",
+    "domain": "auth",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "privacy_page",
+    "route": "/privacy",
+    "canonicalId": "legal.privacy",
+    "domain": "legal",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise",
+      "staff"
+    ]
+  },
+  {
+    "id": "terms_page",
+    "route": "/terms",
+    "canonicalId": "legal.terms",
+    "domain": "legal",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise",
+      "staff"
+    ]
+  },
+  {
+    "id": "orbit",
+    "route": "/layer/orbit",
+    "canonicalId": "layer.orbit",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "showcase",
+    "route": "/showcase",
+    "canonicalId": "layer.showcase",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "stratosphere",
+    "route": "/layer/stratosphere",
+    "canonicalId": "layer.stratosphere",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "metropolis",
+    "route": "/layer/metropolis",
+    "canonicalId": "layer.metropolis",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "crust",
+    "route": "/layer/crust",
+    "canonicalId": "layer.crust",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "mantle",
+    "route": "/layer/mantle",
+    "canonicalId": "layer.mantle",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "core",
+    "route": "/layer/core",
+    "canonicalId": "layer.core",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "discover_directory",
+    "route": "/discover",
+    "canonicalId": "discovery.directory",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "search_results",
+    "route": "/property?view=grid",
+    "canonicalId": "discovery.search_results",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "spatial_canvas",
+    "route": "/property/[id]?chapter=location",
+    "canonicalId": "discovery.spatial_canvas",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "wishlist",
+    "route": "/wishlist",
+    "canonicalId": "seeker.wishlist",
+    "domain": "seeker",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "intel_articles",
+    "route": "/intel",
+    "canonicalId": "intel.articles",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "hubs",
+    "route": "/hubs/[slug]",
+    "canonicalId": "discovery.hubs",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "transit",
+    "route": "/transit",
+    "canonicalId": "discovery.transit",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "brokers_roster",
+    "route": "/brokers",
+    "canonicalId": "roster.brokers",
+    "domain": "broker",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "photographers_roster",
+    "route": "/photographers",
+    "canonicalId": "roster.photographers",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "researchers_roster",
+    "route": "/researchers",
+    "canonicalId": "roster.researchers",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "planners_roster",
+    "route": "/event-planners",
+    "canonicalId": "roster.planners",
+    "domain": "discovery",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "provider"
+    ]
+  },
+  {
+    "id": "badges",
+    "route": "/badges",
+    "canonicalId": "gamification.badges",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep",
+    "route": "/property",
+    "canonicalId": "property.pep",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "pep_ch1_space",
+    "route": "/property/[id]?chapter=space",
+    "canonicalId": "property.pep.ch1_space",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch2_location",
+    "route": "/property/[id]?chapter=location",
+    "canonicalId": "property.pep.ch2_location",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch3_life",
+    "route": "/property/[id]?chapter=life",
+    "canonicalId": "property.pep.ch3_life",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch4_where_to",
+    "route": "/property/[id]?chapter=whereto",
+    "canonicalId": "property.pep.ch4_where_to",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch5_build_plans",
+    "route": "/property/[id]?chapter=buildplans",
+    "canonicalId": "property.pep.ch5_build_plans",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch6_fine_print",
+    "route": "/property/[id]?chapter=hiddenintel",
+    "canonicalId": "property.pep.ch6_fine_print",
+    "domain": "property",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "gate_deep_intel_tier",
+    "route": "/property/[id]?chapter=hiddenintel",
+    "canonicalId": "property.gate.deep_intel",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker"
+    ]
+  },
+  {
+    "id": "gate_hidden_intel_tier",
+    "route": "/property/[id]?chapter=hiddenintel",
+    "canonicalId": "property.gate.hidden_intel",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "pep_ch7_units",
+    "route": "/property/[id]?chapter=units",
+    "canonicalId": "property.pep.ch7_units",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch8_universe",
+    "route": "/property/[id]?chapter=universe",
+    "canonicalId": "property.pep.ch8_universe",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch9_services",
+    "route": "/property/[id]?chapter=services",
+    "canonicalId": "property.pep.ch9_services",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "pep_ch10_your_move",
+    "route": "/property/[id]?chapter=yourmove",
+    "canonicalId": "property.pep.ch10_your_move",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "act_save_reaction",
+    "route": "/api/reactions",
+    "canonicalId": "seeker.reaction.save",
+    "domain": "seeker",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "provider"
+    ]
+  },
+  {
+    "id": "action_ask_faq",
+    "route": "/api/faqs",
+    "canonicalId": "property.faq.ask",
+    "domain": "faq",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "provider"
+    ]
+  },
+  {
+    "id": "inquiry_modal",
+    "route": "/api/deals/initiate",
+    "canonicalId": "deal.inquiry.modal",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "provider"
+    ]
+  },
+  {
+    "id": "booking_modal",
+    "route": "/dashboard/inbox",
+    "canonicalId": "deal.viewing.modal",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "provider"
+    ]
+  },
+  {
+    "id": "offer_modal",
+    "route": "/dashboard/crm",
+    "canonicalId": "deal.offer.modal",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "claim_listing_modal",
+    "route": "/api/property/claim",
+    "canonicalId": "owner.claim_listing.modal",
+    "domain": "layer",
+    "actorRoles": [
+      "owner",
+      "broker"
+    ]
+  },
+  {
+    "id": "owner_creation_pipeline",
+    "route": "/dashboard",
+    "canonicalId": "owner.creation_pipeline",
+    "domain": "owner",
+    "actorRoles": [
+      "owner",
+      "broker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "method_scratch",
+    "route": "/dashboard",
+    "canonicalId": "owner.create.scratch",
+    "domain": "owner",
+    "actorRoles": [
+      "owner",
+      "broker"
+    ]
+  },
+  {
+    "id": "method_advanced",
+    "route": "/dashboard",
+    "canonicalId": "owner.create.advanced",
+    "domain": "owner",
+    "actorRoles": [
+      "owner",
+      "broker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "method_csv",
+    "route": "/dashboard",
+    "canonicalId": "owner.create.csv",
+    "domain": "owner",
+    "actorRoles": [
+      "owner",
+      "broker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "method_pdf",
+    "route": "/dashboard",
+    "canonicalId": "owner.create.pdf",
+    "domain": "owner",
+    "actorRoles": [
+      "owner",
+      "broker",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "scenario_non_refundable_connect",
+    "route": "/dashboard/inbox",
+    "canonicalId": "connects.policy.non_refundable",
+    "domain": "connects",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider",
+      "staff"
+    ]
+  },
+  {
+    "id": "dashboard_buyer",
+    "route": "/dashboard?workspace=buyer",
+    "canonicalId": "seeker.dashboard",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker"
+    ]
+  },
+  {
+    "id": "comp_return_brief_buyer",
+    "route": "/dashboard#return-brief",
+    "canonicalId": "seeker.return_brief",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker"
+    ]
+  },
+  {
+    "id": "dashboard_owner",
+    "route": "/dashboard",
+    "canonicalId": "owner.dashboard",
+    "domain": "layer",
+    "actorRoles": [
+      "owner"
+    ]
+  },
+  {
+    "id": "comp_return_brief_owner",
+    "route": "/dashboard#owner-brief",
+    "canonicalId": "owner.return_brief",
+    "domain": "layer",
+    "actorRoles": [
+      "owner"
+    ]
+  },
+  {
+    "id": "dashboard_broker",
+    "route": "/dashboard",
+    "canonicalId": "broker.dashboard",
+    "domain": "layer",
+    "actorRoles": [
+      "broker"
+    ]
+  },
+  {
+    "id": "comp_return_brief_broker",
+    "route": "/dashboard#broker-brief",
+    "canonicalId": "broker.return_brief",
+    "domain": "layer",
+    "actorRoles": [
+      "broker"
+    ]
+  },
+  {
+    "id": "dashboard_provider",
+    "route": "/dashboard",
+    "canonicalId": "provider.dashboard",
+    "domain": "layer",
+    "actorRoles": [
+      "provider"
+    ]
+  },
+  {
+    "id": "deal_room",
+    "route": "/dashboard/inbox",
+    "canonicalId": "deal.room.chat",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "owner",
+      "provider"
+    ]
+  },
+  {
+    "id": "exc_insufficient_connects",
+    "route": "/api/deals/initiate",
+    "canonicalId": "connects.exc.insufficient",
+    "domain": "connects",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "rec_topup_connects",
+    "route": "/pricing/bundles",
+    "canonicalId": "connects.rec.topup",
+    "domain": "connects",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "exc_slot_conflict",
+    "route": "/api/viewing-appointments",
+    "canonicalId": "deal.viewing.exc.slot_conflict",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "rec_propose_alt_slot",
+    "route": "/api/viewing-appointments",
+    "canonicalId": "deal.viewing.rec.propose_alt_slot",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "exc_contact_leak_blocked",
+    "route": "/api/faqs",
+    "canonicalId": "sentinel.exc.contact_leak",
+    "domain": "sentinel",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "provider"
+    ]
+  },
+  {
+    "id": "rec_redact_contact_faq",
+    "route": "/api/faq/ask",
+    "canonicalId": "sentinel.rec.redact_contact",
+    "domain": "faq",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "provider"
+    ]
+  },
+  {
+    "id": "exc_viewing_noshow",
+    "route": "/dashboard/inbox",
+    "canonicalId": "deal.viewing.exc.noshow",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "reschedule_modal",
+    "route": "/dashboard/inbox",
+    "canonicalId": "deal.viewing.reschedule",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "exc_missing_pdf_metric",
+    "route": "/lib/aiListingEngine.js",
+    "canonicalId": "owner.pdf.exc.missing_metric",
+    "domain": "owner",
+    "actorRoles": [
+      "owner",
+      "broker"
+    ]
+  },
+  {
+    "id": "rec_owner_manual_override",
+    "route": "/dashboard",
+    "canonicalId": "owner.pdf.rec.manual_override",
+    "domain": "layer",
+    "actorRoles": [
+      "owner"
+    ]
+  },
+  {
+    "id": "scenario_churned_owner_escrow",
+    "route": "/api/deals/escrow-trap",
+    "canonicalId": "owner.escrow.churned",
+    "domain": "owner",
+    "actorRoles": [
+      "seeker",
+      "owner"
+    ]
+  },
+  {
+    "id": "scenario_listing_cap_limit",
+    "route": "/dashboard?workspace=broker",
+    "canonicalId": "broker.cap.limit",
+    "domain": "broker",
+    "actorRoles": [
+      "broker"
+    ]
+  },
+  {
+    "id": "scenario_prc_expired_notice",
+    "route": "/mission-control/prc-audit",
+    "canonicalId": "broker.prc.renewal",
+    "domain": "broker",
+    "actorRoles": [
+      "broker",
+      "staff"
+    ]
+  },
+  {
+    "id": "scenario_broker_lead_collision",
+    "route": "/api/deals/route-lead",
+    "canonicalId": "broker.leads.collision",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker"
+    ]
+  },
+  {
+    "id": "scenario_offmarket_pitch",
+    "route": "/dashboard",
+    "canonicalId": "broker.pitch.offmarket",
+    "domain": "layer",
+    "actorRoles": [
+      "owner",
+      "seeker"
+    ]
+  },
+  {
+    "id": "scenario_chat_purge",
+    "route": "/api/cron/purge-chat-messages",
+    "canonicalId": "deal.chat.purge",
+    "domain": "deal",
+    "actorRoles": [
+      "staff",
+      "seeker",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "terminal_handshake_success",
+    "route": "/dashboard/inbox",
+    "canonicalId": "deal.terminal.handshake_success",
+    "domain": "deal",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "owner",
+      "provider"
+    ]
+  },
+  {
+    "id": "terminal_deal_closed",
+    "route": "/dashboard/inbox",
+    "canonicalId": "deal.terminal.closed",
+    "domain": "layer",
+    "actorRoles": [
+      "seeker",
+      "broker",
+      "owner",
+      "provider"
+    ]
+  },
+  {
+    "id": "compare_specs_matrix",
+    "route": "/property",
+    "canonicalId": "seeker.compare.matrix",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker"
+    ]
+  },
+  {
+    "id": "broker_field_briefing",
+    "route": "/dashboard",
+    "canonicalId": "broker.field_briefing",
+    "domain": "broker",
+    "actorRoles": [
+      "broker"
+    ]
+  },
+  {
+    "id": "action_owner_remove_broker",
+    "route": "/dashboard",
+    "canonicalId": "owner.representation.revoke",
+    "domain": "owner",
+    "actorRoles": [
+      "owner"
+    ]
+  },
+  {
+    "id": "global_account_menu",
+    "route": "/",
+    "canonicalId": "core.account_menu",
+    "domain": "core",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "page_settings",
+    "route": "/settings",
+    "canonicalId": "account.settings",
+    "domain": "auth",
+    "actorRoles": [
+      "seeker",
+      "owner",
+      "broker",
+      "provider"
+    ]
+  },
+  {
+    "id": "via_promoter_share",
+    "route": "/property/[id]/via/[contactSlug]",
+    "canonicalId": "broker.via_share",
+    "domain": "broker",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "broker",
+      "owner",
+      "operator"
+    ]
+  },
+  {
+    "id": "unit_detail_page",
+    "route": "/property/[id]/unit/[unitId]",
+    "canonicalId": "property.unit_detail",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker"
+    ]
+  },
+  {
+    "id": "community_signals_feed",
+    "route": "/stratosphere",
+    "canonicalId": "layer.community_signals",
+    "domain": "layer",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "broker",
+      "owner"
+    ]
+  },
+  {
+    "id": "broker_profile_dynamic",
+    "route": "/brokers/[broker-slug]",
+    "canonicalId": "broker.dynamic_profile",
+    "domain": "broker",
+    "actorRoles": [
+      "visitor",
+      "seeker",
+      "broker"
+    ]
+  },
+  {
+    "id": "direct_call_modal",
+    "route": "/property/[id]/unit/[unitId]",
+    "canonicalId": "property.unit.direct_call",
+    "domain": "property",
+    "actorRoles": [
+      "visitor",
+      "seeker"
+    ]
+  }
+]
