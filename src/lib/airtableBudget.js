@@ -23,6 +23,7 @@ import { Redis } from "@upstash/redis";
 
 const KEY_PREFIX = "airtable_public_calls";
 const COUNTER_TTL_S = 60 * 60 * 24 * 40; // outlives its month, then self-cleans
+const BUDGET_COMMAND_TIMEOUT_MS = 2_500;
 
 // Airtable Free caps at 1,000/month. 900 leaves ~100 calls of headroom for
 // publisher rebuilds and staff sessions after routine reads have been declined.
@@ -35,6 +36,8 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
       cache: "default", // same documented Upstash workaround cmsCache.js uses
+      signal: () => AbortSignal.timeout(BUDGET_COMMAND_TIMEOUT_MS),
+      retry: false,
     });
   } catch (err) {
     console.error("[AirtableBudget] Redis unavailable; budget guard disabled:", err?.message);
