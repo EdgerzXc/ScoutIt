@@ -11,6 +11,8 @@ let activeUpload;
 let latestFile;
 let storedSources;
 let deletedFiles;
+let expiredIntents;
+let failRemovalBatch;
 
 vi.mock("@/lib/serverAuth", () => ({ resolveUserId: async () => currentUser }));
 vi.mock("@/lib/notifications", () => ({ notifyUser: vi.fn(async () => true) }));
@@ -20,17 +22,35 @@ vi.mock("@/lib/cronEventLog", () => ({ withCronEventLog: (_name, handler) => han
 const client = {
   rpc: vi.fn(async (name) => ({ data: name === "reserve_property_pdf_upload" ? uploadId : { state: "ready", propertyId, created: false } })),
   from(table) {
+    let deleting = false;
+    let ids = [];
+    let paths = [];
     const query = {
       select: () => query,
-      delete: () => { calls.push(["delete", table]); return query; },
+      delete: () => {
+        calls.push(["delete", table]);
+        deleting = true;
+        return query;
+      },
       eq: (key, value) => { calls.push(["eq", key, value]); return query; },
       gt: () => query,
       lte: () => query,
       order: () => query,
-      limit: async () => ({ data: [{ id: uploadId, owner_id: ownerId }, { id: propertyId, owner_id: ownerId }] }),
-      in: () => query,
+      limit: async (size) => ({ data: expiredIntents.slice(0, size) }),
+      in: (key, values) => {
+        if (key === "id") ids = values;
+        if (key === "pdf_source_url") paths = values;
+        return query;
+      },
       maybeSingle: async () => ({ data: activeUpload }),
-      then: (resolve, reject) => Promise.resolve({ data: table === "properties" ? storedSources : [] }).then(resolve, reject),
+      then(resolve, reject) {
+        let data = table === "properties" ? storedSources.filter((source) => paths.includes(source.pdf_source_url)) : [];
+        if (table === "property_pdf_uploads" && deleting) {
+          data = expiredIntents.filter((intent) => ids.includes(intent.id));
+          expiredIntents = expiredIntents.filter((intent) => !ids.includes(intent.id));
+        }
+        return Promise.resolve({ data }).then(resolve, reject);
+      },
     };
     return query;
   },
@@ -50,7 +70,14 @@ const client = {
           calls.push(["download", path]);
           return { data: latestFile };
         },
-        remove: async (files) => { deletedFiles.push(...files); return {}; },
+        remove: async (files) => {
+          calls.push(["remove", files]);
+          if (failRemovalBatch === calls.filter(([operation]) => operation === "remove").length) {
+            return { error: { statusCode: 502 } };
+          }
+          deletedFiles.push(...files);
+          return {};
+        },
       };
     },
   },
@@ -65,6 +92,20 @@ function request(method, payload) {
   return new Request("https://scoutit.space/api/properties/queue/upload", { method, body: JSON.stringify(payload) });
 }
 
+function expireReservations(count) {
+  expiredIntents = Array.from({ length: count }, (_, index) => ({
+    id: `40000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
+    owner_id: ownerId,
+  }));
+  return expiredIntents.map((intent) => propertyPdfUploadPath(intent.owner_id, intent.id));
+}
+
+function runCleanup() {
+  return cleanup.GET(new Request("https://scoutit.space/api/cron/purge-expired-property-pdf-uploads", {
+    headers: { Authorization: "Bearer local-pdf-cleanup-test" },
+  }));
+}
+
 describe("property PDF direct upload", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -74,6 +115,8 @@ describe("property PDF direct upload", () => {
     activeUpload = { size_bytes: latestFile.size, property_id: null };
     storedSources = [];
     deletedFiles = [];
+    expiredIntents = [{ id: uploadId, owner_id: ownerId }, { id: propertyId, owner_id: ownerId }];
+    failRemovalBatch = null;
   });
 
   it("blocks anonymous reservations and oversize files before obtaining credentials", async () => {
@@ -130,11 +173,61 @@ describe("property PDF direct upload", () => {
       const url = "https://scoutit.space/api/cron/purge-expired-property-pdf-uploads";
       expect((await cleanup.GET(new Request(url))).status).toBe(401);
       expect(deletedFiles).toEqual([]);
-      const response = await cleanup.GET(new Request(url, { headers: { Authorization: "Bearer local-pdf-cleanup-test" } }));
-      expect(await response.json()).toEqual({ cleared: 2, preservedSources: 1 });
+      const response = await runCleanup();
+      expect(await response.json()).toEqual({ cleared: 2, preservedSources: 1, backlogPending: false });
       expect(deletedFiles).toEqual([propertyPdfUploadPath(ownerId, propertyId)]);
       expect(calls).toContainEqual(["delete", "property_pdf_uploads"]);
     } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("clears more than one batch and preserves a source referenced by a draft", async () => {
+    vi.stubEnv("CRON_SECRET", "local-pdf-cleanup-test");
+    try {
+      const allPaths = expireReservations(41);
+      storedSources = [{ pdf_source_url: allPaths[0] }];
+      const response = await runCleanup();
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ cleared: 41, preservedSources: 1, backlogPending: false });
+      expect(deletedFiles).toEqual(allPaths.slice(1));
+      expect(expiredIntents).toEqual([]);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("reports pending work once a run reaches its batch limit", async () => {
+    vi.stubEnv("CRON_SECRET", "local-pdf-cleanup-test");
+    try {
+      const allPaths = expireReservations(321);
+      const response = await runCleanup();
+      expect(await response.json()).toEqual({ cleared: 320, preservedSources: 0, backlogPending: true });
+      expect(deletedFiles).toEqual(allPaths.slice(0, 320));
+      expect(expiredIntents).toHaveLength(1);
+      expect(await (await runCleanup()).json()).toEqual({ cleared: 1, preservedSources: 0, backlogPending: false });
+      expect(deletedFiles).toEqual(allPaths);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("retries the unconfirmed batch and reports prior progress after a Storage failure", async () => {
+    vi.stubEnv("CRON_SECRET", "local-pdf-cleanup-test");
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const allPaths = expireReservations(41);
+      failRemovalBatch = 2;
+      const response = await runCleanup();
+      expect(response.status).toBe(500);
+      expect(await response.json()).toMatchObject({ cleared: 40, preservedSources: 0 });
+      expect(deletedFiles).toEqual(allPaths.slice(0, 40));
+      expect(expiredIntents).toHaveLength(1);
+
+      expect(await (await runCleanup()).json()).toEqual({ cleared: 1, preservedSources: 0, backlogPending: false });
+      expect(deletedFiles).toEqual(allPaths);
+    } finally {
+      errorLog.mockRestore();
       vi.unstubAllEnvs();
     }
   });
