@@ -28,7 +28,7 @@ DECLARE
 BEGIN
   PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('property-pdf:' || p_owner_id::text, 0));
 
-  IF (SELECT count(*) FROM public.properties WHERE owner_id = p_owner_id AND pipeline_status = 'ai_drafting')
+  IF (SELECT count(*) FROM public.properties WHERE owner_id = p_owner_id::text AND pipeline_status = 'ai_drafting')
      + (SELECT count(*) FROM public.property_pdf_uploads
         WHERE owner_id = p_owner_id AND property_id IS NULL AND expires_at > now()) >= 5 THEN
     RETURN NULL;
@@ -66,12 +66,12 @@ BEGIN
   END IF;
 
   SELECT id INTO draft_id FROM public.properties
-    WHERE owner_id = p_owner_id AND pipeline_status = 'ai_drafting' AND creation_source = 'pdf_assisted'
+    WHERE owner_id = p_owner_id::text AND pipeline_status = 'ai_drafting' AND creation_source = 'pdf_assisted'
       AND pdf_source_url IS NOT NULL AND details->>'pdf_hash' = p_pdf_hash
     ORDER BY created_at, id LIMIT 1;
 
   IF draft_id IS NULL THEN
-    IF (SELECT count(*) FROM public.properties WHERE owner_id = p_owner_id AND pipeline_status = 'ai_drafting') >= 5 THEN
+    IF (SELECT count(*) FROM public.properties WHERE owner_id = p_owner_id::text AND pipeline_status = 'ai_drafting') >= 5 THEN
       RETURN jsonb_build_object('state', 'full');
     END IF;
 
@@ -79,7 +79,7 @@ BEGIN
       (owner_id, title, type, space_category, slug, location, pipeline_status,
        creation_source, pdf_source_url, details)
     VALUES (
-      p_owner_id, 'Drafting: ' || pending.filename, 'commercial', 'commercial',
+      p_owner_id::text, 'Drafting: ' || pending.filename, 'commercial', 'commercial',
       'pdf-draft-' || p_upload_id::text, 'Location Pending', 'ai_drafting',
       'pdf_assisted', 'source_queue_docs/' || p_owner_id::text || '/' || p_upload_id::text || '.pdf',
       jsonb_build_object('source_pdf', pending.filename, 'pdf_hash', p_pdf_hash,
