@@ -125,9 +125,7 @@ test.describe('Property directory + briefing page', () => {
 
 test.describe('The Ledger (device-only wishlist)', () => {
   test('saving a reaction surfaces it on Your Board and can be removed', async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.removeItem('scoutit_reactions');
-    });
+    await page.route('**/api/reactions', route => route.fulfill({ json: { success: true } }));
     await gotoAndSettle(page, '/property');
 
     const card = page.locator('.property-preview-card').first();
@@ -149,18 +147,43 @@ test.describe('The Ledger (device-only wishlist)', () => {
 
     await expect(reaction).toHaveClass(/active/);
 
-    const stored = await page.evaluate(() => localStorage.getItem('scoutit_reactions'));
-    expect(stored, 'reaction was not persisted to the device ledger').toBeTruthy();
-    expect(JSON.parse(stored).length).toBeGreaterThan(0);
+    const [saved] = await page.evaluate(() => JSON.parse(localStorage.getItem('scoutit_reactions') || '[]'));
+    expect(saved).toMatchObject({ reaction_type: 'Save', property_id: expect.any(String), property_title: expect.any(String) });
 
-    // The Board must reflect it.
     await gotoAndSettle(page, '/wishlist');
-    await expectRealContent(page);
-    const boardText = await page.locator('body').innerText();
-    expect(boardText).not.toMatch(/Application error/i);
+    const savedLink = page.getByRole('link', { name: saved.property_title, exact: true });
+    await expect(savedLink).toHaveAttribute('href', `/property/${encodeURIComponent(saved.property_id)}`);
+    await page.getByRole('button', { name: `Remove ${saved.property_title} from board`, exact: true }).click();
+    await expect(page.getByText('Your board is empty.', { exact: true })).toBeVisible();
 
-    // Clean the device ledger so reruns stay deterministic.
-    await page.evaluate(() => localStorage.removeItem('scoutit_reactions'));
+    await page.reload();
+    await expect(page.getByText('Your board is empty.', { exact: true })).toBeVisible();
+    await expect(savedLink).toHaveCount(0);
+  });
+
+  test('removing a saved space preserves another with the same timestamp', async ({ page }) => {
+    await page.route('**/api/cms**', route => route.fulfill({
+      json: { properties: [], intel: [], brokers: [], source: 'catalog' },
+    }));
+    await gotoAndSettle(page, '/wishlist');
+    await page.evaluate(() => {
+      localStorage.setItem('scoutit_reactions', JSON.stringify([
+        { property_id: 'fixture-oak', property_title: 'Saved Oak', reaction_type: 'Save', timestamp: 1788940000000 },
+        { property_id: 'fixture-elm', property_title: 'Saved Elm', reaction_type: 'Save', timestamp: 1788940000000 },
+      ]));
+    });
+    await page.reload();
+    const oak = page.getByRole('link', { name: 'Saved Oak', exact: true });
+    const elm = page.getByRole('link', { name: 'Saved Elm', exact: true });
+    await expect(oak).toBeVisible();
+    await expect(elm).toBeVisible();
+    await page.getByRole('button', { name: 'Remove Saved Oak from board', exact: true }).click();
+    await expect(oak).toHaveCount(0);
+    await expect(elm).toBeVisible();
+
+    await page.reload();
+    await expect(elm).toHaveAttribute('href', '/property/fixture-elm');
+    await expect(oak).toHaveCount(0);
   });
 });
 

@@ -227,14 +227,12 @@ export default function WishlistPage() {
 
   // Safe removal across both offline storage and cloud account
   const removeItem = useCallback((item) => {
-    const key = item.timestamp || item.property_id;
+    const key = item.property_id || item.timestamp;
     setFadingOut((prev) => new Set([...prev, key]));
     setTimeout(() => {
       // 1. Remove from local storage
       setOfflineItems((prev) => {
-        const updated = prev.filter(
-          (it) => it.property_id !== item.property_id && it.timestamp !== item.timestamp
-        );
+        const updated = prev.filter((savedItem) => (savedItem.property_id || savedItem.timestamp) !== key);
         try {
           localStorage.setItem("scoutit_reactions", JSON.stringify(updated));
         } catch (e) {}
