@@ -20,6 +20,7 @@ export function isSensitivePath(path) {
     path.startsWith('/api/auth/') ||
     path.startsWith('/api/ai/') ||
     path.startsWith('/api/storage/') ||
+    /^\/api\/deals\/[^/]+\/support\/?$/.test(path) ||
     path.startsWith('/api/properties/queue/') ||
     path.startsWith('/api/intel/')
   );

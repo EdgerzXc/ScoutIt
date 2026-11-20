@@ -4,6 +4,7 @@ import { ANONYMOUS_CONNECT_LABEL, viewerIsRequestSender } from "@/lib/identityDi
 import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import { motion } from "framer-motion";
 import BookingModal from "./BookingModal";
+import DealSupportDialog from "./DealSupportDialog";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
 import ViewingWorkspaceCard from "./ViewingWorkspaceCard";
 import VoiceNotePlayer from "./VoiceNotePlayer";
@@ -22,7 +23,6 @@ import {
   describeDisputeWindow,
 } from "@/lib/chatRetention";
 import { lifecycleNotice } from "@/lib/pendingRequestLifecycle";
-import { reportError } from "@/lib/reportError";
 import { crmFetch } from "@/lib/crmClient";
 
 // Statuses where the conversation is over. Kept as one constant because it
@@ -315,13 +315,6 @@ export default function ChatBox({
   const [activeViewing, setActiveViewing] = useState(null);
   const [viewingBusy, setViewingBusy] = useState(false);
   const [viewingError, setViewingError] = useState(null);
-
-  // Staff Support / Glitch reporting state
-  const [showStaffModal, setShowStaffModal] = useState(false);
-  const [staffCategory, setStaffCategory] = useState("glitch");
-  const [staffMessage, setStaffMessage] = useState("");
-  const [staffSubmitting, setStaffSubmitting] = useState(false);
-  const [staffSuccess, setStaffSuccess] = useState(false);
 
   // A-043 — downloading your own copy. `downloadState` is one of
   // idle | working | done, so the button can say what it is doing without a
@@ -1027,38 +1020,6 @@ export default function ChatBox({
     }
   };
 
-  const submitStaffSupport = async (e) => {
-    if (e) e.preventDefault();
-    if (!staffMessage.trim()) return;
-    setStaffSubmitting(true);
-    try {
-      const ticketId = Math.random().toString(36).substring(2, 8).toUpperCase();
-      await reportError({
-        kind: `deal_room_${staffCategory}`,
-        message: staffMessage.trim(),
-        context: {
-          dealId: deal.id,
-          propertyTitle: deal.property_title,
-          otherParty: deal.other_party,
-          ticketId,
-          role: deal.myRole || "user"
-        }
-      });
-      await sendMessageBody(`[SYSTEM] 🛡️ Staff Support Incident #SR-${ticketId} logged. Mission Control operators have been alerted to review this room.`);
-      setStaffSuccess(true);
-      setStaffMessage("");
-      setTimeout(() => {
-        setStaffSuccess(false);
-        setShowStaffModal(false);
-      }, 2200);
-    } catch (err) {
-      setUploadError(sanitizeError(err, "Couldn't submit staff support ticket."));
-      setTimeout(() => setUploadError(null), 5000);
-    } finally {
-      setStaffSubmitting(false);
-    }
-  };
-
   // Honest blank: no fabricated 14-day default. A deal with no expires_at
   // simply doesn't get a countdown, because we don't know one.
   const msLeft = deal.expires_at ? new Date(deal.expires_at) - new Date() : null;
@@ -1516,13 +1477,7 @@ export default function ChatBox({
             >
               End Conversation
             </button>
-            <button
-              onClick={() => setShowStaffModal(true)}
-              className="border border-gold-accent/30 text-gold-accent px-3 py-2 rounded text-xs font-mono uppercase tracking-widest hover:bg-gold-accent/10 transition-all duration-300 ease-out whitespace-nowrap flex items-center gap-1 min-h-[44px]"
-              title="Report Glitch or Request Staff Review"
-            >
-              <span>🛡️ Staff Support</span>
-            </button>
+            <DealSupportDialog key={deal.id} dealId={deal.id} resolveAuth={resolveAuth} />
             <button
               onClick={() => setShowConfirmBlock(true)}
               className="text-error/70 hover:text-error px-2 py-2 rounded text-xs transition min-h-[44px]"
@@ -2055,80 +2010,6 @@ export default function ChatBox({
                 Conclude Room
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── In-Chat Staff Support & Glitch Incident Modal ── */}
-      {showStaffModal && (
-        <div className="absolute inset-0 bg-background/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-surface border border-gold-accent/25 rounded-xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🛡️</span>
-              <div>
-                <h3 className="font-working-title text-lg text-on-surface">Staff Support &amp; Incident Dispatch</h3>
-                <p className="text-xs text-text-secondary">Request assistance from ScoutIt Mission Control operators.</p>
-              </div>
-            </div>
-
-            {staffSuccess ? (
-              <div className="text-center py-6 space-y-2">
-                <div className="text-3xl">✅</div>
-                <h4 className="font-semibold text-white">Incident Dispatched to Staff</h4>
-                <p className="text-xs text-text-secondary">
-                  A Mission Control operator has received your telemetry and will inspect this deal room.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={submitStaffSupport} className="space-y-3.5">
-                <div>
-                  <label className="block text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold mb-1">
-                    Assistance Type
-                  </label>
-                  <select
-                    value={staffCategory}
-                    onChange={(e) => setStaffCategory(e.target.value)}
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-base sm:text-xs text-on-surface focus:border-gold-accent outline-none"
-                  >
-                    <option value="glitch">Technical Glitch / Upload Error</option>
-                    <option value="no_show">Client / Broker Viewing No-Show</option>
-                    <option value="dispute">Transaction Dispute / Mediation</option>
-                    <option value="connects">Connects Wallet Question</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[12px] font-mono uppercase tracking-widest text-text-muted mb-1">
-                    Describe the Issue
-                  </label>
-                  <textarea
-                    value={staffMessage}
-                    onChange={(e) => setStaffMessage(e.target.value)}
-                    placeholder="Provide details so staff can review and fix things..."
-                    rows={3}
-                    required
-                    className="w-full bg-surface border border-surface-variant rounded-lg p-2 text-base sm:text-xs text-on-surface focus:border-gold-accent outline-none"
-                  />
-                </div>
-
-                <div className="flex gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowStaffModal(false)}
-                    className="flex-1 min-h-[44px] py-2.5 rounded-lg border border-surface-variant text-xs text-text-secondary hover:text-on-surface transition font-mono uppercase tracking-wider"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={staffSubmitting || !staffMessage.trim()}
-                    className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-gold-accent/15 text-gold-accent border border-gold-accent/40 text-xs font-mono uppercase tracking-wider hover:bg-gold-accent/25 transition-all duration-300 ease-out font-bold disabled:opacity-40"
-                  >
-                    {staffSubmitting ? "Dispatching..." : "Dispatch to Staff"}
-                  </button>
-                </div>
-              </form>
-            )}
           </div>
         </div>
       )}
