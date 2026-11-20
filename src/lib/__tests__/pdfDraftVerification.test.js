@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
 
 const propertyId = "87998441-6c10-4a24-ac27-5614c6867355";
 const ownerId = "e32a7c21-a388-498a-84f0-3fc62bec83c0";
 const staffId = "57203bfc-0a8b-45b7-8cdc-e644bc9e3647";
 const sourcePath = `source_queue_docs/${ownerId}/uuid_brochure.pdf`;
 const sourceUrl = "https://storage.example.test/private-download";
+const sourceVersion = createHash("sha256").update(`property-documents-temp/${sourcePath}`).digest("hex");
 const dbCalls = [];
 const storageCalls = [];
 let auth;
@@ -76,7 +78,7 @@ function request(body, queryString = "") {
   });
 }
 
-const attestation = { propertyId, sourceReviewed: true, reviewedDraft: { title: "Listing" } };
+const attestation = { propertyId, sourceReviewed: true, sourceVersion, reviewedDraft: { title: "Listing" } };
 
 describe("staff PDF review", () => {
   beforeEach(() => {
@@ -112,7 +114,7 @@ describe("staff PDF review", () => {
     draft.details = { floor_sqm: 24, storage_token: "internal" };
     const res = await pdfVerify.GET(request(null, `?propertyId=${propertyId}`));
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ sourceUrl, reviewedDraft: factsResult.data });
+    expect(await res.json()).toEqual({ sourceUrl, sourceVersion, reviewedDraft: factsResult.data });
     expect(dbCalls).toContainEqual(["rpc", "read_property_pdf_review_facts", {
       p_property_id: propertyId,
       p_source_path: sourcePath,
@@ -141,6 +143,13 @@ describe("staff PDF review", () => {
     draft.pdf_source_url = sourcePath;
     draft.pipeline_status = "ai_drafting";
     expect((await pdfVerify.POST(request(attestation))).status).toBe(409);
+    expect(storageCalls).toEqual([]);
+  });
+
+  it("rejects a replaced source even if the listing facts are identical", async () => {
+    draft.pdf_source_url = `source_queue_docs/${ownerId}/replacement.pdf`;
+    expect((await pdfVerify.POST(request(attestation))).status).toBe(409);
+    expect(dbCalls.some(([op]) => op === "rpc")).toBe(false);
     expect(storageCalls).toEqual([]);
   });
 

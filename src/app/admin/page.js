@@ -166,7 +166,11 @@ function AdminPageInner() {
         headers: await authHeaders(),
         body: JSON.stringify({
           propertyId,
-          ...(cleanupOnly ? {} : { sourceReviewed: true, reviewedDraft: pdfReview?.reviewedDraft }),
+          ...(cleanupOnly ? {} : {
+            sourceReviewed: true,
+            sourceVersion: pdfReview?.sourceVersion,
+            reviewedDraft: pdfReview?.reviewedDraft,
+          }),
         }),
       });
       const result = await res.json();

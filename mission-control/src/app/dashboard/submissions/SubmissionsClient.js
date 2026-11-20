@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   approveSubmissionAction,
+  loadPdfReviewAction,
   verifyPdfDraftAction,
   generatePropertySeoAction,
 } from "./actions";
@@ -18,13 +19,16 @@ import {
   Building,
 } from "lucide-react";
 
-export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts, staffTier }) {
+export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts, pdfQueueError, staffTier }) {
   const [activeTab, setActiveTab] = useState("submissions"); // submissions, pdf_drafts
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [pdfDrafts, setPdfDrafts] = useState(initialPdfDrafts);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [review, setReview] = useState(null);
+  const [reviewError, setReviewError] = useState(null);
+  const reviewDialog = useRef(null);
 
   const isOpsManager = staffTier >= 2;
 
@@ -53,26 +57,60 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
     }
   };
 
-  const handleVerifyPdf = async (draft) => {
-    if (!isOpsManager) return;
+  const loadReview = async (draft) => {
+    setReview({ draft });
+    setReviewError(null);
+    setBusyId(draft.id);
+    try {
+      const result = await loadPdfReviewAction(draft.id);
+      if (result.error) setReviewError(result.error);
+      else if (reviewDialog.current?.open) setReview({ draft, ...result, sourceOpened: false });
+    } catch {
+      setReviewError("Could not open the PDF review. Check your staff session and try again.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const openReview = (draft) => {
+    reviewDialog.current.showModal();
+    void loadReview(draft);
+  };
+
+  const handleVerifyPdf = async (draft, comparison) => {
     setError(null);
     setSuccess(null);
+    setReviewError(null);
     setBusyId(draft.id);
 
     try {
       const res = await verifyPdfDraftAction({
         propertyId: draft.id,
-        reason: "Source document verified against PDF upload by staff operator",
+        ...(comparison ? {
+          sourceReviewed: comparison.sourceOpened,
+          sourceVersion: comparison.sourceVersion,
+          reviewedDraft: comparison.reviewedDraft,
+        } : {}),
       });
 
       if (res.error) {
-        setError(res.error);
+        if (comparison && reviewDialog.current?.open) {
+          setReviewError(res.error);
+          if (res.status === 409) setReview({ draft });
+        } else setError(res.error);
       } else {
-        setSuccess(`PDF-assisted draft "${draft.title}" verified. Listing is now eligible for publication.`);
-        setPdfDrafts((prev) => prev.filter((d) => d.id !== draft.id));
+        reviewDialog.current?.close();
+        setSuccess(res.cleanupPending
+          ? "Verification was recorded. Retry deleting the stored PDF."
+          : comparison ? "Draft verified and source deleted. The owner can publish." : "Source PDF deleted.");
+        setPdfDrafts((prev) => res.cleanupPending
+          ? prev.map((item) => item.id === draft.id ? { ...item, cleanupPending: true } : item)
+          : prev.filter((item) => item.id !== draft.id));
       }
-    } catch (err) {
-      setError(err.message || "PDF verification failed.");
+    } catch {
+      const message = "Could not finish the PDF review. Check your staff session and try again.";
+      if (comparison && reviewDialog.current?.open) setReviewError(message);
+      else setError(message);
     } finally {
       setBusyId(null);
     }
@@ -115,7 +153,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
               <Send className="w-3.5 h-3.5" />
               Submissions Queue ({submissions.length})
             </button>
-            <button
+            {isOpsManager && <button
               onClick={() => setActiveTab("pdf_drafts")}
               className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2 ${
                 activeTab === "pdf_drafts"
@@ -125,7 +163,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
             >
               <FileCheck className="w-3.5 h-3.5" />
               PDF-Assisted Drafts ({pdfDrafts.length})
-            </button>
+            </button>}
           </div>
 
           <span className="text-xs font-mono text-white/60">
@@ -136,14 +174,14 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
         </div>
 
         {error && (
-          <div className="mt-4 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono flex items-center gap-2">
+          <div role="alert" className="mt-4 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="mt-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-mono flex items-center gap-2">
+          <div role="status" className="mt-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-mono flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{success}</span>
           </div>
@@ -250,7 +288,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                 {pdfDrafts.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-white/60 font-mono">
-                      No unverified PDF-assisted drafts in the queue.
+                      {pdfQueueError ? <span role="alert">{pdfQueueError}</span> : "No PDF-assisted drafts need review or cleanup."}
                     </td>
                   </tr>
                 ) : (
@@ -268,29 +306,17 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                           {new Date(draft.created_at).toLocaleDateString()}
                         </td>
                         <td className="py-3.5">
-                          {draft.pdf_source_url ? (
-                            <a
-                              href={draft.pdf_source_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 text-gold hover:underline font-mono text-xs"
-                            >
-                              <FileText className="w-3.5 h-3.5" />
-                              View PDF Source
-                              <ExternalLink className="w-3 h-3 opacity-60" />
-                            </a>
-                          ) : (
-                            <span className="text-white/60 font-mono text-xs">No PDF link attached</span>
-                          )}
+                          {draft.cleanupPending ? "Deletion pending" : draft.sourceAttached ? "Attached" : "PDF missing"}
                         </td>
                         <td className="py-3.5 text-right">
                           {isOpsManager ? (
                             <button
-                              onClick={() => handleVerifyPdf(draft)}
-                              disabled={isBusy}
-                              className="px-3 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-medium text-xs font-mono uppercase tracking-wider hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                              type="button"
+                              onClick={() => draft.cleanupPending ? handleVerifyPdf(draft) : openReview(draft)}
+                              disabled={Boolean(busyId) || !draft.sourceAttached}
+                              className="min-h-11 px-3 py-1 rounded border border-line text-gold text-xs font-mono uppercase tracking-wider hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-50"
                             >
-                              {isBusy ? "Verifying..." : "Verify Against Source"}
+                              {isBusy ? "Working…" : draft.cleanupPending ? "Retry deletion" : "Review source"}
                             </button>
                           ) : (
                             <span className="text-xs font-mono text-white/60 uppercase">Tier 2+</span>
@@ -305,6 +331,51 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
           </div>
         </div>
       )}
+      <dialog
+        ref={reviewDialog}
+        aria-labelledby="pdf-review-heading"
+        onClose={() => { setReview(null); setReviewError(null); }}
+        className="fixed inset-0 m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-xl border border-line bg-surface p-5 text-white backdrop:bg-black/80 sm:p-6"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="pdf-review-heading" className="text-xl font-semibold">Review source PDF</h2>
+          <button type="button" onClick={() => reviewDialog.current.close()} className="min-h-11 rounded border border-line px-3 font-mono text-xs uppercase tracking-wider focus-visible:outline-2 focus-visible:outline-gold">Close</button>
+        </div>
+        {review?.draft?.title && <p className="mt-1 break-words text-sm text-white/70">{review.draft.title}</p>}
+        {reviewError && <p className="mt-3 text-sm text-red-400" role="alert">{reviewError}</p>}
+        {review && !review.reviewedDraft && (
+          busyId === review.draft.id ? <p role="status" className="mt-3 text-sm text-white/70">Opening review…</p>
+            : <button type="button" className="mt-3 min-h-11 text-sm text-gold underline focus-visible:outline-2 focus-visible:outline-gold" onClick={() => loadReview(review.draft)}>Reload review</button>
+        )}
+        {review?.reviewedDraft && (
+          <>
+            <a href={review.sourceUrl} target="_blank" rel="noopener noreferrer" onClick={() => setReview({ ...review, sourceOpened: true })} className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm text-gold underline focus-visible:outline-2 focus-visible:outline-gold">
+              <FileText size={16} aria-hidden="true" /> Download source PDF <ExternalLink size={14} aria-hidden="true" />
+            </a>
+            <p className="text-sm text-white/70">Compare the draft fields with the source. Confirming records the review and deletes the PDF.</p>
+            <PdfReviewFacts facts={review.reviewedDraft} />
+            <button type="button" disabled={!review.sourceOpened || Boolean(busyId)} onClick={() => handleVerifyPdf(review.draft, review)} className="mt-4 min-h-11 rounded bg-gold px-4 text-black font-mono text-xs font-semibold uppercase tracking-wider focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-50">
+              {busyId === review.draft.id ? "Confirming…" : "Confirm match and delete PDF"}
+            </button>
+          </>
+        )}
+      </dialog>
     </div>
+  );
+}
+
+function PdfReviewFacts({ facts }) {
+  const { listing_details: details = {}, ...summary } = facts;
+  return (
+    <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+      {[["summary", summary], ["details", details]].flatMap(([section, values]) =>
+        Object.entries(values).map(([key, value]) => (
+          <div key={`${section}-${key}`} className="min-w-0">
+            <dt className="font-mono text-xs uppercase tracking-wider text-white/70">{key.replaceAll("_", " ")}</dt>
+            <dd className="break-words text-sm">{value == null || value === "" ? "—" : typeof value === "object" ? JSON.stringify(value) : String(value)}</dd>
+          </div>
+        )),
+      )}
+    </dl>
   );
 }

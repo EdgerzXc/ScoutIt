@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentStaff, TIERS } from "@/lib/rbac";
+import { getCurrentStaff } from "@/lib/rbac";
 import { loadSubmissionsQueue } from "./actions";
 import SubmissionsClient from "./SubmissionsClient";
 import { Send } from "lucide-react";
@@ -11,8 +11,9 @@ export const metadata = {
 export default async function SubmissionsPage() {
   const staff = await getCurrentStaff();
   if (!staff) redirect("/?error=NotAuthorized");
+  if (staff.mfaRequired) redirect("/dashboard/mfa");
 
-  const { submissions = [], pdfDrafts = [] } = await loadSubmissionsQueue();
+  const { submissions = [], pdfDrafts = [], pdfQueueError } = await loadSubmissionsQueue();
 
   return (
     <div className="space-y-6">
@@ -31,6 +32,7 @@ export default async function SubmissionsPage() {
       <SubmissionsClient
         initialSubmissions={submissions}
         initialPdfDrafts={pdfDrafts}
+        pdfQueueError={pdfQueueError}
         staffTier={staff.tier}
       />
     </div>

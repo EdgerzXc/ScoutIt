@@ -59,7 +59,9 @@ test("Server Actions strictly enforce RBAC across all consolidated admin tools",
 
   const subActions = await readFile(path.join(root, "src", "app", "dashboard", "submissions", "actions.js"), "utf8");
   assert.match(subActions, /loadSubmissionsQueue[\s\S]*?assertTier\(staff,\s*TIERS\.AGENT\)/);
+  assert.match(subActions, /loadPdfReviewAction[\s\S]*?assertTier\(staff,\s*TIERS\.OPS_MANAGER\)/);
   assert.match(subActions, /verifyPdfDraftAction[\s\S]*?assertTier\(staff,\s*TIERS\.OPS_MANAGER\)/);
+  assert.doesNotMatch(subActions, /verify_pdf_draft|\.update\(\{\s*pdf_verified:/);
   assert.match(subActions, /approveSubmissionAction[\s\S]*?assertTier\(staff,\s*TIERS\.OPS_MANAGER\)/);
   assert.match(subActions, /generatePropertySeoAction[\s\S]*?assertTier\(staff,\s*TIERS\.OPS_MANAGER\)/);
 });

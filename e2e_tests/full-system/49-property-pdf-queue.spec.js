@@ -71,7 +71,7 @@ test('staff must reopen a changed draft before confirming and can retry PDF dele
       return route.fulfill({ json: { success: true, cleanupPending: attestations.length === 2 } });
     }
     if (new URL(request.url()).searchParams.has('propertyId')) {
-      return route.fulfill({ json: { sourceUrl, reviewedDraft: attestations.length ? revisedDraft : reviewedDraft } });
+      return route.fulfill({ json: { sourceUrl, sourceVersion: 'fixture-source', reviewedDraft: attestations.length ? revisedDraft : reviewedDraft } });
     }
     return route.fulfill({ json: {
       drafts: attestations.length > 2 ? [] : [{ id: propertyId, title: reviewedDraft.title, sourceAttached: true, cleanupPending: attestations.length === 2 }],
@@ -96,8 +96,8 @@ test('staff must reopen a changed draft before confirming and can retry PDF dele
   await page.getByRole('button', { name: 'Retry PDF deletion' }).click();
   await expect(page.getByText('No PDF-assisted drafts awaiting verification.', { exact: false })).toBeVisible();
   expect(attestations).toEqual([
-    { propertyId, sourceReviewed: true, reviewedDraft },
-    { propertyId, sourceReviewed: true, reviewedDraft: revisedDraft },
+    { propertyId, sourceReviewed: true, sourceVersion: 'fixture-source', reviewedDraft },
+    { propertyId, sourceReviewed: true, sourceVersion: 'fixture-source', reviewedDraft: revisedDraft },
     { propertyId },
   ]);
 });

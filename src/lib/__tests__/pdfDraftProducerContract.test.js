@@ -65,13 +65,14 @@ describe("A-076 · PDF-assisted drafts are tagged at creation", () => {
     expect(console_).toMatch(/setActiveTab\("pdf"\)/);
   });
 
-  it("the unlock does not depend on the broken verify_pdf_draft RPC", () => {
-    // The function sets `properties.updated_at`, which does not exist, so every
-    // call throws 42703 (verified live 2026-09-05). Its repair is prepared in
-    // migration 20260905000001 but is owner-gated, so the route must keep doing
-    // the write itself — and must keep the RPC's scoping while doing so.
-    const route = read("src/app/api/admin/pdf-verify/route.js");
-    expect(route).not.toMatch(/\.rpc\(\s*["']verify_pdf_draft["']/);
-    expect(route).toMatch(/\.eq\("creation_source",\s*"pdf_assisted"\)/);
+  it("both staff consoles use the audited review and storage cleanup contract", () => {
+    const workflow = read("src/lib/propertyPdfReview.js");
+    const staffActions = read("mission-control/src/app/dashboard/submissions/actions.js");
+    expect(read("mission-control/src/lib/propertyPdfReview.js")).toBe(workflow);
+    expect(read("mission-control/src/lib/propertyQueueStorage.js")).toBe(read("src/lib/propertyQueueStorage.js"));
+    expect(workflow).toContain('.eq("creation_source", "pdf_assisted")');
+    expect(workflow).toContain('client.rpc("record_property_pdf_review"');
+    expect(staffActions).toContain("verifyPropertyPdfDraft(createAdminClient(), input, staff.id)");
+    expect(staffActions).not.toMatch(/verify_pdf_draft|\.update\(\{\s*pdf_verified:/);
   });
 });
