@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
+import { isSessionAal2 } from "@/lib/mfaPolicy.mjs";
 import {
   Inbox,
   Mail,
@@ -58,6 +59,7 @@ export default async function ContactQueuePage({ searchParams }) {
   if (!staff || staff.tier < TIERS.OPS_MANAGER) {
     redirect("/dashboard?error=InsufficientTier");
   }
+  if (!isSessionAal2(staff.aal)) redirect("/dashboard/mfa");
 
   const params = await searchParams;
   const currentTab = params?.tab || "all";

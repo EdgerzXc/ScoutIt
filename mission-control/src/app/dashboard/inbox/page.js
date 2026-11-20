@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
+import { isSessionAal2 } from "@/lib/mfaPolicy.mjs";
 import {
   Inbox,
   CheckSquare,
@@ -39,6 +40,7 @@ export default async function MissionInboxPage() {
 
   const admin = createAdminClient();
   const isOps = staff.tier >= TIERS.OPS_MANAGER;
+  const canReadSupport = isOps && isSessionAal2(staff.aal);
 
   const [approvals, verifications, disputes, support, flags, quarantine] = await Promise.all([
     safe(
@@ -65,7 +67,7 @@ export default async function MissionInboxPage() {
         .order("created_at", { ascending: true })
         .limit(6)
     ),
-    isOps
+    canReadSupport
       ? safe(
           admin
             .from("contact_messages")
@@ -144,12 +146,12 @@ export default async function MissionInboxPage() {
     {
       key: "support",
       title: "Direct Support & Helpdesk",
-      subtitle: isOps ? "Public inquiries & VIP Pioneer support tickets awaiting triage" : "Ops Manager access required",
+      subtitle: "Public inquiries & VIP Pioneer support tickets awaiting triage",
       icon: <Headphones className="w-4 h-4 text-sky-400" />,
       href: "/dashboard/contact",
       cta: "Open Support Desk",
       count: support.length,
-      hidden: !isOps,
+      hidden: !canReadSupport,
       items: support.map((s) => ({
         id: s.id,
         primary: s.subject || s.name || "Inbound message",

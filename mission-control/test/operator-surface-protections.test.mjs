@@ -32,3 +32,14 @@ test("sensitive workspace has watermark, print redaction, visibility redaction, 
   assert.match(layout, /SensitiveWorkspaceGuard/);
   assert.doesNotMatch(component, /contextmenu|PrintScreen|selectstart/);
 });
+
+test("private support data requires Ops Manager and AAL2 in the desk and the inbox summary", async () => {
+  const readPage = (route) => readFile(path.join(root, "src", "app", "dashboard", route, "page.js"), "utf8");
+  const [desk, inbox] = await Promise.all([readPage("contact"), readPage("inbox")]);
+
+  assert.match(desk, /staff\.tier < TIERS\.OPS_MANAGER[\s\S]*?if \(!isSessionAal2\(staff\.aal\)\) redirect\("\/dashboard\/mfa"\);[\s\S]*?\.from\("contact_messages"\)/);
+  assert.match(inbox, /const isOps = staff\.tier >= TIERS\.OPS_MANAGER;/);
+  assert.match(inbox, /const canReadSupport = isOps && isSessionAal2\(staff\.aal\);/);
+  assert.match(inbox, /canReadSupport\s*\? safe\(\s*admin\s*\.from\("contact_messages"\)/);
+  assert.match(inbox, /key: "support",[\s\S]*?hidden: !canReadSupport/);
+});
