@@ -56,18 +56,43 @@ describe("public release health", () => {
       services: { api: "healthy", supabase: "healthy", airtable: "configured", redis: "healthy", email: "unconfigured" },
       airtableBudget: budget,
     });
-    expect(fetch).toHaveBeenCalledTimes(1);
-    const [url, options] = vi.mocked(fetch).mock.calls[0];
-    expect(new URL(url).origin).toBe(SUPABASE_URL);
-    expect(options.method).toBe("HEAD");
-    expect(new Headers(options.headers).get("apikey")).toBe("anon-fixture");
+    expect(vi.mocked(fetch).mock.calls.map(([url, options]) => ({
+      origin: new URL(url).origin,
+      path: new URL(url).pathname,
+      method: options.method,
+      key: new Headers(options.headers).get("apikey"),
+      redirect: options.redirect,
+    }))).toEqual([
+      { origin: SUPABASE_URL, path: "/rest/v1/properties", method: "HEAD", key: "anon-fixture", redirect: "error" },
+      { origin: SUPABASE_URL, path: "/rest/v1/contact_messages", method: "HEAD", key: "server-fixture", redirect: "error" },
+    ]);
   });
 
-  it("requires the server credential without sending it to Supabase", async () => {
+  it("reports an unconfigured service credential before making a probe", async () => {
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", undefined);
     const response = await requestHealth();
     expect(response.status).toBe(503);
     expect((await response.json()).services.supabase).toBe("unconfigured");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("fails readiness when the privileged database read is denied", async () => {
+    vi.mocked(fetch).mockImplementation(async (url) => new Response(null, {
+      status: new URL(url).pathname === "/rest/v1/contact_messages" ? 403 : 200,
+      headers: { "x-fixture-secret": "secret-provider-detail" },
+    }));
+    const response = await requestHealth();
+    expect(response.status).toBe(503);
+    const json = await response.json();
+    expect(json.services.supabase).toBe("unhealthy");
+    expect(JSON.stringify(json)).not.toMatch(/server-fixture|anon-fixture|secret-provider-detail|contact_messages/);
+  });
+
+  it.each([configured.SUPABASE_SERVICE_ROLE_KEY, "sb_secret_fixture"])("rejects a privileged public key (%s) before probing", async (key) => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", key);
+    const response = await requestHealth();
+    expect(response.status).toBe(503);
+    expect((await response.json()).services.supabase).toBe("unhealthy");
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -93,6 +118,6 @@ describe("public release health", () => {
       airtableBudget: budget,
     });
     expect(timeout).toHaveBeenCalledWith(2_500);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

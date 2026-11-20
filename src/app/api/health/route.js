@@ -5,21 +5,32 @@ import { getAirtableBudgetStatus } from "@/lib/airtableBudget";
 
 const SUPABASE_PROBE_TIMEOUT_MS = 2_500;
 
+function probeSupabaseTable(url, key, table, signal) {
+  const client = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: (input, options) => fetch(input, { ...options, redirect: "error", cache: "no-store" }) },
+  });
+  return client.from(table)
+    .select("id", { head: true })
+    .limit(1)
+    .retry(false)
+    .abortSignal(signal);
+}
+
 async function probeSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey || !process.env.SUPABASE_SERVICE_ROLE_KEY) return "unconfigured";
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !anonKey || !serviceKey) return "unconfigured";
+  if (anonKey === serviceKey || anonKey.startsWith("sb_secret_")) return "unhealthy";
 
   try {
-    const supabase = createClient(url, anonKey, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-    });
-    const { error } = await supabase.from("properties")
-      .select("id", { head: true })
-      .limit(1)
-      .retry(false)
-      .abortSignal(AbortSignal.timeout(SUPABASE_PROBE_TIMEOUT_MS));
-    return error ? "unhealthy" : "healthy";
+    const signal = AbortSignal.timeout(SUPABASE_PROBE_TIMEOUT_MS);
+    const results = await Promise.all([
+      probeSupabaseTable(url, anonKey, "properties", signal),
+      probeSupabaseTable(url, serviceKey, "contact_messages", signal),
+    ]);
+    return results.every(({ error }) => !error) ? "healthy" : "unhealthy";
   } catch {
     return "unhealthy";
   }
