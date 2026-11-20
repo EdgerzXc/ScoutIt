@@ -10,6 +10,7 @@ const storageCalls = [];
 let auth;
 let draft;
 let recordResult;
+let factsResult;
 let storageAvailable;
 let removeResult;
 
@@ -57,7 +58,7 @@ const serviceClient = {
   },
   async rpc(name, args) {
     dbCalls.push(["rpc", name, args]);
-    return recordResult;
+    return name === "read_property_pdf_review_facts" ? factsResult : recordResult;
   },
 };
 
@@ -84,6 +85,7 @@ describe("staff PDF review", () => {
     auth = { userId: staffId };
     draft = { id: propertyId, owner_id: ownerId, title: "Listing", pipeline_status: "pending", pdf_verified: false, pdf_source_url: sourcePath };
     recordResult = { data: true };
+    factsResult = { data: { title: "Listing", floor_sqm: 24, listing_details: { building_grade: "A" } } };
     storageAvailable = true;
     removeResult = { data: [], error: null };
   });
@@ -110,8 +112,19 @@ describe("staff PDF review", () => {
     draft.details = { floor_sqm: 24, storage_token: "internal" };
     const res = await pdfVerify.GET(request(null, `?propertyId=${propertyId}`));
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ sourceUrl, reviewedDraft: { title: "Listing", floor_sqm: 24 } });
+    expect(await res.json()).toEqual({ sourceUrl, reviewedDraft: factsResult.data });
+    expect(dbCalls).toContainEqual(["rpc", "read_property_pdf_review_facts", {
+      p_property_id: propertyId,
+      p_source_path: sourcePath,
+    }]);
     expect(storageCalls).toContainEqual(["sign", sourcePath, 300, { download: "scoutit-source.pdf" }]);
+  });
+
+  it("does not sign a source when the facts cannot be read for the same draft", async () => {
+    factsResult = { data: null };
+    const res = await pdfVerify.GET(request(null, `?propertyId=${propertyId}`));
+    expect(res.status).toBe(409);
+    expect(storageCalls.some(([op]) => op === "sign")).toBe(false);
   });
 
   it("requires the explicit comparison and a PDF that still exists", async () => {

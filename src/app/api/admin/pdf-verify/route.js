@@ -4,20 +4,11 @@ import { requireAdmin } from "@/lib/adminGuard";
 import { notifyUser } from "@/lib/notifications";
 import { resolveQueueDocument, removeReviewedQueueDocument } from "@/lib/propertyQueueStorage";
 
-const REVIEW_COLUMNS = ["title", "location", "space_category", "price", "description", "media_link"];
-const REVIEW_DETAILS = ["floor_sqm", "lot_sqm", "beds", "baths", "parking"];
-const REVIEW_SELECT = ["id", "owner_id", "type", "pdf_source_url", "pdf_verified", "pipeline_status", "details", ...REVIEW_COLUMNS].join(", ");
+const REVIEW_SELECT = "id, owner_id, title, pdf_source_url, pdf_verified, pipeline_status";
 const NO_STORE = { "Cache-Control": "private, no-store" };
 
 function json(data, status = 200) {
   return NextResponse.json(data, { status, headers: NO_STORE });
-}
-
-function reviewDraft(property) {
-  return Object.fromEntries([
-    ...REVIEW_COLUMNS.map((key) => [key, property[key] ?? null]),
-    ...REVIEW_DETAILS.map((key) => [key, property.details?.[key] ?? null]),
-  ]);
 }
 
 function reviewSource(property) {
@@ -48,12 +39,19 @@ export async function GET(request) {
       const document = reviewSource(draft);
       if (!document) return json({ error: "This draft has no source PDF to review." }, 409);
 
+      const { data: reviewedDraft, error: reviewError } = await supabaseAdmin.rpc("read_property_pdf_review_facts", {
+        p_property_id: draft.id,
+        p_source_path: document.path,
+      });
+      if (reviewError) return json({ error: "Could not load the draft fields." }, 503);
+      if (!reviewedDraft) return json({ error: "That draft changed. Refresh the review queue." }, 409);
+
       const { data, error: signingError } = await supabaseAdmin.storage.from(document.bucket)
         .createSignedUrl(document.path, 300, { download: "scoutit-source.pdf" });
       if (signingError || !data?.signedUrl) {
         return json({ error: "Could not open the source PDF. Refresh the link or check the upload." }, 503);
       }
-      return json({ sourceUrl: data.signedUrl, reviewedDraft: reviewDraft(draft) });
+      return json({ sourceUrl: data.signedUrl, reviewedDraft });
     }
 
     const { data, error } = await supabaseAdmin.from("properties")

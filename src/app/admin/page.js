@@ -18,6 +18,24 @@ import StaffWorkspaceAccess from "@/components/auth/StaffWorkspaceAccess";
 import { sanitizeError } from "@/lib/sanitizeError";
 import InfoTip from "@/components/ui/InfoTip";
 
+function PdfReviewFacts({ reviewedDraft }) {
+  const { listing_details: details = {}, ...summary } = reviewedDraft;
+  return (
+    <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+      {[["summary", summary], ["details", details]].flatMap(([section, facts]) =>
+        Object.entries(facts).map(([key, value]) => (
+          <div key={`${section}-${key}`} className="min-w-0">
+            <dt className="font-mono text-xs uppercase text-text-secondary">{key.replaceAll("_", " ")}</dt>
+            <dd className="break-words">
+              {value == null || value === "" ? "—" : typeof value === "object" ? JSON.stringify(value) : String(value)}
+            </dd>
+          </div>
+        ))
+      )}
+    </dl>
+  );
+}
+
 function AdminPageInner() {
   const [activeTab, setActiveTab] = useState("flags");
   const [pendingProperties, setPendingProperties] = useState([]);
@@ -152,6 +170,7 @@ function AdminPageInner() {
         }),
       });
       const result = await res.json();
+      if (res.status === 409 && !cleanupOnly) setPdfReview(null);
       if (!res.ok) throw new Error(result.error || "Could not record the verification.");
       setPdfReview(null);
       const text = result.cleanupPending
@@ -488,14 +507,7 @@ function AdminPageInner() {
                               onClick={() => setPdfReview((review) => ({ ...review, sourceOpened: true }))}>
                               Download source PDF
                             </a>
-                            <dl className="mt-3 grid gap-2 sm:grid-cols-2">
-                              {Object.entries(pdfReview.reviewedDraft).map(([key, value]) => (
-                                <div key={key} className="min-w-0">
-                                  <dt className="font-mono text-xs uppercase text-text-secondary">{key.replaceAll("_", " ")}</dt>
-                                  <dd>{value == null || value === "" ? "—" : String(value)}</dd>
-                                </div>
-                              ))}
-                            </dl>
+                            <PdfReviewFacts reviewedDraft={pdfReview.reviewedDraft} />
                           </div>
                         )}
                       </div>

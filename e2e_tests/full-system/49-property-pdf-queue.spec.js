@@ -48,12 +48,13 @@ test('owner can submit a PDF, retry the same draft and see when review is needed
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 
-test('staff download the source before confirming and can retry PDF deletion', async ({ context, page, baseURL }) => {
+test('staff must reopen a changed draft before confirming and can retry PDF deletion', async ({ context, page, baseURL }) => {
   test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
   await signInAsMock(page, MOCK_OWNER_EMPTY);
   await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
 
-  const reviewedDraft = { title: 'Staff Review Fixture', floor_sqm: 42 };
+  const reviewedDraft = { title: 'Staff Review Fixture', floor_sqm: 42, listing_details: { building_grade: 'Grade A' } };
+  const revisedDraft = { ...reviewedDraft, listing_details: { building_grade: 'Grade B' } };
   const propertyId = '87998441-6c10-4a24-ac27-5614c6867355';
   const sourceUrl = new URL('/review-fixture.pdf', baseURL).href;
   const attestations = [];
@@ -66,13 +67,14 @@ test('staff download the source before confirming and can retry PDF deletion', a
     const request = route.request();
     if (request.method() === 'POST') {
       attestations.push(request.postDataJSON());
-      return route.fulfill({ json: { success: true, cleanupPending: attestations.length === 1 } });
+      if (attestations.length === 1) return route.fulfill({ status: 409, json: { error: 'The draft changed. Reload it and compare it with the source again.' } });
+      return route.fulfill({ json: { success: true, cleanupPending: attestations.length === 2 } });
     }
     if (new URL(request.url()).searchParams.has('propertyId')) {
-      return route.fulfill({ json: { sourceUrl, reviewedDraft } });
+      return route.fulfill({ json: { sourceUrl, reviewedDraft: attestations.length ? revisedDraft : reviewedDraft } });
     }
     return route.fulfill({ json: {
-      drafts: attestations.length > 1 ? [] : [{ id: propertyId, title: reviewedDraft.title, sourceAttached: true, cleanupPending: attestations.length === 1 }],
+      drafts: attestations.length > 2 ? [] : [{ id: propertyId, title: reviewedDraft.title, sourceAttached: true, cleanupPending: attestations.length === 2 }],
     } });
   });
 
@@ -82,11 +84,22 @@ test('staff download the source before confirming and can retry PDF deletion', a
   const confirm = page.getByRole('button', { name: 'Confirm review and delete PDF' });
   await expect(confirm).toBeDisabled();
   await expect(page.getByText('42', { exact: true })).toBeVisible();
+  await expect(page.getByText('Grade A', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Download source PDF' }).click();
+  await confirm.click();
+  await expect(confirm).toHaveCount(0);
+  await page.getByRole('button', { name: 'Review draft and PDF' }).click();
+  await expect(page.getByText('Grade B', { exact: true })).toBeVisible();
+  await expect(confirm).toBeDisabled();
   await page.getByRole('link', { name: 'Download source PDF' }).click();
   await confirm.click();
   await page.getByRole('button', { name: 'Retry PDF deletion' }).click();
   await expect(page.getByText('No PDF-assisted drafts awaiting verification.', { exact: false })).toBeVisible();
-  expect(attestations).toEqual([{ propertyId, sourceReviewed: true, reviewedDraft }, { propertyId }]);
+  expect(attestations).toEqual([
+    { propertyId, sourceReviewed: true, reviewedDraft },
+    { propertyId, sourceReviewed: true, reviewedDraft: revisedDraft },
+    { propertyId },
+  ]);
 });
 
 test('large property PDFs go directly to private storage', async ({ page, baseURL }) => {
