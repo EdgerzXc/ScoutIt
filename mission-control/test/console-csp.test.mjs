@@ -56,6 +56,11 @@ test("the directives the console actually needs are all present", () => {
   }
 });
 
+test("the console blocks inline event handlers independently of the framework bootstrap", () => {
+  assert.equal(directive("script-src-attr"), "'none'");
+  assert.match(directive("script-src"), /'unsafe-inline'/);
+});
+
 test("the two directives the old policy did have are preserved", () => {
   assert.match(directive("frame-ancestors"), /'none'/);
   assert.match(directive("object-src"), /'none'/);

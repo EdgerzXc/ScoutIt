@@ -9,6 +9,15 @@ async function siteHeaders() {
 describe("Preview CSP evaluation trial", () => {
   afterEach(() => vi.unstubAllEnvs());
 
+  it("blocks script attributes on the enforced policy while keeping the framework bootstrap available", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+    const policy = (await siteHeaders())["Content-Security-Policy"];
+    const directives = policy.split(";").map((directive) => directive.trim());
+    expect(directives).toContain("script-src-attr 'none'");
+    expect(directives.find((directive) => directive.startsWith("script-src "))).toContain("'unsafe-inline'");
+  });
+
   it("reports removal of script evaluation on Preview while keeping the current enforced policy", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "preview");

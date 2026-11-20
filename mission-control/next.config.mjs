@@ -21,6 +21,7 @@ const SUPABASE_ORIGIN = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+  "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline'",
   // Map tiles (Carto), Supabase-hosted property media, and inline data/blob
   // previews. Images cannot execute, so this is the one directive kept broad.

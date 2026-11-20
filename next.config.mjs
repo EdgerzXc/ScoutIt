@@ -7,6 +7,7 @@ const __impeccableLiveDev =
 const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://challenges.cloudflare.com https://va.vercel-scripts.com${__impeccableLiveDev};
+    script-src-attr 'none';
     style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style;
     img-src 'self' blob: data: https://*.supabase.co https://*.airtableusercontent.com https://*.mapbox.com https://events.mapbox.com https://*.cartocdn.com https://*.tile.openstreetmap.org https://services.arcgisonline.com https://browser.dataspace.copernicus.eu https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://picsum.photos https://images.unsplash.com https://randomuser.me;
     font-src 'self' data:;
