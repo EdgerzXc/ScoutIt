@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
+import { simpleModeBootstrap } from "@/lib/themeBootstraps.mjs";
 import {
   REMOVABLE_ROLES,
   ROLE_BEHAVIOUR,
@@ -189,10 +190,9 @@ describe("A-083 phase 0 · the switch mirrors the proven Lite Mode pattern", () 
 
   it("applies the class before first paint, beside the existing Lite script", () => {
     const layout = read("src/app/layout.js");
-    expect(layout).toContain("scoutit_simple_mode");
-    expect(layout).toContain("simple-mode");
-    // No-flash: it must be in the same inline head script region as Lite.
-    expect(layout.indexOf("scoutit_simple_mode")).toBeGreaterThan(-1);
+    expect(layout).toMatch(/<head>[\s\S]*__html: liteModeBootstrap,[\s\S]*__html: simpleModeBootstrap,[\s\S]*<\/head>/);
+    expect(simpleModeBootstrap).toContain("scoutit_simple_mode");
+    expect(simpleModeBootstrap).toContain("simple-mode");
   });
 
   it("is SSR-safe — every reader guards for a missing document", () => {
@@ -227,7 +227,6 @@ describe("A-083 phase 0 · the switch mirrors the proven Lite Mode pattern", () 
   it("defaults to off, so a user who never opens the toggle sees today's product", () => {
     // No stored value and no class means Pro. `isSimpleMode` reads the class,
     // which the head script only adds when the stored value is exactly "1".
-    const layout = read("src/app/layout.js");
-    expect(layout).toMatch(/scoutit_simple_mode[\s\S]{0,120}===\s*['"]1['"]/);
+    expect(simpleModeBootstrap).toMatch(/scoutit_simple_mode[\s\S]{0,120}===\s*['"]1['"]/);
   });
 });

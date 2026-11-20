@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createHash } from "node:crypto";
 
 test("opens password recovery from account sign-in", async ({ page }) => {
   await page.goto("/onboarding");
@@ -100,4 +101,58 @@ test("accepts a valid recovery code after an expired attempt without persisting 
     { path: "/auth/v1/logout" },
   ]);
   expect(await page.evaluate(() => Object.keys(localStorage).filter(key => key.includes("auth-token") || key.includes("password-recovery")))).toEqual([]);
+});
+
+test("enters recovery in a fresh document with a private nonce policy", async ({ page, baseURL }) => {
+  test.skip(
+    process.env.SCOUTIT_E2E_PREVIEW_CSP !== "1" || !["localhost", "127.0.0.1"].includes(new URL(baseURL).hostname),
+    "Requires the localhost Preview policy fixture",
+  );
+
+  await page.addInitScript(() => {
+    localStorage.setItem("scoutit_lite_mode", "1");
+    localStorage.setItem("scoutit_simple_mode", "1");
+    localStorage.setItem("scoutit_display_mode", "high-contrast");
+    window.recoveryCspViolations = [];
+    document.addEventListener("securitypolicyviolation", (event) => {
+      if (event.disposition === "enforce") window.recoveryCspViolations.push(event.effectiveDirective);
+    });
+  });
+  await page.route("https://challenges.cloudflare.com/**", (route) => route.fulfill({
+    contentType: "application/javascript",
+    body: "globalThis.turnstile = { render(_node, options) { queueMicrotask(() => options.callback('fixture-captcha')); return 'captcha'; }, reset() {}, remove() {} }; globalThis.onTurnstileLoad?.();",
+  }));
+
+  const signIn = await page.goto("/onboarding");
+  expect(signIn.headers()["content-security-policy"]).not.toContain("'strict-dynamic'");
+  const recoveryDocument = page.waitForResponse((response) =>
+    response.request().resourceType() === "document" && new URL(response.url()).pathname === "/reset-password",
+  );
+  await page.getByRole("link", { name: "Forgot password?" }).click();
+  const recovery = await recoveryDocument;
+  expect(recovery.headers()["referrer-policy"]).toBe("no-referrer");
+  expect(recovery.headers()["cache-control"]).toMatch(/private.*no-store/);
+  const policy = recovery.headers()["content-security-policy"];
+  const scriptSrc = policy.split(";").find((line) => line.trim().startsWith("script-src "));
+  const nonce = scriptSrc.match(/'nonce-([^']+)'/)[1];
+  expect(Buffer.from(nonce, "base64")).toHaveLength(16);
+  expect(scriptSrc).toContain("'strict-dynamic'");
+  expect(scriptSrc).not.toMatch(/'unsafe-(inline|eval)'/);
+
+  await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
+  await expect(page.locator("html")).toHaveClass(/\blite-mode\b/);
+  await expect(page.locator("html")).toHaveClass(/\bsimple-mode\b/);
+  await expect(page.locator("body")).toHaveClass(/\bhigh-contrast\b/);
+  const scripts = await page.locator('script:not([src]):not([type="application/ld+json"])').evaluateAll((elements) =>
+    elements.map(({ nonce, textContent }) => ({ nonce, textContent })),
+  );
+  expect(scripts.some((script) => script.nonce === nonce)).toBe(true);
+  for (const script of scripts.filter((script) => !script.nonce)) {
+    expect(scriptSrc).toContain("'sha256-" + createHash("sha256").update(script.textContent).digest("base64") + "'");
+  }
+  await expect(page.getByRole("button", { name: "Email a reset code" })).toBeEnabled();
+  expect(await page.evaluate(() => window.recoveryCspViolations)).toEqual([]);
+
+  const reloaded = await page.reload();
+  expect(reloaded.headers()["content-security-policy"]).not.toContain(`'nonce-${nonce}'`);
 });

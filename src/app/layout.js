@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { displayModeBootstrap, liteModeBootstrap, simpleModeBootstrap } from "@/lib/themeBootstraps.mjs";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
@@ -99,8 +100,7 @@ export default function RootLayout({ children }) {
             for reduced motion; otherwise reads the stored preference. */}
         <script
           dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var v=localStorage.getItem('scoutit_lite_mode');var on;if(v===null){var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;var mem=navigator.deviceMemory||8;var cores=navigator.hardwareConcurrency||8;var conn=(navigator.connection||{}).effectiveType||'4g';var weakPhone=window.matchMedia('(pointer: coarse)').matches&&(mem<=4||cores<=4||conn==='2g'||conn==='slow-2g'||conn==='3g');on=reduced||weakPhone;}else{on=(v==='1');}if(on)document.documentElement.classList.add('lite-mode');}catch(e){}})();",
+            __html: liteModeBootstrap,
           }}
         />
 
@@ -112,8 +112,7 @@ export default function RootLayout({ children }) {
             product, unchanged, forever. */}
         <script
           dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{if(localStorage.getItem('scoutit_simple_mode')==='1')document.documentElement.classList.add('simple-mode');}catch(e){}})();",
+            __html: simpleModeBootstrap,
           }}
         />
       </head>
@@ -129,8 +128,7 @@ export default function RootLayout({ children }) {
             no-op instead of a re-flash. Dark users get nothing added. */}
         <script
           dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var m=localStorage.getItem('scoutit_display_mode');if(!m){m=localStorage.getItem('scoutit_accessibility_mode')==='high-contrast'?'high-contrast':null;}var b=document.body;if(!b)return;if(m==='high-contrast')b.classList.add('high-contrast');else if(m==='light')b.classList.add('light-mode');}catch(e){}})();",
+            __html: displayModeBootstrap,
           }}
         />
 

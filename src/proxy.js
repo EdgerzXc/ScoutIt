@@ -3,6 +3,7 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { isQuestItPath, shouldBlockQuestIt } from '@/lib/questItGate';
 import { isSensitivePath, rateLimitTier } from '@/lib/sensitiveRoutes';
+import { recoveryContentSecurityPolicy } from '@/lib/siteContentSecurityPolicy.mjs';
 
 // ── Rate limiting (B4) ──────────────────────────────────────────────────────
 // Sensitive routes (auth, uploads, AI) FAIL CLOSED when the limiter is
@@ -126,11 +127,24 @@ function isExemptFromMaintenance(pathname) {
 }
 
 export async function proxy(request, event) {
+  const path = request.nextUrl.pathname;
+  if (path === '/reset-password') {
+    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'preview' || request.headers.get('rsc') === '1') {
+      return NextResponse.next();
+    }
+    const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
+    const policy = recoveryContentSecurityPolicy(nonce);
+    const headers = new Headers(request.headers);
+    headers.set('Content-Security-Policy', policy);
+    const response = NextResponse.next({ request: { headers } });
+    response.headers.set('Content-Security-Policy', policy);
+    return response;
+  }
+
   // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
   // GAP-13: Parse first IP if x-forwarded-for contains comma-separated chain
   const rawIp = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
   const ip = rawIp.split(',')[0].trim();
-  const path = request.nextUrl.pathname;
   const sensitive = isSensitivePath(path);
   const questItPath = isQuestItPath(path);
 
@@ -224,7 +238,7 @@ export async function proxy(request, event) {
 }
 
 export const config = {
-  matcher: '/api/:path*',
+  matcher: ['/api/:path*', '/reset-password'],
 };
 
 export async function checkGlobalReadOnly() {

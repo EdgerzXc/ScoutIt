@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { contentSecurityPolicy } from "@/lib/siteContentSecurityPolicy.mjs";
 
 const nextConfig = readFileSync("next.config.mjs", "utf8");
 
@@ -35,13 +36,13 @@ describe("A-055 transport security headers", () => {
     const commandLens = readFileSync("src/components/maps/lenses/command.js", "utf8");
     const tileUrl = commandLens.match(/https:\/\/[^"\s]+\/World_Imagery\/MapServer\/tile\/[^"\s]+/);
     expect(tileUrl).not.toBeNull();
-    const connect = nextConfig.match(/connect-src\s+([^;]+)/);
+    const connect = contentSecurityPolicy.match(/connect-src\s+([^;]+)/);
     expect(connect).not.toBeNull();
     expect(connect[1].split(/\s+/)).toContain(new URL(tileUrl[0]).origin);
   });
 
   it("allows external video providers in frame-src", () => {
-    const frame = nextConfig.match(/frame-src\s+([^;]+)/);
+    const frame = contentSecurityPolicy.match(/frame-src\s+([^;]+)/);
     expect(frame).not.toBeNull();
     const frameSources = frame[1].split(/\s+/);
     expect(frameSources).toContain("https://www.youtube.com");
@@ -50,7 +51,7 @@ describe("A-055 transport security headers", () => {
   });
 
   it("allows randomuser.me in img-src for directory mock portraits", () => {
-    const imgSrc = nextConfig.match(/img-src\s+([^;]+)/);
+    const imgSrc = contentSecurityPolicy.match(/img-src\s+([^;]+)/);
     expect(imgSrc).not.toBeNull();
     const sources = imgSrc[1].split(/\s+/);
     expect(sources).toContain("https://randomuser.me");

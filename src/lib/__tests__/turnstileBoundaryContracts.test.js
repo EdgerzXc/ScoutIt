@@ -1,11 +1,12 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { contentSecurityPolicy } from "@/lib/siteContentSecurityPolicy.mjs";
 
 const read = (file) => readFileSync(resolve(process.cwd(), file), "utf8");
 
 describe("Turnstile production boundaries", () => {
   it("allows only Cloudflare's documented challenge origin in script and frame CSP", () => {
-    const config = read("next.config.mjs");
+    const config = contentSecurityPolicy;
     const cloudflareOrigin = "https://challenges.cloudflare.com";
 
     const scriptSource = config.match(/script-src ([^;]+);/)?.[1] || "";

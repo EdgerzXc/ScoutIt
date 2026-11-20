@@ -129,7 +129,7 @@ describe("/api/telemetry/device", () => {
 
   it("keeps telemetry under the centralized API rate limiter", () => {
     const proxy = readFileSync(resolve(process.cwd(), "src/proxy.js"), "utf8");
-    expect(proxy).toContain("matcher: '/api/:path*'");
+    expect(proxy).toMatch(/matcher:\s*\[[^\]]*'\/api\/:path\*'/);
     expect(proxy).toContain("Ratelimit.slidingWindow(30, '10 s')");
   });
 
