@@ -41,15 +41,15 @@ export default function GoogleAnalytics() {
       previousConsent.current = granted;
       window[`ga-disable-${gaId}`] = !granted;
 
-      if (granted) {
-        if (!initialized.current) {
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
-          window.gtag("consent", "default", { ...AD_CONSENT, analytics_storage: "denied" });
-          window.gtag("js", new Date());
-          initialized.current = true;
-        }
-        window.gtag("consent", "update", { ...AD_CONSENT, analytics_storage: "granted" });
+      if (granted && !initialized.current) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
+        window.gtag("consent", "default", { ...AD_CONSENT, analytics_storage: "denied" });
+        window.gtag("js", new Date());
+        initialized.current = true;
+      }
+      if (initialized.current) {
+        window.gtag("consent", "update", { ...AD_CONSENT, analytics_storage: granted ? "granted" : "denied" });
       }
       setEnabled(granted);
     }

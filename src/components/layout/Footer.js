@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ScoutItWordmark from "@/components/brand/ScoutItWordmark";
 import ScoutItMark from "@/components/brand/ScoutItMark";
+import { CookieSettings } from "@/components/analytics/CookieConsent";
 
 // ═══════════════════════════════════════════════════════════════
 // SOCIAL LINKS — icons kept, URLs deliberately empty.
@@ -181,6 +182,7 @@ export default function Footer() {
             <Link href="/privacy">Privacy Policy</Link>
             <span className="meta-separator">•</span>
             <Link href="/contact">Contact</Link>
+            <CookieSettings />
           </div>
         </div>
       </div>
@@ -410,6 +412,7 @@ export default function Footer() {
 
         .footer-meta-links {
           display: flex;
+          flex-wrap: wrap;
           align-items: center;
           gap: 10px;
           font-family: var(--font-mono), monospace;
@@ -424,6 +427,72 @@ export default function Footer() {
 
         .footer-meta-links a:hover {
           color: var(--accent-bright);
+        }
+
+        .cookie-settings-trigger,
+        .cookie-settings-actions button {
+          min-height: 44px;
+          border: 1px solid var(--border-solid);
+          border-radius: 6px;
+          background: transparent;
+          color: var(--text-primary);
+          font: 12px var(--font-mono);
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          padding: 8px 12px;
+          cursor: pointer;
+        }
+
+        .cookie-settings-trigger {
+          border-color: transparent;
+          color: var(--text-secondary);
+        }
+
+        .cookie-settings-trigger:hover,
+        .cookie-settings-actions button:hover {
+          color: var(--accent-bright);
+        }
+
+        .cookie-settings-trigger:focus-visible,
+        .cookie-settings-actions button:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+
+        .cookie-settings-panel {
+          box-sizing: border-box;
+          width: min(calc(100% - 32px), 440px);
+          max-height: calc(100% - 32px);
+          margin: auto;
+          overflow: auto;
+          padding: 20px;
+          border: 1px solid var(--border-solid);
+          border-radius: 8px;
+          background: var(--surface);
+          color: var(--text-primary);
+        }
+
+        .cookie-settings-panel::backdrop {
+          background: rgba(var(--bg-rgb), 0.72);
+        }
+
+        .cookie-settings-panel h2 {
+          margin: 0 0 8px;
+          font: 700 16px var(--font-mono);
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .cookie-settings-panel p {
+          margin: 0 0 16px;
+          color: var(--text-secondary);
+          font: 14px/1.5 var(--font-body);
+        }
+
+        .cookie-settings-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
         }
 
         .meta-separator {

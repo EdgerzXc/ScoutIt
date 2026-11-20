@@ -150,6 +150,58 @@ test.describe("A-083 first-visit presentation choice", () => {
     await expect(chooser).toBeVisible();
   });
 
+  for (const width of [1280, 390]) {
+    test(`${width}px Cookie settings can withdraw Analytics across open tabs`, async ({ page, context }) => {
+      const gaId = "G-TEST000000";
+      test.skip(process.env.NEXT_PUBLIC_GA_ID !== gaId, "Requires the CI test GA ID baked into the build");
+      await context.route("https://www.googletagmanager.com/gtag/js?**", (route) => route.fulfill({
+        contentType: "application/javascript",
+        body: "window.scoutitSyntheticTagLoaded = true;",
+      }));
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/about");
+      const trigger = page.getByRole("button", { name: "Cookie settings" });
+      const dialog = page.getByRole("dialog", { name: "Cookie settings" });
+      await trigger.focus();
+      await page.keyboard.press("Enter");
+      await expect(dialog.getByText(/Google Analytics is off/)).toBeVisible();
+      await expect(dialog.getByRole("button", { name: "Cancel" })).toBeFocused();
+      await dialog.getByRole("button", { name: "Allow Analytics" }).click();
+      await page.waitForFunction(() => window.scoutitSyntheticTagLoaded === true);
+      await expect(trigger).toBeFocused();
+
+      const otherTab = await context.newPage();
+      await otherTab.goto(page.url());
+      await otherTab.waitForFunction(() => window.scoutitSyntheticTagLoaded === true);
+      await trigger.click();
+      await expect(dialog.getByText(/Google Analytics is on/)).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeFocused();
+      expect(await page.evaluate((id) => window[`ga-disable-${id}`], gaId)).toBe(false);
+
+      await trigger.click();
+      await dialog.getByRole("button", { name: "Turn off Analytics" }).click();
+      await expect(dialog).toBeHidden();
+      for (const tab of [page, otherTab]) {
+        await tab.waitForFunction((id) => window[`ga-disable-${id}`] === true, gaId);
+        const lastConsent = await tab.evaluate(() =>
+          Array.from(window.dataLayer).filter((entry) => entry[0] === "consent").at(-1)?.[2]?.analytics_storage);
+        expect(lastConsent).toBe("denied");
+      }
+
+      await page.reload();
+      await page.waitForFunction((id) => window[`ga-disable-${id}`] === true, gaId);
+      expect(await page.evaluate(() => window.scoutitSyntheticTagLoaded)).toBeUndefined();
+      await trigger.click();
+      await expect(dialog.getByText(/Google Analytics is off/)).toBeVisible();
+      await expect(dialog).toBeInViewport();
+      await dialog.getByRole("button", { name: "Cancel" }).click();
+      await expect(dialog).toBeHidden();
+      await otherTab.close();
+    });
+  }
+
   test("the chooser's rendered text meets the contrast gate", async ({ page }) => {
     await freshVisit(page);
     const chooser = page.getByRole("dialog", { name: "Choose your view" });

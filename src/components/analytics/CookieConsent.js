@@ -1,18 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
+  COOKIE_CONSENT_DENIED,
+  COOKIE_CONSENT_GRANTED,
   COOKIE_CONSENT_KEY,
   getCookieConsent,
   setCookieConsent,
 } from "@/lib/cookieConsent";
+
+const CONSENT_CHOSEN_EVENT = "scoutit:cookie-consent-chosen";
+
+function saveChoice(value) {
+  setCookieConsent(value);
+  window.dispatchEvent(new Event(CONSENT_CHOSEN_EVENT));
+}
+
+export function CookieSettings() {
+  const dialog = useRef(null);
+  const dialogId = useId();
+  const headingId = useId();
+  const descriptionId = useId();
+  const [choice, setChoice] = useState(COOKIE_CONSENT_DENIED);
+
+  if (!process.env.NEXT_PUBLIC_GA_ID) return null;
+
+  function openSettings(event) {
+    setChoice(getCookieConsent());
+    event.currentTarget.focus();
+    dialog.current.showModal();
+  }
+
+  function applyChoice(event) {
+    const { returnValue } = event.currentTarget;
+    event.currentTarget.returnValue = "";
+    if (returnValue === COOKIE_CONSENT_GRANTED || returnValue === COOKIE_CONSENT_DENIED) {
+      saveChoice(returnValue);
+    }
+  }
+
+  return (
+    <>
+      <button type="button" className="cookie-settings-trigger" aria-haspopup="dialog" aria-controls={dialogId} onClick={openSettings}>
+        Cookie settings
+      </button>
+      <dialog
+        ref={dialog}
+        id={dialogId}
+        className="cookie-settings-panel"
+        aria-labelledby={headingId}
+        aria-describedby={descriptionId}
+        onClose={applyChoice}
+      >
+        <h2 id={headingId}>Cookie settings</h2>
+        <p id={descriptionId}>
+          Google Analytics is {choice === COOKIE_CONSENT_GRANTED ? "on" : "off"} on this browser.
+          Turning it off stops ScoutIt sending future visits to Google Analytics.
+        </p>
+        <form method="dialog" className="cookie-settings-actions">
+          <button type="submit" value={COOKIE_CONSENT_DENIED}>Turn off Analytics</button>
+          <button type="submit" value={COOKIE_CONSENT_GRANTED}>Allow Analytics</button>
+          <button type="submit" value="" autoFocus>Cancel</button>
+        </form>
+      </dialog>
+    </>
+  );
+}
 
 export default function CookieConsent() {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!gaId || getCookieConsent() === "granted") return;
+    if (!gaId) return;
     // No stored choice yet — but only ask once the key is truly absent, so a
     // stored denial never re-prompts.
     try {
@@ -20,15 +80,19 @@ export default function CookieConsent() {
     } catch {
       setVisible(true);
     }
+    const hideBanner = () => setVisible(false);
+    const syncChoice = (event) => {
+      if (event.key === COOKIE_CONSENT_KEY && event.newValue) hideBanner();
+    };
+    window.addEventListener(CONSENT_CHOSEN_EVENT, hideBanner);
+    window.addEventListener("storage", syncChoice);
+    return () => {
+      window.removeEventListener(CONSENT_CHOSEN_EVENT, hideBanner);
+      window.removeEventListener("storage", syncChoice);
+    };
   }, [gaId]);
 
   if (!gaId || !visible) return null;
-
-  const choose = (granted) => {
-    setCookieConsent(granted ? "granted" : "denied");
-    setVisible(false);
-    window.dispatchEvent(new Event("scoutit:cookie-consent-chosen"));
-  };
 
   return (
     <div
@@ -79,7 +143,7 @@ export default function CookieConsent() {
       <div style={{ display: "flex", gap: 10 }}>
         <button
           type="button"
-          onClick={() => choose(false)}
+          onClick={() => saveChoice(COOKIE_CONSENT_DENIED)}
           style={{
             flex: 1,
             background: "transparent",
@@ -98,7 +162,7 @@ export default function CookieConsent() {
         </button>
         <button
           type="button"
-          onClick={() => choose(true)}
+          onClick={() => saveChoice(COOKIE_CONSENT_GRANTED)}
           style={{
             flex: 1,
             background: "var(--accent-fill, var(--accent))",
