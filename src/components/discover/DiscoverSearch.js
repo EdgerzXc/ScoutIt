@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Search, X, MapPin, ArrowRight, SlidersHorizontal } from "lucide-react";
 
-import SpatialIntelMap from "@/components/intel/SpatialIntelMap";
 import SampleIntelDisclosure from "@/components/intel/SampleIntelDisclosure";
+import InViewport from "@/components/ui/InViewport";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import {
   ARTICLES,
@@ -37,6 +38,15 @@ import { loadPublicCatalog } from "@/lib/cms/publicCatalog";
 const RADIUS_MIN = 1;
 const RADIUS_MAX = 80;
 const DEFAULT_RADIUS = 12;
+
+function SearchMapPlaceholder() {
+  return <div className="dsc-map-placeholder" role="status">Loading search map…</div>;
+}
+
+const SpatialIntelMap = dynamic(() => import("@/components/intel/SpatialIntelMap"), {
+  ssr: false,
+  loading: SearchMapPlaceholder,
+});
 
 /** Live CMS articles may predate the two-axis schema. Normalise defensively. */
 function normalizeArticle(raw) {
@@ -258,22 +268,24 @@ export default function DiscoverSearch() {
 
       {/* ── Map + results, side by side on desktop ── */}
       <div className="dsc-body">
-        <div className="dsc-map">
-          <SpatialIntelMap
-            articles={articles}
-            mode="search"
-            selectedCity={selectedCity}
-            onSelectCity={setSelectedCity}
-            radiusKm={radar ? radar.radiusKm : null}
-            center={radar}
-            onRadarChange={(next) =>
-              setRadar((r) => ({
-                radiusKm: r ? r.radiusKm : DEFAULT_RADIUS,
-                ...next,
-              }))
-            }
-            height={430}
-          />
+        <section className="dsc-map" aria-label="Search map" tabIndex={0}>
+          <InViewport className="dsc-map-frame" rootMargin="160px 0px" fallback={<SearchMapPlaceholder />}>
+            <SpatialIntelMap
+              articles={articles}
+              mode="search"
+              selectedCity={selectedCity}
+              onSelectCity={setSelectedCity}
+              radiusKm={radar ? radar.radiusKm : null}
+              center={radar}
+              onRadarChange={(next) =>
+                setRadar((r) => ({
+                  radiusKm: r ? r.radiusKm : DEFAULT_RADIUS,
+                  ...next,
+                }))
+              }
+              height={430}
+            />
+          </InViewport>
 
           {radar ? (
             <div className="dsc-radar">
@@ -303,7 +315,7 @@ export default function DiscoverSearch() {
               </button>
             </div>
           ) : null}
-        </div>
+        </section>
 
         <div className="dsc-results">
           <div className="dsc-results-head">

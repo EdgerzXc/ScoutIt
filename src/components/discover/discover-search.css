@@ -266,6 +266,22 @@
   min-width: 0;
 }
 
+.dsc-map-frame {
+  min-height: 518px;
+}
+
+.dsc-map-placeholder {
+  display: grid;
+  min-height: inherit;
+  place-items: center;
+  border: 1px solid var(--dsc-hairline);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
 /* ── RADAR CONTROL ──────────────────────────────────────────────── */
 .dsc-radar {
   display: flex;

@@ -269,7 +269,7 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
               <h1 className="discoverTitle">{matchedCategory}</h1>
             </div>
             <div className="modeJumpGroup">
-              <Link href="/intel" className="modeJumpBox">
+              <Link href="/intel" prefetch={false} className="modeJumpBox">
                 <span className="jumpHere">Discover</span>
                 <span className="jumpArrow">→</span>
                 <span className="jumpThere">News &amp; Intelligence</span>

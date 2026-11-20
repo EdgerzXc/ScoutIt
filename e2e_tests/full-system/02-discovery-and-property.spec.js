@@ -5,6 +5,55 @@ import { test, expect } from '@playwright/test';
 import { trackErrors, expectRealContent, gotoAndSettle, openYourMove } from './helpers';
 
 test.describe('Discovery engine', () => {
+  test('loads the Discover map on approach and keeps the radar controls usable', async ({ page }) => {
+    const size = page.viewportSize();
+    await page.setViewportSize({ width: size.width, height: 400 });
+    const styleRequests = [];
+    const intelPrefetches = [];
+    page.on('request', (request) => {
+      if (new URL(request.url()).pathname === '/intel' && request.headers()['next-router-prefetch']) {
+        intelPrefetches.push(request.url());
+      }
+    });
+    await page.route('https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', (route) => {
+      styleRequests.push(route.request().url());
+      return route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: {
+        version: 8,
+        sources: {},
+        layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#121212' } }],
+        glyphs: 'https://basemaps.cartocdn.com/gl/fonts/{fontstack}/{range}.pbf',
+      } });
+    });
+    await page.goto('/discover');
+    const map = page.locator('.dsc-map');
+    const before = await map.boundingBox();
+    expect(before.y).toBeGreaterThan(560);
+    await expect(map.locator('.spatial-intel-map-card')).toHaveCount(0);
+    expect(styleRequests).toHaveLength(0);
+    expect(intelPrefetches).toHaveLength(0);
+
+    await page.getByRole('button', { name: 'Filters', exact: true }).focus();
+    await page.keyboard.press('Tab');
+    await expect(map).toBeFocused();
+    await map.scrollIntoViewIfNeeded();
+    const pin = map.getByRole('button', { name: 'Drop pin at map center' });
+    await expect(pin).toBeEnabled({ timeout: 15000 });
+    expect(styleRequests).toHaveLength(1);
+    expect(Math.abs((await map.boundingBox()).height - before.height)).toBeLessThanOrEqual(8);
+
+    await pin.press('Enter');
+    const radius = map.getByRole('slider', { name: 'Radar radius in kilometers' });
+    await expect(radius).toHaveValue('12');
+    await radius.press('ArrowRight');
+    await expect(radius).toHaveValue('13');
+    await map.getByRole('button', { name: 'Clear pin' }).click();
+    await expect(radius).toHaveCount(0);
+    await expect(pin).toBeEnabled();
+
+    await page.getByRole('link', { name: /Discover.*News & Intelligence/i }).click();
+    await expect(page).toHaveURL(/\/intel$/);
+  });
+
   test('keeps Discover search in sync with browser history', async ({ page }) => {
     await page.goto('/discover?q=Makati');
     const search = page.getByRole('searchbox', { name: 'Search intel' });
