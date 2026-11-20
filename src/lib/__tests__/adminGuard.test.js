@@ -30,7 +30,10 @@ const req = (token) =>
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
-const signedIn = () => getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+const signedIn = (aal) => {
+  getUser.mockResolvedValue({ data: { user: { id: 'u1', factors: aal ? [{ status: 'verified' }] : [] } }, error: null });
+  if (aal) getClaims.mockResolvedValue({ data: { claims: { sub: 'u1', aal } }, error: null });
+};
 const profile = (p) => maybeSingle.mockResolvedValue({ data: p, error: null });
 
 describe('requireAdmin', () => {
@@ -56,6 +59,7 @@ describe('requireAdmin', () => {
     ['Bearer    ', 'scheme with only whitespace'],
     ['sometoken', 'no scheme at all'],
     ['Basic abc123', 'wrong scheme'],
+    ['Bearer abc 123', 'multiple token parts'],
   ])('denies %s (%s) without attempting a session lookup', async (headerValue) => {
     const r = await requireAdmin(
       new Request('https://www.scoutit.space/api/admin/osint', {
@@ -71,12 +75,32 @@ describe('requireAdmin', () => {
     expect((await requireAdmin(req('t'))).status).toBe(401);
   });
 
-  it('denies an enrolled actor below AAL2 before reading their staff role', async () => {
-    getUser.mockResolvedValue({ data: { user: { id: 'u1', factors: [{ status: 'verified' }] } }, error: null });
-    getClaims.mockResolvedValue({ data: { claims: { sub: 'u1', aal: 'aal1' } }, error: null });
+  it('requires an enrolled staff member to verify their authenticator', async () => {
+    signedIn('aal1');
+    profile({ role: 'admin' });
 
-    await expect(requireAdmin(req('t'))).resolves.toEqual({ error: 'Verify your authenticator to continue', status: 403 });
-    expect(maybeSingle).not.toHaveBeenCalled();
+    await expect(requireAdmin(req('t'))).resolves.toEqual({
+      error: 'Verify your authenticator to continue', code: 'mfa_required', status: 403,
+    });
+    expect(getUser).toHaveBeenCalledWith('t');
+    expect(getClaims).toHaveBeenCalledWith('t');
+  });
+
+  it('requires enrollment when a staff member has no currently verified factor', async () => {
+    signedIn();
+    profile({ role: 'staff' });
+
+    await expect(requireAdmin(req('t'))).resolves.toEqual({
+      error: 'Set up an authenticator to use staff tools', code: 'mfa_enrollment_required', status: 403,
+    });
+    expect(getClaims).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when staff assurance is unavailable', async () => {
+    signedIn('aal2');
+    profile({ role: 'admin' });
+    getClaims.mockRejectedValueOnce(new Error('provider unavailable'));
+    expect((await requireAdmin(req('t'))).status).toBe(503);
   });
 
   it('fails closed with 503 when the identity service is unavailable', async () => {
@@ -92,6 +116,8 @@ describe('requireAdmin', () => {
     const r = await requireAdmin(req('t'));
     expect(r.status).toBe(403);
     expect(r.user).toBeUndefined();
+    expect(r.code).toBeUndefined();
+    expect(getClaims).not.toHaveBeenCalled();
   });
 
   it('denies when the profile row is missing — a lookup miss is not a pass', async () => {
@@ -119,7 +145,7 @@ describe('requireAdmin', () => {
   });
 
   it('allows admin via the singular `role` column', async () => {
-    signedIn();
+    signedIn('aal2');
     profile({ role: 'admin', active_roles: [] });
 
     const r = await requireAdmin(req('t'));
@@ -128,7 +154,7 @@ describe('requireAdmin', () => {
   });
 
   it('allows staff via the `active_roles` array', async () => {
-    signedIn();
+    signedIn('aal2');
     profile({ role: 'owner', active_roles: ['owner', 'staff'] });
     expect((await requireAdmin(req('t'))).userId).toBe('u1');
   });
@@ -138,7 +164,7 @@ describe('requireAdmin', () => {
   // check `role`. Failing one and passing the other is how a staff member
   // ends up able to use half the console.
   it('allows staff whose singular role is admin but array is empty, and vice versa', async () => {
-    signedIn();
+    signedIn('aal2');
     profile({ role: 'staff', active_roles: null });
     expect((await requireAdmin(req('t'))).userId).toBe('u1');
   });

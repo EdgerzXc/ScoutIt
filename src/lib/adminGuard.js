@@ -37,7 +37,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
+import { getWorkspaceAssuranceError } from "@/lib/workspaceRequestAuth";
 
 /** Roles that may act on staff-only surfaces. */
 const STAFF_ROLES = ["admin", "staff"];
@@ -65,7 +65,7 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
   // hole — but "garbage in, rejected two network hops later" is not a gate, and
   // a caught test is cheaper than a trusted accident.
   const raw = (request.headers.get("Authorization") || "").trim();
-  const token = /^Bearer\s+(.+)$/i.exec(raw)?.[1]?.trim();
+  const token = /^Bearer\s+(\S+)$/i.exec(raw)?.[1];
   if (!token) return { error: "Unauthorized: Missing token", status: 401 };
 
   if (!supabaseAdmin) {
@@ -75,17 +75,19 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
     return { error: "Service unavailable", status: 503 };
   }
 
-  const authClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-  const authResult = await getVerifiedWorkspaceUser(authClient, token);
+  let authClient;
+  let authResult;
+  try {
+    authClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    authResult = await authClient.auth.getUser(token);
+  } catch {
+    return { error: "Could not verify staff access", status: 503 };
+  }
   const user = authResult?.data?.user;
   if (authResult?.error?.name === "AuthRetryableFetchError" || Number(authResult?.error?.status) >= 500) {
     return { error: "Could not verify staff access", status: 503 };
-  }
-  if (authResult?.error?.code === "mfa_required") {
-    return { error: "Verify your authenticator to continue", status: 403 };
   }
   if (authResult?.error || !user) return { error: "Unauthorized: Invalid session", status: 401 };
 
@@ -108,9 +110,20 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
     STAFF_ROLES.includes(profile.role) || roles.some((r) => STAFF_ROLES.includes(r));
 
   if (!isStaff) {
-    console.warn(`[${label}] Unauthorized access attempt by user ${user.id}`);
     return { error: "Unauthorized: Admin privileges required", status: 403 };
   }
+
+  const assuranceError = await getWorkspaceAssuranceError(authClient, token, user);
+  if (assuranceError?.code === "mfa_enrollment_required") {
+    return { error: "Set up an authenticator to use staff tools", code: assuranceError.code, status: 403 };
+  }
+  if (assuranceError?.code === "mfa_required") {
+    return { error: "Verify your authenticator to continue", code: assuranceError.code, status: 403 };
+  }
+  if (assuranceError?.name === "AuthRetryableFetchError" || Number(assuranceError?.status) >= 500) {
+    return { error: "Could not verify staff access", status: 503 };
+  }
+  if (assuranceError) return { error: "Unauthorized: Invalid session", status: 401 };
 
   return { user, userId: user.id };
 }

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useDashboard } from "@/context/DashboardContext";
+import { normalizePrivateReturnPath } from "@/lib/authReturnPath";
 
 export function useStaffRead(path) {
   const { authedFetch, currentUser } = useDashboard();
@@ -17,7 +19,10 @@ export function useStaffRead(path) {
       let value;
       try {
         const response = await authedFetch(path, { cache: "no-store", signal: controller.signal });
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 403) {
+          const { code } = await response.json().catch(() => ({}));
+          value = { status: code === "mfa_enrollment_required" || code === "mfa_required" ? code : "denied" };
+        } else if (response.status === 401) {
           value = { status: "denied" };
         } else if (response.ok) {
           value = { status: "ready", data: await response.json() };
@@ -38,6 +43,8 @@ export function useStaffRead(path) {
 }
 
 export function StaffAccessState({ status, retry }) {
+  const pathname = usePathname();
+  const returnPath = normalizePrivateReturnPath(pathname, "/admin");
   return (
     <main className="min-h-dvh bg-background text-on-surface grid place-items-center p-6">
       <div className="max-w-md text-center space-y-4">
@@ -45,6 +52,18 @@ export function StaffAccessState({ status, retry }) {
           <p role="status">Checking staff access…</p>
         ) : status === "denied" ? (
           <h1 className="text-2xl font-display">Staff access required</h1>
+        ) : status === "mfa_enrollment_required" ? (
+          <>
+            <h1 className="text-2xl font-display">Set up an authenticator</h1>
+            <p className="text-text-secondary">Staff tools require two-factor authentication. Set up your authenticator in Settings, then return here.</p>
+            <Link href="/settings#security" className="inline-flex min-h-11 items-center px-3 text-accent underline">Open security settings</Link>
+          </>
+        ) : status === "mfa_required" ? (
+          <>
+            <h1 className="text-2xl font-display">Verify your authenticator</h1>
+            <p className="text-text-secondary">Enter a code from your authenticator app to continue to the staff workspace.</p>
+            <Link href={`/onboarding?next=${encodeURIComponent(returnPath)}`} className="inline-flex min-h-11 items-center px-3 text-accent underline">Verify and return</Link>
+          </>
         ) : (
           <>
             <h1 role="alert" className="text-2xl font-display">Could not load the staff workspace</h1>
