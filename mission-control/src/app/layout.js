@@ -1,4 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { connection } from "next/server";
+import { useConsoleScriptNonce } from "@/lib/contentSecurityPolicy.mjs";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +19,9 @@ export const metadata = {
   robots: { index: false, follow: false, noarchive: true, nosnippet: true },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  if (useConsoleScriptNonce) await connection();
+
   return (
     <html lang="en">
       <body

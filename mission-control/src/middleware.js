@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
+import { consoleContentSecurityPolicy, useConsoleScriptNonce } from "@/lib/contentSecurityPolicy.mjs";
 
 export async function middleware(request) {
   // Mission Control does not use next/image. Keep the optimizer unreachable
@@ -11,9 +12,22 @@ export async function middleware(request) {
     });
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  const pathname = request.nextUrl.pathname;
+  const rendersConsole = pathname === "/" || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const policy = useConsoleScriptNonce && rendersConsole
+    ? consoleContentSecurityPolicy(btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16)))))
+    : null;
+
+  function continueRequest() {
+    if (!policy) return NextResponse.next({ request });
+    const headers = new Headers(request.headers);
+    headers.set("Content-Security-Policy", policy);
+    const response = NextResponse.next({ request: { headers } });
+    response.headers.set("Content-Security-Policy", policy);
+    return response;
+  }
+
+  let supabaseResponse = continueRequest();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -25,9 +39,7 @@ export async function middleware(request) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = continueRequest();
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );

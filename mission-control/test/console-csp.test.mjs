@@ -16,6 +16,7 @@ import test from "node:test";
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ||= "https://example.supabase.co";
 const { default: config } = await import("../next.config.mjs");
+const { consoleContentSecurityPolicy } = await import("../src/lib/contentSecurityPolicy.mjs");
 
 const headers = (await config.headers())[0].headers;
 const get = (key) => headers.find((h) => h.key === key)?.value;
@@ -59,6 +60,14 @@ test("the directives the console actually needs are all present", () => {
 test("the console blocks inline event handlers independently of the framework bootstrap", () => {
   assert.equal(directive("script-src-attr"), "'none'");
   assert.match(directive("script-src"), /'unsafe-inline'/);
+});
+
+test("the nonce policy replaces the inline-script permission while keeping the other directives", () => {
+  const policy = consoleContentSecurityPolicy("Zml4dHVyZQ==");
+  assert.equal(policy, csp.replace(
+    "script-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'nonce-Zml4dHVyZQ==' 'strict-dynamic'",
+  ));
 });
 
 test("the two directives the old policy did have are preserved", () => {
