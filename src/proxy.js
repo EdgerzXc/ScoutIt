@@ -9,37 +9,44 @@ import { isSensitivePath, rateLimitTier } from '@/lib/sensitiveRoutes';
 // unavailable — better a brief 503 on those than an unmetered attack window.
 // Everything else keeps failing open so a Redis hiccup can't take the site down.
 
-let standardLimiter;
-let strictLimiter;
-let aiLimiter;
+const RATE_LIMIT_TIMEOUT_MS = 5_000;
+let rateLimiters;
 
-function initLimiters() {
-  if (!standardLimiter || !strictLimiter) {
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      const redis = Redis.fromEnv();
+function getRateLimiters() {
+  if (rateLimiters) return rateLimiters;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null;
 
-      standardLimiter = new Ratelimit({
-        redis: redis,
-        limiter: Ratelimit.slidingWindow(30, '10 s'),
-        prefix: '@upstash/ratelimit:standard',
-        analytics: true,
-      });
+  const sharedOptions = {
+    redis: Redis.fromEnv({ signal: () => AbortSignal.timeout(RATE_LIMIT_TIMEOUT_MS) }),
+    analytics: true,
+    timeout: RATE_LIMIT_TIMEOUT_MS,
+  };
+  rateLimiters = {
+    standard: new Ratelimit({
+      ...sharedOptions,
+      limiter: Ratelimit.slidingWindow(30, '10 s'),
+      prefix: '@upstash/ratelimit:standard',
+    }),
+    strict: new Ratelimit({
+      ...sharedOptions,
+      limiter: Ratelimit.slidingWindow(5, '10 s'),
+      prefix: '@upstash/ratelimit:strict',
+    }),
+    ai: new Ratelimit({
+      ...sharedOptions,
+      limiter: Ratelimit.slidingWindow(15, '10 s'),
+      prefix: '@upstash/ratelimit:ai',
+    }),
+  };
+  return rateLimiters;
+}
 
-      strictLimiter = new Ratelimit({
-        redis: redis,
-        limiter: Ratelimit.slidingWindow(5, '10 s'),
-        prefix: '@upstash/ratelimit:strict',
-        analytics: true,
-      });
-
-      aiLimiter = new Ratelimit({
-        redis: redis,
-        limiter: Ratelimit.slidingWindow(15, '10 s'),
-        prefix: '@upstash/ratelimit:ai',
-        analytics: true,
-      });
-    }
-  }
+function rateLimitUnavailable(sensitive) {
+  if (!sensitive) return NextResponse.next();
+  return NextResponse.json(
+    { error: 'Service temporarily unavailable. Please try again shortly.' },
+    { status: 503, headers: { 'Cache-Control': 'no-store' } }
+  );
 }
 
 // ── The masked-IP anomaly guard was RETIRED here on 2026-09-04 (A-080) ──────
@@ -68,6 +75,7 @@ function initLimiters() {
 // (site keeps working, kill switch off).
 const FLAG_CACHE_TTL_MS = 30 * 1000;
 const FLAG_MAX_STALE_MS = 60 * 1000;
+const FLAG_FETCH_TIMEOUT_MS = 1_500;
 let flagCache = { flags: {}, fetchedAt: 0 };
 
 async function getFlags() {
@@ -79,6 +87,7 @@ async function getFlags() {
   try {
     const res = await fetch(`${url}/rest/v1/feature_flags?select=id,is_enabled`, {
       headers: supabaseHeaders(),
+      signal: AbortSignal.timeout(FLAG_FETCH_TIMEOUT_MS),
     });
     if (!res.ok) {
       throw new Error("Upstream feature_flags returned HTTP error");
@@ -182,29 +191,12 @@ export async function proxy(request, event) {
   }
 
   // ── Rate limiting ──
-  initLimiters();
-
-  if (!standardLimiter) {
-    // Limiter not configured: sensitive routes fail closed, rest fail open.
-    if (sensitive) {
-      return NextResponse.json(
-        { error: 'Service temporarily unavailable. Please try again shortly.' },
-        { status: 503 }
-      );
-    }
-    return NextResponse.next();
-  }
-
   const tier = rateLimitTier(path);
-  let limiterToUse = standardLimiter;
-  if (tier === 'strict') {
-    limiterToUse = strictLimiter || standardLimiter;
-  } else if (tier === 'ai') {
-    limiterToUse = aiLimiter || standardLimiter;
-  }
-
   try {
-    const { success, limit, reset, remaining } = await limiterToUse.limit(`ratelimit_${tier}_${ip}`);
+    const limiter = getRateLimiters()?.[tier];
+    if (!limiter) return rateLimitUnavailable(sensitive);
+    const { success, limit, reset, remaining, reason } = await limiter.limit(`ratelimit_${tier}_${ip}`);
+    if (reason === 'timeout') return rateLimitUnavailable(sensitive);
 
     if (!success) {
       return NextResponse.json(
@@ -226,15 +218,8 @@ export async function proxy(request, event) {
     res.headers.set('X-RateLimit-Reset', reset.toString());
     return res;
   } catch (err) {
-    console.error('[RateLimiter] Error:', err);
-    // Redis died mid-request: sensitive routes fail closed, rest fail open.
-    if (sensitive) {
-      return NextResponse.json(
-        { error: 'Service temporarily unavailable. Please try again shortly.' },
-        { status: 503 }
-      );
-    }
-    return NextResponse.next();
+    console.error('[RateLimiter] Error:', err?.name);
+    return rateLimitUnavailable(sensitive);
   }
 }
 
