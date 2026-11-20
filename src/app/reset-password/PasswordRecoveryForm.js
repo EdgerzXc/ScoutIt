@@ -19,11 +19,19 @@ export default function PasswordRecoveryForm({ enterCode }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const emailInput = useRef(null);
   const captchaRef = useRef(null);
   const recoveryRef = useRef(null);
   const inFlight = useRef(false);
 
+  function rememberEmail() {
+    const currentEmail = emailInput.current?.value.trim();
+    if (currentEmail != null) setEmail(currentEmail);
+    return currentEmail ?? email;
+  }
+
   function startOver() {
+    rememberEmail();
     recoveryRef.current = null;
     setError("");
     setCaptchaToken("");
@@ -36,7 +44,7 @@ export default function PasswordRecoveryForm({ enterCode }) {
     if (inFlight.current) return;
 
     const fields = event.currentTarget.elements;
-    const accountEmail = email.trim();
+    const accountEmail = rememberEmail();
     const password = fields.namedItem("recovery-password")?.value;
     if (stage !== "request" && password !== fields.namedItem("recovery-password-confirmation")?.value) {
       setError("The passwords do not match.");
@@ -129,7 +137,7 @@ export default function PasswordRecoveryForm({ enterCode }) {
               <fieldset disabled={busy} className="space-y-4">
                 {stage !== "verified" && <label className="block space-y-1 text-sm font-semibold">
                   <span>Email address</span>
-                  <input id="recovery-email" className={inputClass} type="email" autoComplete={requesting ? "email" : "username"} required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} />
+                  <input ref={emailInput} id="recovery-email" className={inputClass} type="email" autoComplete={requesting ? "email" : "username"} required maxLength={254} defaultValue={email} />
                 </label>}
                 {requesting && <TurnstileGate ref={captchaRef} action="password-recovery" onToken={setCaptchaToken} onError={setError} />}
                 {stage === "code" && <label className="block space-y-1 text-sm font-semibold">
@@ -157,7 +165,11 @@ export default function PasswordRecoveryForm({ enterCode }) {
         {error && <p className="mt-3 text-sm text-error" role="alert">{error}</p>}
         <div className="mt-2 flex flex-wrap items-center gap-x-5 text-sm">
           <Link href="/onboarding" className={linkClass}>Back to sign-in</Link>
-          {requesting && <button type="button" disabled={busy} className={linkClass} onClick={() => { setError(""); setStage("code"); }}>I have a code</button>}
+          {requesting && <button type="button" disabled={busy} className={linkClass} onClick={() => {
+            rememberEmail();
+            setError("");
+            setStage("code");
+          }}>I have a code</button>}
         </div>
       </section>
     </main>

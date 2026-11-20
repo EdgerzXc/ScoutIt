@@ -6,6 +6,14 @@ test("opens password recovery from account sign-in", async ({ page }) => {
   await expect(page).toHaveURL(/\/reset-password$/);
   await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Email a reset code" })).toBeDisabled();
+  const email = page.getByLabel("Email address");
+  await email.fill("recovery@example.com");
+  await page.getByRole("button", { name: "I have a code" }).click();
+  await expect(page.getByLabel("Reset code")).toBeVisible();
+  await expect(email).toHaveValue("recovery@example.com");
+  await page.getByRole("button", { name: "Request a new code" }).click();
+  await expect(page.getByRole("button", { name: "Email a reset code" })).toBeDisabled();
+  await expect(email).toHaveValue("recovery@example.com");
 });
 
 test("accepts a valid recovery code after an expired attempt without persisting a session", async ({ page }) => {
@@ -55,15 +63,26 @@ test("accepts a valid recovery code after an expired attempt without persisting 
     return route.fulfill({ status: 401, headers, json: { code: "session_not_found" } });
   });
 
-  await page.goto("/reset-password?step=code");
+  const { promise: scriptsPending, resolve: releaseScripts } = Promise.withResolvers();
+  await page.route("**/_next/static/**/*.js*", async (route) => {
+    await scriptsPending;
+    await route.continue();
+  });
+  try {
+    await page.goto("/reset-password?step=code", { waitUntil: "commit" });
+    await page.getByLabel("Email address").fill(email);
+  } finally {
+    releaseScripts();
+  }
+  await page.waitForLoadState("load");
   await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
-  await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Reset code").fill("123456");
   await page.getByLabel("New password", { exact: true }).fill(password);
   await page.getByLabel("Confirm new password").fill("A different password 39!");
   await page.getByRole("button", { name: "Save new password" }).click();
   await expect(page.getByText("The passwords do not match.", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Confirm new password")).toBeFocused();
+  await expect(page.getByLabel("Email address")).toHaveValue(email);
   expect(requests).toEqual([]);
   await page.getByLabel("Confirm new password").fill(password);
   const nativeFieldNames = await page.getByLabel("Reset code").evaluate((input) => [...new FormData(input.form).keys()]);
