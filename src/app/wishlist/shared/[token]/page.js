@@ -2,6 +2,8 @@ import { decodeWishlistShareToken, isWishlistShareRevoked } from "@/lib/wishlist
 import { classifySavedItem } from "@/lib/wishlistLiveness";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getCmsBundle } from "@/lib/cmsCache";
+import { readBoardAccountSaves } from "@/lib/boardAccountSaves";
+import { looksLikeUuid } from "@/lib/propertyLookup";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
@@ -44,14 +46,10 @@ export default async function SharedWishlistPage({ params }) {
 
   const userId = tokenDetails.userId;
 
-  // Fetch saved_intel for this user
-  const { data: savedItems, error } = await supabaseAdmin
-    .from("saved_intel")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+  const savedItems = (await readBoardAccountSaves(supabaseAdmin, userId))
+    .filter((item) => !looksLikeUuid(item.property_id));
 
-  if (error || !savedItems || savedItems.length === 0) {
+  if (savedItems.length === 0) {
     return (
       <div className="page-wrapper">
         <AtmosphereBackground variant="default" />
@@ -124,7 +122,7 @@ export default async function SharedWishlistPage({ params }) {
               <h2 className="group-label">{group.type}</h2>
               <div className="cards-grid">
                 {group.items.map((item) => (
-                  <div key={item.timestamp} className="board-card">
+                  <div key={item.property_id} className="board-card">
                     <div className="badge-corner">
                       <ReactionBadge reactionType={item.reaction_type} />
                     </div>

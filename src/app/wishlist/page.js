@@ -3,13 +3,13 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Bookmark, Compass, ShieldCheck } from "lucide-react";
 import { ReactionBadge } from "@/components/ui/ReactionButtons";
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
-import { supabase } from "@/lib/supabaseClient";
 import { getSession, getWorkspaceUser } from "@/lib/authClient";
 import { classifySavedItem, liveSlugSet } from "@/lib/wishlistLiveness";
+import { syncOfflineSpacesToAccount } from "@/lib/boardSync";
 import {
   getLocalSavedSignals,
   removeSignalLocally,
@@ -25,12 +25,16 @@ export default function WishlistPage() {
   const [cloudSignals, setCloudSignals] = useState([]);
   const [filterType, setFilterType] = useState("all"); // "all" | "spaces" | "signals"
   const [loaded, setLoaded] = useState(false);
-  const [fadingOut, setFadingOut] = useState(new Set());
+  const actionInProgress = useRef(false);
+  const [removing, setRemoving] = useState(false);
 
   // Account sync & session
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accountLoading, setAccountLoading] = useState(true);
+  const [accountId, setAccountId] = useState(null);
   const [userEmail, setUserEmail] = useState("");
   const [accountSavedIds, setAccountSavedIds] = useState(() => new Set());
+  const [accountReadFailed, setAccountReadFailed] = useState(false);
   const [merging, setMerging] = useState(false);
   const [mergeMessage, setMergeMessage] = useState(null);
 
@@ -40,7 +44,6 @@ export default function WishlistPage() {
   // CMS catalogue for live property titles, cities, categories, and liveness checks
   const [cmsMap, setCmsMap] = useState({});
   const [liveSlugs, setLiveSlugs] = useState(null);
-
   useEffect(() => {
     let cancelled = false;
     fetch("/api/cms")
@@ -48,10 +51,11 @@ export default function WishlistPage() {
       .then((data) => {
         if (!cancelled && data && Array.isArray(data.properties)) {
           setLiveSlugs(liveSlugSet(data.properties));
-          const map = {};
+          const map = Object.create(null);
           data.properties.forEach((p) => {
             const key = p.slug || p.id;
             if (key) map[key] = p;
+            if (p.id) map[p.id] = p;
           });
           setCmsMap(map);
         }
@@ -98,7 +102,7 @@ export default function WishlistPage() {
       try {
         const { data: { user } } = await getWorkspaceUser();
         const { data: { session } } = user ? await getSession() : { data: {} };
-        if (!user || session?.user?.id !== user.id) {
+        if (!session?.access_token || session.user?.id !== user?.id) {
           if (!cancelled) {
             setIsLoggedIn(false);
             setActiveMode("offline");
@@ -108,43 +112,46 @@ export default function WishlistPage() {
 
         if (!cancelled) {
           setIsLoggedIn(true);
-          setUserEmail(user.email || "");
+          setAccountId(session.user.id);
+          setUserEmail(session.user.email || "");
           setActiveMode("all");
         }
 
-        const { data: savedRows, error } = await supabase
-          .from("saved_intel")
-          .select("property_id, reaction_type, created_at")
-          .order("created_at", { ascending: false });
+        const headers = { Authorization: `Bearer ${session.access_token}` };
+        const readAccount = async (url) => {
+          const response = await fetch(url, { headers });
+          return response.ok ? response.json() : null;
+        };
+        const [spaces, followUps] = await Promise.allSettled([
+          readAccount("/api/wishlist/saved"),
+          readAccount("/api/community/signals?saved=1"),
+        ]);
+        if (cancelled) return;
+        const savedRows = spaces.value?.items;
 
-        if (!cancelled && !error && Array.isArray(savedRows)) {
+        if (Array.isArray(savedRows)) {
           const mappedCloud = savedRows.map((r) => ({
             property_id: r.property_id,
+            account_property_id: r.account_property_id,
             reaction_type: r.reaction_type || "Save",
             timestamp: r.created_at ? new Date(r.created_at).getTime() : Date.now(),
             is_cloud: true,
           }));
           setCloudItems(mappedCloud);
-          setAccountSavedIds(new Set(savedRows.map((r) => r.property_id)));
+          setAccountSavedIds(new Set(savedRows.flatMap((r) => [r.property_id, r.account_property_id])));
+        } else {
+          setAccountReadFailed(true);
         }
 
-        // Fetch cloud saved signals
-        try {
-          const token = session.access_token;
-          const sigRes = await fetch("/api/community/signals?saved=1", {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          if (sigRes.ok) {
-            const sigJson = await sigRes.json();
-            if (!cancelled && sigJson?.ok && Array.isArray(sigJson.signals)) {
-              setCloudSignals(sigJson.signals);
-            }
-          }
-        } catch {
-          // non-blocking
+        if (followUps.value?.ok && !followUps.value.degraded && Array.isArray(followUps.value.signals)) {
+          setCloudSignals(followUps.value.signals);
+        } else {
+          setAccountReadFailed(true);
         }
       } catch {
         // Not signed in / read failed — fallback gracefully to offline mode
+      } finally {
+        if (!cancelled) setAccountLoading(false);
       }
     };
     loadAccount();
@@ -153,132 +160,164 @@ export default function WishlistPage() {
     };
   }, []);
 
-  // Distinct property ids on this device that the account doesn't have yet
   const localOnlyItems = useMemo(() => {
-    return offlineItems.filter((i) => i.property_id && !accountSavedIds.has(i.property_id));
-  }, [offlineItems, accountSavedIds]);
+    const items = new Map();
+    for (const item of offlineItems) {
+      if (item?.is_broker) continue;
+      const id = typeof item?.property_id === "string" ? item.property_id.trim() : "";
+      const slug = cmsMap[id]?.slug;
+      const key = slug || id;
+      if (id && !accountSavedIds.has(id) && !accountSavedIds.has(key) && !items.has(key)) {
+        items.set(key, { ...item, property_id: id, public_slug: slug });
+      }
+    }
+    return [...items.values()];
+  }, [offlineItems, accountSavedIds, cmsMap]);
 
-  const showSyncBanner = isLoggedIn && (localOnlyItems.length > 0 || offlineSignals.length > 0);
+  const localOnlySignals = useMemo(() => {
+    const cloudIds = new Set(cloudSignals.map((signal) => signal.id));
+    return offlineSignals.filter((signal) => !cloudIds.has(signal.id));
+  }, [offlineSignals, cloudSignals]);
+  const pendingSyncCount = localOnlyItems.length + localOnlySignals.length;
+  const showSyncBanner = isLoggedIn && !accountLoading && !accountReadFailed && pendingSyncCount > 0;
 
-  // 1-Tap Cloud Sync / Merge (Spaces + Signals)
   const handleSync = async () => {
-    if (merging || (localOnlyItems.length === 0 && offlineSignals.length === 0)) return;
+    if (actionInProgress.current || !showSyncBanner) return;
+    actionInProgress.current = true;
     setMerging(true);
     setMergeMessage(null);
     try {
       const { data } = await getSession();
-      const token = data?.session?.access_token;
-
-      let mergedSpaces = 0;
-      if (localOnlyItems.length > 0) {
-        const res = await fetch("/api/wishlist/merge", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            items: localOnlyItems.map((it) => ({
-              property_id: it.property_id,
-              reaction_type: it.reaction_type || "Save",
-            })),
-            propertyIds: localOnlyItems.map((it) => it.property_id),
-          }),
-        });
-        const result = await res.json();
-        if (res.ok) {
-          mergedSpaces = result.merged ?? 0;
-          const newlyAddedIds = localOnlyItems.map((it) => it.property_id);
-          setAccountSavedIds((prev) => new Set([...prev, ...newlyAddedIds]));
-          setCloudItems((prev) => [
-            ...localOnlyItems.map((it) => ({ ...it, is_cloud: true })),
-            ...prev,
-          ]);
-        }
+      const session = data?.session;
+      const token = session?.access_token;
+      if (!token || session.user?.id !== accountId) {
+        setMergeMessage("Sign in again to sync your Board.");
+        return;
       }
 
-      if (offlineSignals.length > 0) {
-        await syncOfflineSignalsToAccount(token);
-        try {
-          const sigRes = await fetch("/api/community/signals?saved=1", {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          if (sigRes.ok) {
-            const sigJson = await sigRes.json();
-            if (sigJson?.ok && Array.isArray(sigJson.signals)) {
-              setCloudSignals(sigJson.signals);
+      const spaces = await syncOfflineSpacesToAccount(token, localOnlyItems, (confirmed) => {
+        setAccountSavedIds((prev) => new Set([
+          ...prev, ...confirmed.flatMap((item) => [item.property_id, item.account_property_id, item.public_slug].filter(Boolean)),
+        ]));
+        setCloudItems((prev) => {
+          const byId = new Map(prev.map((item) => [item.account_property_id, item]));
+          for (const item of confirmed) {
+            if (!byId.has(item.account_property_id)) {
+              byId.set(item.account_property_id, { ...item, property_id: item.public_slug || item.property_id, is_cloud: true });
             }
           }
-        } catch {
-          // non-blocking
-        }
+          return [...byId.values()];
+        });
+      });
+      let { confirmedCount, signInRequired } = spaces;
+
+      if (localOnlySignals.length > 0 && !signInRequired) {
+        const signals = await syncOfflineSignalsToAccount(token, localOnlySignals);
+        signInRequired = signals.signInRequired;
+        const acknowledged = new Set(signals.confirmedSignalIds);
+        const confirmed = localOnlySignals.filter((signal) => acknowledged.has(signal.id));
+        confirmedCount += confirmed.length;
+        setCloudSignals((prev) => {
+          const existing = new Set(prev.map((signal) => signal.id));
+          return [...confirmed.filter((signal) => !existing.has(signal.id)), ...prev];
+        });
       }
 
-      setMergeMessage(
-        "Saved spaces and follow-up signals synchronized to your account across devices."
-      );
-      setTimeout(() => setMergeMessage(null), 6000);
+      const remaining = pendingSyncCount - confirmedCount;
+      const synced = `${confirmedCount} ${confirmedCount === 1 ? "item" : "items"} synced to your account.`;
+      const retry = signInRequired ? "Sign in again to continue."
+        : spaces.unlinkedCount === remaining ? "Those listings can only be saved on this device for now."
+          : "Try syncing again.";
+      if (remaining === 0) setMergeMessage(synced);
+      else if (confirmedCount > 0) setMergeMessage(`${synced} ${remaining} still on this device. ${retry}`);
+      else setMergeMessage(`Couldn't sync your Board. Your items are still on this device. ${retry}`);
     } catch {
       setMergeMessage("Couldn't sync right now. Please try again in a moment.");
     } finally {
+      actionInProgress.current = false;
       setMerging(false);
     }
   };
 
-  // Safe removal across both offline storage and cloud account
-  const removeItem = useCallback((item) => {
+  const removeFromBoard = async (remove) => {
+    if (actionInProgress.current || accountLoading || accountReadFailed) return;
+    actionInProgress.current = true;
+    setRemoving(true);
+    setMergeMessage(null);
+    try {
+      await remove();
+    } catch {
+      setMergeMessage("Couldn't remove this save. Try again.");
+    } finally {
+      actionInProgress.current = false;
+      setRemoving(false);
+    }
+  };
+
+  const accountDelete = async (url, body) => {
+    const { data: { session } } = await getSession();
+    if (!session?.access_token || session.user?.id !== accountId) {
+      setMergeMessage("Sign in again to remove this account save.");
+      return false;
+    }
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!response.ok) throw new Error("Account removal failed");
+    const result = await response.json();
+    if (result?.ok !== true || (!body && result.saved !== false)) {
+      throw new Error("Account removal was not confirmed");
+    }
+    return true;
+  };
+
+  const removeItem = (item) => removeFromBoard(async () => {
     const key = item.property_id || item.timestamp;
-    setFadingOut((prev) => new Set([...prev, key]));
-    setTimeout(() => {
-      // 1. Remove from local storage
-      setOfflineItems((prev) => {
-        const updated = prev.filter((savedItem) => (savedItem.property_id || savedItem.timestamp) !== key);
-        try {
-          localStorage.setItem("scoutit_reactions", JSON.stringify(updated));
-        } catch (e) {}
-        return updated;
-      });
-
-      // 2. Remove from cloud account if authenticated
-      if (isLoggedIn && item.property_id) {
-        setCloudItems((prev) => prev.filter((it) => it.property_id !== item.property_id));
-        setAccountSavedIds((prev) => {
-          const next = new Set(prev);
-          next.delete(item.property_id);
-          return next;
-        });
-        supabase
-          .from("saved_intel")
-          .delete()
-          .eq("property_id", item.property_id)
-          .then(() => {})
-          .catch((err) => console.warn("[WISHLIST] Cloud delete failed:", err));
-      }
-
-      setFadingOut((prev) => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
-    }, 250);
-  }, [isLoggedIn]);
+    const slug = cmsMap[item.property_id]?.slug || item.property_id;
+    const accountItem = item.is_broker ? null : cloudItems.find((saved) =>
+      saved.account_property_id === item.property_id ||
+      saved.account_property_id === item.account_property_id ||
+      saved.property_id === slug
+    );
+    const localKeys = new Set([key]);
+    if (accountItem) {
+      if (!await accountDelete("/api/wishlist/saved", { propertyId: accountItem.account_property_id })) return;
+      localKeys.add(accountItem.property_id);
+      localKeys.add(accountItem.account_property_id);
+      setCloudItems((prev) => prev.filter((saved) => saved.account_property_id !== accountItem.account_property_id));
+      setAccountSavedIds((prev) => new Set([...prev].filter((id) => !localKeys.has(id) && !localKeys.has(cmsMap[id]?.slug))));
+    }
+    if (!item.is_local) return;
+    const stored = JSON.parse(localStorage.getItem("scoutit_reactions") || "[]");
+    const updated = stored.filter((saved) =>
+      Boolean(saved.is_broker) !== Boolean(item.is_broker) ||
+      (!localKeys.has(saved.property_id || saved.timestamp) && !localKeys.has(cmsMap[saved.property_id]?.slug))
+    );
+    localStorage.setItem("scoutit_reactions", JSON.stringify(updated));
+    setOfflineItems(updated);
+  });
 
   // Compute active item set based on interchangeable mode
   const displayItems = useMemo(() => {
     let sourceList = [];
-    const localIds = new Set(offlineItems.map((i) => i.property_id));
+    const localIds = new Set(offlineItems.flatMap((item) => [item.property_id, cmsMap[item.property_id]?.slug].filter(Boolean)));
 
     if (!isLoggedIn || activeMode === "offline") {
       sourceList = offlineItems.map((it) => ({
         ...it,
         is_local: true,
-        is_cloud: accountSavedIds.has(it.property_id),
+        is_cloud: accountSavedIds.has(it.property_id) || accountSavedIds.has(cmsMap[it.property_id]?.slug),
       }));
     } else if (activeMode === "cloud") {
       sourceList = cloudItems.map((it) => ({
         ...it,
         is_cloud: true,
-        is_local: localIds.has(it.property_id),
+        is_local: localIds.has(it.property_id) || localIds.has(it.account_property_id),
       }));
     } else {
       // "all" unified mode
@@ -287,16 +326,18 @@ export default function WishlistPage() {
 
       cloudItems.forEach((c) => {
         seen.add(c.property_id);
+        seen.add(c.account_property_id);
         combined.push({
           ...c,
           is_cloud: true,
-          is_local: localIds.has(c.property_id),
+          is_local: localIds.has(c.property_id) || localIds.has(c.account_property_id),
         });
       });
 
       offlineItems.forEach((o) => {
-        if (!seen.has(o.property_id)) {
-          seen.add(o.property_id);
+        const key = cmsMap[o.property_id]?.slug || o.property_id;
+        if (!seen.has(o.property_id) && !seen.has(key)) {
+          seen.add(key);
           combined.push({
             ...o,
             is_cloud: false,
@@ -317,7 +358,8 @@ export default function WishlistPage() {
         city: item.city || prop?.city || "",
         category: item.category || prop?.spaceCategory || "",
         is_broker: Boolean(item.is_broker || prop?.is_broker),
-        removed: classifySavedItem(item, liveSlugs) === "removed",
+        publicSlug: prop?.slug || (item.account_property_id === item.property_id ? null : item.property_id),
+        removed: classifySavedItem({ ...item, property_id: prop?.slug || item.property_id }, liveSlugs) === "removed",
       };
     });
   }, [isLoggedIn, activeMode, offlineItems, cloudItems, accountSavedIds, cmsMap, liveSlugs]);
@@ -345,26 +387,15 @@ export default function WishlistPage() {
     return list;
   }, [displayItems]);
 
-  // Safe removal for signals across offline storage and cloud account
-  const removeSignal = useCallback((sig) => {
-    const key = sig.id;
-    setFadingOut((prev) => new Set([...prev, key]));
-    setTimeout(() => {
-      removeSignalLocally(sig.id);
-      setOfflineSignals((prev) => prev.filter((s) => s.id !== sig.id));
-      if (isLoggedIn) {
-        setCloudSignals((prev) => prev.filter((s) => s.id !== sig.id));
-        fetch(`/api/community/signals/${encodeURIComponent(sig.id)}/save`, {
-          method: "DELETE",
-        }).catch(() => {});
-      }
-      setFadingOut((prev) => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
-    }, 250);
-  }, [isLoggedIn]);
+  const removeSignal = (signal) => removeFromBoard(async () => {
+    if (signal.is_cloud) {
+      if (!await accountDelete(`/api/community/signals/${encodeURIComponent(signal.id)}/save`)) return;
+      setCloudSignals((prev) => prev.filter((saved) => saved.id !== signal.id));
+    }
+    if (!signal.is_local) return;
+    const updated = removeSignalLocally(signal.id, { strict: true });
+    setOfflineSignals(updated);
+  });
 
   // Compute active signal follow-up set based on interchangeable mode
   const displaySignals = useMemo(() => {
@@ -408,8 +439,10 @@ export default function WishlistPage() {
   }, [isLoggedIn, activeMode, offlineSignals, cloudSignals]);
 
   const totalUniqueCount = useMemo(() => {
+    const slugByUuid = new Map(cloudItems.map((item) => [item.account_property_id, item.property_id]));
     const spaceIds = new Set([
-      ...offlineItems.map((i) => i.property_id),
+      ...offlineItems.map((item) => slugByUuid.get(item.property_id)
+        || cmsMap[item.property_id]?.slug || item.property_id),
       ...cloudItems.map((i) => i.property_id),
     ]);
     const signalIds = new Set([
@@ -417,7 +450,7 @@ export default function WishlistPage() {
       ...cloudSignals.map((s) => s.id),
     ]);
     return spaceIds.size + signalIds.size;
-  }, [offlineItems, cloudItems, offlineSignals, cloudSignals]);
+  }, [offlineItems, cloudItems, offlineSignals, cloudSignals, cmsMap]);
 
   const totalCloudCount = cloudItems.length + cloudSignals.length;
   const totalOfflineCount = offlineItems.length + offlineSignals.length;
@@ -539,18 +572,18 @@ export default function WishlistPage() {
             <div className="sync-copy">
               <span className="sync-label">SYNC // ACCOUNT</span>
               <p className="sync-text">
-                <strong>{localOnlyItems.length}</strong> saved{" "}
-                {localOnlyItems.length === 1 ? "space is" : "spaces are"} on this device only.
+                <strong>{pendingSyncCount}</strong>{" "}
+                {pendingSyncCount === 1 ? "item is" : "items are"} saved only on this device.
               </p>
             </div>
             <button
               className="sync-btn"
               onClick={handleSync}
-              disabled={merging}
+              disabled={merging || removing}
             >
               {merging
                 ? "Synchronizing…"
-                : `Sync ${localOnlyItems.length} to Cloud Account`}
+                : `Sync ${pendingSyncCount} to Account`}
             </button>
           </aside>
         )}
@@ -570,9 +603,12 @@ export default function WishlistPage() {
           </div>
         )}
 
-        {mergeMessage && (
-          <div className="merge-message" role="status" aria-live="polite">
-            {mergeMessage}
+        <div className={mergeMessage ? "merge-message" : ""} role="status">
+          {mergeMessage}
+        </div>
+        {accountReadFailed && (
+          <div className="merge-message" role="status">
+            Couldn&apos;t load your account saves. <button type="button" onClick={() => window.location.reload()} className="underline">Retry</button>
           </div>
         )}
 
@@ -604,13 +640,13 @@ export default function WishlistPage() {
                 : "Your board is empty."}
             </div>
             <div className="empty-subtitle">
-              {activeMode === "cloud" && (offlineItems.length > 0 || offlineSignals.length > 0)
-                ? `You have ${offlineItems.length + offlineSignals.length} saved items on this device. Sync them to access your board anywhere.`
+              {activeMode === "cloud" && showSyncBanner
+                ? "Sync your device saves to access them from your account."
                 : "Browse curated spaces or explore market signals across the Philippines and save your follow-ups."}
             </div>
-            {activeMode === "cloud" && (offlineItems.length > 0 || offlineSignals.length > 0) ? (
-              <button className="empty-cta" onClick={handleSync} disabled={merging}>
-                {merging ? "Syncing…" : `Sync ${offlineItems.length + offlineSignals.length} Items to Cloud →`}
+            {activeMode === "cloud" && showSyncBanner ? (
+              <button className="empty-cta" onClick={handleSync} disabled={merging || removing}>
+                {merging ? "Syncing…" : `Sync ${pendingSyncCount} to Account →`}
               </button>
             ) : (
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "24px" }}>
@@ -639,7 +675,7 @@ export default function WishlistPage() {
                     return (
                       <article
                         key={key}
-                        className={`board-card stagger-enter ${fadingOut.has(key) ? "fading" : ""}`}
+                        className="board-card stagger-enter"
                         style={{ '--i': index }}
                       >
                         {/* Top Header Row */}
@@ -683,9 +719,11 @@ export default function WishlistPage() {
                             >
                               <h3 className="card-title">{item.property_title}</h3>
                             </Link>
+                          ) : !item.publicSlug ? (
+                            <h3 className="card-title">{item.property_title}</h3>
                           ) : (
                             <Link
-                              href={`/property/${encodeURIComponent(item.property_id)}`}
+                              href={`/property/${encodeURIComponent(item.publicSlug)}`}
                               className="card-title-link"
                             >
                               <h3 className="card-title">{item.property_title}</h3>
@@ -695,12 +733,12 @@ export default function WishlistPage() {
 
                         {/* Card Actions Row */}
                         <div className="card-actions-row">
-                          {!item.removed && (
+                          {!item.removed && (item.is_broker || item.publicSlug) && (
                             <Link
                               href={
                                 item.is_broker
                                   ? `/brokers/${encodeURIComponent(item.property_id)}`
-                                  : `/property/${encodeURIComponent(item.property_id)}`
+                                  : `/property/${encodeURIComponent(item.publicSlug)}`
                               }
                               className="card-explore-btn"
                             >
@@ -710,6 +748,7 @@ export default function WishlistPage() {
                           <button
                             className="card-remove-btn"
                             onClick={() => removeItem(item)}
+                            disabled={accountLoading || accountReadFailed || merging || removing}
                             aria-label={`Remove ${item.property_title} from board`}
                           >
                             <span className="remove-icon" aria-hidden="true">✕</span>
@@ -761,7 +800,7 @@ export default function WishlistPage() {
                     return (
                       <article
                         key={key}
-                        className={`board-card stagger-enter ${fadingOut.has(key) ? "fading" : ""}`}
+                        className="board-card stagger-enter"
                         style={{ '--i': index }}
                       >
                         {/* Top Header Row */}
@@ -828,6 +867,7 @@ export default function WishlistPage() {
                           <button
                             className="card-remove-btn"
                             onClick={() => removeSignal(sig)}
+                            disabled={accountLoading || accountReadFailed || merging || removing}
                             aria-label={`Remove signal ${sig.title || sig.id} from board`}
                           >
                             <span className="remove-icon" aria-hidden="true">✕</span>
@@ -1340,11 +1380,6 @@ export default function WishlistPage() {
           transform: translateY(-2px);
           border-color: rgba(var(--accent-rgb), 0.35);
           box-shadow: var(--shadow-md), var(--shadow-glow-soft);
-        }
-
-        .board-card.fading {
-          opacity: 0;
-          transform: translateX(-20px);
         }
 
         .card-top-row {

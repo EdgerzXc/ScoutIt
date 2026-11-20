@@ -81,7 +81,37 @@ describe("savedSignalsClient unit tests", () => {
 
     const syncResult = await syncOfflineSignalsToAccount("fake-jwt-token");
     expect(syncResult.syncedCount).toBe(2);
+    expect(syncResult.confirmedSignalIds).toEqual(["sig-cloud-2", "sig-cloud-1"]);
     expect(syncResult.error).toBeNull();
     expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("acknowledges only saved signals and keeps every device snapshot", async () => {
+    const signals = ["sig-one", "sig-two", "sig-three"].map((id) => ({ id }));
+    signals.forEach(saveSignalLocally);
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, saved: true })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ error: "Sign in again." }), { status: 401 }));
+
+    expect(await syncOfflineSignalsToAccount("token", signals)).toEqual({
+      syncedCount: 1,
+      confirmedSignalIds: ["sig-one"],
+      error: "Sign in again.",
+      signInRequired: true,
+    });
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(getLocalSavedSignals()).toHaveLength(3);
+  });
+
+  it("reports a signal-only failure even when no spaces need syncing", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: false, error: "Signal is no longer active." }), { status: 404 }),
+    );
+    expect(await syncOfflineSignalsToAccount("token", [{ id: "sig-closed" }])).toEqual({
+      syncedCount: 0,
+      confirmedSignalIds: [],
+      error: "Signal is no longer active.",
+      signInRequired: false,
+    });
   });
 });

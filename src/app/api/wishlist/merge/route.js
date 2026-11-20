@@ -1,98 +1,96 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
+import { BOARD_SYNC_BATCH_SIZE } from "@/lib/boardSync";
+import { looksLikeUuid } from "@/lib/propertyLookup";
 
-// Merge a device's local "Board" (localStorage `scoutit_reactions`) into the
-// signed-in user's account-level saved list (`saved_intel`).
-//
-// Idempotent by construction: only property_ids the account does NOT already
-// have are inserted, so tapping the button twice (or on two devices) never
-// creates duplicates — important because `saved_intel` has no
-// unique(user_id, property_id) constraint. Identity comes ONLY from the
-// verified session token (resolveUserId), never from the request body, so a
-// client can only ever merge into its own account.
+const REACTION_TYPES = new Set(["Save", "Inspired Me", "Potential Fit", "Interested"]);
+const PROPERTY_FIELDS = "id, canonical_slug";
+const LOOKUP_BATCH_SIZE = 50;
+
+async function lookupProperties(column, keys) {
+  const matches = new Map();
+  for (let start = 0; start < keys.length; start += LOOKUP_BATCH_SIZE) {
+    const { data, error } = await supabaseAdmin.from("properties")
+      .select(PROPERTY_FIELDS)
+      .eq("pipeline_status", "approved")
+      .in(column, keys.slice(start, start + LOOKUP_BATCH_SIZE));
+    if (error) throw error;
+    for (const property of data || []) matches.set(property[column], property);
+  }
+  return matches;
+}
+
+async function resolveProperties(keys) {
+  const uuids = keys.filter(looksLikeUuid).map((id) => id.toLowerCase());
+  const slugs = keys.filter((key) => !looksLikeUuid(key));
+  const [byId, bySlug] = await Promise.all([
+    lookupProperties("id", [...new Set(uuids)]),
+    lookupProperties("canonical_slug", slugs),
+  ]);
+  return keys.flatMap((inputId) => {
+    const property = looksLikeUuid(inputId) ? byId.get(inputId.toLowerCase()) : bySlug.get(inputId);
+    return property ? [{ inputId, propertyId: property.id, slug: property.canonical_slug }] : [];
+  });
+}
+
 export async function POST(request) {
   try {
     const userId = await resolveUserId(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+      return NextResponse.json({ error: "Sign in to sync your Board." }, { status: 401 });
     }
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+      return NextResponse.json({ error: "Board sync is unavailable." }, { status: 503 });
     }
 
-    const body = await request.json().catch(() => ({}));
-    const rawIds = Array.isArray(body?.propertyIds)
-      ? body.propertyIds
-      : Array.isArray(body?.items)
-      ? body.items.map((it) => it?.property_id)
-      : [];
+    const body = await request.json().catch(() => null);
+    const items = Array.isArray(body?.items) ? body.items : null;
+    const propertyIds = Array.isArray(body?.propertyIds) ? body.propertyIds : null;
+    if (!items && !propertyIds) {
+      return NextResponse.json({ error: "Invalid Board sync request." }, { status: 400 });
+    }
+    if (propertyIds?.length > BOARD_SYNC_BATCH_SIZE || items?.length > BOARD_SYNC_BATCH_SIZE) {
+      return NextResponse.json({ error: "Too many spaces in one sync request." }, { status: 413 });
+    }
 
-    const reactionMap = new Map();
-    if (Array.isArray(body?.items)) {
-      body.items.forEach((it) => {
-        if (typeof it?.property_id === "string" && it.property_id.trim()) {
-          reactionMap.set(it.property_id.trim(), it.reaction_type || "Save");
-        }
+    const ids = propertyIds ?? items.map((item) => item?.property_id);
+    const reactions = new Map(items?.map((item) => [
+      typeof item?.property_id === "string" ? item.property_id.trim() : null,
+      REACTION_TYPES.has(item?.reaction_type) ? item.reaction_type : "Save",
+    ]));
+    const keys = [...new Set(ids.filter((id) => typeof id === "string").map((id) => id.trim()))]
+      .filter((id) => /^[A-Za-z0-9_-]{1,256}$/.test(id));
+    const confirmedProperties = await resolveProperties(keys);
+    const rows = new Map();
+    for (const { inputId, propertyId } of confirmedProperties) {
+      if (rows.has(propertyId)) continue;
+      rows.set(propertyId, {
+        user_id: userId,
+        property_id: propertyId,
+        reaction_type: reactions.get(inputId) || "Save",
       });
     }
 
-    // Normalize: strings only, trimmed, de-duped, capped to a sane batch size.
-    const localIds = [...new Set(
-      rawIds
-        .filter((id) => typeof id === "string")
-        .map((id) => id.trim())
-        .filter(Boolean)
-    )].slice(0, 500);
-
-    if (localIds.length === 0) {
-      return NextResponse.json({ merged: 0, alreadyHad: 0, total: 0 });
+    const confirmedPropertyIds = confirmedProperties.map(({ inputId }) => inputId);
+    if (rows.size === 0) {
+      return NextResponse.json({ merged: 0, alreadyHad: 0, confirmedPropertyIds, confirmedProperties });
     }
 
-    // What does the account already have? Service role here, so scope by
-    // user_id explicitly (the RLS policy would do the same for a client).
-    const { data: existingRows, error: fetchError } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("saved_intel")
-      .select("property_id")
-      .eq("user_id", userId);
+      .upsert([...rows.values()], { onConflict: "user_id,property_id", ignoreDuplicates: true })
+      .select("property_id");
 
-    if (fetchError) {
-      console.error("[WISHLIST MERGE] Failed to read existing saves:", fetchError);
-      return NextResponse.json({ error: "Failed to read account saves" }, { status: 500 });
+    if (error) {
+      console.error("[WISHLIST MERGE] Failed to save spaces:", error.code);
+      return NextResponse.json({ error: "Couldn't sync these spaces." }, { status: 500 });
     }
 
-    const existingIds = new Set((existingRows || []).map((r) => r.property_id));
-    const missing = localIds.filter((id) => !existingIds.has(id));
-
-    if (missing.length === 0) {
-      return NextResponse.json({
-        merged: 0,
-        alreadyHad: localIds.length,
-        total: existingIds.size,
-      });
-    }
-
-    const rowsToInsert = missing.map((property_id) => ({
-      user_id: userId,
-      property_id,
-      reaction_type: reactionMap.get(property_id) || "Save",
-    }));
-    const { error: insertError } = await supabaseAdmin
-      .from("saved_intel")
-      .insert(rowsToInsert);
-
-    if (insertError) {
-      console.error("[WISHLIST MERGE] Failed to insert saves:", insertError);
-      return NextResponse.json({ error: "Failed to save to account" }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      merged: missing.length,
-      alreadyHad: localIds.length - missing.length,
-      total: existingIds.size + missing.length,
-    });
+    const merged = data?.length ?? 0;
+    return NextResponse.json({ merged, alreadyHad: rows.size - merged, confirmedPropertyIds, confirmedProperties });
   } catch (err) {
-    console.error("[WISHLIST MERGE] Error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("[WISHLIST MERGE] Error:", err?.name);
+    return NextResponse.json({ error: "Couldn't sync these spaces." }, { status: 500 });
   }
 }

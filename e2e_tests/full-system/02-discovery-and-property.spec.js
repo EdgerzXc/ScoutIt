@@ -179,6 +179,8 @@ test.describe('The Ledger (device-only wishlist)', () => {
 
     const card = page.locator('.property-preview-card').first();
     await expect(card).toBeVisible({ timeout: 25000 });
+    const dossierPath = await card.locator('a[href^="/property/"]').first().getAttribute('href');
+    expect(dossierPath).toMatch(/^\/property\/.+/);
 
     const reaction = card
       .locator('button[aria-label="Save"]')
@@ -201,7 +203,10 @@ test.describe('The Ledger (device-only wishlist)', () => {
 
     await gotoAndSettle(page, '/wishlist');
     const savedLink = page.getByRole('link', { name: saved.property_title, exact: true });
-    await expect(savedLink).toHaveAttribute('href', `/property/${encodeURIComponent(saved.property_id)}`);
+    await expect(savedLink).toHaveAttribute('href', dossierPath);
+    await savedLink.click();
+    await expect(page).toHaveURL(new URL(dossierPath, page.url()).href);
+    await gotoAndSettle(page, '/wishlist');
     await page.getByRole('button', { name: `Remove ${saved.property_title} from board`, exact: true }).click();
     await expect(page.getByText('Your board is empty.', { exact: true })).toBeVisible();
 

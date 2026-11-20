@@ -108,11 +108,12 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ ok: false, error: "Server error: missing service role configuration" }, { status: 500 });
     }
     const { id } = await params;
-    await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from("signal_saves")
       .delete()
       .eq("signal_id", id)
       .eq("account_id", userId);
+    if (error) throw error;
     await syncSavedCount(id);
     return NextResponse.json({ ok: true, saved: false });
   } catch (err) {
