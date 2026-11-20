@@ -17,6 +17,7 @@ import { validateDeclaration, hasValidAgreement } from "@/lib/listerRelationship
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { evaluateServerMonetizationGate } from "@/lib/serverMonetizationGate";
 import { recordHistoricalSlug } from "@/lib/propertyRedirects";
+import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 
 export async function POST(request) {
 
@@ -75,7 +76,15 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     }
 
-    if (currentSubmission.creation_source === 'pdf_assisted' && !currentSubmission.pdf_verified) {
+    const pdfBlock = getPdfPublicationBlock(currentSubmission);
+    if (pdfBlock === "pdf_source_quarantined") {
+      return NextResponse.json({
+        error: "We could not process this PDF. Upload a new PDF or enter the listing manually.",
+        reason: "pdf_source_quarantined",
+      }, { status: 422 });
+    }
+
+    if (pdfBlock) {
       // A-076: a refusal an owner cannot act on is a dead end. Say who is doing
       // what, and that no action is required from them — this draft is already
       // in the reviewer's queue (/api/admin/pdf-verify).

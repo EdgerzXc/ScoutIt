@@ -3,8 +3,7 @@
 import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publishPropertyToAirtable, updatePropertyInAirtable } from "@/lib/airtable";
-import { resolveQueueDocument } from "@/lib/propertyQueueStorage";
-import { loadPropertyPdfReview, verifyPropertyPdfDraft } from "@/lib/propertyPdfReview";
+import { getPdfPublicationBlock, listPropertyPdfReviews, loadPropertyPdfReview, verifyPropertyPdfDraft } from "@/lib/propertyPdfReview";
 
 export async function loadSubmissionsQueue() {
   const staff = await getCurrentStaff();
@@ -12,30 +11,20 @@ export async function loadSubmissionsQueue() {
 
   const admin = createAdminClient();
 
-  const [submissionsRes, pdfDraftsRes] = await Promise.all([
+  const [submissionsRes, pdfReviewQueue] = await Promise.all([
     admin
       .from("properties")
       .select("id, title, location, city, type, space_category, price, rental_rate, owner_id, pipeline_status, lifecycle_state, created_at, slug, canonical_slug")
       .in("pipeline_status", ["submitted", "pending"])
       .order("created_at", { ascending: true })
       .limit(50),
-    staff.tier >= TIERS.OPS_MANAGER ? admin
-      .from("properties")
-      .select("id, title, location, type, owner_id, created_at, pdf_source_url, pdf_verified, pipeline_status")
-      .eq("creation_source", "pdf_assisted")
-      .or("and(pdf_verified.eq.false,pipeline_status.eq.pending),and(pdf_verified.eq.true,pdf_source_url.not.is.null)")
-      .order("created_at", { ascending: true })
-      .limit(50) : Promise.resolve({ data: [] }),
+    staff.tier >= TIERS.OPS_MANAGER ? listPropertyPdfReviews(admin, 50) : { drafts: [] },
   ]);
 
   return {
     submissions: submissionsRes.data || [],
-    pdfDrafts: (pdfDraftsRes.data || []).map(({ pdf_source_url, owner_id, pdf_verified, ...draft }) => ({
-      ...draft,
-      sourceAttached: Boolean(resolveQueueDocument({ pdf_source_url, owner_id })),
-      cleanupPending: pdf_verified,
-    })),
-    pdfQueueError: pdfDraftsRes.error ? "Could not load the PDF review queue." : null,
+    pdfDrafts: pdfReviewQueue.drafts,
+    pdfQueueError: pdfReviewQueue.error || null,
   };
 }
 
@@ -53,7 +42,7 @@ export async function verifyPdfDraftAction(input) {
 
   const result = await verifyPropertyPdfDraft(createAdminClient(), input, staff.id);
   if (result.error) return { error: result.error, status: result.status };
-  return { success: true, cleanupPending: result.cleanupPending };
+  return { success: true, cleanupPending: result.cleanupPending, discarded: Boolean(result.discarded) };
 }
 
 export async function approveSubmissionAction({ propertyId, reason = null }) {
@@ -76,9 +65,9 @@ export async function approveSubmissionAction({ propertyId, reason = null }) {
   }
 
   // Rule: AGENTS.md §2.4: PDF-assisted drafts must be verified before publish
-  if (property.creation_source === "pdf_assisted" && !property.pdf_verified) {
+  if (getPdfPublicationBlock(property)) {
     return {
-      error: "Publication blocked: PDF-assisted draft has not been verified against its source document yet.",
+      error: "Only a verified PDF-assisted draft can be published.",
     };
   }
 

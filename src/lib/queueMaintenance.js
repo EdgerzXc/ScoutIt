@@ -1,8 +1,5 @@
-import { resolveQueueDocument } from "./propertyQueueStorage";
-
 /**
- * Stale Queue Temp Object & Draft Purge Lifecycle
- * Cleans up abandoned or hung ai_drafting uploads older than maxAgeHours.
+ * Move stalled drafts out of processing while retaining any attached source for staff.
  */
 export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24 } = {}) {
   if (!supabaseAdmin) return { purged: 0, errors: [] };
@@ -12,7 +9,7 @@ export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24 } = 
   try {
     const { data: staleRows, error: fetchErr } = await supabaseAdmin
       .from("properties")
-      .select("id, owner_id, pdf_source_url, details")
+      .select("id, details")
       .eq("pipeline_status", "ai_drafting")
       .lt("created_at", cutoff);
 
@@ -24,21 +21,7 @@ export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24 } = 
     const errors = [];
 
     for (const row of staleRows) {
-      const document = resolveQueueDocument(row);
-      if (document) {
-        try {
-          const { error } = await supabaseAdmin.storage.from(document.bucket).remove([document.path]);
-          if (error) {
-            errors.push(`Storage delete failed for ${row.id}: ${error.message}`);
-            continue;
-          }
-        } catch (removeErr) {
-          errors.push(`Storage delete failed for ${row.id}: ${removeErr.message}`);
-          continue;
-        }
-      }
-
-      const { error: updateErr } = await supabaseAdmin
+      const { data: quarantined, error: updateErr } = await supabaseAdmin
         .from("properties")
         .update({
           pipeline_status: "quarantined",
@@ -48,11 +31,14 @@ export async function purgeStaleQueueDocs(supabaseAdmin, { maxAgeHours = 24 } = 
             quarantined_at: new Date().toISOString(),
           },
         })
-        .eq("id", row.id);
+        .eq("id", row.id)
+        .eq("pipeline_status", "ai_drafting")
+        .select("id")
+        .maybeSingle();
 
       if (updateErr) {
         errors.push(`Status update failed for ${row.id}: ${updateErr.message}`);
-      } else {
+      } else if (quarantined) {
         purgedCount += 1;
       }
     }

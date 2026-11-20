@@ -5,6 +5,7 @@ import { insertProperty } from "@/lib/airtable";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { recordHistoricalSlug } from "@/lib/propertyRedirects";
+import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 
 export async function POST(request) {
   try {
@@ -37,6 +38,11 @@ export async function POST(request) {
     if (fetchError || !submission) {
       console.error("[ADMIN API] Failed to fetch submission:", fetchError);
       return NextResponse.json({ error: "Submission not found or error fetching" }, { status: 404 });
+    }
+
+    const pdfBlock = getPdfPublicationBlock(submission);
+    if (pdfBlock) {
+      return NextResponse.json({ error: "Only a verified PDF-assisted draft can be published.", reason: pdfBlock }, { status: 422 });
     }
 
     // 2. Insert into Airtable (inheriting exact resolved coordinates from Supabase)

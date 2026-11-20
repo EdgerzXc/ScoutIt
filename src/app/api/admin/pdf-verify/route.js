@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { notifyUser } from "@/lib/notifications";
-import { resolveQueueDocument } from "@/lib/propertyQueueStorage";
-import { loadPropertyPdfReview, verifyPropertyPdfDraft } from "@/lib/propertyPdfReview";
+import { listPropertyPdfReviews, loadPropertyPdfReview, verifyPropertyPdfDraft } from "@/lib/propertyPdfReview";
 
 const NO_STORE = { "Cache-Control": "private, no-store" };
 
@@ -23,19 +22,8 @@ export async function GET(request) {
       return review.error ? json({ error: review.error }, review.status) : json(review);
     }
 
-    const { data, error } = await supabaseAdmin.from("properties")
-      .select("id, title, location, type, owner_id, pdf_source_url, pdf_verified")
-      .eq("creation_source", "pdf_assisted")
-      .or("and(pdf_verified.eq.false,pipeline_status.eq.pending),and(pdf_verified.eq.true,pdf_source_url.not.is.null)")
-      .order("created_at", { ascending: true }).limit(100);
-    if (error) return json({ error: "Could not load the verification queue." }, 503);
-
-    const drafts = (data || []).map(({ pdf_source_url, owner_id, pdf_verified, ...draft }) => ({
-      ...draft,
-      sourceAttached: Boolean(resolveQueueDocument({ pdf_source_url, owner_id })),
-      cleanupPending: pdf_verified,
-    }));
-    return json({ drafts });
+    const { drafts, error } = await listPropertyPdfReviews(supabaseAdmin, 100);
+    return error ? json({ error }, 503) : json({ drafts });
   } catch (error) {
     console.error("[pdf-review] Unable to read verification queue:", error?.code || error?.name);
     return json({ error: "Could not load the verification queue." }, 500);
@@ -62,7 +50,7 @@ export async function POST(request) {
         notificationType: "pdf_verified",
       }).catch(() => {});
     }
-    return json({ success: true, cleanupPending });
+    return json({ success: true, cleanupPending, ...(result.discarded ? { discarded: true } : {}) });
   } catch (error) {
     console.error("[pdf-review] Unable to record verification:", error?.code || error?.name);
     return json({ error: "Could not record the verification." }, 500);

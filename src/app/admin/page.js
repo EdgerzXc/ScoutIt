@@ -157,7 +157,7 @@ function AdminPageInner() {
     }
   }
 
-  async function handleVerifyPdfDraft(propertyId, cleanupOnly) {
+  async function handleVerifyPdfDraft(propertyId, cleanupOnly, discard = false) {
     setPdfProcessingId(propertyId);
     setMessage(null);
     try {
@@ -166,6 +166,7 @@ function AdminPageInner() {
         headers: await authHeaders(),
         body: JSON.stringify({
           propertyId,
+          ...(discard ? { discard: true } : {}),
           ...(cleanupOnly ? {} : {
             sourceReviewed: true,
             sourceVersion: pdfReview?.sourceVersion,
@@ -177,9 +178,10 @@ function AdminPageInner() {
       if (res.status === 409 && !cleanupOnly) setPdfReview(null);
       if (!res.ok) throw new Error(result.error || "Could not record the verification.");
       setPdfReview(null);
-      const text = result.cleanupPending
-        ? "The draft is verified. The source PDF is still stored. You can retry deletion."
-        : cleanupOnly ? "Source PDF deleted." : "Draft verified and source PDF deleted. The owner can publish.";
+      const text = result.discarded
+        ? result.cleanupPending ? "Discard was recorded. You can retry deleting the stored PDF." : "Source PDF deleted. The listing remains quarantined."
+        : result.cleanupPending ? "The draft is verified. The source PDF is still stored. You can retry deletion."
+          : cleanupOnly ? "Source PDF deleted." : "Draft verified and source PDF deleted. The owner can publish.";
       setMessage({ type: "success", text });
       await fetchPdfQueue();
     } catch (err) {
@@ -501,17 +503,27 @@ function AdminPageInner() {
                           </span>
                         </div>
                         <div className="info-meta">
-                          {draft.cleanupPending ? "Verification was recorded. Delete the source PDF to finish processing."
+                          {draft.cleanupPending ? "The staff decision was recorded. Retry source deletion."
+                            : draft.quarantined ? "Processing stopped. Review the quarantine before deleting the source."
                             : draft.sourceAttached ? "Compare the draft with the source before confirming."
                             : "A source PDF is required before this draft can be verified."}
                         </div>
                         {pdfReview?.propertyId === draft.id && (
                           <div className="mt-3 break-words">
-                            <a href={pdfReview.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline"
-                              onClick={() => setPdfReview((review) => ({ ...review, sourceOpened: true }))}>
-                              Download source PDF
-                            </a>
-                            <PdfReviewFacts reviewedDraft={pdfReview.reviewedDraft} />
+                            {pdfReview.quarantined ? (
+                              <>
+                                <p>{pdfReview.quarantineReason}</p>
+                                <p>The owner can upload a new file or enter the listing manually. Discarding this source keeps the listing quarantined.</p>
+                              </>
+                            ) : (
+                              <>
+                                <a href={pdfReview.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline"
+                                  onClick={() => setPdfReview((review) => ({ ...review, sourceOpened: true }))}>
+                                  Download source PDF
+                                </a>
+                                <PdfReviewFacts reviewedDraft={pdfReview.reviewedDraft} />
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -519,19 +531,19 @@ function AdminPageInner() {
                       <div className="submission-actions">
                         {draft.cleanupPending ? (
                           <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId)}
-                            onClick={() => handleVerifyPdfDraft(draft.id, true)}>
+                            onClick={() => handleVerifyPdfDraft(draft.id, true, draft.quarantined)}>
                             Retry PDF deletion
                           </button>
                         ) : draft.sourceAttached && (
                           <>
                             <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId)}
                               onClick={() => loadPdfReview(draft.id)}>
-                              {pdfReview?.propertyId === draft.id ? "Refresh source link" : "Review draft and PDF"}
+                              {draft.quarantined ? "Review quarantine" : pdfReview?.propertyId === draft.id ? "Refresh source link" : "Review draft and PDF"}
                             </button>
                             {pdfReview?.propertyId === draft.id && (
-                              <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId) || !pdfReview.sourceOpened}
-                                onClick={() => handleVerifyPdfDraft(draft.id, false)}>
-                                Confirm review and delete PDF
+                              <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId) || (!pdfReview.quarantined && !pdfReview.sourceOpened)}
+                                onClick={() => handleVerifyPdfDraft(draft.id, false, pdfReview.quarantined)}>
+                                {pdfReview.quarantined ? "Record discard and delete PDF" : "Confirm review and delete PDF"}
                               </button>
                             )}
                           </>

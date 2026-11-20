@@ -18,9 +18,19 @@ export function resolveQueueDocument(property) {
   return null;
 }
 
-export async function removeReviewedQueueDocument(client, property) {
-  const document = resolveQueueDocument({ owner_id: property.owner_id, pdf_source_url: property.pdf_source_url });
-  if (!property.pdf_verified || !document) return false;
+export function removeReviewedQueueDocument(client, property) {
+  if (!property.pdf_verified) return false;
+  return removeQueueDocument(client, property, "pdf_verified", true);
+}
+
+export function removeQuarantinedQueueDocument(client, property) {
+  if (property.pipeline_status !== "quarantined" || property.pdf_verified) return false;
+  return removeQueueDocument(client, property, "pipeline_status", "quarantined");
+}
+
+async function removeQueueDocument(client, property, guardColumn, guardValue) {
+  const document = resolveQueueDocument(property);
+  if (!document) return false;
 
   try {
     const { error: storageError } = await client.storage.from(document.bucket).remove([document.path]);
@@ -33,7 +43,7 @@ export async function removeReviewedQueueDocument(client, property) {
       .from("properties")
       .update({ pdf_source_url: null })
       .eq("id", property.id)
-      .eq("pdf_verified", true)
+      .eq(guardColumn, guardValue)
       .eq("pdf_source_url", document.path);
     if (updateError) {
       console.error("[pdf-review] Failed to clear the removed document reference:", property.id, updateError.code);

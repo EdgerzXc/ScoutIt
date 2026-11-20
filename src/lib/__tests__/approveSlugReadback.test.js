@@ -56,6 +56,19 @@ const req = () =>
   });
 
 describe("A-146 — staff approve persists Airtable's computed Slug", () => {
+  it("refuses a quarantined PDF before creating a public Airtable record", async () => {
+    Object.assign(submissionRow, { creation_source: "pdf_assisted", pipeline_status: "quarantined", pdf_verified: true });
+    insertProperty.mockClear();
+    try {
+      const response = await POST(req());
+      expect(response.status).toBe(422);
+      expect((await response.json()).reason).toBe("pdf_source_quarantined");
+      expect(insertProperty).not.toHaveBeenCalled();
+    } finally {
+      Object.assign(submissionRow, { creation_source: "manual", pipeline_status: "pending", pdf_verified: false });
+    }
+  });
+
   it("writes slug and adopts canonical when none is locked", async () => {
     capturedUpdate = null;
     const res = await POST(req());

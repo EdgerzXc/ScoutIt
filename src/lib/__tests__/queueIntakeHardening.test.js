@@ -55,12 +55,18 @@ describe("Queue Intake Quota, Private Lifecycle, and Concurrency (A-303)", () =>
   });
 
   describe("purgeStaleQueueDocs", () => {
-    it("identifies expired ai_drafting items, purges storage, and marks them quarantined", async () => {
-      let removedPaths = [];
-      let updatedRows = [];
+    it("quarantines a stalled draft with a guarded transition and preserves Storage", async () => {
+      const storage = { from: vi.fn() };
+      const filters = [];
+      const updateQuery = {
+        eq(column, value) { filters.push([column, value]); return updateQuery; },
+        select: () => updateQuery,
+        maybeSingle: async () => ({ data: { id: "stale-1" } }),
+      };
+      const update = vi.fn(() => updateQuery);
 
       const mockAdmin = {
-        from: (table) => ({
+        from: () => ({
           select: () => ({
             eq: () => ({
               lt: async () => ({
@@ -76,28 +82,16 @@ describe("Queue Intake Quota, Private Lifecycle, and Concurrency (A-303)", () =>
               }),
             }),
           }),
-          update: (payload) => ({
-            eq: async (col, val) => {
-              updatedRows.push({ id: val, payload });
-              return { error: null };
-            },
-          }),
+          update,
         }),
-        storage: {
-          from: () => ({
-            remove: async (paths) => {
-              removedPaths.push(...paths);
-              return { error: null };
-            },
-          }),
-        },
+        storage,
       };
 
       const result = await purgeStaleQueueDocs(mockAdmin, { maxAgeHours: 24 });
       expect(result.purged).toBe(1);
-      expect(removedPaths).toEqual(["temp_queue_docs/u-1/token_stale.pdf"]);
-      expect(updatedRows[0].payload.pipeline_status).toBe("quarantined");
-      expect(updatedRows[0].payload.details.quarantine_reason).toContain("Stale intake TTL expired");
+      expect(storage.from).not.toHaveBeenCalled();
+      expect(filters).toEqual([["id", "stale-1"], ["pipeline_status", "ai_drafting"]]);
+      expect(update).toHaveBeenCalledWith(expect.objectContaining({ pipeline_status: "quarantined" }));
     });
   });
 

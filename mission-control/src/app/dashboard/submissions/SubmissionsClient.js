@@ -86,8 +86,9 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
     try {
       const res = await verifyPdfDraftAction({
         propertyId: draft.id,
+        ...(draft.quarantined ? { discard: true } : {}),
         ...(comparison ? {
-          sourceReviewed: comparison.sourceOpened,
+          sourceReviewed: comparison.quarantined || comparison.sourceOpened,
           sourceVersion: comparison.sourceVersion,
           reviewedDraft: comparison.reviewedDraft,
         } : {}),
@@ -100,9 +101,10 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
         } else setError(res.error);
       } else {
         reviewDialog.current?.close();
-        setSuccess(res.cleanupPending
-          ? "Verification was recorded. Retry deleting the stored PDF."
-          : comparison ? "Draft verified and source deleted. The owner can publish." : "Source PDF deleted.");
+        setSuccess(res.discarded
+          ? res.cleanupPending ? "Discard was recorded. Retry deleting the stored PDF." : "Source PDF deleted. The listing remains quarantined."
+          : res.cleanupPending ? "Verification was recorded. Retry deleting the stored PDF."
+            : comparison ? "Draft verified and source deleted. The owner can publish." : "Source PDF deleted.");
         setPdfDrafts((prev) => res.cleanupPending
           ? prev.map((item) => item.id === draft.id ? { ...item, cleanupPending: true } : item)
           : prev.filter((item) => item.id !== draft.id));
@@ -306,7 +308,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                           {new Date(draft.created_at).toLocaleDateString()}
                         </td>
                         <td className="py-3.5">
-                          {draft.cleanupPending ? "Deletion pending" : draft.sourceAttached ? "Attached" : "PDF missing"}
+                          {draft.cleanupPending ? "Deletion pending" : draft.quarantined ? "Quarantined" : draft.sourceAttached ? "Attached" : "PDF missing"}
                         </td>
                         <td className="py-3.5 text-right">
                           {isOpsManager ? (
@@ -316,7 +318,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                               disabled={Boolean(busyId) || !draft.sourceAttached}
                               className="min-h-11 px-3 py-1 rounded border border-line text-gold text-xs font-mono uppercase tracking-wider hover:border-gold/40 focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-50"
                             >
-                              {isBusy ? "Working…" : draft.cleanupPending ? "Retry deletion" : "Review source"}
+                              {isBusy ? "Working…" : draft.cleanupPending ? "Retry deletion" : draft.quarantined ? "Review quarantine" : "Review source"}
                             </button>
                           ) : (
                             <span className="text-xs font-mono text-white/60 uppercase">Tier 2+</span>
@@ -338,14 +340,23 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
         className="fixed inset-0 m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-xl border border-line bg-surface p-5 text-white backdrop:bg-black/80 sm:p-6"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="pdf-review-heading" className="text-xl font-semibold">Review source PDF</h2>
+          <h2 id="pdf-review-heading" className="text-xl font-semibold">{review?.draft.quarantined ? "Review quarantined PDF" : "Review source PDF"}</h2>
           <button type="button" onClick={() => reviewDialog.current.close()} className="min-h-11 rounded border border-line px-3 font-mono text-xs uppercase tracking-wider focus-visible:outline-2 focus-visible:outline-gold">Close</button>
         </div>
         {review?.draft?.title && <p className="mt-1 break-words text-sm text-white/70">{review.draft.title}</p>}
         {reviewError && <p className="mt-3 text-sm text-red-400" role="alert">{reviewError}</p>}
-        {review && !review.reviewedDraft && (
+        {review && !review.reviewedDraft && !review.quarantined && (
           busyId === review.draft.id ? <p role="status" className="mt-3 text-sm text-white/70">Opening review…</p>
             : <button type="button" className="mt-3 min-h-11 text-sm text-gold underline focus-visible:outline-2 focus-visible:outline-gold" onClick={() => loadReview(review.draft)}>Reload review</button>
+        )}
+        {review?.quarantined && (
+          <>
+            <p className="mt-3 text-sm text-white/80">{review.quarantineReason}</p>
+            <p className="mt-2 text-sm text-white/70">The owner can upload a new file or enter the listing manually. Discarding this source keeps the listing quarantined.</p>
+            <button type="button" disabled={Boolean(busyId)} onClick={() => handleVerifyPdf(review.draft, review)} className="mt-4 min-h-11 rounded border border-line px-4 text-gold font-mono text-xs font-semibold uppercase tracking-wider focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-50">
+              {busyId === review.draft.id ? "Recording…" : "Record discard and delete PDF"}
+            </button>
+          </>
         )}
         {review?.reviewedDraft && (
           <>

@@ -7,6 +7,7 @@ import { publishPropertyToAirtable, unpublishPropertyFromAirtable } from "@/lib/
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 import { notifyUser } from "@/lib/notifications";
+import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 
 /**
  * Approve & Publish — the full publishing loop.
@@ -41,6 +42,7 @@ export async function approveProperty(formData) {
   if (fetchError || !property) {
     throw new Error(fetchError?.message || "Property not found.");
   }
+  if (getPdfPublicationBlock(property)) throw new Error("Only a verified PDF-assisted draft can be published.");
 
   // 1. Live-site publish. Throws on failure — nothing below runs.
   //

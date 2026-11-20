@@ -15,7 +15,7 @@ const MAX_PROCESS_ATTEMPTS = 3;
 /**
  * Quarantines a poison pill or corrupt listing so it does not block the queue.
  */
-async function quarantineProperty(propertyId, reason, details = {}, ownerId = null, document = null) {
+async function quarantineProperty(propertyId, reason, details = {}, ownerId = null) {
   const nowIso = new Date().toISOString();
   try {
     const { data: quarantined, error } = await supabaseAdmin
@@ -34,11 +34,6 @@ async function quarantineProperty(propertyId, reason, details = {}, ownerId = nu
       .select("id")
       .maybeSingle();
     if (error || !quarantined) return false;
-
-    if (document) {
-      const { error: cleanupError } = await supabaseAdmin.storage.from(document.bucket).remove([document.path]);
-      if (cleanupError) console.error("[queue-process] Could not remove quarantined PDF:", propertyId, cleanupError.code);
-    }
 
     await writeAuditLog(supabaseAdmin, {
       action: "PROPERTY_PROCESSING_QUARANTINED",
@@ -139,7 +134,7 @@ export async function POST(request) {
 
     // Poison-pill protection: if this property has failed too many times, quarantine it
     if (currentAttempts > MAX_PROCESS_ATTEMPTS) {
-      const quarantined = await quarantineProperty(property.id, "max_retries_exceeded", property.details, property.owner_id, document);
+      const quarantined = await quarantineProperty(property.id, "max_retries_exceeded", property.details, property.owner_id);
       if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,
@@ -163,7 +158,8 @@ export async function POST(request) {
       .eq("pipeline_status", "ai_drafting");
 
     if (!storagePath) {
-      await quarantineProperty(property.id, "missing_storage_path", property.details, property.owner_id);
+      const quarantined = await quarantineProperty(property.id, "missing_storage_path", property.details, property.owner_id);
+      if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,
         quarantined: true,
@@ -181,7 +177,8 @@ export async function POST(request) {
 
       if (dlError || !dlBlob) {
         console.warn("[queue-process] Storage download failed:", dlError?.message);
-        await quarantineProperty(property.id, "storage_download_failed", { ...property.details, dl_error: dlError?.message }, property.owner_id);
+        const quarantined = await quarantineProperty(property.id, "storage_download_failed", { ...property.details, dl_error: dlError?.message }, property.owner_id);
+        if (!quarantined) return NextResponse.json({ processed: 0 });
         return NextResponse.json({
           success: false,
           quarantined: true,
@@ -192,7 +189,8 @@ export async function POST(request) {
       blob = dlBlob;
     } catch (dlException) {
       console.error("[queue-process] Error reading PDF:", dlException);
-      await quarantineProperty(property.id, "storage_download_exception", { ...property.details, error: dlException.message }, property.owner_id);
+      const quarantined = await quarantineProperty(property.id, "storage_download_exception", { ...property.details, error: dlException.message }, property.owner_id);
+      if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,
         quarantined: true,
@@ -204,7 +202,7 @@ export async function POST(request) {
     // 2. Oversize check: Enforce MAX_PDF_BYTES (25 MB)
     if (blob.size > MAX_PDF_BYTES) {
       console.warn(`[queue-process] PDF size ${blob.size} exceeds maximum ${MAX_PDF_BYTES} bytes`);
-      const quarantined = await quarantineProperty(property.id, "pdf_oversize", { ...property.details, size_bytes: blob.size, max_bytes: MAX_PDF_BYTES }, property.owner_id, document);
+      const quarantined = await quarantineProperty(property.id, "pdf_oversize", { ...property.details, size_bytes: blob.size, max_bytes: MAX_PDF_BYTES }, property.owner_id);
       if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,
@@ -246,7 +244,7 @@ export async function POST(request) {
       extractedText = (rawText || "").trim().slice(0, MAX_RAW_TEXT_CHARS);
     } catch (pdfErr) {
       console.error("[queue-process] Corrupt PDF extraction failed:", pdfErr.message);
-      const quarantined = await quarantineProperty(property.id, "corrupt_pdf", { ...property.details, error: pdfErr.message }, property.owner_id, document);
+      const quarantined = await quarantineProperty(property.id, "corrupt_pdf", { ...property.details, error: pdfErr.message }, property.owner_id);
       if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json(
         {
@@ -260,7 +258,7 @@ export async function POST(request) {
     }
 
     if (!extractedText) {
-      const quarantined = await quarantineProperty(property.id, "no_readable_text", property.details, property.owner_id, document);
+      const quarantined = await quarantineProperty(property.id, "no_readable_text", property.details, property.owner_id);
       if (!quarantined) return NextResponse.json({ processed: 0 });
       return NextResponse.json({
         success: false,

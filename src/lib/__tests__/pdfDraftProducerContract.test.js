@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 
 // A-076 — the PRODUCER half of the PDF verification gate.
 //
@@ -47,11 +48,28 @@ describe("A-076 · PDF-assisted drafts are tagged at creation", () => {
   it("the publish gate refuses with an explanation the owner can act on", () => {
     const src = read("src/app/api/dashboard/publish/route.js");
 
-    expect(src).toMatch(/creation_source === 'pdf_assisted' && !currentSubmission\.pdf_verified/);
+    expect(src).toContain("getPdfPublicationBlock(currentSubmission)");
     // A refusal with no next step is a dead end. The owner must learn that
     // someone else is acting and that they need not resubmit.
     expect(src).toMatch(/reason:\s*"pdf_verification_pending"/);
     expect(src).toMatch(/do not need to resubmit/);
+  });
+
+  it("blocks quarantined PDFs in every publication entry point before Airtable can write", () => {
+    expect(getPdfPublicationBlock({ creation_source: "pdf_assisted", pipeline_status: "quarantined", pdf_verified: true })).toBe("pdf_source_quarantined");
+    expect(getPdfPublicationBlock({ creation_source: "pdf_assisted", pipeline_status: "pending", pdf_verified: false })).toBe("pdf_verification_pending");
+    expect(getPdfPublicationBlock({ creation_source: "pdf_assisted", pipeline_status: "pending", pdf_verified: true })).toBeNull();
+    expect(getPdfPublicationBlock({ creation_source: "manual", pipeline_status: "pending" })).toBeNull();
+    for (const [file, gate, write] of [
+      ["src/app/api/dashboard/publish/route.js", "getPdfPublicationBlock(currentSubmission)", "await insertProperty("],
+      ["src/app/api/admin/approve/route.js", "getPdfPublicationBlock(submission)", "await insertProperty("],
+      ["mission-control/src/app/dashboard/cms/actions.js", "getPdfPublicationBlock(property)", "await publishPropertyToAirtable("],
+      ["mission-control/src/app/dashboard/submissions/actions.js", "getPdfPublicationBlock(property)", "await publishPropertyToAirtable("],
+    ]) {
+      const code = read(file);
+      expect(code.indexOf(gate)).toBeGreaterThan(0);
+      expect(code.indexOf(write)).toBeGreaterThan(code.indexOf(gate));
+    }
   });
 
   it("the staff unlock is reachable from the console", () => {

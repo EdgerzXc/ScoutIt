@@ -13,6 +13,8 @@ let auth;
 let draft;
 let recordResult;
 let factsResult;
+let dispositionResult;
+let dispositionApproved;
 let storageAvailable;
 let removeResult;
 
@@ -50,7 +52,10 @@ const serviceClient = {
       },
       order: () => query,
       limit: async () => ({ data: [draft] }),
-      maybeSingle: async () => ({ data: draft }),
+      in: async () => ({ data: dispositionApproved ? [{ property_id: propertyId, source_path: sourcePath }] : [] }),
+      maybeSingle: async () => ({ data: table === "property_pdf_source_dispositions"
+        ? dispositionApproved ? { property_id: propertyId } : null
+        : draft }),
       update: (fields) => {
         dbCalls.push(["update", fields]);
         return query;
@@ -60,6 +65,10 @@ const serviceClient = {
   },
   async rpc(name, args) {
     dbCalls.push(["rpc", name, args]);
+    if (name === "record_quarantined_property_pdf_disposition") {
+      if (dispositionResult.data) dispositionApproved = true;
+      return dispositionResult;
+    }
     return name === "read_property_pdf_review_facts" ? factsResult : recordResult;
   },
 };
@@ -88,6 +97,8 @@ describe("staff PDF review", () => {
     draft = { id: propertyId, owner_id: ownerId, title: "Listing", pipeline_status: "pending", pdf_verified: false, pdf_source_url: sourcePath };
     recordResult = { data: true };
     factsResult = { data: { title: "Listing", floor_sqm: 24, listing_details: { building_grade: "A" } } };
+    dispositionResult = { data: true };
+    dispositionApproved = false;
     storageAvailable = true;
     removeResult = { data: [], error: null };
   });
@@ -185,5 +196,45 @@ describe("staff PDF review", () => {
     const retry = await pdfVerify.POST(request({ propertyId }));
     expect(await retry.json()).toEqual({ success: true, cleanupPending: false });
     expect(dbCalls.filter(([op]) => op === "rpc")).toHaveLength(1);
+  });
+
+  it("shows a quarantined item for staff without signing or exposing the failed file", async () => {
+    draft.pipeline_status = "quarantined";
+    draft.details = { quarantine_reason: "no_readable_text" };
+    const list = await (await pdfVerify.GET(request())).json();
+    expect(list.drafts[0]).toMatchObject({ quarantined: true, cleanupPending: false, sourceAttached: true });
+    expect(JSON.stringify(list)).not.toContain(sourcePath);
+    const info = await (await pdfVerify.GET(request(null, `?propertyId=${propertyId}`))).json();
+    expect(info).toEqual({ quarantined: true, sourceVersion, quarantineReason: "The PDF did not contain readable text." });
+    expect(storageCalls).toEqual([]);
+  });
+
+  it("protects a quarantined file until staff record a decision for the exact source", async () => {
+    draft.pipeline_status = "quarantined";
+    expect((await pdfVerify.POST(request(attestation))).status).toBe(409);
+    expect((await pdfVerify.POST(request({ propertyId, discard: true }))).status).toBe(409);
+    expect((await pdfVerify.POST(request({ ...attestation, discard: true, sourceVersion: "old" }))).status).toBe(409);
+    dispositionResult = { error: { code: "23514" } };
+    expect((await pdfVerify.POST(request({ ...attestation, discard: true }))).status).toBe(503);
+    expect(storageCalls).toEqual([]);
+  });
+
+  it("records a quarantine discard separately from verification and retries only Storage cleanup", async () => {
+    draft.pipeline_status = "quarantined";
+    removeResult = { error: { code: "TEMPORARY" } };
+    const body = await (await pdfVerify.POST(request({ ...attestation, discard: true }))).json();
+    expect(body).toEqual({ success: true, discarded: true, cleanupPending: true });
+    expect(dbCalls).toContainEqual(["rpc", "record_quarantined_property_pdf_disposition", {
+      p_property_id: propertyId, p_source_path: sourcePath, p_staff_id: staffId,
+    }]);
+    expect(storageCalls).toContainEqual(["remove", [sourcePath]]);
+    const list = await (await pdfVerify.GET(request())).json();
+    expect(list.drafts[0]).toMatchObject({ quarantined: true, cleanupPending: true });
+    removeResult = { error: null };
+    const retried = await (await pdfVerify.POST(request({ propertyId, discard: true }))).json();
+    expect(retried).toEqual({ success: true, discarded: true, cleanupPending: false });
+    expect(dbCalls.filter(([op]) => op === "rpc")).toHaveLength(1);
+    expect(dbCalls).toContainEqual(["eq", "pipeline_status", "quarantined"]);
+    expect(dbCalls.filter(([op]) => op === "update")).toEqual([["update", { pdf_source_url: null }]]);
   });
 });

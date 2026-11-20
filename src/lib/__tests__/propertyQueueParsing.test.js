@@ -401,7 +401,7 @@ describe("Property Listing Queue · Processing and source retention", () => {
     expect(notificationLog[0].userId).toBe("test-owner-123");
   });
 
-  it("quarantines corrupt PDF, purges temporary file, and unblocks queue", async () => {
+  it("quarantines a corrupt PDF and retains its source for staff", async () => {
     // Return corrupt bytes missing %PDF header
     customDownloadHandler = () => {
       const corruptBlob = new Blob(["THIS IS CORRUPT NOT A VALID PDF AT ALL"], { type: "application/pdf" });
@@ -422,8 +422,7 @@ describe("Property Listing Queue · Processing and source retention", () => {
     expect(body.quarantined).toBe(true);
     expect(body.reason).toBe("corrupt_pdf");
 
-    // Verify corrupt file was deleted from storage
-    expect(storageRemoveCalls).toContain("temp_queue_docs/test-owner-123/123_deck.pdf");
+    expect(storageRemoveCalls).toEqual([]);
 
     // Verify status was transitioned to quarantined
     const updateOps = dbLog.filter(([op]) => op === "update");
@@ -445,6 +444,7 @@ describe("Property Listing Queue · Processing and source retention", () => {
     expect(res.status).toBe(422);
     expect(await res.json()).toMatchObject({ reason: "no_readable_text", quarantined: true });
     expect(customAssimilateHandler).not.toHaveBeenCalled();
+    expect(storageRemoveCalls).toEqual([]);
     expect(dbLog.filter(([op]) => op === "update").at(-1)[1].pipeline_status).toBe("quarantined");
   });
 
@@ -472,8 +472,7 @@ describe("Property Listing Queue · Processing and source retention", () => {
     expect(body.quarantined).toBe(true);
     expect(body.reason).toBe("pdf_oversize");
 
-    // Verify storage was purged
-    expect(storageRemoveCalls).toContain("temp_queue_docs/test-owner-123/123_deck.pdf");
+    expect(storageRemoveCalls).toEqual([]);
 
     // Verify status is quarantined
     const updateOps = dbLog.filter(([op]) => op === "update");
@@ -497,5 +496,6 @@ describe("Property Listing Queue · Processing and source retention", () => {
 
     expect(body.quarantined).toBe(true);
     expect(body.reason).toBe("max_retries_exceeded");
+    expect(storageRemoveCalls).toEqual([]);
   });
 });

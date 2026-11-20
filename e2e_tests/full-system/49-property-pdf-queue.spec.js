@@ -102,6 +102,45 @@ test('staff must reopen a changed draft before confirming and can retry PDF dele
   ]);
 });
 
+test('staff can record a quarantine discard and retry deletion without verifying the listing', async ({ page, baseURL }) => {
+  test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
+  await signInAsMock(page, MOCK_OWNER_EMPTY);
+  await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
+
+  const propertyId = '87998441-6c10-4a24-ac27-5614c6867355';
+  const sourceVersion = 'quarantined-fixture-source';
+  const decisions = [];
+  await page.route('**/api/admin/pdf-verify**', (route) => {
+    const request = route.request();
+    if (request.method() === 'POST') {
+      decisions.push(request.postDataJSON());
+      return route.fulfill({ json: { success: true, discarded: true, cleanupPending: decisions.length === 1 } });
+    }
+    if (new URL(request.url()).searchParams.has('propertyId')) {
+      return route.fulfill({ json: { quarantined: true, sourceVersion, quarantineReason: 'The PDF did not contain readable text.' } });
+    }
+    return route.fulfill({ json: {
+      drafts: decisions.length > 1 ? [] : [{ id: propertyId, title: 'Quarantined fixture', sourceAttached: true, quarantined: true, cleanupPending: decisions.length === 1 }],
+    } });
+  });
+
+  await gotoAndSettle(page, '/admin');
+  await page.getByRole('button', { name: /PDF Drafts/ }).click();
+  await page.getByRole('button', { name: 'Review quarantine' }).click();
+  await expect(page.getByText('The PDF did not contain readable text.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download source PDF' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Confirm review and delete PDF' })).toHaveCount(0);
+  expect(decisions).toEqual([]);
+  await page.getByRole('button', { name: 'Record discard and delete PDF' }).click();
+  await expect(page.getByText('Discard was recorded. You can retry deleting the stored PDF.')).toBeVisible();
+  await page.getByRole('button', { name: 'Retry PDF deletion' }).click();
+  await expect(page.getByText('Source PDF deleted. The listing remains quarantined.')).toBeVisible();
+  expect(decisions).toEqual([
+    { propertyId, discard: true, sourceReviewed: true, sourceVersion },
+    { propertyId, discard: true },
+  ]);
+});
+
 test('large property PDFs go directly to private storage', async ({ page, baseURL }) => {
   test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
   await signInAsMock(page, MOCK_OWNER_EMPTY);
