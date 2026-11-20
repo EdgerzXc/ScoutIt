@@ -149,7 +149,7 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
 
     test("GAP-82: cmsCache persists publisher rebuild window in Redis for cross-isolate awareness", () => {
       const content = read("src/lib/cmsCache.js");
-      expect(content).toContain('CMS_PUBLISHER_REBUILD_KEY = "cms_publisher_rebuild_until"');
+      expect(content).toContain('CMS_PUBLISHER_REBUILD_KEY = publicCatalogueCacheKey("cms_publisher_rebuild_until")');
       expect(content).toContain("CMS_PUBLISHER_REBUILD_KEY,");
       expect(content).toContain("redis.get(CMS_PUBLISHER_REBUILD_KEY)");
     });

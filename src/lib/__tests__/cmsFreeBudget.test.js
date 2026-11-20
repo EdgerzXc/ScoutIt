@@ -69,6 +69,7 @@ vi.mock("@/lib/supabaseAdmin", () => ({
 }));
 const recordSystemEvent = vi.fn(async () => {});
 vi.mock("@/lib/systemEvents", () => ({ recordSystemEvent }));
+vi.mock("server-only", () => ({}));
 
 const prior = {
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -79,6 +80,8 @@ const prior = {
 
 beforeEach(() => {
   vi.resetModules();
+  vi.stubEnv("VERCEL_ENV", "production");
+  vi.stubEnv("VERCEL_TARGET_ENV", undefined);
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-10-01T00:00:00.000Z"));
   entries.clear();
@@ -91,6 +94,8 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   for (const [key, value] of Object.entries({
     UPSTASH_REDIS_REST_URL: prior.url,
     UPSTASH_REDIS_REST_TOKEN: prior.token,
@@ -130,6 +135,63 @@ describe("U-042 Free-plan CMS read budget", () => {
     await getCmsBundle();
     expect(fetchProperties).toHaveBeenCalledTimes(2);
     expect(incr).toHaveBeenCalledWith("cms_bundle_generation");
+  });
+
+  it("keeps Preview snapshots, locks and both invalidators out of the production namespace", async () => {
+    const production = await import("@/lib/cmsCache");
+    await production.getCmsBundle();
+    const productionKeys = [...entries.keys()].filter((key) => key.startsWith("cms_"));
+    const snapshot = await get("cms_bundle");
+
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("AIRTABLE_BASE_ID", "sandbox-base");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://sandbox.supabase.co");
+    vi.resetModules();
+    const { getCmsBundle, invalidateCmsBundle } = await import("@/lib/cmsCache");
+    const { publicCatalogueCacheKey } = await import("@/lib/publicCatalogueCacheKey.mjs");
+    fetchProperties.mockResolvedValueOnce([{ id: "rec-preview", slug: "preview-space" }]);
+    const firstPreview = await getCmsBundle();
+    expect(firstPreview.source).toBe("airtable");
+    expect(firstPreview.properties.map(({ slug }) => slug)).toContain("preview-space");
+    expect(fetchProperties).toHaveBeenLastCalledWith("test-key", "sandbox-base", expect.any(Object));
+    expect(evalScript).toHaveBeenCalledWith(expect.any(String), [publicCatalogueCacheKey("cms_bundle_build_lock")], expect.any(Array));
+    expect(await get(publicCatalogueCacheKey("cms_bundle_last_good"))).toBeTruthy();
+
+    const { purgePublicCatalogueCache } = await import("../../../mission-control/src/lib/publicCatalogueCache.js");
+    const redisRest = vi.fn(async (url) => {
+      const [, command, argument] = new URL(url).pathname.split("/");
+      const key = decodeURIComponent(argument);
+      const result = command === "incr" ? await incr(key) : await del(key);
+      return Response.json({ result });
+    });
+    vi.stubGlobal("fetch", redisRest);
+    expect(await purgePublicCatalogueCache()).toMatchObject({ purged: true });
+    expect(await get(publicCatalogueCacheKey("cms_bundle"))).toBeNull();
+    expect(await get(publicCatalogueCacheKey("cms_bundle_generation"))).toBe(1);
+    expect(await invalidateCmsBundle()).toMatchObject({ sharedCachePurged: true });
+    expect(await get(publicCatalogueCacheKey("cms_bundle_generation"))).toBe(2);
+    expect(await get(publicCatalogueCacheKey("cms_publisher_rebuild_until"))).toBeTruthy();
+    expect(await get("cms_bundle")).toEqual(snapshot);
+    expect([...entries.keys()].filter((key) => key.startsWith("cms_"))).toEqual(productionKeys);
+  });
+
+  it("scopes the same Preview key independently by target, Airtable base and Supabase host", async () => {
+    const { publicCatalogueCacheKey } = await import("@/lib/publicCatalogueCacheKey.mjs");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("AIRTABLE_BASE_ID", "sandbox-base");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://sandbox.supabase.co/");
+    const previewKey = publicCatalogueCacheKey("cms_bundle");
+    expect(previewKey).not.toBe("cms_bundle");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://sandbox.supabase.co");
+    expect(publicCatalogueCacheKey("cms_bundle")).toBe(previewKey);
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://other.supabase.co");
+    expect(publicCatalogueCacheKey("cms_bundle")).not.toBe(previewKey);
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://sandbox.supabase.co");
+    vi.stubEnv("AIRTABLE_BASE_ID", "other-base");
+    expect(publicCatalogueCacheKey("cms_bundle")).not.toBe(previewKey);
+    vi.stubEnv("AIRTABLE_BASE_ID", "sandbox-base");
+    vi.stubEnv("VERCEL_TARGET_ENV", "qa");
+    expect(publicCatalogueCacheKey("cms_bundle")).not.toBe(previewKey);
   });
 
   it("reports a local-only purge when shared Redis is not configured", async () => {

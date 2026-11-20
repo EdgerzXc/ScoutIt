@@ -28,6 +28,7 @@ import { CITY_HUB } from "@/lib/transit";
 import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "@/lib/cmsFallback";
 import { normalizeSampleBundle } from "@/lib/sampleInventory";
 import { getServerMapboxToken } from "@/lib/mapboxToken";
+import { publicCatalogueCacheKey } from "@/lib/publicCatalogueCacheKey.mjs";
 import {
   PUBLISHED_BRIEFING_FILTER,
   isPublishedBriefing,
@@ -56,15 +57,16 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 const FRESH_TTL_MS = 60 * 1000; // serve from memory for 60s
 const MAX_STALE_AGE_MS = 2 * 60 * 1000; // never serve an in-process snapshot for days during a long outage
 export const CMS_SHARED_TTL_S = 12 * 60 * 60;
-const CMS_BUILD_LOCK_KEY = "cms_bundle_build_lock";
-const CMS_GENERATION_KEY = "cms_bundle_generation";
+const CMS_BUNDLE_KEY = publicCatalogueCacheKey("cms_bundle");
+const CMS_BUILD_LOCK_KEY = publicCatalogueCacheKey("cms_bundle_build_lock");
+const CMS_GENERATION_KEY = publicCatalogueCacheKey("cms_bundle_generation");
 // The snapshot survives its own TTL under a separate, longer-lived key so a
 // spent monthly budget has something real to serve instead of an empty site.
-const CMS_LAST_GOOD_KEY = "cms_bundle_last_good";
+const CMS_LAST_GOOD_KEY = publicCatalogueCacheKey("cms_bundle_last_good");
 const CMS_LAST_GOOD_TTL_S = 60 * 60 * 24 * 40;
 // For how long an explicit publish/takedown may still spend budgeted calls.
 const PUBLISHER_REBUILD_WINDOW_MS = 10 * 60 * 1000;
-export const CMS_PUBLISHER_REBUILD_KEY = "cms_publisher_rebuild_until";
+export const CMS_PUBLISHER_REBUILD_KEY = publicCatalogueCacheKey("cms_publisher_rebuild_until");
 const WRITE_CURRENT_BUNDLE_SCRIPT = `
   if (redis.call('GET', KEYS[1]) or '0') ~= ARGV[1] then return 0 end
   redis.call('SET', KEYS[2], ARGV[2], 'EX', tonumber(ARGV[3]))
@@ -129,7 +131,7 @@ export async function invalidateCmsBundle() {
     // Increment before deletion. A rebuild started on another instance must
     // not repopulate an older snapshot after an owner withdraws a listing.
     await redis.incr(CMS_GENERATION_KEY);
-    await redis.del("cms_bundle");
+    await redis.del(CMS_BUNDLE_KEY);
     // A publish or takedown is an explicit instruction to be fresh now. Let the
     // rebuild it triggers draw from the monthly budget regardless of the guard.
     // A-307: Budget-aware publisher window. Only grant the rebuild window
@@ -171,7 +173,7 @@ async function buildSharedBundle() {
   if (!locked) {
     for (let attempt = 0; attempt < 10; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const shared = await redis.get("cms_bundle");
+      const shared = await redis.get(CMS_BUNDLE_KEY);
       if (shared) return { ...normalizeSampleBundle(shared), source: "upstash_redis" };
     }
     const lastGood = await redis.get(CMS_LAST_GOOD_KEY).catch(() => null);
@@ -194,7 +196,7 @@ async function buildSharedBundle() {
     // SET lets a withdrawal land between them and leaves old data for 12h.
     const stored = await redis.eval(
       WRITE_CURRENT_BUNDLE_SCRIPT,
-      [CMS_GENERATION_KEY, "cms_bundle"],
+      [CMS_GENERATION_KEY, CMS_BUNDLE_KEY],
       [String(generation ?? 0), JSON.stringify(bundle), CMS_SHARED_TTL_S],
     );
     if (Number(stored) === 1) {
@@ -440,7 +442,7 @@ export async function getCmsBundle() {
   
   if (redis) {
     try {
-      const cachedBundle = await redis.get('cms_bundle');
+      const cachedBundle = await redis.get(CMS_BUNDLE_KEY);
       if (cachedBundle) {
         const normalizedBundle = normalizeSampleBundle(cachedBundle);
         cache = { bundle: normalizedBundle, fetchedAt: now };

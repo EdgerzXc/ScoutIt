@@ -1,18 +1,19 @@
 import "server-only";
+import { publicCatalogueCacheKey } from "./publicCatalogueCacheKey.mjs";
 
 /**
  * A-060 — let Mission Control drop the public catalogue cache.
  *
- * The public site serves properties from a single Redis key (`cms_bundle`,
- * written by the main app's `src/lib/cmsCache.js`) in front of Airtable. A
+ * The public site serves properties from the Redis catalogue bundle
+ * (`cms_bundle` in production) in front of Airtable. A
  * correction that reaches Airtable but not this key is a correction a visitor
  * does not see until the twelve-hour cache happens to expire — which for a wrong map pin
  * means the thing staff were trying to fix stays wrong on screen.
  *
  * This talks to Upstash over its REST API with `fetch` rather than adding
  * `@upstash/redis` to this app, matching how `airtable.js` here already speaks
- * to a service the main app uses a client for. It clears only the one key the
- * main app owns; it never writes.
+ * to a service the main app uses a client for. Both apps derive their Preview
+ * keys from the same deployment target, Airtable base and Supabase URL.
  *
  * The main app also holds a 60-second in-process copy. That layer cannot be
  * reached from another deployment and is deliberately not chased: it expires on
@@ -49,7 +50,9 @@ export async function purgePublicCatalogueCache() {
 
   try {
     const baseUrl = url.replace(/\/$/, "");
-    const generation = await fetch(`${baseUrl}/incr/${CMS_GENERATION_KEY}`, {
+    const generationKey = encodeURIComponent(publicCatalogueCacheKey(CMS_GENERATION_KEY));
+    const bundleKey = encodeURIComponent(publicCatalogueCacheKey(CMS_BUNDLE_KEY));
+    const generation = await fetch(`${baseUrl}/incr/${generationKey}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -58,7 +61,7 @@ export async function purgePublicCatalogueCache() {
     if (!generation.ok || generationResult?.error) {
       return { purged: false, detail: `Upstash refused the catalogue generation update (${generation.status}).` };
     }
-    const res = await fetch(`${baseUrl}/del/${CMS_BUNDLE_KEY}`, {
+    const res = await fetch(`${baseUrl}/del/${bundleKey}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",

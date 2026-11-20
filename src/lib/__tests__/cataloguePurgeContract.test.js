@@ -69,7 +69,8 @@ describe("A-054 public catalogue purge on takedown", () => {
     expect(cmsCache).toContain("export async function invalidateCmsBundle()");
     expect(cmsCache).toContain("if (inflight) await inflight.catch(() => null);");
     expect(cmsCache).toContain("cache = { bundle: null, fetchedAt: 0 };");
-    expect(cmsCache).toContain('await redis.del("cms_bundle")');
+    expect(cmsCache).toContain('CMS_BUNDLE_KEY = publicCatalogueCacheKey("cms_bundle")');
+    expect(cmsCache).toContain("await redis.del(CMS_BUNDLE_KEY)");
   });
 
   it("purges the retained-removal path, not only the idempotent repair", () => {
