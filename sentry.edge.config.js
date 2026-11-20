@@ -4,7 +4,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { isLocalSentryEvent, shouldEnableSentry } from "./src/lib/sentryEventPolicy";
+import { isLocalSentryEvent, sanitizeSentryEvent, sentryPrivacyOptions, shouldEnableSentry } from "./src/lib/sentryEventPolicy";
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -14,8 +14,9 @@ Sentry.init({
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 0.1,
   sendDefaultPii: false,
+  ...sentryPrivacyOptions,
   beforeSend(event) {
-    return isLocalSentryEvent(event) ? null : event;
+    return isLocalSentryEvent(event) ? null : sanitizeSentryEvent(event);
   },
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.

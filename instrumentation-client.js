@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { isLocalSentryUrl } from "./src/lib/sentryEventPolicy";
+import { isLocalSentryUrl, sanitizeSentryEvent, sentryPrivacyOptions } from "./src/lib/sentryEventPolicy";
 
 const isLocalBrowser = typeof window !== "undefined" && isLocalSentryUrl(window.location.href);
 
@@ -23,6 +23,8 @@ Sentry.init({
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 0,
   sendDefaultPii: false,
+  ...sentryPrivacyOptions,
+  beforeSend: sanitizeSentryEvent,
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,

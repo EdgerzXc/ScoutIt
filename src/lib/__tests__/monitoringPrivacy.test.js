@@ -22,6 +22,7 @@ describe("human-pilot monitoring privacy", () => {
     ]) {
       const config = source(file);
       expect(config).toContain("sendDefaultPii: false");
+      expect(config).toContain("...sentryPrivacyOptions");
       expect(config).toContain("tracesSampleRate: 0.1");
       expect(config).not.toContain("tracesSampleRate: 1");
     }
@@ -56,7 +57,8 @@ describe("human-pilot monitoring privacy", () => {
     const server = source("sentry.server.config.js");
     expect(server).toContain("isExpectedNodeRequestAbort");
     expect(server).toContain("if (isLocalSentryEvent(event)) return null");
-    expect(server).toContain("return isExpectedNodeRequestAbort(event, hint) ? null : event");
-    expect(source("sentry.edge.config.js")).toContain("isLocalSentryEvent(event) ? null : event");
+    expect(server).toContain("return isExpectedNodeRequestAbort(event, hint) ? null : sanitizeSentryEvent(event)");
+    expect(source("sentry.edge.config.js")).toContain("isLocalSentryEvent(event) ? null : sanitizeSentryEvent(event)");
+    expect(client).toContain("beforeSend: sanitizeSentryEvent");
   });
 });

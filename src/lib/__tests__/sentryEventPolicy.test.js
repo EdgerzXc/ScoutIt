@@ -3,6 +3,8 @@ import {
   isExpectedNodeRequestAbort,
   isLocalSentryEvent,
   isLocalSentryUrl,
+  sanitizeSentryEvent,
+  sentryPrivacyOptions,
   shouldEnableSentry,
 } from "@/lib/sentryEventPolicy";
 
@@ -93,5 +95,85 @@ describe("Sentry server event policy", () => {
     expect(isLocalSentryEvent({ request: { url: "https://www.scoutit.space/" } })).toBe(false);
     expect(isLocalSentryUrl("https://www.scoutit.space/?next=localhost")).toBe(false);
     expect(isLocalSentryEvent({})).toBe(false);
+  });
+});
+
+describe("Sentry telemetry data minimization", () => {
+  it("drops request data and redacts private links in errors and captured navigation", () => {
+    const event = sanitizeSentryEvent({
+      request: {
+        method: "GET",
+        url: "https://scoutit.space/claim/private-claim?email=private-email#recovery-fragment",
+        headers: { "X-Account": "private-header" },
+        cookies: { scout_did: "private-cookie" },
+        data: "private-body",
+        query_string: "email=private-query",
+      },
+      user: { id: "opaque-id", email: "private-user" },
+      transaction: "GET /claim/private-transaction?code=private-code",
+      message: "Could not open https://scoutit.space/wishlist/shared/private-message?email=private-query",
+      contexts: {
+        nextjs: { request_path: "/claim/private-provider?source=private-query", router_path: "/claim/[token]" },
+        scoutit_report: { page_path: "/wishlist/shared/private-context" },
+      },
+      breadcrumbs: [
+        { category: "console", message: "private-console" },
+        { category: "ui.click", message: "private-dom-label" },
+        { category: "navigation", data: { from: "/reset-password#private-fragment", to: "/wishlist/shared/private-board?ref=private-query" } },
+      ],
+      exception: {
+        values: [{
+          value: "Unable to load /property/tower/via/private-attribution",
+          stacktrace: { frames: [{ filename: "https://scoutit.space/_next/chunk.js?token=private-source", lineno: 2 }] },
+        }],
+      },
+    });
+    expect(event.request).toEqual({ method: "GET", url: "https://scoutit.space/claim/[redacted]" });
+    expect(event.user).toEqual({ id: "opaque-id" });
+    expect(event.transaction).toBe("GET /claim/[redacted]");
+    expect(event.contexts).toEqual({
+      nextjs: { request_path: "/claim/[redacted]", router_path: "/claim/[redacted]" },
+      scoutit_report: { page_path: "/wishlist/shared/[redacted]" },
+    });
+    expect(event.breadcrumbs).toEqual([
+      { category: "navigation", data: { from: "/reset-password", to: "/wishlist/shared/[redacted]" } },
+    ]);
+    expect(event.exception.values[0]).toMatchObject({
+      value: "Unable to load /property/tower/via/[redacted]",
+      stacktrace: { frames: [{ filename: "https://scoutit.space/_next/chunk.js", lineno: 2 }] },
+    });
+    expect(JSON.stringify(event)).not.toContain("private-");
+  });
+
+  it("filters span attributes before transport and preserves route and status diagnostics", () => {
+    const span = sentryPrivacyOptions.beforeSendSpan({
+      description: "GET https://public.example.test/wishlist/shared/board-secret?search=query-secret",
+      data: {
+        "url.full": "https://public.example.test/wishlist/shared/board-secret?search=query-secret",
+        "url.query": "query-secret",
+        "url.fragment": "fragment-secret",
+        "http.response.header.set-cookie": "cookie-secret",
+        "http.request.body.data": "body-secret",
+        "http.response.status_code": 403,
+      },
+    });
+    expect(span).toEqual({
+      description: "GET https://public.example.test/wishlist/shared/[redacted]",
+      data: {
+        "url.full": "https://public.example.test/wishlist/shared/[redacted]",
+        "http.response.status_code": 403,
+      },
+    });
+    expect(sentryPrivacyOptions.beforeSendTransaction({
+      contexts: { trace: { data: { "url.query": "query-secret", "http.route": "/discover?q=query-secret" } } },
+    }).contexts.trace.data).toEqual({ "http.route": "/discover" });
+    expect(sentryPrivacyOptions.dataCollection).toMatchObject({
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+      stackFrameVariables: false,
+    });
   });
 });

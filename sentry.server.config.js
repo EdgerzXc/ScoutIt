@@ -6,6 +6,8 @@ import * as Sentry from "@sentry/nextjs";
 import {
   isLocalSentryEvent,
   isExpectedNodeRequestAbort,
+  sanitizeSentryEvent,
+  sentryPrivacyOptions,
   shouldEnableSentry,
 } from "./src/lib/sentryEventPolicy";
 
@@ -17,9 +19,10 @@ Sentry.init({
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 0.1,
   sendDefaultPii: false,
+  ...sentryPrivacyOptions,
   beforeSend(event, hint) {
     if (isLocalSentryEvent(event)) return null;
-    return isExpectedNodeRequestAbort(event, hint) ? null : event;
+    return isExpectedNodeRequestAbort(event, hint) ? null : sanitizeSentryEvent(event);
   },
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
