@@ -136,7 +136,7 @@ FUNCTIONAL (remembers choices you made):
 • The Ledger (localStorage): your private wishlist and saved spaces, on your device by default per Section 03.
 
 ANALYTICS (only with your consent):
-• Google Analytics (GA4: _ga, _gid and related): measures visits. Loaded only when the site is configured with a measurement id, and storage starts DENIED under Google Consent Mode v2 until you choose Accept in the cookie banner. Declining leaves measurement off; the product works identically either way.
+• Google Analytics (GA4: _ga, _gid and related) measures visits when you choose Accept in the cookie banner and the site has an Analytics measurement ID. The Analytics tag stays off until you accept. You can use ScoutIt with either choice.
 • Vercel Speed Insights: performance telemetry without cookies.
 
 Managing them: the cookie banner (shown only when Analytics is enabled) records Accept or Decline on this device. Clearing site data removes every entry above and restores the defaults; signing out clears the session tokens.`,

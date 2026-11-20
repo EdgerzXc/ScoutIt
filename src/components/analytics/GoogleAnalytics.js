@@ -1,76 +1,78 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { usePathname } from "next/navigation";
 import Script from "next/script";
+import { COOKIE_CONSENT_KEY, getCookieConsent } from "@/lib/cookieConsent";
+
+const AD_CONSENT = {
+  ad_storage: "denied",
+  ad_user_data: "denied",
+  ad_personalization: "denied",
+};
 
 function GaRouteTracker({ gaId }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (!pathname || typeof window === "undefined" || typeof window.gtag !== "function") return;
-    const search = searchParams?.toString();
-    const url = pathname + (search ? `?${search}` : "");
+    if (!pathname || getCookieConsent() !== "granted" || typeof window.gtag !== "function") return;
+    const pagePath = pathname.replace(/^\/(claim|wishlist\/shared)\/.*$/, "/$1");
     window.gtag("config", gaId, {
-      page_path: url,
-      page_location: window.location.href,
-      page_title: typeof document !== "undefined" ? document.title : "",
+      page_path: pagePath,
+      page_location: window.location.origin + pagePath,
     });
-  }, [pathname, searchParams, gaId]);
+  }, [pathname, gaId]);
 
   return null;
 }
 
 export default function GoogleAnalytics() {
-  // Env only — no hardcoded fallback (§25.5).
-  //
-  // GA measurement ids are public, so the old hardcoded `G-36WQZF409S` leaked
-  // nothing. The problem was silent misattribution: with the env var unset,
-  // every environment — local dev, preview deploys, production — quietly
-  // reported into that one property. Analytics that are confidently wrong are
-  // worse than analytics that are visibly absent, because nobody goes looking.
-  //
-  // The `if (!gaId)` guard below was already correct; the fallback made it
-  // unreachable.
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const [enabled, setEnabled] = useState(false);
+  const previousConsent = useRef(null);
+  const initialized = useRef(false);
 
-  if (!gaId) return null;
+  useEffect(() => {
+    if (!gaId) return;
+
+    function syncConsent() {
+      const granted = getCookieConsent() === "granted";
+      if (previousConsent.current === granted) return;
+      previousConsent.current = granted;
+      window[`ga-disable-${gaId}`] = !granted;
+
+      if (granted) {
+        if (!initialized.current) {
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
+          window.gtag("consent", "default", { ...AD_CONSENT, analytics_storage: "denied" });
+          window.gtag("js", new Date());
+          initialized.current = true;
+        }
+        window.gtag("consent", "update", { ...AD_CONSENT, analytics_storage: "granted" });
+      }
+      setEnabled(granted);
+    }
+
+    const handleStorage = (event) => {
+      if (event.key === COOKIE_CONSENT_KEY || event.key === null) syncConsent();
+    };
+    window.addEventListener("scoutit:cookie-consent-chosen", syncConsent);
+    window.addEventListener("storage", handleStorage);
+    syncConsent();
+    return () => {
+      window.removeEventListener("scoutit:cookie-consent-chosen", syncConsent);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [gaId]);
+
+  if (!gaId || !enabled) return null;
 
   return (
     <>
       <Script
         strategy="afterInteractive"
-        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-      />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          // A-151 — Consent Mode v2: storage boots DENIED and only the
-          // CookieConsent banner can grant analytics_storage. Without this
-          // default the config below would start measuring before any
-          // choice. Ad surfaces stay denied unconditionally — ScoutIt
-          // serves no ads.
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            var storedConsent = false;
-            try {
-              storedConsent = localStorage.getItem('scoutit_cookie_consent') === 'granted';
-            } catch (e) {}
-            gtag('consent', 'default', {
-              ad_storage: 'denied',
-              ad_user_data: 'denied',
-              ad_personalization: 'denied',
-              analytics_storage: storedConsent ? 'granted' : 'denied',
-            });
-            gtag('js', new Date());
-            gtag('config', '${gaId}', {
-              page_path: window.location.pathname,
-            });
-          `,
-        }}
+        src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`}
       />
       <Suspense fallback={null}>
         <GaRouteTracker gaId={gaId} />

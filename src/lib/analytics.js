@@ -1,5 +1,7 @@
 "use client";
 
+import { getCookieConsent } from "./cookieConsent";
+
 // GA4 outcome events.
 //
 // GA4 was already recording that people arrive (page_view, session_start) and
@@ -105,6 +107,7 @@ export function trackEvent(name, params = {}) {
   if (!EVENT_PARAM_ALLOWLIST[name]) return false;
   if (!process.env.NEXT_PUBLIC_GA_ID) return false;
   if (typeof window === "undefined") return false;
+  if (getCookieConsent() !== "granted") return false;
   if (typeof window.gtag !== "function") return false;
   try {
     const sanitized = sanitizeAnalyticsParams(name, params);

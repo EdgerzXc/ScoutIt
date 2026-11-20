@@ -7,41 +7,12 @@ import {
   setCookieConsent,
 } from "@/lib/cookieConsent";
 
-// A-151 — dark-luxury, non-intrusive cookie consent for Google Consent Mode
-// v2. Silent by design when GA4 is not configured (no GA ID → nothing to
-// consent to, so no banner). Google Analytics itself boots default-denied
-// (see GoogleAnalytics.js); this banner is the only path to granted.
-
-function pushConsentUpdate(granted) {
-  try {
-    window.dataLayer = window.dataLayer || [];
-    window.gtag =
-      window.gtag ||
-      function gtag() {
-        window.dataLayer.push(arguments);
-      };
-    window.gtag("consent", "update", {
-      ad_storage: "denied",
-      ad_user_data: "denied",
-      ad_personalization: "denied",
-      analytics_storage: granted ? "granted" : "denied",
-    });
-  } catch {
-    // Consent state is persisted regardless; the update replays on next load.
-  }
-}
-
 export default function CookieConsent() {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!gaId) return;
-    // A previous grant must reach gtag even though GA boots denied-first.
-    if (getCookieConsent() === "granted") {
-      pushConsentUpdate(true);
-      return;
-    }
+    if (!gaId || getCookieConsent() === "granted") return;
     // No stored choice yet — but only ask once the key is truly absent, so a
     // stored denial never re-prompts.
     try {
@@ -55,7 +26,6 @@ export default function CookieConsent() {
 
   const choose = (granted) => {
     setCookieConsent(granted ? "granted" : "denied");
-    pushConsentUpdate(granted);
     setVisible(false);
     window.dispatchEvent(new Event("scoutit:cookie-consent-chosen"));
   };
