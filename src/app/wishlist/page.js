@@ -672,6 +672,12 @@ export default function WishlistPage() {
                 <div className="cards-grid">
                   {group.items.map((item, index) => {
                     const key = item.property_id || item.timestamp;
+                    let href = null;
+                    if (!item.removed && item.is_broker) {
+                      href = `/brokers/${encodeURIComponent(item.property_id)}`;
+                    } else if (!item.removed && item.publicSlug) {
+                      href = `/property/${encodeURIComponent(item.publicSlug)}`;
+                    }
                     return (
                       <article
                         key={key}
@@ -710,38 +716,15 @@ export default function WishlistPage() {
 
                         {/* Card Title */}
                         <div className="card-title-area">
-                          {item.removed ? (
-                            <h3 className="card-title removed">{item.property_title}</h3>
-                          ) : item.is_broker ? (
-                            <Link
-                              href={`/brokers/${encodeURIComponent(item.property_id)}`}
-                              className="card-title-link"
-                            >
-                              <h3 className="card-title">{item.property_title}</h3>
-                            </Link>
-                          ) : !item.publicSlug ? (
-                            <h3 className="card-title">{item.property_title}</h3>
-                          ) : (
-                            <Link
-                              href={`/property/${encodeURIComponent(item.publicSlug)}`}
-                              className="card-title-link"
-                            >
-                              <h3 className="card-title">{item.property_title}</h3>
-                            </Link>
-                          )}
+                          <h3 className={`card-title${item.removed ? " removed" : ""}`}>
+                            {href ? <Link href={href} className="card-title-link">{item.property_title}</Link> : item.property_title}
+                          </h3>
                         </div>
 
                         {/* Card Actions Row */}
                         <div className="card-actions-row">
-                          {!item.removed && (item.is_broker || item.publicSlug) && (
-                            <Link
-                              href={
-                                item.is_broker
-                                  ? `/brokers/${encodeURIComponent(item.property_id)}`
-                                  : `/property/${encodeURIComponent(item.publicSlug)}`
-                              }
-                              className="card-explore-btn"
-                            >
+                          {href && (
+                            <Link href={href} className="card-explore-btn">
                               VIEW DOSSIER <span className="arrow-glyph" aria-hidden="true">→</span>
                             </Link>
                           )}
@@ -793,6 +776,7 @@ export default function WishlistPage() {
                 <div className="cards-grid">
                   {displaySignals.map((sig, index) => {
                     const key = sig.id;
+                    const href = `/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`;
                     const area = sig.requirements?.area;
                     const budget = sig.requirements?.budget;
                     const spaceType = sig.requirements?.space_type;
@@ -835,12 +819,9 @@ export default function WishlistPage() {
 
                         {/* Card Title & Specs */}
                         <div className="card-title-area">
-                          <Link
-                            href={`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`}
-                            className="card-title-link"
-                          >
-                            <h3 className="card-title">{sig.title || "Community Space Signal"}</h3>
-                          </Link>
+                          <h3 className="card-title">
+                            <Link href={href} className="card-title-link">{sig.title || "Community Space Signal"}</Link>
+                          </h3>
                           {(spaceType || area || budget) && (
                             <div className="signal-specs-strip">
                               {spaceType && <span className="spec-pill">{spaceType}</span>}
@@ -858,10 +839,7 @@ export default function WishlistPage() {
 
                         {/* Card Actions Row */}
                         <div className="card-actions-row">
-                          <Link
-                            href={`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`}
-                            className="card-explore-btn"
-                          >
+                          <Link href={href} className="card-explore-btn">
                             EXPLORE ON RADAR <span className="arrow-glyph" aria-hidden="true">→</span>
                           </Link>
                           <button
@@ -1376,10 +1354,12 @@ export default function WishlistPage() {
           box-sizing: border-box;
         }
 
-        .board-card:hover {
-          transform: translateY(-2px);
-          border-color: rgba(var(--accent-rgb), 0.35);
-          box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+        @media (hover: hover) and (pointer: fine) {
+          .board-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(var(--accent-rgb), 0.35);
+            box-shadow: var(--shadow-md), var(--shadow-glow-soft);
+          }
         }
 
         .card-top-row {
@@ -1445,8 +1425,18 @@ export default function WishlistPage() {
           min-width: 0;
         }
 
-        .card-title-link {
+        .card-title :global(.card-title-link) {
+          display: flex;
+          align-items: center;
+          min-block-size: 24px;
+          color: inherit;
           text-decoration: none;
+        }
+
+        @media (pointer: coarse) {
+          .card-title :global(.card-title-link) {
+            min-block-size: 44px;
+          }
         }
 
         .card-title {
@@ -1459,7 +1449,7 @@ export default function WishlistPage() {
           transition: color 0.2s ease;
         }
 
-        .card-title-link:hover .card-title {
+        .card-title :global(.card-title-link:hover) {
           color: var(--accent-bright);
         }
 

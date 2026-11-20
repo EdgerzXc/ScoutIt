@@ -114,7 +114,6 @@ describe("F-004 Discover region journey and content ordering contract", () => {
     const discoverSource = read("src/app/discover/DiscoverClient.js");
     expect(discoverSource).toContain("aria-pressed={activeRegion === null}");
     expect(discoverSource).toContain("aria-pressed={isSelected}");
-    expect(discoverSource).toContain("setActiveRegion(initialRegionParam ? cityToRegion(initialRegionParam) : null)");
     expect(discoverSource).toContain("contextMeta");
   });
 });

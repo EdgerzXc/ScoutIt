@@ -99,55 +99,42 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
   const matchedCategory = CATEGORIES.find(c => c.toLowerCase() === typeParam.toLowerCase()) || "Residential";
 
   const initialDatasets = useMemo(() => formatDiscoverDatasets(initialProperties, initialIntel), [initialProperties, initialIntel]);
-  const [allProperties, setAllProperties] = useState(() => initialDatasets.properties);
-  const [allIntel, setAllIntel] = useState(() => initialDatasets.intel);
+  const [refreshedDatasets, setRefreshedDatasets] = useState(null);
   const [cmsUnavailable, setCmsUnavailable] = useState(initialUnavailable);
   const [retryCount, setRetryCount] = useState(0);
 
-  const [properties, setProperties] = useState([]);
-  const [intel, setIntel] = useState([]);
+  const datasets = refreshedDatasets ?? initialDatasets;
+  const dbCategory = getDBCategory(matchedCategory);
+  const properties = datasets.properties[dbCategory];
+  const intel = datasets.intel[dbCategory];
   const [activeSpotlightId, setActiveSpotlightId] = useState(null);
+  const [activeRegion, setActiveRegion] = useState(() => cityToRegion(initialRegionParam));
+  const [regionQuery, setRegionQuery] = useState("");
 
-  // Authoritative region selection state: string | null (null = All Regions)
-  const [activeRegion, setActiveRegion] = useState(() => {
-    if (initialRegionParam) {
-      return cityToRegion(initialRegionParam) || initialRegionParam;
-    }
-    return null;
-  });
-
-  // Fetch live CMS data from Airtable
   useEffect(() => {
+    let cancelled = false;
     async function fetchCMS() {
       try {
         const data = await loadPublicCatalog();
-        const formatted = formatDiscoverDatasets(data.properties || [], data.intel || []);
-        setAllProperties(formatted.properties);
-        setAllIntel(formatted.intel);
+        if (cancelled) return;
+        setRefreshedDatasets(formatDiscoverDatasets(data.properties || [], data.intel || []));
         setCmsUnavailable(false);
       } catch (err) {
+        if (cancelled) return;
         console.error("Discover page CMS load error:", err);
         setCmsUnavailable(true);
       }
     }
 
     fetchCMS();
+    return () => { cancelled = true; };
   }, [retryCount]);
 
-
-  // Region search filter within the regions navigation bar
-  const [regionQuery, setRegionQuery] = useState("");
-
-  // Update category listings on matchedCategory or CMS data load
   useEffect(() => {
-    const dbCategory = getDBCategory(matchedCategory);
-    const list = allProperties[dbCategory] || [];
-    setProperties(list);
-    setIntel(allIntel[dbCategory] || []);
     setActiveSpotlightId(null);
-    setActiveRegion(initialRegionParam ? cityToRegion(initialRegionParam) : null);
+    setActiveRegion(cityToRegion(initialRegionParam));
     setRegionQuery("");
-  }, [matchedCategory, allProperties, allIntel, initialRegionParam]);
+  }, [matchedCategory, initialRegionParam]);
 
   // Regions available in the current category (derived from BOTH properties and intel)
   const regions = useMemo(() => {

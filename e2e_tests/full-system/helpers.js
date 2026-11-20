@@ -72,6 +72,7 @@ const IGNORED_CONSOLE = [
   /ResizeObserver loop/i,
   /THREE\./,
   /Turnstile/i,
+  /^Viewport argument key "interactive-widget" not recognized and ignored\.$/,
   // Vercel serves /_vercel/speed-insights/script.js only on Vercel. A local
   // production build answers with the app's HTML, so Chromium refuses it on
   // MIME grounds. Narrow on purpose: it cannot mask an application error.

@@ -5,9 +5,44 @@ import { test, expect } from '@playwright/test';
 import { trackErrors, expectRealContent, gotoAndSettle, openYourMove } from './helpers';
 
 test.describe('Discovery engine', () => {
+  test('preserves a selected region when the public catalogue refresh completes', async ({ page, baseURL }) => {
+    test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses a local catalogue fixture');
+    const { promise: refreshPending, resolve: completeRefresh } = Promise.withResolvers();
+    await page.route('**/api/cms?scope=public', async (route) => {
+      await refreshPending;
+      await route.fulfill({
+        json: {
+          properties: [{
+            id: 'recRefreshMakati',
+            slug: 'market-refresh-test-loft',
+            title: 'Market Refresh Test Loft',
+            spaceCategory: 'Residential',
+            city: 'Makati',
+          }],
+          intel: [],
+        },
+      });
+    });
+
+    try {
+      await page.goto('/discover');
+      const regions = page.getByRole('region', { name: 'Regions Navigation' });
+      const makati = regions.getByRole('button', { name: /Makati/ });
+      await makati.click();
+      await expect(makati).toHaveAttribute('aria-pressed', 'true');
+
+      completeRefresh();
+      await expect(page.getByRole('heading', { name: 'Market Refresh Test Loft' })).toBeVisible();
+      await expect(makati).toHaveAttribute('aria-pressed', 'true');
+    } finally {
+      completeRefresh();
+    }
+  });
+
   test('loads the Discover map on approach and keeps the radar controls usable', async ({ page }) => {
     const size = page.viewportSize();
-    await page.setViewportSize({ width: size.width, height: 400 });
+    const viewportHeight = 300;
+    await page.setViewportSize({ width: size.width, height: viewportHeight });
     const styleRequests = [];
     const intelPrefetches = [];
     page.on('request', (request) => {
@@ -27,7 +62,7 @@ test.describe('Discovery engine', () => {
     await page.goto('/discover');
     const map = page.locator('.dsc-map');
     const before = await map.boundingBox();
-    expect(before.y).toBeGreaterThan(560);
+    expect(before.y).toBeGreaterThan(viewportHeight + 160);
     await expect(map.locator('.spatial-intel-map-card')).toHaveCount(0);
     expect(styleRequests).toHaveLength(0);
     expect(intelPrefetches).toHaveLength(0);
@@ -59,7 +94,13 @@ test.describe('Discovery engine', () => {
     const search = page.getByRole('searchbox', { name: 'Search intel' });
     await expect(search).toHaveValue('Makati');
 
-    await search.fill('Cebu');
+    const filters = page.getByRole('button', { name: /^Filters/ });
+    await filters.click();
+    await expect(filters).toHaveAttribute('aria-expanded', 'true');
+    await filters.click();
+    await search.press('ControlOrMeta+A');
+    await search.pressSequentially('Cebu');
+    await expect(search).toHaveValue('Cebu');
     await page.evaluate(() => history.pushState(null, '', '/discover?q=Makati#refine'));
     await expect(search).toHaveValue('Cebu');
 
@@ -84,8 +125,9 @@ test.describe('Discovery engine', () => {
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
 
-    // Category switch via fast category rail or querystring-backed navigation.
-    await gotoAndSettle(page, '/discover?type=Commercial');
+    await page.getByRole('navigation', { name: 'Discovery categories' })
+      .getByRole('link', { name: 'Commercial', exact: true }).click();
+    await expect(page).toHaveURL(/\/discover\?type=commercial$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/commercial/i, { timeout: 20000 });
     await expect(page.locator('.spotlightCard').first()).toBeVisible({ timeout: 20000 });
 
@@ -173,7 +215,7 @@ test.describe('Property directory + briefing page', () => {
 });
 
 test.describe('The Ledger (device-only wishlist)', () => {
-  test('saving a reaction surfaces it on Your Board and can be removed', async ({ page }) => {
+  test('saving a reaction surfaces it on Your Board and can be removed', async ({ page, hasTouch }) => {
     await page.route('**/api/reactions', route => route.fulfill({ json: { success: true } }));
     await gotoAndSettle(page, '/property');
 
@@ -204,7 +246,12 @@ test.describe('The Ledger (device-only wishlist)', () => {
     await gotoAndSettle(page, '/wishlist');
     const savedLink = page.getByRole('link', { name: saved.property_title, exact: true });
     await expect(savedLink).toHaveAttribute('href', dossierPath);
-    await savedLink.click();
+    if (hasTouch) {
+      await expect.poll(async () => (await savedLink.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      await savedLink.tap();
+    } else {
+      await savedLink.click();
+    }
     await expect(page).toHaveURL(new URL(dossierPath, page.url()).href);
     await gotoAndSettle(page, '/wishlist');
     await page.getByRole('button', { name: `Remove ${saved.property_title} from board`, exact: true }).click();
