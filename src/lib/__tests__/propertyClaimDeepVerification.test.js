@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as serverAuth from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { POST as uploadHandler } from '@/app/api/property/claim/upload/route';
-import { POST as claimHandler, GET as claimStatusHandler, approvePropertyClaim } from '@/app/api/property/claim/route';
+import { POST as claimHandler, GET as claimStatusHandler } from '@/app/api/property/claim/route';
 import {
   canTransition,
   validateDecision,
@@ -19,7 +19,7 @@ vi.mock('@/lib/supabaseAdmin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
     storage: {
-      listBuckets: vi.fn(),
+      getBucket: vi.fn(),
       createBucket: vi.fn(),
       from: vi.fn(),
     },
@@ -43,10 +43,19 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-claimant-123');
+    supabaseAdmin.from = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301', owner_id: 'current-lister', verified: false },
+          }),
+        }),
+      }),
+    });
 
     // Default storage mock
     supabaseAdmin.storage = {
-      listBuckets: vi.fn().mockResolvedValue({ data: [{ name: 'claim-documents' }] }),
+      getBucket: vi.fn().mockResolvedValue({ data: { public: false } }),
       createBucket: vi.fn().mockResolvedValue({ data: null, error: null }),
       from: vi.fn().mockReturnValue({
         upload: vi.fn().mockResolvedValue({ data: { path: 'path/to/uploaded/doc' }, error: null }),
@@ -77,17 +86,17 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       expect(json.error).toMatch(/No file provided/i);
     });
 
-    it('rejects oversized files exceeding 15MB limit with 413', async () => {
+    it('rejects oversized files exceeding the multipart limit with 413', async () => {
       const oversizeFile = {
         name: 'large_title_scan.pdf',
-        size: 16 * 1024 * 1024, // 16MB
+        size: 4 * 1024 * 1024 + 1,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
       };
       const req = createMockUploadRequest({ file: oversizeFile });
       const res = await uploadHandler(req);
       expect(res.status).toBe(413);
       const json = await res.json();
-      expect(json.error).toMatch(/exceeds 15MB/i);
+      expect(json.error).toMatch(/up to 4 MB/i);
     });
 
     it('rejects forbidden file extensions (.exe, .sh, .html, .zip) with 415', async () => {
@@ -108,7 +117,7 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
         const res = await uploadHandler(req);
         expect(res.status).toBe(415);
         const json = await res.json();
-        expect(json.error).toMatch(/not supported/i);
+        expect(json.error).toMatch(/Choose a PDF, JPG, PNG, or WebP/);
       }
     });
 
@@ -123,7 +132,7 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       const res = await uploadHandler(req);
       expect(res.status).toBe(415);
       const json = await res.json();
-      expect(json.error).toMatch(/Rejected/i);
+      expect(json.error).toMatch(/contents do not match/);
     });
 
     it('detects and rejects executable Windows PE disguise (MZ header renamed to .png)', async () => {
@@ -137,7 +146,7 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       const res = await uploadHandler(req);
       expect(res.status).toBe(415);
       const json = await res.json();
-      expect(json.error).toMatch(/Rejected/i);
+      expect(json.error).toMatch(/contents do not match/);
     });
 
     it('accepts genuine PDF document with valid %PDF- magic bytes', async () => {
@@ -154,7 +163,17 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       expect(json.success).toBe(true);
       expect(json.documentType).toBe('tct_cct_title');
       expect(json.mimeType).toBe('application/pdf');
-      expect(json.storagePath).toContain('user-claimant-123/prop-999/');
+      expect(json.storagePath).toContain('user-claimant-123/3f2504e0-4f89-11d3-9a0c-0305e82c3301/');
+    });
+
+    it('rejects a bucket configured for public access before uploading documents', async () => {
+      supabaseAdmin.storage.getBucket.mockResolvedValue({ data: { public: true } });
+      const pdfBytes = new TextEncoder().encode('%PDF-1.7\nfixture');
+      const result = await uploadHandler(createMockUploadRequest({
+        file: { name: 'title.pdf', size: pdfBytes.length, arrayBuffer: async () => pdfBytes.buffer },
+      }));
+      expect(result.status).toBe(503);
+      expect(supabaseAdmin.storage.from).not.toHaveBeenCalled();
     });
 
     it('accepts genuine JPEG photo with valid SOI \\xFF\\xD8\\xFF magic bytes', async () => {
@@ -179,7 +198,7 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
         size: pngBytes.length,
         arrayBuffer: () => Promise.resolve(pngBytes.buffer),
       };
-      const req = createMockUploadRequest({ file, documentType: 'prc_broker_id' });
+      const req = createMockUploadRequest({ file, documentType: 'prc_license' });
       const res = await uploadHandler(req);
       expect(res.status).toBe(200);
       const json = await res.json();
@@ -199,7 +218,7 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
         size: webpBytes.length,
         arrayBuffer: () => Promise.resolve(webpBytes.buffer),
       };
-      const req = createMockUploadRequest({ file, documentType: 'turnover_notice' });
+      const req = createMockUploadRequest({ file, documentType: 'supporting_document' });
       const res = await uploadHandler(req);
       expect(res.status).toBe(200);
       const json = await res.json();
@@ -207,14 +226,14 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       expect(json.mimeType).toBe('image/webp');
     });
 
-    it('sanitizes path traversal characters in filename and propertyId', async () => {
+    it('uses the resolved property ID and sanitizes the filename', async () => {
       const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, 0x0a, 0x25, 0xe2, 0xe3, 0xcf, 0xd3]);
       const file = {
         name: '../../../etc/passwd.pdf',
         size: pdfBytes.length,
         arrayBuffer: () => Promise.resolve(pdfBytes.buffer),
       };
-      const req = createMockUploadRequest({ file, propertyId: '../../secret_folder' });
+      const req = createMockUploadRequest({ file });
       const res = await uploadHandler(req);
       expect(res.status).toBe(200);
       const json = await res.json();
@@ -331,139 +350,6 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       expect(canTransition('approved', 'approve')).toBe(false);
       expect(canTransition('approved', 'take')).toBe(false);
       expect(canTransition('rejected', 'approve')).toBe(false);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 4. SUCCESSION & MULTI-ROLE ELEVATION INVARIANTS
-  // ─────────────────────────────────────────────────────────────────────────────
-  describe('4. Multi-Role Elevation & Plan Quota Protections', () => {
-    it('promotes Seeker to Owner without overwriting other held roles', async () => {
-      let updatedRoles = null;
-      const claimantUser = {
-        id: 'seeker-user-99',
-        role: 'seeker',
-        active_roles: ['seeker', 'buyer'],
-        subscription_tier: 'starry',
-      };
-
-      const mockClient = {
-        from: vi.fn().mockImplementation((table) => {
-          if (table === 'property_claims') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: { id: 'c1', property_id: 'p1', claimant_user_id: claimantUser.id, status: 'submitted' },
-                    error: null,
-                  }),
-                }),
-              }),
-              update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-            };
-          }
-          if (table === 'properties') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: { id: 'p1', slug: 'unit-1', canonical_slug: 'unit-1', pipeline_status: 'approved' },
-                    error: null,
-                  }),
-                  eq: vi.fn().mockResolvedValue({ data: [], error: null }),
-                }),
-              }),
-              update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-            };
-          }
-          if (table === 'user_profiles') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({ data: claimantUser, error: null }),
-                }),
-              }),
-              update: vi.fn().mockImplementation((payload) => {
-                updatedRoles = payload.active_roles;
-                return { eq: vi.fn().mockResolvedValue({ error: null }) };
-              }),
-            };
-          }
-          return { insert: vi.fn().mockResolvedValue({ error: null }) };
-        }),
-      };
-
-      const result = await approvePropertyClaim(mockClient, { claimId: 'c1', reviewerId: 'admin-1' });
-      expect(result.ok).toBe(true);
-      expect(updatedRoles).toContain('seeker');
-      expect(updatedRoles).toContain('buyer');
-      expect(updatedRoles).toContain('owner');
-    });
-
-    it('safely parks listing in off-market cloud storage when free claimant has reached limit', async () => {
-      let updatedPropertyStatus = null;
-      const claimantUser = {
-        id: 'owner-free-tier',
-        role: 'owner',
-        active_roles: ['owner'],
-        subscription_tier: 'starry', // 1 free active listing limit
-      };
-
-      const mockClient = {
-        from: vi.fn().mockImplementation((table) => {
-          if (table === 'property_claims') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: { id: 'c2', property_id: 'p2', claimant_user_id: claimantUser.id, status: 'submitted' },
-                    error: null,
-                  }),
-                }),
-              }),
-              update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-            };
-          }
-          if (table === 'properties') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({
-                    data: { id: 'p2', slug: 'p2-slug', canonical_slug: 'p2-slug', pipeline_status: 'approved' },
-                    error: null,
-                  }),
-                  eq: vi.fn().mockResolvedValue({
-                    // Already holding 1 active live listing
-                    data: [{ id: 'p-already-live', pipeline_status: 'approved' }],
-                    error: null,
-                  }),
-                }),
-              }),
-              update: vi.fn().mockImplementation((payload) => {
-                updatedPropertyStatus = payload.pipeline_status;
-                return { eq: vi.fn().mockResolvedValue({ error: null }) };
-              }),
-            };
-          }
-          if (table === 'user_profiles') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({ data: claimantUser, error: null }),
-                }),
-              }),
-              update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-            };
-          }
-          return { insert: vi.fn().mockResolvedValue({ error: null }) };
-        }),
-      };
-
-      const result = await approvePropertyClaim(mockClient, { claimId: 'c2', reviewerId: 'admin-1' });
-      expect(result.ok).toBe(true);
-      expect(result.defaultedToOffMarket).toBe(true);
-      // Property moved to off_market rather than throwing paywall error or deleting
-      expect(updatedPropertyStatus).toBe('off_market');
     });
   });
 });

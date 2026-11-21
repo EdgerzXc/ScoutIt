@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSession } from "@/lib/authClient";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { CLAIM_MULTIPART_FILE_MAX_BYTES } from "@/lib/claimDocumentPath.mjs";
 import { LISTER_RELATIONSHIPS, OWNER_SOVEREIGNTY_DISCLAIMER } from "@/lib/listerRelationship";
 import InfoTip from "@/components/ui/InfoTip";
 import {
@@ -77,9 +78,14 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
   const [uploadingAuthority, setUploadingAuthority] = useState(false);
   const [uploadingId, setUploadingId] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const uploading = uploadingAuthority || uploadingId;
 
   const handleFileUpload = async (file, isAuthority) => {
     if (!file) return;
+    if (file.size > CLAIM_MULTIPART_FILE_MAX_BYTES) {
+      setUploadError("Choose a document up to 4 MB. Compress the scan or photo and try again.");
+      return;
+    }
     if (isAuthority) setUploadingAuthority(true);
     else setUploadingId(true);
     setUploadError(null);
@@ -118,7 +124,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
         setIdDoc(json);
       }
     } catch {
-      setUploadError("Upload failed. Please ensure file is a valid PDF or image under 15MB.");
+      setUploadError("The document did not upload. Try again.");
     } finally {
       if (isAuthority) setUploadingAuthority(false);
       else setUploadingId(false);
@@ -159,7 +165,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
 
   const submit = async () => {
     setTouched(true);
-    if (!ready || busy) return;
+    if (!ready || busy || uploading) return;
     setBusy(true);
     setError(null);
     try {
@@ -365,8 +371,13 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                         name="claim-relationship"
                         value={option.value}
                         checked={relationship === option.value}
-                        onChange={() => setRelationship(option.value)}
-                        disabled={busy}
+                        onChange={() => {
+                          setRelationship(option.value);
+                          setAuthorityDoc(null);
+                          setIdDoc(null);
+                          setUploadError(null);
+                        }}
+                        disabled={busy || uploading}
                       />
                       <span className="cp-opt__main">
                         <span className="cp-opt__label">{option.label}</span>
@@ -435,9 +446,9 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                           />
                           <UploadCloud size={18} className="cp-dropzone__icon" />
                           <span className="cp-dropzone__text">
-                            {uploadingAuthority ? "Encrypting & uploading…" : "Attach document or snap photo"}
+                            {uploadingAuthority ? "Uploading…" : "Attach document or take a photo"}
                           </span>
-                          <span className="cp-dropzone__sub">PDF, JPG, PNG up to 15MB</span>
+                          <span className="cp-dropzone__sub">PDF, JPG, PNG, or WebP up to 4 MB</span>
                         </label>
                       )}
                     </div>
@@ -456,7 +467,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                             <span className="cp-doc-attached__name">{idDoc.originalFilename}</span>
                             <span className="cp-doc-attached__meta">
                               {idDoc.fileSizeBytes ? `${(idDoc.fileSizeBytes / 1024).toFixed(0)} KB · ` : ""}
-                              MATCH READY
+                              ATTACHED
                             </span>
                           </div>
                           <button
@@ -483,9 +494,9 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                           />
                           <UploadCloud size={18} className="cp-dropzone__icon" />
                           <span className="cp-dropzone__text">
-                            {uploadingId ? "Encrypting & uploading…" : "Attach ID or snap photo"}
+                            {uploadingId ? "Uploading…" : "Attach ID or take a photo"}
                           </span>
-                          <span className="cp-dropzone__sub">Passport, UMID, Driver&apos;s, PhilID</span>
+                          <span className="cp-dropzone__sub">PDF, JPG, PNG, or WebP up to 4 MB</span>
                         </label>
                       )}
                     </div>
@@ -535,7 +546,7 @@ export default function ClaimPropertyPanel({ propertyId, propertyTitle }) {
                     type="button"
                     className="cp-btn cp-btn--gold"
                     onClick={submit}
-                    disabled={busy || !ready}
+                    disabled={busy || !ready || uploading}
                   >
                     {busy ? "Submitting…" : "Submit legal claim"}
                   </button>

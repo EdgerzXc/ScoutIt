@@ -28,12 +28,48 @@ import {
 import { getActiveListingCap } from "@/lib/propertyLifecycle";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser } from "@/lib/notifications";
-import { updateProperty } from "@/lib/airtable";
-import { invalidateCmsBundle } from "@/lib/cmsCache";
 import {
-  evaluateClaimAutoVerification,
-  AUTO_VERIFIER_SYSTEM_ACTOR_ID,
-} from "@/lib/claimAutoVerificationPolicy.mjs";
+  claimDocumentFilename, CLAIM_DOCUMENT_BUCKET, CLAIM_DOCUMENT_MAX_BYTES,
+  CLAIM_DOCUMENT_MIMES, CLAIM_DOCUMENT_TYPES,
+} from "@/lib/claimDocumentPath.mjs";
+
+async function lookupClaimDocuments(documents, userId, property) {
+  if (documents == null || (Array.isArray(documents) && documents.length === 0)) return [];
+  if (!Array.isArray(documents) || documents.length > 4) return null;
+  const propertyIds = [property.id, property.slug, property.canonical_slug];
+  const filenames = documents.map((item) => claimDocumentFilename(item?.storagePath, userId, propertyIds));
+  if (filenames.some((name) => !name) ||
+      new Set(documents.map((item) => item.storagePath)).size !== documents.length ||
+      documents.some((item) => !CLAIM_DOCUMENT_TYPES.has(item.documentType))) return null;
+
+  const storage = supabaseAdmin.storage;
+  const { data: bucketDetails, error: bucketError } = await storage.getBucket(CLAIM_DOCUMENT_BUCKET);
+  if (bucketError || bucketDetails?.public !== false) {
+    throw new Error("The private claim bucket is unavailable");
+  }
+  const bucket = storage.from(CLAIM_DOCUMENT_BUCKET);
+  const verified = await Promise.all(documents.map(async (item, index) => {
+    const filename = filenames[index];
+    const mimeType = CLAIM_DOCUMENT_MIMES[filename.split(".").at(-1).toLowerCase()];
+    const { data, error } = await bucket.info(item.storagePath);
+    if (error) {
+      if (Number(error.statusCode || error.status) === 404) return null;
+      throw error;
+    }
+    if (data?.contentType !== mimeType || !Number.isInteger(data.size) ||
+        data.size <= 0 || data.size > CLAIM_DOCUMENT_MAX_BYTES) return null;
+    return {
+      document_type: item.documentType,
+      private_storage_path: item.storagePath,
+      original_filename: filename,
+      mime_type: mimeType,
+      file_size_bytes: data.size,
+      malware_scan_status: "pending",
+      ocr_status: "pending",
+    };
+  }));
+  return verified.includes(null) ? null : verified;
+}
 
 /** Statuses that mean a claim is still in play. */
 const OPEN_STATUSES = [
@@ -187,10 +223,13 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { propertyId, claimedRelationship, agreed, documents, ocrData } = body;
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid claim form." }, { status: 400 });
+    }
+    const { propertyId, claimedRelationship, agreed, documents } = body;
 
-    if (!propertyId || typeof propertyId !== "string") {
+    if (typeof propertyId !== "string" || !propertyId.trim() || propertyId.length > 200) {
       return NextResponse.json({ error: "Missing or invalid propertyId" }, { status: 400 });
     }
 
@@ -226,6 +265,8 @@ export async function POST(request) {
     // review-queue item a human then has to work out and close.
     const { property, error: lookupErr } = await findProperty(supabaseAdmin, propertyId, [
       "id",
+      "slug",
+      "canonical_slug",
       "title",
       "owner_id",
       "verified",
@@ -287,6 +328,11 @@ export async function POST(request) {
       );
     }
 
+    const verifiedDocuments = await lookupClaimDocuments(documents, userId, property);
+    if (!verifiedDocuments) {
+      return NextResponse.json({ error: "One or more attachments are unavailable. Upload them again for this listing." }, { status: 422 });
+    }
+
     const { data: claim, error: insertErr } = await supabaseAdmin
       .from("property_claims")
       .insert({
@@ -295,13 +341,14 @@ export async function POST(request) {
         property_id: property.id,
         claimant_user_id: userId,
         claimed_relationship: relationship,
-        status: "submitted",
+        status: verifiedDocuments.length ? "draft" : "submitted",
         declaration_version: DISCLAIMER_VERSION,
       })
       .select()
       .single();
 
     if (insertErr) {
+      if (insertErr.code === "23505") return NextResponse.json({ error: "You already have an active claim for this property." }, { status: 409 });
       console.error("[PROPERTY CLAIM] Insert failed:", insertErr);
       return NextResponse.json(
         { error: sanitizeError(insertErr, "Could not submit property claim.") },
@@ -309,29 +356,26 @@ export async function POST(request) {
       );
     }
 
-    // Persist attached claim verification documents into property_claim_documents
-    const validDocs = Array.isArray(documents)
-      ? documents.filter((d) => d && typeof d === "object" && d.storagePath)
-      : [];
-
-    if (validDocs.length > 0) {
-      const docRows = validDocs.map((d) => ({
-        claim_id: claim.id,
-        document_type: String(d.documentType || "supporting_document").slice(0, 50),
-        private_storage_path: String(d.storagePath).slice(0, 500),
-        original_filename: d.originalFilename ? String(d.originalFilename).slice(0, 255) : null,
-        mime_type: d.mimeType ? String(d.mimeType).slice(0, 100) : null,
-        file_size_bytes: Number.isFinite(d.fileSizeBytes) ? d.fileSizeBytes : null,
-        malware_scan_status: "clean",
-        ocr_status: "pending",
-      }));
-
+    if (verifiedDocuments.length) {
       const { error: docsErr } = await supabaseAdmin
         .from("property_claim_documents")
-        .insert(docRows);
-
-      if (docsErr) {
-        console.error("[PROPERTY CLAIM] Document attachment insertion error:", docsErr);
+        .insert(verifiedDocuments.map((document) => ({ claim_id: claim.id, ...document })));
+      if (!docsErr) {
+        const { data: submitted, error } = await supabaseAdmin
+          .from("property_claims").update({ status: "submitted" })
+          .eq("id", claim.id).eq("claimant_user_id", userId).eq("status", "draft")
+          .select("id").maybeSingle();
+        if (!error && submitted?.id === claim.id) claim.status = "submitted";
+      }
+      if (claim.status === "draft") {
+        const { data: deleted, error } = await supabaseAdmin.from("property_claims")
+          .delete().eq("id", claim.id).eq("claimant_user_id", userId).eq("status", "draft")
+          .select("id").maybeSingle();
+        if (!error && deleted?.id === claim.id) {
+          return NextResponse.json({ error: "Could not save the attachments. Try submitting again." }, { status: 503 });
+        }
+        console.error("[PROPERTY CLAIM] Could not confirm attachment submission:", claim.id);
+        return NextResponse.json({ error: "Could not confirm this claim submission. Check the listing’s claim status before retrying." }, { status: 503 });
       }
     }
 
@@ -369,132 +413,13 @@ export async function POST(request) {
         // What the listing said at the moment of the claim. In a dispute, the
         // contradiction between these two is the whole question.
         property_lister_relationship: property.lister_relationship ?? null,
-        documents_count: validDocs.length,
-        document_types: validDocs.map((d) => d.documentType || "supporting_document"),
+        documents_count: verifiedDocuments.length,
+        document_types: verifiedDocuments.map((d) => d.document_type),
       },
     });
     if (eventErr) {
       console.error("[PROPERTY CLAIM] Audit event failed for claim", claim.id, eventErr);
     }
-
-    // ── Safe Auto-Verification Engine Evaluation ─────────────────────────────
-    // Evaluates the 4 strict safety guardrails:
-    // 1. Direct Owner only (no SPAs or representatives)
-    // 2. Primary Land Title (TCT/CCT) present and confirmed clean
-    // 3. Zero-Contest (no active competing claims, verified owners, or open deals)
-    // 4. Strict 98%+ Name Matching between claimant and Land Title
-    let autoVerification = { canAutoVerify: false, reason: "OCR title scan not provided" };
-
-    try {
-      let claimantProfile = null;
-      let competingClaims = [];
-      let activeDeals = [];
-
-      try {
-        const profileQuery = supabaseAdmin
-          .from("user_profiles")
-          .select("id, role, active_roles, subscription_tier, full_name, display_name")
-          .eq("id", userId);
-        const profileRes = typeof profileQuery?.maybeSingle === "function" ? await profileQuery.maybeSingle() : await profileQuery;
-        claimantProfile = profileRes?.data || null;
-      } catch (_pErr) {}
-
-      try {
-        const claimsRes = await supabaseAdmin
-          .from("property_claims")
-          .select("id, claimant_user_id, status")
-          .eq("property_id", property.id);
-        competingClaims = (claimsRes?.data || []).filter(
-          (c) =>
-            String(c?.claimant_user_id) !== String(userId) &&
-            ["submitted", "technical_review", "human_review", "disputed"].includes(c?.status)
-        );
-      } catch (_cErr) {}
-
-      try {
-        const dealsRes = await supabaseAdmin
-          .from("deals")
-          .select("id, status")
-          .eq("property_id", property.id);
-        activeDeals = (dealsRes?.data || []).filter((d) =>
-          ["open", "handshake_pending", "under_review", "contract_prep"].includes(d?.status)
-        );
-      } catch (_dErr) {}
-
-      autoVerification = evaluateClaimAutoVerification({
-        property,
-        claimantProfile,
-        claimedRelationship: relationship,
-        documents: validDocs,
-        existingClaims: competingClaims,
-        activeDeals,
-        ocrData: ocrData || null,
-        agreed: agreed === true,
-      });
-    } catch (evalErr) {
-      console.warn("[PROPERTY CLAIM] Auto-verification evaluation warning:", evalErr?.message);
-    }
-
-    if (autoVerification.canAutoVerify) {
-      const approvalResult = await approvePropertyClaim(supabaseAdmin, {
-        claimId: claim.id,
-        reviewerId: AUTO_VERIFIER_SYSTEM_ACTOR_ID,
-      });
-
-      if (approvalResult?.ok) {
-        // Record auto-verification audit event
-        try {
-          await supabaseAdmin.from("property_claim_events").insert({
-            claim_id: claim.id,
-            actor_id: userId,
-            event_type: "CLAIM_AUTO_VERIFIED_CLEAN_TITLE",
-            payload: {
-              systemActor: AUTO_VERIFIER_SYSTEM_ACTOR_ID,
-              provisionalWindowHours: autoVerification.provisionalWindowHours,
-              confidence: autoVerification.confidence,
-              titleNumber: autoVerification.titleNumber,
-              registeredOwner: autoVerification.registeredOwner,
-              provisionalUntil: new Date(Date.now() + autoVerification.provisionalWindowHours * 3600 * 1000).toISOString(),
-            },
-          });
-        } catch (_auditErr) {}
-
-        // Notify prior lister if any of the 72h provisional protection grace window
-        if (property.owner_id && String(property.owner_id) !== String(userId)) {
-          await notifyUser(supabaseAdmin, {
-            userId: property.owner_id,
-            title: "Land Title ownership verified (72h review window)",
-            desc: `A verified Land Title claim has been registered for "${property.title}". You have a 72-hour grace window to review or dispute this transfer.`,
-            propertyId: property.id,
-            notificationType: "claim_provisional_notice",
-            forceEmail: true,
-          });
-        }
-
-        return NextResponse.json({
-          success: true,
-          claimId: claim.id,
-          status: "approved",
-          autoVerified: true,
-          provisional: true,
-          provisionalWindowHours: autoVerification.provisionalWindowHours,
-          message: "Land Title ownership verified. Owner Mode is now active on your account with 72h provisional protection.",
-        });
-      }
-    }
-
-    // When auto-verification is not applicable or requires human staff oversight:
-    try {
-      await supabaseAdmin.from("property_claim_events").insert({
-        claim_id: claim.id,
-        actor_id: userId,
-        event_type: "CLAIM_ROUTED_TO_STAFF_REVIEW",
-        payload: {
-          reasonCode: autoVerification.reasonCode || "standard_staff_review",
-          reason: autoVerification.reason || "Routed for staff document verification.",
-        },
-      });
-    } catch (_eventErr) {}
 
     return NextResponse.json({
       success: true,
@@ -502,7 +427,7 @@ export async function POST(request) {
       status: claim.status,
       autoVerified: false,
       routedToStaff: true,
-      staffReviewReason: autoVerification.reason || null,
+      staffReviewReason: "Staff will review the claim and any attached documents.",
       message: "Property claim submitted for verification.",
     });
   } catch (err) {
@@ -512,137 +437,4 @@ export async function POST(request) {
       { status: 500 }
     );
   }
-}
-
-/**
- * GAP-38: Approves a property claim, transfers `properties.owner_id`, and
- * promotes the claimant's `user_profiles.active_roles` to include `'owner'`
- * so the claimant can immediately access Owner Mode in the dashboard.
- */
-export async function approvePropertyClaim(serviceClient, { claimId, reviewerId = null }) {
-  if (!serviceClient || !claimId) {
-    return { ok: false, error: "Missing serviceClient or claimId" };
-  }
-
-  const { data: claim, error: claimErr } = await serviceClient
-    .from("property_claims")
-    .select("id, property_id, claimant_user_id, claimed_relationship, status")
-    .eq("id", claimId)
-    .maybeSingle();
-
-  if (claimErr || !claim) {
-    return { ok: false, error: claimErr?.message || "Claim not found" };
-  }
-
-  const nowIso = new Date().toISOString();
-
-  // Fetch the property to inspect current state
-  const { data: property } = await serviceClient
-    .from("properties")
-    .select("id, slug, canonical_slug, pipeline_status")
-    .eq("id", claim.property_id)
-    .maybeSingle();
-
-  // Check claimant tier and live listing limits
-  const { data: profile } = await serviceClient
-    .from("user_profiles")
-    .select("id, role, active_roles, subscription_tier")
-    .eq("id", claim.claimant_user_id)
-    .maybeSingle();
-
-  const claimantTier = profile?.subscription_tier || "starry";
-  const claimantRole = profile?.role || "owner";
-  const cap = getActiveListingCap({ tier: claimantTier, role: claimantRole });
-
-  const { data: claimantLiveProps } = await serviceClient
-    .from("properties")
-    .select("id")
-    .eq("owner_id", claim.claimant_user_id)
-    .eq("pipeline_status", "approved");
-
-  const liveCount = (claimantLiveProps || []).filter((p) => p.id !== claim.property_id).length;
-  const willExceedCap = liveCount >= cap;
-
-  const propertyUpdates = {
-    owner_id: claim.claimant_user_id,
-    verified: true,
-    lister_relationship: claim.claimed_relationship || "owner",
-    updated_at: nowIso,
-  };
-
-  if (willExceedCap) {
-    propertyUpdates.pipeline_status = "off_market";
-    propertyUpdates.lifecycle_state = "off_market";
-    propertyUpdates.withdrawn_at = nowIso;
-    propertyUpdates.quietly_open_to_offers = false;
-
-    // Dual-CMS sync: if previously live on Airtable, unpublish it to match off-market state
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    if (apiKey && baseId && property?.pipeline_status === "approved") {
-      const slug = property.canonical_slug || property.slug;
-      if (slug) {
-        try {
-          const record = await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
-          await invalidateCmsBundle({ withdrawn: [{ slug, recordId: record?.id }] }).catch(() => {});
-        } catch (airtableErr) {
-          console.warn("[PROPERTY CLAIM] Airtable unpublish during off-market cap fallback warning:", airtableErr?.message);
-        }
-      }
-    }
-  }
-
-  const { error: updateClaimErr } = await serviceClient
-    .from("property_claims")
-    .update({ status: "approved", updated_at: nowIso })
-    .eq("id", claimId);
-  if (updateClaimErr) {
-    return { ok: false, error: updateClaimErr.message };
-  }
-
-  await serviceClient
-    .from("properties")
-    .update(propertyUpdates)
-    .eq("id", claim.property_id);
-
-  // Promote claimant user_profiles to include 'owner' in active_roles
-  const existingRoles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
-  const nextRoles = Array.from(new Set([...existingRoles, "owner"]));
-
-  await serviceClient
-    .from("user_profiles")
-    .update({
-      role: profile?.role && profile.role !== "seeker" ? profile.role : "owner",
-      active_roles: nextRoles,
-      updated_at: nowIso,
-    })
-    .eq("id", claim.claimant_user_id);
-
-  try {
-    await serviceClient.from("property_claim_events").insert({
-      claim_id: claim.id,
-      actor_id: reviewerId || claim.claimant_user_id,
-      event_type: "CLAIM_APPROVED",
-      payload: {
-        owner_id: claim.claimant_user_id,
-        granted_roles: nextRoles,
-        defaultedToOffMarket: willExceedCap,
-      },
-    });
-  } catch (err) {
-    console.warn("[PROPERTY CLAIM] Could not write approval event:", err?.message);
-  }
-
-  await notifyUser(serviceClient, {
-    userId: claim.claimant_user_id,
-    title: "Property claim approved",
-    desc: willExceedCap
-      ? "Your property ownership claim has been verified. Since your live listing quota is currently full, the property has been deposited in your Free Off-Market Cloud Storage."
-      : "Your property ownership claim has been verified and Owner Mode is now active on your account.",
-    propertyId: claim.property_id,
-    notificationType: "claim_approved",
-    forceEmail: true,
-  });
-
-  return { ok: true, claimId: claim.id, ownerId: claim.claimant_user_id, activeRoles: nextRoles, defaultedToOffMarket: willExceedCap };
 }

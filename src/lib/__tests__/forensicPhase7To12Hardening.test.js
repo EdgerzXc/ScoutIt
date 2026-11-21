@@ -111,12 +111,12 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
   describe("Phase 8 — Dual-CMS Slug & Cache Integrity, Outreach Claim Flow & Bulk Ingest Hardening", () => {
     test("GAP-33: mission-control locks canonical_slug and blocks Slug/Title writes to Airtable", () => {
       const airtableContent = read("mission-control/src/lib/airtable.js");
-      expect(airtableContent).toContain("delete patchFields.Title");
+      expect(airtableContent).toContain("delete fields.Title");
       expect(airtableContent).toContain('"Slug" in fields');
       expect(airtableContent).toContain('"Title" in fields');
 
       const cmsActions = read("mission-control/src/app/dashboard/cms/actions.js");
-      expect(cmsActions).toContain("canonical_slug: lockedCanonicalSlug");
+      expect(read("mission-control/src/lib/propertyPublication.mjs")).toContain("canonical_slug: binding.slug");
       expect(cmsActions).toContain("canStaffChangeDisplayTitle");
     });
 
@@ -228,7 +228,7 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
       expect(read("src/components/dashboard/crm/LeadExportButton.js")).toContain("AUDIT_LOG_FAILED");
     });
 
-    test("GAP-38 & GAP-39: notifications EMAIL_WORTHY includes claim/dispute types and claim route exports approvePropertyClaim", () => {
+    test("GAP-38 & GAP-39: notifications EMAIL_WORTHY includes claim/dispute types and claim submission routes to staff", () => {
       const notifContent = read("src/lib/notifications.js");
       expect(notifContent).toContain('"claim_submitted"');
       expect(notifContent).toContain('"claim_approved"');
@@ -236,7 +236,7 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
       expect(notifContent).toContain("forceEmail");
 
       const claimContent = read("src/app/api/property/claim/route.js");
-      expect(claimContent).toContain("export async function approvePropertyClaim");
+      expect(claimContent).toContain("routedToStaff: true");
     });
 
     test("GAP-41: purge-chat-messages enforces 24h DISPUTE_RESOLUTION_GRACE_MS after dispute closure", () => {

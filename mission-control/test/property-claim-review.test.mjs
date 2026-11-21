@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { hasVerifiedClaimScan } from "../src/lib/claimDocumentPath.mjs";
 
 import {
   CLAIM_STATUSES,
@@ -200,5 +201,19 @@ test("the reviewer is shown the conflict, not left to work it out", () => {
 
 test("an unscanned document is called out rather than quietly listed", () => {
   assert.match(page, /malware_scan_status !== "clean"/);
-  assert.match(page, /Do not\s*\n?\s*open them/);
+  assert.match(page, /needs a verified security scan/);
+  assert.match(actions, /if \(scanConfirmed && canSign\)/);
+});
+
+test("a claim attachment needs a verified scan for this claimant and listing", () => {
+  const reviewerRecord = {
+    private_storage_path: "claimant/listing/1763654400000_title.pdf",
+    checksum: "a".repeat(64),
+    malware_scan_status: "clean",
+  };
+  assert.equal(hasVerifiedClaimScan(reviewerRecord, "claimant", ["listing"]), true);
+  assert.equal(hasVerifiedClaimScan({ ...reviewerRecord, checksum: null }, "claimant", ["listing"]), false);
+  assert.equal(hasVerifiedClaimScan({ ...reviewerRecord, malware_scan_status: "pending" }, "claimant", ["listing"]), false);
+  assert.equal(hasVerifiedClaimScan(reviewerRecord, "claimant", ["another-listing"]), false);
+  assert.equal(hasVerifiedClaimScan(reviewerRecord, "another-claimant", ["listing"]), false);
 });

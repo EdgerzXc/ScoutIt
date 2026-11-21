@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, GET, approvePropertyClaim } from '@/app/api/property/claim/route';
+import { POST, GET } from '@/app/api/property/claim/route';
 import * as serverAuth from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -22,7 +22,7 @@ vi.mock('@/lib/serverAuth', () => ({
 }));
 
 vi.mock('@/lib/supabaseAdmin', () => ({
-  supabaseAdmin: { from: vi.fn() },
+  supabaseAdmin: { from: vi.fn(), storage: {} },
 }));
 
 const PROP = {
@@ -39,6 +39,12 @@ const PROP = {
 
 function mockDb({ property = PROP, existingClaim = null, insertError = null, liveProperties = [], userProfile = { id: 'user-123', role: 'seeker', active_roles: ['seeker'], subscription_tier: 'starry' } } = {}) {
   const inserted = [];
+  supabaseAdmin.storage.getBucket = vi.fn().mockResolvedValue({ data: { public: false } });
+  supabaseAdmin.storage.from = vi.fn().mockReturnValue({
+    info: vi.fn().mockImplementation(async (path) => ({
+      data: { contentType: path.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg', size: 10_240 },
+    })),
+  });
   supabaseAdmin.from = vi.fn().mockImplementation((table) => {
     if (table === 'properties') {
       return {
@@ -60,7 +66,13 @@ function mockDb({ property = PROP, existingClaim = null, insertError = null, liv
       };
     }
     if (table === 'property_claims') {
+      const transition = {
+        eq: vi.fn(() => transition),
+        select: vi.fn(() => transition),
+        maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'claim-123' } }),
+      };
       return {
+        update: vi.fn(() => transition),
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
@@ -194,14 +206,14 @@ describe('/api/property/claim — POST', () => {
       documents: [
         {
           documentType: 'title_deed',
-          storagePath: 'user-123/prop-101/title.pdf',
+          storagePath: 'user-123/prop-101/1763654400000_title.pdf',
           originalFilename: 'condo_cct_title.pdf',
           mimeType: 'application/pdf',
           fileSizeBytes: 2048576,
         },
         {
           documentType: 'gov_id',
-          storagePath: 'user-123/prop-101/passport.jpg',
+          storagePath: 'user-123/prop-101/1763654400000_passport.jpg',
           originalFilename: 'passport_scan.jpg',
           mimeType: 'image/jpeg',
           fileSizeBytes: 1048576,
@@ -215,12 +227,24 @@ describe('/api/property/claim — POST', () => {
     const docRows = inserted.filter((r) => r._table === 'property_claim_documents');
     expect(docRows).toHaveLength(2);
     expect(docRows[0].document_type).toBe('title_deed');
-    expect(docRows[0].private_storage_path).toBe('user-123/prop-101/title.pdf');
+    expect(docRows[0].private_storage_path).toBe('user-123/prop-101/1763654400000_title.pdf');
+    expect(docRows[0]).toMatchObject({ file_size_bytes: 10_240, malware_scan_status: 'pending' });
     expect(docRows[1].document_type).toBe('gov_id');
 
     const event = inserted.find((r) => r.event_type === 'CLAIM_SUBMITTED');
     expect(event.payload.documents_count).toBe(2);
     expect(event.payload.document_types).toEqual(['title_deed', 'gov_id']);
+  });
+
+  it('validates the attachment against the selected property before creating a claim', async () => {
+    const inserted = mockDb();
+    const result = await POST(post({
+      ...VALID,
+      documents: [{ documentType: 'title_deed', storagePath: 'user-123/second-listing/1763654400000_title.pdf' }],
+    }));
+    expect(result.status).toBe(422);
+    expect(supabaseAdmin.storage.from).not.toHaveBeenCalled();
+    expect(inserted).toHaveLength(0);
   });
 
   it('404s when the property does not exist', async () => {
@@ -320,162 +344,5 @@ describe('/api/property/claim — GET', () => {
     expect(json.activeLiveCount).toBe(1);
     expect(json.listingCap).toBe(1);
     expect(json.atListingCap).toBe(true);
-  });
-});
-
-describe('approvePropertyClaim — succession & quota lifecycle', () => {
-  it('deposits claimed property to off_market when claimant has reached their live listing cap', async () => {
-    const claim = {
-      id: 'claim-abc',
-      property_id: 'prop-101',
-      claimant_user_id: 'claimant-456',
-      claimed_relationship: 'owner',
-      status: 'submitted',
-    };
-
-    let updatedProperty = null;
-    let updatedClaim = null;
-    let updatedProfile = null;
-
-    const mockClient = {
-      from: vi.fn().mockImplementation((table) => {
-        if (table === 'property_claims') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({ data: claim, error: null }),
-              }),
-            }),
-            update: vi.fn().mockImplementation((payload) => {
-              updatedClaim = payload;
-              return { eq: vi.fn().mockResolvedValue({ error: null }) };
-            }),
-          };
-        }
-        if (table === 'properties') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({
-                  data: { id: 'prop-101', slug: 'tower', canonical_slug: 'tower', pipeline_status: 'approved' },
-                  error: null,
-                }),
-                eq: vi.fn().mockResolvedValue({
-                  data: [{ id: 'existing-live-1' }], // Claimant already has 1 live listing (starry cap is 1)
-                  error: null,
-                }),
-              }),
-            }),
-            update: vi.fn().mockImplementation((payload) => {
-              updatedProperty = payload;
-              return { eq: vi.fn().mockResolvedValue({ error: null }) };
-            }),
-          };
-        }
-        if (table === 'user_profiles') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({
-                  data: { id: 'claimant-456', role: 'seeker', active_roles: ['seeker'], subscription_tier: 'starry' },
-                  error: null,
-                }),
-              }),
-            }),
-            update: vi.fn().mockImplementation((payload) => {
-              updatedProfile = payload;
-              return { eq: vi.fn().mockResolvedValue({ error: null }) };
-            }),
-          };
-        }
-        if (table === 'property_claim_events' || table === 'notifications') {
-          return { insert: vi.fn().mockResolvedValue({ error: null }) };
-        }
-        return {};
-      }),
-    };
-
-    const res = await approvePropertyClaim(mockClient, { claimId: 'claim-abc', reviewerId: 'staff-999' });
-    expect(res.ok).toBe(true);
-    expect(res.defaultedToOffMarket).toBe(true);
-
-    // Property was safely deposited into off-market cloud storage without demanding payment
-    expect(updatedProperty.pipeline_status).toBe('off_market');
-    expect(updatedProperty.lifecycle_state).toBe('off_market');
-    expect(updatedProperty.verified).toBe(true);
-    expect(updatedProperty.owner_id).toBe('claimant-456');
-
-    // Claimant had their role promoted to include owner
-    expect(updatedProfile.active_roles).toContain('owner');
-  });
-
-  it('preserves live status when claimant has unused capacity under their listing cap', async () => {
-    const claim = {
-      id: 'claim-xyz',
-      property_id: 'prop-102',
-      claimant_user_id: 'claimant-789',
-      claimed_relationship: 'owner',
-      status: 'submitted',
-    };
-
-    let updatedProperty = null;
-    const mockClient = {
-      from: vi.fn().mockImplementation((table) => {
-        if (table === 'property_claims') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({ data: claim, error: null }),
-              }),
-            }),
-            update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-          };
-        }
-        if (table === 'properties') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({
-                  data: { id: 'prop-102', slug: 'loft', canonical_slug: 'loft', pipeline_status: 'approved' },
-                  error: null,
-                }),
-                eq: vi.fn().mockResolvedValue({
-                  data: [], // 0 live listings currently
-                  error: null,
-                }),
-              }),
-            }),
-            update: vi.fn().mockImplementation((payload) => {
-              updatedProperty = payload;
-              return { eq: vi.fn().mockResolvedValue({ error: null }) };
-            }),
-          };
-        }
-        if (table === 'user_profiles') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({
-                  data: { id: 'claimant-789', role: 'owner', active_roles: ['owner'], subscription_tier: 'starry' },
-                  error: null,
-                }),
-              }),
-            }),
-            update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-          };
-        }
-        if (table === 'property_claim_events' || table === 'notifications') {
-          return { insert: vi.fn().mockResolvedValue({ error: null }) };
-        }
-        return {};
-      }),
-    };
-
-    const res = await approvePropertyClaim(mockClient, { claimId: 'claim-xyz' });
-    expect(res.ok).toBe(true);
-    expect(res.defaultedToOffMarket).toBe(false);
-    expect(updatedProperty.pipeline_status).toBeUndefined(); // Did not force off_market
-    expect(updatedProperty.verified).toBe(true);
-    expect(updatedProperty.owner_id).toBe('claimant-789');
   });
 });

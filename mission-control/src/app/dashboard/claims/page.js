@@ -232,7 +232,7 @@ export default async function ClaimsPage() {
                                 Inspect Document
                               </a>
                             ) : (
-                              <span className="text-[12px] text-white/60 italic">File on secure record</span>
+                              <span className="text-[12px] text-white/60">Preview unavailable</span>
                             )}
                           </div>
                         </li>
@@ -241,8 +241,7 @@ export default async function ClaimsPage() {
                   )}
                   {unscanned > 0 && (
                     <p className="text-xs text-red-300 mt-2">
-                      {unscanned} document{unscanned === 1 ? "" : "s"} not confirmed clean. Do not
-                      open them.
+                      {unscanned === 1 ? "1 document needs a verified security scan." : `${unscanned} documents need verified security scans.`}
                     </p>
                   )}
                 </div>

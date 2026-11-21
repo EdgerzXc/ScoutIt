@@ -20,6 +20,7 @@ export function isSensitivePath(path) {
     path.startsWith('/api/auth/') ||
     path.startsWith('/api/ai/') ||
     path.startsWith('/api/storage/') ||
+    /^\/api\/property\/claim(?:\/upload)?\/?$/.test(path) ||
     /^\/api\/deals\/[^/]+\/support\/?$/.test(path) ||
     path.startsWith('/api/properties/queue/') ||
     path.startsWith('/api/intel/')
@@ -29,7 +30,7 @@ export function isSensitivePath(path) {
 // Which limiter meters a path: 'strict' (5/10s), 'ai' (15/10s), 'standard'
 // (30/10s). Anything that spends model tokens gets the 'ai' tier.
 export function rateLimitTier(path) {
-  if (path.startsWith('/api/auth/')) return 'strict';
+  if (path.startsWith('/api/auth/') || /^\/api\/property\/claim\/upload\/?$/.test(path)) return 'strict';
   if (path.startsWith('/api/ai/') || path.startsWith('/api/intel/') || path === '/api/properties/queue/process') return 'ai';
   return 'standard';
 }

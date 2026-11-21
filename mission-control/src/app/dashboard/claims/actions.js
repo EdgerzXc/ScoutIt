@@ -13,6 +13,7 @@ import {
 } from "@/lib/propertyClaimPolicy.mjs";
 import { notifyUser } from "@/lib/notifications";
 import { unpublishPropertyFromAirtable } from "@/lib/airtable";
+import { hasVerifiedClaimScan, CLAIM_DOCUMENT_BUCKET } from "@/lib/claimDocumentPath.mjs";
 
 /**
  * Ownership claim review.
@@ -75,7 +76,7 @@ export async function loadClaimQueue() {
       .in("id", propertyIds),
     admin
       .from("property_claim_documents")
-      .select("id, claim_id, document_type, original_filename, private_storage_path, mime_type, file_size_bytes, malware_scan_status, ocr_status, upload_timestamp")
+      .select("id, claim_id, document_type, original_filename, private_storage_path, mime_type, file_size_bytes, checksum, malware_scan_status, ocr_status, upload_timestamp")
       .in("claim_id", claimIds),
     admin
       .from("property_claim_events")
@@ -89,6 +90,9 @@ export async function loadClaimQueue() {
           .in("id", claimantUserIds)
       : Promise.resolve({ data: [] }),
   ]);
+  if (properties.error || documents.error || events.error || profiles.error) {
+    return { claims: [], error: "Could not load the full claim record. Try again." };
+  }
 
   const mainSiteBase = "https://www.scoutit.space";
 
@@ -103,21 +107,34 @@ export async function loadClaimQueue() {
   );
   const profileById = Object.fromEntries((profiles.data || []).map((prof) => [prof.id, prof]));
 
-  // Generate secure 1-hour signed URLs for attached documents so reviewers can inspect them
+  const claimsById = new Map(claims.map((claim) => [claim.id, claim]));
+  const bucketDetails = documents.data?.some((doc) => doc.malware_scan_status === "clean" && doc.checksum)
+    ? await admin.storage.getBucket(CLAIM_DOCUMENT_BUCKET)
+    : null;
+  const canSign = !bucketDetails?.error && bucketDetails?.data?.public === false;
   const docsWithSignedUrls = await Promise.all(
     (documents.data || []).map(async (doc) => {
+      const claim = claimsById.get(doc.claim_id);
+      const property = propertyById[claim?.property_id];
+      const scanConfirmed = property && hasVerifiedClaimScan(
+        doc, claim.claimant_user_id, [property.id, property.slug, property.canonical_slug],
+      );
       let previewUrl = null;
-      if (doc.private_storage_path) {
+      if (scanConfirmed && canSign) {
         try {
           const { data: signed } = await admin.storage
-            .from("claim-documents")
-            .createSignedUrl(doc.private_storage_path, 3600);
+            .from(CLAIM_DOCUMENT_BUCKET)
+            .createSignedUrl(doc.private_storage_path, 300);
           previewUrl = signed?.signedUrl || null;
         } catch {
           // Graceful fallback if storage bucket or file not accessible in local environment
         }
       }
-      return { ...doc, previewUrl };
+      return {
+        id: doc.id, claim_id: doc.claim_id, document_type: doc.document_type,
+        original_filename: doc.original_filename, file_size_bytes: doc.file_size_bytes,
+        malware_scan_status: scanConfirmed ? "clean" : "pending", previewUrl,
+      };
     })
   );
 
@@ -207,6 +224,15 @@ export async function decideClaim(formData) {
         message:
           "This claim has no signed-in claimant, so there is nobody to transfer the listing to. Reject it or ask them to sign in.",
       };
+    }
+    if (reasonCode === "documents_verified") {
+      const { data: attachments, error } = await admin.from("property_claim_documents")
+        .select("private_storage_path, checksum, malware_scan_status").eq("claim_id", claim.id);
+      if (error || !attachments?.some((document) => hasVerifiedClaimScan(
+        document, claim.claimant_user_id, [property.id, property.slug, property.canonical_slug],
+      ))) {
+        return { ok: false, message: "Approval using attached documents requires a verified security scan." };
+      }
     }
 
     // Check claimant's tier and active listing count

@@ -10,14 +10,14 @@ vi.mock('@/lib/supabaseAdmin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
     storage: {
-      listBuckets: vi.fn(),
+      getBucket: vi.fn(),
       createBucket: vi.fn(),
       from: vi.fn(),
     },
   },
 }));
 
-import { GET, POST, approvePropertyClaim } from '@/app/api/property/claim/route';
+import { GET, POST } from '@/app/api/property/claim/route';
 import { POST as uploadHandler } from '@/app/api/property/claim/upload/route';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,13 +145,19 @@ describe('Owner Property Claim Simulation (End-to-End User Journey)', () => {
             };
           }),
           update: vi.fn().mockImplementation((updates) => {
-            return {
-              eq: vi.fn().mockImplementation((col, val) => {
-                const target = dbClaims.find((c) => c.id === val);
+            let target;
+            const query = {
+              eq: vi.fn((column, value) => {
+                target = (column === 'id' ? dbClaims : [target]).find((row) => row?.[column] === value);
+                return query;
+              }),
+              select: vi.fn(() => query),
+              maybeSingle: vi.fn(async () => {
                 if (target) Object.assign(target, updates);
-                return Promise.resolve({ error: null });
+                return { data: target };
               }),
             };
+            return query;
           }),
         };
       }
@@ -184,16 +190,19 @@ describe('Owner Property Claim Simulation (End-to-End User Journey)', () => {
     });
 
     supabaseAdmin.storage = {
-      listBuckets: vi.fn().mockResolvedValue({ data: [{ name: 'claim-documents' }] }),
+      getBucket: vi.fn().mockResolvedValue({ data: { public: false } }),
       createBucket: vi.fn().mockResolvedValue({ data: null, error: null }),
       from: vi.fn().mockReturnValue({
         upload: vi.fn().mockResolvedValue({ data: { path: 'dummy/path' }, error: null }),
+        info: vi.fn().mockImplementation(async (path) => ({
+          data: { contentType: path.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg', size: 20 },
+        })),
         createSignedUrl: vi.fn().mockResolvedValue({ data: { signedUrl: 'https://supabase.co/signed/doc.pdf' }, error: null }),
       }),
     };
   });
 
-  it('Simulates full journey: owner discovers, uploads title + ID, submits claim, and gets approved', async () => {
+  it('Simulates full journey: owner discovers, uploads title + ID, and submits a claim for staff review', async () => {
     // ── STEP 1: Owner visits the property page and checks claim status ──────
     const checkReq = new Request(
       `https://www.scoutit.space/api/property/claim?propertyId=${MOCK_PROPERTY.slug}`
@@ -307,30 +316,11 @@ describe('Owner Property Claim Simulation (End-to-End User Journey)', () => {
     expect(auditEvent).toBeDefined();
     expect(auditEvent.payload.documents_count).toBe(2);
 
-    // ── STEP 5: Staff reviews and approves the claim in Mission Control ──────
-    const approvalResult = await approvePropertyClaim(supabaseAdmin, {
-      claimId,
-      reviewerId: 'staff-super-admin-001',
-    });
-
-    expect(approvalResult.ok).toBe(true);
-    expect(approvalResult.ownerId).toBe(CLAIMANT_USER.id);
-
-    // ── STEP 6: Verify post-approval invariants ──────────────────────────────
-    // 1. Property ownership transferred
-    expect(dbProperty.owner_id).toBe(CLAIMANT_USER.id);
-    expect(dbProperty.verified).toBe(true);
-    expect(dbProperty.lister_relationship).toBe('owner');
-
-    // 2. Claimant profile role promoted to include 'owner'
-    expect(dbProfile.active_roles).toContain('owner');
-
-    // 3. Claim status updated to approved
-    expect(dbClaims[0].status).toBe('approved');
-
-    // 4. Approval event recorded in legal audit trail
-    const approvalEvent = dbEvents.find((e) => e.event_type === 'CLAIM_APPROVED');
-    expect(approvalEvent).toBeDefined();
-    expect(approvalEvent.payload.owner_id).toBe(CLAIMANT_USER.id);
+    expect(claimJson.routedToStaff).toBe(true);
+    expect(dbClaims[0].id).toBe(claimId);
+    expect(dbClaims[0].status).toBe('submitted');
+    expect(dbDocuments.every((document) => document.malware_scan_status === 'pending')).toBe(true);
+    expect(dbProperty.owner_id).toBe(MOCK_PROPERTY.owner_id);
+    expect(dbProfile.active_roles).toEqual(['seeker']);
   });
 });
