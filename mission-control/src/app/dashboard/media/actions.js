@@ -6,7 +6,11 @@ import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
 import { parseSynthesis, scoreCompleteness } from "@/lib/ingestSchema";
 import { processPendingScans } from "@/lib/scanWorker";
 import { sha256Hex } from "@/lib/fileScan";
-import { updatePropertyInAirtable } from "@/lib/airtable";
+import { updateBoundPropertyImage } from "@/lib/airtable";
+import { canSynthesizeListing, getPropertyBinding, isLiveProperty, isProtectedProperty, matchPropertySnapshot } from "@/lib/propertyPublication.mjs";
+import { publicMediaUrl } from "@/lib/publicMediaUrl.mjs";
+
+const PROPERTY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** B1 Stage 1 — staff-triggered scan of the pending queue. */
 export async function runScanQueue() {
@@ -116,20 +120,31 @@ export async function saveSynthesis(formData) {
 
   const propertyId = formData.get("propertyId")?.toString();
   const rawJson = formData.get("rawJson")?.toString();
-  if (!propertyId) throw new Error("Missing property id.");
+  if (!PROPERTY_ID.test(propertyId || "")) return { error: "Select a valid property draft." };
 
   // Throws a friendly message if the pasted JSON is unusable.
-  const { patch, detailsPatch, confidence, gaps, warnings } = parseSynthesis(rawJson);
+  let synthesis;
+  try {
+    synthesis = parseSynthesis(rawJson);
+  } catch (error) {
+    return { error: error.message };
+  }
+  const { patch, detailsPatch, confidence, gaps, warnings } = synthesis;
 
   const admin = createAdminClient();
 
   // Read current row so we merge (never clobber) the details blob.
   const { data: current, error: readErr } = await admin
     .from("properties")
-    .select("id, title, location, space_category, price, description, media_link, details")
+    .select("*")
     .eq("id", propertyId)
     .single();
-  if (readErr) throw new Error(readErr.message);
+  if (readErr || !current) return { error: "Could not load the property draft." };
+  if (!canSynthesizeListing(current)) {
+    return { error: current.creation_source === "pdf_assisted"
+      ? "Use the PDF review queue for this draft."
+      : "Synthesis is available for drafts awaiting first approval." };
+  }
 
   const mergedDetails = {
     ...(current.details || {}),
@@ -144,12 +159,13 @@ export async function saveSynthesis(formData) {
   const update = {
     ...patch,
     details: mergedDetails,
-    pipeline_status: "draft_ready_for_review",
+    pipeline_status: current.creation_source === "pdf_assisted" ? "pending" : "draft_ready_for_review",
     completeness_score: scoreCompleteness(nextRow, detailsPatch),
   };
 
-  const { error } = await admin.from("properties").update(update).eq("id", propertyId);
-  if (error) throw new Error(error.message);
+  const query = admin.from("properties").update(update).eq("id", propertyId);
+  const { data: saved, error } = await matchPropertySnapshot(query, current, ["creation_source", "pdf_verified"]).select("id").maybeSingle();
+  if (error || !saved) return { error: "The draft changed while saving. Reload it and retry." };
 
   await logAction({
     staff,
@@ -161,6 +177,7 @@ export async function saveSynthesis(formData) {
   });
 
   revalidatePath("/dashboard/media");
+  return { ok: true, pdfReviewPending: current.creation_source === "pdf_assisted" };
 }
 
 /**
@@ -172,32 +189,39 @@ export async function updateMedia(formData) {
   assertTier(staff, TIERS.AGENT);
 
   const propertyId = formData.get("propertyId")?.toString();
-  const mediaLink = formData.get("media_link")?.toString().trim() || null;
-  if (!propertyId) throw new Error("Missing property id.");
+  const input = formData.get("media_link")?.toString().trim() || "";
+  const mediaLink = publicMediaUrl(input);
+  if (!PROPERTY_ID.test(propertyId || "")) return { error: "Select a valid listing." };
+  if (input && !mediaLink) return { error: "Use a public HTTPS link without a sign-in token." };
 
   const admin = createAdminClient();
-  const { data: prop } = await admin
+  const { data: prop, error: readError } = await admin
     .from("properties")
-    .select("slug, canonical_slug, moderation_status, pipeline_status, lifecycle_state")
+    .select("*")
     .eq("id", propertyId)
     .maybeSingle();
 
-  const { error } = await admin
+  if (readError || !prop) return { error: "Could not load the listing." };
+  if (isProtectedProperty(prop)) return { error: "Use the protected review workflow for this listing." };
+  const isLive = isLiveProperty(prop);
+  const binding = isLive ? getPropertyBinding(prop) : null;
+  if (isLive && !binding) return { error: "Verify this listing’s Airtable record before changing its public image." };
+
+  const query = admin
     .from("properties")
     .update({ media_link: mediaLink })
     .eq("id", propertyId);
-  if (error) throw new Error(error.message);
+  const { data: saved, error } = await matchPropertySnapshot(query, prop, ["media_link"]).select("id").maybeSingle();
+  if (error || !saved) return { error: "The listing changed while saving. Reload it and retry." };
 
-  const isLive = prop && (prop.pipeline_status === "approved" || prop.lifecycle_state === "live");
-  const slug = prop?.canonical_slug || prop?.slug;
-  if (isLive && slug) {
+  let warning = null;
+  if (binding) {
     try {
-      await updatePropertyInAirtable(slug, {
-        Image: mediaLink,
-        Photos: mediaLink || "",
-      });
+      const cache = await updateBoundPropertyImage(binding, mediaLink);
+      if (!cache.purged) warning = "Image saved. Check the public page before sharing it.";
     } catch (err) {
-      console.warn("[MMC MEDIA] Airtable media sync warning:", err.message);
+      console.warn("[MMC MEDIA] Airtable media sync warning:", err?.code || err?.name);
+      warning = "Link saved privately. The public image update needs a retry.";
     }
   }
 
@@ -206,8 +230,9 @@ export async function updateMedia(formData) {
     action: "media.update",
     targetTable: "properties",
     targetId: propertyId,
-    metadata: { media_link: mediaLink },
+    metadata: { media_link: mediaLink, recordId: binding?.recordId || null, public_sync_pending: Boolean(warning) },
   });
 
   revalidatePath("/dashboard/media");
+  return { ok: true, warning, mediaLink };
 }

@@ -13,7 +13,7 @@ export default function SidebarNav({ items }) {
       {items.map((item, index) => {
         const isActive = item.href === "/dashboard"
           ? pathname === "/dashboard"
-          : pathname.startsWith(item.href);
+          : pathname === item.href || pathname.startsWith(`${item.href}/`);
         const startsGroup = index === 0 || items[index - 1].group !== item.group;
 
         return (
@@ -26,7 +26,7 @@ export default function SidebarNav({ items }) {
             <Link
               href={item.href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+              className={`flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold lg:min-h-0 ${
                 isActive
                   ? "border-gold-muted/60 bg-gold/10 text-gold-bright"
                   : "border-transparent text-white/70 hover:bg-white/5 hover:text-white"

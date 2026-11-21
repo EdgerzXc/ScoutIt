@@ -4,7 +4,7 @@ import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { editBoundProperty } from "@/lib/airtable";
 import { listPropertyPdfReviews, loadPropertyPdfReview, verifyPropertyPdfDraft } from "@/lib/propertyPdfReview";
-import { getPropertyBinding, isLiveProperty, isProtectedProperty, matchPropertySnapshot } from "@/lib/propertyPublication.mjs";
+import { getPropertyBinding, isLiveProperty, isProtectedProperty, isStaffEditableDraft, matchPropertySnapshot } from "@/lib/propertyPublication.mjs";
 import { approveStaffProperty } from "@/lib/staffPropertyApproval";
 import { stripPropertyTags } from "@/lib/propertyText.mjs";
 
@@ -20,7 +20,7 @@ export async function loadSubmissionsQueue() {
     admin
       .from("properties")
       .select("id, title, location, type, space_category, pipeline_status, created_at")
-      .in("pipeline_status", ["submitted", "pending"])
+      .in("pipeline_status", ["submitted", "pending", "draft_ready_for_review"])
       .order("created_at", { ascending: true })
       .limit(50),
     staff.tier >= TIERS.OPS_MANAGER ? listPropertyPdfReviews(admin, 50) : { drafts: [] },
@@ -103,7 +103,7 @@ export async function generatePropertySeoAction({ propertyId } = {}) {
       return { error: "Could not confirm the public metadata update." };
     }
   } else {
-    if (!["pending", "submitted", "draft"].includes(prop.pipeline_status)) return { error: "This draft is no longer editable." };
+    if (!isStaffEditableDraft(prop)) return { error: "This draft is no longer editable." };
     const query = admin.from("properties").update({
       details: { ...prop.details, seo_title: generatedTitle, seo_description: generatedDesc },
     }).eq("id", propertyId);

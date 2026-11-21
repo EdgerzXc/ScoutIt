@@ -107,6 +107,11 @@ test("staff approval waits for the audit and exact provider result before saving
   assert.equal(Object.hasOwn(calls[4][1], "updated_at"), false);
 });
 
+test("a concierge draft marked ready for review can proceed through ordinary approval", async () => {
+  const { args } = publicationFixture({ pipeline_status: "draft_ready_for_review" });
+  assert.equal((await approvePropertyPublication(args)).success, true);
+});
+
 test("staff approval blocks unbound history and protected records without an Airtable write", async () => {
   for (const property of [{ canonical_slug: "legacy" }, { lifecycle_state: "staff_suspended" }]) {
     const { args, calls } = publicationFixture(property);

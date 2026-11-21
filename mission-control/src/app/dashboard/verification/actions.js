@@ -96,7 +96,7 @@ async function decide(formData, status, action, reasonRequired = false) {
   if (reasonRequired && !notes) throw new Error("A reason is required to reject.");
 
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data: decision, error } = await admin
     .from("verification_requests")
     .update({
       status,
@@ -106,8 +106,10 @@ async function decide(formData, status, action, reasonRequired = false) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("status", "pending"); // only decide things still pending
-  if (error) throw new Error(error.message);
+    .eq("status", "pending")
+    .select("id, decided_at")
+    .maybeSingle();
+  if (error || !decision) throw new Error("This verification request changed. Refresh the queue.");
 
   await logAction({
     staff,
@@ -115,6 +117,7 @@ async function decide(formData, status, action, reasonRequired = false) {
     targetTable: "verification_requests",
     targetId: id,
     reason: notes,
+    metadata: { decision_at: decision.decided_at },
   });
 
   revalidatePath("/dashboard/verification");

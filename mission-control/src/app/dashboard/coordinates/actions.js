@@ -1,13 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { createAdminClient } from "@/lib/supabase/admin";
-import { assertTier, getCurrentStaff, logAction, TIERS } from "@/lib/rbac";
+import { assertTier, getCurrentStaff, logAction, logActionStrict, TIERS } from "@/lib/rbac";
 import { syncCoordinatesToAirtable } from "@/lib/airtable";
 import { purgePublicCatalogueCache } from "@/lib/publicCatalogueCache";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+import { getPropertyBinding, isLiveProperty, isProtectedProperty, matchPropertySnapshot } from "@/lib/propertyPublication.mjs";
+import { parsePointToLatLng } from "@/lib/geoPoint.mjs";
 
 // Staff correction of a listing's position.
 //
@@ -16,14 +16,9 @@ import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 // district. This is the escape hatch: when the automatic answer is too coarse,
 // a human puts the pin where the building actually is.
 
-function parsePoint(value) {
-  if (typeof value !== "string") return null;
-  const m = value.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
-  if (!m) return null;
-  return { lng: Number(m[1]), lat: Number(m[2]) };
-}
+const PROPERTY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function setVerifiedCoordinates(formData) {
+export async function setVerifiedCoordinates(_previous, formData) {
   const staff = await getCurrentStaff();
   if (!staff) {
     return { ok: false, message: "Not authorised" };
@@ -35,10 +30,12 @@ export async function setVerifiedCoordinates(formData) {
   }
 
   const id = String(formData.get("id") || "");
-  const lat = Number(formData.get("lat"));
-  const lng = Number(formData.get("lng"));
+  const latText = formData.get("lat");
+  const lngText = formData.get("lng");
+  const lat = typeof latText === "string" && latText.trim() ? Number(latText) : NaN;
+  const lng = typeof lngText === "string" && lngText.trim() ? Number(lngText) : NaN;
 
-  if (!id) return { ok: false, message: "Missing listing" };
+  if (!PROPERTY_ID.test(id)) return { ok: false, message: "Select a valid listing." };
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return { ok: false, message: "Latitude and longitude must both be numbers" };
   }
@@ -56,11 +53,27 @@ export async function setVerifiedCoordinates(formData) {
 
   const { data: row, error: readErr } = await supabase
     .from("properties")
-    .select("id, slug, title, details, pipeline_status")
+    .select("*")
     .eq("id", id)
     .single();
 
   if (readErr || !row) return { ok: false, message: "Listing not found" };
+  if (isProtectedProperty(row)) return { ok: false, message: "Use the protected review workflow for this listing." };
+  const isPublished = isLiveProperty(row);
+  const binding = isPublished ? getPropertyBinding(row) : null;
+  if (isPublished && !binding) {
+    return { ok: false, message: "Verify this listing’s Airtable record before moving its public pin." };
+  }
+
+  let intentId;
+  try {
+    intentId = await logActionStrict({
+      staff, action: "coordinates.verify.intent", targetTable: "properties", targetId: id,
+      metadata: { lat, lng, recordId: binding?.recordId || null },
+    });
+  } catch {
+    return { ok: false, message: "Could not record the pin change in the staff audit." };
+  }
 
   const details = { ...(row.details || {}) };
   details.geo = {
@@ -81,12 +94,11 @@ export async function setVerifiedCoordinates(formData) {
   // which is the wrong way round: staff notice a wrong pin precisely because it
   // is live on the public map. Anything already published therefore has to be
   // corrected in Airtable too, and the cache in front of it dropped.
-  const isPublished = row.pipeline_status === "approved" && Boolean(row.slug);
   let publicSync = null;
 
-  if (isPublished) {
+  if (binding) {
     try {
-      const { recordId } = await syncCoordinatesToAirtable({ slug: row.slug, lat, lng });
+      const { recordId } = await syncCoordinatesToAirtable({ binding, lat, lng });
       const cache = await purgePublicCatalogueCache();
       publicSync = {
         state: "synced",
@@ -104,8 +116,8 @@ export async function setVerifiedCoordinates(formData) {
         event: EVENTS.AIRTABLE_SYNC_OK,
         subjectTable: "properties",
         subjectId: id,
-        summary: `Pin for ${row.slug} pushed to the public CMS`,
-        detail: { lat, lng, slug: row.slug, recordId },
+        summary: `Pin for ${binding.slug} pushed to the public CMS`,
+        detail: { lat, lng, slug: binding.slug, recordId },
       });
       await recordSystemEvent({
         event: cache.purged ? EVENTS.CACHE_PURGED : EVENTS.CACHE_PURGE_FAILED,
@@ -113,7 +125,7 @@ export async function setVerifiedCoordinates(formData) {
         subjectTable: "properties",
         subjectId: id,
         summary: cache.detail,
-        detail: { slug: row.slug },
+        detail: { slug: binding.slug },
       });
     } catch (err) {
       // Do NOT write the Supabase correction on top of a failed public sync and
@@ -125,22 +137,21 @@ export async function setVerifiedCoordinates(formData) {
         severity: "error",
         subjectTable: "properties",
         subjectId: id,
-        summary: `Pin for ${row.slug} did not reach the public CMS`,
-        detail: { lat, lng, slug: row.slug, error: err.message },
+        summary: `Pin for ${binding.slug} could not be confirmed`,
+        detail: { lat, lng, slug: binding.slug, recordId: binding.recordId, errorCode: err?.code || err?.name },
       });
       await logAction({
         staff,
         action: "coordinates.verify.failed",
         targetTable: "properties",
         targetId: id,
-        reason: err.message,
-        metadata: { lat, lng, slug: row.slug, stage: "airtable" },
+        reason: "Airtable did not confirm the pin",
+        metadata: { lat, lng, slug: binding.slug, recordId: binding.recordId, intent_id: intentId, stage: "airtable" },
       });
       return {
         ok: false,
         message:
-          `Saved nothing. The public map could not be updated: ${err.message} ` +
-          `The listing is still showing its old position — try again.`,
+          "Could not confirm the public pin. The private position is unchanged. Check the public listing before retrying.",
       };
     }
   } else {
@@ -162,12 +173,25 @@ export async function setVerifiedCoordinates(formData) {
   // who moved it, when, and whether the public site actually took it.
   details.geo.publicSync = publicSync;
 
-  const { error: writeErr } = await supabase
+  const query = supabase
     .from("properties")
     .update({ coordinates: `POINT(${lng} ${lat})`, details })
     .eq("id", id);
 
-  if (writeErr) return { ok: false, message: writeErr.message };
+  const { data: saved, error: writeErr } = await matchPropertySnapshot(query, row, ["coordinates"]).select("id").maybeSingle();
+  if (writeErr || !saved) {
+    await logAction({
+      staff, action: "coordinates.verify.failed", targetTable: "properties", targetId: id,
+      reason: "The private pin write could not be confirmed",
+      metadata: { lat, lng, recordId: binding?.recordId || null, intent_id: intentId, stage: "supabase" },
+    });
+    return {
+      ok: false,
+      message: binding
+        ? "Airtable confirmed the pin. Reload the listing and reconcile its private position before closing the review."
+        : "The listing changed before the pin could be saved. Reload it and retry.",
+    };
+  }
 
   await logAction({
     staff,
@@ -177,14 +201,13 @@ export async function setVerifiedCoordinates(formData) {
     metadata: {
       lat,
       lng,
-      slug: row.slug,
+      slug: binding?.slug || null,
+      intent_id: intentId,
       published: isPublished,
       public_sync: publicSync.state,
       cache_purged: publicSync.cachePurged ?? null,
     },
   });
-
-  revalidatePath("/dashboard/coordinates");
 
   if (!isPublished) {
     return { ok: true, message: "Position verified. Not published yet, so nothing to update publicly." };
@@ -193,7 +216,7 @@ export async function setVerifiedCoordinates(formData) {
     ok: true,
     message: publicSync.cachePurged
       ? "Position verified and the public map updated."
-      : `Position verified and sent to the public listing. ${publicSync.detail}`,
+      : "Position verified. Check the public map before sharing the new pin.",
   };
 }
 
@@ -216,16 +239,18 @@ export async function loadFlaggedCoordinates() {
 
   const { data, error } = await supabase
     .from("properties")
-    .select("id, slug, title, location, coordinates, details, pipeline_status, created_at")
+    .select("id, slug, canonical_slug, title, location, coordinates, details, pipeline_status, lifecycle_state, moderation_status, permanently_removed_at, created_at")
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
     .limit(300);
 
   if (error) return { rows: [], error: error.message };
 
   const rows = (data || [])
+    .filter((row) => !isProtectedProperty(row))
     .map((p) => {
       const geo = p.details?.geo || null;
-      const point = parsePoint(p.coordinates);
+      const point = parsePointToLatLng(p.coordinates);
       const hasPosition = Boolean(point);
       // Three ways a position needs a human: there is none, the geocoder said
       // it was approximate, or it predates confidence scoring entirely and has

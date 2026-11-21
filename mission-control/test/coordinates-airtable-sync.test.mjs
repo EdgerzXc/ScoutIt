@@ -27,6 +27,22 @@ test("POINT is read longitude-first, the way PostGIS writes it", () => {
   });
 });
 
+test("a stored SRID 4326 point in PostGIS hex keeps longitude and latitude in the right columns", async () => {
+  const point = Buffer.alloc(25);
+  point[0] = 1;
+  point.writeUInt32LE(0x20000001, 1);
+  point.writeUInt32LE(4326, 5);
+  point.writeDoubleLE(121.0437, 9);
+  point.writeDoubleLE(14.5547, 17);
+  const hex = point.toString("hex");
+  const publicParser = await import("../../src/lib/geoPoint.mjs");
+  const expected = { lng: 121.0437, lat: 14.5547 };
+  assert.deepEqual(parsePointToLatLng(hex), expected);
+  assert.deepEqual(publicParser.parsePointToLatLng(hex), expected);
+  point.writeUInt32LE(3857, 5);
+  assert.equal(parsePointToLatLng(point.toString("hex")), null);
+});
+
 test("a missing or malformed position yields nothing rather than a guess", () => {
   for (const bad of [null, undefined, "", "14.5547,121.0437", "POINT()", 42]) {
     assert.equal(parsePointToLatLng(bad), null, `accepted ${JSON.stringify(bad)}`);
@@ -54,7 +70,8 @@ test("a failed public sync fails the whole correction rather than half of it", (
 });
 
 test("only a published listing is corrected in Airtable", () => {
-  assert.match(actions, /row\.pipeline_status === "approved" && Boolean\(row\.slug\)/);
+  assert.match(actions, /isLiveProperty\(row\)/);
+  assert.match(actions, /isPublished && !binding/);
   assert.match(actions, /state: "not_published"/);
 });
 
@@ -77,7 +94,7 @@ test("the correction is written to the human action log with its real outcome", 
 test("the coordinate sync writes latitude and longitude and nothing else", () => {
   const fn = airtable.slice(airtable.indexOf("export async function syncCoordinatesToAirtable"));
   const body = fn.slice(0, fn.indexOf("\n}\n") + 1);
-  const patched = body.match(/fields: \{([^}]*)\}/);
+  const patched = body.match(/patchBoundProperty\(binding, \{([^}]*)\}, true\)/);
   assert.ok(patched, "no PATCH body found");
   const keys = patched[1].split(",").map((s) => s.split(":")[0].trim()).filter(Boolean);
   assert.deepEqual(keys.sort(), ["Latitude", "Longitude"]);
@@ -87,7 +104,9 @@ test("the coordinate sync writes latitude and longitude and nothing else", () =>
 
 test("the sync refuses a listing that is not actually in the public CMS", () => {
   const fn = airtable.slice(airtable.indexOf("export async function syncCoordinatesToAirtable"));
-  assert.match(fn.slice(0, 2000), /if \(!recordId\)/);
+  assert.match(fn.slice(0, 600), /patchBoundProperty\(binding, \{ Latitude: lat, Longitude: lng \}, true\)/);
+  assert.match(airtable, /found !== binding\.recordId/);
+  assert.match(airtable, /flag !== true/);
 });
 
 // ── The gap that made the queue pointless even at publish time ───────────────

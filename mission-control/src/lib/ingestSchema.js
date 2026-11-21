@@ -1,3 +1,6 @@
+import { sanitizePropertyDetails, stripPropertyTags } from "./propertyText.mjs";
+import { publicMediaUrl } from "./publicMediaUrl.mjs";
+
 // Shared ingest schema + mapping for the Concierge Ingest module.
 // Pure JS only (no server-only imports) so both the server action and the
 // client paste-back panel can import it.
@@ -74,6 +77,7 @@ export function parseSynthesis(rawText) {
   if (!rawText || !rawText.trim()) {
     throw new Error("Paste the AI's JSON output first.");
   }
+  if (rawText.length > 100000) throw new Error("Paste at most 100,000 characters of listing JSON.");
 
   // Tolerate ```json fences and stray prose around the object.
   let text = rawText.trim();
@@ -101,8 +105,9 @@ export function parseSynthesis(rawText) {
     const val = obj[key];
     if (val === undefined || val === null || val === "") continue;
     if (key === "price") {
-      const num = Number(String(val).replace(/[^0-9.]/g, ""));
-      if (!Number.isNaN(num)) patch.price = num;
+      const text = typeof val === "string" || typeof val === "number" ? String(val).replace(/[₱,\s]/g, "") : "";
+      const num = Number(text);
+      if (text && Number.isFinite(num) && num >= 0) patch.price = num;
       continue;
     }
     if (key === "space_category") {
@@ -111,7 +116,16 @@ export function parseSynthesis(rawText) {
       else warnings.push(`Ignored unknown space_category "${val}".`);
       continue;
     }
-    patch[key] = val;
+    if (key === "media_link") {
+      const link = publicMediaUrl(val);
+      if (!link) throw new Error("Use a public HTTPS link for the media.");
+      patch.media_link = link;
+      continue;
+    }
+    if (typeof val === "string") {
+      const text = stripPropertyTags(val);
+      if (text) patch[key] = text.slice(0, key === "description" ? 10000 : 255);
+    }
   }
 
   // Assemble the details patch from the flat detail fields + any extra details object.
@@ -119,10 +133,10 @@ export function parseSynthesis(rawText) {
   for (const key of DETAIL_FIELDS) {
     const val = obj[key];
     if (val === undefined || val === null || val === "") continue;
-    detailsPatch[key] = val;
+    detailsPatch[key] = sanitizePropertyDetails(val);
   }
   if (obj.details && typeof obj.details === "object" && !Array.isArray(obj.details)) {
-    Object.assign(detailsPatch, obj.details);
+    Object.assign(detailsPatch, sanitizePropertyDetails(obj.details));
   }
 
   const confidence =

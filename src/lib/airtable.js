@@ -11,6 +11,7 @@ import { reverseMapCategoryFields } from "./propertyFieldMapping";
 import { extractPhotoUrls, imageMediaUrl, safeFloorPlans, spatialEmbedUrl, videoEmbedUrl } from "./propertyMedia";
 import { isSamplePropertySlug } from "./sampleInventory";
 import { stripAllTags } from "./sanitize";
+import { parsePointToLatLng } from "./geoPoint.mjs";
 
 
 export class AirtableRecordNotFoundError extends Error {
@@ -684,12 +685,9 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
   // Parse coordinates if passed as numeric latitude/longitude OR PostGIS POINT string
   let lat = Number.isFinite(Number(data.latitude)) ? Number(data.latitude) : null;
   let lng = Number.isFinite(Number(data.longitude)) ? Number(data.longitude) : null;
-  if ((lat == null || lng == null) && typeof data.coordinates === "string") {
-    const pointMatch = data.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
-    if (pointMatch) {
-      lng = Number(pointMatch[1]);
-      lat = Number(pointMatch[2]);
-    }
+  if (lat == null || lng == null) {
+    const point = parsePointToLatLng(data.coordinates);
+    if (point) ({ lat, lng } = point);
   }
 
   const payload = {

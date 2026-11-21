@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { MapPin, MapPinOff, Crosshair } from "lucide-react";
 
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { loadFlaggedCoordinates, setVerifiedCoordinates } from "./actions";
+import { loadFlaggedCoordinates } from "./actions";
+import { isLiveProperty } from "@/lib/propertyPublication.mjs";
+import { CoordinateForm } from "./CoordinateForm";
 
 // POSITION QUEUE
 //
@@ -33,7 +35,7 @@ export default async function CoordinatesPage() {
   const { rows, error } = await loadFlaggedCoordinates();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <header className="space-y-2">
         <div className="flex items-center gap-2 text-amber-400">
           <Crosshair className="w-4 h-4" />
@@ -104,44 +106,8 @@ export default async function CoordinatesPage() {
                   )}
                 </div>
 
-                {/* Deliberately a plain form: the value being corrected is the
-                    one thing on the page that must be exact, so it is typed and
-                    submitted rather than dragged. */}
-                <form action={setVerifiedCoordinates} className="flex flex-wrap items-center gap-2 shrink-0">
-                  <input type="hidden" name="id" value={row.id} />
-                  <input
-                    name="lat"
-                    inputMode="decimal"
-                    placeholder="latitude"
-                    defaultValue={row.point?.lat ?? ""}
-                    aria-label={`Latitude for ${row.title || row.slug}`}
-                    className="w-32 bg-neutral-900 border border-neutral-700 rounded px-2 py-1.5 font-mono text-xs text-neutral-100 placeholder:text-neutral-400"
-                  />
-                  <input
-                    name="lng"
-                    inputMode="decimal"
-                    placeholder="longitude"
-                    defaultValue={row.point?.lng ?? ""}
-                    aria-label={`Longitude for ${row.title || row.slug}`}
-                    className="w-32 bg-neutral-900 border border-neutral-700 rounded px-2 py-1.5 font-mono text-xs text-neutral-100 placeholder:text-neutral-400"
-                  />
-                  <button
-                    type="submit"
-                    className="px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-neutral-950 font-mono text-[12px] tracking-widest uppercase"
-                  >
-                    Verify
-                  </button>
-                  {row.slug && (
-                    <a
-                      href={`https://www.scoutit.space/property/${row.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1.5 rounded border border-neutral-700 text-neutral-300 font-mono text-[12px] tracking-widest uppercase hover:border-amber-700"
-                    >
-                      View
-                    </a>
-                  )}
-                </form>
+                <CoordinateForm id={row.id} title={row.title || row.slug || "listing"} point={row.point}
+                  publicSlug={isLiveProperty(row) ? row.canonical_slug : null} />
               </div>
             </div>
           );

@@ -7,6 +7,7 @@ import {
   Coins, Send, Activity, UserCheck } from "lucide-react";
 import { getCurrentStaff, TIER_LABELS, TIERS } from "@/lib/rbac";
 import SidebarNav from "@/components/dashboard/SidebarNav";
+import WorkspaceSidebar from "@/components/dashboard/WorkspaceSidebar";
 import SensitiveWorkspaceGuard from "@/components/security/SensitiveWorkspaceGuard";
 
 export default async function DashboardLayout({ children }) {
@@ -64,10 +65,10 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <SensitiveWorkspaceGuard staffEmail={staff.email} sessionReference={sessionReference} sessionStartedAt={sessionStartedAt}>
-    <div className="flex h-screen overflow-hidden bg-background text-white font-sans">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-background text-white font-sans lg:flex-row">
       <a href="#main-content" className="sr-only z-50 rounded bg-gold px-4 py-2 text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to main content</a>
-      <aside className="flex w-64 flex-col border-r border-line bg-surface" aria-label="Mission Control sidebar">
-        <div className="flex items-center gap-3 p-6">
+      <WorkspaceSidebar>
+        <div className="hidden items-center gap-3 p-6 lg:flex">
           <div className="flex h-8 w-8 items-center justify-center rounded border border-line bg-black/50">
             <Shield className="h-4 w-4 text-gold" aria-hidden="true" />
           </div>
@@ -87,11 +88,11 @@ export default async function DashboardLayout({ children }) {
             </button>
           </form>
         </div>
-      </aside>
-      <div className="relative flex-1 overflow-y-auto bg-background">
-        <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-gold opacity-5 blur-[150px]" />
+      </WorkspaceSidebar>
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-y-auto bg-background">
+        <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] max-w-full rounded-full bg-gold opacity-5 blur-[150px]" />
         {staff.mfaRequired && (
-          <div className="relative z-20 bg-amber-500/10 border-b border-amber-500/30 px-8 py-3 flex items-center justify-between text-xs text-amber-300">
+          <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 sm:px-8">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
@@ -106,7 +107,7 @@ export default async function DashboardLayout({ children }) {
             </a>
           </div>
         )}
-        <main id="main-content" className="relative z-10 p-8">{children}</main>
+        <main id="main-content" className="relative z-10 min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
     </SensitiveWorkspaceGuard>

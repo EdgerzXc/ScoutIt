@@ -14,7 +14,7 @@ export default async function MediaIngestPage() {
   const { data: drafts, error } = await admin
     .from("properties")
     .select(
-      "id, title, location, space_category, price, description, media_link, details, completeness_score, pipeline_status, moderation_status, created_at"
+      "id, title, location, space_category, price, description, media_link, details, completeness_score, pipeline_status, moderation_status, lifecycle_state, canonical_slug, published_at, permanently_removed_at, creation_source, pdf_verified, created_at"
     )
     .eq("moderation_status", "pending")
     .is("archived_at", null)

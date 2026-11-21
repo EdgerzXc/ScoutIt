@@ -22,6 +22,7 @@ import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 import { isReservedPublicationAddress } from "@/lib/publicationAddress";
+import { parsePointToLatLng } from "@/lib/geoPoint.mjs";
 
 async function saveOwnedPublicationState(snapshot, ownerId, updates) {
   let query = supabaseAdmin.from("properties").update(updates).eq("id", snapshot.id).eq("owner_id", ownerId);
@@ -249,9 +250,7 @@ export async function POST(request) {
     }
 
     const canonicalSlug = currentSubmission.canonical_slug;
-    const point = typeof currentSubmission.coordinates === "string"
-      ? currentSubmission.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/)
-      : null;
+    const point = parsePointToLatLng(currentSubmission.coordinates);
     const now = new Date().toISOString();
     const payload = {
       location: currentSubmission.location,
@@ -265,7 +264,7 @@ export async function POST(request) {
       last_verified_date: currentSubmission.last_verified_date || now,
       approved_for_scoutit: true,
       ...(currentSubmission.media_link ? { media_link: currentSubmission.media_link } : {}),
-      ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {}),
+      ...(point ? { longitude: point.lng, latitude: point.lat } : {}),
     };
 
     let recordId = currentSubmission.publication_external_record_id;

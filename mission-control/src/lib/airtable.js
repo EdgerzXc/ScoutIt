@@ -148,6 +148,7 @@ async function patchBoundProperty(binding, fields, approved) {
       (approved === false ? flag !== false && flag !== undefined : flag !== true)) {
     throw new Error("Airtable did not confirm the expected public record and its state.");
   }
+  return record;
 }
 
 export const publicationProvider = {
@@ -221,37 +222,22 @@ export async function unpublishBoundProperty(binding) {
  * @param {{slug: string, lat: number, lng: number}} input
  * @returns {Promise<{recordId: string}>}
  */
-export async function syncCoordinatesToAirtable({ slug, lat, lng }) {
-  const { apiKey, baseId } = getCreds();
-
-  if (!slug) throw new Error("No published slug — nothing to correct in Airtable.");
+export async function syncCoordinatesToAirtable({ binding, lat, lng }) {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     throw new Error("Latitude and longitude must both be numbers.");
   }
 
-  const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
-  if (!recordId) {
-    throw new Error(
-      `No Airtable record for slug '${slug}'. The listing is marked published in Supabase ` +
-        `but is not in the public CMS — publish it rather than correcting it.`
-    );
+  const result = await patchBoundProperty(binding, { Latitude: lat, Longitude: lng }, true);
+  if (result.fields.Latitude !== lat || result.fields.Longitude !== lng) {
+    throw new Error("Airtable did not confirm the new map coordinates.");
   }
+  return { recordId: binding.recordId };
+}
 
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ fields: { Latitude: lat, Longitude: lng } }),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Airtable coordinate update failed: ${res.status} ${errText}`);
-  }
-
-  return { recordId };
+export async function updateBoundPropertyImage(binding, mediaLink) {
+  const result = await patchBoundProperty(binding, { Image: mediaLink }, true);
+  if ((result.fields.Image || null) !== mediaLink) throw new Error("Airtable did not confirm the new listing image.");
+  return publicationProvider.refresh();
 }
 
 /**

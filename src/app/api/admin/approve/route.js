@@ -16,6 +16,7 @@ import { looksLikeUuid } from "@/lib/propertyLookup";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { parsePointToLatLng } from "@/lib/geoPoint.mjs";
 
 function loadProperty(id) {
   return supabaseAdmin.from("properties").select("*").eq("id", id).maybeSingle();
@@ -68,13 +69,11 @@ export async function POST(request) {
     }
 
     const now = new Date().toISOString();
-    const point = typeof submission.coordinates === "string"
-      ? submission.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/)
-      : null;
+    const point = parsePointToLatLng(submission.coordinates);
     const listing = {
       ...submission,
       last_verified_date: submission.last_verified_date || now,
-      ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {}),
+      ...(point ? { longitude: point.lng, latitude: point.lat } : {}),
     };
     let staged = false;
     let activationStarted = false;

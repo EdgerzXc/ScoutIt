@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS, TIER_LABELS } from "@/lib/rbac";
-import { isPropertyArchiveAuditAction } from "@/lib/propertyArchive.mjs";
-import { ScrollText, RotateCcw } from "lucide-react";
-import { revertAction } from "./actions";
+import { verificationDecisionForRevert } from "@/lib/auditRevertPolicy.mjs";
+import { ScrollText } from "lucide-react";
+import { AuditRevertForm } from "./AuditRevertForm";
 
 export default async function AuditLogPage() {
   const staff = await getCurrentStaff();
@@ -41,7 +41,7 @@ export default async function AuditLogPage() {
         </div>
       )}
 
-      <div className="bg-[#121212] border border-white/5 rounded-xl overflow-hidden">
+      <div className="bg-[#121212] border border-white/5 rounded-xl overflow-x-auto">
         {(actions ?? []).length === 0 ? (
           <div className="text-sm text-white/70 p-8 text-center flex flex-col items-center gap-2">
             <ScrollText className="w-5 h-5 text-white/70" />
@@ -62,7 +62,7 @@ export default async function AuditLogPage() {
             <tbody>
               {actions.map((a) => {
                 const actor = actorsById[a.actor_id];
-                const canRevert = !a.action.startsWith("revert.") && !a.action.startsWith("database.migration.");
+                const canRevert = Boolean(verificationDecisionForRevert(a));
 
                 return (
                   <tr key={a.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
@@ -83,15 +83,7 @@ export default async function AuditLogPage() {
                     </td>
                     <td className="px-5 py-3 text-white/60">{a.reason || "—"}</td>
                     <td className="px-5 py-3 text-right">
-                      {canRevert && !isPropertyArchiveAuditAction(a.action) && (
-                        <form action={revertAction} className="inline-block">
-                          <input type="hidden" name="actionId" value={a.id} />
-                          <button className="flex items-center gap-1 text-[12px] px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors">
-                            <RotateCcw className="w-3 h-3 text-[#E8AE3C]" />
-                            Revert
-                          </button>
-                        </form>
-                      )}
+                      {canRevert && <AuditRevertForm id={a.id} />}
                     </td>
                   </tr>
                 );

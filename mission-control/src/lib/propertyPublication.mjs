@@ -1,5 +1,5 @@
 const PROTECTED_STATES = new Set(["staff_suspended", "suspended", "permanently_removed"]);
-const APPROVABLE_STATES = new Set(["draft", "pending", "submitted"]);
+export const STAFF_DRAFT_STATES = ["draft", "pending", "submitted", "draft_ready_for_review"];
 
 export function isProtectedProperty(property) {
   return Boolean(property.permanently_removed_at) ||
@@ -8,6 +8,19 @@ export function isProtectedProperty(property) {
 
 export function isLiveProperty(property) {
   return property.pipeline_status === "approved" && !isProtectedProperty(property);
+}
+
+export function isStaffEditableDraft(property) {
+  return STAFF_DRAFT_STATES.includes(property.pipeline_status) &&
+    !isProtectedProperty(property) && !property.archived_at &&
+    !["live", "off_market"].includes(property.lifecycle_state) &&
+    !["approved", "archived"].includes(property.moderation_status);
+}
+
+export function canSynthesizeListing(property) {
+  return isStaffEditableDraft(property) &&
+    !property.published_at && !property.canonical_slug && !property.publication_external_record_id &&
+    (property.creation_source !== "pdf_assisted" || (!property.pdf_verified && property.pipeline_status === "pending"));
 }
 
 export function getPropertyBinding(property) {
@@ -31,10 +44,7 @@ export function matchPropertySnapshot(query, property, additional = []) {
 }
 
 export async function approvePropertyPublication({ admin, property, provider, recordIntent, isReserved, now = new Date().toISOString() }) {
-  if (isProtectedProperty(property) || property.archived_at ||
-      !APPROVABLE_STATES.has(property.pipeline_status) ||
-      ["live", "off_market"].includes(property.lifecycle_state) ||
-      ["approved", "archived"].includes(property.moderation_status)) {
+  if (!isStaffEditableDraft(property)) {
     return { error: "Only an active draft can be approved. Refresh the queue." };
   }
   if (!Object.hasOwn(property, "publication_external_record_id")) {
