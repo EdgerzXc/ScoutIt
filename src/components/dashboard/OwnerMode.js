@@ -16,7 +16,7 @@ import Papa from 'papaparse';
 // filtered on write when nothing filtered it. Sanitisation now happens at the
 // actual write, in DashboardContext.addListing, on the specific free-text
 // fields. Removed rather than wired here, so there is one place to look.
-import { canSee, getCurrentTier } from '../../lib/entitlements';
+import { canSee } from '../../lib/entitlements';
 import { supabase } from '../../lib/supabaseClient';
 import DealTimeline from './crm/DealTimeline';
 import { computeListingStrength } from '../../lib/listingStrength';
@@ -36,11 +36,15 @@ import PropertyUpdateHub from "./PropertyUpdateHub";
 import { requestPropertyPdfProcessing, submitPropertyPdfDraft } from "@/lib/propertyPdfQueueClient";
 import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
+import { getVideoFormat, VIDEO_ACCEPT, VIDEO_MAX_BYTES } from "@/lib/conciergeVideo";
+import { submitConciergeVideo } from "@/lib/conciergeVideoClient";
+import { MONETIZATION_PHASES, resolveMonetizationPhase } from "@/lib/monetizationGate";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory, authedFetch } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, getCurrentTier, isLoading, inventoryError, refetchInventory, authedFetch } = useDashboard();
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
+  const videoBusy = useRef(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(
@@ -55,11 +59,17 @@ export default function OwnerMode() {
   useEffect(() => {
     if (showWizard && showWizard !== "live_editor" && showWizard !== "edit" && showWizard !== "deep_intel_edit") {
       return registerMobileBackAction(() => {
-        setShowWizard(false);
+        if (!videoBusy.current) setShowWizard(false);
       }, { action: "owner_wizard", mode: showWizard });
     }
   }, [showWizard]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoStage, setVideoStage] = useState("");
+  const [videoError, setVideoError] = useState(null);
+  const [videoReceived, setVideoReceived] = useState(false);
+  const videoOperation = useRef(null);
+  const videoInput = useRef(null);
   const [selectedStylePreset, setSelectedStylePreset] = useState("minimalist_organic");
   const [spatialModalOpen, setSpatialModalOpen] = useState(false);
   const [spatialTargetProperty, setSpatialTargetProperty] = useState(null);
@@ -67,8 +77,8 @@ export default function OwnerMode() {
   const [vaultTab, setVaultTab] = useState("url"); // "url" | "build"
   const [vaultBuildOption, setVaultBuildOption] = useState(null); // null | "self" | "team"
   const [vaultUrl, setVaultUrl] = useState("");
-  const [canUseVault, setCanUseVault] = useState(false);
-  useEffect(() => { setCanUseVault(canSee("vault", getCurrentTier())); }, []);
+  const canUseVault = resolveMonetizationPhase() === MONETIZATION_PHASES.PILOT_ZERO_PAYWALL ||
+    canSee("vault", getCurrentTier());
   
   // Bulk select for mass-archive on the Active Property Files grid.
   const [selectMode, setSelectMode] = useState(false);
@@ -548,51 +558,51 @@ export default function OwnerMode() {
       setShowWizard(false);
     };
 
-    const handleSubmitVideo = async () => {
-      if (!selectedFile) return;
-      addToast("Uploading your video...", "●");
-
-      try {
-        const form = new FormData();
-        form.append('file', selectedFile);
-        form.append('owner_id', currentUser?.id || 'unknown');
-        form.append('property_id', activeListing?.id || '');
-
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session?.access_token;
-        const res = await fetch('/api/storage/upload', { 
-          method: 'POST', 
-          headers: { 'Authorization': token ? `Bearer ${token}` : "" },
-          body: form 
-        });
-        const result = await res.json();
-
-        if (!res.ok) throw new Error(result.error || 'Upload failed');
-
-        await fetch('/api/spatial/request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify({
-            propertyId: activeListing?.id,
-            stylePreset: selectedStylePreset,
-            fileUrl: result.publicUrl || selectedFile.name,
-            walletConnects: connects,
-          })
-        }).catch(() => {});
-
-        addToast("Video uploaded. Your Spatial Twin will be ready in 24-48 hours.", "✅");
-      } catch (err) {
-        console.error('[Vault upload]', err);
-        addToast(`Upload failed: ${sanitizeError(err)}`, "❌");
+    const resetVideo = () => {
+      videoOperation.current = null;
+      if (videoInput.current) videoInput.current.value = "";
+      setVideoFile(null);
+      setVideoError(null);
+      setVideoReceived(false);
+    };
+    const handleSubmitVideo = async (event) => {
+      event.preventDefault();
+      if (videoBusy.current || videoReceived || !videoFile || !activeListing) return;
+      if (!getVideoFormat(videoFile.name) || videoFile.size < 12 || videoFile.size > VIDEO_MAX_BYTES) {
+        setVideoError({ message: "Choose an MP4, MOV, WebM or MKV video up to 50 MB.", retry: false });
+        videoInput.current?.focus();
         return;
       }
 
-      setSelectedFile(null);
-      setVaultBuildOption(null);
-      setShowWizard(false);
+      videoBusy.current = true;
+      setVideoError(null);
+      try {
+        if (!videoOperation.current ||
+            videoOperation.current.propertyId !== activeListing.id ||
+            videoOperation.current.stylePreset !== selectedStylePreset) {
+          videoOperation.current = {
+            id: crypto.randomUUID(),
+            propertyId: activeListing.id,
+            stylePreset: selectedStylePreset,
+          };
+        }
+        await submitConciergeVideo({
+          authedFetch,
+          storage: supabase.storage,
+          operation: videoOperation.current,
+          file: videoFile,
+          onStage: setVideoStage,
+        });
+        setVideoReceived(true);
+      } catch (error) {
+        setVideoError({
+          message: error.userMessage || sanitizeError(error, "Could not submit the video. Try again."),
+          retry: true,
+        });
+      } finally {
+        videoBusy.current = false;
+        setVideoStage("");
+      }
     };
 
     const handleJoinQueue = async () => {
@@ -607,26 +617,29 @@ export default function OwnerMode() {
 
     const backLabel = vaultBuildOption ? "← Choose another option" : "← Back";
     const handleBack = () => {
+      if (vaultBuildOption === "self") resetVideo();
       if (vaultBuildOption) { setVaultBuildOption(null); return; }
       setShowWizard('select_mode');
     };
 
     return (
       <div className="max-w-[700px] mx-auto py-lg animate-[fadeIn_0.5s_ease]">
-        <button onClick={handleBack} className="text-text-secondary hover:text-gold-accent mb-8 font-label-caps uppercase tracking-widest transition">{backLabel}</button>
+        <button onClick={handleBack} disabled={Boolean(videoStage)} className="text-text-secondary hover:text-gold-accent mb-8 font-label-caps uppercase tracking-widest transition disabled:opacity-40">{backLabel}</button>
         <h1 className="font-display-md text-5xl text-gold-accent mb-3 drop-shadow-md">The Spatial Vault</h1>
         <p className="text-text-secondary mb-10 font-working-title text-sm">Give buyers an immersive walk-through with 3D maps, 360° tours, and AR experiences. No site visit wasted.</p>
 
         {/* ── TOP TAB: I have a URL / Build one for me ── */}
         <div className="flex gap-0 mb-8 rounded-lg overflow-hidden border border-surface-variant">
           <button
-            onClick={() => { setVaultTab("url"); setVaultBuildOption(null); }}
+            onClick={() => { if (vaultBuildOption === "self") resetVideo(); setVaultTab("url"); setVaultBuildOption(null); }}
+            disabled={Boolean(videoStage)}
             className={`flex-1 py-3 font-label-caps text-[12px] tracking-widest uppercase transition duration-200 ${vaultTab === "url" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
             I already have a tour URL
           </button>
           <button
-            onClick={() => { setVaultTab("build"); setVaultBuildOption(null); }}
+            onClick={() => { if (vaultBuildOption === "self") resetVideo(); setVaultTab("build"); setVaultBuildOption(null); }}
+            disabled={Boolean(videoStage)}
             className={`flex-1 py-3 font-label-caps text-[12px] tracking-widest uppercase transition duration-200 ${vaultTab === "build" ? "bg-gold-accent text-background font-bold" : "bg-surface-alt text-text-secondary hover:text-on-surface"}`}
           >
             Build one for me
@@ -684,7 +697,7 @@ export default function OwnerMode() {
                 </div>
                 <div>
                   <h3 className="font-working-title text-lg text-on-surface group-hover:text-gold-accent transition mb-1">I&apos;ll record it myself</h3>
-                  <p className="text-sm text-text-secondary leading-relaxed">Walk through your property with your phone and upload the raw video. Our team processes it into a full 3D tour, so you just need to hit record.</p>
+                  <p className="text-sm text-text-secondary leading-relaxed">Record your walkthrough on your phone and submit the video for the team to review.</p>
                 </div>
               </div>
             </button>
@@ -714,81 +727,68 @@ export default function OwnerMode() {
 
         {/* ══ PATH B1: Self-record — video upload ══ */}
         {vaultTab === "build" && vaultBuildOption === "self" && (
-          <div className="bg-background border border-gold-accent/20 rounded-2xl p-10 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease]">
-            <div className="bg-surface-alt/50 border border-gold-accent/20 rounded-lg p-5 w-full">
-              <strong className="text-gold-accent font-label-caps uppercase tracking-widest text-sm block mb-1">JUST HIT RECORD</strong>
-              <p className="text-sm text-text-secondary leading-relaxed">Walk through every room slowly with your phone camera or submit your CAD blueprint. Upload the raw footage, and we&apos;ll stitch it into an immersive 3D twin and notify you when it&apos;s live, typically within 24-48 hours.</p>
+          <form action="/api/storage/upload" method="post" aria-labelledby="vault-video-heading" onSubmit={handleSubmitVideo}
+            className="bg-background border border-gold-accent/20 rounded-2xl p-5 sm:p-10 flex flex-col gap-5">
+            <div>
+              <h2 id="vault-video-heading" className="text-gold-accent font-label-caps uppercase tracking-widest text-sm mb-2">Upload a walkthrough</h2>
+              <p className="text-sm text-text-secondary leading-relaxed">
+                {activeListing
+                  ? <>Listing <span className="text-on-surface break-words">{activeListing.title}</span></>
+                  : "Create a listing before uploading a walkthrough."}
+              </p>
             </div>
 
-            {/* Pre-Flight Style & Palette Selector (A-196 Pillar 1) */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold block">
-                1. Select Aesthetic Moodboard Preset
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-                {Object.values(SPATIAL_STYLE_PRESETS).map((preset) => {
-                  const isSelected = selectedStylePreset === preset.id;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => setSelectedStylePreset(preset.id)}
-                      className={`text-left p-3.5 rounded-xl border transition flex flex-col gap-2 ${
-                        isSelected
-                          ? "bg-surface-alt border-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]"
-                          : "bg-surface-variant/30 border-surface-variant hover:border-gold-accent/40"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
+            {activeListing && !videoReceived && (
+              <fieldset disabled={Boolean(videoStage)} className="min-w-0 flex flex-col gap-5">
+                <legend className="text-xs font-mono uppercase tracking-widest text-gold-accent font-bold mb-3">Style preset</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {Object.values(SPATIAL_STYLE_PRESETS).map((preset) => {
+                    const isSelected = selectedStylePreset === preset.id;
+                    return (
+                      <label key={preset.id}
+                        className={`cursor-pointer min-w-0 p-3.5 rounded-xl border flex flex-col gap-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold-accent ${
+                          isSelected ? "bg-surface-alt border-gold-accent" : "bg-surface-variant/30 border-surface-variant hover:border-gold-accent/40"
+                        }`}>
+                        <input className="sr-only" type="radio" name="stylePreset" value={preset.id}
+                          checked={isSelected} onChange={() => setSelectedStylePreset(preset.id)} />
                         <span className="font-working-title text-sm text-on-surface font-bold">
-                          {preset.name}
+                          {preset.name} {isSelected && <span aria-hidden="true" className="text-gold-accent">✓</span>}
                         </span>
-                        {isSelected && <span className="text-gold-accent text-xs">✓</span>}
-                      </div>
-                      <span className="text-[12px] text-text-secondary leading-tight">
-                        {preset.subtitle}
-                      </span>
-                      <span className="text-[12px] font-mono text-gold-bright mt-auto">
-                        {preset.materials.slice(0, 2).join(" · ")}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                        <span className="text-xs text-text-secondary leading-tight">{preset.subtitle}</span>
+                        <span className="text-xs font-mono text-gold-bright mt-auto">{preset.materials.slice(0, 2).join(" · ")}</span>
+                      </label>
+                    );
+                  })}
+                </div>
 
-            {selectedFile ? (
-              <div className="w-full bg-surface-alt/80 p-5 rounded-lg border border-gold-accent/40 flex items-center justify-between">
-                <div>
-                  <p className="text-gold-accent font-working-title text-sm truncate">{selectedFile.name}</p>
-                  <p className="text-[12px] text-text-secondary mt-0.5">{(selectedFile.size / (1024 * 1024)).toFixed(1)} MB</p>
+                <div className="min-w-0 flex flex-col gap-2">
+                  <label htmlFor="video-upload" className="text-sm font-label-caps uppercase tracking-widest text-gold-accent">Walkthrough video</label>
+                  <p id="video-upload-help" className="text-sm text-text-secondary">MP4, MOV, WebM or MKV up to 50 MB.</p>
+                  <input ref={videoInput} type="file" name="video" id="video-upload" accept={VIDEO_ACCEPT}
+                    required aria-invalid={videoError?.retry === false || undefined}
+                    aria-describedby={videoError?.retry === false ? "video-upload-help video-upload-error" : "video-upload-help"}
+                    className="w-full min-w-0 text-base text-text-secondary file:min-h-12 file:me-3 file:rounded file:border file:border-gold-accent file:bg-transparent file:px-3 file:text-gold-accent focus-visible:outline-2 focus-visible:outline-gold-accent"
+                    onChange={(event) => {
+                      videoOperation.current = null;
+                      setVideoError(null);
+                      setVideoFile(event.target.files?.[0] || null);
+                    }}
+                  />
+                  {videoFile && <button type="button" onClick={resetVideo} className="min-h-12 px-2 self-start text-xs font-label-caps uppercase tracking-widest text-gold-accent">Remove video</button>}
                 </div>
-                <button onClick={() => setSelectedFile(null)} className="text-xs font-bold text-error hover:text-red-400 uppercase tracking-widest transition">Remove</button>
-              </div>
-            ) : (
-              <div className="w-full flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-gold-accent/10 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)]">
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
-                </div>
-                <p className="text-text-secondary font-label-caps text-sm uppercase tracking-widest">Drag and drop your video here</p>
-                <input type="file" accept="video/mp4,video/quicktime,video/*" className="hidden" id="video-upload" onChange={e => setSelectedFile(e.target.files[0])} />
-                <label htmlFor="video-upload" className="cursor-pointer border-2 border-gold-accent text-gold-accent font-label-caps uppercase tracking-widest font-bold px-8 py-3 rounded hover:bg-gold-accent hover:text-background transition duration-300">
-                  Select Video File
-                </label>
-                <p className="text-[12px] text-text-secondary tracking-widest uppercase">Supported: .mp4, .mov (any file size)</p>
-              </div>
+
+                <button type="submit" className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright disabled:opacity-50 text-base">
+                  {videoError?.retry ? "Retry submission" : "Submit video"}
+                </button>
+              </fieldset>
             )}
-
-            <button
-              onClick={handleSubmitVideo}
-              disabled={!selectedFile}
-              className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition duration-300 text-base shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)]"
-            >
-              Submit for Processing
-            </button>
-          </div>
+            <div>
+              <p role="status" className="text-sm text-text-secondary">
+                {videoReceived ? "Video received. It’s waiting for a safety scan before the team can review it." : videoStage}
+              </p>
+              <p id="video-upload-error" role="alert" className="text-sm text-error">{videoError?.message}</p>
+            </div>
+          </form>
         )}
 
         {/* ══ PATH B2: ScoutIt Team queue ══ */}

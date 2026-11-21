@@ -1,150 +1,173 @@
-import { NextResponse } from 'next/server';
-import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
-import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from "next/server";
+import { canSee } from "@/lib/entitlements";
+import { detectRealMime } from "@/lib/fileTypeCheck";
+import { looksLikeUuid } from "@/lib/propertyLookup";
+import { resolveServerTier, resolveUserId } from "@/lib/serverAuth";
+import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getVideoFormat, VIDEO_BUCKET, VIDEO_MAX_BYTES } from "@/lib/conciergeVideo";
 
-const TEMP_BUCKET = 'property-videos-temp';
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+const NO_STORE = { "Cache-Control": "private, no-store" };
+const HEADER_BYTES = 64;
+const BODY_BYTES = 2048;
 
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error('Supabase service role not configured');
-  return createClient(url, key);
+function reply(body, status = 200) {
+  return NextResponse.json(body, { status, headers: NO_STORE });
+}
+
+function unavailable() {
+  return reply({ error: "Video intake is temporarily unavailable. Try again.", code: "UNAVAILABLE" }, 503);
+}
+
+async function readJson(request) {
+  if (!request.body) return null;
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder("utf-8", { fatal: true });
+  let length = 0;
+  let body = "";
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) return JSON.parse(body + decoder.decode());
+      length += chunk.value.byteLength;
+      if (length > BODY_BYTES) return null;
+      body += decoder.decode(chunk.value, { stream: true });
+    }
+  } catch {
+    return null;
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
+async function detectStoredVideo(bucket, path) {
+  const { data: stream, error } = await bucket.download(path).asStream();
+  if (error || !stream) throw new Error("Video header unavailable");
+  const reader = stream.getReader();
+  const header = new Uint8Array(HEADER_BYTES);
+  let offset = 0;
+  try {
+    while (offset < header.length) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const piece = value.subarray(0, header.length - offset);
+      header.set(piece, offset);
+      offset += piece.length;
+    }
+    return detectRealMime(header.subarray(0, offset));
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
+const receipt = (id) => reply({ success: true, id, status: "pending_scan" });
+const invalidVideo = () => reply({ error: "The stored file does not match the selected video. Remove it and choose a video again.", code: "INVALID_VIDEO" }, 415);
+const expiredUpload = () => reply({ error: "This upload session expired. Remove the file and select it again.", code: "EXPIRED" }, 410);
+const listingNotFound = () => reply({ error: "Select a listing you own.", code: "NOT_FOUND" }, 404);
+
+async function reserveUpload(bucket, ownerId, id, body) {
+  const { propertyId, stylePreset, filename, size } = body;
+  const format = getVideoFormat(filename);
+  if (!format) return reply({ error: "Choose an MP4, MOV, WebM or MKV video with a valid filename." }, 415);
+  if (!Number.isSafeInteger(size) || size < 12 || size > VIDEO_MAX_BYTES) {
+    return reply({ error: "Choose a non-empty video no larger than 50 MB." }, 413);
+  }
+  if (!looksLikeUuid(propertyId) || typeof stylePreset !== "string" ||
+      !Object.hasOwn(SPATIAL_STYLE_PRESETS, stylePreset)) {
+    return reply({ error: "Select a listing and a style preset." }, 400);
+  }
+
+  const { data: reservation, error } = await supabaseAdmin.rpc("reserve_concierge_video_upload", {
+    p_id: id,
+    p_owner: ownerId,
+    p_property: propertyId.trim(),
+    p_style: stylePreset,
+    p_filename: filename,
+    p_size: size,
+    p_extension: format.extension,
+    p_mime: format.mime,
+  });
+  if (error) return unavailable();
+  if (reservation?.status === "not_found") return listingNotFound();
+  if (reservation?.status === "limit") {
+    return reply({ error: "You reached the daily video upload limit. Try again tomorrow.", code: "RATE_LIMIT" }, 429);
+  }
+  if (reservation?.status === "completed") return receipt(id);
+  if (reservation?.status === "expired") return expiredUpload();
+  if (reservation?.status === "conflict") return reply({ error: "This upload session is already assigned to another file." }, 409);
+  if (reservation?.status !== "reserved" || !reservation.path) return unavailable();
+
+  const { data, error: signError } = await bucket.createSignedUploadUrl(reservation.path, { upsert: false });
+  if (signError || !data?.token) return unavailable();
+  return reply({ success: true, id, path: reservation.path, token: data.token, contentType: format.mime });
+}
+
+async function completeUpload(bucket, ownerId, id) {
+  const { data: reservation, error } = await supabaseAdmin
+    .from("concierge_video_uploads")
+    .select("storage_path, declared_mime, size_bytes, expires_at, completed_at")
+    .eq("id", id)
+    .eq("owner_id", ownerId)
+    .maybeSingle();
+  if (error) return unavailable();
+  if (!reservation) return reply({ error: "Upload session not found.", code: "NO_SESSION" }, 404);
+  if (reservation.completed_at) return receipt(id);
+  if (Date.parse(reservation.expires_at) <= Date.now()) return expiredUpload();
+
+  const { data: object, error: infoError } = await bucket.info(reservation.storage_path);
+  if (infoError) {
+    if ([infoError.status, infoError.statusCode].some((status) => String(status) === "404")) {
+      return reply({ error: "The video upload did not finish. Try again.", code: "UPLOAD_INCOMPLETE" }, 409);
+    }
+    return unavailable();
+  }
+  if (!object?.version) return unavailable();
+  const format = getVideoFormat(reservation.storage_path.split("/").at(-1));
+  if (!format || object.size !== reservation.size_bytes || object.contentType !== reservation.declared_mime) {
+    return invalidVideo();
+  }
+  const mime = await detectStoredVideo(bucket, reservation.storage_path);
+  if (mime !== format.signature) return invalidVideo();
+
+  const { data: result, error: completeError } = await supabaseAdmin.rpc("complete_concierge_video_upload", {
+    p_id: id,
+    p_owner: ownerId,
+    p_version: object.version,
+    p_detected_mime: mime,
+  });
+  if (completeError) return unavailable();
+  if (result === "completed") return receipt(id);
+  if (result === "expired") return expiredUpload();
+  if (result === "not_found") return listingNotFound();
+  if (result === "changed") {
+    return reply({ error: "The file changed before it could be registered. Remove it and try again.", code: "INVALID_VIDEO" }, 409);
+  }
+  return unavailable();
 }
 
 export async function POST(request) {
-
   try {
-    // Authenticate user via JWT to prevent identity spoofing
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    const ownerId = await resolveUserId(request);
+    if (!looksLikeUuid(ownerId)) return reply({ error: "Sign in to upload a video." }, 401);
+    if (!supabaseAdmin) return unavailable();
+    if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get("content-type") || "")) {
+      return reply({ error: "Send upload details as JSON." }, 415);
+    }
+    const body = await readJson(request);
+    if (!body || typeof body.id !== "string" || !looksLikeUuid(body.id) ||
+        (body.action !== "init" && body.action !== "complete")) {
+      return reply({ error: "Invalid upload request." }, 400);
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await getVerifiedWorkspaceUser(authClient, token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const file = formData.get('file');
-    const ownerId = formData.get('owner_id');
-    const propertyId = formData.get('property_id') || 'pending';
-
-    if (!file || typeof file.arrayBuffer !== 'function') {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-    if (!ownerId) {
-      return NextResponse.json({ error: 'owner_id required' }, { status: 400 });
-    }
-    if (ownerId !== user.id) {
-      return NextResponse.json({ error: 'Unauthorized: Cannot upload for a different user' }, { status: 403 });
-    }
-
-    // Path traversal check
-    if (ownerId.includes('/') || ownerId.includes('.') || propertyId.includes('/') || propertyId.includes('.')) {
-      return NextResponse.json({ error: 'Invalid owner_id or property_id format' }, { status: 400 });
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'File too large (max 500MB)' }, { status: 413 });
-    }
-
-    const ext = file.name.split('.').pop().toLowerCase();
-    const allowedExtensions = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
-    if (!allowedExtensions.includes(ext)) {
-      return NextResponse.json({ error: `File type .${ext} not allowed` }, { status: 415 });
-    }
-
-    const allowedMimeTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-matroska'];
-    if (!allowedMimeTypes.includes(file.type)) {
-      return NextResponse.json({ error: `MIME type ${file.type} not allowed` }, { status: 415 });
-    }
-
-    const supabase = getServiceClient();
-    const timestamp = Date.now();
-    const path = `${ownerId}/${propertyId}/${timestamp}.${ext}`;
-
-    const bytes = await file.arrayBuffer();
-
-    // B2 — verify the file is REALLY a video by magic bytes (the extension and
-    // declared MIME above are client-controlled; this is not).
-    const { verifyFileFamily } = await import("@/lib/fileTypeCheck");
-    const check = verifyFileFamily(new Uint8Array(bytes.slice(0, 64)), ["video"]);
-    if (!check.ok) {
-      return NextResponse.json({ error: `Rejected: ${check.reason}` }, { status: 415 });
-    }
-
-    const { error: uploadError } = await supabase.storage
-      .from(TEMP_BUCKET)
-      .upload(path, bytes, {
-        contentType: file.type || 'video/mp4',
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error('[Storage Upload]', uploadError);
-      return NextResponse.json({ error: uploadError.message }, { status: 500 });
-    }
-
-    // B1 Stage 0 — register the upload in the scan pipeline. Staff only ever
-    // see/download it in Mission Control after it scans clean.
-    const { error: scanRegError } = await supabase.from('file_scans').insert({
-      bucket: TEMP_BUCKET,
-      storage_path: path,
-      uploader_id: ownerId,
-      property_id: propertyId || null,
-      original_filename: file.name,
-      declared_mime: file.type || 'video/mp4',
-      size_bytes: file.size,
-      scan_status: 'pending_scan',
-    });
-    // A-146: the upload itself succeeded — a 500 here would lie the other
-    // way and earn a duplicate re-upload. But the "3–5 days" promise below
-    // assumes a queue row exists, so a failed registration must change the
-    // message, not hide behind the success.
-    let queuePending = false;
-    if (scanRegError) {
-      // Non-fatal: the file is uploaded and queued for Luma; scanning catches
-      // up when the row is registered on a retry / by ops.
-      console.warn('[Storage Upload] file_scans registration failed:', scanRegError.message);
-      queuePending = true;
-    }
-
-    // Notify admin via a record in Supabase (admin checks this queue in Mission Control)
-    const { error: notifyError } = await supabase
-      .from('video_upload_queue')
-      .insert({
-        owner_id: ownerId,
-        property_id: propertyId || null,
-        storage_path: path,
-        original_filename: file.name,
-        file_size_bytes: file.size,
-        status: 'pending_luma'
-      });
-
-    if (notifyError) {
-      // Non-fatal to the upload — the file is safe. Flag it so the message
-      // below stays true (see above).
-      console.warn('[Storage Upload] Queue insert failed:', notifyError.message);
-      queuePending = true;
-    }
-
-    return NextResponse.json({
-      success: true,
-      path,
-      processingQueued: !queuePending,
-      message: queuePending
-        ? "Video uploaded. Our processing registration is pending — the file is safe and the team will still pick it up; no need to re-upload."
-        : "Video uploaded. ScoutIt team will process your Spatial Tour within 3–5 business days."
-    });
-
-  } catch (err) {
-    console.error('[Storage Upload] Unexpected error:', err);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    const bucket = supabaseAdmin.storage.from(VIDEO_BUCKET);
+    if (body.action === "complete") return await completeUpload(bucket, ownerId, body.id.trim());
+    const { tier } = await resolveServerTier(request);
+    if (!canSee("vault", tier)) return reply({ error: "This plan does not include Vault video uploads." }, 403);
+    return await reserveUpload(bucket, ownerId, body.id.trim(), body);
+  } catch (error) {
+    console.error("[concierge video] Request failed", error?.code || error?.name || "Error");
+    return unavailable();
   }
 }

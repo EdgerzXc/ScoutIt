@@ -37,6 +37,10 @@
       "schedule": "15 4 * * *"
     },
     {
+      "path": "/api/cron/purge-expired-concierge-videos",
+      "schedule": "30 4 * * *"
+    },
+    {
       "path": "/api/cron/monthly-rollover",
       "schedule": "0 4 1 * *"
     },

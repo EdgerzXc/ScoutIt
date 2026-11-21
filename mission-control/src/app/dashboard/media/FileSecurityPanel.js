@@ -4,6 +4,12 @@ import { useState, useTransition } from "react";
 import { ShieldCheck, ShieldAlert, ShieldX, Loader2, Download, RefreshCw } from "lucide-react";
 import { runScanQueue, requestScannedDownload } from "./actions";
 
+const VIDEO_STYLES = {
+  minimalist_organic: "Minimalist Organic",
+  modern_executive: "Modern Executive",
+  tropical_luxury: "Tropical Luxury",
+};
+
 // B1 Stage 2/3 UI — the staff view of the file-scan pipeline.
 // Only 'clean' files get a download button; suspicious/infected are shown
 // quarantined with NO way to fetch them. Downloads go through the
@@ -105,6 +111,11 @@ export default function FileSecurityPanel({ scans, tableReady }) {
                 <div className="text-white/80 text-xs truncate">
                   {s.original_filename || s.storage_path}
                 </div>
+                {s.video && (
+                  <p className="text-xs text-white/80 break-words">
+                    Walkthrough for {s.video.listing} · {VIDEO_STYLES[s.video.style]}
+                  </p>
+                )}
                 <div className="text-[12px] text-white/70 truncate">
                   {s.detected_mime || s.declared_mime || "type unknown"}
                   {s.scan_engine && ` · ${s.scan_engine}`}

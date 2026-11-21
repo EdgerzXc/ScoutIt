@@ -42,6 +42,26 @@ export default async function MediaIngestPage() {
     }
   }
 
+  const videoPaths = scans.filter((scan) => scan.bucket === "property-videos-temp")
+    .map((scan) => scan.storage_path);
+  if (videoPaths.length) {
+    const { data: intake } = await admin.from("concierge_video_uploads")
+      .select("storage_path, property_id, style_preset")
+      .in("storage_path", videoPaths).not("completed_at", "is", null);
+    if (intake?.length) {
+      const { data: listings } = await admin.from("properties").select("id, title")
+        .in("id", [...new Set(intake.map((video) => video.property_id))]);
+      const titles = new Map((listings || []).map((listing) => [listing.id, listing.title]));
+      const videos = new Map(intake.map((video) => [video.storage_path, {
+        listing: titles.get(video.property_id) || video.property_id,
+        style: video.style_preset,
+      }]));
+      scans = scans.map((scan) => scan.bucket === "property-videos-temp"
+        ? { ...scan, video: videos.get(scan.storage_path) }
+        : scan);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
