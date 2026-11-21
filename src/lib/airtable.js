@@ -23,6 +23,20 @@ export class AirtableRecordNotFoundError extends Error {
 export function isAirtableRecordNotFoundError(error) {
   return error?.code === "AIRTABLE_RECORD_NOT_FOUND";
 }
+
+class AirtableRecordBindingError extends Error {
+  code = "AIRTABLE_RECORD_BINDING";
+}
+
+export function isAirtableRecordBindingError(error) {
+  return error?.code === "AIRTABLE_RECORD_BINDING";
+}
+
+export function confirmsPropertyApproval(record, approved) {
+  if (!/^rec[A-Za-z0-9]+$/.test(record?.id || "") || !record.fields || typeof record.fields !== "object") return false;
+  const flag = record.fields.Approved_For_ScoutIt;
+  return approved ? flag === true : flag === false || flag === undefined;
+}
 const BASE_URL = "https://api.airtable.com/v0";
 const MONTHLY_LIMIT_COOLDOWN_MS = 5 * 60 * 1000;
 let monthlyLimitRetryAt = 0;
@@ -679,7 +693,7 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
             ((data.space_category || data.category || data.type).charAt(0).toUpperCase() + (data.space_category || data.category || data.type).slice(1)) : 
             "Unknown",
           Units_JSON: unitsJson,
-          Approved_For_ScoutIt: true,
+          Approved_For_ScoutIt: data.approved_for_scoutit !== false,
           // Insert must carry what update carries: a first-published row that
           // omits SEO ships without it until an update happens. Conditional so
           // an absent value writes nothing (never a blank claim).
@@ -723,9 +737,9 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
   return result.records[0];
 }
 
-export async function updateProperty(apiKey, baseId, slug, data, unitsOverride = null) {
-  // 1. Find the Airtable Record ID using the slug
-  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
+async function lookupPropertyRecordId(apiKey, baseId, slug) {
+  const escapedSlug = String(slug).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${escapedSlug}'`)}&maxRecords=2`;
   const urlGet = `${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`;
   
   const resGet = await fetch(urlGet, {
@@ -740,8 +754,17 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   if (!getResult.records || getResult.records.length === 0) {
     throw new AirtableRecordNotFoundError(`Airtable record with slug '${slug}' not found.`);
   }
+  if (getResult.records.length !== 1) throw new AirtableRecordBindingError("Airtable returned an ambiguous public listing reference");
+  const recordId = getResult.records[0]?.id;
+  if (!/^rec[A-Za-z0-9]+$/.test(recordId || "")) throw new Error("Airtable returned an invalid public listing reference");
+  return recordId;
+}
   
-  const recordId = getResult.records[0].id;
+export async function updateProperty(apiKey, baseId, slug, data, unitsOverride = null) {
+  const recordId = await lookupPropertyRecordId(apiKey, baseId, slug);
+  if (data.expectedRecordId && data.expectedRecordId !== recordId) {
+    throw new AirtableRecordBindingError("Airtable returned a different record from the verified publication binding");
+  }
 
   // 2. PATCH the record
   const urlPatch = `${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`;
@@ -795,7 +818,24 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
     throw new Error(`Airtable update failed: ${resPatch.status} ${errText}`);
   }
 
-  return await resPatch.json();
+  const record = await resPatch.json();
+  if (record?.id !== recordId) throw new Error("Airtable did not confirm the expected listing record");
+  return record;
+}
+
+export async function unpublishPropertyByRecordId(apiKey, baseId, recordId) {
+  if (!/^rec[A-Za-z0-9]+$/.test(recordId || "")) throw new Error("Missing Airtable listing reference");
+  const response = await fetch(`${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: { Approved_For_ScoutIt: false } }),
+    redirect: "error",
+  });
+  if (!response.ok) throw new Error(`Airtable could not unpublish the listing (${response.status})`);
+  const record = await response.json();
+  if (record?.id !== recordId || !confirmsPropertyApproval(record, false)) {
+    throw new Error("Airtable did not confirm the listing was unpublished");
+  }
 }
 
 export async function deletePropertyById(apiKey, baseId, recordId) {

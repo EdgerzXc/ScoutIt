@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getVerifiedWorkspaceUser } from "@/lib/workspaceRequestAuth";
-import { randomUUID } from "node:crypto";
-import { insertProperty, isAirtableRecordNotFoundError, updateProperty } from "@/lib/airtable";
+import {
+  confirmsPropertyApproval, deletePropertyById, insertProperty, isAirtableRecordBindingError,
+  isAirtableRecordNotFoundError, unpublishPropertyByRecordId, updateProperty,
+} from "@/lib/airtable";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -16,8 +18,41 @@ import {
 import { validateDeclaration, hasValidAgreement } from "@/lib/listerRelationship";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { evaluateServerMonetizationGate } from "@/lib/serverMonetizationGate";
-import { recordHistoricalSlug } from "@/lib/propertyRedirects";
 import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+
+async function saveOwnedPublicationState(snapshot, ownerId, updates) {
+  let query = supabaseAdmin.from("properties").update(updates).eq("id", snapshot.id).eq("owner_id", ownerId);
+  for (const column of ["canonical_slug", "publication_external_record_id", "pipeline_status", "lifecycle_state", "published_at", "withdrawn_at"]) {
+    query = snapshot[column] == null ? query.is(column, null) : query.eq(column, snapshot[column]);
+  }
+  const { data, error } = await query.select("id").maybeSingle();
+  return !error && data?.id === snapshot.id;
+}
+
+async function isReservedPublicationAddress(slug, propertyId) {
+  const [properties, redirects, history] = await Promise.all([
+    supabaseAdmin.from("properties").select("id").eq("canonical_slug", slug).neq("id", propertyId).limit(1),
+    supabaseAdmin.from("property_slug_redirects").select("old_slug").eq("old_slug", slug).limit(1),
+    supabaseAdmin.from("property_slug_history").select("old_slug").eq("old_slug", slug).limit(1),
+  ]);
+  const results = [properties, redirects, history];
+  if (results.some(({ data, error }) => error || !Array.isArray(data))) {
+    throw new Error("The public address reservations could not be verified");
+  }
+  return results.some(({ data }) => data?.length > 0);
+}
+
+async function refreshPublicCatalogue(withdrawn) {
+  try {
+    const result = await invalidateCmsBundle({ withdrawn });
+    return result.sharedCachePurged === false;
+  } catch (cacheError) {
+    console.error("[PUBLISH] Catalogue cache purge failed:", cacheError?.message);
+    return true;
+  }
+}
 
 export async function POST(request) {
 
@@ -31,13 +66,17 @@ export async function POST(request) {
 
     // 1. Extract token from Authorization header to prevent identity spoofing
     const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
+    const token = /^Bearer\s+(.+)$/i.exec(authHeader || "")?.[1]?.trim();
     
     if (!token) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
 
-    const { submissionId, swapWithPropertyId, listerRelationship, ownerSovereigntyAgreed } = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || Array.isArray(body) || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid publication request" }, { status: 400 });
+    }
+    const { submissionId, swapWithPropertyId, listerRelationship, ownerSovereigntyAgreed } = body;
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -50,10 +89,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
 
-    let userId = user.id;
+    const userId = user.id;
 
-    if (!submissionId) {
-      return NextResponse.json({ error: "Missing submissionId" }, { status: 400 });
+    if (typeof submissionId !== "string" || !submissionId ||
+        (swapWithPropertyId != null && typeof swapWithPropertyId !== "string")) {
+      return NextResponse.json({ error: "Invalid listing selection" }, { status: 400 });
     }
 
     if (!supabaseAdmin) {
@@ -95,8 +135,18 @@ export async function POST(request) {
     }
 
     const currentLifecycle = normalizeLifecycleState(currentSubmission);
-    if (currentLifecycle === PROPERTY_LIFECYCLE_STATES.LIVE && currentSubmission.canonical_slug) {
+    const protectedStates = [PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED, PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED];
+    if (currentSubmission.permanently_removed_at || protectedStates.includes(currentLifecycle) || protectedStates.includes(currentSubmission.lifecycle_state)) {
+      return NextResponse.json({ error: "This listing cannot be published from its current lifecycle state." }, { status: 409 });
+    }
+    if (currentLifecycle === PROPERTY_LIFECYCLE_STATES.LIVE || currentSubmission.lifecycle_state === PROPERTY_LIFECYCLE_STATES.LIVE) {
       return NextResponse.json({ error: "Listing is already live; edit it through the lifecycle-safe update path" }, { status: 409 });
+    }
+    if (!Object.hasOwn(currentSubmission, "publication_external_record_id")) {
+      return NextResponse.json({ error: "Verified publication records are not configured yet." }, { status: 503 });
+    }
+    if (Boolean(currentSubmission.canonical_slug) !== Boolean(currentSubmission.publication_external_record_id)) {
+      return NextResponse.json({ error: "ScoutIt support needs to verify this listing’s public record before it can be republished." }, { status: 409 });
     }
 
     // ── LISTER RELATIONSHIP DECLARATION (§34.3 / NEW_IDEAS_2 §50) ──
@@ -151,7 +201,7 @@ export async function POST(request) {
 
     const { data: liveRows, error: liveCountErr } = await supabaseAdmin
       .from("properties")
-      .select("id, title, slug, canonical_slug")
+      .select("id, title, slug, canonical_slug, publication_external_record_id, pipeline_status, lifecycle_state, published_at, withdrawn_at")
       .eq("owner_id", userId)
       .eq("pipeline_status", "approved");
 
@@ -161,12 +211,19 @@ export async function POST(request) {
     }
 
     const activeLiveProperties = (liveRows || []).filter((r) => r.id !== submissionId);
+    const eligibleSwapTargets = activeLiveProperties.filter((row) => row.canonical_slug && row.publication_external_record_id);
     const currentActiveCount = activeLiveProperties.length;
     let toSwap = null;
     const withdrawn = [];
 
     if (currentActiveCount >= cap) {
+      if (currentActiveCount > cap) {
+        return NextResponse.json({ error: "Withdraw enough active listings to reach your plan limit before swapping." }, { status: 409 });
+      }
       if (!swapWithPropertyId) {
+        if (!eligibleSwapTargets.length) {
+          return NextResponse.json({ error: "ScoutIt support needs to verify an active listing’s public record before you can swap it." }, { status: 409 });
+        }
         return NextResponse.json(
           {
             error: "listing_cap_reached",
@@ -174,7 +231,7 @@ export async function POST(request) {
             limit: cap,
             currentActiveCount,
             tier: userTier,
-            liveProperties: activeLiveProperties.map((p) => ({
+            liveProperties: eligibleSwapTargets.map((p) => ({
               id: p.id,
               title: p.title,
               slug: p.canonical_slug || p.slug,
@@ -191,147 +248,161 @@ export async function POST(request) {
           { status: 400 }
         );
       }
+      if (!toSwap.canonical_slug || !toSwap.publication_external_record_id) {
+        return NextResponse.json({ error: "ScoutIt support needs to verify the selected listing’s public record before it can be swapped." }, { status: 409 });
+      }
     }
 
-    // 3. Sync to Airtable (Idempotent Upsert)
+
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
-
-    if (apiKey && baseId) {
-      try {
-
-        // Supabase stores the position as PostGIS POINT(lng lat); Airtable
-        // wants two numbers. Parsed here so the public page inherits the exact
-        // coordinate the owner's listing resolved to, instead of re-geocoding
-        // the location text and possibly landing somewhere else.
-        const point = typeof currentSubmission.coordinates === "string"
-          ? currentSubmission.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/)
-          : null;
-
-        const payload = {
-          title: currentSubmission.title,
-          location: currentSubmission.location,
-          type: currentSubmission.type,
-          space_category: currentSubmission.space_category,
-          details: currentSubmission.details || {},
-          last_verified_date: currentSubmission.last_verified_date || new Date().toISOString(),
-          // photoFields() falls back to data.media_link when no array is
-          // present. Without this forward the fallback is unreachable and a
-          // legacy single-photo row publishes imageless.
-          ...(currentSubmission.media_link ? { media_link: currentSubmission.media_link } : {}),
-          ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {})
-        };
-        
-        let finalSlug = currentSubmission.canonical_slug || currentSubmission.slug;
-
-        // Attempt update first, fallback to insert. Airtable's Slug is a
-        // FORMULA field (computed from Title) — the app-side slug can drift
-        // from it (e.g. "E-Com" slugifies differently on each side, the exact
-        // cause of the one-ecom-center Contact-flow break). Both paths read
-        // Airtable's computed Slug back and persist it to Supabase below, so
-        // Airtable stays the single source of slug truth on every publish.
-        // Once locked as canonical_slug in Supabase, that slug NEVER drifts.
-        try {
-          // If update succeeds, the record existed
-          const lookupSlug = currentSubmission.canonical_slug || currentSubmission.slug;
-          if (!lookupSlug) throw new Error("Published properties require a canonical slug before an update");
-          const updated = await updateProperty(apiKey, baseId, lookupSlug, payload);
-          const computedSlug = updated?.fields?.Slug || lookupSlug;
-          finalSlug = currentSubmission.canonical_slug || computedSlug;
-
-          if (currentSubmission.canonical_slug && computedSlug && computedSlug !== currentSubmission.canonical_slug) {
-            await recordHistoricalSlug({
-              propertyId: submissionId,
-              oldSlug: computedSlug,
-              canonicalSlug: currentSubmission.canonical_slug,
-              reason: "Airtable formula drift mapped to frozen canonical slug",
-            });
-          }
-        } catch (updateErr) {
-          if (!isAirtableRecordNotFoundError(updateErr)) throw updateErr;
-          // Record doesn't exist, insert instead
-          const created = await insertProperty(apiKey, baseId, payload);
-          const computedSlug = created?.fields?.Slug || currentSubmission.slug;
-          finalSlug = currentSubmission.canonical_slug || computedSlug;
-
-          if (currentSubmission.canonical_slug && computedSlug && computedSlug !== currentSubmission.canonical_slug) {
-            await recordHistoricalSlug({
-              propertyId: submissionId,
-              oldSlug: computedSlug,
-              canonicalSlug: currentSubmission.canonical_slug,
-              reason: "Airtable formula drift mapped to frozen canonical slug on insert",
-            });
-          } else if (!currentSubmission.canonical_slug && currentSubmission.slug && computedSlug && currentSubmission.slug !== computedSlug) {
-            await recordHistoricalSlug({
-              propertyId: submissionId,
-              oldSlug: currentSubmission.slug,
-              canonicalSlug: computedSlug,
-              reason: "Pre-publish draft slug mapped to initial canonical slug",
-            });
-          }
-        }
-
-        // 4. Update Supabase only AFTER Airtable success
-        const lifecycleUpdate = buildFirstPublicationUpdate({
-          current: currentSubmission,
-          computedSlug: finalSlug,
-        });
-        const { error: updateError } = await supabaseAdmin
-          .from('properties')
-          // The declaration is persisted in the SAME write that makes the
-          // listing live. Doing it in a separate call would leave a window
-          // where a published listing has no declaration attached — exactly
-          // the state §34.3 exists to prevent.
-          .update({ ...lifecycleUpdate, ...declarationUpdate })
-          .eq('id', submissionId);
-
-        if (updateError) {
-          console.error("[PUBLISH API] Failed to approve in Supabase:", updateError);
-          return NextResponse.json({ error: "Failed to update database status" }, { status: 500 });
-        }
-
-        // 5. If swapping, move the former live listing to Off-Market
-        if (toSwap) {
-          const swapSlug = toSwap.canonical_slug || toSwap.slug;
-          if (swapSlug) {
-            try {
-              const record = await updateProperty(apiKey, baseId, swapSlug, { approved_for_scoutit: false });
-              withdrawn.push({ slug: swapSlug, recordId: record?.id });
-            } catch (swapAirtableErr) {
-              console.error("[PUBLISH SWAP] Airtable unpublish failed for swapped property:", swapAirtableErr);
-            }
-          }
-          const withdrawUpdate = buildWithdrawUpdate();
-          const { error: swapUpdateErr } = await supabaseAdmin
-            .from('properties')
-            .update(withdrawUpdate)
-            .eq('id', toSwap.id)
-            .eq('owner_id', userId);
-
-          if (swapUpdateErr) {
-            console.error("[PUBLISH SWAP] Failed to update swapped property in Supabase:", swapUpdateErr);
-          }
-        }
-
-      } catch (airtableErr) {
-        console.error("[PUBLISH API] Airtable sync failed:", airtableErr);
-        return NextResponse.json({ error: "Airtable sync failed: " + airtableErr.message }, { status: 500 });
-      }
-    } else {
+    if (!apiKey || !baseId) {
       return NextResponse.json({ error: "Publication is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
     }
 
-    // Keep the completed publication successful while exposing an unconfirmed
-    // public refresh to the owner.
-    let publicCachePending = false;
-    try {
-      const purge = await invalidateCmsBundle({ withdrawn });
-      publicCachePending = purge.sharedCachePurged === false;
-    } catch (cacheError) {
-      console.error("[PUBLISH] Catalogue cache purge failed after publication:", cacheError?.message);
-      publicCachePending = true;
+    const canonicalSlug = currentSubmission.canonical_slug;
+    const point = typeof currentSubmission.coordinates === "string"
+      ? currentSubmission.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/)
+      : null;
+    const now = new Date().toISOString();
+    const payload = {
+      location: currentSubmission.location,
+      type: currentSubmission.type,
+      space_category: currentSubmission.space_category,
+      price: currentSubmission.price,
+      details: currentSubmission.details || {},
+      seo_title: currentSubmission.seo_title,
+      seo_description: currentSubmission.seo_description,
+      seo_json_ld: currentSubmission.seo_json_ld,
+      last_verified_date: currentSubmission.last_verified_date || now,
+      approved_for_scoutit: true,
+      ...(currentSubmission.media_link ? { media_link: currentSubmission.media_link } : {}),
+      ...(point ? { longitude: Number(point[1]), latitude: Number(point[2]) } : {}),
+    };
+
+    let recordId = currentSubmission.publication_external_record_id;
+    let finalSlug;
+    let publishedSnapshot;
+    let verifiedStagedDraft = false;
+    async function publicationFailure(stage, error) {
+      console.error("[PUBLISH] Could not complete publication stage:", stage, error?.message);
+      let compensated = false;
+      const bindingConflict = stage === "publish_public" && isAirtableRecordBindingError(error);
+      const approvalWasUnattempted = stage === "prepare_public" || bindingConflict ||
+        (stage === "publish_public" && isAirtableRecordNotFoundError(error));
+      try {
+        if (verifiedStagedDraft && approvalWasUnattempted) {
+          await deletePropertyById(apiKey, baseId, recordId);
+          compensated = true;
+        } else if (recordId && (!canonicalSlug || publishedSnapshot)) {
+          await unpublishPropertyByRecordId(apiKey, baseId, recordId);
+          withdrawn.push({ slug: finalSlug, recordId });
+          if (publishedSnapshot) {
+            compensated = await saveOwnedPublicationState(publishedSnapshot, userId, {
+              pipeline_status: currentSubmission.pipeline_status || "pending",
+              lifecycle_state: currentSubmission.lifecycle_state || PROPERTY_LIFECYCLE_STATES.DRAFT,
+              quietly_open_to_offers: currentSubmission.quietly_open_to_offers === true,
+            });
+          }
+        }
+      } catch (rollbackError) {
+        console.error("[PUBLISH] Publication rollback needs reconciliation:", rollbackError?.message);
+      }
+
+      const publicCachePending = await refreshPublicCatalogue(withdrawn);
+      const reconciliationRequired = !compensated || stage === "swap_private";
+      await recordSystemEvent({
+        event: EVENTS.AIRTABLE_PUBLISH_FAILED,
+        severity: reconciliationRequired ? "error" : "warning",
+        subjectTable: "properties",
+        subjectId: submissionId,
+        summary: "Owner publication did not complete",
+        detail: { stage, submissionId, swapPropertyId: toSwap?.id || null, compensated, reconciliationRequired, publicCachePending },
+      });
+
+      let message = "Could not verify the publication. Check the listing status before trying again.";
+      if (bindingConflict && compensated) {
+        message = "This public address belongs to another listing. Choose a distinct listing title.";
+      } else if (stage === "swap_public" && compensated) {
+        message = "The replacement was rolled back. Check the former listing's public status and retry the swap.";
+      } else if (stage === "swap_private" && compensated) {
+        message = "Airtable confirmed removal of the former listing. Refresh your listings and retry the swap to reconcile the private status.";
+      }
+      return NextResponse.json({
+        success: false,
+        error: message,
+        code: bindingConflict && compensated ? "PUBLICATION_ADDRESS_CONFLICT" : toSwap ? "SWAP_RECONCILIATION_REQUIRED" : "PUBLICATION_RECONCILIATION_REQUIRED",
+        compensated,
+        reconciliationRequired,
+        retryable: compensated,
+        publicCachePending,
+      }, { status: bindingConflict && compensated ? 409 : 502 });
     }
 
+    finalSlug = canonicalSlug;
+    if (!canonicalSlug) {
+      try {
+        const draft = await insertProperty(apiKey, baseId, {
+          ...payload, title: currentSubmission.title, approved_for_scoutit: false,
+        });
+        recordId = draft?.id;
+        finalSlug = draft?.fields?.Slug;
+        if (!confirmsPropertyApproval(draft, false) || typeof finalSlug !== "string" || !finalSlug.trim()) {
+          throw new Error("Airtable did not confirm the private listing and its public address");
+        }
+        verifiedStagedDraft = true;
+        if (await isReservedPublicationAddress(finalSlug, submissionId)) {
+          await deletePropertyById(apiKey, baseId, recordId);
+          return NextResponse.json({ error: "This public address is reserved. Choose a distinct listing title." }, { status: 409 });
+        }
+      } catch (error) {
+        return publicationFailure("prepare_public", error);
+      }
+    }
+
+    try {
+      const record = await updateProperty(apiKey, baseId, finalSlug, { ...payload, expectedRecordId: recordId });
+      if (!confirmsPropertyApproval(record, true) || record.id !== recordId || record.fields.Slug !== finalSlug) {
+        throw new Error("Airtable did not confirm approval at the expected public address");
+      }
+    } catch (error) {
+      return publicationFailure("publish_public", error);
+    }
+
+    const lifecycleUpdate = buildFirstPublicationUpdate({ current: currentSubmission, computedSlug: finalSlug, now });
+    const savedState = { ...lifecycleUpdate, ...declarationUpdate, publication_external_record_id: recordId, quietly_open_to_offers: false };
+    try {
+      if (!await saveOwnedPublicationState(currentSubmission, userId, savedState)) {
+        throw new Error("The private listing changed before publication could be saved");
+      }
+      publishedSnapshot = { ...currentSubmission, ...savedState };
+    } catch (error) {
+      return publicationFailure("publish_private", error);
+    }
+
+    if (toSwap) {
+      const swapSlug = toSwap.canonical_slug;
+      try {
+        const former = await updateProperty(apiKey, baseId, swapSlug, { approved_for_scoutit: false, expectedRecordId: toSwap.publication_external_record_id });
+        if (!confirmsPropertyApproval(former, false) || former.id !== toSwap.publication_external_record_id) {
+          throw new Error("Airtable did not confirm the former listing was unpublished");
+        }
+        withdrawn.push({ slug: swapSlug, recordId: former.id });
+      } catch (error) {
+        return publicationFailure("swap_public", error);
+      }
+
+      try {
+        const withdrawUpdate = buildWithdrawUpdate();
+        if (!await saveOwnedPublicationState(toSwap, userId, withdrawUpdate)) {
+          throw new Error("The former listing changed before withdrawal could be saved");
+        }
+      } catch (error) {
+        return publicationFailure("swap_private", error);
+      }
+    }
+
+    const publicCachePending = await refreshPublicCatalogue(withdrawn);
     return NextResponse.json({ success: true, publicCachePending, swappedPropertyId: toSwap?.id || null });
 
   } catch (err) {

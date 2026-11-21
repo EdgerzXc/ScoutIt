@@ -109,10 +109,12 @@ describe("Canonical Slug Freeze and Photo Hardening (A-306)", () => {
       expect(airtableSrc).not.toContain("f.Enhanced_Photos.split");
     });
 
-    it("pins publish route to frozen canonical slug and redirect tracking", () => {
+    it("pins publication to the reserved address and verified record", () => {
       const publishSrc = readFileSync("src/app/api/dashboard/publish/route.js", "utf8");
-      expect(publishSrc).toContain("recordHistoricalSlug");
-      expect(publishSrc).toContain("finalSlug = currentSubmission.canonical_slug || computedSlug;");
+      expect(publishSrc).toContain("finalSlug = canonicalSlug;");
+      expect(publishSrc).toContain("expectedRecordId: recordId");
+      expect(publishSrc).toContain('from("property_slug_redirects").select("old_slug")');
+      expect(publishSrc).toContain('from("property_slug_history").select("old_slug")');
     });
 
     it("pins dashboard update route to lock live listing titles", () => {

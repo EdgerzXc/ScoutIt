@@ -19,7 +19,7 @@ describe("Publish active listing quota & swap contract (A-271)", () => {
 
   it("returns 409 listing_cap_reached with available live properties when quota is reached without swap", () => {
     expect(route).toContain('"listing_cap_reached"');
-    expect(route).toContain("liveProperties: activeLiveProperties.map");
+    expect(route).toContain("liveProperties: eligibleSwapTargets.map");
     expect(route).toContain("status: 409");
   });
 
