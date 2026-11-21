@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { supabase } from "@/lib/supabaseClient";
 import { getSession } from "@/lib/authClient";
 import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet, GitBranch, Radio } from "lucide-react";
 import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
@@ -199,35 +198,35 @@ function AdminPageInner() {
   }, []);
 
   const handleApprove = async (submissionId) => {
+    if (processingId !== null) return;
     setProcessingId(submissionId);
     setMessage(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
       const res = await fetch("/api/admin/approve", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": token ? `Bearer ${token}` : ""
-        },
+        headers: await authHeaders(),
         body: JSON.stringify({ submissionId }),
       });
 
-      const result = await res.json();
+      const result = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to approve property.");
+      if (!res.ok || result.success !== true) {
+        setMessage({
+          type: "error",
+          text: typeof result.error === "string" ? result.error : "Couldn’t confirm approval. Refresh the queue before trying again.",
+        });
+        return;
       }
 
       if (result.warning) {
-        setMessage({ type: "warning", text: `Warning: ${result.warning}. Listing retained in pending queue.` });
-      } else {
-        setMessage({ type: "success", text: "Property approved and synced to Airtable!" });
-        // Remove from list
-        setPendingProperties((prev) => prev.filter((p) => p.id !== submissionId));
+        setMessage({ type: "warning", text: result.warning });
+        return;
       }
+      setMessage(result.publicCachePending
+        ? { type: "warning", text: "Listing approved. Check the public page before sharing it." }
+        : { type: "success", text: "Listing approved and synced to Airtable." });
+      setPendingProperties((prev) => prev.filter((p) => p.id !== submissionId));
     } catch (err) {
       console.error(err);
       setMessage({ type: "error", text: sanitizeError(err, "Couldn't approve that property.") });
@@ -252,12 +251,22 @@ function AdminPageInner() {
           <p className="page-subtitle">Master feature switches, verification queues, and system parameters.</p>
         </header>
 
-        {message && (
-          <div className={`admin-alert ${message.type}`}>
-            {message.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
-            <span>{message.text}</span>
-          </div>
-        )}
+        <div role="status">
+          {message && message.type !== "error" && (
+            <div className={`admin-alert ${message.type}`}>
+              {message.type === "success" ? <Check size={16} aria-hidden="true" /> : <AlertCircle size={16} aria-hidden="true" />}
+              <span>{message.text}</span>
+            </div>
+          )}
+        </div>
+        <div role="alert">
+          {message?.type === "error" && (
+            <div className="admin-alert error">
+              <AlertCircle size={16} aria-hidden="true" />
+              <span>{message.text}</span>
+            </div>
+          )}
+        </div>
 
         {/* Tab Navigation */}
         <div className="flex border-b border-[var(--surface3)] mb-8 overflow-x-auto gap-2">
@@ -448,7 +457,7 @@ function AdminPageInner() {
                       <div className="submission-actions">
                         <button 
                           className="btn-approve"
-                          disabled={processingId === prop.id}
+                          disabled={processingId !== null}
                           onClick={() => handleApprove(prop.id)}
                         >
                           {processingId === prop.id ? "SYNCING..." : "APPROVE TO AIRTABLE"}

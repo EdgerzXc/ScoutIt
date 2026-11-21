@@ -19,10 +19,8 @@ describe("Phase 2: Dual-CMS & Moderation Invariants Verification", () => {
   describe("GAP-02: Harmonized Approval Lifecycle State", () => {
     it("stamps canonical_slug, canonical_slug_locked_at, published_at, and lifecycle_state='live' in main admin approve", () => {
       const code = read("src/app/api/admin/approve/route.js");
-      expect(code).toContain("lifecycle_state: 'live'");
-      expect(code).toContain("canonical_slug_locked_at: nowIso");
-      expect(code).toContain("published_at: submission.published_at || nowIso");
-      expect(code).toContain("pipeline_status: 'approved'");
+      expect(code).toContain("buildFirstPublicationUpdate({ current: submission, computedSlug: binding.slug, now })");
+      expect(code).toContain("publication_external_record_id: binding.recordId");
     });
 
     it("stamps canonical_slug, canonical_slug_locked_at, published_at, and lifecycle_state='live' in MMC approveProperty", () => {

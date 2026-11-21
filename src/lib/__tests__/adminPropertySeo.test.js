@@ -15,12 +15,13 @@ vi.mock("@/lib/airtable", () => ({
 
 let capturedPatch = null;
 const CURRENT = {
-  id: "p-1",
+  id: "f81d4fae-7dec-41d0-a765-00a0c91e6bf6",
   title: "Tower One",
   details: {},
   pipeline_status: "approved",
   canonical_slug: "tower-one",
   slug: "tower-one",
+  publication_external_record_id: "recTower",
 };
 
 vi.mock("@/lib/supabaseAdmin", () => ({
@@ -33,13 +34,14 @@ vi.mock("@/lib/supabaseAdmin", () => ({
       }),
       update: (patch) => {
         capturedPatch = patch;
-        return {
-          eq: () => ({
-            select: () => ({
-              single: async () => ({ data: { ...CURRENT, ...patch }, error: null }),
-            }),
+        const query = {
+          eq: () => query,
+          is: () => query,
+          select: () => ({
+            maybeSingle: async () => ({ data: { ...CURRENT, ...patch }, error: null }),
           }),
         };
+        return query;
       },
     }),
   },
@@ -65,7 +67,7 @@ describe("A-146 — staff SEO reaches Airtable without breaking the row write", 
 
   it("keeps seo keys out of Supabase and forwards them to Airtable", async () => {
     const res = await PATCH(
-      req({ id: "p-1", seo_title: "T", seo_description: "D", seo_json_ld: "{}" }),
+      req({ id: CURRENT.id, seo_title: "T", seo_description: "D", seo_json_ld: "{}" }),
     );
     expect(res.status).toBe(200);
     expect(capturedPatch).not.toHaveProperty("seo_title");
@@ -75,12 +77,26 @@ describe("A-146 — staff SEO reaches Airtable without breaking the row write", 
     expect(forwarded.seo_title).toBe("T");
     expect(forwarded.seo_description).toBe("D");
     expect(forwarded.seo_json_ld).toBe("{}");
+    expect(forwarded.expectedRecordId).toBe("recTower");
+    expect(forwarded).not.toHaveProperty("title");
   });
 
   it("still saves ordinary fields to Supabase when no SEO is sent", async () => {
     // Title is locked on live rows — use location, an unlocked field.
-    const res = await PATCH(req({ id: "p-1", location: "Makati" }));
+    const res = await PATCH(req({ id: CURRENT.id, location: "<b>Makati</b>" }));
     expect(res.status).toBe(200);
     expect(capturedPatch.location).toBe("Makati");
+  });
+
+  it("requires a reviewed binding before editing a current public listing", async () => {
+    CURRENT.publication_external_record_id = null;
+    try {
+      const response = await PATCH(req({ id: CURRENT.id, location: "Makati" }));
+      expect(response.status).toBe(409);
+      expect(capturedPatch).toBeNull();
+      expect(updateProperty).not.toHaveBeenCalled();
+    } finally {
+      CURRENT.publication_external_record_id = "recTower";
+    }
   });
 });

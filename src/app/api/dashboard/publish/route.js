@@ -21,6 +21,7 @@ import { evaluateServerMonetizationGate } from "@/lib/serverMonetizationGate";
 import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+import { isReservedPublicationAddress } from "@/lib/publicationAddress";
 
 async function saveOwnedPublicationState(snapshot, ownerId, updates) {
   let query = supabaseAdmin.from("properties").update(updates).eq("id", snapshot.id).eq("owner_id", ownerId);
@@ -29,19 +30,6 @@ async function saveOwnedPublicationState(snapshot, ownerId, updates) {
   }
   const { data, error } = await query.select("id").maybeSingle();
   return !error && data?.id === snapshot.id;
-}
-
-async function isReservedPublicationAddress(slug, propertyId) {
-  const [properties, redirects, history] = await Promise.all([
-    supabaseAdmin.from("properties").select("id").eq("canonical_slug", slug).neq("id", propertyId).limit(1),
-    supabaseAdmin.from("property_slug_redirects").select("old_slug").eq("old_slug", slug).limit(1),
-    supabaseAdmin.from("property_slug_history").select("old_slug").eq("old_slug", slug).limit(1),
-  ]);
-  const results = [properties, redirects, history];
-  if (results.some(({ data, error }) => error || !Array.isArray(data))) {
-    throw new Error("The public address reservations could not be verified");
-  }
-  return results.some(({ data }) => data?.length > 0);
 }
 
 async function refreshPublicCatalogue(withdrawn) {
@@ -351,7 +339,7 @@ export async function POST(request) {
           throw new Error("Airtable did not confirm the private listing and its public address");
         }
         verifiedStagedDraft = true;
-        if (await isReservedPublicationAddress(finalSlug, submissionId)) {
+        if (await isReservedPublicationAddress(supabaseAdmin, finalSlug, submissionId)) {
           await deletePropertyById(apiKey, baseId, recordId);
           return NextResponse.json({ error: "This public address is reserved. Choose a distinct listing title." }, { status: 409 });
         }

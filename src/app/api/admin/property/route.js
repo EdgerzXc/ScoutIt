@@ -22,14 +22,35 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireAdmin } from "@/lib/adminGuard";
 import { updateProperty } from "@/lib/airtable";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { sanitizeObject } from "@/lib/sanitize";
+import { sanitizeObject, stripAllTags } from "@/lib/sanitize";
 import { isInternal, fieldMeta } from "@/lib/propertyFieldRegistry";
-import { canChangeDisplayTitle, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import {
+  canChangeDisplayTitle, getPublicationBinding, isMarketVisible, isPermanentlyRemoved,
+  isStaffSuspended, matchPublicationSnapshot,
+} from "@/lib/propertyLifecycle";
+
+const editSchema = z.object({
+  id: z.uuid(),
+  title: z.string().max(255).transform(stripAllTags).pipe(z.string().min(1)).optional(),
+  location: z.string().max(255).transform(stripAllTags).pipe(z.string().min(1)).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
+  seo_title: z.string().max(255).transform(stripAllTags).optional(),
+  seo_description: z.string().max(500).transform(stripAllTags).optional(),
+  seo_json_ld: z.string().max(65000).refine((value) => {
+    try {
+      const parsed = JSON.parse(value);
+      return Boolean(parsed && typeof parsed === "object");
+    } catch {
+      return false;
+    }
+  }).optional(),
+});
 
 // ── GET /api/admin/property?id=… ────────────────────────────────
 // Returns the property plus the registry metadata the editor renders from,
@@ -73,9 +94,9 @@ export async function PATCH(request) {
     const auth = await requireAdmin(request, { label: "ADMIN PROPERTY" });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    const body = await request.json();
-    const { id } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const parsed = editSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid property edit" }, { status: 400 });
+    const { id, details, title, location, ...seo } = parsed.data;
 
     const { data: current, error: loadError } = await supabaseAdmin
       .from("properties")
@@ -87,9 +108,11 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
-    const lifecycleState = normalizeLifecycleState(current);
-    const isLive = lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE;
-    if (body.title !== undefined && body.title !== current.title && !canChangeDisplayTitle(current)) {
+    if (isPermanentlyRemoved(current)) {
+      return NextResponse.json({ error: "Permanently removed listings are retained without further edits" }, { status: 410 });
+    }
+    const isLive = isMarketVisible(current) && !isStaffSuspended(current);
+    if (title !== undefined && title !== current.title && !canChangeDisplayTitle(current)) {
       return NextResponse.json(
         { error: "Live listing titles are locked to protect the canonical public URL" },
         { status: 409, headers: { "Cache-Control": "no-store" } }
@@ -97,97 +120,75 @@ export async function PATCH(request) {
     }
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
-    const canonicalSlug = current.canonical_slug || current.slug;
+    const binding = isLive ? getPublicationBinding(current) : null;
+    if (isLive && !binding) {
+      return NextResponse.json({ error: "This listing requires publication identity reconciliation" }, { status: 409 });
+    }
     if (isLive && (!apiKey || !baseId)) {
       return NextResponse.json({ error: "Live property updates are unavailable while the Airtable CMS is unavailable" }, { status: 503 });
     }
-    if (isLive && !canonicalSlug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
+    if (!isLive && Object.keys(seo).length) {
+      return NextResponse.json({ error: "Public SEO can be edited once the listing is live" }, { status: 409 });
+    }
 
     // Strip internal fields from whatever the client sent. Staff edit notes
     // through their own dedicated controls, not by injecting field names into
     // a section payload.
-    const incoming = body.details ? sanitizeObject(body.details) : {};
+    const incoming = details ? sanitizeObject(details) : {};
     const rejected = Object.keys(incoming).filter(isInternal);
     const safeDetails = Object.fromEntries(
       Object.entries(incoming).filter(([key]) => !isInternal(key)),
     );
-    if (rejected.length) {
-      console.warn(`[ADMIN PROPERTY] Ignored internal keys from client: ${rejected.join(", ")}`);
-    }
-
     // MERGE, don't replace — a section save must not clear other sections.
     // A-146: properties has NO seo_* columns (verified: no migration carries
     // them), so seo keys must never reach the Supabase write — they 500 it.
     // SEO is public display metadata, so it travels Airtable-only, alongside
     // the saved row, in the mirror below.
     const patch = { details: { ...(current.details || {}), ...safeDetails } };
-    for (const key of ["title", "location"]) {
-      if (body[key] !== undefined) patch[key] = body[key];
-    }
-    const seoForward = {};
-    for (const key of ["seo_title", "seo_description", "seo_json_ld"]) {
-      if (body[key] !== undefined) seoForward[key] = body[key];
-    }
+    if (title !== undefined) patch.title = title;
+    if (location !== undefined) patch.location = location;
 
-    const { data: saved, error: saveError } = await supabaseAdmin
-      .from("properties")
-      .update(patch)
-      .eq("id", id)
-      .select()
-      .single();
-
+    const query = supabaseAdmin.from("properties").update(patch).eq("id", id);
+    const { data: saved, error: saveError } = await matchPublicationSnapshot(query, current).select().maybeSingle();
     if (saveError) {
       return NextResponse.json({ error: sanitizeError(saveError, "Could not save the property.") }, { status: 500 });
     }
+    if (!saved) {
+      return NextResponse.json({ error: "Listing changed while saving. Reload it and retry.", retryable: true }, { status: 409 });
+    }
 
-    // Mirror to Airtable only for live listings. Same shape as
-    // /api/dashboard/update: an Airtable failure must NOT lose the Supabase
-    // write, so we return success with a warning instead of throwing.
-    let warning = null;
-    if (isLive) {
-      const apiKey = process.env.AIRTABLE_API_KEY;
-      const baseId = process.env.AIRTABLE_BASE_ID;
-      if (apiKey && baseId && canonicalSlug) {
-        let atResult;
-        try {
-          // seoForward rides alongside the saved row: updateProperty reads
-          // data.seo_title/seo_description/seo_json_ld straight into the
-          // Airtable SEO columns.
-          atResult = await updateProperty(apiKey, baseId, canonicalSlug, { ...saved, ...seoForward });
-        } catch (airtableErr) {
-          console.error("[ADMIN PROPERTY] Airtable sync failed:", airtableErr);
-          const failureResponse = NextResponse.json(
-            { success: false, retryable: true, error: "Supabase updated, but the public CMS sync is pending" },
-            { status: 502 }
-          );
-          warning = "Saved, but the public site sync failed — it will retry on the next save.";
-          return failureResponse;
-        }
-        let publicCachePending = false;
-        try {
-          const purge = await invalidateCmsBundle();
-          publicCachePending = purge.sharedCachePurged === false;
-        } catch (cacheError) {
-          console.error("[ADMIN PROPERTY] Catalogue cache purge failed after update:", cacheError?.message);
-          publicCachePending = true;
-        }
-        const updatedSlug = atResult?.fields?.Slug;
-        if (updatedSlug && updatedSlug !== canonicalSlug) {
-          return NextResponse.json(
-            { error: "The public CMS returned a different slug; staff reconciliation is required", retryable: false, publicCachePending },
-            { status: 409 }
-          );
-        }
-        if (publicCachePending) warning = "Saved; public refresh unconfirmed. Check the listing page.";
-      } else if (!current.slug) {
-        warning = "Saved. No public listing is linked yet, so nothing was published.";
+    let publicCachePending = false;
+    if (binding) {
+      try {
+        const result = await updateProperty(apiKey, baseId, binding.slug, {
+          ...seo,
+          location: saved.location,
+          space_category: saved.space_category,
+          details: saved.details,
+          expectedRecordId: binding.recordId,
+        });
+        if (result?.fields?.Slug !== binding.slug) throw new Error("Airtable did not confirm the canonical address");
+      } catch (airtableErr) {
+        console.error("[ADMIN PROPERTY] Airtable sync failed:", airtableErr?.code || airtableErr?.name);
+        return NextResponse.json(
+          { success: false, retryable: true, error: "Private changes saved. The public listing update needs a retry." },
+          { status: 502 },
+        );
+      }
+      try {
+        const purge = await invalidateCmsBundle();
+        publicCachePending = purge.sharedCachePurged === false;
+      } catch (cacheError) {
+        console.error("[ADMIN PROPERTY] Catalogue cache purge failed after update:", cacheError?.message);
+        publicCachePending = true;
       }
     }
 
     return NextResponse.json({
       success: true,
       property: saved,
-      ...(warning ? { warning } : {}),
+      publicCachePending,
+      ...(publicCachePending ? { warning: "Saved; public refresh unconfirmed. Check the listing page." } : {}),
       ...(rejected.length ? { ignoredFields: rejected } : {}),
     });
   } catch (err) {

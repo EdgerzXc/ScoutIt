@@ -1,97 +1,157 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { POST } from "@/app/api/admin/approve/route";
 
-// A-146: staff approve inserted to Airtable but never read the computed Slug
-// back — reopening the slug drift the owner publish path closed on both its
-// paths. These pin the read-back: slug always, canonical only when none is
-// owner-locked yet.
-
-vi.mock("@/lib/adminGuard", () => ({
-  requireAdmin: async () => ({ userId: "staff-1" }),
+const db = vi.hoisted(() => ({
+  row: {},
+  reloadedRow: null,
+  reservedIn: null,
+  saved: true,
+  stateUpdate: vi.fn(),
+  insert: vi.fn(),
+  activate: vi.fn(),
+  unpublish: vi.fn(),
+  deleteDraft: vi.fn(),
+  purge: vi.fn(),
 }));
 
-const insertProperty = vi.fn(async () => ({
-  id: "rec_airtable_1",
-  fields: { Slug: "tower-one" },
+vi.mock("@/lib/adminGuard", () => ({ requireAdmin: async () => ({ userId: "staff-1" }) }));
+vi.mock("@/lib/airtable", async (importOriginal) => ({
+  ...await importOriginal(),
+  insertProperty: db.insert,
+  updateProperty: db.activate,
+  unpublishPropertyByRecordId: db.unpublish,
+  deletePropertyById: db.deleteDraft,
 }));
-vi.mock("@/lib/airtable", () => ({
-  insertProperty: (...args) => insertProperty(...args),
-  isAirtableRecordNotFoundError: () => false,
-}));
-
-let capturedUpdate = null;
-const submissionRow = {
-  id: "sub-1",
-  pipeline_status: "pending",
-  slug: "old-slug",
-  canonical_slug: null,
-  title: "Tower One",
-};
-
+vi.mock("@/lib/cmsCache", () => ({ invalidateCmsBundle: db.purge }));
+vi.mock("@/lib/systemEvents", () => ({ recordSystemEvent: vi.fn() }));
 vi.mock("@/lib/supabaseAdmin", () => ({
   supabaseAdmin: {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: async () => ({ data: { ...submissionRow }, error: null }),
+    from(table) {
+      const query = {
+        select: () => query,
+        eq: () => query,
+        neq: () => query,
+        is: () => query,
+        limit: async () => ({ data: db.reservedIn === table ? [{ id: "reserved" }] : [] }),
+        maybeSingle: async () => ({
+          data: db.stateUpdate.mock.calls.length && db.reloadedRow ? db.reloadedRow : db.row,
         }),
-      }),
-      update: (obj) => {
-        capturedUpdate = obj;
-        return { eq: async () => ({ error: null }) };
-      },
-    }),
+        update: (patch) => {
+          db.stateUpdate(patch);
+          const writer = {
+            eq: () => writer,
+            is: () => writer,
+            select: () => ({ maybeSingle: async () => ({ data: db.saved ? { id: db.row.id } : null }) }),
+          };
+          return writer;
+        },
+      };
+      return query;
+    },
   },
 }));
 
-const { POST } = await import("@/app/api/admin/approve/route");
+const id = "f81d4fae-7dec-41d0-a765-00a0c91e6bf6";
+const approve = () => POST(new Request("https://www.scoutit.space/api/admin/approve", {
+  method: "POST",
+  body: JSON.stringify({ submissionId: id }),
+}));
 
-process.env.AIRTABLE_API_KEY = "keyTest";
-process.env.AIRTABLE_BASE_ID = "appTest";
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.stubEnv("AIRTABLE_API_KEY", "keyTest");
+  vi.stubEnv("AIRTABLE_BASE_ID", "appTest");
+  db.saved = true;
+  db.reservedIn = null;
+  db.reloadedRow = null;
+  db.row = {
+    id, title: "Tower One", slug: "unpublished-draft-slug", canonical_slug: null,
+    owner_id: "owner-1", pipeline_status: "pending", lifecycle_state: "draft", publication_external_record_id: null,
+  };
+  db.insert.mockResolvedValue({ id: "recNew", fields: { Slug: "tower-one" } });
+  db.activate.mockImplementation(async (_apiKey, _base, slug, payload) => ({
+    id: payload.expectedRecordId, fields: { Slug: slug, Approved_For_ScoutIt: true },
+  }));
+  db.purge.mockResolvedValue({ sharedCachePurged: true });
+});
+afterEach(() => vi.unstubAllEnvs());
 
-const req = () =>
-  new Request("https://www.scoutit.space/api/admin/approve", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ submissionId: "sub-1" }),
+describe("staff approval and canonical address", () => {
+  it("refuses quarantined PDF drafts before creating an Airtable record", async () => {
+    Object.assign(db.row, { creation_source: "pdf_assisted", pipeline_status: "quarantined", pdf_verified: true });
+    const response = await approve();
+    expect(response.status).toBe(422);
+    expect(await response.json()).toMatchObject({ reason: "pdf_source_quarantined" });
+    expect(db.insert).not.toHaveBeenCalled();
   });
 
-describe("A-146 — staff approve persists Airtable's computed Slug", () => {
-  it("refuses a quarantined PDF before creating a public Airtable record", async () => {
-    Object.assign(submissionRow, { creation_source: "pdf_assisted", pipeline_status: "quarantined", pdf_verified: true });
-    insertProperty.mockClear();
-    try {
-      const response = await POST(req());
-      expect(response.status).toBe(422);
-      expect((await response.json()).reason).toBe("pdf_source_quarantined");
-      expect(insertProperty).not.toHaveBeenCalled();
-    } finally {
-      Object.assign(submissionRow, { creation_source: "manual", pipeline_status: "pending", pdf_verified: false });
-    }
+  it("stages privately and persists the confirmed Airtable address and identity", async () => {
+    const response = await approve();
+    expect(response.status).toBe(200);
+    expect(db.insert).toHaveBeenCalledExactlyOnceWith("keyTest", "appTest", expect.objectContaining({ approved_for_scoutit: false }));
+    expect(db.activate).toHaveBeenCalledExactlyOnceWith("keyTest", "appTest", "tower-one",
+      expect.objectContaining({ approved_for_scoutit: true, expectedRecordId: "recNew" }));
+    expect(db.stateUpdate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      pipeline_status: "approved", lifecycle_state: "live", slug: "tower-one", canonical_slug: "tower-one",
+      canonical_slug_locked_at: expect.any(String), published_at: expect.any(String),
+      publication_external_record_id: "recNew",
+    }));
   });
 
-  it("writes slug and adopts canonical when none is locked", async () => {
-    capturedUpdate = null;
-    const res = await POST(req());
-    expect(res.status).toBe(200);
-    expect(capturedUpdate).toMatchObject({
-      pipeline_status: "approved",
-      slug: "tower-one",
-      canonical_slug: "tower-one",
-    });
+  it("reuses a verified previously published record without sending a title change", async () => {
+    Object.assign(db.row, { canonical_slug: "owner-locked-slug", publication_external_record_id: "recBound" });
+    expect((await approve()).status).toBe(200);
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(db.activate).toHaveBeenCalledExactlyOnceWith("keyTest", "appTest", "owner-locked-slug",
+      expect.objectContaining({ expectedRecordId: "recBound" }));
+    expect(db.activate.mock.calls[0][3]).not.toHaveProperty("title");
+    expect(db.stateUpdate).toHaveBeenCalledWith(expect.objectContaining({ slug: "owner-locked-slug", canonical_slug: "owner-locked-slug" }));
   });
 
-  it("never overwrites an owner-locked canonical_slug", async () => {
-    submissionRow.canonical_slug = "owner-locked-slug";
-    capturedUpdate = null;
-    const res = await POST(req());
-    expect(res.status).toBe(200);
-    // Locked means untouched: the write carries no canonical key at all,
-    // while slug still tracks Airtable's computed value.
-    expect(capturedUpdate).toMatchObject({
-      pipeline_status: "approved",
-      slug: "tower-one",
-    });
-    expect(capturedUpdate).not.toHaveProperty("canonical_slug");
-    submissionRow.canonical_slug = null;
+  it("rejects a historical redirect before activating a staged record", async () => {
+    db.reservedIn = "property_slug_history";
+    expect((await approve()).status).toBe(409);
+    expect(db.deleteDraft).toHaveBeenCalledExactlyOnceWith("keyTest", "appTest", "recNew");
+    expect(db.activate).not.toHaveBeenCalled();
+    expect(db.stateUpdate).not.toHaveBeenCalled();
+  });
+
+  it("blocks an unbound historical listing and a staff suspension", async () => {
+    Object.assign(db.row, { canonical_slug: "legacy" });
+    expect((await approve()).status).toBe(409);
+    Object.assign(db.row, { canonical_slug: null, lifecycle_state: "staff_suspended" });
+    expect((await approve()).status).toBe(409);
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(db.activate).not.toHaveBeenCalled();
+  });
+
+  it("does not report success if the private save fails after public activation", async () => {
+    db.saved = false;
+    const response = await approve();
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ retryable: true, reconciliationRequired: false });
+    expect(db.unpublish).toHaveBeenCalledExactlyOnceWith("keyTest", "appTest", "recNew");
+    expect(db.purge).toHaveBeenCalledExactlyOnceWith({ withdrawn: [{ slug: "tower-one", recordId: "recNew" }] });
+    expect(db.deleteDraft).toHaveBeenCalledExactlyOnceWith("keyTest", "appTest", "recNew");
+  });
+
+  it("leaves an already committed concurrent approval on its verified record", async () => {
+    Object.assign(db.row, { canonical_slug: "tower-one", publication_external_record_id: "recBound" });
+    db.reloadedRow = { ...db.row, pipeline_status: "approved", lifecycle_state: "live" };
+    db.saved = false;
+    const response = await approve();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ airtableId: "recBound" });
+    expect(db.unpublish).not.toHaveBeenCalled();
+    expect(db.deleteDraft).not.toHaveBeenCalled();
+  });
+
+  it("requires reconciliation if public rollback cannot be confirmed", async () => {
+    db.saved = false;
+    db.unpublish.mockRejectedValueOnce(new Error("CMS is unavailable"));
+    const response = await approve();
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ retryable: false, reconciliationRequired: true });
+    expect(db.deleteDraft).not.toHaveBeenCalled();
   });
 });

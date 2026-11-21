@@ -111,10 +111,12 @@ describe("Canonical Slug Freeze and Photo Hardening (A-306)", () => {
 
     it("pins publication to the reserved address and verified record", () => {
       const publishSrc = readFileSync("src/app/api/dashboard/publish/route.js", "utf8");
+      const reservations = readFileSync("src/lib/publicationAddress.js", "utf8");
       expect(publishSrc).toContain("finalSlug = canonicalSlug;");
       expect(publishSrc).toContain("expectedRecordId: recordId");
-      expect(publishSrc).toContain('from("property_slug_redirects").select("old_slug")');
-      expect(publishSrc).toContain('from("property_slug_history").select("old_slug")');
+      expect(publishSrc).toContain("isReservedPublicationAddress(supabaseAdmin, finalSlug, submissionId)");
+      expect(reservations).toContain('from("property_slug_redirects").select("old_slug")');
+      expect(reservations).toContain('from("property_slug_history").select("old_slug")');
     });
 
     it("pins dashboard update route to lock live listing titles", () => {
