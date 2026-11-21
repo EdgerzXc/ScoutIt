@@ -80,11 +80,13 @@ describe("A-196 · Spatial Studio UI Components & Source Contracts", () => {
       expect(vaultSrc).toContain("DEFAULT_MATERIAL_CONFIG");
     });
 
-    it("mounts SpatialStudioRequestModal and aesthetic moodboards in OwnerMode", () => {
+    it("keeps the generation modal and submits walkthroughs through private intake", () => {
       expect(ownerSrc).toContain("SpatialStudioRequestModal");
       expect(ownerSrc).toContain("SPATIAL_STYLE_PRESETS");
       expect(ownerSrc).toContain("3D Spatial Studio");
-      expect(ownerSrc).toContain("/api/spatial/request");
+      expect(ownerSrc).toContain("await submitConciergeVideo({");
+      expect(ownerSrc).toContain("stylePreset: selectedStylePreset");
+      expect(ownerSrc).not.toContain("/api/spatial/request");
     });
   });
 });
