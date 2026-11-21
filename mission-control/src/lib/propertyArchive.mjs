@@ -36,7 +36,6 @@ export async function changePropertyArchiveState({ property, archive, reason, no
       lifecycle_state: archive ? "off_market" : "draft",
       archived_at: archive ? now : null,
       rejection_reason: archive ? reason : null,
-      updated_at: now,
       ...(archive && { quietly_open_to_offers: false }),
     });
     if (!saved) return { stage: "supabase", publicChanged: Boolean(wasPublished) };

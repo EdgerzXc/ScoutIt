@@ -227,7 +227,7 @@ export async function rejectProperty(formData) {
   revalidatePath("/dashboard/cms");
 }
 
-const ARCHIVE_STATE_COLUMNS = ["updated_at", "moderation_status", "pipeline_status", "lifecycle_state"];
+const ARCHIVE_STATE_COLUMNS = ["archived_at", "canonical_slug", "moderation_status", "pipeline_status", "lifecycle_state"];
 const PROPERTY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ARCHIVE_FEEDBACK = {
   archived: "Property archived.",
@@ -252,7 +252,7 @@ async function changeArchiveState({ staff, propertyIds, archive, reason, bulk = 
   const ids = [...new Set(propertyIds.map((id) => id.toLowerCase()))];
   const admin = createAdminClient();
   const { data: properties, error } = await admin.from("properties")
-    .select("id, slug, canonical_slug, published_at, permanently_removed_at, updated_at, moderation_status, pipeline_status, lifecycle_state, quietly_open_to_offers")
+    .select("id, slug, canonical_slug, published_at, permanently_removed_at, archived_at, moderation_status, pipeline_status, lifecycle_state, quietly_open_to_offers")
     .in("id", ids);
   if (error || properties?.length !== ids.length) {
     return { code: "unavailable", message: "Could not verify every selected property. Refresh the queue and try again." };
