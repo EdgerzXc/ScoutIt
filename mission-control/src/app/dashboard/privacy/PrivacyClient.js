@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { updateDsrResolution } from "./actions";
+import ClaimEvidenceReview from "./ClaimEvidenceReview";
 import { DSR_STATUSES } from "@/lib/privacyPolicy.mjs";
 import {
   ShieldAlert,
@@ -310,6 +311,8 @@ export default function PrivacyClient({ initialDeletions = [], initialDsrQueue =
                     </button>
                   </div>}
                 </div>
+                {canVerifyClosedAccount && req.requestType === "erasure" && req.subjectVerified &&
+                  req.status === DSR_STATUSES.UNDER_REVIEW && <ClaimEvidenceReview requestId={req.id} />}
               </div>
             ))
           ))}
