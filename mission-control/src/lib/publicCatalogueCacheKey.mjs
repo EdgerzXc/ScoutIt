@@ -33,10 +33,15 @@ const REPLACE_AFTER_WITHDRAWAL = `
 
 function filterWithdrawnProperties(snapshot, withdrawn) {
   if (!Array.isArray(snapshot?.properties)) return null;
-  const slugs = new Set(withdrawn.map(({ slug }) => slug).filter(Boolean));
+  const legacySlugs = new Set(withdrawn.filter(({ recordId }) => !recordId).map(({ slug }) => slug).filter(Boolean));
+  const allSlugs = new Set(withdrawn.map(({ slug }) => slug).filter(Boolean));
   const ids = new Set(withdrawn.map(({ recordId }) => recordId).filter(Boolean));
   const properties = snapshot.properties.filter((property) => {
-    if (!property || !(slugs.has(property.slug) || ids.has(property.id))) return true;
+    if (!property) return true;
+    const matches = property.id
+      ? ids.has(property.id) || legacySlugs.has(property.slug)
+      : allSlugs.has(property.slug);
+    if (!matches) return true;
     if (property.id) ids.add(property.id);
     return false;
   });

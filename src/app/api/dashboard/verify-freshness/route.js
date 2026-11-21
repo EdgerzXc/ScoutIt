@@ -7,6 +7,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { getFreshness } from "@/lib/freshness";
 import { stampAirtableFreshness } from "@/lib/airtableFreshness";
 import { getCmsBundle, invalidateCmsBundle } from "@/lib/cmsCache";
+import { getPublicationBinding, isMarketVisible, isPermanentlyRemoved, isStaffSuspended } from "@/lib/propertyLifecycle";
 
 // ─────────────────────────────────────────────────────────────────────────
 // RE-VERIFICATION GATE  (NEW_IDEAS.md §21)
@@ -41,6 +42,14 @@ function fail(message, status = 400) {
   return NextResponse.json({ success: false, message }, { status });
 }
 
+function canVerify(property) {
+  return !isPermanentlyRemoved(property) && !isStaffSuspended(property);
+}
+
+function isPublic(property) {
+  return canVerify(property) && (isMarketVisible(property) || property.pipeline_status === "published");
+}
+
 // ── GET: portfolio freshness ─────────────────────────────────────────────
 export async function GET(req) {
   try {
@@ -51,33 +60,32 @@ export async function GET(req) {
 
     const { data: properties, error } = await supabaseAdmin
       .from("properties")
-      .select("id, slug, canonical_slug, title, location, last_verified_date, pipeline_status")
+      .select("*")
       .eq("owner_id", userId)
       .is("archived_at", null)
       .neq("pipeline_status", "archived");
 
     if (error) throw error;
 
-    let bundle = null;
-    try {
-      bundle = await getCmsBundle();
-    } catch {
-      // Degrades gracefully if public CMS cache is unavailable
+    const eligible = (properties || []).filter(canVerify);
+    let publicById = new Map();
+    if (eligible.some((property) => isPublic(property) && getPublicationBinding(property))) {
+      try {
+        const bundle = await getCmsBundle();
+        publicById = new Map((bundle?.properties || []).map((property) => [property.id, property]));
+      } catch {
+        // The private timestamps remain available during a catalogue outage.
+      }
     }
 
-    const items = (properties || []).map((p) => {
+    const items = eligible.map((p) => {
       const freshness = getFreshness(p.last_verified_date);
-      const activeSlug = p.canonical_slug || p.slug;
-      const publicProp =
-        activeSlug && Array.isArray(bundle?.properties)
-          ? bundle.properties.find((pub) => pub.slug === activeSlug || (p.slug && pub.slug === p.slug))
-          : null;
-
-      const publicLastVerifiedDate = publicProp?.last_verified_date || null;
-      const isPublished = p.pipeline_status === "published";
+      const binding = isPublic(p) ? getPublicationBinding(p) : null;
+      const publicProp = binding && publicById.get(binding.recordId);
+      const publicLastVerifiedDate = binding && publicProp?.slug === binding.slug ? publicProp.last_verified_date || null : null;
       const isPublicSyncPending =
-        isPublished &&
-        (!activeSlug || (p.last_verified_date && publicLastVerifiedDate !== p.last_verified_date));
+        isPublic(p) &&
+        (!binding || Boolean(p.last_verified_date && Date.parse(publicLastVerifiedDate) !== Date.parse(p.last_verified_date)));
       const publicFreshness = publicLastVerifiedDate ? getFreshness(publicLastVerifiedDate) : null;
 
       return {
@@ -126,74 +134,50 @@ export async function POST(req) {
     const userId = await resolveUserId(req);
     if (!userId) return fail("Sign in to continue.", 401);
 
-    const parsed = schema.safeParse(await req.json());
+    const parsed = schema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return fail("Invalid payload");
 
     // Scope to what the caller actually owns. Never trust the id list — a
     // client could otherwise stamp "verified" on someone else's listing.
     const { data: owned, error: ownError } = await supabaseAdmin
       .from("properties")
-      .select("id, slug, canonical_slug, pipeline_status, title")
+      .select("*")
       .eq("owner_id", userId)
       .in("id", parsed.data.propertyIds);
 
     if (ownError) throw ownError;
     if (!owned?.length) return fail("No matching listings you own.", 403);
+    const eligible = owned.filter(canVerify);
+    if (!eligible.length) return fail("No selected listings are eligible for verification.", 409);
 
     const now = new Date();
     const iso = now.toISOString();
 
-    const { error: updateError } = await supabaseAdmin
+    const { data: updated, error: updateError } = await supabaseAdmin
       .from("properties")
       .update({ last_verified_date: iso })
       .eq("owner_id", userId)
-      .in("id", owned.map((p) => p.id));
+      .in("id", eligible.map((p) => p.id))
+      .is("permanently_removed_at", null)
+      .select("*");
 
     if (updateError) throw updateError;
+    if (!updated?.length) return fail("Listings changed before verification could be recorded.", 409);
 
     // Mirror to Airtable for anything published. Sequential rather than
     // parallel: Airtable rate-limits at 5 req/s per base and blowing that
     // takes the public site's CMS proxy down with it (see cmsCache.js).
-    const airtableResults = [];
-    const unsluggedPublished = [];
-    for (const property of owned) {
-      const activeSlug = property.canonical_slug || property.slug;
-      if (!activeSlug) {
-        if (property.pipeline_status === "published") {
-          unsluggedPublished.push(property.title || property.id);
-        }
-        continue;
-      }
-      let result = await stampAirtableFreshness({ slug: activeSlug, isoDate: iso });
-      if (!result.ok && property.slug && property.slug !== activeSlug) {
-        result = await stampAirtableFreshness({ slug: property.slug, isoDate: iso });
-      }
-      if (!result.ok && property.id) {
-        const { data: history } = await supabaseAdmin
-          .from("property_slug_history")
-          .select("old_slug")
-          .eq("property_id", property.id);
-        if (history?.length) {
-          for (const h of history) {
-            if (h.old_slug && h.old_slug !== activeSlug && h.old_slug !== property.slug) {
-              const histRes = await stampAirtableFreshness({ slug: h.old_slug, isoDate: iso });
-              if (histRes.ok) {
-                result = histRes;
-                break;
-              }
-            }
-          }
-        }
-      }
-      airtableResults.push({ slug: activeSlug, synced: result.ok });
+    let publicUpdated = false;
+    const failedSync = [];
+    for (const property of updated.filter(isPublic)) {
+      const binding = getPublicationBinding(property);
+      const synced = binding && (await stampAirtableFreshness({ ...binding, isoDate: iso })).ok;
+      if (synced) publicUpdated = true;
+      else failedSync.push(property.canonical_slug || property.title || property.id);
     }
 
-    const failedSync = [
-      ...airtableResults.filter((r) => !r.synced).map((r) => r.slug),
-      ...unsluggedPublished,
-    ];
     let publicCachePending = false;
-    if (airtableResults.some((r) => r.synced)) {
+    if (publicUpdated) {
       try {
         const purge = await invalidateCmsBundle();
         publicCachePending = purge.sharedCachePurged === false;
@@ -206,7 +190,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: true,
-        verifiedCount: owned.length,
+        verifiedCount: updated.length,
         verifiedAt: iso,
         // Honest about partial success — the owner's confirmation is saved
         // either way, but a failed CMS sync means the PUBLIC badge is stale.

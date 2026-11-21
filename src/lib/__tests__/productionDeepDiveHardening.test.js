@@ -119,10 +119,12 @@ describe("A-273 — Production Deep-Dive Hardening Suite", () => {
         lifecycle_state: "live_market",
         slug: "drifted-slug",
         canonical_slug: "locked-canonical-slug",
+        publication_external_record_id: "recBound",
         details: {},
       });
       expect(updateProperty).toHaveBeenCalledTimes(1);
       expect(updateProperty.mock.calls[0][2]).toBe("locked-canonical-slug");
+      expect(updateProperty.mock.calls[0][3]).toEqual({ expectedRecordId: "recBound" });
     });
   });
 

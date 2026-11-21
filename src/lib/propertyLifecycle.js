@@ -48,7 +48,34 @@ export function isOffMarket(property = {}) {
 }
 
 export function isPermanentlyRemoved(property = {}) {
-  return normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED;
+  return Boolean(property.permanently_removed_at) ||
+    property.lifecycle_state === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED ||
+    normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED;
+}
+
+export function isStaffSuspended(property = {}) {
+  return property.lifecycle_state === PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED ||
+    normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED;
+}
+
+export function getPublicationBinding(property) {
+  const slug = property.canonical_slug;
+  const recordId = property.publication_external_record_id;
+  if (!slug || !/^rec[A-Za-z0-9]+$/.test(recordId || "")) return null;
+  return { slug, recordId };
+}
+
+export function hasPublicationHistory(property) {
+  return Boolean(property.canonical_slug || property.published_at || property.canonical_slug_locked_at ||
+    property.publication_external_record_id || normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.LIVE);
+}
+
+export function matchPublicationSnapshot(query, property) {
+  for (const field of ["pipeline_status", "lifecycle_state", "canonical_slug", "publication_external_record_id", "permanently_removed_at"]) {
+    if (!Object.hasOwn(property, field)) continue;
+    query = property[field] == null ? query.is(field, null) : query.eq(field, property[field]);
+  }
+  return query;
 }
 
 export function canChangeDisplayTitle(property = {}) {

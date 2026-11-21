@@ -7,7 +7,10 @@ import { z } from "zod";
 import { sanitizeObject, stripAllTags } from "@/lib/sanitize";
 import { notifyAttachedBrokers } from "@/lib/notifications";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { canChangeDisplayTitle, isPermanentlyRemoved, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import {
+  canChangeDisplayTitle, getPublicationBinding, isPermanentlyRemoved, isStaffSuspended,
+  matchPublicationSnapshot, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES,
+} from "@/lib/propertyLifecycle";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 // Price/status-ish keys across every category's details shape (Track 1,
@@ -22,16 +25,16 @@ const updateSchema = z.object({
   title: z.string().max(255).optional(),
   type: z.string().max(100).optional(),
   location: z.string().max(255).optional(),
-  details: z.record(z.any()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
   quietly_open_to_offers: z.boolean().optional(),
   contact_preference: z.enum(["owner_only", "broker_only", "owner_and_brokers"]).optional()
 });
 
 export async function POST(request) {
   try {
-    const { submissionId, data  } = await request.json();
+    const { submissionId, data } = (await request.json().catch(() => null)) || {};
 
-    if (!submissionId || !data) {
+    if (typeof submissionId !== "string" || !submissionId || !data) {
       return NextResponse.json({ error: "Missing submissionId or data" }, { status: 400 });
     }
 
@@ -97,11 +100,20 @@ export async function POST(request) {
     if (isPermanentlyRemoved(currentSubmission)) {
       return NextResponse.json({ error: "Permanently removed listings are retained and cannot be edited" }, { status: 410 });
     }
+    if (isStaffSuspended(currentSubmission)) {
+      return NextResponse.json({ error: "Staff-suspended listings require staff review" }, { status: 409 });
+    }
     if (validatedData.title !== undefined && stripAllTags(validatedData.title) !== currentSubmission.title && !canChangeDisplayTitle(currentSubmission)) {
       return NextResponse.json({ error: "Live listing titles are locked to protect the canonical public URL" }, { status: 409, headers: { "Cache-Control": "no-store" } });
     }
-    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE &&
-        (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID)) {
+    const isLive = lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE;
+    const binding = isLive ? getPublicationBinding(currentSubmission) : null;
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    const baseId = process.env.AIRTABLE_BASE_ID;
+    if (isLive && !binding) {
+      return NextResponse.json({ error: "This listing requires publication identity reconciliation" }, { status: 409 });
+    }
+    if (isLive && (!apiKey || !baseId)) {
       return NextResponse.json(
         { error: "Live property updates are unavailable while the Airtable CMS is unavailable", retryable: true },
         { status: 503 }
@@ -114,7 +126,7 @@ export async function POST(request) {
       type: validatedData.type ? stripAllTags(validatedData.type) : currentSubmission.type,
       location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location,
       // GAP-98: Preserve space_category so Airtable category-scoped field mapping is not bypassed
-      space_category: validatedData.space_category || currentSubmission.space_category,
+      space_category: currentSubmission.space_category,
     };
     if (typeof validatedData.quietly_open_to_offers === "boolean") {
       if (lifecycleState !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
@@ -138,26 +150,36 @@ export async function POST(request) {
     // 2. Update Supabase
     // We verified ownership above. RLS might silently drop updates, so we use the service role key.
 
-    const { error: updateError, data: updateData } = await serviceClient
+    const updateQuery = serviceClient
       .from('properties')
       .update(supabasePayload)
       .eq('id', submissionId)
-      .select();
-
-    if (!updateData || updateData.length === 0) {
-      console.warn("[UPDATE API] Zero rows updated. Supabase RLS or missing ID issue.");
-      return NextResponse.json({ error: "Failed to update database (0 rows affected)" }, { status: 500 });
-    }
+      .eq('owner_id', userId);
+    const { error: updateError, data: updateData } = await matchPublicationSnapshot(updateQuery, currentSubmission).select('id');
 
     if (updateError) {
       console.error("[UPDATE API] Failed to update Supabase:", updateError);
       return NextResponse.json({ error: "Failed to update database" }, { status: 500 });
     }
+    if (updateData?.length !== 1) {
+      return NextResponse.json({ error: "Listing changed while the edit was being saved. Reload and retry.", retryable: true }, { status: 409 });
+    }
+
+    if (binding) {
+      const publicPayload = { ...supabasePayload, expectedRecordId: binding.recordId };
+      delete publicPayload.title;
+      try {
+        await updateProperty(apiKey, baseId, binding.slug, publicPayload);
+      } catch (airtableErr) {
+        console.error("[UPDATE API] Airtable update failed:", airtableErr);
+        return NextResponse.json({ success: false, retryable: true, warning: "Private changes saved. The public listing update needs a retry." }, { status: 502 });
+      }
+    }
 
     // 2b. Broker-on-change alert — only for a watched price/status field
     // actually changing value, and only on already-approved (public)
     // properties, since that's the only state where an attached broker exists.
-    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE && validatedData.details) {
+    if (isLive && validatedData.details) {
       const oldDetails = currentSubmission.details || {};
       const newDetails = supabasePayload.details || {};
       const touchedKeys = Object.keys(validatedData.details);
@@ -182,35 +204,10 @@ export async function POST(request) {
       }
     }
 
-    // 3. If approved, update Airtable too!
-    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE) {
-      const apiKey = process.env.AIRTABLE_API_KEY;
-      const baseId = process.env.AIRTABLE_BASE_ID;
-
-      if (apiKey && baseId) {
-        // The slug is derived from the original title
-        const slug = currentSubmission.canonical_slug || currentSubmission.slug;
-        if (!slug) {
-          return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
-        }
-
-        try {
-          await updateProperty(apiKey, baseId, slug, supabasePayload);
-          
-          // Never replace the first-publication canonical slug with Airtable's formula result.
-        } catch (airtableErr) {
-          console.error("[UPDATE API] Airtable update failed:", airtableErr);
-          return NextResponse.json({ success: false, retryable: true, warning: "Supabase updated; Airtable sync is pending and can be retried: " + airtableErr.message }, { status: 502 });
-        }
-      } else {
-        console.warn("[UPDATE API] Airtable credentials missing, skipping sync.");
-      }
-    }
-
     // Draft edits do not change the public catalogue and must not force a
     // four-table rebuild on the next visit. Live edits do need a purge.
     let publicCachePending = false;
-    if (lifecycleState === PROPERTY_LIFECYCLE_STATES.LIVE) {
+    if (isLive) {
       try {
         const purge = await invalidateCmsBundle();
         publicCachePending = purge.sharedCachePurged === false;

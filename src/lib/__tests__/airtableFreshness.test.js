@@ -24,23 +24,24 @@ describe('stampAirtableFreshness', () => {
 
   it('finds by formula slug and patches only Last_Verified_Date', async () => {
     vi.mocked(fetchWithRetry)
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ records: [{ id: 'rec-1' }] }) })
-      .mockResolvedValueOnce({ ok: true });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ records: [{ id: 'recBound' }] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'recBound' }) });
 
     const isoDate = '2026-08-27T00:00:00.000Z';
     const result = await stampAirtableFreshness({
       slug: 'one-ecom-center',
+      recordId: 'recBound',
       isoDate,
       apiKey: 'key',
       baseId: 'base',
     });
 
-    expect(result).toEqual({ ok: true, recordId: 'rec-1' });
+    expect(result).toEqual({ ok: true, recordId: 'recBound' });
     expect(fetchWithRetry).toHaveBeenCalledTimes(2);
     const [lookupUrl, lookupOptions, lookupPolicy] = vi.mocked(fetchWithRetry).mock.calls[0];
     const lookup = new URL(lookupUrl);
     expect(lookup.searchParams.get('filterByFormula')).toBe("{Slug}='one-ecom-center'");
-    expect(lookup.searchParams.get('maxRecords')).toBe('1');
+    expect(lookup.searchParams.get('maxRecords')).toBe('2');
     expect(lookupOptions).toEqual({ headers: { Authorization: 'Bearer key' } });
     expect(lookupPolicy).toEqual({ circuit: 'airtable-freshness' });
     const patchOptions = vi.mocked(fetchWithRetry).mock.calls[1][1];
@@ -53,11 +54,12 @@ describe('stampAirtableFreshness', () => {
 
   it('keeps quote-bearing slugs inside the Airtable formula string', async () => {
     vi.mocked(fetchWithRetry)
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ records: [{ id: 'rec-1' }] }) })
-      .mockResolvedValueOnce({ ok: true });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ records: [{ id: 'recBound' }] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'recBound' }) });
 
     await stampAirtableFreshness({
       slug: "tower' OR(TRUE())",
+      recordId: 'recBound',
       isoDate: '2026-08-27T00:00:00.000Z',
       apiKey: 'key',
       baseId: 'base',
@@ -65,7 +67,23 @@ describe('stampAirtableFreshness', () => {
 
     const lookup = new URL(vi.mocked(fetchWithRetry).mock.calls[0][0]);
     expect(lookup.searchParams.get('filterByFormula')).toBe("{Slug}='tower\\' OR(TRUE())'");
-    expect(lookup.searchParams.get('maxRecords')).toBe('1');
+    expect(lookup.searchParams.get('maxRecords')).toBe('2');
+  });
+
+  it('rejects a normal provider response that does not match the verified record', async () => {
+    vi.mocked(fetchWithRetry).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ records: [{ id: 'recOther' }] }),
+    });
+    const result = await stampAirtableFreshness({
+      slug: 'one-ecom-center',
+      recordId: 'recBound',
+      isoDate: '2026-08-27T00:00:00.000Z',
+      apiKey: 'key',
+      baseId: 'base',
+    });
+    expect(result).toEqual({ ok: false, reason: 'binding_mismatch' });
+    expect(fetchWithRetry).toHaveBeenCalledTimes(1);
   });
 
   it('projects the stamped Airtable date into the public property payload', async () => {

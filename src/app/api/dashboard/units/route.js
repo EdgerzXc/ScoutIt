@@ -166,7 +166,7 @@ export async function POST(request) {
     const serviceClient = serviceClientFor();
     const { data: property, error: propErr } = await serviceClient
       .from("properties")
-      .select("id, owner_id, slug, canonical_slug, lifecycle_state, pipeline_status, title, location, type, space_category, details")
+      .select("*")
       .eq("id", propertyId)
       .single();
 
@@ -300,7 +300,7 @@ export async function POST(request) {
       if (sync?.publicCachePending) warning = "Units saved; public refresh unconfirmed. Check the listing page.";
     } catch (airtableErr) {
       console.error("[UNITS API] Airtable sync failed:", airtableErr);
-      warning = "Units saved, but Airtable sync failed: " + airtableErr.message;
+      warning = "Units saved. The public listing update needs a retry.";
     }
 
     // Broker-on-change alert — only for structural inventory changes (units

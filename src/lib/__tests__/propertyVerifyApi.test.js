@@ -3,6 +3,7 @@ import { POST } from '@/app/api/property/verify/route';
 import * as serverAuth from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { stampAirtableFreshness } from '@/lib/airtableFreshness';
+import { requireAdmin } from '@/lib/adminGuard';
 
 // ─────────────────────────────────────────────────────────────────────────
 // ⚠️ REWRITTEN 2026-08-06 (§56). The previous version mocked `.or()` and fed
@@ -27,11 +28,13 @@ vi.mock('@/lib/supabaseAdmin', () => ({
 vi.mock('@/lib/airtableFreshness', () => ({
   stampAirtableFreshness: vi.fn(),
 }));
+vi.mock('@/lib/adminGuard', () => ({ requireAdmin: vi.fn() }));
 
 const REAL_ROW = {
   id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301',
   slug: 'bgc-condo',
   canonical_slug: 'bgc-condo',
+  publication_external_record_id: 'recBound',
   title: 'BGC Condo',
   owner_id: 'user-owner',
   lifecycle_state: 'live',
@@ -58,7 +61,7 @@ export const REAL_PROPERTY_COLUMNS = new Set([
   'pdf_source_url', 'lister_relationship', 'owner_claim_agreed',
 ]);
 
-function mockDb({ row = REAL_ROW, error = null, roles = [], updateErrors = [] } = {}) {
+function mockDb({ row = REAL_ROW, error = null, updateErrors = [] } = {}) {
   const eqCalls = [];
   const updates = [];
   const audits = [];
@@ -77,16 +80,12 @@ function mockDb({ row = REAL_ROW, error = null, roles = [], updateErrors = [] } 
         update: vi.fn().mockImplementation((payload) => {
           updates.push(payload);
           const nextError = updateErrors[updates.length - 1] || null;
-          return { eq: vi.fn().mockResolvedValue({ error: nextError }) };
-        }),
-      };
-    }
-    if (table === 'user_profiles') {
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            maybeSingle: vi.fn().mockResolvedValue({ data: { active_roles: roles }, error: null }),
-          }),
+          const query = {
+            eq: () => query,
+            is: () => query,
+            select: () => ({ maybeSingle: async () => ({ data: nextError ? null : { id: row.id }, error: nextError }) }),
+          };
+          return query;
         }),
       };
     }
@@ -119,6 +118,7 @@ describe('/api/property/verify API endpoint', () => {
     vi.clearAllMocks();
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-owner');
     vi.mocked(stampAirtableFreshness).mockResolvedValue({ ok: true, recordId: 'rec-public' });
+    vi.mocked(requireAdmin).mockResolvedValue({ error: 'Staff authorization required', status: 403 });
   });
 
   it('rejects unauthenticated requests with 401', async () => {
@@ -170,13 +170,13 @@ describe('/api/property/verify API endpoint', () => {
 
   it('rejects a stranger with 403', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('someone-else');
-    mockDb({ roles: [] });
+    mockDb();
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(403);
   });
 
   it('rejects an ordinary caller when owner_id is null without any write', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('ordinary-user');
-    const calls = mockDb({ row: { ...REAL_ROW, owner_id: null }, roles: [] });
+    const calls = mockDb({ row: { ...REAL_ROW, owner_id: null } });
 
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(403);
     expect(calls.updates).toHaveLength(0);
@@ -188,24 +188,27 @@ describe('/api/property/verify API endpoint', () => {
   // not own.
   it('allows staff to verify a listing they do not own', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('staff-1');
-    mockDb({ roles: ['staff'] });
+    vi.mocked(requireAdmin).mockResolvedValue({ userId: 'staff-1' });
+    mockDb();
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(200);
   });
 
   it('allows canonical staff authority to verify an unowned listing', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('staff-1');
-    mockDb({ row: { ...REAL_ROW, owner_id: null }, roles: ['staff'] });
+    vi.mocked(requireAdmin).mockResolvedValue({ userId: 'staff-1' });
+    mockDb({ row: { ...REAL_ROW, owner_id: null } });
     expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(200);
   });
 
   it('mirrors a published verification to Airtable before reporting success', async () => {
     const calls = mockDb();
-    const res = await POST(req({ propertyId: 'bgc-condo', verificationType: 'staff_attestation' }));
+    const res = await POST(req({ propertyId: 'bgc-condo' }));
 
     expect(res.status).toBe(200);
     expect(stampAirtableFreshness).toHaveBeenCalledTimes(1);
     expect(stampAirtableFreshness).toHaveBeenCalledWith({
       slug: REAL_ROW.canonical_slug,
+      recordId: REAL_ROW.publication_external_record_id,
       isoDate: calls.updates[0].last_verified_date,
     });
   });
@@ -214,11 +217,28 @@ describe('/api/property/verify API endpoint', () => {
     vi.mocked(stampAirtableFreshness).mockResolvedValue({ ok: false, reason: 'patch_failed' });
     const calls = mockDb();
 
-    const res = await POST(req({ propertyId: 'bgc-condo', verificationType: 'staff_attestation' }));
+    const res = await POST(req({ propertyId: 'bgc-condo' }));
     expect(res.status).toBe(502);
     expect(calls.updates).toHaveLength(2);
     expect(calls.updates[1]).toEqual({ last_verified_date: REAL_ROW.last_verified_date });
     expect(calls.audits).toHaveLength(0);
+  });
+
+  it('returns the staff authenticator challenge without writing a timestamp', async () => {
+    vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('staff-1');
+    vi.mocked(requireAdmin).mockResolvedValue({ error: 'Verify your authenticator', status: 403, code: 'mfa_required' });
+    const calls = mockDb();
+    const response = await POST(req({ propertyId: 'bgc-condo', verificationType: 'staff_attestation' }));
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ code: 'mfa_required' });
+    expect(calls.updates).toHaveLength(0);
+  });
+
+  it('blocks a historical unbound public listing before updating either provider', async () => {
+    const calls = mockDb({ row: { ...REAL_ROW, publication_external_record_id: null } });
+    expect((await POST(req({ propertyId: 'bgc-condo' }))).status).toBe(409);
+    expect(calls.updates).toHaveLength(0);
+    expect(stampAirtableFreshness).not.toHaveBeenCalled();
   });
 
   it('fails closed on missing Airtable credentials for a published property', async () => {

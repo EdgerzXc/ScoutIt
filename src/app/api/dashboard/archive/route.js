@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
-import { updateProperty } from "@/lib/airtable";
-import { buildWithdrawUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES } from "@/lib/propertyLifecycle";
+import { unpublishBoundProperty } from "@/lib/airtable";
+import {
+  buildWithdrawUpdate, getPublicationBinding, hasPublicationHistory, isPermanentlyRemoved,
+  isStaffSuspended, matchPublicationSnapshot, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES,
+} from "@/lib/propertyLifecycle";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { z } from "zod";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
@@ -13,6 +16,7 @@ const schema = z.object({
 }).refine((value) => value.propertyIds?.length || value.submissionId, { message: "At least one property is required" });
 
 async function purgePublicCatalogue(withdrawn) {
+  if (!withdrawn.length) return false;
   try {
     const purge = await invalidateCmsBundle({ withdrawn });
     return purge.sharedCachePurged === false;
@@ -24,7 +28,7 @@ async function purgePublicCatalogue(withdrawn) {
 
 export async function POST(request) {
   try {
-    const parsed = schema.safeParse(await request.json());
+    const parsed = schema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: "Invalid property selection" }, { status: 400 });
 
     const userId = await resolveUserId(request);
@@ -43,68 +47,58 @@ export async function POST(request) {
       return NextResponse.json({ error: "Every selected property must exist and belong to you" }, { status: 403 });
     }
 
-    const permanentlyRemoved = owned.filter((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED);
+    const permanentlyRemoved = owned.filter(isPermanentlyRemoved);
     if (permanentlyRemoved.length) {
       return NextResponse.json({ error: "Permanently removed listings cannot be withdrawn or reactivated", propertyIds: permanentlyRemoved.map((p) => p.id) }, { status: 409 });
     }
+    const suspended = owned.filter(isStaffSuspended);
+    if (suspended.length) {
+      return NextResponse.json({ error: "Staff-suspended listings require staff review", propertyIds: suspended.map((p) => p.id) }, { status: 409 });
+    }
 
-    // Complete the public-side unpublish first. If it fails, do not report a
-    // successful lifecycle transition: the request is safe to retry and the
-    // approved CMS record remains the only known public state.
+    const publicListings = owned.filter(hasPublicationHistory);
+    const bindings = publicListings.map(getPublicationBinding);
+    if (bindings.some((binding) => !binding)) {
+      return NextResponse.json({ error: "A public listing requires publication identity reconciliation", propertyIds: publicListings.filter((property) => !getPublicationBinding(property)).map((property) => property.id) }, { status: 409 });
+    }
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
-    const withdrawn = owned
-      .filter((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.OFF_MARKET)
-      .map((property) => ({ slug: property.canonical_slug || property.slug }))
-      .filter(({ slug }) => slug);
-    if (apiKey && baseId) {
-      for (const property of owned) {
-        const state = normalizeLifecycleState(property);
-        if (state !== PROPERTY_LIFECYCLE_STATES.LIVE) continue;
-        const slug = property.canonical_slug || property.slug;
-        if (!slug) {
-          const publicCachePending = await purgePublicCatalogue(withdrawn);
-          return NextResponse.json({ error: "Live property is missing its canonical slug", publicCachePending }, { status: 409 });
-        }
-        try {
-          const record = await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
-          withdrawn.push({ slug, recordId: record?.id });
-        } catch (error) {
-          console.error("[WITHDRAW API] Airtable unpublish failed:", error);
-          // Earlier records in this batch may already be unpublished.
-          const publicCachePending = await purgePublicCatalogue(withdrawn);
-          return NextResponse.json({ error: "Airtable unpublish failed; check the selected listings before retrying", retryable: true, publicCachePending }, { status: 502 });
-        }
-      }
-    } else if (owned.some((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.LIVE)) {
+    if (bindings.length && (!apiKey || !baseId)) {
       return NextResponse.json({ error: "Withdrawal is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
+    }
+    const withdrawn = [];
+    try {
+      for (const binding of bindings) {
+        await unpublishBoundProperty(apiKey, baseId, binding);
+        withdrawn.push(binding);
+      }
+    } catch (error) {
+      console.error("[WITHDRAW API] Airtable unpublish failed:", error);
+      const publicCachePending = await purgePublicCatalogue(withdrawn);
+      return NextResponse.json({ error: "Airtable unpublish failed; check the selected listings before retrying", retryable: true, publicCachePending }, { status: 502 });
     }
 
     const now = new Date().toISOString();
-    const updatePayload = buildWithdrawUpdate({ now });
-    const alreadyOffMarket = owned.every((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.OFF_MARKET);
-    if (alreadyOffMarket) {
-      delete updatePayload.quietly_open_to_offers;
-      delete updatePayload.withdrawn_at;
+    const committed = [];
+    let writeFailed = false;
+    for (const property of owned) {
+      const updatePayload = buildWithdrawUpdate({ now });
+      if (normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
+        delete updatePayload.quietly_open_to_offers;
+        delete updatePayload.withdrawn_at;
+      }
+      const query = supabaseAdmin.from("properties").update(updatePayload).eq("id", property.id).eq("owner_id", userId);
+      const { data: updated, error: updateError } = await matchPublicationSnapshot(query, property).select("id");
+      if (updateError || updated?.length !== 1) {
+        writeFailed = Boolean(updateError);
+        if (updateError) console.error("[WITHDRAW API] Supabase lifecycle update failed:", updateError);
+        break;
+      }
+      committed.push(property);
     }
 
-    const { data: updated, error: updateError } = await supabaseAdmin
-      .from("properties")
-      .update(updatePayload)
-      .in("id", owned.map((property) => property.id))
-      .eq("owner_id", userId)
-      .select("id, canonical_slug, slug, lifecycle_state, pipeline_status, quietly_open_to_offers");
-    if (updateError) {
-      console.error("[WITHDRAW API] Supabase lifecycle update failed:", updateError);
-      const publicCachePending = await purgePublicCatalogue(withdrawn);
-      return NextResponse.json({ error: "Public listing was unpublished, but lifecycle state needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
-    }
-
-    // Purge before the audit write so an audit failure cannot leave a
-    // withdrawn listing in the twelve-hour public snapshot.
     const publicCachePending = await purgePublicCatalogue(withdrawn);
-
-    const events = owned.map((property) => ({
+    const events = committed.map((property) => ({
       property_id: property.id,
       operation_key: `withdraw:${property.id}:${normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.OFF_MARKET ? (property.withdrawn_at || property.canonical_slug_locked_at || property.published_at || property.created_at || "legacy") : now}`,
       from_state: normalizeLifecycleState(property),
@@ -113,7 +107,9 @@ export async function POST(request) {
       reason: "Owner withdrew listing from ordinary market discovery",
       metadata: { idempotent: normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.OFF_MARKET },
     }));
-    const { error: auditError } = await supabaseAdmin.from("property_lifecycle_events").upsert(events, { onConflict: "operation_key", ignoreDuplicates: true });
+    const { error: auditError } = events.length
+      ? await supabaseAdmin.from("property_lifecycle_events").upsert(events, { onConflict: "operation_key", ignoreDuplicates: true })
+      : { error: null };
     if (auditError) console.error("[WITHDRAW API] Audit insert failed:", auditError);
     if (auditError) {
       return NextResponse.json(
@@ -121,8 +117,12 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+    const withdrawnIds = committed.map((property) => property.id);
+    if (committed.length !== owned.length) {
+      return NextResponse.json({ error: "Withdrawal needs lifecycle reconciliation", retryable: true, withdrawnIds, publicCachePending }, { status: writeFailed ? 500 : 409 });
+    }
 
-    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.OFF_MARKET, withdrawnCount: updated?.length || owned.length, withdrawnIds: owned.map((property) => property.id), publicCachePending, auditWarning: auditError ? "Lifecycle changed; audit event retry is required" : undefined });
+    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.OFF_MARKET, withdrawnCount: withdrawnIds.length, withdrawnIds, publicCachePending });
   } catch (error) {
     console.error("[WITHDRAW API] Error:", error);
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });

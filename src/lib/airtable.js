@@ -838,6 +838,16 @@ export async function unpublishPropertyByRecordId(apiKey, baseId, recordId) {
   }
 }
 
+export async function unpublishBoundProperty(apiKey, baseId, { slug, recordId }) {
+  const record = await updateProperty(apiKey, baseId, slug, {
+    approved_for_scoutit: false,
+    expectedRecordId: recordId,
+  });
+  if (!confirmsPropertyApproval(record, false)) {
+    throw new Error("Airtable did not confirm the listing was unpublished");
+  }
+}
+
 export async function deletePropertyById(apiKey, baseId, recordId) {
   const url = `${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`;
   

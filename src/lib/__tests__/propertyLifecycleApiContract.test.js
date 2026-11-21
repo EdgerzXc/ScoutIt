@@ -6,7 +6,8 @@ const read = (file) => readFileSync(resolve(process.cwd(), file), "utf8");
 describe("LR-01 API safety contracts", () => {
   it("withdraw route unpublishes Airtable before retaining the Supabase row", () => {
     const route = read("src/app/api/dashboard/archive/route.js");
-    expect(route).toContain("approved_for_scoutit: false");
+    expect(route.indexOf("await unpublishBoundProperty(")).toBeLessThan(route.indexOf(".update(updatePayload)"));
+    expect(route).toContain("await unpublishBoundProperty(");
     expect(route).toContain("property_lifecycle_events");
     expect(route).toContain("retryable: true");
     expect(route).not.toContain(".delete()");

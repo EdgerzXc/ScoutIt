@@ -361,7 +361,7 @@ describe("A-274 — Comprehensive Role & Authorization Logic Deep-Dive", () => {
       const faqsRoute = read("src/app/api/faqs/route.js");
       const signalsRoute = read("src/app/api/community/signals/route.js");
 
-      expect(verifyRoute).toContain('select("role, active_roles")');
+      expect(verifyRoute).toContain("await requireAdmin(request,");
       expect(seoRoute).toContain('select("role, active_roles")');
       expect(faqsRoute).toContain('select("role, active_roles, prc_verified")');
       expect(signalsRoute).toContain("active_roles");

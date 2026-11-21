@@ -200,7 +200,7 @@ describe("U-042 Free-plan CMS read budget", () => {
     const { getCmsBundle, invalidateCmsBundle } = await import("@/lib/cmsCache");
     fetchProperties.mockResolvedValueOnce([
       { id: "recWithdrawn", slug: "withdrawn" },
-      { id: "recRetained", slug: "retained", photos: [] },
+      { id: "recRetained", slug: "withdrawn", photos: [] },
     ]);
     fetchHomepageConfig.mockResolvedValueOnce({ featuredProperties: ["recWithdrawn", "recRetained"] });
     await getCmsBundle();
@@ -208,10 +208,10 @@ describe("U-042 Free-plan CMS read budget", () => {
     const budget = await import("@/lib/airtableBudget");
     await budget.recordAirtableCall(1_000);
 
-    expect(await invalidateCmsBundle({ withdrawn: [{ slug: "withdrawn" }] })).toEqual({ sharedCachePurged: true });
+    expect(await invalidateCmsBundle({ withdrawn: [{ slug: "withdrawn", recordId: "recWithdrawn" }] })).toEqual({ sharedCachePurged: true });
     const fallback = await getCmsBundle();
     expect(fallback.source).toBe("stale_monthly_budget");
-    expect(fallback.properties.map(({ slug }) => slug)).toEqual(["retained"]);
+    expect(fallback.properties.map(({ id }) => id)).toEqual(["recRetained"]);
     expect(fallback.properties[0].photos).toEqual([]);
     expect(fallback.homepage.featuredProperties).toEqual(["recRetained"]);
     expect(entries.get("cms_bundle_last_good").expiresAt).toBe(expiry);

@@ -368,9 +368,20 @@ describe("A-313: Stale Freshness Slug-Join, Supabase Mirror & Missing Verificati
 
       resolveUserId.mockResolvedValueOnce("usr-owner-1");
 
+      const property = {
+        id: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+        slug: "one-ecom-draft",
+        canonical_slug: "one-ecom",
+        publication_external_record_id: "recOne",
+        pipeline_status: "approved",
+      };
       const mockUpdate = vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          in: vi.fn().mockResolvedValue({ error: null }),
+          in: vi.fn().mockReturnValue({
+            is: vi.fn().mockReturnValue({
+              select: vi.fn().mockResolvedValue({ data: [property], error: null }),
+            }),
+          }),
         }),
       });
 
@@ -380,13 +391,7 @@ describe("A-313: Stale Freshness Slug-Join, Supabase Mirror & Missing Verificati
             select: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
                 in: vi.fn().mockResolvedValue({
-                  data: [
-                    {
-                      id: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
-                      slug: "one-ecom",
-                      canonical_slug: "one-ecom",
-                    },
-                  ],
+                  data: [property],
                   error: null,
                 }),
               }),
@@ -417,6 +422,7 @@ describe("A-313: Stale Freshness Slug-Join, Supabase Mirror & Missing Verificati
       );
       expect(stampAirtableFreshness).toHaveBeenCalledWith({
         slug: "one-ecom",
+        recordId: "recOne",
         isoDate: expect.any(String),
       });
     });

@@ -56,6 +56,8 @@ const property = {
   id: "p-1",
   pipeline_status: "approved",
   slug: "tower-one",
+  canonical_slug: "tower-one",
+  publication_external_record_id: "recTower",
   details: {},
 };
 
@@ -81,29 +83,16 @@ describe("A-146 — unit operator names respect profile visibility", () => {
   });
 });
 
-// A-146 (B4): the insert fallback persisted slug but not canonical_slug —
-// the same drift the publish and approve paths already close.
-describe("unitsSync insert path adopts Airtable truth", () => {
-  it("adopts slug and canonical when none is locked", async () => {
+describe("unit inventory publication identity", () => {
+  it("does not provision a public record for an unbound listing", async () => {
     const { insertProperty } = await import("@/lib/airtable");
-    const updates = [];
-    const client = {
-      from: (table) => {
-        if (table === "property_units") {
-          return { select: () => ({ eq: () => ({ order: async () => ({ data: [], error: null }) }) }) };
-        }
-        if (table === "user_profiles") {
-          return { select: () => ({ in: async () => ({ data: [], error: null }) }) };
-        }
-        return { update: (obj) => { updates.push(obj); return { eq: async () => ({ error: null }) }; } };
-      },
-    };
-    insertProperty.mockResolvedValue({ id: "rec9", fields: { Slug: "fresh-tower" } });
-    const { syncPropertyUnitsToAirtable } = await import("@/lib/unitsSync");
-    await syncPropertyUnitsToAirtable(client, {
+    const client = { from: vi.fn() };
+    updateProperty.mockClear();
+    await expect(syncPropertyUnitsToAirtable(client, {
       id: "p-9", pipeline_status: "approved", slug: null, canonical_slug: null, details: {},
-    });
-    expect(updates[0]).toMatchObject({ slug: "fresh-tower", canonical_slug: "fresh-tower" });
-    insertProperty.mockReset();
+    })).rejects.toThrow("Publication identity needs reconciliation");
+    expect(client.from).not.toHaveBeenCalled();
+    expect(insertProperty).not.toHaveBeenCalled();
+    expect(updateProperty).not.toHaveBeenCalled();
   });
 });

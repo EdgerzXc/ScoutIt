@@ -55,10 +55,11 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
                     id: "prop-1",
                     slug: "lagging-tower",
                     canonical_slug: "lagging-tower",
+                    publication_external_record_id: "recLagging",
                     title: "Lagging Tower",
                     location: "BGC",
                     last_verified_date: supabaseDate,
-                    pipeline_status: "published",
+                    pipeline_status: "approved",
                   },
                 ],
                 error: null,
@@ -71,6 +72,7 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
       getCmsBundle.mockResolvedValue({
         properties: [
           {
+            id: "recLagging",
             slug: "lagging-tower",
             last_verified_date: laggingAirtableDate,
           },
@@ -105,10 +107,11 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
                     id: "prop-2",
                     slug: "synced-tower",
                     canonical_slug: "synced-tower",
+                    publication_external_record_id: "recSynced",
                     title: "Synced Tower",
                     location: "Makati",
                     last_verified_date: inSyncDate,
-                    pipeline_status: "published",
+                    pipeline_status: "approved",
                   },
                 ],
                 error: null,
@@ -121,8 +124,9 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
       getCmsBundle.mockResolvedValue({
         properties: [
           {
+            id: "recSynced",
             slug: "synced-tower",
-            last_verified_date: inSyncDate,
+            last_verified_date: "2026-11-06T10:00:00+00:00",
           },
         ],
       });
@@ -134,7 +138,7 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
       expect(json.success).toBe(true);
       const item = json.items[0];
       expect(item.cmsSyncPending).toBe(false);
-      expect(item.publicLastVerifiedDate).toBe(inSyncDate);
+      expect(item.publicLastVerifiedDate).toBe("2026-11-06T10:00:00+00:00");
     });
   });
 
@@ -143,6 +147,13 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
       resolveUserId.mockResolvedValue("owner-123");
 
       const propertyId = "11111111-1111-4111-8111-111111111111";
+      const property = {
+        id: propertyId,
+        slug: null,
+        canonical_slug: null,
+        title: "Unslugged Published Tower",
+        pipeline_status: "published",
+      };
 
       mockFrom.mockImplementation((table) => {
         if (table === "properties") {
@@ -150,22 +161,18 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
             select: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
                 in: vi.fn().mockResolvedValue({
-                  data: [
-                    {
-                      id: propertyId,
-                      slug: null,
-                      canonical_slug: null,
-                      title: "Unslugged Published Tower",
-                      pipeline_status: "published",
-                    },
-                  ],
+                  data: [property],
                   error: null,
                 }),
               }),
             }),
             update: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
-                in: vi.fn().mockResolvedValue({ error: null }),
+                in: vi.fn().mockReturnValue({
+                  is: vi.fn().mockReturnValue({
+                    select: vi.fn().mockResolvedValue({ data: [property], error: null }),
+                  }),
+                }),
               }),
             }),
           };
@@ -191,6 +198,7 @@ describe("A-326: Freshness Verification Transparency & Modal Selection Hardening
       expect(json.verifiedCount).toBe(1);
       // Unslugged published property is surfaced in cmsSyncPending
       expect(json.cmsSyncPending).toContain("Unslugged Published Tower");
+      expect(stampAirtableFreshness).not.toHaveBeenCalled();
     });
   });
 

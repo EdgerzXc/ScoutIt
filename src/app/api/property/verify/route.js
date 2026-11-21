@@ -11,6 +11,17 @@ import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { stampAirtableFreshness } from "@/lib/airtableFreshness";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
+import { requireAdmin } from "@/lib/adminGuard";
+import {
+  getPublicationBinding, isMarketVisible, isPermanentlyRemoved, isStaffSuspended, matchPublicationSnapshot,
+} from "@/lib/propertyLifecycle";
+
+async function saveVerificationDate(property, expectedDate, nextDate) {
+  let query = supabaseAdmin.from("properties").update({ last_verified_date: nextDate }).eq("id", property.id);
+  query = property.owner_id == null ? query.is("owner_id", null) : query.eq("owner_id", property.owner_id);
+  query = expectedDate == null ? query.is("last_verified_date", null) : query.eq("last_verified_date", expectedDate);
+  return matchPublicationSnapshot(query, property).select("id").maybeSingle();
+}
 
 /**
  * POST /api/property/verify
@@ -26,7 +37,7 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = (await request.json().catch(() => null)) || {};
     const { propertyId, verificationType } = body;
 
     if (!propertyId || typeof propertyId !== "string") {
@@ -43,22 +54,7 @@ export async function POST(request) {
       );
     }
 
-    // 1. Fetch property to verify ownership/lister authority
-    //
-    // ⚠️ FIXED 2026-08-06 (§55). This previously read:
-    //   .select("id, slug, owner_id, status")
-    //   .or(`id.eq.${propertyId},slug.eq.${propertyId}`)
-    // Two bugs in two lines. `properties.status` does not exist (the column is
-    // `lifecycle_state`), and `id` is a uuid — so passing a SLUG made Postgres
-    // fail to cast it, the query errored, and `propErr || !prop` reported
-    // "Property not found" for a property that exists. Every slug-based call
-    // has 404'd since the route shipped. Nobody noticed: it has no caller.
-    // See lib/propertyLookup.js for the full write-up.
-    const { property: prop, error: propErr } = await findProperty(
-      supabaseAdmin,
-      propertyId,
-      ["id", "slug", "canonical_slug", "owner_id", "lifecycle_state", "pipeline_status", "title", "last_verified_date"]
-    );
+    const { property: prop, error: propErr } = await findProperty(supabaseAdmin, propertyId, "*");
 
     if (propErr) {
       console.error("[PROPERTY VERIFY API] Lookup failed:", propErr);
@@ -74,45 +70,27 @@ export async function POST(request) {
       );
     }
 
-    // Fail closed: exact owner authority requires a non-null owner_id. An
-    // unowned listing is staff-only; absence of an owner never grants access.
-    if (prop.owner_id !== userId) {
-      const { data: profile } = await supabaseAdmin
-        .from("user_profiles")
-        .select("role, active_roles")
-        .eq("id", userId)
-        .maybeSingle();
-
-      const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
-      const isStaff =
-        profile?.role === "admin" ||
-        profile?.role === "staff" ||
-        roles.includes("admin") ||
-        roles.includes("staff");
-      if (!isStaff) {
+    const staffAttestation = prop.owner_id !== userId || verificationType === "staff_attestation";
+    if (staffAttestation) {
+      const auth = await requireAdmin(request, { label: "PROPERTY VERIFY" });
+      if (auth.error || auth.userId !== userId) {
         return NextResponse.json(
-          { error: "Forbidden: You do not have permission to verify this listing" },
-          { status: 403 }
+          { error: auth.error || "You do not have permission to verify this listing", ...(auth.code ? { code: auth.code } : {}) },
+          { status: auth.status || 403 },
         );
       }
     }
+    if (isPermanentlyRemoved(prop) || isStaffSuspended(prop)) {
+      return NextResponse.json({ error: "This listing is unavailable for verification" }, { status: 409 });
+    }
 
+    const isPublished = isMarketVisible(prop) || prop.pipeline_status === "published";
+    const binding = isPublished ? getPublicationBinding(prop) : null;
+    if (isPublished && !binding) {
+      return NextResponse.json({ error: "This listing requires publication identity reconciliation" }, { status: 409 });
+    }
     const nowIso = new Date().toISOString();
-
-    // 2. Update properties table last_verified_date
-    // ⚠️ `updated_at` was here until 2026-08-06 (§58/C28). `public.properties`
-    // has NO `updated_at` column — verified against the live database, not a
-    // document. PostgREST rejects the whole statement, `updateErr` is set, and
-    // this route returned 500 "Could not update verification timestamp." for
-    // EVERY call. W12's staff re-verification panel shipped against it, so the
-    // feature was broken from its first click. Do not re-add it without adding
-    // the column first.
-    const { error: updateErr } = await supabaseAdmin
-      .from("properties")
-      .update({
-        last_verified_date: nowIso,
-      })
-      .eq("id", prop.id);
+    const { data: updated, error: updateErr } = await saveVerificationDate(prop, prop.last_verified_date, nowIso);
 
     if (updateErr) {
       return NextResponse.json(
@@ -120,34 +98,27 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+    if (!updated) {
+      return NextResponse.json({ error: "Listing changed before verification could be recorded" }, { status: 409 });
+    }
 
-    // Public pages read Airtable, not this Supabase row. A published listing is
-    // not successfully verified until both stores carry the same timestamp.
-    const publicSlug = prop.canonical_slug || prop.slug;
-    const isPublished = prop.pipeline_status === "approved" && Boolean(publicSlug);
     let publicCachePending = false;
-    if (isPublished) {
-      const cmsSync = await stampAirtableFreshness({ slug: publicSlug, isoDate: nowIso });
+    if (binding) {
+      const cmsSync = await stampAirtableFreshness({ ...binding, isoDate: nowIso });
       if (!cmsSync.ok) {
-        // Compensate the private write so a failed public projection does not
-        // leave two authoritative timestamps silently diverged.
-        const { error: rollbackError } = await supabaseAdmin
-          .from("properties")
-          .update({ last_verified_date: prop.last_verified_date ?? null })
-          .eq("id", prop.id);
-
-        if (rollbackError) {
+        const { data: reverted, error: rollbackError } = await saveVerificationDate(prop, nowIso, prop.last_verified_date ?? null);
+        if (rollbackError || !reverted) {
           console.error("[PROPERTY VERIFY API] Freshness rollback failed:", rollbackError);
         }
 
         const missingConfig = cmsSync.reason === "missing_configuration";
         return NextResponse.json(
           {
-            error: missingConfig
-              ? "Public verification service is not configured. No verification was recorded."
-              : "Could not update the public verification record. No verification was recorded.",
+            error: reverted
+              ? "The public verification could not be confirmed. The private timestamp was restored."
+              : "The public verification could not be confirmed. The private timestamp needs reconciliation.",
             cmsSyncFailed: true,
-            rollbackFailed: Boolean(rollbackError),
+            rollbackFailed: !reverted,
           },
           { status: missingConfig ? 503 : 502 },
         );
@@ -175,7 +146,7 @@ export async function POST(request) {
       recordId: prop.id,
       userId,
       metadata: {
-        verification_type: verificationType || "owner_attestation",
+        verification_type: staffAttestation ? "staff_attestation" : "owner_attestation",
         verified_at: nowIso,
       },
     });

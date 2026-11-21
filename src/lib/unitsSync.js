@@ -1,5 +1,6 @@
-import { updateProperty, insertProperty } from "./airtable";
+import { updateProperty } from "./airtable";
 import { invalidateCmsBundle } from "./cmsCache";
+import { getPublicationBinding, isPermanentlyRemoved, isStaffSuspended } from "./propertyLifecycle";
 
 async function purgeAfterUnitsSync() {
   try {
@@ -12,21 +13,23 @@ async function purgeAfterUnitsSync() {
 }
 
 // Re-syncs a property's Airtable Units_JSON from the authoritative
-// property_units rows (not the legacy details.units_inventory blob). No-op
-// if the property isn't approved yet, or Airtable credentials are missing.
+// property_units rows (not the legacy details.units_inventory blob).
 // Shared by /api/dashboard/units and /api/dashboard/units/delegate so both
 // write paths stay in sync with a single source of truth.
 export async function syncPropertyUnitsToAirtable(serviceClient, property) {
   if (!property || property.pipeline_status !== "approved") return null;
   if (
     property.lifecycle_state === "off_market" ||
-    property.lifecycle_state === "permanently_removed"
+    isPermanentlyRemoved(property) ||
+    isStaffSuspended(property)
   ) {
     return null;
   }
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
-  if (!apiKey || !baseId) return null;
+  if (!apiKey || !baseId) throw new Error("Airtable configuration is missing");
+  const binding = getPublicationBinding(property);
+  if (!binding) throw new Error("Publication identity needs reconciliation");
 
   const { data: units, error } = await serviceClient
     .from("property_units")
@@ -69,25 +72,6 @@ export async function syncPropertyUnitsToAirtable(serviceClient, property) {
     subdivision_scenarios: u.subdivision_scenarios || [],
   }));
 
-  const publicSlug = property.canonical_slug || property.slug;
-  if (publicSlug) {
-    await updateProperty(apiKey, baseId, publicSlug, { details: property.details }, airtableUnits);
-    return { publicCachePending: await purgeAfterUnitsSync() };
-  }
-  const created = await insertProperty(apiKey, baseId, {
-    title: property.title,
-    location: property.location,
-    type: property.type,
-    space_category: property.space_category,
-    details: property.details,
-  }, airtableUnits);
-  // Same owner-lock rule as dashboard publish and staff approve: Airtable's
-  // computed Slug is truth; canonical is adopted only when none is locked.
-  if (created?.fields?.Slug) {
-    await serviceClient.from("properties").update({
-      slug: created.fields.Slug,
-      ...(property.canonical_slug ? {} : { canonical_slug: created.fields.Slug }),
-    }).eq("id", property.id);
-  }
-  return { ...created, publicCachePending: await purgeAfterUnitsSync() };
+  await updateProperty(apiKey, baseId, binding.slug, { expectedRecordId: binding.recordId }, airtableUnits);
+  return { publicCachePending: await purgeAfterUnitsSync() };
 }

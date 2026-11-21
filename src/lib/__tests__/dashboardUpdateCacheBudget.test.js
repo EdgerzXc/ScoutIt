@@ -5,6 +5,7 @@ const state = vi.hoisted(() => ({
   invalidate: vi.fn(),
   updateProperty: vi.fn(),
   updateRow: vi.fn(),
+  updated: true,
 }));
 
 vi.mock("@supabase/supabase-js", () => ({
@@ -14,7 +15,11 @@ vi.mock("@supabase/supabase-js", () => ({
       select: () => ({ eq: () => ({ single: async () => ({ data: state.current, error: null }) }) }),
       update: (payload) => {
         state.updateRow(payload);
-        return { eq: () => ({ select: async () => ({ data: [{ id: state.current.id }], error: null }) }) };
+        const query = {
+          eq: () => query,
+          select: async () => ({ data: state.updated ? [{ id: state.current.id }] : [], error: null }),
+        };
+        return query;
       },
     }),
   }),
@@ -49,6 +54,7 @@ beforeEach(() => {
     canonical_slug: "original-title",
     pipeline_status: "draft",
   };
+  state.updated = true;
   state.invalidate.mockResolvedValue({ sharedCachePurged: true });
   state.updateProperty.mockResolvedValue({});
 });
@@ -66,12 +72,12 @@ afterEach(() => {
   }
 });
 
-async function update() {
+async function update(data = { location: "Makati" }) {
   const { POST } = await import("@/app/api/dashboard/update/route");
   const response = await POST(new Request("https://scoutit.space/api/dashboard/update", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: "Bearer test-session" },
-    body: JSON.stringify({ submissionId: "property-1", data: { location: "Makati" } }),
+    body: JSON.stringify({ submissionId: "property-1", data }),
   }));
   return { status: response.status, body: await response.json() };
 }
@@ -86,18 +92,43 @@ describe("U-042 owner edit refresh budget", () => {
 
   it("purges the shared catalogue after a live edit", async () => {
     state.current.pipeline_status = "approved";
+    state.current.publication_external_record_id = "recBound";
     expect(await update()).toEqual({ status: 200, body: { success: true, publicCachePending: false } });
-    expect(state.updateProperty).toHaveBeenCalledTimes(1);
+    expect(state.updateProperty).toHaveBeenCalledExactlyOnceWith("test-airtable", "test-base", "original-title",
+      expect.objectContaining({ location: "Makati", expectedRecordId: "recBound" }));
+    expect(state.updateProperty.mock.calls[0][3]).not.toHaveProperty("title");
     expect(state.invalidate).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the completed live edit successful but flags an unconfirmed public refresh", async () => {
     state.current.pipeline_status = "approved";
+    state.current.publication_external_record_id = "recBound";
     state.invalidate.mockRejectedValue(new Error("Redis unavailable"));
     const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await update()).toEqual({ status: 200, body: { success: true, publicCachePending: true } });
     expect(state.updateProperty).toHaveBeenCalledTimes(1);
     expect(state.updateRow).toHaveBeenCalledTimes(1);
     errorLog.mockRestore();
+  });
+
+  it("preserves and sanitizes category details on a normal draft edit", async () => {
+    expect(await update({ details: { description: "<b>Ready</b>", beds: 2 } })).toMatchObject({ status: 200 });
+    expect(state.updateRow).toHaveBeenCalledWith(expect.objectContaining({ details: { description: "Ready", beds: 2 } }));
+  });
+
+  it("blocks an unbound live edit before changing the private or public listing", async () => {
+    state.current.pipeline_status = "approved";
+    expect(await update()).toMatchObject({ status: 409 });
+    expect(state.updateRow).not.toHaveBeenCalled();
+    expect(state.updateProperty).not.toHaveBeenCalled();
+  });
+
+  it("skips the public write if the private lifecycle guard loses a race", async () => {
+    state.current.pipeline_status = "approved";
+    state.current.publication_external_record_id = "recBound";
+    state.updated = false;
+    expect(await update()).toMatchObject({ status: 409 });
+    expect(state.updateProperty).not.toHaveBeenCalled();
+    expect(state.invalidate).not.toHaveBeenCalled();
   });
 });

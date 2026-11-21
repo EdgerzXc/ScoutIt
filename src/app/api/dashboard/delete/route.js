@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
-import { updateProperty } from "@/lib/airtable";
-import { buildPermanentRemovalUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES, isPermanentlyRemoved, exactTitleMatches } from "@/lib/propertyLifecycle";
+import { unpublishBoundProperty } from "@/lib/airtable";
+import {
+  buildPermanentRemovalUpdate, exactTitleMatches, getPublicationBinding, hasPublicationHistory,
+  isPermanentlyRemoved, isStaffSuspended, matchPublicationSnapshot, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES,
+} from "@/lib/propertyLifecycle";
 import { collectPropertyRemovalBlockers } from "@/lib/propertyRemoval";
 import { getBearerToken, hasRecentPasswordAuthentication } from "@/lib/propertyReauthentication";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -44,6 +47,7 @@ async function recordRemovalAudit({ property, actorId, fromState, reason, timest
 // Removal is already committed by the time this runs. Return an unconfirmed
 // public refresh to the owner without inviting a retry of a destructive write.
 async function purgePublicCatalogue(withdrawn) {
+  if (!withdrawn.length) return false;
   try {
     const purge = await invalidateCmsBundle({ withdrawn });
     return purge.sharedCachePurged === false;
@@ -53,11 +57,33 @@ async function purgePublicCatalogue(withdrawn) {
   }
 }
 
+async function verifyTakedown(property) {
+  if (!hasPublicationHistory(property)) return { withdrawn: [] };
+  const binding = getPublicationBinding(property);
+  if (!binding) {
+    return { response: NextResponse.json({ error: "This listing requires publication identity reconciliation" }, { status: 409 }) };
+  }
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  if (!apiKey || !baseId) {
+    return { response: NextResponse.json({ error: "Removal is unavailable while the Airtable CMS is unavailable", retryable: true }, { status: 503 }) };
+  }
+  try {
+    await unpublishBoundProperty(apiKey, baseId, binding);
+    return { withdrawn: [binding] };
+  } catch (error) {
+    console.error("[REMOVE API] Airtable could not confirm takedown:", error);
+    return { response: NextResponse.json({ error: "Airtable could not confirm public removal", retryable: true }, { status: 502 }) };
+  }
+}
+
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
     const { submissionId, confirmationTitle, confirmPermanentRemoval, reason } = body || {};
-    if (!submissionId) return NextResponse.json({ error: "Missing submissionId" }, { status: 400 });
+    if (typeof submissionId !== "string" || !submissionId || (reason != null && (typeof reason !== "string" || reason.length > 500))) {
+      return NextResponse.json({ error: "Invalid removal request" }, { status: 400 });
+    }
     if (String(submissionId).startsWith("rec")) {
       return NextResponse.json({ error: "Direct Airtable deletion is staff-only and not available through the owner action" }, { status: 403 });
     }
@@ -86,15 +112,19 @@ export async function POST(request) {
     if (property.owner_id !== userId) return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     if (!exactTitleMatches(confirmationTitle, property.title)) return NextResponse.json({ error: "Type the exact property title to continue" }, { status: 400 });
     const state = normalizeLifecycleState(property);
-    const slug = property.canonical_slug || property.slug;
     if (isPermanentlyRemoved(property)) {
-      const publicCachePending = await purgePublicCatalogue(slug ? [{ slug }] : []);
+      const { withdrawn, response } = await verifyTakedown(property);
+      if (response) return response;
+      const publicCachePending = await purgePublicCatalogue(withdrawn);
       const { error: auditError } = await recordRemovalAudit({ property, actorId: userId, fromState: state, reason, metadata: { idempotent_repair: true } });
       if (auditError) {
         return NextResponse.json({ error: "Retained removal audit evidence needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
       }
 
-      return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, idempotent: true, publicCachePending });
+      return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug, idempotent: true, publicCachePending });
+    }
+    if (isStaffSuspended(property)) {
+      return NextResponse.json({ error: "Staff-suspended listings require staff review", retryable: false }, { status: 409 });
     }
 
     const [deals, appointments, units, disputes] = await Promise.all([
@@ -116,33 +146,19 @@ export async function POST(request) {
       return NextResponse.json({ error: "Listing cannot be permanently removed while active obligations remain", blockers }, { status: 409 });
     }
 
-    // Unpublish before changing the retained row. We never delete the Airtable
-    // record: it remains the historical/public-CMS record with approval false.
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    const withdrawn = state === PROPERTY_LIFECYCLE_STATES.OFF_MARKET && slug ? [{ slug }] : [];
-    if (state === PROPERTY_LIFECYCLE_STATES.LIVE) {
-      if (!apiKey || !baseId) return NextResponse.json({ error: "Removal is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
-      if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
-      try {
-        const record = await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
-        withdrawn.push({ slug, recordId: record?.id });
-      } catch (error) {
-        console.error("[REMOVE API] Airtable unpublish failed:", error);
-        return NextResponse.json({ error: "Airtable unpublish failed; no removal was recorded", retryable: true }, { status: 502 });
-      }
-    }
+    const { withdrawn, response } = await verifyTakedown(property);
+    if (response) return response;
 
     const removalUpdate = buildPermanentRemovalUpdate({ actorId: userId, reason });
-    const { data: updated, error: updateError } = await supabaseAdmin
+    const query = supabaseAdmin
       .from("properties")
       .update(removalUpdate)
       .eq("id", submissionId)
-      .eq("owner_id", userId)
-      .select("id, canonical_slug, slug, lifecycle_state, pipeline_status, permanently_removed_at");
+      .eq("owner_id", userId);
+    const { data: updated, error: updateError } = await matchPublicationSnapshot(query, property).select("id");
     if (updateError || !updated?.length) {
       const publicCachePending = await purgePublicCatalogue(withdrawn);
-      return NextResponse.json({ error: "Public listing was unpublished, but retained removal needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
+      return NextResponse.json({ error: "Retained removal needs lifecycle reconciliation", retryable: true, publicCachePending }, { status: updateError ? 500 : 409 });
     }
 
     // Clear the public snapshot before the audit write; an audit failure must
@@ -163,7 +179,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Listing was retained and removed from market access, but audit evidence needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, publicCachePending, auditWarning: auditError ? "Removal completed; audit event retry is required" : undefined });
+    return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug, publicCachePending });
   } catch (error) {
     console.error("[REMOVE API] Error:", error);
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });

@@ -13,16 +13,19 @@ function formulaString(value) {
  */
 export async function stampAirtableFreshness({
   slug,
+  recordId,
   isoDate,
   apiKey = process.env.AIRTABLE_API_KEY,
   baseId = process.env.AIRTABLE_BASE_ID,
 }) {
   if (!apiKey || !baseId) return { ok: false, reason: "missing_configuration" };
-  if (!slug || !isoDate) return { ok: false, reason: "missing_identity" };
+  if (!slug || !/^rec[A-Za-z0-9]+$/.test(recordId || "") || !isoDate) {
+    return { ok: false, reason: "missing_identity" };
+  }
 
   try {
     const formula = `{Slug}='${formulaString(slug)}'`;
-    const params = `filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
+    const params = `filterByFormula=${encodeURIComponent(formula)}&maxRecords=2`;
     const findRes = await fetchWithRetry(
       `${AIRTABLE_BASE_URL}/${baseId}/${TABLE}?${params}`,
       { headers: { Authorization: `Bearer ${apiKey}` } },
@@ -31,8 +34,10 @@ export async function stampAirtableFreshness({
     if (!findRes.ok) return { ok: false, reason: "lookup_failed", status: findRes.status };
 
     const found = await findRes.json();
-    const recordId = found?.records?.[0]?.id;
-    if (!recordId) return { ok: false, reason: "record_not_found" };
+    if (!found?.records?.length) return { ok: false, reason: "record_not_found" };
+    if (found.records.length !== 1 || found.records[0]?.id !== recordId) {
+      return { ok: false, reason: "binding_mismatch" };
+    }
 
     const patchRes = await fetchWithRetry(
       `${AIRTABLE_BASE_URL}/${baseId}/${TABLE}/${recordId}`,
@@ -50,6 +55,8 @@ export async function stampAirtableFreshness({
       { circuit: "airtable-freshness", idempotent: true },
     );
     if (!patchRes.ok) return { ok: false, reason: "patch_failed", status: patchRes.status };
+    const updated = await patchRes.json();
+    if (updated?.id !== recordId) return { ok: false, reason: "patch_unconfirmed" };
 
     return { ok: true, recordId };
   } catch (error) {

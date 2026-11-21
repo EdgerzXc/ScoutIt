@@ -3,13 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({
   owned: [],
   updateError: null,
+  missingUpdateId: null,
   auditError: null,
   unpublish: vi.fn(),
   invalidate: vi.fn(),
 }));
 
 vi.mock("@/lib/serverAuth", () => ({ resolveUserId: async () => "owner-1" }));
-vi.mock("@/lib/airtable", () => ({ updateProperty: state.unpublish }));
+vi.mock("@/lib/airtable", () => ({ unpublishBoundProperty: state.unpublish }));
 vi.mock("@/lib/cmsCache", () => ({ invalidateCmsBundle: state.invalidate }));
 vi.mock("@/lib/supabaseAdmin", () => ({
   supabaseAdmin: {
@@ -17,14 +18,20 @@ vi.mock("@/lib/supabaseAdmin", () => ({
       ? { upsert: async () => ({ error: state.auditError }) }
       : {
         select: () => ({ in: () => ({ eq: async () => ({ data: state.owned, error: null }) }) }),
-        update: () => ({
-          in: () => ({
-            eq: () => ({ select: async () => ({
-              data: state.updateError ? null : state.owned.map(({ id }) => ({ id })),
+        update: () => {
+          let id;
+          const query = {
+            eq: (key, value) => {
+              if (key === "id") id = value;
+              return query;
+            },
+            select: async () => ({
+              data: state.updateError || id === state.missingUpdateId ? null : [{ id }],
               error: state.updateError,
-            }) }),
-          }),
-        }),
+            }),
+          };
+          return query;
+        },
       },
   },
 }));
@@ -35,8 +42,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   process.env.AIRTABLE_API_KEY = "test-key";
   process.env.AIRTABLE_BASE_ID = "test-base";
-  state.owned = [{ id: "property-1", owner_id: "owner-1", pipeline_status: "approved", canonical_slug: "live-property" }];
+  state.owned = [{ id: "property-1", owner_id: "owner-1", pipeline_status: "approved", canonical_slug: "live-property", publication_external_record_id: "recConfirmed" }];
   state.updateError = null;
+  state.missingUpdateId = null;
   state.auditError = null;
   state.unpublish.mockResolvedValue({});
   state.invalidate.mockResolvedValue({ sharedCachePurged: true });
@@ -66,7 +74,7 @@ describe("U-042 public withdrawal refresh", () => {
     const result = await withdraw();
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({ success: true, withdrawnCount: 1, publicCachePending: true });
-    expect(state.unpublish).toHaveBeenCalledWith("test-key", "test-base", "live-property", { approved_for_scoutit: false });
+    expect(state.unpublish).toHaveBeenCalledWith("test-key", "test-base", { slug: "live-property", recordId: "recConfirmed" });
     expect(state.invalidate).toHaveBeenCalledTimes(1);
     errorLog.mockRestore();
   });
@@ -83,8 +91,8 @@ describe("U-042 public withdrawal refresh", () => {
   });
 
   it("evicts only the Airtable-confirmed withdrawal when a later batch item fails", async () => {
-    state.owned.push({ id: "property-2", owner_id: "owner-1", pipeline_status: "approved", canonical_slug: "still-live" });
-    state.unpublish.mockResolvedValueOnce({ id: "recConfirmed" }).mockRejectedValueOnce(new Error("Airtable unavailable"));
+    state.owned.push({ id: "property-2", owner_id: "owner-1", pipeline_status: "approved", canonical_slug: "still-live", publication_external_record_id: "recSecond" });
+    state.unpublish.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("Airtable unavailable"));
     const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const result = await withdraw({ propertyIds: ["property-1", "property-2"] });
@@ -94,5 +102,25 @@ describe("U-042 public withdrawal refresh", () => {
     } finally {
       errorLog.mockRestore();
     }
+  });
+
+  it("preflights every selected binding before unpublishing the first record", async () => {
+    state.owned.push({ id: "property-2", pipeline_status: "approved", canonical_slug: "legacy" });
+    const result = await withdraw({ propertyIds: ["property-1", "property-2"] });
+    expect(result).toMatchObject({ status: 409, body: { propertyIds: ["property-2"] } });
+    expect(state.unpublish).not.toHaveBeenCalled();
+    expect(state.invalidate).not.toHaveBeenCalled();
+  });
+
+  it("preserves a staff suspension even when the legacy pipeline still says approved", async () => {
+    state.owned[0].lifecycle_state = "staff_suspended";
+    expect(await withdraw()).toMatchObject({ status: 409 });
+    expect(state.unpublish).not.toHaveBeenCalled();
+  });
+
+  it("reports the guarded write conflict without claiming a row changed", async () => {
+    state.missingUpdateId = "property-1";
+    expect(await withdraw()).toMatchObject({ status: 409, body: { withdrawnIds: [], retryable: true } });
+    expect(state.invalidate).toHaveBeenCalledExactlyOnceWith({ withdrawn: [{ slug: "live-property", recordId: "recConfirmed" }] });
   });
 });

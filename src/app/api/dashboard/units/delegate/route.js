@@ -175,7 +175,7 @@ export async function POST(request) {
 
     const { data: property, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("id, owner_id, slug, canonical_slug, lifecycle_state, pipeline_status, title, location, type, space_category, details")
+      .select("*")
       .eq("id", deal.property_id)
       .single();
     if (propErr || !property) {
@@ -287,7 +287,7 @@ export async function POST(request) {
       if (sync?.publicCachePending) warning = "Units delegated; public refresh unconfirmed. Check the listing page.";
     } catch (airtableErr) {
       console.error("[DELEGATE API] Airtable sync failed:", airtableErr);
-      warning = "Units delegated, but Airtable sync failed: " + airtableErr.message;
+      warning = "Units delegated. The public listing update needs a retry.";
     }
 
     if (property.pipeline_status === 'approved') {
