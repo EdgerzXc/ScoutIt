@@ -12,6 +12,7 @@ import {
   buildFirstPublicationUpdate,
   buildWithdrawUpdate,
   getActiveListingCap,
+  isPublicationSyncPending,
   normalizeLifecycleState,
   PROPERTY_LIFECYCLE_STATES,
 } from "@/lib/propertyLifecycle";
@@ -26,7 +27,8 @@ import { parsePointToLatLng } from "@/lib/geoPoint.mjs";
 
 async function saveOwnedPublicationState(snapshot, ownerId, updates) {
   let query = supabaseAdmin.from("properties").update(updates).eq("id", snapshot.id).eq("owner_id", ownerId);
-  for (const column of ["canonical_slug", "publication_external_record_id", "pipeline_status", "lifecycle_state", "published_at", "withdrawn_at"]) {
+  for (const column of ["canonical_slug", "publication_external_record_id", "pipeline_status", "lifecycle_state", "published_at", "withdrawn_at", "publication_sync_state"]) {
+    if (column === "publication_sync_state" && !Object.hasOwn(snapshot, column)) continue;
     query = snapshot[column] == null ? query.is(column, null) : query.eq(column, snapshot[column]);
   }
   const { data, error } = await query.select("id").maybeSingle();
@@ -125,7 +127,8 @@ export async function POST(request) {
 
     const currentLifecycle = normalizeLifecycleState(currentSubmission);
     const protectedStates = [PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED, PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED];
-    if (currentSubmission.permanently_removed_at || protectedStates.includes(currentLifecycle) || protectedStates.includes(currentSubmission.lifecycle_state)) {
+    if (currentSubmission.permanently_removed_at || isPublicationSyncPending(currentSubmission) ||
+        protectedStates.includes(currentLifecycle) || protectedStates.includes(currentSubmission.lifecycle_state)) {
       return NextResponse.json({ error: "This listing cannot be published from its current lifecycle state." }, { status: 409 });
     }
     if (currentLifecycle === PROPERTY_LIFECYCLE_STATES.LIVE || currentSubmission.lifecycle_state === PROPERTY_LIFECYCLE_STATES.LIVE) {
@@ -190,7 +193,7 @@ export async function POST(request) {
 
     const { data: liveRows, error: liveCountErr } = await supabaseAdmin
       .from("properties")
-      .select("id, title, slug, canonical_slug, publication_external_record_id, pipeline_status, lifecycle_state, published_at, withdrawn_at")
+      .select("id, title, slug, canonical_slug, publication_external_record_id, pipeline_status, lifecycle_state, published_at, withdrawn_at, publication_sync_state")
       .eq("owner_id", userId)
       .eq("pipeline_status", "approved");
 
@@ -200,7 +203,7 @@ export async function POST(request) {
     }
 
     const activeLiveProperties = (liveRows || []).filter((r) => r.id !== submissionId);
-    const eligibleSwapTargets = activeLiveProperties.filter((row) => row.canonical_slug && row.publication_external_record_id);
+    const eligibleSwapTargets = activeLiveProperties.filter((row) => row.canonical_slug && row.publication_external_record_id && !isPublicationSyncPending(row));
     const currentActiveCount = activeLiveProperties.length;
     let toSwap = null;
     const withdrawn = [];
@@ -237,7 +240,7 @@ export async function POST(request) {
           { status: 400 }
         );
       }
-      if (!toSwap.canonical_slug || !toSwap.publication_external_record_id) {
+      if (!toSwap.canonical_slug || !toSwap.publication_external_record_id || isPublicationSyncPending(toSwap)) {
         return NextResponse.json({ error: "ScoutIt support needs to verify the selected listing’s public record before it can be swapped." }, { status: 409 });
       }
     }

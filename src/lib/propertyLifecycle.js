@@ -58,7 +58,12 @@ export function isStaffSuspended(property = {}) {
     normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.STAFF_SUSPENDED;
 }
 
+export function isPublicationSyncPending(property = {}) {
+  return ["pending", "external_applied", "reconciliation_required"].includes(property.publication_sync_state);
+}
+
 export function getPublicationBinding(property) {
+  if (isPublicationSyncPending(property)) return null;
   const slug = property.canonical_slug;
   const recordId = property.publication_external_record_id;
   if (!slug || !/^rec[A-Za-z0-9]+$/.test(recordId || "")) return null;
@@ -71,7 +76,7 @@ export function hasPublicationHistory(property) {
 }
 
 export function matchPublicationSnapshot(query, property) {
-  for (const field of ["pipeline_status", "lifecycle_state", "canonical_slug", "publication_external_record_id", "permanently_removed_at"]) {
+  for (const field of ["pipeline_status", "lifecycle_state", "canonical_slug", "publication_external_record_id", "permanently_removed_at", "publication_sync_state"]) {
     if (!Object.hasOwn(property, field)) continue;
     query = property[field] == null ? query.is(field, null) : query.eq(field, property[field]);
   }

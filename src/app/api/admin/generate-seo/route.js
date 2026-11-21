@@ -58,7 +58,7 @@ export async function POST(request) {
     if (!apiKey || !baseId) return NextResponse.json({ error: "The public catalogue is unavailable" }, { status: 503 });
 
     const { data: listing, error } = await supabaseAdmin.from("properties")
-      .select("canonical_slug, publication_external_record_id, pipeline_status, lifecycle_state, permanently_removed_at")
+      .select("canonical_slug, publication_external_record_id, pipeline_status, lifecycle_state, permanently_removed_at, publication_sync_state")
       .eq("publication_external_record_id", id)
       .maybeSingle();
     if (error?.code === "42703") return NextResponse.json({ error: "Publication identity storage is unavailable" }, { status: 503 });

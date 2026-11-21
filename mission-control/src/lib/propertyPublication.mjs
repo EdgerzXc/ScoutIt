@@ -3,6 +3,7 @@ export const STAFF_DRAFT_STATES = ["draft", "pending", "submitted", "draft_ready
 
 export function isProtectedProperty(property) {
   return Boolean(property.permanently_removed_at) ||
+    ["pending", "external_applied", "reconciliation_required"].includes(property.publication_sync_state) ||
     [property.pipeline_status, property.lifecycle_state, property.moderation_status].some((state) => PROTECTED_STATES.has(state));
 }
 
@@ -34,7 +35,7 @@ export function getPropertyBinding(property) {
 export function matchPropertySnapshot(query, property, additional = []) {
   for (const column of [
     "owner_id", "title", "canonical_slug", "publication_external_record_id", "pipeline_status",
-    "moderation_status", "lifecycle_state", "archived_at", "published_at", "permanently_removed_at",
+    "moderation_status", "lifecycle_state", "archived_at", "published_at", "permanently_removed_at", "publication_sync_state",
     ...additional,
   ]) {
     if (!Object.hasOwn(property, column)) continue;

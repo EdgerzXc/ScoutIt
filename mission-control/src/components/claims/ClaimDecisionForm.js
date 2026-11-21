@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { UserCheck, HelpCircle, XCircle, CheckCircle2 } from "lucide-react";
 
 import { decideClaim } from "@/app/dashboard/claims/actions";
@@ -34,14 +34,17 @@ const TONE = {
  * deciding. The server validates all of it again regardless — this only saves
  * the reviewer a round trip.
  */
-export default function ClaimDecisionForm({ claimId, status, canApprove }) {
+export default function ClaimDecisionForm({ claimId, status, revision, canApprove }) {
   const [transition, setTransition] = useState("");
   const [reasonCode, setReasonCode] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
+  const [current, setCurrent] = useState({ status, revision });
+  const reasonId = useId();
+  const noteId = useId();
 
-  const available = Object.keys(REVIEW_TRANSITIONS).filter((t) => canTransition(status, t));
+  const available = Object.keys(REVIEW_TRANSITIONS).filter((t) => canTransition(current.status, t));
   const rule = transition ? REVIEW_TRANSITIONS[transition] : null;
   const reasons = rule?.requiresReason ? DECISION_REASON_CODES[rule.to] || [] : [];
 
@@ -52,18 +55,20 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
     try {
       const form = new FormData();
       form.append("claimId", claimId);
+      form.append("revision", current.revision || "");
       form.append("transition", transition);
       form.append("reasonCode", reasonCode);
       form.append("note", note);
       const res = await decideClaim(form);
       setResult(res);
       if (res.ok) {
+        setCurrent({ status: res.status, revision: res.updatedAt });
         setTransition("");
         setReasonCode("");
         setNote("");
       }
-    } catch (err) {
-      setResult({ ok: false, message: err.message });
+    } catch {
+      setResult({ ok: false, message: "Could not confirm the decision. Refresh the queue before retrying." });
     } finally {
       setBusy(false);
     }
@@ -71,8 +76,8 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
 
   if (available.length === 0) {
     return (
-      <p className="text-xs text-white/60 border-t border-white/5 pt-3">
-        Nothing to decide from this state.
+      <p role="status" className="text-sm text-[var(--accent-bright)] border-t border-white/5 pt-3">
+        {result?.message || "This claim has been decided."}
       </p>
     );
   }
@@ -82,7 +87,7 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
       <div className="flex flex-wrap gap-2">
         {available.map((t) => {
           const Icon = ICONS[t];
-          const disabled = REVIEW_TRANSITIONS[t].transfersListing && !canApprove;
+          const disabled = busy || (REVIEW_TRANSITIONS[t].transfersListing && !canApprove);
           return (
             <button
               key={t}
@@ -92,8 +97,8 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
                 setTransition(t);
                 setReasonCode("");
               }}
-              title={disabled ? "Approving a claim transfers the listing — Super Admin only." : undefined}
-              className={`px-3 py-1.5 rounded-lg text-xs border flex items-center gap-1.5 transition-colors ${
+              title={REVIEW_TRANSITIONS[t].transfersListing && !canApprove ? "A Super Admin must approve a transfer." : undefined}
+              className={`min-h-11 px-3 py-1.5 rounded-lg text-xs border flex items-center gap-1.5 transition-colors ${
                 TONE[t]
               } ${transition === t ? "ring-1 ring-[#E8AE3C]/40" : ""} ${
                 disabled ? "opacity-40 cursor-not-allowed" : ""
@@ -110,16 +115,17 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
         <div className="space-y-2">
           {rule.transfersListing && (
             <p className="text-xs text-[#F7C64E] bg-[rgba(232,174,60,0.08)] border border-[rgba(232,174,60,0.25)] rounded-lg p-3">
-              This moves the listing to the claimant. Whoever holds it now loses it, and they are
-              not in this room. Their identity is kept on the record so the transfer can be traced.
+              Approval transfers the listing to the claimant. The decision records the previous holder and your reason.
             </p>
           )}
 
-          <label className="block text-[12px] uppercase tracking-wide text-white/70">
-            Reason
+          <div>
+            <label htmlFor={reasonId} className="block text-[12px] uppercase tracking-wide text-white/70">Reason</label>
             <select
+              id={reasonId}
               value={reasonCode}
               onChange={(e) => setReasonCode(e.target.value)}
+              disabled={busy}
               className="mt-1 w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90 normal-case tracking-normal"
             >
               <option value="">Choose a reason…</option>
@@ -129,10 +135,10 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label className="block text-[12px] uppercase tracking-wide text-white/70">
-            What you decided, and why
+          <div>
+            <label htmlFor={noteId} className="block text-[12px] uppercase tracking-wide text-white/70">Review note</label>
             <div className="mt-1 flex flex-wrap gap-1.5 mb-2">
               {transition === "approve" && (
                 <>
@@ -211,13 +217,16 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
               )}
             </div>
             <textarea
+              id={noteId}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
+              disabled={busy}
+              maxLength={2000}
               placeholder="At least a sentence. This is kept on the claim permanently."
               className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90 normal-case tracking-normal"
             />
-          </label>
+          </div>
         </div>
       )}
 
@@ -225,17 +234,14 @@ export default function ClaimDecisionForm({ claimId, status, canApprove }) {
         <button
           type="submit"
           disabled={busy}
-          className="px-4 py-2 rounded-lg text-xs bg-[rgba(232,174,60,0.12)] hover:bg-[rgba(232,174,60,0.2)] text-[#F7C64E] border border-[rgba(232,174,60,0.3)] disabled:opacity-50 transition-colors"
+          className="min-h-11 px-4 py-2 rounded-lg text-xs bg-[rgba(232,174,60,0.12)] hover:bg-[rgba(232,174,60,0.2)] text-[var(--accent-bright)] border border-[rgba(232,174,60,0.3)] disabled:opacity-50 transition-colors"
         >
           {busy ? "Recording…" : `Confirm: ${REVIEW_TRANSITIONS[transition].label}`}
         </button>
       )}
 
-      {result && (
-        <p className={`text-xs ${result.ok ? "text-[#F7C64E]" : "text-red-300"}`}>
-          {result.message}
-        </p>
-      )}
+      <p role="status" className="empty:hidden text-sm text-[var(--accent-bright)]">{result?.ok ? result.message : ""}</p>
+      <p role="alert" className="empty:hidden text-sm text-red-300">{result && !result.ok ? result.message : ""}</p>
     </form>
   );
 }

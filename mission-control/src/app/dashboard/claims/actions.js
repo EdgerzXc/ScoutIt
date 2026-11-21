@@ -1,18 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { createAdminClient } from "@/lib/supabase/admin";
-import { assertTier, getCurrentStaff, logAction, TIERS } from "@/lib/rbac";
-import { recordSystemEvent } from "@/lib/systemEvents";
-import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+import { assertTier, getCurrentStaff, TIERS } from "@/lib/rbac";
 import {
   OPEN_CLAIM_STATUSES,
   REVIEW_TRANSITIONS,
   validateDecision,
 } from "@/lib/propertyClaimPolicy.mjs";
 import { notifyUser } from "@/lib/notifications";
-import { unpublishPropertyFromAirtable } from "@/lib/airtable";
+import { unpublishBoundProperty } from "@/lib/airtable";
+import { reviewPropertyClaim } from "@/lib/claimReview.mjs";
 import { hasVerifiedClaimScan, CLAIM_DOCUMENT_BUCKET } from "@/lib/claimDocumentPath.mjs";
 
 /**
@@ -26,19 +23,6 @@ import { hasVerifiedClaimScan, CLAIM_DOCUMENT_BUCKET } from "@/lib/claimDocument
  * Approving a claim moves the listing. That is the whole point of the feature
  * and also the reason every guard below exists.
  */
-
-async function addClaimEvent(admin, { claimId, actorId, eventType, payload }) {
-  // actor_id is a FK to auth.users. Mission Control staff are auth users, so
-  // this is the same person — but a lookup failure must not lose the event, so
-  // it is written null-tolerant rather than skipped.
-  const { error } = await admin.from("property_claim_events").insert({
-    claim_id: claimId,
-    actor_id: actorId || null,
-    event_type: eventType,
-    payload: payload || {},
-  });
-  if (error) throw new Error(`Could not record the review step: ${error.message}`);
-}
 
 /** The claims queue, with everything a reviewer needs to judge one. Ops Manager+. */
 export async function loadClaimQueue() {
@@ -180,229 +164,76 @@ export async function decideClaim(formData) {
     return { ok: false, message: err.message };
   }
 
-  const claimId = (formData.get("claimId") || "").toString();
-  const reasonCode = (formData.get("reasonCode") || "").toString();
-  const note = (formData.get("note") || "").toString();
-  if (!claimId) return { ok: false, message: "Missing claim." };
-
-  const admin = createAdminClient();
-
-  const { data: claim, error: readErr } = await admin
-    .from("property_claims")
-    .select("id, property_id, claimant_user_id, claimed_relationship, status")
-    .eq("id", claimId)
-    .single();
-  if (readErr || !claim) return { ok: false, message: "That claim no longer exists." };
-
-  // Re-checked against the row as it is NOW, not as the page rendered it.
-  // Two reviewers with the queue open is the ordinary case, not the edge one.
-  const verdict = validateDecision({
-    transition,
-    fromStatus: claim.status,
-    reasonCode,
-    note,
-  });
-  if (!verdict.ok) return { ok: false, message: verdict.message };
-
-  let transfer = null;
-  let willExceedCap = false;
-  let claimantTier = "starry";
-  let listingCap = 1;
-
-  if (verdict.transfersListing) {
-    const { data: property, error: propErr } = await admin
-      .from("properties")
-      .select("id, slug, canonical_slug, title, owner_id, lister_relationship, pipeline_status")
-      .eq("id", claim.property_id)
-      .single();
-    if (propErr || !property) {
-      return { ok: false, message: "The property this claim is about no longer exists." };
-    }
-    if (!claim.claimant_user_id) {
-      return {
-        ok: false,
-        message:
-          "This claim has no signed-in claimant, so there is nobody to transfer the listing to. Reject it or ask them to sign in.",
-      };
-    }
-    if (reasonCode === "documents_verified") {
-      const { data: attachments, error } = await admin.from("property_claim_documents")
-        .select("private_storage_path, checksum, malware_scan_status").eq("claim_id", claim.id);
-      if (error || !attachments?.some((document) => hasVerifiedClaimScan(
-        document, claim.claimant_user_id, [property.id, property.slug, property.canonical_slug],
-      ))) {
-        return { ok: false, message: "Approval using attached documents requires a verified security scan." };
-      }
-    }
-
-    // Check claimant's tier and active listing count
-    const { data: claimantProfile } = await admin
-      .from("user_profiles")
-      .select("subscription_tier, role")
-      .eq("id", claim.claimant_user_id)
-      .maybeSingle();
-
-    claimantTier = String(claimantProfile?.subscription_tier || "starry").toLowerCase();
-    const claimantRole = String(claimantProfile?.role || "owner").toLowerCase();
-    const limits = claimantRole === "broker"
-      ? { starry: 3, solar: 15, cluster: 50, universe: Infinity }
-      : { starry: 1, solar: 5, cluster: 20, universe: Infinity };
-    listingCap = limits[claimantTier] ?? 1;
-
-    const { data: claimantLiveProps } = await admin
-      .from("properties")
-      .select("id")
-      .eq("owner_id", claim.claimant_user_id)
-      .eq("pipeline_status", "approved");
-
-    const liveCount = (claimantLiveProps || []).filter((p) => p.id !== property.id).length;
-    willExceedCap = liveCount >= listingCap;
-
-    // The previous holder is recorded BEFORE the write, on the claim event and
-    // in the audit entry. An approval is close to irreversible for the person
-    // who loses the listing, so who they were must survive the transfer.
-    transfer = {
-      from_owner_id: property.owner_id ?? null,
-      from_lister_relationship: property.lister_relationship ?? null,
-      to_owner_id: claim.claimant_user_id,
-      to_lister_relationship: claim.claimed_relationship,
-      slug: property.canonical_slug || property.slug,
-      defaultedToOffMarket: willExceedCap,
-    };
-
-    const transferPayload = {
-      owner_id: claim.claimant_user_id,
-      lister_relationship: claim.claimed_relationship,
-      verified: true,
-    };
-
-    if (willExceedCap) {
-      transferPayload.pipeline_status = "off_market";
-      transferPayload.lifecycle_state = "off_market";
-      transferPayload.withdrawn_at = new Date().toISOString();
-      transferPayload.quietly_open_to_offers = false;
-
-      // If the property was published in Airtable, unpublish it so it leaves public view
-      const slugToUnpublish = property.canonical_slug || property.slug;
-      if (slugToUnpublish) {
-        try {
-          await unpublishPropertyFromAirtable(slugToUnpublish);
-        } catch (unpublishErr) {
-          console.error("[CLAIM APPROVAL] Airtable unpublish failed:", unpublishErr);
-        }
-      }
-    }
-
-    const { error: transferErr } = await admin
-      .from("properties")
-      .update(transferPayload)
-      .eq("id", property.id);
-
-    if (transferErr) {
-      // Nothing is marked approved if the transfer did not happen. An
-      // "approved" claim over a listing that never moved is the worst of both:
-      // the claimant is told they won and still cannot touch it.
-      return { ok: false, message: `The listing could not be transferred: ${transferErr.message}` };
-    }
+  const claimId = String(formData.get("claimId") || "");
+  const expectedUpdatedAt = String(formData.get("revision") || "") || null;
+  const reason = String(formData.get("reasonCode") || "");
+  const note = String(formData.get("note") || "").trim();
+  if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(claimId) ||
+      (expectedUpdatedAt && (expectedUpdatedAt.length > 50 || !Number.isFinite(Date.parse(expectedUpdatedAt)))) ||
+      note.length > 2000) {
+    return { ok: false, message: "Check the claim and review note before trying again." };
   }
 
-  const { error: updateErr } = await admin
+  const admin = createAdminClient();
+  const { data: claim, error } = await admin
     .from("property_claims")
-    .update({
-      status: verdict.status,
-      reviewer_id: staff.id,
-      decision_reason_code: rule.requiresReason ? reasonCode : null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", claimId);
+    .select("id, property_id, claimant_user_id, status, updated_at")
+    .eq("id", claimId)
+    .maybeSingle();
+  if (error || !claim) return { ok: false, message: "Could not load this claim. Refresh the queue." };
+  const verdict = validateDecision({ transition, fromStatus: claim.status, reasonCode: reason, note });
+  if (!verdict.ok) return { ok: false, message: verdict.message };
 
-  if (updateErr) return { ok: false, message: updateErr.message };
-
-  await addClaimEvent(admin, {
-    claimId,
-    actorId: staff.id,
-    eventType: `CLAIM_${verdict.status.toUpperCase()}`,
-    payload: {
-      by: staff.email,
-      reason_code: rule.requiresReason ? reasonCode : null,
-      note: note || null,
-      from_status: claim.status,
-      transfer,
-    },
+  const result = await reviewPropertyClaim({
+    admin, claimId, staffId: staff.id, transition, expectedUpdatedAt,
+    reason: rule.requiresReason ? reason : null,
+    note: note || null,
+    unpublish: unpublishBoundProperty,
   });
+  if (!result.ok) return result;
 
-  await logAction({
-    staff,
-    action: `claim.${transition}`,
-    targetTable: "property_claims",
-    targetId: claimId,
-    reason: note || null,
-    metadata: {
-      from_status: claim.status,
-      to_status: verdict.status,
-      reason_code: rule.requiresReason ? reasonCode : null,
-      property_id: claim.property_id,
-      transfer,
-    },
-  });
-
-  if (transfer) {
-    await recordSystemEvent({
-      event: EVENTS.LISTING_OWNERSHIP_TRANSFERRED,
-      severity: "warning",
-      subjectTable: "properties",
-      subjectId: claim.property_id,
-      summary: `Listing '${transfer.slug}' transferred to an approved claimant`,
-      detail: transfer,
-    });
-
-    await notifyUser(admin, {
+  const { transfer, status, updatedAt } = result;
+  const notify = (message) => notifyUser(admin, { propertyId: claim.property_id, ...message });
+  if (transfer && claim.claimant_user_id) {
+    await notify({
       userId: claim.claimant_user_id,
       title: "Property claim approved",
-      desc: willExceedCap
-        ? `Your ownership claim for the listing has been approved. Because your ${claimantTier.toUpperCase()} plan is at its active live listing limit (${listingCap}), this property has been safely transferred into your private Off-Market cloud. You can swap it to live or upgrade your plan anytime in your Dashboard.`
-        : "Your ownership claim for the listing has been approved. The property has been transferred to your account.",
-      icon: "🎉",
-      propertyId: claim.property_id,
+      desc: transfer.defaultedToOffMarket
+        ? "The listing has transferred to your account and moved off market because your active listing limit is full."
+        : "The listing has transferred to your account.",
       notificationType: "claim_approved",
     });
-
     if (transfer.from_owner_id) {
-      await notifyUser(admin, {
+      await notify({
         userId: transfer.from_owner_id,
         title: "Listing ownership transferred",
         desc: "Ownership of the listing was transferred following an approved claim review.",
-        icon: "ℹ️",
-        propertyId: claim.property_id,
         notificationType: "claim_transferred",
       });
     }
-  } else if (verdict.status === "rejected") {
-    await notifyUser(admin, {
+  } else if (status === "rejected" && claim.claimant_user_id) {
+    await notify({
       userId: claim.claimant_user_id,
       title: "Property claim not approved",
       desc: "Your ownership claim could not be approved at this time.",
-      icon: "ℹ️",
-      propertyId: claim.property_id,
       notificationType: "claim_rejected",
     });
-  } else if (verdict.status === "needs_information") {
-    await notifyUser(admin, {
+  } else if (status === "needs_information" && claim.claimant_user_id) {
+    await notify({
       userId: claim.claimant_user_id,
       title: "Property claim needs information",
       desc: "Reviewers have requested additional details on your property claim.",
-      icon: "📋",
-      propertyId: claim.property_id,
       notificationType: "claim_needs_info",
     });
   }
 
-  revalidatePath("/dashboard/claims");
-
   return {
-    ok: true,
-    message: transfer
-      ? "Claim approved. The listing now belongs to the claimant."
-      : `Claim moved to ${verdict.status.replace(/_/g, " ")}.`,
+    ok: true, status, updatedAt,
+    message: transfer?.defaultedToOffMarket
+      ? "Claim approved. The listing transferred and is off market."
+      : transfer ? "Claim approved. The listing transferred to the claimant."
+      : status === "human_review" ? "Claim opened for staff review."
+      : status === "needs_information" ? "Claim marked as needing more information."
+      : "Claim rejected.",
   };
 }

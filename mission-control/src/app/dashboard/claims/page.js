@@ -332,6 +332,7 @@ export default async function ClaimsPage() {
                 <ClaimDecisionForm
                   claimId={claim.id}
                   status={claim.status}
+                  revision={claim.updated_at}
                   canApprove={staff.tier >= TIERS.SUPER_ADMIN}
                 />
               </section>

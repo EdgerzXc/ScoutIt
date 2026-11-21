@@ -112,8 +112,8 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
     test("GAP-33: mission-control locks canonical_slug and blocks Slug/Title writes to Airtable", () => {
       const airtableContent = read("mission-control/src/lib/airtable.js");
       expect(airtableContent).toContain("delete fields.Title");
-      expect(airtableContent).toContain('"Slug" in fields');
-      expect(airtableContent).toContain('"Title" in fields');
+      expect(airtableContent).not.toContain("updatePropertyInAirtable");
+      expect(airtableContent).toContain("record.fields?.Slug !== binding.slug");
 
       const cmsActions = read("mission-control/src/app/dashboard/cms/actions.js");
       expect(read("mission-control/src/lib/propertyPublication.mjs")).toContain("canonical_slug: binding.slug");

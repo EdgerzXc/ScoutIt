@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { hasVerifiedClaimScan } from "../src/lib/claimDocumentPath.mjs";
+import { reviewPropertyClaim } from "../src/lib/claimReview.mjs";
 
 import {
   CLAIM_STATUSES,
@@ -17,6 +18,10 @@ import {
 } from "../src/lib/propertyClaimPolicy.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const migration = await readFile(
+  path.join(root, "..", "supabase", "migrations", "20261121000002_atomic_staff_claim_review.sql"),
+  "utf8",
+);
 const actions = await readFile(
   path.join(root, "src", "app", "dashboard", "claims", "actions.js"),
   "utf8",
@@ -166,27 +171,69 @@ test("the status is re-checked against the live row, not the rendered page", () 
 });
 
 test("the previous holder is recorded before the listing moves", () => {
-  const body = actions.slice(actions.indexOf("if (verdict.transfersListing)"));
-  const capture = body.indexOf("from_owner_id: property.owner_id");
-  const write = body.indexOf('.from("properties")\n      .update(');
+  const capture = migration.indexOf("'from_owner_id', v_property.owner_id");
+  const write = migration.indexOf("owner_id = v_claim.claimant_user_id::text,");
   assert.notEqual(capture, -1, "the previous owner is never captured");
   assert.ok(capture < write, "the listing moves before the previous holder is recorded");
 });
 
-test("a failed transfer never leaves a claim marked approved", () => {
-  const body = actions.slice(actions.indexOf("if (transferErr)"));
-  assert.match(body.slice(0, 400), /return \{ ok: false/);
-});
-
 test("a claim with no signed-in claimant cannot transfer a listing to nobody", () => {
-  assert.match(actions, /if \(!claim\.claimant_user_id\)/);
+  assert.match(migration, /IF v_claim\.claimant_user_id IS NULL/);
 });
 
 test("every decision writes a claim event, an audit entry, and a transfer writes a system event", () => {
-  assert.match(actions, /addClaimEvent\(admin, \{/);
-  assert.match(actions, /action: `claim\.\$\{transition\}`/);
-  assert.match(actions, /EVENTS\.LISTING_OWNERSHIP_TRANSFERRED/);
-  assert.match(actions, /severity: "warning"/);
+  assert.match(migration, /INSERT INTO public\.property_claim_events/);
+  assert.match(migration, /'claim\.' \|\| p_transition/);
+  assert.match(migration, /'listing\.ownership\.transferred', 'mission-control', 'warning'/);
+  assert.match(migration, /FROM PUBLIC, anon, authenticated;\s*GRANT EXECUTE ON FUNCTION public\.review_property_claim/);
+  assert.match(actions, /if \(!result\.ok\) return result;/);
+});
+
+const claimContext = {
+  claimId: "claim-id", staffId: "staff-id", transition: "approve",
+  expectedUpdatedAt: "2026-11-21T01:00:00Z", reason: "lister_conceded",
+  note: "The previous lister confirmed the transfer.",
+};
+
+function claimReviewFixture(responses, cachePurged = true) {
+  const calls = [];
+  const lease = new Date().toISOString();
+  const admin = {
+    async rpc(functionName, args) {
+      assert.equal(functionName, "review_property_claim");
+      calls.push(args.p_phase);
+      assert.equal(args.p_expected_updated_at, claimContext.expectedUpdatedAt);
+      if (args.p_phase !== "decide") assert.equal(args.p_lease, lease);
+      return { data: args.p_phase === "decide" ? { state: "withdraw", slug: "fixture", recordId: "recFixture", lease } : responses[args.p_phase] };
+    },
+  };
+  async function unpublish(binding) {
+    assert.deepEqual(binding, { slug: "fixture", recordId: "recFixture" });
+    calls.push("catalogue");
+    return { recordId: "recFixture", cache: { purged: cachePurged } };
+  }
+  return { run: () => reviewPropertyClaim({ admin, unpublish, ...claimContext }), calls };
+}
+
+test("approval follows confirmed withdrawal and catalogue refresh", async () => {
+  const transfer = { defaultedToOffMarket: true };
+  const { run, calls } = claimReviewFixture({ confirm: { state: "saved", status: "approved", transfer } });
+  assert.deepEqual(await run(), { ok: true, status: "approved", updatedAt: undefined, transfer });
+  assert.deepEqual(calls, ["decide", "catalogue", "confirm"]);
+});
+
+test("an unconfirmed catalogue refresh keeps the transfer pending", async () => {
+  const { run, calls } = claimReviewFixture({ release: { state: "retry" } }, false);
+  assert.match((await run()).message, /still belongs to its current holder/);
+  assert.deepEqual(calls, ["decide", "catalogue", "release"]);
+});
+
+test("an uncertain final database decision tells staff to check the queue", async () => {
+  const { run, calls } = claimReviewFixture({ confirm: { state: "retry" }, release: { state: "retry" } });
+  const result = await run();
+  assert.equal(result.ok, false);
+  assert.match(result.message, /confirm whether ownership transferred/);
+  assert.deepEqual(calls, ["decide", "catalogue", "confirm", "release"]);
 });
 
 // ── The surface ──────────────────────────────────────────────────────────────

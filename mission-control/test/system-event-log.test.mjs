@@ -26,6 +26,7 @@ const mainRecorder = await read(mainRoot, "src", "lib", "systemEvents.js");
 const cronWrapper = await read(mainRoot, "src", "lib", "cronEventLog.js");
 const systemPage = await read(root, "src", "app", "dashboard", "system", "page.js");
 const auditPage = await read(root, "src", "app", "dashboard", "audit", "page.js");
+const claimReviewSql = await read(mainRoot, "supabase", "migrations", "20261121000002_atomic_staff_claim_review.sql");
 
 // ── The copy that cannot be an import ────────────────────────────────────────
 // Two deployments write to one table. A log whose event names drift between its
@@ -40,13 +41,16 @@ test("every event name the vocabulary declares is actually emitted somewhere", a
     read(root, "src", "app", "dashboard", "coordinates", "actions.js"),
     read(root, "src", "app", "dashboard", "cms", "actions.js"),
     read(root, "src", "app", "dashboard", "osint", "actions.js"),
-    read(root, "src", "app", "dashboard", "claims", "actions.js"),
     read(mainRoot, "src", "lib", "cronEventLog.js"),
     read(mainRoot, "src", "lib", "cmsCache.js"),
   ]);
   const all = emitters.join("\n");
 
   for (const key of Object.keys(EVENTS)) {
+    if (key === "LISTING_OWNERSHIP_TRANSFERRED") {
+      assert.ok(claimReviewSql.includes(`VALUES ('${EVENTS[key]}'`), "the claim transaction must record the transfer event");
+      continue;
+    }
     assert.match(
       all,
       new RegExp(`EVENTS\\.${key}\\b`),
