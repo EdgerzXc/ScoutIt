@@ -7,7 +7,7 @@ async function siteHeaders() {
   return Object.fromEntries(rule.headers.map(({ key, value }) => [key, value]));
 }
 
-describe("Preview CSP evaluation trial", () => {
+describe("Preview content security policy", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("blocks script attributes on the enforced policy while keeping the framework bootstrap available", async () => {
@@ -19,16 +19,17 @@ describe("Preview CSP evaluation trial", () => {
     expect(directives.find((directive) => directive.startsWith("script-src "))).toContain("'unsafe-inline'");
   });
 
-  it("reports removal of script evaluation on Preview while keeping the current enforced policy", async () => {
+  it("enforces removal of script evaluation and alternate base URLs on Preview", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "preview");
     const headers = await siteHeaders();
     const enforced = headers["Content-Security-Policy"];
-    const trial = headers["Content-Security-Policy-Report-Only"];
-    expect(enforced).toMatch(/script-src[^;]*'unsafe-eval'/);
-    expect(trial).toBe(enforced.replace(" 'unsafe-eval'", ""));
-    expect(trial).toContain("worker-src 'self' blob:");
-    expect(trial).toContain("frame-ancestors 'none'");
+    expect(enforced).not.toContain("'unsafe-eval'");
+    expect(enforced).toContain("base-uri 'none'");
+    expect(enforced).toContain("worker-src 'self' blob:");
+    expect(enforced).toContain("frame-ancestors 'none'");
+    expect(enforced).toContain("script-src-attr 'none'");
+    expect(headers["Content-Security-Policy-Report-Only"]).toBeUndefined();
   });
 
   it("limits the recovery script directive to its nonce and the three pre-paint bootstraps", async () => {
@@ -38,6 +39,7 @@ describe("Preview CSP evaluation trial", () => {
     expect(script).not.toMatch(/'unsafe-(inline|eval)'/);
     expect(script.match(/'sha256-[A-Za-z0-9+/=]+'/g)).toHaveLength(3);
     expect(policy).toContain("frame-src 'self'");
+    expect(policy).toContain("base-uri 'none'");
     expect(policy).toContain("https://challenges.cloudflare.com");
     const rule = (await nextConfig.headers()).find(({ source }) => source === "/reset-password");
     expect(rule.headers).toContainEqual({ key: "Referrer-Policy", value: "no-referrer" });
@@ -48,9 +50,11 @@ describe("Preview CSP evaluation trial", () => {
     ["production", "production"],
     ["production", undefined],
     ["development", "preview"],
-  ])("omits the report-only trial under NODE_ENV=%s and VERCEL_ENV=%s", async (nodeEnv, vercelEnv) => {
+  ])("keeps the regular policy under NODE_ENV=%s and VERCEL_ENV=%s", async (nodeEnv, vercelEnv) => {
     vi.stubEnv("NODE_ENV", nodeEnv);
     vi.stubEnv("VERCEL_ENV", vercelEnv);
-    expect((await siteHeaders())["Content-Security-Policy-Report-Only"]).toBeUndefined();
+    const policy = (await siteHeaders())["Content-Security-Policy"];
+    expect(policy).toContain("'unsafe-eval'");
+    expect(policy).toContain("base-uri 'self'");
   });
 });

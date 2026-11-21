@@ -24,12 +24,14 @@ const cspHeader = `
     upgrade-insecure-requests;
 `;
 export const contentSecurityPolicy = cspHeader.replace(/\n/g, '');
-export const previewNoEvalPolicy = contentSecurityPolicy.replace(" 'unsafe-eval'", '');
+export const previewContentSecurityPolicy = contentSecurityPolicy
+  .replace(" 'unsafe-eval'", '')
+  .replace("base-uri 'self'", "base-uri 'none'");
 
 const themeHashes = [liteModeBootstrap, simpleModeBootstrap, displayModeBootstrap]
   .map((script) => "'sha256-" + createHash("sha256").update(script).digest("base64") + "'")
   .join(" ");
 
 export function recoveryContentSecurityPolicy(nonce) {
-  return previewNoEvalPolicy.replace("'unsafe-inline'", "'nonce-" + nonce + "' 'strict-dynamic' " + themeHashes);
+  return previewContentSecurityPolicy.replace("'unsafe-inline'", "'nonce-" + nonce + "' 'strict-dynamic' " + themeHashes);
 }

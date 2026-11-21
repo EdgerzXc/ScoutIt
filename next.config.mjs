@@ -1,4 +1,4 @@
-import { contentSecurityPolicy, previewNoEvalPolicy } from "./src/lib/siteContentSecurityPolicy.mjs";
+import { contentSecurityPolicy, previewContentSecurityPolicy } from "./src/lib/siteContentSecurityPolicy.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -79,11 +79,9 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: contentSecurityPolicy,
+            value: process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'preview'
+              ? previewContentSecurityPolicy : contentSecurityPolicy,
           },
-          ...(process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'preview'
-            ? [{ key: 'Content-Security-Policy-Report-Only', value: previewNoEvalPolicy }]
-            : []),
           {
             key: 'X-Frame-Options',
             value: 'DENY',
