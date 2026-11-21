@@ -85,7 +85,7 @@ const unitSchema = z.object({
   ]).nullable().optional(),
   listingPurpose: z.enum(["lease", "sale", "short_stay", "flex"]).nullable().optional(),
   price: z.union([z.string(), z.number()]).optional(),
-  details: z.record(z.any()).optional().default({}),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 
 const bodySchema = z.object({
@@ -106,7 +106,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
-    const parsed = bodySchema.safeParse(await request.json());
+    const parsed = bodySchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
@@ -115,7 +115,7 @@ export async function POST(request) {
 
     const { data: property, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("id, slug, canonical_slug, lifecycle_state, pipeline_status, title, location, type, space_category, details")
+      .select("*")
       .eq("id", propertyId)
       .single();
     if (propErr || !property) {
@@ -151,12 +151,21 @@ export async function POST(request) {
         if (u.listingPurpose !== undefined) patch.listing_purpose = u.listingPurpose;
         if (u.price !== undefined) patch.price = u.price != null ? String(u.price) : "";
         if (u.details !== undefined) patch.details = u.details;
-        return supabaseAdmin.from("property_units").update(patch).eq("id", u.id);
+        return supabaseAdmin.from("property_units")
+          .update(patch)
+          .eq("id", u.id)
+          .eq("property_id", propertyId)
+          .eq("operator_id", userId)
+          .select("id")
+          .maybeSingle();
       });
 
       const results = await Promise.all(updatePromises);
       for (const res of results) {
         if (res.error) errors.push(res.error);
+      }
+      if (!errors.length && results.some(({ data }) => !data)) {
+        return NextResponse.json({ error: "A unit assignment changed while saving. Reload the units and retry." }, { status: 409 });
       }
     }
     
@@ -176,11 +185,11 @@ export async function POST(request) {
 
     let warning = null;
     try {
-      const sync = await syncPropertyUnitsToAirtable(supabaseAdmin, property);
+      const sync = toUpdate.length ? await syncPropertyUnitsToAirtable(supabaseAdmin, property) : null;
       if (sync?.publicCachePending) warning = "Units saved; public refresh unconfirmed. Check the listing page.";
     } catch (airtableErr) {
       console.error("[OPERATOR UNITS API] Airtable sync failed:", airtableErr);
-      warning = "Units saved, but Airtable sync failed: " + airtableErr.message;
+      warning = "Units saved. The public listing update needs a retry.";
     }
 
     return NextResponse.json({
