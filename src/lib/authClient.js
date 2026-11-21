@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { ADMIN_SESSION_API } from './adminEntryPath';
 
 export const getSession = async () => {
   try {
@@ -133,7 +134,21 @@ export const verifyOtp = async (email, token) => {
 // pressed Sign Out on a borrowed laptop must not stay logged in because
 // their wifi dropped.
 // ─────────────────────────────────────────────────────────────────────────
+async function clearStaffDocumentSession() {
+  if (typeof window === 'undefined') return;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2000);
+  try {
+    await fetch(ADMIN_SESSION_API, { method: 'DELETE', credentials: 'same-origin', signal: controller.signal });
+  } catch {
+    // The server also bounds the document session to five minutes.
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export const signOut = async (scope = 'global') => {
+  const staffSignOut = clearStaffDocumentSession();
   let error = null;
   try {
     const result = await supabase.auth.signOut({ scope });
@@ -156,5 +171,6 @@ export const signOut = async (scope = 'global') => {
     /* private mode / storage disabled */
   }
 
+  await staffSignOut;
   return { error };
 };

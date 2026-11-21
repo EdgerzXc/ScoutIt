@@ -42,6 +42,11 @@ import { getWorkspaceAssuranceError } from "@/lib/workspaceRequestAuth";
 /** Roles that may act on staff-only surfaces. */
 const STAFF_ROLES = ["admin", "staff"];
 
+export function readAdminBearer(request) {
+  const raw = (request.headers.get("Authorization") || "").trim();
+  return /^Bearer\s+(\S+)$/i.exec(raw)?.[1] || null;
+}
+
 /**
  * Verify the caller is staff.
  *
@@ -64,8 +69,7 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
   // gets sent to Supabase as a credential. It is rejected there, so it is not a
   // hole — but "garbage in, rejected two network hops later" is not a gate, and
   // a caught test is cheaper than a trusted accident.
-  const raw = (request.headers.get("Authorization") || "").trim();
-  const token = /^Bearer\s+(\S+)$/i.exec(raw)?.[1];
+  const token = readAdminBearer(request);
   if (!token) return { error: "Unauthorized: Missing token", status: 401 };
 
   if (!supabaseAdmin) {

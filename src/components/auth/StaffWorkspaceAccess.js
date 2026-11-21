@@ -42,11 +42,11 @@ export function useStaffRead(path) {
   return { status: current?.status || "loading", data: current?.data, retry: () => setAttempt((n) => n + 1) };
 }
 
-export function StaffAccessState({ status, retry }) {
+export function StaffAccessState({ status, retry, destination }) {
   const pathname = usePathname();
-  const returnPath = normalizePrivateReturnPath(pathname, "/admin");
+  const returnPath = normalizePrivateReturnPath(destination ?? pathname, "/admin");
   return (
-    <main className="min-h-dvh bg-background text-on-surface grid place-items-center p-6">
+    <main id="main-content" tabIndex={-1} className="min-h-dvh bg-background text-on-surface grid place-items-center p-6">
       <div className="max-w-md text-center space-y-4">
         {status === "loading" ? (
           <p role="status">Checking staff access…</p>
@@ -56,13 +56,13 @@ export function StaffAccessState({ status, retry }) {
           <>
             <h1 className="text-2xl font-display">Set up an authenticator</h1>
             <p className="text-text-secondary">Staff tools require two-factor authentication. Set up your authenticator in Settings, then return here.</p>
-            <Link href="/settings#security" className="inline-flex min-h-11 items-center px-3 text-accent underline">Open security settings</Link>
+            <Link href="/settings#security" prefetch={false} className="inline-flex min-h-11 items-center px-3 text-accent underline">Open security settings</Link>
           </>
         ) : status === "mfa_required" ? (
           <>
             <h1 className="text-2xl font-display">Verify your authenticator</h1>
             <p className="text-text-secondary">Enter a code from your authenticator app to continue to the staff workspace.</p>
-            <Link href={`/onboarding?next=${encodeURIComponent(returnPath)}`} className="inline-flex min-h-11 items-center px-3 text-accent underline">Verify and return</Link>
+            <Link href={`/onboarding?next=${encodeURIComponent(returnPath)}`} prefetch={false} className="inline-flex min-h-11 items-center px-3 text-accent underline">Verify and return</Link>
           </>
         ) : (
           <>

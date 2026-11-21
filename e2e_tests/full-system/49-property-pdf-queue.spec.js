@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { gotoAndSettle, MOCK_OWNER_EMPTY, signInAsMock } from './helpers';
+import { openStaffWorkspace, seedStaffSession } from './staffSessionFixture';
 
 test('owner can submit a PDF, retry the same draft and see when review is needed', async ({ page, baseURL }) => {
   test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
@@ -49,9 +50,8 @@ test('owner can submit a PDF, retry the same draft and see when review is needed
 });
 
 test('staff must reopen a changed draft before confirming and can retry PDF deletion', async ({ context, page, baseURL }) => {
-  test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
-  await signInAsMock(page, MOCK_OWNER_EMPTY);
-  await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
+  test.skip(process.env.SCOUTIT_RUN_STAFF_E2E !== '1', 'Requires the isolated staff Auth fixture');
+  await seedStaffSession(page);
 
   const reviewedDraft = { title: 'Staff Review Fixture', floor_sqm: 42, listing_details: { building_grade: 'Grade A' } };
   const revisedDraft = { ...reviewedDraft, listing_details: { building_grade: 'Grade B' } };
@@ -78,7 +78,7 @@ test('staff must reopen a changed draft before confirming and can retry PDF dele
     } });
   });
 
-  await gotoAndSettle(page, '/admin');
+  await openStaffWorkspace(page);
   await page.getByRole('button', { name: /PDF Drafts/ }).click();
   await page.getByRole('button', { name: 'Review draft and PDF' }).click();
   const confirm = page.getByRole('button', { name: 'Confirm review and delete PDF' });
@@ -102,10 +102,9 @@ test('staff must reopen a changed draft before confirming and can retry PDF dele
   ]);
 });
 
-test('staff can record a quarantine discard and retry deletion without verifying the listing', async ({ page, baseURL }) => {
-  test.skip(!['localhost', '127.0.0.1'].includes(new URL(baseURL).hostname), 'Uses local mocked routes');
-  await signInAsMock(page, MOCK_OWNER_EMPTY);
-  await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
+test('staff can record a quarantine discard and retry deletion without verifying the listing', async ({ page }) => {
+  test.skip(process.env.SCOUTIT_RUN_STAFF_E2E !== '1', 'Requires the isolated staff Auth fixture');
+  await seedStaffSession(page);
 
   const propertyId = '87998441-6c10-4a24-ac27-5614c6867355';
   const sourceVersion = 'quarantined-fixture-source';
@@ -124,7 +123,7 @@ test('staff can record a quarantine discard and retry deletion without verifying
     } });
   });
 
-  await gotoAndSettle(page, '/admin');
+  await openStaffWorkspace(page);
   await page.getByRole('button', { name: /PDF Drafts/ }).click();
   await page.getByRole('button', { name: 'Review quarantine' }).click();
   await expect(page.getByText('The PDF did not contain readable text.')).toBeVisible();

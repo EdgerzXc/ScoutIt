@@ -10,7 +10,6 @@ import {
   acknowledgeSignal, removeSignal, clearAllSignals,
   computeSignalHealthSummary, createSignal
 } from "@/lib/flow/incidentSignalHub";
-import { INCIDENT_SCENARIOS } from "@/lib/flow/incidentSimulator";
 
 /**
  * IncidentSignalBanner

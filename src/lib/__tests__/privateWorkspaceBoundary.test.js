@@ -14,20 +14,32 @@ const collectPages = (relativeDir) => {
 };
 
 describe("private workspace boundary (A-025)", () => {
-  const privatePages = [
-    ...collectPages("src/app/dashboard"),
-    ...collectPages("src/app/admin"),
-  ];
+  const dashboardPages = collectPages("src/app/dashboard");
+  const adminPages = collectPages("src/app/admin")
+    .filter((page) => page !== path.join("src", "app", "admin", "access", "page.js"));
 
   it("finds the private workspace pages it is meant to protect", () => {
-    expect(privatePages.length).toBeGreaterThan(5);
+    expect(dashboardPages.length).toBeGreaterThan(5);
+    expect(adminPages).toContain(path.join("src", "app", "admin", "flow", "page.js"));
   });
 
-  it.each(privatePages)("wraps %s in VerifiedWorkspaceBoundary", (page) => {
+  it.each(dashboardPages)("wraps %s in VerifiedWorkspaceBoundary", (page) => {
     const source = fs.readFileSync(path.join(ROOT, page), "utf8");
     expect(source).toContain("VerifiedWorkspaceBoundary");
     expect(source).toContain("<VerifiedWorkspaceBoundary>");
   });
+
+  it.each(adminPages)("authorizes %s before loading the staff interface", (page) => {
+    const source = fs.readFileSync(path.join(ROOT, page), "utf8");
+    const gate = source.indexOf("await requireAdminPage(");
+    expect(gate).toBeGreaterThanOrEqual(0);
+    expect(source.indexOf("await import(")).toBeGreaterThan(gate);
+  });
+
+  it.each(["src/app/admin/AdminConsole.js", "src/app/admin/flow/AdminFlowConsole.js"])(
+    "keeps the verified workspace boundary on %s after server entry",
+    (page) => expect(fs.readFileSync(path.join(ROOT, page), "utf8")).toContain("<VerifiedWorkspaceBoundary>"),
+  );
 
   it("resolves identity before the provider requests private data", () => {
     const context = fs.readFileSync(path.join(ROOT, "src/context/DashboardContext.js"), "utf8");

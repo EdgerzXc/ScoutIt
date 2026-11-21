@@ -30,6 +30,7 @@ export const OFFLINE_BLANKED_ENV = Object.freeze({
 
   // Privileged Service Role Database Key
   SUPABASE_SERVICE_ROLE_KEY: "",
+  SCOUTIT_ADMIN_SESSION_KEY: "",
 
   // Platform Cron Authorization Secret
   CRON_SECRET: "",

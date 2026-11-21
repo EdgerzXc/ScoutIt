@@ -72,7 +72,7 @@ describe("A-222 Platform Logic Atomicity, Navigation Escape-Hatches & Layer 04 C
     });
 
     it("links System Flow Graph (/admin/flow) in admin console tab navigation", () => {
-      const src = read("src/app/admin/page.js");
+      const src = read("src/app/admin/AdminConsole.js");
       expect(src).toContain('href="/admin/flow"');
       expect(src).toContain("System Flow Graph");
     });

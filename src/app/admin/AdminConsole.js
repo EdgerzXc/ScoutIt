@@ -1,0 +1,1023 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { getSession } from "@/lib/authClient";
+import { Building2, Check, AlertCircle, ShieldCheck, ShieldOff, Sliders, FileText, ShieldAlert, Wallet, GitBranch, Radio } from "lucide-react";
+import IntelStudioPanel from "@/components/intel/IntelStudioPanel";
+import FeatureConsolePanel from "@/components/admin/FeatureConsolePanel";
+import ConnectsRefundPanel from "@/components/admin/ConnectsRefundPanel";
+import PropertyVerifyPanel from "@/components/admin/PropertyVerifyPanel";
+import NotificationBroadcastPanel from "@/components/admin/NotificationBroadcastPanel";
+import { DashboardProvider } from "@/context/DashboardContext";
+import VerifiedWorkspaceBoundary from "@/components/auth/VerifiedWorkspaceBoundary";
+import StaffWorkspaceAccess from "@/components/auth/StaffWorkspaceAccess";
+import { sanitizeError } from "@/lib/sanitizeError";
+import InfoTip from "@/components/ui/InfoTip";
+
+function PdfReviewFacts({ reviewedDraft }) {
+  const { listing_details: details = {}, ...summary } = reviewedDraft;
+  return (
+    <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+      {[["summary", summary], ["details", details]].flatMap(([section, facts]) =>
+        Object.entries(facts).map(([key, value]) => (
+          <div key={`${section}-${key}`} className="min-w-0">
+            <dt className="font-mono text-xs uppercase text-text-secondary">{key.replaceAll("_", " ")}</dt>
+            <dd className="break-words">
+              {value == null || value === "" ? "—" : typeof value === "object" ? JSON.stringify(value) : String(value)}
+            </dd>
+          </div>
+        ))
+      )}
+    </dl>
+  );
+}
+
+function AdminPageInner() {
+  const [activeTab, setActiveTab] = useState("flags");
+  const [pendingProperties, setPendingProperties] = useState([]);
+  const [pendingError, setPendingError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // A-076: PDF-assisted drafts awaiting their source-document check. AGENTS.md
+  // §2.4 requires this before publication, and until now nothing in the product
+  // could perform it — the publish route's 422 had no matching key.
+  const [pdfQueue, setPdfQueue] = useState([]);
+  const [pdfLoading, setPdfLoading] = useState(true);
+  const [pdfError, setPdfError] = useState(null);
+  const [pdfProcessingId, setPdfProcessingId] = useState(null);
+  const [pdfReview, setPdfReview] = useState(null);
+  const [processingId, setProcessingId] = useState(null);
+  const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
+
+  // RA 9646: PRC credential verification queue
+  const [prcQueue, setPrcQueue] = useState([]);
+  const [prcLoading, setPrcLoading] = useState(true);
+  const [prcProcessingId, setPrcProcessingId] = useState(null);
+
+  async function authHeaders() {
+    const { data: { session } } = await getSession();
+    const token = session?.access_token;
+    return { "Content-Type": "application/json", "Authorization": token ? `Bearer ${token}` : "" };
+  }
+
+  async function fetchPrcQueue() {
+    setPrcLoading(true);
+    try {
+      const res = await fetch("/api/admin/prc", { headers: await authHeaders() });
+      const result = await res.json();
+      if (res.ok) setPrcQueue(result.data || []);
+    } catch (err) {
+      console.error("Failed to load PRC queue", err);
+    } finally {
+      setPrcLoading(false);
+    }
+  }
+
+  const handlePrcToggle = async (userId, verified, prcExpiry) => {
+    setPrcProcessingId(userId);
+    setMessage(null);
+    try {
+      const payload = { userId, verified };
+      if (prcExpiry !== undefined) payload.prcExpiry = prcExpiry;
+      const res = await fetch("/api/admin/prc", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to update verification.");
+      setPrcQueue((prev) => prev.map((p) => (p.id === userId ? { ...p, prc_verified: verified, ...(prcExpiry !== undefined ? { prc_expiry: prcExpiry } : {}) } : p)));
+      setMessage({ type: "success", text: verified ? "Credential marked PRC Verified." : "Verification revoked." });
+    } catch (err) {
+      setMessage({ type: "error", text: sanitizeError(err) });
+    } finally {
+      setPrcProcessingId(null);
+    }
+  };
+
+  // A-073: reads through a staff-authorized server route, NOT directly from the
+  // browser. The old client-direct query was constrained by RLS to rows the
+  // viewer owns, so staff saw an empty queue instead of third-party submissions.
+  // See the header of /api/admin/pending for the full reasoning.
+  async function fetchPending() {
+    setLoading(true);
+    setPendingError(null);
+    try {
+      const res = await fetch("/api/admin/pending", { headers: await authHeaders() });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Could not load the submission queue.");
+      setPendingProperties(result.properties || []);
+    } catch (err) {
+      // An empty queue and a failed load look identical to a reviewer. Say which
+      // one this is, rather than rendering "no submissions" over an error.
+      console.error("Failed to load pending submissions", err);
+      setPendingProperties([]);
+      setPendingError(sanitizeError(err, "Could not load the submission queue."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // A-076: the queue of PDF-assisted drafts a staff member must check against
+  // their source document before the owner can publish.
+  async function fetchPdfQueue() {
+    setPdfLoading(true);
+    setPdfError(null);
+    try {
+      const res = await fetch("/api/admin/pdf-verify", { headers: await authHeaders() });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Could not load the verification queue.");
+      setPdfQueue(result.drafts || []);
+    } catch (err) {
+      console.error("Failed to load PDF verification queue", err);
+      setPdfQueue([]);
+      setPdfError(sanitizeError(err, "Could not load the verification queue."));
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
+  async function loadPdfReview(propertyId) {
+    setPdfProcessingId(propertyId);
+    setPdfReview(null);
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/pdf-verify?propertyId=${encodeURIComponent(propertyId)}`, { headers: await authHeaders() });
+      const review = await response.json();
+      if (!response.ok) throw new Error(review.error || "Could not open the source PDF.");
+      setPdfReview({ propertyId, ...review, sourceOpened: false });
+    } catch (error) {
+      setMessage({ type: "error", text: sanitizeError(error) });
+    } finally {
+      setPdfProcessingId(null);
+    }
+  }
+
+  async function handleVerifyPdfDraft(propertyId, cleanupOnly, discard = false) {
+    setPdfProcessingId(propertyId);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/pdf-verify", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          propertyId,
+          ...(discard ? { discard: true } : {}),
+          ...(cleanupOnly ? {} : {
+            sourceReviewed: true,
+            sourceVersion: pdfReview?.sourceVersion,
+            reviewedDraft: pdfReview?.reviewedDraft,
+          }),
+        }),
+      });
+      const result = await res.json();
+      if (res.status === 409 && !cleanupOnly) setPdfReview(null);
+      if (!res.ok) throw new Error(result.error || "Could not record the verification.");
+      setPdfReview(null);
+      const text = result.discarded
+        ? result.cleanupPending ? "Discard was recorded. You can retry deleting the stored PDF." : "Source PDF deleted. The listing remains quarantined."
+        : result.cleanupPending ? "The draft is verified. The source PDF is still stored. You can retry deletion."
+          : cleanupOnly ? "Source PDF deleted." : "Draft verified and source PDF deleted. The owner can publish.";
+      setMessage({ type: "success", text });
+      await fetchPdfQueue();
+    } catch (err) {
+      setMessage({ type: "error", text: sanitizeError(err) });
+    } finally {
+      setPdfProcessingId(null);
+    }
+  }
+
+  useEffect(() => {
+    fetchPending();
+    fetchPrcQueue();
+    fetchPdfQueue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleApprove = async (submissionId) => {
+    if (processingId !== null) return;
+    setProcessingId(submissionId);
+    setMessage(null);
+
+    try {
+      const res = await fetch("/api/admin/approve", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({ submissionId }),
+      });
+
+      const result = await res.json().catch(() => ({}));
+
+      if (!res.ok || result.success !== true) {
+        setMessage({
+          type: "error",
+          text: typeof result.error === "string" ? result.error : "Couldn’t confirm approval. Refresh the queue before trying again.",
+        });
+        return;
+      }
+
+      if (result.warning) {
+        setMessage({ type: "warning", text: result.warning });
+        return;
+      }
+      setMessage(result.publicCachePending
+        ? { type: "warning", text: "Listing approved. Check the public page before sharing it." }
+        : { type: "success", text: "Listing approved and synced to Airtable." });
+      setPendingProperties((prev) => prev.filter((p) => p.id !== submissionId));
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: sanitizeError(err, "Couldn't approve that property.") });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  return (
+    <div className="admin-layout">
+      <Header />
+      <main className="admin-main">
+        <header className="admin-header">
+          <span className="vector-label">LAYER 00 // RESTRICTED ACCESS</span>
+          {/* A-073: NOT "Mission Control" — that name belongs to exactly one
+              thing, the separate staff console in `mission-control/`. See the
+              rule in MissionControlMode.js:23-30; the collision cost real time
+              once already. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="page-title">Admin Console</h1>
+            <InfoTip tipId="adminKillSwitches" label="About Admin Console" />
+          </div>
+          <p className="page-subtitle">Master feature switches, verification queues, and system parameters.</p>
+        </header>
+
+        <div role="status">
+          {message && message.type !== "error" && (
+            <div className={`admin-alert ${message.type}`}>
+              {message.type === "success" ? <Check size={16} aria-hidden="true" /> : <AlertCircle size={16} aria-hidden="true" />}
+              <span>{message.text}</span>
+            </div>
+          )}
+        </div>
+        <div role="alert">
+          {message?.type === "error" && (
+            <div className="admin-alert error">
+              <AlertCircle size={16} aria-hidden="true" />
+              <span>{message.text}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-[var(--surface3)] mb-8 overflow-x-auto gap-2">
+          <button
+            onClick={() => setActiveTab("flags")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "flags"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <Sliders size={15} />
+            Kill-Switch Console
+          </button>
+
+          <button
+            onClick={() => setActiveTab("approvals")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "approvals"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <Building2 size={15} />
+            Pending Approvals ({pendingProperties.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("prc")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "prc"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <ShieldCheck size={15} />
+            PRC Verification ({prcQueue.filter((p) => !p.prc_verified).length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("pdf")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "pdf"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <FileText size={15} />
+            PDF Drafts ({pdfQueue.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("intel")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "intel"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <FileText size={15} />
+            Intel Studio
+          </button>
+
+          {/* §40.16 — the only legitimate refund path (§38.3). Before this
+              existed, honouring the system-error exception meant hand-written
+              SQL that moved a balance and recorded nothing. */}
+          <button
+            onClick={() => setActiveTab("refunds")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "refunds"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <Wallet size={15} />
+            Connect Refunds
+          </button>
+
+          {/* ACQ-01 · W12 — /api/property/verify had no caller until now (§51). */}
+          <button
+            onClick={() => setActiveTab("verify")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "verify"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <ShieldCheck size={15} />
+            Re-verification
+          </button>
+
+          <button
+            onClick={() => setActiveTab("broadcast")}
+            className={`px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap ${
+              activeTab === "broadcast"
+                ? "border-gold-accent text-gold-accent bg-gold-accent/10 font-bold"
+                : "border-transparent text-gray-400 hover:text-white hover:bg-[var(--surface2)]"
+            }`}
+          >
+            <Radio size={15} />
+            Broadcast & Alerts
+          </button>
+
+          <Link
+            href="/admin/flow"
+            className="px-4 py-3 text-xs font-mono uppercase tracking-wider transition-colors duration-150 flex items-center gap-2 border-b-2 rounded-t-lg shrink-0 whitespace-nowrap border-transparent text-gray-400 hover:text-gold-accent hover:bg-[var(--surface2)]"
+          >
+            <GitBranch size={15} />
+            System Flow Graph
+          </Link>
+        </div>
+
+        <div className="admin-content">
+          {activeTab === "flags" && <FeatureConsolePanel />}
+
+          {activeTab === "broadcast" && (
+            <NotificationBroadcastPanel authHeaders={authHeaders} />
+          )}
+
+          {activeTab === "refunds" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>
+                  Connect Refunds <InfoTip tipId="adminRefunds" label="About connect refunds" />
+                </h2>
+              </div>
+              <ConnectsRefundPanel />
+            </div>
+          )}
+
+          {activeTab === "verify" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>
+                  Listing Re-verification <InfoTip tipId="adminReverification" label="About listing freshness" />
+                </h2>
+              </div>
+              <PropertyVerifyPanel />
+            </div>
+          )}
+
+          {activeTab === "approvals" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>
+                  Pending Approvals <InfoTip tipId="adminPendingApprovals" label="About pending approvals" />
+                </h2>
+                <span className="count-badge">{pendingProperties.length}</span>
+              </div>
+
+              {loading ? (
+                <div className="loading-state">Scanning secure submissions...</div>
+              ) : pendingError ? (
+                /* A-073: a failed load must never render as "the queue is clear" —
+                   a reviewer cannot tell the difference, and the wrong one means
+                   real submissions sit unreviewed. */
+                <div className="error-state" role="alert">
+                  <p>{pendingError}</p>
+                  <button type="button" className="btn-retry" onClick={fetchPending}>
+                    Try again
+                  </button>
+                </div>
+              ) : pendingProperties.length === 0 ? (
+                <div className="empty-state">
+                  <p>No pending properties. The queue is clear.</p>
+                </div>
+              ) : (
+                <div className="submission-list">
+                  {pendingProperties.map((prop) => (
+                    <div key={prop.id} className="submission-card">
+                      <div className="submission-info">
+                        <div className="info-primary">
+                          <Building2 size={16} style={{ color: "var(--accent)" }} />
+                          <h3>{prop.title}</h3>
+                        </div>
+                        <div className="info-secondary">
+                          <span className="info-tag">{prop.type}</span>
+                          <span className="info-tag">{prop.location}</span>
+                          <span className="info-tag coords">
+                            {prop.coordinates ? "Geo-located" : "No Coords"}
+                          </span>
+                        </div>
+                        <div className="info-meta">
+                          Submitted by: {prop.owner_id || "Unknown"}
+                        </div>
+                      </div>
+
+                      <div className="submission-actions">
+                        <button
+                          className="btn-approve"
+                          disabled={processingId !== null}
+                          onClick={() => handleApprove(prop.id)}
+                        >
+                          {processingId === prop.id ? "SYNCING..." : "APPROVE TO AIRTABLE"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "pdf" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>
+                  PDF Draft Verification <InfoTip tipId="adminPdfDrafts" label="About PDF source check" />
+                </h2>
+                <span className="count-badge">{pdfQueue.length}</span>
+              </div>
+
+              {pdfLoading ? (
+                <div className="loading-state">Loading PDF-assisted drafts...</div>
+              ) : pdfError ? (
+                <div className="error-state" role="alert">
+                  <p>{pdfError}</p>
+                  <button type="button" className="btn-retry" onClick={fetchPdfQueue}>
+                    Try again
+                  </button>
+                </div>
+              ) : pdfQueue.length === 0 ? (
+                <div className="empty-state">
+                  <p>
+                    No PDF-assisted drafts awaiting verification. These appear when an owner
+                    builds a listing from an uploaded document.
+                  </p>
+                </div>
+              ) : (
+                <div className="submission-list">
+                  {pdfQueue.map((draft) => (
+                    <div key={draft.id} className="submission-card">
+                      <div className="submission-info">
+                        <div className="info-primary">
+                          <FileText size={16} style={{ color: "var(--accent)" }} />
+                          <h3>{draft.title}</h3>
+                        </div>
+                        <div className="info-secondary">
+                          {draft.type && <span className="info-tag">{draft.type}</span>}
+                          {draft.location && <span className="info-tag">{draft.location}</span>}
+                          <span className="info-tag coords">
+                            {draft.sourceAttached ? "Source attached" : "No source file"}
+                          </span>
+                        </div>
+                        <div className="info-meta">
+                          {draft.cleanupPending ? "The staff decision was recorded. Retry source deletion."
+                            : draft.quarantined ? "Processing stopped. Review the quarantine before deleting the source."
+                            : draft.sourceAttached ? "Compare the draft with the source before confirming."
+                            : "A source PDF is required before this draft can be verified."}
+                        </div>
+                        {pdfReview?.propertyId === draft.id && (
+                          <div className="mt-3 break-words">
+                            {pdfReview.quarantined ? (
+                              <>
+                                <p>{pdfReview.quarantineReason}</p>
+                                <p>The owner can upload a new file or enter the listing manually. Discarding this source keeps the listing quarantined.</p>
+                              </>
+                            ) : (
+                              <>
+                                <a href={pdfReview.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline"
+                                  onClick={() => setPdfReview((review) => ({ ...review, sourceOpened: true }))}>
+                                  Download source PDF
+                                </a>
+                                <PdfReviewFacts reviewedDraft={pdfReview.reviewedDraft} />
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="submission-actions">
+                        {draft.cleanupPending ? (
+                          <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId)}
+                            onClick={() => handleVerifyPdfDraft(draft.id, true, draft.quarantined)}>
+                            Retry PDF deletion
+                          </button>
+                        ) : draft.sourceAttached && (
+                          <>
+                            <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId)}
+                              onClick={() => loadPdfReview(draft.id)}>
+                              {draft.quarantined ? "Review quarantine" : pdfReview?.propertyId === draft.id ? "Refresh source link" : "Review draft and PDF"}
+                            </button>
+                            {pdfReview?.propertyId === draft.id && (
+                              <button type="button" className="btn-approve" disabled={Boolean(pdfProcessingId) || (!pdfReview.quarantined && !pdfReview.sourceOpened)}
+                                onClick={() => handleVerifyPdfDraft(draft.id, false, pdfReview.quarantined)}>
+                                {pdfReview.quarantined ? "Record discard and delete PDF" : "Confirm review and delete PDF"}
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "prc" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>
+                  PRC Verification <InfoTip tipId="adminPrcQueue" label="About PRC verification" />
+                </h2>
+                <span className="count-badge">{prcQueue.filter((p) => !p.prc_verified).length}</span>
+              </div>
+
+              {prcLoading ? (
+                <div className="loading-state">Loading credential submissions...</div>
+              ) : prcQueue.length === 0 ? (
+                <div className="empty-state">
+                  <p>No PRC credentials submitted yet. Brokers add theirs from their dashboard ID card.</p>
+                </div>
+              ) : (
+                <div className="submission-list">
+                  {prcQueue.map((p) => (
+                    <div key={p.id} className="submission-card">
+                      <div className="submission-info">
+                        <div className="info-primary">
+                          {p.prc_verified
+                            ? <ShieldCheck size={16} style={{ color: "var(--emerald)" }} />
+                            : <ShieldOff size={16} style={{ color: "var(--accent)" }} />}
+                          <h3>{p.display_name || p.id}</h3>
+                        </div>
+                        <div className="info-secondary">
+                          <span className="info-tag coords">PRC {p.prc_license}</span>
+                          {p.dhsud_number && <span className="info-tag">DHSUD {p.dhsud_number}</span>}
+                          {p.prc_expiry && <span className="info-tag">Expires {p.prc_expiry}</span>}
+                          {p.firm && <span className="info-tag">{p.firm}</span>}
+                        </div>
+                        <div className="info-meta">
+                          {p.prc_verified
+                            ? `Verified ${p.prc_verified_at ? new Date(p.prc_verified_at).toLocaleDateString() : ""}. Badge is live on public profile.`
+                            : "Unverified. Check against the PRC public registry before approving."}
+                        </div>
+                      </div>
+
+                      <div className="submission-actions">
+                        <button
+                          className="btn-approve"
+                          disabled={prcProcessingId === p.id}
+                          onClick={() => handlePrcToggle(p.id, !p.prc_verified, p.prc_expiry || undefined)}
+                          style={p.prc_verified ? { background: "transparent", border: "1px solid var(--border-mid)", color: "var(--text-secondary)" } : undefined}
+                        >
+                          {prcProcessingId === p.id
+                            ? "SAVING..."
+                            : p.prc_verified ? "REVOKE BADGE" : "MARK PRC VERIFIED"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "intel" && (
+            <div className="admin-panel">
+              <div className="panel-header">
+                <h2>
+                  Intel Studio <InfoTip tipId="adminIntelStudio" label="About Intel Studio" />
+                </h2>
+              </div>
+              <p className="panel-hint">
+                Turn any document into an Intel article. Upload a PDF market report, a CSV data
+                sheet, or plain text. The system structures it into an article,
+                lets you preview it here, and saves it directly to the database.
+              </p>
+              <IntelStudioPanel />
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
+
+      <style jsx>{`
+        .admin-layout {
+          min-height: 100vh;
+          min-height: 100dvh;
+          display: flex;
+          flex-direction: column;
+          background: var(--bg);
+        }
+
+        .admin-main {
+          flex: 1;
+          padding: 80px 24px;
+          max-width: 1000px;
+          margin: 0 auto;
+          width: 100%;
+        }
+
+        .admin-header {
+          margin-bottom: 48px;
+        }
+
+        .vector-label {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          /* A-074. AGENTS.md section 1 locks the palette to deep black plus
+             gold; a raw #ff3333 was the only place on the platform breaking
+             it. --red is the tokenised semantic red the rest of the app
+             already uses, and it themes with the rest of the system. */
+          color: var(--red);
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          display: block;
+          margin-bottom: 16px;
+        }
+
+        .page-title {
+          font-family: var(--font-display);
+          font-size: 38px;
+          color: var(--text-primary);
+          margin-bottom: 12px;
+        }
+
+        .page-subtitle {
+          font-family: var(--font-body);
+          font-size: 16px;
+          color: var(--text-secondary);
+        }
+
+        .admin-alert {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px;
+          padding: 16px;
+          border-radius: 4px;
+          margin-bottom: 32px;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+
+        .admin-alert.success {
+          background: var(--green-dim);
+          border: 1px solid var(--emerald);
+          color: var(--emerald);
+        }
+
+        .admin-alert.warning {
+          background: rgba(var(--accent-rgb), 0.1);
+          border: 1px solid rgba(var(--accent-rgb), 0.3);
+          color: var(--accent);
+        }
+
+        .admin-alert.error {
+          background: var(--red-dim);
+          border: 1px solid var(--red);
+          color: var(--red);
+        }
+
+        .admin-panel {
+          background: var(--surface);
+          border: 1px solid var(--border-subtle);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .panel-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px;
+          border-bottom: 1px solid var(--border-subtle);
+          background: rgba(var(--text-primary-rgb), 0.02);
+        }
+
+        .panel-header h2 {
+          font-family: var(--font-display);
+          font-size: 20px;
+          color: var(--text-primary);
+          margin: 0;
+        }
+
+        .panel-hint {
+          padding: 16px 24px 0;
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+        }
+
+        .admin-panel :global(.intel-studio) {
+          padding: 24px;
+        }
+
+        .count-badge {
+          background: var(--accent);
+          color: var(--on-accent);
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 20px;
+        }
+
+        .loading-state, .empty-state, .error-state {
+          padding: 64px;
+          text-align: center;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+
+        /* A-073: reads as a fault, not as an empty queue. Signal red is status
+           only — the retry stays the panel's neutral control, so the error does
+           not spend the screen's one gold accent. */
+        .error-state {
+          color: var(--red);
+        }
+        .error-state .btn-retry {
+          margin-top: 16px;
+          min-height: 44px;
+          padding: 0 20px;
+          background: transparent;
+          border: 1px solid var(--border-mid);
+          border-radius: var(--radius-md);
+          color: var(--text-secondary);
+          font-family: inherit;
+          font-size: inherit;
+          text-transform: inherit;
+          letter-spacing: inherit;
+          cursor: pointer;
+          transition: border-color 160ms ease-out, color 160ms ease-out;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .error-state .btn-retry:hover {
+            border-color: var(--accent-muted);
+            color: var(--text-primary);
+          }
+        }
+        .error-state .btn-retry:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+        .error-state .btn-retry:active {
+          transform: translateY(1px);
+        }
+
+        .submission-list {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .submission-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 24px;
+          border-bottom: 1px solid var(--border-subtle);
+          transition: background 0.3s ease;
+        }
+
+        .submission-card:hover {
+          background: rgba(var(--text-primary-rgb), 0.01);
+        }
+
+        .submission-card:last-child {
+          border-bottom: none;
+        }
+
+        .submission-info {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          min-width: 0;
+          flex: 1;
+          width: 100%;
+        }
+
+        .info-primary {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+        }
+
+        .info-primary h3 {
+          font-family: var(--font-display);
+          font-size: 18px;
+          color: var(--text-primary);
+          margin: 0;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+
+        .info-secondary {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          min-width: 0;
+        }
+
+        .info-tag {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--text-secondary);
+          background: rgba(var(--text-primary-rgb), 0.05);
+          padding: 4px 8px;
+          border-radius: 2px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          max-width: 100%;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+
+        .info-tag.coords {
+          color: var(--accent);
+          background: rgba(var(--accent-rgb), 0.08);
+        }
+
+        .info-meta {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          color: var(--text-muted);
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          min-width: 0;
+        }
+
+        .btn-approve {
+          background: var(--accent);
+          color: var(--on-accent);
+          border: none;
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          padding: 12px 24px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+        }
+
+        .btn-approve:hover:not(:disabled) {
+          background: var(--accent-bright);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
+        }
+
+        .btn-approve:disabled {
+          background: var(--text-muted);
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+          /* U-033: desktop-only spacing squeezed 390px viewports — cards
+             looked off-center with clipped text. Center within the shell. */
+          .admin-main {
+            padding: 64px 16px;
+          }
+          .page-title {
+            font-size: 28px;
+            overflow-wrap: anywhere;
+          }
+          .page-subtitle {
+            font-size: 14px;
+          }
+          .panel-header {
+            padding: 16px;
+          }
+          .panel-hint {
+            padding: 12px 16px 0;
+          }
+          .admin-panel :global(.intel-studio) {
+            padding: 16px;
+          }
+          .loading-state, .empty-state, .error-state {
+            padding: 32px 16px;
+          }
+          .submission-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+          }
+
+          .submission-actions {
+            width: 100%;
+          }
+
+          .btn-approve {
+            width: 100%;
+          }
+        }
+
+        /* WHITE LENS (locked 2026-09-23, WHITE_LENS_SPEC): this block is
+           scoped, so lens rules need the :global prefix. Dark untouched. */
+        :global(body.light-mode) .page-title,
+        :global(body.light-mode) .panel-header h2,
+        :global(body.light-mode) .info-primary h3 {
+          color: var(--text-primary);
+        }
+        :global(body.light-mode) .admin-panel {
+          background: var(--surface);
+          border-color: var(--border);
+        }
+        :global(body.light-mode) .panel-header {
+          border-bottom-color: var(--border);
+          background: rgba(var(--text-primary-rgb), 0.03);
+        }
+        :global(body.light-mode) .submission-card {
+          border-bottom-color: var(--border);
+        }
+        @media (hover: hover) and (pointer: fine) {
+          :global(body.light-mode) .submission-card:hover {
+            background: rgba(var(--text-primary-rgb), 0.03);
+          }
+        }
+        :global(body.light-mode) .info-tag {
+          background: rgba(var(--text-primary-rgb), 0.05);
+        }
+        :global(body.light-mode) .info-tag.coords {
+          color: var(--text-secondary);
+          background: rgba(var(--text-primary-rgb), 0.05);
+        }
+        :global(body.light-mode) .count-badge,
+        :global(body.light-mode) .btn-approve {
+          background: var(--accent-fill);
+          color: var(--on-accent);
+        }
+        :global(body.light-mode) .admin-alert.success {
+          background: var(--green-dim);
+          border-color: var(--green);
+          color: var(--green);
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function AdminConsole() {
+  return (
+    <DashboardProvider>
+      <VerifiedWorkspaceBoundary>
+        <StaffWorkspaceAccess>
+          <AdminPageInner />
+        </StaffWorkspaceAccess>
+      </VerifiedWorkspaceBoundary>
+    </DashboardProvider>
+  );
+}

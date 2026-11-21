@@ -22,7 +22,6 @@ import {
   LINEAR_GUIDE_DEFINITIONS
 } from "@/lib/flow/subgraphLogic";
 import {
-  INCIDENT_SCENARIOS,
   calculateBlastRadius,
   getNodeHealthStatus,
   getIncidentDossier
@@ -342,7 +341,7 @@ function useCanvasEdges({
 }
 
 // ── Main Master Flow Component ────────────────────────────────────────────────
-export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: graphEdges }) {
+export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: graphEdges, scenarios }) {
   const router = useRouter();
   const containerRef   = useRef(null);
   const canvasLayerRef = useRef(null);
@@ -407,8 +406,8 @@ export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: 
 
   // Incident Scenarios & Topological Blast Radius Computation
   const currentScenario = useMemo(() => {
-    return INCIDENT_SCENARIOS[activeScenarioId] || INCIDENT_SCENARIOS.CMS_BRIDGE_OUTAGE;
-  }, [activeScenarioId]);
+    return scenarios[activeScenarioId] || scenarios.CMS_BRIDGE_OUTAGE;
+  }, [activeScenarioId, scenarios]);
 
   const activeFaultedNodeIds = useMemo(() => {
     if (activeScenarioId === "CUSTOM") return customFaultedNodeIds;
@@ -665,7 +664,7 @@ export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: 
         if (parsed.isIncidentMode) {
           setGraphMode("health");
         }
-        if (parsed.scenarioId && INCIDENT_SCENARIOS[parsed.scenarioId]) {
+        if (parsed.scenarioId && Object.hasOwn(scenarios, parsed.scenarioId)) {
           setActiveScenarioId(parsed.scenarioId);
         }
         if (parsed.nodeId && nodeMap.has(parsed.nodeId)) {
@@ -687,7 +686,7 @@ export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: 
       clearTimeout(timer);
       stopSignals?.();
     };
-  }, [nodeMap, centerOnNode]);
+  }, [nodeMap, centerOnNode, scenarios]);
 
   const handleNodeDragStart = useCallback((e, nodeId) => {
     e.stopPropagation(); setSelectedNodeId(nodeId); dragNodeRef.current = nodeId;
@@ -932,14 +931,14 @@ export default function MasterFlowGraph({ onNavigate, nodes: graphNodes, edges: 
                 value={activeScenarioId}
                 onChange={e => {
                   setActiveScenarioId(e.target.value);
-                  const scen = INCIDENT_SCENARIOS[e.target.value];
+                  const scen = scenarios[e.target.value];
                   if (scen && scen.faultedNodeIds.length > 0) {
                     centerOnNode(scen.faultedNodeIds[0]);
                   }
                 }}
                 className="bg-black/90 border border-red-500/70 rounded-lg px-3 py-1.5 text-xs text-red-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-red-500 max-w-[280px] truncate"
               >
-                {Object.values(INCIDENT_SCENARIOS).map(scen => (
+                {Object.values(scenarios).map(scen => (
                   <option key={scen.id} value={scen.id}>
                     {scen.id === "NOMINAL" ? "✅" : "🚨"} {scen.name}
                   </option>

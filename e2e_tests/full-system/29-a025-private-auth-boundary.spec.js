@@ -22,6 +22,9 @@ test.describe("A-025 verified private-workspace boundary", () => {
 
       await gotoAndSettle(page, route);
 
+      if (route === "/admin" && new URL(page.url()).pathname === "/admin/access") {
+        await page.getByRole("link", { name: "Sign in", exact: true }).click();
+      }
       await expect(page).toHaveURL(/\/onboarding\?next=/, { timeout: 20_000 });
       await expect(page.getByRole("heading", { name: /Sign in or create an account/i })).toBeVisible();
       expect(new URL(page.url()).searchParams.get("next")).toBe(route);

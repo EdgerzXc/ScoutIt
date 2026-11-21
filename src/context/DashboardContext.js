@@ -493,7 +493,7 @@ export function DashboardProvider({ children }) {
         // Each carries its own catch so that one rejecting early cannot become
         // an unhandled rejection while the others are still in flight; a null
         // here means "this read failed", which the code below already handles.
-        const settled = (promise) => promise.catch(() => null);
+        const settled = (request) => Promise.resolve(request).catch(() => null);
         const mockOwnerId = mockUser?.id || "";
         const inventoryPromise = settled(authedFetch('/api/dashboard/inventory'));
         const cmsPromise = settled(fetch('/api/cms'));

@@ -78,7 +78,7 @@ describe("A-076 · PDF-assisted drafts are tagged at creation", () => {
     // Rule 13: an endpoint with no caller is not a feature, it is a plan. The
     // unlock sat uncalled for a month — and was broken the whole time — so this
     // pins the caller in place.
-    const console_ = read("src/app/admin/page.js");
+    const console_ = read("src/app/admin/AdminConsole.js");
     expect(console_).toContain("/api/admin/pdf-verify");
     expect(console_).toMatch(/activeTab === "pdf"/);
     // The panel must be reachable, not merely defined.

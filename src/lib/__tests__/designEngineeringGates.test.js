@@ -99,7 +99,7 @@ describe("A-074 · every hovered control gives press feedback", () => {
 
 describe("A-074 · the palette stays deep black plus gold", () => {
   it("the admin console no longer hardcodes an off-palette red", () => {
-    const admin = fs.readFileSync("src/app/admin/page.js", "utf8");
+    const admin = fs.readFileSync("src/app/admin/AdminConsole.js", "utf8");
     // The literal survives only inside the comment explaining why it went.
     const withoutComments = admin.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(withoutComments).not.toContain("#ff3333");

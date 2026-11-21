@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
-  INCIDENT_SCENARIOS,
   calculateBlastRadius,
   getNodeHealthStatus,
   getIncidentDossier
 } from "@/lib/flow/incidentSimulator";
+import { INCIDENT_SCENARIOS } from "@/lib/flow/incidentScenarios.server";
 import { MASTER_FLOW_NODES } from "@/data/masterFlowGraphData";
 
 describe("incidentSimulator", () => {

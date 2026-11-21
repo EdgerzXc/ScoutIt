@@ -31,6 +31,7 @@ describe("staff flow delivery", () => {
     const data = await response.json();
     expect(data.nodes.some(({ id }) => id === "rec_manual_approval_queue")).toBe(true);
     expect(data.edges.length).toBeGreaterThan(0);
+    expect(data.scenarios.CMS_BRIDGE_OUTAGE.triagePlaybook).toContain("Inspect");
     expect(await (await access.GET(request)).json()).toEqual({ allowed: true });
   });
 });
@@ -51,10 +52,11 @@ describe("browser guide and telemetry projection", () => {
     expect(toolbox).toContain('fetch("/api/profile/me/role",');
     expect(toolbox).toContain("scoutit_journey_guide_v1");
     expect(toolbox).toContain('import("@/lib/journeyGuides")');
-    expect(read("src/app/admin/flow/page.js")).toContain('useStaffRead("/api/admin/flow")');
-    expect(read("src/app/admin/flow/page.js")).toContain("<MasterFlowGraph nodes={data.nodes} edges={data.edges}");
+    expect(read("src/app/admin/flow/AdminFlowConsole.js")).toContain('useStaffRead("/api/admin/flow")');
+    expect(read("src/app/admin/flow/AdminFlowConsole.js")).toContain("<MasterFlowGraph nodes={data.nodes} edges={data.edges}");
     for (const file of ["src/lib/journeyGuides.js", "src/lib/reportError.js", "src/components/flow/MasterFlowGraph.js"]) {
       expect(read(file)).not.toContain("masterFlowGraphData");
+      expect(read(file)).not.toContain("incidentScenarios.server");
     }
   });
 });

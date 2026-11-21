@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import staffAuth from './e2e_tests/fixtures/staff-auth-provider.cjs';
 
 // Point the suite at a deployment instead of a local build:
 //   SCOUTIT_E2E_BASE_URL=https://... npx playwright test
@@ -14,6 +15,9 @@ const baseURL = externalTarget || 'http://localhost:3000';
 // Airtable PAT. Browser verification is offline unless the caller deliberately
 // opts into the live CMS contract suite.
 const useLiveCms = process.env.SCOUTIT_E2E_LIVE_CMS === '1';
+const useStaffFixture = !externalTarget && !useLiveCms;
+const staffPreload = require.resolve('./e2e_tests/fixtures/staff-auth-provider.cjs').replaceAll('\\', '/');
+if (useStaffFixture) process.env.SCOUTIT_RUN_STAFF_E2E = '1';
 
 export default defineConfig({
   // The launch suite includes read-only live-catalog contracts. Local runs
@@ -30,6 +34,7 @@ export default defineConfig({
   // Keep generated HTML reports out of the repository by default. A one-off
   // report can still be requested with `--reporter=html` when debugging.
   reporter: 'line',
+  outputDir: 'test-results/playwright',
   use: {
     baseURL,
     // Ordinary journeys start after analytics was declined and both first-visit
@@ -64,6 +69,10 @@ export default defineConfig({
         UPSTASH_REDIS_REST_URL: '',
         UPSTASH_REDIS_REST_TOKEN: '',
       }),
+      ...(useStaffFixture ? {
+        ...staffAuth.fixtureEnv,
+        NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --require "${staffPreload}"`.trim(),
+      } : {}),
       // Client components need an explicit build-time flag. It exists only in
       // this localhost E2E build and is still rejected on public hostnames.
       NEXT_PUBLIC_SCOUTIT_E2E: '1',

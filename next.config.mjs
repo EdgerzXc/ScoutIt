@@ -141,6 +141,10 @@ const nextConfig = {
         headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
       },
       {
+        source: '/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+      },
+      {
         source: '/reset-password',
         headers: [
           { key: 'Referrer-Policy', value: 'no-referrer' },

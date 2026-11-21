@@ -5,6 +5,7 @@
 // document.scrollWidth <= clientWidth + 1. Inner rails/tables may scroll in
 // their own containers; the page itself must never grow past the viewport.
 import { test, expect } from '@playwright/test';
+import { openStaffWorkspace, seedStaffSession } from './staffSessionFixture';
 import {
   signInAsMock,
   trackErrors,
@@ -182,8 +183,9 @@ test.describe('mobile workspace overflow (390px, data rendered)', () => {
   });
 
   test('/admin console tabs and queues', async ({ page }) => {
+    test.skip(process.env.SCOUTIT_RUN_STAFF_E2E !== '1', 'Requires the isolated staff Auth fixture');
     const errors = trackErrors(page);
-    await signInAsMock(page, MASTER_DEV_READONLY);
+    await seedStaffSession(page);
     // Data-filled queues: long titles, UUID owners, and credential rows must
     // wrap inside their cards instead of pushing the page wide.
     await page.route('**/api/admin/pending', (route) =>
@@ -261,8 +263,7 @@ test.describe('mobile workspace overflow (390px, data rendered)', () => {
         },
       }),
     );
-    await page.route('**/api/admin/access', (route) => route.fulfill({ json: { allowed: true } }));
-    await gotoAndSettle(page, '/admin');
+    await openStaffWorkspace(page);
     await expectRealContent(page);
     await expect(
       page.getByRole('heading', { name: 'Admin Console' }),

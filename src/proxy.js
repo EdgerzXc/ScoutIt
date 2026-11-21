@@ -128,6 +128,9 @@ function isExemptFromMaintenance(pathname) {
 
 export async function proxy(request, event) {
   const path = request.nextUrl.pathname;
+  if (path === '/api/admin/session' && request.method === 'DELETE') {
+    return NextResponse.next();
+  }
   if (path === '/reset-password') {
     if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'preview' || request.headers.get('rsc') === '1') {
       return NextResponse.next();

@@ -81,14 +81,14 @@ describe("A-075 · the erasure route never reports a deletion that did not happe
     expect(response.status).toBeGreaterThanOrEqual(500);
   });
 
-  it("tells the person the truth: data erased, sign-in still open", async () => {
+  it("reports partial data removal and an unclosed sign-in", async () => {
     state.deleteUserError = { message: "auth service unavailable" };
 
     const payload = await (await route.POST(deleteRequest())).json();
     const text = `${payload.error || ""} ${payload.message || ""}`;
 
-    expect(text).toMatch(/sign in/i);
-    expect(text).toMatch(/erased|deleted/i);
+    expect(text).toMatch(/sign-in could not be closed/i);
+    expect(text).toMatch(/some account data was removed/i);
     expect(payload.accountAccessRevoked).toBe(false);
     // Nothing is hidden: what WAS erased is still reported.
     expect(Array.isArray(payload.erased)).toBe(true);
