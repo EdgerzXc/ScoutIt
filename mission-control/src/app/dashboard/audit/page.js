@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS, TIER_LABELS } from "@/lib/rbac";
+import { isPropertyArchiveAuditAction } from "@/lib/propertyArchive.mjs";
 import { ScrollText, RotateCcw } from "lucide-react";
 import { revertAction } from "./actions";
 
@@ -82,7 +83,7 @@ export default async function AuditLogPage() {
                     </td>
                     <td className="px-5 py-3 text-white/60">{a.reason || "—"}</td>
                     <td className="px-5 py-3 text-right">
-                      {canRevert && (
+                      {canRevert && !isPropertyArchiveAuditAction(a.action) && (
                         <form action={revertAction} className="inline-block">
                           <input type="hidden" name="actionId" value={a.id} />
                           <button className="flex items-center gap-1 text-[12px] px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors">

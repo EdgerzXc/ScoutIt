@@ -264,6 +264,12 @@ export async function unpublishPropertyFromAirtable(slug) {
     throw new Error(`Airtable unpublish failed: ${res.status} ${errText}`);
   }
 
+  const record = await res.json();
+  const approved = record.fields?.Approved_For_ScoutIt;
+  if (record.id !== recordId || !record.fields || (approved !== false && approved !== undefined)) {
+    throw new Error("Airtable did not confirm that the listing is unpublished.");
+  }
+
   const cache = await purgePublicCatalogueCache({ withdrawn: [{ slug, recordId }] });
   return { recordId, cache };
 }

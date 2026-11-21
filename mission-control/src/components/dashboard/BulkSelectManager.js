@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { CheckSquare } from "lucide-react";
+
+export const QueueFeedbackContext = createContext(null);
 
 // Client-side bulk-select wrapper.
 //
@@ -18,12 +20,37 @@ import { CheckSquare } from "lucide-react";
 export function BulkSelectManager({ items, bulkActions = [], itemName = "items" }) {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [isProcessing, setIsProcessing] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [completedIds, setCompletedIds] = useState(new Set());
+  const feedbackRegion = useRef(null);
+  const visibleItems = items.filter(({ key }) => !completedIds.has(key));
+
+  useEffect(() => {
+    if (feedback) feedbackRegion.current?.scrollIntoView({ block: "nearest" });
+  }, [feedback]);
+
+  useEffect(() => {
+    const currentIds = new Set(items.map(({ key }) => key));
+    setCompletedIds((previous) => {
+      const remaining = [...previous].filter((id) => currentIds.has(id));
+      return remaining.length === previous.size ? previous : new Set(remaining);
+    });
+  }, [items]);
+
+  const showResult = useCallback((message, savedIds = []) => {
+    setFeedback(message);
+    if (savedIds.length) {
+      setCompletedIds((previous) => new Set([...previous, ...savedIds]));
+      const saved = new Set(savedIds);
+      setSelectedIds((previous) => new Set([...previous].filter((id) => !saved.has(id))));
+    }
+  }, []);
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === items.length && items.length > 0) {
+    if (selectedIds.size === visibleItems.length && visibleItems.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(items.map((item) => item.key)));
+      setSelectedIds(new Set(visibleItems.map((item) => item.key)));
     }
   };
 
@@ -47,11 +74,14 @@ export function BulkSelectManager({ items, bulkActions = [], itemName = "items" 
     }
 
     setIsProcessing(true);
+    setFeedback("");
     try {
-      await actionFn(Array.from(selectedIds), reason);
-      setSelectedIds(new Set());
-    } catch (err) {
-      alert("Failed to perform bulk action: " + err.message);
+      const result = await actionFn(Array.from(selectedIds), reason);
+      if (result?.message) showResult(result.message, result.savedIds);
+      if (Array.isArray(result?.retryIds)) setSelectedIds(new Set(result.retryIds));
+      else if (!result?.message) setSelectedIds(new Set());
+    } catch {
+      setFeedback("The bulk action could not be completed. Try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -60,22 +90,26 @@ export function BulkSelectManager({ items, bulkActions = [], itemName = "items" 
   const hasBulk = bulkActions.length > 0;
 
   return (
+    <QueueFeedbackContext value={showResult}>
     <div className="relative pb-20">
       {/* List */}
       <div className="space-y-3">
-        {items.length > 0 && hasBulk && (
+        <div ref={feedbackRegion} role="status" aria-atomic="true" className={feedback ? "rounded-lg border border-white/10 px-4 py-3 text-sm text-white/90" : "sr-only"}>
+          {feedback}
+        </div>
+        {visibleItems.length > 0 && hasBulk && (
           <div className="flex items-center px-2 py-1 text-sm text-white/70">
             <button
               onClick={toggleSelectAll}
               className="flex items-center gap-2 hover:text-white transition-colors"
             >
               <CheckSquare className="w-4 h-4" />
-              {selectedIds.size === items.length ? "Deselect All" : "Select All"}
+              {selectedIds.size === visibleItems.length ? "Deselect All" : "Select All"}
             </button>
           </div>
         )}
 
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const isSelected = selectedIds.has(item.key);
           return (
             <div key={item.key} className="flex gap-3">
@@ -100,7 +134,7 @@ export function BulkSelectManager({ items, bulkActions = [], itemName = "items" 
           );
         })}
 
-        {items.length === 0 && (
+        {visibleItems.length === 0 && (
           <div className="text-sm text-white/70 bg-[#121212] border border-white/5 rounded-xl p-8 text-center">
             No {itemName} found.
           </div>
@@ -129,5 +163,6 @@ export function BulkSelectManager({ items, bulkActions = [], itemName = "items" 
         </div>
       )}
     </div>
+    </QueueFeedbackContext>
   );
 }

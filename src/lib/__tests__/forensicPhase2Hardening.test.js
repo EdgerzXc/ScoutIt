@@ -8,11 +8,11 @@ describe("Phase 2: Dual-CMS & Moderation Invariants Verification", () => {
   describe("GAP-01: MMC setPropertyArchived and bulkArchiveProperties Dual-CMS Invariants", () => {
     it("updates pipeline_status, unpublishes in Airtable, and invalidates cache", () => {
       const code = read("mission-control/src/app/dashboard/cms/actions.js");
-      expect(code).toContain("pipeline_status: nextValue ? \"archived\" : \"pending\"");
-      expect(code).toContain("lifecycle_state: nextValue ? \"off_market\" : \"draft\"");
-      expect(code).toContain("unpublishPropertyFromAirtable(slug)");
-      expect(code).toContain("pipeline_status: \"archived\"");
-      expect(code).toContain("lifecycle_state: \"off_market\"");
+      const archive = read("mission-control/src/lib/propertyArchive.mjs");
+      expect(archive).toContain('pipeline_status: archive ? "archived" : "pending"');
+      expect(archive).toContain('lifecycle_state: archive ? "off_market" : "draft"');
+      expect(code).toContain("unpublish: unpublishPropertyFromAirtable");
+      expect(code).toContain("logActionStrict");
     });
   });
 

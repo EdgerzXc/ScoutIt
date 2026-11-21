@@ -2,12 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
+import { getCurrentStaff, assertTier, logAction, logActionStrict, TIERS } from "@/lib/rbac";
 import { publishPropertyToAirtable, unpublishPropertyFromAirtable } from "@/lib/airtable";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 import { notifyUser } from "@/lib/notifications";
 import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
+import { changePropertyArchiveState } from "@/lib/propertyArchive.mjs";
 
 /**
  * Approve & Publish — the full publishing loop.
@@ -226,108 +227,118 @@ export async function rejectProperty(formData) {
   revalidatePath("/dashboard/cms");
 }
 
-/**
- * Soft-delete / restore. Requires Tier 2 (Ops Manager) or higher.
- * @param {FormData} formData
- */
-export async function setPropertyArchived(formData) {
+const ARCHIVE_STATE_COLUMNS = ["updated_at", "moderation_status", "pipeline_status", "lifecycle_state"];
+const PROPERTY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const ARCHIVE_FEEDBACK = {
+  archived: "Property archived.",
+  restored: "Property restored to Pending.",
+  cache: "Review status saved. Check the public listing before relying on the cache update.",
+  invalid: "Refresh the queue and select a valid property.",
+  protected: "Use the suspension or retained-removal workflow for this property.",
+  changed: "This property is no longer archived. Refresh the queue.",
+  reference: "Check the Airtable listing reference before retrying.",
+  airtable: "Airtable could not confirm removal. Try again.",
+  supabase: "Could not save the review status. Refresh the queue and try again.",
+  "supabase-after-unpublish": "Airtable confirmed removal. Refresh the queue and retry the review status update.",
+};
+
+async function changeArchiveState({ staff, propertyIds, archive, reason, bulk = false }) {
+  if (!Array.isArray(propertyIds) || !propertyIds.length || propertyIds.length > 50 ||
+      propertyIds.some((id) => typeof id !== "string" || !PROPERTY_ID.test(id)) ||
+      (archive && (!reason || reason.length > 500))) {
+    return { code: "invalid", message: "Choose up to 50 properties and enter a reason of 500 characters or fewer." };
+  }
+
+  const ids = [...new Set(propertyIds.map((id) => id.toLowerCase()))];
+  const admin = createAdminClient();
+  const { data: properties, error } = await admin.from("properties")
+    .select("id, slug, canonical_slug, published_at, permanently_removed_at, updated_at, moderation_status, pipeline_status, lifecycle_state, quietly_open_to_offers")
+    .in("id", ids);
+  if (error || properties?.length !== ids.length) {
+    return { code: "unavailable", message: "Could not verify every selected property. Refresh the queue and try again." };
+  }
+
+  const action = bulk ? "property.bulk_archive" : archive ? "property.archive" : "property.unarchive";
+  const targetId = bulk ? `Multiple (${ids.length})` : ids[0];
+  const audit = { staff, action, targetTable: "properties", targetId, reason };
+  let intentId;
+  try {
+    intentId = await logActionStrict({
+      ...audit,
+      action: `${action}.intent`,
+      metadata: { propertyIds: ids },
+    });
+  } catch {
+    return { code: "audit", message: "Could not record the archive action. Try again." };
+  }
+
+  const now = new Date().toISOString();
+  const outcomes = [];
+  const byId = new Map(properties.map((property) => [property.id, property]));
+  for (const id of ids) {
+    const property = byId.get(id);
+    const result = await changePropertyArchiveState({
+      property, archive, reason, now,
+      unpublish: unpublishPropertyFromAirtable,
+      save: async (updates) => {
+        let query = admin.from("properties").update(updates).eq("id", id);
+        for (const column of ARCHIVE_STATE_COLUMNS) {
+          query = property[column] == null ? query.is(column, null) : query.eq(column, property[column]);
+        }
+        const { data, error } = await query.select("id").maybeSingle();
+        return !error && data?.id === id;
+      },
+    });
+    outcomes.push({ id, ...result });
+  }
+
+  await logAction({
+    ...audit,
+    metadata: { intent_id: intentId, propertyIds: ids, outcomes },
+  });
+  if (bulk) revalidatePath("/dashboard/cms");
+
+  const saved = outcomes.filter(({ stage }) => stage === "saved");
+  const failures = outcomes.filter(({ stage }) => stage !== "saved");
+  const cachePending = saved.filter((outcome) => outcome.cachePending).length;
+  const reconciliation = failures.filter((outcome) => outcome.publicChanged).length;
+  if (!bulk) {
+    const code = reconciliation ? "supabase-after-unpublish" : failures[0]?.stage || (cachePending ? "cache" : archive ? "archived" : "restored");
+    return { message: ARCHIVE_FEEDBACK[code], saved: saved.length > 0 };
+  }
+
+  const messages = [];
+  if (saved.length) messages.push(`Archived ${saved.length} of ${ids.length} selected properties.`);
+  for (const [stage, message] of [
+    ["airtable", "Airtable could not confirm removal. Retry the selected properties."],
+    ["reference", "Check the Airtable listing reference before retrying."],
+    ["protected", "Use the suspension or retained-removal workflow for protected listings."],
+    ["supabase", "Could not save the review status. Refresh and retry."],
+  ]) {
+    const count = failures.filter((outcome) => outcome.stage === stage).length;
+    if (count) messages.push(`${count} ${count === 1 ? "property needs" : "properties need"} attention. ${message}`);
+  }
+  if (reconciliation) messages.push(`Airtable confirmed removal for ${reconciliation}, but the queue update needs a retry.`);
+  if (cachePending) messages.push(`Public cache verification is pending for ${cachePending}.`);
+  return { message: messages.join(" "), retryIds: failures.map(({ id }) => id), savedIds: saved.map(({ id }) => id) };
+}
+
+export async function setPropertyArchived(_previousState, formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
 
   const propertyId = formData.get("propertyId")?.toString();
-  const nextValue = formData.get("nextValue") === "true";
+  const requested = formData.get("nextValue");
   const reason = formData.get("reason")?.toString().trim() || null;
-  if (!propertyId) throw new Error("Missing propertyId.");
-  if (nextValue && !reason) throw new Error("A reason is required to archive a property.");
-
-  const admin = createAdminClient();
-  const { data: prop } = await admin
-    .from("properties")
-    .select("slug, canonical_slug")
-    .eq("id", propertyId)
-    .maybeSingle();
-
-  const { error } = await admin
-    .from("properties")
-    .update({
-      moderation_status: nextValue ? "archived" : "pending",
-      pipeline_status: nextValue ? "archived" : "pending",
-      lifecycle_state: nextValue ? "off_market" : "draft",
-      archived_at: nextValue ? new Date().toISOString() : null,
-      rejection_reason: nextValue ? reason : null,
-    })
-    .eq("id", propertyId);
-  if (error) throw new Error(error.message);
-
-  if (nextValue && prop) {
-    const slug = prop.canonical_slug || prop.slug;
-    if (slug) {
-      try {
-        await unpublishPropertyFromAirtable(slug);
-      } catch (err) {
-        console.warn("[MMC ARCHIVE] Airtable unpublish warning:", err.message);
-      }
-    }
-  }
-
-  await logAction({
-    staff,
-    action: nextValue ? "property.archive" : "property.unarchive",
-    targetTable: "properties",
-    targetId: propertyId,
-    reason,
-  });
-
-  revalidatePath("/dashboard/cms");
+  if (requested !== "true" && requested !== "false") return { message: ARCHIVE_FEEDBACK.invalid };
+  return changeArchiveState({ staff, propertyIds: [propertyId], archive: requested === "true", reason });
 }
 
 export async function bulkArchiveProperties(propertyIds, reason) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
-
-  if (!propertyIds || propertyIds.length === 0) throw new Error("No properties selected.");
-  if (!reason) throw new Error("A reason is required to bulk archive properties.");
-
-  const admin = createAdminClient();
-  const { data: props } = await admin
-    .from("properties")
-    .select("slug, canonical_slug")
-    .in("id", propertyIds);
-
-  const { error } = await admin
-    .from("properties")
-    .update({
-      moderation_status: "archived",
-      pipeline_status: "archived",
-      lifecycle_state: "off_market",
-      archived_at: new Date().toISOString(),
-      rejection_reason: reason,
-    })
-    .in("id", propertyIds);
-  
-  if (error) throw new Error(error.message);
-
-  if (props && props.length > 0) {
-    for (const p of props) {
-      const slug = p.canonical_slug || p.slug;
-      if (slug) {
-        try {
-          await unpublishPropertyFromAirtable(slug);
-        } catch (err) {
-          console.warn("[MMC BULK ARCHIVE] Airtable unpublish warning for", slug, err.message);
-        }
-      }
-    }
-  }
-
-  await logAction({
-    staff,
-    action: "property.bulk_archive",
-    targetTable: "properties",
-    targetId: `Multiple (${propertyIds.length})`,
-    reason,
-    metadata: { propertyIds },
+  return changeArchiveState({
+    staff, propertyIds, archive: true, bulk: true,
+    reason: typeof reason === "string" ? reason.trim() : null,
   });
-
-  revalidatePath("/dashboard/cms");
 }

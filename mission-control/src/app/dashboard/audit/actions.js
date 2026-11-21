@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // called in the same Server Action as the mutation it records.
 import { getCurrentStaff, assertTier, TIERS, logAction } from "@/lib/rbac";
 import { unpublishPropertyFromAirtable, updatePropertyInAirtable } from "@/lib/airtable";
+import { isPropertyArchiveAuditAction } from "@/lib/propertyArchive.mjs";
 
 export async function revertAction(formData) {
   const staff = await getCurrentStaff();
@@ -25,6 +26,9 @@ export async function revertAction(formData) {
   if (error || !targetAction) throw new Error("Action not found or already reverted");
 
   const { target_table, target_id, action, metadata } = targetAction;
+  if (isPropertyArchiveAuditAction(action)) {
+    throw new Error("Use the property review queue to restore an archived listing.");
+  }
   const prevState = metadata?.previous_state;
 
   // Revert target table state based on original action type

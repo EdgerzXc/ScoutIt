@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { approveProperty, rejectProperty, setPropertyArchived, bulkArchiveProperties } from "./actions";
-import { CheckCircle2, XCircle, Archive, ArchiveRestore, MapPin, UploadCloud } from "lucide-react";
+import { approveProperty, rejectProperty, bulkArchiveProperties } from "./actions";
+import { CheckCircle2, XCircle, Archive, MapPin, UploadCloud } from "lucide-react";
 import { BulkSelectManager } from "@/components/dashboard/BulkSelectManager";
 import PropertyEditorPanel from "@/components/dashboard/PropertyEditorPanel";
+import { PropertyArchiveForm } from "./PropertyArchiveForm";
 
 const REJECTION_REASONS = [
   { code: "photos_blurry", label: "Photos too blurry / low quality" },
@@ -69,6 +70,7 @@ export default async function PropertyCmsPage({ searchParams }) {
           <Link
             key={tab.key}
             href={`/dashboard/cms?status=${tab.key}`}
+            prefetch={false}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
               status === tab.key
                 ? "bg-[#E8AE3C] text-black font-medium"
@@ -88,6 +90,7 @@ export default async function PropertyCmsPage({ searchParams }) {
 
       {properties && (
         <BulkSelectManager
+          key={status}
           items={properties.map((p) => ({
             key: p.id,
             content: <PropertyCard property={p} staff={staff} />,
@@ -169,19 +172,7 @@ function PropertyCard({ property: p, staff }) {
           </form>
 
           {canArchive && (
-            <form action={setPropertyArchived}>
-              <input type="hidden" name="propertyId" value={p.id} />
-              <input type="hidden" name="nextValue" value={(!isArchived).toString()} />
-              {!isArchived && <input type="hidden" name="reason" value="Archived via CMS queue" />}
-              <button className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
-                {isArchived ? (
-                  <ArchiveRestore className="w-4 h-4" />
-                ) : (
-                  <Archive className="w-4 h-4" />
-                )}
-                {isArchived ? "Restore to pending" : "Archive"}
-              </button>
-            </form>
+            <PropertyArchiveForm propertyId={p.id} title={p.title} isArchived={isArchived} />
           )}
         </div>
 
