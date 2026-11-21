@@ -49,12 +49,12 @@ afterEach(() => {
   }
 });
 
-async function withdraw() {
+async function withdraw(selection = { submissionId: "property-1" }) {
   const { POST } = await import("@/app/api/dashboard/archive/route");
   const response = await POST(new Request("https://scoutit.space/api/dashboard/archive", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ submissionId: "property-1" }),
+    body: JSON.stringify(selection),
   }));
   return { status: response.status, body: await response.json() };
 }
@@ -80,5 +80,19 @@ describe("U-042 public withdrawal refresh", () => {
     expect(state.unpublish).toHaveBeenCalledTimes(1);
     expect(state.invalidate).toHaveBeenCalledTimes(1);
     errorLog.mockRestore();
+  });
+
+  it("evicts only the Airtable-confirmed withdrawal when a later batch item fails", async () => {
+    state.owned.push({ id: "property-2", owner_id: "owner-1", pipeline_status: "approved", canonical_slug: "still-live" });
+    state.unpublish.mockResolvedValueOnce({ id: "recConfirmed" }).mockRejectedValueOnce(new Error("Airtable unavailable"));
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const result = await withdraw({ propertyIds: ["property-1", "property-2"] });
+      expect(result.status).toBe(502);
+      expect(result.body).toMatchObject({ retryable: true, publicCachePending: false });
+      expect(state.invalidate).toHaveBeenCalledExactlyOnceWith({ withdrawn: [{ slug: "live-property", recordId: "recConfirmed" }] });
+    } finally {
+      errorLog.mockRestore();
+    }
   });
 });

@@ -32,9 +32,23 @@ const expire = vi.fn(async (key, seconds) => {
   return 1;
 });
 const evalScript = vi.fn(async (_script, keys, args) => {
-  if (keys.length === 2) {
+  if (_script.includes("local value")) {
+    const value = await get(keys[0]);
+    return value ? `!${JSON.stringify(value)}` : "";
+  }
+  if (_script.includes("local expected")) {
+    const current = await get(keys[2]);
+    if (args[0] !== "force" && args[0] !== (current ? `!${JSON.stringify(current)}` : "")) return 0;
+    await incr(keys[0]);
+    await del(keys[1]);
+    if (!args[1]) await del(keys[2]);
+    else if (current) entries.get(keys[2]).value = JSON.parse(args[1]);
+    return 1;
+  }
+  if (keys.length === 3) {
     if (String(await get(keys[0]) ?? 0) !== String(args[0])) return 0;
     await set(keys[1], JSON.parse(args[1]), { ex: args[2] });
+    await set(keys[2], JSON.parse(args[1]), { ex: args[3] });
     return 1;
   }
   if ((await get(keys[0])) === args[0]) return del(keys[0]);
@@ -158,7 +172,12 @@ describe("U-042 Free-plan CMS read budget", () => {
     expect(await get(publicCatalogueCacheKey("cms_bundle_last_good"))).toBeTruthy();
 
     const { purgePublicCatalogueCache } = await import("../../../mission-control/src/lib/publicCatalogueCache.js");
-    const redisRest = vi.fn(async (url) => {
+    const redisRest = vi.fn(async (url, options) => {
+      if (options.body) {
+        const [command, script, keyCount, ...parameters] = JSON.parse(options.body);
+        expect(command).toBe("EVAL");
+        return Response.json({ result: await evalScript(script, parameters.slice(0, keyCount), parameters.slice(keyCount)) });
+      }
       const [, command, argument] = new URL(url).pathname.split("/");
       const key = decodeURIComponent(argument);
       const result = command === "incr" ? await incr(key) : await del(key);
@@ -168,11 +187,35 @@ describe("U-042 Free-plan CMS read budget", () => {
     expect(await purgePublicCatalogueCache()).toMatchObject({ purged: true });
     expect(await get(publicCatalogueCacheKey("cms_bundle"))).toBeNull();
     expect(await get(publicCatalogueCacheKey("cms_bundle_generation"))).toBe(1);
+    expect(await purgePublicCatalogueCache({ withdrawn: [{ recordId: "rec-preview" }] })).toMatchObject({ purged: true });
+    expect((await get(publicCatalogueCacheKey("cms_bundle_last_good"))).properties).toEqual([]);
     expect(await invalidateCmsBundle()).toMatchObject({ sharedCachePurged: true });
-    expect(await get(publicCatalogueCacheKey("cms_bundle_generation"))).toBe(2);
+    expect(await get(publicCatalogueCacheKey("cms_bundle_generation"))).toBe(3);
     expect(await get(publicCatalogueCacheKey("cms_publisher_rebuild_until"))).toBeTruthy();
     expect(await get("cms_bundle")).toEqual(snapshot);
     expect([...entries.keys()].filter((key) => key.startsWith("cms_"))).toEqual(productionKeys);
+  });
+
+  it("removes only the confirmed withdrawal from last-good when the quota is exhausted", async () => {
+    const { getCmsBundle, invalidateCmsBundle } = await import("@/lib/cmsCache");
+    fetchProperties.mockResolvedValueOnce([
+      { id: "recWithdrawn", slug: "withdrawn" },
+      { id: "recRetained", slug: "retained", photos: [] },
+    ]);
+    fetchHomepageConfig.mockResolvedValueOnce({ featuredProperties: ["recWithdrawn", "recRetained"] });
+    await getCmsBundle();
+    const expiry = entries.get("cms_bundle_last_good").expiresAt;
+    const budget = await import("@/lib/airtableBudget");
+    await budget.recordAirtableCall(1_000);
+
+    expect(await invalidateCmsBundle({ withdrawn: [{ slug: "withdrawn" }] })).toEqual({ sharedCachePurged: true });
+    const fallback = await getCmsBundle();
+    expect(fallback.source).toBe("stale_monthly_budget");
+    expect(fallback.properties.map(({ slug }) => slug)).toEqual(["retained"]);
+    expect(fallback.properties[0].photos).toEqual([]);
+    expect(fallback.homepage.featuredProperties).toEqual(["recRetained"]);
+    expect(entries.get("cms_bundle_last_good").expiresAt).toBe(expiry);
+    expect(fetchProperties).toHaveBeenCalledTimes(1);
   });
 
   it("scopes the same Preview key independently by target, Airtable base and Supabase host", async () => {
@@ -217,7 +260,37 @@ describe("U-042 Free-plan CMS read budget", () => {
 
     expect((await pending).source).toBe("empty_fallback_on_error");
     expect(await get("cms_bundle")).toBeNull();
+    expect(await get("cms_bundle_last_good")).toBeNull();
     vi.restoreAllMocks();
+  });
+
+  it("rejects a concurrent stale write and rebuilds from the cleaned fallback when properties are unavailable", async () => {
+    const reader = await import("@/lib/cmsCache");
+    fetchProperties.mockResolvedValueOnce([{ id: "rec1", slug: "withdrawn" }, { id: "rec2", slug: "retained" }]);
+    await reader.getCmsBundle();
+    await del("cms_bundle");
+    vi.advanceTimersByTime(61_000);
+
+    let finishProperties;
+    fetchProperties.mockImplementationOnce(() => new Promise((resolve) => { finishProperties = resolve; }));
+    const pending = reader.getCmsBundle();
+    for (let tick = 0; tick < 16 && !finishProperties; tick += 1) await Promise.resolve();
+    expect(finishProperties).toBeTypeOf("function");
+
+    vi.resetModules();
+    const writer = await import("@/lib/cmsCache");
+    await writer.invalidateCmsBundle({ withdrawn: [{ slug: "withdrawn" }] });
+    finishProperties([{ id: "rec1", slug: "withdrawn" }]);
+    const warning = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect((await pending).properties.map(({ slug }) => slug)).toEqual(["retained"]);
+    expect(await get("cms_bundle")).toBeNull();
+    warning.mockRestore();
+
+    fetchProperties.mockRejectedValueOnce(new Error("Airtable properties unavailable"));
+    const degraded = await writer.getCmsBundle();
+    expect(degraded.source).toBe("airtable_partial_degraded");
+    expect(degraded.properties.map(({ slug }) => slug)).toEqual(["retained"]);
+    expect((await get("cms_bundle_last_good")).properties.map(({ slug }) => slug)).toEqual(["retained"]);
   });
 
   it("waits for another instance's rebuild instead of fanning out to Airtable", async () => {

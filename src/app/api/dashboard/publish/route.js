@@ -163,6 +163,7 @@ export async function POST(request) {
     const activeLiveProperties = (liveRows || []).filter((r) => r.id !== submissionId);
     const currentActiveCount = activeLiveProperties.length;
     let toSwap = null;
+    const withdrawn = [];
 
     if (currentActiveCount >= cap) {
       if (!swapWithPropertyId) {
@@ -294,7 +295,8 @@ export async function POST(request) {
           const swapSlug = toSwap.canonical_slug || toSwap.slug;
           if (swapSlug) {
             try {
-              await updateProperty(apiKey, baseId, swapSlug, { approved_for_scoutit: false });
+              const record = await updateProperty(apiKey, baseId, swapSlug, { approved_for_scoutit: false });
+              withdrawn.push({ slug: swapSlug, recordId: record?.id });
             } catch (swapAirtableErr) {
               console.error("[PUBLISH SWAP] Airtable unpublish failed for swapped property:", swapAirtableErr);
             }
@@ -323,7 +325,7 @@ export async function POST(request) {
     // public refresh to the owner.
     let publicCachePending = false;
     try {
-      const purge = await invalidateCmsBundle();
+      const purge = await invalidateCmsBundle({ withdrawn });
       publicCachePending = purge.sharedCachePurged === false;
     } catch (cacheError) {
       console.error("[PUBLISH] Catalogue cache purge failed after publication:", cacheError?.message);

@@ -28,7 +28,7 @@ import { CITY_HUB } from "@/lib/transit";
 import { DEFAULT_LIVE_CMS_URL, normalizeLiveCmsBundle } from "@/lib/cmsFallback";
 import { normalizeSampleBundle } from "@/lib/sampleInventory";
 import { getServerMapboxToken } from "@/lib/mapboxToken";
-import { publicCatalogueCacheKey } from "@/lib/publicCatalogueCacheKey.mjs";
+import { evictWithdrawnCatalogueEntries, publicCatalogueCacheKey } from "@/lib/publicCatalogueCacheKey.mjs";
 import {
   PUBLISHED_BRIEFING_FILTER,
   isPublishedBriefing,
@@ -64,12 +64,12 @@ const CMS_GENERATION_KEY = publicCatalogueCacheKey("cms_bundle_generation");
 // spent monthly budget has something real to serve instead of an empty site.
 const CMS_LAST_GOOD_KEY = publicCatalogueCacheKey("cms_bundle_last_good");
 const CMS_LAST_GOOD_TTL_S = 60 * 60 * 24 * 40;
-// For how long an explicit publish/takedown may still spend budgeted calls.
 const PUBLISHER_REBUILD_WINDOW_MS = 10 * 60 * 1000;
 export const CMS_PUBLISHER_REBUILD_KEY = publicCatalogueCacheKey("cms_publisher_rebuild_until");
 const WRITE_CURRENT_BUNDLE_SCRIPT = `
   if (redis.call('GET', KEYS[1]) or '0') ~= ARGV[1] then return 0 end
   redis.call('SET', KEYS[2], ARGV[2], 'EX', tonumber(ARGV[3]))
+  redis.call('SET', KEYS[3], ARGV[2], 'EX', tonumber(ARGV[4]))
   return 1
 `;
 const RELEASE_OWN_LOCK_SCRIPT = `
@@ -89,9 +89,6 @@ const EMPTY_BUNDLE = {
 let cache = { bundle: null, fetchedAt: 0 };
 let inflight = null; // dedupe concurrent rebuilds into one Airtable fan-out
 let lastMonthlyLimitLogAt = 0;
-// Set by invalidateCmsBundle: for a short window after a publish or takedown,
-// a rebuild bypasses the budget guard. Owner content going live - or being
-// withdrawn - always outranks conserving a capped month of API calls.
 let publisherRebuildUntil = 0;
 let lastBudgetGuardLogAt = 0;
 
@@ -122,20 +119,22 @@ export function _setTableCacheForTesting(partial) {
   tableCache = { ...tableCache, ...partial };
 }
 
-export async function invalidateCmsBundle() {
+export async function invalidateCmsBundle({ withdrawn = [] } = {}) {
   // Do not let a rebuild that started before the publish repopulate the cache
   // after invalidation. Wait for it, then clear both cache layers.
   if (inflight) await inflight.catch(() => null);
   cache = { bundle: null, fetchedAt: 0 };
+  if (withdrawn.length) tableCache.properties = null;
   if (redis) {
     // Increment before deletion. A rebuild started on another instance must
     // not repopulate an older snapshot after an owner withdraws a listing.
-    await redis.incr(CMS_GENERATION_KEY);
-    await redis.del(CMS_BUNDLE_KEY);
-    // A publish or takedown is an explicit instruction to be fresh now. Let the
-    // rebuild it triggers draw from the monthly budget regardless of the guard.
-    // A-307: Budget-aware publisher window. Only grant the rebuild window
-    // if the monthly budget is not already exhausted.
+    if (withdrawn.length) {
+      await evictWithdrawnCatalogueEntries((script, keys, args) => redis.eval(script, keys, args), withdrawn);
+    } else {
+      await redis.incr(CMS_GENERATION_KEY);
+      await redis.del(CMS_BUNDLE_KEY);
+    }
+    // Record the publish window only while Airtable quota remains.
     const budget = await getAirtableBudgetStatus().catch(() => ({ exhausted: false }));
     if (!budget.exhausted) {
       publisherRebuildUntil = Date.now() + PUBLISHER_REBUILD_WINDOW_MS;
@@ -185,8 +184,9 @@ async function buildSharedBundle() {
 
   try {
     const BUILD_TIMEOUT_MS = 25000;
+    const lastGood = await redis.get(CMS_LAST_GOOD_KEY);
     const rawBundle = await Promise.race([
-      buildBundle(),
+      buildBundle(lastGood?.properties ?? null),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("CMS build exceeded deadline (25s)")), BUILD_TIMEOUT_MS)
       ),
@@ -196,18 +196,9 @@ async function buildSharedBundle() {
     // SET lets a withdrawal land between them and leaves old data for 12h.
     const stored = await redis.eval(
       WRITE_CURRENT_BUNDLE_SCRIPT,
-      [CMS_GENERATION_KEY, CMS_BUNDLE_KEY],
-      [String(generation ?? 0), JSON.stringify(bundle), CMS_SHARED_TTL_S],
+      [CMS_GENERATION_KEY, CMS_BUNDLE_KEY, CMS_LAST_GOOD_KEY],
+      [String(generation ?? 0), JSON.stringify(bundle), CMS_SHARED_TTL_S, CMS_LAST_GOOD_TTL_S],
     );
-    if (Number(stored) === 1) {
-      // Keep a long-lived copy the monthly-budget guard can fall back on after
-      // the 12-hour snapshot key itself has expired.
-      try {
-        await redis.set(CMS_LAST_GOOD_KEY, bundle, { ex: CMS_LAST_GOOD_TTL_S });
-      } catch (err) {
-        console.error("[CMS] Could not store last-good snapshot:", err.message);
-      }
-    }
     if (Number(stored) !== 1) {
       throw new Error("CMS changed during rebuild; retry on the next request");
     }
@@ -314,7 +305,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
-async function buildBundle() {
+async function buildBundle(fallbackProperties = tableCache.properties || cache.bundle?.properties || null) {
   const apiKey = process.env.AIRTABLE_API_KEY;
   const baseId = process.env.AIRTABLE_BASE_ID;
 
@@ -341,7 +332,7 @@ async function buildBundle() {
     fetchHomepageConfig(apiKey, baseId, readOptions),
   ]);
 
-  let properties = propRes.status === "fulfilled" ? propRes.value : (tableCache.properties || cache.bundle?.properties || null);
+  let properties = propRes.status === "fulfilled" ? propRes.value : fallbackProperties;
   let intel = intelRes.status === "fulfilled" ? intelRes.value : (tableCache.intel || cache.bundle?.intel || []);
   let brokers = brokerRes.status === "fulfilled" ? brokerRes.value : (tableCache.brokers || cache.bundle?.brokers || []);
   let homepage = homeRes.status === "fulfilled" ? homeRes.value : (tableCache.homepage || cache.bundle?.homepage || null);
@@ -453,20 +444,12 @@ export async function getCmsBundle() {
     }
   }
 
-  // A spent monthly budget must not take the site down (U-042). A routine
-  // TTL-expiry refresh serves the last good snapshot rather than spending calls
-  // Airtable will only reject. The rebuild that a publish or takedown triggers
-  // bypasses this, so owner content always reaches the public base.
-  // A-307: Budget-aware publisher window.
-  // A spent monthly budget must not make additional Airtable calls even after a publish.
-  // When budget is exhausted, serve the last good snapshot immediately without extra calls.
+  // A verified exhausted quota allows only the shared last-good snapshot.
+  // A cold request without that snapshot reports the catalogue outage.
   const budget = await getAirtableBudgetStatus().catch(() => ({ exhausted: false }));
   if (budget?.exhausted) {
     try {
-      let lastGood = redis ? await redis.get(CMS_LAST_GOOD_KEY) : null;
-      if (!lastGood && cache.bundle) {
-        lastGood = cache.bundle;
-      }
+      const lastGood = redis ? await redis.get(CMS_LAST_GOOD_KEY) : null;
       if (lastGood) {
         const bundle = normalizeSampleBundle(lastGood);
         cache = { bundle, fetchedAt: Date.now() };
@@ -493,6 +476,7 @@ export async function getCmsBundle() {
     } catch (err) {
       console.error("[CMS] Budget guard could not read the last-good snapshot:", err.message);
     }
+    return { ...EMPTY_BUNDLE, source: "empty_fallback_on_error" };
   }
 
   let isPublisherRebuild = Date.now() < publisherRebuildUntil;
@@ -523,9 +507,18 @@ export async function getCmsBundle() {
         console.error("[CMS] Airtable fetch failed:", error.message);
         if (error?.code === "AIRTABLE_MONTHLY_LIMIT") lastMonthlyLimitLogAt = Date.now();
       }
-      // A brief upstream wobble may use the last good in-process bundle.
-      // A monthly outage must not keep withdrawn inventory alive indefinitely
-      // on an instance whose Redis copy has already been invalidated.
+      if (redis) {
+        try {
+          const lastGood = await redis.get(CMS_LAST_GOOD_KEY);
+          if (lastGood) return { ...normalizeSampleBundle(lastGood), source: "stale_rebuild_error" };
+          if (await redis.get(CMS_GENERATION_KEY) !== null) {
+            return { ...EMPTY_BUNDLE, source: "empty_fallback_on_error" };
+          }
+        } catch {
+          // A Redis outage may still use the bounded in-process fallback below.
+        }
+      }
+      // Bound local fallback when the shared store cannot confirm a snapshot.
       if (cache.bundle && Date.now() - cache.fetchedAt <= MAX_STALE_AGE_MS) {
         return { ...normalizeSampleBundle(cache.bundle), source: `${cache.bundle.source}_stale` };
       }

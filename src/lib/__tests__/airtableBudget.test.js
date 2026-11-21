@@ -41,9 +41,10 @@ const expire = vi.fn(async (key, seconds) => {
   return 1;
 });
 const evalScript = vi.fn(async (_script, keys, args) => {
-  if (keys.length === 2) {
+  if (keys.length === 3) {
     if (String(await get(keys[0]) ?? 0) !== String(args[0])) return 0;
     await set(keys[1], JSON.parse(args[1]), { ex: args[2] });
+    await set(keys[2], JSON.parse(args[1]), { ex: args[3] });
     return 1;
   }
   if ((await get(keys[0])) === args[0]) return del(keys[0]);
@@ -155,7 +156,7 @@ describe("U-042 Airtable monthly call budget", () => {
     }));
   });
 
-  it("serves last-good without extra calls after a publish or takedown when the budget is spent (A-307)", async () => {
+  it("serves last-good without extra calls after a publication refresh when the budget is spent (A-307)", async () => {
     const { getCmsBundle, invalidateCmsBundle } = await import("@/lib/cmsCache");
     await getCmsBundle();
     await flush();

@@ -246,7 +246,8 @@ export async function unpublishPropertyFromAirtable(slug) {
 
   const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
   if (!recordId) {
-    return { recordId: null, cache: null };
+    const cache = await purgePublicCatalogueCache({ withdrawn: [{ slug }] });
+    return { recordId: null, cache };
   }
 
   const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
@@ -263,7 +264,7 @@ export async function unpublishPropertyFromAirtable(slug) {
     throw new Error(`Airtable unpublish failed: ${res.status} ${errText}`);
   }
 
-  const cache = await purgePublicCatalogueCache();
+  const cache = await purgePublicCatalogueCache({ withdrawn: [{ slug, recordId }] });
   return { recordId, cache };
 }
 

@@ -43,9 +43,9 @@ async function recordRemovalAudit({ property, actorId, fromState, reason, timest
 
 // Removal is already committed by the time this runs. Return an unconfirmed
 // public refresh to the owner without inviting a retry of a destructive write.
-async function purgePublicCatalogue() {
+async function purgePublicCatalogue(withdrawn) {
   try {
-    const purge = await invalidateCmsBundle();
+    const purge = await invalidateCmsBundle({ withdrawn });
     return purge.sharedCachePurged === false;
   } catch (cacheError) {
     console.error("[REMOVE API] Catalogue cache purge failed after removal:", cacheError?.message);
@@ -86,14 +86,13 @@ export async function POST(request) {
     if (property.owner_id !== userId) return NextResponse.json({ error: "Unauthorized: You do not own this property" }, { status: 403 });
     if (!exactTitleMatches(confirmationTitle, property.title)) return NextResponse.json({ error: "Type the exact property title to continue" }, { status: 400 });
     const state = normalizeLifecycleState(property);
+    const slug = property.canonical_slug || property.slug;
     if (isPermanentlyRemoved(property)) {
+      const publicCachePending = await purgePublicCatalogue(slug ? [{ slug }] : []);
       const { error: auditError } = await recordRemovalAudit({ property, actorId: userId, fromState: state, reason, metadata: { idempotent_repair: true } });
       if (auditError) {
-        return NextResponse.json({ error: "Retained removal audit evidence needs reconciliation", retryable: true }, { status: 500 });
+        return NextResponse.json({ error: "Retained removal audit evidence needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
       }
-      // Purged here too: an idempotent repair means the row was already
-      // removed, but a cached bundle may still be serving it.
-      const publicCachePending = await purgePublicCatalogue();
 
       return NextResponse.json({ success: true, state: PROPERTY_LIFECYCLE_STATES.PERMANENTLY_REMOVED, retained: true, reservedSlug: property.canonical_slug || property.slug, idempotent: true, publicCachePending });
     }
@@ -121,12 +120,13 @@ export async function POST(request) {
     // record: it remains the historical/public-CMS record with approval false.
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
+    const withdrawn = state === PROPERTY_LIFECYCLE_STATES.OFF_MARKET && slug ? [{ slug }] : [];
     if (state === PROPERTY_LIFECYCLE_STATES.LIVE) {
-      const slug = property.canonical_slug || property.slug;
       if (!apiKey || !baseId) return NextResponse.json({ error: "Removal is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
       if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
       try {
-        await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+        const record = await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+        withdrawn.push({ slug, recordId: record?.id });
       } catch (error) {
         console.error("[REMOVE API] Airtable unpublish failed:", error);
         return NextResponse.json({ error: "Airtable unpublish failed; no removal was recorded", retryable: true }, { status: 502 });
@@ -141,13 +141,13 @@ export async function POST(request) {
       .eq("owner_id", userId)
       .select("id, canonical_slug, slug, lifecycle_state, pipeline_status, permanently_removed_at");
     if (updateError || !updated?.length) {
-      const publicCachePending = await purgePublicCatalogue();
+      const publicCachePending = await purgePublicCatalogue(withdrawn);
       return NextResponse.json({ error: "Public listing was unpublished, but retained removal needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
     }
 
     // Clear the public snapshot before the audit write; an audit failure must
     // not leave a listing visible after Airtable approval was withdrawn.
-    const publicCachePending = await purgePublicCatalogue();
+    const publicCachePending = await purgePublicCatalogue(withdrawn);
 
     const { error: auditError } = await supabaseAdmin.from("property_lifecycle_events").insert({
       property_id: submissionId,

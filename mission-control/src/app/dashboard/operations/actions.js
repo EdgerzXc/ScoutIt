@@ -289,7 +289,8 @@ export async function reconcileLifecycleCandidate(previousState, formData) {
     const result = decision === "restore_live"
       ? await restoreReviewedPublicLifecycle({ airtableRecordId, expectedReviewHash: reviewHash, actorId: staff.id, reason: input.reason })
       : await unpublishReviewedAirtableRecord({ airtableRecordId, expectedReviewHash: reviewHash });
-    const cache = await purgePublicCatalogueCache();
+    const withdrawn = decision === "unpublish" ? [{ slug: result.slug, recordId: airtableRecordId }] : [];
+    const cache = await purgePublicCatalogueCache({ withdrawn });
     await logActionStrict({ staff, action: `property.lifecycle_reconciliation.${decision}.complete`, targetTable: "properties", targetId: result.after?.propertyId || result.propertyId || airtableRecordId, reason: input.reason, metadata: { intent_id: intentId, operation_id: LIFECYCLE_RECONCILIATION_OPERATION.id, review_hash: reviewHash, decision, slug: result.after?.slug || result.slug } });
     revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/cms"); revalidatePath("/dashboard/audit");
     return { ok: true, message: `${decision === "restore_live" ? "Supabase lifecycle, canonical slug, routing, and Airtable visibility now verify together." : "The drifted Airtable record was unpublished and verified."}${cache.purged ? "" : ` Public cache purge needs attention: ${cache.detail}`}` };

@@ -12,9 +12,9 @@ const schema = z.object({
   submissionId: z.string().optional(),
 }).refine((value) => value.propertyIds?.length || value.submissionId, { message: "At least one property is required" });
 
-async function purgePublicCatalogue() {
+async function purgePublicCatalogue(withdrawn) {
   try {
-    const purge = await invalidateCmsBundle();
+    const purge = await invalidateCmsBundle({ withdrawn });
     return purge.sharedCachePurged === false;
   } catch (cacheError) {
     console.error("[ARCHIVE] Catalogue cache purge failed after withdrawal:", cacheError?.message);
@@ -53,18 +53,26 @@ export async function POST(request) {
     // approved CMS record remains the only known public state.
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
+    const withdrawn = owned
+      .filter((property) => normalizeLifecycleState(property) === PROPERTY_LIFECYCLE_STATES.OFF_MARKET)
+      .map((property) => ({ slug: property.canonical_slug || property.slug }))
+      .filter(({ slug }) => slug);
     if (apiKey && baseId) {
       for (const property of owned) {
         const state = normalizeLifecycleState(property);
         if (state !== PROPERTY_LIFECYCLE_STATES.LIVE) continue;
         const slug = property.canonical_slug || property.slug;
-        if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
+        if (!slug) {
+          const publicCachePending = await purgePublicCatalogue(withdrawn);
+          return NextResponse.json({ error: "Live property is missing its canonical slug", publicCachePending }, { status: 409 });
+        }
         try {
-          await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+          const record = await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+          withdrawn.push({ slug, recordId: record?.id });
         } catch (error) {
           console.error("[WITHDRAW API] Airtable unpublish failed:", error);
           // Earlier records in this batch may already be unpublished.
-          const publicCachePending = await purgePublicCatalogue();
+          const publicCachePending = await purgePublicCatalogue(withdrawn);
           return NextResponse.json({ error: "Airtable unpublish failed; check the selected listings before retrying", retryable: true, publicCachePending }, { status: 502 });
         }
       }
@@ -88,13 +96,13 @@ export async function POST(request) {
       .select("id, canonical_slug, slug, lifecycle_state, pipeline_status, quietly_open_to_offers");
     if (updateError) {
       console.error("[WITHDRAW API] Supabase lifecycle update failed:", updateError);
-      const publicCachePending = await purgePublicCatalogue();
+      const publicCachePending = await purgePublicCatalogue(withdrawn);
       return NextResponse.json({ error: "Public listing was unpublished, but lifecycle state needs reconciliation", retryable: true, publicCachePending }, { status: 500 });
     }
 
     // Purge before the audit write so an audit failure cannot leave a
     // withdrawn listing in the twelve-hour public snapshot.
-    const publicCachePending = await purgePublicCatalogue();
+    const publicCachePending = await purgePublicCatalogue(withdrawn);
 
     const events = owned.map((property) => ({
       property_id: property.id,

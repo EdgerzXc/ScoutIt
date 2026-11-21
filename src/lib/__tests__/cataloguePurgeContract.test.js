@@ -22,7 +22,7 @@ describe("A-054 public catalogue purge on takedown", () => {
       expect(source, `${name} (${path}) does not import the purge`)
         .toContain('invalidateCmsBundle } from "@/lib/cmsCache"');
       expect(source, `${name} (${path}) never calls the purge`)
-        .toMatch(/invalidateCmsBundle\(\)|purgePublicCatalogue\(\)/);
+        .toMatch(/invalidateCmsBundle\(|purgePublicCatalogue\(/);
     }
   });
 
@@ -37,7 +37,7 @@ describe("A-054 public catalogue purge on takedown", () => {
       const source = read(path);
       const firstUpdate = source.indexOf(".update(");
       const callSites = [];
-      const pattern = /await (?:invalidateCmsBundle|purgePublicCatalogue)\(\)/g;
+      const pattern = /await (?:invalidateCmsBundle|purgePublicCatalogue)\(/g;
       for (let m = pattern.exec(source); m; m = pattern.exec(source)) callSites.push(m.index);
 
       expect(callSites.length, `${name} has no awaited purge`).toBeGreaterThan(0);
@@ -66,7 +66,7 @@ describe("A-054 public catalogue purge on takedown", () => {
   it("removes both cache layers and waits out an in-flight rebuild", () => {
     // A rebuild that started before the takedown would otherwise repopulate
     // the cache with the pre-takedown bundle immediately after it is cleared.
-    expect(cmsCache).toContain("export async function invalidateCmsBundle()");
+    expect(cmsCache).toContain("export async function invalidateCmsBundle(");
     expect(cmsCache).toContain("if (inflight) await inflight.catch(() => null);");
     expect(cmsCache).toContain("cache = { bundle: null, fetchedAt: 0 };");
     expect(cmsCache).toContain('CMS_BUNDLE_KEY = publicCatalogueCacheKey("cms_bundle")');
@@ -75,7 +75,7 @@ describe("A-054 public catalogue purge on takedown", () => {
 
   it("purges the retained-removal path, not only the idempotent repair", () => {
     const remove = read("src/app/api/dashboard/delete/route.js");
-    const calls = remove.match(/await purgePublicCatalogue\(\)/g) || [];
+    const calls = remove.match(/await purgePublicCatalogue\(/g) || [];
     // One for the idempotent repair branch, one for the real removal.
     expect(calls.length).toBeGreaterThanOrEqual(2);
   });

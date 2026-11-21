@@ -583,8 +583,8 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
       const slug = property.canonical_slug || property.slug;
       if (slug) {
         try {
-          await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
-          await invalidateCmsBundle().catch(() => {});
+          const record = await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+          await invalidateCmsBundle({ withdrawn: [{ slug, recordId: record?.id }] }).catch(() => {});
         } catch (airtableErr) {
           console.warn("[PROPERTY CLAIM] Airtable unpublish during off-market cap fallback warning:", airtableErr?.message);
         }

@@ -1,5 +1,5 @@
 import "server-only";
-import { publicCatalogueCacheKey } from "./publicCatalogueCacheKey.mjs";
+import { evictWithdrawnCatalogueEntries, publicCatalogueCacheKey } from "./publicCatalogueCacheKey.mjs";
 
 /**
  * A-060 — let Mission Control drop the public catalogue cache.
@@ -35,7 +35,7 @@ const CMS_GENERATION_KEY = "cms_bundle_generation";
  *
  * @returns {Promise<{purged: boolean, detail: string}>}
  */
-export async function purgePublicCatalogueCache() {
+export async function purgePublicCatalogueCache({ withdrawn = [] } = {}) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -50,6 +50,24 @@ export async function purgePublicCatalogueCache() {
 
   try {
     const baseUrl = url.replace(/\/$/, "");
+    if (withdrawn.length) {
+      await evictWithdrawnCatalogueEntries(async (script, keys, args) => {
+        const response = await fetch(baseUrl, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify(["EVAL", script, keys.length, ...keys, ...args]),
+          cache: "no-store",
+          redirect: "error",
+          signal: AbortSignal.timeout(2_500),
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || payload?.error || payload?.result === undefined) {
+          throw new Error(`Upstash refused the withdrawal purge (${response.status}).`);
+        }
+        return payload.result;
+      }, withdrawn);
+      return { purged: true, detail: "Withdrawn properties cleared from the public catalogue cache." };
+    }
     const generationKey = encodeURIComponent(publicCatalogueCacheKey(CMS_GENERATION_KEY));
     const bundleKey = encodeURIComponent(publicCatalogueCacheKey(CMS_BUNDLE_KEY));
     const generation = await fetch(`${baseUrl}/incr/${generationKey}`, {

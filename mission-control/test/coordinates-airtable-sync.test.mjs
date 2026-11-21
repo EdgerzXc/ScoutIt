@@ -98,6 +98,5 @@ test("publishing from Mission Control carries the pin", () => {
 });
 
 test("an unreachable cache never throws over a correction that already landed", () => {
-  assert.match(cache, /catch \(err\)/);
-  assert.doesNotMatch(cache, /throw new Error/);
+  assert.match(cache, /catch \(err\) \{\s*return \{ purged: false/);
 });
