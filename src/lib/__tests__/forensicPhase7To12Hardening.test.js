@@ -241,8 +241,11 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
 
     test("GAP-41: purge-chat-messages enforces 24h DISPUTE_RESOLUTION_GRACE_MS after dispute closure", () => {
       const content = read("src/app/api/cron/purge-chat-messages/route.js");
-      expect(content).toContain("DISPUTE_RESOLUTION_GRACE_MS = 24 * 60 * 60 * 1000");
-      expect(content).toContain("nowMs - resolvedTs < DISPUTE_RESOLUTION_GRACE_MS");
+      const retention = read("src/lib/chatRetention.js");
+      const sql = read("supabase/migrations/20261114000001_serialize_chat_retention.sql");
+      expect(retention).toContain("DISPUTE_RESOLUTION_GRACE_MS = 24 * 60 * 60 * 1000");
+      expect(content).toContain("p_grace_cutoff: new Date(now - DISPUTE_RESOLUTION_GRACE_MS)");
+      expect(sql).toContain("coalesce(h.resolved_at, h.updated_at) > p_grace_cutoff");
     });
 
     test("GAP-46, GAP-61, GAP-62 & GAP-63: serverBehavioralScoring supports direct owner deals, notifies counterparties, and syncs dispute state", () => {

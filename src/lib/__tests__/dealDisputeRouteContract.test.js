@@ -13,25 +13,10 @@ const readCode = () =>
     .replace(/^\s*\/\/.*$/gm, "");
 
 
-// Extract just the object literal passed to .insert({ ... }) by matching
-// braces. Slicing to end-of-file instead lets text that appears LATER in the
-// file satisfy an assertion about the insert — which is how the missing
-// hold_placed_at mutation survived the first time.
-function insertObject() {
-  const code = readCode();
-  const start = code.indexOf(".insert({");
-  if (start === -1) return null;
-  const open = code.indexOf("{", start);
-  let depth = 0;
-  for (let i = open; i < code.length; i += 1) {
-    if (code[i] === "{") depth += 1;
-    if (code[i] === "}") {
-      depth -= 1;
-      if (depth === 0) return code.slice(open, i + 1);
-    }
-  }
-  return null;
-}
+const holdMigration = () => readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20261114000001_serialize_chat_retention.sql"),
+  "utf8",
+);
 
 // ─────────────────────────────────────────────────────────────────────────
 // A-041. `deal_disputes` and the purge exemption both existed, correctly, and
@@ -57,7 +42,7 @@ describe("A-041 dispute filing route", () => {
     const code = readCode();
     expect(code).toContain("resolveUserId(request)");
     expect(code).toContain("reporter_id: userId");
-    expect(code).not.toMatch(/reporter_id:\s*(?:body|validated|payload)\./);
+    expect(code).not.toMatch(/p_reporter_id:\s*(?:body|validated|payload)\./);
   });
 
   it("refuses an unauthenticated caller before touching the database", () => {
@@ -76,18 +61,14 @@ describe("A-041 dispute filing route", () => {
     expect(code).toMatch(/if \(!isParty\)[\s\S]{0,120}403/);
   });
 
-  it("places the hold in the same insert that files the dispute", () => {
-    // The insert object is extracted by brace-matching rather than sliced to
-    // end-of-file. A slice to EOF also contains the audit metadata, which
-    // mentions hold_placed_at too — so deleting it from the insert still
-    // "passed". That mutation was watched surviving before this was fixed.
-    const insert = insertObject();
-    expect(insert).not.toBeNull();
-    expect(insert).toContain("hold_placed_at");
-    // The status is the shared constant, deliberately not a literal: a second
-    // literal here is free to drift away from the purge job's exemption list.
-    expect(insert).toContain("status: INITIAL_DISPUTE_STATUS");
-    expect(insert).not.toMatch(/status:\s*["']/);
+  it("places the hold through the service transaction that locks the deal", () => {
+    const code = readCode();
+    expect(code).toContain('rpc("file_deal_dispute_hold"');
+    expect(code).toContain("p_status: INITIAL_DISPUTE_STATUS");
+    const sql = holdMigration();
+    expect(sql).toContain("WHERE id = p_deal_id FOR UPDATE");
+    expect(sql).toContain("VALUES (p_deal_id, p_reporter_id, p_reason, p_details, p_status)");
+    expect(sql).toContain("RETURNING id, hold_placed_at");
   });
 
   it("never accepts the status or the hold timestamp from the caller", () => {

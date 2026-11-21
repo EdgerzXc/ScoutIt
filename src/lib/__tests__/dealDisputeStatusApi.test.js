@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { GET } from "@/app/api/deals/[id]/dispute/route";
+import { GET, POST } from "@/app/api/deals/[id]/dispute/route";
 import * as serverAuth from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { notifyUser } from "@/lib/notifications";
+import { recordSystemEvent } from "@/lib/systemEvents";
 
 vi.mock("@/lib/serverAuth", () => ({ resolveUserId: vi.fn() }));
-vi.mock("@/lib/supabaseAdmin", () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock("@/lib/supabaseAdmin", () => ({ supabaseAdmin: { from: vi.fn(), rpc: vi.fn() } }));
+vi.mock("@/lib/notifications", () => ({ notifyUser: vi.fn() }));
+vi.mock("@/lib/systemEvents", () => ({ recordSystemEvent: vi.fn() }));
 
 // ─────────────────────────────────────────────────────────────────────────
 // A-045 requires "confirmation that it was filed, and a way to see its state".
@@ -143,5 +147,48 @@ describe("GET /api/deals/[id]/dispute", () => {
     vi.spyOn(serverAuth, "resolveUserId").mockResolvedValue("buyer-1");
     installDatabase({ deal: null });
     expect((await call("nope")).status).toBe(404);
+  });
+});
+
+describe("POST /api/deals/[id]/dispute", () => {
+  function submit(actor) {
+    serverAuth.resolveUserId.mockResolvedValue(actor);
+    return POST(new Request("https://www.scoutit.space/api/deals/deal-1/dispute", {
+      method: "POST",
+      body: JSON.stringify({ reason: "other", reporter_id: "caller-supplied-id", status: "resolved" }),
+      headers: { "Content-Type": "application/json" },
+    }), { params: { id: "deal-1" } });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    supabaseAdmin.rpc.mockReset();
+    installDatabase();
+  });
+
+  it("keeps filing closed when the transaction is missing or the caller is unrelated", async () => {
+    expect((await submit("stranger-9")).status).toBe(403);
+    expect(supabaseAdmin.rpc).not.toHaveBeenCalled();
+    supabaseAdmin.rpc.mockResolvedValueOnce({ error: { code: "PGRST202" } });
+    expect((await submit("buyer-1")).status).toBe(503);
+    expect(notifyUser).not.toHaveBeenCalled();
+  });
+
+  it("returns the same receipt on repeat and emits notifications only for a new hold", async () => {
+    supabaseAdmin.rpc.mockResolvedValueOnce({
+      data: { id: "dispute-1", heldAt: "2026-08-26T01:00:00Z", historyPurged: true, alreadyHeld: false },
+    }).mockResolvedValueOnce({ data: { id: "dispute-1", historyPurged: true, alreadyHeld: true } });
+    const first = await submit("buyer-1");
+    const repeated = await submit("buyer-1");
+    expect(first.headers.get("cache-control")).toContain("no-store");
+    expect(await first.json()).toMatchObject({ disputeId: "dispute-1", historyPurged: true,
+      message: expect.stringContaining("removed by retention") });
+    expect(await repeated.json()).toMatchObject({ disputeId: "dispute-1", historyPurged: true, alreadyHeld: true });
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("file_deal_dispute_hold",
+      expect.objectContaining({ p_reporter_id: "buyer-1", p_status: "open_hold" }));
+    expect(notifyUser).toHaveBeenCalledTimes(2);
+    expect(recordSystemEvent).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ event: "deal.dispute.opened", subjectId: "dispute-1" }),
+    );
   });
 });

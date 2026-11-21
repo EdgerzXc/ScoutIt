@@ -1,125 +1,64 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const mocks = vi.hoisted(() => ({
-  authFailure: null,
-  tables: {},
-  calls: [],
-}));
-
-/**
- * A builder that records every step of the chain and resolves to whatever the
- * test configured for that table. It is thenable at any depth, so it does not
- * assume how long the route's chain is.
- */
-function builder(table) {
-  const record = { table, ops: [], payload: null };
-  mocks.calls.push(record);
-  const chain = new Proxy(
-    {},
-    {
-      get(_target, prop) {
-        if (prop === "then") {
-          const result = mocks.tables[table] ?? { data: [], error: null };
-          return (resolve) => resolve(result);
-        }
-        return (...args) => {
-          record.ops.push({ op: String(prop), args });
-          if (prop === "update") record.payload = args[0];
-          return chain;
-        };
-      },
-    },
-  );
-  return chain;
-}
-
-vi.mock("@/lib/supabaseAdmin", () => ({
-  supabaseAdmin: { from: (table) => builder(table) },
-}));
-
-vi.mock("@/lib/cronAuth", () => ({
-  authorizeCronRequest: () => mocks.authFailure,
-}));
-
-import { PURGED_BODY } from "@/lib/chatRetention";
+import { beforeEach, expect, it, vi } from "vitest";
+import { PURGED_BODY, PURGE_ELIGIBLE_STATUSES, DISPUTE_HOLD_STATUSES } from "@/lib/chatRetention";
 import { GET } from "@/app/api/cron/purge-chat-messages/route";
 
-const request = { headers: { get: () => "Bearer test" } };
-const opArgs = (table, op) =>
-  mocks.calls.find((c) => c.table === table)?.ops.find((o) => o.op === op)?.args;
+const db = vi.hoisted(() => ({ auth: null, rpc: vi.fn(), event: vi.fn() }));
+vi.mock("@/lib/supabaseAdmin", () => ({ supabaseAdmin: { rpc: db.rpc } }));
+vi.mock("@/lib/cronAuth", () => ({ authorizeCronRequest: () => db.auth }));
+vi.mock("@/lib/systemEvents", () => ({ recordSystemEvent: db.event }));
 
-describe("purge-chat-messages route", () => {
-  beforeEach(() => {
-    mocks.authFailure = null;
-    mocks.calls = [];
-    mocks.tables = {
-      deals: { data: [{ id: "deal-old" }, { id: "deal-disputed" }], error: null },
-      deal_disputes: { data: [{ deal_id: "deal-disputed" }], error: null },
-      deal_messages: { data: [{ id: "m1" }, { id: "m2" }], error: null },
-    };
+const request = new Request("https://www.scoutit.space/api/cron/purge-chat-messages");
+const batch = (purged, eligibleDeals, batchCapped) => ({ data: { purged, eligibleDeals, batchCapped } });
+
+beforeEach(() => {
+  db.auth = null;
+  db.rpc.mockReset();
+  db.event.mockReset();
+});
+
+it("passes the retention policy and advances across full batches", async () => {
+  db.rpc.mockResolvedValueOnce(batch(600, 500, true)).mockResolvedValueOnce(batch(17, 12, false));
+  const res = await GET(request);
+  expect(await res.json()).toEqual({ purged: 617, eligibleDeals: 512, retentionDays: 7, batchCapped: false });
+  expect(db.rpc).toHaveBeenCalledTimes(2);
+  const args = db.rpc.mock.calls[0][1];
+  expect(db.rpc).toHaveBeenCalledWith("purge_retained_chat_batch", {
+    p_terminal_statuses: PURGE_ELIGIBLE_STATUSES,
+    p_hold_statuses: DISPUTE_HOLD_STATUSES,
+    p_cutoff: expect.any(String),
+    p_grace_cutoff: expect.any(String),
+    p_purged_body: PURGED_BODY,
   });
+  expect(Date.parse(args.p_grace_cutoff) - Date.parse(args.p_cutoff)).toBe(6 * 86_400_000);
+  expect(db.event).toHaveBeenCalledWith(expect.objectContaining({ subjectId: "purge-chat-messages", severity: "info" }));
+});
 
-  it("redacts bodies only on eligible deals and reports the count", async () => {
-    const response = await GET(request);
-    const payload = await response.json();
+it("bounds work and reports a remaining backlog when all batches are full", async () => {
+  db.rpc.mockResolvedValue(batch(500, 500, true));
+  expect(await (await GET(request)).json()).toMatchObject({ purged: 2000, batchCapped: true });
+  expect(db.rpc).toHaveBeenCalledTimes(4);
+});
 
-    expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ purged: 2, eligibleDeals: 1, heldByDispute: 1, retentionDays: 7 });
+it("reports a failed batch and retains the count from committed batches", async () => {
+  db.rpc.mockResolvedValueOnce(batch(500, 500, true)).mockResolvedValueOnce({ error: { code: "08006" } });
+  const response = await GET(request);
+  expect(response.status).toBe(500);
+  expect(await response.json()).toMatchObject({ purged: 500, error: "Chat retention cleanup could not finish." });
+  expect(db.event).toHaveBeenCalledWith(expect.objectContaining({ severity: "error" }));
+});
 
-    const messages = mocks.calls.find((c) => c.table === "deal_messages");
-    expect(messages.payload).toEqual({ body: PURGED_BODY });
-    // The disputed thread must not be in the update's target list.
-    expect(opArgs("deal_messages", "in")).toEqual(["deal_id", ["deal-old"]]);
-    expect(opArgs("deal_messages", "neq")).toEqual(["body", PURGED_BODY]);
-  });
+it("makes no database call for unauthorized requests", async () => {
+  db.auth = Response.json({ error: "Unauthorized" }, { status: 401 });
+  expect((await GET(request)).status).toBe(401);
+  expect(db.rpc).not.toHaveBeenCalled();
+  expect(db.event).not.toHaveBeenCalled();
+});
 
-  it("selects every terminal status — declined and withdrawn threads purge too", async () => {
-    // A-103: the candidate set is the shared terminal list, never only
-    // `closed`. Asserted behaviourally against the mock chain: the deals
-    // read filters by the widened set past the cutoff.
-    await GET(request);
-    expect(opArgs("deals", "in")).toEqual([
-      "status",
-      ["closed", "declined", "withdrawn", "expired"],
-    ]);
-    expect(opArgs("deals", "lte")).toEqual(["closed_at", expect.any(String)]);
-  });
-
-  it("writes nothing when every closed thread is under a dispute hold", async () => {
-    mocks.tables.deal_disputes = { data: [{ deal_id: "deal-old" }, { deal_id: "deal-disputed" }], error: null };
-
-    const payload = await (await GET(request)).json();
-
-    expect(payload).toMatchObject({ purged: 0, eligibleDeals: 0, heldByDispute: 2 });
-    expect(mocks.calls.some((c) => c.table === "deal_messages")).toBe(false);
-  });
-
-  it("mutates no product data when no thread has passed the retention window", async () => {
-    mocks.tables.deals = { data: [], error: null };
-
-    const payload = await (await GET(request)).json();
-
-    expect(payload).toMatchObject({ purged: 0, eligibleDeals: 0 });
-    expect(mocks.calls.some((c) => c.table === "deal_disputes")).toBe(false);
-    expect(mocks.calls.some((c) => c.table === "deal_messages")).toBe(false);
-    expect(mocks.calls.some((c) => c.table === "system_events")).toBe(true);
-  });
-
-  it("touches nothing at all when the cron caller is not authorised", async () => {
-    mocks.authFailure = Response.json({ error: "Unauthorized" }, { status: 401 });
-
-    const response = await GET(request);
-
-    expect(response.status).toBe(401);
-    expect(mocks.calls).toEqual([]);
-  });
-
-  it("reports a read failure instead of claiming a successful purge", async () => {
-    mocks.tables.deals = { data: null, error: { message: "connection lost" } };
-
-    const response = await GET(request);
-
-    expect(response.status).toBe(500);
-    expect(mocks.calls.some((c) => c.table === "deal_messages")).toBe(false);
-  });
+it("keeps retention fail-closed while the migration is missing", async () => {
+  db.rpc.mockResolvedValueOnce({ error: { code: "PGRST202" } });
+  const response = await GET(request);
+  expect(response.status).toBe(503);
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+  expect(await response.json()).toMatchObject({ purged: 0, eligibleDeals: 0 });
+  expect(db.event).not.toHaveBeenCalled();
 });

@@ -1,123 +1,52 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sanitizeError } from "@/lib/sanitizeError";
 import { authorizeCronRequest } from "@/lib/cronAuth";
 import { withCronEventLog } from "@/lib/cronEventLog";
 import {
   CHAT_RETENTION_DAYS,
   DISPUTE_HOLD_STATUSES,
+  DISPUTE_RESOLUTION_GRACE_MS,
   PURGE_ELIGIBLE_STATUSES,
   PURGED_BODY,
   retentionCutoffIso,
 } from "@/lib/chatRetention";
 
-// ═══════════════════════════════════════════════════════════════
-// CHAT BODY PURGE — the named consumer for the 7-day retention promise
-// ═══════════════════════════════════════════════════════════════
-//
-// An ended thread (closed, declined, withdrawn, expired) stays readable for
-// seven days, then its message bodies are replaced. The rows remain:
-// participants, timestamps and deal metadata are the audit trail, and
-// deleting them would orphan the Connect ledger.
-//
-// A reported thread is NOT a candidate here — Report & Unmatch files a
-// dispute hold at report time, and the hold below exempts it until the case
-// resolves. Purging evidence mid-review would destroy the only record of
-// what happened. The lawful-retention classification behind longer holds
-// stays with W-009 and counsel; this job only enforces the ordinary rule.
+export const maxDuration = 60;
+const MAX_BATCHES = 4;
 
-const BATCH_LIMIT = 500;
-export const DISPUTE_RESOLUTION_GRACE_MS = 24 * 60 * 60 * 1000;
-
-async function handleCron(request) {
-  const authFailure = authorizeCronRequest(request);
-  if (authFailure) return authFailure;
-
-  if (!supabaseAdmin) {
-    return NextResponse.json(
-      { error: "Server error: missing service role configuration" },
-      { status: 500 },
-    );
-  }
-
-  try {
-    const cutoff = retentionCutoffIso();
-
-    // A-103: every terminal status the UI can stamp — never only `closed`.
-    // `reported` is excluded by construction (see PURGE_ELIGIBLE_STATUSES).
-    const { data: closed, error: closedErr } = await supabaseAdmin
-      .from("deals")
-      .select("id")
-      .in("status", PURGE_ELIGIBLE_STATUSES)
-      .lte("closed_at", cutoff)
-      .limit(BATCH_LIMIT);
-
-    if (closedErr) throw closedErr;
-    if (!closed?.length) {
-      return NextResponse.json({ purged: 0, eligibleDeals: 0, retentionDays: CHAT_RETENTION_DAYS });
-    }
-
-    const closedIds = closed.map((d) => d.id);
-
-    // Read the holds rather than trusting the deal row: a dispute is filed
-    // against a deal that is already closed, so closure alone says nothing
-    // about whether the thread is still under review.
-    // GAP-41: Also include recently resolved/dismissed disputes so parties have
-    // a 24-hour grace window to export their transcript before purge.
-    const { data: holds, error: holdErr } = await supabaseAdmin
-      .from("deal_disputes")
-      .select("deal_id, status, resolved_at, updated_at")
-      .in("deal_id", closedIds)
-      .in("status", [...DISPUTE_HOLD_STATUSES, "resolved", "dismissed"]);
-
-    if (holdErr) throw holdErr;
-
-    const nowMs = Date.now();
-    const held = new Set();
-    for (const h of holds || []) {
-      if (!h.status || DISPUTE_HOLD_STATUSES.includes(h.status)) {
-        held.add(h.deal_id);
-      } else if (h.status === "resolved" || h.status === "dismissed") {
-        const resolvedTs = Date.parse(h.resolved_at || h.updated_at || "");
-        if (Number.isFinite(resolvedTs) && nowMs - resolvedTs < DISPUTE_RESOLUTION_GRACE_MS) {
-          held.add(h.deal_id);
-        }
-      }
-    }
-    const eligible = closedIds.filter((id) => !held.has(id));
-
-    if (eligible.length === 0) {
-      return NextResponse.json({
-        purged: 0,
-        eligibleDeals: 0,
-        heldByDispute: held.size,
-        retentionDays: CHAT_RETENTION_DAYS,
-      });
-    }
-
-    const { data: purged, error: purgeErr } = await supabaseAdmin
-      .from("deal_messages")
-      .update({ body: PURGED_BODY })
-      .in("deal_id", eligible)
-      .neq("body", PURGED_BODY)
-      .select("id");
-
-    if (purgeErr) throw purgeErr;
-
-    return NextResponse.json({
-      purged: purged?.length || 0,
-      eligibleDeals: eligible.length,
-      heldByDispute: held.size,
-      retentionDays: CHAT_RETENTION_DAYS,
-      batchCapped: closed.length === BATCH_LIMIT,
-    });
-  } catch (err) {
-    console.error("[CHAT PURGE CRON] Error:", err);
-    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
-  }
+function reply(body, status = 200) {
+  return NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 }
 
-// A-063. Every run of this job is recorded in `system_events`; an
-// unauthorized probe is not, so a job that stops firing is visible as a
-// gap rather than buried among rejected calls.
-export const GET = withCronEventLog("purge-chat-messages", handleCron);
+export const GET = withCronEventLog("purge-chat-messages", async (request) => {
+  const authFailure = authorizeCronRequest(request);
+  if (authFailure) return authFailure;
+  if (!supabaseAdmin) return reply({ error: "Chat retention cleanup is unavailable." }, 503);
+
+  const now = Date.now();
+  const result = { purged: 0, eligibleDeals: 0, retentionDays: CHAT_RETENTION_DAYS, batchCapped: false };
+  try {
+    for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
+      const { data, error } = await supabaseAdmin.rpc("purge_retained_chat_batch", {
+        p_terminal_statuses: PURGE_ELIGIBLE_STATUSES,
+        p_hold_statuses: DISPUTE_HOLD_STATUSES,
+        p_cutoff: retentionCutoffIso(now),
+        p_grace_cutoff: new Date(now - DISPUTE_RESOLUTION_GRACE_MS).toISOString(),
+        p_purged_body: PURGED_BODY,
+      });
+      if (error) throw error;
+      if (!Number.isSafeInteger(data?.purged) || data.purged < 0 ||
+          !Number.isSafeInteger(data?.eligibleDeals) || data.eligibleDeals < 0 ||
+          typeof data?.batchCapped !== "boolean") throw new Error("Invalid chat purge result");
+      result.purged += data.purged;
+      result.eligibleDeals += data.eligibleDeals;
+      result.batchCapped = data.batchCapped;
+      if (!data.batchCapped) break;
+    }
+    return reply(result);
+  } catch (error) {
+    console.error("[chat purge cron] Failed", error?.code || error?.name || "Error");
+    const schemaMissing = error?.code === "PGRST202" || error?.code === "42883";
+    return reply({ ...result, error: "Chat retention cleanup could not finish." }, schemaMissing ? 503 : 500);
+  }
+});

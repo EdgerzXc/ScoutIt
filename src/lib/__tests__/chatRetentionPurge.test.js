@@ -9,6 +9,7 @@ import {
 
 const read = (file) => readFileSync(resolve(process.cwd(), file), "utf8");
 const route = read("src/app/api/cron/purge-chat-messages/route.js");
+const migration = read("supabase/migrations/20261114000001_serialize_chat_retention.sql");
 
 describe("chat retention purge", () => {
   it("computes the cutoff from a fixed instant, seven days back", () => {
@@ -18,8 +19,8 @@ describe("chat retention purge", () => {
   });
 
   it("writes the live column, never the one the dead SQL function used", () => {
-    expect(route).toContain('.update({ body: PURGED_BODY })');
-    expect(route).not.toMatch(/content:\s*PURGED_BODY/);
+    expect(route).toContain("p_purged_body: PURGED_BODY");
+    expect(migration).toContain("UPDATE public.deal_messages AS m SET body = p_purged_body");
     expect(PURGED_BODY).toMatch(/Purged/);
   });
 
@@ -30,22 +31,24 @@ describe("chat retention purge", () => {
     // published seven-day promise. The candidate set is the shared terminal
     // list; `reported` is deliberately absent (it files a dispute hold at
     // report time instead — purging it would destroy evidence under review).
-    expect(route).toContain("PURGE_ELIGIBLE_STATUSES");
-    expect(route).toContain('.lte("closed_at", cutoff)');
-    expect(route).not.toMatch(/\.eq\("status",\s*"closed"\)/);
+    expect(route).toContain("p_terminal_statuses: PURGE_ELIGIBLE_STATUSES");
+    expect(migration).toContain("d.status = ANY(p_terminal_statuses)");
+    expect(migration).toContain("d.closed_at <= p_cutoff");
   });
 
   it("exempts threads under an active dispute hold", () => {
     expect(DISPUTE_HOLD_STATUSES).toEqual(["open_hold", "under_review"]);
-    expect(route).toMatch(/\.in\("status",\s*(?:DISPUTE_HOLD_STATUSES|\[\.\.\.DISPUTE_HOLD_STATUSES)/);
-    expect(route).toContain("held.has(id)");
+    expect(route).toContain("p_hold_statuses: DISPUTE_HOLD_STATUSES");
+    expect(migration).toContain("h.status = ANY(p_hold_statuses)");
+    expect(migration).toContain("FOR UPDATE OF d SKIP LOCKED");
+    expect(migration).toContain("WHERE id = NEW.deal_id FOR UPDATE");
   });
 
   it("refuses an unauthorised invocation before reading anything", () => {
     const authIndex = route.indexOf("authorizeCronRequest(request)");
-    const firstQuery = route.indexOf("supabaseAdmin\n      .from");
+    const firstQuery = route.indexOf('supabaseAdmin.rpc("purge_retained_chat_batch"');
     expect(authIndex).toBeGreaterThan(-1);
-    expect(authIndex).toBeLessThan(firstQuery === -1 ? route.length : firstQuery);
+    expect(authIndex).toBeLessThan(firstQuery);
   });
 
   it("has a named consumer registered as a scheduled job", () => {

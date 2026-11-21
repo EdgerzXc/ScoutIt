@@ -11,6 +11,7 @@
  */
 
 export const CHAT_RETENTION_DAYS = 7;
+export const DISPUTE_RESOLUTION_GRACE_MS = 24 * 60 * 60 * 1000;
 
 /**
  * A-103. The purge candidate set for the ordinary seven-day rule. The UI

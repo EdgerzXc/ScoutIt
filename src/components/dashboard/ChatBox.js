@@ -1551,7 +1551,7 @@ export default function ChatBox({
               <>
                 ScoutIt is reviewing this conversation.{" "}
                 <strong className="text-on-surface">
-                  These messages are kept in full until the review finishes
+                  The remaining messages are protected until the review finishes
                 </strong>{" "}
                 — the {CHAT_RETENTION_DAYS}-day clock does not apply while it is open.
               </>
