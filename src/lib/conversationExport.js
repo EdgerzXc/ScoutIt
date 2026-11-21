@@ -29,9 +29,7 @@
 
 import { maskContactDetails } from "@/lib/contactLeakFilter";
 import { CHAT_RETENTION_DAYS } from "@/lib/chatRetention";
-
-/** Matches ChatBox's storage envelope for an uploaded file. */
-const ATTACHMENT_PREFIX = "__scoutit_attachment__:";
+import { isDealAttachmentEnvelope, parseDealAttachmentEnvelope } from "@/lib/dealAttachments";
 
 /** Prefix on every quoted body line. See the forgery note below. */
 const QUOTE = "  | ";
@@ -73,17 +71,7 @@ function manilaDateOnly(value) {
   return formatManila(value).slice(0, 10);
 }
 
-function decodeAttachment(body) {
-  if (typeof body !== "string" || !body.startsWith(ATTACHMENT_PREFIX)) return null;
-  try {
-    return JSON.parse(body.slice(ATTACHMENT_PREFIX.length));
-  } catch {
-    return null;
-  }
-}
-
-function formatBytes(size) {
-  const n = Number(size);
+function formatBytes(n) {
   if (!Number.isFinite(n) || n <= 0) return null;
   if (n < 1024) return `${n} bytes`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -116,7 +104,7 @@ function partyLabel(party) {
 
 function quote(text) {
   return String(text ?? "")
-    .split("\n")
+    .split(/\r\n?|\n/)
     // Every body line carries QUOTE, so no message can produce a line that
     // sits flush-left like one of this document's own structural markers.
     .map((line) => `${QUOTE}${line}`)
@@ -126,12 +114,13 @@ function quote(text) {
 function renderMessage(message, participants, contactRevealed) {
   const when = formatManila(message.created_at);
   const who = senderLabel(message, participants);
-  const attachment = decodeAttachment(message.body);
-
-  if (attachment) {
-    const size = formatBytes(attachment.size);
-    const name = attachment.name || "unnamed file";
-    return `[${when}] ${who}\n${QUOTE}[File attached] ${name}${size ? ` (${size})` : ""}`;
+  if (isDealAttachmentEnvelope(message.body)) {
+    const attachment = parseDealAttachmentEnvelope(message.body);
+    const size = formatBytes(attachment?.size);
+    const filename = typeof attachment?.name === "string" && attachment.name.trim()
+      ? maskContactDetails(attachment.name, contactRevealed)
+      : "unnamed file";
+    return `[${when}] ${who}\n${quote(`[File attached] ${filename}${size ? ` (${size})` : ""}`)}`;
   }
 
   return `[${when}] ${who}\n${quote(maskContactDetails(message.body, contactRevealed))}`;

@@ -1,38 +1,22 @@
 import { supabase } from "./supabaseClient";
 import { PROPERTY_PHOTO_MAX_BYTES, PROPERTY_PHOTO_MIME_TYPES } from "./propertyPhotoLimits";
-
-// 10MB for documents/images/audio, 50MB for videos
-const MAX_SIZES = {
-  'image/jpeg': 10 * 1024 * 1024,
-  'image/png': 10 * 1024 * 1024,
-  'image/webp': 10 * 1024 * 1024,
-  'application/pdf': 10 * 1024 * 1024,
-  'video/mp4': 50 * 1024 * 1024,
-  'audio/webm': 10 * 1024 * 1024,
-  'audio/mp4': 10 * 1024 * 1024,
-  'audio/ogg': 10 * 1024 * 1024,
-  'audio/mpeg': 10 * 1024 * 1024,
-  'audio/wav': 10 * 1024 * 1024,
-  'audio/x-m4a': 10 * 1024 * 1024,
-  'audio/aac': 10 * 1024 * 1024,
-};
+import { getDealAttachmentLimit } from "./dealAttachments";
 
 export const uploadAttachment = async (dealId, file, extraMeta = {}) => {
   // 1. Client-side MIME Type Validation (Defense in Depth)
   // Clean MIME type to remove codec parameters, e.g. "audio/webm;codecs=opus" -> "audio/webm"
   const baseType = (file.type || '').split(';')[0].trim().toLowerCase();
-  if (!MAX_SIZES[baseType]) {
+  const maxSize = getDealAttachmentLimit(baseType);
+  if (!maxSize) {
     throw new Error("Invalid file type. Only JPG, PNG, WEBP, PDF, MP4, and Audio files are allowed.");
   }
 
   // 2. Client-side Size Validation
-  const maxSize = MAX_SIZES[baseType];
   if (file.size > maxSize) {
     throw new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB for this file type.`);
   }
 
   // 3. Generate a secure, unique filename to prevent collisions and directory traversal
-  const fileExt = file.name.split('.').pop().toLowerCase();
   const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
   const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}_${safeName}`;
   const filePath = `${dealId}/${uniqueFilename}`;

@@ -6,6 +6,11 @@ import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { canPostInDealStatus } from "@/lib/deals/dealStatus";
 import { notifyUser } from "@/lib/notifications";
 import { createRateLimiter } from "@/lib/rateLimit";
+import {
+  DEAL_ATTACHMENT_NOTICE,
+  isDealAttachmentEnvelope,
+  readLegacyDealAttachment,
+} from "@/lib/dealAttachments";
 
 export const dynamic = "force-dynamic";
 
@@ -165,6 +170,11 @@ export async function POST(request, { params }) {
 
     if (!isParty) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    const isAttachment = isDealAttachmentEnvelope(body);
+    if (isAttachment && !readLegacyDealAttachment(body, dealId)) {
+      return NextResponse.json({ error: "This attachment could not be verified. Choose the file again." }, { status: 422 });
+    }
+
     // GAP-68: Enforce account suspension / shadowban check before writing messages
     try {
       const { data: senderProfile } = await supabaseAdmin
@@ -213,7 +223,9 @@ export async function POST(request, { params }) {
       await notifyUser(supabaseAdmin, {
         userId: recipientId,
         title: "New message",
-        desc: `New message on ${deal.properties?.title || "your deal"}: "${body.slice(0, 60)}${body.length > 60 ? "..." : ""}"`,
+        desc: isAttachment
+          ? DEAL_ATTACHMENT_NOTICE
+          : `New message on ${deal.properties?.title || "your deal"}: "${body.slice(0, 60)}${body.length > 60 ? "..." : ""}"`,
         propertyId: deal.properties?.id || deal.property_id || null,
         notificationType: "deal_message",
       });

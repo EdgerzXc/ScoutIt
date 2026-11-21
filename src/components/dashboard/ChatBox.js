@@ -24,6 +24,7 @@ import {
 } from "@/lib/chatRetention";
 import { lifecycleNotice } from "@/lib/pendingRequestLifecycle";
 import { crmFetch } from "@/lib/crmClient";
+import { encodeDealAttachment, isDealAttachmentEnvelope, readLegacyDealAttachment } from "@/lib/dealAttachments";
 
 // Statuses where the conversation is over. Kept as one constant because it
 // was previously duplicated across six inline arrays that had already drifted
@@ -214,21 +215,6 @@ const renderTextWithLinks = (
   });
 };
 
-// Attachment messages are sent through the same plain-text deal_messages.body
-// column as regular text (no separate attachments table/column) -- encoded
-// as a small JSON envelope with a recognizable prefix so it round-trips
-// through the real API instead of only living in local state.
-const ATTACHMENT_PREFIX = "__scoutit_attachment__:";
-const encodeAttachment = (att) => `${ATTACHMENT_PREFIX}${JSON.stringify(att)}`;
-const decodeAttachment = (body) => {
-  if (!body || !body.startsWith(ATTACHMENT_PREFIX)) return null;
-  try {
-    return JSON.parse(body.slice(ATTACHMENT_PREFIX.length));
-  } catch {
-    return null;
-  }
-};
-
 // Resolves { token, mockOwnerId, userId } for API calls -- real Supabase
 // session first; the only fallback is the explicit localhost E2E fixture.
 async function resolveAuth() {
@@ -376,15 +362,15 @@ export default function ChatBox({
     : viewerIsRequestSender(deal.myRole);
 
   const mapMessage = useCallback((m, currentUserId) => {
-    const attachment = decodeAttachment(m.body);
+    const attachment = readLegacyDealAttachment(m.body, deal.id);
     return {
       id: m.id,
       sender: m.sender_id === currentUserId ? "me" : m.sender_role,
-      body: attachment ? "" : m.body,
+      body: attachment ? "" : isDealAttachmentEnvelope(m.body) ? "Attachment unavailable." : m.body,
       timestamp: m.created_at,
       attachments: attachment ? [attachment] : [],
     };
-  }, []);
+  }, [deal.id]);
 
   const loadMessages = useCallback(async () => {
     setLoading(true);
@@ -492,7 +478,7 @@ export default function ChatBox({
 
     try {
       const attachment = await uploadAttachment(deal.id, file);
-      await sendMessageBody(encodeAttachment(attachment));
+      await sendMessageBody(encodeDealAttachment(attachment));
     } catch (err) {
       setUploadError(sanitizeError(err, "Upload failed. Please try again."));
       setTimeout(() => setUploadError(null), 5000);
@@ -611,7 +597,7 @@ export default function ChatBox({
           isVoiceNote: true,
           duration: Math.max(1, finalDuration),
         });
-        await sendMessageBody(encodeAttachment(attachment));
+        await sendMessageBody(encodeDealAttachment(attachment));
       } catch (err) {
         setUploadError(sanitizeError(err, "Failed to upload voice memo."));
         setTimeout(() => setUploadError(null), 5000);

@@ -8,6 +8,8 @@
 // wrong. These helpers take the service-role client from the caller and stay
 // free of request handling so both routes and tests can use them.
 
+import { DEAL_ATTACHMENT_NOTICE, isDealAttachmentEnvelope } from "@/lib/dealAttachments";
+
 const DEAL_FIELDS =
   "id, status, pitch_message, private_notes, buyer_id, broker_id, unit_id, created_at, " +
   "closed_at, expires_at, connects_spent, archived_at, pending_clock_reset_at, " +
@@ -312,7 +314,9 @@ export async function loadDealMessageActivity(client, dealIds, userId) {
 
   const activity = { ...empty };
   for (const message of messages || []) {
-    activity.lastMessageByDeal[message.deal_id] = message.body;
+    activity.lastMessageByDeal[message.deal_id] = isDealAttachmentEnvelope(message.body)
+      ? DEAL_ATTACHMENT_NOTICE
+      : message.body;
     activity.lastActivityByDeal[message.deal_id] = message.created_at;
     if (message.sender_id !== userId && !message.read_at) {
       activity.unreadByDeal[message.deal_id] = (activity.unreadByDeal[message.deal_id] || 0) + 1;

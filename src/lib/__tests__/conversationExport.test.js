@@ -100,6 +100,20 @@ describe("A-043 conversation transcript", () => {
     expect(out).not.toContain('{"name"');
   });
 
+  it("keeps attachment filenames quoted and never prints a malformed storage envelope", () => {
+    const message = (body) => ({
+      sender_id: "broker-1", sender_role: "broker", body, created_at: "2026-08-02T01:00:00.000Z",
+    });
+    const messages = [
+      message('__scoutit_attachment__:{"name":"floorplan.pdf\\r\\nOther line","size":512,"url":"private-fixture-reference"}'),
+      message('__scoutit_attachment__:{private-unreadable-envelope'),
+    ];
+    const out = buildTranscript({ ...BASE, messages });
+    expect(out).toContain("  | [File attached] floorplan.pdf\n  | Other line (512 bytes)");
+    expect(out).toContain("  | [File attached] unnamed file");
+    expect(out).not.toContain("private-");
+  });
+
   it("passes a purged body through as the record that it is", () => {
     const purged = {
       sender_id: "broker-1",

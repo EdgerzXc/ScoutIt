@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { DEAL_ATTACHMENT_NOTICE, encodeDealAttachment, readLegacyDealAttachment } from "@/lib/dealAttachments";
 
 // ─────────────────────────────────────────────────────────────────────────
 // A-236 (GAP-102). The deal chat write path had no size bound and no rate
@@ -14,6 +15,7 @@ const state = vi.hoisted(() => ({
   user: "user-a",
   inserted: [],
   notifications: 0,
+  lastNotice: null,
 }));
 
 function rowsFor(table, filters) {
@@ -84,8 +86,9 @@ vi.mock("@/lib/serverAuth", () => ({
   resolveUserId: async () => state.user,
 }));
 vi.mock("@/lib/notifications", () => ({
-  notifyUser: async () => {
+  notifyUser: async (_client, notice) => {
     state.notifications += 1;
+    state.lastNotice = notice;
     return true;
   },
 }));
@@ -107,6 +110,7 @@ const post = (body, user = state.user) => {
 beforeEach(() => {
   state.inserted = [];
   state.notifications = 0;
+  state.lastNotice = null;
 });
 
 describe("A-236 deal chat bounds", () => {
@@ -143,6 +147,56 @@ describe("A-236 deal chat bounds", () => {
     const res = await post({ body: "x".repeat(2000) }, "user-exact");
     expect(res.status).toBe(200);
     expect(state.inserted).toHaveLength(1);
+  });
+
+  it("refuses an unrelated attachment source and keeps signed links out of notices", async () => {
+    const origin = "https://storage-fixture.example";
+    const attachment = {
+      path: "deal-1/note.webm",
+      url: origin + "/storage/v1/object/sign/chat_attachments/deal-1/note.webm?token=fixture",
+      type: "audio/webm",
+      size: 4096,
+      name: "voice-note.webm",
+    };
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", origin);
+    try {
+      const invalid = encodeDealAttachment({ ...attachment, url: "https://another.example/recording.webm" });
+      expect((await post({ body: invalid }, "user-attachments")).status).toBe(422);
+      expect(state.inserted).toHaveLength(0);
+      expect(state.notifications).toBe(0);
+
+      const valid = encodeDealAttachment(attachment);
+      expect((await post({ body: valid }, "user-attachments")).status).toBe(200);
+      expect(readLegacyDealAttachment(state.inserted[0].body, "deal-1")).toMatchObject({
+        name: attachment.name, url: attachment.url, isVoiceNote: true,
+      });
+      expect(state.lastNotice.desc).toBe(DEAL_ATTACHMENT_NOTICE);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("recognizes a legacy Storage URL only at the exact origin, bucket and deal path", () => {
+    const project = "https://storage-fixture.example";
+    const path = "deal-1/file.pdf";
+    const storagePath = "/storage/v1/object/sign/chat_attachments/" + path;
+    const envelope = (url, overrides = {}) => encodeDealAttachment({
+      path, url, type: "application/pdf", size: 10000, name: "file.pdf", ...overrides,
+    });
+    const legitimate = project + storagePath + "?token=fixture";
+    expect(readLegacyDealAttachment(envelope(legitimate), "deal-1", project)?.url).toBe(legitimate);
+    expect(readLegacyDealAttachment(envelope(legitimate), "deal-2", project)).toBeNull();
+    expect(readLegacyDealAttachment(envelope(legitimate, { name: [] }), "deal-1", project)).toBeNull();
+    expect(readLegacyDealAttachment(envelope(legitimate, { size: 0 }), "deal-1", project)).toBeNull();
+    for (const url of [
+      "http://storage-fixture.example" + storagePath + "?token=fixture",
+      project + ".outside.example" + storagePath + "?token=fixture",
+      project + storagePath.replace("chat_attachments", "public-photos") + "?token=fixture",
+      project + storagePath + "?token=fixture&token=secondary",
+      "about:blank",
+    ]) {
+      expect(readLegacyDealAttachment(envelope(url), "deal-1", project)).toBeNull();
+    }
   });
 
   it("stops a burst and stores nothing past the limit", async () => {
