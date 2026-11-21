@@ -1,4 +1,4 @@
-const PROTECTED_STATES = new Set(["staff_suspended", "suspended", "permanently_removed"]);
+import { getPropertyBinding, isProtectedProperty } from "./propertyPublication.mjs";
 
 export function isPropertyArchiveAuditAction(action) {
   return /^property\.(?:archive|unarchive|bulk_archive)(?:\.intent)?$/.test(action);
@@ -6,20 +6,20 @@ export function isPropertyArchiveAuditAction(action) {
 
 export async function changePropertyArchiveState({ property, archive, reason, now, unpublish, save }) {
   const { lifecycle_state: lifecycle, moderation_status: moderation, pipeline_status: pipeline } = property;
-  if (property.permanently_removed_at || [lifecycle, moderation, pipeline].some((state) => PROTECTED_STATES.has(state))) {
+  if (isProtectedProperty(property)) {
     return { stage: "protected" };
   }
   if (!archive && moderation !== "archived") return { stage: "changed" };
 
   const live = pipeline === "approved" || (!pipeline && (lifecycle === "live" || moderation === "approved"));
-  const wasPublished = live || property.canonical_slug || property.published_at;
+  const wasPublished = live || property.canonical_slug || property.published_at || property.publication_external_record_id;
   let cachePending = false;
   if (wasPublished) {
-    const slug = property.canonical_slug || property.slug;
-    if (!slug) return { stage: "reference" };
+    const binding = getPropertyBinding(property);
+    if (!binding) return { stage: "reference" };
     try {
-      const result = await unpublish(slug);
-      if (live && !result?.recordId) return { stage: "reference" };
+      const result = await unpublish(binding);
+      if (result?.recordId !== binding.recordId) return { stage: "reference" };
       cachePending = result?.cache?.purged !== true;
     } catch {
       return { stage: "airtable" };

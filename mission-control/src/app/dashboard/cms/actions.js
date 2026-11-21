@@ -3,115 +3,27 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, assertTier, logAction, logActionStrict, TIERS } from "@/lib/rbac";
-import { publishPropertyToAirtable, unpublishPropertyFromAirtable } from "@/lib/airtable";
-import { recordSystemEvent } from "@/lib/systemEvents";
-import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+import { editBoundProperty, unpublishBoundProperty } from "@/lib/airtable";
 import { notifyUser } from "@/lib/notifications";
-import { getPdfPublicationBlock } from "@/lib/propertyPdfReview";
 import { changePropertyArchiveState } from "@/lib/propertyArchive.mjs";
+import { getPropertyBinding, isLiveProperty, isProtectedProperty, matchPropertySnapshot } from "@/lib/propertyPublication.mjs";
+import { approveStaffProperty } from "@/lib/staffPropertyApproval";
 
-/**
- * Approve & Publish — the full publishing loop.
- *
- * The live public site only shows Airtable PROPERTIES_CMS records with
- * Approved_For_ScoutIt=true, so flipping Supabase alone (the old behavior)
- * approved a row that never actually went live. Order matters:
- *   1. Publish to Airtable (update-by-slug first, insert if new) and read
- *      back Airtable's COMPUTED Slug — the single source of slug truth.
- *   2. Only after Airtable succeeds, mark the Supabase row approved (both
- *      moderation_status — this console's queue — and pipeline_status — what
- *      the main app's dashboards read) and persist the canonical slug.
- * If Airtable fails, we throw and the row stays un-approved.
- *
- * @param {FormData} formData
- */
-export async function approveProperty(formData) {
+export async function approveProperty(_previousState, formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.AGENT);
 
   const propertyId = formData.get("propertyId")?.toString();
-  if (!propertyId) throw new Error("Missing propertyId.");
-
-  const admin = createAdminClient();
-
-  // Full row — the Airtable payload needs title/location/type/details/media.
-  const { data: property, error: fetchError } = await admin
-    .from("properties")
-    .select("*")
-    .eq("id", propertyId)
-    .single();
-  if (fetchError || !property) {
-    throw new Error(fetchError?.message || "Property not found.");
-  }
-  if (getPdfPublicationBlock(property)) throw new Error("Only a verified PDF-assisted draft can be published.");
-
-  // 1. Live-site publish. Throws on failure — nothing below runs.
-  //
-  // A-063. Recorded either way. A publish that reached Airtable and then
-  // failed to record approval in Supabase is the one state staff cannot
-  // infer from the console, because the listing is live and the queue
-  // still says it is not.
-  let published;
-  try {
-    published = await publishPropertyToAirtable(property);
-  } catch (err) {
-    await recordSystemEvent({
-      event: EVENTS.AIRTABLE_PUBLISH_FAILED,
-      severity: "error",
-      subjectTable: "properties",
-      subjectId: propertyId,
-      summary: `Publish to the public CMS failed: ${err.message}`,
-      detail: { slug: property.slug || null, error: err.message },
-    });
-    throw err;
-  }
-
-  await recordSystemEvent({
-    event: EVENTS.AIRTABLE_PUBLISH_OK,
-    severity: published.cache?.purged ? "info" : "warning",
-    subjectTable: "properties",
-    subjectId: propertyId,
-    summary: published.cache?.purged
-      ? `Published ${published.slug} to the public CMS (${published.mode})`
-      : `Published ${published.slug} to Airtable, but the public cache purge needs attention`,
-    detail: { slug: published.slug, mode: published.mode, recordId: published.recordId, cache: published.cache },
+  if (!PROPERTY_ID.test(propertyId || "")) return { message: "Select a valid property draft." };
+  const result = await approveStaffProperty({
+    admin: createAdminClient(), staff, propertyId, action: "property.approve_publish",
+    reason: "Approved a listing from the CMS queue",
   });
-
-  // 2. Airtable succeeded — now mark approved in Supabase with the canonical slug.
-  // GAP-33: Once canonical_slug is locked on first publication, never overwrite slug
-  // with a newly recomputed formula slug.
-  const nowIso = new Date().toISOString();
-  const lockedCanonicalSlug = property.canonical_slug || published.slug;
-  const { error } = await admin
-    .from("properties")
-    .update({
-      moderation_status: "approved",
-      pipeline_status: "approved",
-      lifecycle_state: "live",
-      slug: lockedCanonicalSlug,
-      canonical_slug: lockedCanonicalSlug,
-      canonical_slug_locked_at: property.canonical_slug_locked_at || nowIso,
-      published_at: property.published_at || nowIso,
-      rejection_reason: null,
-    })
-    .eq("id", propertyId);
-  if (error) {
-    // Airtable is live but Supabase didn't record it — surface loudly so
-    // staff retries (the retry is idempotent: update-by-slug path).
-    throw new Error(
-      `Published to the live site (slug: ${lockedCanonicalSlug}) but failed to record approval in Supabase: ${error.message}. Retry the approval.`
-    );
-  }
-
-  await logAction({
-    staff,
-    action: "property.approve_publish",
-    targetTable: "properties",
-    targetId: propertyId,
-    metadata: { slug: lockedCanonicalSlug, airtable: published.mode, recordId: published.recordId },
-  });
-
-  revalidatePath("/dashboard/cms");
+  if (!result.success) return { message: result.error };
+  return {
+    saved: true,
+    message: result.publicCachePending ? "Listing approved. Check the public page before sharing it." : "Listing published.",
+  };
 }
 
 const LOCKED_TITLE_LIFECYCLE_STATES = new Set([
@@ -146,13 +58,14 @@ export async function updatePropertyMetadata(formData) {
   const admin = createAdminClient();
   const { data: property, error: fetchError } = await admin
     .from("properties")
-    .select("id, title, slug, canonical_slug, canonical_slug_locked_at, lifecycle_state, pipeline_status")
+    .select("*")
     .eq("id", propertyId)
     .single();
 
   if (fetchError || !property) {
     throw new Error(fetchError?.message || "Property not found.");
   }
+  if (isProtectedProperty(property)) throw new Error("This listing must use the protected review workflow.");
 
   const updates = {};
   if (nextTitle && nextTitle !== property.title) {
@@ -169,18 +82,32 @@ export async function updatePropertyMetadata(formData) {
 
   if (Object.keys(updates).length === 0) return;
 
-  const { error } = await admin.from("properties").update(updates).eq("id", propertyId);
-  if (error) throw new Error(error.message);
+  const live = isLiveProperty(property);
+  const binding = live ? getPropertyBinding(property) : null;
+  if (live && !binding) throw new Error("This listing requires publication identity reconciliation.");
+  const query = admin.from("properties").update(updates).eq("id", propertyId);
+  const { data: saved, error } = await matchPropertySnapshot(query, property).select("*").maybeSingle();
+  if (error || !saved) throw new Error("Could not confirm the edit. Refresh the property and retry.");
+  let publicSyncPending = false;
+  if (binding) {
+    try {
+      const cache = await editBoundProperty(binding, { property: saved });
+      publicSyncPending = !cache.purged;
+    } catch {
+      publicSyncPending = true;
+    }
+  }
 
   await logAction({
     staff,
     action: "property.update_metadata",
     targetTable: "properties",
     targetId: propertyId,
-    metadata: updates,
+    metadata: { ...updates, publicSyncPending },
   });
 
   revalidatePath("/dashboard/cms");
+  if (publicSyncPending) throw new Error("Saved privately. Check the public listing before relying on the change.");
 }
 
 /** @param {FormData} formData */
@@ -227,7 +154,6 @@ export async function rejectProperty(formData) {
   revalidatePath("/dashboard/cms");
 }
 
-const ARCHIVE_STATE_COLUMNS = ["archived_at", "canonical_slug", "moderation_status", "pipeline_status", "lifecycle_state"];
 const PROPERTY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ARCHIVE_FEEDBACK = {
   archived: "Property archived.",
@@ -252,7 +178,7 @@ async function changeArchiveState({ staff, propertyIds, archive, reason, bulk = 
   const ids = [...new Set(propertyIds.map((id) => id.toLowerCase()))];
   const admin = createAdminClient();
   const { data: properties, error } = await admin.from("properties")
-    .select("id, slug, canonical_slug, published_at, permanently_removed_at, archived_at, moderation_status, pipeline_status, lifecycle_state, quietly_open_to_offers")
+    .select("*")
     .in("id", ids);
   if (error || properties?.length !== ids.length) {
     return { code: "unavailable", message: "Could not verify every selected property. Refresh the queue and try again." };
@@ -279,13 +205,10 @@ async function changeArchiveState({ staff, propertyIds, archive, reason, bulk = 
     const property = byId.get(id);
     const result = await changePropertyArchiveState({
       property, archive, reason, now,
-      unpublish: unpublishPropertyFromAirtable,
+      unpublish: unpublishBoundProperty,
       save: async (updates) => {
-        let query = admin.from("properties").update(updates).eq("id", id);
-        for (const column of ARCHIVE_STATE_COLUMNS) {
-          query = property[column] == null ? query.is(column, null) : query.eq(column, property[column]);
-        }
-        const { data, error } = await query.select("id").maybeSingle();
+        const query = admin.from("properties").update(updates).eq("id", id);
+        const { data, error } = await matchPropertySnapshot(query, property).select("id").maybeSingle();
         return !error && data?.id === id;
       },
     });

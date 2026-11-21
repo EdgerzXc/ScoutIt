@@ -11,7 +11,7 @@ describe("Phase 2: Dual-CMS & Moderation Invariants Verification", () => {
       const archive = read("mission-control/src/lib/propertyArchive.mjs");
       expect(archive).toContain('pipeline_status: archive ? "archived" : "pending"');
       expect(archive).toContain('lifecycle_state: archive ? "off_market" : "draft"');
-      expect(code).toContain("unpublish: unpublishPropertyFromAirtable");
+      expect(code).toContain("unpublish: unpublishBoundProperty");
       expect(code).toContain("logActionStrict");
     });
   });
@@ -24,10 +24,11 @@ describe("Phase 2: Dual-CMS & Moderation Invariants Verification", () => {
     });
 
     it("stamps canonical_slug, canonical_slug_locked_at, published_at, and lifecycle_state='live' in MMC approveProperty", () => {
-      const code = read("mission-control/src/app/dashboard/cms/actions.js");
+      const code = read("mission-control/src/lib/propertyPublication.mjs");
       expect(code).toContain("lifecycle_state: \"live\"");
-      expect(code).toContain("canonical_slug_locked_at: property.canonical_slug_locked_at || nowIso");
-      expect(code).toContain("published_at: property.published_at || nowIso");
+      expect(code).toContain("canonical_slug_locked_at: property.canonical_slug_locked_at || now");
+      expect(code).toContain("published_at: property.published_at || now");
+      expect(code).toContain("publication_external_record_id: binding.recordId");
       expect(code).toContain("pipeline_status: \"approved\"");
     });
   });

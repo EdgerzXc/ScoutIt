@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
-import { approveProperty, rejectProperty, bulkArchiveProperties } from "./actions";
-import { CheckCircle2, XCircle, Archive, MapPin, UploadCloud } from "lucide-react";
+import { rejectProperty, bulkArchiveProperties } from "./actions";
+import { XCircle, Archive, MapPin, UploadCloud } from "lucide-react";
 import { BulkSelectManager } from "@/components/dashboard/BulkSelectManager";
 import PropertyEditorPanel from "@/components/dashboard/PropertyEditorPanel";
 import { PropertyArchiveForm } from "./PropertyArchiveForm";
+import { PropertyApproveForm } from "./PropertyApproveForm";
 
 const REJECTION_REASONS = [
   { code: "photos_blurry", label: "Photos too blurry / low quality" },
@@ -160,16 +161,9 @@ function PropertyCard({ property: p, staff }) {
         )}
 
         <div className="flex flex-wrap gap-2">
-          <form action={approveProperty}>
-            <input type="hidden" name="propertyId" value={p.id} />
-            <button
-              className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-green-400/10 hover:bg-green-400/20 text-green-400 border border-green-400/20 transition-colors"
-              title="Publishes to Airtable (Approved_For_ScoutIt) — this puts the listing on the live public site"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Approve &amp; Publish to live site
-            </button>
-          </form>
+          {(p.moderation_status === "pending" || p.moderation_status === "rejected") && (
+            <PropertyApproveForm propertyId={p.id} title={p.title} />
+          )}
 
           {canArchive && (
             <PropertyArchiveForm propertyId={p.id} title={p.title} isArchived={isArchived} />

@@ -101,4 +101,14 @@ describe('insertProperty carries SEO like updateProperty', () => {
     expect(fields.SEO_Description).toBeUndefined();
     expect(fields.SEO_JSON_LD).toBeUndefined();
   });
+
+  it('publishes the plain-text metadata prepared in the staff submissions queue', async () => {
+    const fields = await postPayload({
+      ...base,
+      details: { seo_title: '<b>Draft name</b>', seo_description: 'Draft facts' },
+    });
+    expect(fields.SEO_Title).toBe('Draft name');
+    expect(fields.SEO_Description).toBe('Draft facts');
+    expect(fields.SEO_JSON_LD).toBeUndefined();
+  });
 });

@@ -10,6 +10,7 @@ import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
 import { reverseMapCategoryFields } from "./propertyFieldMapping";
 import { extractPhotoUrls, imageMediaUrl, safeFloorPlans, spatialEmbedUrl, videoEmbedUrl } from "./propertyMedia";
 import { isSamplePropertySlug } from "./sampleInventory";
+import { stripAllTags } from "./sanitize";
 
 
 export class AirtableRecordNotFoundError extends Error {
@@ -651,6 +652,15 @@ function photoFields(data) {
 // EXPORTED CMS METHODS
 // ═══════════════════════════════════════════════════════════════
 
+function draftSeoFields(details) {
+  const title = typeof details?.seo_title === "string" ? stripAllTags(details.seo_title).slice(0, 60) : "";
+  const description = typeof details?.seo_description === "string" ? stripAllTags(details.seo_description).slice(0, 160) : "";
+  return {
+    ...(title ? { SEO_Title: title } : {}),
+    ...(description ? { SEO_Description: description } : {}),
+  };
+}
+
 // Insert a new property into Airtable. Returns the created record — its fields
 // include the Slug Airtable computed, so callers persist/display that as the
 // canonical public URL.
@@ -694,6 +704,7 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
             "Unknown",
           Units_JSON: unitsJson,
           Approved_For_ScoutIt: data.approved_for_scoutit !== false,
+          ...draftSeoFields(data.details),
           // Insert must carry what update carries: a first-published row that
           // omits SEO ships without it until an update happens. Conditional so
           // an absent value writes nothing (never a blank claim).
@@ -770,7 +781,7 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   const urlPatch = `${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`;
   
   // We only update what is provided. For ScoutIt, title/location/type updates.
-  const fieldsToUpdate = {};
+  const fieldsToUpdate = data.approved_for_scoutit === true ? draftSeoFields(data.details) : {};
   if (data.title) fieldsToUpdate.Title = data.title;
   if (data.location) fieldsToUpdate.Location = data.location;
   if (Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude))) {

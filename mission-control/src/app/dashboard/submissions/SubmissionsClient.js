@@ -19,7 +19,7 @@ import {
   Building,
 } from "lucide-react";
 
-export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts, pdfQueueError, staffTier }) {
+export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts, pdfQueueError, submissionQueueError, staffTier }) {
   const [activeTab, setActiveTab] = useState("submissions"); // submissions, pdf_drafts
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [pdfDrafts, setPdfDrafts] = useState(initialPdfDrafts);
@@ -33,7 +33,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
   const isOpsManager = staffTier >= 2;
 
   const handleApprove = async (prop) => {
-    if (!isOpsManager) return;
+    if (!isOpsManager || busyId) return;
     setError(null);
     setSuccess(null);
     setBusyId(prop.id);
@@ -44,10 +44,12 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
         reason: `Staff approval by tier ${staffTier} operator`,
       });
 
-      if (res.error) {
-        setError(res.error);
+      if (!res.success) {
+        setError(res.error || "Could not confirm publication. Refresh the queue before trying again.");
       } else {
-        setSuccess(`Listing "${prop.title}" successfully approved to live catalogue! Public cache purged.`);
+        setSuccess(res.publicCachePending
+          ? `Approved "${prop.title}". Check the public listing before sharing it.`
+          : `Published "${prop.title}".`);
         setSubmissions((prev) => prev.filter((p) => p.id !== prop.id));
       }
     } catch (err) {
@@ -119,7 +121,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
   };
 
   const handleGenerateSeo = async (prop) => {
-    if (!isOpsManager) return;
+    if (!isOpsManager || busyId) return;
     setError(null);
     setSuccess(null);
     setBusyId(`seo-${prop.id}`);
@@ -129,7 +131,8 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
       if (res.error) {
         setError(res.error);
       } else {
-        setSuccess(`Generated SEO title: "${res.title}"`);
+        if (res.publicationPending) setSuccess(`Search metadata saved for "${prop.title}". It will go live with the listing.`);
+        else setSuccess(res.publicCachePending ? "Metadata saved. Check the public listing before sharing it." : "Public search metadata updated.");
       }
     } catch (err) {
       setError(err.message || "SEO generation failed.");
@@ -175,23 +178,32 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
           </span>
         </div>
 
-        {error && (
-          <div role="alert" className="mt-4 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+        <div role="alert">
+          {error && (
+            <div className="mt-4 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>{error}</span>
+            </div>
+          )}
+        </div>
 
-        {success && (
-          <div role="status" className="mt-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-mono flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{success}</span>
-          </div>
-        )}
+        <div role="status">
+          {success && (
+            <div className="mt-4 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-mono flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>{success}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tab 1: Submissions */}
-      {activeTab === "submissions" && (
+      {activeTab === "submissions" && submissionQueueError && (
+        <p role="alert" className="rounded-lg border border-line p-4 text-sm text-white/80">
+          {submissionQueueError} Reload this page to try again.
+        </p>
+      )}
+      {activeTab === "submissions" && !submissionQueueError && (
         <div className="p-6 rounded-xl border border-line bg-surface">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -224,7 +236,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                           <div className="text-xs font-mono text-white/60">ID: {prop.id}</div>
                         </td>
                         <td className="py-3.5 text-white/70">
-                          {prop.location || prop.city || "—"}
+                          {prop.location || "—"}
                         </td>
                         <td className="py-3.5 font-mono text-white/60">
                           {prop.space_category || prop.type || "Commercial"}
@@ -242,18 +254,19 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                             {isOpsManager && (
                               <button
                                 onClick={() => handleGenerateSeo(prop)}
-                                disabled={isSeoBusy}
-                                title="Generate SEO Title & Description"
-                                className="p-1.5 rounded border border-line hover:border-gold/40 text-white/60 hover:text-gold transition-colors disabled:opacity-50"
+                                disabled={Boolean(busyId)}
+                                aria-busy={isSeoBusy}
+                                aria-label={`Prepare search metadata for ${prop.title}`}
+                                className="min-h-11 min-w-11 inline-flex items-center justify-center rounded border border-line hover:border-gold/40 text-white/60 hover:text-gold transition-colors disabled:opacity-50"
                               >
-                                <Sparkles className="w-3.5 h-3.5" />
+                                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                               </button>
                             )}
                             {isOpsManager ? (
                               <button
                                 onClick={() => handleApprove(prop)}
-                                disabled={isBusy}
-                                className="px-3 py-1 rounded bg-gold text-black font-medium text-xs font-mono uppercase tracking-wider hover:bg-gold/90 transition-colors disabled:opacity-50"
+                                disabled={Boolean(busyId)}
+                                className="min-h-11 px-3 py-1 rounded bg-gold text-black font-medium text-xs font-mono uppercase tracking-wider hover:bg-gold/90 transition-colors disabled:opacity-50"
                               >
                                 {isBusy ? "Publishing..." : "Approve to Live"}
                               </button>

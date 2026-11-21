@@ -13,7 +13,7 @@ export default async function SubmissionsPage() {
   if (!staff) redirect("/?error=NotAuthorized");
   if (staff.mfaRequired) redirect("/dashboard/mfa");
 
-  const { submissions = [], pdfDrafts = [], pdfQueueError } = await loadSubmissionsQueue();
+  const { submissions = [], pdfDrafts = [], pdfQueueError, submissionQueueError } = await loadSubmissionsQueue();
 
   return (
     <div className="space-y-6">
@@ -31,6 +31,7 @@ export default async function SubmissionsPage() {
 
       <SubmissionsClient
         initialSubmissions={submissions}
+        submissionQueueError={submissionQueueError}
         initialPdfDrafts={pdfDrafts}
         pdfQueueError={pdfQueueError}
         staffTier={staff.tier}

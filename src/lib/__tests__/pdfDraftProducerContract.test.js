@@ -63,12 +63,14 @@ describe("A-076 · PDF-assisted drafts are tagged at creation", () => {
     for (const [file, gate, write] of [
       ["src/app/api/dashboard/publish/route.js", "getPdfPublicationBlock(currentSubmission)", "await insertProperty("],
       ["src/app/api/admin/approve/route.js", "getPdfPublicationBlock(submission)", "await insertProperty("],
-      ["mission-control/src/app/dashboard/cms/actions.js", "getPdfPublicationBlock(property)", "await publishPropertyToAirtable("],
-      ["mission-control/src/app/dashboard/submissions/actions.js", "getPdfPublicationBlock(property)", "await publishPropertyToAirtable("],
+      ["mission-control/src/lib/staffPropertyApproval.js", "getPdfPublicationBlock(property)", "await approvePropertyPublication("],
     ]) {
       const code = read(file);
       expect(code.indexOf(gate)).toBeGreaterThan(0);
       expect(code.indexOf(write)).toBeGreaterThan(code.indexOf(gate));
+    }
+    for (const file of ["cms/actions.js", "submissions/actions.js"]) {
+      expect(read(`mission-control/src/app/dashboard/${file}`)).toContain("approveStaffProperty({");
     }
   });
 

@@ -24,6 +24,7 @@ import { reverseMapCategoryFields } from "./propertyFieldMapping";
 import { escapeAirtableFormulaString } from "./airtableFormula.mjs";
 import { purgePublicCatalogueCache } from "./publicCatalogueCache";
 import { parsePointToLatLng } from "./geoPoint.mjs";
+import { stripPropertyTags } from "./propertyText.mjs";
 
 const BASE_URL = "https://api.airtable.com/v0";
 const TABLE = "PROPERTIES_CMS";
@@ -80,110 +81,129 @@ function listingFields(property) {
     // nothing was erased and the listing still looked published.
     //
     // Spread FIRST so the explicit fields below always win on any key overlap.
-    ...reverseMapCategoryFields(property.details),
+    ...reverseMapCategoryFields(property.details, category),
 
     Title: property.title,
     Location: property.location || "",
     SpaceTypography: property.type ? cap(property.type) : "Unknown",
     SpaceCategory: category ? cap(category) : "Unknown",
-    // THE live-site gate. Set explicitly on BOTH insert and update so staff
-    // publishing always flips a previously-unpublished record live (the main
-    // lib's update path leaves it untouched; that's owner-flow behavior).
-    Approved_For_ScoutIt: true,
-    ...(property.details?.units_inventory
-      ? { Units_JSON: JSON.stringify(property.details.units_inventory) }
-      : {}),
+    ...(property.last_verified_date ? { Last_Verified_Date: property.last_verified_date } : {}),
     ...coordinateFields(property),
     ...photoFields(property),
   };
 }
 
+function draftSeoFields(details) {
+  const title = typeof details?.seo_title === "string" ? stripPropertyTags(details.seo_title).slice(0, 60) : "";
+  const description = typeof details?.seo_description === "string" ? stripPropertyTags(details.seo_description).slice(0, 160) : "";
+  return {
+    ...(title ? { SEO_Title: title } : {}),
+    ...(description ? { SEO_Description: description } : {}),
+  };
+}
+
 async function findRecordIdBySlug(apiKey, baseId, slug) {
   const safe = escapeAirtableFormulaString(slug);
-  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${safe}'`)}&maxRecords=1`;
+  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${safe}'`)}&maxRecords=2`;
   const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}?${params}`, {
     headers: { Authorization: `Bearer ${apiKey}` },
+    redirect: "error",
+    signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) throw new Error(`Airtable lookup failed: ${res.status}`);
   const json = await res.json();
+  if (json.records?.length > 1) throw new PublicationBindingError("Airtable returned more than one record for this address.");
   return json.records?.[0]?.id ?? null;
 }
 
-/**
- * Publish (or re-publish) a Supabase property row to the live Airtable CMS.
- * Update-first by slug, insert if it doesn't exist. Throws on any failure —
- * callers must NOT mark the property approved unless this returns.
- *
- * @param {object} property - full Supabase `properties` row
- * @returns {Promise<{slug: string, recordId: string, mode: "updated"|"created"}>}
- *          slug = Airtable's COMPUTED slug (canonical)
- */
-export async function publishPropertyToAirtable(property) {
+class PublicationBindingError extends Error {
+  code = "AIRTABLE_PUBLICATION_BINDING";
+}
+
+async function mutatePropertyRecord(method, recordId, payload) {
   const { apiKey, baseId } = getCreds();
-  if (!property?.title) {
-    throw new Error("Property has no title — cannot publish to Airtable.");
-  }
-
-  const fields = listingFields(property);
-  const lookupSlug = property.canonical_slug || property.slug;
-
-  // 1. Update path — only if we have a slug to find the record by.
-  if (lookupSlug) {
-    const recordId = await findRecordIdBySlug(apiKey, baseId, lookupSlug);
-    if (recordId) {
-      // GAP-33: Once canonical_slug is locked, never overwrite Airtable Title if it would
-      // recompute Airtable's formula Slug and break the public URL.
-      const patchFields = { ...fields };
-      if (property.canonical_slug && property.canonical_slug_locked_at) {
-        delete patchFields.Title;
-      }
-
-      const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        // typecast lets singleSelect choices auto-create instead of 422ing.
-        body: JSON.stringify({ fields: patchFields, typecast: true }),
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Airtable update failed: ${res.status} ${errText}`);
-      }
-      const updated = await res.json();
-      const cache = await purgePublicCatalogueCache();
-      return {
-        slug: property.canonical_slug || updated?.fields?.Slug || lookupSlug,
-        recordId,
-        mode: "updated",
-        cache,
-      };
-    }
-  }
-
-  // 2. Insert path.
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  if (recordId != null && !/^rec[A-Za-z0-9]+$/.test(recordId)) throw new Error("Invalid Airtable record reference.");
+  const url = `${BASE_URL}/${baseId}/${TABLE}${recordId ? `/${recordId}` : ""}`;
+  const response = await fetch(url, {
+    method,
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    redirect: "error",
+    signal: AbortSignal.timeout(5000),
+    ...(payload ? { body: JSON.stringify(payload) } : {}),
   });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Airtable insert failed: ${res.status} ${errText}`);
+  if (!response.ok) throw new Error(`Airtable did not confirm the property change (${response.status}).`);
+  return response.json();
+}
+
+async function patchBoundProperty(binding, fields, approved) {
+  const { apiKey, baseId } = getCreds();
+  if (!binding?.slug || !/^rec[A-Za-z0-9]+$/.test(binding.recordId || "")) {
+    throw new PublicationBindingError("The verified public record is missing.");
   }
-  const json = await res.json();
-  const record = json.records?.[0];
-  if (!record?.fields?.Slug) {
-    // Record created but no computed slug back — surface loudly rather than
-    // silently persisting a broken public URL.
-    throw new Error("Airtable created the record but returned no computed Slug.");
+  const found = await findRecordIdBySlug(apiKey, baseId, binding.slug);
+  if (found !== binding.recordId) throw new PublicationBindingError("The canonical address belongs to a different record.");
+  const record = await mutatePropertyRecord("PATCH", binding.recordId, { fields, typecast: true });
+  const flag = record?.fields?.Approved_For_ScoutIt;
+  if (record?.id !== binding.recordId || record.fields?.Slug !== binding.slug ||
+      (approved === false ? flag !== false && flag !== undefined : flag !== true)) {
+    throw new Error("Airtable did not confirm the expected public record and its state.");
   }
-  const cache = await purgePublicCatalogueCache();
-  return { slug: record.fields.Slug, recordId: record.id, mode: "created", cache };
+}
+
+export const publicationProvider = {
+  async stage(property) {
+    if (!property.title?.trim()) throw new Error("A property title is required.");
+    const fields = {
+      ...listingFields(property),
+      ...draftSeoFields(property.details),
+      Approved_For_ScoutIt: false,
+      ...(Array.isArray(property.details?.units_inventory)
+        ? { Units_JSON: JSON.stringify(property.details.units_inventory) }
+        : {}),
+    };
+    const response = await mutatePropertyRecord("POST", null, { records: [{ fields }], typecast: true });
+    const record = response?.records?.[0];
+    const flag = record?.fields?.Approved_For_ScoutIt;
+    const slug = record?.fields?.Slug;
+    if (!/^rec[A-Za-z0-9]+$/.test(record?.id || "") || typeof slug !== "string" || !slug.trim() ||
+        (flag !== false && flag !== undefined)) {
+      throw new Error("Airtable did not confirm the staged draft and its computed address.");
+    }
+    return { slug, recordId: record.id };
+  },
+  async activate(binding, property) {
+    const fields = { ...listingFields(property), ...draftSeoFields(property.details) };
+    delete fields.Title;
+    await patchBoundProperty(binding, { ...fields, Approved_For_ScoutIt: true }, true);
+  },
+  async withdraw(recordId) {
+    const record = await mutatePropertyRecord("PATCH", recordId, { fields: { Approved_For_ScoutIt: false } });
+    const flag = record?.fields?.Approved_For_ScoutIt;
+    if (record?.id !== recordId || !record.fields || (flag !== false && flag !== undefined)) {
+      throw new Error("Airtable did not confirm removal.");
+    }
+  },
+  async removeDraft(recordId) {
+    const result = await mutatePropertyRecord("DELETE", recordId);
+    if (result?.id !== recordId || result.deleted !== true) throw new Error("Airtable did not confirm draft cleanup.");
+  },
+  refresh: (withdrawn = []) => purgePublicCatalogueCache({ withdrawn }),
+};
+
+export async function editBoundProperty(binding, { property, seoTitle, seoDescription }) {
+  const fields = property ? listingFields(property) : {};
+  delete fields.Title;
+  delete fields.Last_Verified_Date;
+  if (seoTitle !== undefined) fields.SEO_Title = seoTitle;
+  if (seoDescription !== undefined) fields.SEO_Description = seoDescription;
+  await patchBoundProperty(binding, fields, true);
+  return publicationProvider.refresh();
+}
+
+export async function unpublishBoundProperty(binding) {
+  await patchBoundProperty(binding, { Approved_For_ScoutIt: false }, false);
+  const cache = await publicationProvider.refresh([binding]);
+  return { recordId: binding.recordId, cache };
 }
 
 /**

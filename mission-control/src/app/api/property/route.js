@@ -22,12 +22,17 @@ import {
   canonicalSlugFor,
   titleChangeWouldDriftCanonicalUrl,
 } from "@/lib/canonicalSlugPolicy.mjs";
-import { publishPropertyToAirtable } from "@/lib/airtable";
+import { editBoundProperty } from "@/lib/airtable";
+import { getPropertyBinding, isLiveProperty, isProtectedProperty, matchPropertySnapshot } from "@/lib/propertyPublication.mjs";
+import { sanitizePropertyDetails, stripPropertyTags } from "@/lib/propertyText.mjs";
 // Internal/staff-only keys must never arrive from a client payload. Import the
 // registry's own predicate rather than re-deriving one here: it is the single
 // definition of what "internal" means, and a second guess would drift from it
 // the moment a field's visibility changes.
 import { isInternal } from "@/lib/propertyFieldRegistry";
+
+const PROPERTY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TEXT_LIMITS = { title: 255, location: 255, seo_title: 255, seo_description: 500 };
 
 // ── GET /api/property?id=… ──────────────────────────────────────
 // Returns the FULL row (including `details`), fetched only when a staff member
@@ -43,7 +48,7 @@ export async function GET(request) {
   }
 
   const id = new URL(request.url).searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  if (!PROPERTY_ID.test(id || "")) return NextResponse.json({ error: "A valid property ID is required." }, { status: 400 });
 
   const admin = createAdminClient();
   const { data, error } = await admin.from("properties").select("*").eq("id", id).single();
@@ -66,9 +71,21 @@ export async function PATCH(request) {
   }
 
   try {
-    const body = await request.json();
-    const { id } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const body = await request.json().catch(() => null);
+    const id = body?.id;
+    if (typeof id !== "string" || !PROPERTY_ID.test(id) ||
+        (body.details !== undefined && (!body.details || typeof body.details !== "object" || Array.isArray(body.details)))) {
+      return NextResponse.json({ error: "Invalid property edit." }, { status: 400 });
+    }
+    const text = {};
+    for (const [key, max] of Object.entries(TEXT_LIMITS)) {
+      if (body[key] === undefined) continue;
+      if (typeof body[key] !== "string" || body[key].length > max) {
+        return NextResponse.json({ error: "Invalid property edit." }, { status: 400 });
+      }
+      text[key] = stripPropertyTags(body[key]);
+      if (!text[key]) return NextResponse.json({ error: "Enter a value for the edited field." }, { status: 400 });
+    }
 
     const admin = createAdminClient();
     const { data: current, error: loadError } = await admin
@@ -81,7 +98,10 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
-    if (titleChangeWouldDriftCanonicalUrl(current, body.title)) {
+    if (isProtectedProperty(current)) {
+      return NextResponse.json({ error: "This listing must use the protected review workflow." }, { status: 409 });
+    }
+    if (titleChangeWouldDriftCanonicalUrl(current, text.title)) {
       const canonicalSlug = canonicalSlugFor(current);
       await logAction({
         staff,
@@ -92,7 +112,7 @@ export async function PATCH(request) {
         metadata: {
           canonical_slug: canonicalSlug,
           current_title: current.title,
-          attempted_title: String(body.title),
+          attempted_title: text.title,
         },
       });
       return NextResponse.json(
@@ -106,55 +126,49 @@ export async function PATCH(request) {
       );
     }
 
-    const incoming = body.details || {};
+    const live = isLiveProperty(current);
+    const binding = live ? getPropertyBinding(current) : null;
+    if (live && !binding) {
+      return NextResponse.json({ error: "This listing requires publication identity reconciliation." }, { status: 409 });
+    }
+    if (!live && (text.seo_title || text.seo_description)) {
+      return NextResponse.json({ error: "Public SEO can be edited once the listing is live." }, { status: 409 });
+    }
+
+    const incoming = sanitizePropertyDetails(body.details || {});
     const rejected = Object.keys(incoming).filter(isInternal);
     const safeDetails = Object.fromEntries(
       Object.entries(incoming).filter(([key]) => !isInternal(key)),
     );
-    if (rejected.length) {
-      console.warn(`[MC PROPERTY] Ignored internal keys from client: ${rejected.join(", ")}`);
-    }
-
     // MERGE, never replace. Saving "Commercial" must not wipe "Residential" —
     // the editor deliberately posts one section at a time.
     const patch = { details: { ...(current.details || {}), ...safeDetails } };
-    for (const key of ["title", "location", "seo_title", "seo_description"]) {
-      if (body[key] !== undefined) patch[key] = body[key];
+    for (const key of ["title", "location"]) {
+      if (text[key] !== undefined) patch[key] = text[key];
     }
 
-    const { data: saved, error: saveError } = await admin
-      .from("properties")
-      .update(patch)
-      .eq("id", id)
-      .select()
-      .single();
+    const query = admin.from("properties").update(patch).eq("id", id);
+    const { data: saved, error: saveError } = await matchPropertySnapshot(query, current).select().maybeSingle();
 
     if (saveError) {
       console.error("[MC PROPERTY] Supabase update failed:", saveError);
       return NextResponse.json({ error: "Could not save the property." }, { status: 500 });
     }
+    if (!saved) return NextResponse.json({ error: "The property changed while saving. Reload it and retry." }, { status: 409 });
 
     // Mirror to the public CMS only for listings that are actually live.
     // An Airtable failure must NOT discard the Supabase write — return success
     // with a warning so the staff member knows the public site lagged behind.
     let warning = null;
-    if (current.pipeline_status === "approved") {
+    if (binding) {
       try {
-        const result = await publishPropertyToAirtable(saved);
-        if (!result.cache?.purged) {
-          warning = `Saved to Airtable, but the public catalogue cache was not cleared: ${result.cache?.detail || "unknown error"}`;
-        }
-        // Ordinary edits must never rewrite the first-publication URL.
-        // If Airtable reports anything else, preserve Supabase's canonical value
-        // and surface reconciliation instead of silently accepting formula drift.
-        const canonicalSlug = canonicalSlugFor(current);
-        if (result?.slug && canonicalSlug && result.slug !== canonicalSlug) {
-          warning =
-            "Saved, but Airtable returned a different slug. ScoutIt preserved the canonical URL; publication reconciliation is required.";
-        }
+        const cache = await editBoundProperty(binding, {
+          property: saved, seoTitle: text.seo_title, seoDescription: text.seo_description,
+        });
+        if (!cache.purged) warning = "Saved to Airtable. Check the public page before relying on the change.";
       } catch (airtableErr) {
-        console.error("[MC PROPERTY] Airtable sync failed:", airtableErr);
-        warning = "Saved, but the public site sync failed — it will retry on the next save.";
+        console.error("[MC PROPERTY] Airtable sync failed:", airtableErr?.code || airtableErr?.name);
+        warning = "Saved privately. The public listing update needs a retry.";
       }
     }
 

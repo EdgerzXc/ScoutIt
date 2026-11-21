@@ -4,6 +4,7 @@ import { changePropertyArchiveState, isPropertyArchiveAuditAction } from "../../
 const live = {
   slug: "live-listing",
   canonical_slug: "live-listing",
+  publication_external_record_id: "recFixture",
   pipeline_status: "approved",
   lifecycle_state: "live",
   moderation_status: "approved",
@@ -27,7 +28,7 @@ describe("Mission Control archive consistency", () => {
     let finish;
     const input = operation({ unpublish: vi.fn(() => new Promise((resolve) => { finish = resolve; })) });
     const pending = changePropertyArchiveState(input);
-    expect(input.unpublish).toHaveBeenCalledExactlyOnceWith("live-listing");
+    expect(input.unpublish).toHaveBeenCalledExactlyOnceWith({ slug: "live-listing", recordId: "recFixture" });
     expect(input.save).not.toHaveBeenCalled();
     finish({ recordId: "recFixture", cache: { purged: true } });
     await expect(pending).resolves.toEqual({ stage: "saved", cachePending: false });
@@ -66,8 +67,15 @@ describe("Mission Control archive consistency", () => {
   it("restores a previously published archive to Pending while verifying public removal", async () => {
     const input = operation({ archive: false, property: { ...live, moderation_status: "archived", pipeline_status: "archived", lifecycle_state: "off_market" } });
     await expect(changePropertyArchiveState(input)).resolves.toMatchObject({ stage: "saved" });
-    expect(input.unpublish).toHaveBeenCalledWith("live-listing");
+    expect(input.unpublish).toHaveBeenCalledWith({ slug: "live-listing", recordId: "recFixture" });
     expect(input.save).toHaveBeenCalledWith(expect.objectContaining({ archived_at: null, pipeline_status: "pending", lifecycle_state: "draft" }));
+  });
+
+  it("leaves a legacy public listing untouched until its record is verified", async () => {
+    const input = operation({ property: { ...live, publication_external_record_id: null } });
+    await expect(changePropertyArchiveState(input)).resolves.toEqual({ stage: "reference" });
+    expect(input.unpublish).not.toHaveBeenCalled();
+    expect(input.save).not.toHaveBeenCalled();
   });
 
   it("rechecks public removal on an archive retry while preserving the original private archive", async () => {
