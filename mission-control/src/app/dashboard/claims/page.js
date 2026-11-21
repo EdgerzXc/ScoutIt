@@ -83,7 +83,7 @@ export default async function ClaimsPage() {
               claimedRelationship: claim.claimed_relationship,
             });
             const unscanned = claim.documents.filter(
-              (d) => d.malware_scan_status !== "clean"
+              (d) => d.malware_scan_status === "pending"
             ).length;
 
             return (
@@ -219,20 +219,21 @@ export default async function ClaimsPage() {
                                   : "text-amber-400 bg-amber-400/10 border-amber-400/20"
                               }`}
                             >
-                              scan: {d.malware_scan_status || "unknown"}
+                              {d.malware_scan_status === "clean" ? "Scan verified" :
+                                d.malware_scan_status === "blocked" ? "Blocked by security scan" : "Scan pending"}
                             </span>
-                            {d.previewUrl ? (
+                            {d.downloadHref ? (
                               <a
-                                href={d.previewUrl}
+                                href={d.downloadHref}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F7C64E] hover:bg-[#E8AE3C] text-black font-semibold text-[12px] tracking-wider uppercase transition-colors"
+                                className="inline-flex min-h-11 items-center gap-1 px-3 rounded bg-[var(--accent-bright)] hover:bg-[var(--accent)] text-black font-semibold text-xs tracking-wider uppercase transition-colors"
                               >
                                 <Eye className="w-3 h-3" />
-                                Inspect Document
+                                Download document
                               </a>
                             ) : (
-                              <span className="text-[12px] text-white/60">Preview unavailable</span>
+                              <span className="text-xs text-white/60">Download unavailable</span>
                             )}
                           </div>
                         </li>

@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { hasVerifiedClaimScan } from "../src/lib/claimDocumentPath.mjs";
 import { reviewPropertyClaim } from "../src/lib/claimReview.mjs";
+import { freshClamdSignatures, processPrivateClaimDocuments, removeExpiredClaimUploads } from "../src/lib/claimPrivateScanner.mjs";
 
 import {
   CLAIM_STATUSES,
@@ -247,9 +248,10 @@ test("the reviewer is shown the conflict, not left to work it out", () => {
 });
 
 test("an unscanned document is called out rather than quietly listed", () => {
-  assert.match(page, /malware_scan_status !== "clean"/);
+  assert.match(page, /malware_scan_status === "pending"/);
   assert.match(page, /needs a verified security scan/);
-  assert.match(actions, /if \(scanConfirmed && canSign\)/);
+  assert.match(actions, /downloadHref: scanConfirmed/);
+  assert.doesNotMatch(actions, /createSignedUrl/);
 });
 
 test("a claim attachment needs a verified scan for this claimant and listing", () => {
@@ -257,10 +259,75 @@ test("a claim attachment needs a verified scan for this claimant and listing", (
     private_storage_path: "claimant/listing/1763654400000_title.pdf",
     checksum: "a".repeat(64),
     malware_scan_status: "clean",
+    malware_scan_engine: "clamd-local-v1",
+    malware_scan_object_version: "version-a",
   };
   assert.equal(hasVerifiedClaimScan(reviewerRecord, "claimant", ["listing"]), true);
   assert.equal(hasVerifiedClaimScan({ ...reviewerRecord, checksum: null }, "claimant", ["listing"]), false);
   assert.equal(hasVerifiedClaimScan({ ...reviewerRecord, malware_scan_status: "pending" }, "claimant", ["listing"]), false);
+  assert.equal(hasVerifiedClaimScan({ ...reviewerRecord, malware_scan_engine: "magic-bytes" }, "claimant", ["listing"]), false);
   assert.equal(hasVerifiedClaimScan(reviewerRecord, "claimant", ["another-listing"]), false);
   assert.equal(hasVerifiedClaimScan(reviewerRecord, "another-claimant", ["listing"]), false);
+});
+
+test("a stale or unavailable signature database cannot produce claim scan receipts", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  assert.equal(freshClamdSignatures("ClamAV 1.4.3/28000/Fri Nov 20 13:00:00 2026", now), true);
+  assert.equal(freshClamdSignatures("ClamAV 1.4.3/28000/Mon Nov 16 13:00:00 2026", now), false);
+  assert.equal(freshClamdSignatures("ClamAV 1.4.3", now), false);
+});
+
+test("the worker binds the trusted verdict to one immutable version", async () => {
+  const file = new Blob(["%PDF-1.7 fixture"], { type: "application/pdf" });
+  const job = {
+    document_id: "document", lease: "lease", object_path: "claimant/listing/1763654400000_title.pdf",
+    declared_mime: "application/pdf", byte_count: file.size, claimant_id: "claimant", property_id: "listing",
+  };
+  let version = "version-a";
+  let filed;
+  const storage = {
+    getBucket: async () => ({ data: { public: false } }),
+    from: () => ({
+      info: async () => ({ data: { size: file.size, contentType: file.type, version } }),
+      download: async () => ({ data: file }),
+    }),
+  };
+  const admin = {
+    storage,
+    rpc: async (method, args) => {
+      if (method === "lease_claim_document_scans") return { data: [job] };
+      filed = args;
+      return { data: true };
+    },
+  };
+  assert.equal((await processPrivateClaimDocuments(admin, async () => "clean")).clean, 1);
+  assert.equal(filed.p_version, "version-a");
+  assert.match(filed.p_checksum, /^[0-9a-f]{64}$/);
+  assert.equal((await processPrivateClaimDocuments(admin, async () => {
+    version = "version-b";
+    return "clean";
+  })).pending, 1);
+  assert.equal(filed.p_checksum, null);
+  assert.equal((await processPrivateClaimDocuments(admin, async () => "blocked")).blocked, 1);
+  assert.equal(filed.p_version, null);
+});
+
+test("expiry removal confirms the original object and its absence using Storage", async () => {
+  const candidates = [
+    { object_path: "old-upload", object_version: "version-a" },
+    { object_path: "replaced-upload", object_version: "previous-version" },
+  ];
+  const removed = [];
+  const admin = {
+    rpc: async () => ({ data: candidates }),
+    storage: {
+      getBucket: async () => ({ data: { public: false } }),
+      from: () => ({
+        info: async (path) => removed.includes(path) ? { error: { status: 404 } } : { data: { version: "version-a" } },
+        remove: async ([path]) => removed.push(path),
+      }),
+    },
+  };
+  assert.deepEqual(await removeExpiredClaimUploads(admin), { removed: 1, unconfirmed: 1 });
+  assert.deepEqual(removed, ["old-upload"]);
 });

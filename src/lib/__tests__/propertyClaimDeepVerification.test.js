@@ -47,7 +47,7 @@ describe('In-Depth Verification: Property Claim System Robustness', () => {
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301', owner_id: 'current-lister', verified: false },
+            data: { id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301', owner_id: 'current-lister', verified: false, pipeline_status: 'approved' },
           }),
         }),
       }),

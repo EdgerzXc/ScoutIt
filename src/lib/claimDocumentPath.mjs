@@ -1,6 +1,6 @@
 export const CLAIM_DOCUMENT_BUCKET = "claim-documents";
-export const CLAIM_DOCUMENT_MAX_BYTES = 15 * 1024 * 1024;
 export const CLAIM_MULTIPART_FILE_MAX_BYTES = 4 * 1024 * 1024;
+export const CLAIM_DOCUMENT_SCAN_ENGINE = "clamd-local-v1";
 
 export const CLAIM_DOCUMENT_TYPES = new Set([
   "title_deed", "tct_cct_title", "authority_to_sell", "management_agreement", "prc_license",
@@ -30,6 +30,15 @@ export function claimDocumentFilename(path, userId, propertyIds) {
 
 export function hasVerifiedClaimScan(document, userId, propertyIds) {
   return document.malware_scan_status === "clean" &&
+    document.malware_scan_engine === CLAIM_DOCUMENT_SCAN_ENGINE &&
+    typeof document.malware_scan_object_version === "string" && document.malware_scan_object_version.length > 0 &&
     /^[a-f0-9]{64}$/i.test(document.checksum || "") &&
     Boolean(claimDocumentFilename(document.private_storage_path, userId, propertyIds));
+}
+
+export function isPublicClaimListing(property) {
+  return property?.pipeline_status === "approved" && !property.archived_at && !property.withdrawn_at &&
+    !property.permanently_removed_at &&
+    ![property.lifecycle_state, property.moderation_status].some((status) =>
+      ["archived", "off_market", "staff_suspended", "suspended", "permanently_removed", "rejected", "quarantined"].includes(status));
 }

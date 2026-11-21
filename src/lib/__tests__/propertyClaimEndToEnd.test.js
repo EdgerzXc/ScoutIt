@@ -195,7 +195,7 @@ describe('Owner Property Claim Simulation (End-to-End User Journey)', () => {
       from: vi.fn().mockReturnValue({
         upload: vi.fn().mockResolvedValue({ data: { path: 'dummy/path' }, error: null }),
         info: vi.fn().mockImplementation(async (path) => ({
-          data: { contentType: path.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg', size: 20 },
+          data: { contentType: path.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg', size: 20, createdAt: new Date().toISOString() },
         })),
         createSignedUrl: vi.fn().mockResolvedValue({ data: { signedUrl: 'https://supabase.co/signed/doc.pdf' }, error: null }),
       }),

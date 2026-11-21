@@ -10,7 +10,7 @@ import {
 import { notifyUser } from "@/lib/notifications";
 import { unpublishBoundProperty } from "@/lib/airtable";
 import { reviewPropertyClaim } from "@/lib/claimReview.mjs";
-import { hasVerifiedClaimScan, CLAIM_DOCUMENT_BUCKET } from "@/lib/claimDocumentPath.mjs";
+import { hasVerifiedClaimScan } from "@/lib/claimDocumentPath.mjs";
 
 /**
  * Ownership claim review.
@@ -25,6 +25,16 @@ import { hasVerifiedClaimScan, CLAIM_DOCUMENT_BUCKET } from "@/lib/claimDocument
  */
 
 /** The claims queue, with everything a reviewer needs to judge one. Ops Manager+. */
+async function loadClaimDocuments(admin, claimIds) {
+  const columns = "id, claim_id, document_type, original_filename, private_storage_path, file_size_bytes, checksum, malware_scan_status";
+  const result = await admin.from("property_claim_documents")
+    .select(columns + ", malware_scan_engine, malware_scan_object_version").in("claim_id", claimIds);
+  if (["42703", "PGRST204"].includes(result.error?.code)) {
+    return admin.from("property_claim_documents").select(columns).in("claim_id", claimIds);
+  }
+  return result;
+}
+
 export async function loadClaimQueue() {
   const staff = await getCurrentStaff();
   if (!staff) return { claims: [], error: "Not authorised" };
@@ -58,10 +68,7 @@ export async function loadClaimQueue() {
       .from("properties")
       .select("id, slug, canonical_slug, title, location, owner_id, lister_relationship, pipeline_status")
       .in("id", propertyIds),
-    admin
-      .from("property_claim_documents")
-      .select("id, claim_id, document_type, original_filename, private_storage_path, mime_type, file_size_bytes, checksum, malware_scan_status, ocr_status, upload_timestamp")
-      .in("claim_id", claimIds),
+    loadClaimDocuments(admin, claimIds),
     admin
       .from("property_claim_events")
       .select("id, claim_id, actor_id, event_type, payload, created_at")
@@ -92,38 +99,22 @@ export async function loadClaimQueue() {
   const profileById = Object.fromEntries((profiles.data || []).map((prof) => [prof.id, prof]));
 
   const claimsById = new Map(claims.map((claim) => [claim.id, claim]));
-  const bucketDetails = documents.data?.some((doc) => doc.malware_scan_status === "clean" && doc.checksum)
-    ? await admin.storage.getBucket(CLAIM_DOCUMENT_BUCKET)
-    : null;
-  const canSign = !bucketDetails?.error && bucketDetails?.data?.public === false;
-  const docsWithSignedUrls = await Promise.all(
-    (documents.data || []).map(async (doc) => {
-      const claim = claimsById.get(doc.claim_id);
-      const property = propertyById[claim?.property_id];
-      const scanConfirmed = property && hasVerifiedClaimScan(
-        doc, claim.claimant_user_id, [property.id, property.slug, property.canonical_slug],
-      );
-      let previewUrl = null;
-      if (scanConfirmed && canSign) {
-        try {
-          const { data: signed } = await admin.storage
-            .from(CLAIM_DOCUMENT_BUCKET)
-            .createSignedUrl(doc.private_storage_path, 300);
-          previewUrl = signed?.signedUrl || null;
-        } catch {
-          // Graceful fallback if storage bucket or file not accessible in local environment
-        }
-      }
-      return {
-        id: doc.id, claim_id: doc.claim_id, document_type: doc.document_type,
-        original_filename: doc.original_filename, file_size_bytes: doc.file_size_bytes,
-        malware_scan_status: scanConfirmed ? "clean" : "pending", previewUrl,
-      };
-    })
-  );
+  const reviewedDocuments = (documents.data || []).map((doc) => {
+    const claim = claimsById.get(doc.claim_id);
+    const property = propertyById[claim?.property_id];
+    const scanConfirmed = property && hasVerifiedClaimScan(
+      doc, claim.claimant_user_id, [property.id, property.slug, property.canonical_slug],
+    );
+    return {
+      id: doc.id, claim_id: doc.claim_id, document_type: doc.document_type,
+      original_filename: doc.original_filename, file_size_bytes: doc.file_size_bytes,
+      malware_scan_status: scanConfirmed ? "clean" : doc.malware_scan_status === "blocked" ? "blocked" : "pending",
+      downloadHref: scanConfirmed ? `/api/claims/documents/${doc.id}` : null,
+    };
+  });
 
   const docsByClaim = {};
-  for (const d of docsWithSignedUrls) (docsByClaim[d.claim_id] ||= []).push(d);
+  for (const d of reviewedDocuments) (docsByClaim[d.claim_id] ||= []).push(d);
   const eventsByClaim = {};
   for (const e of events.data || []) (eventsByClaim[e.claim_id] ||= []).push(e);
 

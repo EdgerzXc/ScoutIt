@@ -7,7 +7,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { findProperty } from "@/lib/propertyLookup";
 import { isClaimable } from "@/lib/listerRelationship";
 import {
-  CLAIM_DOCUMENT_BUCKET, CLAIM_MULTIPART_FILE_MAX_BYTES, CLAIM_DOCUMENT_MIMES, CLAIM_DOCUMENT_TYPES,
+  CLAIM_DOCUMENT_BUCKET, CLAIM_MULTIPART_FILE_MAX_BYTES, CLAIM_DOCUMENT_MIMES, CLAIM_DOCUMENT_TYPES, isPublicClaimListing,
 } from "@/lib/claimDocumentPath.mjs";
 
 async function ensurePrivateClaimBucket(storage) {
@@ -79,9 +79,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "The file contents do not match the selected format." }, { status: 415 });
     }
 
-    const { property, error } = await findProperty(supabaseAdmin, propertyId, ["id", "owner_id", "lister_relationship", "verified"]);
+    const { property, error } = await findProperty(supabaseAdmin, propertyId, [
+      "id", "owner_id", "lister_relationship", "verified",
+      "pipeline_status", "lifecycle_state", "moderation_status", "archived_at", "withdrawn_at", "permanently_removed_at",
+    ]);
     if (error) throw error;
-    if (!property) return NextResponse.json({ error: "Listing not found." }, { status: 404 });
+    if (!isPublicClaimListing(property)) return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     if (property.owner_id === userId || !isClaimable({
       lister_relationship: property.lister_relationship, owner_verified: property.verified === true,
     })) {

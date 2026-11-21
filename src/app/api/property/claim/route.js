@@ -29,8 +29,8 @@ import { getActiveListingCap } from "@/lib/propertyLifecycle";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser } from "@/lib/notifications";
 import {
-  claimDocumentFilename, CLAIM_DOCUMENT_BUCKET, CLAIM_DOCUMENT_MAX_BYTES,
-  CLAIM_DOCUMENT_MIMES, CLAIM_DOCUMENT_TYPES,
+  claimDocumentFilename, CLAIM_DOCUMENT_BUCKET, CLAIM_MULTIPART_FILE_MAX_BYTES,
+  CLAIM_DOCUMENT_MIMES, CLAIM_DOCUMENT_TYPES, isPublicClaimListing,
 } from "@/lib/claimDocumentPath.mjs";
 
 async function lookupClaimDocuments(documents, userId, property) {
@@ -56,8 +56,10 @@ async function lookupClaimDocuments(documents, userId, property) {
       if (Number(error.statusCode || error.status) === 404) return null;
       throw error;
     }
-    if (data?.contentType !== mimeType || !Number.isInteger(data.size) ||
-        data.size <= 0 || data.size > CLAIM_DOCUMENT_MAX_BYTES) return null;
+    const created = Date.parse(data?.createdAt);
+    if (!Number.isFinite(created) || created > Date.now() + 60_000 || Date.now() - created >= 24 * 60 * 60 * 1000 ||
+        data?.contentType !== mimeType || !Number.isInteger(data.size) ||
+        data.size <= 0 || data.size > CLAIM_MULTIPART_FILE_MAX_BYTES) return null;
     return {
       document_type: item.documentType,
       private_storage_path: item.storagePath,
@@ -108,6 +110,7 @@ export async function GET(request) {
       "owner_id",
       "verified",
       "lister_relationship",
+      "pipeline_status", "lifecycle_state", "moderation_status", "archived_at", "withdrawn_at", "permanently_removed_at",
     ]);
     if (lookupErr) {
       console.error("[PROPERTY CLAIM] Lookup failed:", lookupErr);
@@ -116,7 +119,7 @@ export async function GET(request) {
         { status: 500 }
       );
     }
-    if (!property) {
+    if (!isPublicClaimListing(property)) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
@@ -271,6 +274,7 @@ export async function POST(request) {
       "owner_id",
       "verified",
       "lister_relationship",
+      "pipeline_status", "lifecycle_state", "moderation_status", "archived_at", "withdrawn_at", "permanently_removed_at",
     ]);
     if (lookupErr) {
       console.error("[PROPERTY CLAIM] Lookup failed:", lookupErr);
@@ -279,7 +283,7 @@ export async function POST(request) {
         { status: 500 }
       );
     }
-    if (!property) {
+    if (!isPublicClaimListing(property)) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 

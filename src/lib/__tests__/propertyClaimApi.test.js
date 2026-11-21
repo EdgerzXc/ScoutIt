@@ -32,6 +32,7 @@ const PROP = {
   title: 'Broker-listed Tower',
   owner_id: 'someone-else',
   verified: false,
+  pipeline_status: 'approved',
   // NULL — "never asked". Every listing in the database is in this state, and
   // it is CLAIMABLE. Silence is not ownership (§50).
   lister_relationship: null,
@@ -42,7 +43,7 @@ function mockDb({ property = PROP, existingClaim = null, insertError = null, liv
   supabaseAdmin.storage.getBucket = vi.fn().mockResolvedValue({ data: { public: false } });
   supabaseAdmin.storage.from = vi.fn().mockReturnValue({
     info: vi.fn().mockImplementation(async (path) => ({
-      data: { contentType: path.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg', size: 10_240 },
+      data: { contentType: path.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg', size: 10_240, createdAt: new Date().toISOString() },
     })),
   });
   supabaseAdmin.from = vi.fn().mockImplementation((table) => {
@@ -247,9 +248,30 @@ describe('/api/property/claim — POST', () => {
     expect(inserted).toHaveLength(0);
   });
 
+  it('requires a fresh upload before opening the claim', async () => {
+    const inserted = mockDb();
+    supabaseAdmin.storage.from.mockReturnValue({
+      info: vi.fn().mockResolvedValue({
+        data: { contentType: 'application/pdf', size: 10_240, createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() },
+      }),
+    });
+    const result = await POST(post({
+      ...VALID,
+      documents: [{ documentType: 'title_deed', storagePath: 'user-123/prop-101/1763654400000_title.pdf' }],
+    }));
+    expect(result.status).toBe(422);
+    expect(inserted).toHaveLength(0);
+  });
+
   it('404s when the property does not exist', async () => {
     mockDb({ property: null });
     expect((await POST(post(VALID))).status).toBe(404);
+  });
+
+  it('treats a private draft like an unavailable property when submitting a claim', async () => {
+    const inserted = mockDb({ property: { ...PROP, pipeline_status: 'draft' } });
+    expect((await POST(post(VALID))).status).toBe(404);
+    expect(inserted).toHaveLength(0);
   });
 
   it('409s when the claimant already owns the listing', async () => {
@@ -329,6 +351,14 @@ describe('/api/property/claim — GET', () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-123');
     mockDb({ property: null });
     expect((await GET(get('nope'))).status).toBe(404);
+  });
+
+  it('keeps a withdrawn listing out of public claim lookup', async () => {
+    vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-123');
+    mockDb({ property: { ...PROP, lifecycle_state: 'off_market' } });
+    const result = await GET(get());
+    expect(result.status).toBe(404);
+    expect(await result.json()).not.toHaveProperty('propertyTitle');
   });
 
   it('returns claimant tier, role, live listing count, and atListingCap flag', async () => {
