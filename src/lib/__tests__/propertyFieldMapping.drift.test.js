@@ -76,7 +76,7 @@ describe('both apps actually use the shared mapping', () => {
     // Guards the specific regression: someone "simplifies" the staff client
     // back to a hardcoded 6-field object and loses ~84 fields again.
     expect(src).toContain('propertyFieldMapping');
-    expect(src).toContain('reverseMapCategoryFields(property.details)');
+    expect(src).toContain('reverseMapCategoryFields(property.details, category)');
   });
 
   it('the main Airtable client imports it too', () => {

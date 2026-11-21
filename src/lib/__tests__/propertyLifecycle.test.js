@@ -5,6 +5,7 @@ import {
   buildWithdrawUpdate,
   canChangeDisplayTitle,
   canContactProperty,
+  getPublicationBinding,
   getRedirectSlug,
   isEntitledOffMarketViewer,
   isMarketVisible,
@@ -38,6 +39,13 @@ describe("property lifecycle contract", () => {
     expect(canChangeDisplayTitle({ pipeline_status: "draft", slug: "draft-slug" })).toBe(true);
     expect(canChangeDisplayTitle({ pipeline_status: "approved", slug: "live-slug" })).toBe(false);
     expect(canChangeDisplayTitle({ lifecycle_state: "off_market", canonical_slug: "reserved" })).toBe(false);
+  });
+
+  it("holds catalogue writes while publication reconciliation is pending", () => {
+    const property = { canonical_slug: "verified-office", publication_external_record_id: "recVerified" };
+    expect(getPublicationBinding(property)).toEqual({ slug: "verified-office", recordId: "recVerified" });
+    expect(getPublicationBinding({ ...property, publication_sync_state: "pending" })).toBeNull();
+    expect(getPublicationBinding({ ...property, publication_sync_state: "reconciliation_required" })).toBeNull();
   });
 
   it("withdraws without deleting and defaults quiet contact off", () => {
