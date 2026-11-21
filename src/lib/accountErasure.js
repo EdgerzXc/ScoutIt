@@ -39,7 +39,7 @@ export function interpretErasureResponse({ ok = false, status = 0, body = null }
   if (ok && payload.success === true && payload.accountAccessRevoked === true) {
     return {
       state: "deleted",
-      message: payload.message || "Your account and private data have been deleted.",
+      message: payload.message || "Your sign-in is closed. Use Contact to request review of retained verification or transaction records.",
       ...(payload.warning ? { warning: payload.warning } : {}),
     };
   }

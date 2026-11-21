@@ -1,163 +1,90 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
-import {
-  maskUserId,
-  calculateSlaStatus,
-  isPrivacySubject,
-  detectDsrType,
-  DSR_STATUSES,
-} from "@/lib/privacyPolicy.mjs";
+import { getCurrentStaff, assertTier, TIERS } from "@/lib/rbac";
+import { maskUserId, calculateSlaStatus, DSR_STATUSES } from "@/lib/privacyPolicy.mjs";
 
-/**
- * Load RA 10173 account deletion audit logs and data subject request queue (A-262).
- * Ops Manager (Tier 2)+.
- */
+const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+const VALID_DECISIONS = new Set([DSR_STATUSES.UNDER_REVIEW, DSR_STATUSES.FULFILLED, DSR_STATUSES.REJECTED]);
+const ERRORS = {
+  changed: "This request changed. Refresh the queue before submitting a new decision.",
+  identity_unavailable: "Verify the requester through their signed-in Contact submission or an authorized closure review.",
+  identity_required: "Verify the requester’s identity before recording fulfillment.",
+  erasure_evidence_required: "Record and verify the erasure separately before closing this request.",
+  denied: "This staff account cannot review privacy requests.",
+  unavailable: "This privacy request is unavailable.",
+};
+
 export async function loadPrivacyConsoleData() {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
-
   const admin = createAdminClient();
-
-  // 1. Fetch erasure audit logs
-  let deletionLogs = [];
-  try {
-    const { data: auditRows } = await admin
-      .from("audit_logs")
-      .select("id, action, record_id, user_id, metadata, created_at")
+  const [deletionAudit, reviewList] = await Promise.all([
+    admin.from("audit_logs")
+      .select("id, record_id, user_id, metadata, created_at")
       .eq("action", "ACCOUNT_DELETED_RIGHT_TO_ERASURE")
-      .order("created_at", { ascending: false })
-      .limit(100);
+      .order("created_at", { ascending: false }).limit(100),
+    admin.rpc("list_privacy_requests"),
+  ]);
 
-    if (Array.isArray(auditRows) && auditRows.length > 0) {
-      deletionLogs = auditRows.map((r) => {
-        const meta = r.metadata || {};
-        return {
-          id: r.id,
-          maskedUser: maskUserId(r.record_id || r.user_id),
-          timestamp: r.created_at,
-          legalBasis: meta.law || "RA 10173 Sec. 16(e)",
-          erasedSubsystems: Array.isArray(meta.erased)
-            ? meta.erased
-            : ["saved_intel", "analytics_events", "privacy_settings", "calendar_events", "crm_contacts"],
-          status: "HONOURED / ANONYMIZED",
-          authRemoved: Boolean(meta.auth_user_removed),
-        };
-      });
-    } else {
-      // Fallback: check anonymized user_profiles
-      const { data: anonProfiles } = await admin
-        .from("user_profiles")
-        .select("id, archived_at, created_at, moderation_note")
-        .not("archived_at", "is", null)
-        .order("archived_at", { ascending: false })
-        .limit(100);
+  const deletionLogs = (deletionAudit.data || []).map((row) => {
+    const metadata = row.metadata || {};
+    const authRemoved = metadata.auth_user_removed === true;
+    return {
+      id: row.id,
+      maskedUser: maskUserId(row.record_id || row.user_id),
+      timestamp: row.created_at,
+      legalBasis: metadata.law || "",
+      erasedSubsystems: Array.isArray(metadata.erased) ? metadata.erased : [],
+      status: authRemoved ? "Sign-in closed" : "Sign-in closure unconfirmed",
+      authRemoved,
+    };
+  });
 
-      deletionLogs = (anonProfiles || []).map((p) => ({
-        id: p.id,
-        maskedUser: maskUserId(p.id),
-        timestamp: p.archived_at || p.created_at,
-        legalBasis: "RA 10173 Sec. 16(e)",
-        erasedSubsystems: ["saved_intel", "analytics_events", "privacy_settings", "calendar_events"],
-        status: "HONOURED / ANONYMIZED",
-        authRemoved: true,
-      }));
-    }
-  } catch (err) {
-    console.warn("[loadPrivacyConsoleData] Could not load deletion logs:", err?.message);
-  }
-
-  // 2. Fetch Data Subject Requests (DSRs) from contact_messages
-  let dsrQueue = [];
-  try {
-    const { data: messages } = await admin
-      .from("contact_messages")
-      .select("id, name, email, subject, message, status, created_at")
-      .order("created_at", { ascending: false })
-      .limit(150);
-
-    const privacyMessages = (messages || []).filter((m) =>
-      isPrivacySubject(m.subject || "", m.message || "")
-    );
-
-    dsrQueue = privacyMessages.map((m) => {
-      const sla = calculateSlaStatus(m.created_at);
-      const reqType = detectDsrType(m.subject || "", m.message || "");
-
-      return {
-        id: m.id,
-        name: m.name,
-        email: m.email,
-        subject: m.subject || "Data Subject Request",
-        message: m.message,
-        requestType: reqType,
-        status: m.status || DSR_STATUSES.PENDING,
-        createdAt: m.created_at,
-        slaDeadline: sla.deadline,
-        daysRemaining: sla.daysRemaining,
-        isBreached: sla.isBreached,
-        isUrgent: sla.isUrgent,
-      };
-    });
-  } catch (err) {
-    console.warn("[loadPrivacyConsoleData] Could not load contact_messages for DSR queue:", err?.message);
-  }
+  const dsrQueue = (reviewList.data || []).map((row) => {
+    const sla = calculateSlaStatus(row.created_at);
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      subject: row.subject || "Data subject request",
+      message: row.message,
+      requestType: row.request_kind,
+      status: row.review_status,
+      revision: row.revision,
+      signedIn: row.signed_in === true,
+      subjectVerified: row.subject_verified === true,
+      createdAt: row.created_at,
+      slaDeadline: sla.deadline,
+      daysRemaining: sla.daysRemaining,
+      isBreached: sla.isBreached,
+      isUrgent: sla.isUrgent,
+    };
+  });
 
   return {
-    deletionLogs,
-    dsrQueue,
+    deletionLogs, dsrQueue,
+    deletionError: deletionAudit.error ? "Could not load account deletion audit entries." : null,
+    reviewError: reviewList.error ? "The privacy review queue is unavailable. Check the review migration before retrying." : null,
   };
 }
 
-/**
- * Resolve or update a Data Subject Request status in Mission Control.
- * Ops Manager (Tier 2)+.
- *
- * @param {object} params
- * @param {string} params.requestId
- * @param {string} params.status - "fulfilled" | "rejected" | "under_review"
- * @param {string} params.resolutionNotes - Substantive legal/compliance explanation
- */
-export async function updateDsrResolution({ requestId, status, resolutionNotes }) {
+export async function updateDsrResolution({ requestId, revision, status, resolutionNotes, verifySubject, closedAccountEvent } = {}) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
-
-  const trimmedNotes = typeof resolutionNotes === "string" ? resolutionNotes.trim() : "";
-  if (!trimmedNotes || trimmedNotes.length < 10) {
-    throw new Error("A substantive compliance reason (at least 10 characters) is required for staff audit.");
+  const notes = typeof resolutionNotes === "string" ? resolutionNotes.trim() : "";
+  if (typeof requestId !== "string" || !UUID.test(requestId) || !Number.isSafeInteger(revision) || revision < 0 ||
+      !VALID_DECISIONS.has(status) || notes.length < 10 || notes.length > 1000 || typeof verifySubject !== "boolean" ||
+      (closedAccountEvent != null && (!verifySubject || staff.tier < TIERS.SUPER_ADMIN ||
+        typeof closedAccountEvent !== "string" || !UUID.test(closedAccountEvent)))) {
+    return { success: false, error: "Check the request and enter a review note between 10 and 1,000 characters." };
   }
-
-  if (!Object.values(DSR_STATUSES).includes(status)) {
-    throw new Error("Invalid DSR status provided.");
-  }
-
-  const admin = createAdminClient();
-
-  const { error } = await admin
-    .from("contact_messages")
-    .update({
-      status,
-    })
-    .eq("id", requestId);
-
-  if (error) {
-    throw new Error(`Could not update DSR status: ${error.message}`);
-  }
-
-  await logActionStrict({
-    staff,
-    action: `privacy.dsr_${status}`,
-    targetTable: "contact_messages",
-    targetId: requestId,
-    reason: trimmedNotes,
-    metadata: {
-      status,
-      timestamp: new Date().toISOString(),
-    },
+  const { data, error } = await createAdminClient().rpc("review_privacy_request", {
+    p_request: requestId, p_actor: staff.id, p_revision: revision, p_status: status,
+    p_notes: notes, p_verify_subject: verifySubject, p_closed_account_event: closedAccountEvent || null,
   });
-
-  revalidatePath("/dashboard/privacy");
-  return { success: true, requestId, status };
+  if (error || data?.state !== "saved") {
+    return { success: false, error: ERRORS[data?.state] || "Could not confirm the privacy review. Refresh before retrying." };
+  }
+  return { success: true, requestId, status: data.status, revision: data.revision, subjectVerified: data.subjectVerified };
 }

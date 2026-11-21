@@ -7,10 +7,6 @@ import { fileURLToPath } from "node:url";
 import {
   maskUserId,
   calculateSlaStatus,
-  isPrivacySubject,
-  detectDsrType,
-  DSR_TYPES,
-  DSR_SLA_DAYS,
 } from "../src/lib/privacyPolicy.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -22,7 +18,7 @@ test("maskUserId generates non-PII compliance tokens", () => {
   assert.equal(maskUserId(""), "USR-ANON-0000");
 });
 
-test("calculateSlaStatus tracks statutory SLA deadline and breach state", () => {
+test("calculateSlaStatus tracks the internal review target and overdue state", () => {
   const now = new Date("2026-10-26T12:00:00Z");
 
   // Created 2 days ago -> 13 days remaining (on track)
@@ -43,20 +39,6 @@ test("calculateSlaStatus tracks statutory SLA deadline and breach state", () => 
   assert.equal(breached.daysRemaining < 0, true);
 });
 
-test("isPrivacySubject identifies RA 10173 and DSR inquiries", () => {
-  assert.equal(isPrivacySubject("Request for account deletion", "Please remove all my data"), true);
-  assert.equal(isPrivacySubject("Inquiry regarding RA 10173", "I want to exercise right to access"), true);
-  assert.equal(isPrivacySubject("General Inquiry", "Can you tell me about the building?"), false);
-  assert.equal(isPrivacySubject("Viewing appointment question", "Is Saturday available?"), false);
-});
-
-test("detectDsrType categorizes request type accurately", () => {
-  assert.equal(detectDsrType("Account deletion", "Please erase all my data"), DSR_TYPES.ERASURE);
-  assert.equal(detectDsrType("Rectification request", "Please correct my phone number"), DSR_TYPES.RECTIFICATION);
-  assert.equal(detectDsrType("Access to personal data", "Send me a copy of my records"), DSR_TYPES.ACCESS);
-  assert.equal(detectDsrType("Privacy policy question", "Who is your DPO?"), DSR_TYPES.INQUIRY);
-});
-
 test("layout.js registers Data Privacy & SLA under Administration for Ops Manager tier", async () => {
   const layout = await readFile(path.join(root, "src", "app", "dashboard", "layout.js"), "utf8");
   assert.match(layout, /href:\s*["']\/dashboard\/privacy["']/);
@@ -64,9 +46,21 @@ test("layout.js registers Data Privacy & SLA under Administration for Ops Manage
   assert.match(layout, /href:\s*["']\/dashboard\/privacy["'][\s\S]*?minTier:\s*TIERS\.OPS_MANAGER/);
 });
 
-test("privacy/actions.js enforces Ops Manager tier and audit logging", async () => {
+test("privacy review is Ops Manager gated and commits status and audit in one service-only transaction", async () => {
   const actions = await readFile(path.join(root, "src", "app", "dashboard", "privacy", "actions.js"), "utf8");
+  const sql = await readFile(path.join(root, "..", "supabase", "migrations", "20261121000005_privacy_request_reviews.sql"), "utf8");
   assert.match(actions, /export async function loadPrivacyConsoleData[\s\S]*?assertTier\(staff,\s*TIERS\.OPS_MANAGER\)/);
   assert.match(actions, /export async function updateDsrResolution[\s\S]*?assertTier\(staff,\s*TIERS\.OPS_MANAGER\)/);
-  assert.match(actions, /logActionStrict\(\{[\s\S]*?targetTable:\s*["']contact_messages["']/);
+  assert.match(actions, /\.rpc\("review_privacy_request"/);
+  assert.match(sql, /INSERT INTO public\.privacy_request_reviews/);
+  assert.match(sql, /INSERT INTO public\.mission_control_actions/);
+  assert.match(sql, /FROM PUBLIC, anon, authenticated;\s*GRANT EXECUTE/);
+  assert.doesNotMatch(actions, /\.update\(/);
+});
+
+test("identity proof uses the signed-in Contact subject and erasure waits for actual evidence", async () => {
+  const sql = await readFile(path.join(root, "..", "supabase", "migrations", "20261121000005_privacy_request_reviews.sql"), "utf8");
+  assert.match(sql, /verified_subject := contact\.user_id/);
+  assert.match(sql, /staff_tier >= 3 AND contact\.user_id IS NULL/);
+  assert.match(sql, /request_kind = 'erasure'[\s\S]*?'erasure_evidence_required'/);
 });

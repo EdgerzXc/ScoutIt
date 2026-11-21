@@ -3,16 +3,8 @@
  * Zero I/O, no server-only imports, 100% testable.
  */
 
-export const DSR_SLA_DAYS = 15; // Statutory 15-day SLA under RA 10173 §16
+export const DSR_SLA_DAYS = 15;
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-export const DSR_TYPES = Object.freeze({
-  ACCESS: "access",             // RA 10173 §16(c) Right to Access
-  RECTIFICATION: "rectification", // RA 10173 §16(d) Right to Correct
-  ERASURE: "erasure",           // RA 10173 §16(e) Right to Erasure / Blocking
-  PORTABILITY: "portability",   // RA 10173 §18 Data Portability
-  INQUIRY: "privacy_inquiry",   // General Privacy Policy Inquiry
-});
 
 export const DSR_STATUSES = Object.freeze({
   PENDING: "pending",
@@ -62,47 +54,4 @@ export function calculateSlaStatus(createdAt, slaDays = DSR_SLA_DAYS, now = new 
     isBreached,
     isUrgent,
   };
-}
-
-/**
- * Checks whether an incoming contact message relates to Data Privacy / DSRs.
- * @param {string} subject
- * @param {string} message
- * @returns {boolean}
- */
-export function isPrivacySubject(subject = "", message = "") {
-  const text = `${subject} ${message}`.toLowerCase();
-  const patterns = [
-    /\bprivacy\b/,
-    /\bdata subject\b/,
-    /\beras(e|ure)\b/,
-    /\bdelet(e|ion)\b/,
-    /\brectif/,
-    /\bra\s*10173\b/,
-    /\bdpa\b/,
-    /\bgdpr\b/,
-    /\bpersonal data\b/,
-    /\bright to access\b/,
-  ];
-  return patterns.some((p) => p.test(text));
-}
-
-/**
- * Detect DSR type from text.
- * @param {string} subject
- * @param {string} message
- * @returns {string}
- */
-export function detectDsrType(subject = "", message = "") {
-  const text = `${subject} ${message}`.toLowerCase();
-  if (text.includes("delete") || text.includes("erase") || text.includes("erasure") || text.includes("blocking")) {
-    return DSR_TYPES.ERASURE;
-  }
-  if (text.includes("correct") || text.includes("rectif") || text.includes("update details")) {
-    return DSR_TYPES.RECTIFICATION;
-  }
-  if (text.includes("access") || text.includes("copy of data") || text.includes("export")) {
-    return DSR_TYPES.ACCESS;
-  }
-  return DSR_TYPES.INQUIRY;
 }

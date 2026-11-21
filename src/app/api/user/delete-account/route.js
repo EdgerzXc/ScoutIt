@@ -85,7 +85,7 @@ export async function POST(request) {
         console.error(`[ACCOUNT DELETION] Failed to erase ${table}:`, error.message);
         return NextResponse.json(
           {
-            error: "Account deletion is incomplete and has been stopped. No data was left in an unknown state; please contact support so this can be completed by hand.",
+            error: "Account deletion stopped before all steps were confirmed. Please contact support to finish the request.",
             failedAt: table,
             erased,
             retryable: true,
@@ -197,8 +197,7 @@ export async function POST(request) {
           success: false,
           accountAccessRevoked: false,
           error:
-            "Your private data was erased, but your sign-in could not be closed — you may still be able to sign in. " +
-            "The request has been recorded and needs to be completed manually. Please contact support so this is finished.",
+            "Some account data was removed, but your sign-in could not be closed. Please contact support to finish the request.",
           erased,
           retryable: true,
           auditRecorded: audit.ok,
@@ -210,7 +209,7 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       accountAccessRevoked: true,
-      message: "Your account and private data have been deleted.",
+      message: "Your sign-in is closed. Use Contact to request review of retained verification or transaction records.",
       erased,
       // Honest reporting: the deletion did happen, but if the audit record
       // failed we say so rather than implying a complete paper trail.

@@ -8,14 +8,14 @@ export const dynamic = "force-dynamic";
 
 export default async function PrivacyPage() {
   const staff = await getCurrentStaff();
-  if (!staff || staff.tier < TIERS.OPS_MANAGER) {
+  if (!staff || staff.mfaRequired || staff.tier < TIERS.OPS_MANAGER) {
     redirect("/dashboard?error=Unauthorized");
   }
 
-  const { deletionLogs, dsrQueue } = await loadPrivacyConsoleData();
+  const { deletionLogs, dsrQueue, deletionError, reviewError } = await loadPrivacyConsoleData();
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div className="min-w-0 space-y-6 p-2 sm:p-6 md:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
         <div>
           <div className="flex items-center gap-2.5">
@@ -25,7 +25,7 @@ export default async function PrivacyPage() {
             </h1>
           </div>
           <p className="mt-1 text-xs text-white/60">
-            A-262 · Compliance oversight for RA 10173 Data Subject Requests (access, rectification, erasure) and non-PII deletion logs.
+            Review data subject requests and check account deletion evidence.
           </p>
         </div>
       </div>
@@ -33,6 +33,9 @@ export default async function PrivacyPage() {
       <PrivacyClient
         initialDeletions={deletionLogs}
         initialDsrQueue={dsrQueue}
+        canVerifyClosedAccount={staff.tier >= TIERS.SUPER_ADMIN}
+        reviewError={reviewError}
+        deletionError={deletionError}
       />
     </div>
   );

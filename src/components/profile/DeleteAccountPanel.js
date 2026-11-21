@@ -34,6 +34,7 @@ const NOT_REMOVED = [
   "Messages you sent in conversations. They follow the normal chat rule and are cleared 7 days after a conversation closes.",
   "Connects on your account. They are not refunded.",
   "Your sign-in record, including your email address. It is closed, not erased.",
+  "Submitted ownership documents. Request a separate review through Contact.",
   "A record that you asked for deletion, and when.",
 ];
 
