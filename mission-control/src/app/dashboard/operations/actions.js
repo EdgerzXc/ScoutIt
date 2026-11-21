@@ -100,9 +100,10 @@ export async function applyWishlistRevocationMigration(previousState, formData) 
 } from "@/lib/sampleChildSpaceOperation";
 import {
   LIFECYCLE_RECONCILIATION_OPERATION,
-  restoreReviewedPublicLifecycle,
-  unpublishReviewedAirtableRecord,
+  applyReviewedLifecycle,
+  verifyWithdrawnReview,
 } from "@/lib/propertyLifecycleReconciliation";
+import { isRecordId, LIFECYCLE_REVIEW_ACTIONS, WITHDRAWAL_AUDIT } from "@/lib/propertyLifecycleReview.mjs";
 
 export async function applyOnboardingMigration(previousState, formData) {
   const staff = await getCurrentStaff();
@@ -270,33 +271,103 @@ export async function attestRetainedMedia(previousState, formData) {
   revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/audit");
   return { ok: true, message: `Recorded owner authorization for ${status.retained.length} retained media value(s).` };
 }
-export async function reconcileLifecycleCandidate(previousState, formData) {
+export async function reconcileLifecycleCandidate(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.SUPER_ADMIN);
-  const decision = formData.get("decision")?.toString();
-  const expectedConfirmation = decision === "restore_live"
-    ? LIFECYCLE_RECONCILIATION_OPERATION.restoreConfirmation
-    : decision === "unpublish" ? LIFECYCLE_RECONCILIATION_OPERATION.unpublishConfirmation : null;
-  if (!expectedConfirmation) return { ok: false, message: "Choose an allowlisted reconciliation action." };
-  const input = sampleInput(formData, expectedConfirmation);
+
+  const decision = formData.get("decision");
+  const policy = typeof decision === "string" && Object.hasOwn(LIFECYCLE_REVIEW_ACTIONS, decision) && LIFECYCLE_REVIEW_ACTIONS[decision];
+  if (!policy) return { ok: false, message: "Choose an available reconciliation action." };
+  const input = sampleInput(formData, policy.confirmation);
   if (input.error) return { ok: false, message: input.error };
-  const airtableRecordId = formData.get("airtableRecordId")?.toString();
-  const reviewHash = formData.get("reviewHash")?.toString();
-  if (!airtableRecordId || !reviewHash) return { ok: false, message: "The reviewed candidate reference is missing." };
+  const airtableRecordId = formData.get("airtableRecordId");
+  const reviewHash = formData.get("reviewHash");
+  if (input.reason.length > 500 || !isRecordId(airtableRecordId) || typeof reviewHash !== "string" || !/^[0-9A-F]{64}$/.test(reviewHash)) {
+    return { ok: false, message: "Check the reviewed listing and keep the reason to 500 characters." };
+  }
+
+  const action = `property.lifecycle_reconciliation.${decision}`;
+  const metadata = { operation_id: LIFECYCLE_RECONCILIATION_OPERATION, review_hash: reviewHash, decision };
   let intentId = null;
+  let applied;
   try {
-    intentId = await logActionStrict({ staff, action: `property.lifecycle_reconciliation.${decision}.intent`, targetTable: "properties", targetId: airtableRecordId, reason: input.reason, metadata: { operation_id: LIFECYCLE_RECONCILIATION_OPERATION.id, review_hash: reviewHash, decision } });
-    const result = decision === "restore_live"
-      ? await restoreReviewedPublicLifecycle({ airtableRecordId, expectedReviewHash: reviewHash, actorId: staff.id, reason: input.reason })
-      : await unpublishReviewedAirtableRecord({ airtableRecordId, expectedReviewHash: reviewHash });
-    const withdrawn = decision === "unpublish" ? [{ slug: result.slug, recordId: airtableRecordId }] : [];
-    const cache = await purgePublicCatalogueCache({ withdrawn });
-    await logActionStrict({ staff, action: `property.lifecycle_reconciliation.${decision}.complete`, targetTable: "properties", targetId: result.after?.propertyId || result.propertyId || airtableRecordId, reason: input.reason, metadata: { intent_id: intentId, operation_id: LIFECYCLE_RECONCILIATION_OPERATION.id, review_hash: reviewHash, decision, slug: result.after?.slug || result.slug } });
-    revalidatePath("/dashboard/operations"); revalidatePath("/dashboard/cms"); revalidatePath("/dashboard/audit");
-    return { ok: true, message: `${decision === "restore_live" ? "Supabase lifecycle, canonical slug, routing, and Airtable visibility now verify together." : "The drifted Airtable record was unpublished and verified."}${cache.purged ? "" : ` Public cache purge needs attention: ${cache.detail}`}` };
+    applied = await applyReviewedLifecycle({
+      airtableRecordId, expectedReviewHash: reviewHash, actorId: staff.id, reason: input.reason, decision,
+      recordIntent: async (candidate, tableId) => {
+        intentId = await logActionStrict({
+          staff, action: `${action}.intent`, targetTable: "properties", targetId: airtableRecordId,
+          reason: input.reason, metadata: { ...metadata, slug: candidate.slug, table_id: tableId },
+        });
+      },
+    });
   } catch (error) {
-    if (intentId) { try { await logActionStrict({ staff, action: `property.lifecycle_reconciliation.${decision}.failed`, targetTable: "properties", targetId: airtableRecordId, reason: input.reason, metadata: { intent_id: intentId, operation_id: LIFECYCLE_RECONCILIATION_OPERATION.id, review_hash: reviewHash, decision, error: error.message || "Unknown failure" } }); } catch (auditError) { console.error("Lifecycle reconciliation failure audit also failed", auditError); } }
-    return { ok: false, message: error.message || "Lifecycle reconciliation failed." };
+    if (intentId) {
+      try {
+        await logActionStrict({
+          staff, action: `${action}.failed`, targetTable: "properties", targetId: airtableRecordId,
+          reason: input.reason, metadata: { ...metadata, intent_id: intentId },
+        });
+      } catch (auditError) {
+        console.error("Lifecycle reconciliation failure audit could not be confirmed", auditError?.name);
+      }
+    }
+    return { ok: false, message: error.message || "Could not confirm this change. Refresh before retrying." };
+  }
+
+  const cache = decision === "unpublish"
+    ? await purgePublicCatalogueCache({ withdrawn: [{ slug: applied.slug, recordId: airtableRecordId }] })
+    : { purged: true };
+  const messages = {
+    bind_record: "Saved the verified Airtable binding for this public address.",
+    restore_live: "Verified the bound public record and repaired the Supabase lifecycle.",
+    unpublish: "Airtable confirmed removal of the reviewed record.",
+  };
+  let message = messages[decision];
+  try {
+    await logActionStrict({
+      staff, action: `${action}.complete`, targetTable: "properties", targetId: applied.propertyId || airtableRecordId,
+      reason: input.reason, metadata: { ...metadata, intent_id: intentId, slug: applied.slug, shared_cache_purged: cache.purged },
+    });
+  } catch (error) {
+    console.error("Lifecycle reconciliation completion audit could not be confirmed", error?.name);
+    message += " The completion entry needs an audit check.";
+  }
+  if (!cache.purged) message += " The shared catalogue refresh still needs a retry.";
+  return { ok: true, message, cacheRetryId: cache.purged ? null : intentId };
+}
+
+export async function retryLifecycleCache(intentId) {
+  const staff = await getCurrentStaff();
+  assertTier(staff, TIERS.SUPER_ADMIN);
+  if (typeof intentId !== "string" || !/^[a-f0-9-]{36}$/i.test(intentId)) {
+    return { ok: false, message: "The reviewed withdrawal reference is missing." };
+  }
+
+  try {
+    const { data: intent, error } = await createAdminClient().from("mission_control_actions")
+      .select("target_id, metadata").eq("id", intentId).eq("target_table", "properties")
+      .eq("action", WITHDRAWAL_AUDIT.intent).maybeSingle();
+    const slug = intent?.metadata?.slug;
+    if (error || !intent || intent.metadata?.operation_id !== LIFECYCLE_RECONCILIATION_OPERATION ||
+        !(await verifyWithdrawnReview(intent.target_id, slug, intent.metadata?.table_id))) {
+      return { ok: false, message: "Airtable no longer confirms the reviewed withdrawal. Refresh the review." };
+    }
+    const cache = await purgePublicCatalogueCache({ withdrawn: [{ slug, recordId: intent.target_id }] });
+    if (!cache.purged) return { ok: false, message: "The shared catalogue refresh still needs a retry." };
+    let message = "Airtable removal and shared catalogue refresh are confirmed.";
+    try {
+      await logActionStrict({
+        staff, action: WITHDRAWAL_AUDIT.refreshed, targetTable: "properties", targetId: intent.target_id,
+        metadata: { operation_id: LIFECYCLE_RECONCILIATION_OPERATION, intent_id: intentId, slug },
+      });
+    } catch (auditError) {
+      console.error("Catalogue refresh audit could not be confirmed", auditError?.name);
+      message += " The completion entry needs an audit check.";
+    }
+    return { ok: true, message };
+  } catch (error) {
+    console.error("Lifecycle catalogue retry could not be confirmed", error?.name);
+    return { ok: false, message: "Could not verify the catalogue refresh. Try again." };
   }
 }
 

@@ -27,7 +27,7 @@ import { SAMPLE_DATA_OPERATION, SAMPLE_PROPERTY_SLUGS, getSampleDataOperationSta
 import MediaReviewForms from "./MediaReviewForms";
 import { PROPERTY_MEDIA_OPERATION, getPropertyMediaOperationStatus } from "@/lib/propertyMediaOperation";
 import LifecycleReconciliationForms from "./LifecycleReconciliationForms";
-import { LIFECYCLE_RECONCILIATION_OPERATION, getLifecycleReconciliationStatus } from "@/lib/propertyLifecycleReconciliation";
+import { getLifecycleReconciliationStatus } from "@/lib/propertyLifecycleReconciliation";
 import DemoAuthorityTransferForm from "./DemoAuthorityTransferForm";
 
 function Status({ ok, label }) {
@@ -51,7 +51,7 @@ function Metric({ label, value }) {
 
 export default async function SystemOperationsPage() {
   const staff = await getCurrentStaff();
-  if (staff.tier < TIERS.SUPER_ADMIN) redirect("/dashboard?error=InsufficientTier");
+  if (!staff || staff.mfaRequired || staff.tier < TIERS.SUPER_ADMIN) redirect("/dashboard?error=InsufficientTier");
 
   let status = null;
   let statusError = null;
@@ -207,13 +207,13 @@ export default async function SystemOperationsPage() {
       </section>
       <section aria-labelledby="lifecycle-review-title" className="rounded-xl border border-line bg-surface p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div><p className="label-mono text-gold">Dual-CMS trust</p><h2 id="lifecycle-review-title" className="mt-2 text-lg font-semibold">Airtable / Supabase public lifecycle reconciliation</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/70">Compares every Airtable-public slug with its canonical Supabase lifecycle and server-resolved inquiry recipient. Mission Control never invents a missing property or recipient.</p></div>
+          <div><h2 id="lifecycle-review-title" className="text-lg font-semibold">Public listing reconciliation</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/70">Compare the Airtable record, the Supabase listing, and inquiry routing before changing a binding or public status.</p></div>
           <Status ok={Boolean(lifecycleStatus && !lifecycleStatus.issues.length)} label={lifecycleStatus?.issues?.length ? `${lifecycleStatus.issues.length} review` : lifecycleStatus ? "Aligned" : "Unavailable"} />
         </div>
         {lifecycleStatusError && <div role="alert" className="mt-5 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger">{lifecycleStatusError}</div>}
-        {lifecycleStatus && <><dl className="my-6 grid gap-3 sm:grid-cols-3"><Metric label="Public records" value={lifecycleStatus.candidates.length} /><Metric label="Aligned" value={lifecycleStatus.ready.length} /><Metric label="Need review" value={lifecycleStatus.issues.length} /></dl>
-          <LifecycleReconciliationForms issues={lifecycleStatus.issues} operation={LIFECYCLE_RECONCILIATION_OPERATION} />
+        {lifecycleStatus && <><dl className="my-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Public records" value={lifecycleStatus.candidates.length} /><Metric label="Aligned" value={lifecycleStatus.ready.length} /><Metric label="Retained samples" value={lifecycleStatus.retained.length} /><Metric label="Need review" value={lifecycleStatus.issues.length} /></dl>
+          <LifecycleReconciliationForms issues={lifecycleStatus.issues} pending={lifecycleStatus.pending} />
         </>}
       </section>
       <section aria-labelledby="pilot-cohort-title" className="rounded-xl border border-line bg-surface p-6">
