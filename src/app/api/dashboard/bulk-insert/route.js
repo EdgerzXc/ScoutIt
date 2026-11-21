@@ -11,21 +11,46 @@ const CSV_FORMULA_PREFIX_RE = /^[=+\-@\t\r]+/;
 
 export function sanitizeCsvFormulaValue(value) {
   const stripped = stripAllTags(value);
-  return stripped.replace(CSV_FORMULA_PREFIX_RE, "");
+  return stripped.trimStart().replace(CSV_FORMULA_PREFIX_RE, "");
 }
 
+const csvText = (limit) => z.string().max(limit).transform(sanitizeCsvFormulaValue);
+
 const propertySchema = z.object({
-  title: z.string().max(255).optional(),
-  type: z.string().max(100).optional(),
-  location: z.string().max(255).optional(),
-  details: z.record(z.any()).optional()
-}).passthrough(); // allows other fields since it's a dynamic CSV upload
+  title: csvText(255).optional(),
+  type: csvText(100).optional(),
+  space_category: csvText(100).optional(),
+  location: csvText(255).optional(),
+  description: csvText(5000).optional(),
+  media_link: z.string().trim().max(2048).refine((value) => {
+    if (!value) return true;
+    try {
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+    } catch {
+      return false;
+    }
+  }).optional(),
+  price: z.union([z.number(), z.string().max(64), z.null()]).optional().transform((value, ctx) => {
+    if (value == null || (typeof value === "string" && !value.trim())) return null;
+    const normalized = typeof value === "string"
+      ? value.trim().replace(/^(?:₱|PHP)\s*/i, "").replaceAll(",", "")
+      : null;
+    const amount = normalized === null ? value : /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
+    if (!Number.isFinite(amount) || amount < 0) {
+      ctx.addIssue({ code: "custom", message: "Price must be a non-negative number." });
+      return z.NEVER;
+    }
+    return amount;
+  }),
+  details: z.record(z.string().max(120), z.union([csvText(5000), z.number(), z.boolean(), z.null()])).optional(),
+});
 
 export async function POST(request) {
   try {
     // 1. Extract token from Authorization header
     const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
+    const token = /^Bearer\s+(.+)$/i.exec(authHeader || "")?.[1]?.trim();
     
     if (!token) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
@@ -43,7 +68,8 @@ export async function POST(request) {
 
     const userId = user.id;
 
-    const { properties } = await request.json();
+    const body = await request.json().catch(() => null);
+    const properties = body?.properties;
 
     if (!properties || !Array.isArray(properties) || properties.length === 0) {
       return NextResponse.json({ error: "Invalid properties array" }, { status: 400 });
@@ -65,29 +91,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid array data format" }, { status: 400 });
     }
 
-    const validatedProperties = validationResult.data;
-
-    // Inject verified user id, sanitize HTML + CSV formula injection, and enforce safe workflow states
-    const verifiedProperties = validatedProperties.map(p => {
-      const sanitized = {};
-      for (const [key, val] of Object.entries(p)) {
-        const cleanKey = stripAllTags(key);
-        if (typeof val === 'string') {
-          sanitized[cleanKey] = sanitizeCsvFormulaValue(val);
-        } else {
-          sanitized[cleanKey] = val;
-        }
-      }
-      return {
-        ...sanitized,
-        owner_id: userId,
-        pipeline_status: "pending",
-        lifecycle_state: "draft",
-        moderation_status: "pending",
-        canonical_slug: null,
-        airtable_record_id: null,
-      };
-    });
+    const verifiedProperties = validationResult.data.map((property) => ({
+      ...property,
+      owner_id: userId,
+      pipeline_status: "pending",
+      lifecycle_state: "draft",
+      moderation_status: "pending",
+      canonical_slug: null,
+    }));
 
     // Attempt to bulk insert into Supabase
     // Using admin client because user may be uploading 1000s of properties.
