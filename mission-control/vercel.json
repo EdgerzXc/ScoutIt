@@ -1,5 +1,10 @@
 {
   "framework": "nextjs",
+  "git": {
+    "deploymentEnabled": {
+      "codex/scoutit-pilot-readiness": false
+    }
+  },
   "crons": [
     {
       "path": "/api/scan/process",
