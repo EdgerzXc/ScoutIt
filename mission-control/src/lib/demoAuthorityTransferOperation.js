@@ -20,7 +20,7 @@ export const REFERENCE_REGISTRY = Object.freeze([
   { table: "calendar_events", column: "owner_user_id", select: "id", className: "blocked", label: "Private calendar events" },
   { table: "calendar_connections", column: "owner_user_id", select: "id, provider", className: "blocked", label: "OAuth calendar connections" },
   { table: "connect_balances", column: "user_id", select: "user_id", className: "blocked", label: "Legacy Connect balances" },
-  { table: "user_connect_wallets", column: "user_id", select: "user_id, role_scope", className: "blocked", label: "Connect wallets" },
+  { table: "user_connect_wallets", column: "user_id", select: "user_id, role", className: "blocked", label: "Connect wallets" },
   { table: "user_connect_accounts", column: "user_id", select: "user_id", className: "blocked", label: "Connect accounts" },
   { table: "connect_wallet_ledger", column: "user_id", select: "id", className: "retained", label: "Connect ledger history" },
   { table: "crm_activity_log", column: "actor_id", select: "id, deal_id, property_id", className: "retained", label: "CRM activity history" },

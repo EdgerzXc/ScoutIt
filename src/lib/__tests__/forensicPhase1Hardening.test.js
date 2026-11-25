@@ -154,8 +154,8 @@ describe("Phase 1: Critical Security & Functional Breakages Verification", () =>
   });
 
   describe("GAP-25: 3D Spatial Studio IDOR & Connects Deduction", () => {
-    it("deducts Connects via spend_connects RPC when paid generation is requested", async () => {
-      const rpcMock = vi.fn().mockResolvedValue({ data: [{ total_balance: 10 }], error: null });
+    it("deducts Connects via spend_connects_atomic RPC when paid generation is requested", async () => {
+      const rpcMock = vi.fn().mockResolvedValue({ data: [{ success: true, remaining_total: 10 }], error: null });
       const mockSupabase = {
         from: vi.fn((table) => {
           if (table === "properties") {
@@ -190,11 +190,12 @@ describe("Phase 1: Critical Security & Functional Breakages Verification", () =>
 
       expect(res.success).toBe(true);
       expect(res.connectsSpent).toBe(3);
-      expect(rpcMock).toHaveBeenCalledWith("spend_connects", expect.objectContaining({
+      expect(rpcMock).toHaveBeenCalledWith("spend_connects_atomic", expect.objectContaining({
         p_user_id: "user-123",
+        p_role: "owner",
         p_amount: 3,
-        p_ref_type: "spatial_generation",
-        p_ref_id: "prop-owner-1",
+        p_source: "spatial_generation",
+        p_reference_id: "prop-owner-1",
       }));
     });
 

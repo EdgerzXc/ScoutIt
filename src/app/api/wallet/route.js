@@ -54,7 +54,7 @@ export async function GET(request) {
       if (!inputRole || typeof inputRole !== "string") return inputRole;
       const lower = inputRole.trim().toLowerCase();
       if (lower === "salesperson") return "broker";
-      if (lower === "operator") return "seeker";
+      if (lower === "operator") return "owner";
       if (lower === "provider") return String(profile?.provider_type || "photographer").trim().toLowerCase();
       return inputRole;
     };

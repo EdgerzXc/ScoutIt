@@ -243,6 +243,20 @@ export async function POST(request) {
       return NextResponse.json({ error: "One or more selected units are already delegated" }, { status: 409 });
     }
 
+    const previousOperatorsByUnitId = new Map(units.map((u) => [u.id, u.operator_id ?? null]));
+    const rollbackDelegatedUnits = async () => {
+      for (const [uid, prevOp] of previousOperatorsByUnitId.entries()) {
+        try {
+          await supabaseAdmin
+            .from("property_units")
+            .update({ operator_id: prevOp, updated_at: new Date().toISOString() })
+            .eq("id", uid);
+        } catch (rbErr) {
+          console.error("[DELEGATE API] Rollback unit operator_id failed:", uid, rbErr?.message);
+        }
+      }
+    };
+
     // Stamp operator_id on every selected unit.
     const { error: stampErr } = await supabaseAdmin
       .from("property_units")
@@ -262,6 +276,7 @@ export async function POST(request) {
       .eq("id", dealId);
     if (updateDealErr) {
       console.error("[DELEGATE API] Failed to update original deal:", updateDealErr);
+      await rollbackDelegatedUnits();
       return NextResponse.json({ error: "Failed to finalize delegation" }, { status: 500 });
     }
 
@@ -276,6 +291,15 @@ export async function POST(request) {
       const { error: cloneErr } = await supabaseAdmin.from("deals").insert(clones);
       if (cloneErr) {
         console.error("[DELEGATE API] Failed to clone sibling deals:", cloneErr);
+        await rollbackDelegatedUnits();
+        try {
+          await supabaseAdmin
+            .from("deals")
+            .update({ unit_id: deal.unit_id ?? null, status: deal.status })
+            .eq("id", dealId);
+        } catch (dealRbErr) {
+          console.error("[DELEGATE API] Rollback original deal failed:", dealId, dealRbErr?.message);
+        }
         return NextResponse.json({ error: "Units delegated, but some deal records failed to save" }, { status: 500 });
       }
     }

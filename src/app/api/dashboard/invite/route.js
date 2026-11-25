@@ -263,19 +263,35 @@ export async function POST(request) {
       const correlation = buildCorrelation(committedDealId);
 
       // 2. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
-      // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
-      await ensureConnectBalancesWallet(supabaseAdmin, userId, 'owner', 'starry');
+      // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects_atomic RPC).
+      let callerTier = 'starry';
+      try {
+        const { data: tierProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('subscription_tier')
+          .eq('id', userId)
+          .maybeSingle();
+        if (tierProfile?.subscription_tier) {
+          callerTier = String(tierProfile.subscription_tier).trim().toLowerCase() || 'starry';
+        }
+      } catch {
+        // Fall back safely when profile lookup is unavailable in minimal mocks
+      }
+      await ensureConnectBalancesWallet(supabaseAdmin, userId, 'owner', callerTier);
 
-      const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
+      const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects_atomic', {
         p_user_id: userId,
+        p_role: 'owner',
         p_amount: 1,
+        p_tier: callerTier,
+        p_source: 'handshake',
         p_reason: 'Owner invited a broker (handshake)',
-        p_ref_type: 'handshake',
-        p_ref_id: String(committedDealId),
+        p_reference_id: String(committedDealId),
       });
 
-      if (spendError) {
-        console.error("[INVITE API] Connect spend failed:", spendError);
+      const spendDeclined = !spendError && Array.isArray(spendData) && spendData[0]?.success === false;
+      if (spendError || spendDeclined) {
+        console.error("[INVITE API] Connect spend failed:", spendError || spendData);
         const cleanedUp = await rollbackInviteSideEffects(dealData[0].id);
         if (!cleanedUp) {
           await recordSystemEvent({
@@ -287,7 +303,10 @@ export async function POST(request) {
             detail: { ...correlation, stage: "spend_rollback", cleanedUp },
           });
         }
-        const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
+        const insufficient =
+          spendDeclined ||
+          spendError?.message?.includes('insufficient balance') ||
+          spendError?.message?.includes('no wallet found');
         return NextResponse.json(
           cleanedUp
             ? { error: insufficient ? "Insufficient Connects balance." : "The Connect charge could not be confirmed. Check your balance before trying again." }
@@ -296,7 +315,7 @@ export async function POST(request) {
         );
       }
 
-      const newBalance = spendData?.[0]?.total_balance ?? null;
+      const newBalance = spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null;
 
       // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
       if (newBalance !== null) {

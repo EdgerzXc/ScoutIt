@@ -482,8 +482,21 @@ export async function POST(request) {
     }
 
     const spendRole = role === "operator" ? "owner" : (role || "seeker");
+    let senderTier = "starry";
     if (!openGateFree) {
-      await ensureConnectBalancesWallet(supabaseAdmin, userId, spendRole, 'starry');
+      try {
+        const { data: tierProfile } = await supabaseAdmin
+          .from("user_profiles")
+          .select("subscription_tier")
+          .eq("id", userId)
+          .maybeSingle();
+        if (tierProfile?.subscription_tier) {
+          senderTier = String(tierProfile.subscription_tier).trim().toLowerCase() || "starry";
+        }
+      } catch {
+        // Fall back safely when profile lookup is unavailable in minimal mocks
+      }
+      await ensureConnectBalancesWallet(supabaseAdmin, userId, spendRole, senderTier);
     }
 
     let spentConnects = false;
@@ -493,7 +506,7 @@ export async function POST(request) {
           p_user_id: userId,
           p_role: spendRole,
           p_amount: 1,
-          p_tier: 'starry',
+          p_tier: senderTier,
           p_source: 'initiate_chat',
           p_reason: role === 'operator'
             ? 'Operator contacted building owner'

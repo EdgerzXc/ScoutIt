@@ -157,18 +157,21 @@ export async function submitSpatialGenerationRequest({
   const connectsSpent = entitlement.connectCostRequired;
   const targetSlaHours = SPATIAL_SLA_HOURS.standard;
 
-  // Deduct Connects atomically via spend_connects RPC if required
+  // Deduct Connects atomically via spend_connects_atomic RPC if required
   let spentViaRpc = false;
   if (connectsSpent > 0 && supabaseClient && typeof supabaseClient.rpc === "function") {
-    const { error: spendError } = await supabaseClient.rpc("spend_connects", {
+    const { data: spendData, error: spendError } = await supabaseClient.rpc("spend_connects_atomic", {
       p_user_id: user.id,
+      p_role: "owner",
       p_amount: connectsSpent,
+      p_tier: currentTier || "starry",
+      p_source: "spatial_generation",
       p_reason: `3D Spatial Studio generation for property ${resolvedPropertyId}`,
-      p_ref_type: "spatial_generation",
-      p_ref_id: String(resolvedPropertyId),
+      p_reference_id: String(resolvedPropertyId),
     });
 
-    if (spendError) {
+    const spendDeclined = !spendError && Array.isArray(spendData) && spendData[0]?.success === false;
+    if (spendError || spendDeclined) {
       return {
         success: false,
         error: "Insufficient Connects balance or wallet error.",

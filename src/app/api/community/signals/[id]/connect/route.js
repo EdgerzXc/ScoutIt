@@ -217,20 +217,37 @@ export async function POST(request, { params }) {
     }
     const dealId = deal.id;
 
-    await ensureConnectBalancesWallet(supabaseAdmin, userId, "seeker", "starry");
+    let callerTier = "starry";
+    try {
+      const { data: tierProfile } = await supabaseAdmin
+        .from("user_profiles")
+        .select("subscription_tier")
+        .eq("id", userId)
+        .maybeSingle();
+      if (tierProfile?.subscription_tier) {
+        callerTier = String(tierProfile.subscription_tier).trim().toLowerCase() || "starry";
+      }
+    } catch {
+      // Fall back safely when profile lookup is unavailable in minimal mocks
+    }
+    await ensureConnectBalancesWallet(supabaseAdmin, userId, "seeker", callerTier);
 
-    const { error: spendError, data: spendData } = await supabaseAdmin.rpc("spend_connects", {
+    const { error: spendError, data: spendData } = await supabaseAdmin.rpc("spend_connects_atomic", {
       p_user_id: userId,
+      p_role: "seeker",
       p_amount: 1,
+      p_tier: callerTier,
+      p_source: "initiate_chat",
       p_reason: "Community signal connect",
-      p_ref_type: "initiate_chat",
-      p_ref_id: dealId,
+      p_reference_id: dealId,
     });
-    if (spendError) {
+    const spendDeclined = !spendError && Array.isArray(spendData) && spendData[0]?.success === false;
+    if (spendError || spendDeclined) {
       await supabaseAdmin.from("deals").delete().eq("id", dealId);
       const insufficient =
-        spendError.message?.includes("insufficient balance") ||
-        spendError.message?.includes("no wallet found");
+        spendDeclined ||
+        spendError?.message?.includes("insufficient balance") ||
+        spendError?.message?.includes("no wallet found");
       return NextResponse.json(
         { ok: false, error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
         { status: insufficient ? 403 : 500 }
@@ -277,7 +294,7 @@ export async function POST(request, { params }) {
       success: true,
       dealId,
       connects_spent: 1,
-      connects_remaining: spendData?.[0]?.total_balance ?? null,
+      connects_remaining: spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null,
       status: "pending",
       source_context: connectSource,
     });

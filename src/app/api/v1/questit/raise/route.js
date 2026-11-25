@@ -140,17 +140,23 @@ export async function POST(request) {
     let refundContext = null;
 
     // 5. Atomic Connect spend — balance check + 3-bucket deduction (granted → purchased →
-    // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects RPC).
-    const { data: spendData, error: spendError } = await supabase.rpc('spend_connects', {
+    // earned) + ledger insert, all in one indivisible Postgres transaction (spend_connects_atomic RPC).
+    const { data: spendData, error: spendError } = await supabase.rpc('spend_connects_atomic', {
       p_user_id: companyId,
+      p_role: 'owner',
       p_amount: bountyConnects,
+      p_tier: providerTier || 'starry',
+      p_source: 'bounty',
       p_reason: `API Quest Raised for ${targetField}`,
-      p_ref_type: 'bounty',
-      p_ref_id: propertyId,
+      p_reference_id: propertyId,
     });
 
-    if (spendError) {
-      const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
+    const spendDeclined = !spendError && Array.isArray(spendData) && spendData[0]?.success === false;
+    if (spendError || spendDeclined) {
+      const insufficient =
+        spendDeclined ||
+        spendError?.message?.includes('insufficient balance') ||
+        spendError?.message?.includes('no wallet found');
       return NextResponse.json(
         { error: insufficient ? "Insufficient Connects to fund this bounty." : "Connect spend failed." },
         { status: insufficient ? 402 : 500 }
@@ -160,7 +166,7 @@ export async function POST(request) {
     connectsDeducted = true;
     refundContext = { companyId, bountyConnects, targetField, propertyId };
 
-    const newBalance = spendData?.[0]?.total_balance ?? null;
+    const newBalance = spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null;
     if (newBalance !== null) {
       await supabase.from('user_profiles').update({ connects_balance: newBalance }).eq('id', companyId);
     }

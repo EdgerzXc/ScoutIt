@@ -109,3 +109,16 @@ test("Claim document viewer action gates signed URLs on clean malware scans with
   assert.match(actions, /malware_scan_status\s*!==\s*["']clean["']/);
   assert.match(actions, /createSignedUrl\([^)]*120/);
 });
+
+test("Demo authority transfer queries live user_connect_wallets.role column instead of removed role_scope", async () => {
+  const op = await readFile(path.join(root, "src", "lib", "demoAuthorityTransferOperation.js"), "utf8");
+  assert.match(op, /select:\s*["']user_id,\s*role["']/);
+  assert.doesNotMatch(op, /role_scope/);
+});
+
+test("Mission Control claim handoff promotes claimant owner role and clears prior broker/operator authority", async () => {
+  const actions = await readFile(path.join(root, "src", "app", "dashboard", "claims", "actions.js"), "utf8");
+  assert.match(actions, /active_roles:\s*nextRoles/);
+  assert.match(actions, /\.from\(["']property_broker_representations["']\)\s*\.update\(\{\s*status:\s*["']revoked["']/s);
+  assert.match(actions, /\.from\(["']property_units["']\)\s*\.update\(\{\s*operator_id:\s*null/s);
+});

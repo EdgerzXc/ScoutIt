@@ -269,7 +269,7 @@ export async function decideClaim(formData) {
     // Check claimant's tier and active listing count
     const { data: claimantProfile } = await admin
       .from("user_profiles")
-      .select("subscription_tier, role")
+      .select("subscription_tier, role, active_roles")
       .eq("id", claim.claimant_user_id)
       .maybeSingle();
 
@@ -390,6 +390,53 @@ export async function decideClaim(formData) {
         summary: "Claim transferred listing to off_market, but Airtable unpublish failed; reconciliation required.",
         detail: { claimId, slug: slugToUnpublishAfterCommit, error: unpublishErr?.message || "unpublish error" },
       });
+    }
+  }
+
+  if (transfer) {
+    if (claim.claimed_relationship === "owner") {
+      try {
+        const existingRoles = Array.isArray(claimantProfile?.active_roles) ? claimantProfile.active_roles : [];
+        const nextRoles = Array.from(new Set([...existingRoles, "owner"]));
+        const currentRole = String(claimantProfile?.role || "").toLowerCase();
+        const nextRole = !currentRole || currentRole === "seeker" || currentRole === "buyer"
+          ? "owner"
+          : claimantProfile.role;
+        await admin
+          .from("user_profiles")
+          .update({ role: nextRole, active_roles: nextRoles, updated_at: new Date().toISOString() })
+          .eq("id", claim.claimant_user_id);
+        transfer.grantedRoles = nextRoles;
+      } catch (roleErr) {
+        console.warn("[claims] Could not promote claimant active_roles to owner:", roleErr?.message);
+      }
+    }
+
+    if (transfer.from_owner_id && transfer.from_owner_id !== transfer.to_owner_id) {
+      const handoffAt = new Date().toISOString();
+      try {
+        const { data: revokedReps } = await admin
+          .from("property_broker_representations")
+          .update({ status: "revoked", updated_at: handoffAt })
+          .eq("property_id", claim.property_id)
+          .in("status", ["active", "pending"])
+          .select("id");
+        transfer.revokedRepresentations = Array.isArray(revokedReps) ? revokedReps.length : 0;
+      } catch (repErr) {
+        console.warn("[claims] Could not revoke previous broker representations on handoff:", repErr?.message);
+      }
+      try {
+        const { data: clearedUnits } = await admin
+          .from("property_units")
+          .update({ operator_id: null, updated_at: handoffAt })
+          .eq("property_id", claim.property_id)
+          .not("operator_id", "is", null)
+          .neq("operator_id", claim.claimant_user_id)
+          .select("id");
+        transfer.clearedUnitOperators = Array.isArray(clearedUnits) ? clearedUnits.length : 0;
+      } catch (unitErr) {
+        console.warn("[claims] Could not clear previous unit operators on handoff:", unitErr?.message);
+      }
     }
   }
 

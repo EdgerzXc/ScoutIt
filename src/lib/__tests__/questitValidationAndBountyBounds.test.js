@@ -471,7 +471,7 @@ describe("A-312: QuestIT Validation, Scope Allowlist, Party Checks, Tier Enforce
     it("accepts valid raise, deduces Connects atomically, inserts quest, and records balance", async () => {
       const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
       const spendRpc = vi.fn().mockResolvedValue({
-        data: [{ total_balance: 450 }],
+        data: [{ success: true, remaining_total: 450, total_balance: 450 }],
         error: null,
       });
       supabaseAdmin.rpc = spendRpc;
@@ -559,13 +559,15 @@ describe("A-312: QuestIT Validation, Scope Allowlist, Party Checks, Tier Enforce
       expect(json.success).toBe(true);
       expect(json.remaining_connects).toBe(450);
       expect(spendRpc).toHaveBeenCalledWith(
-        "spend_connects",
+        "spend_connects_atomic",
         {
           p_user_id: "company-1",
+          p_role: "owner",
           p_amount: 50,
+          p_tier: "cluster",
+          p_source: "bounty",
           p_reason: "API Quest Raised for zoning",
-          p_ref_type: "bounty",
-          p_ref_id: "prop-1",
+          p_reference_id: "prop-1",
         }
       );
       expect(mockQuestInsert).toHaveBeenCalledWith([

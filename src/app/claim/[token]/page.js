@@ -75,17 +75,25 @@ export default async function ClaimPropertyTokenPage({ params }) {
               direct inquiries, and broker representations.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link
-                href={`/dashboard/inventory?claim=${encodeURIComponent(draftProperty.id)}&token=${encodeURIComponent(token)}`}
-                className="px-5 py-3 rounded-lg text-xs uppercase tracking-widest font-semibold"
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  background: "var(--accent-bright)",
-                  color: "var(--bg)",
-                }}
-              >
-                Verify &amp; Claim Property
-              </Link>
+              {(() => {
+                const publicSlug = draftProperty.canonical_slug || draftProperty.slug;
+                const claimHref = publicSlug
+                  ? `/property/${encodeURIComponent(publicSlug)}?claim=1&token=${encodeURIComponent(token)}`
+                  : `/dashboard?claim=${encodeURIComponent(draftProperty.id)}&token=${encodeURIComponent(token)}`;
+                return (
+                  <Link
+                    href={claimHref}
+                    className="px-5 py-3 rounded-lg text-xs uppercase tracking-widest font-semibold"
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      background: "var(--accent-bright)",
+                      color: "var(--bg)",
+                    }}
+                  >
+                    Verify &amp; Claim Property
+                  </Link>
+                );
+              })()}
               <Link
                 href="/property"
                 className="px-5 py-3 rounded-lg text-xs uppercase tracking-widest"
