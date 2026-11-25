@@ -136,7 +136,7 @@ describe("A-211 Phases 7–12 Forensic Hardening (GAP-31 to GAP-92)", () => {
 
       const claimPage = read("src/app/claim/[token]/page.js");
       expect(claimPage).toContain("claim_token");
-      expect(claimPage).toContain("/dashboard/inventory?claim=");
+      expect(claimPage).toContain("/dashboard?claim=");
     });
 
     test("GAP-72, GAP-75, GAP-84 & GAP-87: FAQs, inquiries, and property/premium resolve canonical_slug and UUID", () => {
