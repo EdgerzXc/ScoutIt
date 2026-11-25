@@ -16,6 +16,7 @@ import VaultOfHonor from "./VaultOfHonor";
 import ResidentPassportCard from "./ResidentPassportCard";
 
 const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonMatrix"), { ssr: false });
+const CommunityConnectModal = dynamic(() => import("@/components/stratosphere/CommunityConnectModal"), { ssr: false });
 
 import maplibregl from '@/lib/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -38,6 +39,7 @@ export default function BuyerMode() {
   const [savedSignals, setSavedSignals] = useState([]);
   const [loadingSignals, setLoadingSignals] = useState(true);
   const [showAllSignals, setShowAllSignals] = useState(false);
+  const [connectModalSignal, setConnectModalSignal] = useState(null);
 
   // Area watch — device-local (same pattern as Your Board), so the toggle is
   // real state instead of a fire-and-forget toast that pretends to subscribe.
@@ -773,7 +775,7 @@ export default function BuyerMode() {
                       key={signal.id}
                       signal={{ ...signal, isSaved: true }}
                       onSelect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
-                      onConnect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                      onConnect={(sig) => setConnectModalSignal(sig)}
                     />
                   ))}
                 </div>
@@ -979,6 +981,12 @@ export default function BuyerMode() {
           onClose={() => setIsComparisonOpen(false)}
         />
       )}
+
+      <CommunityConnectModal
+        signal={connectModalSignal}
+        isOpen={Boolean(connectModalSignal)}
+        onClose={() => setConnectModalSignal(null)}
+      />
 
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {

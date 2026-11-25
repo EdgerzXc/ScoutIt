@@ -9,7 +9,9 @@ import {
   ArrowUpRight,
   ArrowRight,
   Coins,
+  Radio,
 } from "lucide-react";
+import InfoTip from "@/components/ui/InfoTip";
 import { useDashboard } from "../../context/DashboardContext";
 import { getUniversalWalletOverview } from "../../lib/connectsWallet";
 import { loadDeals } from "../../lib/deals/dealsClient";
@@ -99,6 +101,16 @@ export default function UnifiedOverviewMode({ onSelectLens, heldRoles = [] }) {
               <p className="text-sm text-text-secondary mt-1 max-w-2xl">
                 Review every incoming inquiry, pitch, viewing, and Connect balance across all your roles in one unified pipeline. Use the Workspace switcher in the header when you want a specific role&apos;s tools.
               </p>
+            </div>
+            <div className="inline-flex items-center gap-1.5 shrink-0 self-start md:self-center">
+              <Link
+                href="/stratosphere?view=radar"
+                className="min-h-11 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider transition"
+              >
+                <Radio size={14} aria-hidden="true" />
+                <span>Live Radar</span>
+              </Link>
+              <InfoTip tipId="stratosphereWorkspace" label="About Live Radar" />
             </div>
           </div>
         </div>

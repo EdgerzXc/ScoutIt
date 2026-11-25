@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft, ArrowRight, Bookmark, Building2, Compass, FileText, Layers, Radio, Search, TrendingUp } from "lucide-react";
 import SignalDossierCard from "./SignalDossierCard";
 import SignalComposer from "./SignalComposer";
+import { getLocalSavedSignals } from "@/lib/savedSignalsClient";
+
+const CommunityConnectModal = dynamic(() => import("./CommunityConnectModal"), { ssr: false });
 
 const StratosphereTerminal = dynamic(() => import("./StratosphereTerminal"), {
   ssr: false,
@@ -75,12 +77,11 @@ async function fetchSavedSignals() {
 }
 
 export default function StratosphereWorkspace({
-  initialView = "articles",
+  initialView = "radar",
   initialStage = "all",
   initialQuery = "",
   initialSignal = null,
 } = {}) {
-  const router = useRouter();
   const [liveArticles, setLiveArticles] = useState([]);
   const [view, setView] = useState(initialView);
   const [stage, setStage] = useState(validJourneyStage(initialStage));
@@ -94,8 +95,36 @@ export default function StratosphereWorkspace({
   const [savedSignalsLoading, setSavedSignalsLoading] = useState(false);
   const [savedSignalsError, setSavedSignalsError] = useState(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [connectModalSignal, setConnectModalSignal] = useState(null);
+  const [communityProfile, setCommunityProfile] = useState(null);
   const [visibleArticleCount, setVisibleArticleCount] = useState(ARTICLES_PAGE_SIZE);
   const signalsFetchedRef = useRef(false);
+
+  useEffect(() => {
+    let alive = true;
+    getSession()
+      .then(async ({ data }) => {
+        const token = data?.session?.access_token;
+        if (!token || !alive) return;
+        const res = await fetch("/api/community/me", {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        const json = await res.json().catch(() => null);
+        if (alive && json?.ok) {
+          setCommunityProfile({
+            role: json.role || null,
+            primaryMode: json.primaryMode || null,
+            activeRoles: Array.isArray(json.activeRoles) ? json.activeRoles : [],
+            providerType: json.providerType || null,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const loadMySignals = useCallback(() => {
     setMySignalsLoading(true);
@@ -115,15 +144,17 @@ export default function StratosphereWorkspace({
   const loadSavedSignals = useCallback(() => {
     setSavedSignalsLoading(true);
     setSavedSignalsError(null);
+    const localList = getLocalSavedSignals();
     fetchSavedSignals()
       .then((json) => {
         if (json?.ok && Array.isArray(json.signals)) {
-          setSavedSignals(json.signals);
+          const seen = new Set(json.signals.map((s) => s.id));
+          setSavedSignals([...json.signals, ...localList.filter((s) => s?.id && !seen.has(s.id))]);
         } else {
-          setSavedSignalsError(json?.error || "Could not load your saved signals.");
+          setSavedSignals(localList);
         }
       })
-      .catch(() => setSavedSignalsError("Could not load your saved signals."))
+      .catch(() => setSavedSignals(localList))
       .finally(() => setSavedSignalsLoading(false));
   }, []);
 
@@ -148,28 +179,20 @@ export default function StratosphereWorkspace({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("view") === "radar") setView("radar");
-    else if (params.get("view") === "articles") setView("articles");
-    else if (params.get("view") === "my-signals") {
+    const paramView = params.get("view");
+    if (paramView === "radar") setView("radar");
+    else if (paramView === "articles") setView("articles");
+    else if (paramView === "my-signals" || initialView === "my-signals") {
       setView("my-signals");
       loadMySignals();
-    } else if (params.get("view") === "saved-signals") {
-      // Saved follow-ups belong in the dashboard workplace (when logged in) or Your Board (when offline)
-      getSession().then(({ data }) => {
-        if (data?.session?.user) {
-          router.replace("/dashboard");
-        } else {
-          router.replace("/wishlist");
-        }
-      }).catch(() => {
-        router.replace("/wishlist");
-      });
+    } else if (paramView === "saved-signals" || initialView === "saved-signals") {
       setView("saved-signals");
+      loadSavedSignals();
     }
     if (params.get("stage")) setStage(validJourneyStage(params.get("stage")));
     if (params.has("q")) setQuery(params.get("q") || "");
     if (params.has("signal")) setReturnSignal(params.get("signal"));
-  }, [loadMySignals, loadSavedSignals, router]);
+  }, [initialView, loadMySignals, loadSavedSignals]);
 
   // Pipeline 1: Load Articles catalog on mount
   useEffect(() => {
@@ -262,9 +285,11 @@ export default function StratosphereWorkspace({
 
   const chooseView = (next) => {
     setView(next);
-    updateUrl("view", next === "articles" ? "" : next);
+    updateUrl("view", next === "radar" ? "" : next);
     if (next === "my-signals") {
       loadMySignals();
+    } else if (next === "saved-signals") {
+      loadSavedSignals();
     }
   };
 
@@ -325,24 +350,24 @@ export default function StratosphereWorkspace({
         <div className="sw-view-switch" role="group" aria-label="Explore Stratosphere">
           <button
             type="button"
-            aria-pressed={view === "articles"}
-            className={view === "articles" ? "is-active" : ""}
-            onClick={() => chooseView("articles")}
-          >
-            <FileText size={15} aria-hidden="true" />
-            <span className="sw-view-label-full">All Articles</span>
-            <span className="sw-view-label-short">Articles</span>
-          </button>
-          <button
-            type="button"
             data-scoutit-guide="spatial-signal-radar"
             aria-pressed={view === "radar"}
             className={view === "radar" ? "is-active" : ""}
             onClick={() => chooseView("radar")}
           >
             <Compass size={15} aria-hidden="true" />
-            <span className="sw-view-label-full">Radar &amp; Community</span>
+            <span className="sw-view-label-full">Radar</span>
             <span className="sw-view-label-short">Radar</span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "articles"}
+            className={view === "articles" ? "is-active" : ""}
+            onClick={() => chooseView("articles")}
+          >
+            <FileText size={15} aria-hidden="true" />
+            <span className="sw-view-label-full">Articles</span>
+            <span className="sw-view-label-short">Articles</span>
           </button>
           <button
             type="button"
@@ -352,7 +377,17 @@ export default function StratosphereWorkspace({
           >
             <Radio size={15} aria-hidden="true" />
             <span className="sw-view-label-full">My Signals</span>
-            <span className="sw-view-label-short">Signals</span>
+            <span className="sw-view-label-short">Mine</span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "saved-signals"}
+            className={view === "saved-signals" ? "is-active" : ""}
+            onClick={() => chooseView("saved-signals")}
+          >
+            <Bookmark size={15} aria-hidden="true" />
+            <span className="sw-view-label-full">Saved</span>
+            <span className="sw-view-label-short">Saved</span>
           </button>
         </div>
         <button type="button" data-scoutit-guide="signal-composer-trigger" className="sw-post-btn" onClick={() => setComposerOpen(true)}>
@@ -370,39 +405,60 @@ export default function StratosphereWorkspace({
         }}
       />
 
+      <CommunityConnectModal
+        signal={connectModalSignal}
+        isOpen={Boolean(connectModalSignal)}
+        onClose={() => setConnectModalSignal(null)}
+      />
+
       {view === "saved-signals" ? (
-        <section className="sw-my-signals" aria-label="Saved Signals Routing">
+        <section className="sw-my-signals" aria-label="Saved Signals">
           <div className="sw-my-signals-header">
             <div>
-              <span className="sw-kicker">SAVED SIGNALS · FOLLOW-UP LIST</span>
-              <h2>Saved Follow-ups Location</h2>
-              <p>Saved follow-ups are located in your Dashboard Workspace when signed in, or on Your Board when offline.</p>
+              <span className="sw-kicker">BOOKMARKS</span>
+              <h2 className="sw-tip-anchor">
+                Saved Signals
+                <InfoTip tipId="signalSavedWorkspace" label="About saved signals" />
+              </h2>
             </div>
             <button type="button" className="sw-post-btn" onClick={() => chooseView("radar")}>
-              <Compass size={14} aria-hidden="true" style={{ marginRight: 6 }} /> EXPLORE ON RADAR
+              <Compass size={14} aria-hidden="true" style={{ marginRight: 6 }} /> EXPLORE RADAR
             </button>
           </div>
-          <div className="sw-empty">
-            <Bookmark size={32} style={{ color: "var(--accent)", marginBottom: 12 }} />
-            <p className="font-working-title text-base mb-2">Saved signals are accessible in your personal workspace.</p>
-            <p className="text-xs text-text-secondary max-w-md mb-6 leading-relaxed">
-              If you are signed in, track your opportunities and requests in your Dashboard. If you are browsing as a guest, your saved follow-ups are preserved on Your Board.
-            </p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-              <Link
-                href="/dashboard"
-                className="font-label-caps text-[12px] tracking-widest uppercase text-background bg-gold-accent hover:opacity-90 px-5 py-2.5 rounded transition font-bold"
-              >
-                Dashboard Workspace →
-              </Link>
-              <Link
-                href="/wishlist"
-                className="font-label-caps text-[12px] tracking-widest uppercase text-gold-accent border border-gold-accent/40 hover:bg-gold-accent/10 px-5 py-2.5 rounded transition font-bold"
-              >
-                Your Board (Offline) →
-              </Link>
+          {savedSignalsLoading ? (
+            <p className="sw-loading-text">Loading saved signals…</p>
+          ) : savedSignalsError ? (
+            <div className="sw-empty">
+              <p>{savedSignalsError}</p>
             </div>
-          </div>
+          ) : savedSignals.length === 0 ? (
+            <div className="sw-empty">
+              <Bookmark size={32} style={{ color: "var(--accent)", marginBottom: 12 }} aria-hidden="true" />
+              <p>No saved signals yet.</p>
+              <button type="button" onClick={() => chooseView("radar")}>
+                Browse Live Radar
+              </button>
+            </div>
+          ) : (
+            <div className="sw-my-signals-grid">
+              {savedSignals.map((signal) => (
+                <SignalDossierCard
+                  key={signal.id}
+                  signal={{ ...signal, isSaved: true }}
+                  onSelect={(sig) => {
+                    updateUrl("signal", sig.id);
+                    chooseView("radar");
+                    setReturnSignal(sig.id);
+                  }}
+                  onConnect={(sig) => setConnectModalSignal(sig)}
+                  onClosed={() => {
+                    loadSavedSignals();
+                    refreshLiveSignals();
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </section>
       ) : view === "my-signals" ? (
         <section className="sw-my-signals" aria-label="My Signals">
@@ -647,6 +703,7 @@ export default function StratosphereWorkspace({
               </div>
               <StratosphereTerminal
                 initialSignals={radarSignals}
+                userProfile={communityProfile}
                 stageFilter={stage}
                 onSelectStage={chooseStage}
                 onClearStage={() => chooseStage("all")}

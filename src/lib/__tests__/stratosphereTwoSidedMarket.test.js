@@ -103,13 +103,13 @@ describe("Layer 02 Stratosphere — UI Component & Noise Reduction Invariants", 
     expect(src).not.toContain("ssr-hud-bottom-right");
   });
 
-  it("SignalDossierCard implements two-sided market badges and Intercept Demand CTA", () => {
+  it("SignalDossierCard implements two-sided market badges and plain Offer Space CTA", () => {
     const src = read("src/components/stratosphere/SignalDossierCard.js");
     expect(src).toContain("sdc-role-badge");
     expect(src).toContain("SEEKER · DEMAND");
     expect(src).toContain("OFF-MARKET SUPPLY");
     expect(src).toContain("SPATIAL INTEL");
-    expect(src).toContain("INTERCEPT DEMAND");
+    expect(src).toContain("OFFER SPACE");
     expect(src).toContain("sdc-ceiling-chip");
     expect(src).toContain("cardRef");
     expect(src).toContain("scrollIntoView");

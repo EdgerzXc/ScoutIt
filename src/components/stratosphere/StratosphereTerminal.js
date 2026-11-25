@@ -16,6 +16,12 @@ import {
   getSignalMarketRole,
 } from "@/lib/communitySignalsAdapter";
 import { matchesJourneyStage } from "@/lib/layerTwoJourney";
+import { getPersistedWorkspaceRole, setPersistedWorkspaceRole } from "@/lib/dashboardModes";
+import {
+  defaultMarketRoleForLens,
+  getAvailableStratosphereLenses,
+  resolveStratosphereDefaultLens,
+} from "@/lib/stratosphereLenses";
 import InfoTip from "@/components/ui/InfoTip";
 import "./stratosphere-terminal.css";
 
@@ -32,6 +38,7 @@ const INTELLIGENCE_STREAMS = [
 
 export default function StratosphereTerminal({
   initialSignals = COMMUNITY_SIGNALS,
+  userProfile = null,
   initialViewMode = "SPATIAL", // 'SPATIAL' | 'SIGNALS'
   stageFilter = "all",
   onSelectStage = () => {},
@@ -54,33 +61,38 @@ export default function StratosphereTerminal({
   const [connectModalSignal, setConnectModalSignal] = useState(null);
   // Two-Sided Market taxonomy: ALL vs DEMAND (Seekers) vs SUPPLY (Spaces Available) vs INTEL
   const [marketRole, setMarketRole] = useState("all");
+  const [activeLens, setActiveLens] = useState("all");
+  const userPickedRoleRef = useRef(false);
   // 3D Radar Beacon Color Signal filter (gold vs green vs purple vs red vs cyan)
   const [colorKey, setColorKey] = useState(null);
   const [visibleSignalCount, setVisibleSignalCount] = useState(SIGNALS_PAGE_SIZE);
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 680px)").matches) setViewMode("SIGNALS");
-  }, []);
-
-  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const place = params.get("place");
     if (place) setSelectedDistrict(place);
-    const role = params.get("role");
-    if (role) {
-      if (role === "buyer" || role === "tenant") {
-        setMarketRole(MARKET_ROLES.SUPPLY);
-      } else if (role === "broker") {
-        setMarketRole(MARKET_ROLES.DEMAND);
-      } else if (Object.values(MARKET_ROLES).includes(role)) {
-        setMarketRole(role);
-      }
-    }
     const color = params.get("color");
     if (color && ["gold", "green", "purple", "red", "cyan"].includes(color)) {
       setColorKey(color);
     }
   }, []);
+
+  useEffect(() => {
+    if (userPickedRoleRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const urlRole = params.get("role") || "";
+    const persistedRole = getPersistedWorkspaceRole();
+    const resolved = resolveStratosphereDefaultLens({
+      urlRole,
+      persistedRole,
+      profile: userProfile,
+    });
+    setActiveLens(resolved.lensId);
+    setMarketRole(resolved.marketRole);
+  }, [userProfile]);
+
+  const availableLenses = useMemo(() => getAvailableStratosphereLenses(userProfile), [userProfile]);
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get("signal");
     if (wanted) setSelectedSignal(initialSignals.find((signal) => signal.id === wanted) || null);
@@ -160,13 +172,29 @@ export default function StratosphereTerminal({
   }, []);
 
   const handleSelectMarketRole = useCallback((role) => {
+    userPickedRoleRef.current = true;
     setMarketRole(role);
+    if (role === MARKET_ROLES.ALL) setActiveLens("all");
     const url = new URL(window.location.href);
     if (role && role !== "all") {
       url.searchParams.set("role", role);
     } else {
       url.searchParams.delete("role");
     }
+    window.history.replaceState(null, "", url);
+  }, []);
+
+  const handleSelectLens = useCallback((lensId) => {
+    userPickedRoleRef.current = true;
+    setActiveLens(lensId);
+    const nextMarketRole = defaultMarketRoleForLens(lensId);
+    setMarketRole(nextMarketRole);
+    if (lensId && lensId !== "all") {
+      setPersistedWorkspaceRole(lensId);
+    }
+    const url = new URL(window.location.href);
+    if (lensId) url.searchParams.set("role", lensId);
+    else url.searchParams.delete("role");
     window.history.replaceState(null, "", url);
   }, []);
 
@@ -182,9 +210,11 @@ export default function StratosphereTerminal({
   }, []);
 
   const handleResetFilters = useCallback(() => {
+    userPickedRoleRef.current = true;
     setFilters({ signalType: null, spaceType: null, district: null });
     setSelectedDistrict(null);
     setSearchQuery("");
+    setActiveLens("all");
     setMarketRole("all");
     setColorKey(null);
     const url = new URL(window.location.href);
@@ -415,6 +445,29 @@ export default function StratosphereTerminal({
                 <InfoTip tipId="signalSources" label="About signal sources" />
               </div>
             </div>
+
+            {availableLenses.length > 0 && (
+              <div className="st-lens-bar" role="group" aria-label="Role lens">
+                <span className="st-lens-label">LENS</span>
+                <div className="st-lens-pills">
+                  {availableLenses.map((lens) => {
+                    const isCurrent = activeLens === lens.id;
+                    return (
+                      <button
+                        key={lens.id}
+                        type="button"
+                        aria-pressed={isCurrent}
+                        className={`st-lens-pill ${isCurrent ? "is-active" : ""}`}
+                        onClick={() => handleSelectLens(lens.id)}
+                      >
+                        {lens.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <InfoTip tipId="stratosphereRoleLens" label="How role lenses filter signals" />
+              </div>
+            )}
 
             {/* Two-Sided Market Intent Switcher */}
             <div className="st-market-tabs" role="tablist" aria-label="Market Intent Taxonomy">

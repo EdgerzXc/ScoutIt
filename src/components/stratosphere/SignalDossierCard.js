@@ -343,12 +343,13 @@ export default function SignalDossierCard({
         </button>
       );
     }
+    const canConnect = Boolean(signal.liveCommunity || signal.matchingSpaces?.[0]?.slug);
     if (signal.isSample && signal.actionType !== "EXPLORE_DATA") {
       if (isDemand) {
         return (
           <button type="button" className="sdc-btn sdc-btn-intercept" onClick={handlePrimaryAction}>
             <Zap size={12} aria-hidden="true" />
-            <span>INTERCEPT DEMAND</span>
+            <span>OFFER SPACE</span>
             <span className="sdc-connect-cost">DEMO</span>
           </button>
         );
@@ -357,10 +358,17 @@ export default function SignalDossierCard({
     }
     switch (signal.actionType) {
       case "PROPOSE_SPACE":
+        if (!signal.matchingSpaces?.length && !canConnect) {
+          return (
+            <button type="button" className="sdc-btn sdc-btn-ghost" onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}>
+              <span>VIEW DETAILS</span>
+            </button>
+          );
+        }
         return (
           <button type="button" className="sdc-btn sdc-btn-primary" onClick={handlePrimaryAction}>
             <Zap size={12} aria-hidden="true" />
-            <span>INTERCEPT DEMAND</span>
+            <span>OFFER SPACE</span>
             <ArrowRight size={13} aria-hidden="true" />
           </button>
         );
@@ -386,6 +394,13 @@ export default function SignalDossierCard({
         );
       case "CONNECT":
       default:
+        if (!canConnect) {
+          return (
+            <button type="button" className="sdc-btn sdc-btn-ghost" onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}>
+              <span>VIEW DETAILS</span>
+            </button>
+          );
+        }
         return (
           <button type="button" className="sdc-btn sdc-btn-primary" onClick={handlePrimaryAction}>
             <span>CONNECT</span>

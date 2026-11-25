@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, MessageSquare, FileText, Shield } from "lucide-react";
+import Link from "next/link";
+import { Lock, MessageSquare, FileText, Shield, Radio } from "lucide-react";
+import InfoTip from "@/components/ui/InfoTip";
 import PhotographerHUD from "./providers/PhotographerHUD";
 import ResearcherHUD from "./providers/ResearcherHUD";
 import DesignerHUD from "./providers/DesignerHUD";
@@ -114,9 +116,19 @@ export default function ProviderMode({ type = "photographer" }) {
           <span className="font-label-caps text-xs tracking-widest text-gold-accent uppercase mb-1 block">Command Center</span>
           <h1 className="font-headline-editorial text-3xl md:text-5xl text-gradient-gold mb-2">{providerLabel} Command Center</h1>
         </div>
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 items-stretch sm:items-center">
+          <div className="inline-flex items-center gap-1.5">
+            <Link
+              href={`/stratosphere?view=radar&role=${encodeURIComponent(type || "provider")}`}
+              className="min-h-11 inline-flex items-center justify-center gap-2 px-4 py-2 rounded border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider transition"
+            >
+              <Radio size={14} aria-hidden="true" />
+              <span>Live Radar</span>
+            </Link>
+            <InfoTip tipId="signalSources" label="About Live Radar" />
+          </div>
           <button
-            className="w-full sm:w-auto bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
+            className="w-full sm:w-auto min-h-11 bg-gold-accent text-background font-working-title font-bold px-6 py-2 rounded shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
             disabled={loading}
             onClick={async () => { setLoading(true); await fetchQuests(); }}
           >

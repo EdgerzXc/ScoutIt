@@ -172,4 +172,40 @@ describe("Stratosphere Spatial Radar — Terminal & Routing Integration", () => 
     expect(src).toContain("DescentBackdrop");
     expect(src).toContain('href="/stratosphere"');
   });
+
+  it("supports all-role Radar presets, inline Saved view, 1-step dashboard Connect, and concise InfoTip explanations", () => {
+    const pageSrc = read("src/app/stratosphere/page.js");
+    expect(pageSrc).toContain(': "radar"');
+
+    const termSrc = read("src/components/stratosphere/StratosphereTerminal.js");
+    expect(termSrc).toContain("resolveStratosphereDefaultLens");
+    expect(termSrc).toContain("availableLenses");
+    expect(termSrc).toContain('tipId="stratosphereRoleLens"');
+
+    const lensSrc = read("src/lib/stratosphereLenses.js");
+    expect(lensSrc).toContain('"owner"');
+    expect(lensSrc).toContain('"operator"');
+    expect(lensSrc).toContain('"researcher"');
+    expect(lensSrc).toContain("MARKET_ROLES.INTEL");
+
+    const wsSrc = read("src/components/stratosphere/StratosphereWorkspace.js");
+    expect(wsSrc).toContain("Saved Signals");
+    expect(wsSrc).not.toContain('router.replace("/dashboard")');
+
+    const modalSrc = read("src/components/stratosphere/CommunityConnectModal.js");
+    expect(modalSrc).toContain('tipId="signalConnect"');
+    expect(modalSrc).toContain("This update has no direct Connect target yet.");
+
+    for (const file of [
+      "src/components/dashboard/OwnerMode.js",
+      "src/components/dashboard/OperatorMode.js",
+      "src/components/dashboard/ProviderMode.js",
+      "src/components/dashboard/UnifiedOverviewMode.js",
+    ]) {
+      expect(read(file), file).toContain("/stratosphere?view=radar");
+    }
+
+    expect(read("src/components/dashboard/BuyerMode.js")).toContain("CommunityConnectModal");
+    expect(read("src/components/dashboard/BrokerMode.js")).toContain("CommunityConnectModal");
+  });
 });

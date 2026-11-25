@@ -5,6 +5,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton, RowListSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Lock, Briefcase, Contact, Compass, Sparkles, FolderOpen, ShieldCheck, FileEdit, Printer, Radio } from "lucide-react";
 import { getSession } from "../../lib/authClient";
 import SignalDossierCard from "@/components/stratosphere/SignalDossierCard";
@@ -30,6 +31,8 @@ import { ownerTenureLabel } from "@/lib/dashboardListings";
 import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 import InfoTip from "@/components/ui/InfoTip";
 
+const CommunityConnectModal = dynamic(() => import("@/components/stratosphere/CommunityConnectModal"), { ssr: false });
+
 export default function BrokerMode({ subRole = "broker" }) {
   const router = useRouter();
   const { connects, listings, pitches, sendPitch, updatePitchStatus, currentUser, addToast, searchByRadius, DEFAULT_MAP_CENTER, isLoading } = useDashboard();
@@ -40,6 +43,7 @@ export default function BrokerMode({ subRole = "broker" }) {
   const [pitchError, setPitchError] = useState("");
   const [isSendingPitch, setIsSendingPitch] = useState(false);
   const [noInquiriesModalOpen, setNoInquiriesModalOpen] = useState(false);
+  const [connectModalSignal, setConnectModalSignal] = useState(null);
 
   // License State
   const [prcInput, setPrcInput] = useState("");
@@ -1464,7 +1468,7 @@ export default function BrokerMode({ subRole = "broker" }) {
                       key={signal.id}
                       signal={{ ...signal, isSaved: true }}
                       onSelect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
-                      onConnect={(sig) => router.push(`/stratosphere?view=radar&signal=${encodeURIComponent(sig.id)}`)}
+                      onConnect={(sig) => setConnectModalSignal(sig)}
                     />
                   ))}
                 </div>
@@ -1551,6 +1555,11 @@ export default function BrokerMode({ subRole = "broker" }) {
           </div>
         </div>
       </div>
+      <CommunityConnectModal
+        signal={connectModalSignal}
+        isOpen={Boolean(connectModalSignal)}
+        onClose={() => setConnectModalSignal(null)}
+      />
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;

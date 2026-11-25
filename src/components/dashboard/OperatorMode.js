@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Building2, Cog, X, DoorOpen, MessageSquare, Compass, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Building2, Cog, X, DoorOpen, MessageSquare, Compass, ChevronRight, SlidersHorizontal, Radio } from "lucide-react";
 import InventoryGridManager from "./InventoryGridManager";
 import { useDashboard } from "../../context/DashboardContext";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
+import InfoTip from "@/components/ui/InfoTip";
 
 // Operator's "Operated Spaces" dashboard (SCOUTIT_MASTER_BUILD_SPEC.md §9.2/§9.6):
 // a filtered view showing only units delegated to this user, grouped by
@@ -119,12 +120,24 @@ export default function OperatorMode() {
             <div className="text-xs text-text-muted mt-0.5">Inbound tenant inquiries and callback requests route directly to your Deal Room Inbox.</div>
           </div>
         </div>
-        <Link
-          href="/dashboard/inbox"
-          className="w-full sm:w-auto min-h-11 justify-center px-4 py-2 rounded-lg bg-white/[0.04] hover:bg-gold-accent hover:text-black border border-white/[0.08] hover:border-gold-accent text-xs font-mono tracking-wider uppercase text-text-primary transition-all flex items-center gap-2"
-        >
-          <span>Open Operations Inbox →</span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <div className="inline-flex items-center gap-1">
+            <Link
+              href="/stratosphere?view=radar&role=operator"
+              className="min-h-11 justify-center px-4 py-2 rounded-lg bg-gold-accent/10 hover:bg-gold-accent/20 border border-gold-accent/40 text-xs font-mono tracking-wider uppercase text-gold-accent transition-all flex items-center gap-2"
+            >
+              <Radio size={14} aria-hidden="true" />
+              <span>Live Radar</span>
+            </Link>
+            <InfoTip tipId="signalRadarOwners" label="About Live Radar" />
+          </div>
+          <Link
+            href="/dashboard/inbox"
+            className="w-full sm:w-auto min-h-11 justify-center px-4 py-2 rounded-lg bg-white/[0.04] hover:bg-gold-accent hover:text-black border border-white/[0.08] hover:border-gold-accent text-xs font-mono tracking-wider uppercase text-text-primary transition-all flex items-center gap-2"
+          >
+            <span>Open Operations Inbox →</span>
+          </Link>
+        </div>
       </div>
 
       <div id="operated-buildings-list" className="flex flex-col gap-6">

@@ -5,6 +5,7 @@ import { X, Shield, Send, CheckCircle2, Zap, MapPin, ShieldCheck } from "lucide-
 import { INTRO_MAX } from "@/lib/connectIntro";
 import { getSession } from "@/lib/authClient";
 import PrivacyNotice from "@/components/ui/PrivacyNotice";
+import InfoTip from "@/components/ui/InfoTip";
 import { useModalDialog } from "@/components/ui/useModalDialog";
 import "./community-connect-modal.css";
 
@@ -72,6 +73,12 @@ export default function CommunityConnectModal({
       return;
     }
 
+    if (!isLive && !signal.matchingSpaces?.[0]?.slug) {
+      setError("This update has no direct Connect target yet.");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const { data: { session } } = await getSession().catch(() => ({ data: {} }));
       const token = session?.access_token;
@@ -121,7 +128,8 @@ export default function CommunityConnectModal({
         <div className="ccm-header">
           <div className="ccm-title-wrap">
             <Zap size={14} className="ccm-zap-icon" aria-hidden="true" />
-            <h3 className="ccm-title">INITIATE PERMISSIONED CONNECT</h3>
+            <h3 className="ccm-title">SEND PRIVATE INTRO</h3>
+            <InfoTip tipId="signalConnect" label="How private intros work" />
           </div>
           <button type="button" className="ccm-close-btn" onClick={onClose} aria-label="Close modal">
             <X size={16} aria-hidden="true" />
@@ -131,10 +139,9 @@ export default function CommunityConnectModal({
         {sent ? (
           <div className="ccm-success-state">
             <CheckCircle2 size={36} className="ccm-success-icon" aria-hidden="true" />
-            <h4 className="ccm-success-title">Connect Dispatched</h4>
+            <h4 className="ccm-success-title">Intro Sent</h4>
             <p className="ccm-success-desc">
-              Your introduction and matching proposal have been sent to{" "}
-              <strong>{signal.author?.name || signal.author?.scoutId}</strong>. Once accepted, a private conversation thread will open in your ScoutIt Dashboard.
+              Sent to <strong>{signal.author?.name || signal.author?.scoutId}</strong>. Once accepted, chat opens in your Inbox.
             </p>
             <div className="ccm-success-actions">
               {dealId ? (
@@ -150,38 +157,39 @@ export default function CommunityConnectModal({
         ) : (
           <form onSubmit={handleSubmit} className="ccm-form">
             <div className="ccm-signal-summary">
-              <span className="ccm-target-kicker">TARGET SIGNAL // {signal.district.toUpperCase()}</span>
+              <span className="ccm-target-kicker">{signal.district.toUpperCase()}</span>
               <h4 className="ccm-target-title">{signal.title}</h4>
               <div className="ccm-target-meta">
-                <span>AUTHOR: {signal.author?.name || signal.author?.scoutId}</span>
+                <span>Posted by: {signal.author?.name || signal.author?.scoutId}</span>
                 <span>•</span>
                 <span className="ccm-trust-badge">{signal.author?.trustTier || "[First-Time Verified Seeker]"}</span>
               </div>
               {signal.radiusKm && signal.radiusKm >= 1 ? (
                 <div className="ccm-radius-badge">
                   <MapPin size={11} aria-hidden="true" />
-                  <span>BROADCAST CATCHMENT: {signal.radiusKm} km coverage area</span>
+                  <span>{signal.radiusKm} km area</span>
                 </div>
               ) : null}
               <div className="ccm-behavioral-assurance">
                 <ShieldCheck size={13} className="ccm-shield-gold" aria-hidden="true" />
                 <span>
-                  <strong>Behavioral Standing:</strong> {signal.author?.trustTier || "[First-Time Verified Seeker]"} · Zero-Knowledge Verified (Author contact withheld until mutual acceptance).
+                  <strong>Standing:</strong> {signal.author?.trustTier || "[First-Time Verified Seeker]"}
                 </span>
+                <InfoTip tipId="signalConnect" label="Privacy and behavioral standing" />
               </div>
               {isSample ? (
                 <p className="ccm-sample-note" role="note">
-                  SAMPLE SIGNAL: exploring only. Dispatch is disabled: nothing will be sent and no Connect will be spent.
+                  SAMPLE SIGNAL: preview only. Nothing will be sent.
                 </p>
               ) : null}
               {isFull ? (
                 <p className="ccm-sample-note" role="note">
-                  ANSWERS FULL: This demand signal has reached its limit of {signal.maxAnswers || 3} open proposals under review. Connect is paused until pending requests resolve or expire.
+                  ANSWERS FULL: {signal.maxAnswers || 3} requests are already under review.
                 </p>
               ) : null}
               {isTerminal ? (
                 <p className="ccm-sample-note" role="note">
-                  SIGNAL {signal.terminalState.toUpperCase()}: This signal is no longer active.
+                  SIGNAL {signal.terminalState.toUpperCase()}: No longer active.
                 </p>
               ) : null}
             </div>
@@ -189,7 +197,7 @@ export default function CommunityConnectModal({
             <div className="ccm-field-group">
               <div className="ccm-field-header">
                 <label htmlFor="ccm-intro-input" className="ccm-label">
-                  PROPOSAL & INTRODUCTION NOTE
+                  YOUR NOTE
                 </label>
                 <span className="ccm-char-count">
                   {intro.length} / {INTRO_MAX || 280}
@@ -200,7 +208,7 @@ export default function CommunityConnectModal({
                 className="ccm-textarea"
                 rows={4}
                 maxLength={INTRO_MAX || 280}
-                placeholder="State how your space or mandate addresses this requirement. Be specific regarding location, floor area, and commercial terms."
+                placeholder="Share your space, location, size, and terms..."
                 value={intro}
                 onChange={(e) => setIntro(e.target.value)}
                 required
@@ -213,7 +221,7 @@ export default function CommunityConnectModal({
             <div className="ccm-disclosure-bar">
               <Shield size={13} className="ccm-shield-icon" aria-hidden="true" />
               <span>
-                Costs <strong>1 Connect</strong>. The recipient reviews your proposal before opening a private conversation thread. No refunds: a Connect buys delivery of your request, not a guaranteed match.
+                Costs <strong>1 Connect</strong>. No refunds: a Connect buys delivery of your request, not a guaranteed match.
               </span>
             </div>
 
@@ -236,8 +244,8 @@ export default function CommunityConnectModal({
                     : isTerminal
                     ? `SIGNAL ${signal.terminalState.toUpperCase()}`
                     : submitting
-                    ? "DISPATCHING..."
-                    : "DISPATCH (1 CONNECT)"}
+                    ? "SENDING..."
+                    : "SEND (1 CONNECT)"}
                 </span>
               </button>
             </div>

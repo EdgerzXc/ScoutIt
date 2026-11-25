@@ -248,6 +248,22 @@ export const INFO_TIPS = Object.freeze({
     title: "What is Open Gate?",
     body: "Open Gate lets verified seekers message you directly on selected properties without spending Connects. Inbound inquiries appear immediately in your Deal Inbox and CRM with an Open Gate badge.",
   }),
+  signalConnect: Object.freeze({
+    title: "Private intro (1 Connect)",
+    body: "Sends a short note to the author. Contact details stay hidden until both sides accept. Open requests are capped at 3 per signal.",
+  }),
+  signalRadarOwners: Object.freeze({
+    title: "Live Radar",
+    body: "See buyers, tenants, and brokers actively looking for space near your buildings, plus local market updates.",
+  }),
+  signalSavedWorkspace: Object.freeze({
+    title: "Saved signals",
+    body: "Bookmarked buyer requests, spaces, and updates stay synced to your account so you can review or connect anytime.",
+  }),
+  stratosphereRoleLens: Object.freeze({
+    title: "Role lens",
+    body: "Radar starts with signals matched to your active role so you skip noise. Switch lenses anytime or pick All to see every signal.",
+  }),
 });
 
 export function getInfoTip(id) {

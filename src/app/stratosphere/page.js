@@ -10,7 +10,14 @@ export const metadata = {
 
 export default async function StratospherePage({ searchParams }) {
   const sp = await searchParams;
-  const initialView = sp?.view === "radar" ? "radar" : "articles";
+  const initialView =
+    sp?.view === "articles"
+      ? "articles"
+      : sp?.view === "my-signals"
+      ? "my-signals"
+      : sp?.view === "saved-signals"
+      ? "saved-signals"
+      : "radar";
   return (
     <div className="min-h-screen flex flex-col font-sans" style={{ background: "var(--bg)", color: "var(--text-primary)" }}>
       <Header />

@@ -16,16 +16,24 @@ export async function GET(request) {
     }
     let displayName = null;
     let isPublic = false;
+    let role = null;
+    let primaryMode = null;
+    let activeRoles = [];
+    let providerType = null;
     let trustTier = "[First-Time Verified Seeker]";
     let compositeScore = null;
     if (supabaseAdmin) {
       const { data } = await supabaseAdmin
         .from("user_profiles")
-        .select("display_name, is_profile_public")
+        .select("display_name, is_profile_public, role, primary_mode, active_roles, provider_type")
         .eq("id", userId)
         .maybeSingle();
       displayName = data?.display_name || null;
       isPublic = data?.is_profile_public === true;
+      role = data?.role || null;
+      primaryMode = data?.primary_mode || null;
+      activeRoles = Array.isArray(data?.active_roles) ? data.active_roles : [];
+      providerType = data?.provider_type || null;
 
       try {
         const { data: metrics } = await supabaseAdmin
@@ -46,6 +54,10 @@ export async function GET(request) {
       scoutId: scoutIdFor(userId),
       displayName,
       isPublic,
+      role,
+      primaryMode,
+      activeRoles,
+      providerType,
       trustTier,
       compositeScore,
     });

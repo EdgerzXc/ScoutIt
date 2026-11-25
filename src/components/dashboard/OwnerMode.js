@@ -973,13 +973,20 @@ export default function OwnerMode() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[100px] pointer-events-none" />
           <h3 className="font-display-md text-2xl md:text-3xl text-on-surface px-2 relative z-10 tracking-tight">Add your first property</h3>
           <p className="text-text-secondary max-w-md text-sm md:text-base px-2 relative z-10 leading-relaxed">Upload a brochure, flyer, or pitch deck to build a complete property dossier in under 10 minutes.</p>
-          <div className="flex flex-col sm:flex-row gap-3 relative z-10 mt-2">
+          <div className="flex flex-col sm:flex-row items-center gap-3 relative z-10 mt-2">
             <button data-scoutit-guide="owner-claim-submit-btn" className="bg-gold-accent text-background font-working-title text-sm active:scale-[0.98] transition-[background-color,box-shadow,transform] duration-200 ease-out px-8 py-3.5 rounded-full hover:bg-gold-bright shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] font-bold" onClick={() => setShowWizard('select_mode')}>
               Add Property →
             </button>
             <Link href="/property" className="border border-white/10 text-text-secondary font-working-title text-sm active:scale-[0.98] transition-[background-color,border-color,color,transform] duration-200 ease-out px-8 py-3.5 rounded-full hover:bg-white/5 hover:text-on-surface">
               Explore Live Feed
             </Link>
+            <div className="inline-flex items-center gap-1.5">
+              <Link href="/stratosphere?view=radar&role=owner" className="inline-flex items-center gap-2 border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider px-5 py-3.5 rounded-full min-h-[44px] transition">
+                <Radio size={14} aria-hidden="true" />
+                <span>Live Radar</span>
+              </Link>
+              <InfoTip tipId="signalRadarOwners" label="About Live Radar" />
+            </div>
           </div>
         </div>
       </div>
@@ -1051,6 +1058,16 @@ export default function OwnerMode() {
             >
               {selectMode ? 'Cancel' : 'Select'}
             </button>
+            <div className="inline-flex items-center gap-1.5">
+              <Link
+                href="/stratosphere?view=radar&role=owner"
+                className="inline-flex items-center gap-2 border border-gold-accent/40 bg-gold-accent/10 hover:bg-gold-accent/20 text-gold-accent font-mono text-xs uppercase tracking-wider px-4 py-3 rounded min-h-[44px] transition"
+              >
+                <Radio size={14} aria-hidden="true" />
+                <span>Live Radar</span>
+              </Link>
+              <InfoTip tipId="signalRadarOwners" label="About Live Radar" />
+            </div>
             <button
               className="hidden md:inline-block border border-gold-accent text-gold-accent hover:bg-gold-accent hover:text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-6 py-3 rounded transition w-full md:w-auto"
               onClick={() => setShowWizard('select_mode')}
@@ -1196,6 +1213,16 @@ export default function OwnerMode() {
             >
               Edit Details
             </button>
+            <div className="inline-flex items-center gap-1">
+              <Link
+                href="/stratosphere?view=radar&role=owner"
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded border border-gold-accent/40 bg-gold-accent/10 px-3.5 py-2 text-center font-mono text-xs uppercase tracking-wider text-gold-accent transition hover:bg-gold-accent/20"
+              >
+                <Radio size={13} aria-hidden="true" />
+                <span>Live Radar</span>
+              </Link>
+              <InfoTip tipId="signalRadarOwners" label="About Live Radar" />
+            </div>
             <Link 
               href={`/dashboard/inventory/${activeListing.id}`}
               className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-accent transition hover:bg-gold-accent/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
