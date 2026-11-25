@@ -4,7 +4,7 @@ import { findProperty } from "@/lib/propertyLookup";
 import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { createHash, createHmac } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/clientIp";
 import { detectContactLeak } from "@/lib/contactLeakFilter";
@@ -92,6 +92,8 @@ export function sanitizeServerMetadata(metadata) {
   return clean;
 }
 
+const EPHEMERAL_ANALYTICS_SALT = randomBytes(32).toString("hex");
+
 export function deriveAnalyticsViewerKey(request, secretSalt) {
   const ip = clientIp(request) || "anon_ip";
   const ua = request.headers.get("user-agent") || "anon_ua";
@@ -100,8 +102,9 @@ export function deriveAnalyticsViewerKey(request, secretSalt) {
     secretSalt ||
     process.env.IP_SALT ||
     process.env.ANALYTICS_SALT ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    "scoutit_analytics_dev_salt_fallback";
+    (process.env.NODE_ENV === "production"
+      ? EPHEMERAL_ANALYTICS_SALT
+      : "scoutit_analytics_dev_salt_fallback");
 
   return createHmac("sha256", salt)
     .update(`${monthRotation}:${ip}:${ua}`)
@@ -125,13 +128,19 @@ export async function POST(request) {
   }
 
   try {
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid request payload" },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
     const { eventType, propertyId, propertySlug, chapterId, dwellSeconds, metadata } = body;
 
     if (!eventType || !ALLOWED_EVENTS.has(eventType)) {
       return NextResponse.json(
         { error: "Missing or unrecognised eventType" },
-        { status: 400 }
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
       );
     }
 
@@ -167,17 +176,27 @@ export async function POST(request) {
     // or reverse-engineered via rainbow tables. Never stores the raw IP.
     const viewerKey = deriveAnalyticsViewerKey(request);
 
+    const safeChapterId = typeof chapterId === "string"
+      ? chapterId.trim().slice(0, 64).replace(/[^A-Za-z0-9_-]/g, "") || null
+      : null;
+    const boundedDwell = Number.isFinite(Number(dwellSeconds))
+      ? Math.min(Math.max(Math.round(Number(dwellSeconds)), 0), 86_400)
+      : 0;
+
     const success = await trackAnalyticsEvent({
       eventType,
       propertyId: resolvedPropertyId,
       viewerKey,
       userId: userId || null,
-      chapterId,
-      dwellSeconds: Number(dwellSeconds) || 0,
+      chapterId: safeChapterId,
+      dwellSeconds: boundedDwell,
       metadata: sanitizeServerMetadata(metadata),
     });
 
-    return NextResponse.json({ success, recorded: success });
+    return NextResponse.json(
+      { success, recorded: success },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (error) {
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });
   }

@@ -128,7 +128,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
         <span style={{ display: "inline-flex", alignItems: "center" }}>
           📍 Interactive Proximity Radar <InfoTip tipId="proximityRadar" label="About proximity radar" />
         </span>
-        <button onClick={onClose} aria-label="Close" className="close-map-btn">✕</button>
+        <button type="button" onClick={onClose} aria-label="Close" className="close-map-btn">✕</button>
       </div>
 
       {!webglSupported ? (
@@ -163,7 +163,7 @@ export default function InteractiveRadiusMap({ onSearch, onClose, initialLng = 1
           Click map or drag pin to move search center.
         </div>
         
-        <button className="confirm-radar-btn" onClick={() => {
+        <button type="button" className="confirm-radar-btn" onClick={() => {
           onSearch(radiusMiles * 1.60934, center[0], center[1]);
           onClose();
         }}>

@@ -42,35 +42,36 @@ import {
 const NODE_W = 320;
 const NODE_H = 185;
 const CULL_PAD = 340;
+const FLOW_POSITIONS_STORAGE_KEY = "scoutit_flow_node_positions_v1";
 
 // High-contrast, polished category & type tokens (WCAG AAA compliant)
 const TYPE_CONFIG = {
-  ENTRY:     { color:"#F59E0B", bg:"rgba(245,158,11,0.16)", border:"rgba(245,158,11,0.70)", badgeBg:"rgba(245,158,11,0.25)", label:"Entrance",   icon:"🌐" },
-  LAYER:     { color:"#F97316", bg:"rgba(249,115,22,0.16)", border:"rgba(249,115,22,0.70)", badgeBg:"rgba(249,115,22,0.25)", label:"Altitude",   icon:"🛰️" },
-  PAGE:      { color:"#38BDF8", bg:"rgba(56,189,248,0.16)", border:"rgba(56,189,248,0.70)", badgeBg:"rgba(56,189,248,0.25)", label:"Page",       icon:"📄" },
-  SECTION:   { color:"#818CF8", bg:"rgba(129,140,248,0.16)",border:"rgba(129,140,248,0.70)",badgeBg:"rgba(129,140,248,0.25)",label:"Section",    icon:"📑" },
-  ACTION:    { color:"#10B981", bg:"rgba(16,185,129,0.16)", border:"rgba(16,185,129,0.70)", badgeBg:"rgba(16,185,129,0.25)", label:"Action",     icon:"⚡" },
-  DECISION:  { color:"#C084FC", bg:"rgba(192,132,252,0.16)",border:"rgba(192,132,252,0.70)",badgeBg:"rgba(192,132,252,0.25)",label:"Decision",   icon:"⚖️" },
-  GATE:      { color:"#EC4899", bg:"rgba(236,72,153,0.16)", border:"rgba(236,72,153,0.70)", badgeBg:"rgba(236,72,153,0.25)", label:"Gate",       icon:"🔒" },
-  SYSTEM:    { color:"#60A5FA", bg:"rgba(96,165,250,0.16)", border:"rgba(96,165,250,0.70)", badgeBg:"rgba(96,165,250,0.25)", label:"System",     icon:"⚙️" },
-  EXCEPTION: { color:"#FB923C", bg:"rgba(251,146,60,0.20)", border:"rgba(251,146,60,0.80)", badgeBg:"rgba(251,146,60,0.30)", label:"Exception",  icon:"⚠️" },
-  RECOVERY:  { color:"#06B6D4", bg:"rgba(6,182,212,0.16)",  border:"rgba(6,182,212,0.70)",  badgeBg:"rgba(6,182,212,0.25)",  label:"Recovery",   icon:"🔄" },
-  OUTCOME:   { color:"#F43F5E", bg:"rgba(244,63,94,0.16)",  border:"rgba(244,63,94,0.70)",  badgeBg:"rgba(244,63,94,0.25)",  label:"Outcome",    icon:"🏁" },
-  TERMINAL:  { color:"#E11D48", bg:"rgba(225,29,72,0.20)",  border:"rgba(225,29,72,0.80)",  badgeBg:"rgba(225,29,72,0.30)",  label:"Terminal",   icon:"🛑" }
+  ENTRY:     { color:"#F59E0B", bg:"rgba(245,158,11,0.16)", border:"rgba(245,158,11,0.70)", badgeBg:"rgba(245,158,11,0.25)", label:"Entrance",   icon:"IN" },
+  LAYER:     { color:"#F97316", bg:"rgba(249,115,22,0.16)", border:"rgba(249,115,22,0.70)", badgeBg:"rgba(249,115,22,0.25)", label:"Altitude",   icon:"LYR" },
+  PAGE:      { color:"#38BDF8", bg:"rgba(56,189,248,0.16)", border:"rgba(56,189,248,0.70)", badgeBg:"rgba(56,189,248,0.25)", label:"Page",       icon:"PG" },
+  SECTION:   { color:"#818CF8", bg:"rgba(129,140,248,0.16)",border:"rgba(129,140,248,0.70)",badgeBg:"rgba(129,140,248,0.25)",label:"Section",    icon:"SEC" },
+  ACTION:    { color:"#10B981", bg:"rgba(16,185,129,0.16)", border:"rgba(16,185,129,0.70)", badgeBg:"rgba(16,185,129,0.25)", label:"Action",     icon:"ACT" },
+  DECISION:  { color:"#C084FC", bg:"rgba(192,132,252,0.16)",border:"rgba(192,132,252,0.70)",badgeBg:"rgba(192,132,252,0.25)",label:"Decision",   icon:"DEC" },
+  GATE:      { color:"#EC4899", bg:"rgba(236,72,153,0.16)", border:"rgba(236,72,153,0.70)", badgeBg:"rgba(236,72,153,0.25)", label:"Gate",       icon:"GTE" },
+  SYSTEM:    { color:"#60A5FA", bg:"rgba(96,165,250,0.16)", border:"rgba(96,165,250,0.70)", badgeBg:"rgba(96,165,250,0.25)", label:"System",     icon:"SYS" },
+  EXCEPTION: { color:"#FB923C", bg:"rgba(251,146,60,0.20)", border:"rgba(251,146,60,0.80)", badgeBg:"rgba(251,146,60,0.30)", label:"Exception",  icon:"EXC" },
+  RECOVERY:  { color:"#06B6D4", bg:"rgba(6,182,212,0.16)",  border:"rgba(6,182,212,0.70)",  badgeBg:"rgba(6,182,212,0.25)",  label:"Recovery",   icon:"REC" },
+  OUTCOME:   { color:"#F43F5E", bg:"rgba(244,63,94,0.16)",  border:"rgba(244,63,94,0.70)",  badgeBg:"rgba(244,63,94,0.25)",  label:"Outcome",    icon:"OUT" },
+  TERMINAL:  { color:"#E11D48", bg:"rgba(225,29,72,0.20)",  border:"rgba(225,29,72,0.80)",  badgeBg:"rgba(225,29,72,0.30)",  label:"Terminal",   icon:"END" }
 };
 
 // Implementation Status token styling
 const STATUS_CONFIG = {
-  VERIFIED:     { color: "#10B981", bg: "rgba(16,185,129,0.18)", border: "rgba(16,185,129,0.60)", label: "Verified", icon: "🛡️" },
-  PARTIAL:      { color: "#F59E0B", bg: "rgba(245,158,11,0.18)", border: "rgba(245,158,11,0.60)", label: "Partial", icon: "⚙️" },
-  // Every planned node — the AI council among them — is NOT_STARTED. Without
+  VERIFIED:     { color: "#10B981", bg: "rgba(16,185,129,0.18)", border: "rgba(16,185,129,0.60)", label: "Verified", icon: "OK" },
+  PARTIAL:      { color: "#F59E0B", bg: "rgba(245,158,11,0.18)", border: "rgba(245,158,11,0.60)", label: "Partial", icon: "~" },
+  // Every planned node - the AI council among them - is NOT_STARTED. Without
   // this entry the lookup below fell back to VERIFIED and drew them as built.
-  NOT_STARTED:  { color: "#94A3B8", bg: "rgba(148,163,184,0.10)", border: "rgba(148,163,184,0.55)", label: "Not built", icon: "○" },
+  NOT_STARTED:  { color: "#94A3B8", bg: "rgba(148,163,184,0.10)", border: "rgba(148,163,184,0.55)", label: "Not built", icon: "o" },
   UNKNOWN:      { color: "#EF4444", bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.60)", label: "Unknown status", icon: "?" },
-  PLANNED:      { color: "#A855F7", bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.60)", label: "Planned", icon: "⏳" },
-  PROPOSED:     { color: "#818CF8", bg: "rgba(129,140,248,0.18)", border: "rgba(129,140,248,0.60)", label: "Proposed", icon: "💡" },
-  CONTRADICTED: { color: "#EF4444", bg: "rgba(239,68,68,0.20)", border: "rgba(239,68,68,0.80)", label: "Conflict", icon: "⚠️" },
-  DEPRECATED:   { color: "#64748B", bg: "rgba(100,116,139,0.20)", border: "rgba(100,116,139,0.60)", label: "Deprecated", icon: "📦" }
+  PLANNED:      { color: "#A855F7", bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.60)", label: "Planned", icon: "T" },
+  PROPOSED:     { color: "#818CF8", bg: "rgba(129,140,248,0.18)", border: "rgba(129,140,248,0.60)", label: "Proposed", icon: "+" },
+  CONTRADICTED: { color: "#EF4444", bg: "rgba(239,68,68,0.20)", border: "rgba(239,68,68,0.80)", label: "Conflict", icon: "!" },
+  DEPRECATED:   { color: "#64748B", bg: "rgba(100,116,139,0.20)", border: "rgba(100,116,139,0.60)", label: "Deprecated", icon: "-" }
 };
 
 // High-contrast canvas edge colour tokens
@@ -78,7 +79,6 @@ const EC_DEFAULT   = "rgba(255,255,255,0.22)";
 const EC_EXCEPTION = "rgba(251,146,60,0.65)";
 const EC_HOVER     = "#818CF8";
 const EC_SELECTED  = "#38BDF8";
-const EC_FOCUS     = "#E8AE3C";
 const EC_TRACE     = "#F59E0B";
 
 // ── Memoized Node Card (Readable, High-Contrast Typography & Left Accent Border) ─
@@ -100,20 +100,20 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
       onClick={(e) => { e.stopPropagation(); onClick(node.id); }}
       onMouseEnter={() => onMouseEnter(node.id)}
       onMouseLeave={() => onMouseLeave(null)}
-      className={`node-card absolute z-10 rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition-all duration-150 select-none border-l-[5px] ${
+      className={`node-card absolute z-10 rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition-[transform,opacity,border-color,box-shadow] duration-150 select-none border-l-[5px] ${
         isFaulted
           ? "ring-2 ring-red-500 shadow-[0_0_40px_rgba(239,68,68,0.75)] z-30 bg-[#250d14] border-t border-r border-b border-red-500 animate-pulse"
           : isBlast
           ? "ring-1 ring-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.4)] z-20 bg-[#1c160c] border-t border-r border-b border-amber-500/70"
           : isSelected
-          ? "ring-2 ring-[#E8AE3C] shadow-[0_0_35px_rgba(232,174,60,0.5)] z-20 bg-[#16162e] border-t border-r border-b border-[#E8AE3C]"
+          ? "ring-2 ring-[var(--accent)] shadow-[0_0_35px_rgba(var(--accent-rgb),0.5)] z-20 bg-surface border-t border-r border-b border-[var(--accent)]"
           : isTraceActive
-          ? "ring-2 ring-amber-400 shadow-[0_0_24px_rgba(245,158,11,0.45)] bg-[#15152a] border-t border-r border-b border-amber-400/80"
+          ? "ring-2 ring-amber-400 shadow-[0_0_24px_rgba(245,158,11,0.45)] bg-surface border-t border-r border-b border-amber-400/80"
           : isDimmed
-          ? "opacity-15 bg-[#090912] border-t border-r border-b border-white/5"
+          ? "opacity-15 bg-background border-t border-r border-b border-white/5"
           : node.type === "EXCEPTION"
           ? "bg-[#1c131a] border-t border-r border-b border-orange-500/50 hover:border-orange-400 shadow-xl hover:shadow-orange-950/50"
-          : "bg-[#111124] border-t border-r border-b border-white/20 hover:border-white/60 shadow-xl hover:shadow-black/80 hover:-translate-y-0.5"
+          : "bg-surface border-t border-r border-b border-white/20 hover:border-white/60 shadow-xl hover:shadow-black/80 hover:-translate-y-0.5"
       }`}
       style={{
         borderLeftColor: isFaulted ? "#EF4444" : isBlast ? "#F59E0B" : tc.color,
@@ -127,7 +127,7 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
           : isBlast
           ? "0 0 25px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.15)"
           : isSelected
-          ? "0 0 35px rgba(232,174,60,0.45), inset 0 1px 0 rgba(255,255,255,0.2)"
+          ? "0 0 35px rgba(var(--accent-rgb),0.45), inset 0 1px 0 rgba(255,255,255,0.2)"
           : "0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)"
       }}
     >
@@ -202,7 +202,7 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
             {node.name}
           </h4>
         </div>
-        <span className="text-[12px] font-mono text-[#E8AE3C]/90 block truncate">
+        <span className="text-[12px] font-mono text-[var(--accent)]/90 block truncate">
           {node.canonicalId || node.id}
         </span>
         <p className="text-[12px] text-white/85 leading-relaxed line-clamp-2 font-normal pt-0.5">
@@ -212,15 +212,15 @@ const MemoizedNodeCard = React.memo(function MemoizedNodeCard({
 
       {/* Footer: Route indicator, Focus Button & In/Out Stats */}
       <div className="flex items-center justify-between pt-1.5 border-t border-white/10 text-[12px] font-mono">
-        <button
+        <button type="button"
           onClick={(e) => { e.stopPropagation(); onToggleFocus(node.id); }}
-          className={`px-2 py-0.5 rounded-md transition font-semibold text-[12px] ${
+          className={`px-2 py-0.5 rounded-md transition-colors font-semibold text-[12px] ${
             isFocusedBranch
-              ? "text-[#E8AE3C] font-bold bg-[#E8AE3C]/25 border border-[#E8AE3C]/60"
+              ? "text-[var(--accent)] font-bold bg-[var(--accent)]/25 border border-[var(--accent)]/60"
               : "text-white/70 hover:text-white hover:bg-white/15 border border-transparent"
           }`}
         >
-          {isFocusedBranch ? "★ Focused" : "Focus Path"}
+          {isFocusedBranch ? "Focused" : "Focus Path"}
         </button>
 
         <div className="flex items-center gap-1.5 text-white/75 font-semibold">
@@ -266,6 +266,7 @@ function useCanvasEdges({
     const hId  = hoveredNodeId;
     const sId  = selectedNodeId;
     const fSet = focusedNodeSet;
+    const focusStroke = getComputedStyle(canvas).getPropertyValue("--accent").trim() || EC_SELECTED;
     const tSet = tracePathSet;
 
     const normal = [], highlight = [];
@@ -300,7 +301,7 @@ function useCanvasEdges({
       let stroke = EC_DEFAULT, lw = 1.4, dash = false;
       if (isSevered)    { stroke = "#EF4444";    lw = 2.4; dash = true; }
       else if (isTrace) { stroke = EC_TRACE;     lw = 3.4; }
-      else if (isFocus) { stroke = EC_FOCUS;     lw = 2.8; }
+      else if (isFocus) { stroke = focusStroke;     lw = 2.8; }
       else if (isSel)   { stroke = EC_SELECTED;  lw = 2.4; }
       else if (isHov)   { stroke = EC_HOVER;     lw = 2.2; }
       else {
@@ -360,6 +361,35 @@ export default function MasterFlowGraph({ onNavigate }) {
   }, []);
   const positionsRef = useRef(initialPositions);
   const [positions, setPositions] = useState(initialPositions);
+
+  // Restore any session-persisted custom node positions on client mount
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(FLOW_POSITIONS_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (!saved || typeof saved !== "object") return;
+      const merged = { ...initialPositions };
+      let hasChanges = false;
+      for (const [id, coords] of Object.entries(saved)) {
+        if (
+          merged[id] &&
+          coords &&
+          typeof coords.x === "number" &&
+          typeof coords.y === "number"
+        ) {
+          merged[id] = { x: coords.x, y: coords.y };
+          hasChanges = true;
+        }
+      }
+      if (hasChanges) {
+        positionsRef.current = merged;
+        setPositions(merged);
+      }
+    } catch {
+      // Ignore storage errors in private browsing or SSR
+    }
+  }, [initialPositions]);
 
   // Viewport transformation
   const tRef = useRef({ x: 40, y: 40, scale: 0.65 });
@@ -558,8 +588,22 @@ export default function MasterFlowGraph({ onNavigate }) {
     }
     if (dragNodeRef.current) {
       dragNodeRef.current = null;
+      const latest = positionsRef.current;
+      setPositions(latest);
+      try {
+        const overrides = {};
+        for (const [id, pos] of Object.entries(latest)) {
+          const orig = initialPositions[id];
+          if (!orig || orig.x !== pos.x || orig.y !== pos.y) {
+            overrides[id] = pos;
+          }
+        }
+        sessionStorage.setItem(FLOW_POSITIONS_STORAGE_KEY, JSON.stringify(overrides));
+      } catch {
+        // Ignore storage errors in private browsing
+      }
     }
-  }, [updateCull]);
+  }, [initialPositions, updateCull]);
 
   // Wheel zoom
   const onWheel = useCallback((e) => {
@@ -630,6 +674,11 @@ export default function MasterFlowGraph({ onNavigate }) {
     MASTER_FLOW_NODES.forEach(n => { m[n.id] = { x: n.x, y: n.y }; });
     positionsRef.current = m;
     setPositions(m);
+    try {
+      sessionStorage.removeItem(FLOW_POSITIONS_STORAGE_KEY);
+    } catch {
+      // Ignore storage errors in private browsing
+    }
 
     tRef.current = { x: 40, y: 40, scale: 0.65 };
     applyDOM();
@@ -646,7 +695,7 @@ export default function MasterFlowGraph({ onNavigate }) {
     setDomainFilter("all");
     setSelectedNodeId("hero");
 
-    setExportNotice("✨ All nodes & canvas reset to original placement");
+    setExportNotice("All nodes and canvas reset to original placement");
     setTimeout(() => setExportNotice(null), 3000);
   }, [applyDOM, updateCull]);
 
@@ -705,7 +754,7 @@ export default function MasterFlowGraph({ onNavigate }) {
   const isNodeMatch = useCallback((node) => {
     if (graphMode === "master") {
       if (categoryFilter !== "all" && node.category !== categoryFilter) return false;
-      if (statusFilter   !== "all" && node.implementationStatus !== statusFilter) return false;
+      if (statusFilter   !== "all" && node.implementationStatus !== statusFilter && node.productStatus !== statusFilter) return false;
       if (domainFilter   !== "all" && node.domain !== domainFilter) return false;
       if (selectedRole   !== "all" && !node.roles.includes(selectedRole)) return false;
       if (selectedType   !== "all" && (node.nodeType || node.type) !== selectedType) return false;
@@ -777,14 +826,14 @@ export default function MasterFlowGraph({ onNavigate }) {
     a.download = `scoutit_${graphMode}_subgraph.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setExportNotice("✨ Subgraph JSON downloaded successfully!");
+    setExportNotice("Subgraph JSON downloaded successfully");
     setTimeout(() => setExportNotice(null), 3000);
   }, [activeSlice, graphMode]);
 
   const handleExportRAG = useCallback(async () => {
     // 639-chunk generation is synchronous and blocks the main thread for a
     // noticeable beat. Announce it and yield so the notice paints first.
-    setExportNotice("🧠 Building knowledge base…");
+    setExportNotice("Building knowledge base...");
     await new Promise((r) => setTimeout(r, 30));
     try {
       const data = JSON.stringify(getAtomicRAGChunks(MASTER_FLOW_NODES, MASTER_FLOW_EDGES, { role: "admin", includePlanned: true }), null, 2);
@@ -795,9 +844,9 @@ export default function MasterFlowGraph({ onNavigate }) {
       a.download = `scoutit_rag_knowledge_base_v2.json`;
       a.click();
       URL.revokeObjectURL(url);
-      setExportNotice("🧠 Atomic RAG Knowledge Base downloaded!");
+      setExportNotice("Atomic RAG Knowledge Base downloaded");
     } catch {
-      setExportNotice("⚠️ Export failed: try again.");
+      setExportNotice("Export failed: please try again.");
     }
     setTimeout(() => setExportNotice(null), 3000);
   }, []);
@@ -807,7 +856,7 @@ export default function MasterFlowGraph({ onNavigate }) {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      className="relative w-full h-screen bg-[#07070e] select-none flex flex-col font-sans overflow-hidden">
+      className="relative w-full h-dvh bg-[#07070e] select-none flex flex-col font-sans overflow-hidden">
 
       {/* ── TOP CONTROL TOOLBAR (High-Contrast & Distinct Navigation) ── */}
       <div className="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
@@ -817,80 +866,83 @@ export default function MasterFlowGraph({ onNavigate }) {
           
           {/* Main Mode Tabs */}
           <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/20 text-xs font-mono">
-            <button
+            <button type="button"
               onClick={() => { setGraphMode("master"); resetView(); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-bold text-xs ${
+              className={`flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg transition-colors font-bold text-xs ${
                 graphMode === "master"
-                  ? "bg-[#E8AE3C] text-black shadow-md"
+                  ? "bg-[var(--accent)] text-black shadow-md"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <Layers size={14} />
               <span>Master Graph ({MASTER_FLOW_NODES.length})</span>
             </button>
-            <button
+            <button type="button"
               onClick={() => { setGraphMode("role"); resetView(); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-bold text-xs ${
+              className={`flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg transition-colors font-bold text-xs ${
                 graphMode === "role"
-                  ? "bg-[#E8AE3C] text-black shadow-md"
+                  ? "bg-[var(--accent)] text-black shadow-md"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <Compass size={14} />
               <span>Role Journeys</span>
             </button>
-            <button
+            <button type="button"
               onClick={() => { setGraphMode("workflow"); resetView(); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-bold text-xs ${
+              className={`flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg transition-colors font-bold text-xs ${
                 graphMode === "workflow"
-                  ? "bg-[#E8AE3C] text-black shadow-md"
+                  ? "bg-[var(--accent)] text-black shadow-md"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <Zap size={14} />
               <span>Workflows</span>
             </button>
-            <button
+            <button type="button"
               onClick={() => { setGraphMode("guide"); resetView(); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-bold text-xs ${
+              className={`flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg transition-colors font-bold text-xs ${
                 graphMode === "guide"
-                  ? "bg-[#E8AE3C] text-black shadow-md"
+                  ? "bg-[var(--accent)] text-black shadow-md"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <BookOpen size={14} />
               <span>User Guides</span>
             </button>
-            <button
+            <button type="button"
               onClick={() => { setGraphMode("health"); resetView(); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition font-bold text-xs ${
+              className={`flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg transition-colors font-bold text-xs ${
                 graphMode === "health"
                   ? "bg-red-500 text-white shadow-md shadow-red-950"
                   : "text-white/80 hover:text-white"
               }`}
             >
               <Activity size={14} />
-              <span>Incident Signals ({blastRadius.totalAffectedCount > 0 ? `🚨 ${blastRadius.totalAffectedCount}` : "Nominal"})</span>
+              <span>Incident Signals ({blastRadius.totalAffectedCount > 0 ? `${blastRadius.totalAffectedCount} Impacted` : "Nominal"})</span>
             </button>
           </div>
 
           {/* Role selector in Role Mode */}
           {graphMode === "role" && (
-            <div className="flex items-center gap-1 bg-black/80 p-0.5 rounded-lg border border-white/20 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-1 bg-black/80 p-0.5 rounded-lg border border-white/20 text-xs font-mono">
               {[
                 ["visitor", "Visitor"],
                 ["seeker", "Seeker / Buyer"],
                 ["owner", "Owner"],
+                ["enterprise", "Enterprise"],
                 ["broker", "Broker"],
+                ["operator", "Operator"],
                 ["provider", "Provider"],
-                ["staff", "Staff"]
+                ["staff", "Staff"],
+                ["admin", "Admin"]
               ].map(([r, l]) => (
-                <button
+                <button type="button"
                   key={r}
                   onClick={() => setActiveRole(r)}
-                  className={`px-2.5 py-1 rounded-md transition font-semibold text-xs ${
+                  className={`min-h-11 px-3 py-2 rounded-md transition-colors font-semibold text-xs ${
                     activeRole === r
-                      ? "bg-[#E8AE3C] text-black font-bold"
+                      ? "bg-[var(--accent)] text-black font-bold"
                       : "text-white/70 hover:text-white"
                   }`}
                 >
@@ -903,9 +955,10 @@ export default function MasterFlowGraph({ onNavigate }) {
           {/* Workflow selector in Workflow Mode */}
           {graphMode === "workflow" && (
             <select
+              aria-label="Filter by workflow"
               value={activeWorkflow}
               onChange={e => setActiveWorkflow(e.target.value)}
-              className="bg-black/80 border border-[#E8AE3C]/60 rounded-lg px-3 py-1.5 text-xs text-[#E8AE3C] font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#E8AE3C] max-w-[260px] truncate"
+              className="min-h-11 bg-black/80 border border-[var(--accent)]/60 rounded-lg px-3 py-2 text-xs text-[var(--accent)] font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[var(--accent)] max-w-[260px] truncate"
             >
               {Object.keys(WORKFLOW_DEFINITIONS).map(k => (
                 <option key={k} value={k}>{WORKFLOW_DEFINITIONS[k].name}</option>
@@ -916,9 +969,10 @@ export default function MasterFlowGraph({ onNavigate }) {
           {/* Guide selector in Guide Mode */}
           {graphMode === "guide" && (
             <select
+              aria-label="Filter by user guide"
               value={activeGuideId}
               onChange={e => { setActiveGuideId(e.target.value); setCurrentGuideStepIdx(0); }}
-              className="bg-black/80 border border-[#E8AE3C]/60 rounded-lg px-3 py-1.5 text-xs text-[#E8AE3C] font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#E8AE3C] max-w-[260px] truncate"
+              className="min-h-11 bg-black/80 border border-[var(--accent)]/60 rounded-lg px-3 py-2 text-xs text-[var(--accent)] font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[var(--accent)] max-w-[260px] truncate"
             >
               {Object.keys(LINEAR_GUIDE_DEFINITIONS).map(k => (
                 <option key={k} value={k}>{LINEAR_GUIDE_DEFINITIONS[k].title}</option>
@@ -930,6 +984,7 @@ export default function MasterFlowGraph({ onNavigate }) {
           {graphMode === "health" && (
             <div className="flex flex-wrap items-center gap-2">
               <select
+                aria-label="Select incident scenario"
                 value={activeScenarioId}
                 onChange={e => {
                   setActiveScenarioId(e.target.value);
@@ -938,17 +993,17 @@ export default function MasterFlowGraph({ onNavigate }) {
                     centerOnNode(scen.faultedNodeIds[0]);
                   }
                 }}
-                className="bg-black/90 border border-red-500/70 rounded-lg px-3 py-1.5 text-xs text-red-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-red-500 max-w-[280px] truncate"
+                className="min-h-11 bg-black/90 border border-red-500/70 rounded-lg px-3 py-2 text-xs text-red-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-red-500 max-w-[280px] truncate"
               >
                 {Object.values(INCIDENT_SCENARIOS).map(scen => (
                   <option key={scen.id} value={scen.id}>
-                    {scen.id === "NOMINAL" ? "✅" : "🚨"} {scen.name}
+                    {scen.id === "NOMINAL" ? "[OK]" : "[ALERT]"} {scen.name}
                   </option>
                 ))}
               </select>
 
               {activeScenarioId === "CUSTOM" && (
-                <button
+                <button type="button"
                   onClick={() => {
                     setCustomFaultedNodeIds(prev =>
                       prev.includes(selectedNodeId)
@@ -956,7 +1011,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                         : [...prev, selectedNodeId]
                     );
                   }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition border ${
+                  className={`min-h-11 px-3 py-2 rounded-lg text-xs font-mono font-bold transition-colors border ${
                     customFaultedNodeIds.includes(selectedNodeId)
                       ? "bg-red-500 text-white border-red-400"
                       : "bg-white/10 text-white/90 border-white/20 hover:bg-white/20"
@@ -967,15 +1022,16 @@ export default function MasterFlowGraph({ onNavigate }) {
               )}
 
               <select
+                aria-label="Filter incident nodes"
                 value={healthFilter}
                 onChange={e => setHealthFilter(e.target.value)}
-                className="bg-black/80 border border-white/25 rounded-lg px-2.5 py-1 text-xs text-white font-mono font-semibold focus:outline-none focus:border-red-400"
+                className="min-h-11 bg-black/80 border border-white/25 rounded-lg px-2.5 py-2 text-xs text-white font-mono font-semibold focus:outline-none focus:border-red-400"
               >
                 <option value="all">View: All Nodes</option>
-                <option value="affected">🚨 Faulted & Blast Radius</option>
-                <option value="faulted">🔥 Faulted Only</option>
-                <option value="exceptions">⚠️ Exceptions Only</option>
-                <option value="recovery">🔄 Recovery Only</option>
+                <option value="affected">Faulted & Blast Radius</option>
+                <option value="faulted">Faulted Only</option>
+                <option value="exceptions">Exceptions Only</option>
+                <option value="recovery">Recovery Only</option>
               </select>
 
               <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-black/60 border border-white/15 text-xs font-mono">
@@ -1003,53 +1059,66 @@ export default function MasterFlowGraph({ onNavigate }) {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search canonical ID, route..."
-              className="bg-black/70 border border-white/25 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/55 focus:outline-none focus:border-[#E8AE3C] w-44 transition font-medium"
+              className="min-h-11 bg-black/70 border border-white/25 rounded-lg pl-8 pr-10 py-2 text-xs text-white placeholder-white/55 focus:outline-none focus:border-[var(--accent)] w-48 transition-colors font-medium"
             />
             {searchQuery && (
-              <button aria-label="Clear the search" onClick={() => setSearchQuery("")} className="absolute right-2 text-white/60 hover:text-white text-xs font-bold">×</button>
+              <button type="button" aria-label="Clear the search" onClick={() => setSearchQuery("")} className="absolute right-0 min-h-11 min-w-11 flex items-center justify-center text-white/60 hover:text-white text-xs font-bold">
+                <X size={14} />
+              </button>
             )}
           </div>
 
           {/* Status Filter in Master Mode */}
           {graphMode === "master" && (
             <select
+              aria-label="Filter by implementation status"
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="bg-black/80 border border-white/25 rounded-lg px-2.5 py-1 text-xs text-white font-mono font-semibold focus:outline-none focus:border-[#E8AE3C]"
+              className="min-h-11 bg-black/80 border border-white/25 rounded-lg px-2.5 py-2 text-xs text-white font-mono font-semibold focus:outline-none focus:border-[var(--accent)]"
             >
               <option value="all">Status: All</option>
-              <option value="VERIFIED">🛡️ Verified Only</option>
-              <option value="PARTIAL">⚙️ Partial</option>
-              <option value="NOT_STARTED">○ Not built</option>
-              <option value="PLANNED">⏳ Planned</option>
-              <option value="PROPOSED">💡 Proposed</option>
+              <option value="VERIFIED">Verified Only</option>
+              <option value="PARTIAL">Partial</option>
+              <option value="NOT_STARTED">Not built</option>
+              <option value="PLANNED">Planned</option>
+              <option value="PROPOSED">Proposed</option>
             </select>
           )}
 
           {/* Domain Filter in Master Mode */}
           {graphMode === "master" && (
             <select
+              aria-label="Filter by surface group"
               value={domainFilter}
               onChange={e => setDomainFilter(e.target.value)}
-              className="bg-black/80 border border-white/25 rounded-lg px-2.5 py-1 text-xs text-white font-mono font-semibold focus:outline-none focus:border-[#E8AE3C]"
+              className="min-h-11 bg-black/80 border border-white/25 rounded-lg px-2.5 py-2 text-xs text-white font-mono font-semibold focus:outline-none focus:border-[var(--accent)]"
             >
               <option value="all">Domain: All</option>
+              <option value="core">Core</option>
               <option value="property">Property</option>
+              <option value="discovery">Discovery</option>
+              <option value="seeker">Seeker</option>
               <option value="deal">Deal</option>
               <option value="auth">Auth</option>
               <option value="connects">Connects</option>
               <option value="owner">Owner</option>
               <option value="broker">Broker</option>
+              <option value="operator">Operator</option>
               <option value="sentinel">Sentinel</option>
+              <option value="freshness">Freshness</option>
+              <option value="legal">Legal</option>
+              <option value="faq">FAQ</option>
+              <option value="layer">Layer</option>
+              <option value="crm">CRM</option>
               <option value="gis">GIS</option>
               <option value="admin">Admin</option>
             </select>
           )}
 
           {focusBranchId && (
-            <button
+            <button type="button"
               onClick={() => setFocusBranchId(null)}
-              className="flex items-center gap-1.5 bg-[#E8AE3C]/25 border border-[#E8AE3C]/60 text-[#E8AE3C] px-2.5 py-1 rounded-lg text-xs hover:bg-[#E8AE3C]/35 transition font-mono font-bold"
+              className="flex items-center gap-1.5 min-h-11 bg-[var(--accent)]/25 border border-[var(--accent)]/60 text-[var(--accent)] px-3 py-2 rounded-lg text-xs hover:bg-[var(--accent)]/35 transition-colors font-mono font-bold"
             >
               <X size={13} /><span>Clear Focus</span>
             </button>
@@ -1059,31 +1128,33 @@ export default function MasterFlowGraph({ onNavigate }) {
         {/* Center: Path Tracer (Master Mode only) */}
         {graphMode === "master" && (
           <div className="hidden xl:flex items-center gap-2 bg-[#0e0e1a]/95 backdrop-blur-xl px-3.5 py-2 rounded-2xl border border-white/25 shadow-2xl pointer-events-auto">
-            <span className="text-[12px] font-mono uppercase text-[#E8AE3C] font-bold tracking-wider">Path Tracer</span>
+            <span className="text-[12px] font-mono uppercase text-[var(--accent)] font-bold tracking-wider">Path Tracer</span>
             <select
+              aria-label="Select path tracer start node"
               value={traceSourceId}
               onChange={e => setTraceSourceId(e.target.value)}
-              className="bg-black/80 border border-white/25 rounded-lg px-2.5 py-1 text-xs text-white max-w-[130px] truncate focus:outline-none"
+              className="min-h-11 bg-black/80 border border-white/25 rounded-lg px-2.5 py-2 text-xs text-white max-w-[130px] truncate focus:outline-none"
             >
               {nodeOptions}
             </select>
             <ArrowRight size={13} className="text-white/60" />
             <select
+              aria-label="Select path tracer target node"
               value={traceTargetId}
               onChange={e => setTraceTargetId(e.target.value)}
-              className="bg-black/80 border border-white/25 rounded-lg px-2.5 py-1 text-xs text-white max-w-[130px] truncate focus:outline-none"
+              className="min-h-11 bg-black/80 border border-white/25 rounded-lg px-2.5 py-2 text-xs text-white max-w-[130px] truncate focus:outline-none"
             >
               {nodeOptions}
             </select>
-            <button
+            <button type="button"
               onClick={runPathTracer}
-              className="px-3 py-1 rounded-lg bg-[#E8AE3C] hover:bg-[#d69d2f] text-black font-bold text-xs transition shadow-sm"
+              className="min-h-11 px-3 py-2 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-bright)] text-black font-bold text-xs transition-colors shadow-sm"
             >
               Trace
             </button>
             {activeTracePath && (
-              <button aria-label="Clear the traced path" onClick={() => setActiveTracePath(null)} className="p-1 text-white/60 hover:text-white text-xs">
-                <X size={13} />
+              <button type="button" aria-label="Clear the traced path" onClick={() => setActiveTracePath(null)} className="min-h-11 min-w-11 flex items-center justify-center p-2 text-white/60 hover:text-white text-xs">
+                <X size={14} />
               </button>
             )}
           </div>
@@ -1093,10 +1164,10 @@ export default function MasterFlowGraph({ onNavigate }) {
         <div className="flex items-center gap-2 bg-[#0e0e1a]/95 backdrop-blur-xl p-2 rounded-2xl border border-white/25 shadow-2xl pointer-events-auto">
           
           {/* Reset Layout */}
-          <button
+          <button type="button"
             onClick={resetEntireLayout}
             title="Reset canvas and restore all dragged nodes back to their original placement"
-            className="graph-control-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 hover:text-amber-100 text-xs font-mono font-bold border border-amber-500/60 transition shadow-md"
+            className="graph-control-btn flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 hover:text-amber-100 text-xs font-mono font-bold border border-amber-500/60 transition-colors shadow-md"
           >
             <RotateCcw size={14} className="text-amber-400" />
             <span>Reset Layout</span>
@@ -1105,18 +1176,18 @@ export default function MasterFlowGraph({ onNavigate }) {
           <div className="h-5 w-px bg-white/20" />
 
           {/* Export JSON & RAG */}
-          <button
+          <button type="button"
             onClick={handleExportJSON}
             title="Export Subgraph JSON"
-            className="graph-control-btn flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 hover:text-white text-xs font-mono font-semibold border border-white/20 transition"
+            className="graph-control-btn flex items-center gap-1 min-h-11 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 hover:text-white text-xs font-mono font-semibold border border-white/20 transition-colors"
           >
             <Download size={14} />
             <span className="hidden md:inline">JSON</span>
           </button>
-          <button
+          <button type="button"
             onClick={handleExportRAG}
             title="Export Atomic RAG Knowledge Base"
-            className="graph-control-btn flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#E8AE3C]/20 hover:bg-[#E8AE3C]/35 text-[#E8AE3C] text-xs font-mono font-bold border border-[#E8AE3C]/50 transition"
+            className="graph-control-btn flex items-center gap-1 min-h-11 px-3 py-2 rounded-lg bg-[var(--accent)]/20 hover:bg-[var(--accent)]/35 text-[var(--accent)] text-xs font-mono font-bold border border-[var(--accent)]/50 transition-colors"
           >
             <Sparkles size={14} />
             <span className="hidden md:inline">RAG V2</span>
@@ -1125,22 +1196,23 @@ export default function MasterFlowGraph({ onNavigate }) {
           <div className="h-5 w-px bg-white/20" />
 
           {/* Zoom controls */}
-          <button onClick={() => doZoom(0.12)}  className="graph-control-btn p-1.5 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition" title="Zoom In"><ZoomIn size={16} /></button>
-          <button onClick={() => doZoom(-0.12)} className="graph-control-btn p-1.5 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition" title="Zoom Out"><ZoomOut size={16} /></button>
-          <button onClick={fitScreen}            className="graph-control-btn p-1.5 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition" title="Fit to Screen"><Crosshair size={16} /></button>
-          <button
+          <button type="button" aria-label="Zoom in" onClick={() => doZoom(0.12)}  className="graph-control-btn min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition-colors" title="Zoom In"><ZoomIn size={16} /></button>
+          <button type="button" aria-label="Zoom out" onClick={() => doZoom(-0.12)} className="graph-control-btn min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition-colors" title="Zoom Out"><ZoomOut size={16} /></button>
+          <button type="button" aria-label="Fit canvas to screen" onClick={fitScreen}            className="graph-control-btn min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition-colors" title="Fit to Screen"><Crosshair size={16} /></button>
+          <button type="button"
             onClick={resetView}
             title="Reset Zoom to 65%"
-            className="graph-control-btn p-1.5 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition text-xs font-mono font-bold px-2"
+            className="graph-control-btn min-h-11 px-3 py-2 rounded-lg hover:bg-white/20 text-white/90 hover:text-white transition-colors text-xs font-mono font-bold"
           >
             {Math.round(displayScale * 100)}%
           </button>
           <div className="h-5 w-px bg-white/20" />
-          <button
+          <button type="button"
+            aria-label="Toggle node inspector"
             onClick={() => setIsInspectorOpen(p => !p)}
             title="Toggle Node Inspector"
-            className={`graph-control-btn p-1.5 rounded-lg transition ${
-              isInspectorOpen ? "bg-white/25 text-[#E8AE3C] border border-[#E8AE3C]/50" : "hover:bg-white/20 text-white/80"
+            className={`graph-control-btn min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg transition-colors ${
+              isInspectorOpen ? "bg-white/25 text-[var(--accent)] border border-[var(--accent)]/50" : "hover:bg-white/20 text-white/80"
             }`}
           >
             <Eye size={16} />
@@ -1150,7 +1222,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
       {/* Toast Notification */}
       {exportNotice && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-[#E8AE3C] text-black font-bold font-mono text-xs px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-[var(--accent)] text-black font-bold font-mono text-xs px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2">
           <CheckCircle2 size={18} />
           <span>{exportNotice}</span>
         </div>
@@ -1224,10 +1296,10 @@ export default function MasterFlowGraph({ onNavigate }) {
 
       {/* ── INTERACTIVE GUIDE WALKTHROUGH PLAYER (Guide Mode) ── */}
       {graphMode === "guide" && activeGuideStep && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-2xl bg-[#0e0e1a]/95 backdrop-blur-2xl border-2 border-[#E8AE3C]/60 rounded-3xl p-5 shadow-[0_0_60px_rgba(0,0,0,0.9)] text-white">
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-2xl bg-[#0e0e1a]/95 backdrop-blur-2xl border-2 border-[var(--accent)]/60 rounded-3xl p-5 shadow-[0_0_60px_rgba(0,0,0,0.9)] text-white">
           <div className="flex items-center justify-between pb-3 border-b border-white/20">
             <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full bg-[#E8AE3C] text-black font-mono font-bold text-xs shadow-md">
+              <span className="px-3 py-1 rounded-full bg-[var(--accent)] text-black font-mono font-bold text-xs shadow-md">
                 Step {activeGuideStep.step} of {currentGuide?.steps.length}
               </span>
               <h3 className="font-bold text-[15px] text-white tracking-tight">{activeGuideStep.title}</h3>
@@ -1241,35 +1313,38 @@ export default function MasterFlowGraph({ onNavigate }) {
             <p className="text-[13px] text-white/95 leading-relaxed">
               <strong className="text-emerald-400 font-bold">What to do:</strong> {activeGuideStep.action}
             </p>
-            <p className="text-[12px] text-[#E8AE3C] font-mono leading-relaxed bg-[#E8AE3C]/15 p-2.5 rounded-xl border border-[#E8AE3C]/30">
-              💡 <strong>Helpful tip:</strong> {activeGuideStep.tip}
+            <p className="text-[12px] text-[var(--accent)] font-mono leading-relaxed bg-[var(--accent)]/15 p-2.5 rounded-xl border border-[var(--accent)]/30">
+              <strong>Helpful tip:</strong> {activeGuideStep.tip}
             </p>
           </div>
 
           <div className="pt-3 border-t border-white/20 flex items-center justify-between">
-            <button
+            <button type="button"
               onClick={() => jumpToGuideStep(currentGuideStepIdx - 1)}
               disabled={currentGuideStepIdx === 0}
-              className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 disabled:opacity-30 disabled:pointer-events-none text-xs font-mono font-bold transition"
+              className="flex items-center gap-1 min-h-11 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 disabled:opacity-30 disabled:pointer-events-none text-xs font-mono font-bold transition-colors"
             >
               <ChevronLeft size={16} /><span>Previous</span>
             </button>
             <div className="flex items-center gap-1.5">
               {currentGuide?.steps.map((s, idx) => (
-                <button
+                <button type="button"
                   key={s.step}
+                  aria-label={`Jump to step ${s.step}`}
                   onClick={() => jumpToGuideStep(idx)}
-                  className={`w-2.5 h-2.5 rounded-full transition ${
-                    idx === currentGuideStepIdx ? "bg-[#E8AE3C] w-6" : "bg-white/30 hover:bg-white/60"
-                  }`}
+                  className="min-h-11 min-w-11 flex items-center justify-center rounded-full transition-colors"
                   title={`Jump to step ${s.step}`}
-                />
+                >
+                  <span className={`h-2.5 rounded-full transition-[width,background-color] ${
+                    idx === currentGuideStepIdx ? "bg-[var(--accent)] w-6" : "w-2.5 bg-white/30 hover:bg-white/60"
+                  }`} />
+                </button>
               ))}
             </div>
-            <button
+            <button type="button"
               onClick={() => jumpToGuideStep(currentGuideStepIdx + 1)}
               disabled={currentGuideStepIdx === currentGuide.steps.length - 1}
-              className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-[#E8AE3C] text-black hover:bg-[#d69d2f] disabled:opacity-30 disabled:pointer-events-none text-xs font-mono font-bold transition shadow-md"
+              className="flex items-center gap-1 min-h-11 px-4 py-2 rounded-xl bg-[var(--accent)] text-black hover:bg-[var(--accent-bright)] disabled:opacity-30 disabled:pointer-events-none text-xs font-mono font-bold transition-colors shadow-md"
             >
               <span>Next</span><ChevronRight size={16} />
             </button>
@@ -1296,7 +1371,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                   {TYPE_CONFIG[selectedNode.nodeType || selectedNode.type]?.icon} {TYPE_CONFIG[selectedNode.nodeType || selectedNode.type]?.label || selectedNode.type}
                 </span>
                 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   <span
                     className="text-[12px] font-mono uppercase px-2 py-0.5 rounded border font-semibold flex items-center gap-1"
                     style={{
@@ -1308,14 +1383,22 @@ export default function MasterFlowGraph({ onNavigate }) {
                     <span>{STATUS_CONFIG[selectedNode.implementationStatus]?.icon}</span>
                     <span>{STATUS_CONFIG[selectedNode.implementationStatus]?.label}</span>
                   </span>
-                  <button aria-label="Close the inspector" onClick={() => setIsInspectorOpen(false)} className="text-white/60 hover:text-white p-1">
+                  <button type="button"
+                    aria-label="Center canvas on node"
+                    title="Center canvas on node"
+                    onClick={() => centerOnNode(selectedNode.id)}
+                    className="min-h-11 min-w-11 flex items-center justify-center text-white/60 hover:text-white p-2 rounded-lg"
+                  >
+                    <Crosshair size={15} />
+                  </button>
+                  <button type="button" aria-label="Close node inspector" onClick={() => setIsInspectorOpen(false)} className="min-h-11 min-w-11 flex items-center justify-center text-white/60 hover:text-white p-2 rounded-lg">
                     <X size={15} />
                   </button>
                 </div>
               </div>
 
               <div>
-                <span className="text-[12px] font-mono text-[#E8AE3C] font-bold block truncate">
+                <span className="text-[12px] font-mono text-[var(--accent)] font-bold block truncate">
                   CANONICAL: {selectedNode.canonicalId || selectedNode.id}
                 </span>
                 <h3 className="text-[15px] font-bold text-white leading-snug tracking-tight mt-0.5">
@@ -1327,17 +1410,27 @@ export default function MasterFlowGraph({ onNavigate }) {
                 {selectedNode.description || selectedNode.purpose}
               </p>
               
-              <div className="pt-2 flex items-center justify-between text-[12px] font-mono">
-                <span className="text-[#E8AE3C] truncate max-w-[240px] font-semibold">{selectedNode.route}</span>
-                {selectedNode.route?.startsWith("/") && (
-                  <button
-                    onClick={() => handleNavigate(selectedNode.route.replace("[id]","sample-space").replace("[slug]","sample-space"))}
-                    className="flex items-center gap-1 text-[#E8AE3C] hover:underline font-bold"
+              <div className="pt-2 flex items-center justify-between gap-2 text-[12px] font-mono">
+                <span className="text-[var(--accent)] truncate max-w-[200px] font-semibold">{selectedNode.route}</span>
+                {selectedNode.route?.startsWith("/") && !selectedNode.route.startsWith("/api/") && !selectedNode.route.includes("[") && !selectedNode.route.includes(":") ? (
+                  <a
+                    href={selectedNode.route}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)]/25 text-[12px] font-mono font-bold transition-colors shrink-0"
+                  >
+                    <span>Open Live Surface</span>
+                    <ExternalLink size={12} />
+                  </a>
+                ) : selectedNode.route?.startsWith("/") && !selectedNode.route.startsWith("/api/") ? (
+                  <button type="button"
+                    onClick={() => handleNavigate(selectedNode.route.replace(/\[[^\]]+\]/g, "sample-space"))}
+                    className="min-h-11 px-3 py-2 flex items-center gap-1 text-[var(--accent)] hover:underline font-bold shrink-0"
                   >
                     <span>Visit Page</span>
                     <ExternalLink size={12} />
                   </button>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -1364,7 +1457,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
             {/* Operational Incident Dossier & Alert Telemetry */}
             {selectedDossier && (graphMode === "health" || selectedDossier.healthStatus !== "NOMINAL" || selectedNode.type === "EXCEPTION") && (
-              <div className={`space-y-2.5 p-3.5 rounded-2xl border transition-all ${
+              <div className={`space-y-2.5 p-3.5 rounded-2xl border transition-colors ${
                 selectedDossier.healthStatus === "FAULTED"
                   ? "bg-red-500/20 border-red-500/70 shadow-[0_0_25px_rgba(239,68,68,0.3)]"
                   : selectedDossier.healthStatus === "BLAST_RADIUS"
@@ -1380,10 +1473,10 @@ export default function MasterFlowGraph({ onNavigate }) {
                     {selectedDossier.healthStatus === "NOMINAL" && <ShieldCheck size={14} className="text-emerald-400" />}
                     <span>
                       {selectedDossier.healthStatus === "FAULTED"
-                        ? "🚨 Primary Fault Origin"
+                        ? "Primary Fault Origin"
                         : selectedDossier.healthStatus === "BLAST_RADIUS"
-                        ? "⚠️ Severed / In Blast Radius"
-                        : "✅ Operational Nominal"}
+                        ? "Severed / In Blast Radius"
+                        : "Operational Nominal"}
                     </span>
                   </span>
                   <span className="text-[12px] font-mono uppercase px-2 py-0.5 rounded bg-black/40 border border-white/15 text-white/80 font-bold">
@@ -1406,7 +1499,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                 {selectedDossier.triageFiles.length > 0 && (
                   <div className="space-y-1">
                     <span className="text-[12px] font-mono text-white/70 uppercase font-bold flex items-center gap-1">
-                      <FileCode size={13} className="text-[#E8AE3C]" />
+                      <FileCode size={13} className="text-[var(--accent)]" />
                       <span>Triage Files ({selectedDossier.triageFiles.length})</span>
                     </span>
                     <div className="space-y-1">
@@ -1428,7 +1521,7 @@ export default function MasterFlowGraph({ onNavigate }) {
                     </span>
                     <div className="space-y-1">
                       {selectedDossier.connectedRecoveryNodes.map(rec => (
-                        <button
+                        <button type="button"
                           key={rec.id}
                           onClick={() => centerOnNode(rec.id)}
                           className="w-full text-left p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:border-cyan-400 hover:bg-cyan-900/40 transition flex items-center justify-between text-[12px] font-mono text-cyan-200"
@@ -1443,7 +1536,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
                 {/* Simulation Action Button */}
                 <div className="pt-1">
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (graphMode !== "health") setGraphMode("health");
                       setActiveScenarioId("CUSTOM");
@@ -1501,16 +1594,16 @@ export default function MasterFlowGraph({ onNavigate }) {
                 {selectedNode.parents?.length ? selectedNode.parents.map(pid => {
                   const pn = nodeMap.get(pid);
                   return (
-                    <button
+                    <button type="button"
                       key={pid}
                       onClick={() => centerOnNode(pid)}
-                      className="w-full text-left p-2.5 rounded-xl bg-[#141428] border border-white/20 hover:border-[#E8AE3C]/70 hover:bg-[#E8AE3C]/15 transition flex items-center justify-between group shadow-sm"
+                      className="w-full text-left p-2.5 rounded-xl bg-[#141428] border border-white/20 hover:border-[var(--accent)]/70 hover:bg-[var(--accent)]/15 transition flex items-center justify-between group shadow-sm"
                     >
                       <div className="truncate pr-2">
                         <span className="text-white font-bold text-[12px] group-hover:text-white truncate block">{pn?.name || pid}</span>
                         <span className="text-[12px] font-mono text-white/60 block">{pn?.canonicalId || pn?.type}</span>
                       </div>
-                      <ChevronLeft size={15} className="text-white/70 group-hover:text-[#E8AE3C] shrink-0" />
+                      <ChevronLeft size={15} className="text-white/70 group-hover:text-[var(--accent)] shrink-0" />
                     </button>
                   );
                 }) : (
@@ -1549,16 +1642,16 @@ export default function MasterFlowGraph({ onNavigate }) {
                 {selectedNode.children?.length ? selectedNode.children.map(cid => {
                   const cn = nodeMap.get(cid);
                   return (
-                    <button
+                    <button type="button"
                       key={cid}
                       onClick={() => centerOnNode(cid)}
-                      className="w-full text-left p-2.5 rounded-xl bg-[#141428] border border-white/20 hover:border-[#E8AE3C]/70 hover:bg-[#E8AE3C]/15 transition flex items-center justify-between group shadow-sm"
+                      className="w-full text-left p-2.5 rounded-xl bg-[#141428] border border-white/20 hover:border-[var(--accent)]/70 hover:bg-[var(--accent)]/15 transition flex items-center justify-between group shadow-sm"
                     >
                       <div className="truncate pr-2">
                         <span className="text-white font-bold text-[12px] group-hover:text-white truncate block">{cn?.name || cid}</span>
                         <span className="text-[12px] font-mono text-white/60 block">{cn?.canonicalId || cn?.type}</span>
                       </div>
-                      <ChevronRight size={15} className="text-white/70 group-hover:text-[#E8AE3C] shrink-0" />
+                      <ChevronRight size={15} className="text-white/70 group-hover:text-[var(--accent)] shrink-0" />
                     </button>
                   );
                 }) : (
@@ -1641,7 +1734,7 @@ export default function MasterFlowGraph({ onNavigate }) {
 
       {/* Stats Bar */}
       <div className="absolute bottom-3 left-3 z-30 flex items-center gap-3 bg-[#0e0e1a]/95 backdrop-blur-xl px-3.5 py-1.5 rounded-xl border border-white/20 text-[12px] font-mono text-white/80 pointer-events-none shadow-xl">
-        <span>Mode: <strong className="text-[#E8AE3C] uppercase font-bold">{graphMode}</strong></span>
+        <span>Mode: <strong className="text-[var(--accent)] uppercase font-bold">{graphMode}</strong></span>
         <span>·</span>
         <span>{culledNodes.length}/{visibleNodes.length} nodes visible</span>
         <span>·</span>

@@ -58,6 +58,7 @@ export default function BrainSearch({ aiAvailable }) {
           />
         </div>
         <button
+          type="submit"
           disabled={isPending}
           className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.12)] hover:bg-[rgba(232,174,60,0.20)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors disabled:opacity-50 whitespace-nowrap"
         >

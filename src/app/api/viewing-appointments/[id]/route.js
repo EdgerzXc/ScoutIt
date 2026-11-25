@@ -13,57 +13,78 @@ import { notifyUser } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
-// PATCH /api/viewing-appointments/[id]
-//
-// Two shapes, deliberately exclusive:
-//   { status }                       -> move along the lifecycle
-//   { scheduledAt, durationMinutes } -> MOVE the viewing to a new time
-//
-// Rescheduling is new. `rescheduleViewingMeet` had existed in lib/calendar/
-// meetLink.js with ZERO callers — a viewing could only ever be cancelled and
-// rebooked, which lost the Meet room and the thread of the original request.
-// The new time goes through the SAME availability gate a first booking does.
-
+const version = z.string().datetime({ offset: true });
 const statusSchema = z.object({
+  expectedUpdatedAt: version,
   status: z.enum(["confirmed", "cancelled", "completed"]),
   reason: z.string().max(500).optional(),
-});
+}).strict();
 
 const rescheduleSchema = z.object({
+  expectedUpdatedAt: version,
   scheduledAt: z.string().datetime({ offset: true }),
   durationMinutes: z.number().int().min(5).max(480).optional(),
   timezone: z.string().min(1).max(64)
     .refine(isValidTimeZone, "Unrecognised timezone")
     .optional(),
-});
+}).strict();
 
 const APPOINTMENT_COLUMNS =
   "id, host_id, guest_id, deal_id, property_id, scheduled_at, ends_at, duration_minutes, " +
-  "status, google_event_id, deals(property_id, status, properties(title, location))";
+  "status, updated_at, google_event_id, deals(property_id, status, properties(title, location))";
+const UPDATED_COLUMNS = "id, scheduled_at, ends_at, duration_minutes, status, updated_at";
+
+function viewingChanged() {
+  return NextResponse.json(
+    { code: "VIEWING_CHANGED", error: "This viewing changed. Review the latest details and try again." },
+    { status: 409 },
+  );
+}
+
+function updateViewing(id, appt, changes) {
+  return supabaseAdmin.from("viewing_appointments")
+    .update(changes)
+    .eq("id", id)
+    .eq("status", appt.status)
+    .eq("updated_at", appt.updated_at)
+    .select(UPDATED_COLUMNS)
+    .maybeSingle();
+}
 
 export async function PATCH(request, { params }) {
   try {
     const { id } = await params;
-    const payload = await request.json();
-
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!supabaseAdmin) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
+    if (!z.string().uuid().safeParse(id).success) {
+      return NextResponse.json({ error: "Invalid appointment ID" }, { status: 400 });
+    }
+    const payload = await request.json().catch(() => null);
+    const reschedule = payload?.scheduledAt !== undefined;
+    const parsed = (reschedule ? rescheduleSchema : statusSchema).safeParse(payload);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid viewing update. Refresh the viewing and try again." }, { status: 400 });
+    }
+
     const { data: appt, error: fetchError } = await supabaseAdmin
       .from("viewing_appointments")
       .select(APPOINTMENT_COLUMNS)
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
-
-    if (payload && payload.scheduledAt !== undefined) {
-      return handleReschedule({ id, appt, payload, userId });
+    if (fetchError) throw fetchError;
+    if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+    if (appt.host_id !== userId && appt.guest_id !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    return handleStatusChange({ id, appt, payload, userId });
+    if (parsed.data.expectedUpdatedAt !== appt.updated_at) return viewingChanged();
+
+    const handleUpdate = reschedule ? handleReschedule : handleStatusChange;
+    return await handleUpdate({ id, appt, payload: parsed.data, userId });
   } catch (err) {
     console.error("[APPOINTMENTS API] PATCH error:", err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
@@ -72,21 +93,11 @@ export async function PATCH(request, { params }) {
 
 /** Move a viewing to a new time, re-checking the host's availability. */
 async function handleReschedule({ id, appt, payload, userId }) {
-  const parsed = rescheduleSchema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues?.[0]?.message || "Invalid data format" },
-      { status: 400 },
-    );
-  }
-  const { scheduledAt, durationMinutes, timezone } = parsed.data;
+  const { scheduledAt, durationMinutes, timezone } = payload;
 
   // Either party may propose a new time; the viewing returns to `pending` so
   // the host still has to accept it. Moving a confirmed viewing without
   // re-confirmation would silently change what the host agreed to.
-  if (appt.host_id !== userId && appt.guest_id !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
   if (!["pending", "confirmed"].includes(appt.status)) {
     return NextResponse.json(
       { error: `A ${appt.status} viewing cannot be moved. Book a new one instead.` },
@@ -116,23 +127,26 @@ async function handleReschedule({ id, appt, payload, userId }) {
     );
   }
 
-  const { data: updated, error: updateError } = await supabaseAdmin
-    .from("viewing_appointments")
-    .update({
-      scheduled_at: new Date(scheduledAt).toISOString(),
-      duration_minutes: slot.durationMinutes,
-      booked_timezone: timezone || slot.timezone,
-      status: "pending",
-    })
-    .eq("id", id)
-    .select("id, scheduled_at, ends_at, duration_minutes, status")
-    .single();
+  const { data: updated, error: updateError } = await updateViewing(id, appt, {
+    scheduled_at: new Date(scheduledAt).toISOString(),
+    duration_minutes: slot.durationMinutes,
+    booked_timezone: timezone || slot.timezone,
+    status: "pending",
+  });
 
+  if (updateError?.code === "23P01") {
+    return NextResponse.json(
+      { error: "That time was just taken. Please choose another.", reason: "not_available" },
+      { status: 409 },
+    );
+  }
   if (updateError) {
     console.error("[APPOINTMENTS API] reschedule failed:", updateError);
     return NextResponse.json({ error: "Failed to move the appointment" }, { status: 500 });
   }
+  if (!updated) return viewingChanged();
 
+  let calendarSync = null;
   // Move the Google event rather than tearing it down, so the Meet link both
   // parties already have keeps working. Best-effort: the ScoutIt row is the
   // source of truth and is already correct.
@@ -144,7 +158,7 @@ async function handleReschedule({ id, appt, payload, userId }) {
       });
       if (!moved) {
         console.error("[APPOINTMENTS API] Google event was not moved; identifiers retained for retry");
-        await enqueueCalendarSyncRetry(supabaseAdmin, {
+        const queued = await enqueueCalendarSyncRetry(supabaseAdmin, {
           appointmentId: id,
           hostUserId: appt.host_id,
           googleEventId: appt.google_event_id,
@@ -155,10 +169,11 @@ async function handleReschedule({ id, appt, payload, userId }) {
           },
           errorReason: "google_event_not_moved",
         });
+        calendarSync = queued ? "pending" : "failed";
       }
     } catch (meetErr) {
       console.error("[APPOINTMENTS API] Meet reschedule failed:", meetErr?.message);
-      await enqueueCalendarSyncRetry(supabaseAdmin, {
+      const queued = await enqueueCalendarSyncRetry(supabaseAdmin, {
         appointmentId: id,
         hostUserId: appt.host_id,
         googleEventId: appt.google_event_id,
@@ -167,8 +182,9 @@ async function handleReschedule({ id, appt, payload, userId }) {
           scheduledAt: updated.scheduled_at,
           durationMinutes: updated.duration_minutes,
         },
-        errorReason: meetErr?.message || "reschedule_exception",
+        errorReason: "reschedule_exception",
       });
+      calendarSync = queued ? "pending" : "failed";
     }
   }
 
@@ -204,23 +220,15 @@ async function handleReschedule({ id, appt, payload, userId }) {
     });
   }
 
-  return NextResponse.json({ success: true, appointment: updated });
+  return NextResponse.json({ success: true, appointment: updated, calendarSync });
 }
 
 /** Advance the viewing's lifecycle: confirmed / cancelled / completed. */
 async function handleStatusChange({ id, appt, payload, userId }) {
-  const parsed = statusSchema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
-  }
-  const { status, reason } = parsed.data;
+  const { status, reason } = payload;
 
   // Both host and guest can cancel, but only host can confirm or complete.
-  if (status === "cancelled") {
-    if (appt.host_id !== userId && appt.guest_id !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-  } else if (appt.host_id !== userId) {
+  if (status !== "cancelled" && appt.host_id !== userId) {
     return NextResponse.json(
       { error: "Only the host can confirm or complete an appointment" },
       { status: 403 },
@@ -234,16 +242,19 @@ async function handleStatusChange({ id, appt, payload, userId }) {
     );
   }
 
-  const { error: updateError } = await supabaseAdmin
-    .from("viewing_appointments")
-    .update({ status })
-    .eq("id", id);
+  const { data: updated, error: updateError } = await updateViewing(id, appt, {
+    status,
+    ...(status === "cancelled" ? { meet_link: null } : {}),
+  });
 
   if (updateError) {
     console.error("[APPOINTMENTS API] Update error:", updateError);
     return NextResponse.json({ error: "Failed to update appointment" }, { status: 500 });
   }
+  if (!updated) return viewingChanged();
 
+  let appointment = updated;
+  let calendarSync = null;
   // Tear down the Google event on cancellation (NEW_IDEAS.md §20.1).
   // Without this, a cancelled viewing leaves a live Meet room and a stale
   // entry in the host's calendar — which is exactly how someone ends up
@@ -253,46 +264,54 @@ async function handleStatusChange({ id, appt, payload, userId }) {
     try {
       const removed = await cancelViewingMeet(appt.host_id, appt.google_event_id);
       if (removed) {
-        await supabaseAdmin
-          .from("viewing_appointments")
-          .update({ meet_link: null, google_event_id: null })
-          .eq("id", id);
+        const { data: cleaned, error: cleanupError } = await updateViewing(id, updated, {
+          meet_link: null,
+          google_event_id: null,
+        });
+        if (cleanupError) throw cleanupError;
+        if (cleaned) appointment = cleaned;
       } else {
         // Keep the id: clearing it after a failed Google delete makes the
         // external event impossible to retry or reconcile later.
         console.error("[APPOINTMENTS API] Google event was not removed; identifiers retained for retry");
-        await enqueueCalendarSyncRetry(supabaseAdmin, {
+        const queued = await enqueueCalendarSyncRetry(supabaseAdmin, {
           appointmentId: id,
           hostUserId: appt.host_id,
           googleEventId: appt.google_event_id,
           operation: "cancel",
           errorReason: "google_event_not_removed",
         });
+        calendarSync = queued ? "pending" : "failed";
       }
     } catch (meetErr) {
       console.error("[APPOINTMENTS API] Meet cleanup failed:", meetErr?.message);
-      await enqueueCalendarSyncRetry(supabaseAdmin, {
+      const queued = await enqueueCalendarSyncRetry(supabaseAdmin, {
         appointmentId: id,
         hostUserId: appt.host_id,
         googleEventId: appt.google_event_id,
         operation: "cancel",
-        errorReason: meetErr?.message || "cancel_exception",
+        errorReason: "cancel_exception",
       });
+      calendarSync = queued ? "pending" : "failed";
     }
   }
 
-  await logActivity(supabaseAdmin, {
-    dealId: appt.deal_id,
-    propertyId: appt.deals?.property_id || appt.property_id || null,
-    activityType: `viewing_${status}`,
-    actorId: userId,
-    metadata: {
-      appointmentId: id,
-      scheduledAt: appt.scheduled_at,
-      endsAt: appt.ends_at,
-      ...(reason ? { reason } : {}),
-    },
-  });
+  try {
+    await logActivity(supabaseAdmin, {
+      dealId: appt.deal_id,
+      propertyId: appt.deals?.property_id || appt.property_id || null,
+      activityType: `viewing_${status}`,
+      actorId: userId,
+      metadata: {
+        appointmentId: id,
+        scheduledAt: appt.scheduled_at,
+        endsAt: appt.ends_at,
+        ...(reason ? { reason } : {}),
+      },
+    });
+  } catch (activityError) {
+    console.warn("[APPOINTMENTS API] Timeline entry not recorded for", id, activityError?.message);
+  }
 
   // The one auto-created task type: when the host marks a viewing completed,
   // drop a "Follow up" task on their list due in 24 hours. A-146: isolated
@@ -335,5 +354,5 @@ async function handleStatusChange({ id, appt, payload, userId }) {
     });
   }
 
-  return NextResponse.json({ success: true, status });
+  return NextResponse.json({ success: true, status, appointment, calendarSync });
 }

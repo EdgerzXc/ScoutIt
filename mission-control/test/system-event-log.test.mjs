@@ -43,6 +43,9 @@ test("every event name the vocabulary declares is actually emitted somewhere", a
     read(root, "src", "app", "dashboard", "claims", "actions.js"),
     read(mainRoot, "src", "lib", "cronEventLog.js"),
     read(mainRoot, "src", "lib", "cmsCache.js"),
+    read(mainRoot, "src", "lib", "calendar", "meetLink.js"),
+    read(mainRoot, "src", "lib", "calendar", "googleSync.js"),
+    read(mainRoot, "src", "app", "api", "deals", "[id]", "dispute", "route.js"),
   ]);
   const all = emitters.join("\n");
 

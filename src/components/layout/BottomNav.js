@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
-import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
-import { notifyLightModeChanged } from "@/lib/lightMode";
+import { getStoredLiteMode, setLiteMode, LITE_MODE_EVENT } from "@/lib/liteMode";
+import { getStoredSimpleMode, setSimpleMode, SIMPLE_MODE_EVENT } from "@/lib/simpleMode";
+import { notifyLightModeChanged, LIGHT_MODE_EVENT } from "@/lib/lightMode";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
 import RoleActivationModal from "@/components/profile/RoleActivationModal";
@@ -608,14 +608,25 @@ export default function BottomNav() {
   const propSlug = propertyMatch ? propertyMatch[1] : null;
 
   useEffect(() => {
-    const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
-    const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
-    // White-lens preview (owner-approved 2026-09-23): keep the saved
-    // selection as-is on read, same as FloatingToolbox. Light is opt-in.
-    setCurrentMode(requestedMode);
-    setLite(getStoredLiteMode());
-    setSimple(getStoredSimpleMode());
+    const syncDisplayPrefs = () => {
+      const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
+      const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
+      setCurrentMode(requestedMode);
+      setLite(getStoredLiteMode());
+      setSimple(getStoredSimpleMode());
+    };
+    syncDisplayPrefs();
     setMounted(true);
+    window.addEventListener(SIMPLE_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener(LITE_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener(LIGHT_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener("storage", syncDisplayPrefs);
+    return () => {
+      window.removeEventListener(SIMPLE_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener(LITE_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener(LIGHT_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener("storage", syncDisplayPrefs);
+    };
   }, []);
 
   // Reflect whether this property is already saved to the Ledger. Saves are stored

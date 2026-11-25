@@ -23,9 +23,13 @@ const SIGNATURES = [
   { mime: "image/png", ext: ["png"], test: (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 },
   { mime: "image/webp", ext: ["webp"], test: (b) => ascii(b, 0, 4) === "RIFF" && ascii(b, 8, 12) === "WEBP" },
   { mime: "application/pdf", ext: ["pdf"], test: (b) => ascii(b, 0, 5) === "%PDF-" },
-  // MP4/MOV family: 'ftyp' box at offset 4.
-  { mime: "video/mp4", ext: ["mp4", "mov", "m4v"], test: (b) => ascii(b, 4, 8) === "ftyp" },
+  // MP4/MOV/M4A family: 'ftyp' box at offset 4.
+  { mime: "video/mp4", ext: ["mp4", "mov", "m4v", "m4a"], test: (b) => ascii(b, 4, 8) === "ftyp" },
   { mime: "video/webm", ext: ["webm", "mkv"], test: (b) => b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3 },
+  { mime: "video/x-msvideo", ext: ["avi"], test: (b) => ascii(b, 0, 4) === "RIFF" && ascii(b, 8, 12) === "AVI " },
+  { mime: "audio/ogg", ext: ["ogg", "oga", "opus"], test: (b) => ascii(b, 0, 4) === "OggS" },
+  { mime: "audio/wav", ext: ["wav"], test: (b) => ascii(b, 0, 4) === "RIFF" && ascii(b, 8, 12) === "WAVE" },
+  { mime: "audio/mpeg", ext: ["mp3", "aac"], test: (b) => ascii(b, 0, 3) === "ID3" || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0 && b[1] !== 0xff) },
 ];
 
 // Types we never accept regardless of declared MIME (executables, scripts,
@@ -138,12 +142,15 @@ export async function scanBuffer(buffer, { declaredMime = null, filename = "" } 
     };
   }
 
-  // Declared-vs-real coherence: a mismatch in FAMILY (image/pdf/video) means
+  // Declared-vs-real coherence: a mismatch in FAMILY (image/pdf/video/audio) means
   // the client lied about what it uploaded — treat as spoofing.
+  // Note: audio/webm and audio/mp4 share EBML / ftyp containers with video/webm and video/mp4.
   if (declaredMime) {
     const declaredFamily = declaredMime.split("/")[0];
     const detectedFamily = detected.mime.split("/")[0];
-    if (declaredFamily !== detectedFamily) {
+    const isSharedMediaContainer =
+      declaredFamily === "audio" && (detected.mime === "video/webm" || detected.mime === "video/mp4");
+    if (declaredFamily !== detectedFamily && !isSharedMediaContainer) {
       return {
         verdict: "infected",
         engine: engines.join("+"),

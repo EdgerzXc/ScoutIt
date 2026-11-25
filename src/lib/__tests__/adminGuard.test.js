@@ -29,8 +29,15 @@ const req = (token) =>
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
-const signedIn = () => getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
-const profile = (p) => maybeSingle.mockResolvedValue({ data: p, error: null });
+const signedIn = (aal = null) =>
+  getUser.mockResolvedValue({ data: { user: { id: 'u1', ...(aal ? { aal } : {}) } }, error: null });
+const staffRow = (s) => maybeSingle.mockResolvedValue({ data: s, error: null });
+
+const makeJwtWithAal = (aal) => {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ sub: 'u1', aal })).toString('base64url');
+  return `${header}.${payload}.sig`;
+};
 
 describe('requireAdmin', () => {
   beforeEach(() => {
@@ -70,61 +77,74 @@ describe('requireAdmin', () => {
     expect((await requireAdmin(req('t'))).status).toBe(401);
   });
 
-  it('denies a signed-in user with no staff role', async () => {
+  it('denies a signed-in user with no admin_users row', async () => {
     signedIn();
-    profile({ role: 'owner', active_roles: ['owner', 'seeker'] });
+    staffRow(null);
 
     const r = await requireAdmin(req('t'));
     expect(r.status).toBe(403);
     expect(r.user).toBeUndefined();
   });
 
-  it('denies when the profile row is missing — a lookup miss is not a pass', async () => {
+  it('denies an inactive admin_users account', async () => {
     signedIn();
-    profile(null);
+    staffRow({ id: 'u1', tier: 3, is_finance: true, active: false });
     expect((await requireAdmin(req('t'))).status).toBe(403);
   });
 
-  it('denies when the role lookup errors', async () => {
+  it('denies when the staff lookup errors', async () => {
     signedIn();
     maybeSingle.mockResolvedValue({ data: null, error: new Error('db down') });
     expect((await requireAdmin(req('t'))).status).toBe(403);
   });
 
-  it('denies an unrecognised role rather than assuming it is fine (Rule 6)', async () => {
+  it('denies an invalid tier value rather than assuming it is fine (Rule 6)', async () => {
     signedIn();
-    profile({ role: 'superuser', active_roles: ['moderator'] });
+    staffRow({ id: 'u1', tier: 0, is_finance: false, active: true });
     expect((await requireAdmin(req('t'))).status).toBe(403);
   });
 
-  it('denies when active_roles is not an array', async () => {
+  it('enforces minTier strictly', async () => {
     signedIn();
-    profile({ role: 'owner', active_roles: 'admin' });
-    expect((await requireAdmin(req('t'))).status).toBe(403);
+    staffRow({ id: 'u1', tier: 1, is_finance: false, active: true });
+    expect((await requireAdmin(req('t'), { minTier: 2 })).status).toBe(403);
+
+    staffRow({ id: 'u1', tier: 2, is_finance: false, active: true });
+    const allowed = await requireAdmin(req('t'), { minTier: 2 });
+    expect(allowed.error).toBeUndefined();
+    expect(allowed.userId).toBe('u1');
+    expect(allowed.tier).toBe(2);
   });
 
-  it('allows admin via the singular `role` column', async () => {
+  it('enforces requireFinance without Super Admin bypass', async () => {
     signedIn();
-    profile({ role: 'admin', active_roles: [] });
+    staffRow({ id: 'u1', tier: 3, is_finance: false, active: true });
+    expect((await requireAdmin(req('t'), { minTier: 2, requireFinance: true })).status).toBe(403);
+
+    staffRow({ id: 'u1', tier: 2, is_finance: true, active: true });
+    const allowed = await requireAdmin(req('t'), { minTier: 2, requireFinance: true });
+    expect(allowed.error).toBeUndefined();
+    expect(allowed.isFinance).toBe(true);
+  });
+
+  it('enforces requireAal2 against JWT assurance claim', async () => {
+    signedIn('aal1');
+    staffRow({ id: 'u1', tier: 3, is_finance: true, active: true });
+    expect((await requireAdmin(req(makeJwtWithAal('aal1')), { requireAal2: true })).status).toBe(403);
+
+    const allowed = await requireAdmin(req(makeJwtWithAal('aal2')), { requireAal2: true });
+    expect(allowed.error).toBeUndefined();
+    expect(allowed.userId).toBe('u1');
+  });
+
+  it('allows active Tier 1 Agent on default requireAdmin', async () => {
+    signedIn();
+    staffRow({ id: 'u1', email: 'agent@scoutit.space', display_name: 'Agent', tier: 1, is_finance: false, active: true });
 
     const r = await requireAdmin(req('t'));
     expect(r.error).toBeUndefined();
     expect(r.userId).toBe('u1');
-  });
-
-  it('allows staff via the `active_roles` array', async () => {
-    signedIn();
-    profile({ role: 'owner', active_roles: ['owner', 'staff'] });
-    expect((await requireAdmin(req('t'))).userId).toBe('u1');
-  });
-
-  // The two columns can disagree; the guard must accept either, because
-  // /api/property/verify checks active_roles while the older admin routes
-  // check `role`. Failing one and passing the other is how a staff member
-  // ends up able to use half the console.
-  it('allows staff whose singular role is admin but array is empty, and vice versa', async () => {
-    signedIn();
-    profile({ role: 'staff', active_roles: null });
-    expect((await requireAdmin(req('t'))).userId).toBe('u1');
+    expect(r.tier).toBe(1);
+    expect(r.isFinance).toBe(false);
   });
 });

@@ -5,6 +5,7 @@ import { Download, Copy, Check, Sparkles, QrCode, FileText } from "lucide-react"
 import { extractFacts, factSpecs, buildMessagingDispatch } from "@/lib/shareBriefing";
 import { listingVerificationCopy } from "@/lib/listingVerification";
 import { generateQrMatrix, generateQrSvg } from "@/lib/qrCodeGenerator";
+import { isSafeSvgMarkup } from "@/lib/sanitize";
 
 export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
   const canvasRef = useRef(null);
@@ -238,7 +239,9 @@ export default function LuxuryStoryStudio({ property, shareUrl, onClose }) {
 
           {/* Mini QR Render */}
           <div className="w-20 h-20 mx-auto rounded border border-gold-accent/30 overflow-hidden flex items-center justify-center bg-black/60">
-            <div dangerouslySetInnerHTML={{ __html: qrSvg }} className="w-16 h-16" />
+            {isSafeSvgMarkup(qrSvg) && (
+              <div dangerouslySetInnerHTML={{ __html: qrSvg }} className="w-16 h-16" />
+            )}
           </div>
 
           <div className="text-center">

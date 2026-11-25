@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { getSession } from "@/lib/authClient";
 import { useModalDialog } from "@/components/ui/useModalDialog";
 import { SPATIAL_SLA_HOURS } from "@/lib/spatialStudio";
 import { Wrench, Clock, Check, AlertCircle, X } from "lucide-react";
@@ -52,9 +53,15 @@ export default function SpatialStudioRevisionModal({
     setErrorMsg(null);
 
     try {
+      const { data: { session } = {} } = await getSession();
+      const headers = { "Content-Type": "application/json" };
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
       const res = await fetch("/api/spatial/revision", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           propertyId: property?.id || property?.slug,
           revisionNotes: revisionNotes.trim(),
@@ -111,6 +118,7 @@ export default function SpatialStudioRevisionModal({
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 text-text-muted hover:text-text-primary transition rounded-lg hover:bg-surface-alt"
             aria-label="Close modal"

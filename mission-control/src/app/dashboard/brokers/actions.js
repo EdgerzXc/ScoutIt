@@ -42,18 +42,32 @@ export async function loadBrokers() {
       .filter((id) => id && typeof id === "string" && id.length > 20);
 
     let profileMap = new Map();
+    const emailByUserId = new Map();
     if (brokerAuthIds.length > 0) {
       const { data: profiles } = await admin
         .from("user_profiles")
-        .select("id, email, full_name, kyc_verified, prc_license, is_verified")
+        .select("id, display_name, kyc_verified, prc_license, is_verified")
         .in("id", brokerAuthIds);
 
       profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+      if (typeof admin.auth?.admin?.getUserById === "function") {
+        await Promise.all(
+          brokerAuthIds.map(async (uid) => {
+            try {
+              const { data: authRes } = await admin.auth.admin.getUserById(uid);
+              if (authRes?.user?.email) emailByUserId.set(uid, authRes.user.email);
+            } catch {
+              // Non-fatal in preview or missing user
+            }
+          })
+        );
+      }
     }
 
     const brokers = rawBrokers.map((r) => {
       const f = r.fields || {};
       const supabaseUser = f.BrokerID ? profileMap.get(f.BrokerID) : null;
+      const resolvedEmail = f.BrokerID ? (emailByUserId.get(f.BrokerID) || null) : null;
 
       const niche = f.Niche
         ? Array.isArray(f.Niche)
@@ -75,7 +89,7 @@ export async function loadBrokers() {
         isLicenseVerified: Boolean(f.License_Verified),
         isExample: Boolean(f.Is_Example),
         niche,
-        supabaseEmail: supabaseUser?.email || null,
+        supabaseEmail: resolvedEmail,
         supabaseKyc: Boolean(supabaseUser?.kyc_verified || supabaseUser?.is_verified),
       };
     });

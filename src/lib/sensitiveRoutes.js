@@ -18,16 +18,66 @@
 export function isSensitivePath(path) {
   return (
     path.startsWith('/api/auth/') ||
+    path.startsWith('/api/admin/') ||
+    path.startsWith('/api/cron/') ||
     path.startsWith('/api/ai/') ||
     path.startsWith('/api/storage/') ||
-    path.startsWith('/api/intel/')
+    path.startsWith('/api/intel/') ||
+    path.startsWith('/api/properties/updates/intent') ||
+    path.startsWith('/api/properties/queue/') ||
+    path.startsWith('/api/questit') ||
+    path.startsWith('/api/v1/questit') ||
+    path.startsWith('/api/property/claim') ||
+    path.startsWith('/api/badges/') ||
+    path.startsWith('/api/user/') ||
+    path.startsWith('/api/contact') ||
+    path.startsWith('/api/deals/') ||
+    path === '/api/deals' ||
+    path.startsWith('/api/dashboard/') ||
+    path.startsWith('/api/wallet') ||
+    path.startsWith('/api/oauth/google/') ||
+    path.startsWith('/api/inquiries') ||
+    path.startsWith('/api/waitlist') ||
+    path.startsWith('/api/notifications') ||
+    path.startsWith('/api/broker/') ||
+    path.startsWith('/api/crm/') ||
+    path.startsWith('/api/spatial/') ||
+    path.startsWith('/api/leads/export-audit') ||
+    path.startsWith('/api/community/signals/') ||
+    path.startsWith('/api/mapbox') ||
+    path.startsWith('/api/whereto')
   );
 }
 
 // Which limiter meters a path: 'strict' (5/10s), 'ai' (15/10s), 'standard'
 // (30/10s). Anything that spends model tokens gets the 'ai' tier.
 export function rateLimitTier(path) {
-  if (path.startsWith('/api/auth/')) return 'strict';
-  if (path.startsWith('/api/ai/') || path.startsWith('/api/intel/')) return 'ai';
+  if (
+    path.startsWith('/api/auth/') ||
+    path.startsWith('/api/admin/') ||
+    path.startsWith('/api/user/delete-account') ||
+    path.startsWith('/api/badges/transfer') ||
+    path.startsWith('/api/badges/claim') ||
+    path.startsWith('/api/badges/apply') ||
+    path.startsWith('/api/property/claim') ||
+    path.startsWith('/api/contact') ||
+    path.startsWith('/api/storage/') ||
+    path.startsWith('/api/oauth/google/') ||
+    path.startsWith('/api/wallet') ||
+    path.startsWith('/api/inquiries') ||
+    path.startsWith('/api/waitlist')
+  ) {
+    return 'strict';
+  }
+  if (
+    path.startsWith('/api/ai/') ||
+    path.startsWith('/api/intel/') ||
+    path.startsWith('/api/properties/updates/intent') ||
+    path.startsWith('/api/properties/queue/process') ||
+    path.startsWith('/api/questit') ||
+    path.startsWith('/api/v1/questit')
+  ) {
+    return 'ai';
+  }
   return 'standard';
 }

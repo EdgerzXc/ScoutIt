@@ -45,6 +45,12 @@ vi.mock("@/lib/connectGates", () => ({
 function fakeSupabase() {
   return {
     rpc: vi.fn(async (name, args) => {
+      if (name === "spend_connects_atomic") {
+        return {
+          data: [{ success: true, remaining_total: 4 }],
+          error: null,
+        };
+      }
       if (name === "create_routed_buyer_deal") {
         const dealId = "deal-created-" + Math.random().toString(36).substring(7);
         state.deals[dealId] = {
@@ -171,6 +177,9 @@ function fakeSupabase() {
             );
             return { data: match || null, error: null };
           }
+          if (table === "stratosphere_signals") {
+            return { data: state.signals?.[filterVal] || null, error: null };
+          }
           return { data: null, error: null };
         }),
         single: vi.fn(async () => {
@@ -256,6 +265,16 @@ describe("Deals Security, Market Lifecycle & Handshake Contracts", () => {
     };
     state.handshakes = {};
     state.routingRecipients = [];
+    state.signals = {
+      "sig-alpha": {
+        id: "sig-alpha",
+        author_account_id: "owner-user",
+        status: "live",
+        last_confirmed_at: new Date().toISOString(),
+        signal_type: "commercial_promotion",
+        commercial_flag: true,
+      },
+    };
   });
 
   describe("1. POST /api/deals/initiate — Security & Quota Gates", () => {
@@ -333,6 +352,26 @@ describe("Deals Security, Market Lifecycle & Handshake Contracts", () => {
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.success).toBe(true);
+    });
+
+    it("blocks a non-universe seeker spoofing a nonexistent or unowned stratosphere_signal referral (403)", async () => {
+      state.currentUser = "starry-seeker";
+      const req = new Request("https://www.scoutit.space/api/deals/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          listingId: "prop-offmarket-open",
+          role: "buyer",
+          source_type: "stratosphere_signal",
+          source_id: "sig-forged-does-not-exist",
+          message: "Forged signal bypass attempt",
+        }),
+      });
+
+      const res = await initiateDeal(req);
+      expect(res.status).toBe(403);
+      const json = await res.json();
+      expect(json.error).toContain("requires Universe tier membership");
     });
   });
 
@@ -450,6 +489,7 @@ describe("Deals Security, Market Lifecycle & Handshake Contracts", () => {
 
     it("allows Party A (buyer) to record first signature, awaiting Party B (200 pending)", async () => {
       state.currentUser = "starry-seeker";
+      state.deals["deal-active-1"].status = "accepted";
       const req = new Request("https://www.scoutit.space/api/deals/handshake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -468,6 +508,7 @@ describe("Deals Security, Market Lifecycle & Handshake Contracts", () => {
     it("allows Party B (broker) to complete the bilateral handshake (200 completed)", async () => {
       // First party A signs
       state.currentUser = "starry-seeker";
+      state.deals["deal-active-1"].status = "accepted";
       await handleHandshake(
         new Request("https://www.scoutit.space/api/deals/handshake", {
           method: "POST",
@@ -549,7 +590,7 @@ describe("Deals Security, Market Lifecycle & Handshake Contracts", () => {
         property_id: "prop-live",
         buyer_id: "owner-user",
         broker_id: null,
-        status: "pending",
+        status: "accepted",
       };
 
       state.currentUser = "owner-user";

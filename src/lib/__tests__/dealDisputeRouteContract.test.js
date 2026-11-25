@@ -19,7 +19,7 @@ const readCode = () =>
 // hold_placed_at mutation survived the first time.
 function insertObject() {
   const code = readCode();
-  const start = code.indexOf(".insert({");
+  const start = code.indexOf('rpc("file_deal_dispute_hold", {');
   if (start === -1) return null;
   const open = code.indexOf("{", start);
   let depth = 0;
@@ -56,8 +56,8 @@ describe("A-041 dispute filing route", () => {
   it("takes the reporter from the session, never from the body", () => {
     const code = readCode();
     expect(code).toContain("resolveUserId(request)");
-    expect(code).toContain("reporter_id: userId");
-    expect(code).not.toMatch(/reporter_id:\s*(?:body|validated|payload)\./);
+    expect(code).toContain("p_reporter_id: userId");
+    expect(code).not.toMatch(/p_reporter_id:\s*(?:body|validated|payload)\./);
   });
 
   it("refuses an unauthenticated caller before touching the database", () => {
@@ -83,10 +83,10 @@ describe("A-041 dispute filing route", () => {
     // "passed". That mutation was watched surviving before this was fixed.
     const insert = insertObject();
     expect(insert).not.toBeNull();
-    expect(insert).toContain("hold_placed_at");
+    expect(insert).toContain("p_hold_statuses: DISPUTE_HOLD_STATUSES");
     // The status is the shared constant, deliberately not a literal: a second
     // literal here is free to drift away from the purge job's exemption list.
-    expect(insert).toContain("status: INITIAL_DISPUTE_STATUS");
+    expect(insert).toContain("p_status: INITIAL_DISPUTE_STATUS");
     expect(insert).not.toMatch(/status:\s*["']/);
   });
 

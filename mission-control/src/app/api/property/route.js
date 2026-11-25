@@ -17,7 +17,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
+import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import {
   canonicalSlugFor,
   titleChangeWouldDriftCanonicalUrl,
@@ -29,6 +29,12 @@ import { publishPropertyToAirtable } from "@/lib/airtable";
 // the moment a field's visibility changes.
 import { isInternal } from "@/lib/propertyFieldRegistry";
 
+const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+function isPlainObject(val) {
+  return Boolean(val) && typeof val === "object" && !Array.isArray(val);
+}
+
 // ── GET /api/property?id=… ──────────────────────────────────────
 // Returns the FULL row (including `details`), fetched only when a staff member
 // actually expands a row. The CMS list query deliberately omits `details` so a
@@ -38,20 +44,25 @@ export async function GET(request) {
   try {
     staff = await getCurrentStaff();
     assertTier(staff, TIERS.OPS_MANAGER);
+  } catch {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  }
+
+  const id = new URL(request.url).searchParams.get("id")?.trim();
+  if (!id || id.length > 128) return NextResponse.json({ error: "Missing or invalid id" }, { status: 400 });
+
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.from("properties").select("*").eq("id", id).single();
+
+    if (error || !data) {
+      return NextResponse.json({ error: "Property not found" }, { status: 404, headers: { "Cache-Control": "private, no-store" } });
+    }
+    return NextResponse.json({ property: data }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (err) {
-    return NextResponse.json({ error: err.message || "Not authorised" }, { status: 403 });
+    console.error("[MC PROPERTY] GET failed:", err);
+    return NextResponse.json({ error: "Property operation failed" }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   }
-
-  const id = new URL(request.url).searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-
-  const admin = createAdminClient();
-  const { data, error } = await admin.from("properties").select("*").eq("id", id).single();
-
-  if (error || !data) {
-    return NextResponse.json({ error: "Property not found" }, { status: 404, headers: { "Cache-Control": "private, no-store" } });
-  }
-  return NextResponse.json({ property: data }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function PATCH(request) {
@@ -59,16 +70,21 @@ export async function PATCH(request) {
   try {
     staff = await getCurrentStaff();
     assertTier(staff, TIERS.OPS_MANAGER);
-  } catch (err) {
-    // assertTier throws a message written for humans; getCurrentStaff throws on
-    // no session. Both are "you may not do this", not a server fault.
-    return NextResponse.json({ error: err.message || "Not authorised" }, { status: 403 });
+  } catch {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
 
   try {
     const body = await request.json();
-    const { id } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    if (!isPlainObject(body)) {
+      return NextResponse.json({ error: "Request body must be a JSON object" }, { status: 400 });
+    }
+    const id = typeof body.id === "string" ? body.id.trim() : "";
+    if (!id || id.length > 128) return NextResponse.json({ error: "Missing or invalid id" }, { status: 400 });
+
+    if (body.details !== undefined && !isPlainObject(body.details)) {
+      return NextResponse.json({ error: "details must be a plain object" }, { status: 400 });
+    }
 
     const admin = createAdminClient();
     const { data: current, error: loadError } = await admin
@@ -83,7 +99,7 @@ export async function PATCH(request) {
 
     if (titleChangeWouldDriftCanonicalUrl(current, body.title)) {
       const canonicalSlug = canonicalSlugFor(current);
-      await logAction({
+      await logActionStrict({
         staff,
         action: "property.title_change_blocked",
         targetTable: "properties",
@@ -92,7 +108,7 @@ export async function PATCH(request) {
         metadata: {
           canonical_slug: canonicalSlug,
           current_title: current.title,
-          attempted_title: String(body.title),
+          attempted_title: String(body.title).slice(0, 300),
         },
       });
       return NextResponse.json(
@@ -107,19 +123,49 @@ export async function PATCH(request) {
     }
 
     const incoming = body.details || {};
-    const rejected = Object.keys(incoming).filter(isInternal);
-    const safeDetails = Object.fromEntries(
-      Object.entries(incoming).filter(([key]) => !isInternal(key)),
-    );
+    const rejected = [];
+    const safeDetails = {};
+    for (const [key, value] of Object.entries(incoming)) {
+      if (FORBIDDEN_KEYS.has(key) || isInternal(key)) {
+        rejected.push(key);
+        continue;
+      }
+      const boundedVal = typeof value === "string" ? value.slice(0, 10000) : value;
+      Object.defineProperty(safeDetails, key, {
+        value: boundedVal,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
     if (rejected.length) {
-      console.warn(`[MC PROPERTY] Ignored internal keys from client: ${rejected.join(", ")}`);
+      console.warn(`[MC PROPERTY] Ignored internal/disallowed keys from client: ${rejected.join(", ")}`);
     }
 
     // MERGE, never replace. Saving "Commercial" must not wipe "Residential" —
     // the editor deliberately posts one section at a time.
     const patch = { details: { ...(current.details || {}), ...safeDetails } };
-    for (const key of ["title", "location", "seo_title", "seo_description"]) {
-      if (body[key] !== undefined) patch[key] = body[key];
+    if (body.title !== undefined) {
+      if (typeof body.title !== "string" || !body.title.trim()) {
+        return NextResponse.json({ error: "title must be a non-empty string" }, { status: 400 });
+      }
+      patch.title = body.title.trim().slice(0, 300);
+    }
+    if (body.location !== undefined) {
+      if (typeof body.location !== "string") {
+        return NextResponse.json({ error: "location must be a string" }, { status: 400 });
+      }
+      patch.location = body.location.trim().slice(0, 500);
+    }
+
+    // seo_title / seo_description are Airtable-only fields (not Supabase columns);
+    // strip from the Supabase update patch and forward only to Airtable publish.
+    const airtableSeoOverrides = {};
+    if (typeof body.seo_title === "string") {
+      airtableSeoOverrides.seo_title = body.seo_title.trim().slice(0, 200);
+    }
+    if (typeof body.seo_description === "string") {
+      airtableSeoOverrides.seo_description = body.seo_description.trim().slice(0, 500);
     }
 
     const { data: saved, error: saveError } = await admin
@@ -140,9 +186,9 @@ export async function PATCH(request) {
     let warning = null;
     if (current.pipeline_status === "approved") {
       try {
-        const result = await publishPropertyToAirtable(saved);
+        const result = await publishPropertyToAirtable({ ...saved, ...airtableSeoOverrides });
         if (!result.cache?.purged) {
-          warning = `Saved to Airtable, but the public catalogue cache was not cleared: ${result.cache?.detail || "unknown error"}`;
+          warning = "Saved to Airtable, but the public catalogue cache could not be cleared.";
         }
         // Ordinary edits must never rewrite the first-publication URL.
         // If Airtable reports anything else, preserve Supabase's canonical value
@@ -158,7 +204,7 @@ export async function PATCH(request) {
       }
     }
 
-    await logAction({
+    await logActionStrict({
       staff,
       action: "property.section_edit",
       targetTable: "properties",
@@ -178,6 +224,6 @@ export async function PATCH(request) {
     );
   } catch (err) {
     console.error("[MC PROPERTY] PATCH failed:", err);
-    return NextResponse.json({ error: "Could not save the property." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ error: "Property operation failed" }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   }
 }

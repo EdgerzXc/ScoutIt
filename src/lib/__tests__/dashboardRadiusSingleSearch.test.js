@@ -42,7 +42,7 @@ describe("dashboard radius search fires once per mount (A-094)", () => {
     }
   });
 
-  it("Supabase properties read in searchByRadius is bounded", () => {
-    expect(ctx).toMatch(/from\('properties'\)\.select\('\*'\)[^;]*\.limit\(\d+\)/);
+  it("Supabase properties read in searchByRadius is owner-scoped and bounded", () => {
+    expect(ctx).toMatch(/from\('properties'\)\.select\('\*'\)\.eq\('owner_id', currentUser\.id\)[^;]*\.limit\(\d+\)/);
   });
 });

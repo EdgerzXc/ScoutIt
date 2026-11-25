@@ -10,7 +10,7 @@ export const INCIDENT_SCENARIOS = {
     faultedNodeIds: [],
     severity: "LOW",
     badge: "100% HEALTHY",
-    description: "All 131 nodes and 252 edges operate nominally. No active incidents or degraded pathways.",
+    description: `All ${MASTER_FLOW_NODES.length} nodes and ${MASTER_FLOW_EDGES.length} edges operate nominally. No active incidents or degraded pathways.`,
     triagePlaybook: "System operational. Monitor Sentry & MMC telemetry for emerging spikes."
   },
   CMS_BRIDGE_OUTAGE: {

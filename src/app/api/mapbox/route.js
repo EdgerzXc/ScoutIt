@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerMapboxToken } from "@/lib/mapboxToken";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { fetchWithRetry } from "@/lib/fetchWithRetry";
+import { clientIp } from "@/lib/clientIp";
 
 // ═══════════════════════════════════════════════════════════════════════
 // MAPBOX PROXY — the browser never holds a Mapbox token
@@ -38,11 +39,6 @@ const checkRateLimit = createRateLimiter({ limit: 60, windowMs: 60_000 });
 const PROFILES = new Set(["driving", "walking", "cycling", "driving-traffic"]);
 // Mapbox's own ceiling for the Matrix API on these profiles.
 const MAX_COORDINATES = 25;
-
-function clientKey(req) {
-  const fwd = req.headers.get("x-forwarded-for") || "";
-  return fwd.split(",")[0].trim() || req.headers.get("x-real-ip") || "anonymous";
-}
 
 function bad(message, status = 400) {
   return NextResponse.json({ success: false, message }, { status });
@@ -85,7 +81,7 @@ export async function GET(req) {
   const params = new URL(req.url).searchParams;
 
   try {
-    const limit = checkRateLimit(clientKey(req));
+    const limit = checkRateLimit(clientIp(req));
     if (!limit.allowed) {
       return NextResponse.json(
         { success: false, message: "Too many requests" },

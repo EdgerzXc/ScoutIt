@@ -23,8 +23,10 @@ export const metadata = {
 export default async function ContactPage({ searchParams }) {
   const params = await searchParams;
   const initialTopic = params?.topic || params?.type || "general";
+  const initialVertical = typeof params?.vertical === "string" ? params.vertical : "";
 
   const isSupport = initialTopic === "support" || initialTopic === "vip_support";
+  const isEnterprise = initialTopic === "enterprise";
 
   return (
     <>
@@ -38,19 +40,29 @@ export default async function ContactPage({ searchParams }) {
           </div>
           <header className="contact-header">
             <span className="contact-eyebrow">
-              {isSupport ? "DIRECT SUPPORT // HELPDESK & TECHNICAL DESK" : "CONTACT // DIRECT PLATFORM ACCESS"}
+              {isEnterprise
+                ? "ENTERPRISE INTAKE // BUSINESS ONBOARDING"
+                : isSupport
+                ? "DIRECT SUPPORT // HELPDESK & TECHNICAL DESK"
+                : "CONTACT // DIRECT PLATFORM ACCESS"}
             </span>
             <h1 className="contact-title">
-              {isSupport ? "Direct Support & Helpdesk." : "Talk to a person."}
+              {isEnterprise
+                ? "Enterprise & Business Intake."
+                : isSupport
+                ? "Direct Support & Helpdesk."
+                : "Talk to a person."}
             </h1>
             <p className="contact-lede">
-              {isSupport
+              {isEnterprise
+                ? "Multi-site portfolios, F&B concepts, hotels, venues, and licensed brokerages. Share your vertical and operational scope."
+                : isSupport
                 ? "Platform troubleshooting, account assistance, or Pioneer VIP SLA escalations. Directly monitored by engineering and operational staff."
                 : "Questions about a space, joining as a broker or provider, or anything about how ScoutIt works. One of us reads every message."}
             </p>
           </header>
 
-          <ContactClient initialTopic={initialTopic} />
+          <ContactClient initialTopic={initialTopic} initialVertical={initialVertical} />
 
           <aside className="contact-aside">
             <h2 className="contact-aside-title">Faster routes</h2>

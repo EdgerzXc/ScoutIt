@@ -372,8 +372,10 @@ export default function ReviewsClient({ reviews = [], initialError = null }) {
                 </h3>
               </div>
               <button
+                type="button"
+                aria-label="Close dialog"
                 onClick={handleCloseModal}
-                className="text-white/60 hover:text-white transition-colors text-sm"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-white/60 hover:text-white transition-colors text-sm rounded-lg"
               >
                 ✕
               </button>

@@ -4,13 +4,24 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { writeAuditLog } from "@/lib/auditTrail";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 import { notifyUser } from "@/lib/notifications";
 import {
   DISPUTE_HOLD_STATUSES,
   DISPUTE_REASONS,
   INITIAL_DISPUTE_STATUS,
   MAX_DISPUTE_DETAILS,
+  PURGED_BODY,
 } from "@/lib/chatRetention";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkDealDisputeRate = createRateLimiter({
+  limit: 10,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 // ═══════════════════════════════════════════════════════════════
 // FILE A DISPUTE — the missing producer for `deal_disputes` (A-041)
@@ -138,6 +149,15 @@ export async function POST(request, { params }) {
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if (!supabaseAdmin) return json({ error: "Disputes are unavailable" }, 503);
+
+    const rate = checkDealDisputeRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many dispute attempts. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
 
     let body = {};
     try {
@@ -186,46 +206,25 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // One open hold per deal is enough to protect the thread. A second would
-    // extend nothing and gives a party a way to keep re-holding a conversation
-    // indefinitely by filing repeatedly.
-    const { data: existing, error: existingError } = await supabaseAdmin
-      .from("deal_disputes")
-      .select("id, status")
-      .eq("deal_id", dealId)
-      .in("status", DISPUTE_HOLD_STATUSES)
-      .limit(1);
-
-    if (existingError) throw existingError;
-
-    if (existing?.length) {
-      return NextResponse.json({
-        success: true,
-        alreadyHeld: true,
-        disputeId: existing[0].id,
-        message: "This conversation is already under review and is protected from deletion.",
-      });
-    }
-
-    const heldAt = new Date().toISOString();
-
-    const { data: filed, error: insertError } = await supabaseAdmin
-      .from("deal_disputes")
-      .insert({
-        deal_id: dealId,
-        reporter_id: userId,
-        reason,
-        details: details || null,
-        // Neither of the next two is ever read from the caller. A client that
-        // could set `status` could file a dispute that is already resolved —
-        // placing no hold while appearing to have filed one.
-        status: INITIAL_DISPUTE_STATUS,
-        hold_placed_at: heldAt,
-      })
-      .select("id")
-      .single();
+    const { data: filed, error: insertError } = await supabaseAdmin.rpc("file_deal_dispute_hold", {
+      p_deal_id: dealId,
+      p_reporter_id: userId,
+      p_reason: reason,
+      p_details: details || null,
+      p_status: INITIAL_DISPUTE_STATUS,
+      p_hold_statuses: DISPUTE_HOLD_STATUSES,
+      p_purged_body: PURGED_BODY,
+    });
 
     if (insertError) throw insertError;
+    if (!filed) return json({ error: "Deal not found" }, 404);
+    const message = filed.historyPurged
+      ? "Your report is under review. Messages already removed by retention cannot be restored."
+      : "This conversation is under review. The remaining message history is protected.";
+    if (filed.alreadyHeld) {
+      return json({ success: true, alreadyHeld: true, historyPurged: filed.historyPurged, message });
+    }
+    const heldAt = filed.heldAt;
 
     await writeAuditLog(supabaseAdmin, {
       action: "deal_dispute_filed",
@@ -249,29 +248,26 @@ export async function POST(request, { params }) {
       await notifyUser(supabaseAdmin, {
         userId: partyId,
         title: "Conversation placed on retention hold",
-        desc: "A dispute hold has been placed on this transaction thread. Message history is protected from deletion while Trust & Safety reviews the case.",
+        desc: "Trust & Safety is reviewing this transaction. Any remaining message history is protected during the review.",
         notificationType: "deal_dispute",
         forceEmail: true,
       });
     }
 
-    // Record Trust & Safety alert event for Mission Control visibility
-    try {
-      await supabaseAdmin.from("system_events").insert({
-        event_type: "deal_dispute_opened",
-        source: "api/deals/dispute",
-        status: "warning",
-        metadata: { deal_id: dealId, dispute_id: filed.id, reason, hold_placed_at: heldAt },
-      });
-    } catch {
-      // Non-fatal if system_events is unavailable in test mocks
-    }
+    await recordSystemEvent({
+      event: EVENTS.DEAL_DISPUTE_OPENED,
+      severity: "warning",
+      subjectTable: "deal_disputes",
+      subjectId: filed.id,
+      summary: "A deal dispute placed the conversation on hold.",
+      detail: { dealId },
+    });
 
-    return NextResponse.json({
+    return json({
       success: true,
       disputeId: filed.id,
-      message:
-        "Dispute filed. This conversation is now protected from deletion while it is reviewed.",
+      historyPurged: filed.historyPurged,
+      message,
     });
   } catch (error) {
     return NextResponse.json({ error: sanitizeError(error) }, { status: 500 });

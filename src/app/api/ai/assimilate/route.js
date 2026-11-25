@@ -80,7 +80,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { source, payload } = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+    const { source, payload } = body;
 
     if (!payload || !Array.isArray(payload) || payload.length === 0) {
       return NextResponse.json({ error: 'Empty or invalid payload' }, { status: 400 });
@@ -120,10 +124,11 @@ export async function POST(request) {
 
     const drafts = await Promise.all(payload.map(async (item, index) => {
       try {
+        const cleanItemJson = JSON.stringify(item, null, 2).replaceAll('</untrusted_property_data>', '');
         const prompt = `${SCOUTIT_SCHEMA_PROMPT}
 
 <untrusted_property_data>
-${JSON.stringify(item, null, 2)}
+${cleanItemJson}
 </untrusted_property_data>
 
 Return a single JSON object following the ScoutIt Schema exactly.`;
@@ -160,9 +165,22 @@ Return a single JSON object following the ScoutIt Schema exactly.`;
         });
 
         const extracted = JSON.parse(response.text);
+        const mergedDetails = {
+          ...(extracted.details && typeof extracted.details === "object" ? extracted.details : {}),
+          ...(extracted.floor_sqm != null && extracted.details?.floor_sqm === undefined ? { floor_sqm: extracted.floor_sqm } : {}),
+          ...(extracted.lot_sqm != null && extracted.details?.lot_sqm === undefined ? { lot_sqm: extracted.lot_sqm } : {}),
+          ...(extracted.beds != null && extracted.details?.beds === undefined ? { beds: extracted.beds } : {}),
+          ...(extracted.baths != null && extracted.details?.baths === undefined ? { baths: extracted.baths } : {}),
+          ...(extracted.parking != null && extracted.details?.parking === undefined ? { parking: extracted.parking } : {}),
+          ...(extracted.furnishing != null && extracted.details?.furnishing === undefined ? { furnishing: extracted.furnishing } : {}),
+          ...(extracted.tenure != null && extracted.details?.tenure === undefined ? { tenure: extracted.tenure } : {}),
+          ...(extracted.year_built != null && extracted.details?.year_built === undefined ? { year_built: extracted.year_built } : {}),
+          ...(extracted.title_status != null && extracted.details?.title_status === undefined ? { title_status: extracted.title_status } : {}),
+        };
         return {
           id: `draft-${Date.now()}-${index}`,
           ...extracted,
+          details: mergedDetails,
           pipeline_status: 'ai_drafting',
           source
         };

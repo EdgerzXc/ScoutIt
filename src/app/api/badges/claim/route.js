@@ -31,14 +31,25 @@ export async function POST(request) {
     if (!rate.allowed) {
       return NextResponse.json(
         { error: "Too many claim attempts. Please wait a moment before trying again." },
-        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 60) } }
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 60), "Cache-Control": "private, no-store" } }
       );
     }
 
-    const { badgeId } = await request.json();
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Database service unavailable" },
+        { status: 503, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
-    if (!badgeId) {
-      return NextResponse.json({ error: "Missing badgeId" }, { status: 400 });
+    const body = await request.json().catch(() => null);
+    const badgeId = body && typeof body === "object" && !Array.isArray(body) ? body.badgeId : null;
+
+    if (!badgeId || typeof badgeId !== "string") {
+      return NextResponse.json(
+        { error: "Missing badgeId" },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
     }
 
     const badgeDef = BADGE_DEFINITIONS[badgeId];
@@ -152,6 +163,20 @@ export async function POST(request) {
         }
         console.error("[CLAIM API] Failed to insert badge claim:", insertError);
         return NextResponse.json({ error: "Failed to mint badge" }, { status: 500 });
+      }
+      // The count-then-insert above is not atomic. Re-count after the write and
+      // roll back our own row if concurrent claims pushed the cohort past its cap.
+      const { count: afterCount } = await supabaseAdmin
+        .from("user_badges")
+        .select("id", { count: "exact", head: true })
+        .eq("badge_id", badgeId);
+      if ((afterCount || 0) > badgeDef.max_slots) {
+        await supabaseAdmin
+          .from("user_badges")
+          .delete()
+          .eq("user_id", userId)
+          .eq("badge_id", badgeId);
+        return NextResponse.json({ error: "This cohort is sold out" }, { status: 409 });
       }
       newBadge = insertedBadge;
     }

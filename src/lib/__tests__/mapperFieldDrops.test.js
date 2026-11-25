@@ -34,12 +34,11 @@ describe("A-146 — comma-safe numerics never silently null", () => {
     expect(map.STR_Nightly_Rate).toBe(3500);
   });
 
-  it("keeps plain numbers and blanks behaving as before", () => {
+  it("distinguishes blank values from an explicit studio bedroom count", () => {
     const map = reverseMapCategoryFields({ totalGLA: 25000, price: "", bedrooms: 0 });
     expect(map.CM_Total_GLA).toBe(25000);
-    // "" and 0 were null before (Number("")||null, Number(0)||null) — unchanged.
     expect(map.RS_Price).toBeNull();
-    expect(map.Beds).toBeNull();
+    expect(map.Beds).toBe(0);
   });
 
   it("passes Listed_Price through untouched (deliberate raw passthrough)", () => {

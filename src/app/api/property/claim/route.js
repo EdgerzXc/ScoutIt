@@ -34,6 +34,14 @@ import {
   evaluateClaimAutoVerification,
   AUTO_VERIFIER_SYSTEM_ACTOR_ID,
 } from "@/lib/claimAutoVerificationPolicy.mjs";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkClaimRate = createRateLimiter({
+  limit: 15,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 /** Statuses that mean a claim is still in play. */
 const OPEN_STATUSES = [
@@ -187,6 +195,14 @@ export async function POST(request) {
       );
     }
 
+    const rate = checkClaimRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many claim submissions. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const { propertyId, claimedRelationship, agreed, documents, ocrData } = body;
 
@@ -310,19 +326,30 @@ export async function POST(request) {
     }
 
     // Persist attached claim verification documents into property_claim_documents
+    const hasSafeUserDocPath = (rawPath) => {
+      const normalized = String(rawPath || "").trim();
+      return (
+        Boolean(normalized) &&
+        normalized.startsWith(`${userId}/`) &&
+        !normalized.includes("..") &&
+        !normalized.includes("\\")
+      );
+    };
     const validDocs = Array.isArray(documents)
-      ? documents.filter((d) => d && typeof d === "object" && d.storagePath)
+      ? documents.filter(
+          (d) => d && typeof d === "object" && hasSafeUserDocPath(d.storagePath)
+        )
       : [];
 
     if (validDocs.length > 0) {
       const docRows = validDocs.map((d) => ({
         claim_id: claim.id,
         document_type: String(d.documentType || "supporting_document").slice(0, 50),
-        private_storage_path: String(d.storagePath).slice(0, 500),
+        private_storage_path: String(d.storagePath).trim().slice(0, 500),
         original_filename: d.originalFilename ? String(d.originalFilename).slice(0, 255) : null,
         mime_type: d.mimeType ? String(d.mimeType).slice(0, 100) : null,
         file_size_bytes: Number.isFinite(d.fileSizeBytes) ? d.fileSizeBytes : null,
-        malware_scan_status: "clean",
+        malware_scan_status: "pending",
         ocr_status: "pending",
       }));
 
@@ -417,7 +444,21 @@ export async function POST(request) {
           .select("id, status")
           .eq("property_id", property.id);
         activeDeals = (dealsRes?.data || []).filter((d) =>
-          ["open", "handshake_pending", "under_review", "contract_prep"].includes(d?.status)
+          [
+            "open",
+            "handshake_pending",
+            "under_review",
+            "contract_prep",
+            "pending",
+            "invited",
+            "connected",
+            "active",
+            "accepted",
+            "pitching",
+            "reviewing",
+            "viewing_scheduled",
+            "touring",
+          ].includes(d?.status)
         );
       } catch (_dErr) {}
 
@@ -428,7 +469,8 @@ export async function POST(request) {
         documents: validDocs,
         existingClaims: competingClaims,
         activeDeals,
-        ocrData: ocrData || null,
+        // Never trust client-supplied OCR payloads for auto-approval decisions.
+        ocrData: null,
         agreed: agreed === true,
       });
     } catch (evalErr) {
@@ -567,7 +609,6 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
     owner_id: claim.claimant_user_id,
     verified: true,
     lister_relationship: claim.claimed_relationship || "owner",
-    updated_at: nowIso,
   };
 
   if (willExceedCap) {
@@ -600,10 +641,17 @@ export async function approvePropertyClaim(serviceClient, { claimId, reviewerId 
     return { ok: false, error: updateClaimErr.message };
   }
 
-  await serviceClient
+  const { error: propUpdateErr } = await serviceClient
     .from("properties")
     .update(propertyUpdates)
     .eq("id", claim.property_id);
+
+  if (propUpdateErr) {
+    return {
+      ok: false,
+      error: propUpdateErr.message || "Failed to update property ownership",
+    };
+  }
 
   // Promote claimant user_profiles to include 'owner' in active_roles
   const existingRoles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];

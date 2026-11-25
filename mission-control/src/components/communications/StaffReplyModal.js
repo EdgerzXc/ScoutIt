@@ -83,8 +83,10 @@ export default function StaffReplyModal({
             <h3 className="text-base font-medium text-white">Outbound Staff Response</h3>
           </div>
           <button
+            type="button"
+            aria-label="Close dialog"
             onClick={onClose}
-            className="p-1 rounded text-white/60 hover:text-white transition-colors"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-1 rounded text-white/60 hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

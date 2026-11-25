@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { getSession } from "@/lib/authClient";
 import { useModalDialog } from "@/components/ui/useModalDialog";
 import {
   SPATIAL_STYLE_PRESETS,
@@ -53,15 +54,23 @@ export default function SpatialStudioRequestModal({
     setErrorMsg(null);
 
     try {
+      const { data: { session } = {} } = await getSession();
+      const headers = { "Content-Type": "application/json" };
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+      const safeFileName = selectedFile?.name
+        ? selectedFile.name.replace(/[^A-Za-z0-9/_\-.]/g, "_")
+        : null;
+
       const res = await fetch("/api/spatial/request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           propertyId: property?.id || property?.slug,
           stylePreset: selectedPreset,
           notes,
-          fileUrl: selectedFile ? selectedFile.name : null,
-          walletConnects: currentConnects,
+          fileUrl: safeFileName,
         }),
       });
 
@@ -91,7 +100,7 @@ export default function SpatialStudioRequestModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="spatial-modal-title"
-        className="w-full max-w-2xl bg-surface border border-border rounded-2xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 max-h-[90vh] overflow-y-auto text-text-primary"
+        className="w-full max-w-2xl bg-surface border border-border rounded-2xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 max-h-[90dvh] overflow-y-auto text-text-primary"
       >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border-subtle pb-4">
@@ -113,8 +122,9 @@ export default function SpatialStudioRequestModal({
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-text-muted hover:text-text-primary transition rounded-lg hover:bg-surface-alt"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-text-muted hover:text-text-primary transition rounded-lg hover:bg-surface-alt"
             aria-label="Close modal"
           >
             <X size={18} />

@@ -6,6 +6,14 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { DELETE_AFTER_DAYS } from "@/lib/pendingRequestLifecycle";
 import { notifyUser } from "@/lib/notifications";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+const checkUnarchiveRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 // ═══════════════════════════════════════════════════════════════
 // UNARCHIVE A PENDING REQUEST — and reset both clocks
@@ -28,6 +36,13 @@ import { notifyUser } from "@/lib/notifications";
 
 export async function POST(request, { params }) {
   try {
+    const rate = checkUnarchiveRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many unarchive attempts. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     const { id: dealId } = await params;
 
     const userId = await resolveUserId(request);
@@ -62,6 +77,12 @@ export async function POST(request, { params }) {
     if (deal.status !== "pending") {
       return NextResponse.json(
         { error: "This request is no longer open." },
+        { status: 409 },
+      );
+    }
+    if (!deal.archived_at) {
+      return NextResponse.json(
+        { error: "This request is not archived." },
         { status: 409 },
       );
     }

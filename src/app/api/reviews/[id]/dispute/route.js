@@ -3,6 +3,15 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { flagReviewDispute } from "@/lib/scoring/serverBehavioralScoring";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+import { stripAllTags } from "@/lib/sanitize";
+
+export const checkReviewDisputeRate = createRateLimiter({
+  limit: 10,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 /**
  * POST /api/reviews/[id]/dispute
@@ -22,6 +31,14 @@ export async function POST(request, { params }) {
       );
     }
 
+    const rate = checkReviewDisputeRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many dispute requests. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     if (!reviewId || typeof reviewId !== "string") {
       return NextResponse.json(
         { error: "Invalid reviewId parameter." },
@@ -36,8 +53,23 @@ export async function POST(request, { params }) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { reason = "Disputed by party" } = body;
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON payload." },
+        { status: 400 }
+      );
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid JSON payload." },
+        { status: 400 }
+      );
+    }
+    const rawReason = typeof body.reason === "string" ? body.reason : "Disputed by party";
+    const reason = stripAllTags(rawReason.slice(0, 500));
 
     const result = await flagReviewDispute(supabaseAdmin, {
       reviewId,
@@ -48,9 +80,11 @@ export async function POST(request, { params }) {
     if (!result.success) {
       const isNotFound = result.error?.startsWith("REVIEW_NOT_FOUND");
       const isForbidden = result.error?.startsWith("UNAUTHORIZED");
+      const isConflict = result.error?.startsWith("ALREADY_DISPUTED");
       let statusCode = 400;
       if (isNotFound) statusCode = 404;
       else if (isForbidden) statusCode = 403;
+      else if (isConflict) statusCode = 409;
 
       return NextResponse.json({ error: result.error }, { status: statusCode });
     }

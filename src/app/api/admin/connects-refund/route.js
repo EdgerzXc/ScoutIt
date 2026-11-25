@@ -36,8 +36,13 @@ function currentYearMonth() {
 // ── GET /api/admin/connects-refund?userId=… ─────────────────────
 export async function GET(request) {
   try {
-    const gate = await requireAdmin(request, { label: "CONNECTS REFUND" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+    const gate = await requireAdmin(request, { label: "CONNECTS REFUND", minTier: 2 });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
     const userId = new URL(request.url).searchParams.get("userId");
     if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
@@ -226,14 +231,20 @@ export async function GET(request) {
 // ── POST /api/admin/connects-refund ─────────────────────────────
 export async function POST(request) {
   try {
-    const gate = await requireAdmin(request, { label: "CONNECTS REFUND" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+    const gate = await requireAdmin(request, { label: "CONNECTS REFUND", minTier: 2, requireFinance: true });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
-    const parsed = schema.safeParse(await request.json());
+    const rawBody = await request.json().catch(() => null);
+    const parsed = schema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "A userId, a positive amount, and a reason of at least 10 characters are required." },
-        { status: 400 },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } },
       );
     }
     const { userId, amount, reason, refId } = parsed.data;

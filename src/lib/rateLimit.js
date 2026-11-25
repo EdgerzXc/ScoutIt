@@ -44,7 +44,7 @@ export function createRateLimiter({ limit, windowMs, maxKeys = DEFAULT_MAX_TRACK
    * @param {string} key identity to meter (never user-supplied free text)
    * @returns {{allowed: boolean, remaining: number, retryAfterSeconds: number}}
    */
-  return function check(key) {
+  function check(key) {
     const now = Date.now();
     const bucket = buckets.get(key);
 
@@ -66,7 +66,10 @@ export function createRateLimiter({ limit, windowMs, maxKeys = DEFAULT_MAX_TRACK
     }
 
     return { allowed: true, remaining: safeLimit - bucket.count, retryAfterSeconds: 0 };
-  };
+  }
+
+  check.reset = () => buckets.clear();
+  return check;
 }
 
 export default createRateLimiter;

@@ -54,6 +54,7 @@ describe("Phase 1: Critical Security & Functional Breakages Verification", () =>
             buyer_id: "buyer-user-111",
             broker_id: null,
             property_id: "prop-xyz",
+            status: "accepted",
           },
           error: null,
         }),
@@ -113,6 +114,7 @@ describe("Phase 1: Critical Security & Functional Breakages Verification", () =>
             buyer_id: "buyer-user-111",
             broker_id: null,
             property_id: "prop-xyz",
+            status: "accepted",
           },
           error: null,
         }),
@@ -220,7 +222,7 @@ describe("Phase 1: Critical Security & Functional Breakages Verification", () =>
   });
 
   describe("GAP-16: RA 10173 Account Deletion purging CRM & Blocks", () => {
-    it("erases crm_contacts, crm_deal_notes, and user_blocks", async () => {
+    it("erases crm_contacts, crm_deal_notes, and connect_blocks", async () => {
       vi.spyOn(serverAuth, "resolveUserId").mockResolvedValue("user-purge-1");
       const deletedTables = [];
 
@@ -251,7 +253,7 @@ describe("Phase 1: Critical Security & Functional Breakages Verification", () =>
 
       expect(deletedTables).toContain("crm_contacts");
       expect(deletedTables).toContain("crm_deal_notes");
-      expect(deletedTables).toContain("user_blocks");
+      expect(deletedTables).toContain("connect_blocks");
 
       supabaseAdmin.from = originalFrom;
     });

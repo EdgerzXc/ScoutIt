@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { reportError } from "@/lib/reportError";
-import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
-import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
-import { notifyLightModeChanged } from "@/lib/lightMode";
+import { getStoredLiteMode, setLiteMode, LITE_MODE_EVENT } from "@/lib/liteMode";
+import { getStoredSimpleMode, setSimpleMode, SIMPLE_MODE_EVENT } from "@/lib/simpleMode";
+import { notifyLightModeChanged, LIGHT_MODE_EVENT } from "@/lib/lightMode";
 import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import { trackEvent, GA_EVENTS } from "@/lib/analytics";
 import { guideForPath } from "@/lib/pageGuides";
@@ -162,6 +162,14 @@ export default function FloatingToolbox({ showTrigger = true }) {
 
     setMounted(true);
 
+    const syncDisplayPrefs = () => {
+      try {
+        const leg = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
+        setMode(localStorage.getItem("scoutit_display_mode") || leg || "dark");
+      } catch {}
+      setLite(getStoredLiteMode());
+      setSimple(getStoredSimpleMode());
+    };
     function handleOpenDisplay() {
       rememberPanelTrigger();
       setOpen(true);
@@ -172,6 +180,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
     window.__scoutitOpenDisplaySettings = handleOpenDisplay;
     window.addEventListener("scoutit:open-display-settings", handleOpenDisplay);
     window.addEventListener("scoutit:close-display-settings", handleCloseDisplay);
+    window.addEventListener(SIMPLE_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener(LITE_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener(LIGHT_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener("storage", syncDisplayPrefs);
     if (window.__scoutitDisplaySettingsRequested) {
       delete window.__scoutitDisplaySettingsRequested;
       handleOpenDisplay();
@@ -180,6 +192,10 @@ export default function FloatingToolbox({ showTrigger = true }) {
     return () => {
       window.removeEventListener("scoutit:open-display-settings", handleOpenDisplay);
       window.removeEventListener("scoutit:close-display-settings", handleCloseDisplay);
+      window.removeEventListener(SIMPLE_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener(LITE_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener(LIGHT_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener("storage", syncDisplayPrefs);
       if (window.__scoutitOpenDisplaySettings === handleOpenDisplay) {
         delete window.__scoutitOpenDisplaySettings;
       }

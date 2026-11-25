@@ -148,7 +148,7 @@ export default async function VerificationPage() {
             />
           </label>
           <div className="sm:col-span-2">
-            <button className="px-4 py-2 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors">
+            <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors">
               Add to queue
             </button>
           </div>
@@ -205,7 +205,7 @@ export default async function VerificationPage() {
                     placeholder="Note (optional)"
                     className="flex-1 min-w-0 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
                   />
-                  <button className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 border border-emerald-400/20 transition-colors whitespace-nowrap">
+                  <button type="submit" className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 border border-emerald-400/20 transition-colors whitespace-nowrap">
                     <ShieldCheck className="w-4 h-4" />
                     {decisionButtonLabel("approved")}
                   </button>
@@ -218,7 +218,7 @@ export default async function VerificationPage() {
                     placeholder="Reason to reject"
                     className="flex-1 min-w-0 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/70"
                   />
-                  <button className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors whitespace-nowrap">
+                  <button type="submit" className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors whitespace-nowrap">
                     <ShieldX className="w-4 h-4" />
                     {decisionButtonLabel("rejected")}
                   </button>

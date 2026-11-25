@@ -3,6 +3,19 @@
 import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateRefundRequest, validateGrantRequest } from "@/lib/walletPolicy.mjs";
+import { notifyUser } from "@/lib/notifications";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isRpcMissingError(err) {
+  const code = String(err?.code || "");
+  const msg = String(err?.message || "");
+  return (
+    code === "42883" ||
+    code === "PGRST202" ||
+    /could not find the function/i.test(msg)
+  );
+}
 
 function currentYearMonth() {
   const d = new Date();
@@ -11,7 +24,7 @@ function currentYearMonth() {
 
 export async function lookupUserWallet({ query }) {
   const staff = await getCurrentStaff();
-  assertTier(staff, TIERS.AGENT);
+  assertTier(staff, TIERS.OPS_MANAGER);
 
   if (!query || typeof query !== "string" || !query.trim()) {
     return { error: "Please provide a user ID or email address to search." };
@@ -23,35 +36,68 @@ export async function lookupUserWallet({ query }) {
   // Try finding user profile
   let targetUserId = cleanQuery;
   let userProfile = null;
+  let resolvedEmail = null;
 
   // UUID pattern
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanQuery);
 
   if (!isUuid) {
-    // Search by email or display_name (strip PostgREST filter delimiters first)
-    const safeSearch = cleanQuery.replace(/[(),%*\\]/g, "").trim();
-    if (!safeSearch) {
-      return { error: "Please provide a valid user ID, email, or name to search." };
+    // Email lookup via Supabase Auth admin when query looks like email
+    if (cleanQuery.includes("@") && typeof admin.auth?.admin?.listUsers === "function") {
+      const targetEmail = cleanQuery.toLowerCase();
+      for (let page = 1; page <= 5 && !userProfile; page += 1) {
+        const { data: authData } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+        const users = authData?.users || [];
+        const matched = users.find((u) => u.email?.toLowerCase() === targetEmail);
+        if (matched) {
+          targetUserId = matched.id;
+          resolvedEmail = matched.email || null;
+          const { data: profile } = await admin
+            .from("user_profiles")
+            .select("id, display_name, role, primary_mode, active_roles, subscription_tier")
+            .eq("id", targetUserId)
+            .maybeSingle();
+          userProfile = profile ? { ...profile, email: resolvedEmail } : { id: targetUserId, email: resolvedEmail };
+          break;
+        }
+        if (users.length < 1000) break;
+      }
     }
-    const { data: profiles } = await admin
-      .from("user_profiles")
-      .select("id, display_name, role, primary_mode, active_roles, subscription_tier, email")
-      .or(`email.ilike.%${safeSearch}%,display_name.ilike.%${safeSearch}%`)
-      .limit(1);
 
-    if (profiles && profiles.length > 0) {
-      userProfile = profiles[0];
-      targetUserId = userProfile.id;
-    } else {
-      return { error: `No user profile found matching "${cleanQuery}".` };
+    if (!userProfile) {
+      // Search by display_name (strip PostgREST filter delimiters first; user_profiles has no email column)
+      const safeSearch = cleanQuery.replace(/[(),%*\\]/g, "").trim();
+      if (!safeSearch) {
+        return { error: "Please provide a valid user ID, email, or name to search." };
+      }
+      const { data: profiles } = await admin
+        .from("user_profiles")
+        .select("id, display_name, role, primary_mode, active_roles, subscription_tier")
+        .ilike("display_name", `%${safeSearch}%`)
+        .limit(1);
+
+      if (profiles && profiles.length > 0) {
+        userProfile = profiles[0];
+        targetUserId = userProfile.id;
+      } else {
+        return { error: `No user profile found matching "${cleanQuery}".` };
+      }
     }
   } else {
     const { data: profile } = await admin
       .from("user_profiles")
-      .select("id, display_name, role, primary_mode, active_roles, subscription_tier, email")
+      .select("id, display_name, role, primary_mode, active_roles, subscription_tier")
       .eq("id", targetUserId)
       .maybeSingle();
-    userProfile = profile;
+    if (typeof admin.auth?.admin?.getUserById === "function") {
+      try {
+        const { data: authRes } = await admin.auth.admin.getUserById(targetUserId);
+        resolvedEmail = authRes?.user?.email || null;
+      } catch {
+        // Non-fatal in mock/preview
+      }
+    }
+    userProfile = profile ? { ...profile, email: resolvedEmail } : null;
   }
 
   const thisMonth = currentYearMonth();
@@ -141,232 +187,329 @@ export async function refundConnectsAction({ userId, amount, reason, refId = nul
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
 
-  const validation = validateRefundRequest({ amount, reason });
+  if (!staff.is_finance) {
+    return { error: "Finance authorization (is_finance) is required to issue Connects refunds." };
+  }
+  if (typeof userId !== "string" || !UUID_RE.test(userId.trim())) {
+    return { error: "A valid target user UUID is required." };
+  }
+  const cleanUserId = userId.trim();
+  const cleanReason = typeof reason === "string" ? reason.trim() : reason;
+  const cleanRefId = typeof refId === "string" && refId.trim() ? refId.trim().slice(0, 128) : null;
+
+  const validation = validateRefundRequest({ amount, reason: cleanReason });
   if (!validation.valid) {
     return { error: validation.error };
   }
 
   const admin = createAdminClient();
 
-  // Try calling canonical or legacy refund RPC first
+  // Fail closed if an unresolved reconciliation hold is active
+  const { data: activeHolds, error: holdsErr } = await admin
+    .from("connect_backfill_holds")
+    .select("id")
+    .eq("user_id", cleanUserId)
+    .eq("resolved", false)
+    .limit(1);
+  if (holdsErr) {
+    return { error: "Failed to verify wallet hold status." };
+  }
+  if (activeHolds && activeHolds.length > 0) {
+    return { error: "Refund blocked: user balance is held pending reconciliation resolution." };
+  }
+
+  // Idempotency check when caller supplies a reference ID
+  if (cleanRefId) {
+    const [{ data: existingCanonical, error: canDupErr }, { data: existingLegacy, error: legDupErr }] = await Promise.all([
+      admin
+        .from("connect_wallet_ledger")
+        .select("id")
+        .eq("user_id", cleanUserId)
+        .eq("reference_id", cleanRefId)
+        .eq("transaction_type", "refund")
+        .limit(1),
+      admin
+        .from("connect_transactions")
+        .select("id")
+        .eq("user_id", cleanUserId)
+        .eq("ref_id", cleanRefId)
+        .eq("kind", "refund")
+        .limit(1),
+    ]);
+    if (canDupErr || legDupErr) {
+      return { error: "Failed to verify refund idempotency." };
+    }
+    if ((existingCanonical && existingCanonical.length > 0) || (existingLegacy && existingLegacy.length > 0)) {
+      return { error: "Duplicate refund blocked: this reference ID has already been refunded." };
+    }
+  }
+
   let refundSuccess = false;
   let transactionId = null;
 
-  try {
-    const { data: rpcData, error: rpcErr } = await admin.rpc("refund_connects_system_error_canonical", {
-      p_user_id: userId,
+  const { data: rpcData, error: rpcErr } = await admin.rpc("refund_connects_system_error_canonical", {
+    p_user_id: cleanUserId,
+    p_amount: amount,
+    p_reason: cleanReason,
+    p_staff_id: staff.id,
+    p_ref_id: cleanRefId,
+  });
+
+  if (!rpcErr) {
+    refundSuccess = true;
+    transactionId = Array.isArray(rpcData) ? rpcData[0]?.transaction_id : rpcData?.transaction_id;
+  } else {
+    const msg = String(rpcErr.message || "");
+    if (msg.includes("WALLET_HOLD_ACTIVE")) {
+      return { error: "Refund blocked: user balance is held pending reconciliation resolution." };
+    }
+    if (msg.includes("WALLET_NOT_FOUND")) {
+      return { error: "Failed to credit refund: user has no established wallet." };
+    }
+    if (!isRpcMissingError(rpcErr)) {
+      return { error: "Refund RPC failed. No Connects were credited." };
+    }
+
+    // Only fall back to legacy atomic RPC when canonical RPC function is not deployed
+    const { data: rpcLegacy, error: legacyErr } = await admin.rpc("refund_connects_system_error", {
+      p_user_id: cleanUserId,
       p_amount: amount,
-      p_reason: reason,
+      p_reason: cleanReason,
       p_staff_id: staff.id,
-      p_ref_id: refId,
+      p_ref_id: cleanRefId,
     });
 
-    if (!rpcErr) {
-      refundSuccess = true;
-      transactionId = Array.isArray(rpcData) ? rpcData[0]?.transaction_id : rpcData?.transaction_id;
-    }
-  } catch (_e) {
-    // Fall back to direct ledger update if RPC is missing
-  }
-
-  if (!refundSuccess) {
-    try {
-      const { data: rpcLegacy, error: legacyErr } = await admin.rpc("refund_connects_system_error", {
-        p_user_id: userId,
-        p_amount: amount,
-        p_reason: reason,
-        p_staff_id: staff.id,
-        p_ref_id: refId,
-      });
-
-      if (!legacyErr) {
-        refundSuccess = true;
-        transactionId = Array.isArray(rpcLegacy) ? rpcLegacy[0]?.transaction_id : rpcLegacy?.transaction_id;
+    if (legacyErr) {
+      const legacyMsg = String(legacyErr.message || "");
+      if (legacyMsg.includes("WALLET_HOLD_ACTIVE")) {
+        return { error: "Refund blocked: user balance is held pending reconciliation resolution." };
       }
-    } catch (_e) {
-      // Direct write fallback
-    }
-  }
-
-  if (!refundSuccess) {
-    // Direct credit to user_connect_accounts or connect_balances
-    const { data: acct } = await admin
-      .from("user_connect_accounts")
-      .select("purchased_balance")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (acct) {
-      await admin
-        .from("user_connect_accounts")
-        .update({
-          purchased_balance: (acct.purchased_balance || 0) + amount,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", userId);
-
-      const { data: newTx } = await admin
-        .from("connect_wallet_ledger")
-        .insert({
-          user_id: userId,
-          role: "all",
-          amount,
-          transaction_type: "refund",
-          source: "system_error_refund",
-          reason,
-          reference_id: refId || `REF-${Date.now()}`,
-        })
-        .select("id")
-        .single();
-      transactionId = newTx?.id;
-      refundSuccess = true;
-    } else {
-      // Legacy table
-      const { data: leg } = await admin
-        .from("connect_balances")
-        .select("purchased_balance, total_balance")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (leg) {
-        await admin
-          .from("connect_balances")
-          .update({
-            purchased_balance: (leg.purchased_balance || 0) + amount,
-            total_balance: (leg.total_balance || 0) + amount,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", userId);
-
-        const { data: legTx } = await admin
-          .from("connect_transactions")
-          .insert({
-            user_id: userId,
-            kind: "refund",
-            bucket: "purchased",
-            amount,
-            reason,
-            ref_type: "system_error_refund",
-            ref_id: refId || `REF-${Date.now()}`,
-          })
-          .select("id")
-          .single();
-        transactionId = legTx?.id;
-        refundSuccess = true;
+      if (legacyMsg.includes("WALLET_NOT_FOUND")) {
+        return { error: "Failed to credit refund: user has no established wallet." };
       }
+      return { error: "Failed to credit refund: atomic refund RPC failed." };
     }
+
+    refundSuccess = true;
+    transactionId = Array.isArray(rpcLegacy) ? rpcLegacy[0]?.transaction_id : rpcLegacy?.transaction_id;
   }
 
   if (!refundSuccess) {
     return { error: "Failed to credit refund: wallet not found or database error." };
   }
 
-  // GAP-21: Notify user
-  try {
-    await admin.from("notifications").insert({
-      user_id: userId,
-      title: "Connects Refunded",
-      message: `${amount} Connects have been credited back to your account: ${reason}`,
-      type: "connects_refund",
-      created_at: new Date().toISOString(),
-    });
-  } catch (_notifErr) {
-    // Non-blocking notification
-  }
+  // GAP-21: Notify user via canonical user_notifications table
+  await notifyUser(admin, {
+    userId: cleanUserId,
+    title: "Connects Refunded",
+    desc: `${amount} Connects have been credited back to your account: ${cleanReason}`,
+    notificationType: "connects_refund",
+  });
 
   // Immutable audit write
   await logActionStrict({
     staff,
     action: "STAFF_CONNECTS_REFUND",
     targetTable: "connect_wallet_ledger",
-    targetId: transactionId || userId,
-    reason,
+    targetId: transactionId || cleanUserId,
+    reason: cleanReason,
     metadata: {
-      user_id: userId,
+      user_id: cleanUserId,
       amount,
-      ref_id: refId,
+      ref_id: cleanRefId,
     },
   });
 
   return { success: true, amount, transactionId };
 }
 
-export async function grantDiscretionaryConnectsAction({ userId, amount, reason, role = "seeker" }) {
+export async function grantDiscretionaryConnectsAction({ userId, amount, reason, role = "seeker", refId = null }) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.SUPER_ADMIN);
 
-  const validation = validateGrantRequest({ amount, reason });
+  if (!staff.is_finance) {
+    return { error: "Finance authorization (is_finance) is required to issue discretionary Connects grants." };
+  }
+  if (typeof userId !== "string" || !UUID_RE.test(userId.trim())) {
+    return { error: "A valid target user UUID is required." };
+  }
+  const cleanUserId = userId.trim();
+  const cleanReason = typeof reason === "string" ? reason.trim() : reason;
+  const cleanRefId = typeof refId === "string" && refId.trim() ? refId.trim().slice(0, 128) : null;
+
+  const validation = validateGrantRequest({ amount, reason: cleanReason, role });
   if (!validation.valid) {
     return { error: validation.error };
   }
 
   const admin = createAdminClient();
 
+  // Fail closed if an unresolved reconciliation hold is active
+  const { data: activeHolds, error: holdsErr } = await admin
+    .from("connect_backfill_holds")
+    .select("id")
+    .eq("user_id", cleanUserId)
+    .eq("resolved", false)
+    .limit(1);
+  if (holdsErr) {
+    return { error: "Failed to verify wallet hold status." };
+  }
+  if (activeHolds && activeHolds.length > 0) {
+    return { error: "Grant blocked: user balance is held pending reconciliation resolution." };
+  }
+
+  if (cleanRefId) {
+    const [{ data: existingCanonical, error: canDupErr }, { data: existingLegacy, error: legDupErr }] = await Promise.all([
+      admin
+        .from("connect_wallet_ledger")
+        .select("id")
+        .eq("user_id", cleanUserId)
+        .eq("reference_id", cleanRefId)
+        .eq("transaction_type", "grant")
+        .limit(1),
+      admin
+        .from("connect_transactions")
+        .select("id")
+        .eq("user_id", cleanUserId)
+        .eq("ref_id", cleanRefId)
+        .eq("kind", "grant")
+        .limit(1),
+    ]);
+    if (canDupErr || legDupErr) {
+      return { error: "Failed to verify grant idempotency." };
+    }
+    if ((existingCanonical && existingCanonical.length > 0) || (existingLegacy && existingLegacy.length > 0)) {
+      return { error: "Duplicate grant blocked: this reference ID has already been granted." };
+    }
+  }
+
   // Update reward_balance in user_connect_accounts
-  const { data: acct } = await admin
+  const { data: acct, error: acctErr } = await admin
     .from("user_connect_accounts")
-    .select("reward_balance")
-    .eq("user_id", userId)
+    .select("purchased_balance, reward_balance")
+    .eq("user_id", cleanUserId)
     .maybeSingle();
 
+  if (acctErr) {
+    return { error: "Failed to read user connect account." };
+  }
+
   let txId = null;
+  const referenceId = cleanRefId || `GRANT-${staff.id.slice(0, 8)}-${Date.now()}`;
 
   if (acct) {
-    await admin
+    const prevPurchased = acct.purchased_balance ?? 0;
+    const prevBalance = acct.reward_balance ?? 0;
+    const nextBalance = prevBalance + amount;
+    const { data: updatedAcct, error: updErr } = await admin
       .from("user_connect_accounts")
       .update({
-        reward_balance: (acct.reward_balance || 0) + amount,
+        reward_balance: nextBalance,
         updated_at: new Date().toISOString(),
       })
-      .eq("user_id", userId);
+      .eq("user_id", cleanUserId)
+      .eq("reward_balance", prevBalance)
+      .select("user_id")
+      .maybeSingle();
 
-    const { data: tx } = await admin
+    if (updErr || !updatedAcct) {
+      return { error: "Failed to update canonical wallet balance (concurrent modification or DB error)." };
+    }
+
+    const { data: tx, error: ledgerErr } = await admin
       .from("connect_wallet_ledger")
       .insert({
-        user_id: userId,
+        user_id: cleanUserId,
         role,
         amount,
         transaction_type: "grant",
         source: "staff_discretionary_grant",
-        reason,
-        reference_id: `GRANT-${staff.id.slice(0, 8)}-${Date.now()}`,
+        reason: cleanReason,
+        reference_id: referenceId,
+        before_granted: 0,
+        after_granted: 0,
+        before_purchased: prevPurchased,
+        after_purchased: prevPurchased,
+        before_reward: prevBalance,
+        after_reward: nextBalance,
       })
       .select("id")
       .single();
-    txId = tx?.id;
+
+    if (ledgerErr || !tx?.id) {
+      await admin
+        .from("user_connect_accounts")
+        .update({
+          reward_balance: prevBalance,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", cleanUserId)
+        .eq("reward_balance", nextBalance);
+      return { error: "Failed to record canonical ledger entry; wallet balance was rolled back." };
+    }
+    txId = tx.id;
   } else {
-    // Fallback legacy table
-    const { data: leg } = await admin
+    // Fallback legacy table when canonical account row does not exist
+    const { data: leg, error: legErr } = await admin
       .from("connect_balances")
       .select("earned_balance, total_balance")
-      .eq("user_id", userId)
+      .eq("user_id", cleanUserId)
       .maybeSingle();
 
-    if (leg) {
+    if (legErr) {
+      return { error: "Failed to read legacy wallet balance." };
+    }
+    if (!leg) {
+      return { error: "Failed to grant Connects: user has no initialized wallet row." };
+    }
+
+    const prevEarned = leg.earned_balance ?? 0;
+    const prevTotal = leg.total_balance ?? 0;
+    const nextEarned = prevEarned + amount;
+    const nextTotal = prevTotal + amount;
+    const { data: updatedLeg, error: legUpdErr } = await admin
+      .from("connect_balances")
+      .update({
+        earned_balance: nextEarned,
+        total_balance: nextTotal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", cleanUserId)
+      .eq("total_balance", prevTotal)
+      .select("user_id")
+      .maybeSingle();
+
+    if (legUpdErr || !updatedLeg) {
+      return { error: "Failed to update legacy wallet balance (concurrent modification or DB error)." };
+    }
+
+    const { data: legTx, error: legTxErr } = await admin
+      .from("connect_transactions")
+      .insert({
+        user_id: cleanUserId,
+        kind: "grant",
+        bucket: "earned",
+        amount,
+        reason: cleanReason,
+        ref_type: "staff_discretionary_grant",
+        ref_id: referenceId,
+      })
+      .select("id")
+      .single();
+
+    if (legTxErr || !legTx?.id) {
       await admin
         .from("connect_balances")
         .update({
-          earned_balance: (leg.earned_balance || 0) + amount,
-          total_balance: (leg.total_balance || 0) + amount,
+          earned_balance: prevEarned,
+          total_balance: prevTotal,
           updated_at: new Date().toISOString(),
         })
-        .eq("user_id", userId);
-
-      const { data: legTx } = await admin
-        .from("connect_transactions")
-        .insert({
-          user_id: userId,
-          kind: "grant",
-          bucket: "earned",
-          amount,
-          reason,
-          ref_type: "staff_discretionary_grant",
-          ref_id: `GRANT-${staff.id.slice(0, 8)}-${Date.now()}`,
-        })
-        .select("id")
-        .single();
-      txId = legTx?.id;
+        .eq("user_id", cleanUserId)
+        .eq("total_balance", nextTotal);
+      return { error: "Failed to record legacy ledger entry; wallet balance was rolled back." };
     }
+    txId = legTx.id;
   }
 
   // Audit
@@ -374,12 +517,13 @@ export async function grantDiscretionaryConnectsAction({ userId, amount, reason,
     staff,
     action: "STAFF_CONNECTS_DISCRETIONARY_GRANT",
     targetTable: "connect_wallet_ledger",
-    targetId: txId || userId,
-    reason,
+    targetId: txId || cleanUserId,
+    reason: cleanReason,
     metadata: {
-      user_id: userId,
+      user_id: cleanUserId,
       amount,
       role,
+      reference_id: referenceId,
     },
   });
 

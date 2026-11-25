@@ -53,6 +53,7 @@ export default function IngestPanel({ property }) {
       {/* Step 1: hand off to AI */}
       <div className="flex flex-wrap items-center gap-2">
         <button
+          type="button"
           onClick={copyPrompt}
           className="flex items-center gap-2 px-3 py-2 bg-black/50 hover:bg-white/5 border border-white/10 rounded-lg text-xs text-white/80 transition-colors"
         >
@@ -85,6 +86,7 @@ export default function IngestPanel({ property }) {
         />
         <div className="flex items-center gap-3">
           <button
+            type="submit"
             disabled={saving}
             className="flex items-center gap-2 px-3 py-2 bg-[#E8AE3C] text-black rounded-lg text-xs font-medium hover:bg-[#F7C64E] transition-colors disabled:opacity-50"
           >
@@ -107,7 +109,7 @@ export default function IngestPanel({ property }) {
           placeholder="Media / Spatial Vault URL"
           className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-white/70"
         />
-        <button className="px-3 py-1.5 text-xs text-white/70 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors whitespace-nowrap">
+        <button type="submit" className="px-3 py-1.5 text-xs text-white/70 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors whitespace-nowrap">
           Save link
         </button>
       </form>

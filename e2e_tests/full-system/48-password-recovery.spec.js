@@ -1,0 +1,69 @@
+import { expect, test } from "@playwright/test";
+
+test("accepts a valid recovery code after an expired attempt without persisting a session", async ({ page }) => {
+  const email = "recovery@example.com";
+  const password = "A fresh password 38!";
+  const user = { id: "00000000-0000-4000-8000-000000000001", email, aud: "authenticated" };
+  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+  const claims = Buffer.from(JSON.stringify({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600 })).toString("base64url");
+  const requests = [];
+  let verifyAttempts = 0;
+
+  await page.route("**/auth/v1/**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    const method = request.method();
+    const headers = {
+      "access-control-allow-origin": "*",
+      "access-control-allow-headers": "authorization, apikey, content-type, x-client-info, x-supabase-api-version",
+      "access-control-allow-methods": "POST, PUT, OPTIONS",
+      "access-control-expose-headers": "x-supabase-api-version",
+      "x-supabase-api-version": "2024-01-01",
+    };
+    if (method === "OPTIONS") return route.fulfill({ status: 204, headers });
+
+    if (path.endsWith("/verify") && method === "POST") {
+      requests.push({ path, body: request.postDataJSON() });
+      verifyAttempts += 1;
+      if (verifyAttempts === 1) {
+        return route.fulfill({ status: 403, headers, json: { code: "otp_expired", message: "expired" } });
+      }
+      return route.fulfill({ headers, json: {
+        access_token: `${header}.${claims}.fixture`,
+        refresh_token: "fixture-refresh-token",
+        token_type: "bearer",
+        expires_in: 3600,
+        user,
+      } });
+    }
+    if (path.endsWith("/user") && method === "PUT") {
+      requests.push({ path, body: request.postDataJSON() });
+      return route.fulfill({ headers, json: user });
+    }
+    if (path.endsWith("/logout") && method === "POST") {
+      requests.push({ path });
+      return route.fulfill({ status: 204, headers });
+    }
+    return route.fulfill({ status: 401, headers, json: { code: "session_not_found" } });
+  });
+
+  await page.goto("/reset-password?step=code");
+  await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Reset code").fill("123456");
+  await page.getByLabel("New password", { exact: true }).fill(password);
+  await page.getByLabel("Confirm new password").fill(password);
+  await page.getByRole("button", { name: "Save new password" }).click();
+  await expect(page.getByText("This code is invalid or has expired. Request a new code and try again.", { exact: true })).toBeVisible();
+
+  await page.getByLabel("Reset code").fill("654321");
+  await page.getByRole("button", { name: "Save new password" }).click();
+  await expect(page.getByRole("heading", { name: "Password updated" })).toBeVisible();
+  expect(requests).toEqual([
+    { path: "/auth/v1/verify", body: expect.objectContaining({ email, token: "123456", type: "recovery" }) },
+    { path: "/auth/v1/verify", body: expect.objectContaining({ email, token: "654321", type: "recovery" }) },
+    { path: "/auth/v1/user", body: expect.objectContaining({ password }) },
+    { path: "/auth/v1/logout" },
+  ]);
+  expect(await page.evaluate(() => Object.keys(localStorage).filter(key => key.includes("auth-token") || key.includes("password-recovery")))).toEqual([]);
+});

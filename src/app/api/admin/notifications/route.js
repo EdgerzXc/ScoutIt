@@ -89,20 +89,58 @@ export async function GET(request) {
  */
 export async function POST(request) {
   try {
-    const gate = await requireAdmin(request, { label: "ADMIN NOTIFICATIONS" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
-
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server configuration error: missing service client" }, { status: 500 });
+    const gate = await requireAdmin(request, { label: "ADMIN NOTIFICATIONS", minTier: 2 });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
     }
 
-    const body = await request.json();
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Server configuration error: missing service client" },
+        { status: 500, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
     const parsed = adminNotificationSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid input data" }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid input data" },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
     }
 
     const { targetType, targetRole, targetUserIds, title, message, notificationType, icon, link, forceEmail } = parsed.data;
+    if (link && typeof link === "string" && link.trim()) {
+      const trimmedLink = link.trim();
+      const isRelativePath = trimmedLink.startsWith("/") && !trimmedLink.startsWith("//");
+      let isTrustedHttps = false;
+      if (!isRelativePath) {
+        try {
+          const parsedUrl = new URL(trimmedLink);
+          isTrustedHttps =
+            parsedUrl.protocol === "https:" &&
+            ["scoutit.space", "www.scoutit.space"].includes(parsedUrl.hostname.toLowerCase());
+        } catch {
+          isTrustedHttps = false;
+        }
+      }
+      if (!isRelativePath && !isTrustedHttps) {
+        return NextResponse.json(
+          { error: "Notification link must be a relative path or scoutit.space HTTPS URL." },
+          { status: 400, headers: { "Cache-Control": "private, no-store" } }
+        );
+      }
+    }
 
     let recipientIds = [];
 

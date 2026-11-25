@@ -4,15 +4,47 @@ import ScoutItImageMark from '@/components/brand/ScoutItImageMark';
 
 export const runtime = 'edge';
 
+const ALLOWED_OG_IMAGE_HOSTS = new Set([
+  'dl.airtable.com',
+  'v5.airtableusercontent.com',
+  'scoutit.space',
+  'www.scoutit.space',
+]);
+
+function isAllowedOgImageUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string' || rawUrl.length > 2000) return null;
+  try {
+    const parsed = new URL(rawUrl.trim());
+    if (parsed.protocol !== 'https:') return null;
+    const host = parsed.hostname.toLowerCase();
+    const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+      ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.toLowerCase()
+      : null;
+    if (
+      ALLOWED_OG_IMAGE_HOSTS.has(host) ||
+      host.endsWith('.supabase.co') ||
+      (supabaseHost && host === supabaseHost)
+    ) {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    // Dynamic parameters
-    const title = searchParams.get('title') || 'Premium Real Estate Intelligence';
-    const category = searchParams.get('category') || 'Commercial Space';
-    const sqm = searchParams.get('sqm') || '';
-    const image = searchParams.get('image');
+    // Bounded parameters & SSRF-safe HTTPS allowlisted image source
+    const rawTitle = (searchParams.get('title') || 'Premium Real Estate Intelligence').replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
+    const rawCategory = (searchParams.get('category') || 'Commercial Space').replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
+    const rawSqm = (searchParams.get('sqm') || '').replace(/[\u0000-\u001f\u007f]/g, '').trim();
+    const title = rawTitle.slice(0, 140) || 'Premium Real Estate Intelligence';
+    const category = rawCategory.slice(0, 48) || 'Commercial Space';
+    const sqm = /^[0-9.,+\-\s]{1,24}$/.test(rawSqm) ? rawSqm : '';
+    const image = isAllowedOgImageUrl(searchParams.get('image'));
 
     // ScoutIt aesthetic: 95% black (#0d0d0d), 5% gold (#E8AE3C)
     return new ImageResponse(

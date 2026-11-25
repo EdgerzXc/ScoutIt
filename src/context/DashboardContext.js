@@ -58,6 +58,7 @@ export const DEFAULT_CONTEXT_VALUE = {
   identityResolved: false,
   isLoading: false,
   inventoryError: false,
+  inventoryStats: null,
   refetchInventory: () => {},
   searchByRadius: async () => {},
   DEFAULT_MAP_CENTER,
@@ -199,14 +200,19 @@ export function DashboardProvider({ children }) {
   const [connects, setConnects] = useState(5);
   const [currentUser, setCurrentUser] = useState(null);
   const [savedIds, setSavedIds] = useState([]);
+  const [accountSaves, setAccountSaves] = useState(null);
   const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [inventoryError, setInventoryError] = useState(false);
+  const [inventorySnapshot, setInventorySnapshot] = useState(null);
+  const inventoryStats = inventorySnapshot?.ownerId === currentUser?.id ? inventorySnapshot?.stats ?? null : null;
   const notificationsApiRef = useRef(null);
   // Which identity the provider has already resolved. Auth events that do not
   // change it are ignored, which is what stops the re-verification loop.
   const resolvedUserIdRef = useRef(null);
   const fetchLiveIntelligenceRef = useRef(null);
+  const publishingIdsRef = useRef(new Set());
+  const closingIdsRef = useRef(new Set());
   // Open lister-declaration prompt (§50 · W2). null = closed. Holds the
   // promise resolver so publishListing can await the user's answer.
   const [declarationPrompt, setDeclarationPrompt] = useState(null);
@@ -339,10 +345,7 @@ export function DashboardProvider({ children }) {
 
     // Local Board -> account merge is now an explicit, idempotent action the
     // user triggers from /wishlist ("Bring your N saved spaces into your
-    // account"), backed by /api/wishlist/merge. The old silent auto-insert on
-    // every login was removed: it ran a naive insert with no de-dup guard
-    // (saved_intel has no unique(user_id, property_id) constraint), so it could
-    // accumulate duplicate rows.
+    // account"), backed by /api/wishlist/merge.
     fetchNotifications(authUser.id);
     return true;
   };
@@ -477,7 +480,7 @@ export function DashboardProvider({ children }) {
             })
           : null;
 
-        if (!token && mockUser?.id !== currentUser.id) return;
+        if (token ? session.user?.id !== currentUser.id : mockUser?.id !== currentUser.id) return;
 
         // These four reads do not depend on each other, but they used to be
         // awaited one after the next: inventory, then the Airtable CMS proxy,
@@ -497,21 +500,24 @@ export function DashboardProvider({ children }) {
         // the same rows at the same moment, and used to get its own request.
         const dealsPromise = settled(loadDeals({ mockUserId: mockOwnerId || null }));
         const savedIntelPromise = token
-          ? settled(supabase.from('saved_intel').select('*'))
-          : Promise.resolve({ data: [], error: null });
+          ? settled(authedFetch('/api/wishlist/saved').then((res) => res.ok ? res.json() : null))
+          : Promise.resolve(null);
 
         // 1. Fetch the signed-in owner's private dossiers through the
         // authenticated server boundary. This works for real sessions and the
         // localhost-only read fixture without exposing a direct table query.
         let supabaseListings = [];
         const inventoryRes = await inventoryPromise;
-        if (inventoryRes?.ok) {
-          const inventoryData = await inventoryRes.json();
+        const inventoryData = inventoryRes?.ok ? await inventoryRes.json().catch(() => null) : null;
+        if (cancelled) return;
+        if (Array.isArray(inventoryData?.properties)) {
           supabaseListings = mapSupabaseProperties(inventoryData.properties || []);
-          if (!cancelled) setInventoryError(false);
+          setInventoryError(false);
+          setInventorySnapshot({ ownerId: currentUser.id, stats: inventoryData.stats ?? null });
         } else {
           console.warn("[DashboardContext] Failed to load inventory from server");
-          if (!cancelled) setInventoryError(true);
+          setInventoryError(true);
+          setInventorySnapshot(null);
         }
 
         let airtableListings = [];
@@ -533,8 +539,9 @@ export function DashboardProvider({ children }) {
           isDuplicateOfAirtable: existingTitles.has((p.title || '').toLowerCase())
         }));
 
+        if (cancelled) return;
         const fullData = [...airtableListings, ...enrichedSupabaseListings];
-        setCatalogue(fullData);
+        setCatalogue(airtableListings);
         setListings(fullData);
 
         // 2. Fetch Deals (Pitches) — via the real /api/deals server route, NOT
@@ -587,13 +594,10 @@ export function DashboardProvider({ children }) {
         }
 
         // 3. Fetch Saved Intel
-        const { data: savedData, error: savedError } = (await savedIntelPromise)
-          || { data: [], error: null };
-          
-        let supabaseSavedIds = [];
-        if (!savedError && savedData) {
-          supabaseSavedIds = savedData.map(s => s.property_id);
-        }
+        const savedData = await savedIntelPromise;
+        const savedItems = Array.isArray(savedData?.items) ? savedData.items : [];
+        const savedKeys = new Set(savedItems.flatMap((item) => [item.property_id, item.account_property_id]));
+        const supabaseSavedIds = airtableListings.filter((item) => savedKeys.has(item.slug)).map((item) => item.id);
 
         // Also merge local storage reactions (Your Board stays on device)
         let localSavedIds = [];
@@ -607,7 +611,10 @@ export function DashboardProvider({ children }) {
           }
         } catch(e) {}
 
-        if (!cancelled) setSavedIds([...new Set([...supabaseSavedIds, ...localSavedIds])]);
+        if (!cancelled) {
+          setAccountSaves({ ownerId: currentUser.id, items: savedItems });
+          setSavedIds([...new Set([...savedKeys, ...supabaseSavedIds, ...localSavedIds])]);
+        }
 
       } catch (error) {
         console.error("Error fetching intelligence from Ledger:", error);
@@ -648,20 +655,41 @@ export function DashboardProvider({ children }) {
 
   // ── Save / unsave (Supabase & Local Storage) ──
   const toggleSave = useCallback(async (item) => {
-    const isSaved = savedIds.includes(item.id);
+    const propertySlug = item.slug || item.property_slug;
+    const aliases = new Set([item.id, propertySlug].filter(Boolean));
+    const isSaved = [...aliases].some((id) => savedIds.includes(id));
+    const saved = currentUser?.id && accountSaves?.ownerId === currentUser.id
+      ? accountSaves.items.find((entry) => aliases.has(entry.property_id) || aliases.has(entry.account_property_id))
+      : null;
     if (isSaved) {
-      setSavedIds(prev => prev.filter(id => id !== item.id));
+      if (saved) {
+        try {
+          const { data: { session } } = await getSession();
+          if (session?.user?.id !== currentUser.id || !session?.access_token) throw new Error("Account changed");
+          const res = await fetch("/api/wishlist/saved", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+            body: JSON.stringify({ propertyId: saved.account_property_id }),
+          });
+          if (!res.ok) throw new Error("Account save removal failed");
+          setAccountSaves((prev) => prev?.ownerId === currentUser.id
+            ? { ...prev, items: prev.items.filter((entry) => entry.account_property_id !== saved.account_property_id) }
+            : prev);
+          aliases.add(saved.account_property_id);
+        } catch {
+          addToast("Couldn't remove this account save. Try again.");
+          return;
+        }
+      }
+      setSavedIds(prev => prev.filter(id => !aliases.has(id)));
       addToast("Removed from Your Board", <Bookmark strokeWidth={1.5} size="1em" />);
-      
-      // Sync Supabase
-      if (currentUser?.id) await supabase.from('saved_intel').delete().eq('user_id', currentUser.id).eq('property_id', item.id);
       
       // Sync Local Storage
       try {
         const raw = localStorage.getItem("scoutit_reactions");
         if (raw) {
           let parsed = JSON.parse(raw);
-          parsed = parsed.filter(p => p.property_id !== item.id);
+          parsed = parsed.filter(p => !aliases.has(p.property_id));
           localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
         }
       } catch(e) {}
@@ -669,9 +697,6 @@ export function DashboardProvider({ children }) {
       setSavedIds(prev => [...prev, item.id]);
       addToast("Saved to Your Board", <Bookmark strokeWidth={1.5} size="1em" />);
       trackEvent(GA_EVENTS.BOARD_SAVE, { property_id: item.id, signed_in: Boolean(currentUser?.id) });
-      
-      // Sync Supabase
-      if (currentUser?.id) await supabase.from('saved_intel').insert([{ user_id: currentUser.id, property_id: item.id }]);
       
       // A-206: Emit property_save telemetry event for Monthly Scout Wrap & save telemetry
       try {
@@ -700,8 +725,35 @@ export function DashboardProvider({ children }) {
         });
         localStorage.setItem("scoutit_reactions", JSON.stringify(parsed));
       } catch(e) {}
+
+      if (currentUser?.id) {
+        try {
+          const { data: { session } } = await getSession();
+          if (session?.user?.id !== currentUser.id || !session?.access_token) return;
+          const res = await fetch("/api/wishlist/merge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+            body: JSON.stringify({ propertyIds: [propertySlug || item.id] }),
+          });
+          if (!res.ok) throw new Error("Account sync failed");
+          const { confirmedProperties } = await res.json();
+          const property = confirmedProperties?.[0];
+          if (property) {
+            setAccountSaves((prev) => {
+              const items = prev?.ownerId === currentUser.id ? prev.items : [];
+              if (items.some((entry) => entry.account_property_id === property.propertyId)) return prev;
+              return { ownerId: currentUser.id, items: [...items, {
+                account_property_id: property.propertyId,
+                property_id: property.slug || property.propertyId,
+              }] };
+            });
+          }
+        } catch {
+          addToast("Saved on this device. Account sync is unavailable.");
+        }
+      }
     }
-  }, [savedIds, addToast, currentUser]);
+  }, [savedIds, accountSaves, addToast, currentUser]);
 
   // ── QuestIT (Raise a Quest) ──
   // GAP-30: Server-authenticated route /api/questit/bounty using supabaseAdmin
@@ -756,14 +808,24 @@ export function DashboardProvider({ children }) {
   const updateListing = useCallback(async (listingId, data, options = {}) => {
     const { silent = false } = options;
 
-    // Optimistic UI update
+    // Optimistic UI update (preserve details & signals.completeness when updating metadata)
     setListings(prev => prev.map(l => {
       if (l.id !== listingId) return l;
+      const detailUpdates = {};
+      if (data.contact_preference !== undefined) detailUpdates.contact_preference = data.contact_preference;
+      if (data.photos !== undefined) detailUpdates.photos = data.photos;
+      if (data.matterportTourUrl !== undefined) detailUpdates.matterport_tour_url = data.matterportTourUrl;
       return {
         ...l,
         ...data,
+        ...(data.quietly_open_to_offers !== undefined ? { quietlyOpenToOffers: data.quietly_open_to_offers === true } : {}),
+        ...(data.quietlyOpenToOffers !== undefined ? { quietlyOpenToOffers: data.quietlyOpenToOffers === true } : {}),
+        ...(Object.keys(detailUpdates).length > 0 ? { details: { ...(l.details || {}), ...detailUpdates } } : {}),
         hasMedia: data.mediaLink ? true : l.hasMedia,
-        signals: { ...l.signals, completeness: data.completenessScore + "%" }
+        signals: {
+          ...l.signals,
+          ...(data.completenessScore != null ? { completeness: `${data.completenessScore}%` } : {}),
+        },
       };
     }));
     // Server-side dual-database update (Supabase + Airtable if approved)
@@ -795,6 +857,8 @@ export function DashboardProvider({ children }) {
   // Withdraw is a recoverable off-market transition. Keep the legacy function
   // name as an internal compatibility alias for Mission Control callers.
   const closeListing = useCallback(async (listingId) => {
+    if (!listingId || closingIdsRef.current.has(listingId)) return false;
+    closingIdsRef.current.add(listingId);
     try {
       const res = await authedFetch("/api/dashboard/archive", {
         method: "POST",
@@ -814,6 +878,8 @@ export function DashboardProvider({ children }) {
       console.error("Failed to withdraw property", err);
       addToast(sanitizeError(err, "Error withdrawing property"), "❌");
       return false;
+    } finally {
+      closingIdsRef.current.delete(listingId);
     }
   }, [authedFetch, addToast]);
 
@@ -878,8 +944,12 @@ export function DashboardProvider({ children }) {
     });
   }, [listings]);
 
-  const publishListing = useCallback(async function runPublishListing(listingId, declaration = null, swapWithPropertyId = null) {
-    if (!currentUser?.id) return false;
+  const publishListing = useCallback(async function runPublishListing(listingId, declaration = null, swapWithPropertyId = null, _isRetry = false) {
+    if (!currentUser?.id || !listingId) return false;
+    if (!_isRetry) {
+      if (publishingIdsRef.current.has(listingId)) return false;
+      publishingIdsRef.current.add(listingId);
+    }
     // Truthful either way: the first attempt may come back asking for the
     // declaration, and "Syncing to live network" would be a claim of progress
     // that hasn't happened.
@@ -913,7 +983,7 @@ export function DashboardProvider({ children }) {
         // Cancelled: the listing stays a draft, which the modal said it would.
         // No error toast — this was a choice, not a failure.
         if (!answer) return false;
-        return await runPublishListing(listingId, answer, swapWithPropertyId);
+        return await runPublishListing(listingId, answer, swapWithPropertyId, true);
       }
 
       if (res.status === 409 && data.error === "listing_cap_reached") {
@@ -933,7 +1003,7 @@ export function DashboardProvider({ children }) {
         });
 
         if (!swapTargetId) return false;
-        return await runPublishListing(listingId, declaration, swapTargetId);
+        return await runPublishListing(listingId, declaration, swapTargetId, true);
       }
 
       if (!res.ok) {
@@ -941,7 +1011,13 @@ export function DashboardProvider({ children }) {
       }
       setListings(prev => prev.map(l => {
         if (l.id === listingId) {
-          return { ...l, pipelineStatus: 'approved', lifecycleState: 'live' };
+          return {
+            ...l,
+            pipelineStatus: 'approved',
+            lifecycleState: 'live',
+            ...(data.slug ? { slug: data.slug } : {}),
+            ...(data.canonicalSlug ? { canonicalSlug: data.canonicalSlug } : {}),
+          };
         }
         if (data.swappedPropertyId && l.id === data.swappedPropertyId) {
           return { ...l, pipelineStatus: 'off_market', lifecycleState: 'off_market', quietlyOpenToOffers: false };
@@ -971,6 +1047,10 @@ export function DashboardProvider({ children }) {
         prev ? { ...prev, busy: false, error: safeErrorMsg } : prev
       );
       return false;
+    } finally {
+      if (!_isRetry) {
+        publishingIdsRef.current.delete(listingId);
+      }
     }
   }, [currentUser, addToast, authedFetch, askForDeclaration, listings]);
 
@@ -1105,54 +1185,60 @@ export function DashboardProvider({ children }) {
     };
 
     setListings(prev => [newListing, ...prev]);
-    addToast("Dossier live on the Intelligence Ledger", "✅");
+    addToast("Dossier draft saved to your workspace", "✅");
     addNotification({
-      title: "Listing Published",
-      desc: `Your property at ${listing.location} is now live in the Broker feed.`,
+      title: "Listing Draft Saved",
+      desc: `Draft saved at ${listing.location}. Publish from Owner Studio when ready to go live.`,
       icon: "✅",
       propertyId: newListing.id,
-      notificationType: "property_published"
+      notificationType: "property_draft_saved"
     });
     
     return newListing;
   }, [addToast, currentUser, addNotification]);
 
   const bulkAddListings = useCallback(async (propertiesArray) => {
-    addToast("Bulk processing via AI Blueprint...", "🤖");
-    
-    // Attempt insertion
-    try {
-      const res = await authedFetch('/api/dashboard/bulk-insert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ properties: propertiesArray })
-      });
-      const data = await res.json();
-      
-      if (data.success && data.inserted) {
-        addToast(`Successfully synced ${data.count} properties to Ledger.`, "✅");
-        
-        // Convert to UI models
-        const mappedNew = mapSupabaseProperties(data.inserted);
-        setListings(prev => [...mappedNew, ...prev]);
-        
-        addNotification({
-          title: "Bulk Import Complete",
-          desc: `${data.count} new properties are now live in the global feed.`,
-          icon: "🚀"
-        });
-        
-        return true;
-      } else {
-        addToast("Bulk insert failed.", "❌");
-        return false;
-      }
-    } catch (err) {
-      console.error(err);
-      addToast("Network error during bulk insert.", "❌");
+    const { data: { session } } = await getSession();
+    if (!session?.access_token || session.user?.id !== currentUser?.id) {
+      addToast("Sign in again to import property drafts.", "❌");
       return false;
     }
-  }, [addToast, authedFetch, addNotification]);
+
+    try {
+      const payload = JSON.stringify(propertiesArray);
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+      const fingerprint = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      const key = `scoutit_csv_import:${session.user.id}:${fingerprint}`;
+      let importId = sessionStorage.getItem(key);
+      if (!importId) {
+        importId = crypto.randomUUID();
+        sessionStorage.setItem(key, importId);
+      }
+
+      const res = await fetch('/api/dashboard/bulk-insert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ properties: propertiesArray, importId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success || !Array.isArray(data.inserted)) {
+        addToast(data?.error || "Couldn't confirm the import. Retry to check for saved drafts.", "❌");
+        return false;
+      }
+      sessionStorage.removeItem(key);
+      const mapped = mapSupabaseProperties(data.inserted);
+      setListings((prev) => {
+        const ids = new Set(mapped.map(({ id }) => id));
+        return [...mapped, ...prev.filter(({ id }) => !ids.has(id))];
+      });
+      addToast(`${data.count} ${data.count === 1 ? "draft" : "drafts"} saved. Review them in your inventory.`, "✅");
+      return true;
+    } catch (err) {
+      console.error(err);
+      addToast("Couldn't confirm the import. Retry to check for saved drafts.", "❌");
+      return false;
+    }
+  }, [addToast, currentUser?.id]);
 
   const addConciergeListing = useCallback(async (fileName) => {
     // A-141: this is a request to the ScoutIt team (OwnerMode "join the queue"),
@@ -1219,7 +1305,20 @@ export function DashboardProvider({ children }) {
   }, [currentUser, addToast, addNotification]);
 
   const sendPitch = useCallback(async (listingId, message) => {
-    const role = (currentUser?.active_roles?.[0] || currentUser?.role || "broker").toLowerCase();
+    const heldRoles = Array.isArray(currentUser?.active_roles)
+      ? currentUser.active_roles.map((r) => String(r).toLowerCase())
+      : [String(currentUser?.role || "").toLowerCase()].filter(Boolean);
+    const canPitchAsBroker =
+      heldRoles.includes("broker") ||
+      heldRoles.includes("salesperson") ||
+      heldRoles.includes("admin") ||
+      heldRoles.includes("staff");
+    if (!canPitchAsBroker) {
+      addToast("Activate your Broker or Salesperson workspace role before sending pitches.", "🔒");
+      return false;
+    }
+
+    const role = "broker";
     const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
     // Local balance is a pre-check only — the authoritative spend is the
     // server's spend_connects RPC. The local sim wallet is deducted AFTER the
@@ -1275,18 +1374,30 @@ export function DashboardProvider({ children }) {
       };
 
       setPitches(prev => [newPitch, ...prev]);
-      addToast("Deal Initiated — 1 Connect spent", "⚡");
+      addToast("Deal Initiated - 1 Connect spent", "⚡");
       return true;
     } catch (err) {
       console.error("Failed to send pitch", err);
-      addToast("Failed to send pitch — check your connection.", "❌");
+      addToast("Failed to send pitch. Check your connection.", "❌");
       return false;
     }
   }, [currentUser, addToast, authedFetch, listings]);
 
   const inviteBroker = useCallback(async (listingId, brokerName) => {
     if (!brokerName) return false;
-    const role = (currentUser?.active_roles?.[0] || currentUser?.role || "owner").toLowerCase();
+    const heldRoles = Array.isArray(currentUser?.active_roles)
+      ? currentUser.active_roles.map((r) => String(r).toLowerCase())
+      : [String(currentUser?.role || "").toLowerCase()].filter(Boolean);
+    const canInviteAsOwner =
+      heldRoles.includes("owner") ||
+      heldRoles.includes("admin") ||
+      heldRoles.includes("staff");
+    if (!canInviteAsOwner) {
+      addToast("Activate your Property Owner workspace role to invite brokers.", "🔒");
+      return false;
+    }
+
+    const role = "owner";
     const tier = (currentUser?.subscription_tier || currentUser?.tier || "starry").toLowerCase();
     // Pre-check only — local sim wallet is deducted after the server confirms
     // (same no-double-jeopardy ordering as sendPitch).
@@ -1323,12 +1434,12 @@ export function DashboardProvider({ children }) {
         brokerFirm: 'Invited advisor',
         message: `Owner invited ${brokerName}.`,
         status: 'invited',
-        statusText: 'Invited — awaiting broker',
+        statusText: 'Invited - awaiting broker',
         badgeText: 'Waiting',
         isCurrentUserBroker: false,
         isCurrentUserOwner: true
       }, ...prev]);
-      addToast(`Handshake sent to ${brokerName} — 1 Connect spent`, "🤝");
+      addToast(`Handshake sent to ${brokerName} - 1 Connect spent`, "🤝");
       return true;
     } catch (err) {
       console.error(err);
@@ -1348,13 +1459,21 @@ export function DashboardProvider({ children }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update deal status");
 
+      const statusLabelMap = {
+        accepted: "Meeting Set",
+        declined: "Owner Declined",
+        closed: "Deal Closed",
+        withdrawn: "Withdrawn",
+        revoked: "Revoked",
+      };
+
       // Optimistic UI
       setPitches(prev => prev.map(p => {
         if (p.id === pitchId) {
           return { 
             ...p, 
             status: newStatus,
-            statusText: newStatus === 'accepted' ? 'Meeting Set' : 'Owner Declined',
+            statusText: statusLabelMap[newStatus] || String(newStatus || "Updated"),
             badgeText: newStatus === 'accepted' ? 'check_circle' : ''
           };
         }
@@ -1378,11 +1497,10 @@ export function DashboardProvider({ children }) {
       // north star (the same headroom A-079's Airtable caps use), newest
       // first so a cap clips the oldest rows, never the owner's latest.
       // RLS applies before the limit, so this bounds cost, not access.
-      const { data: propertiesData, error: propError } = await supabase.from('properties').select('*').order('created_at', { ascending: false }).limit(2000);
-      
-      let supabaseListings = [];
-      if (!propError && propertiesData) {
-        supabaseListings = mapSupabaseProperties(propertiesData);
+      let supabaseListings = listings.filter(l => currentUser?.id && l.ownerId === currentUser.id);
+      if (currentUser?.id) {
+        const { data: propertiesData, error: propError } = await supabase.from('properties').select('*').eq('owner_id', currentUser.id).order('created_at', { ascending: false }).limit(2000);
+        if (!propError && propertiesData) supabaseListings = mapSupabaseProperties(propertiesData);
       }
 
       // Always fetch from CMS
@@ -1408,7 +1526,7 @@ export function DashboardProvider({ children }) {
       const allData = [...airtableListings, ...enrichedSupabaseListings];
 
       if (radiusKm === 'any') {
-        setCatalogue(allData);
+        setCatalogue(airtableListings);
         setListings(allData);
       } else {
         const radius = parseFloat(radiusKm);
@@ -1424,17 +1542,19 @@ export function DashboardProvider({ children }) {
           const distance = distanceKm(centerLat, centerLng, pLat, pLng);
           return distance <= radius;
         });
-        setCatalogue(filtered);
+        setCatalogue(filtered.filter(l => l.ownerId === 'scoutit-cms'));
 
         // A-319: Separate public catalogue from user inventory.
-        // Private drafts and owner inventory listings without coordinates must
-        // survive radius filtering rather than being dropped from the workspace.
-        const currentDrafts = listings.filter(l =>
-          (l.status === 'draft' || l.pipelineStatus === 'draft' || !l.coordinates) &&
-          (currentUser ? l.ownerId === currentUser.id : true)
+        // Preserve ALL listings owned by the signed-in user (live, draft, or
+        // coordinate-less) so a Seeker radius filter never hides a multi-role
+        // user's owned portfolio in Owner Studio.
+        const currentOwnerListings = listings.filter((l) =>
+          currentUser?.id
+            ? l.ownerId === currentUser.id
+            : (l.status === 'draft' || l.pipelineStatus === 'draft' || !l.coordinates)
         );
         const filteredIds = new Set(filtered.map(l => l.id));
-        const mergedListings = [...filtered, ...currentDrafts.filter(d => !filteredIds.has(d.id))];
+        const mergedListings = [...filtered, ...currentOwnerListings.filter(d => !filteredIds.has(d.id))];
         setListings(mergedListings);
       }
     } catch (err) {
@@ -1471,6 +1591,7 @@ export function DashboardProvider({ children }) {
     catalogue,
     isLoading,
     inventoryError,
+    inventoryStats,
     refetchInventory,
     searchByRadius,
     updateListing,
@@ -1486,6 +1607,7 @@ export function DashboardProvider({ children }) {
     catalogue,
     isLoading,
     inventoryError,
+    inventoryStats,
     refetchInventory,
     searchByRadius,
     updateListing,

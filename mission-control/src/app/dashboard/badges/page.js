@@ -111,13 +111,13 @@ export default async function BadgesPage() {
                     <div className="flex items-center gap-2">
                       <form action={rejectCharterApplication}>
                         <input type="hidden" name="applicationId" value={app.id} />
-                        <button className="px-3 py-1.5 rounded-lg text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors">
+                        <button type="submit" className="px-3 py-1.5 rounded-lg text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors">
                           Reject
                         </button>
                       </form>
                       <form action={approveCharterApplication}>
                         <input type="hidden" name="applicationId" value={app.id} />
-                        <button className="px-3 py-1.5 rounded-lg text-xs bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium transition-colors">
+                        <button type="submit" className="px-3 py-1.5 rounded-lg text-xs bg-[#E8AE3C] hover:bg-[#F7C64E] text-black font-medium transition-colors">
                           Approve & Mint Seat →
                         </button>
                       </form>
@@ -159,7 +159,7 @@ export default async function BadgesPage() {
                 </option>
               ))}
           </select>
-          <button className="px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors whitespace-nowrap">
+          <button type="submit" className="px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors whitespace-nowrap">
             Award
           </button>
         </form>
@@ -208,7 +208,7 @@ export default async function BadgesPage() {
                   <form action={setBadgeActive}>
                     <input type="hidden" name="id" value={badge.id} />
                     <input type="hidden" name="nextActive" value={(!badge.is_active).toString()} />
-                    <button className="px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors whitespace-nowrap">
+                    <button type="submit" className="px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors whitespace-nowrap">
                       {badge.is_active ? "Deactivate" : "Reactivate"}
                     </button>
                   </form>
@@ -335,7 +335,7 @@ export default async function BadgesPage() {
                 </label>
               </div>
             </div>
-            <button className="col-span-2 justify-self-start px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
+            <button type="submit" className="col-span-2 justify-self-start px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
               Create badge
             </button>
           </form>
@@ -364,7 +364,7 @@ export default async function BadgesPage() {
                 <form action={revokeBadge}>
                   <input type="hidden" name="userId" value={g.user_id} />
                   <input type="hidden" name="badgeId" value={g.badge_id} />
-                  <button className="px-3 py-1.5 rounded-lg text-xs bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors whitespace-nowrap">
+                  <button type="submit" className="px-3 py-1.5 rounded-lg text-xs bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors whitespace-nowrap">
                     Revoke
                   </button>
                 </form>

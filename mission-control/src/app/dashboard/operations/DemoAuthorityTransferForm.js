@@ -27,7 +27,7 @@ export default function DemoAuthorityTransferForm() {
           Target Supabase Auth email
           <input name="targetEmail" type="email" required maxLength={254} defaultValue={preview?.target?.email || ""} className="min-h-11 rounded border border-line bg-black/25 px-3 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold" />
         </label>
-        <button disabled={pending} className="min-h-11 self-end rounded border border-gold-muted bg-gold/10 px-4 font-mono text-xs uppercase tracking-widest text-gold disabled:opacity-50">{pending ? "Checking…" : "Run dry-run"}</button>
+        <button type="submit" disabled={pending} className="min-h-11 self-end rounded border border-gold-muted bg-gold/10 px-4 font-mono text-xs uppercase tracking-widest text-gold disabled:opacity-50">{pending ? "Checking…" : "Run dry-run"}</button>
       </form>
       {state?.message && <p role={state.ok ? "status" : "alert"} className={`rounded border p-3 text-sm ${state.ok ? "border-ok/25 bg-ok/10 text-ok" : "border-danger/25 bg-danger/10 text-danger"}`}>{state.message}</p>}
       {preview && <>
@@ -51,7 +51,7 @@ export default function DemoAuthorityTransferForm() {
           <label className="grid gap-2 text-sm text-white/75">Operational reason
             <textarea name="reason" minLength={12} maxLength={500} required className="min-h-24 rounded border border-line bg-black/30 p-3 text-white" />
           </label>
-          <button disabled={pending || !preview.canExecute} className="min-h-11 rounded bg-gold px-4 font-mono text-xs font-bold uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:opacity-40">Execute reviewed transfer</button>
+          <button type="submit" disabled={pending || !preview.canExecute} className="min-h-11 rounded bg-gold px-4 font-mono text-xs font-bold uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:opacity-40">Execute reviewed transfer</button>
           {!preview.canExecute && <p className="text-xs text-danger">Execution stays disabled until at least one eligible property exists and every active blocked reference is resolved.</p>}
         </form>
       </>}

@@ -27,10 +27,9 @@ export async function POST(request) {
       );
     }
 
-    const formData = await request.formData();
-
-    // PDF processing is available only to a Supabase-validated account.
-    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+    // PDF processing is available only to a Supabase-validated account (authenticate BEFORE parsing multipart payload).
+    const authHeader = request.headers.get("Authorization") || "";
+    const token = /^Bearer\s+(.+)$/i.exec(authHeader.trim())?.[1]?.trim();
     if (!token) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
@@ -42,6 +41,11 @@ export async function POST(request) {
     const { data: { user }, error: authError } = await authClient.auth.getUser(token);
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    const formData = await request.formData().catch(() => null);
+    if (!formData) {
+      return NextResponse.json({ error: "Invalid multipart form payload" }, { status: 400 });
     }
 
     const file = formData.get('file');

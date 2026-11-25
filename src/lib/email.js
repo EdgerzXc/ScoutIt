@@ -101,9 +101,10 @@ export async function sendEmail({ to, subject, html, text }) {
  * a dark-themed email that renders as black-on-black in a light client is
  * worse than an ugly one that reads.
  */
-export function renderEmail({ heading, body, ctaLabel, ctaPath, footnote }) {
-  const cta = ctaLabel && ctaPath
-    ? `<p style="margin:28px 0 0"><a href="${SITE_URL}${ctaPath}" style="background:#E8AE3C;color:#0d0d0d;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:700;font-size:14px;display:inline-block">${escapeHtml(ctaLabel)}</a></p>`
+export function renderEmail({ heading, body, ctaLabel, ctaPath, ctaUrl, footnote }) {
+  const ctaHref = ctaUrl || (ctaPath ? SITE_URL + ctaPath : null);
+  const cta = ctaLabel && ctaHref
+    ? `<p style="margin:28px 0 0"><a href="${escapeHtml(ctaHref)}" style="background:#E8AE3C;color:#0d0d0d;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:700;font-size:14px;display:inline-block">${escapeHtml(ctaLabel)}</a></p>`
     : "";
 
   return `<!doctype html><html><body style="margin:0;padding:24px;background:#f4f2ef;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">

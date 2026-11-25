@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { resolveUserId } from "@/lib/serverAuth";
+import { resolveUserId, assertAdultEligibility } from "@/lib/serverAuth";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
 import * as userDealsModule from "@/lib/deals/userDeals";
+import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 const { deriveMyRole, loadDealMessageActivity, loadUserDealRows } = userDealsModule;
 
 function fallbackExtractServiceRole(row) {
@@ -268,12 +271,14 @@ export async function GET(request) {
   }
 }
 
+export const checkDealsPostRate = createRateLimiter({ limit: 30, windowMs: 60_000, maxKeys: 10_000 });
+
 const postSchema = z.object({
   propertyId: z.string().optional().nullable(),
   propertySlug: z.string().optional().nullable(),
   otherPartyEmail: z.string(), // Recipient user UUID
   status: z.string().optional(),
-  initialMessage: z.string().optional(),
+  initialMessage: z.string().max(2000).optional(),
   targetRole: z.enum(["owner", "broker", "photographer", "designer", "event_planner", "researcher", "operator"]).optional(),
   serviceTitle: z.string().max(160).optional(),
   sourceLayer: z.string().max(64).optional(),
@@ -281,7 +286,36 @@ const postSchema = z.object({
 
 export async function POST(request) {
   try {
-    const parsed = postSchema.safeParse(await request.json());
+    const userId = await resolveUserId(request);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
+
+    const rate = checkDealsPostRate(`${userId}:${clientIp(request)}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many deal requests. Please wait a moment and try again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 60) } },
+      );
+    }
+
+    if (!(await assertAdultEligibility(userId))) {
+      return NextResponse.json(
+        { error: "You must confirm you are 18 or older before creating a deal." },
+        { status: 403 },
+      );
+    }
+
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    const parsed = postSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
@@ -295,9 +329,6 @@ export async function POST(request) {
       serviceTitle,
       sourceLayer,
     } = parsed.data;
-    const userId = await resolveUserId(request);
-
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const normalizedTargetRole = targetRole === "event_planner" ? "designer" : (targetRole || null);
     const isLayer4ServiceInquiry = ["photographer", "designer", "researcher"].includes(normalizedTargetRole);
@@ -306,7 +337,7 @@ export async function POST(request) {
     if (propertyId) {
       const { data: propData, error: propError } = await supabaseAdmin
         .from("properties")
-        .select("id, title, slug, owner_id")
+        .select("id, title, slug, owner_id, lifecycle_state, pipeline_status")
         .eq("id", propertyId)
         .single();
       if ((propError || !propData) && !isLayer4ServiceInquiry) {
@@ -314,17 +345,50 @@ export async function POST(request) {
       }
       property = propData || null;
     } else if (propertySlug) {
-      const { data: propBySlug } = await supabaseAdmin
+      const { data: propBySlug, error: slugError } = await supabaseAdmin
         .from("properties")
-        .select("id, title, slug, owner_id")
+        .select("id, title, slug, owner_id, lifecycle_state, pipeline_status")
         .eq("slug", propertySlug)
         .maybeSingle();
+      if ((slugError || !propBySlug) && !isLayer4ServiceInquiry) {
+        return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      }
       property = propBySlug || null;
     } else if (!isLayer4ServiceInquiry) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
 
+    if (property) {
+      const propLifecycle = String(property.lifecycle_state || property.pipeline_status || "").toLowerCase();
+      if (["deleted", "archived", "rejected", "quarantined"].includes(propLifecycle)) {
+        return NextResponse.json({ error: "Property is not available for new deals." }, { status: 409 });
+      }
+    }
+
     const isOwner = property ? property.owner_id === userId : false;
+    if (!isLayer4ServiceInquiry) {
+      if (!property) {
+        return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      }
+      if (!isOwner) {
+        const { data: activeRep, error: repErr } = await supabaseAdmin
+          .from("property_broker_representations")
+          .select("id, status")
+          .eq("property_id", property.id)
+          .eq("broker_id", userId)
+          .eq("status", "active")
+          .maybeSingle();
+        if (repErr) {
+          return NextResponse.json({ error: "Unable to verify listing authority" }, { status: 503 });
+        }
+        if (!activeRep) {
+          return NextResponse.json(
+            { error: "Only the property owner or a verified representing broker can open a manual deal for this listing." },
+            { status: 403 },
+          );
+        }
+      }
+    }
     // A-144 §10.10: a manual send starts a request — it cannot manufacture an
     // accepted/connected/closed relationship from a client string. Rejected
     // BEFORE any spend so a forged outcome never costs a Connect.
@@ -347,7 +411,7 @@ export async function POST(request) {
     }
     const { data: recipientProfile, error: recipientError } = await supabaseAdmin
       .from("user_profiles")
-      .select("id")
+      .select("id, role, active_roles, is_shadowbanned, archived_at")
       .eq("id", otherPartyEmail)
       .maybeSingle();
     if (recipientError || !recipientProfile) {
@@ -355,6 +419,29 @@ export async function POST(request) {
         { error: "Recipient account not found. No Connect was spent." },
         { status: 404 },
       );
+    }
+    if (recipientProfile.is_shadowbanned === true || recipientProfile.archived_at) {
+      return NextResponse.json(
+        { error: "Recipient account is not accepting requests. No Connect was spent." },
+        { status: 403 },
+      );
+    }
+    if (isLayer4ServiceInquiry) {
+      const recipientRoles = [
+        recipientProfile.role,
+        ...(Array.isArray(recipientProfile.active_roles) ? recipientProfile.active_roles : []),
+      ]
+        .map((r) => String(r || "").trim().toLowerCase())
+        .filter(Boolean);
+      const holdsRequestedRole =
+        recipientRoles.includes(normalizedTargetRole) ||
+        (normalizedTargetRole === "designer" && recipientRoles.includes("event_planner"));
+      if (!holdsRequestedRole) {
+        return NextResponse.json(
+          { error: `Recipient does not hold an active ${normalizedTargetRole} profile. No Connect was spent.` },
+          { status: 403 },
+        );
+      }
     }
     if (otherPartyEmail === userId) {
       return NextResponse.json(
@@ -388,20 +475,31 @@ export async function POST(request) {
     // Spend FIRST so a failed payment never leaves a phantom conversation.
     // Legacy per-user wallet stays authoritative (owner decision, A-144).
     const spendRefId = property?.id || otherPartyEmail;
-    const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects', {
+    const spendRole = isLayer4ServiceInquiry ? 'seeker' : (isOwner ? 'owner' : 'broker');
+    await ensureConnectBalancesWallet(supabaseAdmin, userId, spendRole, 'starry');
+    const { data: spendData, error: spendError } = await supabaseAdmin.rpc('spend_connects_atomic', {
       p_user_id: userId,
+      p_role: spendRole,
       p_amount: 1,
+      p_tier: 'starry',
+      p_source: isLayer4ServiceInquiry ? 'layer4_service_deal' : 'manual_deal',
       p_reason: isLayer4ServiceInquiry
         ? `Layer 4 ${normalizedTargetRole} inquiry`
         : 'Manual deal created from dashboard',
-      p_ref_type: isLayer4ServiceInquiry ? 'layer4_service_deal' : 'manual_deal',
-      p_ref_id: spendRefId,
+      p_reference_id: String(spendRefId),
     });
     if (spendError) {
       const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
       return NextResponse.json(
         { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
         { status: insufficient ? 403 : 500 }
+      );
+    }
+    const spendRow = Array.isArray(spendData) ? spendData[0] : spendData;
+    if (!spendRow || spendRow.success === false) {
+      return NextResponse.json(
+        { error: "Insufficient Connects balance." },
+        { status: 403 }
       );
     }
     const nowIso = new Date().toISOString();
@@ -513,7 +611,7 @@ export async function POST(request) {
         ref_id: spendRefId,
       }, { status: 500 });
     }
-    const manualBalance = spendData?.[0]?.total_balance ?? null;
+    const manualBalance = spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null;
     if (manualBalance !== null) {
       await supabaseAdmin.from('user_profiles').update({ connects_balance: manualBalance }).eq('id', userId);
     }

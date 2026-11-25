@@ -77,3 +77,66 @@ export function sanitizeObject(obj) {
   }
   return obj;
 }
+
+const MAX_SVG_MARKUP_CHARS = 65536;
+const DANGEROUS_SVG_PATTERNS = [
+  /<script\b/i,
+  /\bon[a-z]+\s*=/i,
+  /javascript\s*:/i,
+  /vbscript\s*:/i,
+  /data\s*:\s*(?:text\/html|image\/svg\+xml|application\/)/i,
+  /<foreignObject\b/i,
+  /<(?:iframe|object|embed|applet|meta|link|style|base|form|input|textarea|button)\b/i,
+  /<(?:use|image|animate|animateTransform|animateMotion|set|mpath|feImage|a)\b/i,
+  /\b(?:xlink:href|href|srcdoc|formaction)\s*=/i,
+  /url\s*\(\s*['"]?\s*(?:javascript|data|vbscript):/i,
+  /&#x?[0-9a-f]+;?/i,
+];
+
+/**
+ * Validates that a string is strictly a safe SVG without script tags,
+ * dangerous URI schemes, or event handlers.
+ * @param {string} svgText - The SVG string to validate
+ * @returns {boolean} Whether the SVG is safe to render
+ */
+export function isSafeSvgMarkup(svgText) {
+  if (typeof svgText !== "string") return false;
+  const trimmed = svgText.trim();
+  if (!trimmed || trimmed.length > MAX_SVG_MARKUP_CHARS) return false;
+  if (!/^<svg(?=[\s>])/i.test(trimmed) || !/<\/svg\s*>$/i.test(trimmed)) return false;
+  if ((trimmed.match(/<svg(?=[\s>])/gi) || []).length !== 1) return false;
+  if ((trimmed.match(/<\/svg\s*>/gi) || []).length !== 1) return false;
+  return !DANGEROUS_SVG_PATTERNS.some((pattern) => pattern.test(trimmed));
+}
+
+const SVG_DATA_URI_PREFIX_RE = /^data:image\/svg\+xml(?:\s*;\s*(?:charset\s*=\s*)?utf-8)?\s*,/i;
+
+/**
+ * Normalizes a raw SVG string or Supabase `data:image/svg+xml;utf-8,...` QR URI
+ * into sanitized SVG markup, or returns null if invalid/unsafe.
+ * @param {string} input
+ * @returns {string|null}
+ */
+export function extractSafeSvgMarkup(input) {
+  if (typeof input !== "string") return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  let candidate = trimmed;
+  if (SVG_DATA_URI_PREFIX_RE.test(trimmed)) {
+    const rest = trimmed.replace(SVG_DATA_URI_PREFIX_RE, "").trim();
+    if (!rest) return null;
+    if (/^<svg(?=[\s>])/i.test(rest)) {
+      candidate = rest;
+    } else {
+      try {
+        candidate = decodeURIComponent(rest);
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  const normalized = candidate.trim();
+  return isSafeSvgMarkup(normalized) ? normalized : null;
+}

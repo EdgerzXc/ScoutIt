@@ -6,6 +6,14 @@ import { buildWithdrawUpdate, normalizeLifecycleState, PROPERTY_LIFECYCLE_STATES
 import { sanitizeError } from "@/lib/sanitizeError";
 import { z } from "zod";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkArchiveRate = createRateLimiter({
+  limit: 30,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 const schema = z.object({
   propertyIds: z.array(z.string()).min(1).max(100).optional(),
@@ -29,6 +37,14 @@ export async function POST(request) {
 
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
+
+    const rate = checkArchiveRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many archive requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     if (!supabaseAdmin) return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
 
     const propertyIds = [...new Set(parsed.data.propertyIds || [parsed.data.submissionId])];
@@ -60,7 +76,10 @@ export async function POST(request) {
         const slug = property.canonical_slug || property.slug;
         if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
         try {
-          await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+          const airtablePayload = property.details?.airtable_record_id
+            ? { approved_for_scoutit: false, airtable_record_id: property.details.airtable_record_id }
+            : { approved_for_scoutit: false };
+          await updateProperty(apiKey, baseId, slug, airtablePayload);
         } catch (error) {
           console.error("[WITHDRAW API] Airtable unpublish failed:", error);
           // Earlier records in this batch may already be unpublished.

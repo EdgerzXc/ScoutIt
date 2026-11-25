@@ -7,6 +7,14 @@ import { collectPropertyRemovalBlockers } from "@/lib/propertyRemoval";
 import { getBearerToken, hasRecentPasswordAuthentication } from "@/lib/propertyReauthentication";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { invalidateCmsBundle } from "@/lib/cmsCache";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkDeleteRate = createRateLimiter({
+  limit: 10,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 async function readRows(table, configure) {
   try {
@@ -67,6 +75,14 @@ export async function POST(request) {
 
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
+
+    const rate = checkDeleteRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many delete requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     const token = getBearerToken(request);
     if (!hasRecentPasswordAuthentication(token)) {
       return NextResponse.json(
@@ -126,7 +142,10 @@ export async function POST(request) {
       if (!apiKey || !baseId) return NextResponse.json({ error: "Removal is unavailable while the Airtable CMS is unavailable" }, { status: 503 });
       if (!slug) return NextResponse.json({ error: "Live property is missing its canonical slug" }, { status: 409 });
       try {
-        await updateProperty(apiKey, baseId, slug, { approved_for_scoutit: false });
+        const airtablePayload = property.details?.airtable_record_id
+          ? { approved_for_scoutit: false, airtable_record_id: property.details.airtable_record_id }
+          : { approved_for_scoutit: false };
+        await updateProperty(apiKey, baseId, slug, airtablePayload);
       } catch (error) {
         console.error("[REMOVE API] Airtable unpublish failed:", error);
         return NextResponse.json({ error: "Airtable unpublish failed; no removal was recorded", retryable: true }, { status: 502 });

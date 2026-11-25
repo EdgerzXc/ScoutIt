@@ -36,7 +36,7 @@ function CreateCohortForm({ phrase }) {
     </div>
     <ConfirmationFields phrase={phrase} />
     <Result state={state} />
-    <button disabled={pending} className={buttonClass}>{pending ? "Creating…" : "Create cohort"}</button>
+    <button type="submit" disabled={pending} className={buttonClass}>{pending ? "Creating…" : "Create cohort"}</button>
   </form>;
 }
 
@@ -51,7 +51,7 @@ function EnrollForm({ cohorts, phrase }) {
     <fieldset><legend className="text-xs text-white/60">Pilot roles</legend><div className="mt-2 flex flex-wrap gap-3">{["owner", "seeker", "broker", "provider"].map((role) => <label key={role} className="inline-flex items-center gap-2 rounded border border-line px-3 py-2 text-xs text-white/70"><input type="checkbox" name="roles" value={role} />{role}</label>)}</div></fieldset>
     <ConfirmationFields phrase={phrase} />
     <Result state={state} />
-    <button disabled={pending || !eligible.length} className={buttonClass}>{pending ? "Enrolling…" : "Enroll tester"}</button>
+    <button type="submit" disabled={pending || !eligible.length} className={buttonClass}>{pending ? "Enrolling…" : "Enroll tester"}</button>
   </form>;
 }
 
@@ -60,7 +60,7 @@ function CohortLifecycleForm({ cohort, command, phrase }) {
   return <form action={action} className="space-y-3 rounded-lg border border-line bg-black/20 p-3">
     <input type="hidden" name="cohortId" value={cohort.id} /><input type="hidden" name="command" value={command} />
     <ConfirmationFields phrase={phrase} reasonLabel={command === "activate" ? "Activation reason" : "Closure reason"} />
-    <Result state={state} /><button disabled={pending} className={buttonClass}>{pending ? "Verifying…" : command === "activate" ? "Activate cohort" : "Close cohort"}</button>
+    <Result state={state} /><button type="submit" disabled={pending} className={buttonClass}>{pending ? "Verifying…" : command === "activate" ? "Activate cohort" : "Close cohort"}</button>
   </form>;
 }
 
@@ -71,7 +71,7 @@ function ParticipantAction({ participant, actionKind, phrase }) {
     <input type="hidden" name="cohortId" value={participant.cohort_id} /><input type="hidden" name="userId" value={participant.user_id} />
     {actionKind === "offboard" && <label className="block text-xs text-white/60">Cleanup note (no personal data)<input name="cleanupNote" maxLength={500} className={fieldClass} /></label>}
     <ConfirmationFields phrase={phrase} reasonLabel={actionKind === "offboard" ? "Offboarding reason" : "Deletion-verification reason"} />
-    <Result state={state} /><button disabled={pending} className={buttonClass}>{pending ? "Verifying…" : actionKind === "offboard" ? "Offboard tester" : "Verify Auth deletion"}</button>
+    <Result state={state} /><button type="submit" disabled={pending} className={buttonClass}>{pending ? "Verifying…" : actionKind === "offboard" ? "Offboard tester" : "Verify Auth deletion"}</button>
   </form>;
 }
 

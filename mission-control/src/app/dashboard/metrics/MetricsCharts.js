@@ -82,12 +82,12 @@ function Chart({ title, data, unit }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 12 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+              tick={{ fill: "rgba(255,255,255,0.65)", fontSize: 12 }}
+              axisLine={{ stroke: "rgba(255,255,255,0.14)" }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 12 }}
+              tick={{ fill: "rgba(255,255,255,0.65)", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               allowDecimals={false}

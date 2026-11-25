@@ -5,14 +5,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // logAction lives in rbac.js alongside the tier checks, not in a separate
 // auditLog module — it shares the service-role client and is meant to be
 // called in the same Server Action as the mutation it records.
-import { getCurrentStaff, assertTier, TIERS, logAction } from "@/lib/rbac";
+import { getCurrentStaff, assertTier, TIERS, logActionStrict } from "@/lib/rbac";
 import { unpublishPropertyFromAirtable, updatePropertyInAirtable } from "@/lib/airtable";
+
+const ALLOWED_RESTORE_STATUSES = new Set(["pending", "approved", "archived", "rejected"]);
 
 export async function revertAction(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
 
-  const actionId = formData.get("actionId");
+  const actionId = formData.get("actionId")?.toString().trim();
   if (!actionId) throw new Error("Action ID is required");
 
   const admin = createAdminClient();
@@ -25,13 +27,31 @@ export async function revertAction(formData) {
   if (error || !targetAction) throw new Error("Action not found or already reverted");
 
   const { target_table, target_id, action, metadata } = targetAction;
+  if (typeof action === "string" && action.startsWith("revert.")) {
+    throw new Error("Revert entries themselves are immutable and cannot be reverted.");
+  }
   const prevState = metadata?.previous_state;
 
   // Revert target table state based on original action type
   if (target_table === "properties") {
-    const restoreStatus = prevState?.moderation_status || "pending";
-    const pipelineStatus = restoreStatus === "approved" ? "approved" : restoreStatus === "archived" ? "archived" : "pending";
-    const lifecycleState = restoreStatus === "approved" ? "live" : restoreStatus === "archived" ? "off_market" : "draft";
+    const rawRestore = String(prevState?.moderation_status || "pending").toLowerCase();
+    const restoreStatus = ALLOWED_RESTORE_STATUSES.has(rawRestore) ? rawRestore : "pending";
+    const pipelineStatus =
+      restoreStatus === "approved"
+        ? "approved"
+        : restoreStatus === "archived"
+        ? "archived"
+        : restoreStatus === "rejected"
+        ? "rejected"
+        : "pending";
+    const lifecycleState =
+      restoreStatus === "approved"
+        ? "live"
+        : restoreStatus === "archived"
+        ? "off_market"
+        : restoreStatus === "rejected"
+        ? "deleted"
+        : "draft";
 
     const { data: prop } = await admin
       .from("properties")
@@ -39,15 +59,18 @@ export async function revertAction(formData) {
       .eq("id", target_id)
       .maybeSingle();
 
-    await admin
+    const { error: propUpdErr } = await admin
       .from("properties")
       .update({
         moderation_status: restoreStatus,
         pipeline_status: pipelineStatus,
         lifecycle_state: lifecycleState,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", target_id);
+
+    if (propUpdErr) {
+      throw new Error(`Could not revert property state: ${propUpdErr.message}`);
+    }
 
     const slug = prop?.canonical_slug || prop?.slug;
     if (slug) {
@@ -62,22 +85,26 @@ export async function revertAction(formData) {
       }
     }
   } else if (target_table === "blocked_access") {
-    await admin.from("blocked_access").delete().eq("id", target_id);
+    const { error: delErr } = await admin.from("blocked_access").delete().eq("id", target_id);
+    if (delErr) throw new Error(`Could not revert block entry: ${delErr.message}`);
   } else if (target_table === "verification_requests") {
-    await admin
+    const { error: verErr } = await admin
       .from("verification_requests")
       .update({ status: "pending", decided_at: null })
       .eq("id", target_id);
+    if (verErr) throw new Error(`Could not revert verification request: ${verErr.message}`);
+  } else {
+    throw new Error(`Reverting actions on "${target_table}" is not supported.`);
   }
 
-  // Record audit log of the revert action
-  await logAction({
+  // Record strict immutable audit log of the revert action
+  await logActionStrict({
     staff,
     action: `revert.${action}`,
     targetTable: target_table,
     targetId: target_id,
     reason: `Reverted previous action #${actionId}`,
-    metadata: { reverted_action_id: actionId }
+    metadata: { reverted_action_id: actionId },
   });
 
   revalidatePath("/dashboard/audit");

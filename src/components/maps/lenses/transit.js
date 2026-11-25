@@ -1,8 +1,5 @@
 // Manila Rail Transit Lens for Spatial Canvas
-import {
-  point as turfPoint,
-  distance as turfDistance,
-} from "@turf/turf";
+import { distanceKm } from "@/lib/geo";
 import manilaTransit from "@/data/manila_transit.json";
 import manilaStations from "@/data/manila_transit_stations.json";
 
@@ -19,10 +16,9 @@ const ALL_STATIONS = LINE_META.flatMap((line) =>
 const MAX_RELEVANT_KM = 15;
 
 function nearestStationTo(lat, lng) {
-  const propertyPoint = turfPoint([lng, lat]);
   let best = null;
   ALL_STATIONS.forEach((s) => {
-    const d = turfDistance(propertyPoint, turfPoint([s.lon, s.lat]), { units: "kilometers" });
+    const d = distanceKm(lat, lng, s.lat, s.lon);
     if (!best || d < best.distanceKm) {
       best = { name: s.name, lineName: s.lineName, lineColor: s.lineColor, lon: s.lon, lat: s.lat, distanceKm: d };
     }

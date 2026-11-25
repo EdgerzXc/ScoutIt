@@ -11,6 +11,9 @@ export const metadata = {
 export default async function PrcPage() {
   const staff = await getCurrentStaff();
   if (!staff) redirect("/?error=NotAuthorized");
+  if (staff.tier < TIERS.OPS_MANAGER) {
+    redirect("/dashboard?error=InsufficientTier");
+  }
 
   const { profiles = [] } = await loadPrcProfiles();
 

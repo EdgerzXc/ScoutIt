@@ -5,6 +5,14 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { isLeadExportAuditActive } from "@/lib/leadExportGate";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+const checkExportAuditRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 const RELEASED_DEAL_STATUS = "accepted";
 const RELEASED_HANDSHAKE_STATUS = "completed";
@@ -28,6 +36,13 @@ function completedContactHandshake(deal) {
 
 export async function POST(req) {
   try {
+    const rate = checkExportAuditRate(clientIp(req));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { success: false, authorized: false, message: "Too many export attempts. Please wait a moment." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     if (!isLeadExportAuditActive()) return fail("Lead export auditing is not active. Export is disabled.", 503, { disabled: true });
     if (!supabaseAdmin) return fail("Server database unconfigured.", 503);
     const userId = await resolveUserId(req);

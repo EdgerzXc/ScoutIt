@@ -3,6 +3,8 @@
 // Both Build from Scratch and Advanced Editor import this file. Keep field keys
 // aligned with the Airtable/Supabase bridge and the public property master page;
 // never fork category definitions inside individual editor components.
+import { toBool } from "./propertyFieldMapping";
+
 export const CATEGORIES = [
   { id: "residential", icon: "🏠", label: "Residential" },
   { id: "commercial", icon: "🏢", label: "Commercial" },
@@ -132,3 +134,79 @@ export const CATEGORY_FIELDS = {
     { key: "VEN_Noise_Curfew", label: "Noise curfew", type: "text", proOnly: true },
   ],
 };
+
+/**
+ * Builds the 6-vertical `d.cat` preview structure consumed by CommercialFlow /
+ * ResidentialFlow and CategorySpecBlock from mapped property/Airtable fields.
+ */
+export function buildPreviewCat(f = {}) {
+  return {
+    commercial: {
+      rentFrom: f.CM_Rent_From ?? null, rentPerSqm: f.CM_Rent_Per_Sqm || "",
+      handOver: f.CM_Hand_Over_Condition || "", availability: f.CM_Availability_Status || "",
+      buildingGrade: f.CM_Building_Grade || "", totalGLA: f.CM_Total_GLA ?? null,
+      floorPlate: f.CM_Floor_Plate_Sqm || "", floorPlateFrom: f.CM_Floor_Plate_From ?? null,
+      peza: toBool(f.CM_PEZA), certification: f.CM_Certification || "", minLeaseTerm: f.CM_Min_Lease_Term || "",
+      camc: f.CM_CAMC_Per_Sqm || "", camcFrom: f.CM_CAMC_From ?? null,
+      acCharges: f.CM_AC_Charges || "", acChargeFrom: f.CM_AC_Charge_From ?? null,
+      acSystem: f.CM_AC_System || "", reservedParking: f.CM_Reserved_Parking || "",
+      escalation: f.CM_Escalation_Rate || "", fitOut: f.CM_Fit_Out_Allowance || "",
+      rentFree: f.CM_Rent_Free_Period || "", parkingRatio: f.CM_Parking_Ratio || "",
+      backupPower: f.CM_Backup_Power || "", floorLoading: f.CM_Floor_Loading || "",
+      internet: f.CM_Internet_Providers || "", availableUnits: f.CM_Available_Units_Summary || "",
+      towersZones: f.CM_Towers_Zones || "", capRate: f.CM_Cap_Rate ?? null, noi: f.CM_NOI ?? null,
+    },
+    residential: {
+      price: f.RS_Price ?? null, floorLevel: f.RS_Floor_Level || "", view: f.RS_View || "",
+      assocDues: f.RS_Assoc_Dues ?? null, turnoverDate: f.RS_Turnover_Date || "",
+      studio: toBool(f.RS_Studio_Flag), petPolicy: f.RS_Pet_Policy || "",
+      pricePerSqm: f.RS_Price_Per_Sqm ?? null, paymentTerms: f.RS_Payment_Terms || "",
+    },
+    str: {
+      nightlyRate: f.STR_Nightly_Rate ?? null, cleaningFee: f.STR_Cleaning_Fee ?? null,
+      maxGuests: f.STR_Max_Guests ?? null, bedrooms: f.Beds ?? null,
+      bathrooms: f.Baths ?? null, minStay: f.STR_Min_Stay_Nights ?? null,
+      rating: f.STR_Avg_Rating ?? null, checkInOut: f.STR_Check_In_Out || "",
+      weekendRate: f.STR_Weekend_Rate ?? null, bedConfig: f.STR_Bed_Config || "",
+      selfCheckIn: toBool(f.STR_Self_Check_In), houseRules: f.STR_House_Rules || "",
+      cancellation: f.STR_Cancellation_Policy || "", permit: f.STR_Permit_Accreditation || "",
+      wifiSpeed: f.STR_WiFi_Speed || "",
+    },
+    restaurant: {
+      floorArea: f.FloorSqm ?? null, seating: f.RST_Seating_Capacity ?? null,
+      rent: f.RST_Rent ?? null, dues: f.RST_Dues_CUSA ?? null,
+      kitchen: f.RST_Kitchen_Condition || "", footTraffic: f.RST_Foot_Traffic || "",
+      frontage: f.RST_Frontage || "", indoorOutdoor: f.Indoor_Outdoor || "",
+      previousUse: f.RST_Previous_Use || "",
+      hoodExhaust: toBool(f.RST_Hood_Exhaust), greaseTrap: toBool(f.RST_Grease_Trap), gasLine: toBool(f.RST_Gas_Line),
+      power: f.RST_Power_Capacity || "",
+      delivery: typeof f.RST_Delivery_Access === "boolean" ? f.RST_Delivery_Access : (typeof f.RST_Delivery_Access === "string" ? f.RST_Delivery_Access.trim() : ""),
+      liquor: typeof f.RST_Liquor_License === "boolean" ? f.RST_Liquor_License : (typeof f.RST_Liquor_License === "string" ? f.RST_Liquor_License.trim() : ""),
+      zoning: f.RST_FB_Zoning_Permit || "",
+      ceiling: f.CeilingHeight || "", ceilingM: f.CeilingHeight_M ?? null,
+      turnover: f.RST_Turnover_Condition || "", parking: f.Guest_Parking || "",
+    },
+    hospitality: {
+      listedPrice: f.Listed_Price ?? null,
+      rooms: f.HOSP_Room_Count ?? null, stars: f.HOSP_Star_Rating ?? null,
+      operator: f.HOSP_Operator_Brand || "", roomTypes: f.HOSP_Room_Types || "",
+      fbOutlets: f.HOSP_FB_Outlets ?? null, functionRooms: f.HOSP_Function_Rooms ?? null,
+      yearRenovated: f.HOSP_Year_Built_Renovated || "",
+      adr: f.HOSP_ADR ?? null, occupancy: f.HOSP_Occupancy_Rate ?? null,
+      revpar: f.HOSP_RevPAR ?? null, capRate: f.HOSP_Cap_Rate ?? null,
+      gfa: f.HOSP_GFA ?? null, landArea: f.HOSP_Land_Area ?? null,
+    },
+    venue: {
+      seated: f.VEN_Capacity_Seated ?? null, standing: f.VEN_Capacity_Standing ?? null,
+      floorArea: f.FloorSqm ?? null, rentalRate: f.VEN_Rental_Rate ?? null,
+      rateBasis: f.VEN_Rate_Basis || "", minHours: f.VEN_Min_Booking_Hours ?? null,
+      indoorOutdoor: f.Indoor_Outdoor || "",
+      aircon: typeof f.VEN_Air_Conditioning === "boolean" ? f.VEN_Air_Conditioning : (typeof f.VEN_Air_Conditioning === "string" ? f.VEN_Air_Conditioning.trim() : ""),
+      catering: f.VEN_Catering_Policy || "", layouts: f.VEN_Layout_Configs || "",
+      ceiling: f.CeilingHeight || "", ceilingM: f.CeilingHeight_M ?? null,
+      av: f.VEN_AV_Equipment || "", power: f.VEN_Power_Capacity || "",
+      parking: f.Guest_Parking || "", accessibility: f.VEN_Accessibility || "",
+      noiseCurfew: f.VEN_Noise_Curfew || "",
+    },
+  };
+}

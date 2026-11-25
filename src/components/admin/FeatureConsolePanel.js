@@ -419,15 +419,15 @@ export default function FeatureConsolePanel() {
 
             <div className="text-center space-y-2">
               <h3 id="emergency-modal-title" className="text-lg font-bold text-on-surface tracking-tight">
-                ENABLE EMERGENCY READ-ONLY MODE?
+                PAUSE PUBLIC API WRITES?
               </h3>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Enabling <strong className="text-error">global_read_only</strong> will freeze all site-wide database writes (publishing properties, deal updates, archiving listings) with HTTP 503 Service Unavailable. Public browsing and authentication remain active.
+                Publishing, archiving, and deal updates will return HTTP 503 Service Unavailable. Public browsing, authentication, provider callbacks, Calendar sync, and staff flag controls remain available.
               </p>
             </div>
 
             <div className="p-3 bg-error/10 border border-red-500/30 rounded-lg text-[12px] text-error font-mono text-center">
-              ⚠️ Use only during database maintenance or emergency outages.
+              Direct Supabase writes, scheduled jobs, and Mission Control are outside this control.
             </div>
 
             <div className="flex gap-3 pt-2">
@@ -448,7 +448,7 @@ export default function FeatureConsolePanel() {
                 }}
                 className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
               >
-                CONFIRM FREEZE
+                PAUSE WRITES
               </button>
             </div>
           </div>

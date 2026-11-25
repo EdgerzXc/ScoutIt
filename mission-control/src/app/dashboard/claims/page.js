@@ -20,6 +20,7 @@ import {
 
 import { loadClaimQueue } from "./actions";
 import ClaimDecisionForm from "@/components/claims/ClaimDecisionForm";
+import ClaimDocInspectButton from "@/components/claims/ClaimDocInspectButton";
 import {
   RELATIONSHIP_LABELS,
   describeConflict,
@@ -221,19 +222,10 @@ export default async function ClaimsPage() {
                             >
                               scan: {d.malware_scan_status || "unknown"}
                             </span>
-                            {d.previewUrl ? (
-                              <a
-                                href={d.previewUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F7C64E] hover:bg-[#E8AE3C] text-black font-semibold text-[12px] tracking-wider uppercase transition-colors"
-                              >
-                                <Eye className="w-3 h-3" />
-                                Inspect Document
-                              </a>
-                            ) : (
-                              <span className="text-[12px] text-white/60 italic">File on secure record</span>
-                            )}
+                            <ClaimDocInspectButton
+                              docId={d.id}
+                              scanStatus={d.malware_scan_status || "unknown"}
+                            />
                           </div>
                         </li>
                       ))}

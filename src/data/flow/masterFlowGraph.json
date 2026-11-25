@@ -3,22 +3,22 @@
   "schemaVersion": "2.2.0",
   "graphVersion": "2.2.0",
   "bundleVersion": "2.2.0",
-  "dataRevision": "9421f1825d2dabe6eeda2b46b87351cda93b579c",
-  "lastVerifiedAt": "2026-09-11",
-  "generatedAt": "2026-10-31T07:26:16.835Z",
+  "dataRevision": "8a1f625f98d11bee808db9717dc76387ef497fcc",
+  "lastVerifiedAt": "2026-11-14",
+  "generatedAt": "2026-11-19T03:27:32.113Z",
   "repo": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "9421f1825d2dabe6eeda2b46b87351cda93b579c"
+    "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
   },
   "brain": {
     "repository": "ScoutIt",
     "branch": "main",
-    "commitSha": "9421f1825d2dabe6eeda2b46b87351cda93b579c"
+    "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
   },
   "generator": {
     "version": "2.2.0",
-    "commitSha": "9421f1825d2dabe6eeda2b46b87351cda93b579c"
+    "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
   },
   "runtimeStateMachines": {
     "implemented": [
@@ -227,15 +227,15 @@
     ]
   },
   "stats": {
-    "totalNodes": 145,
-    "totalEdges": 283,
-    "verifiedNodes": 111,
+    "totalNodes": 155,
+    "totalEdges": 301,
+    "verifiedNodes": 121,
     "partialNodes": 9,
     "plannedNodes": 25,
     "proposedNodes": 0
   },
   "productStats": {
-    "approved": 125,
+    "approved": 135,
     "planned": 5,
     "proposed": 15,
     "deprecated": 0
@@ -244,13 +244,13 @@
     "notStarted": 25,
     "partial": 9,
     "implemented": 0,
-    "verified": 111,
+    "verified": 121,
     "contradicted": 0
   },
   "evidenceStats": {
     "unverified": 17,
     "documented": 8,
-    "codeGrounded": 81,
+    "codeGrounded": 91,
     "testGrounded": 39,
     "runtimeGrounded": 0
   },
@@ -258,8 +258,8 @@
     "notDeployed": 26,
     "deployedDisabled": 0,
     "privatePilot": 4,
-    "limitedLive": 22,
-    "publicLive": 93,
+    "limitedLive": 24,
+    "publicLive": 101,
     "rolledBack": 0
   },
   "nodes": [
@@ -3955,7 +3955,9 @@
       "parents": [
         "hero",
         "crust",
-        "dashboard_broker"
+        "dashboard_broker",
+        "cron_recompute_broker_metrics",
+        "cron_verify_prc_status"
       ],
       "children": [
         "pep",
@@ -7337,7 +7339,8 @@
         "via_promoter_share",
         "unit_detail_page",
         "broker_profile_dynamic",
-        "direct_call_modal"
+        "direct_call_modal",
+        "cron_purge_contact_messages"
       ],
       "children": [
         "sys_connect_wallet",
@@ -7525,7 +7528,8 @@
         "pep_ch10_your_move",
         "rec_propose_alt_slot",
         "gate_auth",
-        "login"
+        "login",
+        "cron_calendar_sync_queue"
       ],
       "children": [
         "exc_slot_conflict",
@@ -9475,7 +9479,8 @@
         "inquiry_modal",
         "scenario_churned_owner_escrow",
         "dec_tier_gate",
-        "sys_ephemeral_secret_engine"
+        "sys_ephemeral_secret_engine",
+        "cron_monthly_rollover"
       ],
       "children": [
         "deal_room",
@@ -11673,7 +11678,8 @@
       "version": "2.1.0",
       "lastVerifiedAt": "2026-09-11",
       "parents": [
-        "sys_connect_wallet"
+        "sys_connect_wallet",
+        "cron_sweep_pending_requests"
       ],
       "children": [],
       "actorRoles": [
@@ -13453,7 +13459,17 @@
         "scenario_pii_erasure",
         "rec_manual_approval_queue",
         "sys_monthly_scout_wrap",
-        "sys_freshness_staleness_engine"
+        "sys_freshness_staleness_engine",
+        "cron_recompute_broker_metrics",
+        "cron_purge_contact_messages",
+        "cron_purge_crm_activity",
+        "cron_purge_analytics",
+        "cron_monthly_rollover",
+        "cron_verify_prc_status",
+        "cron_calendar_sync_queue",
+        "mc_scan_process_cron",
+        "cron_sweep_pending_requests",
+        "cron_purge_chat_messages"
       ],
       "actorRoles": [
         "staff",
@@ -16392,7 +16408,7 @@
       "nodeType": "OUTCOME",
       "domain": "deal",
       "category": "scenario",
-      "route": "/api/cron/purge-chat-messages",
+      "route": "/dashboard/inbox",
       "layer": "core",
       "roles": [
         "staff",
@@ -16501,8 +16517,7 @@
       "telemetry": {
         "eventName": "flow_scenario_chat_purge_viewed",
         "properties": {
-          "domain": "deal",
-          "route": "/api/cron/purge-chat-messages"
+          "domain": "deal"
         }
       },
       "brainRefs": [
@@ -16514,7 +16529,8 @@
       "version": "2.1.0",
       "lastVerifiedAt": "2026-09-11",
       "parents": [
-        "terminal_deal_closed"
+        "terminal_deal_closed",
+        "cron_purge_chat_messages"
       ],
       "children": [
         "sys_zero_log_ai_crm"
@@ -17597,7 +17613,8 @@
       "lastVerifiedAt": "2026-08-19",
       "parents": [
         "deal_room",
-        "scenario_chat_purge"
+        "scenario_chat_purge",
+        "cron_purge_crm_activity"
       ],
       "children": [
         "dashboard_broker",
@@ -23215,6 +23232,1312 @@
       ],
       "children": [
         "inquiry_modal"
+      ]
+    },
+    {
+      "id": "cron_recompute_broker_metrics",
+      "canonicalId": "cron.recompute_broker_metrics",
+      "name": "Cron: Recompute Broker Metrics",
+      "label": "Cron: Recompute Broker Metrics",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "broker",
+      "category": "architecture",
+      "route": "/api/cron/recompute-broker-metrics",
+      "layer": "core",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "broker"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily Vercel Cron recalculating broker response latency, viewing fulfillment, and closed deal metrics.",
+      "description": "Authorized via CRON_SECRET bearer check (0 3 * * *). Updates verified broker roster KPIs cleanly without exposing client state.",
+      "actions": [
+        "Aggregate broker SLA and fulfillment counts",
+        "Refresh verified roster metrics"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/recompute-broker-metrics/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/recompute-broker-metrics/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/recompute-broker-metrics/route.js"
+      ],
+      "dataRefs": [
+        "Supabase deals & user_profiles"
+      ],
+      "database": "Supabase deals & user_profiles",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Upstream database rate limit or transient timeout"
+      ],
+      "recovery": [
+        "Retries on next daily schedule without corrupting partial totals"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_recompute_broker_metrics_executed",
+        "properties": {
+          "domain": "broker",
+          "route": "/api/cron/recompute-broker-metrics"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "brokers_roster"
+      ],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_recompute_broker_metrics_behavior",
+          "text": "Recompute Broker Metrics cron enforces CRON_SECRET auth and updates broker SLA metrics safely.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Core Product Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_purge_contact_messages",
+      "canonicalId": "cron.purge_contact_messages",
+      "name": "Cron: Purge Expired Contact Messages",
+      "label": "Cron: Purge Expired Contact Messages",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "deal",
+      "category": "architecture",
+      "route": "/api/cron/purge-contact-messages",
+      "layer": "core",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "deal"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily PII retention cron pruning expired contact form submissions past retention window.",
+      "description": "Runs at 02:30 UTC daily (30 2 * * *) gated by CRON_SECRET to enforce contact inquiry data minimization.",
+      "actions": [
+        "Prune aged contact_messages rows past retention TTL"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/purge-contact-messages/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/purge-contact-messages/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/purge-contact-messages/route.js"
+      ],
+      "dataRefs": [
+        "Supabase contact_messages"
+      ],
+      "database": "Supabase contact_messages",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Database query timeout during batch delete"
+      ],
+      "recovery": [
+        "Idempotent cutoff predicate retries safely on next run"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/purge-contact-messages/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_purge_contact_messages_executed",
+        "properties": {
+          "domain": "deal",
+          "route": "/api/cron/purge-contact-messages"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "inquiry_modal"
+      ],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_purge_contact_messages_behavior",
+          "text": "Purge Contact Messages cron enforces CRON_SECRET auth and retention-window cleanup.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/purge-contact-messages/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Security & Privacy Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_purge_crm_activity",
+      "canonicalId": "cron.purge_crm_activity",
+      "name": "Cron: Purge Stale CRM Activity",
+      "label": "Cron: Purge Stale CRM Activity",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "crm",
+      "category": "architecture",
+      "route": "/api/cron/purge-crm-activity",
+      "layer": "core",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "crm"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily zero-log CRM cleanup cron purging transient activity entries past retention limits.",
+      "description": "Runs at 03:15 UTC daily (15 3 * * *) under CRON_SECRET auth to enforce CRM activity retention guarantees.",
+      "actions": [
+        "Prune aged crm_activity_log rows past retention policy"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/purge-crm-activity/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/purge-crm-activity/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/purge-crm-activity/route.js"
+      ],
+      "dataRefs": [
+        "Supabase crm_activity_log"
+      ],
+      "database": "Supabase crm_activity_log",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Database delete failure or transient contention"
+      ],
+      "recovery": [
+        "Logs failure safely and retries on next daily execution"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/purge-crm-activity/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_purge_crm_activity_executed",
+        "properties": {
+          "domain": "crm",
+          "route": "/api/cron/purge-crm-activity"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "sys_zero_log_ai_crm"
+      ],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_purge_crm_activity_behavior",
+          "text": "Purge CRM Activity cron enforces CRON_SECRET auth and prunes expired CRM telemetry logs.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/purge-crm-activity/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Core Product Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_purge_analytics",
+      "canonicalId": "cron.purge_analytics",
+      "name": "Cron: Purge Expired Analytics Events",
+      "label": "Cron: Purge Expired Analytics Events",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "admin",
+      "category": "architecture",
+      "route": "/api/cron/purge-analytics",
+      "layer": "core",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "admin"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily retention cron pruning raw behavioral analytics events older than the retention horizon.",
+      "description": "Runs at 03:45 UTC daily (45 3 * * *) under CRON_SECRET auth to keep telemetry storage bounded and compliant.",
+      "actions": [
+        "Prune aged analytics event records"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/purge-analytics/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/purge-analytics/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/purge-analytics/route.js"
+      ],
+      "dataRefs": [
+        "Supabase analytics_events"
+      ],
+      "database": "Supabase analytics_events",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Database query timeout during analytics cleanup"
+      ],
+      "recovery": [
+        "Re-runs cleanly with cutoff timestamp filter on next schedule"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/purge-analytics/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_purge_analytics_executed",
+        "properties": {
+          "domain": "admin",
+          "route": "/api/cron/purge-analytics"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_purge_analytics_behavior",
+          "text": "Purge Analytics cron enforces CRON_SECRET auth and enforces raw event TTL cleanup.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/purge-analytics/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Security & Privacy Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_monthly_rollover",
+      "canonicalId": "cron.monthly_rollover",
+      "name": "Cron: Monthly Connects Wallet Rollover",
+      "label": "Cron: Monthly Connects Wallet Rollover",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "connects",
+      "category": "architecture",
+      "route": "/api/cron/monthly-rollover",
+      "layer": "global",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "connects"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Monthly 1st-of-month cron resetting monthly tier allocations while preserving purchased and reward Connects.",
+      "description": "Runs monthly (0 4 1 * *) gated by CRON_SECRET to execute tier allowance rollover and write ledger audit rows.",
+      "actions": [
+        "Refresh monthly tier Connects allocation",
+        "Record rollover entries in connect_transactions"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/monthly-rollover/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/monthly-rollover/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/monthly-rollover/route.js"
+      ],
+      "dataRefs": [
+        "Supabase connect_balances & connect_transactions"
+      ],
+      "database": "Supabase connect_balances & connect_transactions",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Ledger RPC failure or partial batch interruption"
+      ],
+      "recovery": [
+        "Per-user idempotency key prevents duplicate monthly credits"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/monthly-rollover/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_monthly_rollover_executed",
+        "properties": {
+          "domain": "connects",
+          "route": "/api/cron/monthly-rollover"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "sys_connect_wallet"
+      ],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_monthly_rollover_behavior",
+          "text": "Monthly Rollover cron enforces CRON_SECRET auth and resets tier Connects idempotently.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/monthly-rollover/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Core Product Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_verify_prc_status",
+      "canonicalId": "cron.verify_prc_status",
+      "name": "Cron: Verify Broker PRC License Expiry",
+      "label": "Cron: Verify Broker PRC License Expiry",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "broker",
+      "category": "architecture",
+      "route": "/api/cron/verify-prc-status",
+      "layer": "crust",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "broker"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily RESA compliance cron flagging brokers whose PRC license expiration date has lapsed.",
+      "description": "Runs at 05:00 UTC daily (0 5 * * *) gated by CRON_SECRET to demote expired PRC licenses and alert Mission Control.",
+      "actions": [
+        "Audit broker PRC license expiry timestamps",
+        "Flag lapsed licenses and restrict representation"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/verify-prc-status/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/verify-prc-status/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/verify-prc-status/route.js"
+      ],
+      "dataRefs": [
+        "Supabase user_profiles prc_expiry"
+      ],
+      "database": "Supabase user_profiles prc_expiry",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Missing or malformed prc_expiry field on legacy broker row"
+      ],
+      "recovery": [
+        "Routes flagged broker to Mission Control PRC Audit queue"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/verify-prc-status/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_verify_prc_status_executed",
+        "properties": {
+          "domain": "broker",
+          "route": "/api/cron/verify-prc-status"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "brokers_roster"
+      ],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_verify_prc_status_behavior",
+          "text": "Verify PRC Status cron enforces CRON_SECRET auth and flags lapsed broker credentials.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/verify-prc-status/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Compliance Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_calendar_sync_queue",
+      "canonicalId": "cron.calendar_sync_queue",
+      "name": "Cron: Process Calendar Sync Queue",
+      "label": "Cron: Process Calendar Sync Queue",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "deal",
+      "category": "architecture",
+      "route": "/api/cron/process-calendar-sync-queue",
+      "layer": "core",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "deal"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily cron draining queued Google/Outlook calendar sync retries after transient OAuth or upstream 5xx failures.",
+      "description": "Runs at 06:00 UTC daily (0 6 * * *) gated by CRON_SECRET to flush pending viewing calendar sync jobs.",
+      "actions": [
+        "Retry queued viewing appointment calendar sync jobs"
+      ],
+      "conditions": [
+        "CRON_SECRET bearer token verified via timing-safe comparison"
+      ],
+      "systems": [
+        "src/app/api/cron/process-calendar-sync-queue/route.js",
+        "src/lib/cronAuth.js"
+      ],
+      "components": [
+        "src/app/api/cron/process-calendar-sync-queue/route.js"
+      ],
+      "apis": [
+        "src/app/api/cron/process-calendar-sync-queue/route.js"
+      ],
+      "dataRefs": [
+        "Supabase calendar_sync_queue"
+      ],
+      "database": "Supabase calendar_sync_queue",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Revoked broker OAuth token or provider 429 rate limit"
+      ],
+      "recovery": [
+        "Dead-letters persistently failing sync jobs and notifies broker to reconnect calendar"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "src/lib/cronAuth.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_cron_calendar_sync_queue_executed",
+        "properties": {
+          "domain": "deal",
+          "route": "/api/cron/process-calendar-sync-queue"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "booking_modal"
+      ],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_cron_calendar_sync_queue_behavior",
+          "text": "Calendar Sync Queue cron enforces CRON_SECRET auth and drains deferred viewing calendar updates.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Core Product Engineering",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "mc_scan_process_cron",
+      "canonicalId": "mc.scan_process_cron",
+      "name": "Mission Control Cron: Scheduled Market Scan Processor",
+      "label": "Mission Control Cron: Scheduled Market Scan Processor",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "admin",
+      "category": "architecture",
+      "route": "/dashboard",
+      "layer": "core",
+      "roles": [
+        "staff",
+        "enterprise"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "goals": [
+        "admin"
+      ],
+      "implementationStatus": "VERIFIED",
+      "purpose": "Daily Mission Control Vercel Cron (0 6 * * *) executing /api/scan/process ingestion and duplicate/freshness scans.",
+      "description": "Mission Control background scanner triggered by CRON_SECRET bearer auth at /api/scan/process (mission-control/vercel.json).",
+      "actions": [
+        "Execute queued OSINT & market ingestion scans",
+        "Record scan job outcomes in Mission Control telemetry"
+      ],
+      "conditions": [
+        "Mission Control CRON_SECRET bearer token verified"
+      ],
+      "systems": [
+        "mission-control/src/app/api/scan/process/route.js"
+      ],
+      "components": [
+        "mission-control/src/app/api/scan/process/route.js"
+      ],
+      "apis": [
+        "mission-control/src/app/api/scan/process/route.js"
+      ],
+      "dataRefs": [
+        "Supabase scan_jobs & mission-control ops queue"
+      ],
+      "database": "Supabase scan_jobs & mission-control ops queue",
+      "auth": "cron_secret",
+      "exceptions": [
+        "Missing CRON_SECRET header or external scraper quota throttle"
+      ],
+      "recovery": [
+        "Marks queued job failed cleanly with retry window for staff inspection"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "mission-control/src/app/api/scan/process/route.js",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ],
+      "telemetry": {
+        "eventName": "flow_mc_scan_process_cron_executed",
+        "properties": {
+          "domain": "admin",
+          "route": "/api/scan/process"
+        }
+      },
+      "terminal": false,
+      "isTerminal": false,
+      "version": "2.2.0",
+      "lastVerifiedAt": "2026-11-14",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [],
+      "actorRoles": [
+        "staff",
+        "enterprise"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "claims": [
+        {
+          "id": "claim_mc_scan_process_cron_behavior",
+          "text": "Mission Control Scan Process cron enforces CRON_SECRET auth before draining scheduled scan jobs.",
+          "kind": "PRODUCT_BEHAVIOR",
+          "status": "VERIFIED",
+          "evidence": [
+            {
+              "kind": "API",
+              "path": "mission-control/src/app/api/scan/process/route.js",
+              "provenance": "EXTRACTED",
+              "confidence": 1
+            }
+          ],
+          "confidence": 0.95,
+          "machineVerifiedBy": "Automated Grounding Engine",
+          "humanReviewedBy": null,
+          "reviewStatus": "RESEARCHED",
+          "reviewedAt": null
+        }
+      ],
+      "legalReviewStatus": "RESEARCHED",
+      "requiredCapabilities": [],
+      "resourceRelationship": [],
+      "ownershipRequirement": false,
+      "dealParticipationRequired": false,
+      "representationRequired": false,
+      "governance": {
+        "domainOwner": "Mission Control Operations",
+        "reviewer": null,
+        "riskLevel": "STANDARD",
+        "approvedAt": null,
+        "validFrom": null,
+        "reviewAfter": null,
+        "deprecatedBy": null,
+        "changeReason": "Wave 5 Mission Control Cron Operational Parity"
+      },
+      "guideability": "NONE",
+      "machineVerifiedBy": "Automated Grounding Engine",
+      "humanReviewedBy": null,
+      "machineVerificationStatus": "VERIFIED",
+      "approvedAt": null,
+      "productReviewStatus": "RESEARCHED",
+      "securityReviewStatus": "RESEARCHED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "PUBLIC_LIVE"
+    },
+    {
+      "id": "cron_sweep_pending_requests",
+      "canonicalId": "cron.sweep_pending_requests",
+      "name": "Sweep unanswered requests",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "deal",
+      "category": "architecture",
+      "layer": "core",
+      "route": "/api/cron/sweep-pending-requests",
+      "purpose": "Apply the request retention policy to unanswered deals.",
+      "description": "The daily job archives unanswered requests after 7 days and removes them from the inbox after 30 days. It never refunds the Connect spent to send them.",
+      "auth": "cron_secret",
+      "roles": [
+        "staff"
+      ],
+      "actorRoles": [
+        "staff"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "guideability": "NONE",
+      "implementationStatus": "VERIFIED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "LIMITED_LIVE",
+      "lastVerifiedAt": "2026-11-19",
+      "version": "2.2.0",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "scenario_non_refundable_connect"
+      ],
+      "systems": [
+        "src/app/api/cron/sweep-pending-requests/route.js",
+        "vercel.json"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/sweep-pending-requests/route.js",
+          "symbol": "GET",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "vercel.json",
+          "symbol": "crons",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
+      ]
+    },
+    {
+      "id": "cron_purge_chat_messages",
+      "canonicalId": "cron.purge_chat_messages",
+      "name": "Purge expired chat messages",
+      "type": "SYSTEM",
+      "nodeType": "SYSTEM",
+      "domain": "deal",
+      "category": "architecture",
+      "layer": "core",
+      "route": "/api/cron/purge-chat-messages",
+      "purpose": "Enforce chat retention while protecting conversations under dispute.",
+      "description": "The daily job removes expired message text in bounded batches while respecting dispute holds and retaining the deal record.",
+      "auth": "cron_secret",
+      "roles": [
+        "staff"
+      ],
+      "actorRoles": [
+        "staff"
+      ],
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "uiAudience": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "knowledgeScope": [
+        "INTERNAL",
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "guideability": "NONE",
+      "implementationStatus": "VERIFIED",
+      "productStatus": "APPROVED",
+      "evidenceStatus": "CODE_GROUNDED",
+      "releaseStatus": "LIMITED_LIVE",
+      "lastVerifiedAt": "2026-11-19",
+      "version": "2.2.0",
+      "parents": [
+        "mission_control"
+      ],
+      "children": [
+        "scenario_chat_purge"
+      ],
+      "systems": [
+        "src/app/api/cron/purge-chat-messages/route.js",
+        "vercel.json"
+      ],
+      "evidence": [
+        {
+          "kind": "API",
+          "path": "src/app/api/cron/purge-chat-messages/route.js",
+          "symbol": "GET",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        },
+        {
+          "kind": "CODE",
+          "path": "vercel.json",
+          "symbol": "crons",
+          "provenance": "EXTRACTED",
+          "confidence": 1,
+          "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+        }
       ]
     }
   ],
@@ -38098,6 +39421,224 @@
         "Call unanswered timeout or direct note request"
       ],
       "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_recompute_broker_metrics",
+      "source": "mission_control",
+      "target": "cron_recompute_broker_metrics",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Recompute Broker Metrics",
+      "trigger": "Daily Schedule (0 3 * * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_cron_recompute_broker_metrics_to_brokers_roster",
+      "source": "cron_recompute_broker_metrics",
+      "target": "brokers_roster",
+      "type": "SYSTEM",
+      "label": "Recompute Broker Metrics -> Brokers Roster KPIs",
+      "trigger": "Daily broker SLA aggregation completes",
+      "conditions": [
+        "Metrics recompute succeeded"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_purge_contact_messages",
+      "source": "mission_control",
+      "target": "cron_purge_contact_messages",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Purge Contact Messages",
+      "trigger": "Daily Schedule (30 2 * * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_cron_purge_contact_messages_to_inquiry_modal",
+      "source": "cron_purge_contact_messages",
+      "target": "inquiry_modal",
+      "type": "SYSTEM",
+      "label": "Purge Contact Messages -> Inquiry Retention Policy",
+      "trigger": "Expired contact rows pruned",
+      "conditions": [
+        "Retention window elapsed"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_purge_crm_activity",
+      "source": "mission_control",
+      "target": "cron_purge_crm_activity",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Purge Stale CRM Activity",
+      "trigger": "Daily Schedule (15 3 * * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_cron_purge_crm_activity_to_sys_zero_log_ai_crm",
+      "source": "cron_purge_crm_activity",
+      "target": "sys_zero_log_ai_crm",
+      "type": "SYSTEM",
+      "label": "Purge CRM Activity -> Zero-Log CRM Engine",
+      "trigger": "CRM retention cleanup completed",
+      "conditions": [
+        "Transient activity entries pruned"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_purge_analytics",
+      "source": "mission_control",
+      "target": "cron_purge_analytics",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Purge Expired Analytics Events",
+      "trigger": "Daily Schedule (45 3 * * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_monthly_rollover",
+      "source": "mission_control",
+      "target": "cron_monthly_rollover",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Monthly Connects Wallet Rollover",
+      "trigger": "Monthly Schedule (0 4 1 * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_cron_monthly_rollover_to_sys_connect_wallet",
+      "source": "cron_monthly_rollover",
+      "target": "sys_connect_wallet",
+      "type": "SYSTEM",
+      "label": "Monthly Rollover -> Connects Wallet Engine",
+      "trigger": "Monthly tier allocations refreshed",
+      "conditions": [
+        "Rollover ledger transaction committed"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_verify_prc_status",
+      "source": "mission_control",
+      "target": "cron_verify_prc_status",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Verify PRC License Expiry",
+      "trigger": "Daily Schedule (0 5 * * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_cron_verify_prc_status_to_brokers_roster",
+      "source": "cron_verify_prc_status",
+      "target": "brokers_roster",
+      "type": "SYSTEM",
+      "label": "Verify PRC Status -> Brokers Roster Compliance",
+      "trigger": "Expired PRC licenses demoted",
+      "conditions": [
+        "PRC expiry audit completed"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_calendar_sync_queue",
+      "source": "mission_control",
+      "target": "cron_calendar_sync_queue",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Cron: Process Calendar Sync Queue",
+      "trigger": "Daily Schedule (0 6 * * *)",
+      "conditions": [
+        "CRON_SECRET bearer token verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_cron_calendar_sync_queue_to_booking_modal",
+      "source": "cron_calendar_sync_queue",
+      "target": "booking_modal",
+      "type": "SYSTEM",
+      "label": "Calendar Sync Queue -> Viewing Booking Modal",
+      "trigger": "Queued calendar sync jobs retried",
+      "conditions": [
+        "Sync retry worker completed"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_mc_scan_process_cron",
+      "source": "mission_control",
+      "target": "mc_scan_process_cron",
+      "type": "SYSTEM",
+      "label": "Mission Control -> Scheduled Market Scan Processor",
+      "trigger": "Daily Mission Control Schedule (0 6 * * *)",
+      "conditions": [
+        "Mission Control CRON_SECRET verified"
+      ],
+      "quality": "DOMAIN_DECISION"
+    },
+    {
+      "id": "e_mission_control_to_cron_sweep_pending_requests",
+      "source": "mission_control",
+      "target": "cron_sweep_pending_requests",
+      "type": "SYSTEM",
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "label": "Sweep unanswered requests",
+      "trigger": "Vercel schedule (0 1 * * *)"
+    },
+    {
+      "id": "e_cron_sweep_pending_requests_to_scenario_non_refundable_connect",
+      "source": "cron_sweep_pending_requests",
+      "target": "scenario_non_refundable_connect",
+      "type": "SYSTEM",
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "label": "Applies the policy"
+    },
+    {
+      "id": "e_mission_control_to_cron_purge_chat_messages",
+      "source": "mission_control",
+      "target": "cron_purge_chat_messages",
+      "type": "SYSTEM",
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "label": "Purge expired chat messages",
+      "trigger": "Vercel schedule (0 2 * * *)"
+    },
+    {
+      "id": "e_cron_purge_chat_messages_to_scenario_chat_purge",
+      "source": "cron_purge_chat_messages",
+      "target": "scenario_chat_purge",
+      "type": "SYSTEM",
+      "visibility": [
+        "STAFF",
+        "ADMIN"
+      ],
+      "securityClassification": "INTERNAL",
+      "label": "Applies the policy"
     }
   ]
 }

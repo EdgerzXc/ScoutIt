@@ -14,6 +14,8 @@ import {
 
 const VALID_KINDS = ["broker_vs_broker", "broker_vs_owner", "listing_conflict", "other"];
 const VALID_PRIORITIES = ["low", "normal", "high", "critical"];
+const CLOSED_DISPUTE_STATUSES = new Set(["resolved", "dismissed", "closed"]);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Append one row to the mediation thread. Internal helper. */
 async function addEvent(admin, { disputeId, staff, eventType, body }) {
@@ -49,7 +51,7 @@ async function syncPartyDispute(admin, { dealDisputeId, transition }) {
   if (holdReleased) patch.resolved_at = now;
 
   const { error } = await admin.from("deal_disputes").update(patch).eq("id", dealDisputeId);
-  if (error) throw new Error(`Could not update the party's dispute: ${error.message}`);
+  if (error) throw new Error("Could not update the party's dispute.");
 
   return { status, holdReleased };
 }
@@ -58,10 +60,10 @@ async function syncPartyDispute(admin, { dealDisputeId, transition }) {
 async function loadDisputeLink(admin, disputeId) {
   const { data, error } = await admin
     .from("disputes")
-    .select("id, deal_dispute_id, source, title, property_ref, complainant, respondent")
+    .select("id, status, deal_dispute_id, source, title, property_ref, complainant, respondent")
     .eq("id", disputeId)
     .single();
-  if (error) throw new Error(error.message);
+  if (error || !data) throw new Error("Dispute record not found.");
   return data;
 }
 
@@ -232,17 +234,18 @@ export async function addDisputeNote(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.AGENT);
 
-  const disputeId = formData.get("disputeId")?.toString();
+  const disputeId = formData.get("disputeId")?.toString().trim();
   const body = formData.get("body")?.toString().trim();
   if (!disputeId) throw new Error("Missing dispute id.");
   if (!body) throw new Error("Note cannot be empty.");
 
   const admin = createAdminClient();
   await addEvent(admin, { disputeId, staff, eventType: "note", body });
-  await admin
+  const { error: updErr } = await admin
     .from("disputes")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", disputeId);
+  if (updErr) throw new Error("Failed to update dispute timestamp.");
 
   await logActionStrict({
     staff,
@@ -262,21 +265,27 @@ export async function claimDispute(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.AGENT);
 
-  const disputeId = formData.get("disputeId")?.toString();
+  const disputeId = formData.get("disputeId")?.toString().trim();
   if (!disputeId) throw new Error("Missing dispute id.");
 
   const admin = createAdminClient();
   const link = await loadDisputeLink(admin, disputeId);
+  if (CLOSED_DISPUTE_STATUSES.has(link.status)) {
+    throw new Error("Closed disputes cannot be claimed or reopened.");
+  }
 
-  const { error } = await admin
+  const { data: claimed, error } = await admin
     .from("disputes")
     .update({
       assignee_id: staff.id,
       status: "investigating",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", disputeId);
-  if (error) throw new Error(error.message);
+    .eq("id", disputeId)
+    .eq("status", link.status)
+    .select("id")
+    .maybeSingle();
+  if (error || !claimed) throw new Error("Could not claim dispute (state may have changed).");
 
   const synced = await syncPartyDispute(admin, {
     dealDisputeId: link.deal_dispute_id,
@@ -318,7 +327,7 @@ export async function closeDispute(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.OPS_MANAGER);
 
-  const disputeId = formData.get("disputeId")?.toString();
+  const disputeId = formData.get("disputeId")?.toString().trim();
   const outcome = formData.get("outcome")?.toString(); // resolved | dismissed
   const resolution = formData.get("resolution")?.toString().trim();
   if (!disputeId) throw new Error("Missing dispute id.");
@@ -327,8 +336,11 @@ export async function closeDispute(formData) {
 
   const admin = createAdminClient();
   const link = await loadDisputeLink(admin, disputeId);
+  if (CLOSED_DISPUTE_STATUSES.has(link.status)) {
+    throw new Error("This dispute is already closed.");
+  }
 
-  const { error } = await admin
+  const { data: closedRow, error } = await admin
     .from("disputes")
     .update({
       status: outcome,
@@ -336,8 +348,11 @@ export async function closeDispute(formData) {
       resolved_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", disputeId);
-  if (error) throw new Error(error.message);
+    .eq("id", disputeId)
+    .eq("status", link.status)
+    .select("id")
+    .maybeSingle();
+  if (error || !closedRow) throw new Error("Could not close dispute (state may have changed).");
 
   const synced = await syncPartyDispute(admin, {
     dealDisputeId: link.deal_dispute_id,
@@ -345,23 +360,24 @@ export async function closeDispute(formData) {
   });
 
   // GAP-63: Reconcile behavioral review quarantine (`user_behavioral_reviews.is_disputed`)
-  // When a behavioral review dispute is dismissed (review vindicated), lift the quarantine (`is_disputed: false`).
-  // When resolved (dispute upheld), keep `is_disputed: true` so the review remains excluded from composite scores.
-  const reviewId = formData.get("reviewId")?.toString().trim() || link.property_ref || null;
-  const isBehavioralReviewDispute =
-    Boolean(formData.get("reviewId")) ||
-    Boolean(link.title && String(link.title).startsWith("Behavioral Review Dispute"));
+  // Only reconcile the review linked directly on the authoritative dispute row (never client formData).
+  const isBehavioralReviewDispute = Boolean(
+    link.title && String(link.title).startsWith("Behavioral Review Dispute")
+  );
+  const linkedReviewId =
+    isBehavioralReviewDispute && typeof link.property_ref === "string" && UUID_RE.test(link.property_ref.trim())
+      ? link.property_ref.trim()
+      : null;
 
-  if (isBehavioralReviewDispute && reviewId) {
-    try {
-      await admin
-        .from("user_behavioral_reviews")
-        .update({
-          is_disputed: outcome === "resolved",
-        })
-        .eq("id", reviewId);
-    } catch (err) {
-      console.warn("[disputes/closeDispute] Could not update user_behavioral_reviews:", err?.message);
+  if (isBehavioralReviewDispute && linkedReviewId) {
+    const { error: revErr } = await admin
+      .from("user_behavioral_reviews")
+      .update({
+        is_disputed: outcome === "resolved",
+      })
+      .eq("id", linkedReviewId);
+    if (revErr) {
+      console.warn("[disputes/closeDispute] Could not update user_behavioral_reviews:", revErr.message);
     }
   }
 
@@ -397,11 +413,19 @@ export async function closeDispute(formData) {
     try {
       const { data: dd } = await admin
         .from("deal_disputes")
-        .select("opened_by, against_user_id")
+        .select("deal_id, reporter_id")
         .eq("id", link.deal_dispute_id)
         .maybeSingle();
-      if (dd?.opened_by) partyIds.add(dd.opened_by);
-      if (dd?.against_user_id) partyIds.add(dd.against_user_id);
+      if (dd?.reporter_id) partyIds.add(dd.reporter_id);
+      if (dd?.deal_id) {
+        const { data: deal } = await admin
+          .from("deals")
+          .select("buyer_id, broker_id")
+          .eq("id", dd.deal_id)
+          .maybeSingle();
+        if (deal?.buyer_id) partyIds.add(deal.buyer_id);
+        if (deal?.broker_id) partyIds.add(deal.broker_id);
+      }
     } catch {
       // Non-fatal if deal_disputes query fails
     }

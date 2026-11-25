@@ -270,7 +270,7 @@ export function generateClaimDraftPayload(prospect) {
   const address = prospect.propertyAddress || "Address Pending Verification";
   const district = prospect.districtCity || "Metro Manila";
   const coordinates = prospect.coordinates
-    ? `${prospect.coordinates.latitude},${prospect.coordinates.longitude}`
+    ? `POINT(${prospect.coordinates.longitude} ${prospect.coordinates.latitude})`
     : null;
   const location = address !== "Address Pending Verification" ? `${address}, ${district}` : district;
 

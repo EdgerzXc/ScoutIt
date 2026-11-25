@@ -91,7 +91,7 @@ export default function PrivacyClient({ initialDeletions = [], initialDsrQueue =
         resolutionNotes: notes.trim(),
       });
 
-      if (res.success) {
+      if (res?.success) {
         setDsrList((prev) =>
           prev.map((d) =>
             d.id === selectedRequest.id ? { ...d, status: resolutionStatus } : d
@@ -100,6 +100,8 @@ export default function PrivacyClient({ initialDeletions = [], initialDsrQueue =
         setToast(`Request for ${selectedRequest.email} marked ${resolutionStatus}.`);
         handleCloseModal();
         setTimeout(() => setToast(null), 5000);
+      } else {
+        setActionError(res?.error || "Failed to update request.");
       }
     } catch (err) {
       setActionError(err.message || "Failed to update request.");
@@ -351,7 +353,7 @@ export default function PrivacyClient({ initialDeletions = [], initialDsrQueue =
               <h3 className="text-base font-semibold text-white">
                 {resolutionStatus === "fulfilled" ? "Fulfill Data Subject Request" : "Reject Data Subject Request"}
               </h3>
-              <button onClick={handleCloseModal} className="text-white/60 hover:text-white transition-colors text-sm">
+              <button type="button" aria-label="Close dialog" onClick={handleCloseModal} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-white/60 hover:text-white transition-colors text-sm rounded-lg">
                 ✕
               </button>
             </div>

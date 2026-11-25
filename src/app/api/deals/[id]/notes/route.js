@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
 import { z } from "zod";
 import { logNoteActivityDeduped } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -21,24 +21,25 @@ const schema = z.object({
 export async function PATCH(request, { params }) {
   try {
     const { id: dealId } = await params;
-    const parsed = schema.safeParse(await request.json());
+    const userId = await resolveUserId(request);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
+
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    const parsed = schema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { note  } = parsed.data;
-
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
-    let userId = null;
-    if (token && token.trim() !== "") {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      const authClient = createClient(supabaseUrl, supabaseAnonKey);
-      const { data: { user }, error } = await authClient.auth.getUser(token);
-      if (!error && user) userId = user.id;
-    }
-    // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { note } = parsed.data;
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")

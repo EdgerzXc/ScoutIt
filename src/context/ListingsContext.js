@@ -11,6 +11,7 @@ export const DEFAULT_LISTINGS_VALUE = {
   catalogue: [],
   isLoading: false,
   inventoryError: false,
+  inventoryStats: null,
   refetchInventory: () => {},
   searchByRadius: async () => {},
   updateListing: async () => false,

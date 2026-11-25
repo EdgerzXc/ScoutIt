@@ -93,14 +93,19 @@ const nextConfig = {
     ];
   },
   async headers() {
+    const contentSecurityPolicy = cspHeader.replace(/\n/g, '');
     return [
       {
         source: '/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: cspHeader.replace(/\n/g, ''),
+            value: contentSecurityPolicy,
           },
+          ...(process.env.VERCEL_ENV === 'preview' ? [{
+            key: 'Content-Security-Policy-Report-Only',
+            value: contentSecurityPolicy.replace(" 'unsafe-eval'", ''),
+          }] : []),
           {
             key: 'X-Frame-Options',
             value: 'DENY',
@@ -155,6 +160,39 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/api/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+      },
+      ...[
+        '/admin',
+        '/admin/:path*',
+        '/api/wallet/:path*',
+        '/api/deals/:path*',
+        '/api/dashboard/:path*',
+        '/api/crm/:path*',
+        '/api/calendar/:path*',
+        '/api/oauth/:path*',
+        '/api/user/:path*',
+        '/api/notifications/:path*',
+        '/api/off-market/:path*',
+        '/api/property/claim/:path*',
+        '/api/properties/:path*',
+        '/api/wishlist/:path*',
+        '/api/professionals/:path*',
+        '/api/broker/:path*',
+        '/api/faqs/appeal/:path*',
+        '/api/faqs/preflight/:path*',
+        '/api/faqs/review/:path*',
+        '/api/seo/:path*',
+        '/api/availability/:path*',
+        '/api/viewing-appointments/:path*',
+        '/api/community/me/:path*',
+        '/api/wrap/:path*',
+      ].map((source) => ({
+        source,
+        headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+      })),
     ]
   },
 };

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
+import { OPEN_CLAIM_STATUSES } from "@/lib/propertyClaimPolicy.mjs";
 import {
   Inbox,
   CheckSquare,
@@ -12,6 +13,8 @@ import {
   FileWarning,
   ArrowRight,
   Sparkles,
+  Gavel,
+  Award,
 } from "lucide-react";
 
 // Mission Inbox — the single daily triage list. It does NOT own any data;
@@ -33,6 +36,25 @@ async function safe(promise) {
   }
 }
 
+function formatTriageSummary(summary, propertyId) {
+  if (typeof summary === "string" && summary.trim()) {
+    return summary.trim();
+  }
+  if (summary && typeof summary === "object") {
+    const candidate =
+      summary.summary ||
+      summary.headline ||
+      summary.reason ||
+      summary.recommendation ||
+      summary.status ||
+      summary.verdict;
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+  return `Claim on property ${propertyId?.slice(0, 8) || "record"}...`;
+}
+
 export default async function MissionInboxPage() {
   const staff = await getCurrentStaff();
   if (!staff) redirect("/?error=NotAuthorized");
@@ -40,7 +62,7 @@ export default async function MissionInboxPage() {
   const admin = createAdminClient();
   const isOps = staff.tier >= TIERS.OPS_MANAGER;
 
-  const [approvals, verifications, disputes, support, flags, quarantine] = await Promise.all([
+  const [approvals, verifications, disputes, support, flags, quarantine, claims, charters] = await Promise.all([
     safe(
       admin
         .from("properties")
@@ -93,6 +115,26 @@ export default async function MissionInboxPage() {
         .order("created_at", { ascending: false })
         .limit(6)
     ),
+    isOps
+      ? safe(
+          admin
+            .from("property_claims")
+            .select("id, property_id, claimed_relationship, triage_summary, created_at")
+            .in("status", OPEN_CLAIM_STATUSES)
+            .order("created_at", { ascending: true })
+            .limit(6)
+        )
+      : Promise.resolve([]),
+    isOps
+      ? safe(
+          admin
+            .from("charter_applications")
+            .select("id, badge_id, full_name, agency_name, organization, created_at")
+            .eq("status", "pending")
+            .order("created_at", { ascending: true })
+            .limit(6)
+        )
+      : Promise.resolve([]),
   ]);
 
   const lanes = [
@@ -150,12 +192,19 @@ export default async function MissionInboxPage() {
       cta: "Open Support Desk",
       count: support.length,
       hidden: !isOps,
-      items: support.map((s) => ({
-        id: s.id,
-        primary: s.subject || s.name || "Inbound message",
-        secondary: `${s.name} · ${s.email} (${s.status === "in_progress" ? "In Progress" : "New"})`,
-        at: s.created_at,
-      })),
+      items: support.map((s) => {
+        const triageTag = s.subject?.includes("[ENTERPRISE INTAKE]")
+          ? "Enterprise Intake · "
+          : s.subject?.includes("[LISTING / CLAIM]")
+            ? "Listing / Claim · "
+            : "";
+        return {
+          id: s.id,
+          primary: s.subject || s.name || "Inbound message",
+          secondary: `${triageTag}${s.name} · ${s.email} (${s.status === "in_progress" ? "In Progress" : "New"})`,
+          at: s.created_at,
+        };
+      }),
     },
     {
       key: "security",
@@ -188,6 +237,38 @@ export default async function MissionInboxPage() {
         secondary: labelize(f.scan_verdict || f.scan_status),
         at: f.created_at,
         mono: true,
+      })),
+    },
+    {
+      key: "claims",
+      title: "Ownership Claims",
+      subtitle: isOps ? "Legal title & agency mandate claims awaiting review" : "Ops Manager access required",
+      icon: <Gavel className="w-4 h-4 text-[#E8AE3C]" />,
+      href: "/dashboard/claims",
+      cta: "Open Claims Queue",
+      count: claims.length,
+      hidden: !isOps,
+      items: claims.map((c) => ({
+        id: c.id,
+        primary: formatTriageSummary(c.triage_summary, c.property_id),
+        secondary: labelize(c.claimed_relationship || "claim"),
+        at: c.created_at,
+      })),
+    },
+    {
+      key: "charter",
+      title: "Charter Applications",
+      subtitle: isOps ? "Pioneer charter applications awaiting vetting and minting" : "Ops Manager access required",
+      icon: <Award className="w-4 h-4 text-[#F7C64E]" />,
+      href: "/dashboard/badges",
+      cta: "Review Applications",
+      count: charters.length,
+      hidden: !isOps,
+      items: charters.map((ch) => ({
+        id: ch.id,
+        primary: ch.full_name || ch.agency_name || "Applicant",
+        secondary: `${ch.badge_id}${ch.organization ? ` · ${ch.organization}` : ""}`,
+        at: ch.created_at,
       })),
     },
   ].filter((lane) => !lane.hidden);

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '@/app/api/property/verify/route';
 import * as serverAuth from '@/lib/serverAuth';
+import { requireAdmin } from '@/lib/adminGuard';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { stampAirtableFreshness } from '@/lib/airtableFreshness';
 
@@ -18,6 +19,10 @@ import { stampAirtableFreshness } from '@/lib/airtableFreshness';
 
 vi.mock('@/lib/serverAuth', () => ({
   resolveUserId: vi.fn(),
+}));
+
+vi.mock('@/lib/adminGuard', () => ({
+  requireAdmin: vi.fn(),
 }));
 
 vi.mock('@/lib/supabaseAdmin', () => ({
@@ -62,6 +67,11 @@ function mockDb({ row = REAL_ROW, error = null, roles = [], updateErrors = [] } 
   const eqCalls = [];
   const updates = [];
   const audits = [];
+  vi.mocked(requireAdmin).mockResolvedValue(
+    roles.includes('staff')
+      ? { authorized: true, user: { id: 'staff-1' }, staff: { id: 'staff-1', tier: 1, is_finance: false, active: true } }
+      : { authorized: false, status: 403, error: 'Forbidden' }
+  );
   supabaseAdmin.from = vi.fn().mockImplementation((table) => {
     if (table === 'properties') {
       return {
@@ -118,6 +128,7 @@ describe('/api/property/verify API endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-owner');
+    vi.mocked(requireAdmin).mockResolvedValue({ authorized: false, status: 403, error: 'Forbidden' });
     vi.mocked(stampAirtableFreshness).mockResolvedValue({ ok: true, recordId: 'rec-public' });
   });
 

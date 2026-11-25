@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Calendar, RefreshCw } from "lucide-react";
+import { Calendar, RefreshCw, FolderOpen, Flag } from "lucide-react";
 import { ANONYMOUS_CONNECT_LABEL, viewerIsRequestSender } from "@/lib/identityDisclosure";
 import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import { motion } from "framer-motion";
@@ -7,7 +7,7 @@ import BookingModal from "./BookingModal";
 import DealFileSlideOver from "./crm/DealFileSlideOver";
 import ViewingWorkspaceCard from "./ViewingWorkspaceCard";
 import VoiceNotePlayer from "./VoiceNotePlayer";
-import { uploadAttachment } from "../../lib/storage";
+import { uploadAttachment, getAttachmentSignedUrl } from "../../lib/storage";
 import { getSession, getUser } from "../../lib/authClient";
 import { readDevelopmentMockUser } from "../../lib/developmentMock";
 import { sanitizeError } from "@/lib/sanitizeError";
@@ -32,10 +32,7 @@ const CLOSED_STATUSES = ["closed", "declined", "expired", "reported"];
 const isClosed = (status) => CLOSED_STATUSES.includes(status);
 
 // Safe Link Parser to prevent XSS + Rich Interactive Card Renderer
-const renderTextWithLinks = (
-  text,
-  { onAcceptViewing, onRescheduleViewing, onAcceptReschedule, viewingStatus } = {},
-) => {
+const renderTextWithLinks = (text) => {
   if (!text) return null;
 
   // 1. Initial Viewing Request
@@ -52,39 +49,10 @@ const renderTextWithLinks = (
               <h4 className="text-[12px] font-mono uppercase tracking-widest text-gold-bright font-bold">
                 Live Viewing Requested
               </h4>
-              <span className={`text-[12px] font-mono uppercase px-1.5 py-0.5 rounded ${
-                viewingStatus === "confirmed"
-                  ? "bg-success/10 text-success"
-                  : viewingStatus === "cancelled"
-                    ? "bg-error/10 text-error"
-                    : "bg-gold-accent/20 text-gold-accent"
-              }`}>
-                {viewingStatus === "confirmed" ? "Confirmed" : viewingStatus === "cancelled" ? "Cancelled" : "Pending approval"}
-              </span>
             </div>
             <p className="text-xs font-semibold text-on-surface mt-0.5">{timeStr}</p>
           </div>
         </div>
-        {(onAcceptViewing || onRescheduleViewing) && (
-          <div className="flex gap-2 pt-2 border-t border-surface-variant">
-            {onAcceptViewing && (
-              <button
-                onClick={onAcceptViewing}
-                className="flex-1 py-2 px-3 rounded-lg bg-success/10 text-success border border-success/35 text-[12px] font-mono uppercase tracking-wider hover:bg-success/15 transition-all duration-300 ease-out font-bold"
-              >
-                ✓ Confirm viewing
-              </button>
-            )}
-            {onRescheduleViewing && (
-              <button
-                onClick={onRescheduleViewing}
-                className="py-2 px-3 rounded-lg bg-surface-variant/50 text-text-secondary border border-surface-variant text-[12px] font-mono uppercase tracking-wider hover:border-gold-accent/30 hover:text-on-surface transition-all duration-300 ease-out"
-              >
-                Move
-              </button>
-            )}
-          </div>
-        )}
       </div>
     );
   }
@@ -103,33 +71,10 @@ const renderTextWithLinks = (
               <h4 className="text-[12px] font-mono uppercase tracking-widest text-gold-accent font-bold">
                 Reschedule Proposed
               </h4>
-              <span className="text-[12px] font-mono uppercase bg-gold-accent/15 text-gold-bright px-1.5 py-0.5 rounded">
-                Action Required
-              </span>
             </div>
             <p className="text-xs font-semibold text-on-surface mt-0.5">{details}</p>
           </div>
         </div>
-        {(onAcceptReschedule || onRescheduleViewing) && (
-          <div className="flex gap-2 pt-2 border-t border-surface-variant">
-            {onAcceptReschedule && (
-              <button
-                onClick={() => onAcceptReschedule(details)}
-                className="flex-1 py-2 px-3 rounded-lg bg-success/10 text-success border border-success/35 text-[12px] font-mono uppercase tracking-wider hover:bg-success/15 transition-all duration-300 ease-out font-bold"
-              >
-                ✓ Confirm new slot
-              </button>
-            )}
-            {onRescheduleViewing && (
-              <button
-                onClick={onRescheduleViewing}
-                className="py-2 px-3 rounded-lg bg-surface-variant/50 text-text-secondary border border-surface-variant text-[12px] font-mono uppercase tracking-wider hover:border-gold-accent/30 hover:text-on-surface transition-all duration-300 ease-out"
-              >
-                Propose other
-              </button>
-            )}
-          </div>
-        )}
       </div>
     );
   }
@@ -259,6 +204,7 @@ function normalizeViewingAppointment(row, deal, fallback = {}) {
     endsAt: row.endsAt || row.ends_at || null,
     durationMinutes: row.durationMinutes || row.duration_minutes || fallback.durationMinutes || null,
     status: row.status || fallback.status || "pending",
+    updatedAt: row.updatedAt || row.updated_at,
     isHost: row.isHost ?? fallback.isHost ?? false,
     meetLink: row.meetLink || row.meet_link || fallback.meetLink || null,
   };
@@ -312,9 +258,11 @@ export default function ChatBox({
   const [blockBusy, setBlockBusy] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingMode, setBookingMode] = useState("create");
+  const [bookingViewing, setBookingViewing] = useState(null);
   const [activeViewing, setActiveViewing] = useState(null);
   const [viewingBusy, setViewingBusy] = useState(false);
   const [viewingError, setViewingError] = useState(null);
+  const viewingLoadGeneration = useRef(0);
 
   // Staff Support / Glitch reporting state
   const [showStaffModal, setShowStaffModal] = useState(false);
@@ -336,6 +284,7 @@ export default function ChatBox({
   // "no dispute" while still loading tells someone their report vanished.
   const [dispute, setDispute] = useState(null);
   const [disputeLoad, setDisputeLoad] = useState("loading");
+  const [disputeNotice, setDisputeNotice] = useState("");
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
   const [disputeDetails, setDisputeDetails] = useState("");
@@ -344,8 +293,11 @@ export default function ChatBox({
 
   const [showConfirmHandshake, setShowConfirmHandshake] = useState(false);
   const [showDealFile, setShowDealFile] = useState(false);
+  const [vaultNotice, setVaultNotice] = useState(false);
   const [isPitchExpanded, setIsPitchExpanded] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [refreshedAttachmentUrls, setRefreshedAttachmentUrls] = useState({});
+  const attemptedAttachmentRefreshRef = useRef(new Set());
   const [handshakeBusy, setHandshakeBusy] = useState(false);
   const [pendingBusy, setPendingBusy] = useState(false);
 
@@ -428,22 +380,24 @@ export default function ChatBox({
   }, [deal.id, mapMessage]);
 
   const loadActiveViewing = useCallback(async () => {
+    const generation = ++viewingLoadGeneration.current;
     setViewingError(null);
     try {
       const { userId } = await resolveAuth();
       if (!userId) {
-        setActiveViewing(null);
+        if (generation === viewingLoadGeneration.current) setActiveViewing(null);
         return;
       }
       const data = await crmFetch("/api/viewing-appointments", { mockUserId: userId });
+      if (generation !== viewingLoadGeneration.current) return;
       setActiveViewing(selectCurrentViewing(data.appointments, {
         id: deal.id,
         property_title: deal.property_title,
       }));
     } catch (err) {
+      if (generation !== viewingLoadGeneration.current) return;
       console.error("Failed to load the deal's viewing", err);
-      setActiveViewing(null);
-      setViewingError("Couldn't check the live viewing status. CRM and Calendar may have newer information.");
+      setViewingError("Couldn't load the latest viewing details.");
     }
   }, [deal.id, deal.property_title]);
 
@@ -830,6 +784,7 @@ export default function ChatBox({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Couldn't send your report.");
+      setDisputeNotice(data.historyPurged ? data.message : "");
       // Re-read rather than trusting the POST's echo: the banner must show what
       // the database actually holds, including the case where a hold already
       // existed and this filing joined it instead of creating one.
@@ -959,12 +914,16 @@ export default function ChatBox({
     setViewingBusy(true);
     setViewingError(null);
     try {
-      await crmFetch(`/api/viewing-appointments/${activeViewing.id}`, {
+      const { id, updatedAt } = activeViewing;
+      const { appointment } = await crmFetch(`/api/viewing-appointments/${id}`, {
         method: "PATCH",
         mockUserId: myUserId,
-        body: { status },
+        body: { status, expectedUpdatedAt: updatedAt },
       });
-      setActiveViewing((current) => current ? { ...current, status } : current);
+      viewingLoadGeneration.current += 1;
+      setActiveViewing((current) => current?.id === id && current.updatedAt === updatedAt
+        ? { ...current, status: appointment.status, updatedAt: appointment.updated_at }
+        : current);
       window.dispatchEvent(new Event("calendar:refresh"));
 
       const notice = status === "confirmed"
@@ -979,7 +938,12 @@ export default function ChatBox({
         );
       }
     } catch (err) {
-      setViewingError(sanitizeError(err, "Couldn't update this viewing."));
+      if (err.status === 409) {
+        await loadActiveViewing();
+        setViewingError(err.message);
+      } else {
+        setViewingError(sanitizeError(err, "Couldn't update this viewing."));
+      }
     } finally {
       setViewingBusy(false);
     }
@@ -990,6 +954,7 @@ export default function ChatBox({
 
   const openViewingPicker = (mode = "create") => {
     setBookingMode(mode);
+    setBookingViewing(mode === "reschedule" ? activeViewing : null);
     setShowBookingModal(true);
   };
 
@@ -1004,10 +969,11 @@ export default function ChatBox({
   const handleViewingScheduled = async (appointment) => {
     const wasReschedule = bookingMode === "reschedule";
     const normalized = normalizeViewingAppointment(appointment, deal, {
-      isHost: wasReschedule ? activeViewing?.isHost : false,
-      meetLink: activeViewing?.meetLink,
-      durationMinutes: activeViewing?.durationMinutes,
+      isHost: wasReschedule ? bookingViewing?.isHost : false,
+      meetLink: bookingViewing?.meetLink,
+      durationMinutes: bookingViewing?.durationMinutes,
     });
+    viewingLoadGeneration.current += 1;
     setActiveViewing(normalized);
     setShowBookingModal(false);
     setViewingError(null);
@@ -1064,11 +1030,70 @@ export default function ChatBox({
   const msLeft = deal.expires_at ? new Date(deal.expires_at) - new Date() : null;
   const daysLeft = msLeft === null ? null : Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
 
+  const refreshAttachmentUrl = useCallback(async (att) => {
+    if (!att?.path || !deal.id) return;
+    if (attemptedAttachmentRefreshRef.current.has(att.path)) return;
+    attemptedAttachmentRefreshRef.current.add(att.path);
+    try {
+      const { token, mockOwnerId } = await resolveAuth();
+      const signedUrl = await getAttachmentSignedUrl(deal.id, att.path, { token, mockOwnerId });
+      if (signedUrl) {
+        setRefreshedAttachmentUrls((prev) =>
+          prev[att.path] === signedUrl ? prev : { ...prev, [att.path]: signedUrl }
+        );
+      }
+    } catch {
+      // Keep original URL or allow click fallback to surface any error
+    }
+  }, [deal.id]);
+
+  useEffect(() => {
+    attemptedAttachmentRefreshRef.current.clear();
+    setRefreshedAttachmentUrls({});
+  }, [deal.id]);
+
+  useEffect(() => {
+    const staleThresholdMs = 45 * 60 * 1000;
+    const now = Date.now();
+    for (const msg of messages) {
+      const sentAt = msg?.timestamp ? Date.parse(msg.timestamp) : NaN;
+      const isAged = !Number.isFinite(sentAt) || now - sentAt > staleThresholdMs;
+      if (!isAged || !Array.isArray(msg?.attachments)) continue;
+      for (const att of msg.attachments) {
+        if (att?.path && !attemptedAttachmentRefreshRef.current.has(att.path)) {
+          refreshAttachmentUrl(att);
+        }
+      }
+    }
+  }, [messages, refreshAttachmentUrl]);
+
+  const handleOpenAttachment = async (e, att) => {
+    if (!att?.path) return;
+    e.preventDefault();
+    try {
+      const { token, mockOwnerId } = await resolveAuth();
+      const signedUrl = await getAttachmentSignedUrl(deal.id, att.path, { token, mockOwnerId });
+      setRefreshedAttachmentUrls((prev) =>
+        prev[att.path] === signedUrl ? prev : { ...prev, [att.path]: signedUrl }
+      );
+      window.open(signedUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      if (att.url) {
+        window.open(att.url, "_blank", "noopener,noreferrer");
+      } else {
+        setUploadError(sanitizeError(err, "Couldn't open attachment."));
+        setTimeout(() => setUploadError(null), 5000);
+      }
+    }
+  };
+
   const renderAttachment = (att) => {
+    const resolvedUrl = (att.path && refreshedAttachmentUrls[att.path]) || att.url;
     if (att.isVoiceNote || (att.type && att.type.startsWith('audio/'))) {
       return (
         <VoiceNotePlayer
-          src={att.url}
+          key={resolvedUrl}
+          src={resolvedUrl}
           name={att.name || "Voice Memo"}
           duration={att.duration}
           size={att.size}
@@ -1078,20 +1103,30 @@ export default function ChatBox({
     }
     if (att.type && att.type.startsWith('image/')) {
       return (
-        <a href={att.url} target="_blank" rel="noopener noreferrer" className="block mt-2">
+        <a href={resolvedUrl} onClick={(e) => handleOpenAttachment(e, att)} target="_blank" rel="noopener noreferrer" className="block mt-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={att.url} alt={att.name} className="max-w-[200px] max-h-[200px] rounded object-cover border border-white/10 hover:opacity-90 transition-opacity" />
+          <img
+            src={resolvedUrl}
+            alt={att.name}
+            onError={() => refreshAttachmentUrl(att)}
+            className="max-w-[200px] max-h-[200px] rounded object-cover border border-white/10 hover:opacity-90 transition-opacity"
+          />
         </a>
       );
     }
     if (att.type && att.type.startsWith('video/')) {
       return (
-        <video src={att.url} controls className="max-w-[250px] max-h-[250px] rounded mt-2 border border-white/10" />
+        <video
+          src={resolvedUrl}
+          controls
+          onError={() => refreshAttachmentUrl(att)}
+          className="max-w-[250px] max-h-[250px] rounded mt-2 border border-white/10"
+        />
       );
     }
     if (att.type === 'application/pdf') {
       return (
-        <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mt-2 p-2 bg-black/20 rounded border border-white/10 hover:bg-black/40 transition">
+        <a href={resolvedUrl} onClick={(e) => handleOpenAttachment(e, att)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mt-2 p-2 bg-black/20 rounded border border-white/10 hover:bg-black/40 transition">
           <span className="text-error text-xl">📄</span>
           <div className="flex flex-col overflow-hidden">
             <span className="text-xs truncate font-working-title">{att.name}</span>
@@ -1608,11 +1643,7 @@ export default function ChatBox({
           <p className="mt-1 text-[12px] text-text-secondary leading-relaxed">
             {dispute.onHold ? (
               <>
-                ScoutIt is reviewing this conversation.{" "}
-                <strong className="text-on-surface">
-                  These messages are kept in full until the review finishes
-                </strong>{" "}
-                — the {CHAT_RETENTION_DAYS}-day clock does not apply while it is open.
+                ScoutIt is reviewing this conversation. Any remaining messages are protected until the review finishes.
               </>
             ) : (
               <>
@@ -1622,6 +1653,7 @@ export default function ChatBox({
               </>
             )}
           </p>
+          {disputeNotice && <p role="status" className="mt-1 text-[12px] text-text-secondary">{disputeNotice}</p>}
           {/* Only the person who filed sees what was filed. The other party is
               told the thread is held — never the ground, which is the
               reporter's account of THEM. That filtering is done by the API;
@@ -1704,15 +1736,24 @@ export default function ChatBox({
               <button onClick={() => hasOpenViewing ? rescheduleViewing() : openViewingPicker("create")} className="flex-1 min-w-[120px] bg-gold-accent/20 text-gold-accent border border-gold-accent/30 px-3 py-2 rounded font-mono text-[12px] uppercase tracking-wider hover:bg-gold-accent/30 transition-all duration-300 ease-out">
                 {hasOpenViewing ? "Move viewing" : "Request live viewing"}
               </button>
-              <button className="flex-1 min-w-[120px] bg-surface-variant text-text-secondary border border-white/10 px-3 py-2 rounded text-xs font-working-title hover:text-white transition" onClick={() => alert("Vault access coming soon.")}>
-                📂 Open Vault
+              <button
+                type="button"
+                className="flex-1 min-w-[120px] min-h-11 inline-flex items-center justify-center gap-1.5 bg-surface-variant text-text-secondary border border-white/10 px-3 py-2 rounded text-xs font-working-title hover:text-white transition"
+                onClick={() => setVaultNotice((prev) => !prev)}
+              >
+                <FolderOpen size={14} /> Open Vault
               </button>
             </div>
+            {vaultNotice && (
+              <p role="status" className="mt-3 text-xs text-text-secondary text-center font-mono">
+                Spatial Vault access is opening soon for active deal rooms.
+              </p>
+            )}
           </div>
         </div>
       ) : deal.status === 'reported' ? (
         <div className="bg-error/20 text-error p-4 text-center text-sm font-working-title border-b border-error/30">
-          <span className="mr-2">🚩</span> This conversation was reported and permanently closed. Our Trust &amp; Safety team is reviewing the interaction.
+          <Flag size={14} className="inline-block mr-2 -mt-0.5" aria-hidden="true" /> This conversation was reported and permanently closed. Our Trust &amp; Safety team is reviewing the interaction.
         </div>
       ) : closed ? (
         // A-043. This used to read "The history stays here for your records",
@@ -1779,15 +1820,7 @@ export default function ChatBox({
                     and sent intact -- this is a display lens, so the text
                     becomes readable the instant both sides agree, with no
                     backfill or re-fetch. */}
-                {renderTextWithLinks(
-                  maskContactDetails(msg.body, contactRevealed),
-                  {
-                    onAcceptViewing: activeViewing?.isHost && activeViewing.status === "pending" ? acceptViewing : null,
-                    onRescheduleViewing: activeViewing && ["pending", "confirmed"].includes(activeViewing.status) ? rescheduleViewing : null,
-                    onAcceptReschedule: activeViewing?.isHost && activeViewing.status === "pending" ? acceptViewing : null,
-                    viewingStatus: activeViewing?.status || null,
-                  },
-                )}
+                {renderTextWithLinks(maskContactDetails(msg.body, contactRevealed))}
 
                 {/* Render Attachments */}
                 {msg.attachments && msg.attachments.length > 0 && (
@@ -2244,9 +2277,7 @@ export default function ChatBox({
                 rather than in fine print underneath it. */}
             <div className="rounded-lg border border-surface-variant bg-surface/60 p-3 space-y-2">
               <p className="text-[12px] text-text-secondary leading-relaxed">
-                <strong className="text-on-surface">Filing keeps the record.</strong> The
-                moment you send this, this conversation is protected from deletion for as
-                long as the review takes.
+                Filing protects any remaining messages until the review finishes.
               </p>
               {/* The window, computed for THIS deal rather than one line of
                   copy that is true in one case and misleading in the others. */}
@@ -2343,8 +2374,10 @@ export default function ChatBox({
         brokerName={deal.other_party}
         dealId={deal.id}
         mode={bookingMode}
-        appointmentId={activeViewing?.id || null}
-        durationMinutes={activeViewing?.durationMinutes || null}
+        appointmentId={bookingViewing?.id || null}
+        expectedUpdatedAt={bookingViewing?.updatedAt}
+        durationMinutes={bookingViewing?.durationMinutes || null}
+        onViewingChanged={loadActiveViewing}
         onSchedule={handleViewingScheduled}
       />
 

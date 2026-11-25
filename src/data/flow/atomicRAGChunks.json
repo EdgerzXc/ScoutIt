@@ -21438,7 +21438,7 @@
     "title": "Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/cron/purge-chat-messages",
+    "route": "/dashboard/inbox",
     "roles": [
       "staff",
       "seeker",
@@ -29703,6 +29703,1794 @@
     "graphVersion": "2.2.0",
     "last_verified_at": "2026-10-12",
     "lastVerifiedAt": "2026-10-12"
+  },
+  {
+    "chunk_id": "fact_cron.recompute_broker_metrics",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.recompute_broker_metrics",
+    "canonicalId": "cron.recompute_broker_metrics",
+    "title": "Cron: Recompute Broker Metrics",
+    "domain": "broker",
+    "layer": "core",
+    "route": "/api/cron/recompute-broker-metrics",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily Vercel Cron recalculating broker response latency, viewing fulfillment, and closed deal metrics.",
+    "description": "Authorized via CRON_SECRET bearer check (0 3 * * *). Updates verified broker roster KPIs cleanly without exposing client state.",
+    "available_actions": [
+      "Aggregate broker SLA and fulfillment counts",
+      "Refresh verified roster metrics"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_recompute_broker_metrics_behavior",
+        "text": "Recompute Broker Metrics cron enforces CRON_SECRET auth and updates broker SLA metrics safely.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.recompute_broker_metrics",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.recompute_broker_metrics",
+    "canonicalId": "cron.recompute_broker_metrics",
+    "title": "Recovery Protocol: Cron: Recompute Broker Metrics",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Upstream database rate limit or transient timeout"
+    ],
+    "recovery_mechanisms": [
+      "Retries on next daily schedule without corrupting partial totals"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.recompute_broker_metrics",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.recompute_broker_metrics",
+    "canonicalId": "cron.recompute_broker_metrics",
+    "title": "Implementation Evidence: Cron: Recompute Broker Metrics",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/recompute-broker-metrics/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/recompute-broker-metrics/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/recompute-broker-metrics/route.js"
+    ],
+    "database": "Supabase deals & user_profiles",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_recompute_broker_metrics_behavior",
+        "text": "Recompute Broker Metrics cron enforces CRON_SECRET auth and updates broker SLA metrics safely.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/recompute-broker-metrics/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.purge_contact_messages",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.purge_contact_messages",
+    "canonicalId": "cron.purge_contact_messages",
+    "title": "Cron: Purge Expired Contact Messages",
+    "domain": "deal",
+    "layer": "core",
+    "route": "/api/cron/purge-contact-messages",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily PII retention cron pruning expired contact form submissions past retention window.",
+    "description": "Runs at 02:30 UTC daily (30 2 * * *) gated by CRON_SECRET to enforce contact inquiry data minimization.",
+    "available_actions": [
+      "Prune aged contact_messages rows past retention TTL"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-contact-messages/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_purge_contact_messages_behavior",
+        "text": "Purge Contact Messages cron enforces CRON_SECRET auth and retention-window cleanup.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/purge-contact-messages/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.purge_contact_messages",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.purge_contact_messages",
+    "canonicalId": "cron.purge_contact_messages",
+    "title": "Recovery Protocol: Cron: Purge Expired Contact Messages",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Database query timeout during batch delete"
+    ],
+    "recovery_mechanisms": [
+      "Idempotent cutoff predicate retries safely on next run"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-contact-messages/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.purge_contact_messages",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.purge_contact_messages",
+    "canonicalId": "cron.purge_contact_messages",
+    "title": "Implementation Evidence: Cron: Purge Expired Contact Messages",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/purge-contact-messages/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/purge-contact-messages/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/purge-contact-messages/route.js"
+    ],
+    "database": "Supabase contact_messages",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-contact-messages/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_purge_contact_messages_behavior",
+        "text": "Purge Contact Messages cron enforces CRON_SECRET auth and retention-window cleanup.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/purge-contact-messages/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.purge_crm_activity",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.purge_crm_activity",
+    "canonicalId": "cron.purge_crm_activity",
+    "title": "Cron: Purge Stale CRM Activity",
+    "domain": "crm",
+    "layer": "core",
+    "route": "/api/cron/purge-crm-activity",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily zero-log CRM cleanup cron purging transient activity entries past retention limits.",
+    "description": "Runs at 03:15 UTC daily (15 3 * * *) under CRON_SECRET auth to enforce CRM activity retention guarantees.",
+    "available_actions": [
+      "Prune aged crm_activity_log rows past retention policy"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-crm-activity/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_purge_crm_activity_behavior",
+        "text": "Purge CRM Activity cron enforces CRON_SECRET auth and prunes expired CRM telemetry logs.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/purge-crm-activity/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.purge_crm_activity",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.purge_crm_activity",
+    "canonicalId": "cron.purge_crm_activity",
+    "title": "Recovery Protocol: Cron: Purge Stale CRM Activity",
+    "domain": "crm",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Database delete failure or transient contention"
+    ],
+    "recovery_mechanisms": [
+      "Logs failure safely and retries on next daily execution"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-crm-activity/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.purge_crm_activity",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.purge_crm_activity",
+    "canonicalId": "cron.purge_crm_activity",
+    "title": "Implementation Evidence: Cron: Purge Stale CRM Activity",
+    "domain": "crm",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/purge-crm-activity/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/purge-crm-activity/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/purge-crm-activity/route.js"
+    ],
+    "database": "Supabase crm_activity_log",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-crm-activity/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_purge_crm_activity_behavior",
+        "text": "Purge CRM Activity cron enforces CRON_SECRET auth and prunes expired CRM telemetry logs.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/purge-crm-activity/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.purge_analytics",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.purge_analytics",
+    "canonicalId": "cron.purge_analytics",
+    "title": "Cron: Purge Expired Analytics Events",
+    "domain": "admin",
+    "layer": "core",
+    "route": "/api/cron/purge-analytics",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily retention cron pruning raw behavioral analytics events older than the retention horizon.",
+    "description": "Runs at 03:45 UTC daily (45 3 * * *) under CRON_SECRET auth to keep telemetry storage bounded and compliant.",
+    "available_actions": [
+      "Prune aged analytics event records"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-analytics/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_purge_analytics_behavior",
+        "text": "Purge Analytics cron enforces CRON_SECRET auth and enforces raw event TTL cleanup.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/purge-analytics/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.purge_analytics",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.purge_analytics",
+    "canonicalId": "cron.purge_analytics",
+    "title": "Recovery Protocol: Cron: Purge Expired Analytics Events",
+    "domain": "admin",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Database query timeout during analytics cleanup"
+    ],
+    "recovery_mechanisms": [
+      "Re-runs cleanly with cutoff timestamp filter on next schedule"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-analytics/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.purge_analytics",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.purge_analytics",
+    "canonicalId": "cron.purge_analytics",
+    "title": "Implementation Evidence: Cron: Purge Expired Analytics Events",
+    "domain": "admin",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/purge-analytics/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/purge-analytics/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/purge-analytics/route.js"
+    ],
+    "database": "Supabase analytics_events",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-analytics/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_purge_analytics_behavior",
+        "text": "Purge Analytics cron enforces CRON_SECRET auth and enforces raw event TTL cleanup.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/purge-analytics/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.monthly_rollover",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.monthly_rollover",
+    "canonicalId": "cron.monthly_rollover",
+    "title": "Cron: Monthly Connects Wallet Rollover",
+    "domain": "connects",
+    "layer": "global",
+    "route": "/api/cron/monthly-rollover",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Monthly 1st-of-month cron resetting monthly tier allocations while preserving purchased and reward Connects.",
+    "description": "Runs monthly (0 4 1 * *) gated by CRON_SECRET to execute tier allowance rollover and write ledger audit rows.",
+    "available_actions": [
+      "Refresh monthly tier Connects allocation",
+      "Record rollover entries in connect_transactions"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/monthly-rollover/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_monthly_rollover_behavior",
+        "text": "Monthly Rollover cron enforces CRON_SECRET auth and resets tier Connects idempotently.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/monthly-rollover/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.monthly_rollover",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.monthly_rollover",
+    "canonicalId": "cron.monthly_rollover",
+    "title": "Recovery Protocol: Cron: Monthly Connects Wallet Rollover",
+    "domain": "connects",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Ledger RPC failure or partial batch interruption"
+    ],
+    "recovery_mechanisms": [
+      "Per-user idempotency key prevents duplicate monthly credits"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/monthly-rollover/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.monthly_rollover",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.monthly_rollover",
+    "canonicalId": "cron.monthly_rollover",
+    "title": "Implementation Evidence: Cron: Monthly Connects Wallet Rollover",
+    "domain": "connects",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/monthly-rollover/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/monthly-rollover/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/monthly-rollover/route.js"
+    ],
+    "database": "Supabase connect_balances & connect_transactions",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/monthly-rollover/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_monthly_rollover_behavior",
+        "text": "Monthly Rollover cron enforces CRON_SECRET auth and resets tier Connects idempotently.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/monthly-rollover/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.verify_prc_status",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.verify_prc_status",
+    "canonicalId": "cron.verify_prc_status",
+    "title": "Cron: Verify Broker PRC License Expiry",
+    "domain": "broker",
+    "layer": "crust",
+    "route": "/api/cron/verify-prc-status",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily RESA compliance cron flagging brokers whose PRC license expiration date has lapsed.",
+    "description": "Runs at 05:00 UTC daily (0 5 * * *) gated by CRON_SECRET to demote expired PRC licenses and alert Mission Control.",
+    "available_actions": [
+      "Audit broker PRC license expiry timestamps",
+      "Flag lapsed licenses and restrict representation"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/verify-prc-status/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_verify_prc_status_behavior",
+        "text": "Verify PRC Status cron enforces CRON_SECRET auth and flags lapsed broker credentials.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/verify-prc-status/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.verify_prc_status",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.verify_prc_status",
+    "canonicalId": "cron.verify_prc_status",
+    "title": "Recovery Protocol: Cron: Verify Broker PRC License Expiry",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Missing or malformed prc_expiry field on legacy broker row"
+    ],
+    "recovery_mechanisms": [
+      "Routes flagged broker to Mission Control PRC Audit queue"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/verify-prc-status/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.verify_prc_status",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.verify_prc_status",
+    "canonicalId": "cron.verify_prc_status",
+    "title": "Implementation Evidence: Cron: Verify Broker PRC License Expiry",
+    "domain": "broker",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/verify-prc-status/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/verify-prc-status/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/verify-prc-status/route.js"
+    ],
+    "database": "Supabase user_profiles prc_expiry",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/verify-prc-status/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_verify_prc_status_behavior",
+        "text": "Verify PRC Status cron enforces CRON_SECRET auth and flags lapsed broker credentials.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/verify-prc-status/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.calendar_sync_queue",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.calendar_sync_queue",
+    "canonicalId": "cron.calendar_sync_queue",
+    "title": "Cron: Process Calendar Sync Queue",
+    "domain": "deal",
+    "layer": "core",
+    "route": "/api/cron/process-calendar-sync-queue",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily cron draining queued Google/Outlook calendar sync retries after transient OAuth or upstream 5xx failures.",
+    "description": "Runs at 06:00 UTC daily (0 6 * * *) gated by CRON_SECRET to flush pending viewing calendar sync jobs.",
+    "available_actions": [
+      "Retry queued viewing appointment calendar sync jobs"
+    ],
+    "entry_conditions": [
+      "CRON_SECRET bearer token verified via timing-safe comparison"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_calendar_sync_queue_behavior",
+        "text": "Calendar Sync Queue cron enforces CRON_SECRET auth and drains deferred viewing calendar updates.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_cron.calendar_sync_queue",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "cron.calendar_sync_queue",
+    "canonicalId": "cron.calendar_sync_queue",
+    "title": "Recovery Protocol: Cron: Process Calendar Sync Queue",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Revoked broker OAuth token or provider 429 rate limit"
+    ],
+    "recovery_mechanisms": [
+      "Dead-letters persistently failing sync jobs and notifies broker to reconnect calendar"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_cron.calendar_sync_queue",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.calendar_sync_queue",
+    "canonicalId": "cron.calendar_sync_queue",
+    "title": "Implementation Evidence: Cron: Process Calendar Sync Queue",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/process-calendar-sync-queue/route.js",
+      "src/lib/cronAuth.js"
+    ],
+    "components": [
+      "src/app/api/cron/process-calendar-sync-queue/route.js"
+    ],
+    "apis": [
+      "src/app/api/cron/process-calendar-sync-queue/route.js"
+    ],
+    "database": "Supabase calendar_sync_queue",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "src/lib/cronAuth.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_cron_calendar_sync_queue_behavior",
+        "text": "Calendar Sync Queue cron enforces CRON_SECRET auth and drains deferred viewing calendar updates.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "src/app/api/cron/process-calendar-sync-queue/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_mc.scan_process_cron",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "mc.scan_process_cron",
+    "canonicalId": "mc.scan_process_cron",
+    "title": "Mission Control Cron: Scheduled Market Scan Processor",
+    "domain": "admin",
+    "layer": "core",
+    "route": "/dashboard",
+    "roles": [
+      "staff",
+      "enterprise"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "purpose": "Daily Mission Control Vercel Cron (0 6 * * *) executing /api/scan/process ingestion and duplicate/freshness scans.",
+    "description": "Mission Control background scanner triggered by CRON_SECRET bearer auth at /api/scan/process (mission-control/vercel.json).",
+    "available_actions": [
+      "Execute queued OSINT & market ingestion scans",
+      "Record scan job outcomes in Mission Control telemetry"
+    ],
+    "entry_conditions": [
+      "Mission Control CRON_SECRET bearer token verified"
+    ],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "mission-control/src/app/api/scan/process/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_mc_scan_process_cron_behavior",
+        "text": "Mission Control Scan Process cron enforces CRON_SECRET auth before draining scheduled scan jobs.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "mission-control/src/app/api/scan/process/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "rec_mc.scan_process_cron",
+    "chunk_type": "RECOVERY",
+    "chunkType": "RECOVERY",
+    "canonical_id": "mc.scan_process_cron",
+    "canonicalId": "mc.scan_process_cron",
+    "title": "Recovery Protocol: Mission Control Cron: Scheduled Market Scan Processor",
+    "domain": "admin",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "exceptions": [
+      "Missing CRON_SECRET header or external scraper quota throttle"
+    ],
+    "recovery_mechanisms": [
+      "Marks queued job failed cleanly with retry window for staff inspection"
+    ],
+    "source_type": "BEHAVIORAL_FAILSAFE",
+    "sourceType": "BEHAVIORAL_FAILSAFE",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "mission-control/src/app/api/scan/process/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "impl_mc.scan_process_cron",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "mc.scan_process_cron",
+    "canonicalId": "mc.scan_process_cron",
+    "title": "Implementation Evidence: Mission Control Cron: Scheduled Market Scan Processor",
+    "domain": "admin",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "PUBLIC_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "mission-control/src/app/api/scan/process/route.js"
+    ],
+    "components": [
+      "mission-control/src/app/api/scan/process/route.js"
+    ],
+    "apis": [
+      "mission-control/src/app/api/scan/process/route.js"
+    ],
+    "database": "Supabase scan_jobs & mission-control ops queue",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "mission-control/src/app/api/scan/process/route.js",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_mc_scan_process_cron_behavior",
+        "text": "Mission Control Scan Process cron enforces CRON_SECRET auth before draining scheduled scan jobs.",
+        "kind": "PRODUCT_BEHAVIOR",
+        "status": "VERIFIED",
+        "evidence": [
+          {
+            "kind": "API",
+            "path": "mission-control/src/app/api/scan/process/route.js",
+            "provenance": "EXTRACTED",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.95,
+        "machineVerifiedBy": "Automated Grounding Engine",
+        "humanReviewedBy": null,
+        "reviewStatus": "RESEARCHED",
+        "reviewedAt": null
+      }
+    ],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-14",
+    "lastVerifiedAt": "2026-11-14"
+  },
+  {
+    "chunk_id": "fact_cron.sweep_pending_requests",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.sweep_pending_requests",
+    "canonicalId": "cron.sweep_pending_requests",
+    "title": "Sweep unanswered requests",
+    "domain": "deal",
+    "layer": "core",
+    "route": "/api/cron/sweep-pending-requests",
+    "roles": [
+      "staff"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Apply the request retention policy to unanswered deals.",
+    "description": "The daily job archives unanswered requests after 7 days and removes them from the inbox after 30 days. It never refunds the Connect spent to send them.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/sweep-pending-requests/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "vercel.json",
+        "symbol": "crons",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-19",
+    "lastVerifiedAt": "2026-11-19"
+  },
+  {
+    "chunk_id": "impl_cron.sweep_pending_requests",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.sweep_pending_requests",
+    "canonicalId": "cron.sweep_pending_requests",
+    "title": "Implementation Evidence: Sweep unanswered requests",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/sweep-pending-requests/route.js",
+      "vercel.json"
+    ],
+    "components": [],
+    "apis": [],
+    "database": "None",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/sweep-pending-requests/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "vercel.json",
+        "symbol": "crons",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-19",
+    "lastVerifiedAt": "2026-11-19"
+  },
+  {
+    "chunk_id": "fact_cron.purge_chat_messages",
+    "chunk_type": "NODE_FACT",
+    "chunkType": "NODE_FACT",
+    "canonical_id": "cron.purge_chat_messages",
+    "canonicalId": "cron.purge_chat_messages",
+    "title": "Purge expired chat messages",
+    "domain": "deal",
+    "layer": "core",
+    "route": "/api/cron/purge-chat-messages",
+    "roles": [
+      "staff"
+    ],
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "purpose": "Enforce chat retention while protecting conversations under dispute.",
+    "description": "The daily job removes expired message text in bounded batches while respecting dispute holds and retaining the deal record.",
+    "available_actions": [],
+    "entry_conditions": [],
+    "source_type": "MASTER_FLOW_GRAPH",
+    "sourceType": "MASTER_FLOW_GRAPH",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-chat-messages/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "vercel.json",
+        "symbol": "crons",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [],
+    "humanReviewedBy": null,
+    "productReviewStatus": "RESEARCHED",
+    "legalReviewStatus": "RESEARCHED",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-19",
+    "lastVerifiedAt": "2026-11-19"
+  },
+  {
+    "chunk_id": "impl_cron.purge_chat_messages",
+    "chunk_type": "IMPLEMENTATION_REFERENCE",
+    "chunkType": "IMPLEMENTATION_REFERENCE",
+    "canonical_id": "cron.purge_chat_messages",
+    "canonicalId": "cron.purge_chat_messages",
+    "title": "Implementation Evidence: Purge expired chat messages",
+    "domain": "deal",
+    "status": "VERIFIED",
+    "productStatus": "APPROVED",
+    "implementationStatus": "VERIFIED",
+    "evidenceStatus": "CODE_GROUNDED",
+    "releaseStatus": "LIMITED_LIVE",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "systems": [
+      "src/app/api/cron/purge-chat-messages/route.js",
+      "vercel.json"
+    ],
+    "components": [],
+    "apis": [],
+    "database": "None",
+    "evidence": [
+      {
+        "kind": "API",
+        "path": "src/app/api/cron/purge-chat-messages/route.js",
+        "symbol": "GET",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      },
+      {
+        "kind": "CODE",
+        "path": "vercel.json",
+        "symbol": "crons",
+        "provenance": "EXTRACTED",
+        "confidence": 1,
+        "commitSha": "8a1f625f98d11bee808db9717dc76387ef497fcc"
+      }
+    ],
+    "claims": [],
+    "source_type": "CODEBASE_EVIDENCE",
+    "sourceType": "CODEBASE_EVIDENCE",
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-11-19",
+    "lastVerifiedAt": "2026-11-19"
   },
   {
     "chunk_id": "edge_e_hero_to_sys_edge_ip_masking_1",
@@ -42008,6 +43796,424 @@
       "PUBLIC"
     ],
     "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_recompute_broker_metrics",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_recompute_broker_metrics",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Recompute Broker Metrics",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_recompute_broker_metrics_to_brokers_roster",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_recompute_broker_metrics",
+    "target": "brokers_roster",
+    "transition_type": "SYSTEM",
+    "label": "Recompute Broker Metrics -> Brokers Roster KPIs",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_purge_contact_messages",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_purge_contact_messages",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Purge Contact Messages",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_purge_contact_messages_to_inquiry_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_purge_contact_messages",
+    "target": "inquiry_modal",
+    "transition_type": "SYSTEM",
+    "label": "Purge Contact Messages -> Inquiry Retention Policy",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_purge_crm_activity",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_purge_crm_activity",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Purge Stale CRM Activity",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_purge_crm_activity_to_sys_zero_log_ai_crm",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_purge_crm_activity",
+    "target": "sys_zero_log_ai_crm",
+    "transition_type": "SYSTEM",
+    "label": "Purge CRM Activity -> Zero-Log CRM Engine",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_purge_analytics",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_purge_analytics",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Purge Expired Analytics Events",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_monthly_rollover",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_monthly_rollover",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Monthly Connects Wallet Rollover",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_monthly_rollover_to_sys_connect_wallet",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_monthly_rollover",
+    "target": "sys_connect_wallet",
+    "transition_type": "SYSTEM",
+    "label": "Monthly Rollover -> Connects Wallet Engine",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_verify_prc_status",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_verify_prc_status",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Verify PRC License Expiry",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_verify_prc_status_to_brokers_roster",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_verify_prc_status",
+    "target": "brokers_roster",
+    "transition_type": "SYSTEM",
+    "label": "Verify PRC Status -> Brokers Roster Compliance",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_calendar_sync_queue",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_calendar_sync_queue",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Cron: Process Calendar Sync Queue",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_calendar_sync_queue_to_booking_modal",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_calendar_sync_queue",
+    "target": "booking_modal",
+    "transition_type": "SYSTEM",
+    "label": "Calendar Sync Queue -> Viewing Booking Modal",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_mc_scan_process_cron",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "mc_scan_process_cron",
+    "transition_type": "SYSTEM",
+    "label": "Mission Control -> Scheduled Market Scan Processor",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "PUBLIC"
+    ],
+    "securityClassification": "PUBLIC",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_sweep_pending_requests",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_sweep_pending_requests",
+    "transition_type": "SYSTEM",
+    "label": "Sweep unanswered requests",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_sweep_pending_requests_to_scenario_non_refundable_connect",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_sweep_pending_requests",
+    "target": "scenario_non_refundable_connect",
+    "transition_type": "SYSTEM",
+    "label": "Applies the policy",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_mission_control_to_cron_purge_chat_messages",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "mission_control",
+    "target": "cron_purge_chat_messages",
+    "transition_type": "SYSTEM",
+    "label": "Purge expired chat messages",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
+    "source_type": "TRANSITION_CONTRACT",
+    "sourceType": "TRANSITION_CONTRACT",
+    "evidence": [],
+    "graph_version": "2.2.0",
+    "graphVersion": "2.2.0",
+    "last_verified_at": "2026-08-19",
+    "lastVerifiedAt": "2026-08-19"
+  },
+  {
+    "chunk_id": "edge_e_cron_purge_chat_messages_to_scenario_chat_purge",
+    "chunk_type": "EDGE_TRANSITION",
+    "chunkType": "EDGE_TRANSITION",
+    "source": "cron_purge_chat_messages",
+    "target": "scenario_chat_purge",
+    "transition_type": "SYSTEM",
+    "label": "Applies the policy",
+    "preconditions": [],
+    "postconditions": [],
+    "status": "UNVERIFIED",
+    "visibility": [
+      "STAFF",
+      "ADMIN"
+    ],
+    "securityClassification": "INTERNAL",
     "source_type": "TRANSITION_CONTRACT",
     "sourceType": "TRANSITION_CONTRACT",
     "evidence": [],

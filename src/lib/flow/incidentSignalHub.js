@@ -1,4 +1,4 @@
-import { MASTER_FLOW_NODES } from "@/data/masterFlowGraphData";
+import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from "@/data/masterFlowGraphData";
 import { calculateBlastRadius } from "./incidentSimulator";
 
 const STORAGE_KEY = "scoutit_flow_incident_signals";
@@ -234,7 +234,7 @@ export function computeSignalHealthSummary(signals, nodeMap) {
       faultedNodeIds: [],
       affectedTotalCount: 0,
       criticalSignal: null,
-      message: "All 131 nodes and connections are running smoothly. No active alerts."
+      message: `All ${map.size} nodes and ${MASTER_FLOW_EDGES.length} connections are running smoothly. No active alerts.`
     };
   }
 

@@ -17,11 +17,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const userId = await resolveUserId(request);
 
-    if (!userId) return NextResponse.json({ appointments: [] });
-
-    if (!supabaseAdmin) {
-      return NextResponse.json({ appointments: [] });
-    }
+    if (!userId) return NextResponse.json({ error: "Sign in to view your schedule." }, { status: 401 });
 
     // host_id/guest_id are uuid columns — a non-uuid dev-mock id (e.g.
     // master-dev) can never be a party, and passing it into the .or() filter
@@ -30,14 +26,17 @@ export async function GET(request) {
     if (!UUID_RE.test(userId)) {
       return NextResponse.json({ appointments: [] });
     }
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Viewing schedules are temporarily unavailable." }, { status: 503 });
+    }
 
     // Fetch where user is host or guest (with 42703 fallback when O-004 columns
     // ends_at / duration_minutes / booked_timezone / meet_link are not yet migrated).
     const fullFields = `
       id, deal_id, host_id, guest_id, property_id, scheduled_at, ends_at,
-      duration_minutes, booked_timezone, status, notes, created_at, meet_link
+      duration_minutes, booked_timezone, status, notes, created_at, updated_at, meet_link
     `;
-    const baseFields = "id, deal_id, host_id, guest_id, property_id, scheduled_at, status, notes, created_at";
+    const baseFields = "id, deal_id, host_id, guest_id, property_id, scheduled_at, status, notes, created_at, updated_at";
 
     let { data: appointments, error } = await supabaseAdmin
       .from("viewing_appointments")
@@ -45,7 +44,7 @@ export async function GET(request) {
       .or(`host_id.eq.${userId},guest_id.eq.${userId}`)
       .order("scheduled_at", { ascending: true });
 
-    if (error && (error.code === "42703" || /does not exist|undefined_column/i.test(error.message || ""))) {
+    if (error && (error.code === "42703" || /undefined_column|column .* does not exist/i.test(error.message || ""))) {
       const retry = await supabaseAdmin
         .from("viewing_appointments")
         .select(baseFields)
@@ -55,13 +54,9 @@ export async function GET(request) {
       error = retry.error;
     }
 
-    if (error && (error.code === "42P01" || /relation .* does not exist/i.test(error.message || ""))) {
-      return NextResponse.json({ appointments: [] });
-    }
-
     if (error) {
-      console.warn("[APPOINTMENTS API] Fetch error, returning empty appointments:", error);
-      return NextResponse.json({ appointments: [] });
+      console.warn("[APPOINTMENTS API] Viewing schedule read failed:", error);
+      return NextResponse.json({ error: "Couldn't load your viewings." }, { status: 503 });
     }
 
     const appts = appointments || [];
@@ -173,6 +168,7 @@ export async function GET(request) {
         durationMinutes: appt.duration_minutes,
         bookedTimezone: appt.booked_timezone,
         status: appt.status,
+        updatedAt: appt.updated_at,
         notes: appt.notes,
         isHost,
         contactName: isAccepted ? otherName : "🔒 Hidden (Accept deal to view)",
@@ -181,14 +177,14 @@ export async function GET(request) {
         // Safe to expose: this query already scopes to appointments where the
         // caller is host or guest, so they're a party to the meeting. A Meet
         // room for your own viewing isn't a contact detail.
-        meetLink: appt.meet_link || null,
+        meetLink: appt.status === "cancelled" ? null : (appt.meet_link || null),
       };
     });
 
     return NextResponse.json({ appointments: result });
   } catch (err) {
-    console.warn("[APPOINTMENTS API] GET exception, returning empty appointments:", err);
-    return NextResponse.json({ appointments: [] });
+    console.warn("[APPOINTMENTS API] GET exception:", err);
+    return NextResponse.json({ error: "Couldn't load your viewings." }, { status: 503 });
   }
 }
 
@@ -210,7 +206,20 @@ const postSchema = z.object({
 // previously answer all three differently from the other endpoint.
 export async function POST(request) {
   try {
-    const parsed = postSchema.safeParse(await request.json());
+    const userId = await resolveUserId(request);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
+
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    const parsed = postSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues?.[0]?.message || "Invalid data format" },
@@ -218,12 +227,6 @@ export async function POST(request) {
       );
     }
     const { dealId, scheduledAt, durationMinutes, timezone, notes } = parsed.data;
-
-    const userId = await resolveUserId(request);
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
-    }
 
     const result = await bookViewing(supabaseAdmin, {
       dealId,
@@ -241,7 +244,7 @@ export async function POST(request) {
       );
     }
 
-    return NextResponse.json({ success: true, appointment: result.appointment });
+    return NextResponse.json({ success: true, appointment: result.appointment, calendarSync: result.calendarSync });
   } catch (err) {
     console.error("[APPOINTMENTS API] POST error:", err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

@@ -162,10 +162,14 @@ export default function OSINTControlCenter() {
   };
 
   // 4. Copy Prompt to Clipboard
-  const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(generatedPrompt);
-    setCopiedPrompt(true);
-    setTimeout(() => setCopiedPrompt(false), 3000);
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 3000);
+    } catch {
+      setJsonError("Clipboard access unavailable. Please select and copy the prompt manually.");
+    }
   };
 
   // 5. Live Validate Pasted AI JSON
@@ -275,7 +279,7 @@ export default function OSINTControlCenter() {
         <div className="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
           <button
             onClick={() => setActiveTab("raw_sources")}
-            className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2 ${
               activeTab === "raw_sources"
                 ? "bg-[#E8AE3C] text-black font-bold shadow-lg shadow-[#E8AE3C]/20"
                 : "text-white/60 hover:text-white"
@@ -286,7 +290,7 @@ export default function OSINTControlCenter() {
           </button>
           <button
             onClick={() => setActiveTab("live_briefings")}
-            className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2 ${
               activeTab === "live_briefings"
                 ? "bg-[#E8AE3C] text-black font-bold shadow-lg shadow-[#E8AE3C]/20"
                 : "text-white/60 hover:text-white"
@@ -319,7 +323,7 @@ export default function OSINTControlCenter() {
             <button
               onClick={handleGeneratePrompt}
               disabled={isActionLoading}
-              className="px-4 py-2.5 rounded-xl bg-[#E8AE3C] text-black hover:bg-[#F7C64E] font-bold text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg shadow-[#E8AE3C]/25"
+              className="px-4 py-2.5 rounded-xl bg-[#E8AE3C] text-black hover:bg-[#F7C64E] font-bold text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors shadow-lg shadow-[#E8AE3C]/25"
             >
               <Sparkles className="w-4 h-4" />
               Generate Master Prompt ({selectedSourceIds.length})
@@ -364,7 +368,7 @@ export default function OSINTControlCenter() {
                   <div
                     key={src.id}
                     onClick={() => toggleSourceSelection(src.id)}
-                    className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group ${
+                    className={`p-5 rounded-2xl border transition-colors cursor-pointer relative overflow-hidden group ${
                       isSelected
                         ? "bg-[#E8AE3C]/10 border-[#E8AE3C] shadow-lg shadow-[#E8AE3C]/10"
                         : "bg-[#121212] border-white/10 hover:border-white/20"
@@ -726,7 +730,7 @@ export default function OSINTControlCenter() {
                 type="button"
                 disabled={!parsedPreview || isActionLoading}
                 onClick={handlePublishBriefing}
-                className={`px-6 py-2.5 rounded-xl font-bold text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-all ${
+                className={`px-6 py-2.5 rounded-xl font-bold text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors ${
                   parsedPreview && !isActionLoading
                     ? "bg-[#F7C64E] text-black hover:bg-[#E8AE3C] shadow-lg shadow-[#F7C64E]/25"
                     : "bg-white/10 text-white/70 cursor-not-allowed"

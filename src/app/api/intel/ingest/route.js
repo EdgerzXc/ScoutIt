@@ -301,29 +301,12 @@ async function createIntelRecord(article, publish) {
 
 export async function POST(request) {
   try {
-    const formData = await request.formData();
-
     const auth = await authenticate(request);
     if (!auth.ok) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
-    // ── U-020: the staff requirement belongs ABOVE the paid model call ──
-    // This gate used to sit further down, guarding only `publish`. Everything
-    // between it and `authenticate()` ran for any registered account, and that
-    // included a Gemini call on a document of up to 20 MB against a single
-    // shared GEMINI_API_KEY. Sign up, upload, repeat — the owner is billed and
-    // sustained abuse degrades Intel ingest for staff too.
-    //
-    // The decision, recorded rather than assumed (U-020's boundary asks for
-    // it): **ingest is staff-only**, not metered-for-everyone. Two reasons.
-    // Its only producer is the staff Intel Studio on /admin. And this route
-    // creates INTEL_CMS *article* records — editorial content — not property
-    // listings, so AGENTS.md §2.4's owner-submitted PDF-to-listing path is a
-    // different pipeline and is not closed by this. A per-user quota was the
-    // alternative; it needs a metering table (a migration, owner-gated under
-    // O-004) and would still let every account spend real money. Staff-only
-    // is smaller, needs no schema, and fails closed.
+    // ── U-020: the staff requirement belongs ABOVE body parsing & the paid model call ──
     const staff = await requireAdmin(request, { label: "INTEL INGEST" });
     if (staff.error) {
       return NextResponse.json(
@@ -333,6 +316,11 @@ export async function POST(request) {
         },
         { status: staff.status === 401 ? 401 : 403 }
       );
+    }
+
+    const formData = await request.formData().catch(() => null);
+    if (!formData) {
+      return NextResponse.json({ error: "Invalid form payload." }, { status: 400 });
     }
 
     const source = await extractSource(formData.get("file"), formData.get("text"));

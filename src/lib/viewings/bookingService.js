@@ -15,10 +15,11 @@ import { createViewingMeet, cancelViewingMeet, enqueueCalendarSyncRetry } from "
 import { isValidTimeZone } from "@/lib/calendar/timezone";
 import { logActivity } from "@/lib/crmActivity";
 import { notifyUser } from "@/lib/notifications";
+import { isRoutedDealRecipient } from "@/lib/dealParty";
 
 /** Statuses in which a deal can still accept a new viewing. */
 const BOOKABLE_DEAL_STATUSES = new Set([
-  "connected", "pitching", "pending", "invited", "accepted", "active",
+  "connected", "pitching", "accepted", "active",
 ]);
 
 export function isBookableDealStatus(status) {
@@ -67,8 +68,12 @@ export async function bookViewing(serviceClient, {
   const isBuyer = deal.buyer_id === requesterId;
   const isBroker = deal.broker_id === requesterId;
   const isOwner = deal.properties?.owner_id === requesterId;
+  const isRoutedRecipient = (!isBuyer && !isBroker && !isOwner)
+    ? await isRoutedDealRecipient(serviceClient, dealId, requesterId)
+    : false;
+  const effectiveIsBroker = isBroker || isRoutedRecipient;
 
-  if (!isBuyer && !isBroker && !isOwner) {
+  if (!isBuyer && !effectiveIsBroker && !isOwner) {
     return { ok: false, status: 403, error: "Forbidden" };
   }
   if (timezone && !isValidTimeZone(timezone)) {
@@ -85,7 +90,7 @@ export async function bookViewing(serviceClient, {
     };
   }
 
-  const hostId = resolveViewingHostId({ deal, isBuyer, isBroker });
+  const hostId = resolveViewingHostId({ deal, isBuyer, isBroker: effectiveIsBroker });
   if (!hostId) {
     return { ok: false, status: 400, error: "Could not determine who would host this viewing" };
   }
@@ -136,7 +141,7 @@ export async function bookViewing(serviceClient, {
       notes: notes || "",
       status: "pending",
     }])
-    .select("id, deal_id, host_id, guest_id, property_id, scheduled_at, ends_at, duration_minutes, status, notes, created_at")
+    .select("id, deal_id, host_id, guest_id, property_id, scheduled_at, ends_at, duration_minutes, status, notes, created_at, updated_at")
     .single();
 
   if (insertError) {
@@ -161,9 +166,11 @@ export async function bookViewing(serviceClient, {
   // meetLink, so the host's Google calendar showed a 45-minute block for what
   // the app treated as a 60-minute viewing.
   let meetLink = null;
-  let calendarSyncPending = false;
+  let updatedAt = inserted.updated_at;
+  let calendarSync = null;
   try {
     const meet = await createViewingMeet(hostId, {
+      appointmentId: inserted.id,
       propertyTitle: deal.properties?.title,
       location: deal.properties?.location,
       scheduledAt: inserted.scheduled_at,
@@ -171,8 +178,7 @@ export async function bookViewing(serviceClient, {
       notes,
     });
     if (meet?.syncFailed) {
-      calendarSyncPending = true;
-      await enqueueCalendarSyncRetry(serviceClient, {
+      const queued = await enqueueCalendarSyncRetry(serviceClient, {
         appointmentId: inserted.id,
         hostUserId: hostId,
         operation: "create",
@@ -181,26 +187,38 @@ export async function bookViewing(serviceClient, {
           durationMinutes: slot.durationMinutes,
           propertyTitle: deal.properties?.title || null,
         },
-        errorReason: meet.error || "meet_creation_failed",
+        errorReason: "meet_creation_failed",
       });
+      calendarSync = queued ? "pending" : "failed";
     } else if (meet.meetLink || meet.googleEventId) {
-      const { error: meetStoreError } = await serviceClient
+      const { data: meetRow, error: meetStoreError } = await serviceClient
         .from("viewing_appointments")
         .update({ meet_link: meet.meetLink, google_event_id: meet.googleEventId })
-        .eq("id", inserted.id);
-      if (meetStoreError) {
+        .eq("id", inserted.id)
+        .eq("updated_at", inserted.updated_at)
+        .select("updated_at")
+        .maybeSingle();
+      if (meetStoreError || !meetRow) {
         console.error("[bookViewing] failed to store Meet identifiers:", meetStoreError);
         // Do not leave an untracked Google event behind if ScoutIt could not
         // persist the id needed to update or cancel it later.
-        if (meet.googleEventId) await cancelViewingMeet(hostId, meet.googleEventId);
+        const removed = meet.googleEventId && await cancelViewingMeet(hostId, meet.googleEventId);
+        const queued = await enqueueCalendarSyncRetry(serviceClient, {
+          appointmentId: inserted.id,
+          hostUserId: hostId,
+          googleEventId: removed ? null : meet.googleEventId,
+          operation: "create",
+          errorReason: "meet_binding_failed",
+        });
+        calendarSync = queued ? "pending" : "failed";
       } else {
         meetLink = meet.meetLink;
+        updatedAt = meetRow.updated_at;
       }
     }
   } catch (meetErr) {
     console.error("[bookViewing] Meet generation failed:", meetErr?.message);
-    calendarSyncPending = true;
-    await enqueueCalendarSyncRetry(serviceClient, {
+    const queued = await enqueueCalendarSyncRetry(serviceClient, {
       appointmentId: inserted.id,
       hostUserId: hostId,
       operation: "create",
@@ -208,8 +226,9 @@ export async function bookViewing(serviceClient, {
         scheduledAt: inserted.scheduled_at,
         durationMinutes: slot.durationMinutes,
       },
-      errorReason: meetErr?.message || "meet_generation_exception",
+      errorReason: "meet_generation_exception",
     });
+    calendarSync = queued ? "pending" : "failed";
   }
 
   await logActivity(serviceClient, {
@@ -236,11 +255,12 @@ export async function bookViewing(serviceClient, {
 
   return {
     ok: true,
-    appointment: { ...inserted, meet_link: meetLink },
+    appointment: { ...inserted, meet_link: meetLink, updated_at: updatedAt },
     meetLink,
+    calendarSync,
     // Callers that write into the deal conversation need the requester's role;
     // deriving it twice is how the two endpoints drifted apart last time.
-    requesterRole: isBuyer ? "buyer" : isBroker ? "broker" : "owner",
+    requesterRole: isBuyer ? "buyer" : effectiveIsBroker ? "broker" : "owner",
     timezone: slot.timezone,
   };
 }

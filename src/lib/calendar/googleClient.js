@@ -65,8 +65,9 @@ export function insertEvent(accessToken, body, { conferenceDataVersion } = {}) {
   return gfetch(`${CAL_BASE}${qs}`, accessToken, { method: "POST", body: JSON.stringify(body) });
 }
 
-export function patchEvent(accessToken, googleId, body) {
-  return gfetch(`${CAL_BASE}/${encodeURIComponent(googleId)}`, accessToken, {
+export function patchEvent(accessToken, googleId, body, { conferenceDataVersion } = {}) {
+  const qs = conferenceDataVersion ? `?conferenceDataVersion=${conferenceDataVersion}` : "";
+  return gfetch(`${CAL_BASE}/${encodeURIComponent(googleId)}${qs}`, accessToken, {
     method: "PATCH",
     body: JSON.stringify(body),
   });

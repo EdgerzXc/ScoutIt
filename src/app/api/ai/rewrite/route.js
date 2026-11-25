@@ -98,12 +98,13 @@ export async function POST(request) {
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     
+    const cleanText = text.replaceAll('</untrusted_description_to_rewrite>', '');
     const contextPrompt = `
 Property Category: ${safeCategory}
 Location Context: ${safeLocation}
 
 <untrusted_description_to_rewrite>
-${text}
+${cleanText}
 </untrusted_description_to_rewrite>
 `;
 

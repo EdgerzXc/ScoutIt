@@ -4,6 +4,15 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+const NO_STORE = { "Cache-Control": "private, no-store" };
+const checkBriefingLogRate = createRateLimiter({
+  limit: 30,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 // ─────────────────────────────────────────────────────────────────────────
 // BROKER BRIEFING LOG  (NEW_IDEAS.md §5)
@@ -36,12 +45,38 @@ export async function POST(req) {
 
     const userId = await resolveUserId(req);
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Sign in to continue." }, { status: 401 });
+      return NextResponse.json({ success: false, message: "Sign in to continue." }, { status: 401, headers: NO_STORE });
     }
 
-    const parsed = schema.safeParse(await req.json());
+    const rate = checkBriefingLogRate(`${clientIp(req)}:${userId}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { success: false, message: "Too many briefing log requests. Please try again shortly." },
+        { status: 429, headers: { ...NO_STORE, "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
+    const { data: profile } = await supabaseAdmin
+      .from("user_profiles")
+      .select("role, active_roles")
+      .eq("id", userId)
+      .maybeSingle();
+    const heldRoles = new Set(
+      [profile?.role, ...(Array.isArray(profile?.active_roles) ? profile.active_roles : [])]
+        .filter(Boolean)
+        .map((r) => String(r).toLowerCase())
+    );
+    if (!["broker", "salesperson", "admin", "staff"].some((r) => heldRoles.has(r))) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden: Broker or salesperson role required." },
+        { status: 403, headers: NO_STORE }
+      );
+    }
+
+    const rawBody = await req.json().catch(() => null);
+    const parsed = schema.safeParse(rawBody);
     if (!parsed.success) {
-      return NextResponse.json({ success: false, message: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Invalid payload" }, { status: 400, headers: NO_STORE });
     }
 
     // Collapse repeat generations within the hour into one row. A broker

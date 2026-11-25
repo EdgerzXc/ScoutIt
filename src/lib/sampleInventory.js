@@ -1,3 +1,7 @@
+import { spatialEmbedUrl } from "./propertyMedia";
+
+const SAMPLE_MATTERPORT_TOUR = "https://my.matterport.com/show/?m=xHWLdL3yKLQ";
+
 export const SAMPLE_PROPERTY_SLUGS = Object.freeze([
   "corner-unit-poblacion-strip",
   "cyber-sigma-tower-3",
@@ -11,63 +15,63 @@ export const SAMPLE_PROPERTY_SLUGS = Object.freeze([
 /**
  * Flagship Super Sample Vault Demonstration Media.
  * Enriches sample listings (e.g. The Ridgeline at Capitol Commons) with a complete
- * spatial vault suite (3D Luma map, 360 Matterport walkthrough, drone heatmap,
- * architectural floor plans and blueprints) to demonstrate ScoutIt's full spatial capabilities.
+ * spatial vault suite (3D Luma map, 360 Matterport walkthrough, heatmap example,
+ * and reference images).
  */
 export const SUPER_SAMPLE_VAULT_DATA = Object.freeze({
   "the-ridgeline-at-capitol-commons": Object.freeze({
     luma3dMapUrl: "https://lumalabs.ai/embed/b02c8172-e1ad-4de2-bc57-2e1bf35c5cbf",
-    matterportTourUrl: "https://my.matterport.com/show/?m=JGPnGQLNjQF",
-    virtual_tour_url: "https://my.matterport.com/show/?m=JGPnGQLNjQF",
+    matterportTourUrl: SAMPLE_MATTERPORT_TOUR,
+    virtual_tour_url: SAMPLE_MATTERPORT_TOUR,
     droneHeatmapUrl: "https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1600&q=70",
     floorPlans: Object.freeze([
       Object.freeze({
-        name: "Level 42 Penthouse · Architectural Floor Plan",
+        name: "Residential exterior reference",
         url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
         type: "image/jpeg",
       }),
       Object.freeze({
-        name: "Sky Terrace & Infinity Lap Pool Layout",
+        name: "Residential interior reference",
         url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80",
         type: "image/jpeg",
       }),
       Object.freeze({
-        name: "MEP Conduit, Electrical & HVAC Engineering Plan (PDF)",
-        url: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80#layout.pdf",
-        type: "application/pdf",
+        name: "Residential design reference",
+        url: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80",
+        type: "image/jpeg",
       }),
       Object.freeze({
-        name: "Structural Load & Seismic Isolation Schedule (PDF)",
-        url: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1600&q=80#specs.pdf",
-        type: "application/pdf",
+        name: "Architectural detail reference",
+        url: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1600&q=80",
+        type: "image/jpeg",
       }),
     ]),
   }),
   "cyber-sigma-tower-3": Object.freeze({
     luma3dMapUrl: "https://lumalabs.ai/embed/b02c8172-e1ad-4de2-bc57-2e1bf35c5cbf",
-    matterportTourUrl: "https://my.matterport.com/show/?m=JGPnGQLNjQF",
-    virtual_tour_url: "https://my.matterport.com/show/?m=JGPnGQLNjQF",
+    matterportTourUrl: SAMPLE_MATTERPORT_TOUR,
+    virtual_tour_url: SAMPLE_MATTERPORT_TOUR,
     droneHeatmapUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80",
     floorPlans: Object.freeze([
       Object.freeze({
-        name: "Level 14 East Wing · Fitted BPO Floor Plate (750 sqm)",
+        name: "Fitted office reference",
         url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80",
         type: "image/jpeg",
       }),
       Object.freeze({
-        name: "Level 22 High-Zone · Contiguous Core & Shell Layout (1,500 sqm)",
+        name: "Office layout reference",
         url: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1600&q=80",
         type: "image/jpeg",
       }),
       Object.freeze({
-        name: "MEP Chilled-Water AHU & Data Riser Engineering Blueprint (PDF)",
-        url: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80#layout.pdf",
-        type: "application/pdf",
+        name: "Interior design reference",
+        url: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80",
+        type: "image/jpeg",
       }),
       Object.freeze({
-        name: "500kg/sqm Floor Loading & Raised-Floor Power Distribution Schedule (PDF)",
-        url: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1600&q=80#specs.pdf",
-        type: "application/pdf",
+        name: "Architectural detail reference",
+        url: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1600&q=80",
+        type: "image/jpeg",
       }),
     ]),
   }),
@@ -85,18 +89,27 @@ export function normalizeSampleBundle(bundle) {
       const isSample = property.is_sample === true || isSamplePropertySlug(property.slug);
       const sampleVault = isSample ? SUPER_SAMPLE_VAULT_DATA[property.slug] : null;
 
-      if (!sampleVault && property.is_sample === isSample) return property;
+      if (!sampleVault) {
+        return property.is_sample === isSample ? property : { ...property, is_sample: isSample };
+      }
+
+      const tour = spatialEmbedUrl(property.matterportTourUrl, "matterport") ||
+        spatialEmbedUrl(property.virtual_tour_url, "matterport") || sampleVault.matterportTourUrl;
+      const floorPlans = Array.isArray(property.floorPlans) && property.floorPlans.length
+        ? property.floorPlans.map((plan) => {
+          const url = typeof plan?.url === "string" ? plan.url.split("#", 1)[0] : "";
+          return sampleVault.floorPlans.find((sample) => sample.url === url) ?? plan;
+        })
+        : sampleVault.floorPlans;
 
       return {
         ...property,
         is_sample: isSample,
-        ...(sampleVault && {
-          luma3dMapUrl: property.luma3dMapUrl || sampleVault.luma3dMapUrl,
-          matterportTourUrl: property.matterportTourUrl || sampleVault.matterportTourUrl,
-          virtual_tour_url: property.virtual_tour_url || sampleVault.virtual_tour_url,
-          droneHeatmapUrl: property.droneHeatmapUrl || sampleVault.droneHeatmapUrl,
-          floorPlans: property.floorPlans?.length ? property.floorPlans : sampleVault.floorPlans,
-        }),
+        luma3dMapUrl: property.luma3dMapUrl || sampleVault.luma3dMapUrl,
+        matterportTourUrl: tour,
+        virtual_tour_url: tour,
+        droneHeatmapUrl: property.droneHeatmapUrl || sampleVault.droneHeatmapUrl,
+        floorPlans,
       };
     }),
   };

@@ -18,8 +18,7 @@ import { getCmsBundle } from "@/lib/cmsCache";
 import { stripPremiumFields } from "@/lib/premiumFields";
 import { getHistoricalPropertyRedirect } from "@/lib/propertyRedirects";
 import { resolveServerMonetizationPhase } from "@/lib/serverMonetizationGate";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { VIA_STATUS } from "@/lib/viaRouting";
+import { resolveViaPromoter } from "@/lib/viaPromoter";
 
 export const revalidate = 3600;
 
@@ -154,32 +153,12 @@ export default async function ViaPropertyRoute({ params }) {
     notFound();
   }
 
-  // Resolve promoter details server-side
-  let promoter = null;
-  let viaStatus = VIA_STATUS.VALID;
-
-  if (supabaseAdmin && contactSlug) {
-    // Look up user profile matching slug or ID
-    const { data: profile } = await supabaseAdmin
-      .from("user_profiles")
-      .select("id, display_name, avatar_url, headline, firm, is_profile_public")
-      .or(`display_name.ilike.%${contactSlug.replace(/-/g, " ")}%,id.eq.${contactSlug}`)
-      .maybeSingle();
-
-    if (profile) {
-      promoter = profile;
-    } else {
-      promoter = {
-        id: contactSlug,
-        display_name: contactSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      };
-    }
-  } else if (contactSlug) {
-    promoter = {
-      id: contactSlug,
-      display_name: contactSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-    };
-  }
+  // A promoter is shown only when an active share link exists for this exact
+  // property and slug. The URL text itself is never rendered as an identity.
+  const { promoter, viaStatus } = await resolveViaPromoter(
+    match.slug || propertyParam,
+    contactSlug
+  );
 
   const rawCat = match ? (match.spaceCategory || match.property_type || "default").toLowerCase() : "default";
   let layoutKey = "default";

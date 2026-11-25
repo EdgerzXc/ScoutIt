@@ -3,8 +3,16 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { contactRowFromInput, mergeContactFields, planContactMerge } from "@/lib/crmContactMerge";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 export const dynamic = "force-dynamic";
+
+const checkCrmContactsRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 const VALID_CONTACT_TYPES = Object.freeze([
   "prospective_tenant",
@@ -64,6 +72,13 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const rate = checkCrmContactsRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many contact imports. Please wait a minute." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -75,7 +90,7 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
     const rawItems = Array.isArray(body?.contacts) ? body.contacts : [body];
 
     if (rawItems.length === 0 || !rawItems[0]) {

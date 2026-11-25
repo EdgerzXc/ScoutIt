@@ -598,6 +598,7 @@ function InboxInner() {
           )}
           {selectedDeal ? (
             <ChatBox
+              key={selectedDeal.id}
               deal={selectedDeal}
               onCloseDeal={handleCloseDeal}
               onOfferHandshake={() => handleOfferHandshake(selectedDeal.id)}

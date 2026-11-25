@@ -96,9 +96,14 @@ export async function deleteDocument(formData) {
 export async function askBrain(_prev, formData) {
   const staff = await getCurrentStaff();
   if (!staff) return { error: "Not authorized." };
+  // Read-only, so any active staff tier may ask — but not before MFA step-up.
+  if (staff.mfaRequired) {
+    return { error: "MFA verification required: step up to AAL2 at /dashboard/mfa." };
+  }
 
   const question = formData.get("question")?.toString().trim();
   if (!question) return { error: "Ask a question first." };
+  if (question.length > 2000) return { error: "Question is too long (2,000 character limit)." };
 
   const admin = createAdminClient();
 

@@ -10,6 +10,9 @@ export const metadata = {
 export default async function WalletPage() {
   const staff = await getCurrentStaff();
   if (!staff) redirect("/?error=NotAuthorized");
+  if (staff.tier < TIERS.OPS_MANAGER) {
+    redirect("/dashboard?error=InsufficientTier");
+  }
 
   return (
     <div className="space-y-6">
@@ -25,7 +28,7 @@ export default async function WalletPage() {
         </div>
       </div>
 
-      <WalletClient staffTier={staff.tier} />
+      <WalletClient staffTier={staff.tier} isFinance={Boolean(staff.is_finance)} />
     </div>
   );
 }

@@ -25,6 +25,7 @@ const PENDING_APPT = {
   propertyId: 'prop-e2e-1',
   propertyTitle: 'The Paragon Tower',
   scheduledAt: new Date(Date.now() + 2 * 864e5).toISOString(), // 2 days out
+  updatedAt: '2026-11-13T01:00:00+00:00',
   status: 'pending',
   notes: '',
   isHost: true,
@@ -76,7 +77,10 @@ test.describe('Viewing appointment lifecycle', () => {
     await page.route('**/api/viewing-appointments/*', async (route) => {
       const body = JSON.parse(route.request().postData() || '{}');
       patchedStatus = body.status;
-      await route.fulfill({ status: 200, json: { success: true, status: body.status } });
+      await route.fulfill({
+        status: 200,
+        json: { success: true, appointment: { status: body.status, updated_at: '2026-11-13T02:00:00+00:00' } },
+      });
     });
 
     await page.goto('http://localhost:3000/dashboard/calendar?view=agenda');
@@ -86,7 +90,7 @@ test.describe('Viewing appointment lifecycle', () => {
     await expect(page.getByText('Jordan Buyer')).toBeVisible();
 
     // As the host of a pending request, Accept / Decline are available.
-    const acceptBtn = page.getByRole('button', { name: 'Accept' });
+    const acceptBtn = page.getByRole('button', { name: 'Confirm' });
     await expect(acceptBtn).toBeVisible();
 
     await acceptBtn.click();
@@ -96,7 +100,7 @@ test.describe('Viewing appointment lifecycle', () => {
 
     // …and the row updates to the confirmed badge (Accept/Decline gone).
     await expect(page.getByText('confirmed', { exact: false })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Confirm' })).toHaveCount(0);
   });
 
   // ── 3. UI flow: the guest sees the same viewing as confirmed (read-only) ──
@@ -121,7 +125,7 @@ test.describe('Viewing appointment lifecycle', () => {
 
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
     // Guests can't confirm — no Accept/Decline, just the confirmed state.
-    await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Confirm' })).toHaveCount(0);
     await expect(page.getByText('confirmed', { exact: false })).toBeVisible();
   });
 });

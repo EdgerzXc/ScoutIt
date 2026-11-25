@@ -61,9 +61,9 @@ const NO_STORE = { "Cache-Control": "no-store" };
 // PDF-assisted drafts still awaiting their source-document check.
 export async function GET(request) {
   try {
-    const auth = await requireAdmin(request, { label: "ADMIN PDF VERIFY" });
+    const auth = await requireAdmin(request, { label: "ADMIN PDF VERIFY", minTier: 2 });
     if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+      return NextResponse.json({ error: auth.error }, { status: auth.status, headers: NO_STORE });
     }
 
     if (!supabaseAdmin) {
@@ -103,9 +103,9 @@ export async function GET(request) {
 // Records that a staff member compared the draft against its source document.
 export async function POST(request) {
   try {
-    const auth = await requireAdmin(request, { label: "ADMIN PDF VERIFY" });
+    const auth = await requireAdmin(request, { label: "ADMIN PDF VERIFY", minTier: 2 });
     if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+      return NextResponse.json({ error: auth.error }, { status: auth.status, headers: NO_STORE });
     }
 
     if (!supabaseAdmin) {

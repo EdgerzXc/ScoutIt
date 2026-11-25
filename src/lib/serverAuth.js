@@ -3,14 +3,17 @@ import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
 
 export async function resolveUserId(request) {
   const authHeader = request.headers.get("Authorization");
-  const token = authHeader ? authHeader.replace("Bearer ", "") : null;
+  const bearerMatch = typeof authHeader === "string" ? authHeader.match(/^Bearer\s+(\S+)$/i) : null;
+  const token = bearerMatch ? bearerMatch[1] : null;
 
   if (token && token.trim() !== "") {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await authClient.auth.getUser(token);
-    if (!error && user) return user.id;
+    if (supabaseUrl && supabaseAnonKey) {
+      const authClient = createClient(supabaseUrl, supabaseAnonKey);
+      const { data: { user }, error } = await authClient.auth.getUser(token);
+      if (!error && user) return user.id;
+    }
   }
   
   const requestHost = new URL(request.url).hostname;

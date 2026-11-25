@@ -93,6 +93,7 @@ export default function ConciergeAI() {
       {/* Floating Action Button */}
       <div className={`fixed z-[1000] bottom-[88px] left-5 right-auto md:bottom-6 md:left-auto md:right-6 transition-transform duration-200 motion-reduce:transition-none ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}>
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
           aria-label="Open the ScoutIt concierge"
           className="relative group w-14 h-14 bg-surface border border-gold-accent/50 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)] transition motion-safe:hover:scale-105"
@@ -129,6 +130,7 @@ export default function ConciergeAI() {
             </div>
           </div>
           <button 
+            type="button"
             onClick={() => setIsOpen(false)}
             aria-label="Close"
             className="min-h-11 min-w-11 flex items-center justify-center text-text-secondary hover:text-error transition rounded-full hover:bg-surface-variant"
@@ -173,6 +175,7 @@ export default function ConciergeAI() {
           <div className="px-6 pb-2 flex flex-col gap-2 shrink-0">
             {QUICK_PROMPTS.map((prompt, idx) => (
               <button
+                type="button"
                 key={idx}
                 onClick={() => handleSend(prompt)}
                 className="text-left text-xs font-working-title text-text-secondary border border-surface-variant rounded-lg p-3 hover:border-gold-accent hover:text-gold-accent transition bg-surface/50 backdrop-blur-md"

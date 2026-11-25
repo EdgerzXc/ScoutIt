@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { assertTier, getCurrentStaff, logAction, TIERS } from "@/lib/rbac";
+import { assertTier, getCurrentStaff, logActionStrict, TIERS } from "@/lib/rbac";
 import { recordSystemEvent } from "@/lib/systemEvents";
 import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 import {
@@ -60,7 +60,7 @@ export async function loadClaimQueue() {
     .order("created_at", { ascending: true })
     .limit(100);
 
-  if (error) return { claims: [], error: error.message };
+  if (error) return { claims: [], error: "Could not load ownership claims queue." };
   if (!claims?.length) return { claims: [], error: null };
 
   const claimIds = claims.map((c) => c.id);
@@ -85,7 +85,7 @@ export async function loadClaimQueue() {
     claimantUserIds.length > 0
       ? admin
           .from("user_profiles")
-          .select("id, full_name, email, role, active_roles, subscription_tier")
+          .select("id, display_name, role, active_roles, subscription_tier")
           .in("id", claimantUserIds)
       : Promise.resolve({ data: [] }),
   ]);
@@ -101,25 +101,37 @@ export async function loadClaimQueue() {
       },
     ])
   );
-  const profileById = Object.fromEntries((profiles.data || []).map((prof) => [prof.id, prof]));
 
-  // Generate secure 1-hour signed URLs for attached documents so reviewers can inspect them
-  const docsWithSignedUrls = await Promise.all(
-    (documents.data || []).map(async (doc) => {
-      let previewUrl = null;
-      if (doc.private_storage_path) {
+  // Resolve emails cleanly from Supabase Auth when available (user_profiles has no email/full_name column)
+  const emailByUserId = {};
+  if (typeof admin.auth?.admin?.getUserById === "function" && claimantUserIds.length > 0) {
+    await Promise.all(
+      claimantUserIds.map(async (uid) => {
         try {
-          const { data: signed } = await admin.storage
-            .from("claim-documents")
-            .createSignedUrl(doc.private_storage_path, 3600);
-          previewUrl = signed?.signedUrl || null;
+          const { data: authUser } = await admin.auth.admin.getUserById(uid);
+          if (authUser?.user?.email) emailByUserId[uid] = authUser.user.email;
         } catch {
-          // Graceful fallback if storage bucket or file not accessible in local environment
+          // Non-fatal in unit test or local preview
         }
-      }
-      return { ...doc, previewUrl };
-    })
+      })
+    );
+  }
+  const profileById = Object.fromEntries(
+    (profiles.data || []).map((prof) => [
+      prof.id,
+      {
+        ...prof,
+        full_name: prof.display_name || null,
+        email: emailByUserId[prof.id] || null,
+      },
+    ])
   );
+
+  // Never pre-sign unscanned documents in bulk; generate short-lived links on demand after scan verification.
+  const docsWithSignedUrls = (documents.data || []).map((doc) => ({
+    ...doc,
+    previewUrl: null,
+  }));
 
   const docsByClaim = {};
   for (const d of docsWithSignedUrls) (docsByClaim[d.claim_id] ||= []).push(d);
@@ -138,6 +150,47 @@ export async function loadClaimQueue() {
   };
 }
 
+/** Generate a short-lived signed URL on demand only for clean claim documents. Ops Manager+. */
+export async function getClaimDocumentUrlAction(docId) {
+  const staff = await getCurrentStaff();
+  assertTier(staff, TIERS.OPS_MANAGER);
+
+  const cleanDocId = typeof docId === "string" ? docId.trim() : "";
+  if (!cleanDocId) return { ok: false, error: "Invalid document ID." };
+
+  const admin = createAdminClient();
+  const { data: doc, error } = await admin
+    .from("property_claim_documents")
+    .select("id, claim_id, private_storage_path, malware_scan_status, original_filename")
+    .eq("id", cleanDocId)
+    .maybeSingle();
+
+  if (error || !doc) return { ok: false, error: "Document record not found." };
+  if (doc.malware_scan_status !== "clean") {
+    return { ok: false, error: "Blocked: Document has not passed malware verification." };
+  }
+  if (!doc.private_storage_path) return { ok: false, error: "Storage path missing." };
+
+  const { data: signed, error: signErr } = await admin.storage
+    .from("claim-documents")
+    .createSignedUrl(doc.private_storage_path, 120);
+
+  if (signErr || !signed?.signedUrl) {
+    return { ok: false, error: "Could not generate signed URL." };
+  }
+
+  await logActionStrict({
+    staff,
+    action: "CLAIM_DOCUMENT_VIEWED",
+    targetTable: "property_claim_documents",
+    targetId: doc.id,
+    reason: "Ops Manager inspected verified claim document",
+    metadata: { claim_id: doc.claim_id, filename: doc.original_filename || null },
+  });
+
+  return { ok: true, url: signed.signedUrl };
+}
+
 /**
  * Decide a claim.
  *
@@ -154,8 +207,10 @@ export async function decideClaim(formData) {
   if (!staff) return { ok: false, message: "Not authorised" };
 
   const transition = (formData.get("transition") || "").toString();
+  if (!Object.hasOwn(REVIEW_TRANSITIONS, transition)) {
+    return { ok: false, message: "Unknown decision." };
+  }
   const rule = REVIEW_TRANSITIONS[transition];
-  if (!rule) return { ok: false, message: "Unknown decision." };
 
   try {
     assertTier(staff, rule.transfersListing ? TIERS.SUPER_ADMIN : TIERS.OPS_MANAGER);
@@ -163,9 +218,9 @@ export async function decideClaim(formData) {
     return { ok: false, message: err.message };
   }
 
-  const claimId = (formData.get("claimId") || "").toString();
-  const reasonCode = (formData.get("reasonCode") || "").toString();
-  const note = (formData.get("note") || "").toString();
+  const claimId = (formData.get("claimId") || "").toString().trim();
+  const reasonCode = (formData.get("reasonCode") || "").toString().trim();
+  const note = (formData.get("note") || "").toString().trim();
   if (!claimId) return { ok: false, message: "Missing claim." };
 
   const admin = createAdminClient();
@@ -191,11 +246,13 @@ export async function decideClaim(formData) {
   let willExceedCap = false;
   let claimantTier = "starry";
   let listingCap = 1;
+  let previousPropertySnapshot = null;
+  let slugToUnpublishAfterCommit = null;
 
   if (verdict.transfersListing) {
     const { data: property, error: propErr } = await admin
       .from("properties")
-      .select("id, slug, canonical_slug, title, owner_id, lister_relationship, pipeline_status")
+      .select("id, slug, canonical_slug, title, owner_id, lister_relationship, pipeline_status, lifecycle_state, verified, withdrawn_at, quietly_open_to_offers")
       .eq("id", claim.property_id)
       .single();
     if (propErr || !property) {
@@ -235,6 +292,16 @@ export async function decideClaim(formData) {
     // The previous holder is recorded BEFORE the write, on the claim event and
     // in the audit entry. An approval is close to irreversible for the person
     // who loses the listing, so who they were must survive the transfer.
+    previousPropertySnapshot = {
+      owner_id: property.owner_id ?? null,
+      lister_relationship: property.lister_relationship ?? null,
+      pipeline_status: property.pipeline_status ?? null,
+      lifecycle_state: property.lifecycle_state ?? null,
+      verified: property.verified ?? false,
+      withdrawn_at: property.withdrawn_at ?? null,
+      quietly_open_to_offers: property.quietly_open_to_offers ?? false,
+    };
+
     transfer = {
       from_owner_id: property.owner_id ?? null,
       from_lister_relationship: property.lister_relationship ?? null,
@@ -255,16 +322,7 @@ export async function decideClaim(formData) {
       transferPayload.lifecycle_state = "off_market";
       transferPayload.withdrawn_at = new Date().toISOString();
       transferPayload.quietly_open_to_offers = false;
-
-      // If the property was published in Airtable, unpublish it so it leaves public view
-      const slugToUnpublish = property.canonical_slug || property.slug;
-      if (slugToUnpublish) {
-        try {
-          await unpublishPropertyFromAirtable(slugToUnpublish);
-        } catch (unpublishErr) {
-          console.error("[CLAIM APPROVAL] Airtable unpublish failed:", unpublishErr);
-        }
-      }
+      slugToUnpublishAfterCommit = property.canonical_slug || property.slug || null;
     }
 
     const { error: transferErr } = await admin
@@ -276,11 +334,11 @@ export async function decideClaim(formData) {
       // Nothing is marked approved if the transfer did not happen. An
       // "approved" claim over a listing that never moved is the worst of both:
       // the claimant is told they won and still cannot touch it.
-      return { ok: false, message: `The listing could not be transferred: ${transferErr.message}` };
+      return { ok: false, message: "The listing could not be transferred." };
     }
   }
 
-  const { error: updateErr } = await admin
+  const { data: updatedClaim, error: updateErr } = await admin
     .from("property_claims")
     .update({
       status: verdict.status,
@@ -288,9 +346,52 @@ export async function decideClaim(formData) {
       decision_reason_code: rule.requiresReason ? reasonCode : null,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", claimId);
+    .eq("id", claimId)
+    .eq("status", claim.status)
+    .select("id")
+    .maybeSingle();
 
-  if (updateErr) return { ok: false, message: updateErr.message };
+  if (updateErr || !updatedClaim) {
+    // Compensate if we already transferred the property row
+    if (previousPropertySnapshot) {
+      const { error: rollbackErr } = await admin
+        .from("properties")
+        .update(previousPropertySnapshot)
+        .eq("id", claim.property_id);
+      if (rollbackErr) {
+        await recordSystemEvent({
+          event: EVENTS.AIRTABLE_SYNC_FAILED,
+          severity: "error",
+          subjectTable: "properties",
+          subjectId: claim.property_id,
+          summary: "Claim optimistic update failed and property ownership rollback also failed.",
+          detail: { claimId, error: rollbackErr.message },
+        });
+      }
+    }
+    return {
+      ok: false,
+      message: updateErr
+        ? "Could not update claim status."
+        : "This claim was already updated by another reviewer. Refresh the queue.",
+    };
+  }
+
+  // Unpublish from Airtable ONLY after Supabase claim & transfer commit succeeds.
+  if (slugToUnpublishAfterCommit) {
+    try {
+      await unpublishPropertyFromAirtable(slugToUnpublishAfterCommit);
+    } catch (unpublishErr) {
+      await recordSystemEvent({
+        event: EVENTS.AIRTABLE_SYNC_FAILED,
+        severity: "error",
+        subjectTable: "properties",
+        subjectId: claim.property_id,
+        summary: "Claim transferred listing to off_market, but Airtable unpublish failed; reconciliation required.",
+        detail: { claimId, slug: slugToUnpublishAfterCommit, error: unpublishErr?.message || "unpublish error" },
+      });
+    }
+  }
 
   await addClaimEvent(admin, {
     claimId,
@@ -305,7 +406,7 @@ export async function decideClaim(formData) {
     },
   });
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: `claim.${transition}`,
     targetTable: "property_claims",

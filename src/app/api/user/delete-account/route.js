@@ -14,6 +14,14 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { ERASURE_CONFIRMATION } from "@/lib/accountErasure";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkDeleteAccountRate = createRateLimiter({
+  limit: 5,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 export async function POST(request) {
   try {
@@ -25,10 +33,18 @@ export async function POST(request) {
       );
     }
 
+    const rate = checkDeleteAccountRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many delete account requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     // The phrase lives in lib/accountErasure.js so the screen that asks for it
     // and the route that checks it cannot drift apart (A-126).
-    if (body.confirm !== ERASURE_CONFIRMATION) {
+    if (!body || body.confirm !== ERASURE_CONFIRMATION) {
       return NextResponse.json(
         { error: `Confirmation text '${ERASURE_CONFIRMATION}' is required` },
         { status: 400 }
@@ -69,35 +85,29 @@ export async function POST(request) {
       ["calendar_connections", "owner_user_id"], // holds encrypted OAuth tokens
       ["crm_contacts", "owner_user_id"],
       ["crm_deal_notes", "user_id"],
-      ["user_blocks", "user_id"],
+      ["connect_blocks", "blocker_id", "blocked_id"],
     ];
 
     // Sequential and checked. A partial erasure must not be reported as a
     // complete one, so the first failure stops and surfaces.
     const erased = [];
-    for (const [table, column] of erasures) {
-      const { error } = await supabaseAdmin.from(table).delete().eq(column, userId);
-      if (error) {
-        if (error.code === '42P01') {
-          // Table not present in this environment — skip gracefully
-          continue;
+    for (const [table, ...columns] of erasures) {
+      try {
+        for (const column of columns) {
+          const { error } = await supabaseAdmin.from(table).delete().eq(column, userId);
+          if (error) throw error;
         }
-        console.error(`[ACCOUNT DELETION] Failed to erase ${table}:`, error.message);
+      } catch (error) {
+        console.error(`[ACCOUNT DELETION] Failed to erase ${table}:`, error?.code || error?.name);
         return NextResponse.json(
           {
-            error: "Account deletion is incomplete and has been stopped. No data was left in an unknown state; please contact support so this can be completed by hand.",
+            error: "Account deletion stopped before it finished. Try again, or contact support if the problem continues.",
             failedAt: table,
             erased,
             retryable: true,
           },
           { status: 500 }
         );
-      }
-      if (table === "user_blocks") {
-        try {
-          await supabaseAdmin.from("connect_blocks").delete().eq("blocker_id", userId);
-          await supabaseAdmin.from("connect_blocks").delete().eq("blocked_id", userId);
-        } catch { /* best effort for connect_blocks */ }
       }
       erased.push(table);
     }
@@ -115,6 +125,7 @@ export async function POST(request) {
         display_name: "[DELETED USER]",
         avatar_url: null,
         location: null,
+        location_focus: null,
         headline: null,
         bio: null,
         firm: null,
@@ -145,15 +156,8 @@ export async function POST(request) {
 
     // 3. Revoke auth user and sessions.
     //
-    // A-075: `shouldSoftDelete = true` used to be justified as preserving "FK
-    // references for audit logs". That reason was factually wrong — `audit_logs`
-    // has NO foreign key to `auth.users` (verified via `pg_constraint`; 13 such
-    // FKs exist in `public` and this is not one of them), so nobody had actually
-    // decided this. Soft-delete is kept because a hard delete cannot be undone
-    // if an erasure is later disputed, and because the 13 real FKs elsewhere in
-    // `public` do reference `auth.users`. It retains the `auth.users` row,
-    // including the email, which is the open retention question recorded as this
-    // task's remaining boundary — not something this change settles.
+    // A-075 uses Supabase Auth soft deletion to preserve references to the
+    // retained Auth row. W-009 governs the remaining retention decisions.
     const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(
       userId,
       true
@@ -207,16 +211,19 @@ export async function POST(request) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      accountAccessRevoked: true,
-      message: "Your account and private data have been deleted.",
-      erased,
-      // Honest reporting: the deletion did happen, but if the audit record
-      // failed we say so rather than implying a complete paper trail.
-      auditRecorded: audit.ok,
-      ...(audit.ok ? {} : { warning: "Deletion completed, but the audit record could not be written. Please report this." }),
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        accountAccessRevoked: true,
+        message: "Your account and private data have been deleted.",
+        erased,
+        // Honest reporting: the deletion did happen, but if the audit record
+        // failed we say so rather than implying a complete paper trail.
+        auditRecorded: audit.ok,
+        ...(audit.ok ? {} : { warning: "Deletion completed, but the audit record could not be written. Please report this." }),
+      },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (err) {
     console.error("[ACCOUNT DELETION] Failed:", err);
     return NextResponse.json(

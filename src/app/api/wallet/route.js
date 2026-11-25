@@ -37,11 +37,18 @@ export async function GET(request) {
     const rawRole = searchParams.get("role");
 
     // Fetch user profile for subscription tier and default role
-    const { data: profile } = await supabaseAdmin
+    const { data: profile, error: profileErr } = await supabaseAdmin
       .from("user_profiles")
-      .select("role, provider_type, subscription_tier")
+      .select("role, active_roles, provider_type, subscription_tier")
       .eq("id", userId)
       .maybeSingle();
+
+    if (profileErr) {
+      return NextResponse.json(
+        { error: "Unable to verify user profile roles" },
+        { status: 503 }
+      );
+    }
 
     const mapAliasToWalletRole = (inputRole) => {
       if (!inputRole || typeof inputRole !== "string") return inputRole;
@@ -63,6 +70,30 @@ export async function GET(request) {
         { error: "Invalid role specified for wallet" },
         { status: 400 }
       );
+    }
+
+    if (!isAll && rawRole && role !== "seeker") {
+      const heldRoles = new Set(
+        [
+          profile?.role,
+          profile?.provider_type,
+          ...(Array.isArray(profile?.active_roles) ? profile.active_roles : []),
+        ]
+          .filter(Boolean)
+          .map((r) => resolveConnectRole(mapAliasToWalletRole(String(r)), null))
+          .filter(Boolean)
+      );
+      const rawHeld = [
+        profile?.role,
+        ...(Array.isArray(profile?.active_roles) ? profile.active_roles : []),
+      ].map((r) => String(r || "").trim().toLowerCase());
+      const isStaff = rawHeld.includes("admin") || rawHeld.includes("staff");
+      if (!isStaff && !heldRoles.has(role)) {
+        return NextResponse.json(
+          { error: "Forbidden: You do not hold the requested role." },
+          { status: 403 }
+        );
+      }
     }
 
     const tier = (profile?.subscription_tier || "starry").toLowerCase();

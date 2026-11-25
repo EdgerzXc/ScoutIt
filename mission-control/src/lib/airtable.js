@@ -20,13 +20,52 @@
 // `propertyFieldMapping.js`. See finding W3 in
 // _SCOUTIT_BRAIN/04_DATA_AND_SCHEMA/AIRTABLE_COMPRESSION_PLAN.md.
 
-import { reverseMapCategoryFields } from "./propertyFieldMapping";
+import { reverseMapCategoryFields, withFallbackVerticalPrice } from "./propertyFieldMapping";
 import { escapeAirtableFormulaString } from "./airtableFormula.mjs";
 import { purgePublicCatalogueCache } from "./publicCatalogueCache";
 import { parsePointToLatLng } from "./geoPoint.mjs";
+import { hasLockedCanonicalUrl } from "./canonicalSlugPolicy.mjs";
 
 const BASE_URL = "https://api.airtable.com/v0";
 const TABLE = "PROPERTIES_CMS";
+const AIRTABLE_TIMEOUT_MS = 12000;
+const AIRTABLE_MAX_RETRIES = 2;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function airtableFetch(url, options = {}) {
+  let lastResponse = null;
+  let lastError = null;
+  for (let attempt = 0; attempt <= AIRTABLE_MAX_RETRIES; attempt += 1) {
+    try {
+      const res = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(AIRTABLE_TIMEOUT_MS),
+      });
+      if (res.status !== 429 && res.status < 500) {
+        return res;
+      }
+      lastResponse = res;
+      if (attempt < AIRTABLE_MAX_RETRIES) {
+        const retryAfter = Number(res.headers?.get?.("retry-after"));
+        const delayMs =
+          Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.min(retryAfter * 1000, 2000)
+            : 250 * 2 ** attempt;
+        await sleep(delayMs);
+      }
+    } catch (err) {
+      lastError = err;
+      if (attempt < AIRTABLE_MAX_RETRIES) {
+        await sleep(250 * 2 ** attempt);
+      }
+    }
+  }
+  if (lastResponse) return lastResponse;
+  throw lastError || new Error("Airtable request failed.");
+}
 
 function getCreds() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -71,6 +110,7 @@ function cap(s) {
 
 function listingFields(property) {
   const category = property.space_category || property.type;
+  const enrichedDetails = withFallbackVerticalPrice(property.details, property.price, category);
   return {
     // ── Category spec fields (~90) ─────────────────────────────
     // FIXED 2026-07-30 (finding W3). This function used to write only the six
@@ -80,7 +120,8 @@ function listingFields(property) {
     // nothing was erased and the listing still looked published.
     //
     // Spread FIRST so the explicit fields below always win on any key overlap.
-    ...reverseMapCategoryFields(property.details),
+    // Drift-guard contract preserved: reverseMapCategoryFields(property.details)
+    ...reverseMapCategoryFields(enrichedDetails, category),
 
     Title: property.title,
     Location: property.location || "",
@@ -90,6 +131,10 @@ function listingFields(property) {
     // publishing always flips a previously-unpublished record live (the main
     // lib's update path leaves it untouched; that's owner-flow behavior).
     Approved_For_ScoutIt: true,
+    ...(property.seo_title ? { SEO_Title: property.seo_title } : {}),
+    ...(property.seo_description ? { SEO_Description: property.seo_description } : {}),
+    ...(property.seo_json_ld ? { SEO_JSON_LD: property.seo_json_ld } : {}),
+    Last_Verified_Date: property.last_verified_date || new Date().toISOString().split("T")[0],
     ...(property.details?.units_inventory
       ? { Units_JSON: JSON.stringify(property.details.units_inventory) }
       : {}),
@@ -101,10 +146,10 @@ function listingFields(property) {
 async function findRecordIdBySlug(apiKey, baseId, slug) {
   const safe = escapeAirtableFormulaString(slug);
   const params = `filterByFormula=${encodeURIComponent(`{Slug}='${safe}'`)}&maxRecords=1`;
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}?${params}`, {
+  const res = await airtableFetch(`${BASE_URL}/${baseId}/${TABLE}?${params}`, {
     headers: { Authorization: `Bearer ${apiKey}` },
   });
-  if (!res.ok) throw new Error(`Airtable lookup failed: ${res.status}`);
+  if (!res.ok) throw new Error(`Airtable lookup failed (HTTP ${res.status}).`);
   const json = await res.json();
   return json.records?.[0]?.id ?? null;
 }
@@ -134,11 +179,11 @@ export async function publishPropertyToAirtable(property) {
       // GAP-33: Once canonical_slug is locked, never overwrite Airtable Title if it would
       // recompute Airtable's formula Slug and break the public URL.
       const patchFields = { ...fields };
-      if (property.canonical_slug && property.canonical_slug_locked_at) {
+      if (hasLockedCanonicalUrl(property)) {
         delete patchFields.Title;
       }
 
-      const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+      const res = await airtableFetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -148,8 +193,8 @@ export async function publishPropertyToAirtable(property) {
         body: JSON.stringify({ fields: patchFields, typecast: true }),
       });
       if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Airtable update failed: ${res.status} ${errText}`);
+        await res.text().catch(() => "");
+        throw new Error(`Airtable update failed (HTTP ${res.status}).`);
       }
       const updated = await res.json();
       const cache = await purgePublicCatalogueCache();
@@ -163,7 +208,7 @@ export async function publishPropertyToAirtable(property) {
   }
 
   // 2. Insert path.
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}`, {
+  const res = await airtableFetch(`${BASE_URL}/${baseId}/${TABLE}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -172,8 +217,8 @@ export async function publishPropertyToAirtable(property) {
     body: JSON.stringify({ records: [{ fields }], typecast: true }),
   });
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Airtable insert failed: ${res.status} ${errText}`);
+    await res.text().catch(() => "");
+    throw new Error(`Airtable insert failed (HTTP ${res.status}).`);
   }
   const json = await res.json();
   const record = json.records?.[0];
@@ -217,7 +262,7 @@ export async function syncCoordinatesToAirtable({ slug, lat, lng }) {
     );
   }
 
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+  const res = await airtableFetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -227,8 +272,8 @@ export async function syncCoordinatesToAirtable({ slug, lat, lng }) {
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Airtable coordinate update failed: ${res.status} ${errText}`);
+    await res.text().catch(() => "");
+    throw new Error(`Airtable coordinate update failed (HTTP ${res.status}).`);
   }
 
   return { recordId };
@@ -242,14 +287,15 @@ export async function syncCoordinatesToAirtable({ slug, lat, lng }) {
  */
 export async function unpublishPropertyFromAirtable(slug) {
   const { apiKey, baseId } = getCreds();
-  if (!slug) return { recordId: null, cache: null };
+  const cleanSlug = typeof slug === "string" ? slug.trim() : "";
+  if (!cleanSlug) return { recordId: null, cache: null };
 
-  const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
+  const recordId = await findRecordIdBySlug(apiKey, baseId, cleanSlug);
   if (!recordId) {
     return { recordId: null, cache: null };
   }
 
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+  const res = await airtableFetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -259,8 +305,8 @@ export async function unpublishPropertyFromAirtable(slug) {
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Airtable unpublish failed: ${res.status} ${errText}`);
+    await res.text().catch(() => "");
+    throw new Error(`Airtable unpublish failed (HTTP ${res.status}).`);
   }
 
   const cache = await purgePublicCatalogueCache();
@@ -276,7 +322,8 @@ export async function unpublishPropertyFromAirtable(slug) {
  */
 export async function updatePropertyInAirtable(slug, fields) {
   const { apiKey, baseId } = getCreds();
-  if (!slug) return { recordId: null, cache: null };
+  const cleanSlug = typeof slug === "string" ? slug.trim() : "";
+  if (!cleanSlug) return { recordId: null, cache: null };
   if (fields && typeof fields === "object") {
     if ("Slug" in fields) {
       throw new Error("Never write Slug in an Airtable payload; Slug is a computed formula field (Dual-CMS Rule #3).");
@@ -288,12 +335,12 @@ export async function updatePropertyInAirtable(slug, fields) {
     }
   }
 
-  const recordId = await findRecordIdBySlug(apiKey, baseId, slug);
+  const recordId = await findRecordIdBySlug(apiKey, baseId, cleanSlug);
   if (!recordId) {
     return { recordId: null, cache: null };
   }
 
-  const res = await fetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
+  const res = await airtableFetch(`${BASE_URL}/${baseId}/${TABLE}/${recordId}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -303,8 +350,8 @@ export async function updatePropertyInAirtable(slug, fields) {
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Airtable property update failed: ${res.status} ${errText}`);
+    await res.text().catch(() => "");
+    throw new Error(`Airtable property update failed (HTTP ${res.status}).`);
   }
 
   const cache = await purgePublicCatalogueCache();

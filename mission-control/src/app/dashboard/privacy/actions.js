@@ -74,7 +74,7 @@ export async function loadPrivacyConsoleData() {
   try {
     const { data: messages } = await admin
       .from("contact_messages")
-      .select("id, name, email, subject, message, status, created_at")
+      .select("id, name, email, subject, message, status, staff_notes, created_at")
       .order("created_at", { ascending: false })
       .limit(150);
 
@@ -85,6 +85,17 @@ export async function loadPrivacyConsoleData() {
     dsrQueue = privacyMessages.map((m) => {
       const sla = calculateSlaStatus(m.created_at);
       const reqType = detectDsrType(m.subject || "", m.message || "");
+      const noteStatusMatch =
+        typeof m.staff_notes === "string"
+          ? /^\[DSR:(pending|under_review|fulfilled|rejected)\]/i.exec(m.staff_notes.trim())
+          : null;
+      const derivedStatus = noteStatusMatch
+        ? noteStatusMatch[1].toLowerCase()
+        : m.status === "in_progress"
+        ? DSR_STATUSES.UNDER_REVIEW
+        : m.status === "resolved"
+        ? DSR_STATUSES.FULFILLED
+        : DSR_STATUSES.PENDING;
 
       return {
         id: m.id,
@@ -93,7 +104,7 @@ export async function loadPrivacyConsoleData() {
         subject: m.subject || "Data Subject Request",
         message: m.message,
         requestType: reqType,
-        status: m.status || DSR_STATUSES.PENDING,
+        status: derivedStatus,
         createdAt: m.created_at,
         slaDeadline: sla.deadline,
         daysRemaining: sla.daysRemaining,
@@ -133,12 +144,22 @@ export async function updateDsrResolution({ requestId, status, resolutionNotes }
     throw new Error("Invalid DSR status provided.");
   }
 
+  const dbStatus =
+    status === DSR_STATUSES.UNDER_REVIEW
+      ? "in_progress"
+      : status === DSR_STATUSES.FULFILLED || status === DSR_STATUSES.REJECTED
+      ? "resolved"
+      : "new";
+
   const admin = createAdminClient();
 
   const { error } = await admin
     .from("contact_messages")
     .update({
-      status,
+      status: dbStatus,
+      staff_notes: `[DSR:${status}] ${trimmedNotes}`,
+      handled_at: new Date().toISOString(),
+      handled_by: staff.id,
     })
     .eq("id", requestId);
 

@@ -108,7 +108,7 @@ export default async function BrainPage() {
           </label>
           <input type="hidden" name="source" value="manual" />
           <div className="sm:col-span-2">
-            <button className="px-4 py-2 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors">
+            <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium bg-[rgba(232,174,60,0.10)] hover:bg-[rgba(232,174,60,0.18)] text-[#F7C64E] border border-[rgba(232,174,60,0.25)] transition-colors">
               Ingest document
             </button>
           </div>
@@ -141,7 +141,7 @@ export default async function BrainPage() {
                 {canDelete && (
                   <form action={deleteDocument}>
                     <input type="hidden" name="documentId" value={d.id} />
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-red-400/70 hover:text-red-400 hover:bg-red-400/10 border border-transparent hover:border-red-400/20 transition-colors">
+                    <button type="submit" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-red-400/70 hover:text-red-400 hover:bg-red-400/10 border border-transparent hover:border-red-400/20 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </form>

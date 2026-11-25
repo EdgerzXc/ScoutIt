@@ -32,8 +32,8 @@ export default async function OpenGateControlPage() {
       <label className="block text-sm">Subscription expiry (UTC)<input name="expiresAt" type="datetime-local" className="mt-1 w-full rounded bg-black p-3 text-white" /></label>
       <label className="block text-sm">Invoice / decision reference<input name="reason" required className="mt-1 w-full rounded bg-black p-3 text-white" /></label>
       <div className="flex gap-3">
-        <button name="enabled" value="true" className="rounded bg-gold px-5 py-3 font-mono text-xs uppercase tracking-wider text-black">Grant access</button>
-        <button name="enabled" value="false" className="rounded border border-white/20 px-5 py-3 font-mono text-xs uppercase tracking-wider">Revoke access</button>
+        <button type="submit" name="enabled" value="true" className="rounded bg-gold px-5 py-3 font-mono text-xs uppercase tracking-wider text-black">Grant access</button>
+        <button type="submit" name="enabled" value="false" className="rounded border border-white/20 px-5 py-3 font-mono text-xs uppercase tracking-wider">Revoke access</button>
       </div>
     </form>
     <section className="space-y-2">

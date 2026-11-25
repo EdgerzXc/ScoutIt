@@ -25,7 +25,7 @@ describe('/api/deals/handshake API endpoint', () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({
-        data: { id: 'deal-100', buyer_id: 'user-buyer', broker_id: 'broker-1', property_id: 'prop-1' },
+        data: { id: 'deal-100', buyer_id: 'user-buyer', broker_id: 'broker-1', property_id: 'prop-1', status: 'accepted' },
         error: null,
       }),
       update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),

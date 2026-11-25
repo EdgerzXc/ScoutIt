@@ -11,8 +11,10 @@ import { isDevelopmentMockAllowed } from "@/lib/developmentMock";
 import { useDashboard } from "../../context/DashboardContext";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
-import { FileEdit, Eye } from "lucide-react";
+import { buildPreviewCat } from "../../lib/propertyEditorSchema";
+import { FileEdit, Eye, Sparkles } from "lucide-react";
 import { registerMobileBackAction, triggerMobileBack } from "@/lib/mobileBackStack";
+import { reverseMapCategoryFields } from "../../lib/propertyFieldMapping";
 export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, initialData }) {
   const { currentUser, addToast } = useDashboard();
   
@@ -32,6 +34,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
   const [lastSaved, setLastSaved] = useState(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [confirmingClearDraft, setConfirmingClearDraft] = useState(false);
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -203,14 +206,13 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   }, [formData, draftLoaded, isEditing]);
 
   const clearDraft = () => {
-    if (window.confirm("Are you sure you want to clear your draft and start over?")) {
-      localStorage.removeItem("scoutit_listing_draft");
-      setFormData({
-        title: "", category: "", location: "", price: "", mediaLink: "", image: "", photos: ["", "", "", "", ""], description: "", verified: false, details: {},
-      });
-      setLastSaved(null);
-      setStep(1);
-    }
+    localStorage.removeItem("scoutit_listing_draft");
+    setFormData({
+      title: "", category: "", location: "", price: "", mediaLink: "", image: "", photos: ["", "", "", "", ""], description: "", verified: false, details: {},
+    });
+    setLastSaved(null);
+    setConfirmingClearDraft(false);
+    setStep(1);
   };
 
   const handleDragOver = (e) => { 
@@ -295,6 +297,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           category: draft.space_category || prev.category,
           price: draft.price || prev.price,
           description: draft.description || prev.description,
+          creationSource: "pdf_assisted",
           details: { ...prev.details, ...draft.details }
         }));
       }
@@ -349,6 +352,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         type: formData.category,
         mediaLink: formData.photos?.[0] || formData.image || "",
         completenessScore: completionPercentage,
+        creationSource: formData.creationSource || "manual",
         verified: false
       };
       onPublish(payload, true);
@@ -363,6 +367,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
         type: formData.category,
         mediaLink: formData.photos?.[0] || formData.image || "",
         completenessScore: completionPercentage,
+        creationSource: formData.creationSource || "manual",
         verified: false
       };
       onPublish(payload, false);
@@ -370,6 +375,10 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
   }, [mustHaves.title, isEditing, formData, completionPercentage, onPublish]);
 
   const draftData = useMemo(() => {
+    const rawDetails = formData.details || {};
+    const airtableMapped = reverseMapCategoryFields(rawDetails, formData.category);
+    const mergedFields = { ...rawDetails, ...airtableMapped };
+    const cat = buildPreviewCat(mergedFields);
     return {
       title: formData.title || "Untitled Property",
       location: formData.location || "Location TBD",
@@ -378,7 +387,14 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
       spaceCategory: formData.category,
       category: formData.category,
       photos: formData.photos && formData.photos.some(p => p.trim()) ? formData.photos.filter(p => p.trim()) : (formData.image ? [formData.image] : []),
-      details: formData.details
+      beds: mergedFields.Beds ?? (rawDetails.Beds || rawDetails.Bedrooms || 0),
+      baths: mergedFields.Baths ?? (rawDetails.Baths || rawDetails.Bathrooms || 0),
+      floor_sqm: mergedFields.FloorSqm ?? (rawDetails.Floor_Area_Sqm || rawDetails.Indoor_Sqm || rawDetails.floor_sqm || 0),
+      lot_sqm: mergedFields.LotSqm ?? (rawDetails.Lot_Area_Sqm || rawDetails.Alfresco_Sqm || 0),
+      parking: mergedFields.Parking ?? (rawDetails.Parking_Slots || 0),
+      rooms: mergedFields.HOSP_Room_Count ?? (rawDetails.Rooms || 0),
+      cat,
+      details: rawDetails,
     };
   }, [formData]);
 
@@ -579,22 +595,46 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
-        <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
+        <button type="button" className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
           ← {isEditing ? "Cancel" : "Exit"}
         </button>
         
         <div className="flex items-center gap-4">
           <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
           <button 
+            type="button"
             onClick={() => fileInputRef.current?.click()} 
             className="min-h-11 inline-flex items-center text-gold-accent hover:text-gold-accent/80 text-[12px] uppercase font-label-caps tracking-wider transition border border-gold-accent/30 rounded px-2 py-1"
           >
             Upload PDF (Auto-fill)
           </button>
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="min-h-11 inline-flex items-center text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
-              Clear Draft
-            </button>
+            confirmingClearDraft ? (
+              <div className="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="min-h-11 inline-flex items-center px-2.5 rounded border border-error/40 bg-error/15 text-error text-[12px] uppercase font-label-caps tracking-wider transition hover:bg-error/25"
+                >
+                  Confirm Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingClearDraft(false)}
+                  className="min-h-11 inline-flex items-center px-2 text-text-secondary hover:text-on-surface text-[12px] uppercase font-label-caps tracking-wider transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmingClearDraft(true)}
+                className="min-h-11 inline-flex items-center text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition"
+              >
+                Clear Draft
+              </button>
+            )
           )}
           <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">
             {isEditing ? "Edit Dossier" : "New Property Draft"}
@@ -627,6 +667,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                   {CATEGORIES.map(c => (
                     <button
                       key={c.id}
+                      type="button"
                       className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm active:scale-95 transition touch-manipulation ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
                     >
@@ -678,11 +719,12 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                 <div className="flex justify-between items-end">
                   <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">Property Description</label>
                   <button 
+                    type="button"
                     onClick={handleSeoOptimize}
                     disabled={isOptimizing || !formData.description}
                     className="min-h-11 inline-flex items-center gap-1 text-[12px] font-label-caps tracking-widest text-gold-accent uppercase hover:text-gold-bright transition disabled:opacity-50 bg-gold-accent/10 border border-gold-accent/30 px-2 py-1 rounded"
                   >
-                    {isOptimizing ? "Optimizing..." : "✨ SEO Optimize Description"}
+                    {isOptimizing ? "Optimizing..." : <><Sparkles size={13} aria-hidden="true" /><span>SEO Optimize Description</span></>}
                   </button>
                 </div>
                 <textarea 
@@ -786,6 +828,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
 
             <div className="flex flex-wrap gap-4 items-center">
               <button 
+                type="button"
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
                 className="min-h-11 px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
@@ -795,6 +838,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
               
               {step === 1 ? (
                 <button 
+                  type="button"
                   onClick={() => setStep(2)}
                   disabled={!Object.values(mustHaves).every(Boolean)}
                   className="min-h-11 px-6 py-2 rounded bg-surface-variant text-on-surface text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent hover:text-background disabled:opacity-50 transition"
@@ -815,6 +859,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
                     </span>
                   </label>
                   <button 
+                    type="button"
                     onClick={handlePublish}
                     disabled={!isPublishable || !isVerified}
                     className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] disabled:shadow-none w-full"
@@ -863,7 +908,7 @@ export default function LiveEditorWorkspace({ onPublish, onClose, isEditing, ini
           <span className="md:hidden text-xs font-mono opacity-80">{completionPercentage}%</span>
         </div>
         <div className="mt-4 md:mt-10 opacity-95 md:scale-[0.98] origin-top transition pointer-events-auto">
-          {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
+          {['commercial', 'restaurants', 'venues', 'str', 'hospitality'].includes(formData.category) ? (
             <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />
           ) : (
             <ResidentialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={step === 3 ? 'units' : 'space'} />

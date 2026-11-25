@@ -14,6 +14,8 @@ import {
   ShieldBan,
   Wrench,
   Scale,
+  Inbox,
+  Mail,
 } from "lucide-react";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -227,10 +229,18 @@ export default async function DashboardOverview() {
         <div className="bg-[#121212] border border-white/5 rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
           <div className="space-y-2">
+            <QuickLink href="/dashboard/inbox" icon={Inbox} label="Mission Inbox · Daily Triage" />
+            {staff.tier >= 2 && (
+              <QuickLink href="/dashboard/contact" icon={Mail} label="Direct Support & Contact Queue" />
+            )}
             <QuickLink href="/dashboard/cms" icon={ClipboardCheck} label="Review pending properties" />
             <QuickLink href="/dashboard/crm" icon={Users} label="Open User CRM" />
-            <QuickLink href="/dashboard/features" icon={Flag} label="Feature flags & banners" />
-            <QuickLink href="/dashboard/audit" icon={ScrollText} label="Audit log" />
+            {staff.tier >= 3 && (
+              <QuickLink href="/dashboard/features" icon={Flag} label="Feature flags & banners" />
+            )}
+            {staff.tier >= 2 && (
+              <QuickLink href="/dashboard/audit" icon={ScrollText} label="Audit log" />
+            )}
             {staff.tier >= 3 && (
               <QuickLink href="/dashboard/operations" icon={Wrench} label="System operations" />
             )}

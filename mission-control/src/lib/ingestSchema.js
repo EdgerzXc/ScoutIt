@@ -65,6 +65,39 @@ const DETAIL_FIELDS = [
 
 const VALID_CATEGORIES = ["residential", "commercial", "str", "hospitality", "restaurants", "venues"];
 
+const FORBIDDEN_PROTO_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+// Keep synchronized with INTERNAL_FIELDS in propertyFieldRegistry.js (without bundler-only imports
+// so pure Node tests can import ingestSchema.js directly).
+const INTERNAL_DETAIL_KEYS = new Set([
+  "PriceRange_Internal",
+  "Vision_Uploads",
+  "AI_Architectural_Style",
+  "AI_Extracted_Features",
+  "AI_Marketing_Copy",
+  "AI_Condition_Estimate",
+  "AI_Draft_Notes",
+  "Broker_Input_Notes",
+  "Photos_Status",
+  "Source_Citations",
+  "Pipeline_Status",
+  "Listing_Visibility",
+  "Deep_Intel_Gate",
+  "Owner_Ref",
+]);
+
+function isSafeHttpUrl(value) {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 2048) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Parse a staff-pasted AI JSON string and map it onto a properties update.
  * Returns { patch, detailsPatch, confidence, gaps, warnings }.
@@ -98,11 +131,11 @@ export function parseSynthesis(rawText) {
   const warnings = [];
   const patch = {};
   for (const key of CORE_COLUMNS) {
-    const val = obj[key];
+    const val = Object.hasOwn(obj, key) ? obj[key] : undefined;
     if (val === undefined || val === null || val === "") continue;
     if (key === "price") {
       const num = Number(String(val).replace(/[^0-9.]/g, ""));
-      if (!Number.isNaN(num)) patch.price = num;
+      if (!Number.isNaN(num) && Number.isFinite(num)) patch.price = num;
       continue;
     }
     if (key === "space_category") {
@@ -111,18 +144,38 @@ export function parseSynthesis(rawText) {
       else warnings.push(`Ignored unknown space_category "${val}".`);
       continue;
     }
+    if (key === "media_link") {
+      if (isSafeHttpUrl(val)) {
+        patch.media_link = String(val).trim();
+      } else {
+        warnings.push("Ignored unsafe or malformed media_link URL.");
+      }
+      continue;
+    }
     patch[key] = val;
   }
 
-  // Assemble the details patch from the flat detail fields + any extra details object.
+  // Assemble the details patch from the flat detail fields + safe extra details object.
   const detailsPatch = {};
   for (const key of DETAIL_FIELDS) {
-    const val = obj[key];
+    if (FORBIDDEN_PROTO_KEYS.has(key) || INTERNAL_DETAIL_KEYS.has(key)) continue;
+    const val = Object.hasOwn(obj, key) ? obj[key] : undefined;
     if (val === undefined || val === null || val === "") continue;
     detailsPatch[key] = val;
   }
   if (obj.details && typeof obj.details === "object" && !Array.isArray(obj.details)) {
-    Object.assign(detailsPatch, obj.details);
+    for (const [key, val] of Object.entries(obj.details)) {
+      if (FORBIDDEN_PROTO_KEYS.has(key) || INTERNAL_DETAIL_KEYS.has(key)) {
+        warnings.push(`Stripped disallowed details key "${key}".`);
+        continue;
+      }
+      Object.defineProperty(detailsPatch, key, {
+        value: val,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
   }
 
   const confidence =

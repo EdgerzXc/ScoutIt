@@ -6,25 +6,36 @@ import { invalidateCmsBundle } from "@/lib/cmsCache";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { recordHistoricalSlug } from "@/lib/propertyRedirects";
 
+const NO_STORE = { "Cache-Control": "private, no-store" };
+
 export async function POST(request) {
   try {
-    const authResult = await requireAdmin(request, { label: "ADMIN APPROVE" });
+    const authResult = await requireAdmin(request, { label: "ADMIN APPROVE", minTier: 2 });
     if (authResult.error) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status, headers: NO_STORE });
     }
     const userId = authResult.userId;
 
-    const { submissionId } = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400, headers: NO_STORE });
+    }
 
-    if (!submissionId) {
-      return NextResponse.json({ error: "Missing submissionId" }, { status: 400 });
+    const { submissionId } = body;
+
+    if (
+      typeof submissionId !== "string" ||
+      submissionId.trim().length === 0 ||
+      submissionId.length > 128
+    ) {
+      return NextResponse.json({ error: "Invalid submissionId" }, { status: 400, headers: NO_STORE });
     }
 
     const apiKey = process.env.AIRTABLE_API_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
 
     if (!apiKey || !baseId) {
-      return NextResponse.json({ error: "Airtable configuration missing" }, { status: 500 });
+      return NextResponse.json({ error: "Airtable configuration missing" }, { status: 500, headers: NO_STORE });
     }
 
     // 1. Fetch the submission from Supabase
@@ -36,7 +47,25 @@ export async function POST(request) {
 
     if (fetchError || !submission) {
       console.error("[ADMIN API] Failed to fetch submission:", fetchError);
-      return NextResponse.json({ error: "Submission not found or error fetching" }, { status: 404 });
+      return NextResponse.json({ error: "Submission not found or error fetching" }, { status: 404, headers: NO_STORE });
+    }
+
+    if (submission.creation_source === "pdf_assisted" && submission.pdf_verified !== true) {
+      return NextResponse.json(
+        { error: "PDF-assisted drafts must pass source document verification before publication" },
+        { status: 422, headers: NO_STORE }
+      );
+    }
+
+    if (
+      submission.lifecycle_state === "live" ||
+      submission.pipeline_status === "approved" ||
+      submission.details?.airtable_record_id
+    ) {
+      return NextResponse.json(
+        { error: "Submission is already approved or synced to Airtable" },
+        { status: 409, headers: NO_STORE }
+      );
     }
 
     // 2. Insert into Airtable (inheriting exact resolved coordinates from Supabase)
@@ -99,6 +128,10 @@ export async function POST(request) {
         pipeline_status: 'approved',
         lifecycle_state: 'live',
         published_at: submission.published_at || nowIso,
+        details: {
+          ...(submission.details || {}),
+          airtable_record_id: airtableRecord.id,
+        },
         ...slugUpdate,
       })
       .eq('id', submissionId);
@@ -111,13 +144,13 @@ export async function POST(request) {
         warning: "Inserted to Airtable but failed to update Supabase status",
         airtableId: airtableRecord.id,
         publicCachePending,
-      });
+      }, { headers: NO_STORE });
     }
 
-    return NextResponse.json({ success: true, airtableId: airtableRecord.id, publicCachePending });
+    return NextResponse.json({ success: true, airtableId: airtableRecord.id, publicCachePending }, { headers: NO_STORE });
 
   } catch (err) {
     console.error("[ADMIN API] Error during approval process:", err);
-    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
+    return NextResponse.json({ error: sanitizeError(err, "Approval processing failed") }, { status: 500, headers: NO_STORE });
   }
 }

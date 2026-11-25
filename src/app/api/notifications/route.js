@@ -4,8 +4,33 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId } from "@/lib/serverAuth";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { notifyUser, validateSampleNotificationRouting, resolveDefaultNotificationLink } from "@/lib/notifications";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 export const dynamic = "force-dynamic";
+
+const checkNotificationsWriteRate = createRateLimiter({
+  limit: 30,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
+
+const ALLOWED_CLIENT_NOTIFICATION_TYPES = new Set([
+  "system",
+  "property_published",
+  "property_draft_saved",
+  "property_drafting",
+  "property_updated",
+  "listing_saved",
+  "workspace_notice",
+]);
+
+function normalizeRelativeNotificationLink(link) {
+  if (!link || typeof link !== "string") return null;
+  const trimmed = link.trim();
+  if (!/^\/(?!\/)/.test(trimmed)) return null;
+  return trimmed;
+}
 
 // Persists the dashboard bell dropdown (Track 1,
 // PLAN_STAFF_ENTERPRISE_ANALYTICS_NOTIFICATIONS.md) — previously
@@ -68,7 +93,15 @@ const patchSchema = z.object({
 
 export async function PATCH(request) {
   try {
-    const parsed = patchSchema.safeParse(await request.json());
+    const rate = checkNotificationsWriteRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many notification writes" },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+    const rawBody = await request.json().catch(() => null);
+    const parsed = patchSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
@@ -133,11 +166,26 @@ const postSchema = z.object({
 // recommendation to route everything through one migration/table.
 export async function POST(request) {
   try {
-    const parsed = postSchema.safeParse(await request.json());
+    const rate = checkNotificationsWriteRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many notification writes" },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+    const rawBody = await request.json().catch(() => null);
+    const parsed = postSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
     const { title, desc, icon, propertyId, notificationType, link } = parsed.data;
+    if (!ALLOWED_CLIENT_NOTIFICATION_TYPES.has(notificationType)) {
+      return NextResponse.json({ error: "Unsupported notification type" }, { status: 400 });
+    }
+    const safeLink = normalizeRelativeNotificationLink(link);
+    if (link && !safeLink) {
+      return NextResponse.json({ error: "Invalid notification link" }, { status: 400 });
+    }
     const userId = await resolveUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session or missing token" }, { status: 401 });
@@ -157,7 +205,7 @@ export async function POST(request) {
       icon: icon || "🔔",
       propertyId: propertyId || null,
       notificationType,
-      link: link || null,
+      link: safeLink,
     });
     if (!notified) return NextResponse.json({ error: "Failed to save notification" }, { status: 500 });
     return NextResponse.json({ success: true });

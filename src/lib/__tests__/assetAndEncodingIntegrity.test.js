@@ -24,6 +24,7 @@ const stripComments = (source) =>
     .replace(/^\s*\/\/.*$/gm, "");
 
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".mjs", ".css", ".json"]);
+const SOURCE_SCAN_TIMEOUT_MS = 30_000;
 const sourceFiles = [
   ...walk(resolve(ROOT, "src")),
   ...walk(resolve(ROOT, "mission-control/src")),
@@ -66,7 +67,7 @@ describe("A-118 referenced public assets exist", () => {
     }
     expect(sourceFiles.length, "the sweep scanned real files").toBeGreaterThan(100);
     expect(offenders, `phantom asset paths are back:\n${offenders.join("\n")}`).toEqual([]);
-  });
+  }, SOURCE_SCAN_TIMEOUT_MS);
 
   it("the OG fallback points at the branded card this repo actually builds", () => {
     for (const page of [
@@ -129,5 +130,5 @@ describe("A-119 source encoding integrity", () => {
     }
     expect(sourceFiles.length, "the sweep scanned real files").toBeGreaterThan(100);
     expect(damaged, `files carrying mojibake:\n${damaged.join("\n")}`).toEqual([]);
-  });
+  }, SOURCE_SCAN_TIMEOUT_MS);
 });

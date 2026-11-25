@@ -36,8 +36,13 @@ import { canChangeDisplayTitle, normalizeLifecycleState, PROPERTY_LIFECYCLE_STAT
 // so the client never has to hardcode a field list that can drift from Airtable.
 export async function GET(request) {
   try {
-    const auth = await requireAdmin(request, { label: "ADMIN PROPERTY" });
-    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const auth = await requireAdmin(request, { label: "ADMIN PROPERTY", minTier: 1 });
+    if (auth.error) {
+      return NextResponse.json(
+        { error: auth.error },
+        { status: auth.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
     const id = new URL(request.url).searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -70,10 +75,21 @@ export async function GET(request) {
 // Commercial section cannot wipe the Residential one.
 export async function PATCH(request) {
   try {
-    const auth = await requireAdmin(request, { label: "ADMIN PROPERTY" });
-    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const auth = await requireAdmin(request, { label: "ADMIN PROPERTY", minTier: 2 });
+    if (auth.error) {
+      return NextResponse.json(
+        { error: auth.error },
+        { status: auth.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
     const { id } = body;
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 

@@ -20,20 +20,38 @@ export async function createImpersonationSessionAction({
     return { error: validation.error };
   }
 
+  const secret = process.env.IMPERSONATION_SECRET;
+  if (typeof secret !== "string" || !secret.trim()) {
+    return { error: "Impersonation signing secret is not configured." };
+  }
+
   const admin = createAdminClient();
 
   // Verify target user exists
-  const { data: userProfile } = await admin
+  const { data: userProfile, error: profileError } = await admin
     .from("user_profiles")
-    .select("id, display_name, email, role, primary_mode, subscription_tier")
+    .select("id, display_name, role, primary_mode, subscription_tier")
     .eq("id", targetUserId.trim())
     .maybeSingle();
+
+  if (profileError) {
+    return { error: "Failed to verify target user profile." };
+  }
 
   if (!userProfile) {
     return { error: "Target user not found in user_profiles registry." };
   }
 
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || "scoutit_impersonation_fallback_secret";
+  let targetEmail = null;
+  if (typeof admin.auth?.admin?.getUserById === "function") {
+    try {
+      const { data: authRes } = await admin.auth.admin.getUserById(userProfile.id);
+      targetEmail = authRes?.user?.email || null;
+    } catch {
+      targetEmail = null;
+    }
+  }
+
   const { token, exp } = generateImpersonationToken({
     staffId: staff.id,
     staffEmail: staff.email,
@@ -52,7 +70,7 @@ export async function createImpersonationSessionAction({
     targetId: userProfile.id,
     reason: reason.trim(),
     metadata: {
-      target_user_email: userProfile.email,
+      target_user_email: targetEmail,
       target_user_name: userProfile.display_name,
       duration_minutes: durationMinutes,
       expires_at: new Date(exp).toISOString(),
@@ -64,7 +82,7 @@ export async function createImpersonationSessionAction({
     success: true,
     token,
     exp,
-    targetUser: userProfile,
+    targetUser: { ...userProfile, email: targetEmail },
   };
 }
 

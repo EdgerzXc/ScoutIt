@@ -46,6 +46,7 @@ const nextConfig = {
     root: path.dirname(fileURLToPath(import.meta.url)),
   },
   productionBrowserSourceMaps: false,
+  poweredByHeader: false,
   async headers() {
     return [{
       source: "/:path*",

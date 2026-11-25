@@ -74,11 +74,17 @@ export function isEntitledOffMarketViewer({ tier, isOwner = false, lockerOpen = 
   return ENTITLED_TIERS.has(String(tier || "").toLowerCase());
 }
 
-export function buildFirstPublicationUpdate({ current = {}, computedSlug, now = new Date().toISOString() } = {}) {
+export function buildFirstPublicationUpdate({
+  current = {},
+  computedSlug,
+  airtableRecordId = null,
+  now = new Date().toISOString(),
+} = {}) {
   const canonicalSlug = current.canonical_slug || computedSlug;
   if (!canonicalSlug) throw new Error("Airtable must return a canonical slug before publication can complete");
 
-  return {
+  const resolvedRecordId = airtableRecordId || current.details?.airtable_record_id || null;
+  const baseUpdate = {
     slug: canonicalSlug,
     canonical_slug: canonicalSlug,
     canonical_slug_locked_at: current.canonical_slug_locked_at || now,
@@ -87,6 +93,15 @@ export function buildFirstPublicationUpdate({ current = {}, computedSlug, now = 
     published_at: current.published_at || now,
     last_verified_date: current.last_verified_date || now,
   };
+
+  if (resolvedRecordId) {
+    baseUpdate.details = {
+      ...(current.details && typeof current.details === "object" ? current.details : {}),
+      airtable_record_id: resolvedRecordId,
+    };
+  }
+
+  return baseUpdate;
 }
 
 export function buildWithdrawUpdate({ now = new Date().toISOString() } = {}) {

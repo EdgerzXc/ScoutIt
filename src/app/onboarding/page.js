@@ -425,6 +425,11 @@ export default function OnboardingPage() {
           {useOtp ? "Sign in with a password" : "Sign in with a code"}
         </button>
       )}
+      {!useOtp && authIntent === "signin" && (
+        <Link href="/reset-password" className="flex min-h-11 items-center justify-center font-mono text-xs uppercase tracking-wider text-gold-accent underline hover:text-gold-bright">
+          Forgot password?
+        </Link>
+      )}
       {!useOtp && !otpSent && (
         <button className="w-full text-text-secondary text-sm font-bold hover:text-gold-accent mb-6" onClick={() => { setAuthIntent((current) => current === "signin" ? "signup" : "signin"); setEmailConfirmationSent(false); resetCaptcha(); }}>
           {authIntent === "signin" ? "Create a new ScoutIt account" : "I already have an account"}

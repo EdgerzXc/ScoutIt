@@ -10,6 +10,28 @@ const path = require("path");
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const METRO_MANILA_BBOX = "14.3,120.8,14.8,121.2";
 
+function sanitizeStationName(raw) {
+  if (typeof raw !== "string") return "Station";
+  return raw
+    .replace(/<[^>]*>/g, "")
+    .replace(/[^\w\s\-\.\,\(\)\/]/gi, "")
+    .trim()
+    .slice(0, 100) || "Station";
+}
+
+function isValidCoordinate(lat, lon) {
+  return (
+    typeof lat === "number" &&
+    typeof lon === "number" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lon) &&
+    lat >= 14.0 &&
+    lat <= 15.5 &&
+    lon >= 120.0 &&
+    lon <= 122.0
+  );
+}
+
 // Overpass QL Query for LRT-1, LRT-2, MRT-3, MRT-7, and Subway stations
 const query = `
 [out:json][timeout:25];
@@ -39,16 +61,25 @@ async function syncTransitData() {
 
     console.log(`✓ Fetched ${nodes.length} station nodes from OSM.`);
 
+    if (nodes.length < 10 || nodes.length > 500) {
+      throw new Error(`Suspicious station node count (${nodes.length}). Expected between 10 and 500.`);
+    }
+
     const lrt1 = [];
     const lrt2 = [];
     const mrt3 = [];
 
     nodes.forEach((node) => {
-      const name = node.tags?.name || node.tags?.["name:en"] || "Station";
+      if (!isValidCoordinate(node.lat, node.lon)) {
+        return;
+      }
+
+      const rawName = node.tags?.name || node.tags?.["name:en"] || "Station";
+      const name = sanitizeStationName(rawName);
       const station = {
         name,
-        lon: node.lon,
-        lat: node.lat,
+        lon: Number(node.lon.toFixed(6)),
+        lat: Number(node.lat.toFixed(6)),
       };
 
       const line = (node.tags?.operator || node.tags?.line || "").toLowerCase();
@@ -79,4 +110,8 @@ async function syncTransitData() {
   }
 }
 
-syncTransitData();
+if (require.main === module) {
+  syncTransitData();
+}
+
+module.exports = { syncTransitData, sanitizeStationName, isValidCoordinate };

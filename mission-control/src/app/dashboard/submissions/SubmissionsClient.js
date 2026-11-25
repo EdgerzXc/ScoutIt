@@ -268,11 +268,11 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                           {new Date(draft.created_at).toLocaleDateString()}
                         </td>
                         <td className="py-3.5">
-                          {draft.pdf_source_url ? (
+                          {draft.pdf_source_url && /^https?:\/\//i.test(draft.pdf_source_url.trim()) ? (
                             <a
-                              href={draft.pdf_source_url}
+                              href={draft.pdf_source_url.trim()}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 text-gold hover:underline font-mono text-xs"
                             >
                               <FileText className="w-3.5 h-3.5" />
@@ -280,7 +280,7 @@ export default function SubmissionsClient({ initialSubmissions, initialPdfDrafts
                               <ExternalLink className="w-3 h-3 opacity-60" />
                             </a>
                           ) : (
-                            <span className="text-white/60 font-mono text-xs">No PDF link attached</span>
+                            <span className="text-white/60 font-mono text-xs">No external PDF link attached</span>
                           )}
                         </td>
                         <td className="py-3.5 text-right">

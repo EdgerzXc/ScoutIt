@@ -46,6 +46,9 @@ export async function GET(request, { params }) {
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
 
     // Validate access (buyer, broker, or owner)
     const { data: deal, error: dealError } = await supabaseAdmin
@@ -92,6 +95,9 @@ export async function POST(request, { params }) {
     const { id: dealId } = await params;
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
 
     let payload = null;
     try {
@@ -213,9 +219,10 @@ export async function POST(request, { params }) {
       await notifyUser(supabaseAdmin, {
         userId: recipientId,
         title: "New message",
-        desc: `New message on ${deal.properties?.title || "your deal"}: "${body.slice(0, 60)}${body.length > 60 ? "..." : ""}"`,
+        desc: "Open the conversation to read your message.",
         propertyId: deal.properties?.id || deal.property_id || null,
         notificationType: "deal_message",
+        link: `/dashboard/inbox?dealId=${encodeURIComponent(dealId)}`,
       });
     }
 
@@ -239,6 +246,9 @@ export async function PATCH(request, { params }) {
     const { searchParams } = new URL(request.url);
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from('deals')

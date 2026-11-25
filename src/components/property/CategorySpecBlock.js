@@ -39,8 +39,8 @@ function formatValue(field, raw) {
     case "peso": return peso(raw);
     case "num": return num(raw, field.suffix);
     case "pct": return pct(raw);
-    case "bool": return "Yes";
-    default: return txt(raw);
+    case "bool": return typeof raw === "string" ? txt(raw) : "Yes";
+    default: return typeof raw === "boolean" ? (raw ? "Yes" : null) : txt(raw);
   }
 }
 
@@ -63,9 +63,20 @@ const SPEC_CONFIG = {
       { key: "acSystem", label: "A/C Infrastructure", fmt: "text" },
       { key: "internet", label: "Telco / Fiber Redundancy", fmt: "text" },
     ],
-    minor: ["CAMC (CUSA)", "A/C Charges", "Reserved Parking", "Escalation Rate", "Fit-out Allowance",
-      "Rent-free Period", "Parking Ratio", "Floor Loading",
-      "Available Units", "Towers / Zones", "Cap Rate", "NOI"],
+    minor: [
+      { key: "camc", label: "CAMC (CUSA)", fmt: "text" },
+      { key: "acCharges", label: "A/C Charges", fmt: "text" },
+      { key: "reservedParking", label: "Reserved Parking", fmt: "text" },
+      { key: "escalation", label: "Escalation Rate", fmt: "text" },
+      { key: "fitOut", label: "Fit-out Allowance", fmt: "text" },
+      { key: "rentFree", label: "Rent-free Period", fmt: "text" },
+      { key: "parkingRatio", label: "Parking Ratio", fmt: "text" },
+      { key: "floorLoading", label: "Floor Loading", fmt: "text" },
+      { key: "availableUnits", label: "Available Units", fmt: "text" },
+      { key: "towersZones", label: "Towers / Zones", fmt: "text" },
+      { key: "capRate", label: "Cap Rate", fmt: "pct" },
+      { key: "noi", label: "NOI", fmt: "peso" },
+    ],
   },
   residential: {
     label: "Residential Specifications",
@@ -76,7 +87,10 @@ const SPEC_CONFIG = {
       { key: "petPolicy", label: "Pet Policy", fmt: "text" },
       { key: "studio", label: "Studio Unit", fmt: "bool" },
     ],
-    minor: ["Price / sqm", "Payment Terms"],
+    minor: [
+      { key: "pricePerSqm", label: "Price / sqm", fmt: "peso" },
+      { key: "paymentTerms", label: "Payment Terms", fmt: "text" },
+    ],
   },
   str: {
     label: "Short-Term Rental Specifications",
@@ -88,8 +102,15 @@ const SPEC_CONFIG = {
       { key: "minStay", label: "Min. Stay", fmt: "num", suffix: "nights" },
       { key: "checkInOut", label: "Check-in / out", fmt: "text" },
     ],
-    minor: ["Weekend Rate", "Bed Configuration", "Self Check-in", "House Rules",
-      "Cancellation Policy", "Permit / Accreditation", "WiFi Speed"],
+    minor: [
+      { key: "weekendRate", label: "Weekend Rate", fmt: "peso" },
+      { key: "bedConfig", label: "Bed Configuration", fmt: "text" },
+      { key: "selfCheckIn", label: "Self Check-in", fmt: "bool" },
+      { key: "houseRules", label: "House Rules", fmt: "text" },
+      { key: "cancellation", label: "Cancellation Policy", fmt: "text" },
+      { key: "permit", label: "Permit / Accreditation", fmt: "text" },
+      { key: "wifiSpeed", label: "WiFi Speed", fmt: "text" },
+    ],
   },
   restaurant: {
     label: "Culinary & Retail Specifications",
@@ -107,12 +128,18 @@ const SPEC_CONFIG = {
       { key: "power", label: "Electrical Power Load", fmt: "text" },
       { key: "ceiling", label: "Clear Ceiling Height", fmt: "text" },
     ],
-    minor: ["Delivery Access", "Liquor License", "F&B Zoning Permit",
-      "Turnover Condition", "Parking"],
+    minor: [
+      { key: "delivery", label: "Delivery Access", fmt: "text" },
+      { key: "liquor", label: "Liquor License", fmt: "text" },
+      { key: "zoning", label: "F&B Zoning Permit", fmt: "text" },
+      { key: "turnover", label: "Turnover Condition", fmt: "text" },
+      { key: "parking", label: "Parking", fmt: "text" },
+    ],
   },
   hospitality: {
     label: "Hospitality Specifications",
     major: [
+      { key: "listedPrice", label: "Listed Price", fmt: "peso", hero: true },
       { key: "rooms", label: "Room Count", fmt: "num", suffix: "rooms", hero: true },
       { key: "stars", label: "Star Rating", fmt: "num", suffix: "★", hero: true },
       { key: "fbOutlets", label: "F&B Outlets", fmt: "num", hero: true },
@@ -121,7 +148,14 @@ const SPEC_CONFIG = {
       { key: "roomTypes", label: "Room Types", fmt: "text" },
       { key: "yearRenovated", label: "Built / Renovated", fmt: "text" },
     ],
-    minor: ["ADR", "Occupancy Rate", "RevPAR", "Cap Rate", "GFA", "Land Area"],
+    minor: [
+      { key: "adr", label: "ADR", fmt: "peso" },
+      { key: "occupancy", label: "Occupancy Rate", fmt: "pct" },
+      { key: "revpar", label: "RevPAR", fmt: "peso" },
+      { key: "capRate", label: "Cap Rate", fmt: "pct" },
+      { key: "gfa", label: "GFA", fmt: "num", suffix: "sqm" },
+      { key: "landArea", label: "Land Area", fmt: "num", suffix: "sqm" },
+    ],
   },
   venue: {
     label: "Venue Specifications",
@@ -131,11 +165,18 @@ const SPEC_CONFIG = {
       { key: "floorArea", label: "Floor Area", fmt: "num", suffix: "sqm", hero: true },
       { key: "minHours", label: "Min. Booking", fmt: "num", suffix: "hrs" },
       { key: "indoorOutdoor", label: "Indoor / Outdoor", fmt: "text" },
-      { key: "aircon", label: "Air-conditioned", fmt: "bool" },
+      { key: "aircon", label: "Air-conditioned", fmt: "text" },
       { key: "catering", label: "Catering Policy", fmt: "text" },
     ],
-    minor: ["Layout Configs", "Ceiling Height", "AV Equipment", "Power Capacity",
-      "Parking", "Accessibility", "Noise Curfew"],
+    minor: [
+      { key: "layouts", label: "Layout Configs", fmt: "text" },
+      { key: "ceiling", label: "Ceiling Height", fmt: "text" },
+      { key: "av", label: "AV Equipment", fmt: "text" },
+      { key: "power", label: "Power Capacity", fmt: "text" },
+      { key: "parking", label: "Parking", fmt: "text" },
+      { key: "accessibility", label: "Accessibility", fmt: "text" },
+      { key: "noiseCurfew", label: "Noise Curfew", fmt: "text" },
+    ],
   },
 };
 
@@ -166,21 +207,41 @@ function resolveCategoryKey(category) {
 // /api/property/premium, which resolves the tier from the session server-side.
 // `unlocked` is now simply "did the server give us anything" — a browser can
 // no longer assert it.
-function MinorLockSection({ labels, slug }) {
+function MinorLockSection({ items, labels, catKey, slug }) {
   const [open, setOpen] = useState(false);
   const { fields } = usePremiumFields(slug);
-  const values = fields?.deepIntel || null;
-  const unlocked = Boolean(values && Object.keys(values).length > 0);
-  if (!labels || labels.length === 0) return null;
+  const list = Array.isArray(items) ? items : Array.isArray(labels) ? labels : [];
+  if (list.length === 0) return null;
 
-  const valueFor = (label) => {
-    const v = values ? values[label] : undefined;
-    return v != null && String(v).trim() !== "" ? v : null;
+  const deepIntel = fields?.deepIntel || null;
+  const catMinor = (catKey && fields?.catMinor?.[catKey]) || null;
+  const unlocked = Boolean(
+    (deepIntel && Object.keys(deepIntel).length > 0) ||
+      (catMinor && Object.keys(catMinor).length > 0)
+  );
+
+  const labelFor = (entry) => (typeof entry === "string" ? entry : entry?.label || "");
+
+  const valueFor = (entry) => {
+    if (typeof entry === "string") {
+      const v = deepIntel ? deepIntel[entry] : undefined;
+      return v != null && String(v).trim() !== "" ? v : null;
+    }
+    if (entry && typeof entry === "object") {
+      if (catMinor && Object.prototype.hasOwnProperty.call(catMinor, entry.key)) {
+        const formatted = formatValue(entry, catMinor[entry.key]);
+        if (formatted !== null) return formatted;
+      }
+      const fallback = deepIntel ? deepIntel[entry.label] : undefined;
+      return fallback != null && String(fallback).trim() !== "" ? fallback : null;
+    }
+    return null;
   };
 
   return (
     <div className="mt-7">
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full bg-surface border border-surface-variant px-5 py-3.5 cursor-pointer flex justify-between items-center rounded-sm hover:border-gold-accent/50 transition-colors"
       >
@@ -193,10 +254,11 @@ function MinorLockSection({ labels, slug }) {
       </button>
       {open && (unlocked ? (
         <div className="bg-surface border border-surface-variant border-t-0 p-5 rounded-b-sm flex flex-col">
-          {labels.map((label, i) => {
-            const value = valueFor(label);
+          {list.map((entry, i) => {
+            const label = labelFor(entry);
+            const value = valueFor(entry);
             return (
-              <div key={i} className={`flex justify-between items-baseline py-2.5 gap-5 ${i < labels.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+              <div key={i} className={`flex justify-between items-baseline py-2.5 gap-5 ${i < list.length - 1 ? 'border-b border-surface-variant' : ''}`}>
                 <span className="font-headline-editorial text-[13px] text-text-secondary">{label}</span>
                 {value !== null ? (
                   <span className="font-label-caps text-[12px] text-gold-accent tracking-widest text-right">{value}</span>
@@ -210,12 +272,15 @@ function MinorLockSection({ labels, slug }) {
       ) : (
         <div className="bg-surface border border-surface-variant border-t-0 p-5 relative rounded-b-sm">
           <div className="blur-sm pointer-events-none select-none flex flex-col">
-            {labels.map((label, i) => (
-              <div key={i} className={`flex justify-between items-center py-2.5 ${i < labels.length - 1 ? 'border-b border-surface-variant' : ''}`}>
-                <span className="font-headline-editorial text-[13px] text-text-secondary">{label}</span>
-                <span className="font-label-caps text-[12px] text-[var(--border)] tracking-widest">████████</span>
-              </div>
-            ))}
+            {list.map((entry, i) => {
+              const label = labelFor(entry);
+              return (
+                <div key={i} className={`flex justify-between items-center py-2.5 ${i < list.length - 1 ? 'border-b border-surface-variant' : ''}`}>
+                  <span className="font-headline-editorial text-[13px] text-text-secondary">{label}</span>
+                  <span className="font-label-caps text-[12px] text-[var(--border)] tracking-widest">████████</span>
+                </div>
+              );
+            })}
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 bg-background/90 rounded-b-sm backdrop-blur-sm">
             <span className="font-label-caps text-[12px] text-gold-accent tracking-widest uppercase">Solar Tier Unlocks This</span>
@@ -291,7 +356,7 @@ export default function CategorySpecBlock({ property, extraLockedLabels = [] }) 
 
       {/* MINOR — blur-locked teaser (paywall placeholder). Editorial
           deep-intel labels are folded in so the page shows ONE locked box. */}
-      <MinorLockSection labels={[...config.minor, ...extraLockedLabels]} slug={d.slug} />
+      <MinorLockSection items={[...config.minor, ...extraLockedLabels]} catKey={key} slug={d.slug} />
     </div>
   );
 }

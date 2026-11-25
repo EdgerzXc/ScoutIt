@@ -9,6 +9,10 @@ const rbacPath = path.join(root, "src", "lib", "rbac.js");
 const authenticatedReadActions = new Set([
   "src\\app\\dashboard\\brain\\actions.js#askBrain",
   "src/app/dashboard/brain/actions.js#askBrain",
+  "src\\app\\dashboard\\mfa\\actions.js#getStaffMfaPosture",
+  "src/app/dashboard/mfa/actions.js#getStaffMfaPosture",
+  "src\\app\\dashboard\\mfa\\actions.js#recordMfaAuditEvent",
+  "src/app/dashboard/mfa/actions.js#recordMfaAuditEvent",
 ]);
 
 async function loadTierPolicy() {
@@ -78,7 +82,7 @@ test("every exported dashboard Server Action authorizes before service-role acce
       const body = functionSegment(source, action.index, actions[index + 1]?.index);
       const staff = body.indexOf("await getCurrentStaff()");
       const tier = body.indexOf("assertTier(staff,");
-      const denial = body.indexOf("if (!staff)");
+      const denial = body.search(/if\s*\(\s*!staff(?:\s*\|\|\s*!staff\.active)?\s*\)/);
       const admin = body.indexOf("createAdminClient()");
       const label = `${path.relative(root, file)}#${action[1]}`;
 

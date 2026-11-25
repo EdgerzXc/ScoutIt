@@ -72,6 +72,17 @@ export async function submitBehavioralReview(supabaseAdmin, {
     };
   }
 
+  const safeFeedback = typeof feedback === "string" ? feedback.trim().slice(0, 2000) : "";
+  const safeLeaseType =
+    typeof leaseType === "string" && leaseType.trim()
+      ? leaseType.trim().slice(0, 100)
+      : "Residential Lease";
+  const parsedDuration = Number(durationMonths);
+  const safeDurationMonths =
+    Number.isFinite(parsedDuration) && parsedDuration >= 1
+      ? Math.min(600, Math.round(parsedDuration))
+      : 12;
+
   // 1. Fetch the deal record
   const { data: deal, error: dealError } = await supabaseAdmin
     .from("deals")
@@ -204,10 +215,10 @@ export async function submitBehavioralReview(supabaseAdmin, {
         property_id: String(deal.property_id || qualifyingHandshake.property_id || ""),
         reviewer_id: reviewerId,
         target_user_id: targetUserId,
-        lease_type: leaseType,
-        duration_months: Number(durationMonths) || 12,
+        lease_type: safeLeaseType,
+        duration_months: safeDurationMonths,
         vectors,
-        feedback: feedback ? String(feedback).trim() : "",
+        feedback: safeFeedback,
         is_double_blind_locked: false,
         submitted_at: new Date().toISOString(),
       })
@@ -215,7 +226,8 @@ export async function submitBehavioralReview(supabaseAdmin, {
       .single();
 
     if (insertError) {
-      return { success: false, error: `INSERT_FAILED: ${insertError.message}` };
+      console.error("[serverBehavioralScoring] Simultaneous insert failed:", insertError);
+      return { success: false, error: "INSERT_FAILED: Could not save behavioral review." };
     }
 
     // Unlock counterparty's review
@@ -264,10 +276,10 @@ export async function submitBehavioralReview(supabaseAdmin, {
       property_id: String(deal.property_id || qualifyingHandshake.property_id || ""),
       reviewer_id: reviewerId,
       target_user_id: targetUserId,
-      lease_type: leaseType,
-      duration_months: Number(durationMonths) || 12,
+      lease_type: safeLeaseType,
+      duration_months: safeDurationMonths,
       vectors,
-      feedback: feedback ? String(feedback).trim() : "",
+      feedback: safeFeedback,
       is_double_blind_locked: true,
       submitted_at: new Date().toISOString(),
     })
@@ -275,7 +287,8 @@ export async function submitBehavioralReview(supabaseAdmin, {
     .single();
 
   if (insertError) {
-    return { success: false, error: `INSERT_FAILED: ${insertError.message}` };
+    console.error("[serverBehavioralScoring] Double-blind insert failed:", insertError);
+    return { success: false, error: "INSERT_FAILED: Could not save behavioral review." };
   }
 
   // Target user's metrics stay clean / honest blank until unlock
@@ -456,7 +469,7 @@ export async function flagReviewDispute(supabaseAdmin, { reviewId, userId, reaso
 
   const { data: review, error: findError } = await supabaseAdmin
     .from("user_behavioral_reviews")
-    .select("id, reviewer_id, target_user_id")
+    .select("id, reviewer_id, target_user_id, is_disputed")
     .eq("id", reviewId)
     .maybeSingle();
 
@@ -468,6 +481,10 @@ export async function flagReviewDispute(supabaseAdmin, { reviewId, userId, reaso
     return { success: false, error: "UNAUTHORIZED: You are not a party to this review." };
   }
 
+  if (review.is_disputed === true) {
+    return { success: false, error: "ALREADY_DISPUTED: This review is already under dispute hold." };
+  }
+
   const { error: updateError } = await supabaseAdmin
     .from("user_behavioral_reviews")
     .update({
@@ -475,10 +492,12 @@ export async function flagReviewDispute(supabaseAdmin, { reviewId, userId, reaso
       dispute_reason: String(reason || "Party flagged review for Trust & Safety arbitration").slice(0, 500),
       disputed_at: new Date().toISOString(),
     })
-    .eq("id", reviewId);
+    .eq("id", reviewId)
+    .eq("is_disputed", false);
 
   if (updateError) {
-    return { success: false, error: `DISPUTE_FAILED: ${updateError.message}` };
+    console.error("[flagReviewDispute] Failed to flag dispute:", updateError);
+    return { success: false, error: "DISPUTE_FAILED: Could not record review dispute." };
   }
 
   // Recalculate target user's metrics with review excluded

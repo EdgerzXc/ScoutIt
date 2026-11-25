@@ -10,7 +10,7 @@ import {
 import {
   getFlags,
   resetFlagCache,
-  middleware,
+  proxy,
   FLAG_CACHE_TTL_MS,
   FLAG_MAX_STALE_MS,
 } from "@/proxy";
@@ -219,7 +219,7 @@ describe("A-310: VIA HMAC Signing & Proxy Kill-Switch Bounded Recovery", () => {
       expect(flags.global_read_only).toBe(true);
 
       const req1 = new NextRequest("https://scoutit.space/api/deals", { method: "POST" });
-      const res1 = await middleware(req1);
+      const res1 = await proxy(req1);
       expect(res1.status).toBe(503);
       const body1 = await res1.json();
       expect(body1.code).toBe("GLOBAL_READ_ONLY");
@@ -234,7 +234,7 @@ describe("A-310: VIA HMAC Signing & Proxy Kill-Switch Bounded Recovery", () => {
       expect(flags.global_read_only).toBe(true);
 
       const req2 = new NextRequest("https://scoutit.space/api/deals", { method: "POST" });
-      const res2 = await middleware(req2);
+      const res2 = await proxy(req2);
       expect(res2.status).toBe(503); // Still blocked during grace period
 
       // Step 3: Advance time PAST max stale window (e.g. 65s after initial fetch)
@@ -247,7 +247,7 @@ describe("A-310: VIA HMAC Signing & Proxy Kill-Switch Bounded Recovery", () => {
 
       // Mutating requests proceed!
       const req3 = new NextRequest("https://scoutit.space/api/deals", { method: "POST" });
-      const res3 = await middleware(req3);
+      const res3 = await proxy(req3);
       expect(res3.status).toBe(200); // Successfully unblocked! Site keeps working
 
       // Step 4: Upstream recovers later

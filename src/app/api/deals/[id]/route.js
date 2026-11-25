@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
 import { z } from "zod";
 import { logActivity } from "@/lib/crmActivity";
 import { notifyUser } from "@/lib/notifications";
@@ -13,6 +13,14 @@ import {
   mayAnswerBrokerRequest,
   representationStateForAnswer,
 } from "@/lib/deals/delegationDisclosure";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkDealPatchRate = createRateLimiter({
+  limit: 60,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 // 'withdrawn' = the SENDER took their own pending request back (§40.15).
 // Kept distinct from 'declined' on purpose: declined means the recipient said
@@ -28,28 +36,37 @@ const TERMINAL_STATUSES = ["closed", "declined", "reported", "withdrawn"];
 export async function PATCH(request, { params }) {
   try {
     const { id: dealId } = await params;
-    const parsed = schema.safeParse(await request.json());
+    const userId = await resolveUserId(request);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
+
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    const parsed = schema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
-    const { status  } = parsed.data;
+    const { status } = parsed.data;
 
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
-    let userId = null;
-    if (token && token.trim() !== "") {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      const authClient = createClient(supabaseUrl, supabaseAnonKey);
-      const { data: { user }, error } = await authClient.auth.getUser(token);
-      if (!error && user) userId = user.id;
+    const rate = checkDealPatchRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many deal updates. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
     }
-    // Dev-only fallback -- rejected in production (same gate as /api/dashboard/publish).
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: deal, error: dealError } = await supabaseAdmin
       .from("deals")
-      .select("status, property_id, buyer_id, broker_id, properties(owner_id)")
+      .select("status, closed_at, property_id, buyer_id, broker_id, properties(owner_id)")
       .eq("id", dealId)
       .single();
 
@@ -153,8 +170,16 @@ export async function PATCH(request, { params }) {
         .in("status", ["pending", "active"]);
       if (representationError) {
         console.error("[DEALS API] Representation state update failed:", representationError);
+        try {
+          await supabaseAdmin
+            .from("deals")
+            .update({ status: deal.status, closed_at: deal.closed_at ?? null })
+            .eq("id", dealId);
+        } catch (rollbackErr) {
+          console.error("[DEALS API] Failed to roll back deal status:", rollbackErr);
+        }
         return NextResponse.json(
-          { error: "Deal changed, but representation state needs reconciliation", retryable: true },
+          { error: "Deal status could not be updated because representation sync failed", retryable: true },
           { status: 503 },
         );
       }

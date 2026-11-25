@@ -43,12 +43,14 @@ describe("A-131 — an owner can actually find and use the exit", () => {
     // not expect. Discovering them afterwards is how a support ticket and a
     // dispute get created at the same time.
     const src = code();
-    const at = src.indexOf("window.confirm");
-    expect(at, "removal must be confirmed").toBeGreaterThan(-1);
-    const confirmText = src.slice(at, at + 700);
+    const at = src.indexOf("confirmRemovePitchId === pitch.id");
+    expect(at, "removal must be confirmed inline without blocking window.confirm").toBeGreaterThan(-1);
+    const closeAt = src.indexOf(": (", at);
+    const confirmText = src.slice(at, closeAt > at ? closeAt : at + 1800);
     expect(confirmText).toMatch(/enquir/i);
     expect(confirmText).toMatch(/buyer/i);
     expect(confirmText).toMatch(/not refunded/i);
+    expect(confirmText).toContain("handleRemoveBroker(pitch)");
   });
 
   it("does not offer the control on a buyer inquiry", () => {

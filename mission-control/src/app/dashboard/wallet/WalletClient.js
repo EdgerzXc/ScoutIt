@@ -5,7 +5,7 @@ import { lookupUserWallet, refundConnectsAction, grantDiscretionaryConnectsActio
 import { formatTransactionKind } from "@/lib/walletPolicy.mjs";
 import { Search, Coins, ArrowDownLeft, ShieldAlert, CheckCircle2, AlertCircle, RefreshCw, PlusCircle } from "lucide-react";
 
-export default function WalletClient({ staffTier }) {
+export default function WalletClient({ staffTier, isFinance = false }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -120,6 +120,8 @@ export default function WalletClient({ staffTier }) {
 
   const isOpsManager = staffTier >= 2;
   const isSuperAdmin = staffTier >= 3;
+  const canRefund = isOpsManager && Boolean(isFinance);
+  const canGrant = isSuperAdmin && Boolean(isFinance);
 
   return (
     <div className="space-y-6">
@@ -184,8 +186,8 @@ export default function WalletClient({ staffTier }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {isOpsManager && (
+              <div className="flex flex-wrap items-center gap-3">
+                {canRefund && (
                   <button
                     onClick={() => setShowRefundModal(true)}
                     className="px-4 py-2 rounded-lg border border-gold/40 bg-gold/10 text-gold text-xs font-medium uppercase tracking-wider hover:bg-gold/20 transition-colors flex items-center gap-2"
@@ -194,7 +196,7 @@ export default function WalletClient({ staffTier }) {
                     System Refund
                   </button>
                 )}
-                {isSuperAdmin && (
+                {canGrant && (
                   <button
                     onClick={() => setShowGrantModal(true)}
                     className="px-4 py-2 rounded-lg border border-line hover:border-gold/40 bg-black/40 text-xs font-mono text-white hover:text-gold transition-colors flex items-center gap-2"
@@ -202,6 +204,11 @@ export default function WalletClient({ staffTier }) {
                     <PlusCircle className="w-4 h-4" />
                     Discretionary Grant
                   </button>
+                )}
+                {(isOpsManager || isSuperAdmin) && !isFinance && (
+                  <span className="px-3 py-1.5 rounded-lg border border-line bg-black/40 text-xs font-mono text-white/70">
+                    Finance role required for refunds/grants
+                  </span>
                 )}
               </div>
             </div>

@@ -4,6 +4,7 @@
 
 import { NextResponse } from "next/server";
 import { resolveUserId } from "@/lib/serverAuth";
+import { requireAdmin } from "@/lib/adminGuard";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getFreshness } from "@/lib/freshness";
 import { findProperty } from "@/lib/propertyLookup";
@@ -74,25 +75,19 @@ export async function POST(request) {
       );
     }
 
-    // Fail closed: exact owner authority requires a non-null owner_id. An
-    // unowned listing is staff-only; absence of an owner never grants access.
+    // Fail closed: exact owner authority requires a non-null owner_id.
+    // Non-owner calls must pass the verified staff/admin gate (`admin_users`).
     if (prop.owner_id !== userId) {
-      const { data: profile } = await supabaseAdmin
-        .from("user_profiles")
-        .select("role, active_roles")
-        .eq("id", userId)
-        .maybeSingle();
-
-      const roles = Array.isArray(profile?.active_roles) ? profile.active_roles : [];
-      const isStaff =
-        profile?.role === "admin" ||
-        profile?.role === "staff" ||
-        roles.includes("admin") ||
-        roles.includes("staff");
-      if (!isStaff) {
+      const gate = await requireAdmin(request, { label: "PROPERTY VERIFY", minTier: 1 });
+      if (gate.error) {
         return NextResponse.json(
-          { error: "Forbidden: You do not have permission to verify this listing" },
-          { status: 403 }
+          {
+            error:
+              gate.status === 401
+                ? gate.error
+                : "Forbidden: You do not have permission to verify this listing",
+          },
+          { status: gate.status }
         );
       }
     }

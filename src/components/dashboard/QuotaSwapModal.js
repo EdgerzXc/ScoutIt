@@ -51,7 +51,7 @@ export default function QuotaSwapModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="quota-swap-title"
-        className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-[rgba(232,174,60,0.35)] bg-gradient-to-b from-[#161616] to-[#0d0d0d] p-6 sm:p-7 shadow-[0_24px_70px_rgba(0,0,0,0.9)] max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-[rgba(var(--accent-rgb),0.35)] bg-gradient-to-b from-[var(--bg-surface)] to-[var(--bg-void)] p-6 sm:p-7 shadow-[0_24px_70px_rgba(0,0,0,0.9)] max-h-[90dvh] overflow-y-auto"
       >
         {/* Top Header */}
         <div className="flex items-start justify-between gap-4 mb-4">

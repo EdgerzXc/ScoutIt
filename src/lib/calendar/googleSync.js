@@ -5,11 +5,14 @@
 // Outbound (ScoutIt -> Google) fires from the event CRUD routes. Inbound
 // (Google -> ScoutIt) runs on demand via /api/calendar/sync. Both are wrapped
 // so a sync failure never breaks the user's calendar action.
+import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getValidGoogleAccessToken, markConnectionStatus } from "./connectionStore";
 import { listEvents, insertEvent, patchEvent, deleteEvent } from "./googleClient";
 import { computeContentHash, googleToCanonical, canonicalToGoogle } from "./eventNormalize";
 import { decideOutbound, decideInbound, OUTBOUND, INBOUND } from "./syncEngine";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
 
 /** DB row (snake_case) -> canonical event shape used by mappers/hash. */
 function rowToCanonical(row) {
@@ -24,6 +27,10 @@ function rowToCanonical(row) {
   };
 }
 
+function scoutItGoogleEventId(userId, eventId) {
+  return createHash("sha256").update(`scoutit-calendar:${userId}:${eventId}`).digest("hex");
+}
+
 /**
  * Push a single local event to Google after a create/update/delete. Best-effort:
  * returns a small status object and never throws to the caller.
@@ -35,25 +42,22 @@ export async function syncOutbound(userId, eventId, op) {
   try {
     if (!supabaseAdmin) return { skipped: "no_db" };
 
-    let token;
-    try {
-      token = await getValidGoogleAccessToken(userId);
-    } catch {
-      return { skipped: "token_error" };
-    }
+    const token = await getValidGoogleAccessToken(userId);
     if (!token) return { skipped: "not_connected" };
 
-    const { data: row } = await supabaseAdmin
+    const { data: row, error: readError } = await supabaseAdmin
       .from("calendar_events")
       .select("*")
       .eq("id", eventId)
       .eq("owner_user_id", userId)
       .maybeSingle();
+    if (readError) throw readError;
     if (!row) return { skipped: "no_row" };
 
     // Delete: mirror the tombstone to Google, if it was ever pushed.
     if (op === "delete") {
-      if (row.google_event_id) await deleteEvent(token, row.google_event_id);
+      const id = row.google_event_id || (row.source === "scoutit" ? scoutItGoogleEventId(userId, eventId) : null);
+      if (id) await deleteEvent(token, id);
       return { ok: true, op: "delete" };
     }
 
@@ -62,24 +66,51 @@ export async function syncOutbound(userId, eventId, op) {
     if (decision.action === OUTBOUND.SKIP) return { skipped: "unchanged" };
 
     const body = canonicalToGoogle(canonical);
-    const g = row.google_event_id
-      ? await patchEvent(token, row.google_event_id, body)
-      : await insertEvent(token, body);
+    let g;
+    if (row.google_event_id) {
+      g = await patchEvent(token, row.google_event_id, body);
+    } else {
+      const id = scoutItGoogleEventId(userId, eventId);
+      try {
+        g = await insertEvent(token, { ...body, id });
+      } catch (error) {
+        if (error?.status !== 409) throw error;
+        g = await patchEvent(token, id, body);
+      }
+    }
+    const googleEventId = g?.id || row.google_event_id;
+    if (!googleEventId) throw new Error("Google did not return a calendar event ID");
 
-    await supabaseAdmin
+    const { data: saved, error: saveError } = await supabaseAdmin
       .from("calendar_events")
       .update({
-        google_event_id: g?.id || row.google_event_id,
+        google_event_id: googleEventId,
         last_synced_hash: decision.hash,
         content_hash: decision.hash,
       })
-      .eq("id", eventId);
+      .eq("id", eventId)
+      .eq("owner_user_id", userId)
+      .select("id")
+      .maybeSingle();
+    if (saveError) throw saveError;
+    if (!saved) throw new Error("Calendar event binding was not saved");
 
-    return { ok: true, op: row.google_event_id ? "update" : "create", googleId: g?.id };
+    return { ok: true, op: row.google_event_id ? "update" : "create", googleId: googleEventId };
   } catch (err) {
-    if (err.status === 401) await markConnectionStatus(userId, "google", "error");
-    console.error("[calendar syncOutbound]", op, err.message);
-    return { error: err.message };
+    if (err?.status === 401) {
+      await markConnectionStatus(userId, "google", "error").catch(() => {});
+    }
+    const errorCode = err?.code || err?.status || "sync_failed";
+    console.error("[calendar syncOutbound]", op, errorCode);
+    await recordSystemEvent({
+      event: EVENTS.CALENDAR_SYNC_FAILED,
+      severity: "error",
+      subjectTable: "calendar_events",
+      subjectId: eventId,
+      summary: "A ScoutIt calendar change could not be synced with Google.",
+      detail: { operation: op, errorCode },
+    });
+    return { error: "Google Calendar sync failed." };
   }
 }
 

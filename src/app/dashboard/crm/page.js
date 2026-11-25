@@ -199,17 +199,26 @@ function CRMPageInner() {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, ...updates } : d)));
   };
 
-  const handleAppointmentUpdate = async (id, status) => {
+  const handleAppointmentUpdate = async ({ id, updatedAt }, status) => {
     try {
-      await crmFetch(`/api/viewing-appointments/${id}`, {
+      const { appointment } = await crmFetch(`/api/viewing-appointments/${id}`, {
         method: "PATCH",
         mockUserId,
-        body: { status },
+        body: { status, expectedUpdatedAt: updatedAt },
       });
-      setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+      setAppointments((prev) => prev.map((a) => (
+        a.id === id && a.updatedAt === updatedAt
+          ? { ...a, status: appointment.status, updatedAt: appointment.updated_at }
+          : a
+      )));
     } catch (e) {
       console.error(e);
-      flashToast(sanitizeError(e, "Couldn't update the appointment."));
+      if (e.status === 409) {
+        flashToast(e.message);
+        await fetchData();
+      } else {
+        flashToast(sanitizeError(e, "Couldn't update the appointment."));
+      }
     }
   };
 

@@ -26,6 +26,10 @@ describe("A-055 transport security headers", () => {
     expect(nextConfig).toContain("Permissions-Policy");
   });
 
+  it("marks admin API responses private and non-storable by default", () => {
+    expect(nextConfig).toMatch(/source: ['"]\/api\/admin\/:path\*['"],\s*headers: \[\{ key: ['"]Cache-Control['"], value: ['"]private, no-store['"] \}\]/);
+  });
+
   it("allows the satellite tile source through the fetch policy", () => {
     // MapLibre fetches raster tiles; an img-src allowance alone cannot load them.
     const commandLens = readFileSync("src/components/maps/lenses/command.js", "utf8");

@@ -163,6 +163,12 @@ export async function POST(request) {
 
     // 1. Geocode the location
     const mapboxToken = getServerMapboxToken();
+    if (!mapboxToken) {
+      return NextResponse.json(
+        { error: "Location pricing is temporarily unavailable" },
+        { status: 503, headers: { "Cache-Control": "no-store" } }
+      );
+    }
     const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxToken}&limit=1`;
     
     // A-013: a bare fetch has no timeout. A SLOW Mapbox (not a dead one)

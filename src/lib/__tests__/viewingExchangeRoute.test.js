@@ -14,6 +14,7 @@ const state = vi.hoisted(() => ({
   profiles: [],
   handshakes: [],
   handshakeError: false,
+  scheduleError: null,
 }));
 
 vi.mock("@/lib/serverAuth", () => ({ resolveUserId: async () => ME }));
@@ -23,7 +24,7 @@ vi.mock("@/lib/supabaseAdmin", () => ({
     from: (table) => ({
       select: () => ({
         or: () => ({
-          order: async () => ({ data: [...state.appts], error: null }),
+          order: async () => ({ data: state.scheduleError ? null : [...state.appts], error: state.scheduleError }),
         }),
         in: (...args) => {
           const run = async () => {
@@ -66,6 +67,7 @@ beforeEach(() => {
   state.profiles = [{ id: THEM, display_name: "Gigi" }];
   state.handshakes = [];
   state.handshakeError = false;
+  state.scheduleError = null;
 });
 
 const getExchange = async () => {
@@ -77,6 +79,18 @@ const getExchange = async () => {
 };
 
 describe("A-149 — appointments carry server-resolved contact exchange", () => {
+  it("returns the exact viewing version and distinguishes an unavailable list from an empty one", async () => {
+    state.appts = [appt({ updated_at: "2026-11-13T00:00:00.123456+00:00" })];
+    expect((await getExchange()).updatedAt).toBe(state.appts[0].updated_at);
+
+    const request = new Request("https://www.scoutit.space/api/viewing-appointments");
+    state.appts = [];
+    expect(await (await GET(request)).json()).toEqual({ appointments: [] });
+    state.scheduleError = { code: "42P01" };
+    const failed = await GET(request);
+    expect(failed.status).toBe(503);
+    expect(await failed.json()).toEqual({ error: "Couldn't load your viewings." });
+  });
   it("reports exchanged for a completed handshake", async () => {
     state.handshakes = [handshake({ status: "completed", party_a_signed_at: "2026-09-01", party_b_signed_at: "2026-09-02" })];
     const a = await getExchange();

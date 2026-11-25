@@ -67,7 +67,7 @@ export async function loadPipelineData() {
     try {
       const { data: profiles } = await admin
         .from("user_profiles")
-        .select("id, full_name, email")
+        .select("id, display_name")
         .in("id", [...allUserIds]);
 
       profileMap = new Map((profiles || []).map((p) => [p.id, p]));
@@ -79,24 +79,24 @@ export async function loadPipelineData() {
   // Enrich viewings
   const enrichedViewings = (viewingsRes.data || []).map((v) => ({
     ...v,
-    host_name: profileMap.get(v.host_id)?.full_name || null,
-    host_email: profileMap.get(v.host_id)?.email || null,
-    guest_name: profileMap.get(v.guest_id)?.full_name || null,
-    guest_email: profileMap.get(v.guest_id)?.email || null,
+    host_name: profileMap.get(v.host_id)?.display_name || null,
+    host_email: null,
+    guest_name: profileMap.get(v.guest_id)?.display_name || null,
+    guest_email: null,
   }));
 
   // Enrich contacts
   const enrichedContacts = (contactsRes.data || []).map((c) => ({
     ...c,
-    owner_name: profileMap.get(c.owner_user_id)?.full_name || null,
-    owner_email: profileMap.get(c.owner_user_id)?.email || null,
+    owner_name: profileMap.get(c.owner_user_id)?.display_name || null,
+    owner_email: null,
   }));
 
   // Enrich bounties
   const enrichedBounties = (bountiesRes.data || []).map((b) => ({
     ...b,
-    researcher_name: profileMap.get(b.researcher_user_id)?.full_name || null,
-    researcher_email: profileMap.get(b.researcher_user_id)?.email || null,
+    researcher_name: profileMap.get(b.researcher_user_id)?.display_name || null,
+    researcher_email: null,
   }));
 
   return {

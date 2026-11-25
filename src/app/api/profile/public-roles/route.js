@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 export const dynamic = "force-dynamic";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Public, service-role-backed read: bound enumeration per client.
+const checkPublicRolesRate = createRateLimiter({ limit: 60, windowMs: 60_000, maxKeys: 5000 });
 
 // Which of a user's roles are publicly displayable (privacy_settings.public_roles).
 // The 2026-07-09 RLS reset correctly locked privacy_settings to own-rows-only,
@@ -14,9 +20,17 @@ export const dynamic = "force-dynamic";
 // only for profiles that are is_profile_public.
 export async function GET(request) {
   try {
+    const rate = checkPublicRolesRate(`public-roles:${clientIp(request)}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds || 60) } }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    if (!UUID_RE.test(userId)) return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
     if (!supabaseAdmin) return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
 
     const { data: profile, error: profError } = await supabaseAdmin

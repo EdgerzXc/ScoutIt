@@ -97,7 +97,7 @@ function ContributionRow({ row, canDecide }) {
             placeholder="Reason to withdraw this credit"
             className="flex-1 min-w-0 bg-black/50 border border-white/10 rounded-lg px-3 py-2 min-h-[44px] text-sm text-white placeholder:text-white/70 focus:border-[#E8AE3C]/50 focus:outline-none"
           />
-          <button className="inline-flex items-center justify-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium border border-white/15 text-white/70 hover:border-white/30 hover:text-white transition-colors whitespace-nowrap">
+          <button type="submit" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium border border-white/15 text-white/70 hover:border-white/30 hover:text-white transition-colors whitespace-nowrap">
             <Undo2 className="w-4 h-4" aria-hidden="true" />
             Withdraw credit
           </button>
@@ -221,7 +221,7 @@ export default async function ContributionsPage() {
             />
             Put it on the broker&rsquo;s dossier now
           </label>
-          <button className="inline-flex items-center justify-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-[#E8AE3C]/10 hover:bg-[#E8AE3C]/20 text-[#E8AE3C] border border-[#E8AE3C]/30 transition-colors">
+          <button type="submit" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-[#E8AE3C]/10 hover:bg-[#E8AE3C]/20 text-[#E8AE3C] border border-[#E8AE3C]/30 transition-colors">
             <Plus className="w-4 h-4" aria-hidden="true" />
             Credit contribution
           </button>

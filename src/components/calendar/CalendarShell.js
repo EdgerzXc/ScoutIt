@@ -64,6 +64,7 @@ function normalizeViewing(appt) {
     endsAt,
     allDay: false,
     status: appt.status,
+    updatedAt: appt.updatedAt,
     color: "blue",
     isHost: appt.isHost,
     contactName: appt.contactName,
@@ -123,6 +124,7 @@ export default function CalendarShell() {
   }, [view, viewDate]);
 
   const loadData = useCallback(async () => {
+    const generation = ++loadGeneration.current;
     if (!userId) {
       setEvents([]);
       setViewings([]);
@@ -131,7 +133,6 @@ export default function CalendarShell() {
       return;
     }
 
-    const generation = ++loadGeneration.current;
     setLoading(true);
     const { from, to } = getRange(view, viewDate);
 
@@ -170,7 +171,7 @@ export default function CalendarShell() {
       /401|403|unauthorized|forbidden|canceled|abort|rate limit/i.test(reason?.message || "");
     const failed = [
       eventsRes.status === "rejected" && !isNonFatalAuthOrPerm(eventsRes.reason) ? "your events" : null,
-      viewingsRes.status === "rejected" && !isNonFatalAuthOrPerm(viewingsRes.reason) ? "your viewings" : null,
+      viewingsRes.status === "rejected" ? "your viewings" : null,
     ].filter(Boolean);
     if (failed.length) {
       console.warn("Calendar load notice:", eventsRes.reason || viewingsRes.reason);
@@ -269,18 +270,30 @@ export default function CalendarShell() {
     }
   };
 
-  const handleRespondViewing = async (id, status) => {
+  const handleRespondViewing = async ({ id, updatedAt }, status) => {
+    if (respondingId) return;
     setRespondingId(id);
     try {
-      await crmFetch(`/api/viewing-appointments/${id}`, { method: "PATCH", body: { status }, mockUserId: userId });
+      const { appointment } = await crmFetch(`/api/viewing-appointments/${id}`, {
+        method: "PATCH",
+        body: { status, expectedUpdatedAt: updatedAt },
+        mockUserId: userId,
+      });
       // An older read must not restore the status from before this write.
       loadGeneration.current += 1;
       setLoading(false);
-      setViewings((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
-      setDetailViewing((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
+      const changes = { status: appointment.status, updatedAt: appointment.updated_at };
+      setViewings((prev) => prev.map((v) => (v.id === id && v.updatedAt === updatedAt ? { ...v, ...changes } : v)));
+      setDetailViewing((prev) => (prev?.id === id && prev.updatedAt === updatedAt ? { ...prev, ...changes } : prev));
       addToast?.(status === "confirmed" ? "Viewing confirmed" : "Viewing declined", status === "confirmed" ? "✅" : "🚫");
-    } catch {
-      addToast?.("Couldn't update the viewing.", "❌");
+    } catch (err) {
+      if (err.status === 409) {
+        setDetailViewing((prev) => (prev?.id === id ? null : prev));
+        addToast?.(err.message, "❌");
+        await loadData();
+      } else {
+        addToast?.("Couldn't update the viewing.", "❌");
+      }
     } finally {
       setRespondingId(null);
     }

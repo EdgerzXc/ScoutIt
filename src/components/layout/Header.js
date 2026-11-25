@@ -149,14 +149,23 @@ export default function Header({ ambientContext = null }) {
         if (active) setUser(null);
       }
     }
+    let lastFocusRefreshAt = 0;
+    const onWindowFocus = () => {
+      const now = Date.now();
+      if (now - lastFocusRefreshAt < 60_000) return;
+      lastFocusRefreshAt = now;
+      resolveHeaderUser();
+    };
     resolveHeaderUser();
-    // Pick up sign-in/sign-out from other tabs or after onboarding
+    // Pick up sign-in/sign-out or profile updates cleanly without redundant focus storms
     window.addEventListener("storage", resolveHeaderUser);
-    window.addEventListener("focus", resolveHeaderUser);
+    window.addEventListener("scoutit:profile-updated", resolveHeaderUser);
+    window.addEventListener("focus", onWindowFocus);
     return () => {
       active = false;
       window.removeEventListener("storage", resolveHeaderUser);
-      window.removeEventListener("focus", resolveHeaderUser);
+      window.removeEventListener("scoutit:profile-updated", resolveHeaderUser);
+      window.removeEventListener("focus", onWindowFocus);
     };
   }, []);
 

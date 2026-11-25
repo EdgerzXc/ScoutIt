@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, GET, approvePropertyClaim } from '@/app/api/property/claim/route';
+import { POST, GET, approvePropertyClaim, checkClaimRate } from '@/app/api/property/claim/route';
 import * as serverAuth from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -123,6 +123,7 @@ const VALID = { propertyId: 'prop-101', claimedRelationship: 'owner', agreed: tr
 describe('/api/property/claim — POST', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    checkClaimRate?.reset?.();
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('user-123');
   });
 

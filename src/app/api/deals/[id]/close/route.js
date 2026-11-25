@@ -5,6 +5,7 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { notifyUser } from "@/lib/notifications";
+import { canTransitionWorkflow } from "@/lib/workflowStateMachines";
 
 // Same dev-mock convention as /api/notifications and /api/dashboard/units --
 // ?mockOwnerId=master-dev only takes effect when no real Bearer token was
@@ -14,12 +15,16 @@ import { notifyUser } from "@/lib/notifications";
 export async function POST(request, { params }) {
   try {
     const { id: dealId } = await params;
-    try {
-      const body = await request.json();
-      } catch { /* no body sent -- fine, real sessions don't need one */ }
-
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+    }
+
+    try {
+      await request.json();
+    } catch { /* no body sent -- fine, real sessions don't need one */ }
 
     // Validate access
     const { data: deal, error: dealError } = await supabaseAdmin
@@ -42,6 +47,13 @@ export async function POST(request, { params }) {
 
     if (deal.status === 'closed') {
       return NextResponse.json({ success: true, message: "Already closed." });
+    }
+
+    if (!canTransitionWorkflow("inquiry", deal.status, "closed")) {
+      return NextResponse.json(
+        { error: `Inquiry cannot move from ${deal.status} to closed` },
+        { status: 409 }
+      );
     }
 
     // Set to closed and start the 7-day archive timer

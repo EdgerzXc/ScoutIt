@@ -84,7 +84,7 @@ export default function BrokersClient({ initialBrokers = [], initialError = null
           reason: reason.trim(),
         });
 
-        if (res.success) {
+        if (res?.success) {
           setBrokers((prev) =>
             prev.map((b) =>
               b.recordId === selectedBroker.recordId ? { ...b, isLive } : b
@@ -97,6 +97,8 @@ export default function BrokersClient({ initialBrokers = [], initialError = null
           );
           handleCloseModal();
           setTimeout(() => setToast(null), 5000);
+        } else {
+          setActionError(res?.error || "Failed to update broker status.");
         }
       } else if (modalType === "verify_prc" || modalType === "revoke_prc") {
         const isVerified = modalType === "verify_prc";
@@ -107,7 +109,7 @@ export default function BrokersClient({ initialBrokers = [], initialError = null
           reason: reason.trim(),
         });
 
-        if (res.success) {
+        if (res?.success) {
           setBrokers((prev) =>
             prev.map((b) =>
               b.recordId === selectedBroker.recordId
@@ -122,6 +124,8 @@ export default function BrokersClient({ initialBrokers = [], initialError = null
           );
           handleCloseModal();
           setTimeout(() => setToast(null), 5000);
+        } else {
+          setActionError(res?.error || "Failed to update PRC license verification.");
         }
       }
     } catch (err) {
@@ -416,7 +420,7 @@ export default function BrokersClient({ initialBrokers = [], initialError = null
                 {modalType === "verify_prc" && "Verify Broker PRC License"}
                 {modalType === "revoke_prc" && "Revoke PRC Verification"}
               </h3>
-              <button onClick={handleCloseModal} className="text-white/60 hover:text-white transition-colors text-sm">
+              <button type="button" aria-label="Close dialog" onClick={handleCloseModal} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-white/60 hover:text-white transition-colors text-sm rounded-lg">
                 ✕
               </button>
             </div>

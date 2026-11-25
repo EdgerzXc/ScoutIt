@@ -11,6 +11,7 @@ import {
   computeSignalHealthSummary, createSignal
 } from "@/lib/flow/incidentSignalHub";
 import { INCIDENT_SCENARIOS } from "@/lib/flow/incidentSimulator";
+import { MASTER_FLOW_NODES, MASTER_FLOW_EDGES } from "@/data/masterFlowGraphData";
 
 /**
  * IncidentSignalBanner
@@ -63,10 +64,10 @@ export default function IncidentSignalBanner({
   };
 
   return (
-    <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-4xl transition-all duration-200">
+    <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-4xl transition-[opacity,transform] duration-200">
       {/* Banner Strip */}
       <div
-        className={`rounded-2xl border backdrop-blur-xl px-4 py-2.5 shadow-2xl flex items-center justify-between transition-all ${
+        className={`rounded-2xl border backdrop-blur-xl px-4 py-2.5 shadow-2xl flex items-center justify-between transition-[background-color,border-color,box-shadow] ${
           isAlarmActive
             ? "bg-error/20 border-error/80 shadow-[0_0_35px_rgba(var(--red-rgb,239,68,68),0.4)] text-text-primary"
             : "bg-surface/90 border-border-solid text-text-primary hover:border-accent-muted"
@@ -109,9 +110,9 @@ export default function IncidentSignalBanner({
             <p className="text-[12px] text-white/80 truncate mt-0.5">
               {isAlarmActive
                 ? currentCriticalSignal
-                  ? `${currentCriticalSignal.error} • ${health.affectedTotalCount} downstream steps severed`
+                  ? `${currentCriticalSignal.error} · ${health.affectedTotalCount} downstream steps severed`
                   : `${activeFaultedNodeIds.length} nodes currently faulted in topology`
-                : "Continuous topology telemetry active across all 131 nodes and 252 connections."}
+                : `Continuous topology telemetry active across all ${MASTER_FLOW_NODES.length} nodes and ${MASTER_FLOW_EDGES.length} connections.`}
             </p>
           </div>
         </div>
@@ -121,11 +122,12 @@ export default function IncidentSignalBanner({
           {/* Quick Focus Button if alarm is active */}
           {isAlarmActive && (currentCriticalSignal?.nodeId || activeFaultedNodeIds[0]) && (
             <button
+              type="button"
               onClick={() => {
                 const target = currentCriticalSignal?.nodeId || activeFaultedNodeIds[0];
                 if (target && onFocusNode) onFocusNode(target);
               }}
-              className="px-2.5 py-1 rounded-xl bg-red-500/30 hover:bg-red-500/50 border border-red-500 text-red-100 text-[12px] font-mono font-bold flex items-center gap-1.5 transition"
+              className="min-h-11 px-3 py-2 rounded-xl bg-red-500/30 hover:bg-red-500/50 border border-red-500 text-red-100 text-[12px] font-mono font-bold flex items-center gap-1.5 transition-colors"
               title="Center camera on faulted node"
             >
               <Target size={13} className="text-red-300" />
@@ -135,8 +137,9 @@ export default function IncidentSignalBanner({
 
           {/* Toggle Panel Button */}
           <button
+            type="button"
             onClick={() => setIsExpanded(prev => !prev)}
-            className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[12px] font-mono font-semibold flex items-center gap-1.5 transition"
+            className="min-h-11 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[12px] font-mono font-semibold flex items-center gap-1.5 transition-colors"
           >
             <Activity size={13} className="text-[var(--accent)]" />
             <span>{isExpanded ? "Hide Controls" : "Signal Controls"}</span>
@@ -159,10 +162,11 @@ export default function IncidentSignalBanner({
             <div className="flex items-center gap-2">
               {signals.length > 0 && (
                 <button
+                  type="button"
                   onClick={() => clearAllSignals()}
-                  className="text-[12px] font-mono text-white/60 hover:text-white px-2 py-0.5 rounded border border-white/15 transition flex items-center gap-1"
+                  className="min-h-11 text-[12px] font-mono text-white/75 hover:text-white px-3 py-2 rounded-lg border border-white/15 transition-colors flex items-center gap-1.5"
                 >
-                  <RotateCcw size={11} />
+                  <RotateCcw size={12} />
                   <span>Clear All Signals</span>
                 </button>
               )}

@@ -65,8 +65,8 @@ export default function DiscoverSearch() {
   useEffect(() => {
     if (!searchParams) return;
     const incoming = searchParams.get("search") || searchParams.get("q");
-    if (typeof incoming === "string" && incoming !== query) {
-      setQuery(incoming);
+    if (typeof incoming === "string") {
+      setQuery((prev) => (prev === incoming ? prev : incoming));
     }
   }, [searchParams]);
   const [event, setEvent] = useState(null);

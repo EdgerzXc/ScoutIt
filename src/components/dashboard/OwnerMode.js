@@ -9,7 +9,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { CardGridSkeleton } from "./DashboardSkeleton";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { Building2, Camera, Search, Palette, ArrowUpRight, FileText, Edit3, FileUp, Bot, Radio, FolderOpen, Sparkles, Clock } from "lucide-react";
+import { Building2, Camera, Search, Palette, ArrowUpRight, FileText, Edit3, FileUp, Bot, Radio, FolderOpen, Sparkles, Clock, Loader2 } from "lucide-react";
 import Papa from 'papaparse';
 // A-120: `sanitizeObject` was imported here and never called — an orphaned
 // import that made the security checklist read as though owner input was
@@ -30,14 +30,19 @@ import { dealThreadHref } from "@/lib/deals/dealThreadLink";
 import { DELEGATION_ACCEPT_NOTICE } from "@/lib/deals/delegationDisclosure";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import SimpleDetail from "@/components/ui/SimpleDetail";
+import { useSimpleMode } from "@/hooks/useSimpleMode";
+import dynamic from "next/dynamic";
 import InfoTip from "@/components/ui/InfoTip";
-import SpatialStudioRequestModal from "./SpatialStudioRequestModal";
-import PropertyUpdateHub from "./PropertyUpdateHub";
+const SpatialStudioRequestModal = dynamic(() => import("./SpatialStudioRequestModal"), { ssr: false });
+const PropertyUpdateHub = dynamic(() => import("./PropertyUpdateHub"), { ssr: false });
 import { SPATIAL_STYLE_PRESETS } from "@/lib/spatialStudio";
 import { registerMobileBackAction } from "@/lib/mobileBackStack";
+import { uploadPropertyVideo } from "@/lib/storage";
 
 export default function OwnerMode() {
-  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, bulkAddListings, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
+  const { listings, pitches, updatePitchStatus, addListing, addConciergeListing, addToast, updateListing, publishListing, closeListing, permanentlyRemoveListing, currentUser, inviteBroker, connects, isLoading, inventoryError, refetchInventory } = useDashboard();
+  const isSimple = useSimpleMode();
+  const [simpleToolsOpen, setSimpleToolsOpen] = useState(false);
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "";
   const [showWizard, setShowWizard] = useState(false); // false | 'select_mode' | 'live_editor' | 'concierge' | 'edit'
   useEffect(() => {
@@ -73,7 +78,14 @@ export default function OwnerMode() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [isArchiving, setIsArchiving] = useState(false);
+  const [confirmOffMarketId, setConfirmOffMarketId] = useState(null);
   const [dangerOpen, setDangerOpen] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+  const inviteLockRef = useRef(false);
+  const [busyListingId, setBusyListingId] = useState(null);
+  const busyListingRef = useRef(null);
+  const [busyDealId, setBusyDealId] = useState(null);
+  const busyDealRef = useRef(null);
 
   // Mobile Back button undo integration for Owner mode modals
   useEffect(() => {
@@ -122,13 +134,17 @@ export default function OwnerMode() {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token;
         const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
-        await fetch(`/api/deals/${dealId}/notes`, {
+        const res = await fetch(`/api/deals/${dealId}/notes`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
           body: JSON.stringify({ note, mockOwnerId }),
         });
+        if (!res.ok) {
+          throw new Error("Failed to save deal note");
+        }
       } catch (err) {
         console.error('Failed to save deal notes', err);
+        addToast("Failed to save deal note. Please try again.", "❌");
       }
     }, 800);
   };
@@ -168,17 +184,10 @@ export default function OwnerMode() {
   // The route is given `dealId` only — it resolves the property and the broker
   // server-side, so this component never handles a counterparty's user id.
   const [removingBrokerId, setRemovingBrokerId] = useState(null);
+  const [confirmRemovePitchId, setConfirmRemovePitchId] = useState(null);
   const handleRemoveBroker = async (pitch) => {
     const who = pitch.brokerName || "this broker";
-    const ok = window.confirm(
-      `Remove ${who} from this property?\n\n` +
-        `• They stop receiving enquiries for it\n` +
-        `• Every conversation about it closes, including buyers they were already talking to\n` +
-        `• Connects already spent are not refunded\n\n` +
-        `This cannot be undone. They would have to pitch again.`
-    );
-    if (!ok) return;
-
+    setConfirmRemovePitchId(null);
     setRemovingBrokerId(pitch.id);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -320,7 +329,9 @@ export default function OwnerMode() {
       <div className="max-w-[840px] mx-auto py-lg animate-[fadeIn_0.3s_ease]">
         <button onClick={() => setShowWizard(false)} className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent mb-8 font-working-title active:scale-95 transition">← Back to Workspace</button>
         <h1 className="font-display-md text-3xl md:text-4xl text-text-primary mb-2">How would you like to add this property?</h1>
-        <p className="text-text-secondary mb-8 text-base">Select your starting point. You can refine and add details at any stage before publishing.</p>
+        {!isSimple && (
+          <p className="text-text-secondary mb-8 text-base">Select your starting point. You can refine and add details at any stage before publishing.</p>
+        )}
         
         {/* Primary 2 Choices (Progressive Disclosure) */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -540,7 +551,20 @@ export default function OwnerMode() {
                     // publish route's 422 gate apply — without this the draft is
                     // indistinguishable from a hand-typed one.
                     creationSource: 'pdf_assisted',
-                    details: { ...draft.details, ai_confidence: draft.confidence, ai_gaps: draft.gaps }
+                    details: {
+                      ...(draft.details || {}),
+                      ...(draft.floor_sqm != null && draft.details?.floor_sqm === undefined ? { floor_sqm: draft.floor_sqm } : {}),
+                      ...(draft.lot_sqm != null && draft.details?.lot_sqm === undefined ? { lot_sqm: draft.lot_sqm } : {}),
+                      ...(draft.beds != null && draft.details?.beds === undefined ? { beds: draft.beds } : {}),
+                      ...(draft.baths != null && draft.details?.baths === undefined ? { baths: draft.baths } : {}),
+                      ...(draft.parking != null && draft.details?.parking === undefined ? { parking: draft.parking } : {}),
+                      ...(draft.furnishing != null && draft.details?.furnishing === undefined ? { furnishing: draft.furnishing } : {}),
+                      ...(draft.tenure != null && draft.details?.tenure === undefined ? { tenure: draft.tenure } : {}),
+                      ...(draft.year_built != null && draft.details?.year_built === undefined ? { year_built: draft.year_built } : {}),
+                      ...(draft.title_status != null && draft.details?.title_status === undefined ? { title_status: draft.title_status } : {}),
+                      ai_confidence: draft.confidence,
+                      ai_gaps: draft.gaps,
+                    }
                   });
                   addToast(`Draft created with ${Math.round((draft.confidence || 0) * 100)}% confidence. Review and complete missing fields: a reviewer checks it against your PDF before it goes live.`, "✅");
                 }
@@ -554,7 +578,7 @@ export default function OwnerMode() {
               }
             }}
           >
-            {isAssimilating ? <><span className="animate-spin">⚙️</span> Extracting...</> : "Create draft from PDF"}
+            {isAssimilating ? <><Loader2 size={14} className="inline-block animate-spin mr-1.5" /> Extracting...</> : "Create draft from PDF"}
           </button>
         </div>
       </div>
@@ -594,47 +618,48 @@ export default function OwnerMode() {
     };
 
     const handleSubmitVideo = async () => {
-      if (!selectedFile) return;
+      if (!selectedFile || isAssimilating) return;
+      setIsAssimilating(true);
       addToast("Uploading your video...", "●");
 
       try {
-        const form = new FormData();
-        form.append('file', selectedFile);
-        form.append('owner_id', currentUser?.id || 'unknown');
-        form.append('property_id', activeListing?.id || '');
-
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token;
-        const res = await fetch('/api/storage/upload', { 
-          method: 'POST', 
-          headers: { 'Authorization': token ? `Bearer ${token}` : "" },
-          body: form 
+        const result = await uploadPropertyVideo(selectedFile, {
+          ownerId: currentUser?.id || 'unknown',
+          propertyId: activeListing?.id || 'pending',
+          token,
         });
-        const result = await res.json();
 
-        if (!res.ok) throw new Error(result.error || 'Upload failed');
+        if (activeListing?.id) {
+          const spatialRes = await fetch('/api/spatial/request', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              propertyId: activeListing.id,
+              stylePreset: selectedStylePreset,
+              fileUrl: result.publicUrl || result.path || selectedFile.name,
+              walletConnects: connects,
+            })
+          });
+          const spatialData = await spatialRes.json().catch(() => ({}));
+          if (!spatialRes.ok) {
+            throw new Error(spatialData.error || "Spatial Twin request failed");
+          }
+        }
 
-        await fetch('/api/spatial/request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify({
-            propertyId: activeListing?.id,
-            stylePreset: selectedStylePreset,
-            fileUrl: result.publicUrl || selectedFile.name,
-            walletConnects: connects,
-          })
-        }).catch(() => {});
-
-        addToast("Video uploaded. Your Spatial Twin will be ready in 24-48 hours.", "✅");
+        addToast(result.message || "Video uploaded. Your Spatial Twin will be ready in 24-48 hours.", "●");
       } catch (err) {
         console.error('[Vault upload]', err);
         addToast(`Upload failed: ${sanitizeError(err)}`, "❌");
+        setIsAssimilating(false);
         return;
       }
 
+      setIsAssimilating(false);
       setSelectedFile(null);
       setVaultBuildOption(null);
       setShowWizard(false);
@@ -828,10 +853,10 @@ export default function OwnerMode() {
 
             <button
               onClick={handleSubmitVideo}
-              disabled={!selectedFile}
+              disabled={!selectedFile || isAssimilating}
               className="w-full bg-gold-accent text-background font-label-caps uppercase tracking-widest font-bold px-6 py-4 rounded hover:bg-gold-bright active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 transition duration-300 text-base shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--accent-rgb),0.4)]"
             >
-              Submit for Processing
+              {isAssimilating ? "Uploading..." : "Submit for Processing"}
             </button>
           </div>
         )}
@@ -1197,38 +1222,105 @@ export default function OwnerMode() {
             {activeListing.lifecycleState === 'off_market' || activeListing.pipelineStatus === 'off_market' ? (
               <button
                 type="button"
-                className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/15 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background active:scale-95"
-                onClick={() => publishListing(activeListing.id)}
-              >
-                Publish to Live
-              </button>
-            ) : activeListing.lifecycleState === 'live' || activeListing.pipelineStatus === 'approved' ? (
-              <button
-                type="button"
-                className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface"
-                onClick={() => {
-                  if (window.confirm("Move this property off-market into your private cloud vault? It will be removed from the public live directory and free up 1 listing slot.")) {
-                    closeListing(activeListing.id);
+                disabled={busyListingId === activeListing.id}
+                className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/15 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background active:scale-95 disabled:opacity-50"
+                onClick={async () => {
+                  if (busyListingRef.current === activeListing.id) return;
+                  busyListingRef.current = activeListing.id;
+                  setBusyListingId(activeListing.id);
+                  try {
+                    await publishListing(activeListing.id);
+                  } finally {
+                    if (busyListingRef.current === activeListing.id) busyListingRef.current = null;
+                    setBusyListingId(null);
                   }
                 }}
               >
-                Move Off-Market
+                {busyListingId === activeListing.id ? "Publishing..." : "Publish to Live"}
               </button>
+            ) : activeListing.lifecycleState === 'live' || activeListing.pipelineStatus === 'approved' ? (
+              confirmOffMarketId === activeListing.id ? (
+                <div className="col-span-2 sm:col-span-auto flex flex-col gap-2 rounded border border-surface-variant bg-surface-alt/90 p-2.5">
+                  <p className="text-xs text-text-secondary">
+                    Moves this property into your private vault and frees 1 live slot.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={busyListingId === activeListing.id}
+                      onClick={async () => {
+                        if (busyListingRef.current === activeListing.id) return;
+                        busyListingRef.current = activeListing.id;
+                        setBusyListingId(activeListing.id);
+                        setConfirmOffMarketId(null);
+                        try {
+                          await closeListing(activeListing.id);
+                        } finally {
+                          if (busyListingRef.current === activeListing.id) busyListingRef.current = null;
+                          setBusyListingId(null);
+                        }
+                      }}
+                      className="min-h-11 flex-1 rounded border border-gold-accent/60 bg-gold-accent/15 px-3 py-1.5 font-label-caps text-xs font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background disabled:opacity-50"
+                    >
+                      {busyListingId === activeListing.id ? "Moving..." : "Confirm Off-Market"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busyListingId === activeListing.id}
+                      onClick={() => setConfirmOffMarketId(null)}
+                      className="min-h-11 rounded border border-surface-variant px-3 py-1.5 font-label-caps text-xs uppercase tracking-wider text-text-secondary hover:text-on-surface transition disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busyListingId === activeListing.id}
+                  className="col-span-2 sm:col-span-auto inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface disabled:opacity-50"
+                  onClick={() => setConfirmOffMarketId(activeListing.id)}
+                >
+                  Move Off-Market
+                </button>
+              )
             ) : (
               <div className="col-span-2 sm:col-span-auto flex gap-2">
                 <button
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/15 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background active:scale-95"
-                  onClick={() => publishListing(activeListing.id)}
+                  disabled={busyListingId === activeListing.id}
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-gold-accent bg-gold-accent/15 px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition hover:bg-gold-accent hover:text-background active:scale-95 disabled:opacity-50"
+                  onClick={async () => {
+                    if (busyListingRef.current === activeListing.id) return;
+                    busyListingRef.current = activeListing.id;
+                    setBusyListingId(activeListing.id);
+                    try {
+                      await publishListing(activeListing.id);
+                    } finally {
+                      if (busyListingRef.current === activeListing.id) busyListingRef.current = null;
+                      setBusyListingId(null);
+                    }
+                  }}
                 >
-                  Publish to Live
+                  {busyListingId === activeListing.id ? "Publishing..." : "Publish to Live"}
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface"
-                  onClick={() => closeListing(activeListing.id)}
+                  disabled={busyListingId === activeListing.id}
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-surface-variant px-4 py-2 text-center font-label-caps text-xs sm:text-sm font-bold uppercase tracking-wider text-text-secondary transition hover:border-text-secondary hover:text-on-surface disabled:opacity-50"
+                  onClick={async () => {
+                    if (busyListingRef.current === activeListing.id) return;
+                    busyListingRef.current = activeListing.id;
+                    setBusyListingId(activeListing.id);
+                    try {
+                      await closeListing(activeListing.id);
+                    } finally {
+                      if (busyListingRef.current === activeListing.id) busyListingRef.current = null;
+                      setBusyListingId(null);
+                    }
+                  }}
                 >
-                  Store Off-Market
+                  {busyListingId === activeListing.id ? "Moving..." : "Store Off-Market"}
                 </button>
               </div>
             )}
@@ -1446,31 +1538,51 @@ export default function OwnerMode() {
           </div>
           </SimpleDetail>
 
-          {/* Search readiness (SEO-01 · W11). Sits next to Listing Strength on
-              purpose: Strength answers "is this listing complete?", this
-              answers "can Google reach it?". A 100%-complete DRAFT scores
-              perfectly on the first and fails the second, because a draft has
-              no page. Hidden while the AI is still drafting — there is nothing
-              to index and nothing the owner can act on yet. */}
-          {activeListing.pipelineStatus !== 'ai_drafting' && (
-            <SeoReadinessPanel propertyId={activeListing.id} />
-          )}
+          {/* Search readiness (SEO-01 · W11) & secondary diagnostics — folded in Simple Mode */}
+          {activeListing.pipelineStatus !== 'ai_drafting' && isSimple && !simpleToolsOpen ? (
+            <button
+              type="button"
+              onClick={() => setSimpleToolsOpen(true)}
+              aria-expanded="false"
+              className="w-full min-h-11 px-4 py-3 rounded-lg border border-surface-variant bg-surface/60 text-left font-label-caps text-xs tracking-widest text-text-secondary hover:text-on-surface hover:border-gold-accent/40 transition flex items-center justify-between"
+            >
+              <span>More Owner Tools (Search Readiness, Timeline, FAQs)</span>
+              <span aria-hidden="true">▸</span>
+            </button>
+          ) : (
+            <>
+              {isSimple && (
+                <button
+                  type="button"
+                  onClick={() => setSimpleToolsOpen(false)}
+                  aria-expanded="true"
+                  className="w-full min-h-11 px-4 py-3 rounded-lg border border-gold-accent/30 bg-surface/60 text-left font-label-caps text-xs tracking-widest text-gold-accent hover:text-on-surface transition flex items-center justify-between"
+                >
+                  <span>More Owner Tools (Search Readiness, Timeline, FAQs)</span>
+                  <span aria-hidden="true">▾</span>
+                </button>
+              )}
+              {activeListing.pipelineStatus !== 'ai_drafting' && (
+                <SeoReadinessPanel propertyId={activeListing.id} />
+              )}
 
-          {/* Property Timeline — inquiries, deal changes, notes, viewings on
-              this property, straight from crm_activity_log */}
-          <div className="card-atmosphere rounded-lg p-6">
-            <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Property Timeline</h3>
-            <DealTimeline propertyId={activeListing.id} mockUserId={currentUser?.id} />
-          </div>
+              {/* Property Timeline — inquiries, deal changes, notes, viewings on
+                  this property, straight from crm_activity_log */}
+              <div className="card-atmosphere rounded-lg p-6">
+                <h3 className="font-label-caps text-xs tracking-widest text-text-secondary mb-4 uppercase border-b border-surface-variant pb-2">Property Timeline</h3>
+                <DealTimeline propertyId={activeListing.id} mockUserId={currentUser?.id} />
+              </div>
 
-          {/* Buyer-question pre-flight. Needs a slug, so it only appears once
-              the listing has been published at least once (Airtable owns the
-              slug — see AGENTS.md §2). Optional: never blocks publishing. */}
-          {activeListing.slug && activeListing.pipelineStatus !== 'ai_drafting' && (
-            <FAQPreflightPanel
-              propertySlug={activeListing.slug}
-              onProgressChange={setFaqProgress}
-            />
+              {/* Buyer-question pre-flight. Needs a slug, so it only appears once
+                  the listing has been published at least once (Airtable owns the
+                  slug — see AGENTS.md §2). Optional: never blocks publishing. */}
+              {activeListing.slug && activeListing.pipelineStatus !== 'ai_drafting' && (
+                <FAQPreflightPanel
+                  propertySlug={activeListing.slug}
+                  onProgressChange={setFaqProgress}
+                />
+              )}
+            </>
           )}
         </div>
 
@@ -1494,10 +1606,23 @@ export default function OwnerMode() {
               <button
                 type="button"
                 className="bg-gold-accent text-background active:scale-95 font-label-caps uppercase tracking-widest font-bold px-5 py-3 rounded hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
-                disabled={!inviteName.trim() || connects < 1}
-                onClick={async () => { const ok = await inviteBroker(activeListing.id, inviteName.trim()); if (ok) setInviteName(""); }}
+                disabled={isInviting || !inviteName.trim() || connects < 1}
+                onClick={async () => {
+                  if (inviteLockRef.current || !inviteName.trim() || connects < 1) return;
+                  inviteLockRef.current = true;
+                  setIsInviting(true);
+                  try {
+                    const ok = await inviteBroker(activeListing.id, inviteName.trim());
+                    if (ok) setInviteName("");
+                  } catch (err) {
+                    addToast(sanitizeError(err, "Failed to send handshake"), "❌");
+                  } finally {
+                    inviteLockRef.current = false;
+                    setIsInviting(false);
+                  }
+                }}
               >
-                Send Handshake
+                {isInviting ? "Sending..." : "Send Handshake"}
               </button>
             </div>
           </div>
@@ -1665,14 +1790,38 @@ export default function OwnerMode() {
                   {pitch.status === 'pending' && (
                     <div className="flex gap-3">
                       <button 
-                        className="flex-1 hov-card border border-surface-variant hover:border-error hover:text-error text-text-primary font-working-title text-sm font-bold py-3 rounded transition" 
-                        onClick={() => updatePitchStatus(pitch.id, 'declined')}
+                        type="button"
+                        disabled={busyDealId === pitch.id}
+                        className="flex-1 hov-card border border-surface-variant hover:border-error hover:text-error text-text-primary font-working-title text-sm font-bold py-3 rounded transition disabled:opacity-50" 
+                        onClick={async () => {
+                          if (busyDealRef.current === pitch.id) return;
+                          busyDealRef.current = pitch.id;
+                          setBusyDealId(pitch.id);
+                          try {
+                            await updatePitchStatus(pitch.id, 'declined');
+                          } finally {
+                            if (busyDealRef.current === pitch.id) busyDealRef.current = null;
+                            setBusyDealId(null);
+                          }
+                        }}
                       >
                         Decline
                       </button>
                       <button 
-                        className="flex-1 bg-gold-accent text-background active:scale-95 font-working-title text-sm font-bold py-3 rounded hover:opacity-90 transition-opacity shadow-lg" 
-                        onClick={() => updatePitchStatus(pitch.id, 'accepted')}
+                        type="button"
+                        disabled={busyDealId === pitch.id}
+                        className="flex-1 bg-gold-accent text-background active:scale-95 font-working-title text-sm font-bold py-3 rounded hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50" 
+                        onClick={async () => {
+                          if (busyDealRef.current === pitch.id) return;
+                          busyDealRef.current = pitch.id;
+                          setBusyDealId(pitch.id);
+                          try {
+                            await updatePitchStatus(pitch.id, 'accepted');
+                          } finally {
+                            if (busyDealRef.current === pitch.id) busyDealRef.current = null;
+                            setBusyDealId(null);
+                          }
+                        }}
                       >
                         Accept Inquiry
                       </button>
@@ -1690,22 +1839,55 @@ export default function OwnerMode() {
                       rejects one rather than pretending. */}
                   {pitch.status === 'accepted' && pitch.otherPartyRole === 'Broker' && (
                     <div className="mt-4 border-t border-surface-variant pt-3">
-                      <button
-                        type="button"
-                        disabled={removingBrokerId === pitch.id}
-                        onClick={() => handleRemoveBroker(pitch)}
-                        className="min-h-[44px] w-full rounded border border-surface-variant px-4 text-sm font-working-title text-text-secondary transition hover:border-error hover:text-error disabled:opacity-50"
-                      >
-                        {removingBrokerId === pitch.id ? "Removing…" : "Remove this broker"}
-                      </button>
-                      {/* Said before the click, not discovered after it. The
-                          buyer threads and the non-refund are the parts an
-                          owner would not otherwise expect. */}
-                      <p className="mt-2 text-[12px] leading-relaxed text-text-muted">
-                        They stop receiving enquiries for this property, and every conversation
-                        about it closes, including buyers they were already talking to. Connects
-                        already spent are not refunded.
-                      </p>
+                      {confirmRemovePitchId === pitch.id ? (
+                        <div className="rounded border border-error/40 bg-error/10 p-3 space-y-2.5">
+                          <p className="text-xs font-working-title text-on-surface">
+                            Remove {pitch.brokerName || "this broker"} from this property?
+                          </p>
+                          <ul className="text-xs text-text-secondary space-y-1 list-disc pl-4">
+                            <li>They stop receiving enquiries for it</li>
+                            <li>Every conversation about it closes, including buyers they were already talking to</li>
+                            <li>Connects already spent are not refunded</li>
+                          </ul>
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              disabled={removingBrokerId === pitch.id}
+                              onClick={() => handleRemoveBroker(pitch)}
+                              className="min-h-11 flex-1 rounded border border-error/60 bg-error/20 px-3 text-xs font-label-caps font-bold uppercase tracking-wider text-error hover:bg-error/30 transition disabled:opacity-50"
+                            >
+                              {removingBrokerId === pitch.id ? "Removing…" : "Confirm Remove"}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={removingBrokerId === pitch.id}
+                              onClick={() => setConfirmRemovePitchId(null)}
+                              className="min-h-11 rounded border border-surface-variant px-3 text-xs font-label-caps uppercase tracking-wider text-text-secondary hover:text-on-surface transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            disabled={removingBrokerId === pitch.id}
+                            onClick={() => setConfirmRemovePitchId(pitch.id)}
+                            className="min-h-[44px] w-full rounded border border-surface-variant px-4 text-sm font-working-title text-text-secondary transition hover:border-error hover:text-error disabled:opacity-50"
+                          >
+                            {removingBrokerId === pitch.id ? "Removing…" : "Remove this broker"}
+                          </button>
+                          {/* Said before the click, not discovered after it. The
+                              buyer threads and the non-refund are the parts an
+                              owner would not otherwise expect. */}
+                          <p className="mt-2 text-[12px] leading-relaxed text-text-muted">
+                            They stop receiving enquiries for this property, and every conversation
+                            about it closes, including buyers they were already talking to. Connects
+                            already spent are not refunded.
+                          </p>
+                        </>
+                      )}
                     </div>
                   )}
 

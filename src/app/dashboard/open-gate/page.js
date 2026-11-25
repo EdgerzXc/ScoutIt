@@ -10,6 +10,8 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import WorkspaceCommandBar from "@/components/dashboard/WorkspaceCommandBar";
 import { loadDeals } from "@/lib/deals/dealsClient";
 import {
+  canAccessDashboardWorkspace,
+  getHeldRoles,
   getPersistedWorkspaceRole,
   normalizeDashboardMode,
   setPersistedWorkspaceRole,
@@ -23,17 +25,31 @@ const ROLES = [
 
 function OpenGateDashboardInner() {
   const { currentUser } = useDashboard();
+  const heldRoles = getHeldRoles(currentUser);
+  const availableRoles = currentUser
+    ? ROLES.filter((item) => canAccessDashboardWorkspace(item.id, heldRoles))
+    : ROLES;
   const [role, setRole] = useState("owner");
   const [state, setState] = useState({ loading: true, listings: [] });
   const [deals, setDeals] = useState([]);
   const [busy, setBusy] = useState(null);
 
   useEffect(() => {
+    const rolesForUser = currentUser
+      ? ROLES.filter((item) => canAccessDashboardWorkspace(item.id, getHeldRoles(currentUser)))
+      : ROLES;
+    const valid = rolesForUser.map((r) => r.id);
     const persisted = normalizeDashboardMode(getPersistedWorkspaceRole());
-    if (persisted === "owner" || persisted === "broker" || persisted === "operator") {
+    if (persisted && valid.includes(persisted)) {
       setRole(persisted);
+    } else if (valid.length > 0) {
+      setRole((prev) => {
+        if (valid.includes(prev)) return prev;
+        setPersistedWorkspaceRole(valid[0]);
+        return valid[0];
+      });
     }
-  }, []);
+  }, [currentUser]);
 
   async function token() {
     const {
@@ -197,7 +213,7 @@ function OpenGateDashboardInner() {
         {/* Role Selector */}
         <div className="pt-2">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full" role="group" aria-label="Choose your Open Gate role">
-            {ROLES.map((item) => {
+            {availableRoles.map((item) => {
               const active = role === item.id;
               return (
                 <button
@@ -220,6 +236,11 @@ function OpenGateDashboardInner() {
               );
             })}
           </div>
+          {currentUser && availableRoles.length === 0 && (
+            <p className="mt-3 rounded-xl border border-dashed border-surface-variant bg-surface/50 p-4 text-xs text-text-secondary">
+              Activate Owner, Broker, or Co-Operator in Settings to configure Open Gate routing on managed properties.
+            </p>
+          )}
         </div>
 
         {state.error && (

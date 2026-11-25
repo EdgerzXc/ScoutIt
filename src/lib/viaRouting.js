@@ -190,7 +190,7 @@ export function getViaCookieSecret() {
   const secret = process.env.VIA_COOKIE_SECRET || process.env.WISHLIST_SHARE_SECRET;
   if (!secret) {
     if (process.env.NODE_ENV === "production") {
-      return process.env.SUPABASE_SERVICE_ROLE_KEY || null;
+      return null;
     }
     return DEV_VIA_SECRET;
   }

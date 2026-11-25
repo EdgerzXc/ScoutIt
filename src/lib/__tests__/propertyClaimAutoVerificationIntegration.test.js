@@ -183,7 +183,7 @@ describe("Property Claim Auto-Verification Engine — Integration Tests", () => 
     });
   });
 
-  it("1. Automatically verifies clean Land Title claim with matching owner name", async () => {
+  it("1. Ignores client-supplied ocrData and safely routes owner Land Title claim to staff review", async () => {
     const req = new Request("http://localhost/api/property/claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -205,21 +205,18 @@ describe("Property Claim Auto-Verification Engine — Integration Tests", () => 
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(body.autoVerified).toBe(true);
-    expect(body.provisional).toBe(true);
-    expect(body.provisionalWindowHours).toBe(72);
-    expect(body.status).toBe("approved");
+    expect(body.autoVerified).toBe(false);
+    expect(body.routedToStaff).toBe(true);
+    expect(body.status).toBe("submitted");
+    expect(body.staffReviewReason).toContain("Title OCR extraction is pending");
 
-    // Verified that property ownership was transferred to claimant
-    expect(updatedPropertyOwner).toBe(CLAIMANT_ID);
-    expect(updatedClaimStatus).toBe("approved");
+    // Fail-closed: client OCR payloads must never transfer ownership automatically
+    expect(updatedPropertyOwner).toBeNull();
+    expect(updatedClaimStatus).toBeNull();
 
-    // Verified that auto-verification audit event was recorded with system actor
-    const autoEvent = insertedEvents.find((e) => e.event_type === "CLAIM_AUTO_VERIFIED_CLEAN_TITLE");
-    expect(autoEvent).toBeDefined();
-    expect(autoEvent.payload.systemActor).toBe(AUTO_VERIFIER_SYSTEM_ACTOR_ID);
-    expect(autoEvent.payload.confidence).toBe(1.0);
-    expect(autoEvent.payload.titleNumber).toBe("TCT-001204");
+    const routeEvent = insertedEvents.find((e) => e.event_type === "CLAIM_ROUTED_TO_STAFF_REVIEW");
+    expect(routeEvent).toBeDefined();
+    expect(routeEvent.payload.reasonCode).toBe("ocr_title_data_pending");
   });
 
   it("2. Safely routes represented broker claim with Land Title to human staff review", async () => {
@@ -256,7 +253,7 @@ describe("Property Claim Auto-Verification Engine — Integration Tests", () => 
     expect(routeEvent.payload.reasonCode).toBe("represented_claim_requires_staff");
   });
 
-  it("3. Safely routes name discrepancy (mismatched owner) to human staff review", async () => {
+  it("3. Ignores spoofable client ocrData regardless of name and routes claim to staff review", async () => {
     const req = new Request("http://localhost/api/property/claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -279,13 +276,13 @@ describe("Property Claim Auto-Verification Engine — Integration Tests", () => 
     expect(body.success).toBe(true);
     expect(body.autoVerified).toBe(false);
     expect(body.routedToStaff).toBe(true);
-    expect(body.staffReviewReason).toContain("Name match confidence");
+    expect(body.staffReviewReason).toContain("Title OCR extraction is pending");
 
     // Verified that property ownership was NOT transferred
     expect(updatedPropertyOwner).toBeNull();
 
     const routeEvent = insertedEvents.find((e) => e.event_type === "CLAIM_ROUTED_TO_STAFF_REVIEW");
     expect(routeEvent).toBeDefined();
-    expect(routeEvent.payload.reasonCode).toBe("name_match_insufficient");
+    expect(routeEvent.payload.reasonCode).toBe("ocr_title_data_pending");
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getSession } from "@/lib/authClient";
 import { ShieldCheck, Award, Copy, Check, Lock, ChevronDown, ChevronUp, Flag, X } from "lucide-react";
 import { generateResidentPassport, PASSPORT_SCOPES } from "@/lib/scoring/residentPassport";
 
@@ -42,14 +43,24 @@ export default function ResidentPassportCard({
     if (hasExplicitProps) return;
     let cancelled = false;
 
-    fetch("/api/user/resident-passport?scope=consented_application")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+    (async () => {
+      try {
+        const { data: { session } = {} } = await getSession().catch(() => ({ data: {} }));
+        const headers = session?.access_token
+          ? { Authorization: `Bearer ${session.access_token}` }
+          : undefined;
+        const res = await fetch("/api/user/resident-passport?scope=consented_application", {
+          headers,
+        });
+        if (!res.ok) return;
+        const data = await res.json();
         if (!cancelled && data?.passport) {
           setRemotePassport(data.passport);
         }
-      })
-      .catch(() => {});
+      } catch {
+        // Non-blocking fallback to computed Honest Blank summary
+      }
+    })();
 
     return () => {
       cancelled = true;

@@ -71,8 +71,77 @@ for (const feature of Object.keys(PREMIUM_FIELD_MAP)) {
   }
 }
 
+/**
+ * Per-category MINOR keys stored under `property.cat.<type>` (SPEC_CONFIG[*].minor).
+ * Stripped on public/ISR payloads for tiers below Solar and returned under
+ * `fields.catMinor` from `/api/property/premium` for entitled callers.
+ */
+export const CATEGORY_MINOR_KEYS = {
+  commercial: [
+    "camc",
+    "camcFrom",
+    "acCharges",
+    "acChargeFrom",
+    "reservedParking",
+    "escalation",
+    "fitOut",
+    "rentFree",
+    "parkingRatio",
+    "floorLoading",
+    "availableUnits",
+    "towersZones",
+    "capRate",
+    "noi",
+  ],
+  residential: ["pricePerSqm", "paymentTerms"],
+  str: [
+    "weekendRate",
+    "bedConfig",
+    "selfCheckIn",
+    "houseRules",
+    "cancellation",
+    "permit",
+    "wifiSpeed",
+  ],
+  restaurant: ["delivery", "liquor", "zoning", "turnover", "parking"],
+  hospitality: ["adr", "occupancy", "revpar", "capRate", "gfa", "landArea"],
+  venue: [
+    "layouts",
+    "ceiling",
+    "ceilingM",
+    "av",
+    "power",
+    "parking",
+    "accessibility",
+    "noiseCurfew",
+  ],
+};
+
 /** Every field name any feature gates. */
 export const ALL_PREMIUM_FIELDS = Object.values(PREMIUM_FIELD_MAP).flat();
+
+function hasMinorValue(v) {
+  if (v == null || v === false) return false;
+  if (Array.isArray(v)) return v.length > 0;
+  if (typeof v === "object") return Object.keys(v).length > 0;
+  return String(v).trim() !== "";
+}
+
+function hasCategoryMinorData(cat) {
+  if (!cat || typeof cat !== "object") return false;
+  for (const [catType, keys] of Object.entries(CATEGORY_MINOR_KEYS)) {
+    const slice = cat[catType];
+    if (!slice || typeof slice !== "object") continue;
+    if (keys.some((k) => hasMinorValue(slice[k]))) return true;
+  }
+  return false;
+}
+
+function emptyCatLike(v) {
+  if (typeof v === "boolean") return false;
+  if (typeof v === "number") return null;
+  return emptyLike(v);
+}
 
 /**
  * Returns a copy of 'property' with fields the tier can't see removed.
@@ -93,7 +162,9 @@ export function stripPremiumFields(property, tier) {
   for (const [feature, fields] of Object.entries(PREMIUM_FIELD_MAP)) {
     // Does this listing actually carry anything for this feature? An owner who
     // never uploaded a 3D tour should not get a "Vault" teaser.
-    const hasData = fields.some((f) => hasValue(property[f]));
+    const hasData =
+      fields.some((f) => hasValue(property[f])) ||
+      (feature === "deepIntel" && hasCategoryMinorData(property.cat));
     if (hasData) premiumAvailable.push(feature);
 
     if (canSee(feature, tier)) continue;
@@ -104,6 +175,22 @@ export function stripPremiumFields(property, tier) {
       // components doing `property.floorPlans.map(...)` don't crash on
       // undefined. The absence must be safe, not merely secure.
       out[field] = emptyLike(property[field]);
+    }
+
+    if (feature === "deepIntel" && property.cat && typeof property.cat === "object") {
+      const nextCat = { ...property.cat };
+      for (const [catType, keys] of Object.entries(CATEGORY_MINOR_KEYS)) {
+        const slice = nextCat[catType];
+        if (!slice || typeof slice !== "object") continue;
+        const clonedSlice = { ...slice };
+        for (const k of keys) {
+          if (k in clonedSlice) {
+            clonedSlice[k] = emptyCatLike(clonedSlice[k]);
+          }
+        }
+        nextCat[catType] = clonedSlice;
+      }
+      out.cat = nextCat;
     }
   }
 
@@ -127,6 +214,23 @@ export function pickPremiumFields(property, tier) {
     if (!canSee(feature, tier)) continue;
     for (const field of fields) {
       if (property[field] !== undefined) out[field] = property[field];
+    }
+    if (feature === "deepIntel" && property.cat && typeof property.cat === "object") {
+      const catMinor = {};
+      for (const [catType, keys] of Object.entries(CATEGORY_MINOR_KEYS)) {
+        const slice = property.cat[catType];
+        if (!slice || typeof slice !== "object") continue;
+        const pickedSlice = {};
+        for (const k of keys) {
+          if (slice[k] !== undefined) pickedSlice[k] = slice[k];
+        }
+        if (Object.keys(pickedSlice).length > 0) {
+          catMinor[catType] = pickedSlice;
+        }
+      }
+      if (Object.keys(catMinor).length > 0) {
+        out.catMinor = catMinor;
+      }
     }
   }
   return out;
@@ -155,6 +259,20 @@ export function findPremiumLeak(properties) {
     for (const field of ALL_PREMIUM_FIELDS) {
       if (hasValue(property[field])) {
         return { slug: String(property.slug || property.id || "unknown"), field };
+      }
+    }
+    if (property.cat && typeof property.cat === "object") {
+      for (const [catType, keys] of Object.entries(CATEGORY_MINOR_KEYS)) {
+        const slice = property.cat[catType];
+        if (!slice || typeof slice !== "object") continue;
+        for (const k of keys) {
+          if (hasMinorValue(slice[k])) {
+            return {
+              slug: String(property.slug || property.id || "unknown"),
+              field: `cat.${catType}.${k}`,
+            };
+          }
+        }
       }
     }
   }

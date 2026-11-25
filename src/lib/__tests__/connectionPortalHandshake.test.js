@@ -41,7 +41,9 @@ describe("U-023 the handshake sends what the route actually reads", () => {
     // Non-vacuity: assert against the route's own parameter list rather than a
     // remembered shape, so a rename on either side fails here.
     const route = read(INITIATE);
-    const destructure = route.slice(route.indexOf("const {"), route.indexOf("= await request.json()"));
+    const destructStart = route.indexOf("const {");
+    const destructEnd = route.indexOf(";", destructStart);
+    const destructure = route.slice(destructStart, destructEnd);
     for (const field of ["propertySlug", "message", "preferredBrokerId"]) {
       expect(destructure, `initiate reads ${field}`).toContain(field);
       expect(portal, `portal sends ${field}`).toContain(field);

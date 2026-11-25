@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // U-032 / A-134 — both routes that answer a broker request, driven for real.
 //
@@ -67,10 +67,13 @@ const answerViaInbox = (status) =>
 const writesTo = (table) => state.calls.filter((call) => call.table === table);
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "fixture-anon-key");
   state.actor = null;
   state.deal = null;
   state.calls = [];
 });
+afterEach(() => vi.unstubAllEnvs());
 
 describe("U-032 · a broker cannot accept their own pitch", () => {
   it("refuses it on the dashboard route and writes nothing", async () => {

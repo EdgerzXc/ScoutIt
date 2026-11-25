@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { getSession } from "@/lib/authClient";
 import useModalDialog from "@/components/ui/useModalDialog";
 import { X, Copy, Check, Lock, Sparkles } from "lucide-react";
 import { getCurrentRole, getCurrentTier } from "@/lib/entitlements";
@@ -36,10 +37,16 @@ function MinorLockSection() {
 
 function CopyBox({ label, text }) {
   const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const [copyError, setCopyError] = useState(false);
+  const handleCopy = async () => {
+    setCopyError(false);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopyError(true);
+    }
   };
 
   return (
@@ -49,14 +56,20 @@ function CopyBox({ label, text }) {
           {label}
         </div>
         <button
+          type="button"
           onClick={handleCopy}
-          className="text-xs text-on-surface/70 hover:text-gold-accent flex items-center gap-1 transition-colors"
+          className="text-xs text-on-surface/70 hover:text-gold-accent flex items-center gap-1 transition-colors min-h-[44px] px-2"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <div className="bg-background/80 border border-on-surface/10 rounded p-4 text-sm text-on-surface leading-relaxed whitespace-pre-wrap font-serif focus-within:border-gold-accent focus-within:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2)] transition-all">
+      {copyError && (
+        <p role="status" className="text-xs text-gold-accent mb-2 font-mono">
+          Clipboard access unavailable. Select and copy the text below manually.
+        </p>
+      )}
+      <div className="bg-background/80 border border-on-surface/10 rounded p-4 text-sm text-on-surface leading-relaxed whitespace-pre-wrap font-serif focus-within:border-gold-accent focus-within:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2)] transition-colors">
         {text}
       </div>
     </div>
@@ -102,9 +115,15 @@ export default function PromoteModal({ isOpen, onClose, propertyData, link }) {
     setLoading(true);
     setDegraded(null);
     try {
+      const { data: { session } = {} } = await getSession().catch(() => ({ data: {} }));
+      const headers = { "Content-Type": "application/json" };
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
       const res = await fetch("/api/ai/promote", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           property: propertyData,
           link,

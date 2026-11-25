@@ -46,7 +46,7 @@ test("the staff property route rejects title drift before any update or Airtable
   const source = await readFile(path.join(root, "src", "app", "api", "property", "route.js"), "utf8");
   const guard = source.indexOf("titleChangeWouldDriftCanonicalUrl(current, body.title)");
   const update = source.indexOf(".update(patch)");
-  const publish = source.indexOf("publishPropertyToAirtable(saved)");
+  const publish = source.search(/await\s+publishPropertyToAirtable\(/);
 
   assert.ok(guard >= 0, "Expected the canonical-title guard");
   assert.ok(guard < update, "The title guard must run before the Supabase update");

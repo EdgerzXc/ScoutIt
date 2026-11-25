@@ -11,7 +11,27 @@ export async function sendNotification(formData) {
   const userId = formData.get("userId");
   const title = formData.get("title");
   const message = formData.get("message");
-  const targetUrl = formData.get("targetUrl")?.toString().trim() || null;
+  const rawTargetUrl = formData.get("targetUrl")?.toString().trim() || null;
+
+  let targetUrl = null;
+  if (rawTargetUrl) {
+    const isRelPath = rawTargetUrl.startsWith("/") && !rawTargetUrl.startsWith("//");
+    let isTrustedHttps = false;
+    if (!isRelPath) {
+      try {
+        const parsed = new URL(rawTargetUrl);
+        isTrustedHttps =
+          parsed.protocol === "https:" &&
+          ["scoutit.space", "www.scoutit.space"].includes(parsed.hostname.toLowerCase());
+      } catch {
+        isTrustedHttps = false;
+      }
+    }
+    if (!isRelPath && !isTrustedHttps) {
+      throw new Error("Target URL must be a relative path or scoutit.space HTTPS URL.");
+    }
+    targetUrl = rawTargetUrl;
+  }
 
   if (!userId || !title || !message) {
     throw new Error("Missing required fields");

@@ -6,12 +6,12 @@ import { purgePublicCatalogueCache } from "@/lib/publicCatalogueCache";
 
 export async function loadPrcProfiles() {
   const staff = await getCurrentStaff();
-  assertTier(staff, TIERS.AGENT);
+  assertTier(staff, TIERS.OPS_MANAGER);
 
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("user_profiles")
-    .select("id, display_name, email, firm, prc_license, dhsud_number, prc_expiry, prc_verified, prc_verified_at, updated_at")
+    .select("id, display_name, firm, prc_license, dhsud_number, prc_expiry, prc_verified, prc_verified_at, updated_at")
     .not("prc_license", "is", null)
     .neq("prc_license", "")
     .order("prc_verified", { ascending: true })

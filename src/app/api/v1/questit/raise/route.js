@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabaseAdmin";
 import { canRaiseQuest, VALID_QUEST_SCOPES } from "@/lib/questitPolicyEngine";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkQuestRaiseRate = createRateLimiter({
+  limit: 30,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 // This route currently 401s on every call — the questit_api_keys/questit_policies/
 // company_quests tables it queries were never migrated into the live DB. That's
@@ -8,6 +16,14 @@ import { canRaiseQuest, VALID_QUEST_SCOPES } from "@/lib/questitPolicyEngine";
 // "fixing" this.
 export async function POST(request) {
   try {
+    const rate = checkQuestRaiseRate(clientIp(request));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many quest raise requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     // 1. Authenticate API Key
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {

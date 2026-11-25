@@ -187,14 +187,14 @@ describe("bookViewing — access", () => {
 describe("bookViewing — deal lifecycle", () => {
   // The old /api/viewing-appointments never checked this, so a closed
   // conversation could still gain viewings through it.
-  for (const status of ["closed", "declined", "withdrawn", "expired", "reported"]) {
+  for (const status of ["closed", "declined", "withdrawn", "expired", "reported", "pending", "invited"]) {
     it(`rejects a booking on a ${status} deal`, async () => {
       const result = await book(makeClient({ deal: openDeal({ status }) }));
       expect(result).toMatchObject({ ok: false, status: 409 });
     });
   }
 
-  for (const status of ["connected", "pitching", "pending", "invited", "accepted", "active"]) {
+  for (const status of ["connected", "pitching", "accepted", "active"]) {
     it(`allows a booking on a ${status} deal`, async () => {
       const result = await book(makeClient({ deal: openDeal({ status }) }));
       expect(result.ok).toBe(true);

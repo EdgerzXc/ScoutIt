@@ -160,6 +160,7 @@ function PropertyCard({ property: p, staff }) {
           <form action={approveProperty}>
             <input type="hidden" name="propertyId" value={p.id} />
             <button
+              type="submit"
               className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-green-400/10 hover:bg-green-400/20 text-green-400 border border-green-400/20 transition-colors"
               title="Publishes to Airtable (Approved_For_ScoutIt) — this puts the listing on the live public site"
             >
@@ -173,7 +174,7 @@ function PropertyCard({ property: p, staff }) {
               <input type="hidden" name="propertyId" value={p.id} />
               <input type="hidden" name="nextValue" value={(!isArchived).toString()} />
               {!isArchived && <input type="hidden" name="reason" value="Archived via CMS queue" />}
-              <button className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
+              <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
                 {isArchived ? (
                   <ArchiveRestore className="w-4 h-4" />
                 ) : (
@@ -210,7 +211,7 @@ function PropertyCard({ property: p, staff }) {
             className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
           />
           <input type="hidden" name="propertyId" value={p.id} />
-          <button className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors">
+          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20 transition-colors">
             <XCircle className="w-4 h-4" />
             Reject
           </button>

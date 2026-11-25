@@ -81,8 +81,10 @@ export default async function FeatureFlagsPage() {
           {(flags ?? []).map((flag) => (
             <div key={flag.id} className="flex items-center justify-between gap-4 px-5 py-4">
               <div className="min-w-0">
-                <div className="text-sm font-medium text-white font-mono">{flag.id}</div>
-                {flag.description && (
+                <div className="text-sm font-medium text-white font-mono">{flag.id === "global_read_only" ? "Pause public API writes" : flag.id}</div>
+                {flag.id === "global_read_only" ? (
+                  <div className="text-xs text-white/70">Pauses public-app API writes. Authentication, provider callbacks, Calendar sync, and staff flag controls remain available. Direct Supabase writes, scheduled jobs, and Mission Control are outside this control.</div>
+                ) : flag.description && (
                   <div className="text-xs text-white/70">{flag.description}</div>
                 )}
               </div>
@@ -90,6 +92,7 @@ export default async function FeatureFlagsPage() {
                 <input type="hidden" name="id" value={flag.id} />
                 <input type="hidden" name="nextEnabled" value={(!flag.is_enabled).toString()} />
                 <button
+                  type="submit"
                   className={`w-12 h-7 rounded-full relative transition-colors shrink-0 ${
                     flag.is_enabled ? "bg-[#E8AE3C]" : "bg-white/10"
                   }`}
@@ -142,7 +145,7 @@ export default async function FeatureFlagsPage() {
               />
             </label>
           </div>
-          <button className="px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
+          <button type="submit" className="px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
             Create flag (starts disabled)
           </button>
         </form>

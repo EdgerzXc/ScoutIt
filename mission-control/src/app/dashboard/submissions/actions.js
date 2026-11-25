@@ -2,18 +2,30 @@
 
 import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { publishPropertyToAirtable, updatePropertyInAirtable } from "@/lib/airtable";
+import {
+  publishPropertyToAirtable,
+  unpublishPropertyFromAirtable,
+  updatePropertyInAirtable,
+} from "@/lib/airtable";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+
+const BLOCKED_LIFECYCLE_STATES = new Set([
+  "permanently_removed",
+  "staff_suspended",
+  "archived",
+]);
 
 export async function loadSubmissionsQueue() {
   const staff = await getCurrentStaff();
-  assertTier(staff, TIERS.AGENT);
+  assertTier(staff, TIERS.OPS_MANAGER);
 
   const admin = createAdminClient();
 
   const [submissionsRes, pdfDraftsRes] = await Promise.all([
     admin
       .from("properties")
-      .select("id, title, location, city, type, space_category, price, rental_rate, owner_id, pipeline_status, lifecycle_state, created_at, slug, canonical_slug")
+      .select("id, title, location, type, space_category, price, owner_id, pipeline_status, lifecycle_state, created_at, slug, canonical_slug, details")
       .in("pipeline_status", ["submitted", "pending"])
       .order("created_at", { ascending: true })
       .limit(50),
@@ -48,6 +60,7 @@ export async function verifyPdfDraftAction({ propertyId, reason = null }) {
   try {
     const { data, error } = await admin.rpc("verify_pdf_draft", {
       p_property_id: propertyId,
+      p_verifier_id: staff.id,
     });
     if (!error && data) {
       verified = true;
@@ -57,17 +70,21 @@ export async function verifyPdfDraftAction({ propertyId, reason = null }) {
   }
 
   if (!verified) {
-    const { error: updErr } = await admin
+    const { data: updatedRow, error: updErr } = await admin
       .from("properties")
       .update({
         pdf_verified: true,
-        pdf_verified_at: nowIso,
-        updated_at: nowIso,
       })
-      .eq("id", propertyId);
+      .eq("id", propertyId)
+      .eq("creation_source", "pdf_assisted")
+      .select("id")
+      .maybeSingle();
 
     if (updErr) {
-      return { error: updErr.message || "Failed to update PDF verification status." };
+      return { error: "Failed to update PDF verification status." };
+    }
+    if (!updatedRow) {
+      return { error: "PDF-assisted draft not found or ineligible for verification." };
     }
   }
 
@@ -106,6 +123,13 @@ export async function approveSubmissionAction({ propertyId, reason = null }) {
     return { error: "Property submission not found in database." };
   }
 
+  const lifecycle = String(property.lifecycle_state || "").trim().toLowerCase();
+  if (BLOCKED_LIFECYCLE_STATES.has(lifecycle)) {
+    return {
+      error: `Publication blocked: property lifecycle state "${lifecycle}" cannot be approved from the submissions queue.`,
+    };
+  }
+
   // Rule: AGENTS.md §2.4: PDF-assisted drafts must be verified before publish
   if (property.creation_source === "pdf_assisted" && !property.pdf_verified) {
     return {
@@ -116,30 +140,49 @@ export async function approveSubmissionAction({ propertyId, reason = null }) {
   let airtableResult;
   try {
     airtableResult = await publishPropertyToAirtable(property);
-  } catch (publishErr) {
-    return { error: `Airtable sync failed: ${publishErr.message}` };
+  } catch (_publishErr) {
+    return { error: "Airtable publish sync failed. Please check Airtable configuration and try again." };
   }
 
   const nowIso = new Date().toISOString();
-  const adoptedSlug = airtableResult.slug || property.canonical_slug || property.slug;
+  const adoptedSlug = property.canonical_slug || airtableResult.slug || property.slug;
 
-  const { error: updErr } = await admin
+  const { data: updatedRow, error: updErr } = await admin
     .from("properties")
     .update({
       pipeline_status: "approved",
+      moderation_status: "approved",
       lifecycle_state: "live",
       published_at: property.published_at || nowIso,
       slug: adoptedSlug,
       canonical_slug: property.canonical_slug || adoptedSlug,
       canonical_slug_locked_at: property.canonical_slug_locked_at || nowIso,
-      updated_at: nowIso,
     })
-    .eq("id", propertyId);
+    .eq("id", propertyId)
+    .select("id")
+    .maybeSingle();
 
-  if (updErr) {
+  if (updErr || !updatedRow) {
+    let rollbackFailed = false;
+    if (adoptedSlug) {
+      try {
+        await unpublishPropertyFromAirtable(adoptedSlug);
+      } catch (rollbackErr) {
+        rollbackFailed = true;
+        await recordSystemEvent({
+          event: EVENTS.AIRTABLE_SYNC_FAILED,
+          severity: "error",
+          subjectTable: "properties",
+          subjectId: propertyId,
+          summary: "Supabase update failed after Airtable publish and compensating unpublish also failed.",
+          detail: { slug: adoptedSlug, error: rollbackErr?.message || "rollback error" },
+        });
+      }
+    }
     return {
-      warning: "Synced to Airtable, but failed to update Supabase row status.",
-      airtableSlug: adoptedSlug,
+      error: rollbackFailed
+        ? "Failed to update Supabase row status after Airtable publish, and compensating unpublish failed; reconciliation queued."
+        : "Failed to update Supabase row status; Airtable publication was rolled back.",
     };
   }
 
@@ -170,7 +213,7 @@ export async function generatePropertySeoAction({ propertyId }) {
   const admin = createAdminClient();
   const { data: prop, error: fetchErr } = await admin
     .from("properties")
-    .select("id, title, location, city, space_category, floor_sqm, price, rental_rate, slug, canonical_slug")
+    .select("id, title, location, space_category, price, slug, canonical_slug, details")
     .eq("id", propertyId)
     .single();
 
@@ -183,16 +226,28 @@ export async function generatePropertySeoAction({ propertyId }) {
     return { error: "Property has no slug for Airtable record lookup." };
   }
 
-  const generatedTitle = `${prop.title} | Luxury ${prop.space_category || "Commercial Space"} in ${prop.city || "Taguig"}`.slice(0, 60);
-  const generatedDesc = `Discover ${prop.title}, a premium ${prop.floor_sqm || "spacious"}sqm property located in ${prop.location || prop.city}. View full details on ScoutIt.`.slice(0, 160);
+  const propCity = prop.details?.city || prop.location || "Taguig";
+  const propFloorSqm =
+    prop.details?.floor_sqm ||
+    prop.details?.floorArea ||
+    prop.details?.FloorSqm ||
+    "spacious";
 
+  const generatedTitle = `${prop.title} | Luxury ${prop.space_category || "Commercial Space"} in ${propCity}`.slice(0, 60);
+  const generatedDesc = `Discover ${prop.title}, a premium ${propFloorSqm}sqm property located in ${prop.location || propCity}. View full details on ScoutIt.`.slice(0, 160);
+
+  let airtableRes;
   try {
-    await updatePropertyInAirtable(targetSlug, {
-      seo_title: generatedTitle,
-      seo_description: generatedDesc,
+    airtableRes = await updatePropertyInAirtable(targetSlug, {
+      SEO_Title: generatedTitle,
+      SEO_Description: generatedDesc,
     });
-  } catch (airtableErr) {
-    return { error: `Failed to update SEO fields in Airtable: ${airtableErr.message}` };
+  } catch (_airtableErr) {
+    return { error: "Failed to update SEO fields in Airtable." };
+  }
+
+  if (!airtableRes?.recordId) {
+    return { error: "Airtable record was not found for this property slug; SEO fields were not updated." };
   }
 
   // Audit

@@ -173,6 +173,7 @@ export default function UnitInquiryModal({ isOpen, onClose, propertyTitle, prope
           >
             <GlassPanel className="relative p-8 rounded-xl contact-lens-modal" style={{ boxShadow: "var(--shadow-lg)" }}>
               <button
+                type="button"
                 className="absolute top-5 right-5 text-text-secondary hover:text-text-primary transition-colors"
                 onClick={onClose}
                 aria-label="Close"

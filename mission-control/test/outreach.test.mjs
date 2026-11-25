@@ -141,7 +141,7 @@ test("generateClaimDraftPayload constructs valid draft listing with claim token"
   assert.equal(propertyPayload.title, "Arthaland Century Pacific Tower");
   assert.equal(propertyPayload.lifecycle_status, "DRAFT");
   assert.equal(propertyPayload.source_type, "staff_outreach");
-  assert.equal(propertyPayload.coordinates, "14.5492,121.0503");
+  assert.equal(propertyPayload.coordinates, "POINT(121.0503 14.5492)");
   assert.ok(claimToken.startsWith("claim_"));
   assert.equal(claimUrl, `https://scoutit.space/claim/${claimToken}`);
 });

@@ -57,7 +57,7 @@ export default async function UserCrmPage({ searchParams }) {
           placeholder="Search by display name or user id..."
           className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/70 focus:outline-none focus:border-[#E8AE3C]/50"
         />
-        <button className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/80 transition-colors">
+        <button type="submit" className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/80 transition-colors">
           Search
         </button>
       </form>
@@ -148,7 +148,7 @@ function UserRow({ user, staff }) {
               className="mt-1 w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
             />
           </label>
-          <button className="col-span-2 justify-self-start px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
+          <button type="submit" className="col-span-2 justify-self-start px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors">
             Save changes
           </button>
         </form>
@@ -166,6 +166,7 @@ function UserRow({ user, staff }) {
               />
             )}
             <button
+              type="submit"
               className={`px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
                 user.is_shadowbanned
                   ? "bg-white/5 hover:bg-white/10 text-white/80 border border-white/10"
@@ -193,7 +194,7 @@ function UserRow({ user, staff }) {
                   className="bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white w-48"
                 />
               )}
-              <button className="px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
+              <button type="submit" className="px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
                 {user.archived_at ? (
                   <ArchiveRestore className="w-3.5 h-3.5" />
                 ) : (

@@ -51,7 +51,8 @@ const ESCAPES = {
  */
 export function escapeJsonLd(json) {
   if (json === null || json === undefined) return "";
-  return String(json).replace(HTML_UNSAFE, (char) => ESCAPES[char]);
+  const raw = typeof json === "object" ? JSON.stringify(json) : String(json);
+  return raw.replace(HTML_UNSAFE, (char) => ESCAPES[char]);
 }
 
 export default escapeJsonLd;

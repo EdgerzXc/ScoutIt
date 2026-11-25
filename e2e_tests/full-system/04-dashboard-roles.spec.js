@@ -3,6 +3,7 @@
 //  2. empty owner → must show the zero-listings state + a working wizard
 //  3. master-dev: local preview roster/inbox/CRM render with isolated data
 import { test, expect } from '@playwright/test';
+import { CURRENT_TERMS_VERSION } from '../../src/lib/legalVersions.js';
 import {
   signInAsMock,
   trackErrors,
@@ -18,6 +19,7 @@ const PENDING_APPOINTMENT = {
   propertyId: 'prop-e2e-1',
   propertyTitle: 'The Paragon Tower',
   scheduledAt: new Date(Date.now() + 2 * 864e5).toISOString(),
+  updatedAt: '2026-11-13T01:00:00.123456+00:00',
   status: 'pending',
   notes: '',
   isHost: true,
@@ -108,6 +110,72 @@ test.describe('Owner with zero listings (safe mock)', () => {
     }
     expect(errors, errors.join('\n')).toEqual([]);
   });
+});
+
+test('owner CSV retries a lost response and opens both saved drafts', async ({ page }) => {
+  const ownerId = '20000000-0000-4000-8000-000000000000';
+  const user = { id: ownerId, email: 'owner@example.test', aud: 'authenticated' };
+  await page.addInitScript((account) => {
+    const session = JSON.stringify({
+      access_token: 'csv-fixture-token',
+      refresh_token: 'csv-fixture-refresh',
+      token_type: 'bearer',
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      user: account,
+    });
+    localStorage.setItem('sb-placeholder-auth-token', session);
+    localStorage.setItem('sb-yyixsuaimdzyiocswcgc-auth-token', session);
+  }, user);
+  const cors = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': '*',
+    'access-control-allow-methods': 'GET, OPTIONS',
+  };
+  await page.route('**/auth/v1/**', (route) => route.request().method() === 'OPTIONS'
+    ? route.fulfill({ status: 204, headers: cors })
+    : route.fulfill({ headers: cors, json: user }));
+  await page.route('**/rest/v1/**', (route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+    const profile = {
+      ...user, display_name: 'CSV Owner', primary_mode: 'owner', role: 'owner', active_roles: ['owner'],
+      onboarding_completed_at: '2026-11-13T00:00:00Z', terms_accepted_at: '2026-11-13T00:00:00Z',
+      terms_version: CURRENT_TERMS_VERSION, adult_eligibility_status: 'declared_adult',
+    };
+    return route.fulfill({ headers: cors, json: route.request().url().includes('/user_profiles?') ? profile : [] });
+  });
+  await page.route('**/api/cms**', (route) => route.fulfill({ json: { properties: [] } }));
+  await page.route('**/api/dashboard/inventory', (route) => route.fulfill({ json: { properties: [] } }));
+  const attempts = [];
+  await page.route('**/api/dashboard/bulk-insert', (route) => {
+    const body = route.request().postDataJSON();
+    attempts.push(body);
+    if (attempts.length === 1) return route.abort();
+    return route.fulfill({ json: {
+      success: true,
+      count: 2,
+      inserted: body.properties.map((row, index) => ({
+        ...row, id: `10000000-0000-4000-8000-00000000000${index}`, owner_id: ownerId,
+        pipeline_status: 'draft', lifecycle_state: 'draft', creation_source: 'csv',
+      })),
+    } });
+  });
+  await gotoAndSettle(page, '/dashboard?role=owner');
+  await page.getByRole('button', { name: /Add Property/i }).first().click();
+  await page.getByRole('button', { name: /More ways to add/i }).click();
+  await page.getByRole('button', { name: /Spreadsheet \(CSV\)/i }).click();
+  await page.locator('#csv-upload').setInputFiles({
+    name: 'portfolio.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('Title,Location,Category,Price\nCSV Draft One,Makati,Commercial,"₱25,000"\nCSV Draft Two,Taguig,Residential,'),
+  });
+  await expect(page.getByText('2 rows loaded')).toBeVisible();
+  await page.getByRole('button', { name: 'Save drafts', exact: true }).click();
+  await expect.poll(() => attempts.length).toBe(1);
+  await page.getByRole('button', { name: 'Save drafts', exact: true }).click();
+  await expect(page.getByText('2 drafts saved. Review them in your inventory.')).toBeVisible();
+  expect(attempts[1]).toEqual(attempts[0]);
+  await expect(page.getByText('CSV Draft One', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('CSV Draft Two', { exact: true }).first()).toBeVisible();
 });
 
 test.describe('Settings information architecture', () => {
@@ -264,33 +332,64 @@ test.describe('Calendar viewing lifecycle (fully mocked)', () => {
     await signInAsMock(page, { ...MOCK_OWNER_EMPTY, id: 'master-dev-e2e-calendar-host' });
     await mockAvailability(page);
 
-    let patchedStatus = null;
+    let patchBody = null;
     await page.route('**/api/viewing-appointments', async (route) => {
       await route.fulfill({
         status: 200,
         json: {
           appointments: [
-            { ...PENDING_APPOINTMENT, status: patchedStatus || PENDING_APPOINTMENT.status },
+            { ...PENDING_APPOINTMENT, status: patchBody?.status || PENDING_APPOINTMENT.status },
           ],
         },
       });
     });
     await page.route('**/api/viewing-appointments/*', async (route) => {
-      const body = JSON.parse(route.request().postData() || '{}');
-      patchedStatus = body.status;
-      await route.fulfill({ status: 200, json: { success: true, status: body.status } });
+      patchBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        json: { success: true, appointment: { status: patchBody.status, updated_at: '2026-11-13T02:00:00+00:00' } },
+      });
     });
 
-    await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
+    expect((await gotoAndSettle(page, '/dashboard/calendar?view=agenda'))?.status()).toBe(200);
     await openAgenda(page);
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Jordan Buyer')).toBeVisible();
     await expect(page.getByText('Loading…', { exact: true })).toBeHidden();
 
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await expect.poll(() => patchedStatus, { timeout: 10000 }).toBe('confirmed');
+    await expect.poll(() => patchBody, { timeout: 10000 }).toEqual({
+      status: 'confirmed', expectedUpdatedAt: PENDING_APPOINTMENT.updatedAt,
+    });
     await expect(page.getByText('confirmed', { exact: false })).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('button', { name: 'Confirm' })).toHaveCount(0);
+  });
+
+  test('a failed schedule read preserves the viewing and Retry fetches the latest version', async ({ page }) => {
+    await signInAsMock(page, { ...MOCK_OWNER_EMPTY, id: 'master-dev-e2e-calendar-host' });
+    await mockAvailability(page);
+    let unavailable = false;
+    await page.route('**/api/viewing-appointments', async (route) => {
+      await route.fulfill(unavailable
+        ? { status: 503, json: { error: "Couldn't load your viewings." } }
+        : { status: 200, json: { appointments: [PENDING_APPOINTMENT] } });
+    });
+    await page.route('**/api/calendar/events**', (route) => route.fulfill({ status: 200, json: { events: [] } }));
+    expect((await gotoAndSettle(page, '/dashboard/calendar?view=agenda'))?.status()).toBe(200);
+    await openAgenda(page);
+    const viewing = page.getByText('The Paragon Tower');
+    await expect(viewing).toBeVisible({ timeout: 15000 });
+
+    unavailable = true;
+    await page.evaluate(() => window.dispatchEvent(new Event('calendar:refresh')));
+    const notice = page.getByRole('alert').filter({ hasText: "Couldn't load your viewings" });
+    await expect(notice).toBeVisible();
+    await expect(viewing).toBeVisible();
+
+    unavailable = false;
+    await notice.getByRole('button', { name: 'Retry' }).click();
+    await expect(notice).toBeHidden();
+    await expect(viewing).toBeVisible();
   });
 
   test('guest sees a confirmed viewing without host controls', async ({ page }) => {
@@ -307,7 +406,7 @@ test.describe('Calendar viewing lifecycle (fully mocked)', () => {
       });
     });
 
-    await gotoAndSettle(page, '/dashboard/calendar?view=agenda');
+    expect((await gotoAndSettle(page, '/dashboard/calendar?view=agenda'))?.status()).toBe(200);
     await openAgenda(page);
     await expect(page.getByText('The Paragon Tower')).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('button', { name: 'Confirm' })).toHaveCount(0);

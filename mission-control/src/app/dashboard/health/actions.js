@@ -10,7 +10,7 @@ import {
 
 export async function probeAllSubsystems() {
   const staff = await getCurrentStaff();
-  assertTier(staff, TIERS.AGENT);
+  assertTier(staff, TIERS.OPS_MANAGER);
 
   const probes = [];
 

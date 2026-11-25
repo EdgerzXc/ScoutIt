@@ -40,17 +40,17 @@ export default async function ReviewsPage() {
       if (userIds.length > 0) {
         const { data: profiles } = await admin
           .from("user_profiles")
-          .select("id, full_name, email")
+          .select("id, display_name")
           .in("id", userIds);
 
         const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
 
         reviews = reviews.map((r) => ({
           ...r,
-          reviewer_name: profileMap.get(r.reviewer_id)?.full_name || null,
-          reviewer_email: profileMap.get(r.reviewer_id)?.email || null,
-          target_name: profileMap.get(r.target_user_id)?.full_name || null,
-          target_email: profileMap.get(r.target_user_id)?.email || null,
+          reviewer_name: profileMap.get(r.reviewer_id)?.display_name || null,
+          reviewer_email: null,
+          target_name: profileMap.get(r.target_user_id)?.display_name || null,
+          target_email: null,
         }));
       }
     }

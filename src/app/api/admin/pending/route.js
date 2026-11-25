@@ -52,9 +52,12 @@ const QUEUE_FIELDS = "id, title, type, location, coordinates, owner_id, created_
 // Every pending submission, not only the caller's own.
 export async function GET(request) {
   try {
-    const auth = await requireAdmin(request, { label: "ADMIN PENDING" });
+    const auth = await requireAdmin(request, { label: "ADMIN PENDING", minTier: 1 });
     if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+      return NextResponse.json(
+        { error: auth.error },
+        { status: auth.status, headers: { "Cache-Control": "private, no-store" } }
+      );
     }
 
     if (!supabaseAdmin) {

@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { GET } from "@/app/api/deals/[id]/dispute/route";
+import { GET, POST, checkDealDisputeRate } from "@/app/api/deals/[id]/dispute/route";
 import * as serverAuth from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 vi.mock("@/lib/serverAuth", () => ({ resolveUserId: vi.fn() }));
-vi.mock("@/lib/supabaseAdmin", () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock("@/lib/supabaseAdmin", () => ({ supabaseAdmin: { from: vi.fn(), rpc: vi.fn() } }));
+vi.mock("@/lib/notifications", () => ({ notifyUser: async () => true }));
 
 // ─────────────────────────────────────────────────────────────────────────
 // A-045 requires "confirmation that it was filed, and a way to see its state".
@@ -143,5 +144,41 @@ describe("GET /api/deals/[id]/dispute", () => {
     vi.spyOn(serverAuth, "resolveUserId").mockResolvedValue("buyer-1");
     installDatabase({ deal: null });
     expect((await call("nope")).status).toBe(404);
+  });
+});
+
+describe("filing a deal dispute", () => {
+  it("records a Mission Control event using the live system_events shape", async () => {
+    checkDealDisputeRate.reset();
+    vi.spyOn(serverAuth, "resolveUserId").mockResolvedValue("buyer-1");
+    const insertEvent = vi.fn().mockResolvedValue({ error: null });
+    supabaseAdmin.rpc.mockResolvedValue({
+      data: { id: "dispute-1", heldAt: DISPUTE_ROW.hold_placed_at, alreadyHeld: false, historyPurged: true },
+    });
+    installDatabase({ dispute: null });
+    const from = supabaseAdmin.from.getMockImplementation();
+    supabaseAdmin.from.mockImplementation((table) => {
+      if (table === "system_events") return { insert: insertEvent };
+      return from(table);
+    });
+
+    const response = await POST(new Request("https://www.scoutit.space/api/deals/deal-1/dispute", {
+      method: "POST",
+      body: JSON.stringify({ reason: "other", details: "Private report evidence" }),
+    }), { params: Promise.resolve({ id: "deal-1" }) });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ historyPurged: true, message: expect.stringContaining("cannot be restored") });
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("file_deal_dispute_hold", expect.objectContaining({ p_status: "open_hold" }));
+    expect(insertEvent).toHaveBeenCalledExactlyOnceWith({
+      event: "deal.dispute.opened",
+      source: "main-site",
+      severity: "warning",
+      subject_table: "deal_disputes",
+      subject_id: "dispute-1",
+      summary: "A deal dispute placed the conversation on hold.",
+      detail: { dealId: "deal-1" },
+      occurred_at: expect.any(String),
+    });
   });
 });

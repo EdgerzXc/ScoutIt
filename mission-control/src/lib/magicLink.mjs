@@ -5,7 +5,7 @@ export async function sendMagicLink({ auth, email, origin, captchaToken, resetCa
   try {
     const { error } = await auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${origin}/auth/callback`, captchaToken },
+      options: { emailRedirectTo: `${origin}/auth/callback`, captchaToken, shouldCreateUser: false },
     });
     if (error) throw error;
   } finally {

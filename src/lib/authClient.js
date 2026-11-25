@@ -86,7 +86,7 @@ export const signInWithOAuth = async (provider, options) => {
 export const signInWithOtp = async (email, captchaToken) => {
   return await supabase.auth.signInWithOtp({
     email,
-    ...(captchaToken ? { options: { captchaToken } } : {}),
+    options: { shouldCreateUser: false, ...(captchaToken ? { captchaToken } : {}) },
   });
 };
 

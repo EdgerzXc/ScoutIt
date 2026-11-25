@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { monthlyAllowance } from "@/lib/entitlements";
 import { isCanonicalConnectWalletActive } from "@/lib/connectsSchemaGate";
+import { stripAllTags } from "@/lib/sanitize";
 import {
   CURRENT_TERMS_VERSION,
   isCurrentTermsAcceptance,
@@ -10,6 +11,35 @@ import {
 } from "@/lib/legalAcceptance";
 
 const NO_STORE = { "Cache-Control": "private, no-store" };
+
+// Per-user in-flight serialization queue so concurrent first-time onboarding
+// requests for the same account execute sequentially and converge on a single
+// consistent role and wallet setup.
+const activeUserOnboardingQueues = new Map();
+
+function withUserOnboardingQueue(userId, task) {
+  let entry = activeUserOnboardingQueues.get(userId);
+  if (!entry) {
+    entry = {
+      tail: Promise.resolve(),
+      refCount: 0,
+      completedProfile: null,
+      partialProfile: null,
+    };
+    activeUserOnboardingQueues.set(userId, entry);
+  }
+  entry.refCount += 1;
+
+  const run = entry.tail.then(() => task(entry));
+  entry.tail = run.catch(() => {});
+
+  return run.finally(() => {
+    entry.refCount -= 1;
+    if (entry.refCount <= 0 && activeUserOnboardingQueues.get(userId) === entry) {
+      activeUserOnboardingQueues.delete(userId);
+    }
+  });
+}
 
 function parseDateOfBirth(value) {
   if (!value || typeof value !== "string") return null;
@@ -56,11 +86,10 @@ function normalizeLocationFocus(value) {
 
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    const token = /^Bearer\s+(.+)$/i.exec((request.headers.get("authorization") || "").trim())?.[1]?.trim();
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const token = authHeader.replace("Bearer ", "").trim();
 
     const userClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -80,7 +109,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid account setup details." }, { status: 400 });
+    }
     const { name, role, dateOfBirth, prcLicense, locationFocus, termsVersion } = body;
 
     const allowedRoles = ["buyer", "seeker", "owner", "broker"];
@@ -88,9 +120,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid role selection" }, { status: 400 });
     }
 
-    const trimmedName = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
-    if (!trimmedName || trimmedName.length < 2) {
-      return NextResponse.json({ error: "Full name is required." }, { status: 400 });
+    const trimmedName = typeof name === "string" && name.length <= 120 ? stripAllTags(name) : "";
+    if (trimmedName.length < 2) {
+      return NextResponse.json({ error: "Enter a full name between 2 and 120 characters." }, { status: 400 });
+    }
+    if (locationFocus != null && (typeof locationFocus !== "string" || locationFocus.length > 160)) {
+      return NextResponse.json({ error: "Use at most 160 characters for the scouting area." }, { status: 400 });
     }
 
     if (!isCurrentTermsAcceptance(termsVersion)) {
@@ -100,31 +135,16 @@ export async function POST(request) {
       );
     }
 
-    const { data: existingProfile } = await supabaseAdmin
-      .from("user_profiles")
-      .select("adult_eligibility_status, onboarding_completed_at, active_roles, primary_mode, role, subscription_tier")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (existingProfile?.adult_eligibility_status === "underage") {
-      return NextResponse.json(
-        { error: "Account ineligible under ScoutIt age requirement." },
-        { status: 403 },
-      );
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Account setup is temporarily unavailable." }, { status: 503 });
     }
 
     const parsedDob = parseDateOfBirth(dateOfBirth);
     const adultStatus = evaluateAdultEligibility(parsedDob);
-    if (adultStatus !== "confirmed") {
-      return NextResponse.json(
-        { error: "You must be at least 18 years old to use ScoutIt." },
-        { status: 403 },
-      );
-    }
 
     let normalizedPrc = null;
     if (role === "broker") {
-      normalizedPrc = normalizeLicense(prcLicense);
+      normalizedPrc = typeof prcLicense === "string" && prcLicense.length <= 80 ? normalizeLicense(prcLicense) : null;
       if (!normalizedPrc) {
         return NextResponse.json(
           { error: "Brokers must provide a valid 7- or 8-digit PRC license number." },
@@ -133,189 +153,251 @@ export async function POST(request) {
       }
     }
 
-    const normalizedLocation = normalizeLocationFocus(locationFocus);
-    const primaryMode = role === "seeker" ? "buyer" : role;
-    const dbRole = role === "buyer" ? "seeker" : role;
-    const tier = "starry";
-    const startingAllowance = monthlyAllowance(dbRole, tier);
-    const acceptedAt = new Date().toISOString();
-    const evidence = legalAcceptanceEvidence(request);
-
-    const { error: acceptanceError } = await supabaseAdmin
-      .from("terms_acceptances")
-      .insert({
-        user_id: user.id,
-        terms_version: CURRENT_TERMS_VERSION,
-        accepted_at: acceptedAt,
-        ...evidence,
-      });
-
-    if (acceptanceError && acceptanceError.code !== "23505") {
-      console.error("[ONBOARDING API] Terms acceptance persistence failed:", acceptanceError);
-      return NextResponse.json(
-        { error: "Your acceptance could not be recorded. No account setup was completed." },
-        { status: 500, headers: NO_STORE },
-      );
-    }
-
-    let recordedAcceptedAt = acceptedAt;
-    if (acceptanceError?.code === "23505") {
-      const { data: existingAcceptance } = await supabaseAdmin
-        .from("terms_acceptances")
-        .select("accepted_at")
-        .eq("user_id", user.id)
-        .eq("terms_version", CURRENT_TERMS_VERSION)
-        .single();
-      recordedAcceptedAt = existingAcceptance?.accepted_at || acceptedAt;
-    }
-
-    // ── RE-CONSENT ────────────────────────────────────────────────────────
-    // An account that already finished onboarding is here because a new Terms
-    // version was published, not because it is being set up again. The form
-    // cannot express what such an account already is: it offers three signup
-    // roles, one active role, and the starter tier. Running first-time
-    // provisioning over it would collapse a multi-role account to a single
-    // role and reset a paid tier to the starter one — silently, on the way
-    // through a consent checkbox. Record the acceptance and change nothing
-    // else.
-    if (existingProfile?.onboarding_completed_at) {
-      const { error: reconsentError } = await supabaseAdmin
+    return await withUserOnboardingQueue(user.id, async (queueState) => {
+      const { data: dbExistingProfile, error: profileReadError } = await supabaseAdmin
         .from("user_profiles")
-        .update({ terms_accepted_at: recordedAcceptedAt, terms_version: CURRENT_TERMS_VERSION })
-        .eq("id", user.id);
+        .select("adult_eligibility_status, onboarding_completed_at, active_roles, primary_mode, role, subscription_tier")
+        .eq("id", user.id)
+        .maybeSingle();
 
-      if (reconsentError) {
-        console.error("[ONBOARDING API] Re-consent persistence failed:", reconsentError);
+      if (profileReadError) {
+        console.error("[ONBOARDING API] Profile lookup failed:", profileReadError.code);
+        return NextResponse.json({ error: "We could not load your private profile. Please retry." }, { status: 503 });
+      }
+
+      const existingProfile =
+        dbExistingProfile || queueState.completedProfile || queueState.partialProfile || null;
+
+      if (existingProfile?.adult_eligibility_status === "underage") {
         return NextResponse.json(
-          { error: "Your acceptance could not be recorded. Please try again." },
+          { error: "Account ineligible under ScoutIt age requirement." },
+          { status: 403 },
+        );
+      }
+
+      if (adultStatus !== "confirmed") {
+        return NextResponse.json(
+          { error: "You must be at least 18 years old to use ScoutIt." },
+          { status: 403 },
+        );
+      }
+
+      // A-356: If an incomplete profile already anchored a signup role on an
+      // earlier partial attempt, preserve that role on retry so role and wallet
+      // provisioning never diverge across retries.
+      const existingSignupRole =
+        !existingProfile?.onboarding_completed_at &&
+        existingProfile &&
+        allowedRoles.includes(existingProfile.primary_mode || existingProfile.role)
+          ? (existingProfile.primary_mode || existingProfile.role)
+          : null;
+      const effectiveRole = existingSignupRole || role;
+
+      const normalizedLocation = normalizeLocationFocus(stripAllTags(locationFocus));
+      const primaryMode = effectiveRole === "seeker" ? "buyer" : effectiveRole;
+      const dbRole = effectiveRole === "buyer" ? "seeker" : effectiveRole;
+      const activeRoles = Array.isArray(existingProfile?.active_roles) && existingSignupRole
+        ? existingProfile.active_roles
+        : Array.from(new Set([primaryMode || "buyer", "buyer"]));
+      const tier = "starry";
+      const startingAllowance = monthlyAllowance(dbRole, tier);
+      const acceptedAt = new Date().toISOString();
+      const evidence = legalAcceptanceEvidence(request);
+
+      const { error: acceptanceError } = await supabaseAdmin
+        .from("terms_acceptances")
+        .insert({
+          user_id: user.id,
+          terms_version: CURRENT_TERMS_VERSION,
+          accepted_at: acceptedAt,
+          ...evidence,
+        });
+
+      if (acceptanceError && acceptanceError.code !== "23505") {
+        console.error("[ONBOARDING API] Terms acceptance persistence failed:", acceptanceError);
+        return NextResponse.json(
+          { error: "Your acceptance could not be recorded. No account setup was completed." },
           { status: 500, headers: NO_STORE },
         );
       }
 
-      return NextResponse.json({
-        success: true,
-        reconsent: true,
-        activeRoles: existingProfile.active_roles || [],
-        primaryMode: existingProfile.primary_mode || null,
-        onboardingCompletedAt: existingProfile.onboarding_completed_at,
-        termsVersion: CURRENT_TERMS_VERSION,
-      });
-    }
+      let recordedAcceptedAt = acceptedAt;
+      if (acceptanceError?.code === "23505") {
+        const { data: existingAcceptance, error: acceptanceReadError } = await supabaseAdmin
+          .from("terms_acceptances")
+          .select("accepted_at")
+          .eq("user_id", user.id)
+          .eq("terms_version", CURRENT_TERMS_VERSION)
+          .single();
+        if (acceptanceReadError || !existingAcceptance?.accepted_at) {
+          console.error("[ONBOARDING API] Terms acceptance lookup failed:", acceptanceReadError?.code);
+          return NextResponse.json({ error: "We could not confirm your acceptance. Please retry." }, { status: 503, headers: NO_STORE });
+        }
+        recordedAcceptedAt = existingAcceptance.accepted_at;
+      }
 
-    const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert(
-      {
-        id: user.id,
-        display_name: trimmedName,
-        role: dbRole,
-        active_roles: Array.from(new Set([primaryMode || "buyer", "buyer"])),
-        primary_mode: primaryMode || "buyer",
-        date_of_birth: dateOfBirth,
+      // ── RE-CONSENT / CONCURRENT CONVERGENCE ───────────────────────────────
+      // An account that already finished onboarding is here because a new Terms
+      // version was published, or because a concurrent first-time onboarding
+      // request just finished ahead of this one. Record the acceptance and
+      // preserve the committed roles and tier without re-provisioning.
+      if (existingProfile?.onboarding_completed_at) {
+        const { error: reconsentError } = await supabaseAdmin
+          .from("user_profiles")
+          .update({ terms_accepted_at: recordedAcceptedAt, terms_version: CURRENT_TERMS_VERSION })
+          .eq("id", user.id);
+
+        if (reconsentError) {
+          console.error("[ONBOARDING API] Re-consent persistence failed:", reconsentError);
+          return NextResponse.json(
+            { error: "Your acceptance could not be recorded. Please try again." },
+            { status: 500, headers: NO_STORE },
+          );
+        }
+
+        return NextResponse.json({
+          success: true,
+          reconsent: true,
+          activeRoles: existingProfile.active_roles || [],
+          primaryMode: existingProfile.primary_mode || null,
+          onboardingCompletedAt: existingProfile.onboarding_completed_at,
+          termsVersion: CURRENT_TERMS_VERSION,
+        });
+      }
+
+      const { error: profileError } = await supabaseAdmin.from("user_profiles").upsert(
+        {
+          id: user.id,
+          display_name: trimmedName,
+          role: dbRole,
+          active_roles: activeRoles,
+          primary_mode: primaryMode || "buyer",
+          date_of_birth: dateOfBirth,
+          adult_eligibility_status: adultStatus,
+          prc_license: normalizedPrc,
+          location_focus: normalizedLocation,
+          subscription_tier: tier,
+          terms_accepted_at: recordedAcceptedAt,
+          terms_version: CURRENT_TERMS_VERSION,
+          onboarding_completed_at: null,
+        },
+        { onConflict: "id" },
+      );
+
+      if (profileError) {
+        console.error("[ONBOARDING API] Profile upsert failed:", profileError);
+        return NextResponse.json({ error: "Failed to create the private profile." }, { status: 500 });
+      }
+
+      queueState.partialProfile = {
         adult_eligibility_status: adultStatus,
-        prc_license: normalizedPrc,
-        location_focus: normalizedLocation,
-        subscription_tier: tier,
-        terms_accepted_at: recordedAcceptedAt,
-        terms_version: CURRENT_TERMS_VERSION,
         onboarding_completed_at: null,
-      },
-      { onConflict: "id" },
-    );
+        active_roles: activeRoles,
+        primary_mode: primaryMode || "buyer",
+        role: dbRole,
+        subscription_tier: tier,
+      };
 
-    if (profileError) {
-      console.error("[ONBOARDING API] Profile upsert failed:", profileError);
-      return NextResponse.json({ error: "Failed to create the private profile." }, { status: 500 });
-    }
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const canonicalRole = effectiveRole === "buyer" ? "seeker" : effectiveRole;
 
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const canonicalRole = role === "buyer" ? "seeker" : role;
+      if (isCanonicalConnectWalletActive()) {
+        // 1. Authoritative canonical provisioning: role wallet + account permanent pool
+        const [{ error: canonicalWalletError }, { error: canonicalAcctError }] = await Promise.all([
+          supabaseAdmin.from("user_connect_wallets").upsert(
+            {
+              user_id: user.id,
+              role: canonicalRole,
+              granted_balance: startingAllowance,
+              granted_month: currentMonth,
+            },
+            { onConflict: "user_id,role", ignoreDuplicates: true },
+          ),
+          supabaseAdmin.from("user_connect_accounts").upsert(
+            {
+              user_id: user.id,
+              purchased_balance: 0,
+              reward_balance: 0,
+            },
+            { onConflict: "user_id", ignoreDuplicates: true },
+          ),
+        ]);
 
-    if (isCanonicalConnectWalletActive()) {
-      // 1. Authoritative canonical provisioning: role wallet + account permanent pool
-      const [{ error: canonicalWalletError }, { error: canonicalAcctError }] = await Promise.all([
-        supabaseAdmin.from("user_connect_wallets").upsert(
+        if (canonicalWalletError || canonicalAcctError) {
+          console.error("[ONBOARDING API] Canonical wallet provisioning failed:", {
+            canonicalWalletError,
+            canonicalAcctError,
+          });
+          return NextResponse.json(
+            { error: "Profile saved, but account provisioning is incomplete. Please retry." },
+            { status: 500 },
+          );
+        }
+
+        // 2. Transitional non-authoritative mirror to legacy connect_balances
+        const { error: legacyWalletError } = await supabaseAdmin.from("connect_balances").upsert(
           {
             user_id: user.id,
-            role: canonicalRole,
             granted_balance: startingAllowance,
-            granted_month: currentMonth,
-          },
-          { onConflict: "user_id,role", ignoreDuplicates: true },
-        ),
-        supabaseAdmin.from("user_connect_accounts").upsert(
-          {
-            user_id: user.id,
             purchased_balance: 0,
-            reward_balance: 0,
+            earned_balance: 0,
+            last_granted_reset: new Date().toISOString().slice(0, 10),
           },
           { onConflict: "user_id", ignoreDuplicates: true },
-        ),
-      ]);
+        );
+        if (legacyWalletError) {
+          console.warn("[ONBOARDING API] Non-fatal legacy connect_balances mirror notice:", legacyWalletError);
+        }
+      } else {
+        // Pre-migration stage: legacy connect_balances is authoritative
+        const { error: legacyWalletError } = await supabaseAdmin.from("connect_balances").upsert(
+          {
+            user_id: user.id,
+            granted_balance: startingAllowance,
+            purchased_balance: 0,
+            earned_balance: 0,
+            last_granted_reset: new Date().toISOString().slice(0, 10),
+          },
+          { onConflict: "user_id", ignoreDuplicates: true },
+        );
+        if (legacyWalletError) {
+          console.error("[ONBOARDING API] Legacy wallet provisioning failed:", legacyWalletError);
+          return NextResponse.json(
+            { error: "Profile saved, but account provisioning is incomplete. Please retry." },
+            { status: 500 },
+          );
+        }
+      }
 
-      if (canonicalWalletError || canonicalAcctError) {
-        console.error("[ONBOARDING API] Canonical wallet provisioning failed:", {
-          canonicalWalletError,
-          canonicalAcctError,
-        });
+      const completedAt = new Date().toISOString();
+      const { error: completionError } = await supabaseAdmin
+        .from("user_profiles")
+        .update({ onboarding_completed_at: completedAt })
+        .eq("id", user.id);
+      if (completionError) {
+        console.error("[ONBOARDING API] Completion marker failed:", completionError);
         return NextResponse.json(
-          { error: "Profile saved, but account provisioning is incomplete. Please retry." },
+          { error: "Account provisioning is incomplete. Please retry." },
           { status: 500 },
         );
       }
 
-      // 2. Transitional non-authoritative mirror to legacy connect_balances
-      const { error: legacyWalletError } = await supabaseAdmin.from("connect_balances").upsert(
-        {
-          user_id: user.id,
-          granted_balance: startingAllowance,
-          purchased_balance: 0,
-          earned_balance: 0,
-          last_granted_reset: new Date().toISOString().slice(0, 10),
-        },
-        { onConflict: "user_id", ignoreDuplicates: true },
-      );
-      if (legacyWalletError) {
-        console.warn("[ONBOARDING API] Non-fatal legacy connect_balances mirror notice:", legacyWalletError);
-      }
-    } else {
-      // Pre-migration stage: legacy connect_balances is authoritative
-      const { error: legacyWalletError } = await supabaseAdmin.from("connect_balances").upsert(
-        {
-          user_id: user.id,
-          granted_balance: startingAllowance,
-          purchased_balance: 0,
-          earned_balance: 0,
-          last_granted_reset: new Date().toISOString().slice(0, 10),
-        },
-        { onConflict: "user_id", ignoreDuplicates: true },
-      );
-      if (legacyWalletError) {
-        console.error("[ONBOARDING API] Legacy wallet provisioning failed:", legacyWalletError);
-        return NextResponse.json(
-          { error: "Profile saved, but account provisioning is incomplete. Please retry." },
-          { status: 500 },
-        );
-      }
-    }
+      queueState.completedProfile = {
+        adult_eligibility_status: adultStatus,
+        onboarding_completed_at: completedAt,
+        active_roles: activeRoles,
+        primary_mode: primaryMode || "buyer",
+        role: dbRole,
+        subscription_tier: tier,
+      };
 
-    const completedAt = new Date().toISOString();
-    const { error: completionError } = await supabaseAdmin
-      .from("user_profiles")
-      .update({ onboarding_completed_at: completedAt })
-      .eq("id", user.id);
-    if (completionError) {
-      console.error("[ONBOARDING API] Completion marker failed:", completionError);
-      return NextResponse.json(
-        { error: "Account provisioning is incomplete. Please retry." },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      activeRoles: Array.from(new Set([primaryMode || "buyer", "buyer"])),
-      primaryMode,
-      onboardingCompletedAt: completedAt,
-      termsVersion: CURRENT_TERMS_VERSION,
+      return NextResponse.json({
+        success: true,
+        activeRoles,
+        primaryMode,
+        onboardingCompletedAt: completedAt,
+        termsVersion: CURRENT_TERMS_VERSION,
+      });
     });
   } catch (error) {
     console.error("[ONBOARDING API] Server error:", error);

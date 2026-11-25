@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { 
   LayoutDashboard, Building2, Users, ClipboardList, 
@@ -71,7 +71,7 @@ const NAV_ITEMS = [
 // row the staff member actually opens, not 200 on mount.
 //
 // Module-scoped for the same reason as NavButton below.
-function SectionEditorRow({ listing, colSpan, onClose }) {
+function SectionEditorRow({ listing, fallbackProperty, colSpan, onClose }) {
   const [state, setState] = useState({ loading: true });
 
   useEffect(() => {
@@ -88,20 +88,31 @@ function SectionEditorRow({ listing, colSpan, onClose }) {
         const res = await fetch(`/api/admin/property?id=${encodeURIComponent(listing.id)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
         if (cancelled) return;
+        if (res.status === 403 && fallbackProperty) {
+          setState({
+            property: {
+              ...fallbackProperty,
+              space_category: fallbackProperty.space_category ?? fallbackProperty.spaceCategory,
+            },
+            token,
+            useOwnerEndpoint: true,
+          });
+          return;
+        }
         if (!res.ok) {
           setState({ error: json.error || "Could not load this property." });
           return;
         }
-        setState({ property: json.property, token });
+        setState({ property: json.property, token, useOwnerEndpoint: false });
       } catch (err) {
         if (!cancelled) setState({ error: err.message || "Could not load this property." });
       }
     })();
     // Guard against a staff member collapsing the row mid-request.
     return () => { cancelled = true; };
-  }, [listing.id]);
+  }, [listing.id, fallbackProperty]);
 
   return (
     <tr className="bg-[rgba(var(--text-primary-rgb),0.02)]">
@@ -110,7 +121,7 @@ function SectionEditorRow({ listing, colSpan, onClose }) {
           <span className="text-[12px] font-mono uppercase tracking-widest text-gold-accent">
             Editing · {listing.title}
           </span>
-          <button onClick={onClose} className="text-text-secondary hover:text-white text-xs">
+          <button onClick={onClose} className="min-h-11 px-2 text-text-secondary hover:text-white text-xs">
             Close
           </button>
         </div>
@@ -124,9 +135,41 @@ function SectionEditorRow({ listing, colSpan, onClose }) {
             property={state.property}
             // null category => shared fields only, rather than guessing wrong
             // and hiding the fields that actually apply.
-            category={categoryKeyFor(state.property.space_category)}
-            isStaff
+            category={categoryKeyFor(state.property.space_category ?? state.property.spaceCategory)}
+            isStaff={!state.useOwnerEndpoint}
             authToken={state.token}
+            onUpdated={(next) => next && setState((prev) => ({ ...prev, property: next }))}
+            onSaveSection={
+              state.useOwnerEndpoint
+                ? async (_sectionName, payload, prop) => {
+                    const { getSession } = await import("@/lib/authClient");
+                    const { data: { session } } = await getSession();
+                    const currentToken = session?.access_token || state.token;
+                    const res = await fetch("/api/dashboard/update", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
+                      },
+                      body: JSON.stringify({
+                        submissionId: prop.id,
+                        data: { details: payload },
+                      }),
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                      throw new Error(data.error || data.warning || "Could not save section.");
+                    }
+                    return {
+                      property: {
+                        ...prop,
+                        details: { ...(prop.details || {}), ...payload },
+                      },
+                      warning: data.warning,
+                    };
+                  }
+                : undefined
+            }
           />
         )}
       </td>
@@ -163,9 +206,11 @@ function NavButton({ id, icon: Icon, label, activeTab, onSelect, badge = 0 }) {
 }
 
 export default function MissionControlMode() {
-  const { listings, pitches, connects, currentUser, addToast, closeListing } = useDashboard();
+  const { listings, pitches, connects, currentUser, addToast, closeListing, inventoryStats, refetchInventory, isLoading } = useDashboard();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmMassDelete, setConfirmMassDelete] = useState(false);
+  const [confirmDeleteRowId, setConfirmDeleteRowId] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   // Which Portfolio row has its section editor expanded. Only one at a time —
   // two open editors on the same property could hold conflicting drafts and
@@ -198,7 +243,6 @@ export default function MissionControlMode() {
   const [orgName, setOrgName] = useState("");
   const [orgDomain, setOrgDomain] = useState("");
 
-  const [inventoryStats, setInventoryStats] = useState({ total: 0, occupied: 0, vacant: 0, maintenance: 0 });
   const [isEnterprise, setIsEnterprise] = useState(false);
   const [activeEstateId, setActiveEstateId] = useState(null);
   const [enterpriseUnits, setEnterpriseUnits] = useState([]);
@@ -226,24 +270,6 @@ export default function MissionControlMode() {
   }, [currentUser]);
 
 
-  // Real unit inventory stats feed the Dashboard hero, Inventory tab, and
-  // Analytics intel line — fetch once when the sandbox unlocks.
-  useEffect(() => {
-    if (!isEnterprise) return;
-    const fetchStats = async () => {
-      try {
-        const res = await fetch('/api/dashboard/inventory');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.stats) setInventoryStats(data.stats);
-        }
-      } catch (e) {
-        console.error("Failed to fetch inventory stats", e);
-      }
-    };
-    fetchStats();
-  }, [isEnterprise]);
-
   // Hard-scoped to only the Enterprise's own properties
   const scoped = useMemo(
     () => listings.filter((l) => l.ownerId === currentUser?.id),
@@ -253,6 +279,10 @@ export default function MissionControlMode() {
     () => (pitches || []).filter((p) => p.isCurrentUserOwner),
     [pitches]
   );
+  const inventoryMap = useMemo(
+    () => new Map(scoped.map((item) => [item.id, item])),
+    [scoped]
+  );
 
   // Sync active estate when scoped changes
   useEffect(() => {
@@ -260,6 +290,70 @@ export default function MissionControlMode() {
       setActiveEstateId(scoped[0].id);
     }
   }, [scoped, activeEstateId]);
+
+  const activeEstate = useMemo(
+    () => scoped.find((s) => s.id === activeEstateId) || null,
+    [scoped, activeEstateId]
+  );
+
+  const loadEnterpriseUnits = useCallback(async () => {
+    if (!activeEstateId) {
+      setEnterpriseUnits([]);
+      return;
+    }
+    const fallbackUnits = activeEstate?.details?.units || activeEstate?.units || [];
+    try {
+      const { getSession } = await import("@/lib/authClient");
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+      if (!token) {
+        setEnterpriseUnits(fallbackUnits);
+        return;
+      }
+      const res = await fetch(`/api/dashboard/units?propertyId=${encodeURIComponent(activeEstateId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && Array.isArray(data.units)) {
+        setEnterpriseUnits(data.units);
+      } else {
+        setEnterpriseUnits(fallbackUnits);
+      }
+    } catch {
+      setEnterpriseUnits(fallbackUnits);
+    }
+  }, [activeEstateId, activeEstate]);
+
+  useEffect(() => {
+    loadEnterpriseUnits();
+  }, [loadEnterpriseUnits]);
+
+  const handleUnitsAutoSave = useCallback(async (updatedUnits) => {
+    if (!activeEstateId) return;
+    try {
+      const { getSession } = await import("@/lib/authClient");
+      const { data: { session } } = await getSession();
+      const token = session?.access_token;
+      if (!token) return;
+      const res = await fetch("/api/dashboard/units", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ propertyId: activeEstateId, units: updatedUnits }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && Array.isArray(data.units)) {
+        setEnterpriseUnits(data.units);
+        if (data.warning) addToast(data.warning, "⚠️");
+      } else if (!res.ok) {
+        addToast(data.error || "Could not save unit inventory.", "❌");
+      }
+    } catch {
+      addToast("Could not save unit inventory.", "❌");
+    }
+  }, [activeEstateId, addToast]);
 
   const kpis = {
     total: scoped.length,
@@ -300,7 +394,7 @@ export default function MissionControlMode() {
     ? "No properties in your company scope yet. Add or import your first asset from the Portfolio module."
     : [
         `Your portfolio holds ${kpis.total} ${kpis.total === 1 ? "listing" : "listings"}: ${kpis.approved} live, ${kpis.pending} in the pipeline.`,
-        inventoryStats.total > 0
+        inventoryStats?.total > 0
           ? `${inventoryStats.total} units tracked: ${inventoryStats.occupied} occupied, ${inventoryStats.vacant} vacant${inventoryStats.maintenance ? `, ${inventoryStats.maintenance} in maintenance` : ""}.`
           : null,
         weakListings.length > 0
@@ -325,8 +419,8 @@ export default function MissionControlMode() {
   };
 
   const handleMassDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${selectedIds.size} properties?`)) return;
     setIsDeleting(true);
+    setConfirmMassDelete(false);
     
     const idsToDelete = Array.from(selectedIds);
     setSelectedIds(new Set());
@@ -434,6 +528,14 @@ export default function MissionControlMode() {
             </button>
           ))}
         </div>
+        {!isLoading && !inventoryStats && (
+          <div role="status" className="flex items-center gap-3 text-sm text-text-secondary">
+            Inventory totals are unavailable.
+            <button type="button" onClick={refetchInventory} className="min-h-11 font-mono text-[12px] uppercase tracking-wider text-gold-accent underline">
+              Retry
+            </button>
+          </div>
+        )}
         {activeTab === "dashboard" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both">
             <div className="bg-gold-accent/5 border border-gold-accent/20 rounded-lg px-4 py-3 flex items-start gap-3 mb-6 backdrop-blur-md">
@@ -601,12 +703,12 @@ export default function MissionControlMode() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <Warehouse className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
-                  {inventoryStats.total > 0 && (
+                  {inventoryStats?.total > 0 && (
                     <span className="text-emerald-400 text-[12px] font-mono font-bold">{inventoryStats.vacant} vacant</span>
                   )}
                 </div>
                 <div>
-                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{inventoryStats.total}</div>
+                  <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">{inventoryStats?.total ?? "—"}</div>
                   <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest">
                     Units Tracked
                   </div>
@@ -639,9 +741,9 @@ export default function MissionControlMode() {
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-2 group-hover:scale-[1.02] origin-left transition-transform duration-300">
-                    {inventoryStats.total > 0 ? `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` : "-"}
+                    {inventoryStats?.total > 0 ? `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` : "—"}
                   </div>
-                  {inventoryStats.total > 0 && (
+                  {inventoryStats?.total > 0 && (
                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
                       <div className="h-full bg-emerald-500/60 rounded-full transition duration-200" style={{ width: `${Math.round((inventoryStats.occupied / inventoryStats.total) * 100)}%` }} />
                     </div>
@@ -659,15 +761,15 @@ export default function MissionControlMode() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <Users className="text-text-secondary group-hover:text-gold-accent transition duration-300" size={18} />
-                  {(pitches || []).filter((p) => p.status === "pending").length > 0 && (
+                  {scopedPitches.filter((p) => p.status === "pending").length > 0 && (
                     <span className="text-gold-accent text-[12px] font-mono font-bold">
-                      {(pitches || []).filter((p) => p.status === "pending").length} sealed
+                      {scopedPitches.filter((p) => p.status === "pending").length} sealed
                     </span>
                   )}
                 </div>
                 <div>
                   <div className="font-display-md text-3xl text-white tracking-tight mb-1 group-hover:scale-[1.02] origin-left transition-transform duration-300">
-                    {(pitches || []).filter((p) => p.status === "accepted" || p.status === "pending").length}
+                    {scopedPitches.filter((p) => p.status === "accepted" || p.status === "pending").length}
                   </div>
                   <div className="text-[12px] font-mono text-text-secondary uppercase tracking-widest">
                     Active Chatboxes
@@ -705,13 +807,35 @@ export default function MissionControlMode() {
                   </span>
                 </label>
                 {selectedIds.size > 0 && (
-                  <button 
-                    onClick={handleMassDelete}
-                    disabled={isDeleting}
-                    className="min-h-11 text-xs text-red-400 hover:text-red-300 bg-red-400/10 px-3 py-1.5 rounded transition disabled:opacity-50"
-                  >
-                    {isDeleting ? "Deleting..." : "Delete Selected"}
-                  </button>
+                  confirmMassDelete ? (
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleMassDelete}
+                        disabled={isDeleting}
+                        className="min-h-11 text-xs text-error bg-error/15 border border-error/40 hover:bg-error/25 px-3 py-1.5 rounded font-label-caps uppercase transition disabled:opacity-50"
+                      >
+                        {isDeleting ? "Deleting..." : `Confirm Delete (${selectedIds.size})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmMassDelete(false)}
+                        disabled={isDeleting}
+                        className="min-h-11 text-xs text-text-secondary hover:text-on-surface px-2.5 py-1.5 rounded font-label-caps uppercase transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      type="button"
+                      onClick={() => setConfirmMassDelete(true)}
+                      disabled={isDeleting}
+                      className="min-h-11 text-xs text-red-400 hover:text-red-300 bg-red-400/10 px-3 py-1.5 rounded transition disabled:opacity-50"
+                    >
+                      {isDeleting ? "Deleting..." : "Delete Selected"}
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -793,22 +917,42 @@ export default function MissionControlMode() {
                           Manage
                         </Link>
                         <span className="text-surface-variant mx-2">|</span>
-                        <button
-                          onClick={() => {
-                            if(window.confirm("Are you sure you want to delete this property?")) {
-                              closeListing(l.id);
-                            }
-                          }}
-                          className="text-red-400 hover:text-red-300 text-xs"
-                        >
-                          Delete
-                        </button>
+                        {confirmDeleteRowId === l.id ? (
+                          <span className="inline-flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmDeleteRowId(null);
+                                closeListing(l.id);
+                              }}
+                              className="text-error hover:underline text-xs font-bold uppercase"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteRowId(null)}
+                              className="text-text-secondary hover:text-on-surface text-xs"
+                            >
+                              Cancel
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteRowId(l.id)}
+                            className="text-red-400 hover:text-red-300 text-xs"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </td>
                     </tr>,
                     isEditing ? (
                       <SectionEditorRow
                         key={`${l.id}-editor`}
                         listing={l}
+                        fallbackProperty={inventoryMap.get(l.id) || l}
                         colSpan={6}
                         onClose={() => setEditingId(null)}
                       />
@@ -840,10 +984,10 @@ export default function MissionControlMode() {
                 <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
                   <h3 className="text-white font-medium text-sm">Connection Pipeline</h3>
                   <span className="text-[12px] font-mono uppercase tracking-widest text-text-secondary">
-                    {(pitches || []).length} {(pitches || []).length === 1 ? "conversation" : "conversations"} on record
+                    {scopedPitches.length} {scopedPitches.length === 1 ? "conversation" : "conversations"} on record
                   </span>
                 </div>
-                {(pitches || []).length === 0 ? (
+                {scopedPitches.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 text-center">
                     <div className="w-16 h-16 rounded-full bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center mb-6">
                       <Users className="text-gold-accent" size={28} />
@@ -855,7 +999,7 @@ export default function MissionControlMode() {
                   </div>
                 ) : (
                   <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-white/5">
-                    {(pitches || []).map((p) => {
+                    {scopedPitches.map((p) => {
                       const revealed = p.status === "accepted";
                       return (
                         <div key={p.id} className="px-6 py-4 hover:bg-white/[0.02] transition flex items-start justify-between gap-4">
@@ -874,11 +1018,19 @@ export default function MissionControlMode() {
                               </p>
                             )}
                           </div>
-                          <div className="text-right shrink-0">
-                            <span className={`text-[12px] font-mono uppercase tracking-widest ${p.status === "accepted" ? "text-success" : p.status === "rejected" ? "text-error" : "text-gold-accent"}`}>
-                              {p.statusText}
-                            </span>
-                            <p className="text-[12px] text-text-secondary mt-1">{p.timeRemaining}</p>
+                          <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                            <div className="flex items-center gap-3 flex-wrap justify-end">
+                              <span className={`text-[12px] font-mono uppercase tracking-widest ${p.status === "accepted" ? "text-success" : p.status === "rejected" ? "text-error" : "text-gold-accent"}`}>
+                                {p.statusText}
+                              </span>
+                              <Link
+                                href={`/dashboard/inbox?dealId=${p.id}`}
+                                className="min-h-11 inline-flex items-center text-[12px] font-mono uppercase tracking-widest text-gold-accent hover:underline"
+                              >
+                                Open Thread →
+                              </Link>
+                            </div>
+                            <p className="text-[12px] text-text-secondary">{p.timeRemaining}</p>
                           </div>
                         </div>
                       );
@@ -906,7 +1058,7 @@ export default function MissionControlMode() {
           </div>
         ) : activeTab === "team" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full">
-            <TeamManagementPanel currentUser={currentUser} properties={scoped} pitches={pitches || []} />
+            <TeamManagementPanel currentUser={currentUser} properties={scoped} pitches={scopedPitches} />
           </div>
         ) : activeTab === "inventory" ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-200 fill-mode-both h-full flex flex-col gap-6">
@@ -920,9 +1072,9 @@ export default function MissionControlMode() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { label: "Total Properties", val: scoped.length },
-                { label: "Units Tracked", val: inventoryStats.total },
-                { label: "Occupied", val: inventoryStats.occupied },
-                { label: "Maintenance", val: inventoryStats.maintenance }
+                { label: "Units Tracked", val: inventoryStats?.total ?? "—" },
+                { label: "Occupied", val: inventoryStats?.occupied ?? "—" },
+                { label: "Maintenance", val: inventoryStats?.maintenance ?? "—" }
               ].map(stat => (
                 <GlassPanel key={stat.label} className="min-w-0 p-4 md:p-6 rounded-2xl border-white/5">
                   <div className="text-3xl text-white font-display-md break-words">{stat.val}</div>
@@ -950,14 +1102,20 @@ export default function MissionControlMode() {
               <div className="overflow-x-auto flex-1 p-6 relative flex flex-col gap-8">
                 {activeEstateId ? (
                   <>
-                    <DelegationRequests propertyId={activeEstateId} units={[]} />
+                    <DelegationRequests
+                      propertyId={activeEstateId}
+                      units={enterpriseUnits}
+                      onDelegated={loadEnterpriseUnits}
+                    />
                     <div className="bg-black/50 border border-white/5 rounded-xl p-4 overflow-hidden">
-                      <InventoryGridManager 
-                        propertyId={activeEstateId} 
-                        isOperatorMode={false} 
+                      <InventoryGridManager
+                        mode="owner"
+                        propertyCategory={activeEstate?.spaceCategory || activeEstate?.category || activeEstate?.type || "commercial"}
+                        propertyId={activeEstateId}
+                        property={activeEstate}
                         units={enterpriseUnits}
                         onChange={setEnterpriseUnits}
-                        onAutoSave={() => {}}
+                        onAutoSave={handleUnitsAutoSave}
                       />
                     </div>
                   </>
@@ -986,7 +1144,7 @@ export default function MissionControlMode() {
               <GlassPanel className="col-span-1 rounded-2xl border-white/5 p-6 flex flex-col relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-gold-accent/10 to-transparent" />
                 <h4 className="text-white font-medium text-sm mb-6 relative z-10">Units Ready to Earn</h4>
-                <div className="text-4xl text-gold-accent font-display-md tracking-tighter mt-auto mb-2 relative z-10">{inventoryStats.vacant}</div>
+                <div className="text-4xl text-gold-accent font-display-md tracking-tighter mt-auto mb-2 relative z-10">{inventoryStats?.vacant ?? "—"}</div>
                 <div className="text-text-secondary text-xs font-mono font-medium relative z-10">Vacant units available for lease</div>
               </GlassPanel>
               <GlassPanel className="col-span-1 md:col-span-2 rounded-2xl border-white/5 p-6 flex flex-col">
@@ -1099,21 +1257,35 @@ export default function MissionControlMode() {
                      <Activity size={20} className="text-emerald-400" />
                    </div>
                    <div>
-                     <h3 className="text-white font-medium text-sm">Intel Synergy</h3>
-                     {inventoryStats.saved_intel_count > 0 ? (
-                       <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-                         {inventoryStats.saved_intel_count} intel {inventoryStats.saved_intel_count === 1 ? "report is" : "reports are"} saved against your properties. Cross-referencing them against market movement arrives with live analytics.
-                       </p>
-                     ) : (
-                       <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-                         No intel saved yet. Save market intel from your Master Property Pages and this panel will surface patterns across your scope.
-                       </p>
+                     <h3 className="text-white font-medium text-sm">Board saves</h3>
+                     <p className="text-xs text-text-secondary mt-2 leading-relaxed" role="status">
+                       {inventoryStats?.saved_intel_count == null
+                         ? isLoading ? "Loading Board saves…" : "Board save counts are unavailable."
+                         : inventoryStats.saved_intel_count === 0
+                           ? "No Board saves for your listings yet."
+                           : `${inventoryStats.saved_intel_count} Board ${inventoryStats.saved_intel_count === 1 ? "save" : "saves"} across your listings.`}
+                     </p>
+                     {inventoryStats && inventoryStats.saved_intel_count == null && !isLoading && (
+                       <button type="button" onClick={refetchInventory} className="mt-1 min-h-11 font-mono text-[12px] uppercase tracking-wider text-gold-accent underline">
+                         Retry
+                       </button>
                      )}
                    </div>
                 </div>
               </GlassPanel>
 
-              <GlassPanel className="rounded-2xl border-white/5 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer hover:border-gold-accent/30 transition">
+              <GlassPanel
+                onClick={() => setActiveTab("crm")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActiveTab("crm");
+                  }
+                }}
+                className="rounded-2xl border-white/5 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer hover:border-gold-accent/30 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70"
+              >
                  <div>
                    <div className="text-3xl font-display-md text-white group-hover:scale-105 origin-left transition-transform">{scopedPitches.length}</div>
                    <div className="text-[12px] text-text-secondary font-mono uppercase tracking-widest mt-1">Active Pipeline</div>
@@ -1296,7 +1468,18 @@ export default function MissionControlMode() {
                       </div>
                     </GlassPanel>
 
-                    <GlassPanel className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition cursor-pointer">
+                    <GlassPanel
+                      onClick={() => setAdminActiveTab("Integrations & API")}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setAdminActiveTab("Integrations & API");
+                        }
+                      }}
+                      className="rounded-2xl border-white/5 p-6 hover:border-white/20 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-accent/70"
+                    >
                       <h4 className="text-white font-medium text-sm mb-2 flex justify-between items-center">
                         Integration Endpoints
                         <ArrowRight size={14} className="text-text-secondary" />

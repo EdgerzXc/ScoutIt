@@ -11,6 +11,7 @@ import { motionSafeScrollBehavior } from "@/lib/scrollBehavior";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import InViewport from "@/components/ui/InViewport";
 import { canSee, getCurrentTier } from "@/lib/entitlements";
+import SimpleDetail from "@/components/ui/SimpleDetail";
 import { CHILD_SPACE_LEVEL_LABEL, childSpaceDisplayName, getPropertyHierarchy } from "@/lib/propertyHierarchy";
 
 // Dynamically import heavy modals & widgets
@@ -67,6 +68,8 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
   const seeded = previewProperty || initialProperty;
   const [property, setProperty] = useState(seeded);
   const [loading, setLoading] = useState(!seeded);
+  const [loadError, setLoadError] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isOperatorRequestOpen, setIsOperatorRequestOpen] = useState(false);
@@ -113,19 +116,29 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     }
 
     let cancelled = false;
+    setLoadError(false);
     (async () => {
       try {
         const res = await fetch("/api/cms");
+        if (!res.ok) {
+          throw new Error(`CMS unavailable (${res.status})`);
+        }
         const data = await res.json();
         const match = (data.properties || []).find(
           (p) =>
             (p.slug && p.slug.toLowerCase() === (slug || "").toLowerCase()) ||
             (p.id && p.id === slug)
         );
-        if (!cancelled) setProperty(match || null);
+        if (!cancelled) {
+          setProperty(match || null);
+          setLoadError(false);
+        }
       } catch (e) {
         console.error("Failed to load property for unit page", e);
-        if (!cancelled) setProperty(null);
+        if (!cancelled) {
+          setProperty(null);
+          setLoadError(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -133,7 +146,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
     return () => {
       cancelled = true;
     };
-  }, [slug, previewProperty, initialProperty]);
+  }, [slug, previewProperty, initialProperty, retryNonce]);
 
   // Manage nav scroll indicators
   useEffect(() => {
@@ -205,6 +218,42 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
           Loading Child-space Intelligence…
         </span>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg)", gap: "16px", padding: "24px", textAlign: "center" }}>
+        <h1 style={{ fontFamily: "var(--font-body)", fontSize: "20px", color: "var(--text-primary)" }}>
+          Unable to reach the property directory.
+        </h1>
+        <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--text-secondary)", maxWidth: "420px" }}>
+          The listing service is temporarily unavailable. Your unit link may still be valid once the connection recovers.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setLoadError(false);
+            setLoading(true);
+            setRetryNonce((n) => n + 1);
+          }}
+          style={{
+            minHeight: "44px",
+            padding: "10px 20px",
+            borderRadius: "6px",
+            border: "1px solid var(--accent-muted)",
+            background: "rgba(var(--accent-rgb), 0.12)",
+            color: "var(--accent-bright)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "12px",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+          }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -612,6 +661,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
               </div>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "18px", color: "var(--text-primary)", margin: "0 0 14px 0" }}>{property.title}</p>
               
+              <SimpleDetail label="Technical & Spatial Intelligence">
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
                 <FloodRiskBadge floodRiskScore={property.flood_risk_score} floodZoneStatus={property.flood_zone_status} />
                 {property.details?.spatial_intel?.peza?.is_accredited && (
@@ -656,6 +706,7 @@ export default function UnitMasterPage({ slug, unitId, previewProperty, previewU
                   availableLenses={["command", "location", "flood", "transit"]}
                 />
               </InViewport>
+              </SimpleDetail>
 
               <div style={{ marginTop: "24px" }}>
                 <Link href={`/property/${property.slug}`} style={{ color: ACCENT, fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>

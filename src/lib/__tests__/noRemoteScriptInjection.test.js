@@ -1,14 +1,14 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve, extname } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 
 function walk(dir, out = []) {
-  for (const entry of readdirSync(dir)) {
-    if (entry === "node_modules" || entry.startsWith(".")) continue;
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) walk(full, out);
     else out.push(full);
   }
   return out;
@@ -20,7 +20,11 @@ const stripComments = (source) =>
 const sourceFiles = [
   ...walk(resolve(ROOT, "src")),
   ...walk(resolve(ROOT, "mission-control", "src")),
-].filter((f) => [".js", ".jsx"].includes(extname(f)));
+].filter((file) => [".js", ".jsx"].includes(extname(file)))
+  .map((file) => ({
+    file: file.replace(ROOT, "").replace(/\\/g, "/"),
+    source: stripComments(readFileSync(file, "utf8")),
+  }));
 
 // ── A-121 — no third-party script is fetched into the page at runtime ───────
 //
@@ -36,12 +40,11 @@ const sourceFiles = [
 describe("A-121 no remote script or stylesheet is injected at runtime", () => {
   it("no source file builds a script element pointing at a remote origin", () => {
     const offenders = [];
-    for (const file of sourceFiles) {
-      const source = stripComments(readFileSync(file, "utf8"));
+    for (const { file, source } of sourceFiles) {
       if (!/createElement\(\s*["']script["']\s*\)/.test(source)) continue;
       // A script element is only a finding when it is given a remote src.
       if (/\.src\s*=\s*[`"']https?:\/\//.test(source)) {
-        offenders.push(file.replace(ROOT, "").replace(/\\/g, "/"));
+        offenders.push(file);
       }
     }
     expect(sourceFiles.length, "the sweep scanned real files").toBeGreaterThan(100);
@@ -53,11 +56,10 @@ describe("A-121 no remote script or stylesheet is injected at runtime", () => {
 
   it("no source file injects a remote stylesheet either", () => {
     const offenders = [];
-    for (const file of sourceFiles) {
-      const source = stripComments(readFileSync(file, "utf8"));
+    for (const { file, source } of sourceFiles) {
       if (!/createElement\(\s*["']link["']\s*\)/.test(source)) continue;
       if (/\.href\s*=\s*[`"']https?:\/\//.test(source)) {
-        offenders.push(file.replace(ROOT, "").replace(/\\/g, "/"));
+        offenders.push(file);
       }
     }
     expect(offenders, `remote stylesheets injected at runtime:\n${offenders.join("\n")}`).toEqual([]);
@@ -83,10 +85,9 @@ describe("A-121 no remote script or stylesheet is injected at runtime", () => {
     // cannot catch a NEW Leaflet surface, and a new map written from an old
     // example is exactly how the second engine would come back.
     const offenders = [];
-    for (const file of sourceFiles) {
-      const source = stripComments(readFileSync(file, "utf8"));
+    for (const { file, source } of sourceFiles) {
       if (/from\s+["']leaflet|import\(\s*["']leaflet/.test(source)) {
-        offenders.push(file.replace(ROOT, "").replace(/\\/g, "/"));
+        offenders.push(file);
       }
     }
     expect(offenders, "files importing Leaflet: " + offenders.join(", ")).toEqual([]);

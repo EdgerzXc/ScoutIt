@@ -29,8 +29,13 @@ import { sanitizeError } from "@/lib/sanitizeError";
 // 1. GET /api/admin/osint — Fetch raw OSINT sources & staging briefings for Mission Control
 export async function GET(req) {
   try {
-    const gate = await requireAdmin(req, { label: "ADMIN OSINT" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+    const gate = await requireAdmin(req, { label: "ADMIN OSINT", minTier: 1 });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
     const supabase = supabaseAdmin;
 
@@ -67,10 +72,18 @@ export async function GET(req) {
 // 2. POST /api/admin/osint — Generate 1-Click Master Prompt or Publish AI Output
 export async function POST(req) {
   try {
-    const gate = await requireAdmin(req, { label: "ADMIN OSINT" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+    const gate = await requireAdmin(req, { label: "ADMIN OSINT", minTier: 2 });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body) || !body.action) {
+      return NextResponse.json({ success: false, error: "Invalid JSON payload" }, { status: 400 });
+    }
     const { action } = body;
     const supabase = supabaseAdmin;
 
@@ -98,7 +111,8 @@ export async function POST(req) {
         .single();
 
       if (error) {
-        throw new Error(error.message);
+        console.error("[OSINT API] Database mutation failed (manual_input):", error);
+        return NextResponse.json({ success: false, error: sanitizeError(error) }, { status: 500 });
       }
 
       return NextResponse.json({
@@ -111,7 +125,7 @@ export async function POST(req) {
     // ACTION B: Generate 1-Click Master AI Prompt for ChatGPT/Claude/Gemini
     if (action === "generate_prompt") {
       const { sourceIds } = body;
-      if (!sourceIds || !sourceIds.length) {
+      if (!Array.isArray(sourceIds) || !sourceIds.length) {
         return NextResponse.json({ success: false, error: "No sourceIds provided" }, { status: 400 });
       }
 
@@ -120,7 +134,8 @@ export async function POST(req) {
       });
 
       if (error) {
-        throw new Error(error.message);
+        console.error("[OSINT API] Database mutation failed (generate_prompt):", error);
+        return NextResponse.json({ success: false, error: sanitizeError(error) }, { status: 500 });
       }
 
       return NextResponse.json({

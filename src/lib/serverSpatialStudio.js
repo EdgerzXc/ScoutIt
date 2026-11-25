@@ -50,6 +50,28 @@ export async function submitSpatialGenerationRequest({
     };
   }
 
+  let validatedFileUrl = null;
+  if (fileUrl != null && String(fileUrl).trim() !== "") {
+    const rawFile = String(fileUrl).trim().slice(0, 2000);
+    if (rawFile.startsWith("/") && !rawFile.startsWith("//") && !rawFile.includes("..")) {
+      validatedFileUrl = rawFile;
+    } else {
+      try {
+        const parsed = new URL(rawFile);
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+          return { success: false, error: "Invalid source file URL protocol", code: "invalid_file_url" };
+        }
+        validatedFileUrl = parsed.toString();
+      } catch {
+        if (!rawFile.includes("..") && !rawFile.includes("\\") && /^[A-Za-z0-9/_\-.]+$/.test(rawFile)) {
+          validatedFileUrl = rawFile;
+        } else {
+          return { success: false, error: "Invalid source file URL", code: "invalid_file_url" };
+        }
+      }
+    }
+  }
+
   // Count requests made by this user in the current calendar month
   let monthlyGenerationsUsed = 0;
   if (supabaseClient) {
@@ -187,7 +209,7 @@ export async function submitSpatialGenerationRequest({
           requester_id: user.id,
           status: "REQUESTED",
           style_preset: stylePreset,
-          file_url: fileUrl,
+          file_url: validatedFileUrl,
           notes: notes?.slice(0, 2000) || null,
           is_express: false,
           target_sla_hours: targetSlaHours,

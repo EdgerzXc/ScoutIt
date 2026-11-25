@@ -5356,7 +5356,7 @@
     "title": "Playbook 8.1 — 7-Day Read-Only Chat Retention & Purge",
     "domain": "deal",
     "layer": "core",
-    "route": "/api/cron/purge-chat-messages",
+    "route": "/dashboard/inbox",
     "roles": [
       "staff",
       "seeker",

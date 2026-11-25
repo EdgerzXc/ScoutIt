@@ -38,38 +38,41 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-/** Roles that may act on staff-only surfaces. */
-const STAFF_ROLES = ["admin", "staff"];
+const STAFF_MIN_TIER = 1;
+const STAFF_MAX_TIER = 3;
+
+function readJwtAal(token) {
+  try {
+    const parts = String(token || "").split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    return typeof payload?.aal === "string" ? payload.aal.toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
- * Verify the caller is staff.
+ * Verify the caller is an active Mission Control staff member (`admin_users`)
+ * meeting minimum tier, finance authority, and AAL2 MFA requirements.
  *
  * @param {Request} request
  * @param {object}  [opts]
  * @param {string}  [opts.label] log prefix, e.g. "ADMIN OSINT"
- * @returns {Promise<{user: object, userId: string}|{error: string, status: number}>}
- *
- * Positive checks only — an unknown or missing role denies (Rule 6). A lookup
- * failure denies too: "we could not establish that you are staff" is not
- * "you are staff".
+ * @param {number}  [opts.minTier=1] minimum staff tier (1=Agent, 2=Ops Manager, 3=Super Admin)
+ * @param {boolean} [opts.requireFinance=false] require `is_finance === true`
+ * @param {boolean} [opts.requireAal2=false] require AAL2 MFA on JWT
+ * @returns {Promise<{user: object, userId: string, staff: object, tier: number, isFinance: boolean}|{error: string, status: number}>}
  */
-export async function requireAdmin(request, { label = "ADMIN" } = {}) {
-  // Parse the scheme properly rather than string-replacing "Bearer ".
-  //
-  // The five hand-rolled copies all do `authHeader.replace("Bearer ", "")`,
-  // which the Headers API defeats: header values are trimmed on the way in, so
-  // a header of exactly `Authorization: Bearer` (no token) never matches
-  // "Bearer " and yields the literal string "Bearer" as the token. That then
-  // gets sent to Supabase as a credential. It is rejected there, so it is not a
-  // hole — but "garbage in, rejected two network hops later" is not a gate, and
-  // a caught test is cheaper than a trusted accident.
+export async function requireAdmin(
+  request,
+  { label = "ADMIN", minTier = 1, requireFinance = false, requireAal2 = false } = {}
+) {
   const raw = (request.headers.get("Authorization") || "").trim();
   const token = /^Bearer\s+(.+)$/i.exec(raw)?.[1]?.trim();
   if (!token) return { error: "Unauthorized: Missing token", status: 401 };
 
   if (!supabaseAdmin) {
-    // No service client means the role cannot be checked. Fail closed — a
-    // misconfiguration must never silently disable an admin gate.
     console.error(`[${label}] No service client — cannot verify role. Denying.`);
     return { error: "Service unavailable", status: 503 };
   }
@@ -82,25 +85,46 @@ export async function requireAdmin(request, { label = "ADMIN" } = {}) {
   const user = authResult?.data?.user;
   if (authResult?.error || !user) return { error: "Unauthorized: Invalid session", status: 401 };
 
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from("user_profiles")
-    .select("role, active_roles")
+  if (requireAal2) {
+    const tokenAal = readJwtAal(token);
+    const userAal = typeof user?.aal === "string" ? user.aal.toLowerCase() : null;
+    if ((tokenAal || userAal) !== "aal2") {
+      return { error: "Multi-factor verification (AAL2) required", status: 403 };
+    }
+  }
+
+  const { data: staff, error: staffError } = await supabaseAdmin
+    .from("admin_users")
+    .select("id, email, display_name, tier, is_finance, active")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profileError || !profile) {
-    console.warn(`[${label}] Role lookup failed for ${user.id} — denying.`);
-    return { error: "Unauthorized: Could not verify privileges", status: 403 };
+  if (staffError || !staff) {
+    console.warn(`[${label}] Staff lookup failed for ${user.id} — denying.`);
+    return { error: "Unauthorized: Staff privileges required", status: 403 };
   }
 
-  const roles = Array.isArray(profile.active_roles) ? profile.active_roles : [];
-  const isStaff =
-    STAFF_ROLES.includes(profile.role) || roles.some((r) => STAFF_ROLES.includes(r));
-
-  if (!isStaff) {
-    console.warn(`[${label}] Unauthorized access attempt by user ${user.id}`);
-    return { error: "Unauthorized: Admin privileges required", status: 403 };
+  if (staff.active !== true) {
+    console.warn(`[${label}] Inactive staff account attempted access: ${user.id}`);
+    return { error: "Unauthorized: Staff account is inactive", status: 403 };
   }
 
-  return { user, userId: user.id };
+  const tier = Number(staff.tier);
+  if (!Number.isInteger(tier) || tier < STAFF_MIN_TIER || tier > STAFF_MAX_TIER) {
+    console.warn(`[${label}] Invalid staff tier for ${user.id} — denying.`);
+    return { error: "Unauthorized: Invalid staff tier", status: 403 };
+  }
+
+  if (tier < minTier) {
+    console.warn(`[${label}] Tier ${tier} below required Tier ${minTier} for ${user.id}`);
+    return { error: `Forbidden: Tier ${minTier} authority required`, status: 403 };
+  }
+
+  const isFinance = staff.is_finance === true;
+  if (requireFinance && !isFinance) {
+    console.warn(`[${label}] Non-finance staff ${user.id} denied finance operation`);
+    return { error: "Forbidden: Finance authority required", status: 403 };
+  }
+
+  return { user, userId: user.id, staff, tier, isFinance };
 }

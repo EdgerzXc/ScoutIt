@@ -14,7 +14,7 @@ test("OTP request includes the CAPTCHA token and same-origin callback; success c
   let request;
   let resets = 0;
   await sendMagicLink({ ...params, captchaToken: "fresh-token", auth: { async signInWithOtp(value) { request = value; return { error: null }; } }, resetCaptcha() { resets++; } });
-  assert.deepEqual(request, { email: params.email, options: { emailRedirectTo: `${params.origin}/auth/callback`, captchaToken: "fresh-token" } });
+  assert.deepEqual(request, { email: params.email, options: { emailRedirectTo: `${params.origin}/auth/callback`, captchaToken: "fresh-token", shouldCreateUser: false } });
   assert.equal(resets, 1);
 });
 

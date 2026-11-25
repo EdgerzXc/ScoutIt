@@ -38,6 +38,17 @@ describe("A-151 — cookie schedule and processor disclosure", () => {
     expect(src).toContain("denied");
   });
 
+  it("removes credential query parameters and URL fragments from page-view locations", () => {
+    const src = read("src/components/analytics/GoogleAnalytics.js");
+    expect(src).not.toContain("page_location: window.location.href");
+    expect(src).toContain("pageUrl.hash = ''");
+    expect(src).toContain("pageUrl.searchParams.delete(key)");
+    expect(src).toContain("params.delete(key)");
+    for (const key of ["code", "token_hash", "access_token", "refresh_token"]) {
+      expect(src).toContain(`"${key}"`);
+    }
+  });
+
   it("the consent banner exists, stays silent without GA, and persists choice", () => {
     const src = read("src/components/analytics/CookieConsent.js");
     expect(src).toContain("NEXT_PUBLIC_GA_ID");

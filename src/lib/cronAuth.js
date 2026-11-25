@@ -1,3 +1,19 @@
+import crypto from "crypto";
+
+/**
+ * Constant-time string equality check to prevent timing attacks.
+ */
+export function timingSafeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 /**
  * Authorize a Vercel Cron invocation before any job dependency is touched.
  *
@@ -21,7 +37,10 @@ export function authorizeCronRequest(request) {
     );
   }
 
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+  const authHeader = request.headers.get("authorization") || "";
+  const expectedAuth = `Bearer ${secret}`;
+
+  if (!timingSafeCompare(authHeader, expectedAuth)) {
     return Response.json(
       { error: "Unauthorized" },
       {

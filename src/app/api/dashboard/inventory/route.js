@@ -1,124 +1,84 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { resolveUserId } from '@/lib/serverAuth';
+import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveUserId } from "@/lib/serverAuth";
+
+const PAGE_SIZE = 250;
+const ID_BATCH_SIZE = 100;
+
+async function* readPages(buildQuery) {
+  let cursor;
+  for (;;) {
+    let query = buildQuery().order("id", { ascending: true }).limit(PAGE_SIZE);
+    if (cursor) query = query.gt("id", cursor);
+    const { data, error } = await query;
+    if (error) throw error;
+    if (!Array.isArray(data)) throw new Error("Inventory query did not return rows");
+    if (!data.length) return;
+    yield data;
+    cursor = data.at(-1).id;
+  }
+}
+
+async function readRelated(table, columns, propertyIds, consume) {
+  for (let start = 0; start < propertyIds.length; start += ID_BATCH_SIZE) {
+    const ids = propertyIds.slice(start, start + ID_BATCH_SIZE);
+    const pages = readPages(() => supabaseAdmin.from(table).select(columns).in("property_id", ids));
+    for await (const page of pages) consume(page);
+  }
+}
+
+async function countSaves(propertyIds) {
+  const byProperty = new Map();
+  let total = 0;
+  try {
+    await readRelated("saved_intel", "id, property_id", propertyIds, (rows) => {
+      for (const { property_id } of rows) {
+        byProperty.set(property_id, (byProperty.get(property_id) ?? 0) + 1);
+        total += 1;
+      }
+    });
+    return { byProperty, total };
+  } catch (error) {
+    console.warn("[INVENTORY] Saved-space counts unavailable:", error?.code || error?.name);
+    return null;
+  }
+}
 
 export async function GET(request) {
   try {
     const userId = await resolveUserId(request);
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Inventory is temporarily unavailable." }, { status: 503 });
     }
 
-    // Return the authenticated owner's property rows through the same boundary
-    // used for their unit statistics. DashboardContext consumes `properties`;
-    // Mission Control consumes `units` and `stats`. Keeping both here prevents
-    // the private owner workspace from drifting back to a browser-side table
-    // query and gives read-only E2E a real server boundary to intercept.
-    const { data: userProps, error: propError } = await supabaseAdmin
-      .from('properties')
-      .select('*')
-      .eq('owner_id', userId);
+    const properties = [];
+    const pages = readPages(() => supabaseAdmin.from("properties").select("*").eq("owner_id", userId));
+    for await (const page of pages) properties.push(...page);
 
-    if (propError) {
-      console.error("propError", propError);
-      return NextResponse.json({ error: 'Failed to fetch properties' }, { status: 500 });
+    const propertyIds = properties.map(({ id }) => id);
+    const units = [];
+    const [saves] = await Promise.all([
+      countSaves(propertyIds),
+      readRelated("property_units", "id, property_id, availability_status", propertyIds, (rows) => units.push(...rows)),
+    ]);
+    const stats = { total: units.length, occupied: 0, vacant: 0, maintenance: 0, saved_intel_count: saves?.total ?? null };
+    for (const { availability_status } of units) {
+      if (availability_status === "occupied") stats.occupied += 1;
+      else if (availability_status === "maintenance") stats.maintenance += 1;
+      else stats.vacant += 1;
     }
-
-    const propIds = userProps.map(p => p.id);
-
-    if (propIds.length === 0) {
-      return NextResponse.json({ properties: [], units: [], stats: { total: 0, occupied: 0, vacant: 0, maintenance: 0 } }, { status: 200 });
-    }
-
-    // Now get the units
-    const { data: units, error: unitError } = await supabaseAdmin
-      .from('property_units')
-      // `price_monthly` was here until 2026-08-06 (§58/C28). It is not a column
-      // on `property_units` (the price column is `price`), so PostgREST failed
-      // the whole select and this route returned 500 "Failed to fetch units" —
-      // taking the entire owner inventory panel down. It was also never read:
-      // the stats below only use `availability_status`. Removed rather than
-      // renamed, because adding an unused column back invites the same bug.
-      .select('id, property_id, availability_status')
-      .in('property_id', propIds);
-
-    if (unitError) {
-      console.error("unitError", unitError);
-      return NextResponse.json({ error: 'Failed to fetch units' }, { status: 500 });
-    }
-
-    // Also get saved_intel count across all property identity aliases
-    // (UUID id, slug, canonical_slug, airtable_record_id) because public pages
-    // store saved_intel.property_id using the public slug/record ID.
-    const propIdentityMap = new Map();
-    const allPropIdentifiers = new Set();
-    for (const p of userProps) {
-      const aliases = [
-        p.id,
-        p.slug,
-        p.canonical_slug,
-        p.airtable_record_id,
-      ]
-        .filter(Boolean)
-        .map((val) => String(val));
-      for (const alias of aliases) {
-        allPropIdentifiers.add(alias);
-        propIdentityMap.set(alias, p.id);
-      }
-    }
-
-    const { data: savedRows, count: savedCount } = await supabaseAdmin
-      .from('saved_intel')
-      .select('property_id', { count: 'exact' })
-      .in('property_id', Array.from(allPropIdentifiers));
-
-    const savedCountsByPropId = new Map();
-    if (Array.isArray(savedRows)) {
-      for (const row of savedRows) {
-        const canonicalPropId = propIdentityMap.get(String(row?.property_id || ''));
-        if (canonicalPropId) {
-          savedCountsByPropId.set(
-            canonicalPropId,
-            (savedCountsByPropId.get(canonicalPropId) || 0) + 1
-          );
-        }
-      }
-    }
-
-    const enrichedProps = userProps.map((p) => ({
-      ...p,
-      saved_count: savedCountsByPropId.get(p.id) || 0,
-    }));
-
-    const resolvedSavedCount =
-      typeof savedCount === 'number'
-        ? savedCount
-        : Array.isArray(savedRows)
-          ? savedRows.length
-          : 0;
-
-    // Calculate stats
-    let total = 0;
-    let occupied = 0;
-    let vacant = 0;
-    let maintenance = 0;
-
-    (units || []).forEach(unit => {
-      total++;
-      if (unit.availability_status === 'occupied') occupied++;
-      else if (unit.availability_status === 'maintenance') maintenance++;
-      else vacant++; // default/available
-    });
 
     return NextResponse.json({
-      properties: enrichedProps,
-      units, 
-      stats: { total, occupied, vacant, maintenance, saved_intel_count: resolvedSavedCount } 
-    }, { status: 200 });
-
+      properties: properties.map((property) => ({
+        ...property,
+        saved_count: saves ? (saves.byProperty.get(property.id) ?? 0) : null,
+      })),
+      units,
+      stats,
+    });
   } catch (error) {
-    console.error("Inventory API Error:", error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("[INVENTORY] Could not load inventory:", error?.code || error?.name);
+    return NextResponse.json({ error: "Couldn't load your inventory. Try again." }, { status: 503 });
   }
 }

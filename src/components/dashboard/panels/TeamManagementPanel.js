@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Users, Shield, Clock, X, ChevronDown, Check, Activity, Mail, CheckSquare, Plus, AlertCircle, Key, CheckCircle, Link2, History } from "lucide-react";
 import { useDashboard } from "../../../context/DashboardContext";
 import { crmFetch } from "../../../lib/crmClient";
@@ -12,9 +13,8 @@ import { OPEN_TASK_STATUSES } from "@/lib/crm/taskModel";
 const isOpenTask = (task) =>
   OPEN_TASK_STATUSES.includes(task.status || (task.completedAt ? "done" : "todo"));
 
-// Seats a real estate enterprise actually staffs — brokers, developer project
-// managers, strata/property managers, co-working operators, finance.
-const ROLES = ["Admin", "Broker", "Developer PM", "Strata Manager", "Operator", "Head of Finances", "Agent", "Viewer"];
+// Seats a real estate & hospitality enterprise actually staffs across verticals.
+const ROLES = ["Admin", "Broker", "Listing Manager", "F&B / Venue Manager", "Hospitality GM", "Leasing Director", "Viewer"];
 
 // Plain-language labels for crm_activity_log activity types.
 const ACTIVITY_LABELS = {
@@ -228,6 +228,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-white">Invite New Member</h3>
                 <button
+                  type="button"
                   aria-label="Cancel inviting a team member"
                   onClick={() => setIsInvitingMember(false)}
                   className="min-h-11 min-w-11 inline-flex items-center justify-center text-white/70 hover:text-white transition"
@@ -271,7 +272,8 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
           {/* Members List (Left Side) */}
           <div className={`w-full md:w-1/3 border-r border-white/5 flex-col ${showMobileDetail ? "hidden md:flex" : "flex"}`}>
             <div className="p-4 border-b border-white/5">
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsInvitingMember(true)}
                 className="w-full py-2 bg-gold-accent text-black font-medium text-sm rounded hover:bg-gold-bright transition flex items-center justify-center gap-2">
                 <Users size={16} /> Invite Member
@@ -322,6 +324,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
               <>
                 <div className="p-6 border-b border-white/5 flex flex-col items-center text-center relative">
                   <button
+                    type="button"
                     onClick={() => setShowMobileDetail(false)}
                     className="md:hidden absolute left-4 top-4 flex items-center gap-1 text-[12px] font-mono uppercase tracking-widest text-gold-accent min-h-[40px]"
                   >
@@ -367,6 +370,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                 {/* Sub-Navigation Tabs */}
                 <div className="flex border-b border-white/5">
                   <button 
+                    type="button"
                     onClick={() => setActiveTab('permissions')}
                     className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
                       activeTab === 'permissions' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
@@ -375,6 +379,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     <Key size={14} /> Permissions
                   </button>
                   <button 
+                    type="button"
                     onClick={() => setActiveTab('tasks')}
                     className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
                       activeTab === 'tasks' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
@@ -383,6 +388,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     <CheckSquare size={14} /> Alignment
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveTab('activity')}
                     className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
                       activeTab === 'activity' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
@@ -391,6 +397,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                     <Activity size={14} /> Activity Log
                   </button>
                   <button
+                    type="button"
                     onClick={() => setActiveTab('connections')}
                     className={`flex-1 py-3 text-[12px] font-medium tracking-wide uppercase transition flex items-center justify-center gap-1.5 ${
                       activeTab === 'connections' ? 'text-gold-accent border-b-2 border-gold-accent' : 'text-white/70 hover:text-white/80 border-b-2 border-transparent'
@@ -503,11 +510,19 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                   </div>
                                 )}
                               </div>
-                              <div className="text-right shrink-0">
-                                <span className={`text-[12px] font-mono uppercase tracking-widest ${p.status === 'accepted' ? 'text-green-400' : p.status === 'rejected' ? 'text-red-400' : 'text-gold-accent'}`}>
-                                  {p.statusText}
-                                </span>
-                                <div className="text-[12px] text-white/70 mt-1">{p.timeRemaining}</div>
+                              <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-3 flex-wrap justify-end">
+                                  <span className={`text-[12px] font-mono uppercase tracking-widest ${p.status === 'accepted' ? 'text-green-400' : p.status === 'rejected' ? 'text-red-400' : 'text-gold-accent'}`}>
+                                    {p.statusText}
+                                  </span>
+                                  <Link
+                                    href={`/dashboard/inbox?dealId=${p.id}`}
+                                    className="min-h-11 inline-flex items-center text-[12px] font-mono uppercase tracking-widest text-gold-accent hover:underline"
+                                  >
+                                    Open Thread
+                                  </Link>
+                                </div>
+                                <div className="text-[12px] text-white/70">{p.timeRemaining}</div>
                               </div>
                             </div>
                           );
@@ -521,6 +536,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                       <div className="flex justify-between items-center mb-4">
                         <div className="text-xs text-white/70 uppercase tracking-widest">Delegated Tasks</div>
                         <button 
+                          type="button"
                           onClick={() => setIsAssigningTask(!isAssigningTask)}
                           className={`min-h-11 text-[12px] uppercase font-bold tracking-wider px-2 py-1 rounded flex items-center gap-1 transition ${isAssigningTask ? 'bg-white/10 text-white' : 'bg-gold-accent/10 text-gold-accent hover:bg-gold-accent/20 border border-gold-accent/20 shadow-[0_0_10px_rgba(var(--accent-rgb),0.1)]'}`}
                         >
@@ -577,6 +593,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                                       {task.dealTitle && <span className="text-white/70 text-xs font-normal ml-2">· {task.dealTitle}</span>}
                                     </div>
                                     <button
+                                      type="button"
                                       onClick={() => handleMarkTaskDone(task.id)}
                                       className="min-h-11 min-w-11 inline-flex items-center justify-center -m-2 text-white/70 hover:text-green-400 transition shrink-0"
                                       title="Mark as Done"
@@ -601,6 +618,7 @@ export default function TeamManagementPanel({ currentUser = null, properties = [
                           {memberTasks.filter((t) => !isOpenTask(t)).length > 0 && (
                             <div className="mt-6">
                               <button
+                                type="button"
                                 onClick={() => setShowTaskHistory((s) => !s)}
                                 className="min-h-11 inline-flex items-center gap-2 text-[12px] uppercase font-bold tracking-wider text-white/70 hover:text-white transition"
                               >

@@ -355,13 +355,13 @@ describe("A-274 — Comprehensive Role & Authorization Logic Deep-Dive", () => {
       expect(settings).toContain("rawActiveRoles.includes(role.id)");
     });
 
-    it("API routes inspect both profile.role and profile.active_roles for staff, community capacity, and FAQ authority", () => {
+    it("API routes enforce server authority via admin_users, profile.role, active_roles, and community capacity", () => {
       const verifyRoute = read("src/app/api/property/verify/route.js");
       const seoRoute = read("src/app/api/seo/readiness/route.js");
       const faqsRoute = read("src/app/api/faqs/route.js");
       const signalsRoute = read("src/app/api/community/signals/route.js");
 
-      expect(verifyRoute).toContain('select("role, active_roles")');
+      expect(verifyRoute).toContain("requireAdmin(");
       expect(seoRoute).toContain('select("role, active_roles")');
       expect(faqsRoute).toContain('select("role, active_roles, prc_verified")');
       expect(signalsRoute).toContain("active_roles");

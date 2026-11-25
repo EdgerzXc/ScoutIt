@@ -224,16 +224,18 @@ export default async function PropertyRoute({ params }) {
   // machine-readable claim that something is for sale when it is not. The
   // human-readable page stays public and badged; only the structured assertion
   // is withheld.
+  const strippedMatch = match ? stripPremiumFields(match, "starry") : null;
+
   let jsonLd = null;
   if (match && !match.is_sample) {
-    const canonicalUrl = siteUrl(`/property/${match.slug || resolvedParams.id}`);
-    const faqs = await getAnsweredFaqs(match.slug || resolvedParams.id);
+    const canonicalUrl = siteUrl(`/property/${strippedMatch.slug || resolvedParams.id}`);
+    const faqs = await getAnsweredFaqs(strippedMatch.slug || resolvedParams.id);
 
-    jsonLd = match.seo_json_ld
+    jsonLd = strippedMatch.seo_json_ld
       // A hand-written override still gets the FAQ rich-result eligibility
       // the owner earned by answering questions.
-      ? mergeFaqIntoOverride(match.seo_json_ld, faqs, canonicalUrl)
-      : buildPropertyJsonLd(match, resolvedParams.id, faqs);
+      ? mergeFaqIntoOverride(strippedMatch.seo_json_ld, faqs, canonicalUrl)
+      : buildPropertyJsonLd(strippedMatch, resolvedParams.id, faqs);
   }
 
   return (
@@ -265,7 +267,7 @@ export default async function PropertyRoute({ params }) {
             teaser can advertise what this listing genuinely has. */}
         <InjectedLayout
           slug={resolvedParams.id}
-          initialData={match ? stripPremiumFields(match, "starry") : null}
+          initialData={strippedMatch}
           articles={articles}
           monetizationPhase={monetizationPhase}
         />

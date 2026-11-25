@@ -1,36 +1,149 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Papa from "papaparse";
-import { Table } from "lucide-react";
+import { Download, Table } from "lucide-react";
 import { useDashboard } from "../../context/DashboardContext";
-import { supabase } from "@/lib/supabaseClient";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { mapPropertyCsvRows, MAX_PROPERTY_CSV_ROWS, MAX_PROPERTY_CSV_COLUMNS, MAX_PROPERTY_CSV_BYTES } from "@/lib/propertyCsvImport";
+
+export const SIX_VERTICAL_CSV_TEMPLATE_HEADERS = [
+  "Title",
+  "Location",
+  "Category",
+  "Price",
+  "Floor_Sqm",
+  "Beds",
+  "Baths",
+  "Total_GLA",
+  "PEZA",
+  "Seating_Capacity",
+  "Hood_Exhaust",
+  "Liquor_License",
+  "Room_Count",
+  "Star_Rating",
+  "Nightly_Rate",
+  "Max_Guests",
+  "Seated_Capacity",
+  "Standing_Capacity",
+  "Description",
+];
+
+export const SIX_VERTICAL_CSV_TEMPLATE_ROWS = [
+  {
+    Title: "BGC Grade-A Office Floor",
+    Location: "Bonifacio Global City, Taguig",
+    Category: "commercial",
+    Price: "1450",
+    Floor_Sqm: "1200",
+    Total_GLA: "28500",
+    PEZA: "Accredited",
+    Description: "Full-floor corporate headquarters plate with 100% backup power.",
+  },
+  {
+    Title: "Rockwell Sky Residence",
+    Location: "Rockwell Center, Makati",
+    Category: "residential",
+    Price: "42000000",
+    Floor_Sqm: "185",
+    Beds: "3",
+    Baths: "3",
+    Description: "Corner 3-bedroom residence with panoramic skyline views.",
+  },
+  {
+    Title: "Poblacion Bistro Flagship",
+    Location: "Poblacion, Makati",
+    Category: "restaurants",
+    Price: "260000",
+    Floor_Sqm: "240",
+    Seating_Capacity: "88",
+    Hood_Exhaust: "Yes",
+    Liquor_License: "Eligible",
+    Description: "Turnkey F&B space with dedicated grease trap and street frontage.",
+  },
+  {
+    Title: "Mactan Bay Resort Hotel",
+    Location: "Lapu-Lapu City, Cebu",
+    Category: "hospitality",
+    Price: "650000000",
+    Floor_Sqm: "8400",
+    Room_Count: "120",
+    Star_Rating: "5",
+    Description: "Beachfront hospitality asset with ballroom and dining outlets.",
+  },
+  {
+    Title: "Siargao Cloud Loft Villa",
+    Location: "General Luna, Siargao",
+    Category: "str",
+    Price: "12500",
+    Floor_Sqm: "140",
+    Beds: "2",
+    Baths: "2",
+    Nightly_Rate: "12500",
+    Max_Guests: "6",
+    Description: "Boutique short-term rental villa near Cloud 9 surf break.",
+  },
+  {
+    Title: "Intramuros Heritage Atrium",
+    Location: "Intramuros, Manila",
+    Category: "venues",
+    Price: "180000",
+    Floor_Sqm: "620",
+    Seated_Capacity: "320",
+    Standing_Capacity: "550",
+    Description: "Column-free event hall for corporate summits and weddings.",
+  },
+];
+
+export function buildSixVerticalCsvTemplate() {
+  const rows = SIX_VERTICAL_CSV_TEMPLATE_ROWS.map((row) =>
+    SIX_VERTICAL_CSV_TEMPLATE_HEADERS.map((header) => row[header] ?? "")
+  );
+  return Papa.unparse({ fields: SIX_VERTICAL_CSV_TEMPLATE_HEADERS, data: rows });
+}
 
 export default function BulkImporterMode({ onClose }) {
-  const { addToast, currentUser } = useDashboard();
+  const { addToast, bulkAddListings } = useDashboard();
   const [csvData, setCsvData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const submitting = useRef(false);
+  const parseGeneration = useRef(0);
 
   // Robust CSV parsing via Papa.parse — correctly handles quoted fields,
   // commas inside values (e.g. "Makati, Metro Manila"), and newlines in cells.
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const generation = ++parseGeneration.current;
+    setCsvData([]);
+    setColumns([]);
+    if (file.size > MAX_PROPERTY_CSV_BYTES) {
+      addToast("The CSV is too large. Choose a smaller file.", "❌");
+      return;
+    }
 
     addToast(`Parsing ${file.name}...`, "⏳");
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
+        if (generation !== parseGeneration.current) return;
         const headers = (results.meta.fields || []).filter(Boolean);
+        if (results.errors.length || Object.keys(results.meta.renamedHeaders || {}).length > 0) {
+          addToast("Check the CSV for duplicate headers or rows with missing or extra cells.", "❌");
+          return;
+        }
         const rows = results.data
-          .filter((row) => Object.values(row).some((v) => v && v.trim() !== ""))
-          .map((row, i) => ({ ...row, _id: `row-${i}-${Date.now()}` }));
+          .filter((row) => Object.values(row).some((v) => typeof v === "string" && v.trim() !== ""))
+          .map((values, id) => ({ id, values }));
 
         if (headers.length === 0 || rows.length === 0) {
           addToast("CSV must contain headers and at least one row.", "❌");
+          return;
+        }
+        if (rows.length > MAX_PROPERTY_CSV_ROWS || headers.length > MAX_PROPERTY_CSV_COLUMNS) {
+          addToast(`Use a CSV with up to ${MAX_PROPERTY_CSV_ROWS} rows and ${MAX_PROPERTY_CSV_COLUMNS} columns.`, "❌");
           return;
         }
 
@@ -39,6 +152,7 @@ export default function BulkImporterMode({ onClose }) {
         addToast(`Successfully parsed ${rows.length} records.`, "✅");
       },
       error: (err) => {
+        if (generation !== parseGeneration.current) return;
         console.error("[BulkImporter] CSV parse error:", err);
         addToast(`Could not parse CSV: ${sanitizeError(err, "the file could not be read.")}`, "❌");
       },
@@ -47,88 +161,20 @@ export default function BulkImporterMode({ onClose }) {
 
   const handleCellChange = (rowId, column, value) => {
     setCsvData(prev => prev.map(row => 
-      row._id === rowId ? { ...row, [column]: value } : row
+      row.id === rowId ? { ...row, values: { ...row.values, [column]: value } } : row
     ));
   };
 
   const handleSubmit = async () => {
-    if (csvData.length === 0) return;
+    if (!csvData.length || submitting.current) return;
+    submitting.current = true;
     setIsProcessing(true);
-    addToast("Mapping your columns to ScoutIt schema...", "●");
 
     try {
-      // Step 1: Get AI blueprint mapping for the CSV headers
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      const blueprintRes = await fetch('/api/ai/blueprint', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          headers: columns,
-          sampleData: csvData.slice(0, 3).map(r => {
-            const clean = { ...r };
-            delete clean._id;
-            return clean;
-          })
-        })
-      });
-
-      if (!blueprintRes.ok) throw new Error('Blueprint mapping failed');
-      const mapping = await blueprintRes.json();
-
-      addToast("Schema mapped. Syncing to database...", "●");
-
-      // Step 2: Transform rows using the mapping
-      const properties = csvData.map(row => {
-        const mapped = { details: {} };
-        columns.forEach(col => {
-          const target = mapping[col] || 'details';
-          const val = row[col];
-          if (!val) return;
-          if (target === 'details') {
-            mapped.details[col] = val;
-          } else {
-            mapped[target] = val;
-          }
-        });
-
-        return {
-          owner_id: currentUser?.id || 'bulk-import',
-          title: mapped.title || 'Untitled Property',
-          location: mapped.location || '',
-          type: mapped.type || 'commercial',
-          space_category: mapped.type || 'commercial',
-          price: mapped.price || null,
-          description: mapped.description || '',
-          media_link: mapped.media_link || '',
-          pipeline_status: 'pending',
-          details: mapped.details || {}
-        };
-      });
-
-      // Step 3: Bulk insert into Supabase
-      // (session/token already resolved above for the blueprint call)
-      const insertRes = await fetch('/api/dashboard/bulk-insert', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ""
-        },
-        body: JSON.stringify({ properties })
-      });
-
-      const result = await insertRes.json();
-      if (!insertRes.ok) throw new Error(result.error || 'Insert failed');
-
-      addToast(`${result.count} properties queued for Admin Approval!`, "✅");
-      onClose();
-    } catch (err) {
-      console.error('[BulkImporter]', err);
-      addToast(`Import failed: ${sanitizeError(err)}`, "❌");
+      const properties = mapPropertyCsvRows(columns, csvData.map(({ values }) => values));
+      if (await bulkAddListings(properties)) onClose?.();
     } finally {
+      submitting.current = false;
       setIsProcessing(false);
     }
   };
@@ -136,7 +182,7 @@ export default function BulkImporterMode({ onClose }) {
   // Keyboard accessibility: dismiss bulk importer via Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !submitting.current) {
         onClose?.();
       }
     };
@@ -144,12 +190,28 @@ export default function BulkImporterMode({ onClose }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  const handleDownloadTemplate = () => {
+    const csv = buildSixVerticalCsvTemplate();
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "scoutit-6-vertical-portfolio-template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    addToast("Downloaded 6-vertical CSV template.", "✅");
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden motion-safe:animate-[fadeIn_0.3s_ease-out]">
       {/* HEADER */}
       <div className="p-4 border-b border-surface-variant bg-surface flex justify-between items-center shrink-0">
         <button 
-          onClick={onClose} 
+          type="button"
+          onClick={onClose}
+          disabled={isProcessing}
           className="min-h-11 inline-flex items-center text-text-secondary hover:text-gold-accent text-xs font-label-caps tracking-widest uppercase transition"
         >
           ← Exit Importer
@@ -161,25 +223,47 @@ export default function BulkImporterMode({ onClose }) {
 
       <div className="flex-1 flex flex-col p-6 lg:p-12 overflow-hidden gap-6">
         {/* TOP: Upload Zone */}
-        <div className="shrink-0 bg-surface border-2 border-dashed border-surface-variant rounded-lg p-8 flex flex-col items-center justify-center relative hover:border-gold-accent transition">
+        <div className="shrink-0 bg-surface border-2 border-dashed border-surface-variant rounded-lg p-6 lg:p-8 flex flex-col items-center justify-center relative hover:border-gold-accent transition">
           <h2 className="font-display-md text-2xl text-on-surface mb-2">Upload CSV Portfolio</h2>
-          <p className="text-sm text-text-secondary mb-6 text-center max-w-xl leading-relaxed">
-            Ensure your CSV contains columns matching our schema (e.g., <strong>Title, Location, Category, Price, Condition, Layout, Size (sqm)</strong>). 
-            <br /><em>Note: For Residential spaces, use &quot;Bedrooms&quot; and &quot;Furnishing&quot; instead of Condition and Layout.</em>
+          <p className="text-sm text-text-secondary mb-3 text-center max-w-2xl leading-relaxed">
+            Include <strong>Title</strong> and <strong>Location</strong>. Add <strong>Category</strong> across all 6 verticals:{" "}
+            <span className="text-on-surface font-mono text-xs">
+              commercial, residential, restaurants, hospitality, str, venues
+            </span>
+            . Your rows will be saved as drafts for you to review.
+          </p>
+          <p className="text-xs text-text-secondary mb-5 text-center max-w-3xl leading-relaxed">
+            Canonical vertical headers:{" "}
+            <span className="text-gold-accent font-mono text-xs">
+              Total_GLA, PEZA, Seating_Capacity, Hood_Exhaust, Liquor_License, Room_Count, Star_Rating, Nightly_Rate, Max_Guests, Seated_Capacity, Standing_Capacity
+            </span>
           </p>
           <input 
             type="file" 
             accept=".csv" 
             className="hidden" 
             id="csv-upload" 
+            disabled={isProcessing}
             onChange={handleFileUpload} 
           />
-          <label 
-            htmlFor="csv-upload" 
-            className="cursor-pointer bg-surface-alt border border-gold-accent text-gold-accent font-working-title px-6 py-3 rounded hover:bg-gold-accent/10 transition"
-          >
-            Browse CSV File
-          </label>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <label
+              htmlFor="csv-upload"
+              className="cursor-pointer min-h-11 inline-flex items-center bg-surface-alt border border-gold-accent text-gold-accent font-working-title text-sm px-6 py-3 rounded hover:bg-gold-accent/10 transition"
+            >
+              Browse CSV File
+            </label>
+            <button
+              type="button"
+              data-testid="download-csv-template-btn"
+              onClick={handleDownloadTemplate}
+              disabled={isProcessing}
+              className="min-h-11 inline-flex items-center gap-2 bg-surface-alt border border-surface-variant text-on-surface hover:border-gold-accent hover:text-gold-accent font-working-title text-sm px-5 py-3 rounded transition disabled:opacity-50"
+            >
+              <Download size={14} aria-hidden="true" />
+              <span>Download 6-Vertical CSV Template</span>
+            </button>
+          </div>
         </div>
 
         {/* MIDDLE: Data Grid */}
@@ -206,14 +290,15 @@ export default function BulkImporterMode({ onClose }) {
                     </thead>
                     <tbody>
                       {csvData.map((row, idx) => (
-                        <tr key={row._id} className="border-b border-surface-variant/50 hover:bg-surface-alt/50 transition">
+                        <tr key={row.id} className="border-b border-surface-variant/50 hover:bg-surface-alt/50 transition">
                           <td className="p-3 text-xs text-text-muted text-center bg-surface-alt/30">{idx + 1}</td>
                           {columns.map(col => (
                             <td key={col} className="p-0 border-l border-surface-variant/50">
                               <input 
                                 className="w-full h-full bg-transparent p-3 text-xs text-on-surface focus:outline-none focus:bg-gold-accent/5 focus:ring-1 focus:ring-inset focus:ring-gold-accent"
-                                value={row[col]}
-                                onChange={(e) => handleCellChange(row._id, col, e.target.value)}
+                                value={row.values[col] || ""}
+                                disabled={isProcessing}
+                                onChange={(e) => handleCellChange(row.id, col, e.target.value)}
                               />
                             </td>
                           ))}
@@ -226,7 +311,7 @@ export default function BulkImporterMode({ onClose }) {
                 {/* Mobile List View (lg:hidden) */}
                 <div className="lg:hidden flex-1 overflow-auto flex flex-col gap-4 p-4 custom-scrollbar">
                   {csvData.map((row, idx) => (
-                    <div key={row._id} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl p-5 flex flex-col gap-3 relative transition-all duration-300 hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]">
+                    <div key={row.id} className="bg-surface/40 backdrop-blur-xl border border-white/[0.04] shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)] rounded-2xl p-5 flex flex-col gap-3 relative transition-all duration-300 hover:shadow-[0_8px_32px_rgba(var(--bg-rgb),0.4)]">
                       <div className="absolute top-5 right-5 bg-gold-accent/10 text-gold-accent text-[12px] font-label-caps px-2 py-0.5 rounded uppercase tracking-widest">
                         Row {idx + 1}
                       </div>
@@ -237,8 +322,9 @@ export default function BulkImporterMode({ onClose }) {
                           </label>
                           <input 
                             className="w-full bg-surface-alt/50 border border-white/[0.04] rounded-lg p-2.5 text-sm text-on-surface focus:outline-none focus:border-gold-accent/50 focus:bg-surface-alt transition-all duration-300"
-                            value={row[col]}
-                            onChange={(e) => handleCellChange(row._id, col, e.target.value)}
+                            value={row.values[col] || ""}
+                            disabled={isProcessing}
+                            onChange={(e) => handleCellChange(row.id, col, e.target.value)}
                           />
                         </div>
                       ))}
@@ -257,22 +343,6 @@ export default function BulkImporterMode({ onClose }) {
         </div>
 
         {/* BOTTOM: Action */}
-        {/* ── B2, adapted (2026-08-08) ─────────────────────────────────
-            This mode does NOT have the empty-vs-loading bug the other two had:
-            it reads a local file, so there is no remote fetch on mount and no
-            moment where "empty" is a lie.
-
-            Its gap is different and worth naming: `handleSubmit` runs TWO
-            sequential network calls — an AI column-mapping pass, then a bulk
-            insert — and the only feedback was a button reading "Processing…".
-            On a large CSV that is a long, silent wait over the user's real
-            portfolio data, with no indication of which half is running or that
-            anything is happening at all. Ambiguous progress on a destructive-
-            feeling action is where people double-submit or reload.
-
-            The button already guards against double-submit via `disabled`.
-            What was missing was telling the user, and any screen reader, that
-            work is in flight and which step it is on. */}
         <div className="shrink-0 flex flex-col sm:flex-row gap-3 justify-end items-stretch sm:items-center">
           {isProcessing && (
             <p
@@ -284,16 +354,17 @@ export default function BulkImporterMode({ onClose }) {
                 className="w-3 h-3 rounded-full border-2 border-gold-accent border-t-transparent animate-spin shrink-0"
                 aria-hidden="true"
               />
-              Mapping columns, then importing — do not close this tab.
+              Saving drafts to your inventory…
             </p>
           )}
           <button 
+            type="button"
             onClick={handleSubmit}
             disabled={csvData.length === 0 || isProcessing}
             aria-busy={isProcessing}
             className="bg-gold-accent text-background font-working-title font-bold px-8 py-4 rounded hover:opacity-90 disabled:opacity-50 transition uppercase tracking-widest text-sm shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]"
           >
-            {isProcessing ? "Processing..." : "Process & Import Portfolio"}
+            {isProcessing ? "Saving drafts…" : "Save drafts"}
           </button>
         </div>
       </div>

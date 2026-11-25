@@ -30,6 +30,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
   const [prospects, setProspects] = useState(initialProspects);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [actionError, setActionError] = useState(null);
 
   // Intake Parser State
   const [rawInput, setRawInput] = useState("");
@@ -93,15 +94,19 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
   const handleIngestLead = async () => {
     if (!parsedPreview || !parsedPreview.propertyName) return;
     setIsParsing(true);
+    setActionError(null);
     try {
       const res = await ingestOutreachLead(rawInput);
-      if (res.success && res.prospect) {
+      if (res?.success && res.prospect) {
         setProspects([res.prospect, ...prospects]);
         setRawInput("");
         setParsedPreview(null);
+      } else {
+        setActionError(res?.error || "Failed to ingest lead.");
       }
     } catch (err) {
       console.error("Ingest failed:", err);
+      setActionError(err.message || "Failed to ingest lead.");
     } finally {
       setIsParsing(false);
     }
@@ -109,8 +114,13 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
 
   // Update Status
   const handleStatusChange = async (prospectId, newStatus) => {
+    setActionError(null);
     try {
-      await updateOutreachStatus(prospectId, newStatus);
+      const res = await updateOutreachStatus(prospectId, newStatus);
+      if (res?.success === false) {
+        setActionError(res.error || "Failed to update prospect status.");
+        return;
+      }
       setProspects((prev) =>
         prev.map((p) => {
           if (p.id !== prospectId) return p;
@@ -134,6 +144,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
       }
     } catch (err) {
       console.error("Status update error:", err);
+      setActionError(err.message || "Failed to update prospect status.");
     }
   };
 
@@ -141,14 +152,18 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
   const handleGenerateClaim = async () => {
     if (!selectedProspect) return;
     setIsGeneratingClaim(true);
+    setActionError(null);
     try {
       const res = await convertToClaimableDraft(selectedProspect);
-      if (res.success) {
+      if (res?.success) {
         setClaimResult(res);
-        handleStatusChange(selectedProspect.id, "onboarded");
+        await handleStatusChange(selectedProspect.id, "onboarded");
+      } else {
+        setActionError(res?.error || "Failed to generate claimable draft.");
       }
     } catch (err) {
       console.error("Claim draft generation error:", err);
+      setActionError(err.message || "Failed to generate claimable draft.");
     } finally {
       setIsGeneratingClaim(false);
     }
@@ -164,16 +179,36 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
       })
     : null;
 
-  const handleCopyTemplate = () => {
+  const handleCopyTemplate = async () => {
     if (!activeTemplate) return;
     const textToCopy = `Subject: ${activeTemplate.subject}\n\n${activeTemplate.body}`;
-    navigator.clipboard.writeText(textToCopy);
-    setCopiedText(true);
-    setTimeout(() => setCopiedText(false), 2000);
+    setActionError(null);
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopiedText(true);
+      setTimeout(() => setCopiedText(false), 2000);
+    } catch {
+      setActionError("Clipboard access unavailable. Please copy the template text manually.");
+    }
   };
 
   return (
     <div className="space-y-6">
+      {actionError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-lg border border-red-500/40 bg-red-950/30 px-4 py-3 text-xs font-mono text-red-200"
+        >
+          <span>{actionError}</span>
+          <button
+            type="button"
+            onClick={() => setActionError(null)}
+            className="min-h-[44px] px-2 text-red-200 hover:text-white uppercase"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       {/* Telemetry Filter Rail */}
       <div className="flex flex-wrap items-center gap-2 border-b border-line pb-4">
         {[
@@ -195,7 +230,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
               key={item.key}
               type="button"
               onClick={() => setFilter(item.key)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono tracking-wider uppercase transition-all duration-150 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono tracking-wider uppercase transition-colors duration-150 ${
                 isSelected
                   ? "bg-gold text-black font-bold shadow-[0_0_12px_rgba(232,174,60,0.3)]"
                   : item.isAlert && item.count > 0
@@ -241,7 +276,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
             type="button"
             disabled={!parsedPreview || isParsing}
             onClick={handleIngestLead}
-            className="px-5 py-2.5 rounded-lg bg-gold hover:bg-gold/90 disabled:opacity-40 disabled:hover:bg-gold text-black font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 transition-all duration-150"
+            className="px-5 py-2.5 rounded-lg bg-gold hover:bg-gold/90 disabled:opacity-40 disabled:hover:bg-gold text-black font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 transition-colors duration-150"
           >
             {isParsing ? "Ingesting…" : "Add to Queue"}
           </button>
@@ -498,7 +533,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
                   key={key}
                   type="button"
                   onClick={() => setSelectedTemplateKey(key)}
-                  className={`p-2.5 rounded-lg border text-left text-xs font-mono transition-all ${
+                  className={`p-2.5 rounded-lg border text-left text-xs font-mono transition-colors ${
                     selectedTemplateKey === key
                       ? "bg-gold/15 border-gold text-white font-semibold"
                       : "bg-black/30 border-line text-white/60 hover:border-white/20"
@@ -538,7 +573,7 @@ export default function OutreachClient({ initialProspects = [], staffEmail = "" 
               type="button"
               disabled={isGeneratingClaim || selectedProspect.status === "onboarded"}
               onClick={handleGenerateClaim}
-              className="min-h-[44px] px-5 py-2.5 rounded-lg bg-gold hover:bg-gold/90 disabled:opacity-40 text-black font-mono text-xs font-bold uppercase tracking-wider shrink-0 shadow-[0_0_16px_rgba(232,174,60,0.25)] transition-all inline-flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              className="min-h-[44px] px-5 py-2.5 rounded-lg bg-gold hover:bg-gold/90 disabled:opacity-40 text-black font-mono text-xs font-bold uppercase tracking-wider shrink-0 shadow-[0_0_16px_rgba(232,174,60,0.25)] transition-colors inline-flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               {isGeneratingClaim ? (
                 "Generating…"

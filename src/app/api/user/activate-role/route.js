@@ -3,6 +3,14 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { writeAuditLog } from "@/lib/auditTrail";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkActivateRoleRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 const VALID_ROLES = Object.freeze([
   "owner",
@@ -26,13 +34,24 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const rate = checkActivateRoleRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
     if (!supabaseAdmin) {
       return NextResponse.json({ error: "Server database client unavailable." }, { status: 500 });
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
+    }
     const role = typeof body.role === "string" ? body.role.trim().toLowerCase() : "";
-    const data = body.data || {};
+    const data = body.data && typeof body.data === "object" && !Array.isArray(body.data) ? body.data : {};
 
     if (!VALID_ROLES.includes(role)) {
       return NextResponse.json(
@@ -307,12 +326,15 @@ export async function POST(request) {
       metadata: auditMetadata,
     });
 
-    return NextResponse.json({
-      success: true,
-      role,
-      activeRoles: consolidatedActiveRoles,
-      message: `${role} workspace successfully activated.`,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        role,
+        activeRoles: consolidatedActiveRoles,
+        message: `${role} workspace successfully activated.`,
+      },
+      { headers: { "Cache-Control": "private, no-store" } },
+    );
   } catch (err) {
     console.error("[ACTIVATE_ROLE] Unhandled error:", err);
     return NextResponse.json(

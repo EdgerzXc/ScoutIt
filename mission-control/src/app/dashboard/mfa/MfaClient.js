@@ -28,7 +28,8 @@ export default function MfaClient({ initialPosture }) {
       if (!supabase?.auth?.mfa?.listFactors) return;
       const { data, error: factorErr } = await supabase.auth.mfa.listFactors();
       if (!factorErr && data) {
-        setFactors(data.totp || []);
+        const verifiedTotp = (data.totp || []).filter((f) => f.status === "verified");
+        setFactors(verifiedTotp);
       }
     } catch (err) {
       console.warn("Could not list MFA factors:", err);
@@ -144,10 +145,14 @@ export default function MfaClient({ initialPosture }) {
     }
   };
 
-  const handleCopySecret = (secret) => {
-    navigator.clipboard.writeText(secret);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopySecret = async (secret) => {
+    try {
+      await navigator.clipboard.writeText(secret);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Clipboard access unavailable. Please copy the secret key manually.");
+    }
   };
 
   const isAal2 = posture.aal === "aal2";

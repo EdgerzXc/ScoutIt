@@ -90,7 +90,6 @@ export const BASELINE_HEX_FILES = Object.freeze([
   "src/components/dashboard/BrokerMode.js",
   "src/components/dashboard/BuyerMode.js",
   "src/components/descent/GoldenHorizonCanvas.js",
-  "src/components/flow/MasterFlowGraph.js",
   "src/components/intel/SpatialIntelMap.js",
   "src/components/maps/lenses/location.js",
   "src/components/maps/lenses/transit.js",

@@ -40,7 +40,7 @@ export const EDITOR_DETAIL_ALIASES = {
   // Commercial
   CM_Rent_Per_Sqm: "rentPerSqm", CM_Total_GLA: "totalGLA", CM_Floor_Plate_Sqm: "floorPlate",
   CM_Building_Grade: "buildingGrade", CM_Hand_Over_Condition: "handOver", CM_Availability_Status: "availability",
-  CM_Min_Lease_Term: "minLeaseTerm", CM_Certification: "certification", PEZA: "peza", Listed_Price: "listedPrice",
+  CM_Min_Lease_Term: "minLeaseTerm", CM_Certification: "certification", PEZA: "peza", CM_PEZA: "peza", Listed_Price: "listedPrice",
   CM_CAMC_Per_Sqm: "camc", CM_AC_Charges: "acCharges", CM_AC_System: "acSystem",
   CM_Reserved_Parking: "reservedParking", CM_Escalation_Rate: "escalation", CM_Fit_Out_Allowance: "fitOut",
   CM_Rent_Free_Period: "rentFree", CM_Parking_Ratio: "parkingRatio", CM_Backup_Power: "backupPower",
@@ -108,6 +108,8 @@ const LEGACY_SNAKE_ALIASES = {
   // The Airtable column is CM_PEZA; the alias table only knew the bare `PEZA`.
   PEZA: "CM_PEZA",
   peza: "CM_PEZA",
+  // CSV/legacy singular alias for venue layouts.
+  layout: "VEN_Layout_Configs",
   // The units blob — canonicalising it marks it machine-shaped so the editor
   // renders it as a collapsed JSON textarea rather than a broken text input.
   units_inventory: "Units_JSON",

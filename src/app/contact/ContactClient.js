@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import TurnstileGate from "@/components/ui/TurnstileGate";
 import PrivacyNotice from "@/components/ui/PrivacyNotice";
 import { CONTACT_RETENTION_NOTICE } from "@/lib/contactRetention";
+import { getSession } from "@/lib/authClient";
 
 // The contact & direct support intake form.
 //
@@ -37,15 +38,39 @@ const TOPICS = [
     label: "Listing & Claims",
     desc: "Torrens titles, PDFs & publishing",
   },
+  {
+    id: "enterprise",
+    label: "Enterprise & Business",
+    desc: "Restaurants, developers, brokerages, hotels & venues",
+  },
 ];
 
-export default function ContactClient({ initialTopic = "general" }) {
-  const [topic, setTopic] = useState(initialTopic === "support" || initialTopic === "vip_support" ? initialTopic : "general");
+const VERTICAL_LABELS = {
+  restaurant: "Restaurants & F&B Groups",
+  developer: "Real Estate Developers",
+  brokerage: "Licensed Brokerages & Advisory",
+  hospitality: "Hospitality & Hotel Groups",
+  str: "Short-Term Rental (STR) Operators",
+  venue: "Event Venues & Commercial Spaces",
+};
+
+export default function ContactClient({ initialTopic = "general", initialVertical = "" }) {
+  const validInitialTopic = ["support", "vip_support", "enterprise", "listing", "general"].includes(initialTopic)
+    ? initialTopic
+    : "general";
+  const verticalLabel = initialVertical ? (VERTICAL_LABELS[initialVertical] || initialVertical) : "";
+  const defaultSubject =
+    validInitialTopic === "enterprise" && verticalLabel
+      ? `Enterprise Intake — ${verticalLabel}`
+      : "";
+
+  const [topic, setTopic] = useState(validInitialTopic);
   const [priority, setPriority] = useState("normal");
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", subject: defaultSubject, message: "" });
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
+  const [vipPioneer, setVipPioneer] = useState(false);
   const turnstileRef = useRef(null);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -56,9 +81,12 @@ export default function ContactClient({ initialTopic = "general" }) {
     setError("");
 
     try {
+      const { data: { session } } = await getSession();
+      const headers = { "Content-Type": "application/json" };
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
       const res = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ ...form, topic, priority, turnstileToken: token }),
       });
       const data = await res.json().catch(() => ({}));
@@ -74,6 +102,7 @@ export default function ContactClient({ initialTopic = "general" }) {
         return;
       }
 
+      setVipPioneer(data.vipPioneer === true);
       setStatus("sent");
     } catch {
       turnstileRef.current?.reset?.();
@@ -85,18 +114,29 @@ export default function ContactClient({ initialTopic = "general" }) {
 
   if (status === "sent") {
     const isSupportTicket = topic === "support" || topic === "vip_support";
+    const isEnterpriseTicket = topic === "enterprise";
     return (
       <div className="contact-panel contact-panel--done" role="status">
         <span className="contact-eyebrow">
-          {isSupportTicket ? "TICKET RECEIVED // QUEUED FOR ENGINEERING" : "MESSAGE RECEIVED"}
+          {isEnterpriseTicket
+            ? "ENTERPRISE INTAKE // LOGGED FOR ONBOARDING"
+            : isSupportTicket
+            ? "TICKET RECEIVED // QUEUED FOR ENGINEERING"
+            : "MESSAGE RECEIVED"}
         </span>
         <h2 className="contact-done-title">
-          {isSupportTicket ? "Ticket logged in queue." : "We have it."}
+          {isEnterpriseTicket
+            ? "Enterprise intake logged."
+            : isSupportTicket
+            ? "Ticket logged in queue."
+            : "We have it."}
         </h2>
         <p className="contact-done-body">
-          {isSupportTicket
+          {isEnterpriseTicket
+            ? "Your enterprise onboarding inquiry is in our business operations queue. An enterprise specialist will review your portfolio scope and follow up at "
+            : isSupportTicket
             ? `Your direct support inquiry has been received and routed to our technical triage queue. ${
-                topic === "vip_support"
+                vipPioneer
                   ? "As an accredited Pioneer Charter holder, your ticket is prioritized under our VIP Support SLA."
                   : "A person will read it and respond."
               } Expect a reply at `
@@ -107,7 +147,7 @@ export default function ContactClient({ initialTopic = "general" }) {
           type="button"
           className="contact-secondary"
           onClick={() => {
-            setForm({ name: "", email: "", subject: "", message: "" });
+            setForm({ name: "", email: "", subject: defaultSubject, message: "" });
             setStatus("idle");
           }}
         >
@@ -119,6 +159,7 @@ export default function ContactClient({ initialTopic = "general" }) {
 
   const sending = status === "sending";
   const isSupportTopic = topic === "support" || topic === "vip_support";
+  const isEnterpriseTopic = topic === "enterprise";
 
   return (
     <form className="contact-panel" onSubmit={handleSubmit} noValidate>
@@ -229,13 +270,23 @@ export default function ContactClient({ initialTopic = "general" }) {
           onChange={set("subject")}
           maxLength={200}
           disabled={sending}
-          placeholder={isSupportTopic ? "e.g., Cannot publish listing in BGC / Map error" : undefined}
+          placeholder={
+            isEnterpriseTopic
+              ? "e.g., Enterprise Intake — 4 F&B sites in BGC & Makati"
+              : isSupportTopic
+              ? "e.g., Cannot publish listing in BGC / Map error"
+              : undefined
+          }
         />
       </div>
 
       <div className="contact-field">
         <label className="contact-label" htmlFor="contact-message">
-          {isSupportTopic ? "Problem description & details" : "Message"}
+          {isEnterpriseTopic
+            ? "Portfolio scope, vertical & timeline"
+            : isSupportTopic
+            ? "Problem description & details"
+            : "Message"}
         </label>
         <textarea
           id="contact-message"
@@ -246,7 +297,13 @@ export default function ContactClient({ initialTopic = "general" }) {
           rows={7}
           maxLength={MAX_MESSAGE}
           disabled={sending}
-          placeholder={isSupportTopic ? "Describe the issue, steps to reproduce, or space URL..." : undefined}
+          placeholder={
+            isEnterpriseTopic
+              ? "Share unit/site count, target locations, team seats needed, and onboarding timeline..."
+              : isSupportTopic
+              ? "Describe the issue, steps to reproduce, or space URL..."
+              : undefined
+          }
         />
         <p className="contact-hint">
           {form.message.length.toLocaleString()} / {MAX_MESSAGE.toLocaleString()}
@@ -267,7 +324,13 @@ export default function ContactClient({ initialTopic = "general" }) {
       <p className="contact-hint">{CONTACT_RETENTION_NOTICE}</p>
 
       <button type="submit" className="contact-submit" disabled={sending || !token}>
-        {sending ? "Sending…" : isSupportTopic ? "Submit Support Ticket" : "Send message"}
+        {sending
+          ? "Sending…"
+          : isEnterpriseTopic
+          ? "Submit Enterprise Intake"
+          : isSupportTopic
+          ? "Submit Support Ticket"
+          : "Send message"}
       </button>
 
       {/* A-150: explicit Privacy Policy link beside the submit (RA 10173 §11). */}

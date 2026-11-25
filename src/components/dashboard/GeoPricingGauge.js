@@ -70,12 +70,12 @@ export default function GeoPricingGauge({ location, category, price }) {
       {!loading && !error && insight && (
         <div className="insight-content">
           {insight.compsFound === 0 ? (
-            <p>No similar properties found within 1.5km to compare.</p>
+            <p>No similar properties found within {insight.radiusKm || 1.5}km to compare.</p>
           ) : (
             <>
               <div className="insight-metrics">
                 <div className="metric-box">
-                  <span className="metric-label">Comps within 1.5km</span>
+                  <span className="metric-label">Comps within {insight.radiusKm || 1.5}km</span>
                   <span className="metric-value tabular-nums">{insight.compsFound}</span>
                 </div>
                 <div className="metric-box">

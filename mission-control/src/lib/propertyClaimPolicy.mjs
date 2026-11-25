@@ -121,6 +121,9 @@ export const REVIEW_TRANSITIONS = Object.freeze({
  * this claim is in" is not a reason to let somebody move a listing.
  */
 export function canTransition(fromStatus, transition) {
+  if (typeof transition !== "string" || !Object.hasOwn(REVIEW_TRANSITIONS, transition)) {
+    return false;
+  }
   const rule = REVIEW_TRANSITIONS[transition];
   if (!rule) return false;
 
@@ -148,8 +151,10 @@ export function canTransition(fromStatus, transition) {
  * @returns {{ok: true, status: string, transfersListing: boolean} | {ok: false, message: string}}
  */
 export function validateDecision({ transition, fromStatus, reasonCode, note }) {
+  if (typeof transition !== "string" || !Object.hasOwn(REVIEW_TRANSITIONS, transition)) {
+    return { ok: false, message: `Unknown decision '${transition}'.` };
+  }
   const rule = REVIEW_TRANSITIONS[transition];
-  if (!rule) return { ok: false, message: `Unknown decision '${transition}'.` };
 
   if (!canTransition(fromStatus, transition)) {
     if (transition === "approve" || transition === "reject") {
@@ -165,7 +170,9 @@ export function validateDecision({ transition, fromStatus, reasonCode, note }) {
   }
 
   if (rule.requiresReason) {
-    const allowed = DECISION_REASON_CODES[rule.to] || [];
+    const allowed = Object.hasOwn(DECISION_REASON_CODES, rule.to)
+      ? DECISION_REASON_CODES[rule.to]
+      : [];
     if (!allowed.includes(reasonCode)) {
       return { ok: false, message: "Choose a reason for this decision." };
     }

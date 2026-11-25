@@ -22,11 +22,14 @@ const InteractiveRadiusMap = dynamic(() => import("@/components/property/Interac
 });
 
 import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
-import ComparisonMatrix from "@/components/property/ComparisonMatrix";
+const ComparisonMatrix = dynamic(() => import("@/components/property/ComparisonMatrix"), { ssr: false });
 import { motion, AnimatePresence } from "framer-motion";
 import "./property.css";
 import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
 import { matchesPropertyCategory, getAdaptivePriceBands, unitCategoryLabel } from "@/lib/unitCategory";
+import { useSimpleMode } from "@/hooks/useSimpleMode";
+import { directorySecondaryCollapsed } from "@/lib/simpleModeSurfaces";
+import SimpleDetail from "@/components/ui/SimpleDetail";
 
 const DIRECTORY_AMBIENT_CONTEXT = Object.freeze({
   key: "directory:metro-manila",
@@ -162,6 +165,7 @@ const FAST_CATEGORIES = [
 // half of the 2026-08-08 fix. The useEffect below still runs and overwrites
 // this with a live fetch, so radius/filter changes behave exactly as before.
 function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] }) {
+  const simple = useSimpleMode();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type");
@@ -458,8 +462,8 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
     }
   };
 
-  // Filter properties dynamically
-  const filteredProperties = rawProperties.filter(p => {
+  // Filter properties dynamically (memoized to avoid O(N*M) passes on unrelated state updates)
+  const filteredProperties = useMemo(() => rawProperties.filter(p => {
     // Sector filter (multi-category aware: parent category, active offerings, or child units)
     if (selectedSectors.length > 0) {
       if (!matchesPropertyCategory(p, selectedSectors)) {
@@ -509,7 +513,17 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
       return matchTitle || matchCity || matchLocation || matchCategory || matchAesthetic;
     }
     return true;
-  });
+  }), [
+    rawProperties,
+    selectedSectors,
+    selectedLocations,
+    selectedAesthetics,
+    selectedPriceBands,
+    activePriceBands,
+    selectedBuildingGrades,
+    selectedBeds,
+    searchQuery,
+  ]);
 
   // Flattened Units collection for Unit-level Discovery (A-154)
   const flattenedUnits = useMemo(() => {
@@ -882,6 +896,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
               {renderFilterSections()}
 
               {/* Dynamic Sidebar Widget: Neighborhood Intel */}
+              <SimpleDetail label="Neighborhood Intel">
               <div className="intel-widget">
                 <h2 className="intel-widget-header">
                   Neighborhood Intel <InfoTip tipId="neighborhoodIntel" label="About neighborhood intel" />
@@ -901,12 +916,13 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                   )}
                 </div>
               </div>
+              </SimpleDetail>
             </aside>
 
             {/* Right Search Input & Properties Grid */}
             <section style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-              {/* Contextual Intelligence Insight Strip */}
-              {widgetArticles.length > 0 && (
+              {/* Contextual Intelligence Insight Strip (collapsed in Simple Mode; Neighborhood Intel stays in sidebar expander) */}
+              {!directorySecondaryCollapsed(simple, false) && widgetArticles.length > 0 && (
                 <div className="mb-4 p-3 rounded-xl bg-surface/80 border border-gold-accent/20 backdrop-blur-md flex items-center justify-between gap-3 text-xs shadow-[inset_0_1px_1px_rgba(var(--text-primary-rgb),0.05)]">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     <span className="font-mono text-[12px] tracking-widest uppercase text-gold-accent bg-gold-accent/10 px-2 py-0.5 rounded border border-gold-accent/30 shrink-0 font-bold">
@@ -1272,7 +1288,7 @@ function PropertyDirectoryContent({ initialProperties = [], initialIntel = [] })
                                 small={true}
                               />
                             </div>
-                            <Link href={`/property/${p.slug}`} className="property-action-btn" style={{ textDecoration: 'none' }}>Enter Showcase →</Link>
+                            <Link href={`/property/${p.slug}`} aria-label={`Enter Showcase for ${p.title}`} className="property-action-btn" style={{ textDecoration: 'none' }}>Enter Showcase <span aria-hidden="true">→</span></Link>
                           </div>
                         </div>
                       </div>

@@ -48,15 +48,18 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server configuration error: database unavailable." }, { status: 500 });
     }
 
-    const body = await request.json();
-    const { badgeId, notes } = body || {};
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
+    }
+    const { badgeId, notes } = body;
     const recipientRaw = body?.recipientInput || body?.recipientEmail || body?.recipientUserId;
 
-    if (!badgeId) {
+    if (!badgeId || typeof badgeId !== "string") {
       return NextResponse.json({ error: "Missing badgeId." }, { status: 400 });
     }
 
-    if (!recipientRaw) {
+    if (!recipientRaw || typeof recipientRaw !== "string") {
       return NextResponse.json({ error: "Recipient email or user ID is required." }, { status: 400 });
     }
 
@@ -67,15 +70,23 @@ export async function POST(request) {
     if (cleanInput.includes("@")) {
       const cleanEmail = cleanInput.toLowerCase();
 
-      // Check auth.admin first (where emails reside in Supabase Auth)
+      // Check auth.admin first (paginated up to 5,000 accounts)
       if (supabaseAdmin.auth?.admin?.listUsers) {
         try {
-          const { data: authData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-          const matchedUser = authData?.users?.find(
-            (u) => u.email && u.email.toLowerCase() === cleanEmail
-          );
-          if (matchedUser?.id) {
-            targetRecipientId = matchedUser.id;
+          for (let page = 1; page <= 5 && !targetRecipientId; page += 1) {
+            const { data: authData } = await supabaseAdmin.auth.admin.listUsers({
+              page,
+              perPage: 1000,
+            });
+            const users = authData?.users || [];
+            const matchedUser = users.find(
+              (u) => u.email && u.email.toLowerCase() === cleanEmail
+            );
+            if (matchedUser?.id) {
+              targetRecipientId = matchedUser.id;
+              break;
+            }
+            if (users.length < 1000) break;
           }
         } catch (authErr) {
           console.warn("[BADGE TRANSFER] auth.admin.listUsers warning:", authErr?.message);
@@ -101,7 +112,7 @@ export async function POST(request) {
 
       if (!targetRecipientId) {
         return NextResponse.json(
-          { error: `Recipient with email "${cleanEmail}" not found on ScoutIt.` },
+          { error: "Recipient account not found on ScoutIt." },
           { status: 404 }
         );
       }
@@ -228,6 +239,7 @@ export async function POST(request) {
           transfer_locked_until: cooldownDate,
         })
         .eq("id", senderBadge.id)
+        .eq("user_id", senderId)
         .select()
         .single();
 

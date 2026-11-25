@@ -25,8 +25,14 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { propertyId, questScope } = body || {};
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid request payload" },
+        { status: 400 }
+      );
+    }
+    const { propertyId, questScope } = body;
 
     if (!propertyId || !questScope) {
       return NextResponse.json(
@@ -64,15 +70,21 @@ export async function POST(request) {
       }
 
       let isParty = property.owner_id === userId;
-      if (!isParty && typeof supabaseAdmin.from("broker_representations")?.select === "function") {
-        const { data: rep } = await supabaseAdmin
-          .from("broker_representations")
-          .select("id")
-          .eq("property_id", property.id)
-          .eq("broker_id", userId)
-          .eq("status", "active")
-          .maybeSingle();
-        if (rep) isParty = true;
+      for (const repTable of ["property_broker_representations", "broker_representations"]) {
+        if (!isParty && typeof supabaseAdmin.from(repTable)?.select === "function") {
+          try {
+            const { data: rep } = await supabaseAdmin
+              .from(repTable)
+              .select("id")
+              .eq("property_id", property.id)
+              .eq("broker_id", userId)
+              .eq("status", "active")
+              .maybeSingle();
+            if (rep) isParty = true;
+          } catch {
+            // Try fallback representation table name if unmigrated in test mock
+          }
+        }
       }
       if (!isParty && typeof supabaseAdmin.from("user_profiles")?.select === "function") {
         const { data: profile } = await supabaseAdmin

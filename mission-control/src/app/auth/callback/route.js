@@ -2,11 +2,27 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+function getSafeRedirectPath(rawPath, fallback = "/dashboard") {
+  if (!rawPath || typeof rawPath !== "string") return fallback;
+  const trimmed = rawPath.trim();
+  if (
+    trimmed.startsWith("/") &&
+    !trimmed.startsWith("//") &&
+    !trimmed.startsWith("/\\") &&
+    !trimmed.includes(":") &&
+    !trimmed.includes("\\") &&
+    !trimmed.includes("\0")
+  ) {
+    return trimmed;
+  }
+  return fallback;
+}
+
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get("next") ?? "/dashboard";
+  // Validate and sanitize redirect path against open redirect vulnerabilities
+  const next = getSafeRedirectPath(searchParams.get("next"), "/dashboard");
 
   if (code) {
     const cookieStore = await cookies();

@@ -45,11 +45,10 @@ describe("Super Sample Vault Specification (Capitol Commons & Cyber Sigma Tower 
       expect(classifyPropertyMedia(data.droneHeatmapUrl).kind).toBe("image");
       expect(imageMediaUrl(data.droneHeatmapUrl)).toBe(data.droneHeatmapUrl);
 
-      // 4. Floor Plans (4 items: 2 images, 2 architectural PDFs)
+      // 4. Sample reference images
       const sanitizedPlans = safeFloorPlans(data.floorPlans);
       expect(sanitizedPlans).toHaveLength(4);
-      expect(sanitizedPlans.filter((p) => p.type.startsWith("image/"))).toHaveLength(2);
-      expect(sanitizedPlans.filter((p) => p.type === "application/pdf")).toHaveLength(2);
+      expect(sanitizedPlans.every((p) => p.type === "image/jpeg" && !new URL(p.url).hash)).toBe(true);
     });
   });
 
@@ -93,6 +92,29 @@ describe("Super Sample Vault Specification (Capitol Commons & Cyber Sigma Tower 
     expect(commercial.luma3dMapUrl).toBe(SUPER_SAMPLE_VAULT_DATA[COMMERCIAL_SLUG].luma3dMapUrl);
     expect(commercial.matterportTourUrl).toBe(SUPER_SAMPLE_VAULT_DATA[COMMERCIAL_SLUG].matterportTourUrl);
     expect(commercial.floorPlans).toHaveLength(4);
+  });
+
+  it("repairs stale cached demo references and preserves a real published plan", () => {
+    const unavailableTour = "https://my.matterport.com/show/?m=JGPnGQLNjQF";
+    const sample = SUPER_SAMPLE_VAULT_DATA[COMMERCIAL_SLUG];
+    const referenceImage = sample.floorPlans[2];
+    const realPlan = { url: "https://assets.example/plan.pdf", type: "application/pdf", name: "Approved plan" };
+    const raw = {
+      properties: [{
+        slug: COMMERCIAL_SLUG,
+        matterportTourUrl: unavailableTour,
+        virtual_tour_url: unavailableTour,
+        floorPlans: [{ url: `${referenceImage.url}#layout.pdf`, type: "application/pdf" }, realPlan],
+      }],
+    };
+    const [property] = normalizeSampleBundle(raw).properties;
+    expect(property.matterportTourUrl).toBe(sample.matterportTourUrl);
+    expect(property.virtual_tour_url).toBe(sample.matterportTourUrl);
+    expect(property.floorPlans).toEqual([referenceImage, realPlan]);
+
+    const publishedTour = "https://my.matterport.com/show/?m=AbCdEf12345";
+    raw.properties[0].virtual_tour_url = publishedTour;
+    expect(normalizeSampleBundle(raw).properties[0].matterportTourUrl).toBe(publishedTour);
   });
 
   it("enforces zero public leaks while advertising vault capability to starry users", () => {

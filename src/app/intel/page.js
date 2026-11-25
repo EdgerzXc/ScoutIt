@@ -5,8 +5,9 @@ import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import MeshHero from "@/components/ui/MeshHero";
 import HoverCard from "@/components/ui/HoverCard";
+import dynamic from "next/dynamic";
 import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
-import SpatialIntelMap from "@/components/intel/SpatialIntelMap";
+const SpatialIntelMap = dynamic(() => import("@/components/intel/SpatialIntelMap"), { ssr: false });
 import { distanceKm } from "@/lib/geo";
 import OSINTFlashTicker from "@/components/intel/OSINTFlashTicker";
 import InViewport from "@/components/ui/InViewport";
@@ -549,16 +550,6 @@ export default function IntelPage() {
                 <span className="side-panel-cat">{sidePanelArticle.category}</span>
                 <span className={`article-type-badge ${getArticleType(sidePanelArticle).toLowerCase()}`} style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '2px', textTransform: 'uppercase' }}>{getArticleType(sidePanelArticle)}</span>
                 <span className="side-panel-read-time" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{Math.max(1, Math.round((sidePanelArticle.excerpt || "").split(/\s+/).length / 20))} min read</span>
-              </div>
-              
-              <div className="scan-progress-wrapper" style={{ marginTop: '4px', marginBottom: '8px' }}>
-                <div className="scan-progress-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-                  <span>Briefing Integrity Deep Scan</span>
-                  <span style={{ color: 'var(--accent)' }}>92% SECURE</span>
-                </div>
-                <div className="scan-progress-bar" style={{ height: '3px', background: 'var(--surface3)', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div className="scan-progress-fill" style={{ height: '100%', background: 'var(--accent)', width: '92%' }}></div>
-                </div>
               </div>
 
               {["INSIGHT", "Insight"].includes(sidePanelArticle.category) && (

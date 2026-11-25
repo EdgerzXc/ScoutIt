@@ -36,7 +36,9 @@ export default function BookingModal({
   onSchedule,
   mode = "create",
   appointmentId = null,
+  expectedUpdatedAt,
   durationMinutes = null,
+  onViewingChanged,
 }) {
   const { addToast } = useDashboard();
   const [slots, setSlots] = useState(null); // null = loading
@@ -106,21 +108,27 @@ export default function BookingModal({
         {
         method: isReschedule ? "PATCH" : "POST",
         body: {
-          ...(!isReschedule ? { dealId } : {}),
+          ...(isReschedule ? { expectedUpdatedAt } : { dealId }),
           scheduledAt: selectedSlot.startsAt,
           timezone: viewerTimezone,
           ...(durationMinutes ? { durationMinutes } : {}),
         },
       });
       onSchedule?.(data.appointment);
+      if (data.calendarSync === "failed") {
+        addToast?.("Viewing saved. Google Calendar could not be synced.");
+      }
     } catch (err) {
       console.error(err);
-      // A 409 means the slot went while the modal was open. Reloading is more
-      // useful than a dead-end error, so the buyer can pick again immediately.
       addToast?.(
         err?.message || "Couldn't book that time. It may have just been taken.",
         "❌",
       );
+      if (err.code === "VIEWING_CHANGED") {
+        onClose();
+        await onViewingChanged?.();
+        return;
+      }
       loadSlots();
       setSelectedSlot(null);
     } finally {
@@ -138,7 +146,7 @@ export default function BookingModal({
   return (
     <div className={`${overlayMotion.backdrop} fixed inset-0 z-[120] flex items-end justify-center bg-background/85 p-0 backdrop-blur-md sm:items-center sm:p-6`} onClick={onClose}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="viewing-picker-title" onClick={(e) => e.stopPropagation()} className={`${overlayMotion.panel} relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-t-2xl border border-gold-accent/20 bg-surface/95 p-5 shadow-[0_24px_80px_rgba(var(--bg-rgb),0.58),0_0_42px_rgba(var(--accent-rgb),0.08)] backdrop-blur-xl sm:rounded-xl sm:p-6`}>
-        <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-transparent font-mono text-text-muted transition-all duration-300 ease-out hover:border-surface-variant hover:bg-surface-variant/50 hover:text-on-surface">
+        <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-transparent font-mono text-text-muted transition-all duration-300 ease-out hover:border-surface-variant hover:bg-surface-variant/50 hover:text-on-surface">
           ✕
         </button>
 

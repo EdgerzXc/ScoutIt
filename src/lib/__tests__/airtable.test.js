@@ -102,3 +102,58 @@ describe('insertProperty carries SEO like updateProperty', () => {
     expect(fields.SEO_JSON_LD).toBeUndefined();
   });
 });
+
+describe('A-354 — updateProperty record binding and formula safety', () => {
+  it('escapes formula characters, requests maxRecords=2, and refuses ambiguous matches', async () => {
+    const seenUrls = [];
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      seenUrls.push(String(url));
+      return {
+        ok: true,
+        json: async () => ({
+          records: [
+            { id: 'rec_owner_1', fields: { Slug: "makati's-tower" } },
+            { id: 'rec_owner_2', fields: { Slug: "makati's-tower" } },
+          ],
+        }),
+      };
+    }));
+    const { updateProperty, isAirtableAmbiguousRecordError } = await import('../airtable.js');
+    let caught = null;
+    try {
+      await updateProperty('keyTest', 'appTest', "makati's-tower", { title: "Makati's Tower" });
+    } catch (err) {
+      caught = err;
+    }
+    vi.unstubAllGlobals();
+    expect(seenUrls[0]).toContain('maxRecords=2');
+    expect(decodeURIComponent(seenUrls[0])).toContain("{Slug}='makati\\'s-tower'");
+    expect(caught).toBeTruthy();
+    expect(isAirtableAmbiguousRecordError(caught)).toBe(true);
+  });
+
+  it('refuses to overwrite an Airtable record that does not match the bound airtable_record_id', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        records: [{ id: 'rec_other_owner', fields: { Slug: 'shared-title' } }],
+      }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const { updateProperty, isAirtableRecordConflictError } = await import('../airtable.js');
+    let caught = null;
+    try {
+      await updateProperty('keyTest', 'appTest', 'shared-title', {
+        title: 'Shared Title',
+        details: { airtable_record_id: 'rec_expected_owner' },
+      });
+    } catch (err) {
+      caught = err;
+    }
+    vi.unstubAllGlobals();
+    expect(caught).toBeTruthy();
+    expect(isAirtableRecordConflictError(caught)).toBe(true);
+    // Only the GET lookup should have fired; PATCH must never execute
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});

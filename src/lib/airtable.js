@@ -7,7 +7,7 @@
 import { cityToRegion } from "./regions";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { DEEP_INTEL_SCHEMA } from "./deepIntelSchema";
-import { reverseMapCategoryFields } from "./propertyFieldMapping";
+import { reverseMapCategoryFields, withFallbackVerticalPrice } from "./propertyFieldMapping";
 import { extractPhotoUrls, imageMediaUrl, safeFloorPlans, spatialEmbedUrl, videoEmbedUrl } from "./propertyMedia";
 import { isSamplePropertySlug } from "./sampleInventory";
 
@@ -22,6 +22,34 @@ export class AirtableRecordNotFoundError extends Error {
 
 export function isAirtableRecordNotFoundError(error) {
   return error?.code === "AIRTABLE_RECORD_NOT_FOUND";
+}
+
+export class AirtableAmbiguousRecordError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "AirtableAmbiguousRecordError";
+    this.code = "AIRTABLE_AMBIGUOUS_RECORD";
+  }
+}
+
+export function isAirtableAmbiguousRecordError(error) {
+  return error?.code === "AIRTABLE_AMBIGUOUS_RECORD";
+}
+
+export class AirtableRecordConflictError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "AirtableRecordConflictError";
+    this.code = "AIRTABLE_RECORD_CONFLICT";
+  }
+}
+
+export function isAirtableRecordConflictError(error) {
+  return error?.code === "AIRTABLE_RECORD_CONFLICT";
+}
+
+export function escapeAirtableFormulaValue(value) {
+  return String(value ?? "").replaceAll("\\", "\\\\").replaceAll("'", "\\'");
 }
 const BASE_URL = "https://api.airtable.com/v0";
 const MONTHLY_LIMIT_COOLDOWN_MS = 5 * 60 * 1000;
@@ -454,13 +482,16 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
             frontage: f.RST_Frontage || "", indoorOutdoor: f.Indoor_Outdoor || "",
             previousUse: f.RST_Previous_Use || "",
             hoodExhaust: !!f.RST_Hood_Exhaust, greaseTrap: !!f.RST_Grease_Trap, gasLine: !!f.RST_Gas_Line,
-            power: f.RST_Power_Capacity || "", delivery: !!f.RST_Delivery_Access,
-            liquor: !!f.RST_Liquor_License, zoning: f.RST_FB_Zoning_Permit || "",
+            power: f.RST_Power_Capacity || "",
+            delivery: typeof f.RST_Delivery_Access === "boolean" ? f.RST_Delivery_Access : (typeof f.RST_Delivery_Access === "string" ? f.RST_Delivery_Access.trim() : ""),
+            liquor: typeof f.RST_Liquor_License === "boolean" ? f.RST_Liquor_License : (typeof f.RST_Liquor_License === "string" ? f.RST_Liquor_License.trim() : ""),
+            zoning: f.RST_FB_Zoning_Permit || "",
             ceiling: f.CeilingHeight || "", ceilingM: f.CeilingHeight_M ?? null,
             turnover: f.RST_Turnover_Condition || "",
             parking: f.Guest_Parking || "",
           },
           hospitality: {
+            listedPrice: f.Listed_Price ?? null,
             rooms: f.HOSP_Room_Count ?? null, stars: f.HOSP_Star_Rating ?? null,
             operator: f.HOSP_Operator_Brand || "", roomTypes: f.HOSP_Room_Types || "",
             fbOutlets: f.HOSP_FB_Outlets ?? null, functionRooms: f.HOSP_Function_Rooms ?? null,
@@ -473,7 +504,8 @@ export async function fetchProperties(apiKey, baseId, options = {}) {
             seated: f.VEN_Capacity_Seated ?? null, standing: f.VEN_Capacity_Standing ?? null,
             floorArea: f.FloorSqm ?? null, rentalRate: f.VEN_Rental_Rate ?? null,
             rateBasis: f.VEN_Rate_Basis || "", minHours: f.VEN_Min_Booking_Hours ?? null,
-            indoorOutdoor: f.Indoor_Outdoor || "", aircon: !!f.VEN_Air_Conditioning,
+            indoorOutdoor: f.Indoor_Outdoor || "",
+            aircon: typeof f.VEN_Air_Conditioning === "boolean" ? f.VEN_Air_Conditioning : (typeof f.VEN_Air_Conditioning === "string" ? f.VEN_Air_Conditioning.trim() : ""),
             catering: f.VEN_Catering_Policy || "",
             layouts: f.VEN_Layout_Configs || "", ceiling: f.CeilingHeight || "",
             ceilingM: f.CeilingHeight_M ?? null,
@@ -620,7 +652,8 @@ featuredIntel:       f.Featured_Intel           || [], // linked record IDs
 // Supabase-hosted images. Falls back to media_link when no array is present.
 function photoFields(data) {
   const fromDetails = extractPhotoUrls(data?.details?.photos);
-  const list = fromDetails.length ? fromDetails : extractPhotoUrls(data?.media_link);
+  const fromTop = fromDetails.length ? fromDetails : extractPhotoUrls(data?.photos);
+  const list = fromTop.length ? fromTop : extractPhotoUrls(data?.media_link);
   const out = {};
   if (list.length) {
     out.Photos = list.join(",");
@@ -655,7 +688,14 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
   // precedence over the legacy details.units_inventory blob when provided —
   // see src/app/api/dashboard/units/route.js.
   const unitsJson = JSON.stringify(unitsOverride || data.details?.units_inventory || []);
-  const categoryFields = reverseMapCategoryFields(data.details, data.space_category || data.category || data.type);
+  const resolvedCategory = data.space_category || data.category || data.type;
+  const resolvedDetails = withFallbackVerticalPrice(data.details, data.price, resolvedCategory);
+  const categoryFields = reverseMapCategoryFields(resolvedDetails, resolvedCategory);
+  const rawTourUrl =
+    data?.matterportTourUrl ??
+    data?.virtual_tour_url ??
+    data?.details?.virtual_tour_url ??
+    data?.details?.matterportTourUrl;
 
   // Parse coordinates if passed as numeric latitude/longitude OR PostGIS POINT string
   let lat = Number.isFinite(Number(data.latitude)) ? Number(data.latitude) : null;
@@ -694,6 +734,7 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
             ? { Latitude: lat, Longitude: lng }
             : {}),
           ...(data.last_verified_date ? { Last_Verified_Date: data.last_verified_date } : {}),
+          ...(typeof rawTourUrl === "string" && rawTourUrl.trim() ? { Virtual_Tour_URL: rawTourUrl.trim() } : {}),
           ...photoFields(data),
           ...categoryFields
         }
@@ -723,9 +764,10 @@ export async function insertProperty(apiKey, baseId, data, unitsOverride = null)
   return result.records[0];
 }
 
-export async function updateProperty(apiKey, baseId, slug, data, unitsOverride = null) {
-  // 1. Find the Airtable Record ID using the slug
-  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
+export async function updateProperty(apiKey, baseId, slug, data = {}, unitsOverride = null) {
+  // 1. Find the Airtable Record ID using the escaped slug (maxRecords=2 to detect ambiguity)
+  const escapedSlug = escapeAirtableFormulaValue(slug);
+  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${escapedSlug}'`)}&maxRecords=2`;
   const urlGet = `${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`;
   
   const resGet = await fetch(urlGet, {
@@ -737,24 +779,56 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
   }
   
   const getResult = await resGet.json();
-  if (!getResult.records || getResult.records.length === 0) {
+  const records = Array.isArray(getResult?.records) ? getResult.records : [];
+  if (records.length === 0) {
     throw new AirtableRecordNotFoundError(`Airtable record with slug '${slug}' not found.`);
   }
+  if (records.length > 1) {
+    throw new AirtableAmbiguousRecordError(
+      `Multiple Airtable records matched slug '${slug}'; refusing to overwrite an ambiguous record.`
+    );
+  }
   
-  const recordId = getResult.records[0].id;
+  const recordId = records[0].id;
+  const boundRecordId = data?.airtable_record_id || data?.details?.airtable_record_id || null;
+  if (boundRecordId && recordId && recordId !== boundRecordId) {
+    throw new AirtableRecordConflictError(
+      `Airtable record '${recordId}' for slug '${slug}' does not match bound record '${boundRecordId}'.`
+    );
+  }
 
   // 2. PATCH the record
   const urlPatch = `${BASE_URL}/${baseId}/PROPERTIES_CMS/${recordId}`;
   
   // We only update what is provided. For ScoutIt, title/location/type updates.
   const fieldsToUpdate = {};
-  if (data.title) fieldsToUpdate.Title = data.title;
+  const existingAirtableTitle = records[0]?.fields?.Title || null;
+  const hasLockedCanonicalSlug = Boolean(data?.canonical_slug || data?.canonical_slug_locked_at);
+  if (data.title && (!hasLockedCanonicalSlug || !existingAirtableTitle || data.title === existingAirtableTitle)) {
+    fieldsToUpdate.Title = data.title;
+  }
   if (data.location) fieldsToUpdate.Location = data.location;
   if (Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude))) {
     fieldsToUpdate.Latitude = Number(data.latitude);
     fieldsToUpdate.Longitude = Number(data.longitude);
   }
   if (data.type) fieldsToUpdate.SpaceTypography = data.type.charAt(0).toUpperCase() + data.type.slice(1);
+  if (data.space_category || data.category) {
+    const catVal = data.space_category || data.category;
+    fieldsToUpdate.SpaceCategory = catVal.charAt(0).toUpperCase() + catVal.slice(1);
+  }
+  const rawTourUrl =
+    data?.matterportTourUrl ??
+    data?.virtual_tour_url ??
+    data?.details?.virtual_tour_url ??
+    data?.details?.matterportTourUrl;
+  if (rawTourUrl !== undefined) {
+    if (typeof rawTourUrl === "string" && rawTourUrl.trim()) {
+      fieldsToUpdate.Virtual_Tour_URL = rawTourUrl.trim();
+    } else if (rawTourUrl === null || rawTourUrl === "") {
+      fieldsToUpdate.Virtual_Tour_URL = null;
+    }
+  }
   if (data.seo_title) fieldsToUpdate.SEO_Title = data.seo_title;
   if (data.seo_description) fieldsToUpdate.SEO_Description = data.seo_description;
   if (data.seo_json_ld) fieldsToUpdate.SEO_JSON_LD = data.seo_json_ld;
@@ -770,7 +844,9 @@ export async function updateProperty(apiKey, baseId, slug, data, unitsOverride =
     fieldsToUpdate.Units_JSON = JSON.stringify(data.details.units_inventory);
   }
   
-  const categoryFields = reverseMapCategoryFields(data.details, data.space_category || data.category || data.type);
+  const resolvedCategory = data.space_category || data.category || data.type;
+  const resolvedDetails = withFallbackVerticalPrice(data.details, data.price, resolvedCategory);
+  const categoryFields = reverseMapCategoryFields(resolvedDetails, resolvedCategory);
   Object.assign(fieldsToUpdate, categoryFields);
   
   Object.assign(fieldsToUpdate, photoFields(data));
@@ -817,8 +893,9 @@ export async function deletePropertyById(apiKey, baseId, recordId) {
 }
 
 export async function deleteProperty(apiKey, baseId, slug) {
-  // 1. Find the Airtable Record ID using the slug
-  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${slug}'`)}&maxRecords=1`;
+  // 1. Find the Airtable Record ID using the escaped slug
+  const escapedSlug = escapeAirtableFormulaValue(slug);
+  const params = `filterByFormula=${encodeURIComponent(`{Slug}='${escapedSlug}'`)}&maxRecords=2`;
   const urlGet = `${BASE_URL}/${baseId}/PROPERTIES_CMS?${params}`;
   
   const resGet = await fetch(urlGet, {
@@ -830,12 +907,18 @@ export async function deleteProperty(apiKey, baseId, slug) {
   }
   
   const getResult = await resGet.json();
-  if (!getResult.records || getResult.records.length === 0) {
+  const records = Array.isArray(getResult?.records) ? getResult.records : [];
+  if (records.length === 0) {
     // Record not found, might have been already deleted
     return { deleted: true, id: null };
   }
+  if (records.length > 1) {
+    throw new AirtableAmbiguousRecordError(
+      `Multiple Airtable records matched slug '${slug}'; refusing to delete an ambiguous record.`
+    );
+  }
   
-  const recordId = getResult.records[0].id;
+  const recordId = records[0].id;
 
   // 2. DELETE the record
   return await deletePropertyById(apiKey, baseId, recordId);

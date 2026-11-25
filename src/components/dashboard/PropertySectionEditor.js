@@ -38,6 +38,8 @@ export default function PropertySectionEditor({
   category,
   isStaff = false,
   onSaved,
+  onUpdated,
+  onSaveSection,
   endpoint = "/api/admin/property",
   authToken,
 }) {
@@ -84,21 +86,27 @@ export default function PropertySectionEditor({
     setSavingSection(sectionName);
     setStatus((s) => ({ ...s, [sectionName]: null }));
     try {
-      const res = await fetch(endpoint, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        },
-        body: JSON.stringify({ id: property.id, details: payload }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Save failed");
+      let json;
+      if (typeof onSaveSection === "function") {
+        json = await onSaveSection(sectionName, payload, property);
+        if (json?.error) throw new Error(json.error);
+      } else {
+        const res = await fetch(endpoint, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({ id: property.id, details: payload }),
+        });
+        json = await res.json();
+        if (!res.ok) throw new Error(json.error || "Save failed");
+      }
 
       setStatus((s) => ({
         ...s,
         // A warning is not a failure — the data saved, the public mirror lagged.
-        [sectionName]: { ok: true, message: json.warning || "Saved" },
+        [sectionName]: { ok: true, message: json?.warning || "Saved" },
       }));
       // Clear only this section from the draft so other unsaved edits survive.
       setDraft((d) => {
@@ -106,7 +114,10 @@ export default function PropertySectionEditor({
         for (const field of fields) delete next[field.key];
         return next;
       });
-      onSaved?.(json.property);
+      const updatedProperty =
+        json?.property || { ...property, details: { ...(property?.details || {}), ...payload } };
+      onUpdated?.(updatedProperty);
+      onSaved?.(updatedProperty);
     } catch (err) {
       setStatus((s) => ({ ...s, [sectionName]: { ok: false, message: err.message } }));
     } finally {

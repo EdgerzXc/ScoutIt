@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/user/delete-account/route';
+import { POST, checkDeleteAccountRate } from '@/app/api/user/delete-account/route';
 import * as serverAuth from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -34,11 +34,11 @@ const REAL_USER_PROFILE_COLUMNS = new Set([
   'archived_at', 'moderation_note', 'role', 'is_example_account',
   'dhsud_number', 'prc_expiry', 'prc_verified', 'prc_verified_at',
   'telemetry_opt_out', 'marketing_opt_out', 'adult_eligibility_status',
-  'date_of_birth',
+  'date_of_birth', 'location_focus',
 ]);
 
 // Tables that do not exist and must never be written to again.
-const PHANTOM_TABLES = ['saved_properties', 'search_intent_logs', 'supabase_audit_logs'];
+const PHANTOM_TABLES = ['saved_properties', 'search_intent_logs', 'supabase_audit_logs', 'user_blocks'];
 
 vi.mock('@/lib/serverAuth', () => ({ resolveUserId: vi.fn() }));
 vi.mock('@/lib/supabaseAdmin', () => ({
@@ -52,7 +52,7 @@ const USER = '11111111-2222-3333-4444-555555555555';
  * 'failOn' makes one table's delete return an error so the partial-erasure
  * path can be exercised.
  */
-function installClient({ failOn = null, auditError = null } = {}) {
+function installClient({ failOn = null, failColumn = null, auditError = null } = {}) {
   const calls = { deleted: [], updates: [], inserts: [], tables: [] };
 
   supabaseAdmin.from = vi.fn((table) => {
@@ -62,7 +62,9 @@ function installClient({ failOn = null, auditError = null } = {}) {
         eq: (column, value) => {
           calls.deleted.push({ table, column, value });
           return Promise.resolve({
-            error: failOn === table ? { message: `simulated failure on ${table}` } : null,
+            error: failOn === table && (!failColumn || failColumn === column)
+              ? { code: "57014", message: `simulated failure on ${table}` }
+              : null,
           });
         },
       }),
@@ -92,6 +94,7 @@ const request = (confirm) =>
 describe('/api/user/delete-account endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    checkDeleteAccountRate?.reset?.();
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue(USER);
   });
 
@@ -118,6 +121,9 @@ describe('/api/user/delete-account endpoint', () => {
     expect(tables).toContain('privacy_settings');
     // Holds encrypted OAuth tokens — leaving these behind is a real exposure.
     expect(tables).toContain('calendar_connections');
+    expect(calls.deleted.filter((d) => d.table === 'connect_blocks').map((d) => d.column))
+      .toEqual(['blocker_id', 'blocked_id']);
+    expect((await res.json()).erased.filter((table) => table === 'connect_blocks')).toHaveLength(1);
 
     // Every delete must be scoped to this user, never unfiltered.
     for (const d of calls.deleted) expect(d.value).toBe(USER);
@@ -149,6 +155,7 @@ describe('/api/user/delete-account endpoint', () => {
     expect(update.payload.is_profile_public).toBe(false);
     // §48 age-gate attestation is plain PII and must be cleared.
     expect(update.payload.date_of_birth).toBeNull();
+    expect(update.payload.location_focus).toBeNull();
     expect(update.value).toBe(USER);
   });
 
@@ -184,6 +191,24 @@ describe('/api/user/delete-account endpoint', () => {
     const calls = installClient({ failOn: 'saved_intel' });
     await POST(request('DELETE MY ACCOUNT'));
     expect(calls.deleted.map((d) => d.table)).toEqual(['saved_intel']);
+  });
+
+  it('reports an incomplete block cleanup and finishes on a retry', async () => {
+    const interrupted = installClient({ failOn: 'connect_blocks', failColumn: 'blocked_id' });
+    const failed = await POST(request('DELETE MY ACCOUNT'));
+    expect(failed.status).toBe(500);
+    const payload = await failed.json();
+    expect(payload).toMatchObject({ failedAt: 'connect_blocks', retryable: true });
+    expect(payload.erased).not.toContain('connect_blocks');
+    expect(interrupted.updates).toHaveLength(0);
+    expect(supabaseAdmin.auth.admin.deleteUser).not.toHaveBeenCalled();
+
+    const retried = installClient();
+    const completed = await POST(request('DELETE MY ACCOUNT'));
+    expect(completed.status).toBe(200);
+    expect((await completed.json()).erased).toContain('connect_blocks');
+    expect(retried.deleted.filter((d) => d.table === 'connect_blocks')).toHaveLength(2);
+    expect(supabaseAdmin.auth.admin.deleteUser).toHaveBeenCalledExactlyOnceWith(USER, true);
   });
 
   it('reports an audit-write failure instead of hiding it', async () => {

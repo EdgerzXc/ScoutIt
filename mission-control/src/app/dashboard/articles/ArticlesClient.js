@@ -24,6 +24,7 @@ export default function ArticlesClient({ initialArticles = [], canPublish = fals
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [busyArticleId, setBusyArticleId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
   // Derived counts
@@ -124,7 +125,7 @@ export default function ArticlesClient({ initialArticles = [], canPublish = fals
   };
 
   const handleDelete = async (article) => {
-    if (!window.confirm(`Are you sure you want to delete draft '${article.title}'?`)) return;
+    setConfirmDeleteId(null);
     setBusyArticleId(article.id);
     setFeedback(null);
     try {
@@ -362,15 +363,36 @@ export default function ArticlesClient({ initialArticles = [], canPublish = fals
                         )}
 
                         {!article.live_on_site && (
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(article)}
-                            disabled={isBusy}
-                            className="p-1 rounded text-white/60 hover:text-red-400 transition-colors"
-                            title="Delete draft"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          confirmDeleteId === article.id ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(article)}
+                                disabled={isBusy}
+                                className="px-2 py-1 rounded border border-red-700/60 bg-red-950/60 hover:bg-red-900/70 text-red-200 text-xs font-bold uppercase transition-colors"
+                              >
+                                {isBusy ? "Deleting..." : "Confirm"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteId(null)}
+                                disabled={isBusy}
+                                className="px-2 py-1 rounded text-white/70 hover:text-white text-xs transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(article.id)}
+                              disabled={isBusy}
+                              className="p-1 rounded text-white/60 hover:text-red-400 transition-colors"
+                              title="Delete draft"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )
                         )}
                       </td>
                     </tr>

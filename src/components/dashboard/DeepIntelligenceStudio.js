@@ -9,6 +9,8 @@ import { DEEP_INTEL_SCHEMA } from "../../lib/deepIntelSchema";
 import PhotoUploader from "./PhotoUploader";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { CATEGORIES, CATEGORY_FIELDS } from "../../lib/propertyEditorSchema";
+import { buildPreviewCat } from "../../lib/propertyEditorSchema";
+import { reverseMapCategoryFields } from "../../lib/propertyFieldMapping";
 
 export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, initialData }) {
   // State initialization
@@ -29,6 +31,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   const [lastSaved, setLastSaved] = useState(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [extractionError, setExtractionError] = useState(null);
+  const [confirmingClearDraft, setConfirmingClearDraft] = useState(false);
 
   // Resizer state
   const [leftWidth, setLeftWidth] = useState(50);
@@ -135,14 +138,13 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   }, [formData, draftLoaded, isEditing]);
 
   const clearDraft = () => {
-    if (window.confirm("Are you sure you want to clear your draft and start over?")) {
-      localStorage.removeItem("scoutit_listing_draft");
-      setFormData({
-        title: "", category: "", location: "", price: "", mediaLink: "", image: "", photos: ["", "", "", "", ""], description: "", verified: false, details: {},
-      });
-      setLastSaved(null);
-      setStep(1);
-    }
+    localStorage.removeItem("scoutit_listing_draft");
+    setFormData({
+      title: "", category: "", location: "", price: "", mediaLink: "", image: "", photos: ["", "", "", "", ""], description: "", verified: false, details: {},
+    });
+    setLastSaved(null);
+    setConfirmingClearDraft(false);
+    setStep(1);
   };
 
   const handleDragOver = (e) => { 
@@ -214,6 +216,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
           category: draft.space_category || prev.category,
           price: draft.price || prev.price,
           description: draft.description || prev.description,
+          creationSource: "pdf_assisted",
           details: { ...prev.details, ...draft.details }
         }));
       }
@@ -306,18 +309,38 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
   const handlePublish = () => {
     if (isPublishable) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
-      onPublish(sanitizeObject(formData), true);
+      const payload = {
+        ...sanitizeObject(formData),
+        type: formData.category,
+        mediaLink: formData.photos?.[0] || formData.image || "",
+        completenessScore: completionStats.percentage,
+        creationSource: formData.creationSource || "manual",
+        verified: false,
+      };
+      onPublish(payload, true);
     }
   };
 
   const handleSaveDraft = () => {
     if (mustHaves.title) {
       if (!isEditing) localStorage.removeItem("scoutit_listing_draft");
-      onPublish(sanitizeObject(formData), false);
+      const payload = {
+        ...sanitizeObject(formData),
+        type: formData.category,
+        mediaLink: formData.photos?.[0] || formData.image || "",
+        completenessScore: completionStats.percentage,
+        creationSource: formData.creationSource || "manual",
+        verified: false,
+      };
+      onPublish(payload, false);
     }
   };
 
   const draftData = useMemo(() => {
+    const rawDetails = formData.details || {};
+    const airtableMapped = reverseMapCategoryFields(rawDetails, formData.category);
+    const mergedFields = { ...rawDetails, ...airtableMapped };
+    const cat = buildPreviewCat(mergedFields);
     return {
       title: formData.title || "Untitled Property",
       location: formData.location || "Location TBD",
@@ -328,20 +351,20 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
       photos: formData.photos && formData.photos.some(p => p.trim()) ? formData.photos.filter(p => p.trim()) : (formData.image ? [formData.image] : []),
       
       // Map basic space specs to root so the Preview (Flows) can read them
-      beds: formData.details?.Beds || formData.details?.Bedrooms || 0,
-      baths: formData.details?.Baths || formData.details?.Bathrooms || 0,
-      floor_sqm: formData.details?.Floor_Area_Sqm || formData.details?.Indoor_Sqm || 0,
-      lot_sqm: formData.details?.Lot_Area_Sqm || formData.details?.Alfresco_Sqm || 0,
-      parking: formData.details?.Parking_Slots || 0,
-      guest_capacity: formData.details?.Guest_Capacity || 0,
-      cleaning_time: formData.details?.Cleaning_Time || 0,
-      accommodations: formData.details?.Accommodations || "",
-      event_capacity: formData.details?.Event_Capacity || formData.details?.Seating_Capacity || 0,
-      rooms: formData.details?.Rooms || 0,
-      ceiling_height_text: formData.details?.Ceiling_Height || "",
-      turnoverDate: formData.details?.Turnover_Date || "",
-      
-      details: formData.details
+      beds: mergedFields.Beds ?? (rawDetails.Beds || rawDetails.Bedrooms || 0),
+      baths: mergedFields.Baths ?? (rawDetails.Baths || rawDetails.Bathrooms || 0),
+      floor_sqm: mergedFields.FloorSqm ?? (rawDetails.Floor_Area_Sqm || rawDetails.Indoor_Sqm || rawDetails.floor_sqm || 0),
+      lot_sqm: mergedFields.LotSqm ?? (rawDetails.Lot_Area_Sqm || rawDetails.Alfresco_Sqm || 0),
+      parking: mergedFields.Parking ?? (rawDetails.Parking_Slots || 0),
+      guest_capacity: rawDetails.Guest_Capacity || 0,
+      cleaning_time: rawDetails.Cleaning_Time || 0,
+      accommodations: rawDetails.Accommodations || "",
+      event_capacity: rawDetails.Event_Capacity || rawDetails.Seating_Capacity || 0,
+      rooms: mergedFields.HOSP_Room_Count ?? (rawDetails.Rooms || 0),
+      ceiling_height_text: rawDetails.Ceiling_Height || "",
+      turnoverDate: rawDetails.Turnover_Date || "",
+      cat,
+      details: rawDetails
     };
   }, [formData]);
 
@@ -390,13 +413,15 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
     >
       {/* Mobile Tab Bar */}
       <div className="md:hidden flex bg-surface/95 backdrop-blur-md border-b border-surface-variant z-50 px-2 py-1.5 touch-manipulation">
-        <button 
+        <button
+          type="button"
           onClick={() => setMobileTab('editor')}
           className={`flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-widest uppercase active:scale-95 transition touch-manipulation ${mobileTab === 'editor' ? 'text-gold-accent font-bold border-b-2 border-gold-accent' : 'text-text-secondary hover:text-on-surface'}`}
         >
           Editor
         </button>
-        <button 
+        <button
+          type="button"
           onClick={() => setMobileTab('preview')}
           className={`flex-1 min-h-[44px] py-2 text-xs font-label-caps tracking-widest uppercase active:scale-95 transition touch-manipulation ${mobileTab === 'preview' ? 'text-gold-accent font-bold border-b-2 border-gold-accent' : 'text-text-secondary hover:text-on-surface'}`}
         >
@@ -409,15 +434,38 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
 
       {/* Header */}
       <div className="p-4 border-b border-surface-variant bg-background flex justify-between items-center z-20">
-        <button className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
+        <button type="button" className="min-h-11 inline-flex items-center text-text-secondary hover:text-on-surface font-working-title text-sm" onClick={onClose}>
           ← {isEditing ? "Cancel" : "Exit"}
         </button>
         
         <div className="flex items-center gap-4">
           {!isEditing && lastSaved && (
-            <button onClick={clearDraft} className="min-h-11 inline-flex items-center text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition">
-              Delete draft
-            </button>
+            confirmingClearDraft ? (
+              <div className="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="min-h-11 inline-flex items-center px-2.5 rounded border border-error/40 bg-error/15 text-error text-[12px] uppercase font-label-caps tracking-wider transition hover:bg-error/25"
+                >
+                  Confirm Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingClearDraft(false)}
+                  className="min-h-11 inline-flex items-center px-2 text-text-secondary hover:text-on-surface text-[12px] uppercase font-label-caps tracking-wider transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmingClearDraft(true)}
+                className="min-h-11 inline-flex items-center text-error/80 hover:text-error text-[12px] uppercase font-label-caps tracking-wider transition"
+              >
+                Delete draft
+              </button>
+            )
           )}
           <span className="font-label-caps text-[12px] tracking-widest text-gold-accent uppercase">
             {isEditing ? "Edit Deep Intel" : "New Deep Intel Dossier"}
@@ -462,6 +510,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {CATEGORIES.map(c => (
                     <button
+                      type="button"
                       key={c.id}
                       className={`flex flex-col items-center justify-center gap-2 px-3 py-6 rounded border text-sm transition ${formData.category === c.id ? 'bg-surface-container-low border-gold-accent text-gold-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.15)]' : 'bg-surface-alt border-surface-variant text-on-surface hover:border-gold-accent/50'}`}
                       onClick={() => setField("category", c.id)}
@@ -522,15 +571,40 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 mb-6 border-b border-surface-variant pb-6">
                   {categoryFields.map(field => (
                     <div key={field.key} className="flex flex-col gap-2">
-                      <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
-                      <input 
-                        id={`field-${field.key}`}
-                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition" 
-                        type={field.type} 
-                        value={formData.details[field.key] || ''} 
-                        onChange={e => setDetail(field.key, e.target.value)} 
-                        placeholder={field.type === "number" ? "0" : ""}
-                      />
+                      <label htmlFor={`field-${field.key}`} className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
+                      {field.type === "select" ? (
+                        <select
+                          id={`field-${field.key}`}
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition min-h-[40px]"
+                          value={formData.details[field.key] || ''}
+                          onChange={e => setDetail(field.key, e.target.value)}
+                        >
+                          <option value="">Select...</option>
+                          {(field.options || []).map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : field.type === "checkbox" ? (
+                        <label className="inline-flex items-center gap-2.5 min-h-[40px] cursor-pointer">
+                          <input
+                            id={`field-${field.key}`}
+                            type="checkbox"
+                            checked={Boolean(formData.details[field.key])}
+                            onChange={e => setDetail(field.key, e.target.checked)}
+                            className="w-4 h-4 accent-[var(--accent-bright)] rounded border-surface-variant"
+                          />
+                          <span className="text-sm text-on-surface">{formData.details[field.key] ? "Yes" : "No"}</span>
+                        </label>
+                      ) : (
+                        <input
+                          id={`field-${field.key}`}
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition"
+                          type={field.type || "text"}
+                          value={formData.details[field.key] || ''}
+                          onChange={e => setDetail(field.key, e.target.value)}
+                          placeholder={field.type === "number" ? "0" : ""}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -572,15 +646,26 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(DEEP_INTEL_SCHEMA[formData.category || "commercial"]?.[s] || []).map((field) => (
                     <div key={field.key} className="flex flex-col gap-2 md:col-span-1">
-                      <label className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
-                      <input 
-                        id={`field-${field.key}`}
-                        className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition" 
-                        type={field.key === "DI_Hist_Tx" ? "textarea" : "text"} 
-                        value={formData.details[field.key] || ''} 
-                        onChange={e => setDetail(field.key, e.target.value)} 
-                        placeholder={field.placeholder} 
-                      />
+                      <label htmlFor={`field-${field.key}`} className="text-xs font-label-caps tracking-widest text-text-secondary uppercase">{field.label}</label>
+                      {field.key === "DI_Hist_Tx" || field.type === "textarea" ? (
+                        <textarea
+                          id={`field-${field.key}`}
+                          rows={3}
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition resize-y"
+                          value={formData.details[field.key] || ''}
+                          onChange={e => setDetail(field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                        />
+                      ) : (
+                        <input
+                          id={`field-${field.key}`}
+                          className="bg-surface-alt border border-surface-variant rounded px-3 py-2.5 text-on-surface text-sm focus:outline-none focus:border-gold-accent transition"
+                          type="text"
+                          value={formData.details[field.key] || ''}
+                          onChange={e => setDetail(field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -591,7 +676,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
           {/* Navigation Buttons */}
           <div className="flex flex-wrap justify-between gap-3 mt-12 pt-6 border-t border-surface-variant">
             {step > 1 ? (
-              <button 
+              <button
+                type="button"
                 onClick={() => setStep(step - 1)}
                 className="min-h-11 px-6 py-2 rounded border border-surface-variant text-text-secondary text-sm font-label-caps tracking-widest uppercase hover:text-on-surface hover:border-text-secondary transition"
               >
@@ -600,7 +686,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
             ) : <div></div>}
 
             <div className="flex flex-wrap gap-4">
-              <button 
+              <button
+                type="button"
                 onClick={handleSaveDraft}
                 disabled={!mustHaves.title}
                 className="min-h-11 px-6 py-2 rounded text-gold-accent text-sm font-label-caps tracking-widest uppercase hover:bg-gold-accent/10 disabled:opacity-50 transition"
@@ -609,7 +696,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
               </button>
               
               {step < 6 ? (
-                <button 
+                <button
+                  type="button"
                   onClick={() => setStep(step + 1)}
                   disabled={step === 1 && !formData.category} // Must select category to proceed
                   className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]"
@@ -617,7 +705,8 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
                   Next Step →
                 </button>
               ) : (
-                <button 
+                <button
+                  type="button"
                   onClick={handlePublish}
                   disabled={!isPublishable}
                   className="min-h-11 px-6 py-2 rounded bg-gold-accent text-background text-sm font-label-caps tracking-widest uppercase hover:bg-gold-bright disabled:opacity-50 transition shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
@@ -657,7 +746,7 @@ export default function DeepIntelligenceStudio({ onPublish, onClose, isEditing, 
           <span className="md:hidden text-xs font-mono opacity-80">{completionStats.percentage}%</span>
         </div>
         <div className="mt-4 md:mt-10 opacity-90 md:scale-[0.98] origin-top transition pointer-events-auto">
-          {['commercial', 'restaurants', 'venues'].includes(formData.category) ? (
+          {['commercial', 'restaurants', 'venues', 'str', 'hospitality'].includes(formData.category) ? (
             <CommercialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />
           ) : (
             <ResidentialFlow slug={null} draftData={debouncedDraftData} isDraftMode={true} externalActiveTab={['space', 'location', 'life', 'whereto', 'buildplans', 'units'][step - 1]} />

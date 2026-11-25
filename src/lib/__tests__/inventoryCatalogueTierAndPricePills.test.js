@@ -120,8 +120,7 @@ describe("A-319: Draft Survival Under Radius Search Contract", () => {
       "utf8"
     );
 
-    // searchByRadius updates both catalogue and listings
-    expect(src).toContain("setCatalogue(filtered)");
+    expect(src).toContain("setCatalogue(filtered.filter(l => l.ownerId === 'scoutit-cms'))");
     // Preserves drafts in progress
     expect(src).toContain("l.status === 'draft' || l.pipelineStatus === 'draft' || !l.coordinates");
     expect(src).toContain("setListings(mergedListings)");

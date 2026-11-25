@@ -17,10 +17,64 @@ const BROKER_ALERT_WATCH_KEYS = [
   "listedPrice", "Listed_Price", "priceStatus", "Price_Status", "availability",
 ];
 
+const SERVER_OWNED_DETAIL_KEYS = new Set([
+  "temp_storage_path",
+  "airtable_record_id",
+  "process_attempts",
+  "pdf_verification_required",
+  "pdf_deleted_at",
+  "ai_confidence",
+  "ai_gaps",
+  "processed_at",
+  "pdf_verified",
+  "verified",
+  "quarantine_reason",
+  "quarantined_at",
+  "canonical_slug",
+  "slug",
+  "owner_id",
+]);
+
+function stripServerOwnedDetails(detailsObj) {
+  if (!detailsObj || typeof detailsObj !== "object" || Array.isArray(detailsObj)) return {};
+  const cleaned = {};
+  for (const [k, v] of Object.entries(detailsObj)) {
+    if (SERVER_OWNED_DETAIL_KEYS.has(k) || k.startsWith("_") || k.startsWith("internal_")) {
+      continue;
+    }
+    cleaned[k] = v;
+  }
+  return cleaned;
+}
+
+function cleanOptionalHttpUrl(rawUrl) {
+  if (rawUrl == null) return { ok: true, value: null };
+  const trimmed = String(rawUrl).trim();
+  if (!trimmed) return { ok: true, value: "" };
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return { ok: false, value: null };
+    }
+    return { ok: true, value: parsed.toString() };
+  } catch {
+    return { ok: false, value: null };
+  }
+}
+
 const updateSchema = z.object({
   title: z.string().max(255).optional(),
   type: z.string().max(100).optional(),
+  category: z.string().max(100).optional(),
+  space_category: z.string().max(100).optional(),
   location: z.string().max(255).optional(),
+  price: z.union([z.string().max(100), z.number().finite().nonnegative()]).optional(),
+  description: z.string().max(10000).optional(),
+  mediaLink: z.string().max(2000).optional(),
+  media_link: z.string().max(2000).optional(),
+  photos: z.array(z.string().max(2000)).max(50).optional(),
+  matterportTourUrl: z.string().max(2000).optional(),
+  completenessScore: z.number().finite().min(0).max(100).optional(),
   details: z.record(z.any()).optional(),
   quietly_open_to_offers: z.boolean().optional(),
   contact_preference: z.enum(["owner_only", "broker_only", "owner_and_brokers"]).optional()
@@ -28,7 +82,8 @@ const updateSchema = z.object({
 
 export async function POST(request) {
   try {
-    const { submissionId, data  } = await request.json();
+    const body = await request.json().catch(() => null);
+    const { submissionId, data } = body && typeof body === "object" && !Array.isArray(body) ? body : {};
 
     if (!submissionId || !data) {
       return NextResponse.json({ error: "Missing submissionId or data" }, { status: 400 });
@@ -38,7 +93,7 @@ export async function POST(request) {
 
     // 1. Extract token from Authorization header
     const authHeader = request.headers.get("Authorization");
-    const token = authHeader ? authHeader.replace("Bearer ", "") : null;
+    const token = /^Bearer\s+(.+)$/i.exec(authHeader || "")?.[1]?.trim() || null;
     
     if (token && token.trim() !== "") {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -108,13 +163,32 @@ export async function POST(request) {
     }
 
     // Format the payload for Supabase, sanitizing string inputs
+    const resolvedCategory = validatedData.space_category || validatedData.category;
     const supabasePayload = {
       title: validatedData.title ? stripAllTags(validatedData.title) : currentSubmission.title,
       type: validatedData.type ? stripAllTags(validatedData.type) : currentSubmission.type,
       location: validatedData.location ? stripAllTags(validatedData.location) : currentSubmission.location,
       // GAP-98: Preserve space_category so Airtable category-scoped field mapping is not bypassed
-      space_category: validatedData.space_category || currentSubmission.space_category,
+      space_category: resolvedCategory ? stripAllTags(resolvedCategory) : currentSubmission.space_category,
     };
+    if (validatedData.price !== undefined) {
+      supabasePayload.price =
+        typeof validatedData.price === "string"
+          ? stripAllTags(validatedData.price)
+          : validatedData.price;
+    }
+    if (validatedData.description !== undefined) {
+      supabasePayload.description = stripAllTags(validatedData.description);
+    }
+    const rawMediaLink =
+      validatedData.media_link !== undefined ? validatedData.media_link : validatedData.mediaLink;
+    if (rawMediaLink !== undefined) {
+      const checkedMedia = cleanOptionalHttpUrl(rawMediaLink);
+      if (!checkedMedia.ok) {
+        return NextResponse.json({ error: "Invalid media URL protocol" }, { status: 400 });
+      }
+      supabasePayload.media_link = checkedMedia.value;
+    }
     if (typeof validatedData.quietly_open_to_offers === "boolean") {
       if (lifecycleState !== PROPERTY_LIFECYCLE_STATES.OFF_MARKET) {
         return NextResponse.json({ error: "Quietly open to offers is only available for off-market listings" }, { status: 409 });
@@ -122,15 +196,40 @@ export async function POST(request) {
       supabasePayload.quietly_open_to_offers = validatedData.quietly_open_to_offers;
     }
 
-    // Merge details JSONB safely with deep recursive sanitization (e.g. units_inventory objects)
+    // Merge details JSONB safely with deep recursive sanitization and strip server-owned keys
+    const sanitizedClientDetails = validatedData.details
+      ? sanitizeObject(stripServerOwnedDetails(validatedData.details))
+      : {};
     const mergedDetails = {
       ...(currentSubmission.details || {}),
-      ...(validatedData.details ? sanitizeObject(validatedData.details) : {})
+      ...sanitizedClientDetails,
     };
+    if (validatedData.photos !== undefined) {
+      mergedDetails.photos = validatedData.photos
+        .map((url) => cleanOptionalHttpUrl(url))
+        .filter((res) => res.ok && res.value)
+        .map((res) => res.value);
+    }
+    if (validatedData.matterportTourUrl !== undefined) {
+      const checkedTour = cleanOptionalHttpUrl(validatedData.matterportTourUrl);
+      if (!checkedTour.ok) {
+        return NextResponse.json({ error: "Invalid 3D tour URL protocol" }, { status: 400 });
+      }
+      mergedDetails.matterportTourUrl = checkedTour.value;
+    }
+    if (validatedData.completenessScore !== undefined) {
+      mergedDetails.completenessScore = validatedData.completenessScore;
+    }
     if (validatedData.contact_preference) {
       mergedDetails.contact_preference = validatedData.contact_preference;
     }
-    if (validatedData.details || validatedData.contact_preference) {
+    if (
+      validatedData.details ||
+      validatedData.contact_preference ||
+      validatedData.photos !== undefined ||
+      validatedData.matterportTourUrl !== undefined ||
+      validatedData.completenessScore !== undefined
+    ) {
       supabasePayload.details = mergedDetails;
     }
 
@@ -194,12 +293,15 @@ export async function POST(request) {
         }
 
         try {
-          await updateProperty(apiKey, baseId, slug, supabasePayload);
+          const airtablePayload = currentSubmission.details?.airtable_record_id
+            ? { ...supabasePayload, airtable_record_id: currentSubmission.details.airtable_record_id }
+            : supabasePayload;
+          await updateProperty(apiKey, baseId, slug, airtablePayload);
           
           // Never replace the first-publication canonical slug with Airtable's formula result.
         } catch (airtableErr) {
           console.error("[UPDATE API] Airtable update failed:", airtableErr);
-          return NextResponse.json({ success: false, retryable: true, warning: "Supabase updated; Airtable sync is pending and can be retried: " + airtableErr.message }, { status: 502 });
+          return NextResponse.json({ success: false, retryable: true, warning: "Supabase updated; Airtable sync is pending and can be retried." }, { status: 502 });
         }
       } else {
         console.warn("[UPDATE API] Airtable credentials missing, skipping sync.");

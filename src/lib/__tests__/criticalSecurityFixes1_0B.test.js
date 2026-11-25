@@ -182,7 +182,7 @@ describe('/api/deals/handshake decline authorization', () => {
 
   it('allows a real party to decline', async () => {
     vi.spyOn(serverAuth, 'resolveUserId').mockResolvedValue('broker');
-    supabaseAdmin.from = stubFrom({ deal: { id: 'deal-2', buyer_id: 'buyer', broker_id: 'broker' } });
+    supabaseAdmin.from = stubFrom({ deal: { id: 'deal-2', buyer_id: 'buyer', broker_id: 'broker', status: 'accepted' } });
 
     const res = await POST(declineRequest('deal-2'));
     expect(res.status).toBe(200);

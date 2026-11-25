@@ -95,11 +95,11 @@ export async function POST(request) {
       The "details" key signifies that this column should be stuffed into the flexible JSONB column.
 
       <untrusted_csv_headers>
-      ${JSON.stringify(headers)}
+      ${JSON.stringify(headers).replaceAll('</untrusted_csv_headers>', '')}
       </untrusted_csv_headers>
 
       <untrusted_sample_data>
-      ${JSON.stringify(sampleData.slice(0, MAX_SAMPLE_ROWS), null, 2)}
+      ${JSON.stringify(sampleData.slice(0, MAX_SAMPLE_ROWS), null, 2).replaceAll('</untrusted_sample_data>', '')}
       </untrusted_sample_data>
       
       Return ONLY a JSON object mapping every raw CSV header (key) to either a Core Schema Key or "details" (value).

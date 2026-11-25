@@ -45,7 +45,7 @@ export default async function StaffIamPage() {
             <option value="2">Tier 2 — Ops Manager</option>
             <option value="3">Tier 3 — Super Admin</option>
           </select>
-          <button className="px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors whitespace-nowrap">
+          <button type="submit" className="px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors whitespace-nowrap">
             Send invite
           </button>
         </form>
@@ -82,7 +82,7 @@ export default async function StaffIamPage() {
             <option value="2">Tier 2 — Ops Manager</option>
             <option value="3">Tier 3 — Super Admin</option>
           </select>
-          <button className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+          <button type="submit" className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
             Grant access
           </button>
         </form>
@@ -144,7 +144,7 @@ function StaffRow({ member, isSelf }) {
               <option value="2">Tier 2 — Ops Manager</option>
               <option value="3">Tier 3 — Super Admin</option>
             </select>
-            <button className="px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
+            <button type="submit" className="px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors">
               Update
             </button>
           </form>
@@ -153,6 +153,7 @@ function StaffRow({ member, isSelf }) {
             <input type="hidden" name="staffId" value={member.id} />
             <input type="hidden" name="nextActive" value={(!member.active).toString()} />
             <button
+              type="submit"
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 member.active
                   ? "bg-red-400/10 hover:bg-red-400/20 text-red-400 border border-red-400/20"

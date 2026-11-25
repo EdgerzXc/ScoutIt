@@ -4,17 +4,21 @@ import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 
+const AUTH_QUERY_KEYS = ["code", "token", "token_hash", "access_token", "refresh_token", "provider_token", "provider_refresh_token", "state", "email", "password"];
+
 function GaRouteTracker({ gaId }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!pathname || typeof window === "undefined" || typeof window.gtag !== "function") return;
-    const search = searchParams?.toString();
+    const params = new URLSearchParams(searchParams?.toString());
+    for (const key of AUTH_QUERY_KEYS) params.delete(key);
+    const search = params.toString();
     const url = pathname + (search ? `?${search}` : "");
     window.gtag("config", gaId, {
       page_path: url,
-      page_location: window.location.href,
+      page_location: window.location.origin + url,
       page_title: typeof document !== "undefined" ? document.title : "",
     });
   }, [pathname, searchParams, gaId]);
@@ -66,8 +70,12 @@ export default function GoogleAnalytics() {
               analytics_storage: storedConsent ? 'granted' : 'denied',
             });
             gtag('js', new Date());
+            var pageUrl = new URL(window.location.href);
+            pageUrl.hash = '';
+            for (var key of ${JSON.stringify(AUTH_QUERY_KEYS)}) pageUrl.searchParams.delete(key);
             gtag('config', '${gaId}', {
               page_path: window.location.pathname,
+              page_location: pageUrl.toString(),
             });
           `,
         }}

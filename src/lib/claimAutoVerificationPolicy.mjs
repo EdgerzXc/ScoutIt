@@ -228,7 +228,17 @@ export function evaluateClaimAutoVerification({
 
   // Check for active deals/inquiries in flight
   const hasActiveDeal = (activeDeals || []).some((d) =>
-    ["open", "handshake_pending", "under_review", "contract_prep"].includes(d?.status)
+    [
+      "open",
+      "handshake_pending",
+      "under_review",
+      "contract_prep",
+      "pending",
+      "invited",
+      "accepted",
+      "connected",
+      "active",
+    ].includes(d?.status)
   );
   if (hasActiveDeal) {
     return {

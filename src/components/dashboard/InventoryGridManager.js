@@ -15,6 +15,15 @@ const MAX_BULK = 50;
 // Stable-ish unique id for a new unit row.
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
+const VERTICAL_INVENTORY_META = {
+  restaurants: { badge: "F&B Zones", unitPlaceholder: "e.g. Main Dining / VIP Room" },
+  hospitality: { badge: "Keys & Suites", unitPlaceholder: "e.g. Deluxe King 402" },
+  venues: { badge: "Event Spaces", unitPlaceholder: "e.g. Grand Ballroom A" },
+  str: { badge: "STR Units", unitPlaceholder: "e.g. Cliffside Villa 2" },
+  residential: { badge: "Residential Units", unitPlaceholder: "e.g. Unit 12-A" },
+  commercial: { badge: "Commercial Suites", unitPlaceholder: "e.g. Unit 12-A" },
+};
+
 // mode: "owner" (default, full CRUD) or "operator" — the restricted view
 // used by OperatorMode.js for delegated units (SCOUTIT_MASTER_BUILD_SPEC.md
 // §9.2): operators can rename, re-photo, and set availability on their own
@@ -22,9 +31,17 @@ const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2
 // duplicate, or delete units — those stay owner-only. Kept as one shared
 // component with a mode prop rather than a fork, per the locked plan
 // decision, to avoid the two grids drifting apart.
-export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave, mode = "owner", propertyId, property }) {
+export default function InventoryGridManager({ units = [], onChange, isPro, onAutoSave, mode = "owner", propertyId, property, propertyCategory }) {
   const { addToast } = useDashboard();
   const isOperatorMode = mode === "operator";
+  const resolvedCategory = String(
+    propertyCategory || property?.spaceCategory || property?.category || property?.type || "commercial"
+  ).toLowerCase();
+  const verticalMeta =
+    VERTICAL_INVENTORY_META[resolvedCategory] ||
+    (resolvedCategory === "restaurant" ? VERTICAL_INVENTORY_META.restaurants : null) ||
+    (resolvedCategory === "venue" ? VERTICAL_INVENTORY_META.venues : null) ||
+    VERTICAL_INVENTORY_META.commercial;
   const [activePhotoUnit, setActivePhotoUnit] = useState(null);
   const [uploadingUnitId, setUploadingUnitId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -35,6 +52,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
 
   // The unit whose rich Unit Master Page editor (drawer) is open.
   const [detailsUnitId, setDetailsUnitId] = useState(null);
+  const [confirmDeleteUnitId, setConfirmDeleteUnitId] = useState(null);
 
   const [search, setSearch] = useState("");
   const [collapsedFloors, setCollapsedFloors] = useState(() => new Set());
@@ -120,9 +138,8 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
   };
 
   const removeUnit = (id) => {
-    if (window.confirm("Delete this unit?")) {
-      commit(units.filter((u) => u.id !== id));
-    }
+    commit(units.filter((u) => u.id !== id));
+    setConfirmDeleteUnitId(null);
   };
 
   const updateUnit = (id, field, value, shouldSave = false) => {
@@ -244,6 +261,12 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
           <span>{units.length} {units.length === 1 ? "unit" : "units"}</span>
           <span className="text-text-muted">·</span>
           <span>{floorCount} {floorCount === 1 ? "floor" : "floors"}</span>
+          <span
+            data-testid="inventory-vertical-badge"
+            className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full border border-gold-accent/30 bg-gold-accent/10 text-gold-accent text-[12px] font-label-caps tracking-wider uppercase"
+          >
+            {verticalMeta.badge}
+          </span>
         </div>
 
         {/* Search */}
@@ -393,7 +416,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   value={unit.name || ""}
                                   onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
-                                  placeholder="e.g. Unit 12-A"
+                                  placeholder={verticalMeta.unitPlaceholder}
                                   className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm text-text-primary focus:outline-none transition"
                                 />
                               )}
@@ -569,13 +592,33 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                       >
                                         <Split size={15} />
                                       </button>
-                                      <button
-                                        onClick={() => removeUnit(unit.id)}
-                                        className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition"
-                                        title="Delete unit"
-                                      >
-                                        <Trash2 size={15} />
-                                      </button>
+                                      {confirmDeleteUnitId === unit.id ? (
+                                        <span className="inline-flex items-center gap-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => removeUnit(unit.id)}
+                                            className="px-2 py-1 rounded border border-error/40 bg-error/15 text-error text-xs font-label-caps uppercase hover:bg-error/25 transition"
+                                          >
+                                            Confirm
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => setConfirmDeleteUnitId(null)}
+                                            className="px-2 py-1 rounded text-text-secondary text-xs font-label-caps uppercase hover:text-on-surface transition"
+                                          >
+                                            Cancel
+                                          </button>
+                                        </span>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() => setConfirmDeleteUnitId(unit.id)}
+                                          className="p-2 rounded hover:bg-error/10 text-text-muted hover:text-error transition"
+                                          title="Delete unit"
+                                        >
+                                          <Trash2 size={15} />
+                                        </button>
+                                      )}
                                     </span>
                                   )}
                                 </div>
@@ -617,7 +660,7 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                   value={unit.name || ""}
                                   onChange={(e) => updateUnit(unit.id, "name", e.target.value)}
                                   onBlur={(e) => updateUnit(unit.id, "name", e.target.value, true)}
-                                  placeholder="e.g. Unit 12-A"
+                                  placeholder={verticalMeta.unitPlaceholder}
                                   className="w-full bg-transparent border border-transparent hover:border-surface-variant focus:border-gold-accent rounded px-2 py-1 text-sm font-working-title text-text-primary focus:outline-none transition -ml-2"
                                 />
                               )}
@@ -647,13 +690,33 @@ export default function InventoryGridManager({ units = [], onChange, isPro, onAu
                                     >
                                       <Split size={15} />
                                     </button>
-                                    <button
-                                      aria-label="Remove this unit"
-                                      onClick={() => removeUnit(unit.id)}
-                                      className="min-h-11 min-w-11 inline-flex items-center justify-center rounded hover:bg-error/10 text-text-muted hover:text-error transition"
-                                    >
-                                      <Trash2 size={15} />
-                                    </button>
+                                    {confirmDeleteUnitId === unit.id ? (
+                                      <span className="inline-flex items-center gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => removeUnit(unit.id)}
+                                          className="min-h-11 px-2.5 rounded border border-error/40 bg-error/15 text-error text-xs font-label-caps uppercase hover:bg-error/25 transition"
+                                        >
+                                          Confirm
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setConfirmDeleteUnitId(null)}
+                                          className="min-h-11 px-2.5 rounded text-text-secondary text-xs font-label-caps uppercase hover:text-on-surface transition"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </span>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        aria-label="Remove this unit"
+                                        onClick={() => setConfirmDeleteUnitId(unit.id)}
+                                        className="min-h-11 min-w-11 inline-flex items-center justify-center rounded hover:bg-error/10 text-text-muted hover:text-error transition"
+                                      >
+                                        <Trash2 size={15} />
+                                      </button>
+                                    )}
                                   </>
                                 )}
                             </div>

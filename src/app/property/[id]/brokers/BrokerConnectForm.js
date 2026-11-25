@@ -47,7 +47,7 @@ export default function BrokerConnectForm({ propertySlug, brokerId, freeContact,
       placeholder="Introduce your interest in this property." />
     {state.error && <p role="alert" className="form-error-alert">{state.error}</p>}
     <PrivacyNotice />
-    <button disabled={state.busy || !message.trim()} className="form-submit-btn">
+    <button type="submit" disabled={state.busy || !message.trim()} className="form-submit-btn">
       {state.busy ? "Sending…" : freeContact ? "Send free request →" : "Spend 1 Connect →"}
     </button>
   </form>;

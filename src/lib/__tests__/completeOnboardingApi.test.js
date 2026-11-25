@@ -77,6 +77,32 @@ describe("complete onboarding API", () => {
     }
   });
 
+  it("rejects oversized profile fields before writing any account state", async () => {
+    const response = await POST(request({
+      name: "Jane Scout",
+      role: "buyer",
+      dateOfBirth: "1990-01-02",
+      locationFocus: "a".repeat(161),
+    }));
+
+    expect(response.status).toBe(400);
+    expect(mocks.termsInsert).not.toHaveBeenCalled();
+    expect(mocks.profileUpsert).not.toHaveBeenCalled();
+  });
+
+  it("returns a retryable error when the existing profile cannot be read", async () => {
+    mocks.profileMaybeSingle.mockResolvedValue({ data: null, error: { code: "57014" } });
+    const response = await POST(request({
+      name: "Jane Scout",
+      role: "buyer",
+      dateOfBirth: "1990-01-02",
+    }));
+
+    expect(response.status).toBe(503);
+    expect(mocks.termsInsert).not.toHaveBeenCalled();
+    expect(mocks.profileUpsert).not.toHaveBeenCalled();
+  });
+
   describe("Pre-migration default (legacy mode)", () => {
     it("provisions legacy connect_balances authoritatively without touching canonical tables", async () => {
       delete process.env.CONNECTS_CANONICAL_ACTIVE;
@@ -356,6 +382,109 @@ describe("complete onboarding API", () => {
 
       expect(response.status).toBe(500);
       expect(mocks.profileUpdate).not.toHaveBeenCalled();
+    });
+
+    it("A-356: serializes concurrent first-time onboarding requests with different roles so only one role and wallet setup is provisioned", async () => {
+      const [firstRes, secondRes] = await Promise.all([
+        POST(request({
+          name: "Jane Scout",
+          role: "buyer",
+          dateOfBirth: "1990-01-02",
+          locationFocus: "Makati",
+        })),
+        POST(request({
+          name: "Jane Scout",
+          role: "broker",
+          dateOfBirth: "1990-01-02",
+          prcLicense: "1234567",
+          locationFocus: "BGC",
+        })),
+      ]);
+
+      expect(firstRes.status).toBe(200);
+      expect(secondRes.status).toBe(200);
+      const firstBody = await firstRes.json();
+      const secondBody = await secondRes.json();
+
+      // Both responses report the same converged buyer role
+      expect(firstBody.activeRoles).toEqual(["buyer"]);
+      expect(secondBody.activeRoles).toEqual(["buyer"]);
+      expect(secondBody.reconsent).toBe(true);
+
+      // Profile upsert and canonical role wallet provisioning ran only once (for buyer/seeker, never broker)
+      expect(mocks.profileUpsert).toHaveBeenCalledTimes(1);
+      expect(mocks.profileUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          role: "seeker",
+          active_roles: ["buyer"],
+          primary_mode: "buyer",
+        }),
+        expect.anything(),
+      );
+      expect(mocks.canonicalRoleWalletUpsert).toHaveBeenCalledTimes(1);
+      expect(mocks.canonicalRoleWalletUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user_id: "user-1",
+          role: "seeker",
+        }),
+        expect.anything(),
+      );
+    });
+
+    it("A-356: finishes onboarding cleanly when retried after a partial wallet provisioning failure", async () => {
+      // Attempt 1 fails on canonical role wallet provisioning after saving the profile row
+      mocks.canonicalRoleWalletUpsert.mockResolvedValueOnce({
+        error: new Error("transient wallet failure"),
+      });
+
+      const failedAttempt = await POST(request({
+        name: "Owner Retry",
+        role: "owner",
+        dateOfBirth: "1990-01-02",
+      }));
+      expect(failedAttempt.status).toBe(500);
+      expect(mocks.profileUpsert).toHaveBeenCalledTimes(1);
+      expect(mocks.profileUpdate).not.toHaveBeenCalled();
+
+      // Simulate the saved partial profile row and already-recorded terms acceptance on retry
+      mocks.profileMaybeSingle.mockResolvedValueOnce({
+        data: {
+          adult_eligibility_status: "confirmed",
+          onboarding_completed_at: null,
+          active_roles: ["owner", "buyer"],
+          primary_mode: "owner",
+          role: "owner",
+          subscription_tier: "starry",
+        },
+        error: null,
+      });
+      mocks.termsInsert.mockResolvedValueOnce({ error: { code: "23505", message: "duplicate key" } });
+      mocks.termsSelectSingle.mockResolvedValueOnce({
+        data: { accepted_at: "2026-08-21T09:30:00.000Z" },
+        error: null,
+      });
+
+      // Attempt 2 even if submitted with a different role converges on the already-saved partial role and completes
+      const retryAttempt = await POST(request({
+        name: "Owner Retry",
+        role: "buyer",
+        dateOfBirth: "1990-01-02",
+      }));
+      expect(retryAttempt.status).toBe(200);
+      const retryBody = await retryAttempt.json();
+      expect(retryBody.success).toBe(true);
+      expect(retryBody.primaryMode).toBe("owner");
+      expect(retryBody.activeRoles).toEqual(["owner", "buyer"]);
+      expect(mocks.canonicalRoleWalletUpsert).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          user_id: "user-1",
+          role: "owner",
+        }),
+        expect.anything(),
+      );
+      expect(mocks.profileUpdate).toHaveBeenCalledWith({
+        onboarding_completed_at: expect.any(String),
+      });
     });
   });
 });

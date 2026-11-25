@@ -41,8 +41,12 @@ export function generateImpersonationToken({
   targetUserId,
   reason,
   durationMinutes = DEFAULT_DURATION_MINUTES,
-  secret = "scoutit_impersonation_fallback_secret",
+  secret = process.env.IMPERSONATION_SECRET,
 }) {
+  if (typeof secret !== "string" || !secret.trim()) {
+    throw new Error("IMPERSONATION_SECRET is required to sign impersonation tokens.");
+  }
+
   const now = Date.now();
   const exp = now + durationMinutes * 60 * 1000;
 
@@ -73,23 +77,36 @@ export function generateImpersonationToken({
 /**
  * Verifies an impersonation token signature and expiration.
  */
-export function verifyImpersonationToken({ token, secret = "scoutit_impersonation_fallback_secret" }) {
-  if (!token || typeof token !== "string" || !token.includes(".")) {
+export function verifyImpersonationToken({ token, secret = process.env.IMPERSONATION_SECRET }) {
+  if (typeof secret !== "string" || !secret.trim()) {
+    return { valid: false, error: "Impersonation signing secret is not configured." };
+  }
+  if (!token || typeof token !== "string") {
     return { valid: false, error: "Malformed token." };
   }
 
-  const [serialized, signature] = token.split(".");
+  const parts = token.split(".");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    return { valid: false, error: "Malformed token." };
+  }
+
+  const [serialized, signature] = parts;
   const expectedSig = crypto
     .createHmac("sha256", secret)
     .update(serialized)
     .digest("base64url");
 
-  if (signature !== expectedSig) {
+  const sigBuf = Buffer.from(signature, "utf8");
+  const expectedBuf = Buffer.from(expectedSig, "utf8");
+  if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
     return { valid: false, error: "Invalid cryptographic signature." };
   }
 
   try {
     const payload = JSON.parse(Buffer.from(serialized, "base64url").toString("utf8"));
+    if (!payload || typeof payload.exp !== "number" || !Number.isFinite(payload.exp)) {
+      return { valid: false, error: "Token payload could not be parsed." };
+    }
     if (Date.now() > payload.exp) {
       return { valid: false, error: "Impersonation session has expired." };
     }

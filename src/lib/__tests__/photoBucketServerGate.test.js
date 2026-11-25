@@ -57,7 +57,7 @@ describe("A-317: Public Photo Bucket Server Gate, Magic-Bytes Verification & Orp
       expect(json.error).toMatch(/No file provided/i);
     });
 
-    it("rejects oversized photo (> 10MB) with 413", async () => {
+    it("rejects a photo beyond the 4 MB application limit with 413", async () => {
       const { resolveUserId } = await import("@/lib/serverAuth");
       resolveUserId.mockResolvedValueOnce("usr-valid");
 
@@ -65,7 +65,7 @@ describe("A-317: Public Photo Bucket Server Gate, Magic-Bytes Verification & Orp
       const file = {
         name: "giant-photo.jpg",
         type: "image/jpeg",
-        size: 15 * 1024 * 1024, // 15 MB > 10MB
+        size: 4 * 1024 * 1024 + 1,
         arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(100)),
       };
 

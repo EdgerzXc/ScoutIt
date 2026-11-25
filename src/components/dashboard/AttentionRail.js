@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useReducedMotion } from "framer-motion";
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -54,6 +53,19 @@ const TONE = {
 };
 
 const REFRESH_MS = 120_000;
+
+function useReducedMotion() {
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
+    const onChange = () => setReduceMotion(mq.matches);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+  return reduceMotion;
+}
 
 export default function AttentionRail({ mockUserId, className = "", hideWhenClear = false }) {
   const reduceMotion = useReducedMotion();

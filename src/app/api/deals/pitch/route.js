@@ -9,6 +9,9 @@ import { isBlocked, checkBlockGuard } from "@/lib/connectBlocks";
 import { normalizeConnectSource, connectSourceMetadata } from "@/lib/connectSource";
 import { findRecentPendingDeal, checkReceiverGate } from "@/lib/connectGates";
 import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+import { recordSystemEvent } from "@/lib/systemEvents";
 
 // Broker-initiated pitch (Market Intelligence Feed -> "Open Deal File").
 // `deals` has an explicit RLS policy blocking ALL direct client inserts
@@ -22,21 +25,62 @@ import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 // verified-token + supabaseAdmin + spend_connects pattern already proven in
 // /api/dashboard/invite and /api/deals/initiate.
 
+export const checkPitchRate = createRateLimiter({ limit: 15, windowMs: 60_000, maxKeys: 10_000 });
+
+const pitchQueue = new Map();
+
+function withPitchQueue(key, task) {
+  let entry = pitchQueue.get(key);
+  if (!entry) {
+    entry = { tail: Promise.resolve(), refCount: 0 };
+    pitchQueue.set(key, entry);
+  }
+  entry.refCount += 1;
+
+  const run = entry.tail.then(() => task());
+  entry.tail = run.catch(() => {});
+
+  return run.finally(() => {
+    entry.refCount -= 1;
+    if (entry.refCount <= 0 && pitchQueue.get(key) === entry) {
+      pitchQueue.delete(key);
+    }
+  });
+}
 
 export async function POST(request) {
   try {
-    const { listingId, message, source_type, source_id, reason_tag, sender_identity_mode } = await request.json();
-    const connectSource = normalizeConnectSource({ source_type, source_id, reason_tag, sender_identity_mode });
-
     const brokerId = await resolveUserId(request);
     if (!brokerId) {
       return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
     }
-    if (!listingId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const rl = checkPitchRate(`${brokerId}:${clientIp(request)}`);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many pitch requests. Please wait a moment and try again." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds || 60) } }
+      );
     }
     if (!supabaseAdmin) {
       return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+    }
+
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+    const { listingId, message: rawMessage, source_type, source_id, reason_tag, sender_identity_mode } = body;
+    if (rawMessage !== undefined && rawMessage !== null && typeof rawMessage !== "string") {
+      return NextResponse.json({ error: "Pitch message must be a string" }, { status: 400 });
+    }
+    const message = typeof rawMessage === "string" ? rawMessage.trim() : "";
+    if (message.length > 2000) {
+      return NextResponse.json({ error: "Pitch message must be 2,000 characters or fewer" }, { status: 400 });
+    }
+    const connectSource = normalizeConnectSource({ source_type, source_id, reason_tag, sender_identity_mode });
+
+    if (!listingId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const { data: brokerProfile } = await supabaseAdmin
@@ -45,16 +89,18 @@ export async function POST(request) {
       .eq("id", brokerId)
       .maybeSingle();
 
-    const callerRoles = Array.isArray(brokerProfile?.active_roles)
-      ? brokerProfile.active_roles
-      : [brokerProfile?.role].filter(Boolean);
+    const callerRoles = [
+      brokerProfile?.role,
+      ...(Array.isArray(brokerProfile?.active_roles) ? brokerProfile.active_roles : []),
+    ]
+      .map((r) => String(r || "").trim().toLowerCase())
+      .filter(Boolean);
 
     const isAuthorizedBroker =
-      callerRoles.length === 0 || // Gracefully allow mock sessions without user_profiles rows
       callerRoles.some((r) =>
-        ["broker", "salesperson", "admin", "staff"].includes(String(r).toLowerCase())
+        ["broker", "salesperson", "admin", "staff"].includes(r)
       ) ||
-      brokerId === "master-dev";
+      (process.env.NODE_ENV !== "production" && brokerId === "master-dev");
 
     if (!isAuthorizedBroker) {
       return NextResponse.json(
@@ -91,6 +137,7 @@ export async function POST(request) {
       );
     }
 
+    return withPitchQueue(`${brokerId}:${listingId}`, async () => {
     const { data: existingRepresentation, error: representationLookupError } = await supabaseAdmin
       .from("property_broker_representations")
       .select("id, status")
@@ -109,6 +156,7 @@ export async function POST(request) {
     }
 
     let createdRepresentationId = null;
+    let resetRepresentationFromStatus = null;
     if (!existingRepresentation) {
       const { data: createdRepresentation, error: representationError } = await supabaseAdmin.from("property_broker_representations").insert({
         property_id: listingId,
@@ -118,12 +166,31 @@ export async function POST(request) {
       }).select("id").maybeSingle();
       if (representationError) return NextResponse.json({ error: "Failed to create representation request" }, { status: 503 });
       createdRepresentationId = createdRepresentation?.id || null;
+    } else if (existingRepresentation.status === "declined" || existingRepresentation.status === "revoked") {
+      const { error: resetError } = await supabaseAdmin
+        .from("property_broker_representations")
+        .update({ status: "pending", source: "broker_pitch" })
+        .eq("id", existingRepresentation.id)
+        .in("status", ["declined", "revoked"]);
+      if (resetError) return NextResponse.json({ error: "Failed to reopen representation request" }, { status: 503 });
+      resetRepresentationFromStatus = existingRepresentation.status;
     }
     // A-144 §10.10: a failed send must leave no actionable phantom — clean up
     // the representation row this send created, not just the deal row.
     const rollbackPitchSideEffects = async (dealId) => {
-      if (dealId) await supabaseAdmin.from('deals').delete().eq('id', dealId);
-      if (createdRepresentationId) await supabaseAdmin.from('property_broker_representations').delete().eq('id', createdRepresentationId);
+      if (dealId) {
+        try { await supabaseAdmin.from('deals').delete().eq('id', dealId); } catch {}
+      }
+      if (createdRepresentationId) {
+        try { await supabaseAdmin.from('property_broker_representations').delete().eq('id', createdRepresentationId); } catch {}
+      } else if (resetRepresentationFromStatus && existingRepresentation?.id) {
+        try {
+          await supabaseAdmin
+            .from('property_broker_representations')
+            .update({ status: resetRepresentationFromStatus })
+            .eq('id', existingRepresentation.id);
+        } catch {}
+      }
     };
 
     // 1. Insert the pitch deal first — rolled back below if a gate or the Connect spend fails.
@@ -192,6 +259,14 @@ export async function POST(request) {
         { status: insufficient ? 403 : 500 }
       );
     }
+    const spendRow = Array.isArray(spendData) ? spendData[0] : spendData;
+    if (!spendRow || spendRow.success === false) {
+      await rollbackPitchSideEffects(dealData[0].id);
+      return NextResponse.json(
+        { error: "Insufficient Connects balance." },
+        { status: 403 }
+      );
+    }
     spentConnects = true;
 
     const newBalance = spendData?.[0]?.remaining_total ?? spendData?.[0]?.total_balance ?? null;
@@ -209,7 +284,9 @@ export async function POST(request) {
       }
 
       if (newBalance !== null) {
-        await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', brokerId).catch(() => {});
+        try {
+          await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', brokerId);
+        } catch {}
       }
 
       // Notify the owner — the same real-time signal every other deal-creating
@@ -245,20 +322,54 @@ export async function POST(request) {
       console.error("[PITCH API] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
       if (spentConnects && brokerId !== 'master-dev') {
         try {
-          await supabaseAdmin.rpc('refund_connects_system_error', {
+          const { data: refundRows, error: refundRpcErr } = await supabaseAdmin.rpc('refund_connects_system_error', {
             p_user_id: brokerId,
             p_amount: 1,
             p_reason: `Compensating refund: pitch delivery failed for deal ${dealData[0].id} (${postSpendErr.message})`,
             p_staff_id: "system",
             p_ref_id: String(listingId),
           });
+          const refundConfirmed =
+            !refundRpcErr &&
+            (!Array.isArray(refundRows) ||
+              (refundRows.length > 0 && refundRows[0]?.success !== false));
+          if (!refundConfirmed) {
+            console.error("[PITCH API] Compensating refund unconfirmed:", refundRpcErr);
+            await recordSystemEvent({
+              event: "connects.pitch.reconciliation_required",
+              severity: "error",
+              subjectTable: "deals",
+              subjectId: String(dealData?.[0]?.id || listingId),
+              summary: "Compensating Connect refund failed after pitch delivery error",
+              detail: {
+                brokerId,
+                listingId,
+                dealId: dealData?.[0]?.id || null,
+                error: refundRpcErr?.message || postSpendErr?.message || "unknown",
+              },
+            });
+          }
         } catch (refundErr) {
           console.error("[PITCH API] Compensating refund RPC failed:", refundErr);
+          await recordSystemEvent({
+            event: "connects.pitch.reconciliation_required",
+            severity: "error",
+            subjectTable: "deals",
+            subjectId: String(dealData?.[0]?.id || listingId),
+            summary: "Compensating Connect refund failed after pitch delivery error",
+            detail: {
+              brokerId,
+              listingId,
+              dealId: dealData?.[0]?.id || null,
+              error: refundErr?.message || postSpendErr?.message || "unknown",
+            },
+          });
         }
       }
       await rollbackPitchSideEffects(dealData[0].id);
       return NextResponse.json({ error: "Pitch delivery failed. Your Connect has been refunded." }, { status: 500 });
     }
+    });
 
   } catch (err) {
     console.error("[PITCH API] Error during pitch process:", err);

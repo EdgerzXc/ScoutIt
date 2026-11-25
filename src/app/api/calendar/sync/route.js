@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { resolveUserId } from "@/lib/serverAuth";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { pullInbound } from "@/lib/calendar/googleSync";
+import { processCalendarSyncQueue } from "@/lib/calendar/meetLink";
 
 // POST /api/calendar/sync — pull the caller's Google events into ScoutIt for a
 // window around now (default −30d … +90d). This is the on-demand "Sync now" /
@@ -13,6 +15,14 @@ export async function POST(request) {
   try {
     const userId = await resolveUserId(request);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // A-361: Drain any queued viewing-appointment calendar retries for this host
+    // alongside the manual/periodic sync.
+    if (supabaseAdmin) {
+      await processCalendarSyncQueue(supabaseAdmin, { hostUserId: userId, limit: 10 }).catch((err) => {
+        console.warn("[calendar/sync] retry queue drain warning:", err?.message);
+      });
+    }
 
     const now = Date.now();
     const from = new Date(now - DEFAULT_BACK_DAYS * DAY_MS).toISOString();

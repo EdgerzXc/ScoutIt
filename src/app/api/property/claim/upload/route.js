@@ -3,6 +3,14 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { verifyFileFamily } from "@/lib/fileTypeCheck";
 import { sanitizeError } from "@/lib/sanitizeError";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkClaimUploadRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 const CLAIM_BUCKET = "claim-documents";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
@@ -16,6 +24,14 @@ export async function POST(request) {
       return NextResponse.json(
         { error: "Unauthorized: Sign in to upload claim documents" },
         { status: 401 }
+      );
+    }
+
+    const rate = checkClaimUploadRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many upload attempts. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
       );
     }
 

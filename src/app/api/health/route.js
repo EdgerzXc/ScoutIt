@@ -8,14 +8,9 @@ import { getAirtableBudgetStatus } from '@/lib/airtableBudget';
 // Airtable already used "unconfigured" for this; "configured" is its counterpart
 // for a credential whose presence is all we assert.
 const NON_FAILING_STATUSES = new Set(['healthy', 'configured', 'unconfigured']);
+const NO_STORE = { 'Cache-Control': 'no-store' };
 
-export async function GET(request) {
-  try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-  } catch (error) {
-    return NextResponse.json({ status: "error", message: "Error" }, { status: 500 });
-  }
-
+export async function GET() {
   const results = {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
@@ -33,7 +28,7 @@ export async function GET(request) {
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (supabaseUrl && supabaseKey) {
       const supabase = createClient(supabaseUrl, supabaseKey);
-      const { data, error } = await supabase.from('properties').select('id').limit(1);
+      const { error } = await supabase.from('feature_flags').select('id').limit(1).abortSignal(AbortSignal.timeout(3000));
       results.services.supabase = error ? "unhealthy" : "healthy";
     } else {
       results.services.supabase = "unconfigured";
@@ -67,9 +62,11 @@ export async function GET(request) {
     // failing silently at the moment someone was waiting for a notification.
     results.services.email = isEmailConfigured() ? "configured" : "unconfigured";
 
-    const allHealthy = Object.values(results.services).every(status => NON_FAILING_STATUSES.has(status));
+    const coreConfigured = results.services.supabase !== 'unconfigured' && results.services.airtable !== 'unconfigured';
+    const allHealthy = Object.values(results.services).every(status => NON_FAILING_STATUSES.has(status))
+      && (process.env.VERCEL_ENV !== 'production' || coreConfigured);
 
-    return NextResponse.json(results, { status: allHealthy ? 200 : 503 });
+    return NextResponse.json(results, { status: allHealthy ? 200 : 503, headers: NO_STORE });
 
   } catch (error) {
     console.error("[Health Check] Probe failed", error);
@@ -77,6 +74,6 @@ export async function GET(request) {
     // /api/health is publicly reachable — never echo the raw probe error,
     // it names our Airtable base and Supabase host.
     results.message = sanitizeError(error, "Health probe failed.");
-    return NextResponse.json(results, { status: 500 });
+    return NextResponse.json(results, { status: 500, headers: NO_STORE });
   }
 }

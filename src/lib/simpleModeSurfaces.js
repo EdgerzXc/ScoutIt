@@ -55,3 +55,27 @@ export const sidebarGroupCollapsed = detailGroupCollapsed;
 export function sidebarGroupVisible(fieldCount) {
   return fieldCount > 0;
 }
+
+/**
+ * Should secondary directory filters/intel widgets collapse in Simple Mode?
+ * Pro Mode is always expanded (returns false).
+ */
+export function directorySecondaryCollapsed(simple, open) {
+  return detailGroupCollapsed(simple, open);
+}
+
+/**
+ * Should secondary Discover panels/descriptions collapse in Simple Mode?
+ * Pro Mode is always expanded (returns false).
+ */
+export function discoverSecondaryCollapsed(simple, open) {
+  return detailGroupCollapsed(simple, open);
+}
+
+/**
+ * Should secondary Unit Master technical specs collapse in Simple Mode?
+ * Pro Mode is always expanded (returns false).
+ */
+export function unitSecondaryCollapsed(simple, open) {
+  return detailGroupCollapsed(simple, open);
+}

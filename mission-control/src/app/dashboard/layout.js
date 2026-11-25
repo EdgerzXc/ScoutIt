@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import {
   Shield, ShieldAlert, LayoutDashboard, Users, Database, Flag, Video, LogOut, Bell,
   ScrollText, KeyRound, Award, BarChart3, Radar, Inbox, BadgeCheck,
@@ -12,6 +13,11 @@ import SensitiveWorkspaceGuard from "@/components/security/SensitiveWorkspaceGua
 export default async function DashboardLayout({ children }) {
   const staff = await getCurrentStaff();
   if (!staff) redirect("/?error=NotAuthorized");
+
+  const pathname = (await headers()).get("x-mc-pathname") || "";
+  if (staff.mfaRequired && !pathname.startsWith("/dashboard/mfa")) {
+    redirect("/dashboard/mfa");
+  }
 
   const sessionStartedAt = new Date().toISOString();
   const sessionReference = `MC-${String(staff.id).slice(0, 8)}-${sessionStartedAt.replace(/\D/g, "").slice(0, 12)}`;
@@ -64,9 +70,10 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <SensitiveWorkspaceGuard staffEmail={staff.email} sessionReference={sessionReference} sessionStartedAt={sessionStartedAt}>
-    <div className="flex h-screen overflow-hidden bg-background text-white font-sans">
+    <div className="flex flex-col lg:flex-row h-dvh overflow-hidden bg-background text-white font-sans">
       <a href="#main-content" className="sr-only z-50 rounded bg-gold px-4 py-2 text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to main content</a>
-      <aside className="flex w-64 flex-col border-r border-line bg-surface" aria-label="Mission Control sidebar">
+      <SidebarNav items={navigation} mobile />
+      <aside className="hidden lg:flex w-64 flex-col border-r border-line bg-surface" aria-label="Mission Control sidebar">
         <div className="flex items-center gap-3 p-6">
           <div className="flex h-8 w-8 items-center justify-center rounded border border-line bg-black/50">
             <Shield className="h-4 w-4 text-gold" aria-hidden="true" />
@@ -82,7 +89,7 @@ export default async function DashboardLayout({ children }) {
             </div>
           </div>
           <form action="/auth/signout" method="POST">
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-400/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
+            <button type="submit" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-400/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
               <LogOut className="h-4 w-4" aria-hidden="true" />Sign out
             </button>
           </form>
@@ -91,7 +98,7 @@ export default async function DashboardLayout({ children }) {
       <div className="relative flex-1 overflow-y-auto bg-background">
         <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-gold opacity-5 blur-[150px]" />
         {staff.mfaRequired && (
-          <div className="relative z-20 bg-amber-500/10 border-b border-amber-500/30 px-8 py-3 flex items-center justify-between text-xs text-amber-300">
+          <div className="relative z-20 bg-amber-500/10 border-b border-amber-500/30 px-4 md:px-8 py-3 flex items-center justify-between gap-3 text-xs text-amber-300">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
@@ -106,7 +113,7 @@ export default async function DashboardLayout({ children }) {
             </a>
           </div>
         )}
-        <main id="main-content" className="relative z-10 p-8">{children}</main>
+        <main id="main-content" className="relative z-10 p-4 md:p-8">{children}</main>
       </div>
     </div>
     </SensitiveWorkspaceGuard>

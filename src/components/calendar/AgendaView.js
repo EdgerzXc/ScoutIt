@@ -42,7 +42,7 @@ function groupByDay(events) {
  * @param {{
  *   events: object[],
  *   onSelectEvent: (event)=>void,
- *   onRespondViewing: (id, status)=>void,   // accept/decline host viewings
+ *   onRespondViewing: (viewing, status)=>void,
  *   respondingId: string|null,
  * }} props
  */
@@ -104,7 +104,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         type="button"
-                        onClick={() => onRespondViewing(ev.id, "cancelled")}
+                        onClick={() => onRespondViewing(ev, "cancelled")}
                         disabled={respondingId === ev.id}
                         className="text-xs text-error border border-error/30 px-2.5 py-1.5 rounded hover:bg-error/10
                           uppercase tracking-wider font-mono disabled:opacity-50"
@@ -113,7 +113,7 @@ export default function AgendaView({ events, onSelectEvent, onRespondViewing, re
                       </button>
                       <button
                         type="button"
-                        onClick={() => onRespondViewing(ev.id, "confirmed")}
+                        onClick={() => onRespondViewing(ev, "confirmed")}
                         disabled={respondingId === ev.id}
                         className="text-xs text-background bg-gold-accent px-2.5 py-1.5 rounded hover:bg-gold-bright
                           uppercase tracking-wider font-mono disabled:opacity-50"

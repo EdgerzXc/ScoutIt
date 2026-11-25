@@ -195,6 +195,8 @@ export default function BrokerMode({ subRole = "broker" }) {
 
   // New Deal File Workspace State
   const [activeDealId, setActiveDealId] = useState(null);
+  const [busyDealId, setBusyDealId] = useState(null);
+  const busyDealRef = useRef(null);
 
   // For the scratchpad notes in the deal file -- persisted to deals.private_notes
   // (debounced so we're not firing a PATCH on every keystroke).
@@ -524,11 +526,14 @@ export default function BrokerMode({ subRole = "broker" }) {
         const { data: { session } } = await getSession();
         const token = session?.access_token;
         const mockOwnerId = !token && currentUser?.id ? currentUser.id : undefined;
-        await fetch(`/api/deals/${dealId}/notes`, {
+        const res = await fetch(`/api/deals/${dealId}/notes`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
           body: JSON.stringify({ note, mockOwnerId }),
         });
+        if (!res.ok) {
+          throw new Error("Failed to save private note");
+        }
       } catch (err) {
         console.error('Failed to save deal notes', err);
         if (addToast) addToast("Failed to save private note. Check your connection.", "❌");
@@ -574,33 +579,63 @@ export default function BrokerMode({ subRole = "broker" }) {
             </div>
             {deal.status === 'pending' && (
               <button 
-                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm"
-                onClick={() => {
-                  updatePitchStatus(deal.id, 'declined'); // Brokers can withdraw
-                  setActiveDealId(null);
+                type="button"
+                disabled={busyDealId === deal.id}
+                className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50"
+                onClick={async () => {
+                  if (busyDealRef.current === deal.id) return;
+                  busyDealRef.current = deal.id;
+                  setBusyDealId(deal.id);
+                  try {
+                    const ok = await updatePitchStatus(deal.id, 'declined'); // Brokers can withdraw
+                    if (ok === true) setActiveDealId(null);
+                  } finally {
+                    if (busyDealRef.current === deal.id) busyDealRef.current = null;
+                    setBusyDealId(null);
+                  }
                 }}
               >
-                Withdraw Pitch
+                {busyDealId === deal.id ? "Withdrawing..." : "Withdraw Pitch"}
               </button>
             )}
             {deal.status === 'invited' && (
               <div className="flex gap-2">
                 <button 
-                  className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm"
-                  onClick={() => {
-                    updatePitchStatus(deal.id, 'declined');
-                    setActiveDealId(null);
+                  type="button"
+                  disabled={busyDealId === deal.id}
+                  className="border border-surface-variant text-text-secondary hover:text-error hover:border-error font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50"
+                  onClick={async () => {
+                    if (busyDealRef.current === deal.id) return;
+                    busyDealRef.current = deal.id;
+                    setBusyDealId(deal.id);
+                    try {
+                      const ok = await updatePitchStatus(deal.id, 'declined');
+                      if (ok === true) setActiveDealId(null);
+                    } finally {
+                      if (busyDealRef.current === deal.id) busyDealRef.current = null;
+                      setBusyDealId(null);
+                    }
                   }}
                 >
                   Decline
                 </button>
                 <button 
-                  className="bg-gold-accent text-background hover:opacity-90 font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm"
-                  onClick={() => {
-                    updatePitchStatus(deal.id, 'accepted');
+                  type="button"
+                  disabled={busyDealId === deal.id}
+                  className="bg-gold-accent text-background hover:opacity-90 font-working-title font-bold px-4 py-2 min-h-11 rounded transition text-sm disabled:opacity-50"
+                  onClick={async () => {
+                    if (busyDealRef.current === deal.id) return;
+                    busyDealRef.current = deal.id;
+                    setBusyDealId(deal.id);
+                    try {
+                      await updatePitchStatus(deal.id, 'accepted');
+                    } finally {
+                      if (busyDealRef.current === deal.id) busyDealRef.current = null;
+                      setBusyDealId(null);
+                    }
                   }}
                 >
-                  Accept
+                  {busyDealId === deal.id ? "Updating..." : "Accept"}
                 </button>
               </div>
             )}

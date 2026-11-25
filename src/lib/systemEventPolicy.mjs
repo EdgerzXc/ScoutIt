@@ -47,6 +47,8 @@ export const EVENTS = Object.freeze({
   // Ownership — a listing changing hands is not routine, and the person who
   // lost it is not the person pressing the button
   LISTING_OWNERSHIP_TRANSFERRED: "listing.ownership.transferred",
+  DEAL_DISPUTE_OPENED: "deal.dispute.opened",
+  CALENDAR_SYNC_FAILED: "calendar.sync.failed",
 
   // Scheduled work
   CRON_COMPLETED: "cron.completed",

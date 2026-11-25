@@ -19,6 +19,7 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import BrokerPanel from "@/components/profile/panels/BrokerPanel";
 import PhotographerPanel from "@/components/profile/panels/PhotographerPanel";
 import ResearcherPanel from "@/components/profile/panels/ResearcherPanel";
+import EventPlannerPanel from "@/components/profile/panels/EventPlannerPanel";
 import { getUser } from "@/lib/authClient";
 import {
   loadOwnProfile,
@@ -135,6 +136,9 @@ export default function OwnProfilePage() {
   const isBroker = roles.includes("broker");
   const isPhotographer = roles.includes("provider") && provType === "photographer";
   const isResearcher = roles.includes("provider") && provType === "researcher";
+  const isEventPlanner =
+    roles.includes("provider") &&
+    (provType === "designer" || roles.includes("event-planner") || roles.includes("designer"));
 
   return (
     <div style={pageWrap} className="profile-page">
@@ -188,6 +192,14 @@ export default function OwnProfilePage() {
             <ResearcherPanel
               data={researcherData}
               isAnonymous={privacy?.anonymous_byline ?? false}
+            />
+          )}
+          {isEventPlanner && (
+            <EventPlannerPanel
+              userId={profile.id}
+              isAvailable={profile.provider_availability}
+              isOwnView
+              specialties={profile.provider_specialties || []}
             />
           )}
         </div>

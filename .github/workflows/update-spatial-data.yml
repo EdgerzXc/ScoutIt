@@ -30,6 +30,9 @@ jobs:
       - name: Run Transit Sync Script
         run: node scripts/sync_transit_data.js
 
+      - name: Verify Surface Locks Integrity
+        run: node scripts/verify-approved-surfaces.mjs
+
       - name: Commit and Push Changes
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:

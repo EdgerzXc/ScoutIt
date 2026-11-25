@@ -26,6 +26,72 @@
 import { EDITOR_DETAIL_ALIASES } from "./detailKeyAliases";
 import { deriveNumericTwins } from "./numericTwins";
 
+export function toBool(val) {
+  if (typeof val === "boolean") return val;
+  if (typeof val === "number") return val !== 0 && !Number.isNaN(val);
+  if (typeof val === "string") {
+    const norm = val.trim().toLowerCase();
+    if (
+      !norm ||
+      [
+        "false",
+        "no",
+        "0",
+        "none",
+        "n/a",
+        "na",
+        "null",
+        "undefined",
+        "not eligible",
+        "not available",
+        "unchecked",
+        "off",
+      ].includes(norm)
+    ) {
+      return false;
+    }
+    return true;
+  }
+  return Boolean(val);
+}
+
+const FALLBACK_PRICE_FIELD_BY_CATEGORY = {
+  residential: { camel: "price", aliases: ["RS_Price", "price"] },
+  commercial: { camel: "rentPerSqm", aliases: ["CM_Rent_Per_Sqm", "rentPerSqm"] },
+  restaurants: { camel: "rstRent", aliases: ["RST_Rent", "RST_Rent_Per_Month", "rstRent"] },
+  restaurant: { camel: "rstRent", aliases: ["RST_Rent", "RST_Rent_Per_Month", "rstRent"] },
+  hospitality: { camel: "listedPrice", aliases: ["Listed_Price", "listedPrice"] },
+  str: { camel: "nightlyRate", aliases: ["STR_Nightly_Rate", "nightlyRate"] },
+  "short-term": { camel: "nightlyRate", aliases: ["STR_Nightly_Rate", "nightlyRate"] },
+  venues: { camel: "rentalRate", aliases: ["VEN_Rental_Rate", "rentalRate"] },
+  venue: { camel: "rentalRate", aliases: ["VEN_Rental_Rate", "rentalRate"] },
+  "venues/events": { camel: "rentalRate", aliases: ["VEN_Rental_Rate", "rentalRate"] },
+};
+
+/**
+ * Seeds the canonical vertical price key in `details` from top-level `price`
+ * when a CSV or AI draft supplied top-level `price` without populating the
+ * vertical-specific detail key. Preserves explicit detail values when present.
+ */
+export function withFallbackVerticalPrice(details, price, category = null) {
+  const hasTopPrice =
+    price !== undefined && price !== null && String(price).trim() !== "";
+  if (!hasTopPrice) return details;
+
+  const base = details && typeof details === "object" ? { ...details } : {};
+  const normCat = typeof category === "string" ? category.trim().toLowerCase() : "";
+  const spec = FALLBACK_PRICE_FIELD_BY_CATEGORY[normCat];
+  if (!spec) return base;
+
+  const alreadyHasPrice = spec.aliases.some(
+    (k) => base[k] !== undefined && base[k] !== null && String(base[k]).trim() !== ""
+  );
+  if (!alreadyHasPrice) {
+    base[spec.camel] = normCat === "commercial" ? String(price).trim() : price;
+  }
+  return base;
+}
+
 export function reverseMapCategoryFields(details, category = null) {
   const map = {};
   if (!details) return map;
@@ -49,6 +115,13 @@ export function reverseMapCategoryFields(details, category = null) {
   };
 
   const cleanStr = (v) => (typeof v === "string" ? v.trim() : v);
+
+  // Preserve descriptive text options while gracefully handling legacy booleans.
+  const textOrLegacyBool = (v) => {
+    if (typeof v === "boolean") return v;
+    if (typeof v === "string") return v.trim();
+    return v;
+  };
 
   // A-146: ambiguous camelCase keys shared across categories (capRate →
   // CM+HOSP, power → RST+VEN) wrote EVERY matching column, so a hospitality
@@ -98,14 +171,14 @@ export function reverseMapCategoryFields(details, category = null) {
 
   // Commercial
   if (details.rentPerSqm !== undefined) map.CM_Rent_Per_Sqm = cleanStr(details.rentPerSqm);
-  if (details.totalGLA !== undefined) map.CM_Total_GLA = toNum(details.totalGLA) || null;
+  if (details.totalGLA !== undefined) map.CM_Total_GLA = toNum(details.totalGLA);
   if (details.floorPlate !== undefined) map.CM_Floor_Plate_Sqm = cleanStr(details.floorPlate);
   if (details.buildingGrade !== undefined) map.CM_Building_Grade = cleanStr(details.buildingGrade);
   if (details.handOver !== undefined) map.CM_Hand_Over_Condition = cleanStr(details.handOver);
   if (details.availability !== undefined) map.CM_Availability_Status = cleanStr(details.availability);
   if (details.minLeaseTerm !== undefined) map.CM_Min_Lease_Term = details.minLeaseTerm;
   if (details.certification !== undefined) map.CM_Certification = details.certification;
-  if (details.peza !== undefined) map.CM_PEZA = !!details.peza;
+  if (details.peza !== undefined) map.CM_PEZA = toBool(details.peza);
   if (details.camc !== undefined) map.CM_CAMC_Per_Sqm = details.camc;
   if (details.acCharges !== undefined) map.CM_AC_Charges = details.acCharges;
   if (details.acSystem !== undefined) map.CM_AC_System = details.acSystem;
@@ -130,27 +203,27 @@ export function reverseMapCategoryFields(details, category = null) {
   if (details.listedPrice !== undefined) map.Listed_Price = details.listedPrice;
 
   // Residential
-  if (details.price !== undefined) map.RS_Price = toNum(details.price) || null;
+  if (details.price !== undefined) map.RS_Price = toNum(details.price);
   if (details.floorLevel !== undefined) map.RS_Floor_Level = details.floorLevel;
   if (details.view !== undefined) map.RS_View = details.view;
-  if (details.assocDues !== undefined) map.RS_Assoc_Dues = toNum(details.assocDues) || null;
+  if (details.assocDues !== undefined) map.RS_Assoc_Dues = toNum(details.assocDues);
   if (details.turnoverDate !== undefined) map.RS_Turnover_Date = details.turnoverDate;
-  if (details.studio !== undefined) map.RS_Studio_Flag = !!details.studio;
+  if (details.studio !== undefined) map.RS_Studio_Flag = toBool(details.studio);
   if (details.petPolicy !== undefined) map.RS_Pet_Policy = details.petPolicy;
-  if (details.pricePerSqm !== undefined) map.RS_Price_Per_Sqm = toNum(details.pricePerSqm) || null;
+  if (details.pricePerSqm !== undefined) map.RS_Price_Per_Sqm = toNum(details.pricePerSqm);
   if (details.paymentTerms !== undefined) map.RS_Payment_Terms = details.paymentTerms;
 
   // STR
-  if (details.nightlyRate !== undefined) map.STR_Nightly_Rate = toNum(details.nightlyRate) || null;
-  if (details.maxGuests !== undefined) map.STR_Max_Guests = toNum(details.maxGuests) || null;
-  if (details.rating !== undefined) map.STR_Avg_Rating = toNum(details.rating) || null;
-  if (details.bedrooms !== undefined) map.Beds = toNum(details.bedrooms) || null;
-  if (details.bathrooms !== undefined) map.Baths = toNum(details.bathrooms) || null;
-  if (details.minStay !== undefined) map.STR_Min_Stay_Nights = toNum(details.minStay) || null;
+  if (details.nightlyRate !== undefined) map.STR_Nightly_Rate = toNum(details.nightlyRate);
+  if (details.maxGuests !== undefined) map.STR_Max_Guests = toNum(details.maxGuests);
+  if (details.rating !== undefined) map.STR_Avg_Rating = toNum(details.rating);
+  if (details.bedrooms !== undefined) map.Beds = toNum(details.bedrooms);
+  if (details.bathrooms !== undefined) map.Baths = toNum(details.bathrooms);
+  if (details.minStay !== undefined) map.STR_Min_Stay_Nights = toNum(details.minStay);
   if (details.checkInOut !== undefined) map.STR_Check_In_Out = details.checkInOut;
-  if (details.weekendRate !== undefined) map.STR_Weekend_Rate = toNum(details.weekendRate) || null;
+  if (details.weekendRate !== undefined) map.STR_Weekend_Rate = toNum(details.weekendRate);
   if (details.bedConfig !== undefined) map.STR_Bed_Config = details.bedConfig;
-  if (details.selfCheckIn !== undefined) map.STR_Self_Check_In = !!details.selfCheckIn;
+  if (details.selfCheckIn !== undefined) map.STR_Self_Check_In = toBool(details.selfCheckIn);
   if (details.houseRules !== undefined) map.STR_House_Rules = details.houseRules;
   if (details.cancellation !== undefined) map.STR_Cancellation_Policy = details.cancellation;
   if (details.permit !== undefined) map.STR_Permit_Accreditation = details.permit;
@@ -158,51 +231,52 @@ export function reverseMapCategoryFields(details, category = null) {
   if (details.cleaningFee !== undefined) map.STR_Cleaning_Fee = toNum(details.cleaningFee);
 
   // Restaurant
-  if (details.floorArea !== undefined) map.FloorSqm = toNum(details.floorArea) || null;
-  if (details.seating !== undefined) map.RST_Seating_Capacity = toNum(details.seating) || null;
+  if (details.floorArea !== undefined) map.FloorSqm = toNum(details.floorArea);
+  if (details.seating !== undefined) map.RST_Seating_Capacity = toNum(details.seating);
   if (details.kitchen !== undefined) map.RST_Kitchen_Condition = details.kitchen;
   if (details.footTraffic !== undefined) map.RST_Foot_Traffic = details.footTraffic;
   if (details.frontage !== undefined) map.RST_Frontage = details.frontage;
   if (details.indoorOutdoor !== undefined) map.Indoor_Outdoor = details.indoorOutdoor;
   if (details.previousUse !== undefined) map.RST_Previous_Use = details.previousUse;
-  if (details.hoodExhaust !== undefined) map.RST_Hood_Exhaust = !!details.hoodExhaust;
-  if (details.greaseTrap !== undefined) map.RST_Grease_Trap = !!details.greaseTrap;
-  if (details.gasLine !== undefined) map.RST_Gas_Line = !!details.gasLine;
+  if (details.hoodExhaust !== undefined) map.RST_Hood_Exhaust = toBool(details.hoodExhaust);
+  if (details.greaseTrap !== undefined) map.RST_Grease_Trap = toBool(details.greaseTrap);
+  if (details.gasLine !== undefined) map.RST_Gas_Line = toBool(details.gasLine);
   if (details.power !== undefined && scopedTo("restaurants")) map.RST_Power_Capacity = details.power;
-  if (details.delivery !== undefined) map.RST_Delivery_Access = !!details.delivery;
-  if (details.liquor !== undefined) map.RST_Liquor_License = !!details.liquor;
+  if (details.delivery !== undefined) map.RST_Delivery_Access = textOrLegacyBool(details.delivery);
+  if (details.liquor !== undefined) map.RST_Liquor_License = textOrLegacyBool(details.liquor);
   if (details.zoning !== undefined) map.RST_FB_Zoning_Permit = details.zoning;
   if (details.ceiling !== undefined) map.CeilingHeight = details.ceiling;
   if (details.turnover !== undefined) map.RST_Turnover_Condition = details.turnover;
-  // parking already mapped above, but we can also set Guest_Parking
-  if (details.parking !== undefined) map.Guest_Parking = details.parking;
+  // parking already mapped above; scope Guest_Parking strictly to restaurant/venue verticals
+  if (details.parking !== undefined && scopedTo("restaurants", "venues")) map.Guest_Parking = details.parking;
   if (details.rstRent !== undefined) map.RST_Rent = toNum(details.rstRent);
   if (details.rstDues !== undefined) map.RST_Dues_CUSA = toNum(details.rstDues);
 
   // Hospitality
-  if (details.rooms !== undefined) map.HOSP_Room_Count = toNum(details.rooms) || null;
-  if (details.stars !== undefined) map.HOSP_Star_Rating = toNum(details.stars) || null;
+  if (details.rooms !== undefined) map.HOSP_Room_Count = toNum(details.rooms);
+  if (details.stars !== undefined) map.HOSP_Star_Rating = toNum(details.stars);
   if (details.operator !== undefined) map.HOSP_Operator_Brand = details.operator;
   if (details.roomTypes !== undefined) map.HOSP_Room_Types = details.roomTypes;
-  if (details.fbOutlets !== undefined) map.HOSP_FB_Outlets = toNum(details.fbOutlets) || null;
-  if (details.functionRooms !== undefined) map.HOSP_Function_Rooms = toNum(details.functionRooms) || null;
+  if (details.fbOutlets !== undefined) map.HOSP_FB_Outlets = toNum(details.fbOutlets);
+  if (details.functionRooms !== undefined) map.HOSP_Function_Rooms = toNum(details.functionRooms);
   if (details.yearRenovated !== undefined) map.HOSP_Year_Built_Renovated = details.yearRenovated;
-  if (details.adr !== undefined) map.HOSP_ADR = toNum(details.adr) || null;
-  if (details.occupancy !== undefined) map.HOSP_Occupancy_Rate = toNum(details.occupancy) || null;
-  if (details.revpar !== undefined) map.HOSP_RevPAR = toNum(details.revpar) || null;
-  if (details.capRate !== undefined && scopedTo("hospitality")) map.HOSP_Cap_Rate = toNum(details.capRate) || null;
-  if (details.gfa !== undefined) map.HOSP_GFA = toNum(details.gfa) || null;
-  if (details.landArea !== undefined) map.HOSP_Land_Area = toNum(details.landArea) || null;
+  if (details.adr !== undefined) map.HOSP_ADR = toNum(details.adr);
+  if (details.occupancy !== undefined) map.HOSP_Occupancy_Rate = toNum(details.occupancy);
+  if (details.revpar !== undefined) map.HOSP_RevPAR = toNum(details.revpar);
+  if (details.capRate !== undefined && scopedTo("hospitality")) map.HOSP_Cap_Rate = toNum(details.capRate);
+  if (details.gfa !== undefined) map.HOSP_GFA = toNum(details.gfa);
+  if (details.landArea !== undefined) map.HOSP_Land_Area = toNum(details.landArea);
 
   // Venue
-  if (details.seated !== undefined) map.VEN_Capacity_Seated = toNum(details.seated) || null;
-  if (details.standing !== undefined) map.VEN_Capacity_Standing = toNum(details.standing) || null;
-  if (details.floorArea !== undefined && !map.FloorSqm) map.FloorSqm = toNum(details.floorArea) || null;
-  if (details.rentalRate !== undefined) map.VEN_Rental_Rate = toNum(details.rentalRate) || null;
-  if (details.minHours !== undefined) map.VEN_Min_Booking_Hours = toNum(details.minHours) || null;
-  if (details.aircon !== undefined) map.VEN_Air_Conditioning = !!details.aircon;
+  if (details.seated !== undefined) map.VEN_Capacity_Seated = toNum(details.seated);
+  if (details.standing !== undefined) map.VEN_Capacity_Standing = toNum(details.standing);
+  if (details.floorArea !== undefined && map.FloorSqm === undefined) map.FloorSqm = toNum(details.floorArea);
+  if (details.rentalRate !== undefined) map.VEN_Rental_Rate = toNum(details.rentalRate);
+  if (details.minHours !== undefined) map.VEN_Min_Booking_Hours = toNum(details.minHours);
+  if (details.aircon !== undefined) map.VEN_Air_Conditioning = textOrLegacyBool(details.aircon);
   if (details.catering !== undefined) map.VEN_Catering_Policy = details.catering;
   if (details.layouts !== undefined) map.VEN_Layout_Configs = details.layouts;
+  else if (details.layout !== undefined && scopedTo("venues")) map.VEN_Layout_Configs = details.layout;
   if (details.av !== undefined) map.VEN_AV_Equipment = details.av;
   if (details.power !== undefined && scopedTo("venues")) map.VEN_Power_Capacity = details.power;
   if (details.accessibility !== undefined) map.VEN_Accessibility = details.accessibility;

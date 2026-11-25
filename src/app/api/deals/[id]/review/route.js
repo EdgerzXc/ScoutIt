@@ -47,22 +47,53 @@ export async function POST(request, { params }) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON payload." },
+        { status: 400 }
+      );
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid JSON payload." },
+        { status: 400 }
+      );
+    }
     const { vectors, feedback, leaseType, durationMonths } = body;
 
-    if (!vectors || typeof vectors !== "object") {
+    if (!vectors || typeof vectors !== "object" || Array.isArray(vectors)) {
       return NextResponse.json(
         { error: "Missing required vectors object containing ratings (1 to 5) for all evaluation vectors." },
         { status: 400 }
       );
     }
 
+    if (feedback !== undefined && feedback !== null && typeof feedback !== "string") {
+      return NextResponse.json({ error: "Feedback must be a string." }, { status: 400 });
+    }
+    if (typeof feedback === "string" && feedback.length > 2000) {
+      return NextResponse.json({ error: "Feedback must be 2,000 characters or fewer." }, { status: 400 });
+    }
+    if (leaseType !== undefined && leaseType !== null && (typeof leaseType !== "string" || leaseType.trim().length > 100)) {
+      return NextResponse.json({ error: "leaseType must be a string of 100 characters or fewer." }, { status: 400 });
+    }
+    if (
+      durationMonths !== undefined &&
+      durationMonths !== null &&
+      (!Number.isInteger(durationMonths) || durationMonths < 1 || durationMonths > 600)
+    ) {
+      return NextResponse.json({ error: "durationMonths must be an integer between 1 and 600." }, { status: 400 });
+    }
+
     const result = await submitBehavioralReview(supabaseAdmin, {
       dealId,
       reviewerId: userId,
       vectors,
-      feedback: typeof feedback === "string" ? feedback : "",
-      leaseType: typeof leaseType === "string" ? leaseType : "Residential Lease",
+      feedback: typeof feedback === "string" ? feedback.trim().slice(0, 2000) : "",
+      leaseType: typeof leaseType === "string" && leaseType.trim() ? leaseType.trim().slice(0, 100) : "Residential Lease",
       durationMonths: typeof durationMonths === "number" ? durationMonths : 12,
     });
 

@@ -9,6 +9,8 @@ import { notifyUser } from "@/lib/notifications";
 import { recordFaqContactLeakTelemetry } from "@/lib/faqContactLeakTelemetry";
 import { validateSampleInquiryRecipients } from "@/lib/sampleInventory";
 import { findProperty } from "@/lib/propertyLookup";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PER-PROPERTY 3-TIER FAQ API  (NEW_IDEAS.md §4)
@@ -39,6 +41,12 @@ const answerSchema = z.object({
 });
 
 const TIER_BY_ROLE = { owner: "gold", advisor: "silver", resident: "bronze" };
+
+const checkFaqWriteRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 function fail(message, status = 400, extra = {}) {
   return NextResponse.json({ success: false, message, ...extra }, { status });
@@ -107,7 +115,14 @@ export async function GET(req) {
       "id",
       "slug",
       "canonical_slug",
+      "lifecycle_state",
     ]);
+    if (property?.lifecycle_state && property.lifecycle_state !== "live") {
+      return NextResponse.json(
+        { success: true, faqs: [], archivedFaqs: [] },
+        { status: 200, headers: { "Cache-Control": "no-store" } }
+      );
+    }
     const propertyKeys = [
       ...new Set([propertyId, property?.slug, property?.canonical_slug, property?.id].filter(Boolean)),
     ];
@@ -127,7 +142,10 @@ export async function GET(req) {
 
     if (qError) throw qError;
     if (!questions?.length) {
-      return NextResponse.json({ success: true, faqs: [] }, { status: 200 });
+      return NextResponse.json(
+        { success: true, faqs: [], archivedFaqs: [] },
+        { status: 200, headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300" } }
+      );
     }
 
     const { data: answers, error: aError } = await supabaseAdmin
@@ -215,7 +233,10 @@ export async function GET(req) {
       }
     }
 
-    return NextResponse.json({ success: true, faqs: activeFaqs, archivedFaqs }, { status: 200 });
+    return NextResponse.json(
+      { success: true, faqs: activeFaqs, archivedFaqs },
+      { status: 200, headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300" } }
+    );
   } catch (error) {
     console.error("[api/faqs] GET failed:", error);
     return fail("Failed to load questions", 500);
@@ -225,6 +246,13 @@ export async function GET(req) {
 // ── POST: ask a question, or answer one ──────────────────────────────────
 export async function POST(req) {
   try {
+    const rate = checkFaqWriteRate(clientIp(req));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { success: false, message: "Too many FAQ submissions. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     if (!supabaseAdmin) return fail("Server error: missing service role configuration", 500);
 
     const userId = await resolveUserId(req);
@@ -336,10 +364,12 @@ export async function POST(req) {
     const { property, error: propertyError } = await findProperty(
       supabaseAdmin,
       parsed.data.propertyId,
-      ["id", "title", "slug", "canonical_slug", "owner_id"]
+      ["id", "title", "slug", "canonical_slug", "owner_id", "lifecycle_state"]
     );
     if (propertyError) throw propertyError;
-    if (!property) return fail("Property not found", 404);
+    if (!property || (property.lifecycle_state && property.lifecycle_state !== "live")) {
+      return fail("Property not found", 404);
+    }
 
     const canonicalPropertyKey = property.canonical_slug || property.slug || parsed.data.propertyId;
 

@@ -19,6 +19,8 @@ const state = vi.hoisted(() => ({
   db: null,
   enterpriseTables: false,
   operatorRpcAvailable: true,
+  failInviteInsert: false,
+  failInviteRefund: false,
 }));
 
 function seedDb() {
@@ -126,6 +128,9 @@ class Q {
   run() {
     const db = this.db;
     if (this.insertRows) {
+      if (state.failInviteInsert && this.table === "deals") {
+        return { data: null, error: { code: "57014" } };
+      }
       if (!Array.isArray(this.insertRows)) this.insertRows = [this.insertRows];
       if (!Array.isArray(db[this.table])) db[this.table] = [];
       const made = this.insertRows.map((r) => {
@@ -243,9 +248,10 @@ function fakeAdmin() {
         return { data: [{ total_balance: db.wallets[args.p_user_id], success: true }], error: null };
       }
       if (name === "refund_connects_system_error" || name === "refund_connects_system_error_canonical") {
+        if (state.failInviteRefund) return { data: null, error: { code: "57014" } };
         db.wallets[args.p_user_id] = (db.wallets[args.p_user_id] ?? 0) + args.p_amount;
         db.ledger.push({ user: args.p_user_id, amount: args.p_amount, reason: args.p_reason, ref: args.p_ref_id });
-        return { data: null, error: null };
+        return { data: [{ transaction_id: "fixture-refund", total_balance: db.wallets[args.p_user_id] }], error: null };
       }
       return { data: null, error: { message: `unknown rpc ${name}` } };
     },
@@ -273,6 +279,8 @@ const { POST: invite } = await import("@/app/api/dashboard/invite/route");
 const { GET: inbox, POST: manual } = await import("@/app/api/deals/route");
 const { PATCH: answer } = await import("@/app/api/deals/[id]/route");
 const { POST: chat } = await import("@/app/api/deals/[id]/messages/route");
+const { notifyUser } = await import("@/lib/notifications");
+const { logActivity } = await import("@/lib/crmActivity");
 const { POST: inquire } = await import("@/app/api/inquiries/route");
 
 const as = (user, body, url = "https://www.scoutit.space/api/x") => {
@@ -303,6 +311,8 @@ const inboxAs = (user) => {
 const walletOf = (u) => state.db.wallets[u];
 
 beforeEach(() => {
+  state.failInviteInsert = false;
+  state.failInviteRefund = false;
   state.db = seedDb();
   state.enterpriseTables = false;
   state.operatorRpcAvailable = true;
@@ -352,6 +362,18 @@ describe("Connect journeys — buyer, owner, broker", () => {
       { params: Promise.resolve({ id: b1.dealId }) },
     );
     expect(m2.status).toBe(200);
+    expect(await m2.json()).toMatchObject({ message: { body: "Perfect." } });
+    const chatAlerts = notifyUser.mock.calls
+      .map(([, alert]) => alert)
+      .filter((alert) => alert.notificationType === "deal_message");
+    expect(chatAlerts).toHaveLength(2);
+    for (const alert of chatAlerts) {
+      expect(alert).toMatchObject({
+        desc: "Open the conversation to read your message.",
+        link: `/dashboard/inbox?dealId=${b1.dealId}`,
+      });
+      expect(JSON.stringify(alert)).not.toMatch(/Sure, Saturday\?|Perfect\./);
+    }
     // Acceptance never spends.
     expect(walletOf(OWNER)).toBe(5);
     expect(walletOf(BUYER)).toBe(4);
@@ -406,6 +428,71 @@ describe("Connect journeys — buyer, owner, broker", () => {
     const { dealId: deal2 } = await inv2.json();
     const [ownReq, ownCtx] = patchAs(OWNER, deal2, "accepted");
     expect((await answer(ownReq, ownCtx)).status).toBe(403);
+  });
+
+  it("cleans up a new representation if its invite cannot be saved", async () => {
+    state.failInviteInsert = true;
+    const response = await invite(as(OWNER, { listingId: "prop-1", brokerName: "Bobby Broker" }));
+    expect(response.status).toBe(500);
+    expect(state.db.property_broker_representations).toEqual([]);
+    expect(walletOf(OWNER)).toBe(5);
+  });
+
+  it.each([false, true])("reports only a confirmed invite refund (RPC failure: %s)", async (refundFails) => {
+    state.failInviteRefund = refundFails;
+    logActivity.mockRejectedValueOnce(new Error("timeline connection closed"));
+    const response = await invite(as(OWNER, { listingId: "prop-1", brokerName: "Bobby Broker" }));
+    expect(response.status).toBe(500);
+    const result = await response.json();
+    expect(result).toMatchObject({ refundConfirmed: !refundFails, reconciliationRequired: refundFails });
+    expect(result.error.includes("has been refunded")).toBe(!refundFails);
+    expect(walletOf(OWNER)).toBe(refundFails ? 4 : 5);
+    expect(state.db.deals).toEqual([]);
+  });
+
+  it("A-363: concurrent duplicate broker invites return the same invitation and charge at most once", async () => {
+    const req1 = as(OWNER, { listingId: "prop-1", brokerName: "Bobby Broker" });
+    const req2 = as(OWNER, { listingId: "prop-1", brokerName: "Bobby Broker" });
+    const [res1, res2] = await Promise.all([invite(req1), invite(req2)]);
+
+    expect(res1.status).toBe(200);
+    expect(res2.status).toBe(200);
+    const body1 = await res1.json();
+    const body2 = await res2.json();
+
+    expect(body1.dealId).toBeTruthy();
+    expect(body2.dealId).toBe(body1.dealId);
+    expect([body1.deduped, body2.deduped]).toContain(true);
+    expect(walletOf(OWNER)).toBe(4);
+    expect(state.db.deals.filter((d) => d.property_id === "prop-1" && d.broker_id === BROKER)).toHaveLength(1);
+    expect(
+      state.db.property_broker_representations.filter(
+        (r) => r.property_id === "prop-1" && r.broker_id === BROKER
+      )
+    ).toHaveLength(1);
+  });
+
+  it("A-363: records a durable operator reconciliation event with correlation metadata when invite refund fails", async () => {
+    state.failInviteRefund = true;
+    logActivity.mockRejectedValueOnce(new Error("timeline connection closed"));
+    const response = await invite(as(OWNER, { listingId: "prop-1", brokerName: "Bobby Broker" }));
+    expect(response.status).toBe(500);
+    const body = await response.json();
+
+    expect(body.reconciliationRequired).toBe(true);
+    expect(body.correlation).toMatchObject({
+      propertyId: "prop-1",
+      ownerId: OWNER,
+      brokerId: BROKER,
+    });
+    expect(body.correlation.dealId).toBeTruthy();
+    expect(state.db.system_events).toHaveLength(1);
+    expect(state.db.system_events[0]).toMatchObject({
+      event: "connects.invite.reconciliation_required",
+      severity: "error",
+      subject_table: "deals",
+      subject_id: body.correlation.dealId,
+    });
   });
 
   it("J4 manual deals cannot forge outcomes; failures never strand a debit", async () => {

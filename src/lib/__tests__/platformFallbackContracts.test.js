@@ -223,6 +223,10 @@ describe("Deals Transactional Rollback Fallback Contract", () => {
   it("handles deal insert failure by executing refund and returning safe notification", async () => {
     vi.doMock("@/lib/serverAuth", () => ({
       resolveUserId: async () => "user-sender-1",
+      assertAdultEligibility: async () => true,
+    }));
+    vi.doMock("@/lib/connectsWallet", () => ({
+      ensureConnectBalancesWallet: async () => ({ ok: true }),
     }));
     vi.doMock("@/lib/connectBlocks", () => ({
       isBlocked: async () => false,
@@ -241,7 +245,7 @@ describe("Deals Transactional Rollback Fallback Contract", () => {
             select: () => ({
               eq: () => ({
                 single: async () => ({
-                  data: { id: "prop-uuid-1", title: "Tower Alpha", slug: "tower-alpha", owner_id: "other-owner" },
+                  data: { id: "prop-uuid-1", title: "Tower Alpha", slug: "tower-alpha", owner_id: "user-sender-1" },
                   error: null,
                 }),
               }),
@@ -281,7 +285,7 @@ describe("Deals Transactional Rollback Fallback Contract", () => {
       },
       rpc: vi.fn((method, args) => {
         rpcCalledWith.push({ method, args });
-        if (method === "spend_connects") {
+        if (method === "spend_connects" || method === "spend_connects_atomic") {
           return Promise.resolve({ data: [{ total_balance: 5 }], error: null });
         }
         if (method === "refund_connects_system_error") {

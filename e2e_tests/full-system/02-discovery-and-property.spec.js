@@ -162,3 +162,65 @@ test('empty catalogue fallback keeps an existing saved-property link', async ({ 
     .toHaveAttribute('href', '/property/one-ecom-center');
   await expect(page.getByText('Listing removed', { exact: true })).toHaveCount(0);
 });
+
+test('Board sync keeps unlinked spaces on the device and removes account saves by UUID', async ({ page }) => {
+  const propertyId = '10000000-0000-4000-8000-000000000001';
+  await page.addInitScript(() => {
+    const session = JSON.stringify({
+      access_token: 'test-board-token',
+      refresh_token: 'test-board-refresh',
+      token_type: 'bearer',
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      user: { id: 'test-board-owner', aud: 'authenticated' },
+    });
+    localStorage.setItem('sb-placeholder-auth-token', session);
+    localStorage.setItem('sb-yyixsuaimdzyiocswcgc-auth-token', session);
+    if (!localStorage.getItem('scoutit_reactions')) {
+      localStorage.setItem('scoutit_reactions', JSON.stringify([
+        { property_id: 'recLinked', property_title: 'Linked space', reaction_type: 'Save', timestamp: 11 },
+        { property_id: 'device-only', property_title: 'Device-only space', reaction_type: 'Save', timestamp: 12 },
+      ]));
+    }
+  });
+  await page.route('**/auth/v1/**', (route) => route.fulfill({ status: 401, json: {} }));
+  await page.route('**/api/cms**', (route) => route.fulfill({ json: {
+    properties: [
+      { id: 'recLinked', slug: 'linked-space', title: 'Linked space' },
+      { id: 'recDevice', slug: 'device-only', title: 'Device-only space' },
+    ],
+  } }));
+  await page.route('**/api/community/signals?saved=1', (route) => route.fulfill({ json: { ok: true, signals: [] } }));
+  let cloudItem;
+  let removedId;
+  await page.route('**/api/wishlist/saved', (route) => {
+    if (route.request().method() === 'DELETE') {
+      removedId = route.request().postDataJSON().propertyId;
+      cloudItem = null;
+      return route.fulfill({ json: { ok: true } });
+    }
+    return route.fulfill({ json: { items: cloudItem ? [cloudItem] : [] } });
+  });
+  let submittedItems;
+  await page.route('**/api/wishlist/merge', (route) => {
+    submittedItems = route.request().postDataJSON().items;
+    cloudItem = { property_id: 'linked-space', account_property_id: propertyId, reaction_type: 'Save' };
+    return route.fulfill({ json: {
+      confirmedPropertyIds: ['linked-space'],
+      confirmedProperties: [{ inputId: 'linked-space', propertyId, slug: 'linked-space' }],
+    } });
+  });
+
+  await gotoAndSettle(page, '/wishlist');
+  await page.getByRole('button', { name: 'Sync 2 to Account', exact: true }).click();
+  expect(submittedItems.map((item) => item.property_id)).toEqual(['linked-space', 'device-only']);
+  await expect(page.getByRole('status').filter({ hasText: '1 item synced to your account.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sync 1 to Account', exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Sync 1 to Account', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Linked space', exact: true })).toHaveAttribute('href', '/property/linked-space');
+  await page.getByRole('button', { name: 'Remove Linked space from board' }).click();
+  await expect.poll(() => removedId).toBe(propertyId);
+  await expect(page.getByRole('link', { name: 'Linked space', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Device-only space', exact: true })).toBeVisible();
+});

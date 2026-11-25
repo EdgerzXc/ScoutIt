@@ -9,6 +9,11 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { logActivity } from "@/lib/crmActivity";
 import { SIGNAL_STATUSES } from "@/lib/communityPosting";
 import { isRoutedDealRecipient } from "@/lib/dealParty";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+const NO_STORE = { "Cache-Control": "private, no-store" };
+const checkHandshakeRate = createRateLimiter({ limit: 30, windowMs: 60_000, maxKeys: 10_000 });
 
 /**
  * POST /api/deals/handshake
@@ -20,7 +25,15 @@ export async function POST(request) {
     if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized: Sign in to complete deal handshake" },
-        { status: 401 }
+        { status: 401, headers: NO_STORE }
+      );
+    }
+
+    const rate = checkHandshakeRate(`${clientIp(request)}:${userId}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many handshake requests. Please try again shortly." },
+        { status: 429, headers: { ...NO_STORE, "Retry-After": String(rate.retryAfterSeconds) } }
       );
     }
 
@@ -35,20 +48,34 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Database service unavailable" },
+        { status: 503 }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 }
+      );
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 }
+      );
+    }
     const { dealId, action = "sign" } = body;
 
     if (!dealId || typeof dealId !== "string") {
       return NextResponse.json(
         { error: "Missing or invalid dealId" },
         { status: 400 }
-      );
-    }
-
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: "Database service unavailable" },
-        { status: 503 }
       );
     }
 
@@ -120,9 +147,10 @@ export async function POST(request) {
       );
     }
 
-    if (deal.status && ["declined", "withdrawn", "closed", "reported"].includes(deal.status)) {
+    const HANDSHAKE_ELIGIBLE_DEAL_STATUSES = new Set(["accepted", "active", "connected"]);
+    if (!HANDSHAKE_ELIGIBLE_DEAL_STATUSES.has(String(deal.status || "").toLowerCase())) {
       return NextResponse.json(
-        { error: `Cannot execute handshake on a ${deal.status} deal.` },
+        { error: `Cannot execute handshake on a ${deal.status || "unknown"} deal.` },
         { status: 409 }
       );
     }

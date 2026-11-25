@@ -220,8 +220,9 @@ export default function ArticleEditorModal({
 
             <button
               type="button"
+              aria-label="Close dialog"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

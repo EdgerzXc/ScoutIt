@@ -70,7 +70,7 @@ export function renderStaffEmailHtml({
   staffRole = "Platform Operations Desk",
   referenceId = null,
 }) {
-  const cleanMessage = (message || "").trim().replace(/\n/g, "<br/>");
+  const cleanMessage = escapeHtml((message || "").trim()).replace(/\n/g, "<br/>");
 
   return `<!DOCTYPE html>
 <html>

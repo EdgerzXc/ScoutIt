@@ -118,22 +118,12 @@ export function removeSignalLocally(signalId) {
   }
 }
 
-/**
- * Synchronize all locally saved signals to the server account once signed in.
- * Clears or keeps synchronized with server state.
- * @param {string} [accessToken]
- * @returns {Promise<{ syncedCount: number, error: string | null }>}
- */
-export async function syncOfflineSignalsToAccount(accessToken) {
-  const localList = getLocalSavedSignals();
-  if (localList.length === 0) {
-    return { syncedCount: 0, error: null };
-  }
+export async function syncOfflineSignalsToAccount(accessToken, signals = getLocalSavedSignals()) {
+  const confirmedSignalIds = [];
+  let error = null;
+  let signInRequired = false;
 
-  let count = 0;
-  const errors = [];
-
-  for (const sig of localList) {
+  for (const sig of signals) {
     try {
       const headers = { "Content-Type": "application/json" };
       if (accessToken) {
@@ -143,19 +133,23 @@ export async function syncOfflineSignalsToAccount(accessToken) {
         method: "POST",
         headers,
       });
-      if (res.ok) {
-        count++;
-      } else if (res.status !== 401) {
-        const json = await res.json().catch(() => ({}));
-        errors.push(json.error || `Signal ${sig.id} sync failed`);
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.ok === true && json.saved === true) {
+        confirmedSignalIds.push(sig.id);
+        continue;
       }
+      error ??= json.error || "Couldn't sync a follow-up signal.";
+      signInRequired = res.status === 401;
+      if (signInRequired || res.status === 429) break;
     } catch (err) {
-      errors.push(err.message || `Signal ${sig.id} network error`);
+      error ??= err.message || "Couldn't reach ScoutIt.";
     }
   }
 
   return {
-    syncedCount: count,
-    error: errors.length > 0 ? errors[0] : null,
+    syncedCount: confirmedSignalIds.length,
+    confirmedSignalIds,
+    error,
+    signInRequired,
   };
 }

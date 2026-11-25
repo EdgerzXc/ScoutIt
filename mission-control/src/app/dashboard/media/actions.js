@@ -2,11 +2,36 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentStaff, assertTier, logAction, TIERS } from "@/lib/rbac";
+import { getCurrentStaff, assertTier, logActionStrict, TIERS } from "@/lib/rbac";
 import { parseSynthesis, scoreCompleteness } from "@/lib/ingestSchema";
 import { processPendingScans } from "@/lib/scanWorker";
 import { sha256Hex } from "@/lib/fileScan";
 import { updatePropertyInAirtable } from "@/lib/airtable";
+import { hasLockedCanonicalUrl, titleChangeWouldDriftCanonicalUrl } from "@/lib/canonicalSlugPolicy.mjs";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { EVENTS } from "@/lib/systemEventPolicy.mjs";
+
+function validateMediaLinkUrl(value) {
+  if (value === null || value === "") return null;
+  if (typeof value !== "string") {
+    throw new Error("Media link must be a valid http(s) URL.");
+  }
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.length > 2048) {
+    throw new Error("Media link exceeds the maximum URL length.");
+  }
+  let parsed;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    throw new Error("Media link must be a valid http(s) URL.");
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new Error("Media link must use an https:// or http:// URL.");
+  }
+  return parsed.toString();
+}
 
 /** B1 Stage 1 — staff-triggered scan of the pending queue. */
 export async function runScanQueue() {
@@ -16,7 +41,7 @@ export async function runScanQueue() {
   const admin = createAdminClient();
   const summary = await processPendingScans(admin);
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "filescan.run",
     targetTable: "file_scans",
@@ -39,7 +64,7 @@ export async function requestScannedDownload(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.AGENT);
 
-  const scanId = formData.get("scanId")?.toString();
+  const scanId = formData.get("scanId")?.toString().trim();
   if (!scanId) throw new Error("Missing scan id.");
 
   const admin = createAdminClient();
@@ -48,7 +73,7 @@ export async function requestScannedDownload(formData) {
     .select("*")
     .eq("id", scanId)
     .single();
-  if (error || !scan) throw new Error(error?.message || "Scan record not found.");
+  if (error || !scan) throw new Error("Scan record not found.");
 
   if (scan.scan_status !== "scanned" || scan.scan_verdict !== "clean") {
     throw new Error("This file is not cleared for download (not scanned clean).");
@@ -61,14 +86,17 @@ export async function requestScannedDownload(formData) {
   if (dlError || !blob) throw new Error("File unavailable for re-verification.");
   const currentHash = sha256Hex(Buffer.from(await blob.arrayBuffer()));
   if (scan.sha256 && currentHash !== scan.sha256) {
-    await admin
+    const { error: tamperErr } = await admin
       .from("file_scans")
       .update({
         scan_verdict: "suspicious",
         scan_notes: `HASH MISMATCH at download time (was ${scan.sha256?.slice(0, 12)}…, now ${currentHash.slice(0, 12)}…) — possible tampering`,
       })
       .eq("id", scanId);
-    await logAction({
+    if (tamperErr) {
+      console.error("[MMC MEDIA] Failed to flag tampered scan:", tamperErr.message);
+    }
+    await logActionStrict({
       staff,
       action: "filescan.tamper_detected",
       targetTable: "file_scans",
@@ -84,7 +112,7 @@ export async function requestScannedDownload(formData) {
     .createSignedUrl(scan.storage_path, 300); // 5 minutes
   if (signError || !signed?.signedUrl) throw new Error("Failed to issue download URL.");
 
-  await admin
+  const { error: dlCountErr } = await admin
     .from("file_scans")
     .update({
       download_count: (scan.download_count ?? 0) + 1,
@@ -92,8 +120,11 @@ export async function requestScannedDownload(formData) {
       last_downloaded_by: staff.email,
     })
     .eq("id", scanId);
+  if (dlCountErr) {
+    throw new Error("Failed to update file download audit counters.");
+  }
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "filescan.download",
     targetTable: "file_scans",
@@ -114,7 +145,7 @@ export async function saveSynthesis(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.AGENT);
 
-  const propertyId = formData.get("propertyId")?.toString();
+  const propertyId = formData.get("propertyId")?.toString().trim();
   const rawJson = formData.get("rawJson")?.toString();
   if (!propertyId) throw new Error("Missing property id.");
 
@@ -126,10 +157,24 @@ export async function saveSynthesis(formData) {
   // Read current row so we merge (never clobber) the details blob.
   const { data: current, error: readErr } = await admin
     .from("properties")
-    .select("id, title, location, space_category, price, description, media_link, details")
+    .select("id, title, location, space_category, price, description, media_link, details, slug, canonical_slug, canonical_slug_locked_at, pipeline_status, lifecycle_state, moderation_status")
     .eq("id", propertyId)
     .single();
-  if (readErr) throw new Error(readErr.message);
+  if (readErr || !current) throw new Error("Property record not found.");
+
+  const isLockedOrPublished =
+    current.pipeline_status === "approved" ||
+    current.lifecycle_state === "live" ||
+    hasLockedCanonicalUrl(current);
+
+  if (patch.title !== undefined && isLockedOrPublished && titleChangeWouldDriftCanonicalUrl(current, patch.title)) {
+    throw new Error("Cannot change title on an approved, live, or canonical-slug-locked property.");
+  }
+
+  const safePatch = { ...patch };
+  if (isLockedOrPublished && safePatch.title === current.title) {
+    delete safePatch.title;
+  }
 
   const mergedDetails = {
     ...(current.details || {}),
@@ -140,24 +185,26 @@ export async function saveSynthesis(formData) {
     synthesized_at: new Date().toISOString(),
   };
 
-  const nextRow = { ...current, ...patch, details: mergedDetails };
+  const nextRow = { ...current, ...safePatch, details: mergedDetails };
   const update = {
-    ...patch,
+    ...safePatch,
     details: mergedDetails,
-    pipeline_status: "draft_ready_for_review",
     completeness_score: scoreCompleteness(nextRow, detailsPatch),
   };
+  if (!isLockedOrPublished) {
+    update.pipeline_status = "draft_ready_for_review";
+  }
 
   const { error } = await admin.from("properties").update(update).eq("id", propertyId);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error("Failed to apply synthesis update.");
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "property.synthesize",
     targetTable: "properties",
     targetId: propertyId,
     reason: confidence != null ? `Concierge synthesis (confidence ${confidence.toFixed(2)})` : "Concierge synthesis",
-    metadata: { fields: Object.keys(patch), detailKeys: Object.keys(detailsPatch), gaps, warnings },
+    metadata: { fields: Object.keys(safePatch), detailKeys: Object.keys(detailsPatch), gaps, warnings },
   });
 
   revalidatePath("/dashboard/media");
@@ -171,23 +218,27 @@ export async function updateMedia(formData) {
   const staff = await getCurrentStaff();
   assertTier(staff, TIERS.AGENT);
 
-  const propertyId = formData.get("propertyId")?.toString();
-  const mediaLink = formData.get("media_link")?.toString().trim() || null;
+  const propertyId = formData.get("propertyId")?.toString().trim();
+  const rawMediaLink = formData.get("media_link")?.toString().trim() || null;
   if (!propertyId) throw new Error("Missing property id.");
 
+  const mediaLink = validateMediaLinkUrl(rawMediaLink);
+
   const admin = createAdminClient();
-  const { data: prop } = await admin
+  const { data: prop, error: readErr } = await admin
     .from("properties")
     .select("slug, canonical_slug, moderation_status, pipeline_status, lifecycle_state")
     .eq("id", propertyId)
     .maybeSingle();
+  if (readErr || !prop) throw new Error("Property record not found.");
 
   const { error } = await admin
     .from("properties")
     .update({ media_link: mediaLink })
     .eq("id", propertyId);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error("Failed to update media link.");
 
+  let syncWarning = null;
   const isLive = prop && (prop.pipeline_status === "approved" || prop.lifecycle_state === "live");
   const slug = prop?.canonical_slug || prop?.slug;
   if (isLive && slug) {
@@ -197,17 +248,28 @@ export async function updateMedia(formData) {
         Photos: mediaLink || "",
       });
     } catch (err) {
-      console.warn("[MMC MEDIA] Airtable media sync warning:", err.message);
+      syncWarning = "Saved media link in Supabase, but Airtable media sync failed.";
+      await recordSystemEvent({
+        event: EVENTS.AIRTABLE_SYNC_FAILED,
+        severity: "warning",
+        subjectTable: "properties",
+        subjectId: propertyId,
+        summary: syncWarning,
+        detail: { slug, error: err?.message || "Airtable sync error" },
+      });
     }
   }
 
-  await logAction({
+  await logActionStrict({
     staff,
     action: "media.update",
     targetTable: "properties",
     targetId: propertyId,
-    metadata: { media_link: mediaLink },
+    metadata: { media_link: mediaLink, airtable_sync_warning: syncWarning },
   });
 
   revalidatePath("/dashboard/media");
+  if (syncWarning) {
+    return { success: true, warning: syncWarning };
+  }
 }

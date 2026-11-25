@@ -34,7 +34,10 @@ export async function crmFetch(path, { method = "GET", body, mockUserId } = {}) 
     if (process.env.NODE_ENV === "development") {
       console.warn(`[crmFetch] API threw ${res.status}: ${data.error || 'Unknown error'}`);
     }
-    throw new Error(data.error || `Request failed (${res.status})`);
+    throw Object.assign(new Error(data.error || `Request failed (${res.status})`), {
+      status: res.status,
+      code: data.code,
+    });
   }
   return data;
 }

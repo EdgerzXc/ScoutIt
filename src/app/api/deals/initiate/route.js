@@ -16,11 +16,33 @@ import { getViaCookieName, parseViaCookie, isAttributionExpired, ROUTING_REASONS
 import { recordRoutingDecision } from "@/lib/serverViaRouting";
 import { canReadOffMarket } from "@/lib/serverEntitlements";
 import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
+import { recordSystemEvent } from "@/lib/systemEvents";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+import { signalTerminalState } from "@/lib/communityPosting";
 
-
+export const checkInitiateRate = createRateLimiter({ limit: 20, windowMs: 60_000, maxKeys: 10_000 });
+const ALLOWED_INITIATE_ROLES = new Set(["buyer", "seeker", "operator", "broker"]);
 
 export async function POST(request) {
   try {
+    const userId = await resolveUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
+    }
+
+    const rl = checkInitiateRate(`${userId}:${clientIp(request)}`);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many inquiry requests. Please wait a moment and try again." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds || 60) } },
+      );
+    }
+
     // role is a display/reason-text hint only, never persisted to a column —
     // connect_balances/connect_transactions have no ole` column in the live
     // schema (per-role wallets are a documented but unbuilt design; the
@@ -33,15 +55,43 @@ export async function POST(request) {
     // (persisted to deals.sender_anonymous, migration-gated under O-004) —
     // distinct from `sender_identity_mode`, which is analytics-only source
     // context and never a send behavior.
-    const { listingId, propertySlug, message, role = 'buyer', unitId, preferredBrokerId, source_type, source_id, reason_tag, sender_identity_mode, anonymous, expectOpenGate } = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+    const { listingId, propertySlug, message, role: rawRole = 'buyer', unitId, preferredBrokerId, source_type, source_id, reason_tag, sender_identity_mode, anonymous, expectOpenGate } = body;
+    const role = typeof rawRole === "string" ? rawRole.trim().toLowerCase() : "";
+    if (!ALLOWED_INITIATE_ROLES.has(role)) {
+      return NextResponse.json({ error: "Invalid role specified" }, { status: 400 });
+    }
+    if (role !== "buyer" && role !== "seeker") {
+      const { data: callerProfile, error: callerProfileErr } = await supabaseAdmin
+        .from("user_profiles")
+        .select("role, active_roles")
+        .eq("id", userId)
+        .maybeSingle();
+      if (callerProfileErr) {
+        return NextResponse.json({ error: "Unable to verify caller role" }, { status: 503 });
+      }
+      const heldRoles = [
+        callerProfile?.role,
+        ...(Array.isArray(callerProfile?.active_roles) ? callerProfile.active_roles : []),
+      ]
+        .map((r) => String(r || "").trim().toLowerCase())
+        .filter(Boolean);
+      const holdsRequestedRole =
+        heldRoles.includes(role) ||
+        heldRoles.includes("admin") ||
+        heldRoles.includes("staff") ||
+        (role === "broker" && heldRoles.includes("salesperson"));
+      if (!holdsRequestedRole) {
+        return NextResponse.json({ error: `Forbidden: Caller does not hold the ${role} role.` }, { status: 403 });
+      }
+    }
+
     let requestedAnonymous = anonymous === true;
     // A-144: source context is analytics + audit, never a send blocker.
     const connectSource = normalizeConnectSource({ source_type, source_id, reason_tag, sender_identity_mode });
-
-    const userId = await resolveUserId(request);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
-    }
 
     if (!listingId && !propertySlug) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -71,10 +121,6 @@ export async function POST(request) {
         return NextResponse.json({ error: intro.error, maxLength: INTRO_MAX }, { status: 400 });
       }
       introMessage = intro.value;
-    }
-
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server error: missing service role configuration" }, { status: 500 });
     }
 
     // Public property pages are sourced from Airtable and only ever carry an
@@ -130,7 +176,7 @@ export async function POST(request) {
     }
 
     // Invariant: Self-contact guard (prevents self-dealing, accidental connect spend, and handshake manipulation)
-    if (propertyRow.owner_id && String(propertyRow.owner_id) === String(userId) && role === 'buyer') {
+    if (propertyRow.owner_id && String(propertyRow.owner_id) === String(userId)) {
       return NextResponse.json({ error: "You cannot initiate an inquiry on your own property." }, { status: 409 });
     }
 
@@ -139,11 +185,30 @@ export async function POST(request) {
         return NextResponse.json({ error: "This off-market listing is view-only; the owner has not opened quiet offers" }, { status: 403 });
       }
 
-      // Off-market contact is exclusive to Universe tier seekers, unless referring directly from a Layer 2 promotion
-      const isPromotionalReferral = Boolean(
+      // Off-market contact is exclusive to Universe tier seekers, unless referring directly from a verified live Layer 2 signal owned by the property owner
+      let isPromotionalReferral = false;
+      if (
         connectSource?.source_id &&
         ["stratosphere_signal", "promotion"].includes(connectSource?.source_type)
-      );
+      ) {
+        const { data: referralSignal } = await supabaseAdmin
+          .from("stratosphere_signals")
+          .select("id, author_account_id, status, last_confirmed_at, signal_type, commercial_flag")
+          .eq("id", connectSource.source_id)
+          .maybeSingle();
+
+        if (
+          referralSignal &&
+          propertyRow.owner_id &&
+          referralSignal.author_account_id === propertyRow.owner_id &&
+          signalTerminalState({
+            status: referralSignal.status,
+            lastConfirmedAt: referralSignal.last_confirmed_at,
+          }) === "live"
+        ) {
+          isPromotionalReferral = true;
+        }
+      }
       if (!isPromotionalReferral) {
         const offMarketAccess = await canReadOffMarket({
           supabaseAdmin,
@@ -265,10 +330,20 @@ export async function POST(request) {
     let recipientIds = routedDeal[0].recipient_ids || [];
     let routedToRoster = routedDeal[0].routed_to_roster === true;
 
+    const abortCreatedDeal = async (targetDealId) => {
+      if (!targetDealId) return;
+      try {
+        await supabaseAdmin.from('deal_routing_recipients').delete().eq('deal_id', targetDealId);
+      } catch {}
+      try {
+        await supabaseAdmin.from('deals').delete().eq('id', targetDealId);
+      } catch {}
+    };
+
     // Owner Sovereignty: Respect contact_preference ('owner_only', 'broker_only', 'owner_and_brokers')
     const contactPreference = propertyRow?.details?.contact_preference || "owner_and_brokers";
     if (contactPreference === "broker_only" && !routedToRoster) {
-      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      await abortCreatedDeal(dealId);
       return NextResponse.json(
         { error: "The owner of this listing only accepts inquiries through an authorized broker, and no broker is currently assigned." },
         { status: 409 }
@@ -307,7 +382,7 @@ export async function POST(request) {
       allowlistValue: process.env.HUMAN_TEST_SAMPLE_RECIPIENT_IDS,
     });
     if (!sampleRouting.ok) {
-      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      await abortCreatedDeal(dealId);
       return NextResponse.json(
         { error: "Sample inquiries are unavailable until test routing is configured. No Connect was spent." },
         { status: 503 },
@@ -319,7 +394,7 @@ export async function POST(request) {
     // the property is resolved, before any money moves.
     const recentDealId = await findRecentPendingDeal(supabaseAdmin, userId, resolvedListingId);
     if (recentDealId && recentDealId !== dealId) {
-      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      await abortCreatedDeal(dealId);
       return NextResponse.json({
         success: true,
         dealId: recentDealId,
@@ -334,14 +409,14 @@ export async function POST(request) {
     // without spending Connects; pre-migration fails open with operator signal.
     const blockGuard = await checkBlockGuard(supabaseAdmin, userId, [...recipientIds, unitOperatorId].filter(Boolean));
     if (!blockGuard.ok && blockGuard.unavailable) {
-      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      await abortCreatedDeal(dealId);
       return NextResponse.json(
         { error: "Block safety check unavailable. No Connect was spent." },
         { status: 503 },
       );
     }
     if (blockGuard.blocked) {
-      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      await abortCreatedDeal(dealId);
       return NextResponse.json(
         { error: "This request can't be sent. No Connect was spent." },
         { status: 403 },
@@ -353,7 +428,7 @@ export async function POST(request) {
     for (const recipientId of [...recipientIds, unitOperatorId].filter(Boolean)) {
       const gate = await checkReceiverGate(supabaseAdmin, recipientId, resolvedListingId, dealId);
       if (!gate.ok) {
-        await supabaseAdmin.from('deals').delete().eq('id', dealId);
+        await abortCreatedDeal(dealId);
         return NextResponse.json(
           { error: gate.message || "This account isn't accepting new Connects right now. No Connect was spent." },
           { status: 403 },
@@ -377,20 +452,20 @@ export async function POST(request) {
       && await isOpenGateAvailable(supabaseAdmin, resolvedListingId, propertyRow.owner_id, "owner");
     const openGateFree = Boolean(operatorOpenGate || brokerFree || ownerFree);
     if (expectOpenGate === true && !openGateFree) {
-      await supabaseAdmin.from("deals").delete().eq("id", dealId);
+      await abortCreatedDeal(dealId);
       return NextResponse.json({ error: "Open Gate has closed. No Connect was spent. Refresh the contact card." }, { status: 409 });
     }
     if (openGateFree) {
       const blockState = await anyBlockedStrict(supabaseAdmin, userId, recipientIds);
       if (!blockState.ok || blockState.blocked) {
-        await supabaseAdmin.from("deals").delete().eq("id", dealId);
+        await abortCreatedDeal(dealId);
         return NextResponse.json({ error: blockState.blocked ? "This recipient has blocked the request. No Connect was spent." : "Open Gate safety check unavailable. No request was sent." }, { status: blockState.blocked ? 403 : 503 });
       }
       const { data: admitted, error: admissionError } = await supabaseAdmin.rpc("admit_open_gate_free_deal", {
         p_deal_id: dealId, p_buyer_id: userId,
       });
       if (admissionError || admitted !== true) {
-        await supabaseAdmin.from("deals").delete().eq("id", dealId);
+        await abortCreatedDeal(dealId);
         return NextResponse.json({ error: admissionError ? "Open Gate is temporarily unavailable. No request was sent." : "Free inquiry limit reached. Try again later." }, { status: admissionError ? 503 : 429 });
       }
     }
@@ -398,7 +473,7 @@ export async function POST(request) {
       const { data: senderProfile, error: senderError } = await supabaseAdmin
         .from("user_profiles").select("is_profile_public").eq("id", userId).maybeSingle();
       if (senderError || !senderProfile) {
-        await supabaseAdmin.from("deals").delete().eq("id", dealId);
+        await abortCreatedDeal(dealId);
         return NextResponse.json({ error: "Privacy setting unavailable. No request was sent." }, { status: 503 });
       }
       // Open Gate identity follows the sender's own profile choice; a browser
@@ -406,8 +481,9 @@ export async function POST(request) {
       requestedAnonymous = senderProfile.is_profile_public !== true;
     }
 
+    const spendRole = role === "operator" ? "owner" : (role || "seeker");
     if (!openGateFree) {
-      await ensureConnectBalancesWallet(supabaseAdmin, userId, role, 'starry');
+      await ensureConnectBalancesWallet(supabaseAdmin, userId, spendRole, 'starry');
     }
 
     let spentConnects = false;
@@ -415,7 +491,7 @@ export async function POST(request) {
       ? { data: null, error: null }
       : await supabaseAdmin.rpc('spend_connects_atomic', {
           p_user_id: userId,
-          p_role: role || 'seeker',
+          p_role: spendRole,
           p_amount: 1,
           p_tier: 'starry',
           p_source: 'initiate_chat',
@@ -431,7 +507,7 @@ export async function POST(request) {
 
     if (spendError) {
       console.error("[INITIATE API] Connect spend failed:", spendError);
-      await supabaseAdmin.from('deals').delete().eq('id', dealId);
+      await abortCreatedDeal(dealId);
       const insufficient = spendError.message?.includes('insufficient balance') || spendError.message?.includes('no wallet found');
       return NextResponse.json(
         { error: insufficient ? "Insufficient Connects balance." : "Transaction failed. No Connects spent." },
@@ -439,6 +515,14 @@ export async function POST(request) {
       );
     }
     if (!openGateFree) {
+      const spendRow = Array.isArray(spendData) ? spendData[0] : spendData;
+      if (!spendRow || spendRow.success === false) {
+        await abortCreatedDeal(dealId);
+        return NextResponse.json(
+          { error: "Insufficient Connects balance." },
+          { status: 403 }
+        );
+      }
       spentConnects = true;
     }
 
@@ -480,7 +564,9 @@ export async function POST(request) {
 
       // Keep the user_profiles cache in sync (best-effort display cache; not the source of truth)
       if (newBalance !== null) {
-        await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId).catch(() => {});
+        try {
+          await supabaseAdmin.from('user_profiles').update({ connects_balance: newBalance }).eq('id', userId);
+        } catch {}
       }
 
       // Signal exactly the recipient snapshot. When the active roster is
@@ -560,21 +646,53 @@ export async function POST(request) {
       console.error("[DEALS INITIATE] Post-spend side effect failure, issuing compensating refund:", postSpendErr);
       if (spentConnects && userId !== 'master-dev') {
         try {
-          await supabaseAdmin.rpc('refund_connects_system_error', {
+          const { data: refundRows, error: refundRpcErr } = await supabaseAdmin.rpc('refund_connects_system_error', {
             p_user_id: userId,
             p_amount: 1,
             p_reason: `Compensating refund: inquiry delivery failed for deal ${dealId} (${postSpendErr.message})`,
             p_staff_id: "system",
             p_ref_id: String(resolvedListingId),
           });
+          const refundConfirmed =
+            !refundRpcErr &&
+            (!Array.isArray(refundRows) ||
+              (refundRows.length > 0 && refundRows[0]?.success !== false));
+          if (!refundConfirmed) {
+            console.error("[DEALS INITIATE] Compensating refund unconfirmed:", refundRpcErr);
+            await recordSystemEvent({
+              event: "connects.initiate.reconciliation_required",
+              severity: "error",
+              subjectTable: "deals",
+              subjectId: String(dealId || resolvedListingId || "unknown"),
+              summary: "Compensating Connect refund failed after inquiry delivery error",
+              detail: {
+                userId,
+                listingId: resolvedListingId,
+                dealId,
+                error: refundRpcErr?.message || postSpendErr?.message || "unknown",
+              },
+            });
+          }
         } catch (refundErr) {
           console.error("[DEALS INITIATE] Compensating refund RPC failed:", refundErr);
+          await recordSystemEvent({
+            event: "connects.initiate.reconciliation_required",
+            severity: "error",
+            subjectTable: "deals",
+            subjectId: String(dealId || resolvedListingId || "unknown"),
+            summary: "Compensating Connect refund failed after inquiry delivery error",
+            detail: {
+              userId,
+              listingId: resolvedListingId,
+              dealId,
+              error: refundErr?.message || postSpendErr?.message || "unknown",
+            },
+          });
         }
       }
       try {
         if (dealId) {
-          await supabaseAdmin.from('deal_routing_recipients').delete().eq('deal_id', dealId).catch(() => {});
-          await supabaseAdmin.from('deals').delete().eq('id', dealId).catch(() => {});
+          await abortCreatedDeal(dealId);
         }
       } catch (rollbackErr) {
         console.error("[DEALS INITIATE] Deal rollback failed:", rollbackErr);

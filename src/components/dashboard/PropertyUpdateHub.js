@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
+import { getSession } from "@/lib/authClient";
 import { 
   Search, 
   Sparkles, 
@@ -44,14 +45,30 @@ export default function PropertyUpdateHub({
   const [queueInfo, setQueueInfo] = useState(null); // { queueNumber, propertyId, status }
   const fileInputRef = useRef(null);
 
+  async function buildAuthHeaders(extra = {}) {
+    const headers = { ...extra };
+    try {
+      const { data: { session } = {} } = await getSession();
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+    } catch {
+      // Fall back to cookie/anonymous headers if session lookup fails
+    }
+    return headers;
+  }
+
   // Fetch real property_units rows for accurate unit-level searching
   useEffect(() => {
     let isMounted = true;
     async function loadUnits() {
+      const headers = await buildAuthHeaders();
       for (const p of listings) {
         if (!p.id) continue;
         try {
-          const res = await fetch(`/api/dashboard/units?propertyId=${p.id}`);
+          const res = await fetch(`/api/dashboard/units?propertyId=${encodeURIComponent(p.id)}`, {
+            headers,
+          });
           if (res.ok) {
             const data = await res.json();
             if (isMounted && Array.isArray(data.units)) {
@@ -318,9 +335,10 @@ export default function PropertyUpdateHub({
     setProposedUpdates([]);
 
     try {
+      const headers = await buildAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch("/api/properties/updates/intent", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           text: pastedText,
           properties: propertiesList
@@ -444,8 +462,10 @@ export default function PropertyUpdateHub({
       formData.append("file", file);
       formData.append("title", file.name.replace(/\.[^/.]+$/, ""));
 
+      const intakeHeaders = await buildAuthHeaders();
       const res = await fetch("/api/properties/queue/intake", {
         method: "POST",
+        headers: intakeHeaders,
         body: formData
       });
 
@@ -462,9 +482,10 @@ export default function PropertyUpdateHub({
       addToast?.(`Document Queued · You are #${data.queueNumber} in line`);
 
       // Trigger asynchronous background parsing immediately
+      const processHeaders = await buildAuthHeaders({ "Content-Type": "application/json" });
       fetch("/api/properties/queue/process", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: processHeaders,
         body: JSON.stringify({ propertyId: data.property?.id })
       }).catch(err => console.warn("Background trigger dispatch:", err));
 

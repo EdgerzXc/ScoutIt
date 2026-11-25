@@ -18,10 +18,11 @@ import { getCurrentTier } from "@/lib/entitlements";
 import { SETTINGS_SECTIONS } from "@/lib/settingsNavigation";
 import { canAddRole } from "@/lib/workspaceUnlock";
 import { normalizeDashboardModes, pickPrimaryRole } from "@/lib/dashboardModes";
-import { getStoredLiteMode, setLiteMode } from "@/lib/liteMode";
-import { getStoredSimpleMode, setSimpleMode } from "@/lib/simpleMode";
-import { notifyLightModeChanged } from "@/lib/lightMode";
+import { getStoredLiteMode, setLiteMode, LITE_MODE_EVENT } from "@/lib/liteMode";
+import { getStoredSimpleMode, setSimpleMode, SIMPLE_MODE_EVENT } from "@/lib/simpleMode";
+import { notifyLightModeChanged, LIGHT_MODE_EVENT } from "@/lib/lightMode";
 import { readDevelopmentMockUser } from "@/lib/developmentMock";
+import { isSafeSvgMarkup, extractSafeSvgMarkup } from "@/lib/sanitize";
 
 const SELF_SERVICE_TAGS = [
   { id: 'buyer', label: 'Looking to Buy / Rent', icon: <Search strokeWidth={1.5} size="1.1em" /> },
@@ -44,6 +45,7 @@ export const ALL_PLATFORM_ROLES = [
   { id: 'operator', label: 'Co-Operator & Facilities', icon: '🏢', badge: 'Operations Desk', desc: 'Space management, facilities desk & guest access operations' },
   { id: 'photographer', label: 'Spatial Photographer', icon: '📷', badge: 'Creative Network', desc: 'Space photography, Matterport staging & QuestIT photo bounties' },
   { id: 'designer', label: 'Event & Concept Designer', icon: '✨', badge: 'Spatial Staging', desc: 'Spatial staging, pop-up commercial concepts & design lookbooks' },
+  { id: 'researcher', label: 'Zoning & Land Researcher', icon: '📐', badge: 'Site Audits', desc: 'Field verification, due diligence & land audits' },
 ];
 
 const INTENT_TAGS = [...SELF_SERVICE_TAGS, ...GATED_TAGS];
@@ -125,11 +127,24 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
-    const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
-    setCurrentMode(requestedMode);
-    setLite(getStoredLiteMode());
-    setSimple(getStoredSimpleMode());
+    const syncDisplayPrefs = () => {
+      const legacy = localStorage.getItem("scoutit_accessibility_mode") === "high-contrast" ? "high-contrast" : null;
+      const requestedMode = localStorage.getItem("scoutit_display_mode") || legacy || "dark";
+      setCurrentMode(requestedMode);
+      setLite(getStoredLiteMode());
+      setSimple(getStoredSimpleMode());
+    };
+    syncDisplayPrefs();
+    window.addEventListener(SIMPLE_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener(LITE_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener(LIGHT_MODE_EVENT, syncDisplayPrefs);
+    window.addEventListener("storage", syncDisplayPrefs);
+    return () => {
+      window.removeEventListener(SIMPLE_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener(LITE_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener(LIGHT_MODE_EVENT, syncDisplayPrefs);
+      window.removeEventListener("storage", syncDisplayPrefs);
+    };
   }, []);
 
   const handleThemeChange = (m) => {
@@ -490,7 +505,13 @@ export default function SettingsPage() {
     }
     
     setFactorId(data.id);
-    setQrCode(data.totp.qr_code); // SVG string
+    const safeSvg = extractSafeSvgMarkup(data?.totp?.qr_code);
+    if (safeSvg) {
+      setQrCode(safeSvg); // Sanitized raw SVG markup
+    } else {
+      setMfaMessage({ type: 'error', text: 'Invalid QR code format received from authentication service.' });
+      setIsEnrolling2FA(false);
+    }
   };
 
   const verify2FA = async () => {
@@ -941,7 +962,7 @@ export default function SettingsPage() {
                     Simple Mode {simple ? "· Active" : "· Inactive"}
                   </div>
                   <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
-                    Fewer words with high density. Essential metrics with no decorative copy.
+                    Calm, plain-language layout. Keeps key facts and actions up front and folds advanced panels away.
                   </div>
                 </div>
                 <span style={{ fontSize: 13, fontFamily: "var(--font-mono)", color: simple ? "var(--accent)" : "var(--text-muted)" }}>
@@ -1077,9 +1098,9 @@ export default function SettingsPage() {
                   {publicProfile.headline || "Your headline will appear here"}
                 </div>
                 <div style={{display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10}}>
-                  {tags.map(t => {
-                    const tag = INTENT_TAGS.find(x => x.id === t);
-                    return tag ? (
+                  {[...new Set([...rawActiveRoles, ...tags])].map(t => {
+                    const roleMeta = ALL_PLATFORM_ROLES.find(x => x.id === t) || INTENT_TAGS.find(x => x.id === t);
+                    return roleMeta ? (
                       <span key={t} style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: 12,
@@ -1091,7 +1112,7 @@ export default function SettingsPage() {
                         padding: '2px 8px',
                         borderRadius: 9999
                       }}>
-                        {tag.label}
+                        {roleMeta.label}
                       </span>
                     ) : null;
                   })}
@@ -1260,7 +1281,7 @@ export default function SettingsPage() {
             <input
               type="password"
               className={styles.input}
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
               aria-label="New password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -1359,10 +1380,12 @@ export default function SettingsPage() {
                 <p style={{fontSize: 14, color: 'var(--text-primary)', marginBottom: 12}}>
                   1. Scan this QR code with your Authenticator App:
                 </p>
-                <div
-                  style={{background: '#ffffff', padding: 12, borderRadius: 8, width: 200, height: 200, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}
-                  dangerouslySetInnerHTML={{ __html: qrCode }}
-                />
+                {isSafeSvgMarkup(qrCode) && (
+                  <div
+                    style={{background: '#ffffff', padding: 12, borderRadius: 8, width: 200, height: 200, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}
+                    dangerouslySetInnerHTML={{ __html: qrCode }}
+                  />
+                )}
                 <p style={{fontSize: 14, color: 'var(--text-primary)', marginBottom: 8}}>
                   2. Enter the 6-digit code shown in your app:
                 </p>

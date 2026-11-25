@@ -11,8 +11,13 @@ import { invalidateCmsBundle } from "@/lib/cmsCache";
 
 export async function GET(request) {
   try {
-    const gate = await requireAdmin(request, { label: "ADMIN PRC" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+    const gate = await requireAdmin(request, { label: "ADMIN PRC", minTier: 2 });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
     const { data, error } = await supabaseAdmin
       .from("user_profiles")
@@ -35,8 +40,13 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const gate = await requireAdmin(request, { label: "ADMIN PRC" });
-    if (gate.error) return NextResponse.json({ error: gate.error }, { status: gate.status });
+    const gate = await requireAdmin(request, { label: "ADMIN PRC", minTier: 2 });
+    if (gate.error) {
+      return NextResponse.json(
+        { error: gate.error },
+        { status: gate.status, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
 
     let body;
     try {

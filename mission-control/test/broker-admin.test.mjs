@@ -39,14 +39,15 @@ test("setBrokerLiveStateInAirtable PATCHes Approved_For_Live_Site and purges cac
     capturedBody = JSON.parse(options.body);
     return {
       ok: true,
-      json: async () => ({ id: "recBroker123", fields: capturedBody.fields }),
+      status: 200,
+      json: async () => ({ id: "recBroker12345678", fields: capturedBody.fields }),
     };
   };
 
   const res = await setBrokerLiveStateInAirtable({
     apiKey: "test-pat",
     baseId: "appBase123",
-    recordId: "recBroker123",
+    recordId: "recBroker12345678",
     isLive: false,
     fetchImpl: mockFetch,
     purgeCacheFn: async () => {
@@ -55,9 +56,9 @@ test("setBrokerLiveStateInAirtable PATCHes Approved_For_Live_Site and purges cac
     },
   });
 
-  assert.equal(res.recordId, "recBroker123");
+  assert.equal(res.recordId, "recBroker12345678");
   assert.equal(res.isLive, false);
-  assert.equal(capturedUrl, "https://api.airtable.com/v0/appBase123/BROKERS_CMS/recBroker123");
+  assert.equal(capturedUrl, "https://api.airtable.com/v0/appBase123/BROKERS_CMS/recBroker12345678");
   assert.equal(capturedMethod, "PATCH");
   assert.equal(capturedBody.fields.Approved_For_Live_Site, false);
   assert.equal(cachePurged, true);
@@ -70,20 +71,21 @@ test("setBrokerLicenseVerifiedInAirtable PATCHes License_Verified", async () => 
     capturedBody = JSON.parse(options.body);
     return {
       ok: true,
-      json: async () => ({ id: "recBroker123", fields: capturedBody.fields }),
+      status: 200,
+      json: async () => ({ id: "recBroker12345678", fields: capturedBody.fields }),
     };
   };
 
   const res = await setBrokerLicenseVerifiedInAirtable({
     apiKey: "test-pat",
     baseId: "appBase123",
-    recordId: "recBroker123",
+    recordId: "recBroker12345678",
     isVerified: true,
     fetchImpl: mockFetch,
     purgeCacheFn: async () => ({ purged: true }),
   });
 
-  assert.equal(res.recordId, "recBroker123");
+  assert.equal(res.recordId, "recBroker12345678");
   assert.equal(res.isVerified, true);
   assert.equal(capturedBody.fields.License_Verified, true);
 });

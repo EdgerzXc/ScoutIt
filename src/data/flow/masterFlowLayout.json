@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "generatedAt": "2026-10-31T07:26:16.835Z",
+  "generatedAt": "2026-11-19T03:27:32.113Z",
   "positions": {
     "hero": {
       "x": 80,
@@ -581,6 +581,46 @@
     "direct_call_modal": {
       "x": 1850,
       "y": 2050
+    },
+    "cron_recompute_broker_metrics": {
+      "x": 4250,
+      "y": 2150
+    },
+    "cron_purge_contact_messages": {
+      "x": 4250,
+      "y": 2370
+    },
+    "cron_purge_crm_activity": {
+      "x": 4250,
+      "y": 2590
+    },
+    "cron_purge_analytics": {
+      "x": 4250,
+      "y": 2810
+    },
+    "cron_monthly_rollover": {
+      "x": 4250,
+      "y": 3030
+    },
+    "cron_verify_prc_status": {
+      "x": 4250,
+      "y": 3250
+    },
+    "cron_calendar_sync_queue": {
+      "x": 4250,
+      "y": 3470
+    },
+    "mc_scan_process_cron": {
+      "x": 4250,
+      "y": 3690
+    },
+    "cron_sweep_pending_requests": {
+      "x": 2670,
+      "y": 3400
+    },
+    "cron_purge_chat_messages": {
+      "x": 4270,
+      "y": 3830
     }
   }
 }

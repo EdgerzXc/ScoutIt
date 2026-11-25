@@ -89,7 +89,7 @@ describe("the screen and the route agree", () => {
 
   it("'What is deleted' names exactly the tables the route erases", () => {
     const block = route.slice(route.indexOf("const erasures = ["), route.indexOf("];", route.indexOf("const erasures = [")));
-    const erasedTables = [...block.matchAll(/\["(\w+)",\s*"\w+"\]/g)].map((match) => match[1]);
+    const erasedTables = [...block.matchAll(/\["(\w+)",(?:\s*"\w+",?)+\]/g)].map((match) => match[1]);
     expect(erasedTables.length).toBeGreaterThanOrEqual(8);
     expect(Object.keys(ERASED_DATA_LABELS).sort()).toEqual([...erasedTables].sort());
   });

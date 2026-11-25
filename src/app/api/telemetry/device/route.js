@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
 
 // ── Storage-exhaustion defence (§1.0B) ──
 // This endpoint is unauthenticated by design: it measures anonymous visitors,
@@ -135,16 +136,10 @@ export function classifyTelemetryPath(path) {
   return `/${root}`;
 }
 
-function firstClientIp(request) {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim() || "unknown";
-  return request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip") || "unknown";
-}
-
 export function deriveTelemetryIdentity(request, salt) {
   const userAgent = request.headers.get("user-agent") || "unknown";
   return `telemetry_anon_${createHmac("sha256", salt)
-    .update(`${firstClientIp(request)}:${userAgent}`)
+    .update(`${clientIp(request)}:${userAgent}`)
     .digest("hex")
     .slice(0, 24)}`;
 }
@@ -296,7 +291,7 @@ async function recordPageview({ maskedIdentity, route, geo, now }) {
 export async function POST(request) {
   try {
     // Meter before parsing so a flood costs as little as possible.
-    const clientAddr = firstClientIp(request);
+    const clientAddr = clientIp(request);
     const rate = checkTelemetryRate(clientAddr);
     if (!rate.allowed) {
       return NextResponse.json(

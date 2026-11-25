@@ -15,6 +15,7 @@ import {
   Sparkles,
   Zap,
   ShieldAlert,
+  Building2,
 } from "lucide-react";
 import { setContactStatus, saveStaffNotes } from "./actions";
 import ContactReplyButton from "@/components/communications/ContactReplyButton";
@@ -98,11 +99,7 @@ export default async function ContactQueuePage({ searchParams }) {
   }
 
   function isVipMessage(m) {
-    const hasSubjectFlag = m.subject?.includes("[VIP PIONEER");
-    const hasMessageFlag = m.message?.includes("VIP Tier:") || m.message?.includes("vip_support");
-    const badges = m.user_id ? userBadgesMap[m.user_id] || [] : [];
-    const hasPioneerBadge = badges.some((b) => b.badge_id?.toLowerCase().includes("pioneer"));
-    return hasSubjectFlag || hasMessageFlag || hasPioneerBadge;
+    return Boolean(getPioneerCharterBadge(m.user_id));
   }
 
   function isSupportMessage(m) {
@@ -110,6 +107,20 @@ export default async function ContactQueuePage({ searchParams }) {
       isVipMessage(m) ||
       m.subject?.includes("[DIRECT SUPPORT]") ||
       m.message?.includes("Topic: support")
+    );
+  }
+
+  function isEnterpriseMessage(m) {
+    return Boolean(
+      m.subject?.includes("[ENTERPRISE INTAKE]") ||
+        m.message?.includes("Topic: enterprise")
+    );
+  }
+
+  function isListingMessage(m) {
+    return Boolean(
+      m.subject?.includes("[LISTING / CLAIM]") ||
+        m.message?.includes("Topic: listing")
     );
   }
 
@@ -123,7 +134,10 @@ export default async function ContactQueuePage({ searchParams }) {
   function getPioneerCharterBadge(userId) {
     if (!userId) return null;
     const badges = userBadgesMap[userId] || [];
-    return badges.find((b) => b.badge_id?.toLowerCase().includes("pioneer")) || null;
+    return badges.find((b) => {
+      const id = b.badge_id?.toUpperCase();
+      return id === "FOUNDING_SEEKER" || id?.includes("PIONEER");
+    }) || null;
   }
 
   // Telemetry KPIs
@@ -131,6 +145,15 @@ export default async function ContactQueuePage({ searchParams }) {
   const openCount = rows.filter((m) => m.status === "new" || m.status === "in_progress").length;
   const supportCount = rows.filter((m) => isSupportMessage(m) && m.status !== "spam").length;
   const vipCount = rows.filter((m) => isVipMessage(m) && m.status !== "spam").length;
+  const enterpriseCount = rows.filter((m) => isEnterpriseMessage(m) && m.status !== "spam").length;
+  const listingCount = rows.filter((m) => isListingMessage(m) && m.status !== "spam").length;
+  const generalCount = rows.filter(
+    (m) =>
+      !isSupportMessage(m) &&
+      !isEnterpriseMessage(m) &&
+      !isListingMessage(m) &&
+      m.status !== "spam"
+  ).length;
   const resolvedCount = rows.filter((m) => m.status === "resolved").length;
   const spamCount = rows.filter((m) => m.status === "spam").length;
 
@@ -138,7 +161,9 @@ export default async function ContactQueuePage({ searchParams }) {
     { key: "all", label: "All Active", count: totalCount - spamCount },
     { key: "support", label: "Direct Support", count: supportCount },
     { key: "vip", label: "VIP Pioneer SLA", count: vipCount },
-    { key: "general", label: "General", count: Math.max(0, totalCount - spamCount - supportCount) },
+    { key: "enterprise", label: "Enterprise Intake", count: enterpriseCount },
+    { key: "listing", label: "Listings & Claims", count: listingCount },
+    { key: "general", label: "General", count: generalCount },
     { key: "resolved", label: "Resolved", count: resolvedCount },
     { key: "spam", label: "Spam", count: spamCount },
   ];
@@ -146,7 +171,16 @@ export default async function ContactQueuePage({ searchParams }) {
   const filteredRows = rows.filter((m) => {
     if (currentTab === "support") return isSupportMessage(m) && m.status !== "spam";
     if (currentTab === "vip") return isVipMessage(m) && m.status !== "spam";
-    if (currentTab === "general") return !isSupportMessage(m) && m.status !== "spam";
+    if (currentTab === "enterprise") return isEnterpriseMessage(m) && m.status !== "spam";
+    if (currentTab === "listing") return isListingMessage(m) && m.status !== "spam";
+    if (currentTab === "general") {
+      return (
+        !isSupportMessage(m) &&
+        !isEnterpriseMessage(m) &&
+        !isListingMessage(m) &&
+        m.status !== "spam"
+      );
+    }
     if (currentTab === "resolved") return m.status === "resolved";
     if (currentTab === "spam") return m.status === "spam";
     return m.status !== "spam";
@@ -174,7 +208,7 @@ export default async function ContactQueuePage({ searchParams }) {
       </div>
 
       {/* KPI Telemetry Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="bg-[#121212] border border-white/5 rounded-xl p-4">
           <span className="text-[12px] font-mono uppercase tracking-wider text-white/70 block">Total Inbound</span>
           <span className="text-2xl font-semibold text-white/90 mt-1 block">{totalCount}</span>
@@ -188,6 +222,12 @@ export default async function ContactQueuePage({ searchParams }) {
             <Award className="w-3.5 h-3.5 text-[#E8AE3C]" /> VIP Pioneer SLA
           </span>
           <span className="text-2xl font-semibold text-[#F7C64E] mt-1 block">{vipCount}</span>
+        </div>
+        <div className="bg-[#121212] border border-[#E8AE3C]/30 rounded-xl p-4">
+          <span className="text-[12px] font-mono uppercase tracking-wider text-[#F7C64E] flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-[#E8AE3C]" /> Enterprise Intake
+          </span>
+          <span className="text-2xl font-semibold text-[#F7C64E] mt-1 block">{enterpriseCount}</span>
         </div>
         <div className="bg-[#121212] border border-emerald-400/20 rounded-xl p-4">
           <span className="text-[12px] font-mono uppercase tracking-wider text-emerald-400 block">Resolved</span>
@@ -243,6 +283,8 @@ export default async function ContactQueuePage({ searchParams }) {
       <div className="space-y-4">
         {filteredRows.map((m) => {
           const isVip = isVipMessage(m);
+          const isEnterprise = isEnterpriseMessage(m);
+          const isListing = isListingMessage(m);
           const isUrgent = isUrgentMessage(m);
           const userProfile = m.user_id ? userProfilesMap[m.user_id] : null;
           const pioneerBadge = getPioneerCharterBadge(m.user_id);
@@ -276,6 +318,21 @@ export default async function ContactQueuePage({ searchParams }) {
                       <span className="text-[12px] uppercase font-mono px-2.5 py-0.5 rounded-full border border-[#E8AE3C]/40 bg-[#E8AE3C]/15 text-[#F7C64E] font-medium flex items-center gap-1 shadow-sm">
                         <Award className="w-3 h-3 text-[#E8AE3C]" />
                         {charterSeat ? `Charter #${String(charterSeat).padStart(3, "0")}` : "Pioneer Charter"}
+                      </span>
+                    )}
+
+                    {/* Enterprise Intake Badge */}
+                    {isEnterprise && (
+                      <span className="text-[12px] uppercase font-mono px-2.5 py-0.5 rounded-full border border-[#E8AE3C]/40 bg-[#E8AE3C]/15 text-[#F7C64E] font-medium flex items-center gap-1">
+                        <Building2 className="w-3 h-3 text-[#E8AE3C]" />
+                        Enterprise Intake
+                      </span>
+                    )}
+
+                    {/* Listing / Claim Badge */}
+                    {isListing && (
+                      <span className="text-[12px] uppercase font-mono px-2.5 py-0.5 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-300 font-medium">
+                        Listing / Claim
                       </span>
                     )}
 

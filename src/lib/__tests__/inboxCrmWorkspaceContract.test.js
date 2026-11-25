@@ -94,7 +94,8 @@ describe("A-047 ChatBox live scheduling connection", () => {
 
   it("treats the appointment row, not a system message, as ChatBox state", () => {
     expect(chatBox).toContain('crmFetch("/api/viewing-appointments"');
-    expect(chatBox).toContain('crmFetch(`/api/viewing-appointments/${activeViewing.id}`');
+    expect(chatBox).toContain('crmFetch(`/api/viewing-appointments/${id}`');
+    expect(chatBox).toContain("expectedUpdatedAt: updatedAt");
     expect(chatBox).toContain("setActiveViewing");
     expect(chatBox).toContain("<ViewingWorkspaceCard");
     expect(chatBox).toContain('window.dispatchEvent(new Event("calendar:refresh"))');
@@ -105,7 +106,9 @@ describe("A-047 ChatBox live scheduling connection", () => {
   });
 
   it("keeps host confirmation and live-slot rescheduling permission-aware", () => {
-    expect(chatBox).toContain('activeViewing?.isHost && activeViewing.status === "pending"');
+    expect(chatBox).toContain("onConfirm={acceptViewing}");
+    expect(chatBox).toContain("renderTextWithLinks(maskContactDetails(msg.body, contactRevealed))");
+    expect(chatBox).not.toContain("onAcceptReschedule");
     expect(chatBox).toContain('openViewingPicker("reschedule")');
     expect(viewingCard).toContain("appointment.isHost");
     expect(viewingCard).toContain('href="/dashboard/calendar"');

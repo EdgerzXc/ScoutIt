@@ -6,15 +6,24 @@ const { auth } = vi.hoisted(() => ({
     getSession: vi.fn(),
     resend: vi.fn(),
     signUp: vi.fn(),
+    signInWithOtp: vi.fn(),
   },
 }));
 
 vi.mock("@/lib/supabaseClient", () => ({ supabase: { auth } }));
 
-import { getSession, getUser, resendSignupConfirmation, signUp } from "@/lib/authClient";
+import { getSession, getUser, resendSignupConfirmation, signInWithOtp, signUp } from "@/lib/authClient";
 
 describe("email confirmation auth client", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("keeps code sign-in separate from registration", async () => {
+    await signInWithOtp("person@example.com", "captcha");
+    expect(auth.signInWithOtp).toHaveBeenCalledWith({
+      email: "person@example.com",
+      options: { shouldCreateUser: false, captchaToken: "captcha" },
+    });
+  });
 
   it("validates a returning user through Supabase Auth", async () => {
     auth.getUser.mockResolvedValue({ data: { user: { id: "verified" } }, error: null });

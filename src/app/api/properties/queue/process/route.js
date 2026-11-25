@@ -12,6 +12,13 @@ import { assimilatePropertyText, MAX_PDF_BYTES, MAX_RAW_TEXT_CHARS, MAX_PDF_PAGE
 const TEMP_BUCKET = "property_photos";
 const MAX_PROCESS_ATTEMPTS = 3;
 
+function isSafeOwnerTempPdfPath(rawPath, ownerId) {
+  if (typeof rawPath !== "string" || !ownerId) return false;
+  const trimmed = rawPath.trim();
+  if (!trimmed || trimmed.includes("..") || trimmed.includes("\\")) return false;
+  return trimmed.startsWith(`temp_queue_docs/${ownerId}/`);
+}
+
 /**
  * Quarantines a poison pill or corrupt listing so it does not block the queue.
  */
@@ -106,16 +113,23 @@ export async function POST(request) {
       }
     }
 
-    // 3. User session check (owner checking their own listing)
+    // 3. User session check (owner checking their own listing) BEFORE querying DB
     if (!isAuthorized) {
       authUserId = await resolveUserId(request);
+      if (!authUserId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     }
 
-    // Select the property to process
+    // Select the property to process (non-admin sessions can only inspect their own drafts)
     let query = supabaseAdmin
       .from("properties")
       .select("id, owner_id, title, location, type, space_category, price, description, media_link, pipeline_status, pdf_source_url, created_at, details")
       .eq("pipeline_status", "ai_drafting");
+
+    if (!isAuthorized && authUserId) {
+      query = query.eq("owner_id", authUserId);
+    }
 
     if (requestedPropertyId) {
       query = query.eq("id", requestedPropertyId);
@@ -154,11 +168,12 @@ export async function POST(request) {
     }
 
     const storagePath = property.details?.temp_storage_path || property.pdf_source_url;
+    const hasValidStoragePath = isSafeOwnerTempPdfPath(storagePath, property.owner_id);
     const currentAttempts = (property.details?.process_attempts || 0) + 1;
 
     // Poison-pill protection: if this property has failed too many times, quarantine it
     if (currentAttempts > MAX_PROCESS_ATTEMPTS) {
-      if (storagePath) {
+      if (hasValidStoragePath) {
         await supabaseAdmin.storage.from(TEMP_BUCKET).remove([storagePath]).catch(() => {});
       }
       await quarantineProperty(property.id, "max_retries_exceeded", property.details, property.owner_id);
@@ -182,13 +197,14 @@ export async function POST(request) {
       })
       .eq("id", property.id);
 
-    if (!storagePath) {
-      await quarantineProperty(property.id, "missing_storage_path", property.details, property.owner_id);
+    if (!hasValidStoragePath) {
+      const invalidReason = storagePath ? "invalid_storage_path" : "missing_storage_path";
+      await quarantineProperty(property.id, invalidReason, property.details, property.owner_id);
       return NextResponse.json({
         success: false,
         quarantined: true,
-        reason: "missing_storage_path",
-        error: "Document storage path missing.",
+        reason: invalidReason,
+        error: storagePath ? "Document storage path is invalid." : "Document storage path missing.",
       }, { status: 422 });
     }
 

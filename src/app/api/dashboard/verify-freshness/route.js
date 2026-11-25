@@ -7,6 +7,14 @@ import { sanitizeError } from "@/lib/sanitizeError";
 import { getFreshness } from "@/lib/freshness";
 import { stampAirtableFreshness } from "@/lib/airtableFreshness";
 import { getCmsBundle, invalidateCmsBundle } from "@/lib/cmsCache";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+const checkVerifyFreshnessRate = createRateLimiter({
+  limit: 10,
+  windowMs: 60_000,
+  maxKeys: 5000,
+});
 
 // ─────────────────────────────────────────────────────────────────────────
 // RE-VERIFICATION GATE  (NEW_IDEAS.md §21)
@@ -74,7 +82,7 @@ export async function GET(req) {
           : null;
 
       const publicLastVerifiedDate = publicProp?.last_verified_date || null;
-      const isPublished = p.pipeline_status === "published";
+      const isPublished = p.pipeline_status === "published" || p.pipeline_status === "approved";
       const isPublicSyncPending =
         isPublished &&
         (!activeSlug || (p.last_verified_date && publicLastVerifiedDate !== p.last_verified_date));
@@ -121,12 +129,20 @@ export async function GET(req) {
 // ── POST: confirm freshness ──────────────────────────────────────────────
 export async function POST(req) {
   try {
+    const rate = checkVerifyFreshnessRate(clientIp(req));
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { success: false, message: "Too many freshness updates. Please wait a minute." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
     if (!supabaseAdmin) return fail("Server error: missing service role configuration", 500);
 
     const userId = await resolveUserId(req);
     if (!userId) return fail("Sign in to continue.", 401);
 
-    const parsed = schema.safeParse(await req.json());
+    const rawBody = await req.json().catch(() => null);
+    const parsed = schema.safeParse(rawBody);
     if (!parsed.success) return fail("Invalid payload");
 
     // Scope to what the caller actually owns. Never trust the id list — a
@@ -159,7 +175,7 @@ export async function POST(req) {
     for (const property of owned) {
       const activeSlug = property.canonical_slug || property.slug;
       if (!activeSlug) {
-        if (property.pipeline_status === "published") {
+        if (property.pipeline_status === "published" || property.pipeline_status === "approved") {
           unsluggedPublished.push(property.title || property.id);
         }
         continue;

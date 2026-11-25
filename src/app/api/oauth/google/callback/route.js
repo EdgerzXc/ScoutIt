@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { siteUrl } from "@/lib/siteUrl";
@@ -5,13 +6,31 @@ import { isGoogleConfigured, exchangeCodeForTokens, fetchAccountEmail, GOOGLE_SC
 import { verifyState } from "@/lib/calendar/oauthState";
 import { encryptToken } from "@/lib/calendar/tokenCrypto";
 
+const OAUTH_NONCE_COOKIE = "scoutit_google_oauth_nonce";
+
 // GET /api/oauth/google/callback?code=...&state=...
 // Top-level browser redirect from Google (no auth header). We recover the user
-// from the signed state, exchange the code, and store ENCRYPTED tokens. On any
-// failure we redirect back to the calendar with a friendly ?error flag rather
-// than dumping a raw error page.
+// from the signed state, verify the HttpOnly CSRF nonce cookie set at /start,
+// exchange the code, and store ENCRYPTED tokens.
 function backToCalendar(flag) {
-  return NextResponse.redirect(siteUrl(`/dashboard/calendar?${flag}`));
+  const res = NextResponse.redirect(siteUrl(`/dashboard/calendar?${flag}`), {
+    headers: { "Cache-Control": "private, no-store" },
+  });
+  res.cookies.delete({
+    name: OAUTH_NONCE_COOKIE,
+    path: "/api/oauth/google/callback",
+  });
+  return res;
+}
+
+function hasMatchingNonceCookie(request, expectedNonceHash) {
+  if (!expectedNonceHash || typeof expectedNonceHash !== "string") return false;
+  const cookieVal = request.cookies?.get?.(OAUTH_NONCE_COOKIE)?.value;
+  if (!cookieVal || typeof cookieVal !== "string") return false;
+  const actualHash = crypto.createHash("sha256").update(cookieVal).digest("hex");
+  const a = Buffer.from(actualHash, "hex");
+  const b = Buffer.from(expectedNonceHash, "hex");
+  return a.length > 0 && a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function GET(request) {
@@ -27,7 +46,9 @@ export async function GET(request) {
     const code = searchParams.get("code");
     const state = searchParams.get("state");
     const verified = verifyState(state);
-    if (!code || !verified) return backToCalendar("calendar_error=invalid_state");
+    if (!code || !verified || !hasMatchingNonceCookie(request, verified.nonceHash)) {
+      return backToCalendar("calendar_error=invalid_state");
+    }
 
     const userId = verified.userId;
 

@@ -36,7 +36,7 @@ export async function getFlag(id, defaultValue = false) {
   return id in flags ? flags[id] : defaultValue;
 }
 
-/** The kill switch: when true, all mutating public-site routes refuse writes. */
+/** Read the public API maintenance flag for routes with their own write guard. */
 export async function isGlobalReadOnly() {
   // Default false — if the flag table is unreachable the site keeps working.
   return getFlag("global_read_only", false);

@@ -10,6 +10,8 @@ import AtmosphereBackground from "@/components/ui/AtmosphereBackground";
 import ProvenanceBadge from "@/components/ui/ProvenanceBadge";
 import { DISCOVER_INTEL, DISCOVER_PROPERTIES, USE_MOCK_DATA } from "@/data/mock";
 import DiscoverSearch from "@/components/discover/DiscoverSearch";
+import { useSimpleMode } from "@/hooks/useSimpleMode";
+import { chapterSubtitleVisible } from "@/lib/simpleModeSurfaces";
 import "./discover.css";
 import { loadPublicCatalog } from "../../lib/cms/publicCatalog";
 
@@ -93,6 +95,7 @@ export function formatDiscoverDatasets(airtableProperties = [], airtableIntel = 
 }
 
 export default function DiscoverClient({ initialProperties = [], initialIntel = [], initialUnavailable = false }) {
+  const simple = useSimpleMode();
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type") || "residential";
   const initialRegionParam = searchParams.get("region");
@@ -300,9 +303,11 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
           <section className="discover-news-section" aria-label="Regional News Feed">
             <div className="sectionHeader">
               <h2 className="sectionTitle">News Feed</h2>
-              <p className="sectionSubtitle">
-                {activeRegion ? `Latest in ${activeRegion} · newest first` : "Latest across all regions · newest first"}
-              </p>
+              {chapterSubtitleVisible("Latest", simple) && (
+                <p className="sectionSubtitle">
+                  {activeRegion ? `Latest in ${activeRegion} · newest first` : "Latest across all regions · newest first"}
+                </p>
+              )}
             </div>
             <div className="chronologicalNewsRow" onPointerDown={onRowPointerDown}>
               {filteredIntel.length === 0 ? (
@@ -332,7 +337,9 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
           <section className="discover-regions-section" aria-label="Regions Navigation">
             <div className="sectionHeader" style={{ marginBottom: "16px" }}>
               <h2 className="sectionTitle">Regions</h2>
-              <p className="sectionSubtitle">Filter news and spaces by regional hub</p>
+              {chapterSubtitleVisible("Regions", simple) && (
+                <p className="sectionSubtitle">Filter news and spaces by regional hub</p>
+              )}
             </div>
             {regions.length > 6 && (
               <input
@@ -390,13 +397,15 @@ export default function DiscoverClient({ initialProperties = [], initialIntel = 
             <div className="sectionHeader">
               <span className="secondaryKicker">Also in this area</span>
               <h2 className="sectionTitle">Spaces</h2>
-              <p className="sectionSubtitle">
-                {activeRegion ? `Filtered to ${activeRegion} · ` : "All spaces in category · "}
-                Drag left &amp; right ·{" "}
-                <Link href="/layer/metropolis" className="secondaryJump">
-                  Browse the full directory
-                </Link>
-              </p>
+              {chapterSubtitleVisible("Spaces", simple) && (
+                <p className="sectionSubtitle">
+                  {activeRegion ? `Filtered to ${activeRegion} · ` : "All spaces in category · "}
+                  Drag left &amp; right ·{" "}
+                  <Link href="/layer/metropolis" className="secondaryJump">
+                    Browse the full directory
+                  </Link>
+                </p>
+              )}
             </div>
 
             {filteredProperties.length === 0 ? (

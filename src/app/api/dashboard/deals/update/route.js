@@ -11,6 +11,14 @@ import {
   mayAnswerBrokerRequest,
   representationStateForAnswer,
 } from "@/lib/deals/delegationDisclosure";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+export const checkDealStatusRate = createRateLimiter({
+  limit: 60,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 export async function POST(request) {
   try {
@@ -34,7 +42,16 @@ export async function POST(request) {
 
     const userId = user.id;
 
-    const { dealId, newStatus } = await request.json();
+    const rate = checkDealStatusRate(clientIp(request) + ":" + userId);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many deal status updates. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } }
+      );
+    }
+
+    const body = await request.json().catch(() => null);
+    const { dealId, newStatus } = body && typeof body === "object" && !Array.isArray(body) ? body : {};
 
     if (!dealId || !newStatus || !userId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -130,10 +147,22 @@ export async function POST(request) {
       return NextResponse.json({ error: "Only the other side of this request can answer it." }, { status: 403 });
     }
 
+    const TERMINAL_DEAL_STATUSES = new Set(["closed", "declined", "withdrawn", "expired", "reported"]);
+    if (TERMINAL_DEAL_STATUSES.has(deal.status)) {
+      return NextResponse.json(
+        { error: `Deal is already ${deal.status} and cannot transition to ${newStatus}` },
+        { status: 409 }
+      );
+    }
+
     // 2. Update the deal
+    const dealPatch = { status: newStatus };
+    if (newStatus === "closed") {
+      dealPatch.closed_at = new Date().toISOString();
+    }
     const { error: updateError } = await supabaseAdmin
       .from('deals')
-      .update({ status: newStatus })
+      .update(dealPatch)
       .eq('id', dealId);
 
     if (updateError) {
@@ -186,7 +215,10 @@ export async function POST(request) {
       metadata: { from: deal.status, to: newStatus },
     });
 
-    return NextResponse.json({ success: true, dealId, newStatus });
+    return NextResponse.json(
+      { success: true, dealId, newStatus },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
 
   } catch (err) {
     console.error("[DEAL UPDATE API] Error during deal update:", err);

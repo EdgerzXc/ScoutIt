@@ -71,7 +71,7 @@ export default async function NotificationsPage() {
               />
             </label>
 
-            <button className="w-full px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors mt-2">
+            <button type="submit" className="w-full px-4 py-2 bg-[#E8AE3C] text-black rounded-lg text-sm font-medium hover:bg-[#F7C64E] transition-colors mt-2">
               Send Notification
             </button>
           </form>

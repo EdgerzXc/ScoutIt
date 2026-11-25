@@ -3,6 +3,15 @@ import { resolveUserId } from "@/lib/serverAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sanitizeError } from "@/lib/sanitizeError";
 import { writeAuditLog } from "@/lib/auditTrail";
+import { createRateLimiter } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/clientIp";
+
+const NO_STORE = { "Cache-Control": "private, no-store" };
+const checkBrokerCredentialRate = createRateLimiter({
+  limit: 20,
+  windowMs: 60_000,
+  maxKeys: 10_000,
+});
 
 // ── U-025 — a broker states their own credential; only staff verifies it ────
 //
@@ -75,15 +84,26 @@ export async function POST(request) {
     if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized: Active session required" },
-        { status: 401 }
+        { status: 401, headers: NO_STORE }
+      );
+    }
+
+    const rate = checkBrokerCredentialRate(`${clientIp(request)}:${userId}`);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many credential update attempts. Please wait a moment and try again." },
+        { status: 429, headers: { ...NO_STORE, "Retry-After": String(rate.retryAfterSeconds) } }
       );
     }
 
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Database service unavailable" }, { status: 503 });
+      return NextResponse.json({ error: "Database service unavailable" }, { status: 503, headers: NO_STORE });
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid request payload." }, { status: 400, headers: NO_STORE });
+    }
 
     const updates = {};
     for (const [field, column] of Object.entries(FIELD_COLUMN)) {

@@ -37,18 +37,40 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server error: database client unavailable." }, { status: 500 });
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid application payload." }, { status: 400 });
+    }
     const {
       badgeId,
       annualVolumeTier,
       proofDocumentUrl,
-    } = body || {};
+    } = body;
 
-    const cleanAgency = String(body?.agencyName || body?.organization || body?.agency || "").trim();
-    const cleanTerritory = String(body?.territory || "Metro Manila / Prime Corridors").trim();
-    const cleanFullName = String(body?.fullName || body?.name || "").trim();
-    const cleanLicense = String(body?.licenseNumber || body?.proofReference || "").trim();
-    const cleanStatement = String(body?.statement || body?.notes || "").trim();
+    const cleanAgency = String(body?.agencyName || body?.organization || body?.agency || "").trim().slice(0, 160);
+    const cleanTerritory = String(body?.territory || "Metro Manila / Prime Corridors").trim().slice(0, 160);
+    const cleanFullName = String(body?.fullName || body?.name || "").trim().slice(0, 160);
+    const cleanLicense = String(body?.licenseNumber || body?.proofReference || "").trim().slice(0, 80);
+    const cleanStatement = String(body?.statement || body?.notes || "").trim().slice(0, 2000);
+    const cleanVolumeTier = typeof annualVolumeTier === "string" ? annualVolumeTier.trim().slice(0, 64) : null;
+
+    let safeProofUrl = null;
+    if (proofDocumentUrl != null && String(proofDocumentUrl).trim() !== "") {
+      const rawProof = String(proofDocumentUrl).trim().slice(0, 1000);
+      if (rawProof.startsWith("/") && !rawProof.startsWith("//")) {
+        safeProofUrl = rawProof;
+      } else {
+        try {
+          const parsedProof = new URL(rawProof);
+          if (parsedProof.protocol !== "https:") {
+            return NextResponse.json({ error: "Proof document URL must use HTTPS." }, { status: 400 });
+          }
+          safeProofUrl = parsedProof.toString();
+        } catch {
+          return NextResponse.json({ error: "Invalid proof document URL." }, { status: 400 });
+        }
+      }
+    }
 
     if (!badgeId || !isPioneerBadge(badgeId)) {
       return NextResponse.json({ error: "Invalid Pioneer badge ID specified." }, { status: 400 });
@@ -140,8 +162,8 @@ export async function POST(request) {
         organization: cleanAgency || null,
         license_number: cleanLicense || null,
         statement: cleanStatement || null,
-        annual_volume_tier: annualVolumeTier || null,
-        proof_document_url: proofDocumentUrl || null,
+        annual_volume_tier: cleanVolumeTier || null,
+        proof_document_url: safeProofUrl || null,
         status: "pending",
       })
       .select()
@@ -152,11 +174,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Failed to submit charter application." }, { status: 500 });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Charter candidacy successfully submitted. Our team reviews dossiers within 24 hours.",
-      application: newApp,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Charter candidacy successfully submitted. Our team reviews dossiers within 24 hours.",
+        application: newApp,
+      },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (err) {
     console.error("[CHARTER APPLY API] Error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

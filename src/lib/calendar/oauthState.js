@@ -21,24 +21,33 @@ function b64url(buf) {
   return buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-/** Create a signed state string binding this userId + provider to the flow. */
-export function signState({ userId, provider }) {
-  const payload = { u: userId, p: provider, t: Date.now(), n: crypto.randomBytes(8).toString("hex") };
+/** Create a signed state string binding this userId + provider (and optional CSRF nonce hash) to the flow. */
+export function signState({ userId, provider, nonceHash = null }) {
+  const payload = {
+    u: userId,
+    p: provider,
+    t: Date.now(),
+    n: crypto.randomBytes(8).toString("hex"),
+    ...(nonceHash ? { nh: nonceHash } : {}),
+  };
   const body = b64url(Buffer.from(JSON.stringify(payload), "utf8"));
   const sig = crypto.createHmac("sha256", getSecret()).update(body).digest("hex");
   return `${body}.${sig}`;
 }
 
 /**
- * Verify a state string. Returns { userId, provider } on success, or null if the
+ * Verify a state string. Returns { userId, provider, nonceHash } on success, or null if the
  * signature is invalid or the state has expired.
  */
 export function verifyState(state) {
   if (!state || typeof state !== "string" || !state.includes(".")) return null;
-  const [body, sig] = state.split(".");
+  const parts = state.split(".");
+  if (parts.length !== 2) return null;
+  const [body, sig] = parts;
+  if (!body || !sig) return null;
   const expected = crypto.createHmac("sha256", getSecret()).update(body).digest("hex");
   // Constant-time compare to avoid timing leaks.
-  const a = Buffer.from(sig || "", "hex");
+  const a = Buffer.from(sig, "hex");
   const b = Buffer.from(expected, "hex");
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
 
@@ -48,6 +57,6 @@ export function verifyState(state) {
   } catch {
     return null;
   }
-  if (!payload?.u || Date.now() - payload.t > STATE_TTL_MS) return null;
-  return { userId: payload.u, provider: payload.p };
+  if (!payload?.u || typeof payload.t !== "number" || Date.now() - payload.t > STATE_TTL_MS) return null;
+  return { userId: payload.u, provider: payload.p, nonceHash: payload.nh || null };
 }

@@ -29,6 +29,9 @@ export async function GET(_request, { params }) {
     if (!supabaseAdmin) return NextResponse.json({ error: "Roster service unavailable" }, { status: 503 });
     const { id: slug } = await params;
     if (!slug) return NextResponse.json({ error: "Missing property slug" }, { status: 400 });
+    if (!/^[a-z0-9][a-z0-9-_]{0,159}$/i.test(slug)) {
+      return NextResponse.json({ error: "Invalid property slug" }, { status: 400 });
+    }
 
     const propertySelect = "id, title, owner_id, slug, canonical_slug, lifecycle_state, pipeline_status";
     const canonicalLookup = await supabaseAdmin.from("properties").select(propertySelect).eq("canonical_slug", slug).maybeSingle();

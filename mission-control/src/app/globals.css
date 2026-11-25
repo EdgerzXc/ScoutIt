@@ -55,7 +55,7 @@ body {
 }
 
 .mc-sensitive-shell {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .mc-sensitive-shell.mc-is-redacted {
@@ -115,11 +115,21 @@ body {
 
 .mc-privacy-card button {
   margin-top: 20px;
+  min-height: 44px;
   border-radius: 8px;
   padding: 10px 18px;
   background: var(--gold);
   color: #0d0d0d;
   font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .mc-print-notice {

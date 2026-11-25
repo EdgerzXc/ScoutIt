@@ -1,5 +1,6 @@
 const KNOWN_PLACEHOLDERS = new Set([
   "matterport:YWayaXpaJyH",
+  "matterport:JGPnGQLNjQF",
   "luma:b86b7928-f130-40a5-8cac-8095f30eed54",
 ]);
 

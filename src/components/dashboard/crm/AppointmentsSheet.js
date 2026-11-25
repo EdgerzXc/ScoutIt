@@ -138,10 +138,13 @@ export default function AppointmentsSheet({ appointments = [], onStatusUpdate, o
     return () => window.removeEventListener("calendar:refresh", onRefresh);
   }, [loadExtras]);
 
-  const handleViewingUpdate = async (id, status) => {
-    setUpdatingId(id);
-    if (onStatusUpdate) await onStatusUpdate(id, status);
-    setUpdatingId(null);
+  const handleViewingUpdate = async (appointment, status) => {
+    setUpdatingId(appointment.id);
+    try {
+      await onStatusUpdate?.(appointment, status);
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const handleSaveEvent = async (payload) => {
@@ -385,14 +388,14 @@ function ScheduleRow({ item, updatingId, onViewingUpdate, onEditEvent, userId, o
       {canRespond ? (
         <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-variant/40">
           <button
-            onClick={() => onViewingUpdate(item.raw.id, "cancelled")}
+            onClick={() => onViewingUpdate(item.raw, "cancelled")}
             disabled={updatingId === item.raw.id}
             className="flex-1 sm:flex-none justify-center min-h-11 px-3 py-1.5 rounded border border-error/30 text-error hover:bg-error/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
           >
             <XCircle size={13} /> Decline
           </button>
           <button
-            onClick={() => onViewingUpdate(item.raw.id, "confirmed")}
+            onClick={() => onViewingUpdate(item.raw, "confirmed")}
             disabled={updatingId === item.raw.id}
             className="flex-1 sm:flex-none justify-center min-h-11 px-3 py-1.5 rounded border border-success/30 text-success hover:bg-success/10 text-xs font-working-title flex items-center gap-1 disabled:opacity-50"
           >

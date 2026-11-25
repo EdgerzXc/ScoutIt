@@ -117,11 +117,39 @@ function isExemptFromMaintenance(pathname) {
 }
 
 export async function proxy(request, event) {
+  const path = request.nextUrl.pathname;
+  const isWrite = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
+  const providerCallback = path.startsWith('/api/webhooks/') || path === '/api/oauth/google/callback';
+  if (isWrite && !providerCallback) {
+    const origin = request.headers.get('origin');
+    const fetchSite = request.headers.get('sec-fetch-site');
+    const hasExplicitToken = Boolean(request.headers.get('authorization') || request.headers.get('x-cron-secret'));
+    const hasCookie = Boolean(request.headers.get('cookie'));
+    let missingCookieOriginProof = false;
+    if (!origin && !fetchSite && hasCookie && !hasExplicitToken) {
+      const referer = request.headers.get('referer');
+      if (!referer) {
+        missingCookieOriginProof = true;
+      } else {
+        try {
+          missingCookieOriginProof = new URL(referer).origin !== request.nextUrl.origin;
+        } catch {
+          missingCookieOriginProof = true;
+        }
+      }
+    }
+    if (
+      (origin ? origin !== request.nextUrl.origin : fetchSite === 'cross-site' || fetchSite === 'same-site') ||
+      missingCookieOriginProof
+    ) {
+      return NextResponse.json({ error: 'Cross-origin request denied.' }, { status: 403 });
+    }
+  }
+
   // Local dev / E2E runs fire hundreds of same-IP requests and were tripping
   // GAP-13: Parse first IP if x-forwarded-for contains comma-separated chain
   const rawIp = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
   const ip = rawIp.split(',')[0].trim();
-  const path = request.nextUrl.pathname;
   const sensitive = isSensitivePath(path);
   const questItPath = isQuestItPath(path);
 
@@ -129,13 +157,10 @@ export async function proxy(request, event) {
   try {
     const flags = await getFlags();
 
-    // KILL SWITCH: freeze every write on the site instantly. Auth and inbound
-    // webhooks/callbacks stay up so external integrations and logins are preserved (GAP-14).
-    const isWrite = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
     if (flags.global_read_only === true && isWrite && !path.startsWith('/api/auth/') && !isExemptFromMaintenance(path)) {
       return NextResponse.json(
         {
-          error: 'ScoutIt is briefly in read-only mode for maintenance. Nothing is lost — please try again shortly.',
+          error: 'This action is paused for maintenance. Try again shortly.',
           code: 'GLOBAL_READ_ONLY',
         },
         {
@@ -182,7 +207,11 @@ export async function proxy(request, event) {
   }
 
   // ── Rate limiting ──
-  initLimiters();
+  try {
+    initLimiters();
+  } catch (error) {
+    console.error('[RateLimiter] Initialization failed:', error?.name);
+  }
 
   if (!standardLimiter) {
     // Limiter not configured: sensitive routes fail closed, rest fail open.
@@ -204,7 +233,13 @@ export async function proxy(request, event) {
   }
 
   try {
-    const { success, limit, reset, remaining } = await limiterToUse.limit(`ratelimit_${tier}_${ip}`);
+    const { success, limit, reset, remaining, reason, pending } = await limiterToUse.limit(`ratelimit_${tier}_${ip}`);
+    if (pending && event) event.waitUntil(pending.catch(() => {}));
+
+    if (reason === 'timeout') {
+      if (sensitive) throw new Error('Rate limiter timed out');
+      return NextResponse.next();
+    }
 
     if (!success) {
       return NextResponse.json(
@@ -215,6 +250,7 @@ export async function proxy(request, event) {
             'X-RateLimit-Limit': limit.toString(),
             'X-RateLimit-Remaining': remaining.toString(),
             'X-RateLimit-Reset': reset.toString(),
+            'Retry-After': String(Math.max(1, Math.ceil((reset - Date.now()) / 1000))),
           },
         }
       );
@@ -226,7 +262,7 @@ export async function proxy(request, event) {
     res.headers.set('X-RateLimit-Reset', reset.toString());
     return res;
   } catch (err) {
-    console.error('[RateLimiter] Error:', err);
+    console.error('[RateLimiter] Request could not be metered:', err?.name);
     // Redis died mid-request: sensitive routes fail closed, rest fail open.
     if (sensitive) {
       return NextResponse.json(
@@ -251,5 +287,5 @@ export function resetFlagCache() {
   flagCache = { flags: {}, fetchedAt: 0 };
 }
 
-export { proxy as middleware, getFlags, FLAG_CACHE_TTL_MS, FLAG_MAX_STALE_MS };
+export { getFlags, FLAG_CACHE_TTL_MS, FLAG_MAX_STALE_MS };
 

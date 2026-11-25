@@ -85,7 +85,7 @@ export default async function AuditLogPage() {
                       {canRevert && (
                         <form action={revertAction} className="inline-block">
                           <input type="hidden" name="actionId" value={a.id} />
-                          <button className="flex items-center gap-1 text-[12px] px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors">
+                          <button type="submit" className="flex items-center gap-1 text-[12px] px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors">
                             <RotateCcw className="w-3 h-3 text-[#E8AE3C]" />
                             Revert
                           </button>

@@ -108,6 +108,8 @@ export async function GET(req) {
     //   ok, n nodes    → a real score with confidence 'high'
     const walkability = poi.ok ? calculateWalkabilityScore(poi.layers) : null;
 
+    const canCache = Boolean(poi.ok && (!wantIsochrone || iso.ok));
+
     return NextResponse.json(
       {
         success: true,
@@ -125,7 +127,7 @@ export async function GET(req) {
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+          "Cache-Control": canCache ? "public, s-maxage=86400, stale-while-revalidate=604800" : "no-store",
         },
       },
     );

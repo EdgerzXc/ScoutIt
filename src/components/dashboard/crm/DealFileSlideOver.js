@@ -15,9 +15,12 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
   const [notes, setNotes] = useState("");
   const [savingState, setSavingState] = useState("idle"); // idle, saving, saved
   const [exportingTranscript, setExportingTranscript] = useState(false);
+  const [contactFeedback, setContactFeedback] = useState(null);
+  const [actionError, setActionError] = useState(null);
   const saveTimeout = useRef(null);
 
   const handleDownloadVCard = () => {
+    setContactFeedback(null);
     const vcard = leadToVCard({
       ...deal,
       name: deal.name || deal.otherParty,
@@ -25,7 +28,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
       phone: deal.phone || deal.otherPartyPhone,
     });
     if (!vcard) {
-      alert("No contact details to save yet.");
+      setContactFeedback("No contact details to save yet.");
       return;
     }
     const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8;" });
@@ -41,6 +44,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
 
   const handleExportTranscript = async () => {
     setExportingTranscript(true);
+    setActionError(null);
     try {
       const { data: { session } } = await getSession();
       const token = session?.access_token;
@@ -66,6 +70,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       console.error(err);
+      setActionError("Could not export transcript. Please try again.");
     } finally {
       setExportingTranscript(false);
     }
@@ -76,6 +81,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
       // We assume notes are loaded via the main deal fetch or separately.
       // For now, if private_notes is missing, we leave it empty.
       setNotes(deal.private_notes || "");
+      setActionError(null);
     }
   }, [deal]);
 
@@ -94,6 +100,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
     const newNotes = e.target.value;
     setNotes(newNotes);
     setSavingState("saving");
+    setActionError(null);
 
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
 
@@ -110,6 +117,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
       } catch (e) {
         console.error(e);
         setSavingState("idle");
+        setActionError("Failed to save private notes. Please check your connection.");
       }
     }, 1000);
   };
@@ -147,6 +155,7 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                 Deal Details
               </h2>
               <button 
+                type="button"
                 onClick={onClose}
                 aria-label="Close"
                 className="min-h-11 min-w-11 flex items-center justify-center rounded-full hover:bg-surface-alt text-text-secondary transition"
@@ -156,6 +165,11 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom)))] flex flex-col gap-8">
+              {actionError && (
+                <div role="alert" className="p-3 rounded-lg border border-error/40 bg-error/10 text-error text-xs font-mono">
+                  {actionError}
+                </div>
+              )}
               {/* Status Pill & Stage Transition Selector */}
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -232,14 +246,21 @@ export default function DealFileSlideOver({ isOpen, onClose, deal, onDealUpdate,
                   </div>
                 )}
                 {(deal.status === "accepted" || deal.status === "closed") && (
-                  <div className="mt-4 pt-4 border-t border-surface-variant flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={handleDownloadVCard}
-                      className="min-h-11 px-3 py-1.5 rounded border border-surface-variant bg-surface hover:border-gold-accent/50 text-xs font-mono uppercase text-on-surface flex items-center gap-1.5 transition"
-                    >
-                      <Download size={14} className="text-gold-accent" /> Save Contact (.vcf)
-                    </button>
+                  <div className="mt-4 pt-4 border-t border-surface-variant flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDownloadVCard}
+                        className="min-h-11 px-3 py-1.5 rounded border border-surface-variant bg-surface hover:border-gold-accent/50 text-xs font-mono uppercase text-on-surface flex items-center gap-1.5 transition"
+                      >
+                        <Download size={14} className="text-gold-accent" /> Save Contact (.vcf)
+                      </button>
+                    </div>
+                    {contactFeedback && (
+                      <p role="status" className="text-xs text-error">
+                        {contactFeedback}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
