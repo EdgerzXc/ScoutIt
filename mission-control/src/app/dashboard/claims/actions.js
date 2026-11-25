@@ -243,6 +243,7 @@ export async function decideClaim(formData) {
   if (!verdict.ok) return { ok: false, message: verdict.message };
 
   let transfer = null;
+  let claimantProfile = null;
   let willExceedCap = false;
   let claimantTier = "starry";
   let listingCap = 1;
@@ -267,11 +268,12 @@ export async function decideClaim(formData) {
     }
 
     // Check claimant's tier and active listing count
-    const { data: claimantProfile } = await admin
+    const { data: fetchedClaimantProfile } = await admin
       .from("user_profiles")
       .select("subscription_tier, role, active_roles")
       .eq("id", claim.claimant_user_id)
       .maybeSingle();
+    claimantProfile = fetchedClaimantProfile || null;
 
     claimantTier = String(claimantProfile?.subscription_tier || "starry").toLowerCase();
     const claimantRole = String(claimantProfile?.role || "owner").toLowerCase();
