@@ -93,10 +93,11 @@
    the .spatial-intel-map-card block in globals.css already uses: re-declare the
    dark tokens locally. */
 body.light-mode .map-credit {
-  --text-muted: rgba(255, 255, 255, 0.62);
-  --text-secondary: #a8a29a;
+  --text-muted: #d6d0c7;
+  --text-secondary: #ede9e2;
   --accent-rgb: 232, 174, 60;
   --accent-bright: #F7C64E;
+  opacity: 0.92;
 }
 
 @media (max-width: 640px) {
