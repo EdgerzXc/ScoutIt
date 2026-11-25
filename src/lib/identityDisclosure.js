@@ -121,6 +121,16 @@ export function canSeeCounterpartyName({
   return counterpartyIsPublic === true;
 }
 
+export function canRevealCounterpartyIdentity({
+  dealStatus = "",
+  counterpartyIsPublic = false,
+  senderAnonymous = false,
+} = {}) {
+  if (IDENTITY_REVEALING_STATUSES.includes(dealStatus)) return true;
+  if (senderAnonymous === true) return false;
+  return counterpartyIsPublic === true;
+}
+
 /**
  * What to actually render for the counterparty.
  *

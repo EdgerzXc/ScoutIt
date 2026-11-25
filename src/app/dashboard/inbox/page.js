@@ -47,6 +47,9 @@ function toChatBoxDeal(d) {
     // Role label only -- this is what a recipient sees instead of a name while
     // the request is still pending (§38.3: intent and tier, not identity).
     otherPartyRole: d.otherPartyRole || d.other_party_role || null,
+    otherPartyId: d.otherPartyId ?? d.other_party_id ?? null,
+    identityRevealed: d.identityRevealed === true,
+    otherPartyTrust: d.otherPartyTrust ?? d.other_party_trust ?? null,
     last_message: d.lastMessage || d.last_message || d.pitch_message || "",
     pitch_message: d.pitch_message || d.pitchMessage || "",
     myRole: d.myRole || d.my_role || "buyer",

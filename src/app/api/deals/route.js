@@ -4,7 +4,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveUserId, assertAdultEligibility } from "@/lib/serverAuth";
 import { logActivity } from "@/lib/crmActivity";
 import { sanitizeError } from "@/lib/sanitizeError";
-import { isIdentityPublic, counterpartyDisplayName } from "@/lib/identityDisclosure";
+import {
+  isIdentityPublic,
+  counterpartyDisplayName,
+  canRevealCounterpartyIdentity,
+  IDENTITY_REVEALING_STATUSES,
+} from "@/lib/identityDisclosure";
 import * as userDealsModule from "@/lib/deals/userDeals";
 import { ensureConnectBalancesWallet } from "@/lib/connectsWallet";
 import { createRateLimiter } from "@/lib/rateLimit";
@@ -140,16 +145,34 @@ export async function GET(request) {
 
     let namesById = {};
     let publicById = {};
+    let prcById = {};
+    let metricsById = {};
     if (otherPartyIds.size > 0) {
       const { data: profiles } = await supabaseAdmin
         .from("user_profiles")
-        .select("id, display_name, is_profile_public")
+        .select("id, display_name, is_profile_public, prc_verified")
         .in("id", [...otherPartyIds]);
       namesById = Object.fromEntries((profiles || []).map((p) => [p.id, p.display_name]));
       // The privacy flag travels with the name so the disclosure rule below can
       // ask about it. Fetching the name without it is what made the leak
       // possible: the value was always available, nothing consulted it.
       publicById = Object.fromEntries((profiles || []).map((p) => [p.id, isIdentityPublic(p)]));
+      prcById = Object.fromEntries((profiles || []).map((p) => [p.id, p.prc_verified === true]));
+
+      const uuidOtherIds = [...otherPartyIds].filter((id) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id || ""))
+      );
+      if (uuidOtherIds.length > 0) {
+        try {
+          const { data: metricRows } = await supabaseAdmin
+            .from("user_behavioral_metrics")
+            .select("user_id, tier, display_badge, composite_score, eligible_review_count, transaction_count, vector_averages")
+            .in("user_id", uuidOtherIds);
+          metricsById = Object.fromEntries((metricRows || []).map((m) => [String(m.user_id), m]));
+        } catch {
+          // Fail-safe fallback to Honest Blank summary when table/mock is unavailable
+        }
+      }
     }
 
     // Deals has no updated_at column, so "most recent conversation first" is
@@ -208,6 +231,33 @@ export async function GET(request) {
         const resolvedTitle = d.properties?.title || d.routing_snapshot?.signal_title || fallbackServiceTitle;
         const intentInfo = resolveIntentInfo({ ...d, propertyTitle: resolvedTitle }, myRole);
 
+        const senderAnonymous = myRole !== "buyer" && d.sender_anonymous === true;
+        const counterpartyIsPublic = otherId ? publicById[otherId] === true : false;
+        const identityRevealed = canRevealCounterpartyIdentity({
+          dealStatus: d.status,
+          counterpartyIsPublic,
+          senderAnonymous,
+        });
+        const isPendingIncoming = !IDENTITY_REVEALING_STATUSES.includes(d.status) && myRole !== "buyer";
+        const metric = isPendingIncoming && otherId ? metricsById[String(otherId)] : null;
+        const isHonestBlank =
+          !metric ||
+          metric.composite_score === null ||
+          metric.composite_score === undefined ||
+          Number(metric.eligible_review_count || 0) === 0;
+        const otherPartyTrust = isPendingIncoming
+          ? {
+              tier: isHonestBlank ? "TIER_HONEST_BLANK" : (metric.tier || "TIER_STANDARD"),
+              displayBadge: isHonestBlank ? "[First-Time Verified Seeker]" : (metric.display_badge || "[Verified Resident]"),
+              compositeScore: isHonestBlank ? null : Number(metric.composite_score),
+              isHonestBlank,
+              verifiedTransactions: Number(metric?.transaction_count || 0),
+              eligibleReviewCount: Number(metric?.eligible_review_count || 0),
+              isPrcVerified: otherId ? prcById[otherId] === true : false,
+              vectorAverages: isHonestBlank ? null : (metric?.vector_averages || null),
+            }
+          : null;
+
         return {
           id: d.id,
           status: d.status,
@@ -235,12 +285,14 @@ export async function GET(request) {
           // it applies exactly when the viewer is not the buyer.
           otherParty: counterpartyDisplayName({
             dealStatus: d.status,
-            counterpartyIsPublic: otherId ? publicById[otherId] === true : false,
-            senderAnonymous: myRole !== "buyer" && d.sender_anonymous === true,
+            counterpartyIsPublic,
+            senderAnonymous,
             name: otherId ? namesById[otherId] : "",
             roleLabel: otherRoleLabel,
           }),
-          otherPartyId: otherId || null,
+          otherPartyId: identityRevealed ? (otherId || null) : null,
+          identityRevealed,
+          otherPartyTrust,
           otherPartyRole: otherRoleLabel, // "Broker" | "Buyer" | "Owner" — which template a UI card should use
           lastMessage: lastMessageByDeal[d.id] || d.pitch_message || "",
           pitch_message: d.pitch_message,

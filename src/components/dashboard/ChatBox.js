@@ -300,6 +300,7 @@ export default function ChatBox({
   const attemptedAttachmentRefreshRef = useRef(new Set());
   const [handshakeBusy, setHandshakeBusy] = useState(false);
   const [pendingBusy, setPendingBusy] = useState(false);
+  const [expandedTrustDealId, setExpandedTrustDealId] = useState(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -1203,15 +1204,79 @@ export default function ChatBox({
 
           {/* Identity is withheld from the recipient until they accept. The
               sender already knows who they contacted, so they keep the name.
-              A-148: an explicitly anonymous send reads "Anonymous" — the
-              owner's word — rather than the role. */}
+              A-148: an explicitly anonymous send reads "Anonymous" rather than
+              the role, while public non-anonymous senders show their profile name. */}
           <p className="text-xs text-text-secondary font-mono uppercase tracking-wider break-words [overflow-wrap:anywhere]">
             {isRequestSender
               ? deal.other_party
               : deal.other_party === ANONYMOUS_CONNECT_LABEL
                 ? "Anonymous · name revealed on accept"
-                : `From a verified ${deal.otherPartyRole || "Seeker"} · name revealed on accept`}
+                : deal.identityRevealed && deal.other_party && deal.other_party !== deal.otherPartyRole
+                  ? `${deal.other_party} · Public profile`
+                  : `From a verified ${deal.otherPartyRole || "Seeker"} · name revealed on accept`}
           </p>
+
+          {!isRequestSender && deal.otherPartyTrust && (() => {
+            const trust = deal.otherPartyTrust;
+            const vectors = trust.vectorAverages;
+            const showTrustVectors = expandedTrustDealId === deal.id;
+            const txCount = Number(trust.verifiedTransactions || 0);
+            const hasVectors =
+              !trust.isHonestBlank &&
+              vectors &&
+              typeof vectors === "object" &&
+              (vectors.payment_punctuality !== undefined || vectors.communication_conduct !== undefined);
+
+            return (
+              <div className="mt-4 rounded-lg border border-gold-accent/35 bg-gold-accent/10 p-3 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+                    <span className="font-bold text-gold-bright">
+                      {trust.displayBadge || "[First-Time Verified Seeker]"}
+                    </span>
+                    <span className="text-on-surface tabular-nums">
+                      {trust.isHonestBlank || trust.compositeScore === null
+                        ? "New Seeker (Neutral)"
+                        : `${Number(trust.compositeScore).toFixed(1)} / 100`}
+                    </span>
+                    <span className="text-text-secondary tabular-nums">
+                      · {txCount} Verified {txCount === 1 ? "Closure" : "Closures"}
+                    </span>
+                    {trust.isPrcVerified && (
+                      <span className="rounded border border-gold-accent/40 px-2 py-0.5 text-xs uppercase text-gold-accent">
+                        PRC Verified
+                      </span>
+                    )}
+                  </div>
+                  {hasVectors && (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedTrustDealId((prev) => (prev === deal.id ? null : deal.id))}
+                      className="min-h-11 px-2 font-mono text-xs text-gold-accent underline hover:text-gold-bright transition cursor-pointer"
+                    >
+                      {showTrustVectors ? "Hide 4 scores" : "Show 4 scores"}
+                    </button>
+                  )}
+                </div>
+
+                {trust.isHonestBlank ? (
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    Honest Blank protection: new members are never penalized with a 0/5 score.
+                  </p>
+                ) : (
+                  showTrustVectors &&
+                  hasVectors && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-2 border-t border-gold-accent/25 font-mono text-xs text-text-secondary tabular-nums">
+                      <span>Payment: <strong className="text-on-surface">{vectors.payment_punctuality ?? "-"} / 5</strong></span>
+                      <span>Space Care: <strong className="text-on-surface">{vectors.space_care_maintenance ?? "-"} / 5</strong></span>
+                      <span>Conduct: <strong className="text-on-surface">{vectors.communication_conduct ?? "-"} / 5</strong></span>
+                      <span>Rules: <strong className="text-on-surface">{vectors.lease_covenant_adherence ?? "-"} / 5</strong></span>
+                    </div>
+                  )
+                )}
+              </div>
+            );
+          })()}
 
           {deal.pitch_message && (
             <div className="mt-5 border-l-2 border-gold-accent/30 pl-4">

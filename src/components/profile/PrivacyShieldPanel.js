@@ -178,11 +178,15 @@ export default function PrivacyShieldPanel({ role, tier, activeRoles = [] }) {
     }
   };
 
-  const shieldApplies = canUseAnonymityShield(role);
+  const eligibleShieldRoles = Array.isArray(activeRoles)
+    ? activeRoles.filter((r) => canUseAnonymityShield(r))
+    : [];
+  const shieldApplies = canUseAnonymityShield(role) || eligibleShieldRoles.length > 0;
   // A-135: which of this person's roles may appear on their public profile.
   // Moved here from /profile so privacy has one home and one writer.
   const roleChoices = PUBLIC_ROLE_CHOICES.filter((r) => activeRoles.includes(r));
-  const defaultsOn = anonymityShieldDefaultsOn(tier, role);
+  const shieldRoleForDefault = canUseAnonymityShield(role) ? role : (eligibleShieldRoles[0] || role);
+  const defaultsOn = anonymityShieldDefaultsOn(tier, shieldRoleForDefault);
 
   const ROWS = [
     ...(shieldApplies
