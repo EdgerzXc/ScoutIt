@@ -27,11 +27,10 @@ describe("A-231 Stratosphere Layer 02 Mobile Ergonomics & Touch Optimization", (
     expect(leadRules).toContain("white-space: nowrap");
   });
 
-  it("provides smooth scroll-snapping track navigation on mobile", () => {
+  it("shows all three article tracks together on mobile", () => {
     const css = read("src/components/stratosphere/stratosphere-workspace.css");
-    expect(css).toContain("scroll-snap-type: x mandatory");
-    expect(css).toContain("scroll-snap-align: start");
-    expect(css).toContain("-webkit-overflow-scrolling: touch");
+    const mobileCss = css.slice(css.indexOf("@media (max-width: 768px)"));
+    expect(mobileCss).toMatch(/\.sw-track-nav\s*\{[^}]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
   });
 
   it("organizes stage subcategory chips into a balanced 2-column mobile grid with lead item spanning full width", () => {

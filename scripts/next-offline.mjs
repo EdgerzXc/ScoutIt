@@ -47,6 +47,9 @@ export const OFFLINE_BLANKED_ENV = Object.freeze({
   CALENDAR_TOKEN_KEY: "",
   SENTRY_AUTH_TOKEN: "",
 
+  SCOUTIT_SIGNAL_MEDIA_ENABLED: "false",
+  SCOUTIT_SIGNAL_STREAM_TOKEN: "",
+
   // Decouple CMS to offline mock fixtures
   SCOUTIT_OFFLINE_CMS: "1",
 });

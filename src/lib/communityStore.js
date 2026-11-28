@@ -13,6 +13,7 @@ import { getServerMapboxToken } from "./mapboxToken";
 import { fetchWithRetry } from "./fetchWithRetry";
 import { BoundedCache } from "./boundedCache";
 import { resolveTrustTier } from "./scoring/behavioralScoring";
+import { withApprovedSignalMedia } from "./signalMediaServer";
 
 // ─────────────────────────────────────────────────────────────────────────
 // COMMUNITY STORE (A-145 P1, server-only)
@@ -134,8 +135,9 @@ export function mapDbSignalToCard(
 }
 
 /** Public feed: LIVE rows only, expired filtered, newest first. */
-export async function listLiveSignals({ district = null, signalType = null, limit = 60, viewerId = null } = {}) {
+export async function listLiveSignals({ district = null, signalType = null, limit = 60, viewerId = null, paginate = false, cursor = null } = {}) {
   if (!supabaseAdmin) return { missing: true };
+  const batchSize = Math.min(Math.max(Number(limit) || 60, 1), 100);
   try {
     let query = supabaseAdmin
       .from("stratosphere_signals")
@@ -149,8 +151,13 @@ export async function listLiveSignals({ district = null, signalType = null, limi
       // fresh signals existed. The limit now applies to rows that are
       // actually live.
       .or(activeSignalFilter())
-      .order("created_at", { ascending: false })
-      .limit(Math.min(Math.max(Number(limit) || 60, 1), 100));
+      .limit(batchSize);
+    if (paginate) {
+      query = query.order("id", { ascending: false });
+      if (cursor) query = query.lt("id", cursor);
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
     if (signalType) query = query.eq("signal_type", signalType);
     const { data: rows, error } = await query;
     if (error) {
@@ -173,14 +180,16 @@ export async function listLiveSignals({ district = null, signalType = null, limi
     ];
     if (viewerId) {
       queries.push(
-        supabaseAdmin.from("signal_saves").select("signal_id").eq("account_id", viewerId).in("signal_id", ids)
+        supabaseAdmin.from("signal_saves").select("signal_id").eq("account_id", viewerId).in("signal_id", ids),
+        supabaseAdmin.from("signal_relevance").select("signal_id").eq("account_id", viewerId).in("signal_id", ids)
       );
     }
-    const [locationsRes, reqsRes, openDealsRes, savesRes] = await Promise.all(queries);
+    const [locationsRes, reqsRes, openDealsRes, savesRes, relevanceRes] = await Promise.all(queries);
     const locations = locationsRes?.data;
     const reqs = reqsRes?.data;
     const openDeals = openDealsRes?.data;
     const savedIds = new Set((savesRes?.data || []).map((s) => s.signal_id));
+    const relevantIds = new Set((relevanceRes?.data || []).map((s) => s.signal_id));
 
     const locById = new Map((locations || []).map((l) => [l.signal_id, l]));
     const reqById = new Map((reqs || []).map((r) => [r.signal_id, r]));
@@ -205,8 +214,8 @@ export async function listLiveSignals({ district = null, signalType = null, limi
     }
 
     const now = new Date();
-    let signals = rows.map((row) =>
-      mapDbSignalToCard(
+    let signals = rows.map((row) => {
+      const card = mapDbSignalToCard(
         { ...row, open_answers_count: openAnswersBySignal.get(row.id) || 0 },
         locById.get(row.id) || {},
         reqById.get(row.id) || {},
@@ -214,8 +223,9 @@ export async function listLiveSignals({ district = null, signalType = null, limi
         viewerId,
         savedIds.has(row.id),
         metricsByUser.get(row.author_account_id)
-      )
-    );
+      );
+      return { ...card, isRelevant: relevantIds.has(row.id) };
+    });
     // Expired rows leave the feed until refreshed (spec §10). Unpinned rows
     // (no trusted coords) stay readable in the dossier — honest absence.
     signals = signals.filter((s) => s.freshness !== "expired");
@@ -242,7 +252,7 @@ export async function listLiveSignals({ district = null, signalType = null, limi
           : s
       );
     }
-    return { signals };
+    return { signals: paginate ? await withApprovedSignalMedia(supabaseAdmin, signals) : signals, nextCursor: paginate && rows.length === batchSize ? rows.at(-1).id : null };
   } catch (error) {
     if (isMissingTable(error)) return { missing: true };
     throw error;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff, TIERS } from "@/lib/rbac";
 import { decideSignal } from "./actions";
+import SignalMediaReview from "./SignalMediaReview";
 import {
   SIGNAL_STATUSES,
   MODERATION_ACTIONS,
@@ -157,6 +158,8 @@ export default async function CommunitySignalsPage({ searchParams }) {
           </p>
         </div>
       </div>
+
+      {canDecide && <SignalMediaReview staff={staff} client={admin} />}
 
       {missing && (
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-amber-200">

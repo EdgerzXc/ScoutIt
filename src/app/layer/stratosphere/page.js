@@ -26,8 +26,12 @@ export default function StratospherePreview() {
             <p className="strat-kicker"><span className="strat-live-dot" aria-hidden="true" />Layer 02 · Stratosphere <InfoTip tipId="stratosphereMission" label="About Stratosphere" /></p>
             <h1 className="strat-headline">The ground shifts. Find what changed near your <span className="strat-headline-accent">space</span>.</h1>
             <span className="strat-underline" aria-hidden="true" />
-            <p className="strat-entry-copy">Enter to explore building updates, areas, and the articles behind them.</p>
+            <p className="strat-entry-copy">Local signals, community posts, and the stories behind them.</p>
             <Link href="/stratosphere" className="strat-entry-cta">Enter Stratosphere <ArrowRight size={17} aria-hidden="true" /></Link>
+            <nav className="strat-feed-links" aria-label="Explore Stratosphere feeds">
+              <Link href="/stratosphere/signals">All signals</Link>
+              <Link href="/stratosphere/signals?source=community">Community posts</Link>
+            </nav>
           </header>
         </div>
         <section className="strat-entry-steps" aria-label="What you can explore inside">

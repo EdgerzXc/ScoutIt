@@ -38,7 +38,7 @@ export default function SpatialSignalRadar({
   const [legendExpanded, setLegendExpanded] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 680) {
+    if (window.matchMedia("(max-width: 768px)").matches) {
       setLegendExpanded(false);
     }
   }, []);
@@ -313,14 +313,17 @@ export default function SpatialSignalRadar({
     return (
       <div className="ssr-container ssr-fallback" aria-label="Stratosphere Spatial Radar Fallback">
         <div className="ssr-fallback-card">
-          <h4 className="ssr-fallback-title">Spatial Radar: 2D Dossier Mode Active</h4>
+          <h4 className="ssr-fallback-title">Map unavailable</h4>
           <p className="ssr-fallback-desc">
-            WebGL acceleration is unavailable on this device. All geospatial signals and metrics remain accessible in the dossier feed.
+            Read matching signals in the list.
           </p>
         </div>
       </div>
     );
   }
+
+  const visiblePins = filteredSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length;
+  const totalPins = allSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length;
 
   return (
     <div className="ssr-container" aria-label="Stratosphere 3D Spatial Radar">
@@ -334,13 +337,13 @@ export default function SpatialSignalRadar({
             <span className="ssr-hud-title">METRO MANILA RADAR</span>
           </div>
           <span className="ssr-hud-sep">/</span>
-          <span className="ssr-hud-stat">
-            {filteredSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} OF {allSignals.filter((signal) => signal.coords?.lat && signal.coords?.lng).length} BEACONS
-          </span>
+          <span className="ssr-hud-stat ssr-wide-label">{visiblePins} OF {totalPins} BEACONS</span>
+          <span className="ssr-hud-stat ssr-mobile-label">{visiblePins}/{totalPins} PINS</span>
           <span className="ssr-hud-sep">/</span>
-          <span className="ssr-hud-sector">
+          <span className="ssr-hud-sector ssr-wide-label">
             {selectedDistrict ? `SECTOR: ${selectedDistrict.toUpperCase()}` : "ALL SECTORS"}
           </span>
+          {selectedDistrict && <span className="ssr-hud-sector ssr-mobile-label">{selectedDistrict}</span>}
         </div>
       </div>
 
@@ -437,7 +440,8 @@ export default function SpatialSignalRadar({
                 />
               ))}
             </div>
-            <span className="ssr-legend-pill-label">COLOR SIGNAL MAP</span>
+            <span className="ssr-legend-pill-label ssr-wide-label">COLOR SIGNAL MAP</span>
+            <span className="ssr-legend-pill-label ssr-mobile-label">PIN COLORS</span>
             {activeColorKey ? (
               <span className="ssr-legend-filter-badge">
                 {activeColorKey.toUpperCase()} ACTIVE

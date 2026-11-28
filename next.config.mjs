@@ -3,6 +3,11 @@
 // Guarded by NODE_ENV so it never reaches production.
 const __impeccableLiveDev =
   process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
+const signalMediaPilot = process.env.SCOUTIT_SIGNAL_MEDIA_ENABLED === "true";
+const signalStreamCustomer = process.env.SCOUTIT_SIGNAL_STREAM_CUSTOMER || "";
+const signalPlayerOrigin = signalMediaPilot && /^[a-z\d]+$/i.test(signalStreamCustomer)
+  ? ` https://customer-${signalStreamCustomer}.cloudflarestream.com`
+  : "";
 
 const cspHeader = `
     default-src 'self';
@@ -12,8 +17,8 @@ const cspHeader = `
     font-src 'self' data:;
     worker-src 'self' blob:;
     child-src 'self' blob:;
-    frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai https://accounts.google.com https://challenges.cloudflare.com;
-    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://*.cartocdn.com https://services.arcgisonline.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://va.vercel-scripts.com${__impeccableLiveDev};
+    frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://my.matterport.com https://*.matterport.com https://lumalabs.ai https://accounts.google.com https://challenges.cloudflare.com${signalPlayerOrigin};
+    connect-src 'self' https://*.supabase.co https://*.mapbox.com https://events.mapbox.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://*.cartocdn.com https://services.arcgisonline.com https://huggingface.co https://*.hf.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.com https://earthquake.usgs.gov https://*.ingest.us.sentry.io https://*.ingest.sentry.io https://va.vercel-scripts.com${__impeccableLiveDev}${signalMediaPilot ? " https://upload.videodelivery.net" : ""};
     object-src 'none';
     base-uri 'self';
     form-action 'self';

@@ -24,6 +24,7 @@ import {
   TRANSACTION_TYPES,
   SIGNAL_EXPIRY_DAYS,
 } from "@/lib/communityPosting";
+import SignalMediaUpload from "./SignalMediaUpload";
 import "./signal-composer.css";
 
 const STEPS = ["Category", "Details", "Location", "Review"];
@@ -443,17 +444,18 @@ export default function SignalComposer({ isOpen = false, onClose = () => {}, onP
         {published ? (
           <div className="scp-success">
             <CheckCircle2 size={36} className="scp-success-icon" aria-hidden="true" />
-            <h4 className="scp-success-title">Your Post is Live!</h4>
+            <h4 className="scp-success-title">Signal posted</h4>
             <p className="scp-success-desc">
-              Posted under <strong>{published.scoutId}</strong>. It is now visible to everyone browsing this area. When someone has a match, they will message you through Connect.
+              Posted as <strong>{published.scoutId}</strong>. Readers can respond through Connect.
             </p>
+            <SignalMediaUpload signalId={published.id} />
             <div className="scp-actions">
               <button
                 type="button"
                 className="scp-primary-btn"
                 onClick={() => { onPublished({ id: published.id }); onClose(); }}
               >
-                <span>VIEW ON RADAR</span>
+                <span>VIEW MY SIGNALS</span>
                 <ArrowRight size={12} aria-hidden="true" />
               </button>
             </div>

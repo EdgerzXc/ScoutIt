@@ -149,6 +149,7 @@ const ROUTE_FALLBACKS = [
   { regex: /^\/about-you$/, targetNodeId: "auth_onboarding_flow" },
   { regex: /^\/claim\/[^/]+$/, targetNodeId: "claim_listing_modal" },
   { regex: /^\/community$/, targetNodeId: "community_signals_feed" },
+  { regex: /^\/stratosphere\/signals$/, targetNodeId: "community_signals_feed" },
   { regex: /^\/descent$/, targetNodeId: "orbit" },
   { regex: /^\/event-planners\/[^/]+$/, targetNodeId: "planners_roster" },
   { regex: /^\/intel\/[^/]+$/, targetNodeId: "intel_articles" },

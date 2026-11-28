@@ -243,7 +243,7 @@ describe("Layer 02 Stratosphere — UI Component & Noise Reduction Invariants", 
       expect(css).toContain(".ssr-legend-pill-trigger");
       expect(css).toContain("backdrop-filter: blur");
       expect(css).toContain("min-height: 44px");
-      expect(css).toContain("@media (max-width: 680px)");
+      expect(css).toMatch(/@media \(max-width: 768px\)\s*\{\s*\.ssr-container\s*\{\s*min-height: 0;/);
     });
 
     it("wires activeColorKey and onSelectColorKey into SpatialSignalRadar and StratosphereTerminal", () => {

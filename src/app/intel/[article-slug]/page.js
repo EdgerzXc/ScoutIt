@@ -114,8 +114,16 @@ export default async function IntelArticlePage({ params, searchParams }) {
   if (typeof sp.place === "string" && sp.place.length <= 80) workspaceReturn.set("place", sp.place);
   if (typeof sp.signal === "string" && sp.signal.length <= 120) workspaceReturn.set("signal", sp.signal);
   if (typeof sp.q === "string" && sp.q.length <= 120) workspaceReturn.set("q", sp.q);
-  if (sp.view === "radar") workspaceReturn.set("view", "radar");
-  const workspaceHref = `/stratosphere${workspaceReturn.size ? `?${workspaceReturn}` : ""}`;
+  if (sp.view === "articles" || sp.view === "radar") workspaceReturn.set("view", sp.view);
+  if (sp.view === "radar") {
+    if (sp.mode === "map" || sp.mode === "list") workspaceReturn.set("mode", sp.mode);
+    if (typeof sp.signalQ === "string") workspaceReturn.set("signalQ", sp.signalQ);
+    for (const key of ["signalType", "spaceType", "color", "role"]) {
+      if (typeof sp[key] === "string" && sp[key].length <= 120) workspaceReturn.set(key, sp[key]);
+    }
+  }
+  const workspacePath = sp.surface === "signals" && sp.view === "radar" ? "/stratosphere/signals" : "/stratosphere";
+  const workspaceHref = `${workspacePath}${workspaceReturn.size ? `?${workspaceReturn}` : ""}`;
   const article = await getLiveArticle(slug);
 
   if (!article) {

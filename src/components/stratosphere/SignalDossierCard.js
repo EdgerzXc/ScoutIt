@@ -20,7 +20,11 @@ import {
   Maximize2,
 } from "lucide-react";
 import SignalGlyph from "./glyphs/SignalGlyph";
+import SignalPostMedia from "./SignalPostMedia";
+import SignalMediaUpload from "./SignalMediaUpload";
 import { getSession } from "@/lib/authClient";
+import { isLiteMode } from "@/lib/liteMode";
+import { SIGNALS_PATH } from "@/lib/stratosphereFeed";
 import {
   SIGNAL_TYPES,
   SIGNAL_TYPE_LABELS,
@@ -35,19 +39,24 @@ import {
 } from "@/lib/savedSignalsClient";
 import "./signal-dossier-card.css";
 
+const TRANSACTION_LABELS = { lease: "Lease", buy: "Buy", str: "Short-term rental" };
+const CONFIRMED_DATE = new Intl.DateTimeFormat("en-PH", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Manila" });
+
 export default function SignalDossierCard({
   signal,
   isActive = false,
+  revealActive = true,
   isHovered = false,
   onSelect = () => {},
   onHover = () => {},
   onConnect = () => {},
   onClosed = () => {},
   returnStage = "all",
+  communityPost = false,
 }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-  const [relevant, setRelevant] = useState(false);
+  const [relevant, setRelevant] = useState(() => Boolean(signal.isRelevant));
   const [relevantCount, setRelevantCount] = useState(signal.relevantCount || 0);
   const [saved, setSaved] = useState(() => Boolean(signal.isSaved || isSignalSavedLocally(signal.id)));
 
@@ -58,6 +67,8 @@ export default function SignalDossierCard({
       setSaved(isSignalSavedLocally(signal.id));
     }
   }, [signal.id, signal.isSaved]);
+
+  useEffect(() => setRelevant(Boolean(signal.isRelevant)), [signal.id, signal.isRelevant]);
 
   useEffect(() => {
     const handleSavedChanged = (e) => {
@@ -81,10 +92,11 @@ export default function SignalDossierCard({
   const errorTimer = useRef(null);
   const cardRef = useRef(null);
   useEffect(() => {
-    if (isActive && cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (isActive && revealActive && cardRef.current) {
+      const still = isLiteMode() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      cardRef.current.scrollIntoView({ behavior: still ? "instant" : "smooth", block: "nearest" });
     }
-  }, [isActive]);
+  }, [isActive, revealActive]);
   const flashActionError = useCallback((message) => {
     setActionError(message);
     if (errorTimer.current) clearTimeout(errorTimer.current);
@@ -104,6 +116,8 @@ export default function SignalDossierCard({
   const isDemand = marketRole === MARKET_ROLES.DEMAND;
   const isSupply = marketRole === MARKET_ROLES.SUPPLY;
   const ceilingHeight = signal.glyphData?.ceilingM || signal.requirements?.ceilingHeight;
+  const transaction = TRANSACTION_LABELS[signal.requirements?.transaction];
+  const confirmedAt = signal.lastConfirmedAt ? new Date(signal.lastConfirmedAt) : null;
 
   // Live member posts vote through the community endpoints (one tap per
   // account, server-counted). Everything else keeps its prior path: samples
@@ -285,9 +299,13 @@ export default function SignalDossierCard({
   const handlePrimaryAction = (e) => {
     e.stopPropagation();
     if (signal.actionType === "EXPLORE_DATA" && signal.id?.startsWith("pipeline-") && signal.id.slice(9)) {
-      const place = new URLSearchParams(window.location.search).get("place");
+      const current = new URLSearchParams(window.location.search);
       const query = new URLSearchParams({ fromStratosphere: "1", view: "radar", stage: returnStage, signal: signal.id });
-      if (place) query.set("place", place);
+      if (window.location.pathname === SIGNALS_PATH) query.set("surface", "signals");
+      for (const key of ["place", "mode", "signalQ", "signalType", "spaceType", "color", "role"]) {
+        const value = current.get(key);
+        if (value) query.set(key, value);
+      }
       router.push(`/intel/${encodeURIComponent(signal.id.slice(9))}?${query}`);
       return;
     }
@@ -315,6 +333,9 @@ export default function SignalDossierCard({
   };
 
   const renderActionButton = () => {
+    if (communityPost && signal.isMine) {
+      return <button type="button" className="sdc-btn sdc-btn-disabled" disabled title="This is your post">Connect</button>;
+    }
     if (signal.terminalState && signal.terminalState !== "live") {
       return (
         <button
@@ -404,7 +425,7 @@ export default function SignalDossierCard({
         return (
           <button type="button" className="sdc-btn sdc-btn-primary" onClick={handlePrimaryAction}>
             <span>CONNECT</span>
-            <span className="sdc-connect-cost">1 CONNECT</span>
+            {!communityPost && <span className="sdc-connect-cost">1 CONNECT</span>}
           </button>
         );
     }
@@ -413,7 +434,7 @@ export default function SignalDossierCard({
   return (
     <article
       ref={cardRef}
-      className={`sdc-card sdc-card--${marketRole} ${isActive ? "active" : ""} ${isHovered ? "hovered" : ""}`}
+      className={`sdc-card sdc-card--${marketRole}${communityPost ? " sdc-card--community" : ""} ${isActive ? "active" : ""} ${isHovered ? "hovered" : ""}`}
       onClick={() => onSelect(signal)}
       onMouseEnter={() => onHover(signal.id)}
       onMouseLeave={() => onHover(null)}
@@ -422,7 +443,7 @@ export default function SignalDossierCard({
       {/* ── CARD HEADER (Crisp 2-Sided Market Taxonomy) ── */}
       <div className="sdc-header">
         <div className="sdc-intent-row">
-          <span className={`sdc-role-badge sdc-role-${marketRole}`}>
+          {!communityPost && <span className={`sdc-role-badge sdc-role-${marketRole}`}>
             {isDemand ? (
               <Compass size={11} aria-hidden="true" />
             ) : isSupply ? (
@@ -430,17 +451,20 @@ export default function SignalDossierCard({
             ) : (
               <TrendingUp size={11} aria-hidden="true" />
             )}
-            <span>{isDemand ? "SEEKER · DEMAND" : isSupply ? "OFF-MARKET SUPPLY" : "SPATIAL INTEL"}</span>
-          </span>
+            <span className="sdc-role-label-wide">{isDemand ? "SEEKER · DEMAND" : isSupply ? "OFF-MARKET SUPPLY" : "SPATIAL INTEL"}</span>
+            <span className="sdc-role-label-mobile">{isDemand ? "DEMAND" : isSupply ? "SUPPLY" : "INTEL"}</span>
+          </span>}
           <span className="sdc-type-pill" style={{ "--pill-color": typeColor }}>
-            {typeLabel.toUpperCase()}
+            {communityPost && signal.signalType === SIGNAL_TYPES.COMMERCIAL_PROMOTION ? "PROMOTION" : typeLabel.toUpperCase()}
           </span>
           <span className="sdc-location-datum">
             <MapPin size={11} aria-hidden="true" />
             <span>
-              {signal.city && signal.city !== signal.district ? `${signal.city} · ` : ""}
-              {signal.district}
-              {signal.radiusKm && signal.radiusKm >= 1 ? ` (${signal.radiusKm}km zone)` : ""}
+              {communityPost ? signal.location || signal.district || signal.city : (
+                <>{signal.city && signal.city !== signal.district ? `${signal.city} · ` : ""}
+                {signal.district}
+                {signal.radiusKm && signal.radiusKm >= 1 ? ` (${signal.radiusKm}km zone)` : ""}</>
+              )}
             </span>
           </span>
         </div>
@@ -448,11 +472,11 @@ export default function SignalDossierCard({
         <div className="sdc-meta-status">
           {signal.isSample ? (
             <span className="sdc-demo-tag" title="Demonstration signal for exploring radar flow">DEMO</span>
-          ) : (
+          ) : !communityPost ? (
             <span className="sdc-source-pill" title={isPipelineUpdate ? "ScoutIt building update" : "Community post"}>
               {sourceKind}
             </span>
-          )}
+          ) : null}
           {signal.openAnswersText ? (
             <span className="sdc-answers-chip" title="Active answers under review">
               {signal.openAnswersText}
@@ -469,9 +493,19 @@ export default function SignalDossierCard({
       <div className="sdc-main-split">
         <div className="sdc-content-col">
           <h3 className="sdc-title">{signal.title}</h3>
+          {communityPost && (
+            <div className="sdc-community-byline">
+              <span>{signal.author?.name || signal.author?.scoutId}</span>
+              {confirmedAt && Number.isFinite(confirmedAt.getTime()) && (
+                <time dateTime={confirmedAt.toISOString()}>Confirmed {CONFIRMED_DATE.format(confirmedAt)}</time>
+              )}
+            </div>
+          )}
 
           {/* Quick Specifications Strip */}
           <div className="sdc-specs-strip">
+            {communityPost && signal.spaceType && <span className="sdc-spec-chip">{signal.spaceType}</span>}
+            {communityPost && transaction && <span className="sdc-spec-chip">{transaction}</span>}
             {signal.areaSqm ? (
               <span className="sdc-spec-chip sdc-area-chip">
                 <Building2 size={11} aria-hidden="true" />
@@ -520,10 +554,13 @@ export default function SignalDossierCard({
         </div>
 
         {/* Micro Spatial Glyph (Architectural Volume or Trend Diagram) */}
-        <div className="sdc-glyph-col">
+        {!communityPost && <div className="sdc-glyph-col">
           <SignalGlyph type={signal.glyphType} data={signal.glyphData} label={signal.title} />
-        </div>
+        </div>}
       </div>
+
+      {communityPost && signal.summary && <p className="sdc-community-summary">{signal.summary}</p>}
+      {communityPost && signal.media?.length > 0 && <SignalPostMedia signalId={signal.id} title={signal.title} media={signal.media} />}
 
       {/* ── CARD METRICS & ACTIONS ── */}
       <div className="sdc-footer">
@@ -569,12 +606,13 @@ export default function SignalDossierCard({
             aria-pressed={saved}
           >
             <Bookmark size={13} aria-hidden="true" />
+            {communityPost && <span>{saved ? "Saved" : "Save"}</span>}
           </button>
         </div> : null}
 
         <div className="sdc-cta-group">
           {renderActionButton()}
-          <button
+          {(!communityPost || signal.isMine || signal.specs?.length > 3 || signal.requirements && Object.keys(signal.requirements).length > 0) && <button
             type="button"
             className="sdc-expand-toggle"
             onClick={(e) => {
@@ -585,7 +623,7 @@ export default function SignalDossierCard({
             aria-label={expanded ? "Collapse dossier details" : "Expand dossier details"}
           >
             {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-          </button>
+          </button>}
         </div>
       </div>
       {actionError ? (
@@ -595,7 +633,9 @@ export default function SignalDossierCard({
       {/* ── EXPANDED DOSSIER DETAILS ── */}
       {expanded && (
         <div className="sdc-expanded-drawer">
-          <p className="sdc-summary-text">{signal.summary}</p>
+          {!communityPost && <p className="sdc-summary-text">{signal.summary}</p>}
+          {communityPost && signal.specs?.length > 3 && <p className="sdc-summary-text">{signal.specs.join(" · ")}</p>}
+          {signal.liveCommunity && signal.isMine && signal.terminalState === "live" && <SignalMediaUpload signalId={signal.id} />}
 
           {/* Structured Requirements Matrix */}
           {signal.requirements && Object.keys(signal.requirements).length > 0 && (

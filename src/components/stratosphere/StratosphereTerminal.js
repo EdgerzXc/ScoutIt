@@ -1,22 +1,26 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Search, Filter, Layers, ListFilter, Compass, Radio, X, Zap, Building2, ChevronDown, Check } from "lucide-react";
+import React, { useState, useMemo, useCallback, useEffect, useRef, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ArrowRight, Search, Filter, Layers, ListFilter, Compass, Radio, X, Zap, Building2, ChevronDown, Check } from "lucide-react";
 import SpatialSignalRadar from "./SpatialSignalRadar";
 import SignalDossierCard from "./SignalDossierCard";
 import DistrictIntelligenceStrip from "./DistrictIntelligenceStrip";
-import StratosphereFilterDrawer from "./StratosphereFilterDrawer";
+import StratosphereFilterDrawer, { SPACE_TYPES } from "./StratosphereFilterDrawer";
 import CommunityConnectModal from "./CommunityConnectModal";
 import {
   COMMUNITY_SIGNALS,
   filterSignals,
   MARKET_ROLES,
-  MARKET_ROLE_LABELS,
   MARKET_ROLE_DESCRIPTIONS,
+  SIGNAL_TYPE_LABELS,
+  getDistrictsSummary,
   getSignalMarketRole,
 } from "@/lib/communitySignalsAdapter";
-import { matchesJourneyStage } from "@/lib/layerTwoJourney";
+import { ALL_JOURNEY_STAGES, matchesJourneyStage } from "@/lib/layerTwoJourney";
 import { getPersistedWorkspaceRole, setPersistedWorkspaceRole } from "@/lib/dashboardModes";
+import { stratosphereFeedHref } from "@/lib/stratosphereFeed";
 import {
   defaultMarketRoleForLens,
   getAvailableStratosphereLenses,
@@ -36,6 +40,34 @@ const INTELLIGENCE_STREAMS = [
   { key: "all-trends", label: "ALL TRENDS", desc: "All macro & spatial dynamics" },
 ];
 
+const MARKET_TABS = [
+  { key: MARKET_ROLES.ALL, label: "ALL", shortLabel: "ALL" },
+  { key: MARKET_ROLES.DEMAND, label: "SEEKERS · DEMAND", shortLabel: "DEMAND", Icon: Zap, classMod: "tab-demand" },
+  { key: MARKET_ROLES.SUPPLY, label: "SPACES AVAILABLE", shortLabel: "SPACES", Icon: Building2, classMod: "tab-supply" },
+  { key: MARKET_ROLES.INTEL, label: "MARKET INTEL", shortLabel: "INTEL", Icon: Radio, classMod: "tab-intel" },
+];
+
+const mobileQuery = "(max-width: 768px)";
+
+function subscribeToMobile(callback) {
+  const media = window.matchMedia(mobileQuery);
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+
+const getIsMobile = () => window.matchMedia(mobileQuery).matches;
+const getServerIsMobile = () => false;
+
+function writeRadarParams(changes, push = false) {
+  const url = new URL(window.location.href);
+  for (const [key, value] of Object.entries(changes)) {
+    if (value) url.searchParams.set(key, value);
+    else url.searchParams.delete(key);
+  }
+  if (push) window.history.pushState(null, "", url);
+  else window.history.replaceState(null, "", url);
+}
+
 export default function StratosphereTerminal({
   initialSignals = COMMUNITY_SIGNALS,
   userProfile = null,
@@ -44,59 +76,60 @@ export default function StratosphereTerminal({
   onSelectStage = () => {},
   onClearStage = () => {},
   onSignalClosed = () => {},
+  resultsOnly = false,
+  feedState = "ready",
+  onRetryFeed,
 }) {
-  const [viewMode, setViewMode] = useState(initialViewMode);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
-  const [selectedSignal, setSelectedSignal] = useState(null);
+  const params = useSearchParams();
+  const isMobile = useSyncExternalStore(subscribeToMobile, getIsMobile, getServerIsMobile);
+  const mode = params.get("mode");
+  const viewMode = resultsOnly ? "SIGNALS" : mode === "map" ? "SPATIAL" : mode === "list" || isMobile ? "SIGNALS" : initialViewMode;
+  const [searchQuery, setSearchQuery] = useState(() => params.get("signalQ") || "");
+  const activeDistrict = params.get("place") || null;
+  const requestedColor = params.get("color");
+  const colorKey = ["gold", "green", "purple", "red", "cyan"].includes(requestedColor) ? requestedColor : null;
+  const requestedType = params.get("signalType");
+  const signalType = Object.hasOwn(SIGNAL_TYPE_LABELS, requestedType) ? requestedType : null;
+  const requestedSpace = params.get("spaceType");
+  const spaceType = SPACE_TYPES.includes(requestedSpace) ? requestedSpace : null;
+  const wantedSignal = params.get("signal");
+  const selectedSignal = useMemo(
+    () => wantedSignal ? initialSignals.find((signal) => signal.id === wantedSignal) || null : null,
+    [initialSignals, wantedSignal]
+  );
   const [hoveredSignalId, setHoveredSignalId] = useState(null);
   const [streamOpen, setStreamOpen] = useState(false);
   const streamDropdownRef = useRef(null);
-  const [filters, setFilters] = useState({
-    signalType: null,
-    spaceType: null,
-    district: null,
-  });
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [connectModalSignal, setConnectModalSignal] = useState(null);
   // Two-Sided Market taxonomy: ALL vs DEMAND (Seekers) vs SUPPLY (Spaces Available) vs INTEL
   const [marketRole, setMarketRole] = useState("all");
   const [activeLens, setActiveLens] = useState("all");
   const userPickedRoleRef = useRef(false);
-  // 3D Radar Beacon Color Signal filter (gold vs green vs purple vs red vs cyan)
-  const [colorKey, setColorKey] = useState(null);
   const [visibleSignalCount, setVisibleSignalCount] = useState(SIGNALS_PAGE_SIZE);
+  const showCounts = feedState === "ready";
 
   useEffect(() => {
-    if (window.matchMedia("(max-width: 680px)").matches) setViewMode("SIGNALS");
-    const params = new URLSearchParams(window.location.search);
-    const place = params.get("place");
-    if (place) setSelectedDistrict(place);
-    const color = params.get("color");
-    if (color && ["gold", "green", "purple", "red", "cyan"].includes(color)) {
-      setColorKey(color);
+    function restoreRole() {
+      const urlRole = new URLSearchParams(window.location.search).get("role") || "";
+      const resolved = resolveStratosphereDefaultLens({
+        urlRole,
+        persistedRole: getPersistedWorkspaceRole(),
+        profile: userProfile,
+      });
+      setActiveLens(resolved.lensId);
+      setMarketRole(resolved.marketRole);
     }
-  }, []);
-
-  useEffect(() => {
-    if (userPickedRoleRef.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const urlRole = params.get("role") || "";
-    const persistedRole = getPersistedWorkspaceRole();
-    const resolved = resolveStratosphereDefaultLens({
-      urlRole,
-      persistedRole,
-      profile: userProfile,
-    });
-    setActiveLens(resolved.lensId);
-    setMarketRole(resolved.marketRole);
+    function restoreRadar() {
+      setSearchQuery(new URLSearchParams(window.location.search).get("signalQ") || "");
+      restoreRole();
+    }
+    if (!userPickedRoleRef.current) restoreRole();
+    window.addEventListener("popstate", restoreRadar);
+    return () => window.removeEventListener("popstate", restoreRadar);
   }, [userProfile]);
 
   const availableLenses = useMemo(() => getAvailableStratosphereLenses(userProfile), [userProfile]);
-  useEffect(() => {
-    const wanted = new URLSearchParams(window.location.search).get("signal");
-    if (wanted) setSelectedSignal(initialSignals.find((signal) => signal.id === wanted) || null);
-  }, [initialSignals]);
 
   const stageSignals = useMemo(
     () => initialSignals.filter((signal) => matchesJourneyStage(signal, stageFilter)),
@@ -104,21 +137,15 @@ export default function StratosphereTerminal({
   );
   useEffect(() => {
     if (!selectedSignal || stageSignals.some((signal) => signal.id === selectedSignal.id)) return;
-    setSelectedSignal(null);
-    const url = new URL(window.location.href);
-    url.searchParams.delete("signal");
-    window.history.replaceState(null, "", url);
+    writeRadarParams({ signal: null });
   }, [selectedSignal, stageSignals]);
-
-  // Sync selectedDistrict into filters or vice versa
-  const activeDistrict = selectedDistrict || filters.district;
 
   // Telemetry counts across two-sided market taxonomy
   const roleCounts = useMemo(() => {
     const base = filterSignals(stageSignals, {
       query: searchQuery,
-      signalType: filters.signalType,
-      spaceType: filters.spaceType,
+      signalType,
+      spaceType,
       district: activeDistrict,
       marketRole: "all",
     });
@@ -133,19 +160,19 @@ export default function StratosphereTerminal({
       if (counts[r] !== undefined) counts[r]++;
     }
     return counts;
-  }, [stageSignals, searchQuery, filters, activeDistrict]);
+  }, [stageSignals, searchQuery, signalType, spaceType, activeDistrict]);
 
   // Filtered signal dataset
   const filteredSignals = useMemo(() => {
     return filterSignals(stageSignals, {
       query: searchQuery,
-      signalType: filters.signalType,
-      spaceType: filters.spaceType,
+      signalType,
+      spaceType,
       district: activeDistrict,
       marketRole,
       colorKey,
     });
-  }, [stageSignals, searchQuery, filters, activeDistrict, marketRole, colorKey]);
+  }, [stageSignals, searchQuery, signalType, spaceType, activeDistrict, marketRole, colorKey]);
 
   const visibleSignals = useMemo(() => {
     const sliced = filteredSignals.slice(0, visibleSignalCount);
@@ -157,31 +184,32 @@ export default function StratosphereTerminal({
   }, [filteredSignals, visibleSignalCount, selectedSignal]);
 
   const activeFilterCount =
-    (filters.signalType ? 1 : 0) +
-    (filters.spaceType ? 1 : 0) +
+    (signalType ? 1 : 0) +
+    (spaceType ? 1 : 0) +
     (activeDistrict ? 1 : 0) +
     (colorKey ? 1 : 0);
+  const mobileFilterCount = activeFilterCount + (stageFilter !== "all" ? 1 : 0);
+  const shownFilterCount = isMobile ? mobileFilterCount : activeFilterCount;
+
+  function chooseMode(next) {
+    if (viewMode === next) return;
+    writeRadarParams({ mode: next === "SPATIAL" ? "map" : "list" }, true);
+  }
+
+  function searchSignals(value) {
+    setSearchQuery(value);
+    writeRadarParams({ signalQ: value });
+  }
 
   const handleSelectDistrict = useCallback((dist) => {
-    setSelectedDistrict(dist);
-    setFilters((prev) => ({ ...prev, district: dist }));
-    const url = new URL(window.location.href);
-    if (dist) url.searchParams.set("place", dist);
-    else url.searchParams.delete("place");
-    window.history.replaceState(null, "", url);
+    writeRadarParams({ place: dist });
   }, []);
 
   const handleSelectMarketRole = useCallback((role) => {
     userPickedRoleRef.current = true;
     setMarketRole(role);
     if (role === MARKET_ROLES.ALL) setActiveLens("all");
-    const url = new URL(window.location.href);
-    if (role && role !== "all") {
-      url.searchParams.set("role", role);
-    } else {
-      url.searchParams.delete("role");
-    }
-    window.history.replaceState(null, "", url);
+    writeRadarParams({ role });
   }, []);
 
   const handleSelectLens = useCallback((lensId) => {
@@ -192,44 +220,23 @@ export default function StratosphereTerminal({
     if (lensId && lensId !== "all") {
       setPersistedWorkspaceRole(lensId);
     }
-    const url = new URL(window.location.href);
-    if (lensId) url.searchParams.set("role", lensId);
-    else url.searchParams.delete("role");
-    window.history.replaceState(null, "", url);
+    writeRadarParams({ role: lensId });
   }, []);
 
   const handleSelectColorKey = useCallback((key) => {
-    setColorKey(key);
-    const url = new URL(window.location.href);
-    if (key && key !== "all") {
-      url.searchParams.set("color", key);
-    } else {
-      url.searchParams.delete("color");
-    }
-    window.history.replaceState(null, "", url);
+    writeRadarParams({ color: key === "all" ? null : key });
   }, []);
 
   const handleResetFilters = useCallback(() => {
     userPickedRoleRef.current = true;
-    setFilters({ signalType: null, spaceType: null, district: null });
-    setSelectedDistrict(null);
-    setSearchQuery("");
     setActiveLens("all");
     setMarketRole("all");
-    setColorKey(null);
-    const url = new URL(window.location.href);
-    url.searchParams.delete("place");
-    url.searchParams.delete("role");
-    url.searchParams.delete("color");
-    window.history.replaceState(null, "", url);
+    setSearchQuery("");
+    writeRadarParams({ place: null, role: "all", color: null, signalQ: null, signalType: null, spaceType: null });
   }, []);
 
   const handleSelectSignal = useCallback((signal) => {
-    setSelectedSignal(signal);
-    const url = new URL(window.location.href);
-    if (signal?.id) url.searchParams.set("signal", signal.id);
-    else url.searchParams.delete("signal");
-    window.history.replaceState(null, "", url);
+    writeRadarParams({ signal: signal?.id });
   }, []);
 
   const handleHoverSignal = useCallback((id) => {
@@ -252,14 +259,18 @@ export default function StratosphereTerminal({
     };
   }, [streamOpen]);
 
-  const currentStream = INTELLIGENCE_STREAMS.find((s) => s.key === stageFilter) || INTELLIGENCE_STREAMS[0];
+  const drawerStage = stageFilter === "buildings" || stageFilter === "trends" ? `all-${stageFilter}` : stageFilter;
+  const currentStream = INTELLIGENCE_STREAMS.find((s) => s.key === drawerStage)
+    || ALL_JOURNEY_STAGES.find((s) => s.key === drawerStage)
+    || INTELLIGENCE_STREAMS[0];
+  const districts = filterDrawerOpen && isMobile ? getDistrictsSummary(stageSignals) : [];
 
   const handleOpenConnect = useCallback((signal) => {
     setConnectModalSignal(signal);
   }, []);
 
   return (
-    <div className={`st-terminal${viewMode === "SIGNALS" ? " st-terminal--feed" : ""}`} role="region" aria-label="Stratosphere Spatial Radar Terminal">
+    <div className={`st-terminal${viewMode === "SIGNALS" ? " st-terminal--feed" : ""}${resultsOnly ? " st-terminal--results" : ""}`} role="region" aria-label={resultsOnly ? "Browse signals" : "Stratosphere Spatial Radar Terminal"}>
       {/* ── TOP CONTROL BAR ── */}
       <header className="st-control-bar">
         <div className="st-search-cluster">
@@ -268,16 +279,16 @@ export default function StratosphereTerminal({
             <input
               type="text"
               className="st-search-input"
-              placeholder="Search demand, space type, specs, or district..."
+              placeholder="Search signals"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search community signals"
+              onChange={(e) => searchSignals(e.target.value)}
+              aria-label="Search signals"
             />
             {searchQuery && (
               <button
                 type="button"
                 className="st-search-clear"
-                onClick={() => setSearchQuery("")}
+                onClick={() => searchSignals("")}
                 aria-label="Clear search"
               >
                 <X size={13} />
@@ -315,7 +326,7 @@ export default function StratosphereTerminal({
                     <span>INTELLIGENCE STREAM</span>
                   </div>
                   {INTELLIGENCE_STREAMS.map((s) => {
-                    const isSelected = stageFilter === s.key;
+                    const isSelected = drawerStage === s.key;
                     return (
                       <button
                         key={s.key}
@@ -342,61 +353,76 @@ export default function StratosphereTerminal({
 
             <button
               type="button"
-              className={`st-filter-btn ${activeFilterCount > 0 ? "active" : ""}`}
+              className={`st-filter-btn ${shownFilterCount > 0 ? "active" : ""}`}
               onClick={() => setFilterDrawerOpen(true)}
-              aria-label={`Open filters. ${activeFilterCount} active filters.`}
+              aria-haspopup="dialog"
+              aria-label={shownFilterCount ? `Filters, ${shownFilterCount} active` : "Filters"}
             >
               <Filter size={13} aria-hidden="true" />
               <span>FILTERS</span>
-              {activeFilterCount > 0 && <span className="st-filter-badge">{activeFilterCount}</span>}
+              {shownFilterCount > 0 && <span className="st-filter-badge">{shownFilterCount}</span>}
             </button>
           </div>
         </div>
 
         {/* Mode Switcher: SPATIAL (Split-Screen 3D) vs SIGNALS (Minimalist Feed) */}
-        <div className="st-mode-cluster" role="radiogroup" aria-label="Stratosphere Viewing Mode">
+        {!resultsOnly && <div className="st-mode-cluster" data-mode={viewMode} role="group" aria-label="Signal view">
           <button
             type="button"
-            role="radio"
-            aria-checked={viewMode === "SPATIAL"}
+            aria-pressed={viewMode === "SPATIAL"}
             className={`st-mode-btn ${viewMode === "SPATIAL" ? "active" : ""}`}
-            onClick={() => setViewMode("SPATIAL")}
+            onClick={() => chooseMode("SPATIAL")}
           >
             <Compass size={13} aria-hidden="true" />
-            <span>SPATIAL RADAR</span>
+            <span className="st-wide-label">SPATIAL RADAR</span>
+            <span className="st-mobile-label">MAP</span>
           </button>
 
           <button
             type="button"
-            role="radio"
-            aria-checked={viewMode === "SIGNALS"}
+            aria-pressed={viewMode === "SIGNALS"}
             className={`st-mode-btn ${viewMode === "SIGNALS" ? "active" : ""}`}
-            onClick={() => setViewMode("SIGNALS")}
+            onClick={() => chooseMode("SIGNALS")}
           >
             <ListFilter size={13} aria-hidden="true" />
-            <span>SIGNALS DOSSIER</span>
+            <span className="st-wide-label">SIGNALS DOSSIER</span>
+            <span className="st-mobile-label">LIST</span>
           </button>
-        </div>
+        </div>}
       </header>
 
       {/* ── MAIN WORKSPACE ── */}
       <div className={`st-workspace ${viewMode === "SPATIAL" ? "st-split-layout" : "st-feed-layout"}`}>
         {/* SPATIAL RADAR CANVAS (64% in Split mode) */}
         {viewMode === "SPATIAL" && (
-          <section className="st-radar-pane" aria-label="3D Metro Manila Spatial Signal Radar">
-            <SpatialSignalRadar
-              allSignals={stageSignals}
-              filteredSignals={filteredSignals}
-              selectedSignal={selectedSignal}
-              hoveredSignalId={hoveredSignalId}
-              selectedDistrict={activeDistrict}
-              activeColorKey={colorKey}
-              onSelectColorKey={handleSelectColorKey}
-              onSelectSignal={handleSelectSignal}
-              onHoverSignal={handleHoverSignal}
-              onSelectDistrict={handleSelectDistrict}
-            />
-          </section>
+          <>
+            <div className="st-map-handoff">
+              <Link
+                href={stratosphereFeedHref(params)}
+                className="st-map-results"
+              >
+                {selectedSignal && filteredSignals.some((signal) => signal.id === selectedSignal.id)
+                  ? "View selected signal"
+                  : "Browse matching signals"}
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+              <InfoTip tipId="exploreByArea" label="About the map" />
+            </div>
+            <section className="st-radar-pane" aria-label="3D Metro Manila Spatial Signal Radar">
+              <SpatialSignalRadar
+                allSignals={stageSignals}
+                filteredSignals={filteredSignals}
+                selectedSignal={selectedSignal}
+                hoveredSignalId={hoveredSignalId}
+                selectedDistrict={activeDistrict}
+                activeColorKey={colorKey}
+                onSelectColorKey={handleSelectColorKey}
+                onSelectSignal={handleSelectSignal}
+                onHoverSignal={handleHoverSignal}
+                onSelectDistrict={handleSelectDistrict}
+              />
+            </section>
+          </>
         )}
 
         {/* SIGNAL DOSSIER FEED (36% in Split mode, Centered in Feed mode) */}
@@ -406,17 +432,17 @@ export default function StratosphereTerminal({
         >
           {/* Telemetry Header & Two-Sided Market Switcher */}
           <div className="st-dossier-header">
-            <div className="st-telemetry-row">
+            {showCounts && <div className="st-telemetry-row">
               <div className="st-telemetry-tag">
                 <Radio size={11} className="st-live-icon" aria-hidden="true" />
-                <span>
-                  {filteredSignals.length} {filteredSignals.length === 1 ? "SIGNAL" : "SIGNALS"} MATCHING
+                <span role="status">
+                  {filteredSignals.length} {filteredSignals.length === 1 ? "SIGNAL" : "SIGNALS"}
                 </span>
               </div>
               <div className="st-telemetry-meta">
                 {activeDistrict && (
                   <span className="st-district-indicator">
-                    DISTRICT · {activeDistrict.toUpperCase()}
+                    <span className="st-wide-label">DISTRICT · </span>{activeDistrict.toUpperCase()}
                   </span>
                 )}
                 {colorKey && (
@@ -444,7 +470,7 @@ export default function StratosphereTerminal({
                 )}
                 <InfoTip tipId="signalSources" label="About signal sources" />
               </div>
-            </div>
+            </div>}
 
             {availableLenses.length > 0 && (
               <div className="st-lens-bar" role="group" aria-label="Role lens">
@@ -470,25 +496,19 @@ export default function StratosphereTerminal({
             )}
 
             {/* Two-Sided Market Intent Switcher */}
-            <div className="st-market-tabs" role="tablist" aria-label="Market Intent Taxonomy">
-              {[
-                { key: MARKET_ROLES.ALL, label: "ALL", shortLabel: "ALL", Icon: null, classMod: "" },
-                { key: MARKET_ROLES.DEMAND, label: "SEEKERS · DEMAND", shortLabel: "DEMAND", Icon: Zap, classMod: "tab-demand" },
-                { key: MARKET_ROLES.SUPPLY, label: "SPACES AVAILABLE", shortLabel: "SUPPLY", Icon: Building2, classMod: "tab-supply" },
-                { key: MARKET_ROLES.INTEL, label: "MARKET INTEL", shortLabel: "INTEL", Icon: Radio, classMod: "tab-intel" },
-              ].map(({ key, label, shortLabel, Icon, classMod }) => (
+            <div className="st-market-tabs" role="group" aria-label="Market intent">
+              {MARKET_TABS.map(({ key, label, shortLabel, Icon, classMod = "" }) => (
                 <button
                   key={key}
                   type="button"
-                  role="tab"
-                  aria-selected={marketRole === key}
+                  aria-pressed={marketRole === key}
                   className={`st-market-tab ${classMod} ${marketRole === key ? "is-active" : ""}`}
                   onClick={() => handleSelectMarketRole(key)}
                 >
                   {Icon && <Icon size={12} className="st-tab-icon" aria-hidden="true" />}
                   <span className="st-market-tab-label">{label}</span>
                   <span className="st-market-tab-label-short">{shortLabel}</span>
-                  <span className="st-market-tab-count">{roleCounts[key] || 0}</span>
+                  {showCounts && <span className="st-market-tab-count">{roleCounts[key] || 0}</span>}
                 </button>
               ))}
             </div>
@@ -499,17 +519,24 @@ export default function StratosphereTerminal({
           </div>
 
           {/* Dossier Cards List */}
-          <div className="st-dossier-scroll">
-            {filteredSignals.length === 0 ? (
+          <div className="st-dossier-scroll" aria-busy={feedState === "loading"}>
+            {feedState === "loading" ? (
+              <p className="st-feed-status" role="status">Loading signals…</p>
+            ) : feedState === "unavailable" && filteredSignals.length === 0 ? (
+              <div className="st-empty-state">
+                <h4 className="st-empty-title">Community posts are unavailable</h4>
+                <button type="button" className="st-empty-reset-btn" onClick={onRetryFeed}>Retry</button>
+              </div>
+            ) : filteredSignals.length === 0 ? (
               <div className="st-empty-state">
                 <Compass size={28} className="st-empty-icon" aria-hidden="true" />
-                <h4 className="st-empty-title">No signals match this view</h4>
+                <h4 className="st-empty-title">No matching signals</h4>
                 <p className="st-empty-desc">
                   {marketRole !== "all"
-                    ? `No active ${MARKET_ROLE_LABELS[marketRole]?.toLowerCase() || "signals"} found for this filter. Switch to All Signals or clear district search.`
+                    ? "Try all signals or another district."
                     : stageFilter === "all"
                     ? "Try another area or clear your search and filters."
-                    : "No updates are confirmed at this stage here yet. See all updates or choose another stage."}
+                    : "Try all updates or another stage."}
                 </p>
                 <button
                   type="button"
@@ -519,22 +546,25 @@ export default function StratosphereTerminal({
                     if (stageFilter !== "all") onClearStage();
                   }}
                 >
-                  {marketRole !== "all" ? "VIEW ALL SIGNALS" : stageFilter === "all" ? "CLEAR SEARCH AND FILTERS" : "SEE ALL UPDATES"}
+                  {marketRole !== "all" ? "VIEW ALL" : stageFilter === "all" ? "CLEAR FILTERS" : "SEE ALL UPDATES"}
                 </button>
               </div>
             ) : (
               <>
+                {feedState === "unavailable" && <div className="st-feed-status" role="status">Community posts are unavailable. <button type="button" onClick={onRetryFeed}>Retry</button></div>}
                 {visibleSignals.map((signal) => (
                   <SignalDossierCard
                     key={signal.id}
                     signal={signal}
                     isActive={selectedSignal?.id === signal.id}
+                    revealActive={!isMobile || viewMode === "SIGNALS"}
                     isHovered={hoveredSignalId === signal.id}
                     onSelect={handleSelectSignal}
                     onHover={handleHoverSignal}
                     onConnect={handleOpenConnect}
                     onClosed={onSignalClosed}
                     returnStage={stageFilter}
+                    communityPost={resultsOnly && signal.liveCommunity && !signal.isSample}
                   />
                 ))}
                 {filteredSignals.length > visibleSignalCount && (
@@ -543,7 +573,7 @@ export default function StratosphereTerminal({
                     className="st-empty-reset-btn"
                     onClick={() => setVisibleSignalCount((c) => c + SIGNALS_PAGE_SIZE)}
                   >
-                    LOAD MORE SIGNALS ({filteredSignals.length - visibleSignalCount} REMAINING)
+                    MORE SIGNALS ({filteredSignals.length - visibleSignalCount})
                   </button>
                 )}
               </>
@@ -556,17 +586,56 @@ export default function StratosphereTerminal({
       <StratosphereFilterDrawer
         isOpen={filterDrawerOpen}
         onClose={() => setFilterDrawerOpen(false)}
-        filters={filters}
-        onChange={(newFilters) => {
-          setFilters(newFilters);
-          setSelectedDistrict(newFilters.district);
-          const url = new URL(window.location.href);
-          if (newFilters.district) url.searchParams.set("place", newFilters.district);
-          else url.searchParams.delete("place");
-          window.history.replaceState(null, "", url);
+        filters={{ signalType, spaceType, district: activeDistrict }}
+        onChange={(field, value) => writeRadarParams({ [field === "district" ? "place" : field]: value })}
+        onReset={() => {
+          handleResetFilters();
+          if (isMobile && stageFilter !== "all") onClearStage();
         }}
-        onReset={handleResetFilters}
-      />
+        activeCount={shownFilterCount}
+        canReset={isMobile ? Boolean(mobileFilterCount || searchQuery || marketRole !== "all") : undefined}
+      >
+        {filterDrawerOpen && isMobile && (
+          <>
+            <label className="sfd-field">
+              <span className="sfd-label">District</span>
+              <select value={activeDistrict || ""} onChange={(e) => handleSelectDistrict(e.target.value || null)}>
+                <option value="">All districts ({stageSignals.length})</option>
+                {activeDistrict && !districts.some(({ district }) => district === activeDistrict) && (
+                  <option value={activeDistrict}>{activeDistrict}</option>
+                )}
+                {districts.map(({ district, count }) => <option key={district} value={district}>{district} ({count})</option>)}
+              </select>
+            </label>
+            <label className="sfd-field">
+              <span className="sfd-label">Updates</span>
+              <select value={drawerStage} onChange={(e) => onSelectStage(e.target.value)}>
+                {ALL_JOURNEY_STAGES.map(({ key, label }) => <option key={key} value={key}>{label}</option>)}
+              </select>
+            </label>
+            {availableLenses.length > 0 && (
+              <label className="sfd-field">
+                <span className="sfd-label">Role lens</span>
+                <select
+                  value={availableLenses.some(({ id }) => id === activeLens) ? activeLens : ""}
+                  onChange={(e) => handleSelectLens(e.target.value)}
+                >
+                  <option value="" disabled>Custom view</option>
+                  {availableLenses.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+                </select>
+              </label>
+            )}
+            {viewMode === "SPATIAL" && (
+              <label className="sfd-field">
+                <span className="sfd-label">Market intent</span>
+                <select value={marketRole} onChange={(e) => handleSelectMarketRole(e.target.value)}>
+                  {MARKET_TABS.map(({ key, shortLabel }) => <option key={key} value={key}>{shortLabel} ({roleCounts[key] || 0})</option>)}
+                </select>
+              </label>
+            )}
+          </>
+        )}
+      </StratosphereFilterDrawer>
 
       {/* ── CONNECT PROPOSAL MODAL ── */}
       <CommunityConnectModal

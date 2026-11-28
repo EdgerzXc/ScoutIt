@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useLayoutEffect, useRef } from "react";
 import { X, Filter, RotateCcw } from "lucide-react";
 import {
   SIGNAL_TYPES,
@@ -9,7 +9,7 @@ import {
 } from "@/lib/communitySignalsAdapter";
 import "./stratosphere-filter-drawer.css";
 
-const SPACE_TYPES = ["Office", "Retail", "Warehouse", "Mixed-Use", "Land"];
+export const SPACE_TYPES = ["Office", "Retail", "Warehouse", "Mixed-Use", "Land"];
 
 export default function StratosphereFilterDrawer({
   isOpen = false,
@@ -17,49 +17,67 @@ export default function StratosphereFilterDrawer({
   filters = {},
   onChange = () => {},
   onReset = () => {},
+  activeCount = 0,
+  canReset,
+  children,
 }) {
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose?.();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  const activeCount =
-    (filters.signalType ? 1 : 0) +
-    (filters.spaceType ? 1 : 0) +
-    (filters.district ? 1 : 0);
+  const dialogRef = useRef(null);
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    if (isOpen && !dialog.open) dialog.showModal();
+    if (!isOpen && dialog.open) dialog.close();
+  }, [isOpen]);
 
   return (
-    <div className="sfd-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Signal Filters">
-      <div className="sfd-panel" onClick={(e) => e.stopPropagation()}>
+    <dialog
+      ref={dialogRef}
+      className="sfd-overlay"
+      aria-label="Signal filters"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="sfd-panel">
         <div className="sfd-header">
           <div className="sfd-title-wrap">
             <Filter size={14} className="sfd-filter-icon" aria-hidden="true" />
-            <h3 className="sfd-title">SPATIAL RADAR FILTERS</h3>
+            <h3 className="sfd-title">FILTERS</h3>
             {activeCount > 0 && <span className="sfd-count-badge">{activeCount} ACTIVE</span>}
           </div>
-          <button type="button" className="sfd-close-btn" onClick={onClose} aria-label="Close filter drawer">
+          <button type="button" className="sfd-close-btn" onClick={onClose} aria-label="Close filters">
             <X size={16} />
           </button>
         </div>
 
         <div className="sfd-body">
+          {children}
+          <label className="sfd-field sfd-mobile-field">
+            <span className="sfd-label">Signal type</span>
+            <select value={filters.signalType || ""} onChange={(e) => onChange("signalType", e.target.value || null)}>
+              <option value="">All signal types</option>
+              {Object.values(SIGNAL_TYPES).map((type) => <option key={type} value={type}>{SIGNAL_TYPE_LABELS[type]}</option>)}
+            </select>
+          </label>
+          <label className="sfd-field sfd-mobile-field">
+            <span className="sfd-label">Space type</span>
+            <select value={filters.spaceType || ""} onChange={(e) => onChange("spaceType", e.target.value || null)}>
+              <option value="">All space types</option>
+              {SPACE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </label>
           {/* Signal Category */}
-          <div className="sfd-group">
-            <label className="sfd-label">SIGNAL CATEGORY</label>
+          <div className="sfd-group" role="group" aria-label="Signal type">
+            <span className="sfd-label">SIGNAL TYPE</span>
             <div className="sfd-chip-grid">
               <button
                 type="button"
+                aria-pressed={!filters.signalType}
                 className={`sfd-chip ${!filters.signalType ? "active" : ""}`}
-                onClick={() => onChange({ ...filters, signalType: null })}
+                onClick={() => onChange("signalType", null)}
               >
                 All Categories
               </button>
@@ -67,8 +85,9 @@ export default function StratosphereFilterDrawer({
                 <button
                   key={key}
                   type="button"
+                  aria-pressed={filters.signalType === val}
                   className={`sfd-chip ${filters.signalType === val ? "active" : ""}`}
-                  onClick={() => onChange({ ...filters, signalType: filters.signalType === val ? null : val })}
+                  onClick={() => onChange("signalType", filters.signalType === val ? null : val)}
                 >
                   {SIGNAL_TYPE_LABELS[val]}
                 </button>
@@ -77,13 +96,14 @@ export default function StratosphereFilterDrawer({
           </div>
 
           {/* Space Type */}
-          <div className="sfd-group">
-            <label className="sfd-label">SPACE TYPE</label>
+          <div className="sfd-group" role="group" aria-label="Space type">
+            <span className="sfd-label">SPACE TYPE</span>
             <div className="sfd-chip-grid">
               <button
                 type="button"
+                aria-pressed={!filters.spaceType}
                 className={`sfd-chip ${!filters.spaceType ? "active" : ""}`}
-                onClick={() => onChange({ ...filters, spaceType: null })}
+                onClick={() => onChange("spaceType", null)}
               >
                 All Space Types
               </button>
@@ -91,8 +111,9 @@ export default function StratosphereFilterDrawer({
                 <button
                   key={type}
                   type="button"
+                  aria-pressed={filters.spaceType === type}
                   className={`sfd-chip ${filters.spaceType === type ? "active" : ""}`}
-                  onClick={() => onChange({ ...filters, spaceType: filters.spaceType === type ? null : type })}
+                  onClick={() => onChange("spaceType", filters.spaceType === type ? null : type)}
                 >
                   {type}
                 </button>
@@ -101,13 +122,14 @@ export default function StratosphereFilterDrawer({
           </div>
 
           {/* District / Zone */}
-          <div className="sfd-group">
-            <label className="sfd-label">DISTRICT / ECONOMIC ZONE</label>
+          <div className="sfd-group" role="group" aria-label="District">
+            <span className="sfd-label">DISTRICT</span>
             <div className="sfd-chip-grid">
               <button
                 type="button"
+                aria-pressed={!filters.district}
                 className={`sfd-chip ${!filters.district ? "active" : ""}`}
-                onClick={() => onChange({ ...filters, district: null })}
+                onClick={() => onChange("district", null)}
               >
                 All Districts
               </button>
@@ -115,8 +137,9 @@ export default function StratosphereFilterDrawer({
                 <button
                   key={d}
                   type="button"
+                  aria-pressed={filters.district === d}
                   className={`sfd-chip ${filters.district === d ? "active" : ""}`}
-                  onClick={() => onChange({ ...filters, district: filters.district === d ? null : d })}
+                  onClick={() => onChange("district", filters.district === d ? null : d)}
                 >
                   {d}
                 </button>
@@ -127,15 +150,15 @@ export default function StratosphereFilterDrawer({
 
         {/* Footer */}
         <div className="sfd-footer">
-          <button type="button" className="sfd-reset-btn" onClick={onReset} disabled={activeCount === 0}>
+          <button type="button" className="sfd-reset-btn" onClick={onReset} disabled={!(canReset ?? activeCount)}>
             <RotateCcw size={12} aria-hidden="true" />
-            <span>RESET FILTERS</span>
+            <span>RESET</span>
           </button>
           <button type="button" className="sfd-apply-btn" onClick={onClose}>
-            <span>APPLY & VIEW</span>
+            <span>DONE</span>
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

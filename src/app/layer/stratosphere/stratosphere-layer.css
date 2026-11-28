@@ -910,3 +910,36 @@
   .strat-entry-steps { grid-template-columns: 1fr; }
   .strat-entry-step { padding: 15px 17px; }
 }
+.strat-feed-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.strat-feed-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: rgba(var(--surface-rgb), 0.76);
+  color: var(--text-primary);
+  font: 12px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.strat-feed-links a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strat-feed-links a:hover {
+    border-color: var(--accent);
+    color: var(--accent-bright);
+  }
+}

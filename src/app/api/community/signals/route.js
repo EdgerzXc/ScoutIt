@@ -85,6 +85,11 @@ export async function GET(request) {
       );
     }
 
+    const paginate = url.searchParams.get("page") === "1";
+    const cursor = paginate ? url.searchParams.get("cursor") : null;
+    if (cursor && !/^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i.test(cursor)) {
+      return NextResponse.json({ ok: false, error: "Invalid feed cursor." }, { status: 400 });
+    }
     const result = await listLiveSignals({
       district: url.searchParams.get("district") || null,
       signalType: POSTABLE_SIGNAL_TYPES.includes(url.searchParams.get("signalType"))
@@ -92,6 +97,8 @@ export async function GET(request) {
         : null,
       limit: url.searchParams.get("limit") || 60,
       viewerId,
+      paginate,
+      cursor,
     });
     if (result.missing) {
       return NextResponse.json(
@@ -100,7 +107,7 @@ export async function GET(request) {
       );
     }
     return NextResponse.json(
-      { ok: true, signals: result.signals },
+      { ok: true, signals: result.signals, ...(paginate ? { nextCursor: result.nextCursor || null } : {}) },
       { headers: { "Cache-Control": "private, no-store" } }
     );
   } catch (err) {

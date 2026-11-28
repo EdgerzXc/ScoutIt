@@ -113,10 +113,10 @@ describe("Stratosphere Spatial Radar — Terminal & Routing Integration", () => 
     expect(src).toContain("canonical: \"/stratosphere\"");
   });
 
-  it("/community hands off to the single Stratosphere radar instead of a duplicate terminal", () => {
+  it("/community opens the member-post feed without creating a duplicate terminal", () => {
     expect(existsSync(join(process.cwd(), "src/app/community/page.js"))).toBe(true);
     const src = read("src/app/community/page.js");
-    expect(src).toContain('permanentRedirect("/stratosphere?view=radar")');
+    expect(src).toContain('permanentRedirect("/stratosphere/signals?source=community")');
     expect(src).not.toContain("StratosphereTerminal");
   });
 

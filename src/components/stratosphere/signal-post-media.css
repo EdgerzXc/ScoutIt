@@ -1,0 +1,88 @@
+.spm-gallery,
+.spm-upload {
+  display: grid;
+  gap: 8px;
+  margin-block: 12px;
+  color: var(--text-primary);
+}
+
+.spm-frame {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.spm-frame :is(img, iframe) {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+}
+
+.spm-items,
+.spm-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.spm-gallery button,
+.spm-upload button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-mid);
+  border-radius: 4px;
+  color: var(--text-primary);
+  background: var(--surface);
+  font: 12px var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.spm-gallery button:is([aria-pressed="true"], .spm-play),
+.spm-upload button[type="submit"] {
+  color: var(--accent-bright);
+  border-color: var(--accent-muted);
+  background: var(--accent-dim);
+}
+
+.spm-gallery button:focus-visible,
+.spm-upload button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.spm-upload {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: left;
+}
+
+.spm-upload form,
+.spm-upload label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.spm-upload input {
+  min-width: 0;
+  width: 100%;
+}
+
+.spm-upload-status,
+.spm-error {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
